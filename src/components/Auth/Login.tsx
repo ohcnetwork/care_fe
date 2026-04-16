@@ -458,10 +458,10 @@ const Login = (props: LoginProps) => {
 
                         <div className="space-y-4">
                           <div>
-                            <h2 className="text-2xl font-bold text-gray-900">
+                            <h2 className="text-2xl font-bold text-foreground">
                               {t("forget_password")}
                             </h2>
-                            <p className="text-sm text-gray-500 mt-2">
+                            <p className="text-sm text-muted-foreground mt-2">
                               {t("forget_password_instruction")}
                             </p>
                           </div>
@@ -620,10 +620,10 @@ const Login = (props: LoginProps) => {
 
                           <div className="space-y-4">
                             <div>
-                              <h2 className="text-2xl font-bold text-gray-900">
+                              <h2 className="text-2xl font-bold text-foreground">
                                 {t("forget_password")}
                               </h2>
-                              <p className="text-sm text-gray-500 mt-2">
+                              <p className="text-sm text-muted-foreground mt-2">
                                 {t("forget_password_instruction")}
                               </p>
                             </div>
@@ -766,7 +766,7 @@ const Login = (props: LoginProps) => {
                                 {t("resend_otp")}
                               </Button>
                             ) : (
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-muted-foreground">
                                 {t("resend_otp_timer", {
                                   time: resendOtpCountdown,
                                 })}

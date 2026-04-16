@@ -225,7 +225,7 @@ export const EncounterShow = (props: Props) => {
       )}
 
       <div className="flex flex-col gap-2">
-        <Card className="bg-white shadow-sm border-none rounded-sm p-2 md:p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <Card className="bg-background shadow-sm border-none rounded-sm p-2 md:p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <PatientHeader
             patient={patient}
             facilityId={facilityId}
@@ -278,7 +278,7 @@ export const EncounterShow = (props: Props) => {
                       `encounter_class__${selectedEncounter?.encounter_class}`,
                     )}
                   </h4>
-                  <div className="text-sm text-gray-700 space-x-2">
+                  <div className="text-sm text-muted-foreground space-x-2">
                     {primaryEncounterId !== selectedEncounterId && (
                       <>
                         <span>{selectedEncounter?.facility.name}</span>

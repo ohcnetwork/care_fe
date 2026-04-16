@@ -116,7 +116,7 @@ export function OrgSelector({
                   <Building className="size-4" />
                   <span>{org.name}</span>
                   {org.description && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       - {org.description}
                     </span>
                   )}
@@ -281,7 +281,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
             </Badge>
           ))}
           {!isLoading && selectedOrganizations.length === 0 && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               {t("no_organizations_selected")}
             </p>
           )}
@@ -349,12 +349,12 @@ export default function ManageQuestionnaireOrganizationsSheet({
               <h2 className="text-base font-semibold">
                 {t("manage_organization", { count: 0 })}
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {t("manage_organizations_description")}
               </p>
             </div>
             <div className="flex-1 overflow-y-auto pr-1">{bodyContent}</div>
-            <div className="mt-4 border-t pt-4 sticky bottom-0 bg-white">
+            <div className="mt-4 border-t pt-4 sticky bottom-0 bg-background">
               {footerActions}
             </div>
           </div>
@@ -381,7 +381,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
           </SheetDescription>
         </SheetHeader>
         {bodyContent}
-        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
           {footerActions}
         </SheetFooter>
       </SheetContent>

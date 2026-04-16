@@ -20,7 +20,7 @@ interface Props {
 export function FacilityCard({ facility, className }: Props) {
   const { t } = useTranslation();
   return (
-    <Card className={cn("overflow-hidden bg-white", className)}>
+    <Card className={cn("overflow-hidden bg-card", className)}>
       <div className="flex flex-col h-full">
         <div className="p-6">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -35,10 +35,10 @@ export function FacilityCard({ facility, className }: Props) {
               <h3 className="truncate text-xl font-semibold">
                 {facility.name}
               </h3>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-soft-foreground mt-1">
                 {facility.facility_type}
               </p>
-              <p className="text-sm text-gray-500 truncate">
+              <p className="text-sm text-muted-foreground truncate">
                 {[facility.address].filter(Boolean).join(", ")}
                 {facility.latitude && facility.longitude && (
                   <FacilityMapsLink
@@ -60,7 +60,7 @@ export function FacilityCard({ facility, className }: Props) {
           </div>
         </div>
 
-        <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
+        <div className="mt-auto border-t border-soft-border bg-soft-background p-4">
           <div className="flex justify-end">
             <Button variant="outline" asChild>
               <Link href={`/facility/${facility.id}`}>

@@ -69,7 +69,7 @@ function OrganizationCard({
             <div className="mb-2">
               <h3 className="text-lg font-semibold">{org.name}</h3>
               {org.description && (
-                <p className="mt-0.5 text-sm text-gray-500">
+                <p className="mt-0.5 text-sm text-muted-foreground">
                   {org.description}
                 </p>
               )}
@@ -165,7 +165,7 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
             <div className="relative">
               <CareIcon
                 icon="l-search"
-                className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500"
+                className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
               />
               <Input
                 placeholder={t("search_by_department_team_name")}
@@ -204,7 +204,7 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
               ))
             ) : (
               <Card className="col-span-full">
-                <CardContent className="p-6 text-center text-gray-500">
+                <CardContent className="p-6 text-center text-muted-foreground">
                   {t("no_organizations_found")}
                 </CardContent>
               </Card>

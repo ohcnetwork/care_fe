@@ -94,7 +94,7 @@ function RoleCommandContent({
               <div className="flex flex-col items-start">
                 <span>{role.name}</span>
                 {role.description && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-muted-foreground">
                     {role.description}
                   </span>
                 )}
@@ -176,7 +176,7 @@ export function RoleSelect({
       className={cn("w-full justify-between", className)}
       disabled={disabled}
     >
-      <span className={cn(!selectedRole && "text-gray-500")}>
+      <span className={cn(!selectedRole && "text-muted-foreground")}>
         {selectedRole ? selectedRole.name : placeholder || t("select_role")}
       </span>
       <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />

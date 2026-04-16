@@ -67,7 +67,7 @@ const TokenCard = ({
     <Card
       id={id}
       className={cn(
-        "p-3 pt-0 border border-gray-300 relative hover:scale-101 hover:shadow-md transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none",
+        "p-3 pt-0 border border-strong-border relative hover:scale-101 hover:shadow-md transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none",
         className,
       )}
     >
@@ -81,13 +81,13 @@ const TokenCard = ({
             <div>
               {token.patient && (
                 <div className="flex-1 min-w-0">
-                  <Label className="text-sm font-normal text-gray-600">
+                  <Label className="text-sm font-normal text-soft-foreground">
                     {t("patient_name")}:
                   </Label>
                   <p className="font-semibold break-words">
                     {token.patient.name}
                   </p>
-                  <p className="text-sm font-medium text-gray-700">
+                  <p className="text-sm font-medium text-muted-foreground">
                     {`${formatPatientAge(token.patient, true)}, ${t(`GENDER__${token.patient.gender}`)}`}
                   </p>
                 </div>
@@ -95,7 +95,7 @@ const TokenCard = ({
             </div>
 
             <div className="pt-2">
-              <Label className="text-sm font-normal text-gray-600">
+              <Label className="text-sm font-normal text-soft-foreground">
                 {t(`schedulable_resource__${token.resource_type}`)}:
               </Label>
               <p className="text-sm font-semibold break-words">
@@ -103,14 +103,14 @@ const TokenCard = ({
               </p>
               {token.resource_type === SchedulableResourceType.Location &&
                 token.resource.description && (
-                  <p className="text-xs text-gray-600 break-words">
+                  <p className="text-xs text-soft-foreground break-words">
                     {token.resource.description}
                   </p>
                 )}
               {token.resource_type ===
                 SchedulableResourceType.HealthcareService &&
                 token.resource.extra_details && (
-                  <p className="text-xs text-gray-600 break-words">
+                  <p className="text-xs text-soft-foreground break-words">
                     {token.resource.extra_details}
                   </p>
                 )}
@@ -120,7 +120,7 @@ const TokenCard = ({
               <div className="text-lg font-bold tracking-tight">
                 {facility.name}
               </div>
-              <div className="text-sm text-gray-600 whitespace-pre-wrap wrap-break-word">
+              <div className="text-sm text-soft-foreground whitespace-pre-wrap wrap-break-word">
                 <span>{facility.address?.replace(/,\s*/g, ", ")}</span>
                 <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
               </div>
@@ -130,14 +130,14 @@ const TokenCard = ({
           <div className="flex flex-col items-end gap-2">
             <div className="flex items-end justify-between gap-4">
               <div className="flex-shrink-0">
-                <div className="px-2 py-2 text-sm font-medium text-center text-gray-500 bg-gray-100 border whitespace-nowrap rounded-b-md">
+                <div className="px-2 py-2 text-sm font-medium text-center text-muted-foreground bg-muted-background border whitespace-nowrap rounded-b-md">
                   <p>{token.category.name}</p>
                 </div>
               </div>
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-gray-600">
+              <p className="text-sm font-semibold text-soft-foreground">
                 {token.queue.date}
               </p>
             </div>
@@ -145,7 +145,7 @@ const TokenCard = ({
             <div className="flex-col items-end justify-between gap-4 mt-4">
               <div className="mt-2">
                 <div>
-                  <Label className="justify-end text-sm font-normal text-gray-600">
+                  <Label className="justify-end text-sm font-normal text-soft-foreground">
                     {t("token_no")}
                   </Label>
                   <div className="flex justify-end text-2xl font-bold leading-none">
@@ -172,7 +172,7 @@ const TokenCard = ({
               <Button
                 variant="link"
                 asChild
-                className="text-base font-semibold underline capitalize text-gray-950"
+                className="text-base font-semibold underline capitalize text-foreground"
               >
                 <Link
                   href={`/facility/${facility.id}/${resourceTypeToResourcePathSlug[token.resource_type]}/${token.resource.id}/queues/${token.queue.id}`}
@@ -183,7 +183,7 @@ const TokenCard = ({
               <Button
                 variant="outline"
                 onClick={() => printToken(token.id)}
-                className="text-base font-semibold text-gray-950"
+                className="text-base font-semibold text-foreground"
               >
                 <PrinterIcon className="mr-2 size-4" />
                 {t("print")}

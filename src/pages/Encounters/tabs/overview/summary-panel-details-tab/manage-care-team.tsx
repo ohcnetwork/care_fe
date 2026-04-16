@@ -26,9 +26,9 @@ export const ManageCareTeam = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
-      <div className="bg-gray-100 rounded-md">
-        <div className="flex justify-between items-center w-full text-gray-950 pl-2">
+    <div className="bg-muted-background rounded-md w-full border border-border p-1 pt-2 space-y-1">
+      <div className="bg-muted-background rounded-md">
+        <div className="flex justify-between items-center w-full text-foreground pl-2">
           <span className=" font-semibold">
             {canWrite ? t("manage_care_team") : t("view_care_team")}
           </span>
@@ -39,7 +39,7 @@ export const ManageCareTeam = () => {
           )}
         </div>
       </div>
-      <div className="bg-white p-2 rounded-md shadow">
+      <div className="bg-background p-2 rounded-md shadow">
         {encounter.care_team.length > 0 ? (
           <div className="flex flex-col gap-1">
             {(showAllMembers
@@ -48,20 +48,20 @@ export const ManageCareTeam = () => {
             ).map((member, index) => (
               <div
                 key={member.member.id}
-                className="flex items-center gap-2 p-2 rounded-md border border-gray-100 bg-gray-200/20"
+                className="flex items-center gap-2 p-2 rounded-md border border-soft-border bg-strong-background/20"
               >
                 <Avatar
                   key={member.member.id}
                   name={formatName(member.member, true)}
                   imageUrl={member.member.profile_picture_url}
-                  className="size-9 rounded-full border border-white shadow-sm"
+                  className="size-9 rounded-full border border-background shadow-sm"
                 />{" "}
                 <div className="flex items-center justify-between w-full">
                   <div className="flex flex-col">
-                    <span className="font-medium text-black text-sm">
+                    <span className="font-medium text-foreground text-sm">
                       {formatName(member.member)}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {member.role.display}
                     </span>
                   </div>
@@ -76,7 +76,7 @@ export const ManageCareTeam = () => {
             {encounter.care_team.length > 3 && !showAllMembers && (
               <div
                 onClick={() => setShowAllMembers(true)}
-                className="text-sm font-medium text-black underline cursor-pointer p-1"
+                className="text-sm font-medium text-foreground underline cursor-pointer p-1"
               >
                 <span>
                   +{encounter.care_team.length - 3} {t("members")}
@@ -86,7 +86,7 @@ export const ManageCareTeam = () => {
             {encounter.care_team.length > 3 && showAllMembers && (
               <div
                 onClick={() => setShowAllMembers(false)}
-                className="text-sm font-medium text-black underline cursor-pointer p-1"
+                className="text-sm font-medium text-foreground underline cursor-pointer p-1"
               >
                 <span>{t("show_less")}</span>
               </div>

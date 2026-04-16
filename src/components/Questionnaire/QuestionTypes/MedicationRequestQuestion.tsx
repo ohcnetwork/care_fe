@@ -1132,43 +1132,43 @@ export function MedicationRequestQuestion({
           <div className="min-w-fit">
             <div
               className={cn(
-                "relative lg:border border-gray-200 rounded-md",
+                "relative lg:border border-border rounded-md",
                 showAdvancedFields ? "max-w-[2678px]" : "max-w-[1108px]",
                 {
-                  "bg-gray-50/50": !desktopLayout,
+                  "bg-soft-background/50": !desktopLayout,
                 },
               )}
             >
               {/* Header - Only show on desktop */}
               <div
                 className={cn(
-                  "hidden lg:grid bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500",
+                  "hidden lg:grid bg-soft-background border-b border-border text-sm font-medium text-muted-foreground",
                   showAdvancedFields
                     ? "grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
                     : "grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
                 )}
               >
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                   {t("medicine")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                   {t("dosage")}
                   <span className="text-red-500 ml-0.5">*</span>
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                   {t("frequency")}
                   <span className="text-red-500 ml-0.5">*</span>
                 </div>
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                   {t("duration")}
                 </div>
                 {/* Expand/Collapse bar for advanced fields */}
                 <div
                   className={cn(
-                    "flex items-center justify-center border-r border-gray-200 cursor-pointer transition-colors",
+                    "flex items-center justify-center border-r border-border cursor-pointer transition-colors",
                     showAdvancedFields
                       ? "bg-primary-50 hover:bg-primary-100"
-                      : "bg-gray-100 hover:bg-gray-200",
+                      : "bg-muted-background hover:bg-strong-background",
                   )}
                   onClick={() => setShowAdvancedFields(!showAdvancedFields)}
                   title={
@@ -1180,45 +1180,45 @@ export function MedicationRequestQuestion({
                   {showAdvancedFields ? (
                     <ChevronsDownUp className="h-4 w-4 text-primary-600 rotate-90" />
                   ) : (
-                    <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
+                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground rotate-90" />
                   )}
                 </div>
                 {/* Advanced fields - inserted between bar and notes when expanded */}
                 {showAdvancedFields && (
                   <>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                    <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                       {t("instructions")}
                     </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                    <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                       {t("route")}
                     </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                    <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                       {t("site")}
                     </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                    <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                       {t("method")}
                     </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                    <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                       {t("intent")}
                     </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                    <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                       {t("authored_on")}
                     </div>
-                    <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                    <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                       {t("requester")}
                     </div>
                   </>
                 )}
                 {/* Notes - Always visible, at the end before remove button */}
-                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                <div className="font-semibold text-soft-foreground p-3 border-r border-border">
                   {t("note")}
                 </div>
-                <div className="font-semibold text-gray-600 p-3 sticky right-0 bg-gray-50 shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12" />
+                <div className="font-semibold text-soft-foreground p-3 sticky right-0 bg-soft-background shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12" />
               </div>
 
               {/* Body */}
               <div
-                className={cn("bg-white", {
+                className={cn("bg-background", {
                   "bg-transparent": !desktopLayout,
                 })}
               >
@@ -1250,9 +1250,9 @@ export function MedicationRequestQuestion({
                             <CollapsibleTrigger asChild>
                               <CardHeader
                                 className={cn(
-                                  "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
+                                  "p-2 rounded-lg shadow-none bg-soft-background cursor-pointer active:bg-muted-background transition-colors",
                                   {
-                                    "bg-gray-200 border border-gray-300":
+                                    "bg-strong-background border border-strong-border":
                                       expandedMedicationIndex !== index,
                                   },
                                 )}
@@ -1262,7 +1262,7 @@ export function MedicationRequestQuestion({
                                     <div className="flex-1 min-w-0 mr-2">
                                       <CardTitle
                                         className={cn(
-                                          "text-base text-gray-950 break-all",
+                                          "text-base text-foreground break-all",
                                           isInactive &&
                                             medication.status !== "ended" &&
                                             "line-through",
@@ -1288,7 +1288,7 @@ export function MedicationRequestQuestion({
                                             handleRemoveMedication(index);
                                           }}
                                           disabled={isInactive || disabled}
-                                          className="size-10 p-4 border border-gray-400 bg-white shadow text-destructive"
+                                          className="size-10 p-4 border border-stronger-border bg-background shadow text-destructive"
                                           aria-label="Remove medication"
                                         >
                                           <MinusCircledIcon className="size-5" />
@@ -1297,7 +1297,7 @@ export function MedicationRequestQuestion({
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="size-10 border border-gray-400 bg-white shadow p-4 pointer-events-none"
+                                        className="size-10 border border-stronger-border bg-background shadow p-4 pointer-events-none"
                                         aria-label={
                                           expandedMedicationIndex === index
                                             ? "Collapse medication"
@@ -1313,7 +1313,7 @@ export function MedicationRequestQuestion({
                                     </div>
                                   </div>
                                   {expandedMedicationIndex !== index && (
-                                    <div className="text-sm mt-1 text-gray-600 space-y-0.5">
+                                    <div className="text-sm mt-1 text-soft-foreground space-y-0.5">
                                       {medication.dosage_instruction.map(
                                         (di, dIdx) => {
                                           const freq = formatFrequency(di);
@@ -1343,7 +1343,7 @@ export function MedicationRequestQuestion({
                               </CardHeader>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
-                              <CardContent className="p-2 pt-2 space-y-3 rounded-lg bg-gray-50">
+                              <CardContent className="p-2 pt-2 space-y-3 rounded-lg bg-soft-background">
                                 <MedicationRequestGridRow
                                   medication={medication}
                                   disabled={disabled}
@@ -1442,9 +1442,11 @@ export function MedicationRequestQuestion({
         <div className="max-w-4xl space-y-2">
           <Label htmlFor="prescription-note">{t("note")}</Label>
           {prescriptionId ? (
-            <div className="p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[80px] text-sm text-gray-700 whitespace-pre-wrap">
+            <div className="p-3 bg-soft-background border border-border rounded-md min-h-[80px] text-sm text-muted-foreground whitespace-pre-wrap">
               {prescription?.note || (
-                <span className="text-gray-400 italic">{t("no_notes")}</span>
+                <span className="text-placeholder-foreground italic">
+                  {t("no_notes")}
+                </span>
               )}
             </div>
           ) : (
@@ -1667,7 +1669,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
+        "grid grid-cols-1 border-b border-border hover:bg-soft-background/50 space-y-3 lg:space-y-0",
         showAdvancedFields
           ? "lg:grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
           : "lg:grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
@@ -1678,7 +1680,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     >
       {/* Medicine Name */}
       {desktopLayout && (
-        <div className="lg:p-4 lg:px-2 lg:py-1 flex flex-col justify-between lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
+        <div className="lg:p-4 lg:px-2 lg:py-1 flex flex-col justify-between lg:col-span-1 lg:border-r border-border font-medium overflow-hidden text-sm">
           <span
             className={cn(
               "wrap-break-word line-clamp-2 hidden lg:block",
@@ -1692,7 +1694,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {!isReadOnly && (
             <button
               type="button"
-              className="text-[10px] text-gray-400 hover:text-primary-600 transition-colors self-end mt-0.5"
+              className="text-[10px] text-placeholder-foreground hover:text-primary-600 transition-colors self-end mt-0.5"
               onClick={handleAddDosageInstruction}
             >
               <PlusIcon className="size-3" />
@@ -1701,7 +1703,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </div>
       )}
       {/* Dosage */}
-      <div className="p-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="p-1 lg:py-1 lg:border-r border-border overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -1712,7 +1714,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           return (
             <div key={dIdx}>
               {isMultiple && dIdx > 0 && (
-                <div className="border-t border-dashed border-gray-300 my-1" />
+                <div className="border-t border-dashed border-strong-border my-1" />
               )}
               <div className="flex items-center justify-between gap-1">
                 <div className="flex-1 min-w-0">
@@ -1762,7 +1764,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                   <div className="flex items-end">
                     <button
                       type="button"
-                      className="size-3 rounded-full hover:bg-transparent text-gray-500"
+                      className="size-3 rounded-full hover:bg-transparent text-muted-foreground"
                       onClick={() => handleDoseRangeClick(dIdx)}
                       disabled={disabled || isReadOnly}
                     >
@@ -1772,7 +1774,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                   {isMultiple && !isReadOnly && (
                     <button
                       type="button"
-                      className="shrink-0 text-gray-500 hover:text-red-500 transition-colors ml-1"
+                      className="shrink-0 text-muted-foreground hover:text-red-500 transition-colors ml-1"
                       onClick={() => handleRemoveDosageInstruction(dIdx)}
                       title={t("remove_dosage_step")}
                     >
@@ -1826,7 +1828,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         })}
       </div>
       {/* Frequency */}
-      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-border overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("frequency")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -1836,7 +1838,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           return (
             <div key={dIdx}>
               {medication.dosage_instruction.length > 1 && dIdx > 0 && (
-                <div className="border-t border-dashed border-gray-300 my-1" />
+                <div className="border-t border-dashed border-strong-border my-1" />
               )}
               <DosageFrequencyInput
                 dosageInstruction={di}
@@ -1857,7 +1859,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         })}
       </div>
       {/* Duration */}
-      <div className="lg:px-2 p-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 p-1 lg:py-1 lg:border-r border-border overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("duration")}
         </Label>
@@ -1866,7 +1868,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           return (
             <div key={dIdx}>
               {medication.dosage_instruction.length > 1 && dIdx > 0 && (
-                <div className="border-t border-dashed border-gray-300 my-1" />
+                <div className="border-t border-dashed border-strong-border my-1" />
               )}
               <DurationInput
                 value={di?.timing?.repeat?.bounds_duration}
@@ -1932,10 +1934,10 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       {desktopLayout && (
         <div
           className={cn(
-            "lg:border-r border-gray-200 cursor-pointer transition-colors flex items-center justify-center",
+            "lg:border-r border-border cursor-pointer transition-colors flex items-center justify-center",
             showAdvancedFields
               ? "bg-primary-50 hover:bg-primary-100"
-              : "bg-gray-100 hover:bg-gray-200",
+              : "bg-muted-background hover:bg-strong-background",
           )}
           onClick={onToggleAdvanced}
           title={
@@ -1947,7 +1949,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {showAdvancedFields ? (
             <ChevronsDownUp className="h-4 w-4 text-primary-600 rotate-90" />
           ) : (
-            <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
+            <ChevronsUpDown className="h-4 w-4 text-muted-foreground rotate-90" />
           )}
         </div>
       )}
@@ -1955,11 +1957,11 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       {showAdvancedFields && desktopLayout && (
         <>
           {/* Instructions */}
-          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-border overflow-hidden">
             {medication.dosage_instruction.map((di, dIdx) => (
               <div key={dIdx}>
                 {medication.dosage_instruction.length > 1 && dIdx > 0 && (
-                  <div className="border-t border-dashed border-gray-300 my-1" />
+                  <div className="border-t border-dashed border-strong-border my-1" />
                 )}
                 {di?.as_needed_boolean ? (
                   <div className="space-y-1">
@@ -1997,11 +1999,11 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             ))}
           </div>
           {/* Route */}
-          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-border overflow-hidden">
             {medication.dosage_instruction.map((di, dIdx) => (
               <div key={dIdx}>
                 {medication.dosage_instruction.length > 1 && dIdx > 0 && (
-                  <div className="border-t border-dashed border-gray-300 my-1" />
+                  <div className="border-t border-dashed border-strong-border my-1" />
                 )}
                 <ValueSetSelect
                   system="system-route"
@@ -2016,11 +2018,11 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             ))}
           </div>
           {/* Site */}
-          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-border overflow-hidden">
             {medication.dosage_instruction.map((di, dIdx) => (
               <div key={dIdx}>
                 {medication.dosage_instruction.length > 1 && dIdx > 0 && (
-                  <div className="border-t border-dashed border-gray-300 my-1" />
+                  <div className="border-t border-dashed border-strong-border my-1" />
                 )}
                 <ValueSetSelect
                   system="system-body-site"
@@ -2035,11 +2037,11 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             ))}
           </div>
           {/* Method */}
-          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-border overflow-hidden">
             {medication.dosage_instruction.map((di, dIdx) => (
               <div key={dIdx}>
                 {medication.dosage_instruction.length > 1 && dIdx > 0 && (
-                  <div className="border-t border-dashed border-gray-300 my-1" />
+                  <div className="border-t border-dashed border-strong-border my-1" />
                 )}
                 <ValueSetSelect
                   system="system-administration-method"
@@ -2055,7 +2057,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             ))}
           </div>
           {/* Intent */}
-          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-border overflow-hidden">
             <Select
               value={medication.intent}
               onValueChange={(value: MedicationRequestIntent) =>
@@ -2083,7 +2085,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             </Select>
           </div>
           {/* Authored On */}
-          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-border overflow-hidden">
             <CombinedDatePicker
               value={
                 medication.authored_on
@@ -2098,7 +2100,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             />
           </div>
           {/* Requester */}
-          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden flex gap-1">
+          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-border overflow-hidden flex gap-1">
             <UserSelector
               selected={medication.requester}
               onChange={(user) => {
@@ -2123,7 +2125,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </>
       )}
       {/* Notes - Always visible on desktop, at the end before remove button */}
-      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-border overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("note")}</Label>
         <Input
           value={medication.note || ""}
@@ -2145,7 +2147,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-between text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                className="w-full justify-between text-soft-foreground hover:text-foreground hover:bg-muted-background"
               >
                 <span className="flex items-center gap-2">
                   <SlidersHorizontal className="h-4 w-4" />
@@ -2163,11 +2165,11 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 <div key={dIdx} className="space-y-2">
                   {medication.dosage_instruction.length > 1 && (
                     <div className="flex items-center gap-1.5 px-1">
-                      <span className="text-[10px] font-medium text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-medium text-placeholder-foreground bg-muted-background px-1.5 py-0.5 rounded">
                         #{dIdx + 1}
                       </span>
                       {dIdx > 0 && (
-                        <div className="flex-1 border-t border-dashed border-gray-300" />
+                        <div className="flex-1 border-t border-dashed border-strong-border" />
                       )}
                     </div>
                   )}
@@ -2336,7 +2338,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       )}
 
       {/* Actions Dropdown */}
-      <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center sticky right-0 bg-white shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12">
+      <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center sticky right-0 bg-background shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

@@ -58,7 +58,7 @@ export const MedicationsTable = ({
   if (!medications.length) {
     return (
       <CardContent className="p-2">
-        <p className="text-gray-500 w-full flex justify-center mb-3">
+        <p className="text-muted-foreground w-full flex justify-center mb-3">
           {t("no_active_medication_recorded")}
         </p>
       </CardContent>
@@ -66,10 +66,10 @@ export const MedicationsTable = ({
   }
 
   return (
-    <div className=" @container border border-gray-200 rounded-lg">
+    <div className=" @container border border-border rounded-lg">
       <Table className="@lg:min-w-auto min-w-6xl">
         <TableHeader>
-          <TableRow className="divide-x bg-gray-100">
+          <TableRow className="divide-x bg-muted-background">
             <TableHead>{t("medicine")}</TableHead>
             <TableHead>{t("dosage")}</TableHead>
             <TableHead>{t("frequency")}</TableHead>
@@ -116,7 +116,7 @@ export const MedicationsTable = ({
                           <>
                             {freq || "-"}
                             {additionalInstr.length > 0 && (
-                              <div className="text-sm text-gray-600 space-y-1">
+                              <div className="text-sm text-soft-foreground space-y-1">
                                 {additionalInstr.map(
                                   (item: { display: string }, aIdx: number) => (
                                     <div key={aIdx}>{item.display}</div>
@@ -142,7 +142,9 @@ export const MedicationsTable = ({
                         <>
                           {formatSig(di) || "-"}
                           {notes && (
-                            <div className="text-sm text-gray-600">{notes}</div>
+                            <div className="text-sm text-soft-foreground">
+                              {notes}
+                            </div>
                           )}
                         </>
                       )}
@@ -156,15 +158,15 @@ export const MedicationsTable = ({
       </Table>
       {!showActiveOnly && !!inactiveMedications.length && (
         <div
-          className="flex items-center gap-2 p-4 cursor-pointer hover:bg-gray-50 border-t"
+          className="flex items-center gap-2 p-4 cursor-pointer hover:bg-soft-background border-t"
           onClick={() => setShowInactive(!showInactive)}
         >
           {showInactive ? (
-            <EyeOffIcon className="size-4 text-gray-500" />
+            <EyeOffIcon className="size-4 text-muted-foreground" />
           ) : (
-            <EyeIcon className="size-4 text-gray-500" />
+            <EyeIcon className="size-4 text-muted-foreground" />
           )}
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-muted-foreground">
             {showInactive ? t("hide") : t("show")}{" "}
             {`${inactiveMedications.length} ${t("inactive")}`}{" "}
             {t("medications")}

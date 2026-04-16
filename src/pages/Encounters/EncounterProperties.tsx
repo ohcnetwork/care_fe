@@ -41,7 +41,7 @@ export const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
           <h4 className="font-medium text-sm">{t("status_history")}</h4>
           {encounter.status_history.history.map((history, index) => (
             <div key={index} className="flex items-center gap-2 text-sm">
-              <span className="text-gray-500">
+              <span className="text-muted-foreground">
                 {formatDateTime(history.moved_at)}
               </span>
               <span className="font-medium">
@@ -85,7 +85,7 @@ export const EncounterClassBadge = ({
           <h4 className="font-medium text-sm">{t("class_history")}</h4>
           {encounter.encounter_class_history.history.map((history, index) => (
             <div key={index} className="flex items-center gap-2 text-sm">
-              <span className="text-gray-500">
+              <span className="text-muted-foreground">
                 {formatDateTime(history.moved_at)}
               </span>
               <span className="font-medium">

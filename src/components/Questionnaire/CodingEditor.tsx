@@ -189,7 +189,9 @@ export function CodingEditor({
                       {...field}
                       value={code.display}
                       placeholder={t("unverified")}
-                      className={!code.display ? "text-gray-500" : undefined}
+                      className={
+                        !code.display ? "text-muted-foreground" : undefined
+                      }
                       readOnly
                     />
                   </FormControl>

@@ -100,7 +100,7 @@ export default function ObservationDefinitionForm({
       <Page title={t("edit_observation_definition")} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("edit_observation_definition")}
             </h1>
           </div>
@@ -370,7 +370,7 @@ function ObservationDefinitionFormContent({
     >
       <div className="container mx-auto max-w-3xl">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-foreground">
             {isEditMode
               ? t("edit_observation_definition")
               : t("create_observation_definition")}
@@ -426,13 +426,13 @@ function ObservationDefinitionFormContent({
             className="space-y-4"
           >
             {/* Basic Information Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("basic_information")}
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {t("observation_basic_information")}
                   </p>
                 </div>
@@ -644,16 +644,16 @@ function ObservationDefinitionFormContent({
             />
 
             {/* Additional Details Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("additional_details")}{" "}
-                    <span className="text-sm font-normal text-gray-500">
+                    <span className="text-sm font-normal text-muted-foreground">
                       ({t("optional")})
                     </span>
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {t("observation_additional_details")}
                   </p>
                 </div>
@@ -742,26 +742,26 @@ function ObservationDefinitionFormContent({
             </div>
 
             {/* Components Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("components")}{" "}
-                    <span className="text-sm font-normal text-gray-500">
+                    <span className="text-sm font-normal text-muted-foreground">
                       {t("optional")}
                     </span>
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {t("observation_components_description")}
                   </p>
                 </div>
 
                 {componentFields.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4">
-                    <p className="mb-2 text-sm text-gray-500">
+                  <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-soft-background p-4">
+                    <p className="mb-2 text-sm text-muted-foreground">
                       {t("observation_components_description")}
                     </p>
-                    <ul className="mb-4 text-sm text-gray-600">
+                    <ul className="mb-4 text-sm text-soft-foreground">
                       <li>• {t("blood_pressure_systolic_diastolic")}</li>
                       <li>• {t("complete_blood_count_rbc_wbc_platelets")}</li>
                     </ul>
@@ -786,21 +786,21 @@ function ObservationDefinitionFormContent({
                     {componentFields.map((componentField, index) => (
                       <div
                         key={componentField.id}
-                        className="relative rounded-lg border border-gray-200 bg-gray-50 p-4"
+                        className="relative rounded-lg border border-border bg-soft-background p-4"
                       >
                         <div className="absolute right-3 top-3">
                           <Button
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 rounded-full hover:bg-gray-100"
+                            className="h-7 w-7 rounded-full hover:bg-muted-background"
                             onClick={() => removeComponent(index)}
                           >
-                            <X className="h-4 w-4 text-gray-500" />
+                            <X className="h-4 w-4 text-muted-foreground" />
                           </Button>
                         </div>
 
-                        <div className="mb-2 text-sm font-medium text-gray-700">
+                        <div className="mb-2 text-sm font-medium text-muted-foreground">
                           {t("component_with_index", { index: index + 1 })}
                         </div>
 

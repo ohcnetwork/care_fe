@@ -68,7 +68,7 @@ export function TemplateSelector({
           variant="ghost"
           size="sm"
           disabled={disabled}
-          className="h-8 px-3 text-gray-900 hover:bg-transparent"
+          className="h-8 px-3 text-foreground hover:bg-transparent"
         >
           <CareIcon icon="l-file-upload-alt" className="size-4" />
           <span className="font-semibold underline">
@@ -106,19 +106,19 @@ export function TemplateSelector({
         </Command>
         {/* Keyboard shortcuts - not translatable text */}
         {/* eslint-disable i18next/no-literal-string */}
-        <div className="flex items-center justify-between border-t px-3 py-2 text-xs text-gray-500 mt-2">
+        <div className="flex items-center justify-between border-t px-3 py-2 text-xs text-muted-foreground mt-2">
           <div className="flex items-center gap-1">
-            <kbd className="rounded border bg-gray-100 px-1">↑</kbd>
-            <kbd className="rounded border bg-gray-100 px-1">↓</kbd>
+            <kbd className="rounded border bg-muted-background px-1">↑</kbd>
+            <kbd className="rounded border bg-muted-background px-1">↓</kbd>
             <span>{t("navigate")}</span>
           </div>
           <div className="flex items-center gap-1">
-            <kbd className="rounded border bg-gray-100 px-1">⇧</kbd>
-            <kbd className="rounded border bg-gray-100 px-1">↵</kbd>
+            <kbd className="rounded border bg-muted-background px-1">⇧</kbd>
+            <kbd className="rounded border bg-muted-background px-1">↵</kbd>
             <span>{t("keep_open")}</span>
           </div>
           <div className="flex items-center gap-1">
-            <kbd className="rounded border bg-gray-100 px-1">↵</kbd>
+            <kbd className="rounded border bg-muted-background px-1">↵</kbd>
             <span>{t("insert")}</span>
           </div>
         </div>

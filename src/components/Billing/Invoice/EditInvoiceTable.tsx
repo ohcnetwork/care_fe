@@ -536,7 +536,7 @@ export function EditInvoiceTable({
 
                 return (
                   <React.Fragment key={item.id}>
-                    <TableRow className="divide-x font-medium text-gray-950">
+                    <TableRow className="divide-x font-medium text-foreground">
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>{item.title}</TableCell>
                       <TableCell>
@@ -593,7 +593,7 @@ export function EditInvoiceTable({
                           )}
                         />
                       </TableCell>
-                      <TableCell className="border-r border-gray-200 font-medium text-gray-950 text-sm ">
+                      <TableCell className="border-r border-border font-medium text-foreground text-sm ">
                         {(() => {
                           const hasAppliedDiscounts =
                             item.discounts && item.discounts.length > 0;
@@ -604,7 +604,7 @@ export function EditInvoiceTable({
                             !hasAppliedDiscounts
                           ) {
                             return (
-                              <div className="text-sm text-gray-500 py-2">
+                              <div className="text-sm text-muted-foreground py-2">
                                 {t("no_discounts")}
                               </div>
                             );
@@ -790,7 +790,7 @@ export function EditInvoiceTable({
                                           return (
                                             <FormItem>
                                               <div className="flex items-center gap-2">
-                                                <span className="text-sm text-gray-500">
+                                                <span className="text-sm text-muted-foreground">
                                                   {getCurrencySymbol()}
                                                 </span>
                                                 <FormControl>
@@ -806,10 +806,10 @@ export function EditInvoiceTable({
                                                       );
                                                     }}
                                                     disabled={isDisabled}
-                                                    className="data-[state=unchecked]:bg-gray-900"
+                                                    className="data-[state=unchecked]:bg-foreground"
                                                   />
                                                 </FormControl>
-                                                <span className="text-sm text-gray-500">
+                                                <span className="text-sm text-muted-foreground">
                                                   %
                                                 </span>
                                               </div>
@@ -864,7 +864,7 @@ export function EditInvoiceTable({
                                   size="icon"
                                   aria-label={t("note")}
                                   className={cn(
-                                    "bg-gray-100",
+                                    "bg-muted-background",
                                     field.value && "bg-primary-100",
                                   )}
                                 >
@@ -911,7 +911,7 @@ export function EditInvoiceTable({
           </Table>
         </div>
 
-        <div className="sticky bottom-0 bg-white p-4 flex justify-end gap-2 border-t">
+        <div className="sticky bottom-0 bg-background p-4 flex justify-end gap-2 border-t">
           <Button type="button" variant="outline" onClick={onClose}>
             {t("cancel")}
             {enableShortcut && <ShortcutBadge actionId="cancel-action" />}

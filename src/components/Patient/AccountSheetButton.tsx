@@ -120,8 +120,8 @@ export function AccountSheetButton({
           ) : (
             <div className="space-y-5 pr-2 max-h-[calc(100vh-120px)] overflow-y-auto">
               {accounts.length === 0 ? (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500 mb-4">
+                <div className="text-center py-8 bg-soft-background rounded-lg">
+                  <p className="text-muted-foreground mb-4">
                     {t("no_active_account_found")}
                   </p>
                   {canCreateAccount && (
@@ -141,7 +141,7 @@ export function AccountSheetButton({
                         {accounts[0].name}
                       </h2>
                       {accounts[0].description && (
-                        <div className="text-sm text-gray-500 max-w-lg">
+                        <div className="text-sm text-muted-foreground max-w-lg">
                           {accounts[0].description}
                         </div>
                       )}
@@ -155,19 +155,23 @@ export function AccountSheetButton({
                       </h3>
 
                       <div className="grid grid-cols-2 gap-y-2 text-sm">
-                        <span className="text-gray-500">{t("status")}</span>
+                        <span className="text-muted-foreground">
+                          {t("status")}
+                        </span>
                         <span className="font-medium">
                           {t(accounts[0].status)}
                         </span>
 
-                        <span className="text-gray-500">
+                        <span className="text-muted-foreground">
                           {t("billing_status")}
                         </span>
                         <span className="font-medium">
                           {t(accounts[0].billing_status)}
                         </span>
 
-                        <span className="text-gray-500">{t("start_date")}</span>
+                        <span className="text-muted-foreground">
+                          {t("start_date")}
+                        </span>
                         <span className="font-medium">
                           {accounts[0].service_period &&
                           accounts[0].service_period.start
@@ -181,7 +185,9 @@ export function AccountSheetButton({
                             : "-"}
                         </span>
 
-                        <span className="text-gray-500">{t("end_date")}</span>
+                        <span className="text-muted-foreground">
+                          {t("end_date")}
+                        </span>
                         <span className="font-medium">
                           {accounts[0].service_period &&
                           accounts[0].service_period.end
@@ -204,7 +210,7 @@ export function AccountSheetButton({
 
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
+                          <span className="text-soft-foreground">
                             {t("total_balance")}
                           </span>
                           <span className="text-lg font-semibold text-red-600">
@@ -215,7 +221,7 @@ export function AccountSheetButton({
                         </div>
 
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
+                          <span className="text-soft-foreground">
                             {t("total_gross")}
                           </span>
                           <span className="font-medium">
@@ -224,7 +230,7 @@ export function AccountSheetButton({
                         </div>
 
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
+                          <span className="text-soft-foreground">
                             {t("total_net")}
                           </span>
                           <span className="font-medium">
@@ -233,7 +239,7 @@ export function AccountSheetButton({
                         </div>
 
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
+                          <span className="text-soft-foreground">
                             {t("total_paid")}
                           </span>
                           <span className="font-medium text-green-600">
@@ -241,7 +247,7 @@ export function AccountSheetButton({
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
+                          <span className="text-soft-foreground">
                             {t("total_billable")}
                           </span>
                           <span className="font-medium">

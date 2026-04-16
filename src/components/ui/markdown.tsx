@@ -37,7 +37,7 @@ function Markdown({
     return (
       <article
         ref={ref}
-        className={cn("prose max-w-none dark:prose-invert", className)}
+        className={cn("prose max-w-none", className)}
         dangerouslySetInnerHTML={{ __html: html }}
         {...props}
       />

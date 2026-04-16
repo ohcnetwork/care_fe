@@ -99,13 +99,13 @@ export function ClinicalHistoryPage({
       }
       hideTitleOnPage
     >
-      <div className="flex justify-between items-center bg-gray-100 -mx-3 -mt-8 md:-mt-8 md:-mx-9 px-3 md:px-6 pb-3 pt-2 md:rounded-t-lg">
+      <div className="flex justify-between items-center bg-muted-background -mx-3 -mt-8 md:-mt-8 md:-mx-9 px-3 md:px-6 pb-3 pt-2 md:rounded-t-lg">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
             <Button variant="outline" onClick={handleClose} size="icon">
               <ArrowLeftIcon />
             </Button>
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-muted-foreground">
               {sourceUrl ? t("back_to_encounter") : t("back_to_patient")}
             </span>
           </div>

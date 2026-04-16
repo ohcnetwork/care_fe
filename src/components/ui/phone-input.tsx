@@ -166,7 +166,7 @@ function InputComponent({
     <>
       <Input
         className={cn(
-          "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
+          "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-border",
           className,
         )}
         onBeforeInput={handleBeforeInput}
@@ -220,7 +220,7 @@ const CountrySelect = ({
         <Button
           type="button"
           variant="outline"
-          className="flex gap-1 rounded-e-none rounded-s-md border-r-0 border-gray-200 shadow-xs px-3 focus:z-10 h-auto"
+          className="flex gap-1 rounded-e-none rounded-s-md border-r-0 border-border shadow-xs px-3 focus:z-10 h-auto"
           disabled={disabled}
         >
           <FlagComponent

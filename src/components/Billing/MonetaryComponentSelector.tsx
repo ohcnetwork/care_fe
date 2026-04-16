@@ -257,8 +257,11 @@ export function MonetaryComponentSelector({
       return (
         <div key={groupCode} className="flex flex-col gap-2 mb-3">
           <div className="flex items-center gap-2 p-2">
-            <Component className="size-4 text-black/80" strokeWidth={1.25} />
-            <div className="text-sm font-semibold text-gray-900 uppercase">
+            <Component
+              className="size-4 text-foreground/80"
+              strokeWidth={1.25}
+            />
+            <div className="text-sm font-semibold text-foreground uppercase">
               {groupCode}
             </div>
           </div>
@@ -283,20 +286,20 @@ export function MonetaryComponentSelector({
       return (
         <div
           key={`${component.title}-${component.code?.code || idx}`}
-          className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded"
+          className="flex items-center space-x-3 p-2 hover:bg-soft-background rounded"
         >
           <Checkbox
             checked={isSelected}
             onCheckedChange={(checked) =>
               handleCheckboxToggle(component, checked as boolean)
             }
-            className="h-4 w-4 rounded border-gray-300"
+            className="h-4 w-4 rounded border-strong-border"
           />
           <div className="flex flex-row justify-between items-center flex-1 min-w-0">
-            <div className="text-sm font-medium text-gray-900">
+            <div className="text-sm font-medium text-foreground">
               {component.code?.display}
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-soft-foreground">
               {formatComponentValue(component)}
             </div>
           </div>
@@ -380,10 +383,10 @@ export function MonetaryComponentSelector({
 
     // Full display mode
     return (
-      <div className="bg-white border rounded-md p-3 cursor-pointer hover:border-gray-400 transition-colors min-h-11 flex items-center justify-between">
+      <div className="bg-background border rounded-md p-3 cursor-pointer hover:border-stronger-border transition-colors min-h-11 flex items-center justify-between">
         <div className="flex items-center gap-2 flex-wrap">
           {selectedComponents.length === 0 ? (
-            <span className="text-gray-500 text-sm">
+            <span className="text-muted-foreground text-sm">
               {t(
                 type === MonetaryComponentType.tax ? "add_tax" : "add_discount",
               )}
@@ -406,12 +409,12 @@ export function MonetaryComponentSelector({
               )}
             </>
           ) : (
-            <span className="text-gray-700 text-sm">
+            <span className="text-muted-foreground text-sm">
               {selectedComponents.length} {t("selected")}
             </span>
           )}
         </div>
-        <ChevronDown className="size-4 text-gray-400" />
+        <ChevronDown className="size-4 text-placeholder-foreground" />
       </div>
     );
   };
@@ -424,7 +427,7 @@ export function MonetaryComponentSelector({
         type === MonetaryComponentType.discount &&
         selectedComponents.length > 0 && (
           <div className="space-y-1 mb-2">
-            <p className="text-sm font-medium text-gray-700">
+            <p className="text-sm font-medium text-muted-foreground">
               {t("selected")} {title?.toLowerCase()}
             </p>
             {selectedComponents.map((component, idx) => {
@@ -436,7 +439,7 @@ export function MonetaryComponentSelector({
               return (
                 <div
                   key={`selected-${componentRead?.title}-${componentRead?.code?.code || idx}`}
-                  className="p-3 rounded-lg bg-white border border-gray-200 transition-colors"
+                  className="p-3 rounded-lg bg-background border border-border transition-colors"
                 >
                   <div className="flex items-center justify-between border-b pb-2">
                     <div>
@@ -463,7 +466,7 @@ export function MonetaryComponentSelector({
                         onCheckedChange={() => handleToggleGlobal(component)}
                         aria-label={t("use_facility_global_value")}
                       />
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-soft-foreground">
                         {isGlobal
                           ? t("use_facility_global_value")
                           : t("override_with_local_value")}
@@ -507,7 +510,7 @@ export function MonetaryComponentSelector({
       {/* Title */}
       {title && displayMode === "full" && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-900">{title}</p>
+          <p className="text-sm text-foreground">{title}</p>
         </div>
       )}
 
@@ -522,7 +525,7 @@ export function MonetaryComponentSelector({
           {/* Search */}
           <div className="p-3 border-b">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-placeholder-foreground" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

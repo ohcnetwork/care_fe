@@ -100,7 +100,7 @@ export default function FacilityOrganizationUsers({
         <div className="relative w-full md:w-auto">
           <CareIcon
             icon="l-search"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4"
           />
           <Input
             placeholder={t("search_by_username")}
@@ -151,7 +151,7 @@ export default function FacilityOrganizationUsers({
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:pb-6">
             {!users?.results?.length ? (
               <Card className="col-span-full">
-                <CardContent className="p-6 text-center text-gray-500">
+                <CardContent className="p-6 text-center text-muted-foreground">
                   {t("no_users_found")}
                 </CardContent>
               </Card>
@@ -172,7 +172,7 @@ export default function FacilityOrganizationUsers({
                           <Button
                             variant="link"
                             size="sm"
-                            className="underline text-gray-500"
+                            className="underline text-muted-foreground"
                           >
                             <span>{t("edit")}</span>
                           </Button>

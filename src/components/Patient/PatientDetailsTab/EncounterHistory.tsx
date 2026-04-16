@@ -98,10 +98,10 @@ const EncounterHistory = (props: PatientProps) => {
                 </div>
               ) : (
                 <div className="p-2">
-                  <div className="h-full space-y-2 rounded-lg bg-white px-7 py-12 border border-secondary-300">
+                  <div className="h-full space-y-2 rounded-lg bg-background px-7 py-12 border border-secondary-300">
                     <div className="flex w-full items-center justify-center text-lg text-secondary-600">
                       <div className="h-full flex w-full items-center justify-center">
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-muted-foreground">
                           {t("no_encounters_found")}
                         </span>
                       </div>

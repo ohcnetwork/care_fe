@@ -146,13 +146,13 @@ export default function StockLotSelector({
       <PopoverTrigger disabled={disabled} className="p-0!">
         <Button
           variant="outline"
-          className={`w-auto min-w-40 h-auto justify-between p-1 border-gray-300 border ${className}`}
+          className={`w-auto min-w-40 h-auto justify-between p-1 border-strong-border border ${className}`}
           type="button"
           disabled={disabled}
         >
           <div className="flex flex-col min-w-40 items-start gap-1 w-full">
             {selectedLotsWithInventory.length === 0 ? (
-              <span className="text-gray-500">
+              <span className="text-muted-foreground">
                 {placeholder || t("select_stock")}
               </span>
             ) : (
@@ -164,14 +164,14 @@ export default function StockLotSelector({
                 return (
                   <div
                     key={lot.selectedInventoryId}
-                    className="flex flex-wrap w-full bg-gray-50 px-1 py-0.5 border-gray-200 border rounded-sm text-gray-950 gap-0.5"
+                    className="flex flex-wrap w-full bg-soft-background px-1 py-0.5 border-border border rounded-sm text-foreground gap-0.5"
                   >
                     <div className="flex items-center justify-between gap-1">
                       <span
                         className={cn(
                           "font-medium text-sm truncate max-w-24",
                           !selectedInventory?.product.batch?.lot_number &&
-                            "text-gray-500",
+                            "text-muted-foreground",
                         )}
                         title={
                           selectedInventory?.product.batch?.lot_number ||
@@ -243,7 +243,7 @@ export default function StockLotSelector({
         {enableSearch && (
           <div className="p-2 border-b">
             <div className="relative">
-              <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 size-4" />
+              <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-placeholder-foreground size-4" />
               <Input
                 placeholder={t("search")}
                 value={searchQuery}
@@ -281,7 +281,7 @@ export default function StockLotSelector({
                   key={inv.id}
                   className={`flex items-center space-x-2 p-2 ${
                     isDisabled
-                      ? "cursor-not-allowed opacity-50 bg-gray-50"
+                      ? "cursor-not-allowed opacity-50 bg-soft-background"
                       : "cursor-pointer hover:bg-accent"
                   }`}
                   onClick={() => toggleLotSelection(inv, isRestricted)}
@@ -290,7 +290,8 @@ export default function StockLotSelector({
                   <div className="flex-1 flex items-center justify-between gap-2">
                     <span
                       className={cn(
-                        !inv.product.batch?.lot_number && "text-gray-500",
+                        !inv.product.batch?.lot_number &&
+                          "text-muted-foreground",
                       )}
                     >
                       {inv.product.batch?.lot_number || t("unknown")}
@@ -336,7 +337,7 @@ export default function StockLotSelector({
               );
             })
           ) : (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-muted-foreground">
               {enableSearch && searchQuery
                 ? t("no_results_found")
                 : t("no_lots_found")}

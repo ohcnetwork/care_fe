@@ -37,11 +37,11 @@ export function VitalsTable({ vitals, vitalCodes }: VitalsTableProps) {
   return (
     <Table className="border-separate border-spacing-y-0.5">
       <TableHeader>
-        <TableRow className="rounded-md overflow-hidden bg-gray-100">
+        <TableRow className="rounded-md overflow-hidden bg-muted-background">
           {vitalCodes?.map((code) => (
             <TableHead
               key={code.code}
-              className="h-auto  py-1 px-2  text-gray-600 text-center"
+              className="h-auto  py-1 px-2  text-soft-foreground text-center"
             >
               <div className="flex items-center justify-center space-x-1">
                 <span className="text-sm font-medium">
@@ -49,7 +49,7 @@ export function VitalsTable({ vitals, vitalCodes }: VitalsTableProps) {
                 </span>
                 <Popover>
                   <PopoverTrigger>
-                    <Info className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                    <Info className="size-4 text-muted-foreground hover:text-muted-foreground cursor-pointer" />
                   </PopoverTrigger>
                   <PopoverContent
                     className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
@@ -73,7 +73,7 @@ export function VitalsTable({ vitals, vitalCodes }: VitalsTableProps) {
       <TableBody>
         {vitals.map((vital, idx) => (
           <TableRow
-            className={`rounded-md overflow-hidden bg-gray-50`}
+            className={`rounded-md overflow-hidden bg-soft-background`}
             key={idx}
           >
             {vitalCodes?.map((code) => (

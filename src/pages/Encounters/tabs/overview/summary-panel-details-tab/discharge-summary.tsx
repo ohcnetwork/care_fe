@@ -31,9 +31,9 @@ export const DischargeDetails = () => {
   );
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
+    <div className="bg-muted-background rounded-md w-full border border-border p-1 pt-2 space-y-1">
       <div className="flex justify-between items-center pl-2">
-        <span className="text-gray-950 font-semibold">
+        <span className="text-foreground font-semibold">
           {t("discharge_details")}
         </span>
         {canWriteSelectedEncounter && (
@@ -42,27 +42,27 @@ export const DischargeDetails = () => {
               href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
             >
               <SquarePen
-                className="size-4 text-gray-950 cursor-pointer"
+                className="size-4 text-foreground cursor-pointer"
                 strokeWidth={1.5}
               />
             </Link>
           </Button>
         )}
       </div>
-      <div className="bg-white rounded-md p-2 shadow flex flex-col gap-3">
+      <div className="bg-background rounded-md p-2 shadow flex flex-col gap-3">
         {dischargeStatus ? (
           <>
             <div className="flex justify-between items-center">
               <div className="flex flex-col text-xs gap-1">
-                <span className=" text-gray-700">
+                <span className=" text-muted-foreground">
                   {t("discharge_date_and_time")}:
                 </span>
                 <div className="flex flex-row gap-1 font-semibold">
                   <div className="flex flex-row gap-1 font-semibold">
-                    <span className="text-gray-950">
+                    <span className="text-foreground">
                       {format(dischargeStatus.moved_at, "dd MMM yyyy")},
                     </span>
-                    <span className="text-gray-700">
+                    <span className="text-muted-foreground">
                       {format(dischargeStatus.moved_at, "hh:mma")}
                     </span>
                   </div>
@@ -72,11 +72,11 @@ export const DischargeDetails = () => {
             </div>
             <Dialog>
               <DialogTrigger asChild>
-                <div className="flex flex-col items-center justify-center bg-gray-50 border border-gray-200 rounded-sm p-2 gap-1 cursor-pointer">
-                  <div className="bg-white border border-gray-200 rounded-md size-8 flex items-center justify-center">
-                    <NotepadText className="text-gray-500 size-4" />
+                <div className="flex flex-col items-center justify-center bg-soft-background border border-border rounded-sm p-2 gap-1 cursor-pointer">
+                  <div className="bg-background border border-border rounded-md size-8 flex items-center justify-center">
+                    <NotepadText className="text-muted-foreground size-4" />
                   </div>
-                  <span className="font-semibold text-sm text-gray-950 underline">
+                  <span className="font-semibold text-sm text-foreground underline">
                     {t("discharge_summary_advice")}
                   </span>
                 </div>
@@ -85,20 +85,20 @@ export const DischargeDetails = () => {
                 <DialogHeader>
                   <DialogTitle>{t("discharge_summary_advice")}</DialogTitle>
                 </DialogHeader>
-                <div className="w-full h-35 border-gray-200 border rounded-md p-2 overflow-y-auto">
+                <div className="w-full h-35 border-border border rounded-md p-2 overflow-y-auto">
                   {encounter.discharge_summary_advice ? (
                     encounter.discharge_summary_advice
                       .split("\n")
                       .map((paragraph, index) => (
                         <p
                           key={index}
-                          className="text-sm text-gray-950 text-justify"
+                          className="text-sm text-foreground text-justify"
                         >
                           {paragraph}
                         </p>
                       ))
                   ) : (
-                    <span className="text-gray-600 text-sm">
+                    <span className="text-soft-foreground text-sm">
                       {t("no_discharge_summary_advice")}
                     </span>
                   )}

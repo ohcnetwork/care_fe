@@ -48,10 +48,10 @@ function OrganizationRow({
   canManageOrganization: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-white px-3 py-2">
+    <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-background px-3 py-2">
       <Link
         href={`/admin/organizations/role/${organization.id}`}
-        className="min-w-0 truncate text-sm font-medium text-gray-900 hover:text-primary-700 hover:underline"
+        className="min-w-0 truncate text-sm font-medium text-foreground hover:text-primary-700 hover:underline"
       >
         {organization.name}
       </Link>
@@ -59,7 +59,7 @@ function OrganizationRow({
         <Button
           variant="ghost"
           size="icon"
-          className="size-7 shrink-0 text-gray-400 hover:text-red-600"
+          className="size-7 shrink-0 text-placeholder-foreground hover:text-red-600"
           onClick={onAction}
           disabled={isPending}
         >
@@ -209,10 +209,10 @@ export default function RoleOrganizationConnections({
     <div className="space-y-4">
       {!embedded && (
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-foreground">
             {t("role_organization_connections")}
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {t("role_organization_connections_description")}
           </p>
         </div>
@@ -220,19 +220,19 @@ export default function RoleOrganizationConnections({
 
       <div className="grid gap-4 xl:grid-cols-2">
         {/* Managing Organizations Section */}
-        <section className="rounded-lg border border-gray-200 bg-white">
-          <div className="border-b border-gray-100 px-4 py-3">
+        <section className="rounded-lg border border-border bg-background">
+          <div className="border-b border-soft-border px-4 py-3">
             <div className="flex items-center gap-2">
               <div className="flex size-6 items-center justify-center rounded bg-blue-50 text-blue-600">
                 <Link2 className="size-3.5" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">
+                <h3 className="text-sm font-semibold text-foreground">
                   {t("managing_organizations")}
                 </h3>
               </div>
             </div>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               {t("managing_organizations_hint")}
             </p>
           </div>
@@ -259,9 +259,9 @@ export default function RoleOrganizationConnections({
                 />
               ))
             ) : (
-              <div className="flex flex-col items-center gap-1.5 rounded-lg border border-dashed border-gray-200 bg-gray-50/50 px-4 py-5 text-center">
-                <Unlink className="size-5 text-gray-300" />
-                <p className="text-sm text-gray-500">
+              <div className="flex flex-col items-center gap-1.5 rounded-lg border border-dashed border-border bg-soft-background/50 px-4 py-5 text-center">
+                <Unlink className="size-5 text-disabled-foreground" />
+                <p className="text-sm text-muted-foreground">
                   {t("no_managing_organizations")}
                 </p>
               </div>
@@ -269,8 +269,8 @@ export default function RoleOrganizationConnections({
           </div>
 
           {canManageOrganization && (
-            <div className="border-t border-gray-100 p-3">
-              <Label className="text-xs font-medium text-gray-600">
+            <div className="border-t border-soft-border p-3">
+              <Label className="text-xs font-medium text-soft-foreground">
                 {t("add_managing_organization")}
               </Label>
               <div className="mt-1.5 flex flex-col gap-2 sm:flex-row">
@@ -301,26 +301,26 @@ export default function RoleOrganizationConnections({
         </section>
 
         {/* Managed Organizations Section */}
-        <section className="rounded-lg border border-gray-200 bg-white">
-          <div className="border-b border-gray-100 px-4 py-3">
+        <section className="rounded-lg border border-border bg-background">
+          <div className="border-b border-soft-border px-4 py-3">
             <div className="flex items-center gap-2">
               <div className="flex size-6 items-center justify-center rounded bg-emerald-50 text-emerald-600">
                 <Link2 className="size-3.5" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">
+                <h3 className="text-sm font-semibold text-foreground">
                   {t("managed_role_organizations")}
                 </h3>
               </div>
             </div>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               {t("managed_role_organizations_hint")}
             </p>
           </div>
 
           <div className="space-y-2 p-3">
             {isLoadingManagedOrganizations ? (
-              <div className="flex items-center justify-center gap-2 py-5 text-sm text-gray-400">
+              <div className="flex items-center justify-center gap-2 py-5 text-sm text-placeholder-foreground">
                 <Loader2 className="size-4 animate-spin" />
                 {t("loading")}
               </div>
@@ -345,9 +345,9 @@ export default function RoleOrganizationConnections({
                 />
               ))
             ) : (
-              <div className="flex flex-col items-center gap-1.5 rounded-lg border border-dashed border-gray-200 bg-gray-50/50 px-4 py-5 text-center">
-                <Unlink className="size-5 text-gray-300" />
-                <p className="text-sm text-gray-500">
+              <div className="flex flex-col items-center gap-1.5 rounded-lg border border-dashed border-border bg-soft-background/50 px-4 py-5 text-center">
+                <Unlink className="size-5 text-disabled-foreground" />
+                <p className="text-sm text-muted-foreground">
                   {t("no_managed_role_organizations")}
                 </p>
               </div>
@@ -355,8 +355,8 @@ export default function RoleOrganizationConnections({
           </div>
 
           {canManageOrganization && (
-            <div className="border-t border-gray-100 p-3">
-              <Label className="text-xs font-medium text-gray-600">
+            <div className="border-t border-soft-border p-3">
+              <Label className="text-xs font-medium text-soft-foreground">
                 {t("add_managed_role_organization")}
               </Label>
               <div className="mt-1.5 flex flex-col gap-2 sm:flex-row">

@@ -259,7 +259,7 @@ export const PractitionerSelector = ({
       className="size-8! rounded-full"
     >
       {selected && selected.length > MULTI_SELECT_SHOW_LIMIT ? (
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-muted-foreground">
           +{selected.length - MULTI_SELECT_SHOW_LIMIT}
         </span>
       ) : (
@@ -289,7 +289,9 @@ export const PractitionerSelector = ({
           </span>
         </div>
       ) : (
-        <span className="text-gray-400">{t("select_practitioner")}</span>
+        <span className="text-placeholder-foreground">
+          {t("select_practitioner")}
+        </span>
       )}
       <CaretDownIcon className="ml-auto" />
     </Button>
@@ -301,11 +303,11 @@ export const PractitionerSelector = ({
       {!currentOrganizationId && (
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <div className="px-4 py-3 border-b bg-gray-50 rounded-t-md">
+          <div className="px-4 py-3 border-b bg-soft-background rounded-t-md">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-600">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-soft-foreground">
                   {t("select_practitioners")}
                 </span>
               </div>
@@ -335,14 +337,14 @@ export const PractitionerSelector = ({
             <CommandList className="md:max-h-[30dvh] overflow-y-auto">
               <CommandEmpty>
                 {searchQuery ? (
-                  <div className="p-6 text-center text-gray-500">
+                  <div className="p-6 text-center text-muted-foreground">
                     <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <div className="text-sm">
                       {t("no_results")} "{searchQuery}"
                     </div>
                   </div>
                 ) : (
-                  <div className="p-6 text-center text-gray-500">
+                  <div className="p-6 text-center text-muted-foreground">
                     <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <div className="text-sm">{t("no_organizations_found")}</div>
                   </div>
@@ -353,7 +355,7 @@ export const PractitionerSelector = ({
               {selected && selected.length > 0 && (
                 <CommandGroup>
                   <div className="flex items-center justify-between px-2 py-1.5">
-                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                       {t("selected")}
                     </span>
                     {multiple && selected.length > 1 && (
@@ -373,7 +375,7 @@ export const PractitionerSelector = ({
                       onSelect={() => {
                         onSelect(selected.filter((s) => s.id !== user.id));
                       }}
-                      className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
+                      className="flex items-center gap-2 p-2 cursor-pointer hover:bg-soft-background"
                     >
                       <Avatar
                         imageUrl={user.profile_picture_url}
@@ -401,7 +403,7 @@ export const PractitionerSelector = ({
                       key={organization.id}
                       value={organization.name}
                       onSelect={() => handleOrganizationClick(organization)}
-                      className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50"
+                      className="flex items-center justify-between p-2 cursor-pointer hover:bg-soft-background"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="flex-shrink-0">
@@ -417,7 +419,7 @@ export const PractitionerSelector = ({
                             {organization.name}
                           </div>
                           {organization.description && (
-                            <div className="text-xs text-gray-500 truncate mt-0.5">
+                            <div className="text-xs text-muted-foreground truncate mt-0.5">
                               {organization.description}
                             </div>
                           )}
@@ -425,7 +427,7 @@ export const PractitionerSelector = ({
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {organization.has_children && (
-                          <ChevronRight className="h-4 w-4 text-gray-500" />
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         )}
                       </div>
                     </CommandItem>
@@ -450,7 +452,7 @@ export const PractitionerSelector = ({
                             handleUserSelect(user);
                           }
                         }}
-                        className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
+                        className="flex items-center gap-2 p-2 cursor-pointer hover:bg-soft-background"
                       >
                         <Avatar
                           imageUrl={user.profile_picture_url}
@@ -466,7 +468,7 @@ export const PractitionerSelector = ({
                           </span>
                         </div>
                         {isSelected && (
-                          <CheckIcon className="h-4 w-4 text-gray-700" />
+                          <CheckIcon className="h-4 w-4 text-muted-foreground" />
                         )}
                       </CommandItem>
                     );
@@ -480,9 +482,9 @@ export const PractitionerSelector = ({
 
       {/* Sidebar */}
       {currentOrganizationId && (
-        <div className="border-l border-gray-200 flex flex-col">
+        <div className="border-l border-border flex flex-col">
           {/* Sidebar Header */}
-          <div className="px-4 py-3 border-b bg-gray-50">
+          <div className="px-4 py-3 border-b bg-soft-background">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Button
@@ -493,8 +495,8 @@ export const PractitionerSelector = ({
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <Building2 className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-600">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-soft-foreground">
                   {navigationStack.length > 0
                     ? navigationStack[navigationStack.length - 1].name
                     : organizations.find(
@@ -509,7 +511,7 @@ export const PractitionerSelector = ({
                   setCurrentOrganizationId(null);
                   setNavigationStack([]);
                 }}
-                className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-muted-foreground"
               >
                 <X className="h-3 w-3" />
               </Button>
@@ -522,13 +524,13 @@ export const PractitionerSelector = ({
             {childOrganizations?.results?.length &&
             childOrganizations.results.length > 0 ? (
               <div className="p-2">
-                <h3 className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                <h3 className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   {t("departments")}
                 </h3>
                 {childOrganizations.results.map((organization) => (
                   <div
                     key={organization.id}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-background cursor-pointer"
                     onClick={() => handleChildOrganizationClick(organization)}
                   >
                     <div className="flex-shrink-0">
@@ -544,13 +546,13 @@ export const PractitionerSelector = ({
                         {organization.name}
                       </span>
                       {organization.description && (
-                        <span className="text-xs text-gray-500 truncate mt-0.5">
+                        <span className="text-xs text-muted-foreground truncate mt-0.5">
                           {organization.description}
                         </span>
                       )}
                     </div>
                     {organization.has_children && (
-                      <ChevronRight className="h-4 w-4 text-gray-500" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     )}
                   </div>
                 ))}
@@ -563,15 +565,15 @@ export const PractitionerSelector = ({
                   <div className="flex items-center gap-3">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <div className="space-y-1 flex-1">
-                      <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
-                      <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
+                      <div className="h-4 w-3/4 bg-strong-background rounded animate-pulse" />
+                      <div className="h-3 w-1/2 bg-strong-background rounded animate-pulse" />
                     </div>
                   </div>
                 </div>
               ) : organizationUsers?.users?.length ? (
                 <>
                   <div className="flex items-center justify-between">
-                    <h3 className="px-2 py-1 text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    <h3 className="px-2 py-1 text-sm font-medium text-muted-foreground uppercase tracking-wide">
                       {t("practitioners")}
                     </h3>
                     {multiple && (
@@ -609,7 +611,7 @@ export const PractitionerSelector = ({
                     return (
                       <div
                         key={user.id}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-background cursor-pointer"
                         onClick={() => !isSelected && handleUserSelect(user)}
                       >
                         <Avatar
@@ -626,14 +628,14 @@ export const PractitionerSelector = ({
                           </span>
                         </div>
                         {isSelected && (
-                          <CheckIcon className="h-4 w-4 text-gray-700" />
+                          <CheckIcon className="h-4 w-4 text-muted-foreground" />
                         )}
                       </div>
                     );
                   })}
                 </>
               ) : (
-                <div className="p-6 text-center text-gray-500">
+                <div className="p-6 text-center text-muted-foreground">
                   <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <div className="text-sm">{t("no_users_in_organization")}</div>
                 </div>
@@ -665,7 +667,7 @@ export const PractitionerSelector = ({
                       <span className="text-sm font-medium">
                         {formatName(user)}
                       </span>
-                      <span className="text-xs text-gray-300 truncate">
+                      <span className="text-xs text-disabled-foreground truncate">
                         {user.username}
                       </span>
                     </TooltipContent>

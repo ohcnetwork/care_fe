@@ -46,14 +46,14 @@ function LeftCard({
           <div className="font-medium text-xs">
             {formatDateTime(response.created_date)}
           </div>
-          <div className="text-gray-600">
+          <div className="text-soft-foreground">
             {t("filed_by")}{" "}
-            <span className="font-medium text-gray-800">
+            <span className="font-medium text-foreground">
               {formatName(response.created_by)}
             </span>
           </div>
         </div>
-        {isActive && <ArrowRight className="size-4 text-gray-500" />}
+        {isActive && <ArrowRight className="size-4 text-muted-foreground" />}
       </div>
     </Card>
   );
@@ -116,7 +116,7 @@ function LeftPanel({
                       e.stopPropagation();
                       handleQuestionnaireChange();
                     }}
-                    className="h-5 w-5 p-0 hover:bg-gray-100"
+                    className="h-5 w-5 p-0 hover:bg-muted-background"
                   >
                     <X className="size-4" />
                   </Button>

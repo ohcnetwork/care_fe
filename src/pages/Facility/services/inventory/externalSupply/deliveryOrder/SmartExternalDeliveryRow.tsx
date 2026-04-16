@@ -127,7 +127,7 @@ export function SmartExternalDeliveryRow({
   };
 
   return (
-    <TableRow className="divide-x divide-gray-200 hover:bg-gray-50/50">
+    <TableRow className="divide-x divide-border hover:bg-soft-background/50">
       {/* Product Knowledge */}
       <TableCell className="align-top p-2">
         <FormField
@@ -162,7 +162,7 @@ export function SmartExternalDeliveryRow({
           <PopoverTrigger asChild>
             <div
               className={cn(
-                "flex items-center border rounded-md h-9 p-1! cursor-pointer hover:border-gray-400 transition-colors",
+                "flex items-center border rounded-md h-9 p-1! cursor-pointer hover:border-stronger-border transition-colors",
                 !productKnowledge && "opacity-50 pointer-events-none",
                 isCreatingNew && "border-green-500 bg-green-50",
               )}
@@ -383,7 +383,7 @@ export function SmartExternalDeliveryRow({
             className="w-full min-w-[140px]"
           />
         ) : (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-muted-foreground">
             {suppliedItem?.charge_item_definition?.category?.title || "-"}
           </span>
         )}
@@ -449,7 +449,7 @@ export function SmartExternalDeliveryRow({
       <TableCell className="align-top p-2!">
         <div className="flex flex-col gap-1">
           <div className="flex items-center">
-            <span className="text-xs text-gray-500 mr-1">
+            <span className="text-xs text-muted-foreground mr-1">
               {CURRENCY_SYMBOL}
             </span>
             <Input
@@ -465,7 +465,7 @@ export function SmartExternalDeliveryRow({
               disabled={!productKnowledge || isTaxInclusive}
               className={cn(
                 "w-[90px]",
-                isTaxInclusive && "bg-gray-100 text-gray-600",
+                isTaxInclusive && "bg-muted-background text-soft-foreground",
               )}
             />
           </div>
@@ -479,7 +479,7 @@ export function SmartExternalDeliveryRow({
               disabled={!productKnowledge}
               className="h-3.5 w-3.5"
             />
-            <span className="text-[10px] text-gray-500 whitespace-nowrap">
+            <span className="text-[10px] text-muted-foreground whitespace-nowrap">
               {t("tax_inclusive")}
             </span>
           </label>
@@ -494,7 +494,7 @@ export function SmartExternalDeliveryRow({
         return (
           <TableCell key={code.code} className="align-top p-2">
             <div className="flex items-center">
-              <span className="text-xs text-gray-500 mr-1">
+              <span className="text-xs text-muted-foreground mr-1">
                 {CURRENCY_SYMBOL}
               </span>
               <Input
@@ -520,7 +520,9 @@ export function SmartExternalDeliveryRow({
       {/* Purchase Price (auto-calculated: tpr / pack_quantity) */}
       <TableCell className="align-top p-2">
         <div className="flex items-center">
-          <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
+          <span className="text-xs text-muted-foreground mr-1">
+            {CURRENCY_SYMBOL}
+          </span>
           <Input
             type="number"
             min={0}
@@ -528,7 +530,7 @@ export function SmartExternalDeliveryRow({
             value={purchasePrice || ""}
             placeholder="0"
             disabled
-            className="w-[90px] bg-gray-100 text-gray-600"
+            className="w-[90px] bg-muted-background text-soft-foreground"
           />
         </div>
       </TableCell>
@@ -536,7 +538,9 @@ export function SmartExternalDeliveryRow({
       {/* Total Purchase Price (user-entered) */}
       <TableCell className="align-top p-2">
         <div className="flex items-center">
-          <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
+          <span className="text-xs text-muted-foreground mr-1">
+            {CURRENCY_SYMBOL}
+          </span>
           <Input
             type="number"
             min={0}
@@ -566,7 +570,7 @@ export function SmartExternalDeliveryRow({
           disabled={!productKnowledge}
           displayMode="inline"
         />
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-muted-foreground">
           <MonetaryComponentSelector
             type={MonetaryComponentType.discount}
             components={availableDiscounts}

@@ -119,8 +119,9 @@ const TriggerButton = (
     <Button
       variant="white"
       className={cn(
-        "w-full justify-between border-gray-300 font-normal shadow-xs h-auto",
-        currentInstructions.length === 0 && "text-gray-500 hover:bg-white",
+        "w-full justify-between border-strong-border font-normal shadow-xs h-auto",
+        currentInstructions.length === 0 &&
+          "text-muted-foreground hover:bg-background",
       )}
       disabled={disabledButton}
     >
@@ -157,7 +158,7 @@ export default function InstructionsPopover({
         </DrawerTrigger>
         <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
           <div className="pb-[env(safe-area-inset-bottom)]">
-            <DrawerHeader className="sticky top-0 z-10 bg-white p-0 mt-1.5">
+            <DrawerHeader className="sticky top-0 z-10 bg-background p-0 mt-1.5">
               {t("additional_instructions")}
             </DrawerHeader>
             <InstructionContentSection

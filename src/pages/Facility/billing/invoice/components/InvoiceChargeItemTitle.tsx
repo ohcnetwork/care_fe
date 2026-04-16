@@ -61,7 +61,7 @@ export function InvoiceChargeItemTitle({
     <div className="flex flex-col">
       <span>{medicineName || item.title}</span>
       {(lotNumber || expiryDate) && (
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-muted-foreground">
           {lotNumber && `${t("lot")}: ${lotNumber}`}
           {lotNumber && expiryDate && " | "}
           {expiryDate &&

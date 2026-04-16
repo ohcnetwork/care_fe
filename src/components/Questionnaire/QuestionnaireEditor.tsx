@@ -129,8 +129,8 @@ const LAYOUT_OPTIONS = [
     label: "Full Width",
     preview: (
       <div className="space-y-1 w-full">
-        <div className="h-2 w-full bg-gray-200 rounded" />
-        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
       </div>
     ),
   },
@@ -140,10 +140,10 @@ const LAYOUT_OPTIONS = [
     label: "Equal Split",
     preview: (
       <div className="w-full grid grid-cols-2 gap-1">
-        <div className="h-2 w-full bg-gray-200 rounded" />
-        <div className="h-2 w-full bg-gray-200 rounded" />
-        <div className="h-2 w-full bg-gray-200 rounded" />
-        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
       </div>
     ),
   },
@@ -153,10 +153,10 @@ const LAYOUT_OPTIONS = [
     label: "Wide Start",
     preview: (
       <div className="w-full grid grid-cols-[2fr_1fr] gap-1">
-        <div className="h-2 w-full bg-gray-200 rounded" />
-        <div className="h-2 w-full bg-gray-200 rounded" />
-        <div className="h-2 w-full bg-gray-200 rounded" />
-        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
       </div>
     ),
   },
@@ -166,10 +166,10 @@ const LAYOUT_OPTIONS = [
     label: "Wide End",
     preview: (
       <div className="w-full grid grid-cols-[1fr_2fr] gap-1">
-        <div className="h-2 w-full bg-gray-200 rounded" />
-        <div className="h-2 w-full bg-gray-200 rounded" />
-        <div className="h-2 w-full bg-gray-200 rounded" />
-        <div className="h-2 w-full bg-gray-200 rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
+        <div className="h-2 w-full bg-strong-background rounded" />
       </div>
     ),
   },
@@ -197,7 +197,7 @@ function LayoutOptionCard({
       <Label
         htmlFor={optionId}
         className={cn(
-          "flex flex-col items-center justify-between rounded-md border-2 border-gray-200 bg-white p-2 md:p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+          "flex flex-col items-center justify-between rounded-md border-2 border-border bg-background p-2 md:p-4 hover:bg-soft-background peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
           isSelected && "border-primary",
         )}
       >
@@ -930,7 +930,9 @@ export default function QuestionnaireEditor({
               ? t("edit") + " " + form.watch("title")
               : t("create_questionnaire")}
           </h1>
-          <p className="text-sm text-gray-500">{form.watch("description")}</p>
+          <p className="text-sm text-muted-foreground">
+            {form.watch("description")}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -1012,13 +1014,13 @@ export default function QuestionnaireEditor({
                             scrollToQuestion(question.link_id);
                             toggleQuestionExpanded(question.link_id);
                           }}
-                          className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
+                          className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-strong-background flex items-center gap-2 ${
                             expandedQuestions.has(question.link_id)
                               ? "bg-accent"
                               : ""
                           }`}
                         >
-                          <span className="font-medium text-gray-500">
+                          <span className="font-medium text-muted-foreground">
                             {index + 1}.
                           </span>
                           <span className="flex-1 truncate">
@@ -1026,7 +1028,7 @@ export default function QuestionnaireEditor({
                           </span>
                         </button>
                         {hasSubQuestions && question.questions && (
-                          <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
+                          <div className="ml-6 border-l-2 border-border pl-2 space-y-1">
                             {question.questions.map((subQuestion, subIndex) => (
                               <button
                                 key={subQuestion.id}
@@ -1042,9 +1044,9 @@ export default function QuestionnaireEditor({
                                     scrollToQuestion(subQuestion.link_id);
                                   }
                                 }}
-                                className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
+                                className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-strong-background "
                               >
-                                <span className="font-medium text-gray-500">
+                                <span className="font-medium text-muted-foreground">
                                   {index + 1}.{subIndex + 1}
                                 </span>
                                 <span className="flex-1 truncate">
@@ -1136,7 +1138,7 @@ export default function QuestionnaireEditor({
                             <FormItem>
                               <FormLabel>
                                 {t("slug")}{" "}
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-muted-foreground mt-1">
                                   {t("unique_url_for_questionnaire")}
                                 </p>
                               </FormLabel>
@@ -1190,7 +1192,7 @@ export default function QuestionnaireEditor({
                     <CardHeader className="flex flex-row items-center justify-between px-0 py-2">
                       <div>
                         <CardTitle>
-                          <p className="text-sm text-gray-700 font-medium mt-1">
+                          <p className="text-sm text-muted-foreground font-medium mt-1">
                             {(rootQuestions?.length || 0) > 1
                               ? t("questions")
                               : t("question")}
@@ -1207,7 +1209,7 @@ export default function QuestionnaireEditor({
                               ref={(el) => {
                                 questionRefs.current[question.link_id] = el;
                               }}
-                              className="relative bg-white rounded-lg shadow-md"
+                              className="relative bg-card rounded-lg shadow-md"
                             >
                               <QuestionEditor
                                 name={`questions.${index}`}
@@ -1407,7 +1409,7 @@ export default function QuestionnaireEditor({
               <Label>{t("preview")}</Label>
               <div className="p-4 border rounded-lg">
                 <p className="font-medium">{importedData.title}</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {importedData.description}
                 </p>
                 <p className="text-sm mt-2">
@@ -1464,7 +1466,7 @@ export default function QuestionnaireEditor({
                 "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
                 dragOver
                   ? "border-primary bg-primary/10"
-                  : "border-gray-200 hover:border-gray-300",
+                  : "border-border hover:border-strong-border",
               )}
               onDragOver={onDragOver}
               onDragLeave={onDragLeave}
@@ -1492,14 +1494,14 @@ export default function QuestionnaireEditor({
               <div className="flex flex-col items-center gap-2">
                 <CareIcon
                   icon="l-cloud-upload"
-                  className="size-12 text-gray-400"
+                  className="size-12 text-placeholder-foreground"
                 />
-                <p className="text-sm text-gray-500 select-none">
+                <p className="text-sm text-muted-foreground select-none">
                   {dragOver
                     ? t("drop_file_here")
                     : t("drag_and_drop_or_click_to_select")}
                 </p>
-                <p className="text-xs text-gray-400 select-none">
+                <p className="text-xs text-placeholder-foreground select-none">
                   {t("json_files_only")}
                 </p>
               </div>
@@ -1507,7 +1509,10 @@ export default function QuestionnaireEditor({
             {selectedImportFile && (
               <div className="flex items-center justify-between p-2 border rounded-lg">
                 <div className="flex items-center gap-2">
-                  <CareIcon icon="l-file" className="size-4 text-gray-400" />
+                  <CareIcon
+                    icon="l-file"
+                    className="size-4 text-placeholder-foreground"
+                  />
                   <span className="text-sm">{selectedImportFile.name}</span>
                 </div>
                 <Button
@@ -1624,7 +1629,7 @@ const OptionFields = ({
                 </span>
               </div>
               <div className="border-b pb-2 mb-2">
-                <div className="font-semibold text-xs text-gray-500 mb-1">
+                <div className="font-semibold text-xs text-muted-foreground mb-1">
                   {t("quick_actions")}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -1695,7 +1700,7 @@ const OptionFields = ({
                 </div>
               </div>
               <div className="mb-2">
-                <div className="font-semibold text-xs text-gray-500 mb-1">
+                <div className="font-semibold text-xs text-muted-foreground mb-1">
                   {t("move_to_specific_position")}
                 </div>
                 <div className="flex gap-2">
@@ -1731,7 +1736,7 @@ const OptionFields = ({
                     {t("move")}
                   </Button>
                 </div>
-                <div className="text-xs text-gray-400 mt-1">
+                <div className="text-xs text-placeholder-foreground mt-1">
                   {t("range")}: {1} {t("to")}
                   {annotatedAnswerOptions.length}
                 </div>
@@ -2111,7 +2116,12 @@ function QuestionEditor({
       onOpenChange={onToggleExpand}
       className={`rounded-lg p-1 bg-card text-card-foreground`}
     >
-      <div className={cn("flex items-center p-2", isExpanded && "bg-gray-50")}>
+      <div
+        className={cn(
+          "flex items-center p-2",
+          isExpanded && "bg-soft-background",
+        )}
+      >
         {depth > 0 && (
           <Checkbox
             checked={selectedQuestions.has(question.id)}
@@ -2138,9 +2148,9 @@ function QuestionEditor({
           </div>
 
           {isExpanded ? (
-            <ChevronsDownUp className="size-4 text-gray-500" />
+            <ChevronsDownUp className="size-4 text-muted-foreground" />
           ) : (
-            <ChevronsUpDown className="size-4 text-gray-500" />
+            <ChevronsUpDown className="size-4 text-muted-foreground" />
           )}
         </CollapsibleTrigger>
         <DropdownMenu>
@@ -2278,7 +2288,7 @@ function QuestionEditor({
 
           {(enableWhenDependencies.get(question.link_id)?.size || 0) > 0 && (
             <>
-              <div className="text-sm text-gray-500 flex flex-col gap-1">
+              <div className="text-sm text-muted-foreground flex flex-col gap-1">
                 {t("questionnaire_question_dependent")}
                 <div className="flex flex-wrap gap-2">
                   {Array.from(
@@ -2350,7 +2360,7 @@ function QuestionEditor({
                       <SelectItem key={type.value} value={type.value}>
                         <div className="flex flex-col items-start">
                           <span>{type.name}</span>
-                          <span className="text-xs max-w-xs text-gray-500 whitespace-normal">
+                          <span className="text-xs max-w-xs text-muted-foreground whitespace-normal">
                             {t(type.description)}
                           </span>
                         </div>
@@ -2432,11 +2442,11 @@ function QuestionEditor({
           </div>
 
           <div className="space-y-6">
-            <div className="border rounded-lg border-gray-200 bg-gray-100 p-4">
+            <div className="border rounded-lg border-border bg-muted-background p-4">
               <h3 className="text-sm font-medium mb-2">
                 {t("question_settings")}
               </h3>
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 {t("question_settings_description")}
               </p>
               <div className="">
@@ -2479,11 +2489,11 @@ function QuestionEditor({
               </div>
             </div>
 
-            <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
+            <div className="border border-border rounded-lg bg-muted-background p-4">
               <h3 className="text-sm font-medium mb-2">
                 {t("data_collection_details")}
               </h3>
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 {t("data_collection_details_description")}
               </p>
               <div className="">
@@ -2561,11 +2571,11 @@ function QuestionEditor({
 
           {type === "group" && (
             <div className="space-y-4">
-              <div className="border border-gray-200 rounded-lg bg-gray-100 p-4">
+              <div className="border border-border rounded-lg bg-muted-background p-4">
                 <h3 className="text-sm font-medium mb-2">
                   {t("group_layout_options")}
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   {t("choose_layout_style")}
                 </p>
                 <RadioGroup
@@ -2608,7 +2618,7 @@ function QuestionEditor({
                         <CardTitle className="text-base font-medium ">
                           {t("answer_options")}
                         </CardTitle>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           {t("answer_options_description")}
                         </p>
                       </div>
@@ -2648,7 +2658,7 @@ function QuestionEditor({
                       <CardTitle className="text-base font-medium">
                         {t("quantity")}
                       </CardTitle>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {t("quantity_question_description")}
                       </p>
                     </div>
@@ -2660,7 +2670,7 @@ function QuestionEditor({
                     {annotatedAnswerOptions.length !== 0 && (
                       <>
                         <div className="grid grid-cols-12 items-center border-b pb-2">
-                          <div className="col-span-12 flex flex-wrap items-center justify-end gap-2 sm:gap-4 text-sm text-gray-600">
+                          <div className="col-span-12 flex flex-wrap items-center justify-end gap-2 sm:gap-4 text-sm text-soft-foreground">
                             <span className="whitespace-nowrap">
                               {
                                 annotatedAnswerOptions.filter(
@@ -2712,7 +2722,7 @@ function QuestionEditor({
                         </div>
                         <div className="w-full overflow-x-auto">
                           <div className="min-w-[470px]">
-                            <div className="grid grid-cols-12 items-center border-b pb-2 font-medium text-sm text-gray-700">
+                            <div className="grid grid-cols-12 items-center border-b pb-2 font-medium text-sm text-muted-foreground">
                               <div className="col-span-1 whitespace-nowrap">
                                 {t("default")}
                               </div>
@@ -2736,7 +2746,8 @@ function QuestionEditor({
                                   <div
                                     className={cn(
                                       "grid grid-cols-12 items-center gap-3 rounded-md p-3 mb-2",
-                                      opt.initial_selected && "bg-gray-100",
+                                      opt.initial_selected &&
+                                        "bg-muted-background",
                                     )}
                                   >
                                     <div className="col-span-1 flex items-center justify-start">
@@ -2798,7 +2809,8 @@ function QuestionEditor({
                                     <div
                                       className={cn(
                                         "grid grid-cols-12 items-center gap-3 rounded-md p-3",
-                                        opt.initial_selected && "bg-gray-100",
+                                        opt.initial_selected &&
+                                          "bg-muted-background",
                                       )}
                                     >
                                       <div className="col-span-1 flex items-center justify-start">
@@ -2865,15 +2877,15 @@ function QuestionEditor({
           )}
 
           {type === "group" && (
-            <div className="bg-gray-100 rounded-lg p-1">
+            <div className="bg-muted-background rounded-lg p-1">
               <div className="flex items-center justify-between mb-2">
-                <Label className="text-gray-950 font-semibold">
+                <Label className="text-foreground font-semibold">
                   {t("sub_questions_for_group", { group: text })}
                 </Label>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="underline text-gray-950 font-semibold"
+                  className="underline text-foreground font-semibold"
                   onClick={(e) => {
                     e.preventDefault();
                     handleAddSubQuestionAtIndex((questions || []).length);
@@ -2893,7 +2905,7 @@ function QuestionEditor({
                   <div
                     key={subQuestion.id}
                     id={`question-${subQuestion.link_id}`}
-                    className="relative bg-white rounded-lg shadow-md"
+                    className="relative bg-card rounded-lg shadow-md"
                     ref={(el) => {
                       questionRefs.current[subQuestion.link_id] = el;
                     }}
@@ -2989,10 +3001,10 @@ function QuestionEditor({
               {(question.enable_when || []).map((condition, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col border border-gray-300 rounded-lg p-4"
+                  className="flex flex-col border border-strong-border rounded-lg p-4"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {t("condition")} {idx + 1}
                     </span>
                     <Button
@@ -3248,10 +3260,10 @@ function QuestionEditor({
                 {question.templates?.map((template, idx) => (
                   <div
                     key={idx}
-                    className="flex flex-col gap-2 border border-gray-300 rounded-lg p-4"
+                    className="flex flex-col gap-2 border border-strong-border rounded-lg p-4"
                   >
                     <div className="flex flex-row items-center justify-between">
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-muted-foreground">
                         {t("template")} {idx + 1}
                       </span>
                       <Button

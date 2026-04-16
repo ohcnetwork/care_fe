@@ -39,7 +39,7 @@ export function LinkedBedListing({
             className={cn(
               "h-32 relative border rounded-lg pt-3 pb-1 cursor-pointer",
               isSelected && "border-green-600 bg-green-50",
-              !isSelected && "border-gray-400 hover:border-green-200",
+              !isSelected && "border-stronger-border hover:border-green-200",
             )}
             onClick={() => onLinkedBedSelect(linkedBed)}
           >

@@ -84,7 +84,7 @@ export function OngoingQueueTokenCard({
       <ContextMenuTrigger ref={contextMenuTriggerRef}>
         <div
           className={cn(
-            "relative flex flex-col md:flex-row gap-1 md:gap-3 items-start md:items-center justify-between p-3 bg-gray-50 rounded-lg shadow",
+            "relative flex flex-col md:flex-row gap-1 md:gap-3 items-start md:items-center justify-between p-3 bg-soft-background rounded-lg shadow",
             token?.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
           )}
@@ -119,7 +119,7 @@ export function OngoingQueueTokenCard({
                     {t("encounter")}
                   </Link>
                 </Button>
-                <div className="flex gap-2 items-center justify-center p-1 bg-gray-100 border border-gray-200 rounded-lg">
+                <div className="flex gap-2 items-center justify-center p-1 bg-muted-background border border-border rounded-lg">
                   <Badge
                     variant={
                       QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]
@@ -127,11 +127,11 @@ export function OngoingQueueTokenCard({
                     className="h-2 w-2 rounded-full p-0 border"
                   />
 
-                  <span className="text-base font-medium text-black">
+                  <span className="text-base font-medium text-foreground">
                     {t(`token_status__${getQueueTokenStatus(token)}`)}:
                   </span>
 
-                  <span className="text-lg font-bold text-black">
+                  <span className="text-lg font-bold text-foreground">
                     {renderTokenNumber(token)}
                   </span>
                 </div>

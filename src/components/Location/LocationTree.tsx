@@ -36,19 +36,21 @@ export function LocationNode({
     return (
       <div className="flex flex-col gap-2">
         <div className="flex items-center text-sm">
-          <span className="size-2 rounded-full bg-gray-400 mr-2" />
+          <span className="size-2 rounded-full bg-stronger-border mr-2" />
           {isLast ? (
             <Badge variant="blue">
               <Circle className="size-3.5" strokeWidth={2} />
               {location.name}
             </Badge>
           ) : (
-            <span className="text-gray-700 font-medium">{location.name}</span>
+            <span className="text-muted-foreground font-medium">
+              {location.name}
+            </span>
           )}
         </div>
         {children}
         {isLast && (startTime || endTime) && (
-          <div className="pl-6 text-sm font-normal text-gray-700 italic">
+          <div className="pl-6 text-sm font-normal text-muted-foreground italic">
             {[
               startTime && format(new Date(startTime), "MMM d, yyyy h:mm a"),
               endTime && format(new Date(endTime), "MMM d, yyyy h:mm a"),
@@ -70,8 +72,8 @@ export function LocationNode({
     >
       <div className="flex flex-col gap-2 ml-2">
         <div className="flex items-center text-sm">
-          <div className="relative border-l border-b border-gray-400 rounded-bl-sm size-2 -mt-1.5 mr-2">
-            <div className="absolute -bottom-0.75 -right-0.75 size-1.5 bg-gray-400 rounded-full" />
+          <div className="relative border-l border-b border-stronger-border rounded-bl-sm size-2 -mt-1.5 mr-2">
+            <div className="absolute -bottom-0.75 -right-0.75 size-1.5 bg-stronger-border rounded-full" />
           </div>
           {isLast ? (
             <Badge variant="sky">
@@ -79,12 +81,14 @@ export function LocationNode({
               {location.name}
             </Badge>
           ) : (
-            <span className="text-gray-700 font-medium">{location.name}</span>
+            <span className="text-muted-foreground font-medium">
+              {location.name}
+            </span>
           )}
         </div>
         {children}
         {isLast && (startTime || endTime) && (
-          <div className="pl-6 text-sm font-normal text-gray-700 italic">
+          <div className="pl-6 text-sm font-normal text-muted-foreground italic">
             {[
               startTime && format(new Date(startTime), "MMM d, yyyy h:mm a"),
               endTime && format(new Date(endTime), "MMM d, yyyy h:mm a"),
@@ -114,17 +118,17 @@ export function LocationTree({
       {showTimeline && (
         <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center">
           <div
-            className={`absolute w-px bg-gray-200 h-full ${isLatest ? "top-3" : "-top-3"}`}
+            className={`absolute w-px bg-strong-background h-full ${isLatest ? "top-3" : "-top-3"}`}
           />
           <div
-            className={`size-6 rounded-full ${isCompleted ? "bg-gray-100" : isLatest ? "bg-green-100" : "bg-gray-100"} flex items-center justify-center z-10`}
+            className={`size-6 rounded-full ${isCompleted ? "bg-muted-background" : isLatest ? "bg-green-100" : "bg-muted-background"} flex items-center justify-center z-10`}
           >
             <CareIcon
               icon={isCompleted ? "l-check" : "l-location-point"}
-              className={`size-4 ${isCompleted ? "text-gray-600" : isLatest ? "text-green-600" : "text-gray-600"}`}
+              className={`size-4 ${isCompleted ? "text-soft-foreground" : isLatest ? "text-green-600" : "text-soft-foreground"}`}
             />
           </div>
-          {!isLatest && <div className="flex-1 w-px bg-gray-200" />}
+          {!isLatest && <div className="flex-1 w-px bg-strong-background" />}
         </div>
       )}
       <div className="flex flex-col gap-2">

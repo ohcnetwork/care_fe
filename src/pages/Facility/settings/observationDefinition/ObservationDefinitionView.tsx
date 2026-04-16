@@ -45,8 +45,8 @@ function CodeDisplay({ code }: { code: Code | null }) {
   return (
     <div className="space-y-1">
       <p className="text-sm font-medium">{code.display}</p>
-      <p className="text-xs text-gray-500">{code.system}</p>
-      <p className="text-xs text-gray-500">{code.code}</p>
+      <p className="text-xs text-muted-foreground">{code.system}</p>
+      <p className="text-xs text-muted-foreground">{code.code}</p>
     </div>
   );
 }
@@ -60,7 +60,7 @@ function ObservationInterpretationDisplay({
 
   if (!qualifiedRanges || qualifiedRanges.length === 0) {
     return (
-      <p className="text-sm text-gray-500 py-2">
+      <p className="text-sm text-muted-foreground py-2">
         {t("no_interpretations_configured")}
       </p>
     );
@@ -75,7 +75,7 @@ function ObservationInterpretationDisplay({
       <div className="space-y-2">
         {conditionCount > 0 && (
           <div className="flex gap-2 text-xs">
-            <span className="text-gray-500 shrink-0 w-20">
+            <span className="text-muted-foreground shrink-0 w-20">
               {t("conditions")}
             </span>
             <div className="min-w-0 space-y-1">
@@ -84,7 +84,7 @@ function ObservationInterpretationDisplay({
                 .map((condition, conditionIndex) => (
                   <div
                     key={`condition-${conditionIndex}`}
-                    className="text-gray-700"
+                    className="text-muted-foreground"
                   >
                     <ConditionOperationSummary
                       condition={condition}
@@ -93,7 +93,7 @@ function ObservationInterpretationDisplay({
                   </div>
                 ))}
               {conditionCount > 2 && (
-                <span className="text-gray-400">
+                <span className="text-placeholder-foreground">
                   +{conditionCount - 2} {t("more")}
                 </span>
               )}
@@ -103,13 +103,15 @@ function ObservationInterpretationDisplay({
 
         {rangeCount > 0 && (
           <div className="flex gap-2 text-xs">
-            <span className="text-gray-500 shrink-0 w-20">{t("ranges")}</span>
+            <span className="text-muted-foreground shrink-0 w-20">
+              {t("ranges")}
+            </span>
             <div className="min-w-0 space-y-1">
               {range.ranges.map((rangeItem, rangeIndex) => (
                 <div
                   key={`range-${rangeIndex}`}
                   className={cn(
-                    "text-gray-700 whitespace-normal break-words",
+                    "text-muted-foreground whitespace-normal break-words",
                     rangeItem.interpretation.highlight
                       ? "font-semibold"
                       : "font-normal",
@@ -124,7 +126,7 @@ function ObservationInterpretationDisplay({
 
         {valuesetCount > 0 && (
           <div className="flex gap-2 text-xs">
-            <span className="text-gray-500 shrink-0 w-20">
+            <span className="text-muted-foreground shrink-0 w-20">
               {t("value_sets")}
             </span>
             <div className="min-w-0 space-y-1">
@@ -134,7 +136,7 @@ function ObservationInterpretationDisplay({
                   <div
                     key={`valueset-${valuesetIndex}`}
                     className={cn(
-                      "text-gray-700 whitespace-normal break-words",
+                      "text-muted-foreground whitespace-normal break-words",
                       valueset.interpretation.highlight
                         ? "font-semibold"
                         : "font-normal",
@@ -144,7 +146,7 @@ function ObservationInterpretationDisplay({
                   </div>
                 ))}
               {valuesetCount > 2 && (
-                <span className="text-gray-400">
+                <span className="text-placeholder-foreground">
                   +{valuesetCount - 2} {t("more")}
                 </span>
               )}
@@ -160,10 +162,10 @@ function ObservationInterpretationDisplay({
       {qualifiedRanges.map((range, index) => (
         <div
           key={index}
-          className="p-2.5 sm:p-3 rounded-lg border bg-gray-50/50"
+          className="p-2.5 sm:p-3 rounded-lg border bg-soft-background/50"
         >
           <div className="flex items-center justify-between mb-2 gap-2">
-            <span className="text-sm font-medium text-gray-700 min-w-0 truncate">
+            <span className="text-sm font-medium text-muted-foreground min-w-0 truncate">
               {t("interpretation")} #{index + 1}
               {range.title ? ` — ${range.title}` : ""}
             </span>
@@ -287,7 +289,7 @@ export default function ObservationDefinitionView({
                 {t(definition.status)}
               </Badge>
             </div>
-            <p className="mt-1 text-sm text-gray-600 mb-4 md:mb-0">
+            <p className="mt-1 text-sm text-soft-foreground mb-4 md:mb-0">
               {definition.code.system} | {definition.code.code}
             </p>
           </div>
@@ -342,12 +344,14 @@ export default function ObservationDefinitionView({
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-gray-500">{t("category")}</p>
+              <p className="text-sm text-muted-foreground">{t("category")}</p>
               <p className="font-medium">{t(definition.category)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">{t("description")}</p>
-              <p className="text-gray-700">{definition.description}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("description")}
+              </p>
+              <p className="text-muted-foreground">{definition.description}</p>
             </div>
           </CardContent>
         </Card>
@@ -359,39 +363,45 @@ export default function ObservationDefinitionView({
           <CardContent className="space-y-6">
             <div className="grid gap-6">
               <div>
-                <p className="mb-2 text-sm text-gray-500">{t("code")}</p>
-                <div className="rounded-lg border bg-gray-50/50 p-3">
+                <p className="mb-2 text-sm text-muted-foreground">
+                  {t("code")}
+                </p>
+                <div className="rounded-lg border bg-soft-background/50 p-3">
                   <CodeDisplay code={definition.code} />
                 </div>
               </div>
               <div>
-                <p className="mb-1 text-sm text-gray-500">
+                <p className="mb-1 text-sm text-muted-foreground">
                   {t("permitted_data_type")}
                 </p>
                 <p className="font-medium">{definition.permitted_data_type}</p>
               </div>
               {definition.permitted_unit && (
                 <div>
-                  <p className="mb-2 text-sm text-gray-500">
+                  <p className="mb-2 text-sm text-muted-foreground">
                     {t("permitted_unit")}
                   </p>
-                  <div className="rounded-lg border bg-gray-50/50 p-3">
+                  <div className="rounded-lg border bg-soft-background/50 p-3">
                     <CodeDisplay code={definition.permitted_unit} />
                   </div>
                 </div>
               )}
               {definition.method && (
                 <div>
-                  <p className="mb-2 text-sm text-gray-500">{t("method")}</p>
-                  <div className="rounded-lg border bg-gray-50/50 p-3">
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    {t("method")}
+                  </p>
+                  <div className="rounded-lg border bg-soft-background/50 p-3">
                     <CodeDisplay code={definition.method} />
                   </div>
                 </div>
               )}
               {definition.body_site && (
                 <div>
-                  <p className="mb-2 text-sm text-gray-500">{t("body_site")}</p>
-                  <div className="rounded-lg border bg-gray-50/50 p-3">
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    {t("body_site")}
+                  </p>
+                  <div className="rounded-lg border bg-soft-background/50 p-3">
                     <CodeDisplay code={definition.body_site} />
                   </div>
                 </div>
@@ -399,10 +409,10 @@ export default function ObservationDefinitionView({
               {definition.qualified_ranges &&
                 definition.qualified_ranges.length > 0 && (
                   <div>
-                    <p className="mb-2 text-sm text-gray-500">
+                    <p className="mb-2 text-sm text-muted-foreground">
                       {t("observation_interpretation")}
                     </p>
-                    <div className="rounded-lg border bg-gray-50/50 p-3">
+                    <div className="rounded-lg border bg-soft-background/50 p-3">
                       <ObservationInterpretationDisplay
                         qualifiedRanges={definition.qualified_ranges}
                       />
@@ -426,14 +436,14 @@ export default function ObservationDefinitionView({
                 {definition.component.map((comp, index) => (
                   <div
                     key={index}
-                    className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
+                    className="rounded-lg border bg-soft-background/50 p-4 transition-colors hover:bg-soft-background"
                   >
                     <div className="space-y-4">
                       <CodeDisplay code={comp.code} />
                       <Separator />
                       <div className="grid gap-4">
                         <div>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-muted-foreground">
                             {t("data_type")}
                           </p>
                           <p className="font-medium">
@@ -442,14 +452,16 @@ export default function ObservationDefinitionView({
                         </div>
                         {comp.permitted_unit && (
                           <div>
-                            <p className="text-sm text-gray-500">{t("unit")}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {t("unit")}
+                            </p>
                             <CodeDisplay code={comp.permitted_unit} />
                           </div>
                         )}
                         {comp.qualified_ranges &&
                           comp.qualified_ranges.length > 0 && (
                             <div>
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-muted-foreground">
                                 {t("observation_interpretation")}
                               </p>
                               <ObservationInterpretationDisplay
@@ -472,7 +484,7 @@ export default function ObservationDefinitionView({
               <CardTitle>{t("derived_from")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-700 break-all">
+              <p className="text-sm text-muted-foreground break-all">
                 {definition.derived_from_uri}
               </p>
             </CardContent>

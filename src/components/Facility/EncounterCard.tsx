@@ -70,7 +70,7 @@ export function TimelineEncounterCard({
 
       <Card
         className={`flex-1 transition-all duration-200 ${
-          isHovered ? "shadow-md border-gray-200" : "shadow-sm border-gray-100"
+          isHovered ? "shadow-md border-border" : "shadow-sm border-soft-border"
         }`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -101,8 +101,8 @@ export function TimelineEncounterCard({
           <div className="grid gap-3 sm:gap-6 sm:flex sm:flex-wrap text-sm">
             <div className="flex gap-2">
               <div>
-                <div className="text-gray-600">{t("start_date")}</div>
-                <div className="font-semibold text-gray-900">
+                <div className="text-soft-foreground">{t("start_date")}</div>
+                <div className="font-semibold text-foreground">
                   {encounter.period.start
                     ? formatDateTime(encounter.period.start)
                     : t("not_started")}
@@ -110,8 +110,8 @@ export function TimelineEncounterCard({
               </div>
 
               <div>
-                <div className="text-gray-600">{t("end_date")}</div>
-                <div className="font-semibold text-gray-900">
+                <div className="text-soft-foreground">{t("end_date")}</div>
+                <div className="font-semibold text-foreground">
                   {encounter.period.end
                     ? formatDateTime(encounter.period.end)
                     : t("ongoing") + "..."}
@@ -119,8 +119,8 @@ export function TimelineEncounterCard({
               </div>
             </div>
             <div>
-              <div className="text-gray-600">{t("facility")}</div>
-              <div className="font-semibold text-gray-900">
+              <div className="text-soft-foreground">{t("facility")}</div>
+              <div className="font-semibold text-foreground">
                 {encounter.facility.name}
               </div>
             </div>
@@ -128,7 +128,7 @@ export function TimelineEncounterCard({
 
           {encounter.tags.length > 0 && (
             <div className="w-full mt-2 sm:w-auto">
-              <div className="text-gray-600 mt-1">
+              <div className="text-soft-foreground mt-1">
                 {t("encounter_tag_label", { count: encounter.tags.length })}
               </div>
               <div className="flex flex-wrap gap-1">
@@ -140,7 +140,7 @@ export function TimelineEncounterCard({
           )}
         </CardContent>
         <CardFooter className="p-1">
-          <div className="flex justify-between bg-gray-100 p-2 rounded-b-lg w-full">
+          <div className="flex justify-between bg-muted-background p-2 rounded-b-lg w-full">
             <Button asChild variant="outline" disabled={!canAccess}>
               <Link
                 href={

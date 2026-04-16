@@ -469,7 +469,9 @@ const AllergyItem = ({
         {showNotes && (
           <TableRow>
             <TableCell colSpan={6} className="px-4 py-2">
-              <Label className="text-xs text-gray-500">{t("note")}</Label>
+              <Label className="text-xs text-muted-foreground">
+                {t("note")}
+              </Label>
               <NotesInput
                 note={allergy.note}
                 onChange={(e) => onUpdate?.({ note: e.target.value })}
@@ -678,11 +680,11 @@ export function AllergyQuestion({
     <div className="space-y-4">
       <QuestionLabel question={question} />
       {allergies.length > 0 && (
-        <div className="rounded-lg lg:border lg:border-gray-200">
+        <div className="rounded-lg lg:border lg:border-border">
           <div className="hidden lg:block overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-50">
+                <TableRow className="bg-soft-background">
                   <TableHead className="w-[10%] max-w-[3rem]"></TableHead>
                   <TableHead className="w-[40%]">{t("substance")}</TableHead>
                   <TableHead className="w-[15%] text-center">
@@ -733,7 +735,7 @@ export function AllergyQuestion({
                   className={cn(
                     "rounded-lg",
                     expandedAllergyIndex === index &&
-                      "border border-primary-500 bg-gray-50",
+                      "border border-primary-500 bg-soft-background",
                     expandedAllergyIndex !== index && "border-0 shadow-none",
                     (disabled ||
                       patientAllergies?.results[index]?.verification_status ===
@@ -746,9 +748,9 @@ export function AllergyQuestion({
                   <CollapsibleTrigger asChild>
                     <CardHeader
                       className={cn(
-                        "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
+                        "p-2 rounded-lg shadow-none bg-soft-background cursor-pointer active:bg-muted-background transition-colors",
                         expandedAllergyIndex !== index &&
-                          "bg-gray-200 border border-gray-300",
+                          "bg-strong-background border border-strong-border",
                       )}
                     >
                       <div className="flex flex-col space-y-1">
@@ -756,7 +758,7 @@ export function AllergyQuestion({
                           <div className="flex items-center gap-2">
                             <CardTitle
                               className={cn(
-                                "text-base text-gray-950 break-words",
+                                "text-base text-foreground break-words",
                                 allergy.clinical_status === "resolved" &&
                                   "line-through",
                                 allergy.clinical_status === "inactive" &&
@@ -777,7 +779,7 @@ export function AllergyQuestion({
                                   e.stopPropagation();
                                   handleRemoveAllergy(index);
                                 }}
-                                className="size-10 p-4 border border-gray-400 bg-white shadow text-destructive"
+                                className="size-10 p-4 border border-stronger-border bg-background shadow text-destructive"
                               >
                                 <MinusCircledIcon className="size-5" />
                               </Button>
@@ -785,7 +787,7 @@ export function AllergyQuestion({
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="size-10 border border-gray-400 bg-white shadow p-4 pointer-events-none"
+                              className="size-10 border border-stronger-border bg-background shadow p-4 pointer-events-none"
                             >
                               {expandedAllergyIndex === index ? (
                                 <ChevronsDownUp className="size-5" />
@@ -797,7 +799,7 @@ export function AllergyQuestion({
                         </div>
                         {expandedAllergyIndex !== index && (
                           <div
-                            className={cn("text-sm mt-1 text-gray-600", {
+                            className={cn("text-sm mt-1 text-soft-foreground", {
                               "line-through":
                                 allergy.clinical_status === "resolved",
                             })}
@@ -824,7 +826,7 @@ export function AllergyQuestion({
                   <CollapsibleContent>
                     <CardContent
                       className={cn(
-                        "p-3 pt-2 space-y-3 rounded-lg bg-gray-50",
+                        "p-3 pt-2 space-y-3 rounded-lg bg-soft-background",
                         disabled && "pointer-events-none",
                       )}
                     >

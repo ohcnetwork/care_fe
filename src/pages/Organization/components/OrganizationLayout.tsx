@@ -176,7 +176,7 @@ export default function OrganizationLayout({
                   <BreadcrumbItem>
                     <BreadcrumbLink
                       asChild
-                      className="text-sm text-gray-900 hover:underline hover:underline-offset-2"
+                      className="text-sm text-foreground hover:underline hover:underline-offset-2"
                     >
                       <Link href={path.replace(id, parent.id)}>
                         {parent.name}
@@ -187,7 +187,7 @@ export default function OrganizationLayout({
                 </React.Fragment>
               ))}
               <BreadcrumbItem key={org.id}>
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm font-semibold text-foreground">
                   {org.name}
                 </span>
               </BreadcrumbItem>
@@ -207,8 +207,8 @@ export default function OrganizationLayout({
                   <MenubarTrigger
                     className={`${
                       path === item.url
-                        ? "font-medium text-primary-700 bg-gray-100"
-                        : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
+                        ? "font-medium text-primary-700 bg-muted-background"
+                        : "hover:text-primary-500 hover:bg-muted-background text-muted-foreground"
                     }`}
                     asChild
                   >
@@ -261,8 +261,8 @@ export default function OrganizationLayout({
                     className={cn(
                       "flex justify-between items-center py-3",
                       path === item.url
-                        ? "font-medium text-primary-700 bg-gray-100"
-                        : "text-gray-700",
+                        ? "font-medium text-primary-700 bg-muted-background"
+                        : "text-muted-foreground",
                     )}
                     asChild
                   >

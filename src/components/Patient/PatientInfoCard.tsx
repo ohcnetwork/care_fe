@@ -38,7 +38,7 @@ export const PatientInfoCard = ({
 
   return (
     <>
-      <Card className="bg-white shadow-sm rounded-md">
+      <Card className="bg-card shadow-sm rounded-md">
         <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-center justify-between px-2">
           <div className="space-y-4">
             <PatientHoverCard patient={patient} facilityId={facilityId} />
@@ -46,7 +46,7 @@ export const PatientInfoCard = ({
           {children}
         </CardHeader>
       </Card>
-      <Card className="bg-white shadow-sm mx-3 rounded-md rounded-t-none rounded-b-md">
+      <Card className="bg-card shadow-sm mx-3 rounded-md rounded-t-none rounded-b-md">
         <CardHeader className="px-1 py-0 pt-2 md:pt-1">
           <div className="flex flex-col md:flex-row items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
@@ -57,7 +57,7 @@ export const PatientInfoCard = ({
                   </Badge>
                 ))
               ) : (
-                <span className="text-sm text-gray-500 px-2">
+                <span className="text-sm text-muted-foreground px-2">
                   {t("no_tags_assigned")}
                 </span>
               )}
@@ -74,7 +74,10 @@ export const PatientInfoCard = ({
               }}
               trigger={
                 <Button variant="ghost">
-                  <SettingsIcon className=" text-gray-950" strokeWidth={1.5} />
+                  <SettingsIcon
+                    className=" text-foreground"
+                    strokeWidth={1.5}
+                  />
                   <span className="font-semibold underline">
                     {tags.length === 0 ? t("add_tags") : t("manage_tags")}
                   </span>

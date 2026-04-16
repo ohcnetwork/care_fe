@@ -236,7 +236,7 @@ export default function QuickAddChargeItemsSheet({
             {/* Groups Section */}
             <section className="space-y-4">
               <div className="flex items-center gap-2">
-                <Package className="h-4 w-4 text-gray-500" />
+                <Package className="h-4 w-4 text-muted-foreground" />
                 <h3 className="font-semibold text-sm">{t("packages")}</h3>
               </div>
 
@@ -272,7 +272,7 @@ export default function QuickAddChargeItemsSheet({
                 <section className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-sm flex items-center gap-2">
-                      <ShoppingCart className="h-4 w-4 text-gray-500" />
+                      <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                       {t("items_to_add")}
                       <Badge variant="secondary">{cartItems.length}</Badge>
                     </h3>
@@ -309,14 +309,14 @@ export default function QuickAddChargeItemsSheet({
         </ScrollArea>
 
         {/* Footer */}
-        <SheetFooter className="border-t bg-gray-50/80 px-6 py-4">
+        <SheetFooter className="border-t bg-soft-background/80 px-6 py-4">
           <div className="w-full space-y-4">
             {cartItems.length > 0 && (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-soft-foreground">
                   {t("estimated_total")}
                 </span>
-                <span className="text-xl font-bold text-gray-900">
+                <span className="text-xl font-bold text-foreground">
                   <MonetaryDisplay amount={cartTotal} />
                 </span>
               </div>
@@ -406,16 +406,16 @@ function GroupCard({
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="w-full flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+          className="w-full flex items-center gap-3 p-3 rounded-lg bg-soft-background hover:bg-muted-background transition-colors"
         >
-          <div className="p-1.5 rounded-md bg-gray-100">
-            <FolderOpen className="h-4 w-4 text-gray-600" />
+          <div className="p-1.5 rounded-md bg-muted-background">
+            <FolderOpen className="h-4 w-4 text-soft-foreground" />
           </div>
           <div className="flex-1 text-left">
-            <h4 className="font-semibold text-sm text-gray-900">
+            <h4 className="font-semibold text-sm text-foreground">
               {group.display}
             </h4>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               {t("packages_count", {
                 count: packages.length,
                 defaultValue: `${packages.length} packages`,
@@ -428,9 +428,9 @@ function GroupCard({
             </span>
           </div>
           {isOpen ? (
-            <ChevronDown className="h-4 w-4 text-gray-400" />
+            <ChevronDown className="h-4 w-4 text-placeholder-foreground" />
           ) : (
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 text-placeholder-foreground" />
           )}
         </button>
       </CollapsibleTrigger>
@@ -518,7 +518,7 @@ function PackageCard({
         "rounded-xl border-2 transition-all duration-200 overflow-hidden",
         isSelected
           ? "border-primary-400 bg-primary-50 shadow-md shadow-primary-100"
-          : "border-gray-200 bg-white hover:border-primary-300 hover:shadow-sm",
+          : "border-border bg-background hover:border-primary-300 hover:shadow-sm",
         (disabled || items.length === 0) && "opacity-50 cursor-not-allowed",
       )}
     >
@@ -535,7 +535,7 @@ function PackageCard({
               "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all",
               isSelected
                 ? "bg-primary-500 border-primary-500"
-                : "border-gray-300 bg-white",
+                : "border-strong-border bg-background",
             )}
           >
             {isSelected && <Check className="h-3 w-3 text-white" />}
@@ -543,9 +543,11 @@ function PackageCard({
 
           {/* Package info */}
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-sm text-gray-900">{tag.display}</h4>
+            <h4 className="font-medium text-sm text-foreground">
+              {tag.display}
+            </h4>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {isLoading
                   ? "..."
                   : t("items_count", {
@@ -555,8 +557,8 @@ function PackageCard({
               </span>
               {!isLoading && Number(totalEstimate) > 0 && (
                 <>
-                  <span className="text-gray-300">•</span>
-                  <span className="text-xs font-medium text-gray-700">
+                  <span className="text-disabled-foreground">•</span>
+                  <span className="text-xs font-medium text-muted-foreground">
                     <MonetaryDisplay amount={totalEstimate} />
                   </span>
                 </>
@@ -568,13 +570,13 @@ function PackageCard({
           <div
             className={cn(
               "p-1.5 rounded-lg",
-              isSelected ? "bg-primary-100" : "bg-gray-100",
+              isSelected ? "bg-primary-100" : "bg-muted-background",
             )}
           >
             <Package
               className={cn(
                 "h-4 w-4",
-                isSelected ? "text-primary-600" : "text-gray-500",
+                isSelected ? "text-primary-600" : "text-muted-foreground",
               )}
             />
           </div>
@@ -583,14 +585,14 @@ function PackageCard({
 
       {/* Expandable items preview */}
       {items.length > 0 && (
-        <div className="border-t border-gray-100">
+        <div className="border-t border-soft-border">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
-            className="w-full px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-50 flex items-center justify-center gap-1"
+            className="w-full px-3 py-1.5 text-xs text-muted-foreground hover:bg-soft-background flex items-center justify-center gap-1"
           >
             {isExpanded ? (
               <>
@@ -606,18 +608,18 @@ function PackageCard({
           </button>
 
           {isExpanded && (
-            <div className="px-3 pb-2 space-y-1 bg-gray-50/50">
+            <div className="px-3 pb-2 space-y-1 bg-soft-background/50">
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="text-xs text-gray-600 flex items-center justify-between py-0.5"
+                  className="text-xs text-soft-foreground flex items-center justify-between py-0.5"
                 >
                   <span className="truncate pr-2">{item.title}</span>
                   <MonetaryDisplay
                     amount={calculateTotalPrice(
                       item.price_components ?? [],
                     ).toString()}
-                    className="text-gray-500 flex-shrink-0 text-xs"
+                    className="text-muted-foreground flex-shrink-0 text-xs"
                   />
                 </div>
               ))}
@@ -652,13 +654,13 @@ function CartItemRow({
   ).toString();
 
   return (
-    <div className="flex items-center gap-3 p-2 rounded-lg bg-white border">
+    <div className="flex items-center gap-3 p-2 rounded-lg bg-background border">
       {/* Item info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate">
+        <p className="text-sm font-medium text-foreground truncate">
           {item.definition.title}
         </p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           <MonetaryDisplay amount={unitPrice} /> × {item.quantity}
         </p>
       </div>
@@ -669,7 +671,7 @@ function CartItemRow({
           type="button"
           onClick={() => onQuantityChange(Number(item.quantity) - 1)}
           disabled={disabled || Number(item.quantity) <= 1}
-          className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
+          className="p-1 rounded hover:bg-muted-background disabled:opacity-50"
         >
           <Minus className="h-3 w-3" />
         </button>
@@ -685,7 +687,7 @@ function CartItemRow({
           type="button"
           onClick={() => onQuantityChange(Number(item.quantity) + 1)}
           disabled={disabled}
-          className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
+          className="p-1 rounded hover:bg-muted-background disabled:opacity-50"
         >
           <Plus className="h-3 w-3" />
         </button>
@@ -703,7 +705,7 @@ function CartItemRow({
         type="button"
         onClick={onRemove}
         disabled={disabled}
-        className="p-1 text-gray-400 hover:text-destructive rounded"
+        className="p-1 text-placeholder-foreground hover:text-destructive rounded"
       >
         <Trash2 className="h-4 w-4" />
       </button>

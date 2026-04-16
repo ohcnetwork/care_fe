@@ -147,7 +147,7 @@ function AppointmentsEmptyState() {
         <CareIcon icon="l-calendar-slash" className="size-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_appointments")}</h3>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         {t("adjust_appointments_filters")}
       </p>
     </Card>
@@ -353,11 +353,11 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         </Tabs>
       }
     >
-      <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
+      <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-border">
         <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start md:w-xs">
           {practitionerFilterEnabled && (
             <div className="mt-1 w-full">
-              <Label className="mb-2 text-black">
+              <Label className="mb-2 text-foreground">
                 {t("practitioner", { count: 2 })}
               </Label>
               <PractitionerSelector
@@ -375,7 +375,9 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
 
           {/* Tags Filter */}
           <div>
-            <Label className="mt-1 text-black">{t("filter_by_tags")}</Label>
+            <Label className="mt-1 text-foreground">
+              {t("filter_by_tags")}
+            </Label>
             <MultiFilter
               selectedFilters={selectedFilters}
               onFilterChange={handleFilterChange}
@@ -406,7 +408,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="cursor-help hidden md:block">
-                    <InfoIcon className="size-4 text-gray-500" />
+                    <InfoIcon className="size-4 text-muted-foreground" />
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -594,13 +596,13 @@ function AppointmentColumn(props: {
   }, [inView, hasNextPage, fetchNextPage]);
 
   return (
-    <div className="bg-gray-100 py-4 rounded-lg w-[20rem] overflow-y-hidden">
+    <div className="bg-muted-background py-4 rounded-lg w-[20rem] overflow-y-hidden">
       <div className="flex flex-row justify-between px-3 gap-2 mb-3">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold capitalize text-base px-1">
             {props.statusGroup.label}
           </h2>
-          <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
+          <span className="bg-strong-background px-2 py-1 rounded-md text-xs font-medium">
             {appointmentsData?.pages[0]?.count == null ? (
               "..."
             ) : appointmentsData?.pages[0]?.count === appointments.length ? (
@@ -640,7 +642,7 @@ function AppointmentColumn(props: {
                         <div className="flex items-center gap-2 flex-1">
                           <div
                             className={
-                              "size-4 rounded flex items-center justify-center border border-gray-300"
+                              "size-4 rounded flex items-center justify-center border border-strong-border"
                             }
                           >
                             {selectedStatuses.includes(status) && <CheckIcon />}
@@ -664,7 +666,7 @@ function AppointmentColumn(props: {
                 key={status}
                 variant="outline"
                 onClick={() => toggleStatus(status)}
-                className="bg-white"
+                className="bg-background"
               >
                 {t(status)}
                 <Button variant="ghost" size="icon" className="size-6 -mr-2">
@@ -677,7 +679,7 @@ function AppointmentColumn(props: {
       </div>
       {appointments.length === 0 ? (
         <div className="flex justify-center items-center h-[calc(100vh-18rem)]">
-          <p className="text-gray-500">{t("no_appointments")}</p>
+          <p className="text-muted-foreground">{t("no_appointments")}</p>
         </div>
       ) : (
         <ScrollArea>
@@ -725,16 +727,16 @@ function AppointmentCard({
   const { t } = useTranslation();
 
   return (
-    <div className="bg-white p-3 rounded shadow-sm group hover:ring-1 hover:ring-primary-700 hover:ring-offset-1 hover:ring-offset-white hover:shadow-md transition-all duration-100 ease-in-out">
+    <div className="bg-card p-3 rounded shadow-sm group hover:ring-1 hover:ring-primary-700 hover:ring-offset-1 hover:ring-offset-background hover:shadow-md transition-all duration-100 ease-in-out">
       <div className="flex justify-between items-start mb-2">
         <div>
           <h3 className="font-semibold text-base group-hover:text-primary-700 transition-all duration-200 ease-in-out">
             {patient.name}
           </h3>
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-muted-foreground">
             {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {formatDateTime(
               appointment.token_slot.start_datetime,
               "ddd, DD MMM YYYY, HH:mm",
@@ -749,7 +751,7 @@ function AppointmentCard({
           )}
           {appointment.token && (
             <div className="flex">
-              <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
+              <div className="bg-muted-background px-2 py-1 ml-px text-center rounded-md">
                 <p className="text-[10px] uppercase">{t("token")}</p>
                 <p className="font-bold text-lg uppercase">
                   {renderTokenNumber(appointment.token)}
@@ -776,12 +778,12 @@ function AppointmentCard({
       </div>
       {showPractitioner &&
         appointment.resource_type === SchedulableResourceType.Practitioner && (
-          <div className="flex items-center justify-start gap-1 pr-2 bg-gray-100 w-fit rounded-full mt-1">
+          <div className="flex items-center justify-start gap-1 pr-2 bg-muted-background w-fit rounded-full mt-1">
             <ScheduleResourceIcon
               resource={appointment}
               className="size-5 rounded-full"
             />
-            <span className="text-xs font-semibold text-gray-500">
+            <span className="text-xs font-semibold text-muted-foreground">
               {formatScheduleResourceName(appointment)}
             </span>
           </div>
@@ -900,23 +902,23 @@ function AppointmentRow(props: {
         ) : appointments.length === 0 ? (
           <AppointmentsEmptyState />
         ) : (
-          <Table className="p-2 border-separate border-gray-200 border-spacing-y-3">
+          <Table className="p-2 border-separate border-border border-spacing-y-3">
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-8 font-semibold text-black text-xs">
+                <TableHead className="pl-8 font-semibold text-foreground text-xs">
                   {t("patient")}
                 </TableHead>
                 {props.resourceType ===
                   SchedulableResourceType.Practitioner && (
-                  <TableHead className="font-semibold text-black text-xs">
+                  <TableHead className="font-semibold text-foreground text-xs">
                     {t("practitioner", { count: 1 })}
                   </TableHead>
                 )}
 
-                <TableHead className="font-semibold text-black text-xs">
+                <TableHead className="font-semibold text-foreground text-xs">
                   {t("current_status")}
                 </TableHead>
-                <TableHead className="font-semibold text-black text-xs">
+                <TableHead className="font-semibold text-foreground text-xs">
                   {t("token_no")}
                 </TableHead>
               </TableRow>
@@ -950,7 +952,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
 
   return (
     <>
-      <TableCell className="flex flex-row gap-2 py-6 group-hover:bg-gray-100 bg-white rounded-l-lg">
+      <TableCell className="flex flex-row gap-2 py-6 group-hover:bg-muted-background bg-card rounded-l-lg">
         <span className="flex flex-row items-center gap-2">
           <CareIcon
             icon="l-draggabledots"
@@ -958,7 +960,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
           />
           <span className="flex flex-col">
             <span className="text-sm font-semibold">{patient.name}</span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               {formatPatientAge(patient, true)},{" "}
               {t(`GENDER__${patient.gender}`)}
             </span>
@@ -975,14 +977,14 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
       </TableCell>
       {/* TODO: Replace with relevant information */}
       {appointment.resource_type === SchedulableResourceType.Practitioner && (
-        <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
+        <TableCell className="py-6 group-hover:bg-muted-background bg-card">
           {formatScheduleResourceName(appointment)}
         </TableCell>
       )}
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white">
+      <TableCell className="py-6 group-hover:bg-muted-background bg-card">
         {t(appointment.status)}
       </TableCell>
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-r-lg">
+      <TableCell className="py-6 group-hover:bg-muted-background bg-card rounded-r-lg">
         {appointment.token ? renderTokenNumber(appointment.token) : "--"}
       </TableCell>
     </>

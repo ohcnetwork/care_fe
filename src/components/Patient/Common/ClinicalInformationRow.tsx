@@ -36,7 +36,7 @@ export function BadgeButtonDropdownTrigger({ note }: { note?: string }) {
     <DropdownMenuTrigger asChild>
       <Button
         variant="link"
-        className="hover:text-gray-700"
+        className="hover:text-muted-foreground"
         aria-label={note ? t("has_note") : undefined}
       >
         <span className="relative inline-flex">
@@ -68,7 +68,7 @@ export default function ClinicalInformationRow({
         <div
           key={col.key}
           className={cn(
-            "px-2 py-1 border-t border-b border-gray-200 flex items-center",
+            "px-2 py-1 border-t border-b border-border flex items-center",
             index === 0 && "border-l rounded-l",
             index !== 0 && "border-l",
             index === columns.length - 1 && "border-r",
@@ -79,7 +79,7 @@ export default function ClinicalInformationRow({
         </div>
       ))}
 
-      <div className="flex items-center justify-center border border-gray-200 border-l-0 rounded-r-sm">
+      <div className="flex items-center justify-center border border-border border-l-0 rounded-r-sm">
         <DropdownMenu>
           <BadgeButtonDropdownTrigger note={note} />
           <DropdownMenuContent>
@@ -104,18 +104,18 @@ export default function ClinicalInformationRow({
             )}
 
             {(!!onViewEncounter || note) && (
-              <div className="my-2 border-t border-dashed border-gray-300" />
+              <div className="my-2 border-t border-dashed border-strong-border" />
             )}
 
             <div className="p-1 text-sm">
-              <div className="text-gray-500">{t("reported_by")}:</div>
+              <div className="text-muted-foreground">{t("reported_by")}:</div>
               <div className="mt-1 flex items-center gap-2">
                 <Avatar
                   name={formatName(createdBy)}
                   className="size-6"
                   imageUrl={createdBy.profile_picture_url}
                 />
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-foreground">
                   {formatName(createdBy)}
                 </span>
               </div>
@@ -125,8 +125,8 @@ export default function ClinicalInformationRow({
       </div>
 
       {showNote && note && (
-        <div className="col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded -mt-2.5 rounded-t-none">
-          <div className="text-sm font-semibold text-gray-800">
+        <div className="col-span-full relative border border-border p-2 pt-4 bg-soft-background rounded -mt-2.5 rounded-t-none">
+          <div className="text-sm font-semibold text-foreground">
             {t("note")}
             {":"}
           </div>
@@ -140,7 +140,7 @@ export default function ClinicalInformationRow({
             <span className="underline">{t("hide_note")}</span>
           </Button>
 
-          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words mt-2">
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap pr-8 max-w-full break-words mt-2">
             {note}
           </p>
         </div>

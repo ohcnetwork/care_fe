@@ -131,7 +131,7 @@ export default function OrganizationPatients({
                 <CardGridSkeleton count={6} />
               ) : patients?.results?.length === 0 ? (
                 <Card className="col-span-full">
-                  <CardContent className="p-6 text-center text-gray-500">
+                  <CardContent className="p-6 text-center text-muted-foreground">
                     {t("no_patients_found")}
                   </CardContent>
                 </Card>
@@ -152,10 +152,10 @@ export default function OrganizationPatients({
                                 className="size-10"
                               />
                               <div>
-                                <h3 className="text-sm font-medium text-gray-900">
+                                <h3 className="text-sm font-medium text-foreground">
                                   {patient.name}
                                 </h3>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-muted-foreground">
                                   {formatPhoneNumberIntl(patient.phone_number)}
                                 </p>
                               </div>
@@ -176,20 +176,24 @@ export default function OrganizationPatients({
                           </div>
                           <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
                             <div className="text-sm">
-                              <div className="text-gray-500">{t("phone")}</div>
+                              <div className="text-muted-foreground">
+                                {t("phone")}
+                              </div>
                               <div className="font-medium">
                                 {formatPhoneNumberIntl(patient.phone_number)}
                               </div>
                             </div>
                             <div className="text-sm">
-                              <div className="text-gray-500">{t("gender")}</div>
+                              <div className="text-muted-foreground">
+                                {t("gender")}
+                              </div>
                               <div className="font-medium">
                                 {patient.gender}
                               </div>
                             </div>
                             {patient.geo_organization && (
                               <div className="col-span-2 text-sm">
-                                <div className="text-gray-500">
+                                <div className="text-muted-foreground">
                                   {t("organization")}
                                 </div>
                                 <div className="font-medium">
@@ -198,8 +202,8 @@ export default function OrganizationPatients({
                               </div>
                             )}
                           </div>
-                          <div className="mt-4 pt-4 border-t border-gray-200">
-                            <div className="text-sm text-gray-500">
+                          <div className="mt-4 pt-4 border-t border-border">
+                            <div className="text-sm text-muted-foreground">
                               {t("last_modified")}{" "}
                               <RelativeDateTooltip
                                 className="underline underline-offset-2"

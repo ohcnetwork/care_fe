@@ -125,7 +125,7 @@ function AudioPlayer({ src, className }: AudioPlayerProps) {
         <CareIcon icon={isPlaying ? "l-pause" : "l-play"} />
       </Button>
       <div className="flex flex-1 items-center gap-2">
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-soft-foreground">
           {formatTime(currentTime)} / {formatTime(duration)}
         </span>
         <Slider

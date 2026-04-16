@@ -157,7 +157,7 @@ export default function FacilityOrganizationList({
               onToggleExpand={handleToggleExpand}
               onOrganizationSelect={handleOrganizationSelect}
             />
-            <div className="flex-1 space-y-3 sm:space-y-4 rounded-lg md:shadow-lg overflow-hidden ml-0 md:ml-4 md:bg-white">
+            <div className="flex-1 space-y-3 sm:space-y-4 rounded-lg md:shadow-lg overflow-hidden ml-0 md:ml-4 md:bg-card">
               {organizationId && (
                 <div className="md:pt-4 flex items-center mx-auto max-w-4xl">
                   <Breadcrumb className="md:px-5 md:pt-5">
@@ -165,7 +165,7 @@ export default function FacilityOrganizationList({
                       <BreadcrumbItem>
                         <BreadcrumbLink
                           asChild
-                          className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
+                          className="text-sm text-foreground cursor-pointer hover:underline hover:underline-offset-2"
                           onClick={() =>
                             navigate(
                               `/facility/${facilityId}/settings/departments`,
@@ -181,7 +181,7 @@ export default function FacilityOrganizationList({
                           <BreadcrumbItem>
                             <BreadcrumbLink
                               asChild
-                              className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
+                              className="text-sm text-foreground cursor-pointer hover:underline hover:underline-offset-2"
                               onClick={() => handleParentClick(parent.id)}
                             >
                               <button type="button">{parent.name}</button>
@@ -191,7 +191,7 @@ export default function FacilityOrganizationList({
                         </React.Fragment>
                       ))}
                       <BreadcrumbItem key={org?.id}>
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-foreground">
                           {org?.name}
                         </span>
                       </BreadcrumbItem>
@@ -216,7 +216,7 @@ export default function FacilityOrganizationList({
                     </div>
                     <div className="mt-2">
                       {org.description && (
-                        <p className="text-sm text-gray-500 break-all whitespace-normal">
+                        <p className="text-sm text-muted-foreground break-all whitespace-normal">
                           {org.description}
                         </p>
                       )}
@@ -226,12 +226,12 @@ export default function FacilityOrganizationList({
                         value={currentTab}
                         onValueChange={handleTabChange}
                       >
-                        <TabsList className="w-full justify-start border-b border-gray-300 bg-transparent p-0 h-auto rounded-none">
+                        <TabsList className="w-full justify-start border-b border-strong-border bg-transparent p-0 h-auto rounded-none">
                           {navItems.map((item) => (
                             <TabsTrigger
                               key={item.value}
                               value={item.value}
-                              className="border-0 border-b-2 border-transparent px-2 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                              className="border-0 border-b-2 border-transparent px-2 py-2 text-soft-foreground hover:text-foreground data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
                             >
                               {item.title}
                             </TabsTrigger>

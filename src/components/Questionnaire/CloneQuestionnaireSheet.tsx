@@ -165,7 +165,7 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
                     </Badge>
                   ))
               ) : (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {t("no_organizations_selected")}
                 </p>
               )}
@@ -215,7 +215,7 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
                               <Building className="size-4" />
                               <span>{org.name}</span>
                               {org.description && (
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-muted-foreground">
                                   - {org.description}
                                 </span>
                               )}
@@ -234,7 +234,7 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
           </div>
         </div>
 
-        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
           <div className="flex w-full justify-end gap-4">
             <Button
               type="button"

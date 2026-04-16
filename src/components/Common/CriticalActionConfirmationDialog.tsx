@@ -101,9 +101,11 @@ const CriticalActionConfirmationDialog = ({
         };
       case "secondary":
         return {
-          bgColor: "bg-gray-500/10",
-          iconColor: "text-gray-500",
-          defaultIcon: <AlertTriangleIcon className="size-4 text-gray-500" />,
+          bgColor: "bg-muted-foreground/10",
+          iconColor: "text-muted-foreground",
+          defaultIcon: (
+            <AlertTriangleIcon className="size-4 text-muted-foreground" />
+          ),
         };
       case "outline":
       case "ghost":
@@ -111,9 +113,11 @@ const CriticalActionConfirmationDialog = ({
       case "white":
       default:
         return {
-          bgColor: "bg-gray-500/10",
-          iconColor: "text-gray-600",
-          defaultIcon: <AlertTriangleIcon className="size-4 text-gray-600" />,
+          bgColor: "bg-muted-foreground/10",
+          iconColor: "text-soft-foreground",
+          defaultIcon: (
+            <AlertTriangleIcon className="size-4 text-soft-foreground" />
+          ),
         };
     }
   };
@@ -134,7 +138,7 @@ const CriticalActionConfirmationDialog = ({
             </AlertDialogTitle>
           </div>
         </AlertDialogHeader>
-        <div className="space-y-3 text-sm text-black">
+        <div className="space-y-3 text-sm text-foreground">
           <AlertDialogDescription asChild>
             <div>{description}</div>
           </AlertDialogDescription>
@@ -144,7 +148,7 @@ const CriticalActionConfirmationDialog = ({
                 i18nKey="confirmation_dialog_input_label"
                 components={{
                   code: (
-                    <code className="font-mono px-1 py-0.5 bg-gray-100 rounded" />
+                    <code className="font-mono px-1 py-0.5 bg-muted-background rounded" />
                   ),
                 }}
                 values={{ confirmationText }}

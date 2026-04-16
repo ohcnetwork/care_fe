@@ -90,13 +90,13 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                     asChild
                     tooltip={link.name}
                     className={
-                      "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
+                      "text-soft-foreground transition font-normal hover:bg-strong-background hover:text-green-700"
                     }
                   >
                     <ActiveLink
                       href={link.url}
-                      activeClass="bg-white text-green-700 shadow-sm"
-                      exactActiveClass="bg-white text-green-700 shadow-sm"
+                      activeClass="bg-background text-green-700 shadow-sm"
+                      exactActiveClass="bg-background text-green-700 shadow-sm"
                     >
                       {link.icon ? (
                         link.icon
@@ -141,7 +141,7 @@ function CollapsibleNavItem({
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
             tooltip={link.name}
-            className="cursor-pointer hover:bg-gray-200 hover:text-green-700"
+            className="cursor-pointer hover:bg-strong-background hover:text-green-700"
           >
             {link.icon ? (
               link.icon
@@ -155,7 +155,7 @@ function CollapsibleNavItem({
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <SidebarMenuSub className="border-l border-gray-300">
+          <SidebarMenuSub className="border-l border-strong-border">
             {link.children
               ?.filter((link) => link.visibility !== false)
               .map((subItem) => (
@@ -163,7 +163,7 @@ function CollapsibleNavItem({
                   {subItem.header && (
                     <div className="flex items-center gap-2 mt-2">
                       {subItem.headerIcon}
-                      <span className="text-gray-400 uppercase text-xs font-bold">
+                      <span className="text-placeholder-foreground uppercase text-xs font-bold">
                         {subItem.header}
                       </span>
                     </div>
@@ -172,7 +172,7 @@ function CollapsibleNavItem({
                     <SidebarMenuSubButton
                       asChild
                       className={
-                        "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
+                        "text-soft-foreground transition font-normal hover:bg-strong-background hover:text-green-700"
                       }
                     >
                       <ActiveLink
@@ -182,9 +182,9 @@ function CollapsibleNavItem({
                           subItem.url
                             .split("/")
                             .every((part) => fullPathMap[part]) &&
-                            "bg-white text-green-700 shadow",
+                            "bg-background text-green-700 shadow",
                         )}
-                        exactActiveClass="bg-white text-green-700 shadow"
+                        exactActiveClass="bg-background text-green-700 shadow"
                       >
                         {subItem.name}
                       </ActiveLink>
@@ -208,9 +208,9 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
         <SidebarMenuButton
           tooltip={link.name}
           className={cn(
-            "cursor-pointer hover:bg-gray-200 hover:text-green-700",
+            "cursor-pointer hover:bg-strong-background hover:text-green-700",
             {
-              "bg-white text-green-700 shadow": isChildActive(link),
+              "bg-background text-green-700 shadow": isChildActive(link),
             },
           )}
         >
@@ -233,9 +233,9 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
               key={subItem.name}
               href={subItem.url}
               onClick={() => setOpen(false)}
-              className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
-              activeClass="bg-gray-100 text-green-700"
-              exactActiveClass="bg-gray-100 text-green-700"
+              className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted-background focus:bg-muted-background"
+              activeClass="bg-muted-background text-green-700"
+              exactActiveClass="bg-muted-background text-green-700"
             >
               {subItem.name}
             </ActiveLink>

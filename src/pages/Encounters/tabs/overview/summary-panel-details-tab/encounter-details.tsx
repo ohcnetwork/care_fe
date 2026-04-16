@@ -28,20 +28,20 @@ export const EncounterDetails = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="flex flex-wrap gap-2 border bg-gray-100 border-gray-200 rounded-md pt-2 px-1 pb-1">
-      <div className="flex items-center justify-between w-full text-gray-950 pl-2">
+    <div className="flex flex-wrap gap-2 border bg-muted-background border-border rounded-md pt-2 px-1 pb-1">
+      <div className="flex items-center justify-between w-full text-foreground pl-2">
         <span className="font-semibold ">{t("encounter_details")}</span>
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" asChild>
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
             >
-              <SquarePen className="text-gray-950" strokeWidth={1.5} />
+              <SquarePen className="text-foreground" strokeWidth={1.5} />
             </Link>
           </Button>
         )}
       </div>
-      <div className="flex flex-wrap gap-2 justify-between bg-white w-full p-2 rounded-md shadow">
+      <div className="flex flex-wrap gap-2 justify-between bg-background w-full p-2 rounded-md shadow">
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium">{t("status")}: </span>
           <div>
@@ -70,14 +70,14 @@ export const EncounterDetails = () => {
         <Separator className="mt-2" />
         <div className="md:flex flex-col gap-1">
           <div>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-muted-foreground">
               {t("start_date")}:
             </span>
-            <div className="text-sm text-gray-950 font-semibold">
+            <div className="text-sm text-foreground font-semibold">
               {encounter.period.start ? (
                 <>
                   {format(encounter.period.start, "dd MMM yyyy")}
-                  <div className="text-gray-600">
+                  <div className="text-soft-foreground">
                     {format(encounter.period.start, "hh:mma")}
                   </div>
                 </>
@@ -90,14 +90,14 @@ export const EncounterDetails = () => {
 
         <div className=" md:flex flex-col gap-1">
           <div>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-muted-foreground">
               {t("end_date")}:
             </span>
-            <div className="text-sm text-gray-950 font-semibold">
+            <div className="text-sm text-foreground font-semibold">
               {encounter.period.end ? (
                 <>
                   {format(encounter.period.end, "dd MMM yyyy")},
-                  <div className="text-gray-600">
+                  <div className="text-soft-foreground">
                     {format(encounter.period.end, "hh:mma")}
                   </div>
                 </>
@@ -113,8 +113,8 @@ export const EncounterDetails = () => {
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
           >
-            <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
-            <span className="text-gray-950">{t("update_encounter")}</span>
+            <SquarePen className="size-3 text-foreground" strokeWidth={1.5} />
+            <span className="text-foreground">{t("update_encounter")}</span>
           </Link>
         </Button>
       )}

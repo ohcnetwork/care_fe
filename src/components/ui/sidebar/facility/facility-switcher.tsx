@@ -39,7 +39,7 @@ export function FacilitySwitcher({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-background"
               tooltip={selectedFacility?.name}
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
@@ -79,7 +79,7 @@ export function FacilitySwitcher({
                 )}
               >
                 <Link href={`/facility/${facility.id}/overview`}>
-                  <div className="flex size-6 items-center justify-center rounded-sm border border-gray-200 shrink-0">
+                  <div className="flex size-6 items-center justify-center rounded-sm border border-border shrink-0">
                     <Hospital className="size-4 shrink-0 text-current" />
                   </div>
                   {facility.name}

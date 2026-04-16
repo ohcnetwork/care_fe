@@ -24,9 +24,9 @@ export function DisablingCover({
     <div className={cn("relative", containerClassName)}>
       {disabled && (
         <>
-          <div className="absolute w-full h-full bg-white opacity-75 z-20 flex items-center justify-center" />
+          <div className="absolute w-full h-full bg-background opacity-75 z-20 flex items-center justify-center" />
           <div className="absolute w-full h-full z-20 flex items-center justify-center">
-            <div className="disabling-cover__loading-container bg-white rounded-lg shadow-xl p-4">
+            <div className="disabling-cover__loading-container bg-background rounded-lg shadow-xl p-4">
               <div className="disabling-cover__loading-animation-box mx-auto">
                 <div className="disabling-cover__loading-box-1" />
                 <div className="disabling-cover__loading-box-2" />

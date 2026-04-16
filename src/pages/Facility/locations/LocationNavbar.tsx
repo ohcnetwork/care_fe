@@ -57,14 +57,14 @@ export function LocationTreeNode({
     <div className="space-y-1">
       <div
         className={cn(
-          "flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100",
+          "flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-muted-background",
           isSelected && "bg-blue-100 text-blue-800",
         )}
         style={{ paddingLeft: `${level}rem` }}
       >
         {isLoading ? (
           <Button variant="ghost" size="icon" className="size-6">
-            <div className="size-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+            <div className="size-4 animate-spin rounded-full border-2 border-strong-border border-t-soft-foreground" />
           </Button>
         ) : hasChildren ? (
           <Button
@@ -153,7 +153,7 @@ export default function LocationNavbar({
   }
 
   return (
-    <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block">
+    <div className="w-64 shadow-lg bg-background rounded-lg hidden md:block">
       <div className="p-4">
         <h2 className="text-lg font-semibold">{t("locations")}</h2>
       </div>

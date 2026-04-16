@@ -20,7 +20,7 @@ const LabelValue = ({
   id?: string;
 }) => (
   <div className="flex flex-col gap-1">
-    <p className="text-sm text-gray-500">{label}</p>
+    <p className="text-sm text-muted-foreground">{label}</p>
     <TooltipComponent content={value || "-"} side="bottom">
       <span id={`view-${id}`} className="text-sm truncate max-w-fit">
         {value || "-"}
@@ -38,7 +38,7 @@ interface BadgeProps {
 
 export const Badge = ({
   text,
-  textColor = "text-black",
+  textColor = "text-foreground",
   className = "",
 }: BadgeProps) => {
   return (

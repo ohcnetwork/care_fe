@@ -23,7 +23,7 @@ function PasswordInput({
       <button
         type="button"
         tabIndex={-1}
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-hidden"
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-soft-foreground focus:outline-hidden"
         onClick={() => setShowPassword(!showPassword)}
       >
         <CareIcon icon={showPassword ? "l-eye" : "l-eye-slash"} />

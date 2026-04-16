@@ -127,7 +127,7 @@ export function ComboboxQuantityInput({
             {selectedUnit && (
               <div
                 className={cn(
-                  "absolute right-4 pr-2 top-1/2 -translate-y-1/2 text-sm text-gray-500",
+                  "absolute right-4 pr-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground",
                 )}
               >
                 {selectedUnit.display}
@@ -162,7 +162,7 @@ export function ComboboxQuantityInput({
                     }}
                     className={cn(
                       "flex items-center gap-2",
-                      activeIndex === index && "bg-gray-100",
+                      activeIndex === index && "bg-muted-background",
                     )}
                   >
                     <div>

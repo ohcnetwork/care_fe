@@ -101,7 +101,7 @@ export default function ProductForm({
       <Page title={t("edit_product")} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("edit_product")}
             </h1>
           </div>
@@ -117,11 +117,11 @@ export default function ProductForm({
     >
       <div className="container mx-auto max-w-3xl">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-foreground">
             {isEditMode ? t("edit_product") : t("create_product")}
           </h1>
           {isEditMode && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               {t("edit_product_description")}
             </p>
           )}
@@ -131,7 +131,7 @@ export default function ProductForm({
           productId={productId}
           existingData={existingData}
           onSuccess={onSuccess}
-          containerClassName="rounded-lg border border-gray-200 bg-white p-6"
+          containerClassName="rounded-lg border border-border bg-background p-6"
         />
       </div>
     </Page>
@@ -348,7 +348,7 @@ export function ProductFormContent({
                           (pk) => pk.slug === field.value,
                         )}
                         onChange={(selected) => field.onChange(selected?.slug)}
-                        className="border-gray-300 font-normal text-gray-700"
+                        className="border-strong-border font-normal text-muted-foreground"
                       />
                     </FormControl>
                     <FormDescription>
@@ -456,12 +456,12 @@ export function ProductFormContent({
             />
           </div>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <div className="rounded-lg border border-border bg-background p-6">
           <div className="mb-4">
-            <h2 className="text-lg font-medium text-gray-900">
+            <h2 className="text-lg font-medium text-foreground">
               {t("billing_information")}
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               {t("product_charge_item_definition_selection_description")}
             </p>
           </div>
@@ -515,7 +515,7 @@ export function ProductFormContent({
                           {t("create_new")}
                         </Button>
                       </SheetTrigger>
-                      <SheetContent className="w-[90%] sm:max-w-2xl flex min-w-full flex-col bg-gray-100 sm:min-w-fit overflow-y-auto">
+                      <SheetContent className="w-[90%] sm:max-w-2xl flex min-w-full flex-col bg-muted-background sm:min-w-fit overflow-y-auto">
                         <SheetHeader>
                           <SheetTitle>
                             {t("create_charge_item_definition")}

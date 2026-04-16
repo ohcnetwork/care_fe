@@ -70,7 +70,7 @@ function InputWithNotes({
             type="button"
             disabled={disabled}
             className={cn(
-              "flex items-center justify-center w-10 border border-gray-300 rounded-r-md bg-gray-100/20",
+              "flex items-center justify-center w-10 border border-strong-border rounded-r-md bg-muted-background/20",
               hasNotes && "bg-orange-50",
             )}
           >
@@ -78,7 +78,7 @@ function InputWithNotes({
               icon={hasNotes ? "l-notes" : "l-file-medical-alt"}
               className={cn(
                 "size-4",
-                hasNotes ? "text-orange-600" : "text-gray-500",
+                hasNotes ? "text-orange-600" : "text-muted-foreground",
               )}
             />
           </button>
@@ -90,7 +90,7 @@ function InputWithNotes({
           <Textarea
             value={notes}
             onChange={(e) => onUpdateNote(e.target.value)}
-            className="bg-white border-orange-200 focus-visible:border-orange-300 focus-visible:ring-orange-300"
+            className="bg-background border-orange-200 focus-visible:border-orange-300 focus-visible:ring-orange-300"
             placeholder={t("add_notes")}
             disabled={disabled}
           />
@@ -122,7 +122,7 @@ function RepeatingNotesButton({
           type="button"
           disabled={disabled}
           className={cn(
-            "flex items-center justify-center w-10 h-10 border border-gray-300 rounded-md bg-gray-100/20",
+            "flex items-center justify-center w-10 h-10 border border-strong-border rounded-md bg-muted-background/20",
             hasNotes && "bg-orange-50 border-orange-300",
           )}
         >
@@ -130,7 +130,7 @@ function RepeatingNotesButton({
             icon={hasNotes ? "l-notes" : "l-file-medical-alt"}
             className={cn(
               "size-4",
-              hasNotes ? "text-orange-600" : "text-gray-500",
+              hasNotes ? "text-orange-600" : "text-muted-foreground",
             )}
           />
         </button>
@@ -142,7 +142,7 @@ function RepeatingNotesButton({
         <Textarea
           value={notes}
           onChange={(e) => onUpdateNote(e.target.value)}
-          className="bg-white border-orange-200 focus-visible:border-orange-300 focus-visible:ring-orange-300"
+          className="bg-background border-orange-200 focus-visible:border-orange-300 focus-visible:ring-orange-300"
           placeholder={t("add_notes")}
           disabled={disabled}
         />
@@ -383,17 +383,19 @@ export function QuestionInput({
     if (question.type === "choice") {
       return (
         <div
-          className="bg-gray-100 md:bg-transparent px-2 py-1.5"
+          className="bg-muted-background md:bg-transparent px-2 py-1.5"
           id={"question-" + question.id}
         >
-          <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
+          <div className="px-2 pt-2 bg-muted-background md:bg-transparent">
             <QuestionLabel
               question={question}
               isSubQuestion={isSubQuestion}
               className="mb-2 text-md"
             />
             {question.description && (
-              <p className="text-sm text-gray-500">{question.description}</p>
+              <p className="text-sm text-muted-foreground">
+                {question.description}
+              </p>
             )}
           </div>
           <InputWithNotes
@@ -414,7 +416,7 @@ export function QuestionInput({
     }
 
     return (
-      <div className="bg-gray-100 md:bg-transparent px-2 py-1.5">
+      <div className="bg-muted-background md:bg-transparent px-2 py-1.5">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 &&
@@ -440,13 +442,13 @@ export function QuestionInput({
                 id={"question-" + question.id}
               >
                 {index === 0 && question.type !== "structured" && (
-                  <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
+                  <div className="px-2 pt-2 bg-muted-background md:bg-transparent">
                     <QuestionLabel
                       question={question}
                       isSubQuestion={isSubQuestion}
                     />
                     {question.description && (
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {question.description}
                       </p>
                     )}

@@ -119,9 +119,9 @@ export function InvoiceShow({
   const queryClient = useQueryClient();
   useShortcutSubContext("facility:billing:invoice:show");
 
-  const tableHeadClass = "border-r border-gray-200 font-semibold text-center";
+  const tableHeadClass = "border-r border-border font-semibold text-center";
   const tableCellClass =
-    "border-r border-gray-200 font-medium text-gray-950 text-sm";
+    "border-r border-border font-medium text-foreground text-sm";
 
   // Fetch facility data for available components
   const { data: facilityData } = useQuery({
@@ -371,7 +371,9 @@ export function InvoiceShow({
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold">{t("invoice_not_found")}</h2>
-          <p className="mt-2 text-gray-600">{t("invoice_may_not_exist")}</p>
+          <p className="mt-2 text-soft-foreground">
+            {t("invoice_may_not_exist")}
+          </p>
           <Button asChild className="mt-4">
             <Link
               href={`/facility/${facilityId}/billing/invoices`}
@@ -397,9 +399,9 @@ export function InvoiceShow({
               <ChevronLeft />
               <span>{t("back")}</span>
             </BackButton>
-            <div className="h-auto w-px bg-gray-300" aria-hidden="true" />
+            <div className="h-auto w-px bg-strong-border" aria-hidden="true" />
             <div>
-              <label className="text-gray-700 text-sm font-medium">
+              <label className="text-muted-foreground text-sm font-medium">
                 {t("patient_name")}
               </label>
               <Link
@@ -412,7 +414,7 @@ export function InvoiceShow({
                   },
                 ).toString()}`}
               >
-                <div className="font-semibold text-gray-950 underline">
+                <div className="font-semibold text-foreground underline">
                   {invoice.account.patient.name}
                   <SquareArrowOutUpRight className="ml-1 size-4 inline" />
                 </div>
@@ -420,13 +422,13 @@ export function InvoiceShow({
             </div>
 
             <div>
-              <label className="text-gray-700 text-sm font-medium">
+              <label className="text-muted-foreground text-sm font-medium">
                 {t("account")}
               </label>
               <Link
                 href={`/facility/${facilityId}/billing/account/${invoice.account.id}`}
               >
-                <div className="font-semibold text-gray-950 underline">
+                <div className="font-semibold text-foreground underline">
                   {invoice.account.name}
                   <SquareArrowOutUpRight className="ml-1 size-4 inline" />
                 </div>
@@ -434,18 +436,18 @@ export function InvoiceShow({
             </div>
             <div className="flex flex-row gap-6">
               <div>
-                <label className="text-gray-700 text-sm font-medium">
+                <label className="text-muted-foreground text-sm font-medium">
                   {t("amount_due")}
                 </label>
-                <div className="font-semibold text-gray-950">
+                <div className="font-semibold text-foreground">
                   <MonetaryDisplay amount={invoice.account.total_balance} />
                 </div>
               </div>
               <div>
-                <label className="text-gray-700 text-sm font-medium">
+                <label className="text-muted-foreground text-sm font-medium">
                   {t("status")}
                 </label>
-                <div className="font-semibold text-gray-950">
+                <div className="font-semibold text-foreground">
                   <Badge
                     variant={ACCOUNT_STATUS_COLORS[invoice.account.status]}
                   >
@@ -519,10 +521,10 @@ export function InvoiceShow({
         </div>
 
         <div className="md:col-span-2 overflow-x-auto max-w-5xl mx-auto">
-          <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-3">
+          <div className="bg-soft-background border border-border rounded-md p-3 mb-3">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-600">
+                <span className="text-sm font-medium text-soft-foreground">
                   {t("invoice_summary")}
                 </span>
                 <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
@@ -531,16 +533,16 @@ export function InvoiceShow({
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-center">
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-muted-foreground">
                     {t("total_amount")}
                   </div>
-                  <div className="text-base font-semibold text-gray-900">
+                  <div className="text-base font-semibold text-foreground">
                     <MonetaryDisplay amount={invoice.total_gross} />
                   </div>
                 </div>
-                <div className="h-6 w-px bg-gray-300" />
+                <div className="h-6 w-px bg-strong-border" />
                 <div className="text-center">
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-muted-foreground">
                     {invoice.is_refund
                       ? t("total_credit_notes")
                       : t("total_payments_received")}
@@ -560,12 +562,12 @@ export function InvoiceShow({
                     />
                   </div>
                 </div>
-                <div className="h-6 w-px bg-gray-300" />
+                <div className="h-6 w-px bg-strong-border" />
                 <div className="text-center">
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-muted-foreground">
                     {t("balance_due")}
                   </div>
-                  <div className="text-base font-semibold text-gray-900">
+                  <div className="text-base font-semibold text-foreground">
                     <MonetaryDisplay
                       amount={subtract(
                         subtract(invoice.total_gross, invoice.total_payments),
@@ -615,7 +617,7 @@ export function InvoiceShow({
 
           <div className="flex sm:flex-row flex-col sm:items-center gap-4 justify-between items-start mb-4">
             <div className="flex flex-row items-center gap-2">
-              <span className="font-semibold text-gray-950 text-base">
+              <span className="font-semibold text-foreground text-base">
                 {t("invoice")}: {invoice.number}
               </span>
               <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
@@ -632,7 +634,7 @@ export function InvoiceShow({
               {invoice.status === InvoiceStatus.draft && (
                 <Button
                   variant="outline"
-                  className="border-gray-400 gap-1"
+                  className="border-stronger-border gap-1"
                   onClick={() => {
                     setIsEditDialogOpen(true);
                     setSelectedChargeItems(invoice.charge_items);
@@ -645,7 +647,7 @@ export function InvoiceShow({
               )}
               <Button
                 variant="outline"
-                className="border-gray-400 gap-1"
+                className="border-stronger-border gap-1"
                 onClick={() => {
                   if (relatedInvoices) {
                     // Navigate to multi-invoice print with all invoices
@@ -671,7 +673,10 @@ export function InvoiceShow({
               {canEdit && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="border-gray-400 px-2">
+                    <Button
+                      variant="outline"
+                      className="border-stronger-border px-2"
+                    >
                       <CareIcon icon="l-ellipsis-v" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -739,43 +744,43 @@ export function InvoiceShow({
             <CardHeader className="p-4">
               <CardTitle>
                 <div>
-                  <div className="font-semibold text-gray-950 text-base uppercase">
+                  <div className="font-semibold text-foreground text-base uppercase">
                     {t("tax_invoice")}
                   </div>
-                  <div className="text-gray-600 text-sm font-medium">
+                  <div className="text-soft-foreground text-sm font-medium">
                     {invoice.number}
                   </div>
                 </div>
               </CardTitle>
             </CardHeader>
 
-            <div className="px-4 py-0 my-4 text-gray-200">
+            <div className="px-4 py-0 my-4 text-border">
               <Separator />
             </div>
 
             <CardContent className="space-y-4 px-4 pt-0 pb-8">
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
-                  <div className="font-medium text-gray-700 text-sm">
+                  <div className="font-medium text-muted-foreground text-sm">
                     {t("bill_to")}:
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-950 text-base ml-2">
+                    <p className="font-semibold text-foreground text-base ml-2">
                       {invoice.account.patient.name}
                     </p>
-                    <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
+                    <div className="flex gap-1 font-medium text-muted-foreground text-sm ml-2">
                       {t("address")}:{" "}
-                      <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
+                      <p className="font-medium text-muted-foreground text-sm whitespace-pre-wrap ml-2">
                         {formatPatientAddress(
                           invoice.account.patient.address,
                         ) || (
-                          <span className="text-gray-500">
+                          <span className="text-muted-foreground">
                             {t("no_address_provided")}
                           </span>
                         )}
                       </p>
                     </div>
-                    <p className="font-medium text-gray-700 text-sm ml-2">
+                    <p className="font-medium text-muted-foreground text-sm ml-2">
                       {t("phone")}:{" "}
                       {formatPhoneNumberIntl(
                         invoice.account.patient.phone_number,
@@ -793,7 +798,7 @@ export function InvoiceShow({
                         .map((identifier) => (
                           <p
                             key={identifier.config.id}
-                            className="font-medium text-gray-700 text-sm ml-2"
+                            className="font-medium text-muted-foreground text-sm ml-2"
                           >
                             <span>{identifier.config.config.display}: </span>
                             <span>{identifier.value}</span>
@@ -805,10 +810,10 @@ export function InvoiceShow({
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-medium text-gray-700 text-sm">
+                  <div className="font-medium text-muted-foreground text-sm">
                     {t("issue_date")}:
                   </div>
-                  <p className="font-medium text-gray-950 text-sm">
+                  <p className="font-medium text-foreground text-sm">
                     {invoice.issue_date
                       ? format(
                           new Date(invoice.issue_date),
@@ -819,10 +824,10 @@ export function InvoiceShow({
                 </div>
               </div>
 
-              <div className="rounded-t-sm border border-gray-300">
+              <div className="rounded-t-sm border border-strong-border">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-b border-gray-200">
+                    <TableRow className="border-b border-border">
                       <TableHead className={tableHeadClass}>#</TableHead>
                       <TableHead className={cn(tableHeadClass, "text-left")}>
                         {t("item")}
@@ -862,14 +867,14 @@ export function InvoiceShow({
                   </TableHeader>
                   <TableBody>
                     {invoice.charge_items.length === 0 ? (
-                      <TableRow className="border-b border-gray-200">
+                      <TableRow className="border-b border-border">
                         <TableCell
                           colSpan={
                             invoice?.status === InvoiceStatus.draft
                               ? 9 + getApplicableTaxColumns(invoice).length
                               : 8 + getApplicableTaxColumns(invoice).length
                           }
-                          className="text-center text-gray-500"
+                          className="text-center text-muted-foreground"
                         >
                           {t("no_charge_items")}
                         </TableCell>
@@ -882,7 +887,7 @@ export function InvoiceShow({
                         const mainRow = (
                           <TableRow
                             key={item.id}
-                            className="border-b border-gray-200 hover:bg-muted/50"
+                            className="border-b border-border hover:bg-muted/50"
                           >
                             <TableCell
                               className={cn(tableCellClass, "text-center")}
@@ -947,7 +952,7 @@ export function InvoiceShow({
                                   .map((discountComponent, idx) => (
                                     <div
                                       key={idx}
-                                      className="text-xs text-gray-500"
+                                      className="text-xs text-muted-foreground"
                                     >
                                       <MonetaryDisplay
                                         {...discountComponent}
@@ -979,7 +984,7 @@ export function InvoiceShow({
                                             amount={totalAmount}
                                             hideCurrency
                                           />
-                                          <div className="text-xs text-gray-500">
+                                          <div className="text-xs text-muted-foreground">
                                             {totalAmount && (
                                               <MonetaryDisplay
                                                 {...unitAmount}
@@ -1053,7 +1058,7 @@ export function InvoiceShow({
 
               <div
                 className={cn(
-                  "border-x border-gray-300 p-2 -mt-4 border-t-none space-y-2",
+                  "border-x border-strong-border p-2 -mt-4 border-t-none space-y-2",
                   invoice.payments?.filter(
                     (p) => p.status === PaymentReconciliationStatus.active,
                   ).length === 0 && "border-b rounded-b-md",
@@ -1070,7 +1075,7 @@ export function InvoiceShow({
                       trigger={
                         <Button
                           variant="ghost"
-                          className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
+                          className="w-full border border-stronger-border text-foreground font-semibold text-sm shadow-sm"
                           disabled={isAddChargeItemSheetOpen}
                         >
                           <CareIcon icon="l-plus" className="mr-2 size-4" />
@@ -1081,7 +1086,7 @@ export function InvoiceShow({
                     />
                   )}
 
-                <div className="flex flex-col items-end space-y-2 text-gray-950 font-mormal text-sm mb-4">
+                <div className="flex flex-col items-end space-y-2 text-foreground font-mormal text-sm mb-4">
                   {/* Base Amount */}
                   {invoice.total_price_components
                     ?.filter(
@@ -1113,7 +1118,7 @@ export function InvoiceShow({
                     .map((component, index) => (
                       <div
                         key={`discount-${index}`}
-                        className="flex w-64 justify-between text-gray-500 text-sm"
+                        className="flex w-64 justify-between text-muted-foreground text-sm"
                       >
                         <span>
                           {component.code && `${component.code.display} `}(
@@ -1135,7 +1140,7 @@ export function InvoiceShow({
                     .map((component, index) => (
                       <div
                         key={`discount-${index}`}
-                        className="flex w-64 justify-between text-gray-500 text-sm"
+                        className="flex w-64 justify-between text-muted-foreground text-sm"
                       >
                         <span>
                           {component.code && `${component.code.display} `}(
@@ -1149,7 +1154,9 @@ export function InvoiceShow({
 
                   {/* Subtotal */}
                   <div className="flex w-64 justify-between">
-                    <span className="text-gray-500">{t("net_amount")}</span>
+                    <span className="text-muted-foreground">
+                      {t("net_amount")}
+                    </span>
                     <MonetaryDisplay amount={invoice.total_net} />
                   </div>
 
@@ -1162,7 +1169,7 @@ export function InvoiceShow({
                     .map((component, index) => (
                       <div
                         key={`tax-${index}`}
-                        className="flex w-64 justify-between text-gray-500 text-sm"
+                        className="flex w-64 justify-between text-muted-foreground text-sm"
                       >
                         <span>
                           {component.code && `${component.code.display} `}(
@@ -1174,14 +1181,14 @@ export function InvoiceShow({
                       </div>
                     ))}
 
-                  <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+                  <div className="p-1 border-t-2 border-dashed border-border w-full" />
 
                   {/* Total */}
                   <div className="flex w-64 justify-between font-bold">
                     <span>{t("total")}</span>
                     <MonetaryDisplay amount={invoice.total_gross} />
                   </div>
-                  <div className="p-1 pb-2.5 border-t-2 border-dashed border-gray-200 w-full" />
+                  <div className="p-1 pb-2.5 border-t-2 border-dashed border-border w-full" />
                 </div>
               </div>
 
@@ -1189,7 +1196,7 @@ export function InvoiceShow({
                 (p) => p.status === PaymentReconciliationStatus.active,
               ).length > 0 && (
                 <>
-                  <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2">
+                  <div className="border-x border-b border-t border-strong-border rounded-b-md -mt-4 space-y-2">
                     <div className="-mt-7 px-3 font-medium ">
                       {invoice.is_refund
                         ? t("refunds_given_against_this_invoice")
@@ -1197,7 +1204,7 @@ export function InvoiceShow({
                     </div>
                     <Table>
                       <TableHeader>
-                        <TableRow className="border-b border-gray-200">
+                        <TableRow className="border-b border-border">
                           <TableHead className={tableHeadClass}>#</TableHead>
                           <TableHead
                             className={cn(tableHeadClass, "text-left")}
@@ -1235,7 +1242,7 @@ export function InvoiceShow({
                             const mainRow = (
                               <TableRow
                                 key={payment.id}
-                                className="border-b border-gray-200 hover:bg-muted/50"
+                                className="border-b border-border hover:bg-muted/50"
                               >
                                 <TableCell
                                   className={cn(tableCellClass, "text-center")}
@@ -1257,7 +1264,7 @@ export function InvoiceShow({
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        className="text-gray-800 font-semibold text-xs p-2"
+                                        className="text-foreground font-semibold text-xs p-2"
                                         onClick={() => {
                                           navigate(
                                             `/facility/${facilityId}/billing/payments/${payment.id}`,
@@ -1272,7 +1279,7 @@ export function InvoiceShow({
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        className="text-gray-800 font-semibold text-xs p-2"
+                                        className="text-foreground font-semibold text-xs p-2"
                                         onClick={() => {
                                           navigate(
                                             `/facility/${facilityId}/billing/payments/${payment.id}/print`,
@@ -1316,8 +1323,8 @@ export function InvoiceShow({
                       </TableBody>
                     </Table>
                   </div>
-                  <div className="flex flex-col items-end space-y-2 text-gray-950 font-mormal text-sm mb-4">
-                    <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+                  <div className="flex flex-col items-end space-y-2 text-foreground font-mormal text-sm mb-4">
+                    <div className="p-1 border-t-2 border-dashed border-border w-full" />
 
                     {/* Total Received/Refunded */}
                     <div className="flex w-64 justify-between font-bold">
@@ -1328,7 +1335,7 @@ export function InvoiceShow({
                       </span>
                       <MonetaryDisplay amount={invoice.total_payments} />
                     </div>
-                    <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
+                    <div className="p-1 border-b-2 border-dashed border-border w-full" />
                   </div>
                 </>
               )}
@@ -1337,13 +1344,13 @@ export function InvoiceShow({
                 (p) => p.status === PaymentReconciliationStatus.active,
               ).length > 0 && (
                 <>
-                  <div className="border border-gray-300 rounded-md space-y-2">
+                  <div className="border border-strong-border rounded-md space-y-2">
                     <div className="mt-2 px-3 font-medium">
                       {t("credit_notes_issued_against_this_invoice")}
                     </div>
                     <Table>
                       <TableHeader>
-                        <TableRow className="border-b border-gray-200">
+                        <TableRow className="border-b border-border">
                           <TableHead className={tableHeadClass}>#</TableHead>
                           <TableHead
                             className={cn(tableHeadClass, "text-left")}
@@ -1374,7 +1381,7 @@ export function InvoiceShow({
                           .map((creditNote, index) => (
                             <TableRow
                               key={creditNote.id}
-                              className="border-b border-gray-200 hover:bg-muted/50"
+                              className="border-b border-border hover:bg-muted/50"
                             >
                               <TableCell
                                 className={cn(tableCellClass, "text-center")}
@@ -1396,7 +1403,7 @@ export function InvoiceShow({
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="text-gray-800 font-semibold text-xs p-2"
+                                      className="text-foreground font-semibold text-xs p-2"
                                       onClick={() => {
                                         navigate(
                                           `/facility/${facilityId}/billing/payments/${creditNote.id}`,
@@ -1411,7 +1418,7 @@ export function InvoiceShow({
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="text-gray-800 font-semibold text-xs p-2"
+                                      className="text-foreground font-semibold text-xs p-2"
                                       onClick={() => {
                                         navigate(
                                           `/facility/${facilityId}/billing/payments/${creditNote.id}/print`,
@@ -1449,15 +1456,15 @@ export function InvoiceShow({
                       </TableBody>
                     </Table>
                   </div>
-                  <div className="flex flex-col items-end space-y-2 text-gray-950 font-mormal text-sm mb-4">
-                    <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+                  <div className="flex flex-col items-end space-y-2 text-foreground font-mormal text-sm mb-4">
+                    <div className="p-1 border-t-2 border-dashed border-border w-full" />
 
                     {/* Total Credit Notes */}
                     <div className="flex w-64 justify-between font-bold">
                       <span>{t("total_credit_notes")}</span>
                       <MonetaryDisplay amount={invoice.total_credit_notes} />
                     </div>
-                    <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
+                    <div className="p-1 border-b-2 border-dashed border-border w-full" />
                   </div>
                 </>
               )}
@@ -1466,7 +1473,7 @@ export function InvoiceShow({
           <div>
             {invoice.payment_terms && (
               <Card className="mt-8 rounded-sm shadow-sm">
-                <CardHeader className="font-semibold text-gray-950">
+                <CardHeader className="font-semibold text-foreground">
                   {t("payment_terms")}
                 </CardHeader>
                 <CardContent>
@@ -1533,17 +1540,17 @@ export function InvoiceShow({
                   {selectedStatus === InvoiceStatus.balanced ? (
                     <>
                       <p>{t("are_you_sure_want_to_mark_as_balanced")}</p>
-                      <div className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
+                      <div className="bg-soft-background border border-border rounded-md p-3 space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">
+                          <span className="text-soft-foreground">
                             {t("invoice_total")}
                           </span>
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-foreground">
                             <MonetaryDisplay amount={invoice.total_gross} />
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">
+                          <span className="text-soft-foreground">
                             {t("total_payments_received")}
                           </span>
                           <span className="font-medium text-green-600">
@@ -1552,7 +1559,7 @@ export function InvoiceShow({
                         </div>
                         {parseFloat(invoice.total_credit_notes || "0") > 0 && (
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">
+                            <span className="text-soft-foreground">
                               {t("total_credit_notes")}
                             </span>
                             <span className="font-medium text-red-600">
@@ -1562,11 +1569,11 @@ export function InvoiceShow({
                             </span>
                           </div>
                         )}
-                        <div className="border-t border-gray-200 pt-2 flex justify-between text-sm">
-                          <span className="text-gray-600">
+                        <div className="border-t border-border pt-2 flex justify-between text-sm">
+                          <span className="text-soft-foreground">
                             {t("outstanding_balance")}
                           </span>
-                          <span className="font-semibold text-gray-900">
+                          <span className="font-semibold text-foreground">
                             <MonetaryDisplay
                               amount={subtract(
                                 subtract(
@@ -1655,8 +1662,8 @@ export function InvoiceShow({
                   {invoice?.payments?.filter(
                     (p) => p.status === PaymentReconciliationStatus.active,
                   ).length > 0 && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
-                      <div className="text-sm font-medium text-gray-700">
+                    <div className="bg-soft-background border border-border rounded-md p-3 space-y-2">
+                      <div className="text-sm font-medium text-muted-foreground">
                         {t("active_payments")}
                       </div>
                       {invoice.payments
@@ -1667,9 +1674,9 @@ export function InvoiceShow({
                         .map((payment, index) => (
                           <div
                             key={payment.id}
-                            className="flex justify-between text-sm border-t border-gray-100 pt-1"
+                            className="flex justify-between text-sm border-t border-soft-border pt-1"
                           >
-                            <span className="text-gray-600">
+                            <span className="text-soft-foreground">
                               {index + 1}.{" "}
                               {
                                 PAYMENT_RECONCILIATION_METHOD_MAP[
@@ -1679,13 +1686,15 @@ export function InvoiceShow({
                               {payment.reference_number &&
                                 ` (${payment.reference_number})`}
                             </span>
-                            <span className="font-medium text-gray-900">
+                            <span className="font-medium text-foreground">
                               <MonetaryDisplay amount={payment.amount} />
                             </span>
                           </div>
                         ))}
-                      <div className="flex justify-between text-sm border-t border-gray-200 pt-2 font-medium">
-                        <span className="text-gray-700">{t("total")}</span>
+                      <div className="flex justify-between text-sm border-t border-border pt-2 font-medium">
+                        <span className="text-muted-foreground">
+                          {t("total")}
+                        </span>
                         <span className="text-green-600">
                           <MonetaryDisplay amount={invoice.total_payments} />
                         </span>
@@ -1697,8 +1706,8 @@ export function InvoiceShow({
                   {invoice?.credit_notes?.filter(
                     (p) => p.status === PaymentReconciliationStatus.active,
                   ).length > 0 && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
-                      <div className="text-sm font-medium text-gray-700">
+                    <div className="bg-soft-background border border-border rounded-md p-3 space-y-2">
+                      <div className="text-sm font-medium text-muted-foreground">
                         {t("active_credit_notes")}
                       </div>
                       {invoice.credit_notes
@@ -1709,9 +1718,9 @@ export function InvoiceShow({
                         .map((creditNote, index) => (
                           <div
                             key={creditNote.id}
-                            className="flex justify-between text-sm border-t border-gray-100 pt-1"
+                            className="flex justify-between text-sm border-t border-soft-border pt-1"
                           >
-                            <span className="text-gray-600">
+                            <span className="text-soft-foreground">
                               {index + 1}.{" "}
                               {
                                 PAYMENT_RECONCILIATION_METHOD_MAP[
@@ -1721,13 +1730,15 @@ export function InvoiceShow({
                               {creditNote.reference_number &&
                                 ` (${creditNote.reference_number})`}
                             </span>
-                            <span className="font-medium text-gray-900">
+                            <span className="font-medium text-foreground">
                               <MonetaryDisplay amount={creditNote.amount} />
                             </span>
                           </div>
                         ))}
-                      <div className="flex justify-between text-sm border-t border-gray-200 pt-2 font-medium">
-                        <span className="text-gray-700">{t("total")}</span>
+                      <div className="flex justify-between text-sm border-t border-border pt-2 font-medium">
+                        <span className="text-muted-foreground">
+                          {t("total")}
+                        </span>
                         <span className="text-red-600">
                           <MonetaryDisplay
                             amount={invoice.total_credit_notes}
@@ -1775,17 +1786,17 @@ export function InvoiceShow({
 
         <div className="flex gap-10 max-w-4xl mx-auto">
           <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center size-14 bg-white rounded-full border border-gray-200">
+            <div className="flex items-center justify-center size-14 bg-background rounded-full border border-border">
               <FileCheck className="size-4" />
             </div>
             <div>
-              <span className="text-sm font-semibold text-gray-950">
+              <span className="text-sm font-semibold text-foreground">
                 {t("invoice_updated")}
               </span>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-soft-foreground">
                 {t("by_label", { label: formatName(invoice.updated_by) })}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 {formatDateTime(
                   invoice.modified_date,
                   "hh:mm A - MMM DD, YYYY",
@@ -1795,17 +1806,17 @@ export function InvoiceShow({
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center size-14 bg-white rounded-full border border-gray-200">
+            <div className="flex items-center justify-center size-14 bg-background rounded-full border border-border">
               <ReceiptText className="size-4" />
             </div>
             <div>
-              <span className="text-sm font-semibold text-gray-950">
+              <span className="text-sm font-semibold text-foreground">
                 {t("draft_invoice_created")}
               </span>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-soft-foreground">
                 {t("by_label", { label: formatName(invoice.created_by) })}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 {formatDateTime(invoice.created_date, "hh:mm A - MMM DD, YYYY")}
               </p>
             </div>
@@ -1813,7 +1824,7 @@ export function InvoiceShow({
         </div>
 
         {sourceUrl && (
-          <Alert className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-2xl w-full mx-auto shadow-lg rounded-lg p-0 bg-white border border-gray-200">
+          <Alert className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-2xl w-full mx-auto shadow-lg rounded-lg p-0 bg-background border border-border">
             <AlertTitle className="flex items-center justify-between gap-0">
               <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-l-lg p-4 flex-1">
                 <BadgeCheck className="size-5 text-green-600" />
@@ -1821,7 +1832,7 @@ export function InvoiceShow({
                   {t("invoice_alert_title")}
                 </span>
               </div>
-              <div className="flex items-center bg-white rounded-r-lg p-2 pl-0">
+              <div className="flex items-center bg-background rounded-r-lg p-2 pl-0">
                 <Button
                   variant="primary"
                   onClick={() => navigate(sourceUrl)}

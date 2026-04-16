@@ -79,7 +79,7 @@ export default function HealthcareServiceShow({
       <Page title={t("healthcare_service_details")} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("healthcare_service_details")}
             </h1>
           </div>
@@ -94,7 +94,7 @@ export default function HealthcareServiceShow({
       <Page title={t("healthcare_service_details")} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("healthcare_service_details")}
             </h1>
           </div>
@@ -105,7 +105,7 @@ export default function HealthcareServiceShow({
                   icon="l-folder-open"
                   className="mx-auto mb-2 size-8"
                 />
-                <p className="text-gray-600">
+                <p className="text-soft-foreground">
                   {t("healthcare_service_not_found")}
                 </p>
               </div>
@@ -120,7 +120,7 @@ export default function HealthcareServiceShow({
     <Page title={t("healthcare_service_details")} hideTitleOnPage>
       <div className="container mx-auto max-w-3xl">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-foreground">
             {t("healthcare_service_details")}
           </h1>
           <div className="flex gap-2">
@@ -176,10 +176,10 @@ export default function HealthcareServiceShow({
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="mb-1 text-sm font-medium text-gray-500">
+                <h3 className="mb-1 text-sm font-medium text-muted-foreground">
                   {t("extra_details")}
                 </h3>
-                <p className="text-gray-900">
+                <p className="text-foreground">
                   {healthcareService.extra_details || t("no_extra_details")}
                 </p>
               </div>
@@ -196,7 +196,9 @@ export default function HealthcareServiceShow({
             </CardHeader>
             <CardContent>
               {healthcareService.locations.length === 0 ? (
-                <p className="text-gray-500">{t("no_locations_assigned")}</p>
+                <p className="text-muted-foreground">
+                  {t("no_locations_assigned")}
+                </p>
               ) : (
                 <div className="grid gap-2">
                   {healthcareService.locations.map((location) => (
@@ -207,7 +209,7 @@ export default function HealthcareServiceShow({
                     >
                       <div className="flex items-center justify-between rounded-lg border p-3">
                         <div>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-foreground">
                             {location.name}
                           </p>
                         </div>
@@ -225,7 +227,7 @@ export default function HealthcareServiceShow({
           {/* Managing Organization Section */}
           {!isLoading && healthcareService?.managing_organization && (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-foreground">
                 {t("managing_organization")}
               </h2>
               <Card className="transition-all duration-200 rounded-md">
@@ -241,15 +243,15 @@ export default function HealthcareServiceShow({
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold truncate text-gray-900 text-base">
+                    <h3 className="font-semibold truncate text-foreground text-base">
                       {healthcareService.managing_organization.name}
                     </h3>
                     {healthcareService.managing_organization.description && (
-                      <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">
+                      <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
                         {healthcareService.managing_organization.description}
                       </p>
                     )}
-                    <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+                    <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                       <CareIcon icon="l-tag" className="size-3" />
                       <span>{t("organization")}</span>
                     </div>

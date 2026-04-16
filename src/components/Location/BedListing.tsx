@@ -61,10 +61,10 @@ export function BedListing({
               isSelected && "border-green-600 bg-green-50",
               !isSelected &&
                 isClickable &&
-                "border-gray-400 hover:border-green-200 cursor-pointer",
+                "border-stronger-border hover:border-green-200 cursor-pointer",
               !isSelected &&
                 !isClickable &&
-                "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed",
+                "border-soft-border bg-soft-background opacity-60 cursor-not-allowed",
             )}
             onClick={() => {
               if (isAvailable) {
@@ -101,7 +101,7 @@ export function BedListing({
               {showParent && segments.length > 1 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <p className="text-xs mt-1 text-gray-400 truncate max-w-full cursor-default">
+                    <p className="text-xs mt-1 text-placeholder-foreground truncate max-w-full cursor-default">
                       {shortPath}
                     </p>
                   </TooltipTrigger>

@@ -123,14 +123,14 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
         <div className="rounded-lg">
           <div className="flex items-center gap-4 mb-4">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900">
+              <h1 className="text-4xl font-bold text-foreground">
                 {t("hey_user", {
                   user: [user.prefix, user.first_name]
                     .filter(Boolean)
                     .join(" "),
                 })}
               </h1>
-              <p className="text-gray-500">
+              <p className="text-muted-foreground">
                 {t("welcome_back_to_hospital_dashboard")}
               </p>
             </div>
@@ -139,7 +139,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
 
         {/* Quick Actions Section */}
         <div className="">
-          <h2 className="mb-6 text-xl font-semibold text-gray-900">
+          <h2 className="mb-6 text-xl font-semibold text-foreground">
             {t("quick_actions")}
           </h2>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
@@ -160,7 +160,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                         <CardTitle className="text-lg">
                           {shortcut.title}
                         </CardTitle>
-                        <CardDescription className="text-gray-500">
+                        <CardDescription className="text-muted-foreground">
                           {shortcut.description}
                         </CardDescription>
                       </div>
@@ -175,12 +175,12 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
         {pinnedLinks.length > 0 && (
           <div>
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-foreground">
                 {t("pinned_links")}
               </h2>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+                  <button className="p-2 rounded-lg hover:bg-muted-background text-muted-foreground hover:text-muted-foreground transition-colors">
                     <Wrench className="size-5" />
                   </button>
                 </DropdownMenuTrigger>
@@ -200,25 +200,25 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                 >
                   <button
                     onClick={() => removeCustomLink(link.link)}
-                    className="absolute -top-2 -right-2 z-10 p-1 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    className="absolute -top-2 -right-2 z-10 p-1 rounded-full bg-muted-background hover:bg-red-100 text-muted-foreground hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
                     aria-label={t("remove")}
                   >
                     <X className="size-4" />
                   </button>
                   <Link href={link.link} className="block h-full">
-                    <Card className="h-full border border-gray-200 shadow-sm rounded-xl p-5">
+                    <Card className="h-full border border-border shadow-sm rounded-xl p-5">
                       <CardContent className="p-0 flex flex-row items-center justify-between h-full gap-4">
                         <div className="space-y-1">
                           {link.description && (
-                            <CardDescription className="text-gray-500 text-sm">
+                            <CardDescription className="text-muted-foreground text-sm">
                               {link.description}
                             </CardDescription>
                           )}
-                          <CardTitle className="text-xl font-semibold text-gray-900">
+                          <CardTitle className="text-xl font-semibold text-foreground">
                             {link.title}
                           </CardTitle>
                         </div>
-                        <ArrowUpRight className="size-5 text-gray-400 shrink-0" />
+                        <ArrowUpRight className="size-5 text-placeholder-foreground shrink-0" />
                       </CardContent>
                     </Card>
                   </Link>

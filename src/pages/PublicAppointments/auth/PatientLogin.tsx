@@ -122,7 +122,7 @@ export default function PatientLogin({
         </span>
         <form
           onSubmit={handleSubmit}
-          className="flex mt-2 flex-col gap-4 shadow-sm border border-gray-200 p-8 rounded-lg"
+          className="flex mt-2 flex-col gap-4 shadow-sm border border-border p-8 rounded-lg"
         >
           <div className="space-y-2">
             <Label>{t("phone_number")}</Label>
@@ -167,7 +167,7 @@ export default function PatientLogin({
         <Form {...OTPForm}>
           <form
             onSubmit={OTPForm.handleSubmit(handleVerifySubmit)}
-            className="flex mt-2 flex-col gap-4 shadow-sm border border-gray-200 p-8 rounded-lg"
+            className="flex mt-2 flex-col gap-4 shadow-sm border border-border p-8 rounded-lg"
           >
             <FormField
               control={OTPForm.control}

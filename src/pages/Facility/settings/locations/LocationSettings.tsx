@@ -170,7 +170,7 @@ export default function LocationSettings({
 
         <div className="flex">
           {activeTab !== "map" && (
-            <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block flex-shrink-0">
+            <div className="w-64 shadow-lg bg-card rounded-lg hidden md:block flex-shrink-0">
               <ScrollArea className="h-[calc(100vh-14rem)]">
                 <div className="p-4">
                   {parentLocations?.results?.length ? (
@@ -186,7 +186,7 @@ export default function LocationSettings({
                       />
                     ))
                   ) : (
-                    <div className="p-4 text-sm text-gray-500">
+                    <div className="p-4 text-sm text-muted-foreground">
                       {t("no_locations_available")}
                     </div>
                   )}
@@ -198,7 +198,7 @@ export default function LocationSettings({
           <div
             className={cn(
               "flex-1 space-y-3 sm:space-y-4 rounded-lg  md:shadow-lg overflow-hidden",
-              activeTab !== "map" && "ml-0 md:ml-4 md:bg-white md:p-4 ",
+              activeTab !== "map" && "ml-0 md:ml-4 md:bg-card md:p-4 ",
             )}
           >
             {activeTab === "map" ? (
@@ -265,7 +265,7 @@ export default function LocationSettings({
                           />
                         ) : (
                           <Card>
-                            <CardContent className="p-4 text-center text-gray-500">
+                            <CardContent className="p-4 text-center text-muted-foreground">
                               {t("no_locations_found")}
                             </CardContent>
                           </Card>
@@ -302,7 +302,7 @@ export default function LocationSettings({
                           </div>
                         ) : (
                           <Card>
-                            <CardContent className="p-4 text-center text-gray-500">
+                            <CardContent className="p-4 text-center text-muted-foreground">
                               {t("no_locations_found")}
                             </CardContent>
                           </Card>

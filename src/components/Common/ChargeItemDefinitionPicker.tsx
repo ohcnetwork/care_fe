@@ -227,7 +227,7 @@ export function ChargeItemDefinitionPicker({
               <h3 className="text-lg font-semibold">
                 {t("select_definition_to_copy")}
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-soft-foreground">
                 {t("select_definition_to_copy_description")}
               </p>
             </div>
@@ -235,7 +235,7 @@ export function ChargeItemDefinitionPicker({
             <Command className="border-0">
               <div className="px-3 py-2 border-b">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <CommandInput
                     placeholder={t("search_definitions")}
                     className="pl-9 h-9 border-0 focus:ring-0 text-base sm:text-sm"
@@ -256,7 +256,7 @@ export function ChargeItemDefinitionPicker({
                       </div>
                     </div>
                   ) : (
-                    <div className="p-6 text-center text-gray-500">
+                    <div className="p-6 text-center text-muted-foreground">
                       <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
                       <div className="text-sm">{t("no_definitions_found")}</div>
                     </div>
@@ -269,7 +269,7 @@ export function ChargeItemDefinitionPicker({
                       key={definition.id}
                       value={definition.title}
                       onSelect={() => handleCopyDefinitionSelect(definition)}
-                      className="flex items-center justify-between px-3 py-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 last:border-b-0"
+                      className="flex items-center justify-between px-3 py-3 cursor-pointer hover:bg-soft-background hover:text-foreground transition-colors duration-150 border-b border-border last:border-b-0"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="shrink-0">
@@ -280,7 +280,7 @@ export function ChargeItemDefinitionPicker({
                             {definition.title}
                           </div>
                           {definition.description && (
-                            <div className="text-xs text-gray-500 truncate mt-0.5">
+                            <div className="text-xs text-muted-foreground truncate mt-0.5">
                               {definition.description}
                             </div>
                           )}
@@ -298,7 +298,7 @@ export function ChargeItemDefinitionPicker({
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <Copy className="h-4 w-4 text-gray-500" />
+                        <Copy className="h-4 w-4 text-muted-foreground" />
                       </div>
                     </CommandItem>
                   ))}

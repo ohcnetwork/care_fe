@@ -207,7 +207,7 @@ export function SubstitutionSheet({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-12 border-gray-300">
+                        <SelectTrigger className="h-12 border-strong-border">
                           <SelectValue placeholder={t("select")}>
                             {field.value
                               ? getSubstitutionTypeDisplay(t, field.value)
@@ -250,7 +250,7 @@ export function SubstitutionSheet({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-12 border-gray-300">
+                        <SelectTrigger className="h-12 border-strong-border">
                           <SelectValue placeholder={t("select")}>
                             {field.value
                               ? getSubstitutionReasonDisplay(t, field.value)

@@ -279,7 +279,9 @@ export default function useFileManager(
                   />
                 </div>
                 <div className="text-sm">
-                  <h1 className="text-xl text-black">{t("archive_file")}</h1>
+                  <h1 className="text-xl text-foreground">
+                    {t("archive_file")}
+                  </h1>
                   <span className="text-sm text-secondary-600">
                     {t("this_action_is_irreversible")}
                   </span>
@@ -296,7 +298,7 @@ export default function useFileManager(
             className="mx-2 my-4 flex w-full flex-col"
           >
             <div>
-              <Label className="text-gray-800 mb-2">
+              <Label className="text-foreground mb-2">
                 <Trans
                   i18nKey="state_reason_for_archiving"
                   values={{ name: archiveDialogueOpen?.name }}
@@ -347,7 +349,7 @@ export default function useFileManager(
       >
         <DialogContent className="md:w-[700px]">
           <DialogHeader>
-            <DialogTitle className="text-xl text-black">
+            <DialogTitle className="text-xl text-foreground">
               {archiveDialogueOpen?.name} {t("archived")}
             </DialogTitle>
           </DialogHeader>
@@ -435,7 +437,9 @@ export default function useFileManager(
                   />
                 </div>
                 <div className="m-4">
-                  <h1 className="text-xl text-black">{t("rename_file")}</h1>
+                  <h1 className="text-xl text-foreground">
+                    {t("rename_file")}
+                  </h1>
                 </div>
               </div>
             </DialogTitle>

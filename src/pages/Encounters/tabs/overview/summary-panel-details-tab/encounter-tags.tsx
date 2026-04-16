@@ -16,9 +16,9 @@ export const EncounterTags = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md border border-gray-200 p-1 pt-2 space-y-1">
+    <div className="bg-muted-background rounded-md border border-border p-1 pt-2 space-y-1">
       <div className="flex items-center justify-between w-full pl-2">
-        <span className="font-semibold text-gray-950">
+        <span className="font-semibold text-foreground">
           {t("encounter_tags")}
         </span>
         {canEdit && (
@@ -34,14 +34,14 @@ export const EncounterTags = () => {
             }}
             trigger={
               <Button variant="ghost" size="sm">
-                <SquarePen className=" text-gray-950" strokeWidth={1.5} />
+                <SquarePen className=" text-foreground" strokeWidth={1.5} />
               </Button>
             }
             canWrite={canEdit}
           />
         )}
       </div>
-      <div className="flex flex-wrap bg-white w-full p-2 rounded-md gap-2 shadow">
+      <div className="flex flex-wrap bg-background w-full p-2 rounded-md gap-2 shadow">
         {encounter.tags.length > 0 ? (
           <>
             {encounter.tags.map((tag) => (

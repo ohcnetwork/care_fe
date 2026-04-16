@@ -84,7 +84,7 @@ function StatusSelector({
       <RadioGroup
         value={value}
         onValueChange={onChange}
-        className="flex items-center gap-0 border border-gray-300 divide-x rounded-md bg-white [&>div:has([data-state=checked])]:text-primary-500 [&>div:has([data-state=checked])]:bg-primary-200"
+        className="flex items-center gap-0 border border-strong-border divide-x rounded-md bg-background [&>div:has([data-state=checked])]:text-primary-500 [&>div:has([data-state=checked])]:bg-primary-200"
       >
         {["active", "draft", "retired"].map((status) => (
           <div
@@ -98,7 +98,7 @@ function StatusSelector({
             <RadioGroupItem value={status} id={`status-${status}`} />
             <Label
               htmlFor={`status-${status}`}
-              className="text-sm mx-1 font-normal text-gray-950"
+              className="text-sm mx-1 font-normal text-foreground"
             >
               {t(status)}
             </Label>
@@ -124,7 +124,7 @@ function SubjectTypeSelector({
       <RadioGroup
         value={value}
         onValueChange={onChange}
-        className="flex w-fit items-center gap-0 border border-gray-300 divide-x rounded-md bg-white [&>div:has([data-state=checked])]:bg-primary-200"
+        className="flex w-fit items-center gap-0 border border-strong-border divide-x rounded-md bg-background [&>div:has([data-state=checked])]:bg-primary-200"
       >
         {[
           { value: "patient", label: "patient" },
@@ -144,7 +144,7 @@ function SubjectTypeSelector({
             />
             <Label
               htmlFor={`subject-type-${type.value}`}
-              className="text-sm mx-1 font-normal text-gray-950"
+              className="text-sm mx-1 font-normal text-foreground"
             >
               {t(type.label)}
             </Label>
@@ -219,7 +219,7 @@ function OrganizationSelector({
             </Badge>
           ))
         ) : (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {t("no_organizations_selected")}
           </p>
         )}
@@ -270,7 +270,9 @@ function TagSelector({
             </Badge>
           ))}
           {tags?.length === 0 && (
-            <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("no_tags_selected")}
+            </p>
           )}
         </div>
         <ManageQuestionnaireTagsSheet
@@ -308,7 +310,9 @@ function TagSelector({
             </Badge>
           ))
         ) : (
-          <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("no_tags_selected")}
+          </p>
         )}
       </div>
 

@@ -55,7 +55,7 @@ export default function EncounterQuestionnaire({
             <PatientHeader
               patient={encounter.patient}
               facilityId={facilityId}
-              className="bg-white shadow-sm rounded-sm"
+              className="bg-card shadow-sm rounded-sm"
             />
             <PatientDeceasedInfo patient={encounter.patient} />
           </div>

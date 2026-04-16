@@ -83,15 +83,15 @@ function LocationCard({
           </div>
           <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-2">
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold truncate text-gray-900 text-base">
+              <h3 className="font-semibold truncate text-foreground text-base">
                 {location.name}
               </h3>
-              <p className="mt-0.5 text-xs text-gray-500 line-clamp-1">
+              <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
                 {location.description}
               </p>
             </div>
 
-            <div className="shrink-0 w-full sm:w-auto px-3 text-xs border rounded-md bg-white py-2 flex items-center justify-center gap-1 text-gray-700">
+            <div className="shrink-0 w-full sm:w-auto px-3 text-xs border rounded-md bg-background py-2 flex items-center justify-center gap-1 text-muted-foreground">
               {text}
               <CareIcon icon="l-arrow-right" className="size-3 ml-1" />
             </div>
@@ -164,7 +164,7 @@ export default function HealthcareServiceShow({
                     <CardTitle className="text-base">
                       {shortcut.title}
                     </CardTitle>
-                    <CardDescription className="text-gray-500 text-xs">
+                    <CardDescription className="text-muted-foreground text-xs">
                       {shortcut.description}
                     </CardDescription>
                   </div>
@@ -176,18 +176,18 @@ export default function HealthcareServiceShow({
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           {isLoading
             ? t("service_details")
             : service?.name || t("service_details")}
         </h1>
-        <p className="mt-1 text-sm text-gray-600">
+        <p className="mt-1 text-sm text-soft-foreground">
           {t("accurate_diagnostic_tests")}
         </p>
       </div>
 
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-semibold text-foreground">
           {t("available_locations")}
         </h2>
 
@@ -233,7 +233,7 @@ export default function HealthcareServiceShow({
       {/* Managing Organization Section */}
       {!isLoading && service?.managing_organization && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-foreground">
             {t("managing_organization")}
           </h2>
           <Card className="transition-all duration-200 rounded-md">
@@ -246,15 +246,15 @@ export default function HealthcareServiceShow({
                 <CareIcon icon="l-building" className="size-6 relative z-10" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold truncate text-gray-900 text-base">
+                <h3 className="font-semibold truncate text-foreground text-base">
                   {service.managing_organization.name}
                 </h3>
                 {service.managing_organization.description && (
-                  <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">
+                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
                     {service.managing_organization.description}
                   </p>
                 )}
-                <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+                <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                   <CareIcon icon="l-tag" className="size-3" />
                   <span>{t("organization")}</span>
                 </div>

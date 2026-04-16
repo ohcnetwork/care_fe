@@ -65,7 +65,7 @@ function EmptyState() {
       <h3 className="text-lg font-semibold mb-1">
         {t("no_service_requests_found")}
       </h3>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         {t("adjust_service_request_filters")}
       </p>
     </Card>
@@ -90,10 +90,10 @@ function ServiceRequestCard({
         <div className="mb-2 flex flex-col sm:flex-row sm:items-start gap-4">
           <div className="flex-1 min-w-0">
             <div className="mb-2">
-              <div className="font-semibold text-gray-900">
+              <div className="font-semibold text-foreground">
                 {request.encounter.patient.name}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-muted-foreground">
                 {request.encounter.patient.id}
               </div>
             </div>
@@ -110,7 +110,7 @@ function ServiceRequestCard({
             <div>
               <div className="text-lg">{request.title || "-"}</div>
               {request.code?.display && (
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-muted-foreground">
                   {request.code.display}
                 </div>
               )}
@@ -340,9 +340,9 @@ export default function ServiceRequestList({
       <div className="container mx-auto pb-8">
         <div className="mb-4">
           <div className="mb-4">
-            <p className="text-sm text-gray-600">{location?.name}</p>
+            <p className="text-sm text-soft-foreground">{location?.name}</p>
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
-              <h1 className="text-2xl font-semibold text-gray-900">
+              <h1 className="text-2xl font-semibold text-foreground">
                 {t("service_requests")}
               </h1>
               <Button
@@ -382,7 +382,7 @@ export default function ServiceRequestList({
                   updateQuery({ patient: patientId, patient_name: patientName })
                 }
                 placeholder={t("filter_by_identifier")}
-                className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+                className="w-full sm:w-auto rounded-md h-9 text-muted-foreground shadow-sm"
                 patientId={qParams.patient}
                 patientName={qParams.patient_name}
               />

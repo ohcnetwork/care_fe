@@ -46,7 +46,7 @@ function AutoExpandingTextarea({
       rows={1}
       style={{ overflow: "hidden", resize: "none" }}
       className={cn(
-        "flex-1 p-2 rounded-md border border-green-700 focus:outline-hidden focus:ring-1 focus:ring-green-700 placeholder:text-gray-500",
+        "flex-1 p-2 rounded-md border border-green-700 focus:outline-hidden focus:ring-1 focus:ring-green-700 placeholder:text-placeholder-foreground",
         className,
       )}
       {...props}

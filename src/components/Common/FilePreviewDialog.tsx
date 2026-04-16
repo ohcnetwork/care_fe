@@ -217,7 +217,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
     <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="h-full w-full max-w-[100vw] md:max-w-[80vw] flex-col gap-4 rounded-lg p-4 shadow-xl md:p-6 overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-sm text-gray-600">
+          <DialogTitle className="text-sm text-soft-foreground">
             {t("file_preview")}
           </DialogTitle>
         </DialogHeader>
@@ -226,14 +226,14 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
             <div className="mb-2 flex flex-col items-start md:justify-between md:flex-row gap-4">
               <div>
                 <TooltipComponent content={fileName}>
-                  <p className="text-xl font-bold text-gray-800 truncate">
+                  <p className="text-xl font-bold text-foreground truncate">
                     {fileNameTooltip}
                   </p>
                 </TooltipComponent>
                 {uploadedFiles &&
                   uploadedFiles[index] &&
                   uploadedFiles[index].created_date && (
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="mt-1 text-sm text-soft-foreground">
                       {t("created_on")}{" "}
                       {new Date(
                         uploadedFiles[index].created_date!,
@@ -333,10 +333,10 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                         icon="l-video"
                         className="mb-4 text-5xl text-secondary-600"
                       />
-                      <p className="text-lg font-semibold text-gray-800 mb-2">
+                      <p className="text-lg font-semibold text-foreground mb-2">
                         {t("mov_file_not_supported")}
                       </p>
-                      <p className="text-sm text-gray-600 text-center max-w-md mb-4">
+                      <p className="text-sm text-soft-foreground text-center max-w-md mb-4">
                         {t("mov_file_safari_only")}
                       </p>
                       {downloadURL && (
@@ -432,7 +432,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                       key={index}
                       onClick={button.action}
                       className={cn(
-                        "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
+                        "z-50 rounded bg-background/60 px-4 py-2 text-foreground backdrop-blur-sm transition hover:bg-background/70",
                         index === 3 && "col-start-1 md:col-auto",
                         index === 4 && "col-start-3 md:col-auto",
                       )}
@@ -475,7 +475,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                       variant="ghost"
                       key={index}
                       onClick={button.action}
-                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70"
+                      className="z-50 rounded bg-background/60 px-4 py-2 text-foreground backdrop-blur-sm transition hover:bg-background/70"
                       disabled={button.disabled}
                     >
                       {button.icon && (

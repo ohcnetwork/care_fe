@@ -24,19 +24,19 @@ export const SummaryPanel = () => {
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
-        className="@xs:bg-gray-100 @xs:border border-gray-200 p-1 xl:p-0 @xs:rounded-lg"
+        className="@xs:bg-muted-background @xs:border border-border p-1 xl:p-0 @xs:rounded-lg"
       >
-        <TabsList className="w-full sm:w-72 bg-gray-100 @xs:bg-gray-200 justify-between inset-shadow-sm pt-px pb-0.5 px-0.5">
+        <TabsList className="w-full sm:w-72 bg-muted-background @xs:bg-strong-background justify-between inset-shadow-sm pt-px pb-0.5 px-0.5">
           <TabsTrigger value="details" className="w-full">
-            <span className="text-black">{t("details")}</span>
+            <span className="text-foreground">{t("details")}</span>
           </TabsTrigger>
           {canWriteSelectedEncounter && (
             <TabsTrigger value="actions" className="w-full">
-              <span className="text-black">{t("actions")}</span>
+              <span className="text-foreground">{t("actions")}</span>
             </TabsTrigger>
           )}
           <TabsTrigger value="reports" className="w-full">
-            <span className="text-black">{t("reports")}</span>
+            <span className="text-foreground">{t("reports")}</span>
           </TabsTrigger>
         </TabsList>
 

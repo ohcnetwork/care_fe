@@ -104,7 +104,9 @@ export const EncounterObservationsTab = () => {
   if (isLoading) {
     return (
       <Card className="p-6">
-        <div className="text-lg font-medium text-gray-500">{t("loading")}</div>
+        <div className="text-lg font-medium text-muted-foreground">
+          {t("loading")}
+        </div>
       </Card>
     );
   }
@@ -114,7 +116,7 @@ export const EncounterObservationsTab = () => {
   if (observations.length === 0) {
     return (
       <Card className="p-6">
-        <div className="text-lg font-medium text-gray-500">
+        <div className="text-lg font-medium text-muted-foreground">
           {t("no_observations")}
         </div>
       </Card>
@@ -128,7 +130,7 @@ export const EncounterObservationsTab = () => {
     <div className="flex flex-col mt-4 w-full max-h-[85vh] gap-4 px-3">
       {dates.map((date, index) => (
         <div key={date}>
-          <div className="mb-3 text-base font-semibold text-gray-700">
+          <div className="mb-3 text-base font-semibold text-muted-foreground">
             {formatDisplayDate(date)}
           </div>
           <div className="flex flex-col gap-3">
@@ -140,32 +142,32 @@ export const EncounterObservationsTab = () => {
               )
               .map((item: ObservationListRead) => (
                 <div key={item.id} className="flex gap-4">
-                  <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium">
+                  <div className="p-1 h-fit text-sm text-muted-foreground bg-muted-background rounded-md font-medium">
                     {formatDisplayTime(item.effective_datetime)}:
                   </div>
-                  <Card className="flex-1 p-3 border-gray-100 shadow-none bg-gray-50">
+                  <Card className="flex-1 p-3 border-soft-border shadow-none bg-soft-background">
                     <div>
                       <div className="flex items-center gap-2">
                         {item.value.value && (
-                          <div className="mt-1 font-semibold whitespace-pre-wrap text-lg text-gray-950">
+                          <div className="mt-1 font-semibold whitespace-pre-wrap text-lg text-foreground">
                             {formatValue(item.value.value, item.value_type)}
                           </div>
                         )}
                       </div>
                       {item.note && (
-                        <div className="mt-1 text-sm text-gray-500">
+                        <div className="mt-1 text-sm text-muted-foreground">
                           {item.note}
                         </div>
                       )}
-                      <div className="font-medium text-sm text-gray-600">
+                      <div className="font-medium text-sm text-soft-foreground">
                         {item.main_code?.display ||
                           item.main_code?.code ||
                           t("unknown")}
                       </div>
                       {item.data_entered_by && (
-                        <div className="text-gray-600 text-sm">
+                        <div className="text-soft-foreground text-sm">
                           {t("filed_by")}{" "}
-                          <span className="font-medium text-gray-800">
+                          <span className="font-medium text-foreground">
                             {formatName(item.data_entered_by)}
                           </span>
                         </div>
@@ -176,13 +178,13 @@ export const EncounterObservationsTab = () => {
               ))}
           </div>
           {index < dates.length - 1 && (
-            <div className="my-4 border-b border-dashed border-gray-200" />
+            <div className="my-4 border-b border-dashed border-border" />
           )}
         </div>
       ))}
       {hasNextPage && (
         <div ref={ref} className="flex justify-center p-4">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-muted-foreground">
             {isFetchingNextPage ? t("loading") : t("load_more")}
           </div>
         </div>

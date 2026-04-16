@@ -49,9 +49,9 @@ export const SummaryPanelReportsTab = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 bg-gray-100 @sm:bg-white p-2 @sm:p-3 rounded-lg border border-gray-200 @sm:shadow @sm:overflow-x-auto">
+    <div className="flex flex-col gap-2 bg-muted-background @sm:bg-background p-2 @sm:p-3 rounded-lg border border-border @sm:shadow @sm:overflow-x-auto">
       <div className="flex pl-1 @xs:hidden">
-        <h6 className="text-gray-950 font-semibold">{t("reports")}</h6>
+        <h6 className="text-foreground font-semibold">{t("reports")}</h6>
       </div>
       <div className="flex flex-col @md:grid @md:grid-cols-2 gap-3">
         <Button variant="outline" className="justify-start w-full" asChild>

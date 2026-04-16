@@ -19,44 +19,44 @@ export default function NavigationHelper({
         <></>
       ) : (
         <>
-          <Separator orientation="horizontal" className="bg-gray-200 h-px" />
+          <Separator orientation="horizontal" className="bg-border h-px" />
           <div className="flex justify-between">
             <div className="flex gap-1 my-2 mx-2">
               {isActiveFilter && (
-                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+                <div className="bg-muted-background shadow-full rounded-md px-1 border border-strong-border">
                   <CareIcon icon="l-arrow-left" className="h-4 w-4" />
                 </div>
               )}
-              <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+              <div className="bg-muted-background shadow-full rounded-md px-1 border border-strong-border">
                 <CareIcon icon="l-arrow-down" className="h-4 w-4" />
               </div>
-              <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+              <div className="bg-muted-background shadow-full rounded-md px-1 border border-strong-border">
                 <CareIcon icon="l-arrow-up" className="h-4 w-4" />
               </div>
               {!isActiveFilter && (
-                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+                <div className="bg-muted-background shadow-full rounded-md px-1 border border-strong-border">
                   <CareIcon icon="l-arrow-right" className="h-4 w-4" />
                 </div>
               )}
-              <span className="text-xs text-gray-500 self-center">
+              <span className="text-xs text-muted-foreground self-center">
                 {t("navigate")}
               </span>
             </div>
             {isActiveFilter ? (
               <div className="flex gap-1 my-2 mx-2">
-                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+                <div className="bg-muted-background shadow-full rounded-md px-1 border border-strong-border">
                   <CareIcon icon="l-space-key" className="h-4 w-4" />
                 </div>
-                <span className="text-xs text-gray-500 self-center">
+                <span className="text-xs text-muted-foreground self-center">
                   {t("select")}
                 </span>
               </div>
             ) : (
               <div className="flex gap-1 my-2 mx-2">
-                <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
+                <div className="bg-muted-background shadow-full rounded-md px-1 border border-strong-border">
                   <CareIcon icon="l-enter" className="h-4 w-4" />
                 </div>
-                <span className="text-xs text-gray-500 self-center">
+                <span className="text-xs text-muted-foreground self-center">
                   {t("open")}
                 </span>
               </div>

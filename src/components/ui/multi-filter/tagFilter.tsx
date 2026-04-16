@@ -101,7 +101,10 @@ function TreeViewItem({
       >
         <div className="flex items-center gap-2 flex-1">
           {isRootLevel ? (
-            <Component className="h-4 w-4 text-black/80" strokeWidth={1.25} />
+            <Component
+              className="h-4 w-4 text-foreground/80"
+              strokeWidth={1.25}
+            />
           ) : (
             <Checkbox checked={isSelected} className="h-4 w-4" />
           )}
@@ -250,7 +253,7 @@ function TagFilterDropdown({
           return (
             filteredSelectedTags.length > 0 && (
               <>
-                <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   {t("selected_tags")}
                 </div>
                 {filteredSelectedTags.map((tag, index) => (
@@ -269,14 +272,14 @@ function TagFilterDropdown({
                     <div className="flex items-center gap-2 max-w-xs truncate">
                       {tag.parent && (
                         <Component
-                          className="h-3 w-3 text-black/80"
+                          className="h-3 w-3 text-foreground/80"
                           strokeWidth={1.25}
                         />
                       )}
                       <span className="text-sm flex flex-row items-center gap-1 min-w-0">
                         {tag.parent && (
                           <span className="flex gap-1 items-center shrink-0">
-                            <span className="text-gray-700 truncate">
+                            <span className="text-muted-foreground truncate">
                               {tag.parent.display}
                             </span>
                             <ChevronRight className="h-3 w-3 shrink-0" />
@@ -302,7 +305,7 @@ function TagFilterDropdown({
         {/* Groups */}
         {rootLevelGroupTags.length > 0 && !isSearching && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {t("tag_groups")}
             </div>
             {isMobile
@@ -340,7 +343,7 @@ function TagFilterDropdown({
         {/* Other Tags */}
         {nonSelectedRootLevelTags.length > 0 && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {t("other_tags")}
             </div>
             {nonSelectedRootLevelTags.map((tag, index) => (
@@ -363,7 +366,7 @@ function TagFilterDropdown({
                   <span className="text-sm flex flex-row items-center gap-1 min-w-0 truncate">
                     {tag.parent && (
                       <>
-                        <span className="text-gray-400 shrink-0">
+                        <span className="text-placeholder-foreground shrink-0">
                           {tag.parent.display}
                         </span>
                         <ChevronRight className="size-4 shrink-0" />
@@ -378,13 +381,13 @@ function TagFilterDropdown({
         )}
 
         {isLoading && (
-          <div className="px-2 py-4 text-sm text-gray-500 text-center">
+          <div className="px-2 py-4 text-sm text-muted-foreground text-center">
             {t("loading")}
           </div>
         )}
 
         {!isLoading && filteredTags.length === 0 && (
-          <div className="px-2 py-4 text-sm text-gray-500 text-center">
+          <div className="px-2 py-4 text-sm text-muted-foreground text-center">
             {t("no_tags_group")}
           </div>
         )}
@@ -461,7 +464,10 @@ function GroupSubmenu({
       >
         <div className="flex items-center gap-2 flex-1 justify-between">
           <div className="flex items-center gap-1">
-            <Component className="h-4 w-4 text-black/80" strokeWidth={1.25} />
+            <Component
+              className="h-4 w-4 text-foreground/80"
+              strokeWidth={1.25}
+            />
             <span className="text-sm">{group.display}</span>
           </div>
           <Badge variant="secondary" className="text-xs p-0.5">
@@ -470,13 +476,15 @@ function GroupSubmenu({
         </div>
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
-        <div className="p-2 border-b border-gray-200">
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+        <div className="p-2 border-b border-border">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             {group.display}
           </div>
         </div>
         {loadingChildren ? (
-          <div className="p-2 text-sm text-gray-500">{t("loading")}</div>
+          <div className="p-2 text-sm text-muted-foreground">
+            {t("loading")}
+          </div>
         ) : children?.results?.length ? (
           children.results.map((childTag: TagConfig, index: number) => {
             const isSelected = selectedTags.some((t) => t.id === childTag.id);
@@ -503,7 +511,9 @@ function GroupSubmenu({
             );
           })
         ) : (
-          <div className="p-2 text-sm text-gray-500">{t("no_tags")}</div>
+          <div className="p-2 text-sm text-muted-foreground">
+            {t("no_tags")}
+          </div>
         )}
       </DropdownMenuSubContent>
     </DropdownMenuSub>

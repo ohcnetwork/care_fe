@@ -55,7 +55,7 @@ function EmptyState() {
         <CareIcon icon="l-folder-open" className="size-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_valuesets_found")}</h3>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         {t("adjust_valueset_filters")}
       </p>
     </Card>
@@ -83,7 +83,7 @@ const RenderCard = ({
           {valuesets.map((valueset) => (
             <Card
               key={valueset.id}
-              className="overflow-hidden bg-white rounded-lg transition-shadow hover:shadow-lg"
+              className="overflow-hidden bg-background rounded-lg transition-shadow hover:shadow-lg"
             >
               <CardContent className="p-6 relative">
                 <div className="absolute top-4 right-4">
@@ -95,15 +95,15 @@ const RenderCard = ({
                   </Badge>
                 </div>
 
-                <div className="mb-4 border-b pb-2 border-gray-200">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <div className="mb-4 border-b pb-2 border-border">
+                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {t("name")}
                   </h3>
                   {valueset.name && valueset.name.length > 20 ? (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger className="w-full flex">
-                          <p className="mt-2 text-xl font-bold text-gray-900 truncate">
+                          <p className="mt-2 text-xl font-bold text-foreground truncate">
                             {valueset.name}
                           </p>
                         </TooltipTrigger>
@@ -113,7 +113,7 @@ const RenderCard = ({
                       </Tooltip>
                     </TooltipProvider>
                   ) : (
-                    <p className="mt-2 text-xl font-bold text-gray-900 truncate">
+                    <p className="mt-2 text-xl font-bold text-foreground truncate">
                       {valueset.name}
                     </p>
                   )}
@@ -121,28 +121,28 @@ const RenderCard = ({
 
                 <div className="mb-4 flex flex-wrap gap-4">
                   <div className="flex-1 min-w-[120px]">
-                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       {t("slug")}
                     </h3>
-                    <p className="text-sm text-gray-900 break-words">
+                    <p className="text-sm text-foreground break-words">
                       {valueset.slug}
                     </p>
                   </div>
                   <div className="flex-1 min-w-[120px]">
-                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       {t("system")}
                     </h3>
-                    <p className="text-sm text-gray-900">
+                    <p className="text-sm text-foreground">
                       {valueset.is_system_defined ? t("yes") : t("no")}
                     </p>
                   </div>
                 </div>
 
                 <div className="mb-4">
-                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <h3 className="text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {t("description")}
                   </h3>
-                  <div className="max-w-md text-sm text-gray-900 break-words whitespace-normal">
+                  <div className="max-w-md text-sm text-foreground break-words whitespace-normal">
                     <ExpandableText>
                       <ExpandableTextContent>
                         {valueset.description}
@@ -195,41 +195,41 @@ const RenderTable = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="hidden md:block overflow-hidden rounded-lg bg-white shadow-sm">
+    <div className="hidden md:block overflow-hidden rounded-lg bg-background shadow-sm">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : valuesets.length === 0 ? (
         <EmptyState />
       ) : (
-        <Table className="min-w-full divide-y divide-gray-200">
-          <TableHeader className="bg-gray-50">
+        <Table className="min-w-full divide-y divide-border">
+          <TableHeader className="bg-soft-background">
             <TableRow>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {t("name")}
               </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {t("slug")}
               </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {t("status")}
               </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {t("description")}
               </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {t("actions")}
               </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="divide-y divide-gray-200 bg-white">
+          <TableBody className="divide-y divide-border bg-background">
             {valuesets.map((valueset) => (
-              <TableRow key={valueset.id} className="hover:bg-gray-50">
+              <TableRow key={valueset.id} className="hover:bg-soft-background">
                 <TableCell className="whitespace-nowrap px-6 py-4">
                   {valueset.name && valueset.name.length > 20 ? (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger className="flex w-full">
-                          <div className="text-sm font-medium text-gray-900 truncate">
+                          <div className="text-sm font-medium text-foreground truncate">
                             {valueset.name}
                           </div>
                         </TooltipTrigger>
@@ -239,12 +239,12 @@ const RenderTable = ({
                       </Tooltip>
                     </TooltipProvider>
                   ) : (
-                    <div className="text-sm font-medium text-gray-900 truncate">
+                    <div className="text-sm font-medium text-foreground truncate">
                       {valueset.name}
                     </div>
                   )}
                 </TableCell>
-                <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                <TableCell className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
                   {valueset.slug}
                 </TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4">
@@ -255,7 +255,7 @@ const RenderTable = ({
                     {t(valueset.status)}
                   </Badge>
                 </TableCell>
-                <TableCell className="max-w-md text-sm text-gray-900 break-words whitespace-normal">
+                <TableCell className="max-w-md text-sm text-foreground break-words whitespace-normal">
                   <ExpandableText>
                     <ExpandableTextContent>
                       {valueset.description}
@@ -320,7 +320,9 @@ export function ValueSetList() {
       <div className="mb-4 px-4 md:px-0">
         <div className="mb-2">
           <h1 className="text-2xl font-bold">{t("valuesets")}</h1>
-          <p className="text-gray-600">{t("manage_and_view_valuesets")}</p>
+          <p className="text-soft-foreground">
+            {t("manage_and_view_valuesets")}
+          </p>
         </div>
 
         <div className="mt-8 mb-4">
@@ -353,7 +355,7 @@ export function ValueSetList() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:max-w-md">
-            <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
+            <Search className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
             <Input
               placeholder={t("search_valuesets")}
               className="pl-10 w-full"

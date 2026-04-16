@@ -182,7 +182,7 @@ export default function TreatmentSummary({
 
   if (!encounter) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-gray-200 border-dashed p-4 text-gray-500">
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-border border-dashed p-4 text-muted-foreground">
         {t("no_patient_record_found")}
       </div>
     );
@@ -207,8 +207,8 @@ export default function TreatmentSummary({
       >
         <div className="py-2 max-w-4xl mx-auto">
           <div className="space-y-6">
-            <div className="flex justify-between items-start pb-2 border-b border-gray-200">
-              <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold">
+            <div className="flex justify-between items-start pb-2 border-b border-border">
+              <h2 className="text-muted-foreground uppercase text-sm tracking-wide font-semibold">
                 {t("treatment_summary")}
               </h2>
             </div>
@@ -217,29 +217,31 @@ export default function TreatmentSummary({
             <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-6">
               <div className="space-y-3">
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                  <span className="text-gray-600">{t("patient")}</span>
-                  <span className="text-gray-600">:</span>
+                  <span className="text-soft-foreground">{t("patient")}</span>
+                  <span className="text-soft-foreground">:</span>
                   <span className="font-semibold break-words">
                     {encounter.patient.name}
                   </span>
                 </div>
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                  <span className="text-gray-600">{`${t("age")} / ${t("sex")}`}</span>
-                  <span className="text-gray-600">:</span>
+                  <span className="text-soft-foreground">{`${t("age")} / ${t("sex")}`}</span>
+                  <span className="text-soft-foreground">:</span>
                   <span className="font-semibold break-words">
                     {`${formatPatientAge(encounter.patient, true)}, ${t(`GENDER__${encounter.patient.gender}`)}`}
                   </span>
                 </div>
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                  <span className="text-gray-600">{t("encounter_class")}</span>
-                  <span className="text-gray-600">:</span>
+                  <span className="text-soft-foreground">
+                    {t("encounter_class")}
+                  </span>
+                  <span className="text-soft-foreground">:</span>
                   <span className="font-semibold">
                     {t(`encounter_class__${encounter.encounter_class}`)}
                   </span>
                 </div>
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                  <span className="text-gray-600">{t("priority")}</span>
-                  <span className="text-gray-600">:</span>
+                  <span className="text-soft-foreground">{t("priority")}</span>
+                  <span className="text-soft-foreground">:</span>
                   <span className="font-semibold">
                     {t(`encounter_priority__${encounter.priority}`)}
                   </span>
@@ -247,10 +249,10 @@ export default function TreatmentSummary({
 
                 {encounter.hospitalization?.admit_source && (
                   <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                    <span className="text-gray-600">
+                    <span className="text-soft-foreground">
                       {t("admission_source")}
                     </span>
-                    <span className="text-gray-600">:</span>
+                    <span className="text-soft-foreground">:</span>
                     <span className="font-semibold">
                       {t(
                         `encounter_admit_sources__${encounter.hospitalization.admit_source}`,
@@ -260,17 +262,19 @@ export default function TreatmentSummary({
                 )}
                 {encounter.hospitalization?.re_admission && (
                   <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                    <span className="text-gray-600">{t("readmission")}</span>
-                    <span className="text-gray-600">:</span>
+                    <span className="text-soft-foreground">
+                      {t("readmission")}
+                    </span>
+                    <span className="text-soft-foreground">:</span>
                     <span className="font-semibold">{t("yes")}</span>
                   </div>
                 )}
                 {encounter.hospitalization?.diet_preference && (
                   <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                    <span className="text-gray-600">
+                    <span className="text-soft-foreground">
                       {t("diet_preference")}
                     </span>
-                    <span className="text-gray-600">:</span>
+                    <span className="text-soft-foreground">:</span>
                     <span className="font-semibold">
                       {t(
                         `encounter_diet_preference__${encounter.hospitalization.diet_preference}`,
@@ -292,17 +296,19 @@ export default function TreatmentSummary({
                       key={identifier.config.id}
                       className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center"
                     >
-                      <span className="text-gray-600">
+                      <span className="text-soft-foreground">
                         {identifier.config.config.display}
                       </span>
-                      <span className="text-gray-600">:</span>
+                      <span className="text-soft-foreground">:</span>
                       <span className="font-semibold">{identifier.value}</span>
                     </div>
                   ))}
 
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                  <span className="text-gray-600">{t("mobile_number")}</span>
-                  <span className="text-gray-600">:</span>
+                  <span className="text-soft-foreground">
+                    {t("mobile_number")}
+                  </span>
+                  <span className="text-soft-foreground">:</span>
                   <span className="font-semibold break-words">
                     {encounter.patient.phone_number &&
                       formatPhoneNumberIntl(encounter.patient.phone_number)}
@@ -311,8 +317,10 @@ export default function TreatmentSummary({
 
                 {encounter.period?.start && (
                   <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                    <span className="text-gray-600">{t("encounter_date")}</span>
-                    <span className="text-gray-600">:</span>
+                    <span className="text-soft-foreground">
+                      {t("encounter_date")}
+                    </span>
+                    <span className="text-soft-foreground">:</span>
                     <span className="font-semibold">
                       {format(
                         new Date(encounter.period.start),
@@ -323,8 +331,8 @@ export default function TreatmentSummary({
                 )}
 
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                  <span className="text-gray-600">{t("status")}</span>
-                  <span className="text-gray-600">:</span>
+                  <span className="text-soft-foreground">{t("status")}</span>
+                  <span className="text-soft-foreground">:</span>
                   <span className="font-semibold">
                     {t(`encounter_status__${encounter.status}`)}
                   </span>
@@ -332,10 +340,10 @@ export default function TreatmentSummary({
 
                 {encounter.care_team[0] && (
                   <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                    <span className="text-gray-600">
+                    <span className="text-soft-foreground">
                       {encounter.care_team[0].role?.display}
                     </span>
-                    <span className="text-gray-600">:</span>
+                    <span className="text-soft-foreground">:</span>
                     <span className="flex flex-row">
                       <div className="flex flex-col">
                         <div className="font-semibold">
@@ -348,8 +356,10 @@ export default function TreatmentSummary({
 
                 {encounter.external_identifier && (
                   <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                    <span className="text-gray-600">{t("external_id")}</span>
-                    <span className="text-gray-600">:</span>
+                    <span className="text-soft-foreground">
+                      {t("external_id")}
+                    </span>
+                    <span className="text-soft-foreground">:</span>
                     <span className="font-semibold">
                       {encounter.external_identifier}
                     </span>
@@ -358,10 +368,10 @@ export default function TreatmentSummary({
 
                 {encounter.hospitalization?.discharge_disposition && (
                   <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
-                    <span className="text-gray-600">
+                    <span className="text-soft-foreground">
                       {t("discharge_disposition")}
                     </span>
-                    <span className="text-gray-600">:</span>
+                    <span className="text-soft-foreground">:</span>
                     <span className="font-semibold">
                       {t(
                         `encounter_discharge_disposition__${encounter.hospitalization.discharge_disposition}`,
@@ -374,10 +384,10 @@ export default function TreatmentSummary({
 
             {encounter.discharge_summary_advice && (
               <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr]">
-                <span className="text-gray-600">
+                <span className="text-soft-foreground">
                   {t("discharge_summary_advice")}
                 </span>
-                <span className="text-gray-600">:</span>
+                <span className="text-soft-foreground">:</span>
                 <span className="font-semibold">
                   {encounter.discharge_summary_advice
                     .split("\n")
@@ -396,8 +406,8 @@ export default function TreatmentSummary({
                 <div className="space-y-4">
                   {/* Other Consultants */}
                   {encounter.care_team.length > 1 && (
-                    <div className="border border-gray-100 p-3 rounded-sm">
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    <div className="border border-soft-border p-3 rounded-sm">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-2">
                         {t("care_team")}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -408,7 +418,7 @@ export default function TreatmentSummary({
                                 {formatName(member.member)}
                               </div>
                               {member.role?.display && (
-                                <div className="text-sm text-gray-500 truncate">
+                                <div className="text-sm text-muted-foreground truncate">
                                   {member.role.display}
                                 </div>
                               )}

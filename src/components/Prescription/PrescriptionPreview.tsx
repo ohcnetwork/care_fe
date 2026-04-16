@@ -45,7 +45,7 @@ const PrescriptionContent = ({
       {/* Prescription Symbol */}
       <div className="text-xl font-semibold mb-3 flex items-end gap-4">
         <p>{t("℞")}</p>
-        <p className="text-sm text-gray-600 font-semibold ">
+        <p className="text-sm text-soft-foreground font-semibold ">
           {formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")}
         </p>
       </div>
@@ -77,7 +77,7 @@ const PrescriptionContent = ({
                   .join("\n"),
               }));
             })}
-            className="text-sm break-words font-semibold whitespace-break-spaces text-gray-950"
+            className="text-sm break-words font-semibold whitespace-break-spaces text-foreground"
             cellConfig={{
               medicine: { className: "text-left" },
               frequency: { className: "text-left" },
@@ -87,7 +87,7 @@ const PrescriptionContent = ({
         </div>
       )}
       {prescription?.note && (
-        <div className="mt-6 mb-6 text-sm text-gray-600">
+        <div className="mt-6 mb-6 text-sm text-soft-foreground">
           <p className="font-semibold mb-1">{t("note")}</p>
           <Markdown
             content={prescription.note}
@@ -99,8 +99,10 @@ const PrescriptionContent = ({
       {/* Doctor's Signature */}
       <div className="w-full items-end mt-6 flex flex-row justify-end gap-1">
         <div className="text-right">
-          <p className="text-sm text-gray-400">{t("prescribed_by")}</p>
-          <p className="text-base text-gray-600 font-semibold">
+          <p className="text-sm text-placeholder-foreground">
+            {t("prescribed_by")}
+          </p>
+          <p className="text-base text-soft-foreground font-semibold">
             {formatName(prescription.prescribed_by)}
           </p>
         </div>
@@ -112,8 +114,8 @@ const PrescriptionContent = ({
 const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
   return (
     <div className="flex">
-      <span className="text-gray-600 w-32">{label}</span>
-      <span className="text-gray-600">: </span>
+      <span className="text-soft-foreground w-32">{label}</span>
+      <span className="text-soft-foreground">: </span>
       <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
         {value || "-"}
       </span>
@@ -173,7 +175,7 @@ export const PrescriptionPreview = ({
 
   if (!prescriptions.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-muted-foreground border-border">
         {t("no_prescriptions_found")}
       </div>
     );
@@ -181,7 +183,7 @@ export const PrescriptionPreview = ({
 
   if (!hasMedications) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-muted-foreground border-border">
         {t("no_medications_found_for_this_encounter")}
       </div>
     );
@@ -248,7 +250,7 @@ export const PrescriptionPreview = ({
           </div>
 
           {prescriptions.length > 1 && (
-            <div className="mb-4 text-sm text-gray-500 border-b pb-2">
+            <div className="mb-4 text-sm text-muted-foreground border-b pb-2">
               {t("prescriptions_count", { count: prescriptions.length })}
             </div>
           )}
@@ -256,7 +258,7 @@ export const PrescriptionPreview = ({
           {prescriptions.map((prescription, index) => (
             <div key={prescription.id}>
               {index > 0 && (
-                <div className="border-t border-dashed border-gray-300 my-6" />
+                <div className="border-t border-dashed border-strong-border my-6" />
               )}
               <PrescriptionContent prescription={prescription} />
             </div>

@@ -67,12 +67,12 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
     <Page title={t("tag_config")} hideTitleOnPage>
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">
+          <h1 className="text-2xl font-bold text-muted-foreground">
             {t("tag_config")}
           </h1>
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-gray-600 text-sm">
+              <p className="text-soft-foreground text-sm">
                 {t("manage_tag_config_description")}
               </p>
             </div>
@@ -91,7 +91,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
             <div className="w-full md:w-auto">
               <div className="relative w-full md:w-auto">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-placeholder-foreground">
                   <CareIcon icon="l-search" className="size-5" />
                 </span>
                 <Input

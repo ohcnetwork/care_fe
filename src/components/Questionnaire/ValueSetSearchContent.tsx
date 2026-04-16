@@ -195,7 +195,7 @@ export default function ValueSetSearchContent({
 
   return (
     <Command filter={() => 1}>
-      <div className="p-3 border-b border-gray-200 flex justify-between items-center md:hidden">
+      <div className="p-3 border-b border-border flex justify-between items-center md:hidden">
         {title && <h3 className="text-base font-semibold">{title}</h3>}
         <Tabs
           value={activeTab.toString()}
@@ -214,7 +214,7 @@ export default function ValueSetSearchContent({
           </TabsList>
         </Tabs>
       </div>
-      <div className="border-b border-gray-200">
+      <div className="border-b border-border">
         <CommandInput
           placeholder={placeholder}
           className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
@@ -224,7 +224,7 @@ export default function ValueSetSearchContent({
         />
       </div>
       {searchQuery.isFetching ? (
-        <div className="h-72 flex justify-center items-center py-6 text-gray-500">
+        <div className="h-72 flex justify-center items-center py-6 text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin mr-2" />
           {t("searching")}
         </div>
@@ -232,11 +232,11 @@ export default function ValueSetSearchContent({
         <CommandList className="overflow-y-auto max-h-[55dvh] md:max-h-[35dvh] lg:max-h-[40dvh]">
           <CommandEmpty>
             {search.length < 3 ? (
-              <p className="p-4 text-sm text-gray-500">
+              <p className="p-4 text-sm text-muted-foreground">
                 {t("min_char_length_error", { min_length: 3 })}
               </p>
             ) : (
-              <p className="p-4 text-sm text-gray-500">
+              <p className="p-4 text-sm text-muted-foreground">
                 {t("no_results_found")}
               </p>
             )}
@@ -290,12 +290,12 @@ export default function ValueSetSearchContent({
                   (!favourites?.length && !resultsWithRecents.length)
                   ? ""
                   : "md:border-l",
-                "border-gray-200",
+                "border-border",
               )}
             >
               <CommandGroup>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-normal text-gray-700 p-1">
+                  <span className="text-xs font-normal text-muted-foreground p-1">
                     {t("starred")}
                   </span>
                   {favouritesQuery.data && favouritesQuery.data.length > 0 && (
@@ -303,7 +303,7 @@ export default function ValueSetSearchContent({
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowBulkClearConfirm(true)}
-                      className="h-6 px-1 text-xs text-gray-500 hover:text-gray-700"
+                      className="h-6 px-1 text-xs text-muted-foreground hover:text-muted-foreground"
                     >
                       {t("clear")}
                     </Button>
@@ -311,7 +311,7 @@ export default function ValueSetSearchContent({
                 </div>
                 {favouritesQuery.isFetched &&
                   favouritesQuery.data?.length === 0 && (
-                    <div className="flex items-center flex-col justify-center max-h-[30vh] md:max-h-[35vh] text-xs text-gray-500">
+                    <div className="flex items-center flex-col justify-center max-h-[30vh] md:max-h-[35vh] text-xs text-muted-foreground">
                       {t("no_starred", {
                         star: "☆",
                       })}

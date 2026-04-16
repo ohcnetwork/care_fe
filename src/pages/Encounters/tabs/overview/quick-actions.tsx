@@ -81,7 +81,7 @@ export function QuickAction({
   actionId?: string;
 }) {
   const className =
-    "flex-1 flex flex-row md:flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white";
+    "flex-1 flex flex-row md:flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-background";
 
   if (href) {
     return (
@@ -121,10 +121,10 @@ const QuickActionContent = ({
 }) => {
   return (
     <>
-      <div className="relative flex md:py-3 py-0 rounded-t-md rounded-b-lg md:bg-gray-100 bg-white">
+      <div className="relative flex md:py-3 py-0 rounded-t-md rounded-b-lg md:bg-muted-background bg-background">
         <KeyboardShortcutBadge shortcut={shortcut} position="top-right" />
         {actionId && <ShortcutBadge actionId={actionId} position="top-right" />}
-        <div className="rounded-xl bg-white md:shadow shadow-none mx-auto items-center flex p-2">
+        <div className="rounded-xl bg-background md:shadow shadow-none mx-auto items-center flex p-2">
           {icon}
         </div>
       </div>

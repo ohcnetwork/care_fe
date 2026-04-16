@@ -99,7 +99,7 @@ export default function ErrorPage({
   };
 
   return (
-    <div className="h-[calc(100vh-7rem)] sm:h-[calc(100vh-5rem)] flex flex-col items-center md:justify-center bg-white text-black p-4 rounded-lg overflow-hidden ">
+    <div className="h-[calc(100vh-7rem)] sm:h-[calc(100vh-5rem)] flex flex-col items-center md:justify-center bg-background text-foreground p-4 rounded-lg overflow-hidden ">
       <div
         className="relative scale-75 md:scale-100 rounded-xl transition border-6 border-yellow-950 duration-300 ease-in-out"
         ref={containerRef}
@@ -132,7 +132,7 @@ export default function ErrorPage({
           aria-hidden="true"
         />
 
-        <div className="relative max-w-fit w-full bg-white rounded-xl ring-1 ring-white/60 backdrop-blur-md transition-all duration-300 hover:shadow-[inset_0_0_40px_rgba(255,255,150,0.5)]">
+        <div className="relative max-w-fit w-full bg-background rounded-xl ring-1 ring-white/60 backdrop-blur-md transition-all duration-300 hover:shadow-[inset_0_0_40px_rgba(255,255,150,0.5)]">
           {!isTouched && (
             <div
               className="absolute inset-0 z-20 pointer-events-none"
@@ -151,7 +151,7 @@ export default function ErrorPage({
               return (
                 <p
                   key={index}
-                  className="text-black select-none pb-3 transition-all duration-300"
+                  className="text-foreground select-none pb-3 transition-all duration-300"
                   style={{
                     fontSize: `${fontSize}px`,
                     filter: isUnblurred ? "blur(0px)" : "blur(2px)",
@@ -167,10 +167,10 @@ export default function ErrorPage({
         </div>
       </div>
       <div className="max-w-lg mx-auto text-center px-4">
-        <h1 className="md:mt-16 text-xl md:text-4xl text-gray-950 font-bold">
+        <h1 className="md:mt-16 text-xl md:text-4xl text-foreground font-bold">
           {title}
         </h1>
-        <p className="max-w-sm mx-auto px-2 text-sm md:text-base mt-2 text-gray-600">
+        <p className="max-w-sm mx-auto px-2 text-sm md:text-base mt-2 text-soft-foreground">
           {message}
         </p>
         <div className="mt-6">

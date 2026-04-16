@@ -42,15 +42,15 @@ export function ServiceCard({ service, link }: Props) {
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold truncate text-gray-900 text-base">
+                <h3 className="font-semibold truncate text-foreground text-base">
                   {service.name}
                 </h3>
-                <p className="mt-0.5 text-xs text-gray-500 truncate">
+                <p className="mt-0.5 text-xs text-muted-foreground truncate">
                   {service.extra_details}
                 </p>
               </div>
             </div>
-            <div className="px-3 text-xs whitespace-nowrap w-full md:w-auto border rounded-md bg-white py-2 flex items-center justify-center gap-1 text-gray-700">
+            <div className="px-3 text-xs whitespace-nowrap w-full md:w-auto border rounded-md bg-background py-2 flex items-center justify-center gap-1 text-muted-foreground">
               {t("view_details")}
               <CareIcon icon="l-arrow-right" className="size-3" />
             </div>

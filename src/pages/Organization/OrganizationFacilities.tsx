@@ -112,7 +112,7 @@ export default function OrganizationFacilities({
                 <CardGridSkeleton count={6} />
               ) : facilities?.results?.length === 0 ? (
                 <Card className="col-span-full">
-                  <CardContent className="p-6 text-center text-gray-500">
+                  <CardContent className="p-6 text-center text-muted-foreground">
                     {t("no_facilities_found")}
                   </CardContent>
                 </Card>
@@ -122,7 +122,7 @@ export default function OrganizationFacilities({
                     key={facility.id}
                     className="h-full hover:border-primary/50 transition-colors overflow-hidden"
                   >
-                    <div className="relative h-48 bg-gray-100">
+                    <div className="relative h-48 bg-muted-background">
                       {facility.read_cover_image_url ? (
                         <img
                           src={facility.read_cover_image_url}
@@ -139,7 +139,7 @@ export default function OrganizationFacilities({
                       <div className="flex flex-col h-full">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 className="text-md font-medium text-gray-900">
+                            <h3 className="text-md font-medium text-foreground">
                               {facility.name}
                             </h3>
                             <div className="font-medium">

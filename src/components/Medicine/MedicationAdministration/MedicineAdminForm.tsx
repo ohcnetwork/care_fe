@@ -112,22 +112,30 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
         {medication.dosage_instruction.map((di, idx) => (
           <div
             key={idx}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-gray-50 rounded-lg"
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-soft-background rounded-lg"
           >
             <div>
-              <Label className="text-xs text-gray-500">{t("dosage")}</Label>
+              <Label className="text-xs text-muted-foreground">
+                {t("dosage")}
+              </Label>
               <p className="font-medium">{formatDosage(di)}</p>
             </div>
             <div>
-              <Label className="text-xs text-gray-500">{t("frequency")}</Label>
+              <Label className="text-xs text-muted-foreground">
+                {t("frequency")}
+              </Label>
               <p className="font-medium">{formatFrequency(di) || "-"}</p>
             </div>
             <div>
-              <Label className="text-xs text-gray-500">{t("route")}</Label>
+              <Label className="text-xs text-muted-foreground">
+                {t("route")}
+              </Label>
               <p className="font-medium">{di?.route?.display || t("oral")}</p>
             </div>
             <div>
-              <Label className="text-xs text-gray-500">{t("duration")}</Label>
+              <Label className="text-xs text-muted-foreground">
+                {t("duration")}
+              </Label>
               <p className="font-medium">{formatDuration(di) || "-"}</p>
             </div>
           </div>
@@ -153,7 +161,7 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
                 "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
                 isSelected
                   ? "bg-primary-50 border-primary-300"
-                  : "bg-gray-50 border-gray-200 hover:border-gray-300",
+                  : "bg-soft-background border-border hover:border-strong-border",
               )}
               onClick={() => handleSelectDosage(idx)}
             >
@@ -164,23 +172,27 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
               />
               <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <Label className="text-xs text-gray-500">{t("dosage")}</Label>
+                  <Label className="text-xs text-muted-foreground">
+                    {t("dosage")}
+                  </Label>
                   <p className="font-medium">{formatDosage(di)}</p>
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500">
+                  <Label className="text-xs text-muted-foreground">
                     {t("frequency")}
                   </Label>
                   <p className="font-medium">{formatFrequency(di) || "-"}</p>
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500">{t("route")}</Label>
+                  <Label className="text-xs text-muted-foreground">
+                    {t("route")}
+                  </Label>
                   <p className="font-medium">
                     {di?.route?.display || t("oral")}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500">
+                  <Label className="text-xs text-muted-foreground">
                     {t("duration")}
                   </Label>
                   <p className="font-medium">{formatDuration(di) || "-"}</p>
@@ -378,7 +390,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             variant="outline"
             size="sm"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-gray-600"
+            className="text-soft-foreground"
           >
             <CareIcon
               icon={showAdvanced ? "l-angle-up" : "l-angle-down"}
@@ -390,7 +402,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
         {/* Status Badge */}
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">{t("status")}:</span>
+          <span className="text-sm text-muted-foreground">{t("status")}:</span>
           <Badge
             variant={
               administrationRequest.status === "completed"
@@ -406,7 +418,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
         {/* Advanced Options */}
         {showAdvanced && (
-          <div className="space-y-4 pt-2 border-t border-gray-200">
+          <div className="space-y-4 pt-2 border-t border-border">
             {/* Status Select */}
             <div className="space-y-2">
               <Label className="text-sm">{t("status")}</Label>
@@ -554,13 +566,13 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           {medication.medication?.display}
         </h3>
         {lastAdministeredDate && (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {t("last_administered")}{" "}
             {formatDistanceToNow(new Date(lastAdministeredDate))} {t("ago")}{" "}
             {t("by")} {formatName(medication.created_by)}
           </p>
         )}
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           {t("prescribed")}{" "}
           {formatDistanceToNow(
             new Date(medication.authored_on || medication.created_date),
@@ -578,8 +590,8 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       {/* All prescriptions in the group */}
       {otherGroupRequests && otherGroupRequests.length > 0 && (
-        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+        <div className="p-3 bg-soft-background rounded-lg border border-border">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <CareIcon icon="l-clipboard-notes" className="size-4" />
             <span>{t("all_prescriptions_in_group")}</span>
           </div>
@@ -602,7 +614,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                     "flex items-center justify-between w-full px-3 py-2 rounded-md text-sm border text-left transition-colors",
                     isCurrentMedication
                       ? "bg-primary-50 border-primary-200 cursor-default"
-                      : "bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200 cursor-pointer",
+                      : "bg-background border-soft-border hover:bg-soft-background hover:border-border cursor-pointer",
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -619,7 +631,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                             className={
                               isCurrentMedication
                                 ? "text-primary-700 font-medium"
-                                : "text-gray-700"
+                                : "text-muted-foreground"
                             }
                           >
                             {summary.dosage}
@@ -629,7 +641,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                               className={
                                 isCurrentMedication
                                   ? "text-primary-500"
-                                  : "text-gray-400"
+                                  : "text-placeholder-foreground"
                               }
                             >
                               · {summary.freq}

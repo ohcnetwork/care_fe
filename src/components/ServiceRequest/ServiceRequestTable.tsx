@@ -53,8 +53,8 @@ export default function ServiceRequestTable({
   return (
     <div className="rounded-md border">
       <Table>
-        <TableHeader className="bg-gray-100">
-          <TableRow className="divide-gray-200">
+        <TableHeader className="bg-muted-background">
+          <TableRow className="divide-border">
             {showPatientInfo && <TableHead>{t("patient_name")}</TableHead>}
             <TableHead>{t("service_type")}</TableHead>
             <TableHead>
@@ -65,12 +65,9 @@ export default function ServiceRequestTable({
             <TableHead>{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className="bg-white">
+        <TableBody className="bg-background">
           {requests.map((request) => (
-            <TableRow
-              key={request.id}
-              className="divide-x divide-gray-200 group"
-            >
+            <TableRow key={request.id} className="divide-x divide-border group">
               {showPatientInfo && (
                 <TableCell
                   className={cn(
@@ -79,10 +76,10 @@ export default function ServiceRequestTable({
                   )}
                   onClick={() => onPatientClick?.(request)}
                 >
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-semibold text-foreground">
                     {request.encounter.patient.name}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-muted-foreground">
                     {request.encounter.patient.id}
                   </div>
                 </TableCell>
@@ -91,7 +88,7 @@ export default function ServiceRequestTable({
                 <div>
                   <div className="text-lg">{request.title || "-"}</div>
                   {request.code?.display && (
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground">
                       {request.code.display}
                     </div>
                   )}
@@ -122,7 +119,7 @@ export default function ServiceRequestTable({
                 />
               </TableCell>
               <TableCell>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-muted-foreground">
                   {request.encounter.current_location && (
                     <LocationNode
                       location={request.encounter.current_location}

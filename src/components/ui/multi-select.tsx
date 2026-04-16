@@ -83,7 +83,7 @@ function ListContent({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <Command className="flex-1 overflow-hidden min-h-0">
-        <div className="border border-gray-200 rounded-md m-1 mb-2">
+        <div className="border border-border rounded-md m-1 mb-2">
           <CommandInput
             placeholder={
               translationBasekey
@@ -172,7 +172,7 @@ function ListContent({
           )}
         </CommandList>
       </Command>
-      <div className="flex justify-end space-x-2 p-3 border-t border-t-gray-200 shrink-0">
+      <div className="flex justify-end space-x-2 p-3 border-t border-t-border shrink-0">
         <Button
           variant="link"
           size="md"
@@ -239,7 +239,7 @@ export function MultiSelect({
             >
               <div className="flex justify-between items-center w-full">
                 {value.length == 0 ? (
-                  <span className="text-sm text-gray-500 mx-3">
+                  <span className="text-sm text-muted-foreground mx-3">
                     {placeholder}
                   </span>
                 ) : (
@@ -250,9 +250,9 @@ export function MultiSelect({
                   </Badge>
                 )}
                 {open ? (
-                  <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
+                  <ChevronUp className="h-4 mx-2 cursor-pointer text-foreground" />
                 ) : (
-                  <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
+                  <ChevronDown className="h-4 mx-2 cursor-pointer text-foreground" />
                 )}
               </div>
             </Button>
@@ -293,7 +293,7 @@ export function MultiSelect({
           >
             <div className="flex justify-between items-center w-full">
               {value.length == 0 ? (
-                <span className="text-sm text-gray-500 mx-3">
+                <span className="text-sm text-muted-foreground mx-3">
                   {placeholder}
                 </span>
               ) : (
@@ -304,9 +304,9 @@ export function MultiSelect({
                 </Badge>
               )}
               {open ? (
-                <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
+                <ChevronUp className="h-4 mx-2 cursor-pointer text-foreground" />
               ) : (
-                <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
+                <ChevronDown className="h-4 mx-2 cursor-pointer text-foreground" />
               )}
             </div>
           </Button>

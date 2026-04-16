@@ -19,7 +19,7 @@ export default function Callout({
         "flex items-center h-min gap-2 rounded-md px-2 py-2 text-sm/tight",
         {
           primary: "bg-primary-100/50 text-primary-800",
-          secondary: "bg-gray-50 text-gray-700",
+          secondary: "bg-soft-background text-muted-foreground",
           warning: "bg-warning-50 text-warning-700",
           alert: "bg-purple-50 text-purple-500",
           danger: "bg-danger-50 text-danger-600",
@@ -29,7 +29,7 @@ export default function Callout({
     >
       <div
         className={cn(
-          "h-min rounded-full border bg-white px-2",
+          "h-min rounded-full border bg-background px-2",
           {
             primary: "border-primary-200",
             secondary: "border-secondary-300",

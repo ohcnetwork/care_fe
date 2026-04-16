@@ -662,7 +662,7 @@ export function ChargeItemDefinitionForm({
         )}
 
         {/* Pricing Components */}
-        <Card className="bg-gray-50">
+        <Card className="bg-soft-background">
           <CardHeader className={minimal ? "pb-3" : ""}>
             <CardTitle className={minimal ? "text-lg" : ""}>
               {t("pricing_components")}
@@ -679,7 +679,7 @@ export function ChargeItemDefinitionForm({
                       name="base_price"
                       render={({ field }) => (
                         <FormItem className="w-full">
-                          <FormLabel className="font-medium text-gray-900 text-base">
+                          <FormLabel className="font-medium text-foreground text-base">
                             {t("base_price")}
                           </FormLabel>
                           <FormControl>
@@ -710,7 +710,7 @@ export function ChargeItemDefinitionForm({
                   name="mrp"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="font-medium text-gray-900 text-base">
+                      <FormLabel className="font-medium text-foreground text-base">
                         {t("mrp")}
                       </FormLabel>
                       <FormControl>
@@ -735,7 +735,7 @@ export function ChargeItemDefinitionForm({
                   name="purchase_price"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="font-medium text-gray-900 text-base">
+                      <FormLabel className="font-medium text-foreground text-base">
                         {t("purchase_price")}
                       </FormLabel>
                       <FormControl>
@@ -796,9 +796,11 @@ export function ChargeItemDefinitionForm({
                 </h4>
                 <div className="space-y-2 divide-y divide-green-200">
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600">{t("base_price")}</span>
+                    <span className="text-soft-foreground">
+                      {t("base_price")}
+                    </span>
                     <MonetaryDisplay
-                      className="font-medium text-gray-900"
+                      className="font-medium text-foreground"
                       amount={basePrice}
                     />
                   </div>

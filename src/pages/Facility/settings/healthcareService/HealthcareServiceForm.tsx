@@ -95,13 +95,13 @@ export default function HealthcareServiceForm({
       <Page title={t("edit_healthcare_service")} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("edit_healthcare_service")}
             </h1>
           </div>
-          <div className="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-8">
+          <div className="flex items-center justify-center rounded-lg border border-border bg-background p-8">
             <div className="text-center">
-              <div className="mb-2 text-sm text-gray-500">
+              <div className="mb-2 text-sm text-muted-foreground">
                 {t("loading_healthcare_service")}
               </div>
             </div>
@@ -226,7 +226,7 @@ function HealthcareServiceFormContent({
     >
       <div className="container mx-auto max-w-3xl">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-foreground">
             {isEditMode
               ? t("edit_healthcare_service")
               : t("create_healthcare_service")}
@@ -236,13 +236,13 @@ function HealthcareServiceFormContent({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Basic Information Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("basic_information")}
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {t("basic_details_of_the_healthcare_service")}
                   </p>
                 </div>
@@ -326,13 +326,13 @@ function HealthcareServiceFormContent({
             </div>
 
             {/* Locations Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("locations")}
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {t("Select the locations where this service is available")}
                   </p>
                 </div>
@@ -382,16 +382,16 @@ function HealthcareServiceFormContent({
             </div>
 
             {/* Managing Organization Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("managing_organization")}{" "}
-                    <span className="text-sm font-normal text-gray-500">
+                    <span className="text-sm font-normal text-muted-foreground">
                       ({t("optional")})
                     </span>
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {t("select_organization_that_manages_this_service")}
                   </p>
                 </div>
@@ -425,16 +425,16 @@ function HealthcareServiceFormContent({
             </div>
 
             {/* Styling Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("styling")}{" "}
-                    <span className="text-sm font-normal text-gray-500">
+                    <span className="text-sm font-normal text-muted-foreground">
                       ({t("optional")})
                     </span>
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {t("Customize how this service appears in the UI")}
                   </p>
                 </div>

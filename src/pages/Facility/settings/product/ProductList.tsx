@@ -57,22 +57,22 @@ function ProductCard({
                 {t(product.status)}
               </Badge>
             </div>
-            <h3 className="font-medium text-gray-900 break-normal text-lg">
+            <h3 className="font-medium text-foreground break-normal text-lg">
               {product.product_knowledge.name}
             </h3>
             {product.batch?.lot_number && (
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {t("lot_number")}: {product.batch.lot_number}
               </p>
             )}
             {product.expiration_date && (
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-1 text-xs text-placeholder-foreground">
                 {t("expires")}:{" "}
                 {format(new Date(product.expiration_date), "PPP")}
               </p>
             )}
             {product.standard_pack_size != null && (
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-1 text-xs text-placeholder-foreground">
                 {t("pack_size")}: {product.standard_pack_size}
               </p>
             )}
@@ -127,10 +127,14 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
     <Page title={t("products")} hideTitleOnPage>
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">{t("products")}</h1>
+          <h1 className="text-2xl font-bold text-muted-foreground">
+            {t("products")}
+          </h1>
           <div className="mb-6 flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
             <div>
-              <p className="text-gray-600 text-sm">{t("manage_products")}</p>
+              <p className="text-soft-foreground text-sm">
+                {t("manage_products")}
+              </p>
             </div>
           </div>
 
@@ -194,7 +198,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
             <div className="hidden md:block">
               <div className="rounded-lg border">
                 <Table>
-                  <TableHeader className="bg-gray-100">
+                  <TableHeader className="bg-muted-background">
                     <TableRow className="divide-x">
                       <TableHead>{t("name")}</TableHead>
                       <TableHead>{t("status")}</TableHead>
@@ -205,7 +209,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                       <TableHead>{t("actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody className="bg-white">
+                  <TableBody className="bg-background">
                     {products.map((product: ProductRead) => {
                       const basePrice =
                         product.charge_item_definition?.price_components.find(

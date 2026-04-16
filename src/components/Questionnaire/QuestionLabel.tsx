@@ -11,7 +11,7 @@ interface QuestionLabelProps {
   isSubQuestion?: boolean;
 }
 
-const defaultGroupClass = "text-lg font-medium text-gray-900";
+const defaultGroupClass = "text-lg font-medium text-foreground";
 const defaultInputClass = "text-base font-medium block";
 
 export function QuestionLabel({
@@ -24,7 +24,7 @@ export function QuestionLabel({
 
   return (
     <Label className={className ?? defaultClass}>
-      <div className="flex flex-col gap-3 bg-gray-100 md:bg-transparent">
+      <div className="flex flex-col gap-3 bg-muted-background md:bg-transparent">
         {(question.type === "structured" || !isSubQuestion) && (
           <div className="hidden md:block h-1 w-4 rounded-full bg-indigo-600" />
         )}
@@ -35,7 +35,7 @@ export function QuestionLabel({
           <span>
             <span
               className={cn({
-                "text-gray-950 font-semibold":
+                "text-foreground font-semibold":
                   question.type === "structured" ||
                   groupLabel ||
                   !isSubQuestion,
@@ -46,7 +46,7 @@ export function QuestionLabel({
             {question.required && <span className="ml-1 text-red-500">*</span>}
           </span>
           {question.unit?.code && (
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-muted-foreground">
               ({question.unit.code})
             </span>
           )}

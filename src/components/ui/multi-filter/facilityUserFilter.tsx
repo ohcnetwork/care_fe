@@ -99,7 +99,7 @@ function FacilityUserFilterDropdown({
         {/* Selected Users */}
         {selectedUsers.length > 0 && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {t("selected")}
             </div>
             {selectedUsers.map((user) => (
@@ -125,7 +125,7 @@ function FacilityUserFilterDropdown({
                     <span className="text-sm truncate">
                       {formatName(user)}
                       {user.id === currentUser.id && (
-                        <span className="text-xs text-gray-500 ml-1">
+                        <span className="text-xs text-muted-foreground ml-1">
                           ({t("me")})
                         </span>
                       )}
@@ -134,7 +134,7 @@ function FacilityUserFilterDropdown({
                 </div>
               </DropdownMenuItem>
             ))}
-            <div className="my-2 border-t border-gray-200" />
+            <div className="my-2 border-t border-border" />
           </>
         )}
 
@@ -143,7 +143,7 @@ function FacilityUserFilterDropdown({
           !selectedUserIds.has(currentUser.id) &&
           currentUserInList && (
             <>
-              <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 {t("quick_select")}
               </div>
               <DropdownMenuItem
@@ -163,14 +163,14 @@ function FacilityUserFilterDropdown({
                   <span className="text-sm font-medium">{t("mine")}</span>
                 </div>
               </DropdownMenuItem>
-              <div className="my-2 border-t border-gray-200" />
+              <div className="my-2 border-t border-border" />
             </>
           )}
 
         {/* Available Users */}
         {sortedNonSelectedUsers.length > 0 && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {t("available_users")}
             </div>
             {sortedNonSelectedUsers
@@ -195,7 +195,7 @@ function FacilityUserFilterDropdown({
                       <span className="text-sm truncate">
                         {formatName(user)}
                         {user.id === currentUser.id && (
-                          <span className="text-xs text-gray-500 ml-1">
+                          <span className="text-xs text-muted-foreground ml-1">
                             ({t("me")})
                           </span>
                         )}
@@ -208,14 +208,14 @@ function FacilityUserFilterDropdown({
         )}
 
         {isLoading && (
-          <div className="px-2 py-4 text-sm text-gray-500 text-center flex items-center justify-center gap-2">
+          <div className="px-2 py-4 text-sm text-muted-foreground text-center flex items-center justify-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             {t("loading")}
           </div>
         )}
 
         {!isLoading && allUsers.length === 0 && (
-          <div className="px-2 py-4 text-sm text-gray-500 text-center">
+          <div className="px-2 py-4 text-sm text-muted-foreground text-center">
             {t("no_users_found")}
           </div>
         )}
@@ -244,7 +244,7 @@ export default function RenderFacilityUserFilter({
 
   if (!facilityId) {
     return (
-      <div className="p-4 text-sm text-gray-500 text-center">
+      <div className="p-4 text-sm text-muted-foreground text-center">
         {t("facility_required_for_facility_user_filter")}
       </div>
     );
@@ -276,7 +276,7 @@ export const SelectedFacilityUserBadge = ({
 
   return (
     <div className="flex items-center gap-2 min-w-0 shrink-0">
-      <User className="h-3 w-3 text-gray-600 shrink-0" />
+      <User className="h-3 w-3 text-soft-foreground shrink-0" />
       <span className="text-sm whitespace-nowrap truncate max-w-[150px]">
         {formatName(user)}
       </span>

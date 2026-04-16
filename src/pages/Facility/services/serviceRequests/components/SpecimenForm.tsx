@@ -290,7 +290,10 @@ export function SpecimenForm({
                 <>
                   <div className="rounded-lg bg-green-50 p-2 mb-4">
                     <div className="flex items-center gap-2">
-                      <Badge variant="green" className="bg-white rounded-full">
+                      <Badge
+                        variant="green"
+                        className="bg-background rounded-full"
+                      >
                         {t("success")}
                       </Badge>
                       <span className="text-green-800 font-medium text-sm">
@@ -307,9 +310,9 @@ export function SpecimenForm({
                   </Card>
                 </>
               ) : (
-                <div className="rounded-lg border-2 border-dashed p-4 text-center bg-gray-50">
-                  <QrCode className="h-8 w-8 mx-auto mb-2 text-gray-500" />
-                  <p className="text-sm text-gray-500">
+                <div className="rounded-lg border-2 border-dashed p-4 text-center bg-soft-background">
+                  <QrCode className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
                     {draftSpecimen
                       ? t("generating_qr")
                       : t("generate_qr_failed")}
@@ -343,10 +346,10 @@ export function SpecimenForm({
           <div className="font-medium text-lg mb-2">
             {t("specimen_collection_info")}
           </div>
-          <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+          <div className="space-y-4 bg-soft-background p-4 rounded-lg">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm text-gray-700">
+                <Label className="text-sm text-muted-foreground">
                   {t("collection_date_time")}
                 </Label>
                 <Input
@@ -369,7 +372,9 @@ export function SpecimenForm({
                 />
               </div>
               <div>
-                <Label className="text-sm text-gray-700">{t("quantity")}</Label>
+                <Label className="text-sm text-muted-foreground">
+                  {t("quantity")}
+                </Label>
                 <div className="flex gap-2">
                   <div className="flex-1 max-w-36">
                     <Input
@@ -444,7 +449,9 @@ export function SpecimenForm({
             </div>
 
             <div>
-              <Label className="text-sm text-gray-700">{t("body_site")}</Label>
+              <Label className="text-sm text-muted-foreground">
+                {t("body_site")}
+              </Label>
               <ValueSetSelect
                 system="system-body-site"
                 placeholder={t("select_body_site")}
@@ -457,7 +464,7 @@ export function SpecimenForm({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
               <div className="col-span-1 md:col-span-4">
-                <Label className="text-sm text-gray-700">
+                <Label className="text-sm text-muted-foreground">
                   {t("fasting_status")}
                 </Label>
                 <ValueSetSelect
@@ -478,7 +485,7 @@ export function SpecimenForm({
               </div>
 
               <div className="col-span-1 md:col-span-2">
-                <Label className="text-sm text-gray-700">
+                <Label className="text-sm text-muted-foreground">
                   {t("fasting_duration")}
                 </Label>
                 <Input
@@ -507,19 +514,19 @@ export function SpecimenForm({
             </div>
 
             {specimenDefinition.type_tested?.container && (
-              <div className="mt-4 rounded-lg border bg-gray-50 p-4">
-                <div className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-600">
+              <div className="mt-4 rounded-lg border bg-soft-background p-4">
+                <div className="flex items-center gap-2 mb-2 text-sm font-medium text-soft-foreground">
                   <Info className="h-4 w-4" />
                   {t("container_requirements")}
                 </div>
                 <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
                   <div>
-                    <span className="text-gray-600">{t("type")}: </span>
+                    <span className="text-soft-foreground">{t("type")}: </span>
                     {specimenDefinition.type_tested.container.description}
                   </div>
                   {specimenDefinition.type_tested.container.capacity && (
                     <div>
-                      <span className="text-gray-600">
+                      <span className="text-soft-foreground">
                         {t("container_capacity")}:{" "}
                       </span>
                       {round(
@@ -533,7 +540,7 @@ export function SpecimenForm({
                   )}
                   {specimenDefinition.type_tested.container.minimum_volume && (
                     <div>
-                      <span className="text-gray-600">
+                      <span className="text-soft-foreground">
                         {t("container_min_volume")}:{" "}
                       </span>
                       {specimenDefinition.type_tested.container.minimum_volume
@@ -545,7 +552,7 @@ export function SpecimenForm({
                   )}
                   {specimenDefinition.type_tested.container.preparation && (
                     <div className="col-span-2">
-                      <span className="text-gray-600">
+                      <span className="text-soft-foreground">
                         {t("preparation")}:{" "}
                       </span>
                       {specimenDefinition.type_tested.container.preparation}
@@ -555,7 +562,9 @@ export function SpecimenForm({
               </div>
             )}
             <div className="space-y-2">
-              <Label className="text-sm text-gray-700">{t("notes")}</Label>
+              <Label className="text-sm text-muted-foreground">
+                {t("notes")}
+              </Label>
               <Textarea
                 placeholder={t("notes_placeholder")}
                 value={specimenData.specimen.note ?? ""}

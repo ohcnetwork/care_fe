@@ -383,24 +383,24 @@ export function ObservationInterpretation<
     return (
       <div className="flex flex-col gap-2 flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="inline-flex items-center justify-center size-6 rounded-full bg-gray-900 text-white text-xs font-medium shrink-0">
+          <span className="inline-flex items-center justify-center size-6 rounded-full bg-foreground text-inverse-foreground text-xs font-medium shrink-0">
             {index + 1}
           </span>
           {range.title && (
-            <span className="text-sm font-medium text-gray-900">
+            <span className="text-sm font-medium text-foreground">
               {range.title}
             </span>
           )}
           {hasDefault && (
-            <span className="inline-flex items-center rounded-md border border-gray-200 px-1.5 py-0.5 text-[10px] text-gray-600">
+            <span className="inline-flex items-center rounded-md border border-border px-1.5 py-0.5 text-[10px] text-soft-foreground">
               {t("default_interpretation")} {t("enabled")}
             </span>
           )}
         </div>
         {(conditionCount > 0 || rangeCount > 0 || valuesetCount > 0) && (
-          <div className="flex flex-col gap-1 sm:pl-8 text-xs text-gray-500">
+          <div className="flex flex-col gap-1 sm:pl-8 text-xs text-muted-foreground">
             {range.conditions?.map((condition, i) => (
-              <div key={`condition-${i}`} className="text-gray-600">
+              <div key={`condition-${i}`} className="text-soft-foreground">
                 <ConditionOperationSummary condition={condition} shortDisplay />
               </div>
             ))}
@@ -429,9 +429,9 @@ export function ObservationInterpretation<
   };
 
   return (
-    <div className="flex flex-col gap-3 bg-white rounded-md p-4 border border-gray-200">
+    <div className="flex flex-col gap-3 bg-background rounded-md p-4 border border-border">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-medium text-gray-700">
+        <h3 className="text-base font-medium text-muted-foreground">
           {t("observation_interpretation")} ({qualifiedRanges?.length})
         </h3>
         {!disabled && (
@@ -473,10 +473,10 @@ export function ObservationInterpretation<
 
       {qualifiedRanges?.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="size-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-            <Ruler className="size-5 text-gray-400" />
+          <div className="size-10 rounded-full bg-muted-background flex items-center justify-center mb-3">
+            <Ruler className="size-5 text-placeholder-foreground" />
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {t("no_interpretations_configured")}
           </p>
         </div>
@@ -494,7 +494,7 @@ export function ObservationInterpretation<
                   "group flex flex-col sm:flex-row gap-3 items-start p-3 rounded-lg border transition-colors",
                   wouldBeAffectedByTypeChange(range, index)
                     ? "bg-red-50 border-red-200"
-                    : "bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50/50",
+                    : "bg-background border-border hover:border-strong-border hover:bg-soft-background/50",
                   errors && "border-red-400 bg-red-50/50",
                 )}
               >
@@ -510,7 +510,7 @@ export function ObservationInterpretation<
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="size-8 text-gray-400 hover:text-gray-700"
+                      className="size-8 text-placeholder-foreground hover:text-muted-foreground"
                       onClick={() => handleEditInterpretation(index)}
                     >
                       <Edit className="size-3.5" />
@@ -519,7 +519,7 @@ export function ObservationInterpretation<
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="size-8 text-gray-400 hover:text-red-600"
+                      className="size-8 text-placeholder-foreground hover:text-red-600"
                       onClick={() => handleRemoveInterpretation(index)}
                     >
                       <Trash2 className="size-3.5" />
@@ -651,7 +651,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
                   {...field}
                   value={editedRange.title ?? ""}
                   placeholder={t("interpretation_title_placeholder")}
-                  className="h-10 text-base font-medium border-0 border-b border-gray-200 rounded-none px-0 focus-visible:ring-0 focus-visible:border-gray-900 placeholder:text-gray-300 placeholder:font-normal"
+                  className="h-10 text-base font-medium border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 focus-visible:border-foreground placeholder:text-disabled-foreground placeholder:font-normal"
                   onChange={(e) =>
                     setEditedRange(editedRange, "title", e.target.value)
                   }
@@ -692,7 +692,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
           fieldName={`${fieldName}.default_interpretation`}
         />
       </div>
-      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 mt-auto border-t border-gray-100">
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 mt-auto border-t border-soft-border">
         <Button
           type="button"
           variant="outline"
@@ -1228,7 +1228,7 @@ export function ConditionComponent<
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
           {t("conditions")}
         </h3>
         <Button
@@ -1243,7 +1243,7 @@ export function ConditionComponent<
         </Button>
       </div>
       {conditions.length > 0 && (
-        <div className="flex flex-col divide-y divide-gray-100 rounded-lg border border-gray-200">
+        <div className="flex flex-col divide-y divide-soft-border rounded-lg border border-border">
           {conditions.map((condition, index) => {
             const metric = metrics?.find((m) => m.name === condition.metric);
             if (!metric) return null;
@@ -1334,7 +1334,7 @@ export function ConditionComponent<
                   size="icon"
                   variant="ghost"
                   type="button"
-                  className="size-7 shrink-0 text-gray-400 hover:text-red-600 mt-0.5"
+                  className="size-7 shrink-0 text-placeholder-foreground hover:text-red-600 mt-0.5"
                   onClick={() => handleRemoveCondition(index)}
                 >
                   <X className="size-3.5" />
@@ -1404,7 +1404,7 @@ function InterpretationComponent<
           checked={interpretation.highlight ?? false}
           onCheckedChange={handleHighlightChange}
         />
-        <Highlighter className="size-3 text-gray-400" />
+        <Highlighter className="size-3 text-placeholder-foreground" />
       </label>
     </div>
   );
@@ -1438,16 +1438,16 @@ function DefaultInterpretationComponent<
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
           {t("default_interpretation")}
         </h3>
         <Switch checked={isEnabled} onCheckedChange={handleToggle} />
       </div>
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-placeholder-foreground">
         {t("default_interpretation_description")}
       </p>
       {isEnabled && defaultInterpretation && (
-        <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-2.5">
+        <div className="flex items-center gap-2 rounded-lg border border-border p-2.5">
           <InterpretationComponent
             form={form}
             interpretation={defaultInterpretation}
@@ -1518,7 +1518,7 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
           {t("ranges")}
         </h3>
         <Button
@@ -1533,7 +1533,7 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
         </Button>
       </div>
       {ranges.length > 0 && (
-        <div className="flex flex-col divide-y divide-gray-100 rounded-lg border border-gray-200">
+        <div className="flex flex-col divide-y divide-soft-border rounded-lg border border-border">
           {ranges.map((range, index) => {
             const { min, max } = range;
             return (
@@ -1571,7 +1571,9 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
                         </FormItem>
                       )}
                     />
-                    <span className="text-gray-300 text-xs shrink-0">–</span>
+                    <span className="text-disabled-foreground text-xs shrink-0">
+                      –
+                    </span>
                     <FormField
                       control={form.control}
                       name={`${fieldName}.ranges.${index}.max` as any}
@@ -1599,7 +1601,7 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
                   variant="ghost"
                   size="icon"
                   type="button"
-                  className="size-7 shrink-0 text-gray-400 hover:text-red-600 mt-0.5"
+                  className="size-7 shrink-0 text-placeholder-foreground hover:text-red-600 mt-0.5"
                   onClick={() => handleRemoveRange(index)}
                 >
                   <X className="size-3.5" />
@@ -1677,7 +1679,7 @@ function CustomValueSetInterpretationComponent<
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
           {t("custom_valueset_interpretations")}
         </h3>
         <Button
@@ -1692,7 +1694,7 @@ function CustomValueSetInterpretationComponent<
         </Button>
       </div>
       {valuesetInterpretations.length > 0 && (
-        <div className="flex flex-col divide-y divide-gray-100 rounded-lg border border-gray-200">
+        <div className="flex flex-col divide-y divide-soft-border rounded-lg border border-border">
           {valuesetInterpretations.map((valuesetInterpretation, index) => (
             <div key={index} className="flex gap-2 p-2.5 items-start">
               <div className="flex flex-col gap-1.5 flex-1 min-w-0">
@@ -1726,7 +1728,7 @@ function CustomValueSetInterpretationComponent<
                 variant="ghost"
                 size="icon"
                 type="button"
-                className="size-7 shrink-0 text-gray-400 hover:text-red-600 mt-0.5"
+                className="size-7 shrink-0 text-placeholder-foreground hover:text-red-600 mt-0.5"
                 onClick={() => handleRemoveValueset(index)}
               >
                 <X className="size-3.5" />

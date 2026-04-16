@@ -62,7 +62,7 @@ export function EncounterActions({ encounter }: EncounterActionsProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 text-gray-500 hover:text-gray-700"
+          className="size-8 text-muted-foreground hover:text-muted-foreground"
           disabled={isRestarting}
         >
           <Settings className="size-4" />

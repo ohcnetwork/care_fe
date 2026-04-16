@@ -57,12 +57,12 @@ export default function TemplateCard({
   return (
     <Card
       key={template.id}
-      className="flex flex-col justify-between gap-2 rounded-md bg-gray-100 p-3"
+      className="flex flex-col justify-between gap-2 rounded-md bg-muted-background p-3"
     >
       <div className="flex flex-col sm:flex-row justify-between gap-2">
         <div className="flex flex-col">
           <span className="font-medium">{template.name}</span>
-          <span className="text-xs text-gray-500">{template.slug}</span>
+          <span className="text-xs text-muted-foreground">{template.slug}</span>
         </div>
         <Badge
           variant={template.status === "active" ? "primary" : "secondary"}
@@ -76,7 +76,7 @@ export default function TemplateCard({
           <Badge variant="blue" className="text-xs">
             {template.default_format.toUpperCase()}
           </Badge>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-muted-foreground">
             {t(template.template_type)}
           </span>
         </div>

@@ -1,5 +1,5 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
-import { BadgeCheck, LogOut, RefreshCw } from "lucide-react";
+import { BadgeCheck, LogOut, RefreshCw, Settings } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -114,6 +114,17 @@ export function FacilityNavUser({
               >
                 <BadgeCheck />
                 {t("profile")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  const appearanceUrl = selectedFacilityId
+                    ? `/facility/${selectedFacilityId}/users/${user.username}/appearance`
+                    : `/users/${user.username}/appearance`;
+                  navigate(appearanceUrl);
+                }}
+              >
+                <Settings />
+                {t("settings")}
               </DropdownMenuItem>
               {pluginNavItems.map((item) => (
                 <DropdownMenuItem

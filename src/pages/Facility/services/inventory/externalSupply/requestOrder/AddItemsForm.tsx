@@ -161,11 +161,11 @@ export function AddItemsForm({
                         <TableRow key={field.id}>
                           <TableCell>
                             {itemData?.name ? (
-                              <div className="font-medium text-gray-900">
+                              <div className="font-medium text-foreground">
                                 {itemData.name}
                               </div>
                             ) : (
-                              <div className="text-gray-500 italic">
+                              <div className="text-muted-foreground italic">
                                 {t("no_product_selected")}
                               </div>
                             )}
@@ -217,7 +217,7 @@ export function AddItemsForm({
 
             {fields.length > 0 ? (
               <>
-                <Separator className="my-2 bg-gray-200" />
+                <Separator className="my-2 bg-strong-background" />
                 <div className="flex justify-end space-x-2">
                   <Button
                     type="button"
@@ -240,12 +240,12 @@ export function AddItemsForm({
             ) : (
               <div className="mt-2 flex flex-col gap-2">
                 <p>-{t("or")}-</p>
-                <div className="flex flex-row gap-2 justify-between bg-white p-2 items-center border border-gray-200 rounded-md">
+                <div className="flex flex-row gap-2 justify-between bg-background p-2 items-center border border-border rounded-md">
                   <div className="flex flex-col gap-2">
                     <p className="font-bold">
                       {t("review_and_finalise_request")}
                     </p>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {t("review_and_finalise_request_description")}
                     </span>
                   </div>

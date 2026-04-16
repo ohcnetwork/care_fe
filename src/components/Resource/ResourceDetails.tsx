@@ -36,7 +36,7 @@ function PatientCard({ patient }: { patient: PatientRead }) {
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1">
             <p className="text-sm font-medium">{t("name")}</p>
-            <p className="text-sm text-gray-500">{patient.name}</p>
+            <p className="text-sm text-muted-foreground">{patient.name}</p>
           </div>
 
           <div className="space-y-1">
@@ -59,14 +59,14 @@ function PatientCard({ patient }: { patient: PatientRead }) {
                 </a>
               </div>
             ) : (
-              <p className="text-sm text-gray-500">--</p>
+              <p className="text-sm text-muted-foreground">--</p>
             )}
           </div>
           <div className="space-y-1 md:col-span-2">
             <p className="text-sm font-medium">{t("address")}</p>
-            <p className="text-sm text-gray-500 whitespace-pre-wrap">
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
               {formatPatientAddress(patient.address) || (
-                <span className="text-gray-500">
+                <span className="text-muted-foreground">
                   {t("no_address_provided")}
                 </span>
               )}
@@ -95,7 +95,7 @@ function FacilityCard({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <p className="text-sm font-medium">{t("name")}</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               {facilityData?.name || "--"}
             </p>
           </div>
@@ -173,7 +173,7 @@ export default function ResourceDetails({
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("category")}</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {t(
                     `resource_request_category__${getResourceRequestCategoryEnum(data.category)}`,
                   )}
@@ -181,7 +181,7 @@ export default function ResourceDetails({
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("contact_person")}</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {data.referring_facility_contact_name || "--"}
                 </p>
               </div>
@@ -205,7 +205,7 @@ export default function ResourceDetails({
                     </a>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500">--</p>
+                  <p className="text-sm text-muted-foreground">--</p>
                 )}
               </div>
             </div>
@@ -214,7 +214,7 @@ export default function ResourceDetails({
 
             <div className="space-y-2">
               <p className="text-sm font-medium">{t("reason")}</p>
-              <p className="text-sm text-gray-500 whitespace-pre-wrap">
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                 {data.reason || "--"}
               </p>
             </div>
@@ -248,20 +248,20 @@ export default function ResourceDetails({
               {data.created_by && (
                 <div className="space-y-1">
                   <p className="text-sm font-medium">{t("created_by")}</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {formatName(data.created_by)}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {formatDateTime(data.created_date)}
                   </p>
                 </div>
               )}
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("last_modified_by")}</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {data.updated_by ? formatName(data.updated_by) : "--"}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {formatDateTime(data.modified_date)}
                 </p>
               </div>

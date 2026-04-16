@@ -406,7 +406,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-500">
+            <h3 className="text-sm font-medium text-muted-foreground">
               {t("contact_points")}
             </h3>
             <Button
@@ -426,7 +426,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           </div>
 
           {fields.length === 0 && (
-            <div className="py-4 text-center text-sm text-gray-700">
+            <div className="py-4 text-center text-sm text-muted-foreground">
               {t("no_contact_points_added")}
             </div>
           )}

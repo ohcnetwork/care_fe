@@ -68,7 +68,7 @@ const MedicineListItem = ({
   const { t } = useTranslation();
 
   return (
-    <div className="border-b border-gray-200 py-4">
+    <div className="border-b border-border py-4">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -269,7 +269,7 @@ export function MedicineAdminSheet({
             </div>
           </div>
 
-          <SheetFooter className="border-t border-gray-200 pt-4 mr-2">
+          <SheetFooter className="border-t border-border pt-4 mr-2">
             <div className="flex justify-between w-full">
               <Button type="button" variant="outline" onClick={handleClose}>
                 {t("cancel")}

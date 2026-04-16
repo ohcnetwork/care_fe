@@ -263,7 +263,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium">{t("basic_information")}</h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {t("resource_request_basic_info_description")}
               </p>
             </div>
@@ -426,7 +426,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium">{t("request_details")}</h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {t("resource_request_details_description")}
               </p>
             </div>
@@ -482,7 +482,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                 <h3 className="text-lg font-medium">
                   {t("contact_information")}
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {t("contact_information_description")}
                 </p>
               </div>
@@ -540,7 +540,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
             </div>
           </div>
 
-          <div className="flex justify-end gap-4 border-t border-gray-200 pt-4">
+          <div className="flex justify-end gap-4 border-t border-border pt-4">
             <Button type="button" variant="outline" onClick={() => goBack()}>
               {t("cancel")}
             </Button>

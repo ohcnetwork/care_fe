@@ -31,12 +31,12 @@ export default function RailPanel({
           aria-expanded={open}
           onClick={() => onOpenChange(!open)}
           className={cn(
-            "border border-gray-200 rounded-sm bg-gray-200 h-full relative transition-all duration-300 ease-in-out w-auto",
+            "border border-border rounded-sm bg-strong-background h-full relative transition-all duration-300 ease-in-out w-auto",
             open ? "cursor-w-resize" : "cursor-e-resize",
           )}
         >
           <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
-            <div className="rounded-b-lg rounded-t-lg border border-gray-300 bg-white">
+            <div className="rounded-b-lg rounded-t-lg border border-strong-border bg-background">
               <GripVertical className="size-4 my-2" />
             </div>
           </div>

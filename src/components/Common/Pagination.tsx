@@ -99,7 +99,7 @@ const Pagination = ({
       </div>
 
       {/* Desktop view */}
-      <nav className="relative hidden rounded-lg border border-secondary-300 bg-white sm:inline-flex sm:flex-1 sm:items-center sm:justify-between">
+      <nav className="relative hidden rounded-lg border border-secondary-300 bg-background sm:inline-flex sm:flex-1 sm:items-center sm:justify-between">
         <NavButton
           id="first-page"
           tooltip="Jump to first page"

@@ -273,15 +273,15 @@ export const ENCOUNTER_STATUS_FILTER_COLORS = {
   cancelled: "bg-red-100 text-red-900 border-red-300",
   discontinued: "bg-red-100 text-red-900 border-red-300",
   entered_in_error: "bg-red-100 text-red-900 border-red-300",
-  unknown: "bg-gray-100 text-gray-900 border-gray-300",
+  unknown: "bg-muted-background text-foreground border-strong-border",
 } as const;
 
 export const ENCOUNTER_CLASS_FILTER_COLORS = {
   imp: "bg-indigo-100 text-indigo-900 border-indigo-300",
   emer: "bg-red-100 text-red-900 border-red-300",
   amb: "bg-green-100 text-green-900 border-green-300",
-  obsenc: "border-gray-300 bg-gray-100 text-gray-900",
-  vr: "border-gray-300 bg-gray-100 text-gray-900",
+  obsenc: "border-strong-border bg-muted-background text-foreground",
+  vr: "border-strong-border bg-muted-background text-foreground",
   hh: "bg-teal-100 text-teal-900 border-teal-300",
 } as const;
 

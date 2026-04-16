@@ -61,7 +61,7 @@ const TokenCard = ({
   return (
     <Card
       id={id}
-      className="p-2 border border-gray-200 relative transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none bg-gray-100"
+      className="p-2 border border-border relative transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none bg-muted-background"
     >
       <div className="flex flex-col px-1">
         {token && <p className="font-semibold">{renderTokenNumber(token)}</p>}
@@ -71,23 +71,23 @@ const TokenCard = ({
           </p>
         )}
         {appointment && (
-          <p className="text-gray-700">
+          <p className="text-muted-foreground">
             {formatScheduleResourceName(appointment)}
           </p>
         )}
       </div>
-      <div className="flex flex-col gap-2 bg-white rounded-md p-4 shadow-md mt-2 ">
+      <div className="flex flex-col gap-2 bg-card rounded-md p-4 shadow-md mt-2 ">
         <div className="flex flex-row justify-between">
           <div className=" flex flex-col items-start justify-between">
             {patient && (
               <div>
-                <Label className="text-gray-600 text-sm">
+                <Label className="text-soft-foreground text-sm">
                   {t("patient_name")}:
                 </Label>
                 <p className="font-semibold wrap-break-word text-sm">
                   {patient.name || "--"}
                 </p>
-                <p className="pl-1 text-sm text-gray-600 font-medium">
+                <p className="pl-1 text-sm text-soft-foreground font-medium">
                   {formatPatientAge(patient, true)},{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </p>
@@ -99,7 +99,7 @@ const TokenCard = ({
                   )
                   .map((identifier) => (
                     <div key={identifier.config.id}>
-                      <Label className="text-gray-600 text-sm">
+                      <Label className="text-soft-foreground text-sm">
                         {identifier.config.config.display}:
                       </Label>
                       <p className="font-semibold text-sm">
@@ -109,7 +109,7 @@ const TokenCard = ({
                   ))}
                 {inPrintMode && patient.address?.trim() && (
                   <div>
-                    <Label className="text-gray-600 text-sm">
+                    <Label className="text-soft-foreground text-sm">
                       {t("address")}:
                     </Label>
                     <p className="font-semibold text-sm whitespace-pre-wrap">
@@ -130,7 +130,7 @@ const TokenCard = ({
                   {appointment && (
                     <>
                       <div>
-                        <Label className="text-gray-600 text-sm">
+                        <Label className="text-soft-foreground text-sm">
                           {t(
                             `schedulable_resource__${appointment.resource_type}`,
                           )}
@@ -142,17 +142,17 @@ const TokenCard = ({
                       </div>
                       <Separator />
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-sm font-semibold text-foreground">
                           {appointment.token_slot.availability.name}
                         </p>
-                        <p className="text-sm font-semibold text-gray-600 flex gap-2">
-                          <span className="text-sm font-semibold text-gray-600">
+                        <p className="text-sm font-semibold text-soft-foreground flex gap-2">
+                          <span className="text-sm font-semibold text-soft-foreground">
                             {formatDate(
                               appointment.token_slot.start_datetime,
                               "EEE, dd MMM",
                             )}
                           </span>
-                          <span className="text-sm font-semibold text-gray-600">
+                          <span className="text-sm font-semibold text-soft-foreground">
                             {formatSlotTimeRange(appointment.token_slot)}
                           </span>
                         </p>
@@ -186,7 +186,7 @@ const TokenCard = ({
                     <h3 className="text-sm font-semibold tracking-tight wrap-break-word">
                       {facility.name}
                     </h3>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-soft-foreground">
                       <span>{facility.pincode}</span>
                       <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
                     </div>
@@ -198,7 +198,7 @@ const TokenCard = ({
           <div className="flex flex-col gap-2 items-end">
             {token && (
               <div className="items-end">
-                <Label className="text-gray-600 text-sm whitespace-nowrap justify-end">
+                <Label className="text-soft-foreground text-sm whitespace-nowrap justify-end">
                   {t("token_no")}
                 </Label>
                 <p className="text-2xl font-bold justify-end flex">
@@ -221,7 +221,7 @@ const TokenCard = ({
             <div className="pt-3 mx-4 flex gap-2 justify-between print:hidden">
               <Button
                 variant="link"
-                className="underline font-semibold text-base capitalize text-gray-950"
+                className="underline font-semibold text-base capitalize text-foreground"
               >
                 <Link
                   basePath="/"
@@ -233,7 +233,7 @@ const TokenCard = ({
               <Button
                 variant="outline"
                 onClick={() => print()}
-                className="text-base text-gray-950 font-semibold"
+                className="text-base text-foreground font-semibold"
               >
                 <PrinterIcon className="size-4 mr-2" />
                 {t("print_token")}

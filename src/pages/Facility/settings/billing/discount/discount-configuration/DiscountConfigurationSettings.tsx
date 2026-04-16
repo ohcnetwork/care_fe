@@ -85,12 +85,12 @@ export function DiscountConfigurationSettings() {
   return (
     <Page title={t("discount_configuration")}>
       <section className="w-full max-w-5xl mx-auto mt-8">
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 flex flex-col gap-6">
+        <div className="bg-card border border-border rounded-xl shadow-sm p-8 flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-foreground">
               {t("discount_configuration")}
             </h2>
-            <p className="text-gray-500 text-sm">
+            <p className="text-muted-foreground text-sm">
               {t("discount_configuration_description")}
             </p>
           </div>
@@ -111,7 +111,7 @@ export function DiscountConfigurationSettings() {
                   }
                   className="w-full"
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {t("max_applicable_discounts_description")}
                 </p>
               </div>
@@ -138,7 +138,7 @@ export function DiscountConfigurationSettings() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {t("applicability_order_description")}
                 </p>
               </div>
@@ -163,25 +163,25 @@ export function DiscountConfigurationSettings() {
           ) : (
             <div className="flex flex-col gap-4 w-full max-w-md">
               <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-muted-foreground">
                   {t("max_applicable_discounts")}
                 </span>
-                <span className="font-mono bg-gray-100 px-3 py-2 rounded text-base border border-gray-200 text-gray-800 block">
+                <span className="font-mono bg-muted-background px-3 py-2 rounded text-base border border-border text-foreground block">
                   {config?.max_applicable ?? (
-                    <span className="text-gray-400">-</span>
+                    <span className="text-placeholder-foreground">-</span>
                   )}
                 </span>
               </div>
 
               <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-muted-foreground">
                   {t("applicability_order")}
                 </span>
-                <span className="font-mono bg-gray-100 px-3 py-2 rounded text-base border border-gray-200 text-gray-800 block">
+                <span className="font-mono bg-muted-background px-3 py-2 rounded text-base border border-border text-foreground block">
                   {config?.applicability_order ? (
                     t(`applicability_order_${config.applicability_order}`)
                   ) : (
-                    <span className="text-gray-400">-</span>
+                    <span className="text-placeholder-foreground">-</span>
                   )}
                 </span>
               </div>

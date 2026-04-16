@@ -83,7 +83,7 @@ export default function TemplateList({
           <div className="relative flex-3 w-full sm:w-auto">
             <CareIcon
               icon="l-search"
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-placeholder-foreground"
             />
             <Input
               type="search"
@@ -165,7 +165,7 @@ export default function TemplateList({
               </Button>
             )
           }
-          className="my-4 bg-gray-50"
+          className="my-4 bg-soft-background"
         />
       ) : (
         <>

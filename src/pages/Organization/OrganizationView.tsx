@@ -127,7 +127,7 @@ export default function OrganizationView({
                               </div>
                             </div>
                             {orgChild.description && (
-                              <p className="text-sm text-gray-500 line-clamp-2">
+                              <p className="text-sm text-muted-foreground line-clamp-2">
                                 {orgChild.description}
                               </p>
                             )}
@@ -148,7 +148,7 @@ export default function OrganizationView({
                     ))
                   ) : (
                     <Card className="col-span-full">
-                      <CardContent className="p-6 text-center text-gray-500">
+                      <CardContent className="p-6 text-center text-muted-foreground">
                         {qParams.name
                           ? t("no_organizations_found")
                           : t("no_sub_organizations_found")}

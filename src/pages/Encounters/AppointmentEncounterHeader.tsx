@@ -157,8 +157,8 @@ const PatientScanButton = ({
         aria-label={t("scan_qr")}
         className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
       >
-        <ScanLine className="size-4 text-black" />
-        <span className="text-sm text-black">{t("scan")}</span>
+        <ScanLine className="size-4 text-foreground" />
+        <span className="text-sm text-foreground">{t("scan")}</span>
       </Button>
       <PatientIDScanDialog
         open={scanDialogOpen}
@@ -179,7 +179,7 @@ export const AppointmentEncounterHeader = ({
   canWritePrimaryEncounter: boolean;
 }) => {
   return (
-    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full sm:items-center items-stretch justify-center shadow-sm">
+    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 border border-strong-border rounded-lg py-1.5 px-2 bg-background sm:w-fit w-full sm:items-center items-stretch justify-center shadow-sm">
       <div className="flex divide-x-2 items-stretch justify-evenly overflow-auto">
         <PatientScanButton
           facilityId={encounter.facility.id}
@@ -250,14 +250,14 @@ const AppointmentEncounterHeaderActions = ({
           appointment.token && "sm:border-l-2 sm:pl-2",
         )}
       >
-        <span className="text-sm text-black">
+        <span className="text-sm text-foreground">
           {option === "mark_as_complete"
             ? t("do_you_want_to_complete_this_encounter")
             : t("do_you_want_to_start_this_encounter")}
         </span>
         <Button
           variant="outline"
-          className="w-full sm:w-auto text-sm font-semibold text-black"
+          className="w-full sm:w-auto text-sm font-semibold text-foreground"
           onClick={
             option === "mark_as_complete"
               ? actions.markAsCompleted
@@ -279,7 +279,7 @@ const AppointmentEncounterHeaderActions = ({
         appointment.token && "sm:border-l-2 sm:pl-2",
       )}
     >
-      <span className="text-sm text-black">
+      <span className="text-sm text-foreground">
         {t("how_do_you_to_finish_this_visit")}
       </span>
       <DropdownMenu>
@@ -289,7 +289,7 @@ const AppointmentEncounterHeaderActions = ({
             className="w-full sm:w-auto"
             disabled={isEndEncounterPending}
           >
-            <span className="text-sm font-semibold text-black">
+            <span className="text-sm font-semibold text-foreground">
               {t("end_actions")}
             </span>
             <ChevronDown className="size-4" />
@@ -309,10 +309,10 @@ const AppointmentEncounterHeaderActions = ({
               }}
             >
               <div className="flex flex-col items-start">
-                <span className="text-sm font-medium text-black">
+                <span className="text-sm font-medium text-foreground">
                   {t(option)}
                 </span>
-                <p className="text-xs text-gray-700">
+                <p className="text-xs text-muted-foreground">
                   {t(`${option}_description`)}
                 </p>
               </div>
@@ -355,9 +355,11 @@ const TokenActions = ({
             className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
           >
             <Link href={getQueueLink(appointment)}>
-              <CalendarRange className="size-4 text-black" />
-              <span className="text-sm text-black underline">{t("list")}</span>
-              <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
+              <CalendarRange className="size-4 text-foreground" />
+              <span className="text-sm text-foreground underline">
+                {t("list")}
+              </span>
+              <ExternalLinkIcon className="size-4 text-foreground hidden sm:block" />
             </Link>
           </Button>
         </div>
@@ -375,21 +377,23 @@ const TokenActions = ({
               <>
                 {token ? (
                   <>
-                    <span className="text-xs sm:text-sm text-gray-600">
+                    <span className="text-xs sm:text-sm text-soft-foreground">
                       {t("token")}:
                     </span>
                     <div className="flex whitespace-nowrap gap-1 items-center">
-                      <span className="text-sm text-black font-semibold underline">
+                      <span className="text-sm text-foreground font-semibold underline">
                         {renderTokenNumber(token)}
                       </span>
-                      <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
+                      <ExternalLinkIcon className="size-4 text-foreground hidden sm:block" />
                     </div>
                   </>
                 ) : (
                   <>
-                    <CalendarCheck className="size-4 text-black" />
-                    <span className="text-black underline">{t("view")}</span>
-                    <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
+                    <CalendarCheck className="size-4 text-foreground" />
+                    <span className="text-foreground underline">
+                      {t("view")}
+                    </span>
+                    <ExternalLinkIcon className="size-4 text-foreground hidden sm:block" />
                   </>
                 )}
               </>
@@ -408,9 +412,11 @@ const TokenActions = ({
               basePath="/"
               href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
             >
-              <ListOrdered className="size-4 text-black" />
-              <span className="text-sm text-black underline">{t("queue")}</span>
-              <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
+              <ListOrdered className="size-4 text-foreground" />
+              <span className="text-sm text-foreground underline">
+                {t("queue")}
+              </span>
+              <ExternalLinkIcon className="size-4 text-foreground hidden sm:block" />
             </Link>
           </Button>
         </div>

@@ -46,7 +46,7 @@ export function PatientHeader({
                   key={identifier.config.id}
                   className="flex flex-col gap-1 items-start md:hidden xl:flex"
                 >
-                  <span className="text-xs text-gray-700 md:w-auto">
+                  <span className="text-xs text-muted-foreground md:w-auto">
                     {identifier.config.config.display}:{" "}
                   </span>
                   <span className="text-sm font-semibold">

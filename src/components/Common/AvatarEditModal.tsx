@@ -282,7 +282,7 @@ export default function AvatarEditModal({
                       </>
                     ) : (
                       <>
-                        <div className="w-full h-[400px] bg-gray-100 rounded-lg flex items-center justify-center">
+                        <div className="w-full h-[400px] bg-muted-background rounded-lg flex items-center justify-center">
                           {croppedPreview ? (
                             <img
                               src={croppedPreview || "/placeholder.svg"}

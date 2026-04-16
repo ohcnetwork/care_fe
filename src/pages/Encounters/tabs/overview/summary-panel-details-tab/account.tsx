@@ -86,8 +86,8 @@ export const Account = () => {
     account?.primary_encounter?.id === encounter.id;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
-      <div className="flex justify-between items-center text-gray-950 pl-2">
+    <div className="bg-muted-background rounded-md w-full border border-border p-1 pt-2 space-y-1">
+      <div className="flex justify-between items-center text-foreground pl-2">
         <span className="font-semibold">{t("account")}:</span>
         <AccountSheetButton
           encounter={encounter}
@@ -99,18 +99,18 @@ export const Account = () => {
         />
       </div>
 
-      <div className="bg-white rounded-md p-1 shadow">
+      <div className="bg-background rounded-md p-1 shadow">
         {!account ? (
           <EmptyState message={t("no_account_found")} />
         ) : (
           <Link href={`/facility/${facilityId}/billing/account/${account.id}`}>
             <div
               className={cn(
-                "flex flex-row bg-gray-100 rounded-md p-2 border border-gray-200 justify-between",
+                "flex flex-row bg-muted-background rounded-md p-2 border border-border justify-between",
                 !isCurrentEncounterPrimary ? "bg-red-100" : "bg-green-100",
               )}
             >
-              <span className="text-sm text-black font-semibold">
+              <span className="text-sm text-foreground font-semibold">
                 {account.name}
               </span>
 

@@ -128,7 +128,7 @@ export function LocationCardWrapper({
         </div>
         <div
           className={cn(
-            "flex gap-2 border border-gray-200 rounded-lg bg-gray-50 px-2 py-1",
+            "flex gap-2 border border-border rounded-lg bg-soft-background px-2 py-1",
             areLinkedLocations && !isEditing
               ? "flex-row items-start"
               : "flex-col justify-between",

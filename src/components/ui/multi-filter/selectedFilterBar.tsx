@@ -32,7 +32,7 @@ function SubMenuFilter({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center gap-2 px-2.5 h-9 border-x border-gray-200 underline cursor-pointer text-sm text-gray-600 whitespace-nowrap">
+        <div className="flex items-center gap-2 px-2.5 h-9 border-x border-border underline cursor-pointer text-sm text-soft-foreground whitespace-nowrap">
           {t(selectedOption.label)}
         </div>
       </DropdownMenuTrigger>
@@ -89,17 +89,17 @@ export function SelectedFilterBar({
     >
       <div
         className={cn(
-          "flex items-center bg-white rounded-md border border-gray-200 w-fit",
+          "flex items-center bg-background rounded-md border border-border w-fit",
           selectedBarClassName,
         )}
       >
         <DropdownMenuTrigger asChild>
           <div
-            className="flex items-center gap-2 px-3 h-9 border-gray-200 text-sm"
+            className="flex items-center gap-2 px-3 h-9 border-border text-sm"
             onClick={onClick}
           >
             {filter?.icon}
-            <span className="truncate text-gray-950 font-medium cursor-pointer">
+            <span className="truncate text-foreground font-medium cursor-pointer">
               {t(filter.label)}
             </span>
           </div>
@@ -111,8 +111,8 @@ export function SelectedFilterBar({
           }
           availableOptions={availableOperations ?? []}
         />
-        <div className="flex items-center gap-2 px-3 h-9 border-gray-200 whitespace-nowrap">
-          <span className="truncate text-gray-950 font-medium">
+        <div className="flex items-center gap-2 px-3 h-9 border-border whitespace-nowrap">
+          <span className="truncate text-foreground font-medium">
             {filter.renderSelected?.(selected, filter, onFilterChange)}
           </span>
         </div>
@@ -120,9 +120,9 @@ export function SelectedFilterBar({
           <Button
             variant="ghost"
             onClick={clearFilter}
-            className="flex border-l rounded-l-none border-gray-200 hover:bg-gray-50"
+            className="flex border-l rounded-l-none border-border hover:bg-soft-background"
           >
-            <X className="h-5 w-5 text-gray-600" />
+            <X className="h-5 w-5 text-soft-foreground" />
           </Button>
         )}
       </div>

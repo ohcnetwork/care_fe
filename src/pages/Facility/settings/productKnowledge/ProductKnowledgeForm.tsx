@@ -144,7 +144,7 @@ export default function ProductKnowledgeForm({
       <Page title={t("edit_product_knowledge")} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("edit_product_knowledge")}
             </h1>
           </div>
@@ -329,7 +329,7 @@ function ProductKnowledgeFormContent({
     >
       <div className="container mx-auto max-w-3xl">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-foreground">
             {isEditMode
               ? t("edit_product_knowledge")
               : t("create_product_knowledge")}
@@ -339,13 +339,13 @@ function ProductKnowledgeFormContent({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Basic Information Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("basic_information")}
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {t("pk_form_basic_information_description")}
                   </p>
                 </div>
@@ -578,14 +578,14 @@ function ProductKnowledgeFormContent({
             </div>
 
             {/* Alternative Names Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-base font-medium text-gray-900">
+                    <h2 className="text-base font-medium text-foreground">
                       {t("alternative_names")}
                     </h2>
-                    <p className="mt-0.5 text-sm text-gray-500">
+                    <p className="mt-0.5 text-sm text-muted-foreground">
                       {t("add_product_alternative name")}
                     </p>
                   </div>
@@ -675,7 +675,7 @@ function ProductKnowledgeFormContent({
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-md bg-gray-50 p-4 text-center text-sm text-gray-500">
+                  <div className="rounded-md bg-soft-background p-4 text-center text-sm text-muted-foreground">
                     {t("no_alternative_names_added")}
                   </div>
                 )}
@@ -683,14 +683,14 @@ function ProductKnowledgeFormContent({
             </div>
 
             {/* Storage Guidelines Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-base font-medium text-gray-900">
+                    <h2 className="text-base font-medium text-foreground">
                       {t("storage_guidelines")}
                     </h2>
-                    <p className="mt-0.5 text-sm text-gray-500">
+                    <p className="mt-0.5 text-sm text-muted-foreground">
                       {t("pk_form_storage_guidelines_description")}
                     </p>
                   </div>
@@ -807,7 +807,7 @@ function ProductKnowledgeFormContent({
                                         >
                                           <span>
                                             {t(`unit_${duration.code}`)}
-                                            <span className="text-sm ml-1 text-gray-500">
+                                            <span className="text-sm ml-1 text-muted-foreground">
                                               ({duration.code})
                                             </span>
                                           </span>
@@ -833,7 +833,7 @@ function ProductKnowledgeFormContent({
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-md bg-gray-50 p-4 text-center text-sm text-gray-500">
+                  <div className="rounded-md bg-soft-background p-4 text-center text-sm text-muted-foreground">
                     {t("no_storage_guidelines_added")}
                   </div>
                 )}
@@ -841,14 +841,14 @@ function ProductKnowledgeFormContent({
             </div>
 
             {/* Product Definition Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-2">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
-                    <h2 className="text-base font-medium text-gray-900">
+                    <h2 className="text-base font-medium text-foreground">
                       {t("product_definition")}
                     </h2>
-                    <p className="mt-0.5 text-sm text-gray-500">
+                    <p className="mt-0.5 text-sm text-muted-foreground">
                       {t("pk_form_definitional_description")}
                     </p>
                   </div>
@@ -931,10 +931,10 @@ function ProductKnowledgeFormContent({
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-sm font-medium text-gray-900">
+                          <h3 className="text-sm font-medium text-foreground">
                             {t("intended_routes")}
                           </h3>
-                          <p className="mt-0.5 text-xs text-gray-500">
+                          <p className="mt-0.5 text-xs text-muted-foreground">
                             {t("pk_form_intended_routes_description")}
                           </p>
                         </div>
@@ -1008,14 +1008,14 @@ function ProductKnowledgeFormContent({
                           ))}
                         </div>
                       ) : (
-                        <div className="rounded-md bg-gray-50 p-4 text-center text-sm text-gray-500">
+                        <div className="rounded-md bg-soft-background p-4 text-center text-sm text-muted-foreground">
                           {t("no_routes_added")}
                         </div>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <div className="rounded-md bg-gray-50 p-4 text-center text-sm text-gray-500">
+                  <div className="rounded-md bg-soft-background p-4 text-center text-sm text-muted-foreground">
                     {t("no_product_definition_added")}
                   </div>
                 )}

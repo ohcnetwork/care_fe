@@ -233,7 +233,7 @@ export default function MedicationDispenseHistory({
               <TabsTrigger
                 key={key}
                 value={key}
-                className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                className="border-b-2 px-2 sm:px-4 py-2 text-soft-foreground hover:text-foreground data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
               >
                 {t(label)}
               </TabsTrigger>
@@ -251,7 +251,7 @@ export default function MedicationDispenseHistory({
               })
             }
             placeholder={t("filter_by_identifier")}
-            className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+            className="w-full sm:w-auto rounded-md h-9 text-muted-foreground shadow-sm"
             patientId={qParams.patientId}
             patientName={qParams.patient_name}
           />
@@ -335,7 +335,7 @@ export default function MedicationDispenseHistory({
                       }
                     >
                       {item.patient.name}
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted-foreground">
                         {t("created_at")}: {formatDateTime(item.created_date)}
                       </div>
                     </TableCell>
@@ -348,7 +348,7 @@ export default function MedicationDispenseHistory({
                     </TableCell>
                     <TableCell className="text-sm">
                       <div className="font-medium">{item.location.name}</div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted-foreground">
                         {item.location.description}
                       </div>
                     </TableCell>

@@ -56,7 +56,7 @@ export default function ScheduleTemplates({
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center text-center text-gray-500 py-16">
+      <div className="flex flex-col items-center text-center text-muted-foreground py-16">
         <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
         <p>{t("no_schedule_templates_found")}</p>
       </div>
@@ -121,7 +121,7 @@ const ScheduleTemplateItem = ({
   });
 
   return (
-    <div className="rounded-lg bg-white py-2 shadow-sm">
+    <div className="rounded-lg bg-card py-2 shadow-sm">
       <div className="flex items-center justify-between py-2 pr-4">
         <div className="flex">
           <ColoredIndicator
@@ -135,7 +135,7 @@ const ScheduleTemplateItem = ({
               {!template.is_public && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Lock className="size-4 text-gray-400" />
+                    <Lock className="size-4 text-placeholder-foreground" />
                   </TooltipTrigger>
                   <TooltipContent>
                     {t("schedule_template_is_not_public")}
@@ -144,7 +144,7 @@ const ScheduleTemplateItem = ({
               )}
             </div>
 
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-muted-foreground">
               {t("schedule_for")}
               {": "}
               <strong className="font-medium">
@@ -194,17 +194,19 @@ const ScheduleTemplateItem = ({
         <ul className="flex flex-col gap-2">
           {template.availabilities.map((slot) => (
             <li key={slot.id} className="w-full">
-              <div className="rounded-lg bg-gray-50 px-3 py-2">
+              <div className="rounded-lg bg-soft-background px-3 py-2">
                 <div className="flex w-full items-center justify-between">
                   <div className="flex flex-col">
                     <span>{slot.name}</span>
-                    <p className="text-gray-600">
+                    <p className="text-soft-foreground">
                       <span className="text-sm">
                         {t(`SCHEDULE_AVAILABILITY_TYPE__${slot.slot_type}`)}
                       </span>
                       {slot.slot_type === "appointment" && (
                         <>
-                          <span className="px-2 text-gray-300">|</span>
+                          <span className="px-2 text-disabled-foreground">
+                            |
+                          </span>
                           <span className="text-sm">
                             {Math.floor(
                               getSlotsPerSession(
@@ -227,7 +229,7 @@ const ScheduleTemplateItem = ({
             </li>
           ))}
         </ul>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-muted-foreground">
           <Trans
             i18nKey="schedule_valid_from_till_range"
             values={{

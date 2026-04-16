@@ -164,20 +164,22 @@ export const QuestionGroup = memo(function QuestionGroup({
   return (
     <div
       className={cn(
-        "sm:rounded-lg bg-gray-100 md:bg-transparent",
+        "sm:rounded-lg bg-muted-background md:bg-transparent",
         isActive && "ring-2 ring-primary",
         question.styling_metadata?.classes && question.styling_metadata.classes,
       )}
     >
       {question.text && (
-        <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
+        <div className="px-2 pt-2 bg-muted-background md:bg-transparent">
           <QuestionLabel
             question={question}
             groupLabel
             isSubQuestion={isSubQuestion}
           />
           {question.description && (
-            <p className="text-sm text-gray-500">{question.description}</p>
+            <p className="text-sm text-muted-foreground">
+              {question.description}
+            </p>
           )}
         </div>
       )}

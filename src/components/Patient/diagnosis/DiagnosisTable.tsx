@@ -38,9 +38,9 @@ const DiagnosisCard = ({
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
   return (
-    <div className="border shadow rounded-md p-2 bg-white">
+    <div className="border shadow rounded-md p-2 bg-card">
       <div className="flex justify-between items-start flex-wrap gap-3">
-        <div className="flex-1 font-semibold text-gray-900 break-words">
+        <div className="flex-1 font-semibold text-foreground break-words">
           {diagnosis.code.display}
         </div>
 
@@ -76,18 +76,18 @@ const DiagnosisCard = ({
               )}
 
               {(!!onViewEncounter || diagnosis.note) && (
-                <div className="my-1 border-t border-dashed border-gray-300" />
+                <div className="my-1 border-t border-dashed border-strong-border" />
               )}
 
               <div className="p-1 text-xs">
-                <div className="text-gray-500">{t("reported_by")}:</div>
+                <div className="text-muted-foreground">{t("reported_by")}:</div>
                 <div className="mt-1 flex items-center gap-1.5">
                   <Avatar
                     name={formatName(diagnosis.created_by)}
                     className="size-5"
                     imageUrl={diagnosis.created_by.profile_picture_url}
                   />
-                  <span className="font-medium text-gray-900 truncate">
+                  <span className="font-medium text-foreground truncate">
                     {formatName(diagnosis.created_by)}
                   </span>
                 </div>
@@ -98,7 +98,9 @@ const DiagnosisCard = ({
       </div>
       <div className="mt-4 flex gap-8 flex-wrap">
         <div>
-          <div className="text-sm text-gray-600 mb-1">{t("verification")}</div>
+          <div className="text-sm text-soft-foreground mb-1">
+            {t("verification")}
+          </div>
           <Badge
             variant={
               DIAGNOSIS_VERIFICATION_STATUS_COLORS[
@@ -111,14 +113,16 @@ const DiagnosisCard = ({
         </div>
         {diagnosis.severity && (
           <div>
-            <div className="text-sm text-gray-600 mb-1">{t("severity")}</div>
+            <div className="text-sm text-soft-foreground mb-1">
+              {t("severity")}
+            </div>
             <Badge variant={DIAGNOSIS_SEVERITY_COLORS[diagnosis.severity]}>
               {t(diagnosis.severity)}
             </Badge>
           </div>
         )}
         <div>
-          <div className="text-sm text-gray-600 mb-1">{t("onset")}</div>
+          <div className="text-sm text-soft-foreground mb-1">{t("onset")}</div>
           {diagnosis.onset?.onset_datetime ? (
             <RelativeDateTooltip
               date={diagnosis.onset.onset_datetime}
@@ -130,8 +134,8 @@ const DiagnosisCard = ({
         </div>
       </div>
       {showNote && diagnosis.note && (
-        <div className="col-span-full relative border border-gray-200 p-2 bg-gray-50 rounded mt-2 rounded-t-none">
-          <div className="text-sm font-semibold text-gray-800">
+        <div className="col-span-full relative border border-border p-2 bg-soft-background rounded mt-2 rounded-t-none">
+          <div className="text-sm font-semibold text-foreground">
             {t("note")}
             {":"}
           </div>
@@ -145,7 +149,7 @@ const DiagnosisCard = ({
             <span className="underline">{t("hide_note")}</span>
           </Button>
 
-          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words mt-2">
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap pr-8 max-w-full break-words mt-2">
             {diagnosis.note}
           </p>
         </div>
@@ -165,7 +169,7 @@ export const DiagnosisTable = ({
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
   const baseHeaderClasses =
-    "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
+    "text-center border-y border-border bg-soft-background p-1 text-muted-foreground text-sm";
 
   return (
     <>
@@ -192,7 +196,7 @@ export const DiagnosisTable = ({
       <div className="overflow-x-auto hidden sm:block">
         <div className="min-w-xl pb-2">
           <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-y-2">
-            <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
+            <div className="px-3 border border-border rounded-tl-lg bg-soft-background py-1 text-muted-foreground text-sm">
               {t("diagnosis")}
             </div>
 
@@ -212,7 +216,7 @@ export const DiagnosisTable = ({
 
             <div
               className={cn(
-                "text-center border border-l-0 border-gray-200 rounded-tr-lg bg-gray-50",
+                "text-center border border-l-0 border-border rounded-tr-lg bg-soft-background",
               )}
             ></div>
 
@@ -235,7 +239,7 @@ export const DiagnosisTable = ({
                   {
                     key: "display",
                     className:
-                      "bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 rounded-l",
+                      "bg-muted-background break-words whitespace-normal text-base font-semibold text-foreground rounded-l",
                     render: () => diagnosis.code.display,
                   },
                   {
@@ -283,7 +287,7 @@ export const DiagnosisTable = ({
                   },
                   {
                     key: "onset",
-                    className: "bg-gray-100",
+                    className: "bg-muted-background",
                     render: () =>
                       diagnosis.onset?.onset_datetime ? (
                         <RelativeDateTooltip

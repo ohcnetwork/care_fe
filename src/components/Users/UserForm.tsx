@@ -251,9 +251,9 @@ export default function UserForm({
         <div className="flex items-center gap-1">
           <CareIcon
             icon="l-spinner"
-            className="text-sm text-gray-500 animate-spin"
+            className="text-sm text-muted-foreground animate-spin"
           />
-          <span className="text-gray-500 text-sm">
+          <span className="text-muted-foreground text-sm">
             {t("checking_availability")}
           </span>
         </div>
@@ -570,7 +570,7 @@ export default function UserForm({
                 control={form.control}
                 name="password_setup_method"
                 render={({ field }) => (
-                  <FormItem className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <FormItem className="border border-border rounded-lg p-4 bg-soft-background">
                     <FormLabel className="text-base font-medium mb-3 block">
                       {t("password_setup_method")}
                     </FormLabel>
@@ -584,8 +584,8 @@ export default function UserForm({
                           className={cn(
                             "flex items-start space-x-3 rounded-md border p-3",
                             field.value === "immediate"
-                              ? "bg-white border-primary"
-                              : "bg-transparent  border-gray-200",
+                              ? "bg-background border-primary"
+                              : "bg-transparent  border-border",
                           )}
                         >
                           <RadioGroupItem
@@ -601,7 +601,7 @@ export default function UserForm({
                               <Lock className="size-4" />
                               {t("set_password_now")}
                             </Label>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               {t("set_password_now_description")}
                             </p>
                           </div>
@@ -611,8 +611,8 @@ export default function UserForm({
                           className={cn(
                             "flex items-start space-x-3 rounded-md border p-3",
                             field.value === "email"
-                              ? "bg-white border-primary"
-                              : "bg-transparent  border-gray-200",
+                              ? "bg-background border-primary"
+                              : "bg-transparent  border-border",
                           )}
                         >
                           <RadioGroupItem
@@ -628,7 +628,7 @@ export default function UserForm({
                               <Mail className="size-4" />
                               {t("send_email_invitation")}
                             </Label>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               {t("send_email_invitation_description")}
                             </p>
                           </div>

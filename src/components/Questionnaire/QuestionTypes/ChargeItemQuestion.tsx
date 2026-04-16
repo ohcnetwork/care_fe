@@ -137,7 +137,7 @@ function ChargeItemForm({
               0 && (
               <Popover>
                 <PopoverTrigger>
-                  <InfoIcon className="h-4 w-4 text-gray-700 cursor-pointer" />
+                  <InfoIcon className="h-4 w-4 text-muted-foreground cursor-pointer" />
                 </PopoverTrigger>
                 <PopoverContent
                   side="right"

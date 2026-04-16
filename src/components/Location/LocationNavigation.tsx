@@ -71,7 +71,7 @@ export function LocationNavigation({
       <form onSubmit={onSearch}>
         <div className="relative">
           <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-placeholder-foreground"
             size={18}
           />
           <Input
@@ -121,7 +121,7 @@ export function LocationNavigation({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-gray-950 border-gray-400 font-semibold"
+                  className="text-foreground border-stronger-border font-semibold"
                   onClick={onClearSelection}
                 >
                   <XIcon className="size-4" />
@@ -155,7 +155,7 @@ export function LocationNavigation({
 
             <BedStatusLegend />
             {!isLoadingBeds && beds.length === 0 && (
-              <div className="w-full mt-6 py-6 px-4 border border-gray-200 bg-gray-50 text-center text-gray-500 text-sm rounded-md">
+              <div className="w-full mt-6 py-6 px-4 border border-border bg-soft-background text-center text-muted-foreground text-sm rounded-md">
                 {t(
                   !showAvailableOnly
                     ? "no_beds_found"
@@ -175,7 +175,7 @@ export function LocationNavigation({
 
         {isLoadingLocations || isLoadingBeds ? (
           <div className="flex justify-center my-4">
-            <Loader2 className="size-6 animate-spin text-gray-400" />
+            <Loader2 className="size-6 animate-spin text-placeholder-foreground" />
           </div>
         ) : (
           hasMore && (

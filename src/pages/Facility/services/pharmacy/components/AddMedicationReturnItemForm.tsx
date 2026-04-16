@@ -277,7 +277,7 @@ export function AddMedicationReturnItemForm({
 
   return (
     <DisablingCover disabled={isProcessing} message={t("saving")}>
-      <Card className="bg-gray-50 py-4 rounded-md">
+      <Card className="bg-soft-background py-4 rounded-md">
         <CardContent className="space-y-4">
           {fields.length > 0 ? (
             <Form {...form}>
@@ -285,11 +285,11 @@ export function AddMedicationReturnItemForm({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
-                <div className="rounded-md border border-gray-200 bg-white shadow overflow-hidden">
+                <div className="rounded-md border border-border bg-background shadow overflow-hidden">
                   <div className="overflow-x-auto">
                     <Table>
-                      <TableHeader className="bg-gray-100">
-                        <TableRow className="divide-x divide-gray-200">
+                      <TableHeader className="bg-muted-background">
+                        <TableRow className="divide-x divide-border">
                           <TableHead className="min-w-[180px] text-xs font-semibold">
                             {t("product")}
                           </TableHead>
@@ -308,7 +308,7 @@ export function AddMedicationReturnItemForm({
                         {fields.map((field, index) => (
                           <TableRow
                             key={field.id}
-                            className="divide-x divide-gray-200"
+                            className="divide-x divide-border"
                           >
                             <TableCell className="align-top p-2">
                               <FormField
@@ -495,7 +495,7 @@ export function AddMedicationReturnItemForm({
           ) : (
             <div className="flex flex-col gap-3 items-center">
               <h4>{t("add_items_to_return")}</h4>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {t("select_items_from_stock_to_return")}
               </p>
               <div className="flex flex-row gap-2 items-center mt-2">
@@ -534,7 +534,7 @@ export function AddMedicationReturnItemForm({
               <DialogTitle>{t("select_items_to_add")}</DialogTitle>
             </DialogHeader>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-placeholder-foreground" />
               <Input
                 placeholder={t("search_items")}
                 value={dispenseSearchQuery}
@@ -547,7 +547,9 @@ export function AddMedicationReturnItemForm({
             <div className="flex-1 overflow-y-auto">
               {filteredDispenses.length === 0 ? (
                 <EmptyState
-                  icon={<Search className="size-4 text-gray-400" />}
+                  icon={
+                    <Search className="size-4 text-placeholder-foreground" />
+                  }
                   title={t("no_results_found")}
                   description={t("try_different_search")}
                   className="rounded-md shadow-none border-solid"
@@ -582,7 +584,7 @@ export function AddMedicationReturnItemForm({
                       {filteredDispenses.map((dispense) => (
                         <TableRow
                           key={dispense.id}
-                          className="hover:bg-gray-50 cursor-pointer select-none"
+                          className="hover:bg-soft-background cursor-pointer select-none"
                           onClick={() =>
                             handleSelectDispense(
                               dispense.id,
@@ -610,7 +612,7 @@ export function AddMedicationReturnItemForm({
                               </span>
                               {(dispense.item.product.batch?.lot_number ||
                                 dispense.item.product.expiration_date) && (
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-muted-foreground">
                                   {dispense.item.product.batch?.lot_number &&
                                     `${t("lot")}: ${dispense.item.product.batch.lot_number}`}
                                   {dispense.item.product.batch?.lot_number &&

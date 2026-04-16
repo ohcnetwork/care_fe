@@ -159,7 +159,7 @@ export function TextQuestion({
       <div className="flex items-stretch">
         <div
           className={cn(
-            "flex-1 bg-white border border-gray-300 border-r-0",
+            "flex-1 bg-background border border-strong-border border-r-0",
             hasTemplates ? "rounded-tl-md" : "rounded-l-md",
           )}
         >
@@ -207,7 +207,7 @@ export function TextQuestion({
               type="button"
               disabled={disabled}
               className={cn(
-                "flex items-center justify-center w-10 border border-gray-300 bg-gray-100/20",
+                "flex items-center justify-center w-10 border border-strong-border bg-muted-background/20",
                 hasTemplates ? "rounded-tr-md" : "rounded-r-md",
                 hasNotes && "bg-orange-50",
               )}
@@ -216,7 +216,7 @@ export function TextQuestion({
                 icon={hasNotes ? "l-notes" : "l-file-medical-alt"}
                 className={cn(
                   "size-4",
-                  hasNotes ? "text-orange-600" : "text-gray-500",
+                  hasNotes ? "text-orange-600" : "text-muted-foreground",
                 )}
               />
             </button>
@@ -228,7 +228,7 @@ export function TextQuestion({
             <Textarea
               value={notes}
               onChange={(e) => handleUpdateNote(e.target.value)}
-              className="bg-white border-orange-200 focus-visible:border-orange-300 focus-visible:ring-orange-300"
+              className="bg-background border-orange-200 focus-visible:border-orange-300 focus-visible:ring-orange-300"
               placeholder={t("add_notes")}
               disabled={disabled}
             />
@@ -237,7 +237,7 @@ export function TextQuestion({
       </div>
       {/* Insert Template section - only shown when templates exist */}
       {hasTemplates && (
-        <div className="bg-gray-50/10 border border-t-0 border-gray-300 rounded-bl-md rounded-br-md">
+        <div className="bg-soft-background/10 border border-t-0 border-strong-border rounded-bl-md rounded-br-md">
           <TemplateSelector
             templates={question.templates!}
             onAddTemplates={handleAddTemplates}

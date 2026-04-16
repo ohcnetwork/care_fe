@@ -429,7 +429,7 @@ export default function ConsentFormSheet({
                                 <p className="font-medium">
                                   {t(`consent_category__${category}`)}
                                 </p>
-                                <p className="text-xs text-gray-500 whitespace-normal">
+                                <p className="text-xs text-muted-foreground whitespace-normal">
                                   {t(
                                     `consent_category__${category}_description`,
                                   )}
@@ -524,7 +524,7 @@ export default function ConsentFormSheet({
                                 }}
                               />
                             </FormControl>
-                            <div className="bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 flex items-center gap-2 max-w-[150px]">
+                            <div className="bg-muted-background border border-border rounded-lg px-2 py-1 flex items-center gap-2 max-w-[150px]">
                               <span className="text-sm truncate">
                                 {file.name}
                               </span>

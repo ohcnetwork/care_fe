@@ -592,7 +592,7 @@ export function AddSupplyDeliveryForm({
   return (
     <>
       <DisablingCover disabled={isProcessing} message={t("saving")}>
-        <Card className="bg-gray-50 py-4 rounded-md">
+        <Card className="bg-soft-background py-4 rounded-md">
           <CardContent className="space-y-4 ">
             {fields.length > 0 ? (
               <Form {...form}>
@@ -618,7 +618,7 @@ export function AddSupplyDeliveryForm({
                                 <div
                                   key={type}
                                   className={cn(
-                                    "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
+                                    "flex items-center space-x-2 rounded-md border border-border bg-background p-2",
                                     field.value === type &&
                                       "border-primary bg-primary/10",
                                   )}
@@ -635,12 +635,12 @@ export function AddSupplyDeliveryForm({
                     />
                   </div>
 
-                  <div className="rounded-md border border-gray-200 bg-white shadow overflow-hidden">
+                  <div className="rounded-md border border-border bg-background shadow overflow-hidden">
                     <div className="overflow-x-auto">
                       <Table>
-                        <TableHeader className="bg-gray-100">
+                        <TableHeader className="bg-muted-background">
                           {origin ? (
-                            <TableRow className="divide-x divide-gray-200">
+                            <TableRow className="divide-x divide-border">
                               <TableHead className="min-w-[180px] text-xs font-semibold">
                                 {t("product")}
                               </TableHead>
@@ -656,7 +656,7 @@ export function AddSupplyDeliveryForm({
                             </TableRow>
                           ) : (
                             <>
-                              <TableRow className="divide-x divide-gray-200">
+                              <TableRow className="divide-x divide-border">
                                 <TableHead
                                   rowSpan={2}
                                   className="min-w-[180px] text-xs font-semibold"
@@ -738,7 +738,7 @@ export function AddSupplyDeliveryForm({
                                   {t("actions")}
                                 </TableHead>
                               </TableRow>
-                              <TableRow className="divide-x divide-gray-200">
+                              <TableRow className="divide-x divide-border">
                                 <TableHead className="min-w-[100px] text-xs font-semibold">
                                   {t("item_price")}
                                 </TableHead>
@@ -765,7 +765,7 @@ export function AddSupplyDeliveryForm({
                             origin ? (
                               <TableRow
                                 key={field.id}
-                                className="divide-x divide-gray-200"
+                                className="divide-x divide-border"
                               >
                                 <TableCell className="align-top p-2">
                                   <FormField
@@ -1007,7 +1007,7 @@ export function AddSupplyDeliveryForm({
                 {supplyRequests.results.map((request) => (
                   <div
                     key={request.id}
-                    className="flex items-center space-x-4 p-2 hover:bg-gray-50"
+                    className="flex items-center space-x-4 p-2 hover:bg-soft-background"
                   >
                     <Checkbox
                       id={request.id}

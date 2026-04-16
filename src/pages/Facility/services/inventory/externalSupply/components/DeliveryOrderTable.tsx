@@ -108,7 +108,7 @@ export default function DeliveryOrderTable({
                 <span className="font-medium">
                   {formatName(delivery.created_by)}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted-foreground">
                   {formatDateTime(delivery.created_date)}
                 </span>
               </div>

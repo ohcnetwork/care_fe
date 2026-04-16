@@ -97,7 +97,9 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
 
     return (
       <div key={`${contact.system}-${contact.value}`} className="space-y-1">
-        <p className="text-sm font-medium text-gray-500">{t(contact.system)}</p>
+        <p className="text-sm font-medium text-muted-foreground">
+          {t(contact.system)}
+        </p>
         {link ? (
           <a
             href={link}
@@ -108,7 +110,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             {contact.value}
           </a>
         ) : (
-          <p className="text-sm text-gray-900">{contact.value}</p>
+          <p className="text-sm text-foreground">{contact.value}</p>
         )}
       </div>
     );
@@ -143,13 +145,13 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("registered_name")}
                   </h4>
                   <p className="mt-1 break-all">{device.registered_name}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("user_friendly_name")}
                   </h4>
                   <p className="mt-1">{device.user_friendly_name || "-"}</p>
@@ -158,7 +160,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("location")}
                   </h4>
                   <div className="mt-1 flex items-center gap-2">
@@ -171,7 +173,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                         <ExternalLink className="size-3 flex-shrink-0" />
                       </Link>
                     ) : (
-                      <span className="text-gray-500 text-sm">
+                      <span className="text-muted-foreground text-sm">
                         {t("no_location_associated")}
                       </span>
                     )}
@@ -191,7 +193,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("encounter")}
                   </h4>
                   <div className="mt-1 flex items-center gap-2">
@@ -205,7 +207,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                         <ExternalLink className="size-3 flex-shrink-0" />
                       </Link>
                     ) : (
-                      <span className="text-gray-500 text-sm">
+                      <span className="text-muted-foreground text-sm">
                         {t("no_encounter_associated")}
                       </span>
                     )}
@@ -226,7 +228,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                 </div>
 
                 <div className="md:col-span-2">
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("managing_organization")}
                   </h4>
                   <div className="mt-1 flex items-center gap-2">
@@ -239,7 +241,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                         <ExternalLink className="size-3 flex-shrink-0" />
                       </Link>
                     ) : (
-                      <span className="text-gray-500 text-sm">
+                      <span className="text-muted-foreground text-sm">
                         {t("no_organization_associated")}
                       </span>
                     )}
@@ -299,43 +301,43 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("identifier")}
                   </h4>
                   <p className="text-sm mt-1">{device.identifier || "-"}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("lot_number")}
                   </h4>
                   <p className="text-sm mt-1">{device.lot_number || "-"}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("manufacturer")}
                   </h4>
                   <p className="text-sm mt-1">{device.manufacturer || "-"}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("model_number")}
                   </h4>
                   <p className="text-sm mt-1">{device.model_number || "-"}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("serial_number")}
                   </h4>
                   <p className="text-sm mt-1">{device.serial_number || "-"}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("part_number")}
                   </h4>
                   <p className="text-sm mt-1">{device.part_number || "-"}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("manufacture_date")}
                   </h4>
                   <p className="text-sm mt-1">
@@ -345,7 +347,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">
+                  <h4 className="text-sm font-medium text-muted-foreground">
                     {t("expiration_date")}
                   </h4>
                   <p className="text-sm mt-1">
@@ -415,7 +417,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                 <h3 className="text-sm font-medium">
                   {t("delete_this_device")}
                 </h3>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-muted-foreground">
                   {t("delete_device_description")}
                 </p>
               </div>

@@ -105,7 +105,9 @@ export const EncounterOverviewTab = () => {
       ) : (
         <div className="flex-1 xl:pr-3 flex items-center justify-center">
           <EmptyState
-            icon={<ShieldAlert className="text-gray-400 size-8" />}
+            icon={
+              <ShieldAlert className="text-placeholder-foreground size-8" />
+            }
             title={t("no_permission_to_view_clinical_data")}
             description={t("no_permission_to_view_clinical_data_description")}
             className="h-full w-full bg-transparent"

@@ -104,7 +104,7 @@ export function BackupCodesDialog({
           )}
         </DialogHeader>
         <div className="space-y-4">
-          <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="bg-soft-background p-4 rounded-lg">
             <div className="grid grid-cols-2 gap-2">
               {backupCodes.map((code, index) => (
                 <code key={index} className="font-mono text-sm">
@@ -129,7 +129,7 @@ export function BackupCodesDialog({
             >
               <CareIcon
                 icon="l-file-download"
-                className="size-4 text-gray-500"
+                className="size-4 text-muted-foreground"
               />
               {t("download")}
             </Button>
@@ -138,7 +138,10 @@ export function BackupCodesDialog({
               onClick={handlePrintBackupCodes}
               className="flex-1"
             >
-              <CareIcon icon="l-print" className="size-4 text-gray-500" />
+              <CareIcon
+                icon="l-print"
+                className="size-4 text-muted-foreground"
+              />
               {t("print")}
             </Button>
           </div>

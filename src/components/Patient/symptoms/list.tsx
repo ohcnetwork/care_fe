@@ -101,10 +101,10 @@ export function SymptomsList({
         {Object.entries(groupedByYear).map(([year, groupedByDate]) => {
           return (
             <div key={year}>
-              <h2 className="text-sm font-medium text-indigo-700 border-y border-gray-300 py-2 w-fit pr-10">
+              <h2 className="text-sm font-medium text-indigo-700 border-y border-strong-border py-2 w-fit pr-10">
                 {year}
               </h2>
-              <div className="border-l border-gray-300 pt-5 ml-4">
+              <div className="border-l border-strong-border pt-5 ml-4">
                 {Object.entries(groupedByDate).map(([date, symptoms]) => {
                   return (
                     <div key={date} className="pb-6">
@@ -157,7 +157,7 @@ export function SymptomsList({
           variant="ghost"
           size="icon"
           asChild
-          className="hover:bg-transparent text-gray-500 hover:text-gray-500"
+          className="hover:bg-transparent text-muted-foreground hover:text-muted-foreground"
         >
           <Link
             href={

@@ -193,7 +193,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
               {t("patient_registration")}
             </h2>
 
-            <div className="mt-4 space-y-6 flex flex-col bg-white border border-gray-200/50 rounded-md p-8 shadow-md">
+            <div className="mt-4 space-y-6 flex flex-col bg-background border border-border/50 rounded-md p-8 shadow-md">
               <span className="inline-block bg-primary-100 p-4 rounded-md w-full mb-4 text-primary-600 text-sm">
                 {t("phone_number_verified")}:{" "}
                 <span className="font-bold">{tokenData.phoneNumber}</span>
@@ -302,7 +302,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                           />
                         </FormControl>
                         <FormMessage />
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {t("age_notice")}
                         </span>
                         {form.getValues("age") && (
@@ -327,7 +327,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
               </div>
             </div>
 
-            <div className="space-y-6 mt-12 flex-row bg-white border border-gray-200/50 rounded-md p-8 shadow-md">
+            <div className="space-y-6 mt-12 flex-row bg-background border border-border/50 rounded-md p-8 shadow-md">
               <FormField
                 control={form.control}
                 name="address"

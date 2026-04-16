@@ -45,7 +45,7 @@ export function EmptyState() {
   return (
     <div className="flex min-h-[200px] flex-col items-center justify-center gap-1 p-8 text-center">
       <div className="rounded-full bg-secondary/10 p-3">
-        <UserRound className="text-3xl text-gray-500" />
+        <UserRound className="text-3xl text-muted-foreground" />
       </div>
       <div className="max-w-[300px] space-y-1">
         <h3 className="font-medium">{t("no_care_team_members")}</h3>
@@ -280,7 +280,7 @@ export function CareTeamSheet({
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               {member.role.display}
                             </p>
                           </div>

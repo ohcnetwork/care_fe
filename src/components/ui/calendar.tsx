@@ -92,7 +92,7 @@ function Calendar({
   );
   const _weekdaysClassName = cn("flex flex-row", props.weekdaysClassName);
   const _weekdayClassName = cn(
-    "w-8 text-sm font-normal text-gray-700",
+    "w-8 text-sm font-normal text-muted-foreground",
     props.weekdayClassName,
   );
   const _monthClassName = cn("w-full", props.monthClassName);
@@ -101,7 +101,7 @@ function Calendar({
     props.captionClassName,
   );
   const _captionLabelClassName = cn(
-    "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8 [&>svg]:size-3.5 border border-gray-400",
+    "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8 [&>svg]:size-3.5 border border-stronger-border",
     props.captionLabelClassName,
   );
   const buttonNavClassName = buttonVariants({
@@ -152,15 +152,15 @@ function Calendar({
     props.selectedClassName,
   );
   const _todayClassName = cn(
-    "[&>button]:bg-gray-100 [&>button]:rounded-md",
+    "[&>button]:bg-muted-background [&>button]:rounded-md",
     props.todayClassName,
   );
   const _outsideClassName = cn(
-    "day-outside text-gray-500 opacity-50 aria-selected:bg-accent/50 aria-selected:text-gray-700 aria-selected:opacity-30",
+    "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
     props.outsideClassName,
   );
   const _disabledClassName = cn(
-    "text-gray-500 opacity-50",
+    "text-muted-foreground opacity-50",
     props.disabledClassName,
   );
   const _hiddenClassName = cn("invisible flex-1", props.hiddenClassName);

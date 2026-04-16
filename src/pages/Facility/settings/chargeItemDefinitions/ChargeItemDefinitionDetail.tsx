@@ -94,7 +94,9 @@ export function ChargeItemDefinitionDetail({
             {typeLabels[component.monetary_component_type]}
           </p>
           {component.code && (
-            <p className="text-sm text-gray-500">{component.code.display}</p>
+            <p className="text-sm text-muted-foreground">
+              {component.code.display}
+            </p>
           )}
         </div>
         <div className="text-right">
@@ -106,7 +108,9 @@ export function ChargeItemDefinitionDetail({
           ) : component.factor ? (
             <p className="font-medium">{round(component.factor)}%</p>
           ) : (
-            <p className="text-sm text-gray-500">{t("not_specified")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("not_specified")}
+            </p>
           )}
         </div>
       </div>
@@ -127,7 +131,7 @@ export function ChargeItemDefinitionDetail({
     return (
       <Page title={t("charge_item_definition_not_found")}>
         <div className="container mx-auto">
-          <div className="flex h-[200px] items-center justify-center text-gray-500">
+          <div className="flex h-[200px] items-center justify-center text-muted-foreground">
             <div className="text-center">
               <CareIcon icon="l-folder-open" className="mx-auto mb-2 size-8" />
               <p>{t("charge_item_definition_not_found")}</p>
@@ -250,7 +254,7 @@ export function ChargeItemDefinitionDetail({
               <CardContent>
                 {chargeItemDefinition.description && (
                   <div className="mb-4">
-                    <h3 className="text-sm font-medium text-gray-500">
+                    <h3 className="text-sm font-medium text-muted-foreground">
                       {t("description")}
                     </h3>
                     <p className="whitespace-pre-wrap">
@@ -260,7 +264,7 @@ export function ChargeItemDefinitionDetail({
                 )}
                 {chargeItemDefinition.purpose && (
                   <div className="mb-4">
-                    <h3 className="text-sm font-medium text-gray-500">
+                    <h3 className="text-sm font-medium text-muted-foreground">
                       {t("purpose")}
                     </h3>
                     <p className="whitespace-pre-wrap">
@@ -270,7 +274,7 @@ export function ChargeItemDefinitionDetail({
                 )}
                 {chargeItemDefinition.derived_from_uri && (
                   <div className="mb-4">
-                    <h3 className="text-sm font-medium text-gray-500">
+                    <h3 className="text-sm font-medium text-muted-foreground">
                       {t("derived_from")}
                     </h3>
                     <p className="font-mono text-sm">
@@ -280,7 +284,7 @@ export function ChargeItemDefinitionDetail({
                 )}
                 {chargeItemDefinition.can_edit_charge_item !== undefined && (
                   <div className="mb-4">
-                    <h3 className="text-sm font-medium text-gray-500">
+                    <h3 className="text-sm font-medium text-muted-foreground">
                       {t("can_edit_charge_item")}
                     </h3>
                     <p>
@@ -300,7 +304,7 @@ export function ChargeItemDefinitionDetail({
             </CardHeader>
             <CardContent>
               {chargeItemDefinition.price_components.length === 0 ? (
-                <div className="py-4 text-center text-gray-500">
+                <div className="py-4 text-center text-muted-foreground">
                   <p>{t("no_price_components")}</p>
                 </div>
               ) : (
@@ -321,7 +325,7 @@ export function ChargeItemDefinitionDetail({
                         {/* {component.conditions && ( */}
                         {component.conditions && (
                           <div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               {t("conditions")}
                             </p>
                             <div className="flex flex-wrap gap-1 mt-1">
@@ -329,7 +333,7 @@ export function ChargeItemDefinitionDetail({
                                 return (
                                   <div
                                     key={index}
-                                    className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
+                                    className="flex items-center justify-between text-sm text-soft-foreground bg-soft-background px-3 py-2 rounded border"
                                   >
                                     <ConditionOperationSummary
                                       condition={condition}

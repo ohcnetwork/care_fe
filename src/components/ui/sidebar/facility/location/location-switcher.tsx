@@ -81,16 +81,16 @@ export function LocationSwitcher() {
         <div className="w-full px-2">
           <Button
             variant="ghost"
-            className="w-full flex items-center justify-between gap-3 py-6 px-2 rounded-md bg-white border border-gray-200"
+            className="w-full flex items-center justify-between gap-3 py-6 px-2 rounded-md bg-background border border-border"
             onClick={() => setOpenDialog(true)}
           >
             <div className="flex items-center gap-2">
               <MapPinIcon className="size-5 text-green-600" />
               <div className="flex flex-col items-start">
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted-foreground">
                   {t("current_location")}
                 </span>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-foreground">
                   {location?.name}
                 </span>
               </div>
@@ -209,8 +209,8 @@ export function LocationSelectorDialog({
 
     return (
       <div className="flex flex-row items-center gap-1 text-sm font-normal">
-        <span className="text-gray-500">{t("current_location")}:</span>
-        <div className="flex flex-row gap-1 items-center p-1 rounded-md bg-gray-100">
+        <span className="text-muted-foreground">{t("current_location")}:</span>
+        <div className="flex flex-row gap-1 items-center p-1 rounded-md bg-muted-background">
           {locationList.map((loc, index) => (
             <div className="flex flex-row gap-1 items-center" key={loc.id}>
               {loc.has_children ? (
@@ -250,7 +250,7 @@ export function LocationSelectorDialog({
           <DialogTitle>{getCurrentLocation()}</DialogTitle>
         </DialogHeader>
         {locationLevel.length > 0 && (
-          <div className="flex flex-row justify-between gap-1 bg-gray-100 p-1 overflow-auto">
+          <div className="flex flex-row justify-between gap-1 bg-muted-background p-1 overflow-auto">
             <div className="flex flex-row gap-1 items-center">
               {locationLevel.map((level, index) => (
                 <div
@@ -260,13 +260,13 @@ export function LocationSelectorDialog({
                   {level.has_children ? (
                     <Button
                       variant="link"
-                      className="w-full text-nowrap text-xs border bg-gray-100 border-gray-200 rounded-md p-2"
+                      className="w-full text-nowrap text-xs border bg-muted-background border-border rounded-md p-2"
                       onClick={() => handleLocationClick(level)}
                     >
                       {level.name}
                     </Button>
                   ) : (
-                    <div className="w-full text-xs border bg-gray-100 border-gray-200 rounded-md p-2">
+                    <div className="w-full text-xs border bg-muted-background border-border rounded-md p-2">
                       {level.name}
                     </div>
                   )}
@@ -304,7 +304,7 @@ export function LocationSelectorDialog({
           </div>
         )}
         <Command className="pt-3" shouldFilter={false}>
-          <div className="border border-gray-200">
+          <div className="border border-border">
             <CommandInput
               className="border-0 ring-0 sm:text-sm text-base"
               placeholder={t("search")}
@@ -323,8 +323,8 @@ export function LocationSelectorDialog({
               <CommandEmpty>
                 {isLoading ? (
                   <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                    <span className="ml-2 text-sm text-gray-500">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    <span className="ml-2 text-sm text-muted-foreground">
                       {t("loading")}
                     </span>
                   </div>
@@ -387,7 +387,7 @@ function LocationCommandItem({
       <div className="flex flex-col min-w-0">
         <span className="truncate">{location.name}</span>
         {isSearching && path && (
-          <span className="text-xs text-gray-500 truncate">{path}</span>
+          <span className="text-xs text-muted-foreground truncate">{path}</span>
         )}
       </div>
       <div>

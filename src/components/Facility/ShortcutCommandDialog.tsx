@@ -107,7 +107,7 @@ export function ShortcutCommandDialog({
         onOpenChange={onOpenChange}
         className="md:max-w-2xl"
       >
-        <div className="border-b border-gray-100 shadow-xs">
+        <div className="border-b border-soft-border shadow-xs">
           <CommandInput
             placeholder={t("search")}
             className="border-none focus:ring-0 text-base sm:text-sm"
@@ -123,12 +123,12 @@ export function ShortcutCommandDialog({
                     key={action.id}
                     value={action.id}
                     onSelect={() => handleSelect(action.id)}
-                    className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
+                    className="rounded-md cursor-pointer hover:bg-muted-background flex justify-between aria-selected:bg-muted-background"
                     autoFocus={false}
                   >
                     <span className="flex-1">{action.label}</span>
                     {action.shortcut && (
-                      <CommandShortcut className="ml-2 text-xs text-gray-500 bg-white border border-gray-200 shadow-xs px-1.5 py-0.5 rounded">
+                      <CommandShortcut className="ml-2 text-xs text-muted-foreground bg-background border border-border shadow-xs px-1.5 py-0.5 rounded">
                         {action.shortcut}
                       </CommandShortcut>
                     )}

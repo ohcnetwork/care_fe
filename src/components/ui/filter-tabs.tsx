@@ -115,16 +115,16 @@ export function FilterTabs({
 
   const getTriggerClassName = () => {
     if (variant === "underline") {
-      return "border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none";
+      return "border-b-3 px-1.5 sm:px-2.5 py-2 text-soft-foreground font-semibold hover:text-foreground data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none";
     }
-    return "data-[state=active]:bg-white data-[state=active]:text-gray-950 px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-900 data-[state=active]:shadow-sm";
+    return "data-[state=active]:bg-background data-[state=active]:text-foreground px-3 py-1 text-sm font-medium text-soft-foreground hover:text-foreground data-[state=active]:shadow-sm";
   };
 
   const getMoreButtonClassName = () => {
     if (variant === "underline") {
-      return "text-gray-500 font-semibold hover:text-gray-900 hover:bg-transparent pb-2.5 px-2.5 rounded-none";
+      return "text-muted-foreground font-semibold hover:text-foreground hover:bg-transparent pb-2.5 px-2.5 rounded-none";
     }
-    return "text-gray-500 font-medium text-sm px-3 flex items-center";
+    return "text-muted-foreground font-medium text-sm px-3 flex items-center";
   };
 
   const tabsToShow = showMoreDropdown ? visibleOptions : options;
@@ -132,7 +132,9 @@ export function FilterTabs({
   return (
     <div className={cn("flex items-center gap-4", className)}>
       {label && (
-        <span className="text-sm font-medium text-gray-700">{t(label)}:</span>
+        <span className="text-sm font-medium text-muted-foreground">
+          {t(label)}:
+        </span>
       )}
       <Tabs value={value || "all"} onValueChange={handleValueChange}>
         <TabsList className={getTabsClassName()}>
@@ -163,7 +165,7 @@ export function FilterTabs({
                   <DropdownMenuItem
                     key={option}
                     onClick={() => handleDropdownSelect(option)}
-                    className="text-gray-950 font-medium text-sm"
+                    className="text-foreground font-medium text-sm"
                   >
                     {t(option)}
                   </DropdownMenuItem>

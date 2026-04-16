@@ -66,7 +66,7 @@ const MESSAGES_LIMIT = 20;
 // Info tooltip component for help text
 const InfoTooltip = ({ content }: { content: string }) => (
   <TooltipComponent content={content}>
-    <Info className="size-4 text-gray-500 hover:text-primary cursor-help" />
+    <Info className="size-4 text-muted-foreground hover:text-primary cursor-help" />
   </TooltipComponent>
 );
 
@@ -85,7 +85,7 @@ const ThreadItem = ({
       "group relative w-full p-4 text-left rounded-lg transition-colors border",
       isSelected
         ? "bg-primary-100 hover:bg-primary/15 border-primary"
-        : "hover:bg-gray-100 hover:border-gray-200",
+        : "hover:bg-muted-background hover:border-border",
     )}
     onClick={onClick}
   >
@@ -147,16 +147,16 @@ function MessageItem({
           className={cn(
             "p-3 rounded-lg break-words whitespace-pre-wrap w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
             isCurrentUser
-              ? "bg-white text-black rounded-tr-none border border-gray-200"
-              : "bg-gray-100 rounded-tl-none border border-gray-200",
+              ? "bg-background text-foreground rounded-tr-none border border-border"
+              : "bg-muted-background rounded-tl-none border border-border",
           )}
         >
           <p className="text-xs space-x-2 mb-1">
-            <span className="text-gray-700 font-medium">
+            <span className="text-muted-foreground font-medium">
               {formatName(message.created_by)}
             </span>
             <time
-              className="text-gray-500"
+              className="text-muted-foreground"
               dateTime={message.created_date}
               title={formatDateTime(message.created_date)}
             >
@@ -167,8 +167,8 @@ function MessageItem({
             className={cn(
               "p-3 rounded-lg break-words",
               isCurrentUser
-                ? "bg-white text-black rounded-tr-none border border-gray-200"
-                : "bg-gray-100 rounded-tl-none border border-gray-200",
+                ? "bg-background text-foreground rounded-tr-none border border-border"
+                : "bg-muted-background rounded-tl-none border border-border",
             )}
           >
             {message.message && (
@@ -285,7 +285,7 @@ const MobileNav = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-2 flex items-center justify-around z-50 divide-x">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-background p-2 flex items-center justify-around z-50 divide-x">
       <Button
         variant="ghost"
         size="sm"
@@ -490,8 +490,8 @@ export function NoteManager({
   return (
     <div className="flex h-[calc(100vh-15rem)] overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
-        <div className="p-4 border-b border-gray-200">
+      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-border">
+        <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MessageCircle className="size-4 text-primary" />
@@ -516,7 +516,7 @@ export function NoteManager({
             {threadsData?.results.length === 0 ? (
               <div className="text-center py-6">
                 <MessageSquarePlus className="size-8 text-primary mx-auto mb-3" />
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {t("notes__no_discussions")}
                 </p>
               </div>
@@ -542,7 +542,7 @@ export function NoteManager({
           </SheetDescription>
           <SheetTitle className="sr-only">{t("encounter")}</SheetTitle>
           <div className="flex flex-col h-full">
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-4 border-b border-border">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MessageCircle className="size-4 text-primary" />
@@ -570,7 +570,7 @@ export function NoteManager({
                 {threadsData?.results.length === 0 ? (
                   <div className="text-center py-6">
                     <MessageSquarePlus className="size-8 text-primary mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {t("notes__no_discussions")}
                     </p>
                   </div>
@@ -597,7 +597,7 @@ export function NoteManager({
       <div className="flex-1 min-w-0 flex flex-col">
         <div className="flex flex-col h-full relative">
           {/* Header */}
-          <div className="p-3 sm:p-4 border-b border-gray-200 bg-white z-1">
+          <div className="p-3 sm:p-4 border-b border-border bg-background z-1">
             {selectedThread ? (
               <div className="flex items-center gap-3">
                 <h2 className="text-base font-medium truncate flex-1">
@@ -610,7 +610,7 @@ export function NoteManager({
                   content={`${t("participants")}: ${new Set(messages.map((m) => m.created_by.id)).size}
                     ${t("messages")}: ${totalMessages}`}
                 >
-                  <div className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
                     <Users className="size-4" />
                     <span>
                       {new Set(messages.map((m) => m.created_by.id)).size}
@@ -621,7 +621,7 @@ export function NoteManager({
                 </TooltipComponent>
               </div>
             ) : (
-              <div className="text-center text-sm font-medium text-gray-500">
+              <div className="text-center text-sm font-medium text-muted-foreground">
                 {t("notes__select_create_thread")}
               </div>
             )}
@@ -691,7 +691,7 @@ export function NoteManager({
 
                   {/* Message Input */}
                   {canWrite && (
-                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky bottom-0 max-lg:bottom-14">
+                    <div className="border-t border-border p-3 sm:p-4 bg-background sticky bottom-0 max-lg:bottom-14">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
@@ -738,7 +738,7 @@ export function NoteManager({
               <h3 className="text-lg font-medium mb-2">
                 {t("notes__welcome")}
               </h3>
-              <p className="text-sm text-gray-500 mb-6 max-w-sm">
+              <p className="text-sm text-muted-foreground mb-6 max-w-sm">
                 {t("notes__welcome_description")}
               </p>
               <Button

@@ -41,7 +41,7 @@ export function OrganizationSwitcher({
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-background"
               tooltip={
                 selectedOrganization
                   ? t("my_organizations")

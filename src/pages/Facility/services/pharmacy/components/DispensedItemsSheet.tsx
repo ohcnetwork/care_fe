@@ -140,7 +140,7 @@ export function DispensedItemsSheet({
               )}
             </>
           ) : (
-            <p className="text-center text-gray-500">
+            <p className="text-center text-muted-foreground">
               {t("no_items_dispensed_yet")}
             </p>
           )}

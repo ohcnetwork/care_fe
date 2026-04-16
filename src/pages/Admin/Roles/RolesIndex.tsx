@@ -72,21 +72,23 @@ function RoleCard({
   return (
     <div
       className={cn(
-        "relative rounded-lg border bg-white p-4 transition-all",
+        "relative rounded-lg border bg-background p-4 transition-all",
         isSystem
-          ? "border-gray-100 bg-gray-50/50"
-          : "border-gray-200 hover:border-gray-300 hover:shadow-sm",
+          ? "border-soft-border bg-soft-background/50"
+          : "border-border hover:border-strong-border hover:shadow-sm",
       )}
     >
       {/* Header: name + actions */}
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            {isSystem && <Lock className="size-3 shrink-0 text-gray-400" />}
+            {isSystem && (
+              <Lock className="size-3 shrink-0 text-placeholder-foreground" />
+            )}
             <h3
               className={cn(
                 "truncate text-sm font-semibold",
-                isSystem ? "text-gray-600" : "text-gray-900",
+                isSystem ? "text-soft-foreground" : "text-foreground",
               )}
               title={role.name}
             >
@@ -98,7 +100,9 @@ function RoleCard({
             <p
               className={cn(
                 "mt-1 line-clamp-2 text-xs",
-                isSystem ? "text-gray-400" : "text-gray-500",
+                isSystem
+                  ? "text-placeholder-foreground"
+                  : "text-muted-foreground",
               )}
             >
               {role.description}
@@ -110,7 +114,7 @@ function RoleCard({
           {isSystem && (
             <Badge
               variant="outline"
-              className="border-gray-200 bg-gray-100 text-[10px] text-gray-500"
+              className="border-border bg-muted-background text-[10px] text-muted-foreground"
             >
               {t("system")}
             </Badge>
@@ -120,7 +124,7 @@ function RoleCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-7 text-gray-400 hover:text-gray-700"
+                className="size-7 text-placeholder-foreground hover:text-muted-foreground"
               >
                 <MoreVertical className="size-3.5" />
                 <span className="sr-only">{t("actions")}</span>
@@ -143,15 +147,17 @@ function RoleCard({
       </div>
 
       {/* Footer: contexts + permission count */}
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5">
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-soft-border pt-2.5">
         <div className="flex flex-wrap gap-1">
           {role.contexts.map((context) => (
             <Badge
               key={context}
               variant="outline"
               className={cn(
-                "border-gray-200 text-[10px] font-normal",
-                isSystem ? "bg-gray-50 text-gray-400" : "text-gray-500",
+                "border-border text-[10px] font-normal",
+                isSystem
+                  ? "bg-soft-background text-placeholder-foreground"
+                  : "text-muted-foreground",
               )}
             >
               {t(getRoleContextLabelKey(context))}
@@ -161,7 +167,7 @@ function RoleCard({
         <span
           className={cn(
             "shrink-0 text-[11px] tabular-nums",
-            isSystem ? "text-gray-400" : "text-gray-500",
+            isSystem ? "text-placeholder-foreground" : "text-muted-foreground",
           )}
         >
           {role.permissions.length} {t("permissions").toLowerCase()}
@@ -226,8 +232,8 @@ export default function RolesIndex() {
         {/* Header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t("roles")}</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-foreground">{t("roles")}</h1>
+            <p className="text-sm text-muted-foreground">
               {t("manage_roles_and_permissions")}
             </p>
           </div>
@@ -276,7 +282,7 @@ export default function RolesIndex() {
         {/* Search + Context Filters */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative w-full sm:max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-placeholder-foreground" />
             <Input
               placeholder={t("search_roles")}
               value={qParams.search || ""}
@@ -303,7 +309,7 @@ export default function RolesIndex() {
                   "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
                   contextFilter === filter
                     ? "border-primary-200 bg-primary-50 text-primary-700"
-                    : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50",
+                    : "border-border bg-background text-soft-foreground hover:bg-soft-background",
                 )}
               >
                 {getContextFilterLabel(filter)}

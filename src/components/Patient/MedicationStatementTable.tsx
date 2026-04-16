@@ -31,28 +31,28 @@ export const MedicationStatementTable = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <Table className="border-separate border-gray-200 border-spacing-y-0.5 min-w-5xl">
+    <Table className="border-separate border-border border-spacing-y-0.5 min-w-5xl">
       <TableHeader>
-        <TableRow className="rounded-md overflow-hidden bg-gray-100">
-          <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600">
+        <TableRow className="rounded-md overflow-hidden bg-muted-background">
+          <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-soft-foreground">
             {t("medication")}
           </TableHead>
-          <TableHead className="h-auto py-1 px-2 text-gray-600">
+          <TableHead className="h-auto py-1 px-2 text-soft-foreground">
             {t("dosage")}
           </TableHead>
-          <TableHead className="h-auto py-1 px-2 text-gray-600">
+          <TableHead className="h-auto py-1 px-2 text-soft-foreground">
             {t("status")}
           </TableHead>
-          <TableHead className="h-auto py-1 px-2 text-gray-600">
+          <TableHead className="h-auto py-1 px-2 text-soft-foreground">
             {t("medication_taken_between")}
           </TableHead>
-          <TableHead className="h-auto py-1 px-2 text-gray-600">
+          <TableHead className="h-auto py-1 px-2 text-soft-foreground">
             {t("reason")}
           </TableHead>
-          <TableHead className="h-auto py-1 px-2 text-gray-600">
+          <TableHead className="h-auto py-1 px-2 text-soft-foreground">
             {t("notes")}
           </TableHead>
-          <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-gray-600">
+          <TableHead className="last:rounded-r-md h-auto py-1 px-2 text-soft-foreground">
             {t("logged_by")}
           </TableHead>
         </TableRow>
@@ -61,7 +61,7 @@ export const MedicationStatementTable = ({
         {statements.map((statement) => (
           <TableRow
             key={statement.id}
-            className={`rounded-md overflow-hidden bg-gray-50 ${
+            className={`rounded-md overflow-hidden bg-soft-background ${
               statement.status === "entered_in_error" ? "opacity-50" : ""
             }`}
           >
@@ -106,7 +106,7 @@ export const MedicationStatementTable = ({
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-4">
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                         {statement.note}
                       </p>
                     </PopoverContent>

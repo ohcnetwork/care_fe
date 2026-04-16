@@ -211,8 +211,10 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       <button
         onClick={() => setSelectedDate(date)}
         className={cn(
-          "h-full w-full hover:bg-gray-50 rounded-lg",
-          isSelected ? "bg-white ring-2 ring-primary-500" : "bg-gray-100",
+          "h-full w-full hover:bg-soft-background rounded-lg",
+          isSelected
+            ? "bg-card ring-2 ring-primary-500"
+            : "bg-muted-background",
         )}
       >
         <span>{date.getDate()}</span>
@@ -238,7 +240,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="sm:w-1/3">
-            <Card className={cn("overflow-hidden bg-white")}>
+            <Card className={cn("overflow-hidden bg-card")}>
               <div className="flex flex-col">
                 <div className="flex flex-col gap-4 py-4 justify-between h-full">
                   <Avatar
@@ -251,20 +253,20 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                     <h3 className="truncate text-xl font-semibold">
                       {formatName(userData)}
                     </h3>
-                    <p className="text-sm text-gray-500 truncate">
+                    <p className="text-sm text-muted-foreground truncate">
                       {userData.user_type}
                     </p>
 
                     {/* <p className="text-xs mt-4">Education: </p>
-                    <p className="text-sm text-gray-500 truncate">
+                    <p className="text-sm text-muted-foreground truncate">
                       {userData.qualification}
                     </p> */}
                   </div>
                 </div>
 
-                <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
+                <div className="mt-auto border-t border-soft-border bg-soft-background p-4">
                   <div className="flex justify-between items-center">
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-muted-foreground">
                       {facilityResponse?.name}
                     </div>
                   </div>

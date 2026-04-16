@@ -53,7 +53,7 @@ export function ObservationHistorySheet({
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-xl bg-gray-50">
+      <SheetContent className="w-full sm:max-w-xl bg-soft-background">
         <SheetHeader>
           <SheetTitle>{t("observation_history")}</SheetTitle>
         </SheetHeader>
@@ -85,12 +85,14 @@ export function ObservationHistorySheet({
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       {observation.value?.value ? (
                         <div>
-                          <p className="text-gray-500">{t("value")}</p>
+                          <p className="text-muted-foreground">{t("value")}</p>
                           <p>{observation.value.value}</p>
                         </div>
                       ) : null}
                       <div>
-                        <p className="text-gray-500">{t("modified_date")}</p>
+                        <p className="text-muted-foreground">
+                          {t("modified_date")}
+                        </p>
                         <p>
                           {observation.effective_datetime
                             ? new Date(
@@ -100,13 +102,17 @@ export function ObservationHistorySheet({
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-500">{t("interpretation")}</p>
+                        <p className="text-muted-foreground">
+                          {t("interpretation")}
+                        </p>
                         <p className="capitalize">
                           {observation.interpretation?.display || "-"}
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-500">{t("recorded_by")}</p>
+                        <p className="text-muted-foreground">
+                          {t("recorded_by")}
+                        </p>
                         {observation.updated_by && (
                           <div className="flex items-center gap-2">
                             <span>{formatName(observation.updated_by)}</span>
@@ -119,14 +125,14 @@ export function ObservationHistorySheet({
                     {observation.component &&
                       observation.component.length > 0 && (
                         <div>
-                          <p className="text-gray-500 mb-2">
+                          <p className="text-muted-foreground mb-2">
                             {t("components")}
                           </p>
                           <div className="space-y-2">
                             {observation.component.map((comp, index) => (
                               <div
                                 key={index}
-                                className="bg-gray-50 p-2 rounded-md text-sm"
+                                className="bg-soft-background p-2 rounded-md text-sm"
                               >
                                 <p className="font-medium">
                                   {comp.code?.display || comp.code?.code}
@@ -146,7 +152,7 @@ export function ObservationHistorySheet({
 
                     {observation.note && (
                       <div>
-                        <p className="text-gray-500">{t("notes")}</p>
+                        <p className="text-muted-foreground">{t("notes")}</p>
                         <p className="text-sm">{observation.note}</p>
                       </div>
                     )}

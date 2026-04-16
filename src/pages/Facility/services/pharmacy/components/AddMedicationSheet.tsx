@@ -259,7 +259,7 @@ export const AddMedicationSheet = ({
         side="bottom"
         className="max-h-[90vh] min-h-[50vh] px-4 pt-2 pb-0 rounded-t-lg pb-safe"
       >
-        <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
+        <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-strong-background mt-2" />
         <div className="mt-6 h-full flex flex-col">
           <div className="flex items-center justify-between mb-6 px-20">
             <SheetHeader>
@@ -275,7 +275,7 @@ export const AddMedicationSheet = ({
               {selectedProduct && (
                 <>
                   <div>
-                    <Label className="text-sm text-gray-500 mb-1.5 block">
+                    <Label className="text-sm text-muted-foreground mb-1.5 block">
                       {t("selected")} {t("product")}
                     </Label>
                     <div className="font-medium text-lg">
@@ -408,7 +408,7 @@ export const AddMedicationSheet = ({
                             className={cn(
                               "flex gap-2",
                               localDosageInstruction?.as_needed_boolean &&
-                                "opacity-50 bg-gray-100 rounded-md",
+                                "opacity-50 bg-muted-background rounded-md",
                             )}
                           >
                             {localDosageInstruction?.timing && (
@@ -472,7 +472,7 @@ export const AddMedicationSheet = ({
                                 className={cn(
                                   "h-9 text-sm w-full",
                                   localDosageInstruction?.as_needed_boolean &&
-                                    "cursor-not-allowed bg-gray-50",
+                                    "cursor-not-allowed bg-soft-background",
                                 )}
                               >
                                 <SelectValue />
@@ -582,7 +582,7 @@ export const AddMedicationSheet = ({
               )}
             </div>
           </div>
-          <div className="sticky bottom-0 py-4 bg-white border-t flex justify-end px-20">
+          <div className="sticky bottom-0 py-4 bg-background border-t flex justify-end px-20">
             <Button
               className="mr-1"
               disabled={

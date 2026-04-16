@@ -203,7 +203,7 @@ export default function MedicationValueSetSelect({
                 wrapTextForSmallScreen
                   ? "h-auto whitespace-normal text-left"
                   : "truncate",
-                !value?.display && "text-gray-400",
+                !value?.display && "text-placeholder-foreground",
               )}
               disabled={disabled}
             >
@@ -260,8 +260,8 @@ export default function MedicationValueSetSelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between font-normal border-gray-300 shadow-xs",
-            !value?.display && "text-gray-500 hover:bg-white",
+            "w-full justify-between font-normal border-strong-border shadow-xs",
+            !value?.display && "text-muted-foreground hover:bg-background",
           )}
           disabled={disabled}
         >
@@ -329,19 +329,19 @@ function CategoryBreadcrumbs({
   }
 
   return (
-    <div className="p-1.5 border-b bg-gray-100 mt-0.5">
+    <div className="p-1.5 border-b bg-muted-background mt-0.5">
       <Breadcrumb>
         <BreadcrumbList className="text-xs flex-nowrap overflow-x-auto">
           <BreadcrumbItem>
             <BreadcrumbLink
               asChild
-              className="flex items-center hover:text-gray-900"
+              className="flex items-center hover:text-foreground"
               onClick={onBackToRoot}
             >
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 px-2 text-xs hover:bg-white"
+                className="h-6 px-2 text-xs hover:bg-background"
               >
                 <Home className="size-3" />
                 {t("root")}
@@ -354,13 +354,13 @@ function CategoryBreadcrumbs({
               <BreadcrumbSeparator />
               <BreadcrumbLink
                 asChild
-                className="hover:text-gray-900"
+                className="hover:text-foreground"
                 onClick={() => onBreadcrumbClick(index)}
               >
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 px-2 text-xs hover:bg-white truncate max-w-[150px]"
+                  className="h-6 px-2 text-xs hover:bg-background truncate max-w-[150px]"
                 >
                   {breadcrumb.title}
                 </Button>
@@ -424,20 +424,20 @@ function MedicationCommandItem({
       value={item.id}
       content={isCategory ? item.title : item.name}
       onSelect={handleSelect}
-      className="cursor-pointer p-3 hover:bg-gray-50"
+      className="cursor-pointer p-3 hover:bg-soft-background"
     >
       {isCategory ? (
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <FolderOpen className="size-5 text-gray-500" />
+          <FolderOpen className="size-5 text-muted-foreground" />
           <div className="min-w-0 flex-1">
             <div className="font-medium text-sm truncate">{item.title}</div>
             {item.description && (
-              <div className="text-xs text-gray-500 truncate">
+              <div className="text-xs text-muted-foreground truncate">
                 {item.description}
               </div>
             )}
           </div>
-          <ChevronRight className="size-4 text-gray-500" />
+          <ChevronRight className="size-4 text-muted-foreground" />
         </div>
       ) : (
         <div className="flex flex-col">
@@ -494,7 +494,7 @@ export function MedicationValueSetSelectTabContent({
       >
         <TabsContent value="product">
           <Command className="rounded-lg" filter={() => 1}>
-            <div className="bg-white z-10 w-full fixed mb-4">
+            <div className="bg-background z-10 w-full fixed mb-4">
               <CommandInput
                 placeholder={t("search_products")}
                 onValueChange={onSearchChange}
@@ -505,18 +505,18 @@ export function MedicationValueSetSelectTabContent({
             </div>
 
             <CommandList className="flex-1 mt-7 overflow-y-auto">
-              <CommandEmpty className="h-72 flex justify-center items-center py-6 text-gray-500">
+              <CommandEmpty className="h-72 flex justify-center items-center py-6 text-muted-foreground">
                 {search.length < 3 ? (
-                  <p className="p-4 text-sm text-gray-500">
+                  <p className="p-4 text-sm text-muted-foreground">
                     {t("min_char_length_error", { min_length: 3 })}
                   </p>
                 ) : isProductLoading || isCategoriesLoading ? (
-                  <p className="flex items-center justify-center p-4 text-sm text-gray-500">
+                  <p className="flex items-center justify-center p-4 text-sm text-muted-foreground">
                     <Loader2 className="size-5 animate-spin mr-2" />
                     {t("searching")}
                   </p>
                 ) : (
-                  <p className="p-4 text-sm text-gray-500">
+                  <p className="p-4 text-sm text-muted-foreground">
                     {t("no_results_found")}
                   </p>
                 )}

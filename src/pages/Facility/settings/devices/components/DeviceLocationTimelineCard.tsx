@@ -43,12 +43,12 @@ function LocationNode({ locationData, children }: LocationNodeProps) {
         </div>
       </div>
       <div className="flex items-center text-sm">
-        <span className="text-gray-700 font-normal">
+        <span className="text-muted-foreground font-normal">
           {t("associated_by", { name: formatName(created_by) })}
         </span>
       </div>
       {children}
-      <span className="flex items-center gap-2 text-sm text-gray-600">
+      <span className="flex items-center gap-2 text-sm text-soft-foreground">
         <span>{format(new Date(start), "MMM d, yyyy")}</span>
         <ArrowRight className="size-3" />
         {end ? (
@@ -69,7 +69,7 @@ export const DeviceLocationTimelineCard = ({
   return (
     <div className="relative flex gap-8 pl-12 pt-0.5">
       <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center">
-        <div className="absolute w-px bg-gray-200 h-full top-4 group-last:hidden" />
+        <div className="absolute w-px bg-border h-full top-4 group-last:hidden" />
         <div
           className={cn(
             "size-6 rounded-full flex items-center justify-center z-10",
@@ -81,7 +81,7 @@ export const DeviceLocationTimelineCard = ({
             className={!end ? "text-green-600" : "text-white"}
           />
         </div>
-        {!end && <div className="flex-1 w-px bg-gray-200" />}
+        {!end && <div className="flex-1 w-px bg-border" />}
       </div>
       <LocationNode locationData={locationData} />
     </div>

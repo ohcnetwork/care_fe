@@ -10,7 +10,7 @@ function FilterHeader({
   onBack: () => void;
 }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200">
+    <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
       <Button
         variant="ghost"
         size="sm"

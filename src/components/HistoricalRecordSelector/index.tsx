@@ -375,7 +375,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                   <TabsTrigger
                     key={type}
                     value={type}
-                    className="border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                    className="border-b-3 px-1.5 sm:px-2.5 py-2 text-soft-foreground font-semibold hover:text-foreground data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
                   >
                     {type}
                   </TabsTrigger>
@@ -388,8 +388,10 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
         <div className="space-y-0 p-2">
           {state.dateGroupedRecords.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
-              <Clock className="size-8 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-500">{t("no_records_found")}</p>
+              <Clock className="size-8 text-placeholder-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">
+                {t("no_records_found")}
+              </p>
             </div>
           ) : (
             state.dateGroupedRecords.map(({ date, records }) => (
@@ -398,7 +400,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                 open={state.expandedDates.has(date)}
                 onOpenChange={(isOpen) => handleExpandDate(date, isOpen)}
               >
-                <CollapsibleTrigger className="w-full bg-gray-50 border border-gray-200 px-2 py-1.5 rounded-t-md mb-1">
+                <CollapsibleTrigger className="w-full bg-soft-background border border-border px-2 py-1.5 rounded-t-md mb-1">
                   <div className="flex items-center justify-between gap-2">
                     <div className="px-2">
                       <p className="text-sm text-indigo-700 font-medium">
@@ -406,9 +408,9 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                       </p>
                     </div>
                     {state.expandedDates.has(date) ? (
-                      <ChevronsDownUp className="size-4 text-gray-400" />
+                      <ChevronsDownUp className="size-4 text-placeholder-foreground" />
                     ) : (
-                      <ChevronsUpDown className="size-4 text-gray-400" />
+                      <ChevronsUpDown className="size-4 text-placeholder-foreground" />
                     )}
                   </div>
                 </CollapsibleTrigger>
@@ -439,7 +441,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                               <TableHead
                                 key={String(field.label)}
                                 className={
-                                  "border border-gray-200 bg-gray-50 nth-2:rounded-l-md nth-last-1:rounded-r-md"
+                                  "border border-border bg-soft-background nth-2:rounded-l-md nth-last-1:rounded-r-md"
                                 }
                               >
                                 {field.label}
@@ -449,7 +451,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                               activeTypeConfig.expandableFields.length > 0 && (
                                 <TableHead
                                   className={
-                                    "border border-gray-200 bg-gray-50 nth-last-1:rounded-r-md"
+                                    "border border-border bg-soft-background nth-last-1:rounded-r-md"
                                   }
                                 ></TableHead>
                               )}
@@ -481,7 +483,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                         </TableBody>
                       </Table>
                     ) : (
-                      <div className="pb-4 text-center text-sm text-gray-500">
+                      <div className="pb-4 text-center text-sm text-muted-foreground">
                         {t("no_records_found")}
                       </div>
                     )}
@@ -495,7 +497,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
           {isLoadingRecords && <Skeleton className="h-8 w-full" />}
         </div>
 
-        <div className="sticky bottom-0 bg-white p-4 border-t">
+        <div className="sticky bottom-0 bg-background p-4 border-t">
           {state.dateGroupedRecords.length > 0 &&
             (isLoadingRecords ? (
               <div className="flex justify-center p-4">

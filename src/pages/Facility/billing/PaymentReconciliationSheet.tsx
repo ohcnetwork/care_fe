@@ -360,7 +360,7 @@ export function PaymentReconciliationSheet({
           <SheetTitle className="m-0">
             {isCreditNote ? t("record_credit_note") : t("record_payment")}
           </SheetTitle>
-          <SheetDescription className="text-gray-700">
+          <SheetDescription className="text-muted-foreground">
             {invoice
               ? isCreditNote
                 ? t("recording_refund_for_invoice", {
@@ -378,9 +378,9 @@ export function PaymentReconciliationSheet({
         <Form {...form}>
           <form onSubmit={handleSubmit} className="space-y-6 py-4">
             <div className="space-y-6">
-              <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 space-y-3">
+              <div className="rounded-lg bg-soft-background border border-border p-3 space-y-3">
                 {invoice && (
-                  <div className="flex text-sm justify-center text-gray-700">
+                  <div className="flex text-sm justify-center text-muted-foreground">
                     {t("invoice_total")}:
                     <p className="font-bold ml-1">
                       <MonetaryDisplay amount={invoice.total_gross} />
@@ -388,13 +388,13 @@ export function PaymentReconciliationSheet({
                   </div>
                 )}
 
-                <div className="bg-white p-3 text-center">
+                <div className="bg-card p-3 text-center">
                   {invoice ? (
                     <>
-                      <p className="text-sm text-gray-600 mb-1">
+                      <p className="text-sm text-soft-foreground mb-1">
                         {isCreditNote ? t("refund_given") : t("amount_due")}
                       </p>
-                      <p className="text-3xl font-bold text-gray-900">
+                      <p className="text-3xl font-bold text-foreground">
                         <MonetaryDisplay
                           amount={new Decimal(invoice.total_gross)
                             .minus(invoice.total_payments)
@@ -404,10 +404,10 @@ export function PaymentReconciliationSheet({
                     </>
                   ) : (
                     <>
-                      <p className="text-sm text-gray-600 mb-1">
+                      <p className="text-sm text-soft-foreground mb-1">
                         {t("balance_due")}
                       </p>
-                      <p className="text-3xl font-bold text-gray-900">
+                      <p className="text-3xl font-bold text-foreground">
                         <MonetaryDisplay amount={account?.total_balance} />
                       </p>
                     </>
@@ -429,7 +429,7 @@ export function PaymentReconciliationSheet({
                 name="method"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-950">
+                    <FormLabel className="text-foreground">
                       {t("payment_method")}
                     </FormLabel>
                     <RadioGroup
@@ -442,7 +442,7 @@ export function PaymentReconciliationSheet({
                         return (
                           <Label
                             key={method.value}
-                            className="relative flex cursor-pointer flex-col items-center rounded-md border border-gray-400 shadow-sm p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-green-50"
+                            className="relative flex cursor-pointer flex-col items-center rounded-md border border-stronger-border shadow-sm p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-green-50"
                           >
                             <RadioGroupItem
                               value={method.value}
@@ -450,8 +450,8 @@ export function PaymentReconciliationSheet({
                               aria-label={`payment-method-${method.value}`}
                             />
                             <div className="grid grow justify-items-center gap-1">
-                              <Icon className="size-5 text-gray-600" />
-                              <span className="text-sm font-medium text-center text-gray-950">
+                              <Icon className="size-5 text-soft-foreground" />
+                              <span className="text-sm font-medium text-center text-foreground">
                                 {t(method.label)}
                               </span>
                             </div>
@@ -468,7 +468,7 @@ export function PaymentReconciliationSheet({
                 name="reconciliation_type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-950">
+                    <FormLabel className="text-foreground">
                       {t("payment_type")}
                     </FormLabel>
                     <RadioGroup
@@ -479,13 +479,13 @@ export function PaymentReconciliationSheet({
                       {PAYMENT_TYPES.map((type) => (
                         <Label
                           key={type.value}
-                          className="flex cursor-pointer gap-2 items-center justify-center rounded-md border border-gray-400 shadow-sm p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-primary-100/50"
+                          className="flex cursor-pointer gap-2 items-center justify-center rounded-md border border-stronger-border shadow-sm p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-primary-100/50"
                         >
                           <RadioGroupItem
                             value={type.value}
                             aria-label={`payment-type-${type.value}`}
                           />
-                          <span className="text-sm font-medium text-gray-950">
+                          <span className="text-sm font-medium text-foreground">
                             {t(type.label)}
                           </span>
                         </Label>
@@ -502,7 +502,7 @@ export function PaymentReconciliationSheet({
                   name="issuer_type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-950">
+                      <FormLabel className="text-foreground">
                         {t("issuer_type")}
                       </FormLabel>
                       <RadioGroup
@@ -514,13 +514,13 @@ export function PaymentReconciliationSheet({
                           (type) => (
                             <Label
                               key={type}
-                              className="flex cursor-pointer gap-2 items-center justify-center rounded-md border border-gray-400 shadow-sm p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-primary-100/50"
+                              className="flex cursor-pointer gap-2 items-center justify-center rounded-md border border-stronger-border shadow-sm p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-primary-100/50"
                             >
                               <RadioGroupItem
                                 value={type}
                                 aria-label={`issuer-type-${type}`}
                               />
-                              <span className="text-sm font-medium text-gray-950">
+                              <span className="text-sm font-medium text-foreground">
                                 {t(type)}
                               </span>
                             </Label>
@@ -538,7 +538,7 @@ export function PaymentReconciliationSheet({
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-950">
+                    <FormLabel className="text-foreground">
                       {t("location")}
                     </FormLabel>
                     <FormControl>
@@ -550,7 +550,7 @@ export function PaymentReconciliationSheet({
                           field.onChange(location?.id);
                         }}
                         placeholder={t("select_location")}
-                        className="w-full border-gray-300"
+                        className="w-full border-strong-border"
                       />
                     </FormControl>
                     <FormMessage />
@@ -563,7 +563,7 @@ export function PaymentReconciliationSheet({
                 name="amount"
                 render={({ field }) => (
                   <FormItem className="gap-1.5">
-                    <FormLabel className="text-gray-950">
+                    <FormLabel className="text-foreground">
                       {isCreditNote ? t("refund_amount") : t("amount_paid")}
                     </FormLabel>
                     <FormControl>
@@ -578,7 +578,7 @@ export function PaymentReconciliationSheet({
                         }}
                       />
                     </FormControl>
-                    <FormDescription className="text-gray-700 italic -mt-1.5">
+                    <FormDescription className="text-muted-foreground italic -mt-1.5">
                       {t("amount_to_be_recorded")}
                     </FormDescription>
                     <FormMessage />
@@ -593,7 +593,7 @@ export function PaymentReconciliationSheet({
                     name="tendered_amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-950">
+                        <FormLabel className="text-foreground">
                           {t("amount_received")}
                         </FormLabel>
                         <FormControl>
@@ -602,7 +602,7 @@ export function PaymentReconciliationSheet({
                             value={field.value || ""}
                           />
                         </FormControl>
-                        <FormDescription className="text-gray-700 italic -mt-1.5">
+                        <FormDescription className="text-muted-foreground italic -mt-1.5">
                           {t("amount_given_by_customer")}
                         </FormDescription>
                         <FormMessage />
@@ -632,16 +632,16 @@ export function PaymentReconciliationSheet({
                   name="reference_number"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-950">
+                      <FormLabel className="text-foreground">
                         {t("reference_number")}
-                        <span className="text-gray-600 italic">
+                        <span className="text-soft-foreground italic">
                           ({t("optional")})
                         </span>
                       </FormLabel>
                       <FormControl>
                         <Input {...field} value={field.value || ""} />
                       </FormControl>
-                      <FormDescription className="text-gray-700 italic -mt-1.5">
+                      <FormDescription className="text-muted-foreground italic -mt-1.5">
                         {t("reference_number_description")}
                       </FormDescription>
                       <FormMessage />
@@ -655,7 +655,7 @@ export function PaymentReconciliationSheet({
                 name="payment_datetime"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-950">
+                    <FormLabel className="text-foreground">
                       {t("payment_date")}
                     </FormLabel>
                     <FormControl>
@@ -676,9 +676,9 @@ export function PaymentReconciliationSheet({
                 name="note"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-950">
+                    <FormLabel className="text-foreground">
                       {t("notes")}
-                      <span className="text-gray-600 italic">
+                      <span className="text-soft-foreground italic">
                         ({t("optional")})
                       </span>
                     </FormLabel>
@@ -697,7 +697,7 @@ export function PaymentReconciliationSheet({
               {extensions.fields}
             </div>
 
-            <SheetFooter className="sticky bottom-0 bg-white p-4 border-t border-gray-200 -mx-6">
+            <SheetFooter className="sticky bottom-0 bg-card p-4 border-t border-border -mx-6">
               <div className="flex justify-between gap-3">
                 <Button
                   type="button"

@@ -210,7 +210,7 @@ export default function AppointmentDetail(props: Props) {
           <BackButton size="icon" variant="ghost">
             <ChevronLeft />
           </BackButton>
-          <h4 className="font-semibold text-gray-800">
+          <h4 className="font-semibold text-foreground">
             {t("appointment_details")}
           </h4>
         </div>
@@ -319,13 +319,13 @@ export default function AppointmentDetail(props: Props) {
             ) : (
               !["fulfilled"].includes(appointment.status) &&
               canWriteToken && (
-                <div className="bg-gray-100 border border-gray-200 rounded flex flex-col items-center justify-center text-center">
-                  <ReceiptText className="size-8 text-gray-500 mt-4" />
+                <div className="bg-muted-background border border-border rounded flex flex-col items-center justify-center text-center">
+                  <ReceiptText className="size-8 text-muted-foreground mt-4" />
                   <div className="mt-2">
-                    <h6 className="text-gray-900 text-sm font-semibold">
+                    <h6 className="text-foreground text-sm font-semibold">
                       {t("token_not_generated")}
                     </h6>
-                    <p className="text-gray-900 text-sm">
+                    <p className="text-foreground text-sm">
                       {t("token_not_generated_description")}
                     </p>
                   </div>
@@ -358,8 +358,8 @@ export default function AppointmentDetail(props: Props) {
               )
             )}
             {appointment.associated_encounter?.id && (
-              <Card className="bg-white shadow-sm rounded-md p-1 mt-2">
-                <CardHeader className="p-2 bg-gray-50">
+              <Card className="bg-card shadow-sm rounded-md p-1 mt-2">
+                <CardHeader className="p-2 bg-soft-background">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <AvatarIcon className="size-5 text-primary" />
                     {t("encounter")}
@@ -576,8 +576,8 @@ const AppointmentDetailsContent = ({
         disableCreateChargeItems
       />
       <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
-        <Card className="bg-white shadow-sm rounded-md p-1">
-          <CardHeader className="p-2 bg-gray-50">
+        <Card className="bg-card shadow-sm rounded-md p-1">
+          <CardHeader className="p-2 bg-soft-background">
             <CardTitle className="flex justify-between">
               <span className="mr-3 inline-block mb-2">
                 {t("schedule_information")}
@@ -589,7 +589,7 @@ const AppointmentDetailsContent = ({
           </CardHeader>
           <CardContent className="space-y-4 p-2">
             <div className="flex space-x-2 text-sm">
-              <CalendarIcon className="size-4 text-gray-600" />
+              <CalendarIcon className="size-4 text-soft-foreground" />
               <div>
                 <p className="font-medium">
                   {format(
@@ -597,19 +597,19 @@ const AppointmentDetailsContent = ({
                     "MMMM d, yyyy",
                   )}
                 </p>
-                <p className="text-gray-600">
+                <p className="text-soft-foreground">
                   {appointment.token_slot.availability.name}
                 </p>
               </div>
             </div>
             <div className="flex space-x-2 text-sm">
-              <ClockIcon className="size-4 text-gray-500" />
+              <ClockIcon className="size-4 text-muted-foreground" />
               <div>
                 <p className="font-medium">
                   {format(appointment.token_slot.start_datetime, "h:mm a")} -{" "}
                   {format(appointment.token_slot.end_datetime, "h:mm a")}
                 </p>
-                <p className="text-gray-600 capitalize">
+                <p className="text-soft-foreground capitalize">
                   {t("duration")}:{" "}
                   {getReadableDuration(
                     appointment.token_slot.start_datetime,
@@ -619,10 +619,10 @@ const AppointmentDetailsContent = ({
               </div>
             </div>
             <div className="flex space-x-2 text-sm">
-              <AvatarIcon className="size-4 text-gray-500" />
+              <AvatarIcon className="size-4 text-muted-foreground" />
               <div className="text-sm">
                 <p className="font-medium">{t("booked_by")}</p>
-                <p className="text-gray-600 flex w-fit items-center gap-2 bg-gray-100 p-1 rounded-sm">
+                <p className="text-soft-foreground flex w-fit items-center gap-2 bg-muted-background p-1 rounded-sm">
                   {appointment.booked_by && (
                     <Avatar
                       name={formatName(appointment.booked_by)}
@@ -639,10 +639,10 @@ const AppointmentDetailsContent = ({
               </div>
             </div>
             <div className="flex space-x-2 text-sm">
-              <AvatarIcon className="size-4 text-gray-500" />
+              <AvatarIcon className="size-4 text-muted-foreground" />
               <div className="text-sm">
                 <p className="font-medium">{t("last_updated_by")}</p>
-                <p className="text-gray-600 flex w-fit items-center gap-2 bg-gray-100 p-1 rounded-sm">
+                <p className="text-soft-foreground flex w-fit items-center gap-2 bg-muted-background p-1 rounded-sm">
                   {appointment.updated_by && (
                     <Avatar
                       name={formatName(appointment.updated_by)}
@@ -663,15 +663,15 @@ const AppointmentDetailsContent = ({
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm rounded-md p-1">
-          <CardHeader className="p-2 bg-gray-50">
+        <Card className="bg-card shadow-sm rounded-md p-1">
+          <CardHeader className="p-2 bg-soft-background">
             <CardTitle>{t("patient_information")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 p-2">
             <div className="flex space-x-2 text-sm">
-              <MobileIcon className="size-4 text-gray-500" />
+              <MobileIcon className="size-4 text-muted-foreground" />
               <div>
-                <p className="text-gray-600">
+                <p className="text-soft-foreground">
                   {t("phone")}:{" "}
                   <a
                     href={`tel:${appointment.patient.phone_number}`}
@@ -681,7 +681,7 @@ const AppointmentDetailsContent = ({
                   </a>
                 </p>
                 {appointment.patient.emergency_phone_number && (
-                  <p className="text-gray-600">
+                  <p className="text-soft-foreground">
                     {t("emergency")}:{" "}
                     <a
                       href={`tel:${appointment.patient.emergency_phone_number}`}
@@ -696,17 +696,17 @@ const AppointmentDetailsContent = ({
               </div>
             </div>
             <div className="flex flex-row items-start gap-2 text-sm">
-              <DrawingPinIcon className="size-4 text-gray-500 mt-1" />
+              <DrawingPinIcon className="size-4 text-muted-foreground mt-1" />
               <div className="flex flex-col gap-2 w-full">
                 <div>
-                  <p className="text-gray-600 break-words">
+                  <p className="text-soft-foreground break-words">
                     {formatPatientAddress(appointment.patient.address) || (
-                      <span className="text-gray-500">
+                      <span className="text-muted-foreground">
                         {t("no_address_provided")}
                       </span>
                     )}
                   </p>
-                  <p className="text-gray-600">
+                  <p className="text-soft-foreground">
                     {t("pincode")}: {appointment.patient.pincode}
                   </p>
                 </div>
@@ -717,8 +717,8 @@ const AppointmentDetailsContent = ({
         </Card>
       </div>
 
-      <Card className="bg-white shadow-sm rounded-md p-1">
-        <CardHeader className="p-2 bg-gray-50">
+      <Card className="bg-card shadow-sm rounded-md p-1">
+        <CardHeader className="p-2 bg-soft-background">
           <CardTitle>
             {t(`schedulable_resource__${appointment.resource_type}`)}
           </CardTitle>
@@ -737,16 +737,16 @@ const AppointmentDetailsContent = ({
               {formatScheduleResourceName(appointment)}
             </p>
             <Separator orientation="vertical" className="min-h-6 h-full" />
-            <p className="text-sm text-gray-600">{facility.name}</p>
+            <p className="text-sm text-soft-foreground">{facility.name}</p>
           </div>
         </CardContent>
       </Card>
-      <Card className="bg-white shadow-sm rounded-md p-1">
-        <CardHeader className="p-2 bg-gray-50">
+      <Card className="bg-card shadow-sm rounded-md p-1">
+        <CardHeader className="p-2 bg-soft-background">
           <CardTitle>{t("note")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 p-2">
-          <p className="text-sm text-gray-600 whitespace-pre-wrap">
+          <p className="text-sm text-soft-foreground whitespace-pre-wrap">
             {appointment.note || t("no_note_provided")}
           </p>
         </CardContent>
@@ -959,7 +959,7 @@ const AppointmentActions = ({
                             />
                           </div>
                           {appointment.tags?.length > 0 ? (
-                            <p className="text-gray-600 flex flex-wrap gap-1">
+                            <p className="text-soft-foreground flex flex-wrap gap-1">
                               {appointment.tags.map((tag) => (
                                 <Badge key={tag.id} variant="secondary">
                                   {tag.parent ? `${tag.parent.display}: ` : ""}
@@ -968,7 +968,7 @@ const AppointmentActions = ({
                               ))}
                             </p>
                           ) : (
-                            <p className="text-gray-600 md:-mt-2">
+                            <p className="text-soft-foreground md:-mt-2">
                               {t("no_tags_assigned")}
                             </p>
                           )}
@@ -983,7 +983,7 @@ const AppointmentActions = ({
                         />
                         <div className="my-4 space-y-4">
                           <div className="flex flex-col">
-                            <Label className="mb-2 text-sm font-medium text-gray-950">
+                            <Label className="mb-2 text-sm font-medium text-foreground">
                               {t(
                                 `schedulable_resource__${selectedResource.resource_type}`,
                               )}

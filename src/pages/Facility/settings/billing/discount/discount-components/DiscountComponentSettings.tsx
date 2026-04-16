@@ -119,7 +119,7 @@ export function DiscountComponentSettings() {
                 <TableHead className="w-24"></TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="bg-white">
+            <TableBody className="bg-background">
               {filteredComponents.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center h-24">
@@ -152,7 +152,7 @@ export function DiscountComponentSettings() {
                       {component.code && (
                         <div className="flex items-center gap-2 min-w-0">
                           <code
-                            className="truncate px-2 py-1 rounded bg-gray-100 text-sm"
+                            className="truncate px-2 py-1 rounded bg-muted-background text-sm"
                             title={component.code.code}
                           >
                             {component.code.code}

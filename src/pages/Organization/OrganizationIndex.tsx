@@ -57,7 +57,7 @@ export default function OrganizationIndex() {
             <div className="rounded-full bg-primary/10 p-6 mb-4">
               <CareIcon icon="d-hospital" className="size-12 text-primary" />
             </div>
-            <p className="text-center text-sm text-gray-500 max-w-sm mb-4">
+            <p className="text-center text-sm text-muted-foreground max-w-sm mb-4">
               {t("organization_access_help")}
             </p>
           </CardContent>

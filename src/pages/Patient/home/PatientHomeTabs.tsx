@@ -59,7 +59,7 @@ export default function PatientHomeTabs({
   return (
     <div className="w-full">
       {/* Custom Navigation Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-border">
         <nav className="flex space-x-8">
           {tabs.map((tab) => (
             <button
@@ -69,7 +69,7 @@ export default function PatientHomeTabs({
                 "py-2 px-1 border-b-2 font-medium text-sm transition-colors",
                 activeTab === tab.id
                   ? "border-primary-600 text-primary-600"
-                  : "border-transparent text-gray-700 hover:text-gray-500 hover:border-gray-300",
+                  : "border-transparent text-muted-foreground hover:text-muted-foreground hover:border-strong-border",
               )}
             >
               {tab.label}

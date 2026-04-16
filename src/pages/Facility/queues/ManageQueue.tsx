@@ -143,7 +143,7 @@ export function ManageQueuePage({
                 <ScheduleResourceIcon resource={resource} />
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-black">
+                    <span className="font-semibold text-foreground">
                       {t("queue_of_resource", {
                         resource: formatScheduleResourceName(resource),
                       })}
@@ -157,7 +157,7 @@ export function ManageQueuePage({
                       </Badge>
                     )}
                   </div>
-                  <span className="text-xs font-medium text-gray-500 break-all">
+                  <span className="text-xs font-medium text-muted-foreground break-all">
                     {!queue.system_generated && `${queue.name} - `}
                     {formatDate(queue.date, "dd MMM yyyy")}
                   </span>
@@ -166,7 +166,7 @@ export function ManageQueuePage({
             )}
           </div>
           <div className="flex gap-5 items-center justify-center">
-            <div className="hidden sm:flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
+            <div className="hidden sm:flex flex-col-reverse sm:flex-row gap-2 items-center text-foreground font-medium text-md">
               <Switch
                 checked={shouldAutoRefresh}
                 onCheckedChange={(checked) =>
@@ -184,7 +184,7 @@ export function ManageQueuePage({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="cursor-help">
-                        <InfoIcon className="size-4 text-gray-500" />
+                        <InfoIcon className="size-4 text-muted-foreground" />
                       </span>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -379,7 +379,7 @@ function ManageServicePointsDialog({
             return (
               <div
                 key={subQueue.id}
-                className="flex items-center justify-between rounded-sm w-full p-3 hover:bg-gray-100 cursor-pointer"
+                className="flex items-center justify-between rounded-sm w-full p-3 hover:bg-muted-background cursor-pointer"
                 onClick={() => {
                   toggleServicePoint(subQueue.id, !isSelected);
                 }}

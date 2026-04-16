@@ -79,11 +79,11 @@ const CustomNode = ({ data }: NodeProps) => {
       />
       {hasChildren && (
         <>
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[93%] h-full border-2 border-gray-200 rounded-lg bg-white" />
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[97%] h-full border-2 border-gray-200 rounded-lg bg-white" />
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[93%] h-full border-2 border-border rounded-lg bg-card" />
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[97%] h-full border-2 border-border rounded-lg bg-card" />
         </>
       )}
-      <div className="relative w-65 bg-white rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all duration-200">
+      <div className="relative w-65 bg-card rounded-lg border-2 overflow-hidden shadow-xs cursor-pointer border-border hover:border-primary/50 hover:shadow-lg transition-all duration-200">
         <div className="p-4 pb-2 cursor-pointer" onClick={handleEdit}>
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-md shrink-0">
@@ -93,7 +93,7 @@ const CustomNode = ({ data }: NodeProps) => {
               <TooltipProvider>
                 <Tooltip delayDuration={200}>
                   <TooltipTrigger asChild>
-                    <h3 className="font-medium text-gray-900 truncate">
+                    <h3 className="font-medium text-foreground truncate">
                       {data.name}
                     </h3>
                   </TooltipTrigger>
@@ -104,30 +104,32 @@ const CustomNode = ({ data }: NodeProps) => {
                   )}
                 </Tooltip>
               </TooltipProvider>
-              <p className="text-sm text-gray-500 truncate">{data.type}</p>
+              <p className="text-sm text-muted-foreground truncate">
+                {data.type}
+              </p>
             </div>
             {data.form !== "facility" && <Pencil className="size-4" />}
           </div>
         </div>
         {hasChildren && (
           <div
-            className="flex justify-center m-2 border-t border-gray-200 pt-2"
+            className="flex justify-center m-2 border-t border-border pt-2"
             onClick={(e) => e.stopPropagation()}
           >
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 px-2 hover:bg-gray-100 transition-colors"
+              className="h-8 px-2 hover:bg-muted-background transition-colors"
               onClick={handleToggle}
             >
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-soft-foreground">
                 {data.childCount} {t("level_inside")}
               </span>
               {data.form !== "facility" &&
                 (data.isExpanded ? (
-                  <ChevronDown className="size-4 text-gray-600" />
+                  <ChevronDown className="size-4 text-soft-foreground" />
                 ) : (
-                  <ChevronRight className="size-4 text-gray-600" />
+                  <ChevronRight className="size-4 text-soft-foreground" />
                 ))}
             </Button>
           </div>
@@ -512,7 +514,7 @@ function LocationMapContent({
   ]);
 
   return (
-    <div className="h-[calc(100vh-14rem)] w-full bg-gray-50 rounded-lg border border-gray-200">
+    <div className="h-[calc(100vh-14rem)] w-full bg-soft-background rounded-lg border border-border">
       <ReactFlow
         nodes={nodes}
         edges={edges}

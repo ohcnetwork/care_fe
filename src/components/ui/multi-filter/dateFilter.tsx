@@ -85,11 +85,11 @@ function CustomDateRange({
           rangeMiddleClassName="bg-primary/10 [&>button]:rounded-md"
         />
         <div className="my-2">
-          <Separator orientation="horizontal" className="bg-gray-200 h-px" />
+          <Separator orientation="horizontal" className="bg-border h-px" />
         </div>
         <div className="flex flex-col gap-2 p-3 pt-0">
           <div>
-            <label className="text-sm text-gray-600 mb-1 block capitalize">
+            <label className="text-sm text-soft-foreground mb-1 block capitalize">
               {t("from")}
             </label>
             <Input
@@ -107,7 +107,7 @@ function CustomDateRange({
             />
           </div>
           <div>
-            <label className="text-sm text-gray-600 mb-1 block capitalize">
+            <label className="text-sm text-soft-foreground mb-1 block capitalize">
               {t("to")}
             </label>
             <Input
@@ -196,8 +196,9 @@ function DateRangeOptions({
               handleDateRangeSelect(option);
             }}
             className={cn(
-              "w-full justify-start px-3 font-medium text-sm text-gray-950",
-              isSameRange(option) && "bg-gray-100 border-green-500 border",
+              "w-full justify-start px-3 font-medium text-sm text-foreground",
+              isSameRange(option) &&
+                "bg-muted-background border-green-500 border",
             )}
           >
             {option.count
@@ -208,8 +209,9 @@ function DateRangeOptions({
         <DropdownMenuItem
           ref={options.length === focusItemIndex ? setFocusItemRef : null}
           className={cn(
-            "w-full justify-between px-3 font-medium text-sm text-gray-950",
-            isCustomDateRangeSelected && "bg-gray-100 border-green-500 border",
+            "w-full justify-between px-3 font-medium text-sm text-foreground",
+            isCustomDateRangeSelected &&
+              "bg-muted-background border-green-500 border",
           )}
           onSelect={(e) => {
             e.preventDefault();

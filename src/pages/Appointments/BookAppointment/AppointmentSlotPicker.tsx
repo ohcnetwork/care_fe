@@ -138,28 +138,28 @@ export function AppointmentSlotPicker({
       )}
     >
       <div className="hidden sm:flex sm:justify-between items-center lg:flex-col xl:flex-row lg:gap-1 xl:justify-between">
-        <span className="font-semibold text-gray-950 text-base">
+        <span className="font-semibold text-foreground text-base">
           {format(selectedDate, "MMMM d yyyy")}
         </span>
         {!!slotsQuery.data?.length && (
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-muted-foreground">
             {availableSlots.length} {t("available_time_slots")}
           </span>
         )}
       </div>
       <div className="flex flex-col gap-2 sm:hidden">
-        <span className="font-semibold text-lg text-gray-950 mb-2">
+        <span className="font-semibold text-lg text-foreground mb-2">
           {format(selectedDate, "MMMM d yyyy")}
         </span>
         <div className="mb-2">
           {!!slotsQuery.data?.length && (
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-muted-foreground">
               {slotsQuery.data?.length} {t("available_time_slots")}
             </span>
           )}
         </div>
       </div>
-      <div className="border-b border-gray-200 w-full" />
+      <div className="border-b border-border w-full" />
       {/* Schedule Filter */}
       {uniqueSchedules.length > 1 && (
         <RadioInput
@@ -183,12 +183,12 @@ export function AppointmentSlotPicker({
           {slotsQuery.data == null && (
             <div className="flex flex-col gap-5">
               <div className="flex flex-col gap-3">
-                <div className="w-32 h-4 bg-gray-50 rounded" />
+                <div className="w-32 h-4 bg-soft-background rounded" />
                 <div className="grid grid-cols-4 gap-2">
                   {Array.from({ length: 12 }).map((_, i) => (
                     <div
                       key={i}
-                      className="h-12 bg-gray-50 rounded flex text-gray-400 items-center justify-center"
+                      className="h-12 bg-soft-background rounded flex text-placeholder-foreground items-center justify-center"
                     >
                       --:--
                     </div>
@@ -196,12 +196,12 @@ export function AppointmentSlotPicker({
                 </div>
               </div>
               <div className="flex flex-col gap-3">
-                <div className="w-32 h-4 bg-gray-50 rounded" />
+                <div className="w-32 h-4 bg-soft-background rounded" />
                 <div className="grid grid-cols-4 gap-4">
                   {Array.from({ length: 12 }).map((_, i) => (
                     <div
                       key={i}
-                      className="h-12 bg-gray-50 rounded flex text-gray-400 items-center justify-center"
+                      className="h-12 bg-soft-background rounded flex text-placeholder-foreground items-center justify-center"
                     >
                       --:--
                     </div>
@@ -212,8 +212,8 @@ export function AppointmentSlotPicker({
           )}
 
           {slotsQuery.data?.length === 0 && (
-            <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
-              <p className="text-gray-400">
+            <div className="flex items-center justify-center py-32 border-2 border-border border-dashed rounded-lg text-center">
+              <p className="text-placeholder-foreground">
                 {t("no_slots_available_for_this_date")}
               </p>
             </div>
@@ -223,7 +223,7 @@ export function AppointmentSlotPicker({
               <div key={availability.name} className="flex flex-col">
                 <div className="flex flex-row gap-2 items-center mb-2 mt-2 sm:mt-0">
                   <ClipboardCheck size={16} />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-muted-foreground">
                     {availability.name}
                   </span>
                 </div>
@@ -293,7 +293,7 @@ export const TokenSlotButton = ({
         className={cn(
           "text-xs group-hover:text-inherit",
           percentage >= 1
-            ? "text-gray-400"
+            ? "text-placeholder-foreground"
             : percentage >= 0.8
               ? "text-red-600"
               : percentage >= 0.6

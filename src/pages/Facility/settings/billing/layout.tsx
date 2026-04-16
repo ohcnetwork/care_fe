@@ -120,8 +120,8 @@ export function BillingSettingsLayout() {
                     <ActiveLink
                       href={`/billing${item.href}`}
                       className="w-full cursor-pointer"
-                      activeClass="bg-gray-100 shadow-sm"
-                      exactActiveClass="bg-gray-100 shadow"
+                      activeClass="bg-muted-background shadow-sm"
+                      exactActiveClass="bg-muted-background shadow"
                     >
                       {item.title}
                     </ActiveLink>
@@ -152,8 +152,8 @@ export function BillingSettingsLayout() {
                         buttonVariants({ variant: "ghost" }),
                         "w-full justify-start",
                       )}
-                      activeClass="bg-gray-100 shadow-sm text-black"
-                      exactActiveClass="bg-gray-100 shadow-sm text-black"
+                      activeClass="bg-muted-background shadow-sm text-foreground"
+                      exactActiveClass="bg-muted-background shadow-sm text-foreground"
                     >
                       {item.title}
                     </ActiveLink>

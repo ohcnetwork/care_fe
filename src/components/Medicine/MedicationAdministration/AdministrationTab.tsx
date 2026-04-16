@@ -78,26 +78,26 @@ const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({
             <div className="text-sm font-medium">
               {format(slot.date, "dd MMM").toUpperCase()}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-muted-foreground">
               {format(slot.date, "EEE")}
             </div>
           </div>
-          <div className="flex-1 border-t border-dotted border-gray-300 ml-2" />
+          <div className="flex-1 border-t border-dotted border-strong-border ml-2" />
         </div>
       )}
       {!isFirstSlotOfDay && !isLastSlotOfDay && (
         <div className="flex items-center h-full">
-          <div className="w-full border-t border-dotted border-gray-300" />
+          <div className="w-full border-t border-dotted border-strong-border" />
         </div>
       )}
       {isLastSlotOfDay && (
         <div className="flex items-center h-full mr-2">
-          <div className="flex-1 border-t border-dotted border-gray-300 mr-2" />
+          <div className="flex-1 border-t border-dotted border-strong-border mr-2" />
           <div className="flex flex-col items-center">
             <div className="text-sm font-medium">
               {format(slot.date, "dd MMM").toUpperCase()}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-muted-foreground">
               {format(slot.date, "EEE")}
             </div>
           </div>
@@ -508,7 +508,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           (g) => showStopped || g.hasActiveRequests,
         ) && (
           <CardContent className="p-2">
-            <p className="text-gray-500 w-full flex justify-center mb-3">
+            <p className="text-muted-foreground w-full flex justify-center mb-3">
               {t("no_active_medication_recorded")}
             </p>
           </CardContent>
@@ -518,20 +518,20 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             <div className="grid grid-cols-[minmax(200px,2fr)_repeat(4,minmax(140px,1fr))_40px]">
               {/* Top row without vertical borders */}
               <div className="col-span-full grid grid-cols-subgrid">
-                <div className="flex items-center justify-between p-4 bg-gray-50 border-t border-gray-50">
+                <div className="flex items-center justify-between p-4 bg-soft-background border-t border-soft-background">
                   <div className="flex items-center gap-2 whitespace-break-spaces">
                     {lastModifiedDate && (
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted-foreground">
                         {t("last_modified")}{" "}
                         {formatDistanceToNow(lastModifiedDate)} {t("ago")}
                       </div>
                     )}
                   </div>
-                  <div className="flex justify-end items-center bg-gray-50 rounded">
+                  <div className="flex justify-end items-center bg-soft-background rounded">
                     <Button
                       variant="outline"
                       size="icon"
-                      className="size-8 text-gray-400 mr-2"
+                      className="size-8 text-placeholder-foreground mr-2"
                       onClick={handlePreviousSlot}
                       disabled={!canGoBack}
                       title={
@@ -552,11 +552,11 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     isEndSlot={slot.date.getTime() === currentDate.getTime()}
                   />
                 ))}
-                <div className="flex justify-start items-center px-1 bg-gray-50">
+                <div className="flex justify-start items-center px-1 bg-soft-background">
                   <Button
                     variant="outline"
                     size="icon"
-                    className="size-8 text-gray-400"
+                    className="size-8 text-placeholder-foreground"
                     onClick={handleNextSlot}
                     disabled={isTimeInSlot(currentDate, visibleSlots[3])}
                   >
@@ -566,9 +566,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               </div>
 
               {/* Main content with borders */}
-              <div className="col-span-full grid grid-cols-subgrid border-l border-r border-gray-200">
+              <div className="col-span-full grid grid-cols-subgrid border-l border-r border-border">
                 {/* Headers */}
-                <div className="p-4 font-medium text-sm border-t border-r border-gray-200 bg-gray-100 text-secondary-700">
+                <div className="p-4 font-medium text-sm border-t border-r border-border bg-muted-background text-secondary-700">
                   {t("medicine")}:
                 </div>
                 {visibleSlots.map((slot, i) => {
@@ -583,8 +583,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     <div
                       key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
                       className={cn(
-                        "p-4 font-semibold text-xs text-center border-t border-r border-gray-200 relative bg-gray-100 text-secondary-700",
-                        isLastSlotOfDay && "border-r-4 border-r-gray-200",
+                        "p-4 font-semibold text-xs text-center border-t border-r border-border relative bg-muted-background text-secondary-700",
+                        isLastSlotOfDay && "border-r-4 border-r-border",
                       )}
                     >
                       {i === endSlotIndex &&
@@ -597,7 +597,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     </div>
                   );
                 })}
-                <div className="border-t border-gray-200 bg-gray-100" />
+                <div className="border-t border-border bg-muted-background" />
 
                 {/* Grouped Medication rows */}
                 {groupedMedications
@@ -625,8 +625,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             {stoppedMedications?.results?.length > 0 &&
               activeMedications?.results?.length > 0 &&
               !searchQuery.trim() && (
-                <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
-                  <span className="text-xs text-gray-500">
+                <div className="p-3 border-t border-border bg-soft-background text-center">
+                  <span className="text-xs text-muted-foreground">
                     {showStopped
                       ? t("showing_all_medications")
                       : t("n_discontinued_medications_hidden", {
@@ -648,19 +648,22 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         <div className="flex flex-col gap-3">
           {/* Search and Actions Row */}
           <div className="flex justify-between items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md bg-white border rounded-lg px-3 py-1.5">
-              <CareIcon icon="l-search" className="text-lg text-gray-400" />
+            <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md bg-background border rounded-lg px-3 py-1.5">
+              <CareIcon
+                icon="l-search"
+                className="text-lg text-placeholder-foreground"
+              />
               <Input
                 placeholder={t("search_medications")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 border-0 bg-transparent text-sm outline-none focus-visible:ring-0 placeholder:text-gray-400 h-8 px-0"
+                className="flex-1 border-0 bg-transparent text-sm outline-none focus-visible:ring-0 placeholder:text-placeholder-foreground h-8 px-0"
               />
               {searchQuery && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                  className="h-6 w-6 p-0 text-placeholder-foreground hover:text-soft-foreground"
                   onClick={() => setSearchQuery("")}
                 >
                   <CareIcon icon="l-times" className="text-base" />
@@ -710,7 +713,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               />
               <Label
                 htmlFor="show-stopped"
-                className="text-sm cursor-pointer text-gray-600"
+                className="text-sm cursor-pointer text-soft-foreground"
               >
                 {t("show_discontinued")}
                 {stoppedMedications?.results?.length

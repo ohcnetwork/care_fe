@@ -61,11 +61,11 @@ function DepartmentCard({
             href={`/facility/${facilityId}/settings/departments/${department.id}/departments`}
             className="flex-1 min-w-0"
           >
-            <h3 className="font-semibold text-gray-900 truncate hover:text-primary-600">
+            <h3 className="font-semibold text-foreground truncate hover:text-primary-600">
               {department.name}
             </h3>
             {department.description && (
-              <p className="mt-1 text-sm text-gray-500 line-clamp-2">
+              <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
                 {department.description}
               </p>
             )}
@@ -80,15 +80,17 @@ function DepartmentCard({
           )}
         </div>
         {department.parent?.name && (
-          <div className="mt-2 text-xs text-gray-400 flex items-center gap-1">
+          <div className="mt-2 text-xs text-placeholder-foreground flex items-center gap-1">
             <CareIcon icon="l-corner-down-right" className="h-3 w-3" />
             <span className="truncate">{department.parent?.name}</span>
           </div>
         )}
         {userRole && (
-          <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+          <div className="mt-3 pt-3 border-t border-soft-border flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">{t("role")}:</span>
+              <span className="text-xs text-muted-foreground">
+                {t("role")}:
+              </span>
               <Badge variant="secondary" className="text-xs">
                 {userRole.role.name}
               </Badge>
@@ -128,7 +130,7 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
   if (isLoading) {
     return (
       <div className="mt-8 space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 className="text-lg font-semibold text-foreground mb-4">
           {t("departments")}
         </h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -143,7 +145,7 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
   return (
     <div className="mt-8 space-y-4">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-foreground">
           {t("departments")}
         </h3>
         <LinkUserToDepartmentSheet
@@ -153,12 +155,15 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
       </div>
 
       {departments.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
-          <CareIcon icon="l-building" className="h-16 w-16 text-gray-400" />
-          <p className="mt-4 text-lg font-medium text-gray-600">
+        <div className="flex flex-col items-center justify-center py-12 border border-dashed border-strong-border rounded-lg">
+          <CareIcon
+            icon="l-building"
+            className="h-16 w-16 text-placeholder-foreground"
+          />
+          <p className="mt-4 text-lg font-medium text-soft-foreground">
             {t("no_departments_assigned")}
           </p>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             {t("click_link_department_to_get_started")}
           </p>
         </div>

@@ -228,7 +228,7 @@ export function SpecimenWorkflowCard({
     <Card
       className={cn(
         "overflow-hidden rounded-lg",
-        isDiscarded && "opacity-70 bg-gray-50",
+        isDiscarded && "opacity-70 bg-soft-background",
       )}
     >
       <Collapsible open={isOpen}>
@@ -238,25 +238,28 @@ export function SpecimenWorkflowCard({
         >
           {/* === Header: Changes based on collection status === */}
           <CardHeader
-            className={cn("p-4  bg-white", isOpen && "bg-gray-100")}
+            className={cn(
+              "p-4  bg-background",
+              isOpen && "bg-muted-background",
+            )}
             onClick={() => hasCollected && setIsOpen(!isOpen)}
           >
             {hasCollected && collectedSpecimen ? (
               // --- Collected Header ---
               <div className="flex justify-between items-start overflow-x-auto">
                 <div className="space-y-1.5">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-soft-foreground">
                     {t("collected_specimen")}:
                   </span>
                   <CardTitle className="text-base font-semibold">
                     {collectedSpecimen.specimen_definition.title}
                   </CardTitle>
                   {/* Mimic original UI structure */}
-                  <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-700 mt-4">
+                  <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-muted-foreground mt-4">
                     {collectedSpecimen.specimen_definition?.type_tested
                       ?.container?.cap?.display && (
                       <span className="flex flex-col">
-                        <span className="text-sm text-gray-600 flex items-center">
+                        <span className="text-sm text-soft-foreground flex items-center">
                           {t("container_cap")}:
                         </span>
                         <span className="text-base capitalize">
@@ -269,7 +272,7 @@ export function SpecimenWorkflowCard({
                     )}
                     {collectedSpecimen.specimen_type?.display && (
                       <span className="flex flex-col">
-                        <span className="text-sm text-gray-600 flex items-center">
+                        <span className="text-sm text-soft-foreground flex items-center">
                           {t("specimen")}:
                         </span>
                         <span className="text-base font-semibold capitalize">
@@ -279,7 +282,7 @@ export function SpecimenWorkflowCard({
                     )}
                     {collectedSpecimen.collection?.collector_object && (
                       <span className="flex flex-col">
-                        <span className="text-sm text-gray-600 flex items-center">
+                        <span className="text-sm text-soft-foreground flex items-center">
                           {t("collected_by")}:
                         </span>
                         <div className="flex items-center gap-2">
@@ -325,7 +328,7 @@ export function SpecimenWorkflowCard({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-10 border border-gray-400 bg-white shadow p-4"
+                        className="size-10 border border-stronger-border bg-background shadow p-4"
                       >
                         <ChevronsDownUp className="size-5" />
                       </Button>
@@ -333,7 +336,7 @@ export function SpecimenWorkflowCard({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-10 border border-gray-400 bg-white shadow p-4"
+                        className="size-10 border border-stronger-border bg-background shadow p-4"
                       >
                         <ChevronsUpDown className="size-5" />
                       </Button>
@@ -383,7 +386,7 @@ export function SpecimenWorkflowCard({
                               {SPECIMEN_DISCARD_REASONS.map((reason) => (
                                 <div
                                   key={reason.status}
-                                  className="flex items-start space-x-2 p-2 rounded-md border border-gray-200 hover:bg-gray-50"
+                                  className="flex items-start space-x-2 p-2 rounded-md border border-border hover:bg-soft-background"
                                 >
                                   <RadioGroupItem
                                     value={reason.status}
@@ -393,10 +396,10 @@ export function SpecimenWorkflowCard({
                                     htmlFor={reason.status}
                                     className="flex flex-col gap-0.5 px-1"
                                   >
-                                    <span className="font-medium text-sm text-gray-950">
+                                    <span className="font-medium text-sm text-foreground">
                                       {reason.label}
                                     </span>
-                                    <span className="text-sm text-gray-500 font-normal">
+                                    <span className="text-sm text-muted-foreground font-normal">
                                       {reason.description}
                                     </span>
                                   </Label>
@@ -431,7 +434,7 @@ export function SpecimenWorkflowCard({
               // --- Pending Collection Header ---
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2">
                 <CardTitle className="text-base font-medium flex items-center gap-2">
-                  <PackageSearch className="size-5 text-gray-600" />
+                  <PackageSearch className="size-5 text-soft-foreground" />
                   <span className="truncate">
                     {t("required")}: {requirement.title}
                   </span>
@@ -465,7 +468,7 @@ export function SpecimenWorkflowCard({
         </CollapsibleTrigger>
         <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up overflow-hidden">
           {/* === Accordion for Instructions, Collection Details, Processing, Discard === */}
-          <CardContent className="p-2 bg-gray-100">
+          <CardContent className="p-2 bg-muted-background">
             {hasCollected && collectedSpecimen && (
               <Card className="p-4 w-full my-2 shadow-none border-none rounded-md">
                 <PrintableQRCode
@@ -487,60 +490,60 @@ export function SpecimenWorkflowCard({
               <AccordionItem value="instructions" className="border-none">
                 <AccordionTrigger
                   className={cn(
-                    "px-4 py-2 text-sm hover:bg-gray-50/50 data-[state=closed]:bg-white data-[state=open]:bg-gray-50 data-[state=open]:rounded-b-none",
+                    "px-4 py-2 text-sm hover:bg-soft-background/50 data-[state=closed]:bg-background data-[state=open]:bg-soft-background data-[state=open]:rounded-b-none",
                   )}
                 >
                   <div className="flex items-center gap-2 flex-1 mr-4">
-                    <FileText className="size-4 text-gray-500" />
+                    <FileText className="size-4 text-muted-foreground" />
                     <span className="font-medium flex items-center gap-2 underline">
                       {t("specimen_collection_instructions")}
                       {hasCollected ? (
                         <CheckCheck className="size-4 text-blue-500" />
                       ) : (
-                        <Eye className="size-4 text-gray-500" />
+                        <Eye className="size-4 text-muted-foreground" />
                       )}
                     </span>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="px-4 pt-1 pb-4 space-y-4 bg-gray-50 rounded-b-lg">
+                <AccordionContent className="px-4 pt-1 pb-4 space-y-4 bg-soft-background rounded-b-lg">
                   <div className="space-y-1">
-                    <p className="font-medium text-xs text-gray-950 uppercase tracking-wide">
+                    <p className="font-medium text-xs text-foreground uppercase tracking-wide">
                       {t("specimen_collection")}
                     </p>
                     <Card className="rounded-xl overflow-clip">
                       <Table>
-                        <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
+                        <TableHeader className="text-xs text-muted-foreground bg-muted-background uppercase tracking-wide">
                           <TableRow>
-                            <TableHead className="w-[150px] text-gray-700 ">
+                            <TableHead className="w-[150px] text-muted-foreground ">
                               {t("field")}
                             </TableHead>
-                            <TableHead className="text-gray-700">
+                            <TableHead className="text-muted-foreground">
                               {t("details")}
                             </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           <TableRow>
-                            <TableHead className="w-[150px] text-gray-700">
+                            <TableHead className="w-[150px] text-muted-foreground">
                               {t("required_type")}
                             </TableHead>
-                            <TableCell className="text-gray-950 font-semibold">
+                            <TableCell className="text-foreground font-semibold">
                               {requirement.type_collected?.display ?? t("na")}
                             </TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableHead className="text-gray-700">
+                            <TableHead className="text-muted-foreground">
                               {t("required_method")}
                             </TableHead>
-                            <TableCell className="text-gray-950 font-semibold">
+                            <TableCell className="text-foreground font-semibold">
                               {requirement.collection?.display ?? t("na")}
                             </TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableHead className="text-gray-700">
+                            <TableHead className="text-muted-foreground">
                               {t("patient_prep")}
                             </TableHead>
-                            <TableCell className="text-gray-950 font-semibold break-words whitespace-pre-wrap">
+                            <TableCell className="text-foreground font-semibold break-words whitespace-pre-wrap">
                               {requirement.patient_preparation &&
                               requirement.patient_preparation.length > 0
                                 ? requirement.patient_preparation
@@ -555,35 +558,35 @@ export function SpecimenWorkflowCard({
                   </div>
                   {container && (
                     <div className="space-y-1">
-                      <p className="font-medium text-xs text-gray-950 uppercase tracking-wide">
+                      <p className="font-medium text-xs text-foreground uppercase tracking-wide">
                         {t("required_container")}
                       </p>
                       <Card className="rounded-xl overflow-clip">
                         <Table>
-                          <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
+                          <TableHeader className="text-xs text-muted-foreground bg-muted-background uppercase tracking-wide">
                             <TableRow>
-                              <TableHead className="w-[150px] text-gray-700 ">
+                              <TableHead className="w-[150px] text-muted-foreground ">
                                 {t("field")}
                               </TableHead>
-                              <TableHead className="text-gray-700">
+                              <TableHead className="text-muted-foreground">
                                 {t("details")}
                               </TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             <TableRow>
-                              <TableHead className="w-[150px] text-gray-700">
+                              <TableHead className="w-[150px] text-muted-foreground">
                                 {t("container")}
                               </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
+                              <TableCell className="text-foreground font-semibold">
                                 {container.cap?.display ?? t("na")}
                               </TableCell>
                             </TableRow>
                             <TableRow>
-                              <TableHead className="text-gray-700">
+                              <TableHead className="text-muted-foreground">
                                 {t("capacity")}
                               </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
+                              <TableCell className="text-foreground font-semibold">
                                 {container.capacity
                                   ? formatQuantity({
                                       quantity: container.capacity,
@@ -592,20 +595,20 @@ export function SpecimenWorkflowCard({
                               </TableCell>
                             </TableRow>
                             <TableRow>
-                              <TableHead className="text-gray-700">
+                              <TableHead className="text-muted-foreground">
                                 {t("min_volume")}
                               </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
+                              <TableCell className="text-foreground font-semibold">
                                 {container.minimum_volume
                                   ? formatQuantity(container.minimum_volume)
                                   : t("na")}
                               </TableCell>
                             </TableRow>
                             <TableRow>
-                              <TableHead className="text-gray-700">
+                              <TableHead className="text-muted-foreground">
                                 {t("preparation")}
                               </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
+                              <TableCell className="text-foreground font-semibold">
                                 {container.preparation ?? t("na")}
                               </TableCell>
                             </TableRow>
@@ -615,27 +618,27 @@ export function SpecimenWorkflowCard({
                     </div>
                   )}
                   <div className="space-y-1">
-                    <p className="font-medium text-xs text-gray-950 uppercase tracking-wide">
+                    <p className="font-medium text-xs text-foreground uppercase tracking-wide">
                       {t("required_processing_storage")}
                     </p>
                     <Card className="rounded-xl overflow-clip border">
                       <Table>
-                        <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
+                        <TableHeader className="text-xs text-muted-foreground bg-muted-background uppercase tracking-wide">
                           <TableRow>
-                            <TableHead className="w-[150px] text-gray-700">
+                            <TableHead className="w-[150px] text-muted-foreground">
                               {t("field")}
                             </TableHead>
-                            <TableHead className="text-gray-700">
+                            <TableHead className="text-muted-foreground">
                               {t("details")}
                             </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           <TableRow>
-                            <TableHead className="w-[150px] text-gray-700">
+                            <TableHead className="w-[150px] text-muted-foreground">
                               {t("retention")}
                             </TableHead>
-                            <TableCell className="text-gray-950 font-semibold">
+                            <TableCell className="text-foreground font-semibold">
                               {requirement.type_tested?.retention_time
                                 ? `${round(requirement.type_tested.retention_time.value)} ${requirement.type_tested.retention_time.unit.display}`
                                 : t("na")}
@@ -656,11 +659,11 @@ export function SpecimenWorkflowCard({
                 >
                   <AccordionTrigger
                     className={cn(
-                      "px-4 py-2 text-sm hover:bg-gray-50/50 data-[state=closed]:bg-white data-[state=open]:bg-gray-50 data-[state=open]:rounded-b-none",
+                      "px-4 py-2 text-sm hover:bg-soft-background/50 data-[state=closed]:bg-background data-[state=open]:bg-soft-background data-[state=open]:rounded-b-none",
                     )}
                   >
                     <div className="flex items-center gap-2 flex-1 mr-4">
-                      <Receipt className="size-4 text-gray-500" />
+                      <Receipt className="size-4 text-muted-foreground" />
                       <span className="font-medium underline">
                         {t("specimen_collection")}
                       </span>
@@ -669,18 +672,18 @@ export function SpecimenWorkflowCard({
                       <Badge variant="green"> 1/1 {t("collected")}</Badge>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="px-4 pt-1 pb-4 space-y-4 bg-gray-50 rounded-b-lg">
+                  <AccordionContent className="px-4 pt-1 pb-4 space-y-4 bg-soft-background rounded-b-lg">
                     <p className="font-semibold text-xs mb-2 flex items-center gap-2">
                       {t("collected_specimen_details")}
                     </p>
                     <Card className="rounded-xl overflow-clip border-none shadow-md">
                       <Table>
-                        <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
+                        <TableHeader className="text-xs text-muted-foreground bg-muted-background uppercase tracking-wide">
                           <TableRow>
-                            <TableHead className="w-[150px] text-gray-700 ">
+                            <TableHead className="w-[150px] text-muted-foreground ">
                               {t("field")}
                             </TableHead>
-                            <TableHead className="text-gray-700">
+                            <TableHead className="text-muted-foreground">
                               {t("details")}
                             </TableHead>
                           </TableRow>
@@ -688,10 +691,10 @@ export function SpecimenWorkflowCard({
                         <TableBody>
                           {collectedSpecimen.collection?.collector && (
                             <TableRow>
-                              <TableHead className="w-[150px] text-gray-700">
+                              <TableHead className="w-[150px] text-muted-foreground">
                                 {t("collector")}
                               </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
+                              <TableCell className="text-foreground font-semibold">
                                 {collectedSpecimen.collection.collector_object
                                   ? formatName(
                                       collectedSpecimen.collection
@@ -704,10 +707,10 @@ export function SpecimenWorkflowCard({
                           {collectedSpecimen.collection
                             ?.collected_date_time && (
                             <TableRow>
-                              <TableHead className="text-gray-700">
+                              <TableHead className="text-muted-foreground">
                                 {t("collected_time")}
                               </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
+                              <TableCell className="text-foreground font-semibold">
                                 {new Date(
                                   collectedSpecimen.collection
                                     .collected_date_time,
@@ -717,20 +720,20 @@ export function SpecimenWorkflowCard({
                           )}
                           {collectedSpecimen.collection?.body_site && (
                             <TableRow>
-                              <TableHead className="text-gray-700">
+                              <TableHead className="text-muted-foreground">
                                 {t("body_site")}
                               </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
+                              <TableCell className="text-foreground font-semibold">
                                 {collectedSpecimen.collection.body_site.display}
                               </TableCell>
                             </TableRow>
                           )}
                           {collectedSpecimen.collection?.quantity && (
                             <TableRow>
-                              <TableHead className="text-gray-700">
+                              <TableHead className="text-muted-foreground">
                                 {t("quantity")}
                               </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
+                              <TableCell className="text-foreground font-semibold">
                                 {formatQuantity({
                                   quantity:
                                     collectedSpecimen.collection.quantity,
@@ -741,10 +744,10 @@ export function SpecimenWorkflowCard({
                           {collectedSpecimen.collection
                             ?.fasting_status_codeable_concept && (
                             <TableRow>
-                              <TableHead className="text-gray-700">
+                              <TableHead className="text-muted-foreground">
                                 {t("fasting_status")}
                               </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
+                              <TableCell className="text-foreground font-semibold">
                                 {
                                   collectedSpecimen.collection
                                     .fasting_status_codeable_concept.display

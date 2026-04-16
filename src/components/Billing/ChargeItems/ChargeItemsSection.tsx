@@ -97,8 +97,8 @@ export function ChargeItemsSection({
 
   return (
     <>
-      <Card className="bg-white shadow-sm rounded-md p-1">
-        <CardHeader className="p-2 bg-gray-50">
+      <Card className="bg-card shadow-sm rounded-md p-1">
+        <CardHeader className="p-2 bg-soft-background">
           <div className="flex flex-col sm:flex-row gap-2 items-center justify-between">
             <CardTitle>{t("charge_items")}</CardTitle>
             <div className="flex items-center gap-2">

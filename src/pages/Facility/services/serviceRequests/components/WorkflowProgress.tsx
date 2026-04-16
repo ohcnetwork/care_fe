@@ -36,13 +36,13 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
   return (
     <div className="relative flex gap-8 pl-8 pt-0.5 group">
       <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center">
-        <div className="absolute w-px bg-gray-200 h-full top-4 group-last:hidden" />
+        <div className="absolute w-px bg-strong-background h-full top-4 group-last:hidden" />
         <div
           className={cn(
             "size-6 rounded-full flex items-center justify-center",
             event.status === "completed" && "bg-green-100",
             event.status === "in_progress" && "bg-blue-100",
-            event.status === "pending" && "bg-gray-100",
+            event.status === "pending" && "bg-muted-background",
           )}
         >
           {event.status === "completed" && (
@@ -52,10 +52,10 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
             <div className="size-2 rounded-full bg-blue-600 animate-pulse" />
           )}
           {event.status === "pending" && (
-            <div className="size-2 rounded-full bg-gray-400" />
+            <div className="size-2 rounded-full bg-stronger-border" />
           )}
         </div>
-        {!event.status && <div className="flex-1 w-px bg-gray-200" />}
+        {!event.status && <div className="flex-1 w-px bg-strong-background" />}
       </div>
       <div className="flex flex-col gap-1 pb-8">
         <div className="flex items-start justify-between gap-4">
@@ -63,16 +63,18 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
             <h3
               className={cn(
                 "font-medium text-base",
-                event.status === "completed" && "text-gray-900",
+                event.status === "completed" && "text-foreground",
                 event.status === "in_progress" && "text-blue-900",
-                event.status === "pending" && "text-gray-500",
+                event.status === "pending" && "text-muted-foreground",
               )}
             >
               {event.title}
             </h3>
-            <p className="text-sm text-gray-500">{event.description}</p>
-            <p className="text-sm text-gray-500">{event.additional_info}</p>
-            <time className="text-sm text-gray-500 whitespace-nowrap">
+            <p className="text-sm text-muted-foreground">{event.description}</p>
+            <p className="text-sm text-muted-foreground">
+              {event.additional_info}
+            </p>
+            <time className="text-sm text-muted-foreground whitespace-nowrap">
               {format(new Date(event.timestamp), " hh:mm a, MMM d, yyyy")}
             </time>
           </div>
@@ -187,7 +189,7 @@ export function WorkflowProgress({
           <Button
             variant="outline"
             size="icon"
-            className="border border-gray-400"
+            className="border border-stronger-border"
           >
             <PanelRight />
           </Button>

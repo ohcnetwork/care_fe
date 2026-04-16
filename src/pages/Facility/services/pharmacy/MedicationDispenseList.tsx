@@ -85,30 +85,44 @@ function MedicationTable({
   return (
     <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
       <Table className="rounded-md">
-        <TableHeader className=" bg-gray-100 text-gray-700">
+        <TableHeader className=" bg-muted-background text-muted-foreground">
           <TableRow className="divide-x">
-            <TableHead className="text-gray-700">{t("medicine")}</TableHead>
-            <TableHead className="text-gray-700">{t("dosage")}</TableHead>
-            <TableHead className="text-gray-700">{t("frequency")}</TableHead>
-            <TableHead className="text-gray-700">{t("duration")}</TableHead>
-            <TableHead className="text-gray-700">{t("total_units")}</TableHead>
-            <TableHead className="text-gray-700">
+            <TableHead className="text-muted-foreground">
+              {t("medicine")}
+            </TableHead>
+            <TableHead className="text-muted-foreground">
+              {t("dosage")}
+            </TableHead>
+            <TableHead className="text-muted-foreground">
+              {t("frequency")}
+            </TableHead>
+            <TableHead className="text-muted-foreground">
+              {t("duration")}
+            </TableHead>
+            <TableHead className="text-muted-foreground">
+              {t("total_units")}
+            </TableHead>
+            <TableHead className="text-muted-foreground">
               {t("dispense_status")}
             </TableHead>
-            <TableHead className="text-gray-700">{t("instructions")}</TableHead>
-            <TableHead className="text-gray-700">{t("status")}</TableHead>
+            <TableHead className="text-muted-foreground">
+              {t("instructions")}
+            </TableHead>
+            <TableHead className="text-muted-foreground">
+              {t("status")}
+            </TableHead>
             {medications.some(
               (medication) =>
                 medication.dispense_status ===
                 MedicationRequestDispenseStatus.partial,
             ) && (
-              <TableHead className="text-gray-700 w-10">
+              <TableHead className="text-muted-foreground w-10">
                 {t("actions")}
               </TableHead>
             )}
           </TableRow>
         </TableHeader>
-        <TableBody className="bg-white">
+        <TableBody className="bg-background">
           {medications.map((medication: MedicationRequestRead) => {
             const instructions = medication.dosage_instruction;
 
@@ -116,13 +130,13 @@ function MedicationTable({
               <TableRow
                 key={medication.id}
                 className={cn(
-                  "hover:bg-gray-50 divide-x",
+                  "hover:bg-soft-background divide-x",
                   medication.requested_product
-                    ? "hover:bg-gray-50"
-                    : "bg-gray-200",
+                    ? "hover:bg-soft-background"
+                    : "bg-strong-background",
                 )}
               >
-                <TableCell className="font-semibold text-gray-950 h-full items-center max-w-xs break-words">
+                <TableCell className="font-semibold text-foreground h-full items-center max-w-xs break-words">
                   <span className="flex flex-col gap-2 text-wrap">
                     {displayMedicationName(medication)}
                     {medication?.dispense_status ===
@@ -142,7 +156,7 @@ function MedicationTable({
                     )}
                   </span>
                 </TableCell>
-                <TableCell className="text-gray-950 font-medium">
+                <TableCell className="text-foreground font-medium">
                   <DosageInstructionList
                     instructions={instructions}
                     renderItem={(di) => {
@@ -154,25 +168,25 @@ function MedicationTable({
                     }}
                   />
                 </TableCell>
-                <TableCell className="text-gray-950 font-medium">
+                <TableCell className="text-foreground font-medium">
                   <DosageInstructionList
                     instructions={instructions}
                     renderItem={(di) => formatFrequency(di) || "-"}
                   />
                 </TableCell>
-                <TableCell className="text-gray-950 font-medium">
+                <TableCell className="text-foreground font-medium">
                   <DosageInstructionList
                     instructions={instructions}
                     renderItem={(di) => formatDuration(di) || "-"}
                   />
                 </TableCell>
-                <TableCell className="text-gray-950 font-medium">
+                <TableCell className="text-foreground font-medium">
                   {formatTotalUnits(medication.dosage_instruction, t("units"))}
                 </TableCell>
                 <TableCell>
                   <Badge>{t(medication.dispense_status || "incomplete")}</Badge>
                 </TableCell>
-                <TableCell className="whitespace-pre-wrap text-gray-950 font-medium">
+                <TableCell className="whitespace-pre-wrap text-foreground font-medium">
                   {medication.note || "-"}
                 </TableCell>
                 <TableCell>
@@ -331,7 +345,7 @@ export default function MedicationDispenseList({
   return (
     <div>
       {prescription.encounter.patient && (
-        <div className="rounded-none shadow-none bg-gray-100 p-4">
+        <div className="rounded-none shadow-none bg-muted-background p-4">
           <PatientHeader
             patient={prescription.encounter.patient}
             facilityId={facilityId}
@@ -339,7 +353,7 @@ export default function MedicationDispenseList({
           <div className="flex flex-wrap gap-4 mt-2 text-sm">
             {prescription.encounter.current_location && (
               <div className="flex items-center gap-1.5">
-                <span className="text-gray-500">{t("location")}:</span>
+                <span className="text-muted-foreground">{t("location")}:</span>
                 <span className="font-medium">
                   {prescription.encounter.current_location.name}
                 </span>
@@ -348,7 +362,7 @@ export default function MedicationDispenseList({
             {prescription.encounter.organizations &&
               prescription.encounter.organizations.length > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-gray-500">
+                  <span className="text-muted-foreground">
                     {t("departments", {
                       count: prescription.encounter.organizations.length,
                     })}
@@ -394,7 +408,7 @@ export default function MedicationDispenseList({
             <Button
               variant="outline"
               asChild
-              className="w-full sm:w-auto border-gray-400 font-semibold"
+              className="w-full sm:w-auto border-stronger-border font-semibold"
             >
               <Link
                 href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/?patientId=${patientId}&patient_name=${encodeURIComponent(prescription.encounter.patient.name || "")}`}
@@ -406,7 +420,7 @@ export default function MedicationDispenseList({
             </Button>
             <Button
               variant="outline"
-              className="w-full sm:w-auto border-gray-400 font-semibold"
+              className="w-full sm:w-auto border-stronger-border font-semibold"
               disabled={prescription.medications.length === 0}
               onClick={() =>
                 navigate(
@@ -442,16 +456,16 @@ export default function MedicationDispenseList({
       ) : (
         <div className="space-y-8">
           <div className="space-y-2">
-            <div className="bg-white border rounded-md p-1">
+            <div className="bg-background border rounded-md p-1">
               <div className="flex md:flex-row flex-col items-start md:items-center justify-between gap-2">
                 <div className="flex flex-col gap-1">
-                  <div className="text-sm text-gray-700 flex items-center gap-2">
-                    <UserIcon className="size-4 text-gray-600" />
-                    <span className="text-gray-900">
+                  <div className="text-sm text-muted-foreground flex items-center gap-2">
+                    <UserIcon className="size-4 text-soft-foreground" />
+                    <span className="text-foreground">
                       {formatName(prescription.prescribed_by)}
                     </span>
-                    <span className="text-gray-500">{t("on")}</span>
-                    <span className="text-gray-900">
+                    <span className="text-muted-foreground">{t("on")}</span>
+                    <span className="text-foreground">
                       {formatDateTime(prescription.created_date)}
                     </span>
                   </div>
@@ -466,7 +480,7 @@ export default function MedicationDispenseList({
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="border-gray-300 shadow-none"
+                        className="border-strong-border shadow-none"
                         size="icon"
                       >
                         <MoreVertical className="size-4" />
@@ -517,7 +531,7 @@ export default function MedicationDispenseList({
               </div>
             </div>
             <div className="mt-3">
-              <div className="flex items-center justify-between text-xs text-gray-700">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>
                   {t("total")}: {dispenseCounts.total} • {t("complete")}:{" "}
                   {dispenseCounts.complete} • {t("partial")}:{" "}
@@ -528,7 +542,7 @@ export default function MedicationDispenseList({
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-foreground">
                 {t("medications")}
               </h2>
               <MedicationTable
@@ -548,7 +562,7 @@ export default function MedicationDispenseList({
             </div>
           </div>
           {prescription.note && (
-            <div className="mt-6 mb-6 text-sm text-gray-600">
+            <div className="mt-6 mb-6 text-sm text-soft-foreground">
               <p className="font-semibold mb-1">{t("note")}</p>
               <Markdown
                 content={prescription.note}
@@ -584,7 +598,7 @@ export default function MedicationDispenseList({
                 action: t("mark_as_already_given").toLowerCase(),
               }}
               components={{
-                1: <strong className="text-gray-900" />,
+                1: <strong className="text-foreground" />,
               }}
             />{" "}
             {t("you_cannot_change_once_submitted")}
@@ -621,7 +635,7 @@ export default function MedicationDispenseList({
                 action: t("change_status").toLowerCase(),
               }}
               components={{
-                1: <strong className="text-gray-900" />,
+                1: <strong className="text-foreground" />,
               }}
             />{" "}
             {t("you_cannot_change_once_submitted")}

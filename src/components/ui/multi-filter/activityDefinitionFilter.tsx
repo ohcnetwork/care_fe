@@ -245,13 +245,13 @@ function ActivityDefinitionFilterDropdown({
 
       {/* Breadcrumbs */}
       {breadcrumbs.length > 0 && (
-        <div className="px-3 py-2 border-b bg-gray-50">
+        <div className="px-3 py-2 border-b bg-soft-background">
           <div className="flex items-center gap-1 text-xs overflow-auto">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleBackToRoot}
-              className="h-6 px-2 text-xs hover:bg-white"
+              className="h-6 px-2 text-xs hover:bg-background"
             >
               <Home className="size-3 mr-1" />
               {t("root")}
@@ -259,12 +259,12 @@ function ActivityDefinitionFilterDropdown({
             {breadcrumbs.length <= 2 || breadcrumbsExpanded ? (
               breadcrumbs.map((breadcrumb, index) => (
                 <div key={breadcrumb.slug} className="flex items-center">
-                  <ChevronRight className="size-3 mx-1 text-gray-500" />
+                  <ChevronRight className="size-3 mx-1 text-muted-foreground" />
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleBreadcrumbClick(index)}
-                    className="h-6 px-2 text-xs hover:bg-white"
+                    className="h-6 px-2 text-xs hover:bg-background"
                   >
                     {breadcrumb.title}
                   </Button>
@@ -272,21 +272,21 @@ function ActivityDefinitionFilterDropdown({
               ))
             ) : (
               <>
-                <ChevronRight className="size-3 mx-1 text-gray-500" />
+                <ChevronRight className="size-3 mx-1 text-muted-foreground" />
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setBreadcrumbsExpanded(true)}
-                  className="h-6 px-2 text-xs hover:bg-white"
+                  className="h-6 px-2 text-xs hover:bg-background"
                 >
                   <MoreHorizontal className="size-3" />
                 </Button>
-                <ChevronRight className="size-3 mx-1 text-gray-500" />
+                <ChevronRight className="size-3 mx-1 text-muted-foreground" />
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleBreadcrumbClick(breadcrumbs.length - 1)}
-                  className="h-6 px-2 text-xs hover:bg-white"
+                  className="h-6 px-2 text-xs hover:bg-background"
                 >
                   {breadcrumbs[breadcrumbs.length - 1].title}
                 </Button>
@@ -300,7 +300,7 @@ function ActivityDefinitionFilterDropdown({
         {/* Selected Definitions */}
         {selectedDefinitions.length > 0 && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {t("selected")}
             </div>
             {selectedDefinitions.map((def) => (
@@ -321,7 +321,7 @@ function ActivityDefinitionFilterDropdown({
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-sm truncate">{def.title}</span>
                   {def.category && (
-                    <span className="text-xs text-gray-500 flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Folder className="size-2.5" />
                       {def.category.title}
                     </span>
@@ -345,7 +345,7 @@ function ActivityDefinitionFilterDropdown({
         {/* Categories (only show when not searching) */}
         {!isLoading && !searchQuery && categories.length > 0 && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {currentParent ? t("subcategories") : t("categories")}
             </div>
             {categories.map((category) => (
@@ -361,7 +361,7 @@ function ActivityDefinitionFilterDropdown({
                   <FolderOpen className="size-4 text-amber-500" />
                   <span className="text-sm">{category.title}</span>
                 </div>
-                <ChevronRight className="size-4 text-gray-400" />
+                <ChevronRight className="size-4 text-placeholder-foreground" />
               </DropdownMenuItem>
             ))}
             {definitions.length > 0 && <div className="border-b my-2" />}
@@ -372,7 +372,7 @@ function ActivityDefinitionFilterDropdown({
         {!isLoading && (searchQuery || currentParent) && (
           <>
             {definitions.length > 0 && (
-              <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 {t("activity_definitions")}
               </div>
             )}
@@ -397,7 +397,7 @@ function ActivityDefinitionFilterDropdown({
                         {definition.title}
                       </span>
                       {searchQuery && displayPath && (
-                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <Folder className="size-2.5" />
                           {displayPath}
                         </span>
@@ -415,14 +415,14 @@ function ActivityDefinitionFilterDropdown({
           !currentParent &&
           definitions.length === 0 &&
           categories.length === 0 && (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-muted-foreground">
               <Folder className="size-8 mx-auto mb-2 opacity-50" />
               <div className="text-sm">{t("no_items_found")}</div>
             </div>
           )}
 
         {!isLoading && searchQuery && definitions.length === 0 && (
-          <div className="p-4 text-center text-gray-500">
+          <div className="p-4 text-center text-muted-foreground">
             <Search className="size-8 mx-auto mb-2 opacity-50" />
             <div className="text-sm">{t("no_matching_items_found")}</div>
           </div>

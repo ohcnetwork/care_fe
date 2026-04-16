@@ -291,7 +291,7 @@ export default function DeliveryOrderForm({
       <Page title={title} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{title}</h1>
           </div>
           <FormSkeleton rows={10} />
         </div>
@@ -307,7 +307,7 @@ export default function DeliveryOrderForm({
     >
       <div className="container mx-auto max-w-5xl">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
             {title}
             <Badge
               variant={
@@ -327,7 +327,7 @@ export default function DeliveryOrderForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <input type="submit" hidden />
-            <Card className="p-0 bg-gray-50">
+            <Card className="p-0 bg-soft-background">
               <CardContent className="space-y-4 p-4 rounded-md">
                 <div className="grid sm:grid-cols-2 gap-4 items-start">
                   <FormField
@@ -403,7 +403,7 @@ export default function DeliveryOrderForm({
                     <FormItem>
                       <FormLabel>
                         {t("note")}
-                        <span className="text-gray-500 text-sm italic">
+                        <span className="text-muted-foreground text-sm italic">
                           {" "}
                           ({t("optional")})
                         </span>

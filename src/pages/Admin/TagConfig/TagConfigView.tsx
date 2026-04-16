@@ -162,7 +162,7 @@ export default function TagConfigView({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-foreground">
                 {tagConfig.display}
               </h1>
             </div>
@@ -192,7 +192,7 @@ export default function TagConfigView({
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-soft-foreground">
                   {t("category")}
                 </label>
                 <div className="mt-1 capitalize">
@@ -200,7 +200,7 @@ export default function TagConfigView({
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-soft-foreground">
                   {t("resource")}
                 </label>
                 <div className="mt-1">
@@ -208,7 +208,7 @@ export default function TagConfigView({
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-soft-foreground">
                   {t("status")}
                 </label>
                 <div className="mt-1">
@@ -218,13 +218,13 @@ export default function TagConfigView({
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-soft-foreground">
                   {t("priority")}
                 </label>
                 <div className="mt-1 text-sm">{tagConfig.priority}</div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-soft-foreground">
                   {t("system_generated")}
                 </label>
                 <div className="mt-1 text-sm">
@@ -233,7 +233,7 @@ export default function TagConfigView({
               </div>
               {!tagConfig.parent && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-soft-foreground">
                     {t("has_children")}
                   </label>
                   <div className="mt-1 text-sm">
@@ -242,7 +242,7 @@ export default function TagConfigView({
                 </div>
               )}
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-soft-foreground">
                   {t("managing_organization")}
                 </label>
                 <div className="mt-1 text-sm">
@@ -256,17 +256,17 @@ export default function TagConfigView({
             </div>
             {tagConfig.description && (
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-soft-foreground">
                   {t("description")}
                 </label>
-                <div className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">
+                <div className="mt-1 text-sm text-foreground whitespace-pre-wrap">
                   {tagConfig.description}
                 </div>
               </div>
             )}
             {tagConfig.parent && tagConfig.parent.id && (
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-soft-foreground">
                   {t("parent_tag")}
                 </label>
                 <div className="mt-1">

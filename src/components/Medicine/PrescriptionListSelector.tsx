@@ -110,12 +110,12 @@ export default function PrescriptionListSelector({
                     <span className="text-sm font-medium whitespace-nowrap">
                       {t("all_prescriptions")}
                     </span>
-                    <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                       {t("view_all_medications")}
                     </span>
                   </div>
                 </div>
-                <ChevronDown className="size-5 text-gray-500 shrink-0 ml-2" />
+                <ChevronDown className="size-5 text-muted-foreground shrink-0 ml-2" />
               </Button>
             ) : selectedPrescription ? (
               <Button
@@ -132,14 +132,14 @@ export default function PrescriptionListSelector({
                       )}
                     </span>
 
-                    <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                       {t("prescribed_by")}:{" "}
                       {formatName(selectedPrescription.prescribed_by)}
                     </span>
                     <PrescriptionTags tags={selectedPrescription.tags} />
                   </div>
                 </div>
-                <ChevronDown className="size-5 text-gray-500 shrink-0 ml-2" />
+                <ChevronDown className="size-5 text-muted-foreground shrink-0 ml-2" />
               </Button>
             ) : (
               <Button variant="outline" className="w-full">
@@ -208,8 +208,8 @@ function PrescriptionList({
             className={cn(
               "rounded-md relative cursor-pointer transition-colors w-full",
               isSelected
-                ? "bg-white border-primary-600 shadow-md"
-                : "bg-gray-100 hover:bg-gray-100 shadow-none",
+                ? "bg-background border-primary-600 shadow-md"
+                : "bg-muted-background hover:bg-muted-background shadow-none",
             )}
             onClick={() =>
               onSelectPrescription(prescriptions.find((p) => p.id === item.id))
@@ -223,14 +223,14 @@ function PrescriptionList({
                 <ReceiptTextIcon
                   className={cn(
                     "size-5",
-                    isSelected ? "text-primary-600" : "text-gray-500",
+                    isSelected ? "text-primary-600" : "text-muted-foreground",
                   )}
                 />
                 <div className="flex flex-col -mt-1">
                   <span className="text-sm font-medium whitespace-nowrap">
                     {item.title}
                   </span>
-                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                  <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                     {item.subtitle}
                   </span>
                   <PrescriptionTags tags={item.tags} />

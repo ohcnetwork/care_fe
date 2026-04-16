@@ -185,7 +185,7 @@ export function EntitySelectionDrawer({
         <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
           {selectedEntity ? (
             <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)] mt-2">
-              <DrawerHeader className="py-1 px-1 border-b border-gray-200 sticky top-0 z-10 bg-white">
+              <DrawerHeader className="py-1 px-1 border-b border-border sticky top-0 z-10 bg-background">
                 <div className="flex justify-between w-full p-1">
                   <Button
                     variant="link"

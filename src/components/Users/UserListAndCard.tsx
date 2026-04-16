@@ -60,7 +60,7 @@ export const UserStatusIndicator = ({
         </Badge>
       ) : (
         <Badge variant="secondary" className="whitespace-nowrap">
-          <span className="inline-block size-2 shrink-0 rounded-full bg-gray-500" />
+          <span className="inline-block size-2 shrink-0 rounded-full bg-muted-foreground" />
           <span className="hidden lg:inline">{t("never_logged_in")}</span>
           <span className="lg:hidden">{t("never")}</span>
         </Badge>
@@ -99,12 +99,12 @@ export function UserCard(props: UserCardProps) {
                   {formatName(user)}
                 </h1>
                 {!isServiceAccount && (
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-muted-foreground">
                     <UserStatusIndicator user={user} />
                   </span>
                 )}
               </div>
-              <span className="text-sm text-gray-500 mr-2 wrap-break-word">
+              <span className="text-sm text-muted-foreground mr-2 wrap-break-word">
                 {user.username}
               </span>
             </div>
@@ -115,13 +115,15 @@ export function UserCard(props: UserCardProps) {
                   isServiceAccount && "ml-0",
                 )}
               >
-                {roleName && <span className="text-gray-500">{roleName}</span>}
+                {roleName && (
+                  <span className="text-muted-foreground">{roleName}</span>
+                )}
                 {editRoleAction}
               </div>
             )}
           </div>
         </div>
-        <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end gap-2">
+        <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-soft-background flex justify-end gap-2">
           {!user.deleted ? (
             <>
               {actions}
@@ -139,7 +141,7 @@ export function UserCard(props: UserCardProps) {
               </Button>
             </>
           ) : (
-            <div className="bg-gray-200 rounded-md px-2 py-1 text-sm inline-block">
+            <div className="bg-strong-background rounded-md px-2 py-1 text-sm inline-block">
               <CareIcon icon="l-archive" className="mr-2" />
               {t("archived")}
             </div>
@@ -171,7 +173,7 @@ const UserListHeader = () => {
 
   return (
     <thead>
-      <tr className="bg-gray-50 text-sm font-medium text-gray-500">
+      <tr className="bg-soft-background text-sm font-medium text-muted-foreground">
         <th className="px-4 py-3 text-left">{t("name")}</th>
         <th className="w-32 px-10 py-3 text-left">{t("status")}</th>
         <th className="px-10 py-3 text-left">{t("role")}</th>
@@ -189,7 +191,7 @@ const UserListRow = ({ user }: { user: UserReadMinimal }) => {
     <tr
       key={`usr_${user.id}`}
       id={`usr_${user.id}`}
-      className="hover:bg-gray-50"
+      className="hover:bg-soft-background"
     >
       <td className="px-4 py-4 lg:pr-20">
         <div className="flex items-center gap-3">
@@ -206,7 +208,7 @@ const UserListRow = ({ user }: { user: UserReadMinimal }) => {
             </h1>
             <span
               id={`username-${user.username}`}
-              className="text-xs text-gray-500"
+              className="text-xs text-muted-foreground"
             >
               {user.username}
             </span>
@@ -240,10 +242,10 @@ const UserListRow = ({ user }: { user: UserReadMinimal }) => {
 };
 export const UserList = ({ users }: { users?: UserReadMinimal[] }) => {
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
-      <table className="relative min-w-full divide-y divide-gray-200">
+    <div className="overflow-x-auto rounded-lg border border-border">
+      <table className="relative min-w-full divide-y divide-border">
         <UserListHeader />
-        <tbody className="divide-y divide-gray-200 bg-white">
+        <tbody className="divide-y divide-border bg-background">
           {users?.map((user) => (
             <UserListRow key={user.id} user={user} />
           ))}
@@ -274,7 +276,7 @@ export default function UserListAndCardView({
           )}
         </>
       ) : (
-        <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow-sm">
+        <div className="h-full space-y-2 rounded-lg bg-background p-7 shadow-sm">
           <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
             {t("no_users_found")}
           </div>

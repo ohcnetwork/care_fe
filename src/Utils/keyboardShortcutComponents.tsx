@@ -9,11 +9,11 @@ const keyboardShortcutBadgeVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-linear-to-b from-white to-gray-200 border-gray-200 text-gray-700",
-        primary: "border-gray-200/20 font-normal",
+          "bg-linear-to-b from-white to-strong-background border-border text-muted-foreground",
+        primary: "border-border/20 font-normal",
         classic_primary:
           "border-primary-900 font-normal bg-linear-to-b from-primary-600 to-primary-900",
-        secondary: "bg-gray-50 text-gray-700",
+        secondary: "bg-soft-background text-muted-foreground",
       },
       position: {
         "top-right": "absolute top-1 right-1",

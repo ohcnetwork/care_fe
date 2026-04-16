@@ -62,7 +62,7 @@ export function TaxComponentSettings() {
               <TableHead>{t("value")}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="bg-white">
+          <TableBody className="bg-background">
             {filteredComponents.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={3} className="text-center h-24">
@@ -77,7 +77,7 @@ export function TaxComponentSettings() {
                   <TableCell>{component.title}</TableCell>
                   <TableCell>
                     {component.code && (
-                      <code className="px-2 py-1 rounded bg-gray-100 text-sm">
+                      <code className="px-2 py-1 rounded bg-muted-background text-sm">
                         {component.code.code}
                       </code>
                     )}

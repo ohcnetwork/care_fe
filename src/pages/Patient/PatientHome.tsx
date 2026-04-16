@@ -209,7 +209,7 @@ export default function PatientHome() {
                       facilityId={facilityId}
                       trigger={
                         <QuickAction
-                          icon={<Ticket className="text-gray-500" />}
+                          icon={<Ticket className="text-muted-foreground" />}
                           title={t("generate_token")}
                           actionId="generate-token"
                         />
@@ -269,7 +269,7 @@ export default function PatientHome() {
               <h3 className="text-xl font-semibold mb-1">
                 {t("verification_failed")}
               </h3>
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-sm text-muted-foreground mb-6">
                 {t("please_enter_correct_birth_year")}
               </p>
               <Button

@@ -35,7 +35,7 @@ import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
 const TABLE_HEADER_CLASS =
-  "px-4 py-3 border-r font-medium border-y-1 border-r-0 border-gray-200 rounded-b-none border-b-0";
+  "px-4 py-3 border-r font-medium border-y-1 border-r-0 border-border rounded-b-none border-b-0";
 const TABLE_CELL_CLASS = "px-2 py-2 border-r";
 
 export interface MedicationBillTableProps {
@@ -147,12 +147,12 @@ export function MedicationBillTable({
       <form onSubmit={(e) => e.preventDefault()}>
         <Table className="w-full border-separate border-spacing-y-2 px-1">
           <TableHeader>
-            <TableRow className="bg-white rounded-lg shadow-sm rounded-b-none">
+            <TableRow className="bg-background rounded-lg shadow-sm rounded-b-none">
               <TableHead
                 className={cn(
                   "w-12",
                   TABLE_HEADER_CLASS,
-                  "rounded-l-lg border-y border-l border-gray-200 rounded-b-none border-b-0",
+                  "rounded-l-lg border-y border-l border-border rounded-b-none border-b-0",
                 )}
               >
                 <FormField
@@ -184,7 +184,7 @@ export function MedicationBillTable({
               <TableHead
                 className={cn(
                   TABLE_HEADER_CLASS,
-                  "border-y border-r-0 border-gray-200 rounded-b-none border-b-0",
+                  "border-y border-r-0 border-border rounded-b-none border-b-0",
                 )}
               >
                 {t("medicine")}
@@ -224,10 +224,10 @@ export function MedicationBillTable({
                   return (
                     <React.Fragment key={key}>
                       {/* Group Header Row */}
-                      <TableRow className="bg-gray-50">
+                      <TableRow className="bg-soft-background">
                         <TableCell
                           colSpan={7}
-                          className="py-2 px-4 font-semibold text-gray-800 border-b"
+                          className="py-2 px-4 font-semibold text-foreground border-b"
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex flex-col gap-1">
@@ -249,7 +249,7 @@ export function MedicationBillTable({
                                     }));
                                   }}
                                 />
-                                <span className="text-sm text-gray-600">
+                                <span className="text-sm text-soft-foreground">
                                   {t("mark_complete")}
                                 </span>
                               </div>

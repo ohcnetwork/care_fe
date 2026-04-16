@@ -59,7 +59,7 @@ export const ResourceRequests = (props: PatientProps) => {
         )}
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white">
+      <div className="rounded-lg border border-border bg-background">
         {loading ? (
           <TableSkeleton count={5} />
         ) : (

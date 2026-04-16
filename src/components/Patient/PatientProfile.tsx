@@ -101,14 +101,14 @@ export const PatientProfile = (props: {
         <div className="flex flex-col gap-2">
           <PatientHeader
             patient={patientData}
-            className="bg-white shadow-sm border-none rounded-sm"
+            className="bg-card shadow-sm border-none rounded-sm"
             facilityId={facilityId}
             isPatientPage={true}
           />
           <PatientDeceasedInfo patient={patientData} />
         </div>
         <div
-          className="sticky top-0 z-9 mt-4 w-full border-b border-gray-200 bg-gray-50"
+          className="sticky top-0 z-9 mt-4 w-full border-b border-border bg-soft-background"
           role="navigation"
         >
           <div className="overflow-x-auto pb-3">
@@ -124,7 +124,7 @@ export const PatientProfile = (props: {
                   className={`whitespace-nowrap px-4 py-2 text-sm font-medium ${
                     page === tab.route
                       ? "border-b-4 border-green-800 text-green-800 md:border-b-2"
-                      : "rounded-t-lg text-gray-600 hover:bg-gray-100"
+                      : "rounded-t-lg text-soft-foreground hover:bg-muted-background"
                   }`}
                   role="tab"
                   aria-selected={page === tab.route}
@@ -178,28 +178,28 @@ export const PatientProfile = (props: {
                           __name="PatientHomeActions"
                           patient={patientData}
                           facilityId={facilityId}
-                          className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
+                          className="w-full bg-background font-semibold text-green-800 hover:bg-secondary-200"
                         />
                       </div>
                     </div>
                   </div>
                 </div>
               </section>
-              <hr className="border-gray-200" />
+              <hr className="border-border" />
               <div
                 id="actions"
                 className="my-2 flex h-full flex-col justify-between space-y-2"
               >
                 <div className="my-1 rounded-sm py-2">
                   <div>
-                    <div className="text-xs font-normal leading-5 text-gray-600">
+                    <div className="text-xs font-normal leading-5 text-soft-foreground">
                       {t("last_updated_by")}
-                      <div className="font-semibold text-gray-900">
+                      <div className="font-semibold text-foreground">
                         {formatName(patientData.updated_by || undefined)}
                       </div>
                     </div>
 
-                    <div className="whitespace-normal text-xs font-normal text-gray-900">
+                    <div className="whitespace-normal text-xs font-normal text-foreground">
                       {patientData.modified_date ? (
                         <RelativeDateTooltip date={patientData.modified_date} />
                       ) : (
@@ -209,13 +209,13 @@ export const PatientProfile = (props: {
                   </div>
 
                   <div className="mt-4">
-                    <div className="text-xs font-normal leading-5 text-gray-600">
+                    <div className="text-xs font-normal leading-5 text-soft-foreground">
                       {t("patient_profile_created_by")}
-                      <div className="font-semibold text-gray-900">
+                      <div className="font-semibold text-foreground">
                         {formatName(patientData.created_by || undefined)}
                       </div>
                     </div>
-                    <div className="whitespace-normal text-xs font-normal text-gray-900">
+                    <div className="whitespace-normal text-xs font-normal text-foreground">
                       {patientData.created_date ? (
                         <RelativeDateTooltip date={patientData.created_date} />
                       ) : (

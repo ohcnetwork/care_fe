@@ -10,7 +10,425 @@
 
 @import "tw-animate-css";
 
-@config "../../tailwind.config.js";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Legacy secondary palette (old CARE branding) — kept for backwards compat */
+@theme {
+  --color-secondary-50: #f9fafb;
+  --color-secondary-100: #fbfafc;
+  --color-secondary-200: #f7f5fa;
+  --color-secondary-300: #f1edf7;
+  --color-secondary-400: #dfdae8;
+  --color-secondary-500: #bfb8cc;
+  --color-secondary-600: #9187a1;
+  --color-secondary-700: #7d728f;
+  --color-secondary-800: #6a5f7a;
+  --color-secondary-900: #453c52;
+
+  --font-sans: "Figtree", sans-serif;
+
+  --scale-25: 0.25;
+  --scale-175: 1.75;
+  --scale-200: 2;
+
+  --text-7xl: 5rem;
+
+  --spacing-80mm: 80mm;
+  --spacing-170mm: 170mm;
+
+  --animate-caret-blink: caret-blink 1.25s ease-out infinite;
+  --animate-collapsible-down: collapsible-down 0.2s ease-out;
+  --animate-collapsible-up: collapsible-up 0.2s ease-out;
+
+  @keyframes caret-blink {
+    0%, 70%, 100% { opacity: 1; }
+    20%, 50%      { opacity: 0; }
+  }
+
+  @keyframes collapsible-down {
+    from { height: 0; }
+    to   { height: var(--radix-collapsible-content-height); }
+  }
+
+  @keyframes collapsible-up {
+    from { height: var(--radix-collapsible-content-height); }
+    to   { height: 0; }
+  }
+}
+
+:root {
+  color-scheme: light;
+  --font-size-scale: 1;
+
+  /* Primary palette */
+  --primary-50: var(--color-emerald-50);
+  --primary-100: var(--color-emerald-100);
+  --primary-200: var(--color-emerald-200);
+  --primary-300: var(--color-emerald-300);
+  --primary-400: var(--color-emerald-400);
+  --primary-500: var(--color-emerald-500);
+  --primary-600: var(--color-emerald-600);
+  --primary-700: var(--color-emerald-700);
+  --primary-800: var(--color-emerald-800);
+  --primary-900: var(--color-emerald-900);
+  --primary-950: var(--color-emerald-950);
+
+  --radius: 0.625rem;
+
+  --background: var(--color-white);
+  --soft-background: var(--color-neutral-50);
+  --muted-background: var(--color-neutral-100);
+  --strong-background: var(--color-neutral-200);
+
+  --muted: var(--color-neutral-100);
+
+  --foreground: var(--color-neutral-950);
+  --muted-foreground: var(--color-neutral-700);
+  --soft-foreground: var(--color-neutral-600);
+  --disabled-foreground: var(--color-neutral-300);
+  --placeholder-foreground: var(--color-neutral-500);
+  --inverse-foreground: var(--color-white);
+
+  --card: var(--color-white);
+  --card-foreground: var(--color-neutral-950);
+
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-neutral-950);
+
+  --primary: var(--color-primary-800);
+  --primary-foreground: var(--color-primary-50);
+
+  --secondary: var(--color-neutral-100);
+  --secondary-foreground: var(--color-neutral-900);
+
+  --accent: var(--color-neutral-100);
+  --accent-foreground: var(--color-neutral-900);
+
+  --destructive: var(--color-red-600);
+  --destructive-foreground: var(--color-red-50);
+
+  --soft-border: var(--color-neutral-100);
+  --border: var(--color-neutral-200);
+  --strong-border: var(--color-neutral-300);
+  --stronger-border: var(--color-neutral-400);
+  --inverse-border: var(--color-white);
+
+  --input: var(--color-neutral-300);
+  --ring: --alpha(var(--color-indigo-500) / 75%);
+
+  --chart-1: var(--color-orange-600);
+  --chart-2: var(--color-primary-600);
+  --chart-3: var(--color-cyan-900);
+  --chart-4: var(--color-amber-400);
+  --chart-5: var(--color-yellow-500);
+
+  --sidebar: var(--color-neutral-100);
+  --sidebar-foreground: var(--color-neutral-950);
+  --sidebar-primary: var(--color-primary-800);
+  --sidebar-primary-foreground: var(--color-primary-50);
+  --sidebar-accent: var(--color-neutral-200);
+  --sidebar-accent-foreground: var(--color-neutral-950);
+  --sidebar-border: var(--color-neutral-200);
+  --sidebar-ring: var(--color-indigo-400);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: var(--color-neutral-950);
+  --soft-background: --alpha(var(--color-neutral-900) / 75%);
+  --muted-background: --alpha(var(--color-neutral-800) / 75%);
+  --strong-background: --alpha(var(--color-neutral-700) / 95%);
+
+  --muted: var(--color-neutral-800);
+
+  --foreground: var(--color-neutral-50);
+  --muted-foreground: var(--color-neutral-200);
+  --soft-foreground: var(--color-neutral-300);
+  --disabled-foreground: var(--color-neutral-700);
+  --placeholder-foreground: var(--color-neutral-600);
+  --inverse-foreground: var(--color-black);
+
+  --card: --alpha(var(--color-neutral-900) / 80%);
+  --card-foreground: var(--color-white);
+
+  --popover: var(--color-neutral-950);
+  --popover-foreground: var(--color-neutral-50);
+
+  --primary: var(--color-primary-400);
+  --primary-foreground: var(--color-primary-950);
+
+  --secondary: var(--color-neutral-800);
+  --secondary-foreground: var(--color-neutral-50);
+
+  --accent: var(--color-neutral-700);
+  --accent-foreground: var(--color-neutral-50);
+
+  --destructive: var(--color-red-400);
+  --destructive-foreground: var(--color-red-50);
+
+  --soft-border: --alpha(var(--color-white) / 5%);
+  --border: --alpha(var(--color-white) / 9%);
+  --strong-border: --alpha(var(--color-white) / 15%);
+  --stronger-border: --alpha(var(--color-white) / 22%);
+  --inverse-border: var(--color-neutral-50);
+
+  --input: --alpha(var(--color-white) / 15%);
+  --ring: --alpha(var(--color-indigo-500) / 75%);
+
+  --chart-1: var(--color-blue-700);
+  --chart-2: var(--color-green-500);
+  --chart-3: var(--color-amber-500);
+  --chart-4: var(--color-purple-500);
+  --chart-5: var(--color-rose-500);
+
+  --sidebar: var(--color-neutral-900);
+  --sidebar-foreground: var(--color-neutral-50);
+  --sidebar-primary: var(--color-primary-400);
+  --sidebar-primary-foreground: var(--color-primary-950);
+  --sidebar-accent: var(--color-neutral-800);
+  --sidebar-accent-foreground: var(--color-neutral-50);
+  --sidebar-border: --alpha(var(--color-white) / 12%);
+  --sidebar-ring: var(--color-indigo-400);
+}
+
+/* ── Protanopia & Deuteranopia ──────────────────────────────────────────── */
+[data-theme="protanopia"] {
+  --primary-50: var(--color-blue-50);
+  --primary-100: var(--color-blue-100);
+  --primary-200: var(--color-blue-200);
+  --primary-300: var(--color-blue-300);
+  --primary-400: var(--color-blue-400);
+  --primary-500: var(--color-blue-500);
+  --primary-600: var(--color-blue-600);
+  --primary-700: var(--color-blue-700);
+  --primary-800: var(--color-blue-800);
+  --primary-900: var(--color-blue-900);
+  --primary-950: var(--color-blue-950);
+
+  --color-red-50: var(--color-yellow-50);
+  --color-red-100: var(--color-yellow-100);
+  --color-red-200: var(--color-yellow-200);
+  --color-red-300: var(--color-yellow-300);
+  --color-red-400: var(--color-yellow-400);
+  --color-red-500: var(--color-yellow-500);
+  --color-red-600: var(--color-yellow-600);
+  --color-red-700: var(--color-yellow-700);
+  --color-red-800: var(--color-yellow-800);
+  --color-red-900: var(--color-yellow-900);
+  --color-red-950: var(--color-yellow-950);
+
+  --color-green-50: var(--color-teal-50);
+  --color-green-100: var(--color-teal-100);
+  --color-green-200: var(--color-teal-200);
+  --color-green-300: var(--color-teal-300);
+  --color-green-400: var(--color-teal-400);
+  --color-green-500: var(--color-teal-500);
+  --color-green-600: var(--color-teal-600);
+  --color-green-700: var(--color-teal-700);
+  --color-green-800: var(--color-teal-800);
+  --color-green-900: var(--color-teal-900);
+  --color-green-950: var(--color-teal-950);
+
+  --color-emerald-50: var(--color-cyan-50);
+  --color-emerald-100: var(--color-cyan-100);
+  --color-emerald-200: var(--color-cyan-200);
+  --color-emerald-300: var(--color-cyan-300);
+  --color-emerald-400: var(--color-cyan-400);
+  --color-emerald-500: var(--color-cyan-500);
+  --color-emerald-600: var(--color-cyan-600);
+  --color-emerald-700: var(--color-cyan-700);
+  --color-emerald-800: var(--color-cyan-800);
+  --color-emerald-900: var(--color-cyan-900);
+  --color-emerald-950: var(--color-cyan-950);
+}
+
+[data-theme="protanopia"]:not(.dark) {
+  --primary: var(--color-blue-800);
+  --primary-foreground: var(--color-blue-50);
+  --destructive: var(--color-yellow-800);
+  --destructive-foreground: var(--color-yellow-50);
+  --ring: --alpha(var(--color-blue-500) / 75%);
+  --sidebar-primary: var(--color-blue-800);
+  --sidebar-primary-foreground: var(--color-blue-50);
+  --sidebar-ring: var(--color-blue-400);
+}
+
+[data-theme="protanopia"].dark {
+  --primary: var(--color-blue-400);
+  --primary-foreground: var(--color-blue-950);
+  --destructive: var(--color-yellow-300);
+  --destructive-foreground: var(--color-yellow-950);
+  --ring: --alpha(var(--color-blue-500) / 75%);
+  --sidebar-primary: var(--color-blue-400);
+  --sidebar-primary-foreground: var(--color-blue-950);
+  --sidebar-ring: var(--color-blue-400);
+}
+
+/* ── Tritanopia ─────────────────────────────────────────────────────────── */
+[data-theme="tritanopia"] {
+  --primary-50: var(--color-rose-50);
+  --primary-100: var(--color-rose-100);
+  --primary-200: var(--color-rose-200);
+  --primary-300: var(--color-rose-300);
+  --primary-400: var(--color-rose-400);
+  --primary-500: var(--color-rose-500);
+  --primary-600: var(--color-rose-600);
+  --primary-700: var(--color-rose-700);
+  --primary-800: var(--color-rose-800);
+  --primary-900: var(--color-rose-900);
+  --primary-950: var(--color-rose-950);
+
+  --color-green-50: var(--color-amber-50);
+  --color-green-100: var(--color-amber-100);
+  --color-green-200: var(--color-amber-200);
+  --color-green-300: var(--color-amber-300);
+  --color-green-400: var(--color-amber-400);
+  --color-green-500: var(--color-amber-500);
+  --color-green-600: var(--color-amber-600);
+  --color-green-700: var(--color-amber-700);
+  --color-green-800: var(--color-amber-800);
+  --color-green-900: var(--color-amber-900);
+  --color-green-950: var(--color-amber-950);
+
+  --color-emerald-50: var(--color-orange-50);
+  --color-emerald-100: var(--color-orange-100);
+  --color-emerald-200: var(--color-orange-200);
+  --color-emerald-300: var(--color-orange-300);
+  --color-emerald-400: var(--color-orange-400);
+  --color-emerald-500: var(--color-orange-500);
+  --color-emerald-600: var(--color-orange-600);
+  --color-emerald-700: var(--color-orange-700);
+  --color-emerald-800: var(--color-orange-800);
+  --color-emerald-900: var(--color-orange-900);
+  --color-emerald-950: var(--color-orange-950);
+}
+
+[data-theme="tritanopia"]:not(.dark) {
+  --primary: var(--color-rose-700);
+  --primary-foreground: var(--color-rose-50);
+  --ring: --alpha(var(--color-rose-500) / 75%);
+  --sidebar-primary: var(--color-rose-700);
+  --sidebar-primary-foreground: var(--color-rose-50);
+  --sidebar-ring: var(--color-rose-400);
+}
+
+[data-theme="tritanopia"].dark {
+  --primary: var(--color-rose-400);
+  --primary-foreground: var(--color-rose-950);
+  --ring: --alpha(var(--color-rose-500) / 75%);
+  --sidebar-primary: var(--color-rose-400);
+  --sidebar-primary-foreground: var(--color-rose-950);
+  --sidebar-ring: var(--color-rose-400);
+}
+
+/* ── High Contrast — Light ──────────────────────────────────────────────── */
+.high-contrast:not(.dark) {
+  --foreground: var(--color-neutral-950);
+  --muted-foreground: var(--color-neutral-800);
+  --soft-foreground: var(--color-neutral-700);
+  --placeholder-foreground: var(--color-neutral-600);
+  --border: var(--color-neutral-400);
+  --strong-border: var(--color-neutral-600);
+  --stronger-border: var(--color-neutral-700);
+  --soft-border: var(--color-neutral-200);
+  --input: var(--color-neutral-500);
+}
+
+/* ── High Contrast — Dark ───────────────────────────────────────────────── */
+.dark.high-contrast {
+  --foreground: var(--color-white);
+  --muted-foreground: var(--color-neutral-100);
+  --soft-foreground: var(--color-neutral-200);
+  --placeholder-foreground: var(--color-neutral-400);
+  --border: --alpha(var(--color-white) / 25%);
+  --strong-border: --alpha(var(--color-white) / 40%);
+  --stronger-border: --alpha(var(--color-white) / 55%);
+  --soft-border: --alpha(var(--color-white) / 12%);
+  --input: --alpha(var(--color-white) / 30%);
+}
+
+@theme inline {
+  --font-sans: "Figtree", sans-serif;
+
+  --color-background: var(--background);
+  --color-soft-background: var(--soft-background);
+  --color-muted-background: var(--muted-background);
+  --color-strong-background: var(--strong-background);
+  --color-muted: var(--muted);
+
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-soft-foreground: var(--soft-foreground);
+  --color-disabled-foreground: var(--disabled-foreground);
+  --color-placeholder-foreground: var(--placeholder-foreground);
+  --color-inverse-foreground: var(--inverse-foreground);
+
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+
+  --color-border: var(--border);
+  --color-strong-border: var(--strong-border);
+  --color-stronger-border: var(--stronger-border);
+  --color-soft-border: var(--soft-border);
+  --color-inverse-border: var(--inverse-border);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Primary color scale */
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  --color-primary-900: var(--primary-900);
+  --color-primary-950: var(--primary-950);
+}
 
 /* Custom animations for the SessionExpired component */
 @keyframes ping-slow {
@@ -96,7 +514,7 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    border-color: var(--color-border, currentColor);
   }
 
   button:not(:disabled),
@@ -695,7 +1113,7 @@
 
   /* Style for tabs */
   [data-slot="tabs-trigger"] {
-    @apply not-data-[state=active]:text-gray-500;
+    @apply not-data-[state=active]:text-muted-foreground;
   }
 
   /* Styling for input otp */
@@ -705,7 +1123,7 @@
 
   /* Styling for radio group */
   button[role="radio"] {
-    @apply data-[state=checked]:border-primary-500 data-[state=checked]:text-primary-500 border-gray-300 shadow-sm;
+    @apply data-[state=checked]:border-primary-500 data-[state=checked]:text-primary-500 border-strong-border shadow-sm;
   }
 
   /* Styling for autocomplete */
@@ -730,15 +1148,23 @@
 }
 
 @layer base {
-  :root {
-    --radius: 0.5rem;
-    --sidebar-background: 220 14.3% 95.9%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: transparent;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  html {
+    @apply font-sans;
+    font-size: calc(100% * var(--font-size-scale));
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-balance;
+  }
+  p {
+    @apply text-pretty;
   }
 }

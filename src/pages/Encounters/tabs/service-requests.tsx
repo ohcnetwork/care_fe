@@ -111,7 +111,7 @@ export const EncounterServiceRequestTab = () => {
 
         <div className="flex items-center gap-4 md:ml-auto">
           <div className="relative w-full md:w-[300px]">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-placeholder-foreground">
               <CareIcon icon="l-search" className="size-5" />
             </span>
             <Input
@@ -120,7 +120,7 @@ export const EncounterServiceRequestTab = () => {
               onChange={(e) =>
                 updateQuery({ search: e.target.value || undefined })
               }
-              className="w-full md:w-[300px] pl-10 border border-gray-400 rounded-md"
+              className="w-full md:w-[300px] pl-10 border border-stronger-border rounded-md"
             />
           </div>
 
@@ -151,7 +151,7 @@ export const EncounterServiceRequestTab = () => {
                   showPatientInfo={false}
                 />
               ) : (
-                <div className="p-6 text-center text-gray-500">
+                <div className="p-6 text-center text-muted-foreground">
                   {t("no_service_requests_found")}
                 </div>
               )}

@@ -38,7 +38,7 @@ export function FilterSelect({
   return (
     <div
       className={cn(
-        "flex items-center overflow-hidden rounded-md border border-gray-400",
+        "flex items-center overflow-hidden rounded-md border border-stronger-border",
         className,
       )}
     >
@@ -51,19 +51,19 @@ export function FilterSelect({
             {icon || <CareIcon icon="l-filter" className="size-4" />}
             {value ? (
               <>
-                <span className="text-gray-950">
+                <span className="text-foreground">
                   <Trans
                     i18nKey="filter_label_is"
                     components={{
-                      style: <span className="text-gray-600 ml-1" />,
+                      style: <span className="text-soft-foreground ml-1" />,
                     }}
                     values={{ label }}
                   />
                 </span>
-                <span className="text-gray-950 underline">{t(value)}</span>
+                <span className="text-foreground underline">{t(value)}</span>
               </>
             ) : (
-              <span className="text-gray-500">
+              <span className="text-muted-foreground">
                 {placeholder ? placeholder : label}
               </span>
             )}
@@ -82,7 +82,7 @@ export function FilterSelect({
           variant="ghost"
           size="sm"
           onClick={onClear}
-          className="h-8 border-l hover:bg-transparent w-9 rounded-none text-gray-400 border-gray-400"
+          className="h-8 border-l hover:bg-transparent w-9 rounded-none text-placeholder-foreground border-stronger-border"
         >
           <X className="size-4" />
         </Button>

@@ -40,7 +40,7 @@ export const AppointmentDateSelection = ({
   return (
     <div className="flex flex-col gap-3 md:min-w-121 lg:w-full">
       {!resourceId ? (
-        <span className="text-gray-950 font-medium">
+        <span className="text-foreground font-medium">
           {t("choose_resource")}
         </span>
       ) : (
@@ -158,14 +158,16 @@ const DateColumn = ({
           setSelectedDate(date);
         }}
         className={cn(
-          "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden cursor-not-allowed",
+          "h-full w-full hover:bg-soft-background rounded-lg relative overflow-hidden cursor-not-allowed",
           isSelected ? "ring-2 ring-primary-500" : "",
         )}
       >
         <div className="relative z-10">
           <span>{date.getDate()}</span>
           {!heatmapQuery.isFetching && (
-            <span className="text-xs text-gray-400 block">--</span>
+            <span className="text-xs text-placeholder-foreground block">
+              --
+            </span>
           )}
         </div>
       </button>
@@ -184,11 +186,11 @@ const DateColumn = ({
         setSelectedDate(date);
       }}
       className={cn(
-        "h-full w-full hover:bg-gray-50 rounded-md relative overflow-hidden border hover:scale-105 hover:shadow-md transition-all",
+        "h-full w-full hover:bg-soft-background rounded-md relative overflow-hidden border hover:scale-105 hover:shadow-md transition-all",
         isSelected
           ? "border-2 border-primary-600 bg-green-50 hover:bg-green-50"
-          : "border-gray-400",
-        isFullyBooked && "bg-gray-200",
+          : "border-stronger-border",
+        isFullyBooked && "bg-strong-background",
       )}
     >
       {isSelected && (
@@ -199,7 +201,7 @@ const DateColumn = ({
         {Number.isFinite(tokensLeft) && (
           <span
             className={cn(
-              "text-xs text-gray-500 block font-semibold",
+              "text-xs text-muted-foreground block font-semibold",
               bookedPercentage >= 0.8
                 ? "text-red-500"
                 : bookedPercentage >= 0.5

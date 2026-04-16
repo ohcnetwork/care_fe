@@ -143,7 +143,7 @@ function PatientSearchSelector({
       <div className="flex flex-col">
         {allIdentifierConfigs.length > 2 ? (
           <div className="p-2">
-            <label className="text-xs text-gray-600 mb-1.5 ml-1 block">
+            <label className="text-xs text-soft-foreground mb-1.5 ml-1 block">
               {t("search_by")}
             </label>
             <Select value={searchType} onValueChange={setSearchType}>
@@ -182,7 +182,7 @@ function PatientSearchSelector({
           </Tabs>
         ) : allIdentifierConfigs.length === 1 ? (
           <div className="p-2">
-            <span className="text-sm text-gray-900">
+            <span className="text-sm text-foreground">
               {allIdentifierConfigs[0].config.display}
             </span>
           </div>
@@ -200,7 +200,7 @@ function PatientSearchSelector({
             />
           ) : (
             <>
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-placeholder-foreground pointer-events-none z-10" />
               <Input
                 ref={inputRef}
                 type="text"
@@ -216,7 +216,7 @@ function PatientSearchSelector({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-5 top-1/2 -translate-y-1/2 size-6 text-gray-400 hover:bg-transparent"
+              className="absolute right-5 top-1/2 -translate-y-1/2 size-6 text-placeholder-foreground hover:bg-transparent"
               onClick={() => setSearchTerm("")}
               aria-label="Clear search input"
             >
@@ -226,14 +226,14 @@ function PatientSearchSelector({
         </div>
 
         {searchStateMessage ? (
-          <Card className="flex items-center justify-center border m-2 bg-gray-50 rounded-sm shadow-none">
-            <div className="text-sm text-gray-950 text-center p-5">
+          <Card className="flex items-center justify-center border m-2 bg-soft-background rounded-sm shadow-none">
+            <div className="text-sm text-foreground text-center p-5">
               {searchStateMessage}
             </div>
           </Card>
         ) : (
           <>
-            <div className="p-2 text-xs text-gray-700">
+            <div className="p-2 text-xs text-muted-foreground">
               <Trans
                 i18nKey="found_patient_with_this"
                 values={{
@@ -254,9 +254,9 @@ function PatientSearchSelector({
                     key={patient.id}
                     value={patient.id}
                     onSelect={() => handlePatientSelect(patient)}
-                    className="px-4 py-2.5 cursor-pointer hover:bg-gray-50 aria-selected:bg-gray-50"
+                    className="px-4 py-2.5 cursor-pointer hover:bg-soft-background aria-selected:bg-soft-background"
                   >
-                    <span className="text-sm text-gray-900">
+                    <span className="text-sm text-foreground">
                       {patient.name}
                     </span>
                   </CommandItem>
@@ -470,12 +470,12 @@ export default function PatientIdentifierFilter({
       variant="outline"
       role="combobox"
       aria-expanded={open}
-      className="flex-1 justify-between bg-white border-none rounded-none font-normal"
+      className="flex-1 justify-between bg-background border-none rounded-none font-normal"
     >
       {selectedPatient && !verificationOpen ? (
         <span className="text-primary-500 text-sm">{selectedPatient.name}</span>
       ) : (
-        <span className="text-sm text-gray-900">
+        <span className="text-sm text-foreground">
           {placeholder || t("filter_by_identifier")}
         </span>
       )}
@@ -487,7 +487,7 @@ export default function PatientIdentifierFilter({
     <>
       <div
         className={cn(
-          "flex overflow-hidden border-gray-400 rounded-lg border",
+          "flex overflow-hidden border-stronger-border rounded-lg border",
           className,
         )}
       >
@@ -495,7 +495,7 @@ export default function PatientIdentifierFilter({
           <Button
             variant="ghost"
             onClick={() => setScanDialogOpen(true)}
-            className="shrink-0 text-gray-950 px-2 border-r rounded-r-none bg-white"
+            className="shrink-0 text-foreground px-2 border-r rounded-r-none bg-background"
             aria-label={t("scan_patient_qr")}
             data-shortcut-id="scan-patient"
           >
@@ -548,7 +548,7 @@ export default function PatientIdentifierFilter({
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="h-auto border-l px-2 hover:bg-transparent w-8 mr-3 pr-px rounded-none border-gray-400 text-gray-950"
+            className="h-auto border-l px-2 hover:bg-transparent w-8 mr-3 pr-px rounded-none border-stronger-border text-foreground"
           >
             <X className="size-4" />
           </Button>

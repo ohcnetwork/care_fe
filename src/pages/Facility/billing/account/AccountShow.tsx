@@ -258,7 +258,9 @@ export function AccountShow({
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold">{t("account_not_found")}</h2>
-          <p className="mt-2 text-gray-600">{t("account_may_not_exist")}</p>
+          <p className="mt-2 text-soft-foreground">
+            {t("account_may_not_exist")}
+          </p>
           <Button asChild className="mt-4">
             <Link href={`/facility/${facilityId}/billing/account`}>
               {t("back_to_accounts")}
@@ -349,7 +351,7 @@ export function AccountShow({
             <div className="hidden lg:flex gap-2">
               <Button
                 variant="ghost"
-                className="text-gray-950 gap-1 flex flex-row items-center justify-between"
+                className="text-foreground gap-1 flex flex-row items-center justify-between"
                 onClick={() =>
                   setCloseAccountStatus({
                     ...closeAccountStatus,
@@ -364,7 +366,7 @@ export function AccountShow({
               <>
                 <Button
                   variant="outline"
-                  className="border-gray-400 text-gray-950"
+                  className="border-stronger-border text-foreground"
                   onClick={() =>
                     navigate(
                       `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
@@ -395,7 +397,7 @@ export function AccountShow({
                       <Button
                         variant="outline"
                         size="icon"
-                        className="border-gray-400"
+                        className="border-stronger-border"
                       >
                         <MoreVertical className="h-4 w-4" />
                       </Button>
@@ -421,7 +423,7 @@ export function AccountShow({
             <div className="lg:hidden w-full flex justify-end gap-2">
               <Button
                 variant="outline"
-                className="border-gray-400 text-gray-950"
+                className="border-stronger-border text-foreground"
                 onClick={() =>
                   navigate(
                     `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
@@ -451,7 +453,7 @@ export function AccountShow({
                   <Button
                     variant="outline"
                     size="icon"
-                    className="border-gray-400"
+                    className="border-stronger-border"
                   >
                     <MoreVertical className="size-4" />
                   </Button>
@@ -484,20 +486,20 @@ export function AccountShow({
           </div>
         )}
       </Card>
-      <div className="bg-gray-100 p-3 space-y-4 rounded-lg">
-        <div className="bg-gray-100 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-muted-background p-3 space-y-4 rounded-lg">
+        <div className="bg-muted-background rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
             <div>
-              <p className="text-sm text-gray-700 font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 {t("account")}
               </p>
-              <p className="font-medium text-base text-gray-950">
+              <p className="font-medium text-base text-foreground">
                 {account.name}
               </p>
             </div>
             <div className="flex md:items-center gap-6">
               <div>
-                <p className="text-sm text-gray-700 font-medium">
+                <p className="text-sm text-muted-foreground font-medium">
                   {t("status")}
                 </p>
                 <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>
@@ -505,20 +507,20 @@ export function AccountShow({
                 </Badge>
               </div>
               <div>
-                <p className="text-sm text-gray-700 font-medium">
+                <p className="text-sm text-muted-foreground font-medium">
                   {t("start_date")}
                 </p>
-                <p className="font-medium text-base text-gray-950">
+                <p className="font-medium text-base text-foreground">
                   {account.service_period?.start
                     ? formatDate(account.service_period?.start)
                     : formatDate(account.created_date)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-700 font-medium">
+                <p className="text-sm text-muted-foreground font-medium">
                   {t("end_date")}
                 </p>
-                <p className="font-medium text-base text-gray-950">
+                <p className="font-medium text-base text-foreground">
                   {account.service_period?.end
                     ? formatDate(account.service_period?.end)
                     : t("ongoing")}
@@ -526,7 +528,7 @@ export function AccountShow({
               </div>
             </div>
             <div>
-              <p className="text-sm text-gray-700 font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 {t("tags_proper")}
               </p>
               <div className="flex flex-wrap gap-1">
@@ -559,7 +561,11 @@ export function AccountShow({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="link" asChild className="text-gray-950 underline">
+            <Button
+              variant="link"
+              asChild
+              className="text-foreground underline"
+            >
               <Link
                 href={`/facility/${facilityId}/patient/${account.patient.id}/accounts`}
               >
@@ -569,7 +575,7 @@ export function AccountShow({
             {canUpdateAccount && (
               <Button
                 variant="outline"
-                className="border-gray-400 gap-1"
+                className="border-stronger-border gap-1"
                 onClick={() => setSheetOpen(true)}
               >
                 <CareIcon
@@ -584,10 +590,10 @@ export function AccountShow({
         </div>
 
         {/* Financial Summary Section */}
-        <div className="flex flex-col md:flex-row rounded-lg border border-gray-200 bg-white flex-wrap">
-          <div className="flex-1 p-6 border-b md:border-r border-gray-200">
+        <div className="flex flex-col md:flex-row rounded-lg border border-border bg-card flex-wrap">
+          <div className="flex-1 p-6 border-b md:border-r border-border">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-medium text-muted-foreground">
                 {t("amount_due")}
               </p>
               <div className="flex items-end">
@@ -602,7 +608,7 @@ export function AccountShow({
                   <MonetaryDisplay amount={account.total_balance} />
                 </p>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 {isPositive(account.total_balance)
                   ? t("pending_from_patient")
                   : t("overpaid_amount")}
@@ -610,31 +616,33 @@ export function AccountShow({
             </div>
           </div>
 
-          <div className="flex-1 p-6 border-b md:border-r border-gray-200">
+          <div className="flex-1 p-6 border-b md:border-r border-border">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-medium text-muted-foreground">
                 {t("total_paid")}
               </p>
               <div className="flex items-end">
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-foreground">
                   <MonetaryDisplay amount={account.total_paid} />
                 </p>
               </div>
-              <p className="text-xs text-gray-500">{t("payments_received")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("payments_received")}
+              </p>
             </div>
           </div>
 
-          <div className="flex-1 p-6 border-b md:border-r border-gray-200">
+          <div className="flex-1 p-6 border-b md:border-r border-border">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-medium text-muted-foreground">
                 {t("billed_gross")}
               </p>
               <div className="flex items-end">
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-foreground">
                   <MonetaryDisplay amount={account.total_gross} />
                 </p>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 {t("total_billed_before_adjustments")}
               </p>
             </div>
@@ -642,17 +650,17 @@ export function AccountShow({
 
           <div className="flex-1 p-6">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-medium text-muted-foreground">
                 {t("total_billable")}
               </p>
               <div className="flex items-end">
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-foreground">
                   <MonetaryDisplay
                     amount={account.total_billable_charge_items}
                   />
                 </p>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 {t("total_billable_charge_items_description")}
               </p>
             </div>
@@ -663,7 +671,7 @@ export function AccountShow({
           <div className="flex gap-2 items-center">
             <Button
               variant="outline"
-              className="gap-2 border-gray-400 text-gray-950 hidden"
+              className="gap-2 border-stronger-border text-foreground hidden"
             >
               <CareIcon icon="l-eye" className="size-4" />
               {t("view_statement")}
@@ -683,7 +691,7 @@ export function AccountShow({
             )}
             {account.calculated_at && (
               <span
-                className="text-xs text-gray-500 cursor-default"
+                className="text-xs text-muted-foreground cursor-default"
                 title={new Date(account.calculated_at).toLocaleString("en-IN", {
                   month: "short",
                   day: "numeric",
@@ -702,7 +710,7 @@ export function AccountShow({
             )}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-500">
+            <span className="text-xs font-medium text-muted-foreground">
               {t("billing_status")}
             </span>
             <BillingLifecycleStepper
@@ -763,7 +771,7 @@ export function AccountShow({
         <DialogHeader></DialogHeader>
         <DialogContent>
           <DialogTitle>{t("close_account")}</DialogTitle>
-          <DialogDescription className="text-xs text-gray-500 -mt-1">
+          <DialogDescription className="text-xs text-muted-foreground -mt-1">
             {t(
               closedStatusText[
                 closeAccountStatus.reason as keyof typeof closedStatusText
@@ -881,7 +889,9 @@ function BillingLifecycleStepper({
               <div
                 className={cn(
                   "h-px w-3",
-                  index <= currentStepIndex ? "bg-green-400" : "bg-gray-300",
+                  index <= currentStepIndex
+                    ? "bg-green-400"
+                    : "bg-strong-background",
                 )}
               />
             )}
@@ -893,7 +903,7 @@ function BillingLifecycleStepper({
               className={cn(
                 "flex items-center gap-1 group transition-all rounded-full px-1.5 py-0.5 text-xs",
                 isClickable
-                  ? "cursor-pointer hover:bg-gray-100"
+                  ? "cursor-pointer hover:bg-muted-background"
                   : "cursor-default",
                 isNext && "hover:ring-1 hover:ring-primary-300",
               )}
@@ -908,7 +918,7 @@ function BillingLifecycleStepper({
                   !isCompleted &&
                     !isCurrent &&
                     !isNext &&
-                    "bg-gray-200 text-gray-400",
+                    "bg-strong-background text-placeholder-foreground",
                 )}
               >
                 {isCompleted ? (
@@ -923,7 +933,7 @@ function BillingLifecycleStepper({
                 <span
                   className={cn(
                     "whitespace-nowrap",
-                    isCurrent && "font-semibold text-gray-900",
+                    isCurrent && "font-semibold text-foreground",
                     isNext && "font-medium text-primary-600",
                   )}
                 >

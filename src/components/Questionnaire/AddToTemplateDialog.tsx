@@ -240,10 +240,10 @@ export function AddToTemplateDialog<T>({
             {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-2 text-gray-500">
+                <span className="bg-background px-2 text-muted-foreground">
                   {t("or_add_to_existing")}
                 </span>
               </div>
@@ -251,7 +251,7 @@ export function AddToTemplateDialog<T>({
 
             {/* Search and Template List */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-placeholder-foreground" />
               <Input
                 placeholder={t("search_templates")}
                 value={templateSearchQuery}
@@ -274,13 +274,13 @@ export function AddToTemplateDialog<T>({
 
             <div className="max-h-48 overflow-y-auto space-y-2 -mx-1 px-1">
               {isLoadingTemplates ? (
-                <div className="flex flex-col items-center justify-center py-6 text-gray-400">
+                <div className="flex flex-col items-center justify-center py-6 text-placeholder-foreground">
                   <Loader2 className="size-5 animate-spin mb-2" />
                   <span className="text-sm">{t("loading_templates")}</span>
                 </div>
               ) : templatesData?.results?.length === 0 ? (
                 <div className="text-center py-6 px-4">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {templateSearchQuery
                       ? t("no_templates_match_search")
                       : t("no_existing_templates")}
@@ -320,7 +320,7 @@ export function AddToTemplateDialog<T>({
                             ? isMedication
                               ? "border-blue-200 bg-blue-50/30"
                               : "border-purple-200 bg-purple-50/30"
-                            : "border-gray-200 bg-white",
+                            : "border-border bg-card",
                         )}
                         onClick={() => onSelectTemplate(template)}
                         disabled={isAdding}
@@ -332,7 +332,7 @@ export function AddToTemplateDialog<T>({
                               ? isMedication
                                 ? "bg-blue-100"
                                 : "bg-purple-100"
-                              : "bg-gray-100",
+                              : "bg-muted-background",
                           )}
                         >
                           {hasItems ? (
@@ -345,14 +345,14 @@ export function AddToTemplateDialog<T>({
                               )}
                             />
                           ) : (
-                            <FileTextIcon className="size-4 text-gray-600" />
+                            <FileTextIcon className="size-4 text-soft-foreground" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 truncate">
+                          <p className="font-medium text-foreground truncate">
                             {template.name}
                           </p>
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             {itemCount > 0 && (
                               <span
                                 className={cn(

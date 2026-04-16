@@ -72,7 +72,7 @@ function LeftCard({ report, isActive, onClick }: LeftCardProps) {
             {report.service_request?.title ||
               t("diagnostic_report", { count: 1 })}
           </div>
-          <div className="text-xs text-gray-600">
+          <div className="text-xs text-soft-foreground">
             {formatDateTime(report.created_date)}
           </div>
           <div className="flex items-center gap-2 mt-1">
@@ -83,13 +83,15 @@ function LeftCard({ report, isActive, onClick }: LeftCardProps) {
               {t(report.status)}
             </Badge>
             {report.category?.display && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {report.category.display}
               </span>
             )}
           </div>
         </div>
-        {isActive && <ArrowRight className="size-4 text-gray-500 ml-2" />}
+        {isActive && (
+          <ArrowRight className="size-4 text-muted-foreground ml-2" />
+        )}
       </div>
     </Card>
   );
@@ -219,11 +221,11 @@ function DiagnosticReportDetailCard({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           {report.service_request?.code?.display && (
             <div className="col-span-full">
-              <div className="text-gray-500">{t("procedure")}</div>
+              <div className="text-muted-foreground">{t("procedure")}</div>
               <div className="font-medium">
                 {report.service_request.code.display}
                 {report.service_request.code.code && (
-                  <span className="text-xs text-gray-500 ml-2">
+                  <span className="text-xs text-muted-foreground ml-2">
                     ({report.service_request.code.code})
                   </span>
                 )}
@@ -231,26 +233,26 @@ function DiagnosticReportDetailCard({
             </div>
           )}
           <div>
-            <div className="text-gray-500">{t("category")}</div>
+            <div className="text-muted-foreground">{t("category")}</div>
             <div className="font-medium">{report.category?.display || "-"}</div>
           </div>
           <div>
-            <div className="text-gray-500">{t("report_date")}</div>
+            <div className="text-muted-foreground">{t("report_date")}</div>
             <div className="font-medium">
               {format(new Date(report.created_date), "dd-MM-yyyy HH:mm")}
             </div>
           </div>
           <div>
-            <div className="text-gray-500">{t("requested_by")}</div>
+            <div className="text-muted-foreground">{t("requested_by")}</div>
             <div className="font-medium">{formatName(report.requester)}</div>
           </div>
           <div>
-            <div className="text-gray-500">{t("filed_by")}</div>
+            <div className="text-muted-foreground">{t("filed_by")}</div>
             <div className="font-medium">{formatName(report.created_by)}</div>
           </div>
           {report.note && (
             <div className="col-span-full">
-              <div className="text-gray-500">{t("notes")}</div>
+              <div className="text-muted-foreground">{t("notes")}</div>
               <div className="font-medium whitespace-pre-wrap">
                 {report.note}
               </div>
@@ -258,7 +260,7 @@ function DiagnosticReportDetailCard({
           )}
           {report.conclusion && (
             <div className="col-span-full">
-              <div className="text-gray-500">{t("conclusion")}</div>
+              <div className="text-muted-foreground">{t("conclusion")}</div>
               <div className="font-medium whitespace-pre-wrap">
                 {report.conclusion}
               </div>
@@ -268,7 +270,7 @@ function DiagnosticReportDetailCard({
 
         {filteredObservations && filteredObservations.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-gray-700">
+            <h4 className="text-sm font-semibold text-muted-foreground">
               {t("test_results")}
             </h4>
             <DiagnosticReportResultsTable observations={filteredObservations} />
@@ -277,7 +279,7 @@ function DiagnosticReportDetailCard({
 
         {files.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-gray-700">
+            <h4 className="text-sm font-semibold text-muted-foreground">
               {t("uploaded_files")}
             </h4>
             <FileListTable
@@ -375,7 +377,7 @@ function LeftPanel({
             <div ref={scrollRef} />
             {isFetchingNextPage && <CardListSkeleton count={3} />}
             {!hasNextPage && reports.length > 0 && (
-              <div className="border-b border-gray-300 pb-2" />
+              <div className="border-b border-strong-border pb-2" />
             )}
           </ul>
         )}

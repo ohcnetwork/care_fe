@@ -130,7 +130,7 @@ function UserCommandContent({
                   >
                     {formatName(user)}
                   </span>
-                  <span className="text-xs text-gray-500 truncate">
+                  <span className="text-xs text-muted-foreground truncate">
                     {user.username}
                   </span>
                 </div>
@@ -242,7 +242,7 @@ export default function UserSelector({
               className="size-6 rounded-full"
             />
             <TooltipComponent content={formatName(selected)} side="bottom">
-              <p className="font-medium text-gray-900 truncate max-w-48 sm:max-w-56 md:max-w-64">
+              <p className="font-medium text-foreground truncate max-w-48 sm:max-w-56 md:max-w-64">
                 {formatName(selected)}
               </p>
             </TooltipComponent>

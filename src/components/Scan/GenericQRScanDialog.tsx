@@ -100,8 +100,8 @@ export function GenericQRScanDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md w-[95%] rounded-lg p-0 overflow-hidden">
-        <DialogHeader className="px-4 sm:px-6 py-3 border-b bg-gray-50/80">
-          <DialogTitle className="flex items-center gap-2 font-semibold text-gray-900 text-sm sm:text-lg">
+        <DialogHeader className="px-4 sm:px-6 py-3 border-b bg-soft-background/80">
+          <DialogTitle className="flex items-center gap-2 font-semibold text-foreground text-sm sm:text-lg">
             <QrCode className="size-5 text-primary" />
             {dialogTitle}
           </DialogTitle>
@@ -166,7 +166,7 @@ export function GenericQRScanDialog({
                 <div className="relative">
                   <Separator className="absolute top-1/2 w-full" />
                   <div className="relative flex justify-center">
-                    <span className="bg-white px-2 text-sm text-gray-500">
+                    <span className="bg-background px-2 text-sm text-muted-foreground">
                       {t("or")}
                     </span>
                   </div>
@@ -175,7 +175,7 @@ export function GenericQRScanDialog({
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm sm:text-base font-medium text-gray-700">
+                  <label className="text-sm sm:text-base font-medium text-muted-foreground">
                     {labelText}
                   </label>
                   <Input

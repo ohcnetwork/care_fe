@@ -339,14 +339,14 @@ export default function LinkDepartmentsSheet({
                 {currentOrganizations.map((org) => (
                   <div
                     key={org.id}
-                    className="flex items-center justify-between rounded-md border border-gray-200 p-2"
+                    className="flex items-center justify-between rounded-md border border-border p-2"
                   >
                     <div className="flex items-center space-x-2">
                       <Building className="size-4 text-blue-400" />
                       <div className="flex flex-col">
                         <span className="font-medium">{org.name}</span>
                         {org.description && (
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-muted-foreground">
                             {org.description}
                           </span>
                         )}
@@ -362,7 +362,7 @@ export default function LinkDepartmentsSheet({
                   </div>
                 ))}
                 {currentOrganizations.length === 0 && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {t("no_organization_added_yet", {
                       count: entityType === "device" ? 1 : 0,
                     })}

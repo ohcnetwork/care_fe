@@ -127,7 +127,7 @@ function OrganizationCard({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="cursor-help">
-                        <FolderOpen className="size-3 text-gray-400" />
+                        <FolderOpen className="size-3 text-placeholder-foreground" />
                       </span>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -220,7 +220,7 @@ export default function FacilityOrganizationView({
         <div className="relative w-full sm:w-72 max-w-full">
           <CareIcon
             icon="l-search"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4"
           />
           <Input
             placeholder={t("search_by_department_team_name")}
@@ -288,7 +288,7 @@ export default function FacilityOrganizationView({
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span className="cursor-help">
-                                      <FolderOpen className="size-3 text-gray-400" />
+                                      <FolderOpen className="size-3 text-placeholder-foreground" />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent>
@@ -358,7 +358,7 @@ export default function FacilityOrganizationView({
             </>
           ) : (
             <Card className="col-span-full">
-              <CardContent className="p-6 text-center text-gray-500">
+              <CardContent className="p-6 text-center text-muted-foreground">
                 {t("no_departments_teams_found")}
               </CardContent>
             </Card>

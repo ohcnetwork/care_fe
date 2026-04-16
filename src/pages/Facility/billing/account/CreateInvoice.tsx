@@ -407,41 +407,44 @@ export function CreateInvoicePage({
     }
   }, [disableCreateChargeItems, isLoading, chargeItems.length]);
 
-  const tableHeadClass = "border-r border-gray-200 font-semibold text-center";
+  const tableHeadClass = "border-r border-border font-semibold text-center";
   const tableCellClass =
-    "border-r border-gray-200 font-medium text-gray-950 text-sm";
+    "border-r border-border font-medium text-foreground text-sm";
 
   return (
     <div className="space-y-8 relative">
       {showHeader && (
         <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center border-b-3 border-double pb-4">
           <div className="flex gap-3 sm:gap-6 flex-col md:flex-row">
-            <div className="h-auto w-px bg-gray-300" aria-hidden="true" />
+            <div
+              className="h-auto w-px bg-strong-background"
+              aria-hidden="true"
+            />
             {account?.patient && (
               <>
                 <div>
-                  <span className="text-gray-700 text-sm font-medium">
+                  <span className="text-muted-foreground text-sm font-medium">
                     {t("patient_name")}
                   </span>
-                  <div className="font-semibold text-gray-950">
+                  <div className="font-semibold text-foreground">
                     {account.patient.name}
                   </div>
                 </div>
                 <div>
-                  <span className="text-gray-700 text-sm font-medium">
+                  <span className="text-muted-foreground text-sm font-medium">
                     {t("account")}
                   </span>
                   <Link
                     href={`/facility/${facilityId}/billing/account/${accountId}`}
                   >
-                    <div className="font-semibold text-gray-950 underline">
+                    <div className="font-semibold text-foreground underline">
                       {account.name}
                       <SquareArrowOutUpRight className="ml-1 size-4 inline" />
                     </div>
                   </Link>
                 </div>
                 <div>
-                  <span className="text-gray-700 text-sm font-medium">
+                  <span className="text-muted-foreground text-sm font-medium">
                     {t("status")}
                   </span>
                   <div>
@@ -459,7 +462,7 @@ export function CreateInvoicePage({
       <div className="md:col-span-2 overflow-x-auto max-w-5xl mx-auto">
         <div className="flex sm:flex-row flex-col sm:items-center gap-4 justify-between items-start mb-4">
           <div className="flex flex-row items-center gap-2">
-            <span className="font-semibold text-gray-950 text-base">
+            <span className="font-semibold text-foreground text-base">
               {t("create_invoice")}
             </span>
             <Badge variant="secondary">{t("draft")}</Badge>
@@ -487,14 +490,14 @@ export function CreateInvoicePage({
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="p-4 border border-gray-200 bg-white text-gray-950 rounded-sm shadow-sm">
+            <div className="p-4 border border-border bg-background text-foreground rounded-sm shadow-sm">
               {isLoading ? (
                 <TableSkeleton count={3} />
               ) : (
-                <div className="rounded-t-sm border border-gray-300">
+                <div className="rounded-t-sm border border-strong-border">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-b border-gray-200">
+                      <TableRow className="border-b border-border">
                         <TableHead
                           className={cn(
                             tableHeadClass,
@@ -556,7 +559,7 @@ export function CreateInvoicePage({
                         <TableRow>
                           <TableCell
                             colSpan={7}
-                            className="h-20 text-center text-gray-400"
+                            className="h-20 text-center text-placeholder-foreground"
                           >
                             {t("no_billable_items")}
                           </TableCell>
@@ -569,7 +572,7 @@ export function CreateInvoicePage({
                           return (
                             <TableRow
                               key={item.id}
-                              className="border-b border-gray-200 hover:bg-muted/50"
+                              className="border-b border-border hover:bg-muted/50"
                             >
                               <TableCell
                                 className={cn(tableCellClass, "align-middle")}
@@ -592,7 +595,7 @@ export function CreateInvoicePage({
                                 <div className="font-medium text-base">
                                   {item.title}
                                 </div>
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-muted-foreground">
                                   {formatName(item.created_by)}
                                   {" · "}
                                   {formatDateTime(
@@ -646,20 +649,20 @@ export function CreateInvoicePage({
               )}
 
               {!disableCreateChargeItems && account?.patient && (
-                <div className="border-x border-b border-gray-300 -mt-0 rounded-b-sm">
+                <div className="border-x border-b border-strong-border -mt-0 rounded-b-sm">
                   {pendingItem && (
                     <div
                       key={pendingItem.definition.slug}
-                      className="border-b border-gray-200 bg-primary-50/50"
+                      className="border-b border-border bg-primary-50/50"
                       onKeyDown={handlePendingKeyDown}
                     >
                       <div className="flex items-center gap-3 p-3">
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm text-gray-950">
+                          <div className="font-medium text-sm text-foreground">
                             {pendingItem.definition.title}
                           </div>
                           {pendingItem.definition.price_components?.[0] && (
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-muted-foreground">
                               <MonetaryDisplay
                                 amount={
                                   pendingItem.definition.price_components[0]
@@ -673,7 +676,7 @@ export function CreateInvoicePage({
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="flex flex-col gap-1">
-                            <label className="text-xs text-gray-500">
+                            <label className="text-xs text-muted-foreground">
                               {t("quantity")}
                             </label>
                             <Input
@@ -700,7 +703,7 @@ export function CreateInvoicePage({
                             />
                           </div>
                           <div className="flex flex-col gap-1">
-                            <label className="text-xs text-gray-500">
+                            <label className="text-xs text-muted-foreground">
                               {t("performer")}
                             </label>
                             <UserSelector
@@ -715,7 +718,7 @@ export function CreateInvoicePage({
                             />
                           </div>
                           <div className="flex flex-col gap-1">
-                            <label className="text-xs text-gray-500">
+                            <label className="text-xs text-muted-foreground">
                               &nbsp;
                             </label>
                             <div className="flex items-center gap-1">
@@ -810,7 +813,7 @@ export function CreateInvoicePage({
                 control={form.control}
                 name="charge_items"
                 render={({ field }) => (
-                  <FormMessage className="text-xs text-gray-950 italic mt-3">
+                  <FormMessage className="text-xs text-foreground italic mt-3">
                     {field.value.length > 0
                       ? t("selected_items_count_one", {
                           count: field.value.length,
@@ -822,14 +825,14 @@ export function CreateInvoicePage({
 
               {/* Invoice Total */}
               {chargeItems.length > 0 && (
-                <div className="flex flex-col items-end space-y-2 text-gray-950 font-normal text-sm mt-4">
-                  <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+                <div className="flex flex-col items-end space-y-2 text-foreground font-normal text-sm mt-4">
+                  <div className="p-1 border-t-2 border-dashed border-border w-full" />
                   <div className="flex w-64 justify-between font-bold">
                     <span>{t("invoice_total")}</span>
                     <MonetaryDisplay amount={selectedItemsTotal} />
                   </div>
-                  <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
-                  <p className="text-xs text-gray-500">
+                  <div className="p-1 border-b-2 border-dashed border-border w-full" />
+                  <p className="text-xs text-muted-foreground">
                     {t("includes_all_taxes")}
                   </p>
                 </div>
@@ -856,7 +859,7 @@ export function CreateInvoicePage({
               <CollapsibleTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-950 transition-colors py-2 group"
+                  className="flex items-center gap-2 text-sm text-soft-foreground hover:text-foreground transition-colors py-2 group"
                 >
                   <ChevronRight
                     className={cn(
@@ -867,7 +870,7 @@ export function CreateInvoicePage({
                   <span className="font-medium">
                     {t("payment_terms_and_note")}
                   </span>
-                  <span className="text-xs text-gray-400 group-hover:text-gray-500">
+                  <span className="text-xs text-placeholder-foreground group-hover:text-muted-foreground">
                     ({t("optional")})
                   </span>
                 </button>

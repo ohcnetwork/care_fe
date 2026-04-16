@@ -46,7 +46,7 @@ function humanize(str: string): string {
 function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="mb-1">
-      <div className="text-xs text-gray-500">{label}</div>
+      <div className="text-xs text-muted-foreground">{label}</div>
       <div className="font-medium">{value || "-"}</div>
     </div>
   );
@@ -110,7 +110,9 @@ export function PaymentReconciliationShow({
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold">{t("payment_not_found")}</h2>
-          <p className="mt-2 text-gray-600">{t("payment_may_not_exist")}</p>
+          <p className="mt-2 text-soft-foreground">
+            {t("payment_may_not_exist")}
+          </p>
           <Button asChild className="mt-4">
             <Link href={`/facility/${facilityId}/billing/payments`}>
               {t("back_to_payments")}
@@ -128,7 +130,7 @@ export function PaymentReconciliationShow({
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             {t(payment.is_credit_note ? "refund" : "payment")}
-            <span className="text-lg font-normal text-gray-500">
+            <span className="text-lg font-normal text-muted-foreground">
               #{payment.id}
             </span>
           </h1>
@@ -176,7 +178,7 @@ export function PaymentReconciliationShow({
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   <div>
-                    <div className="text-sm text-gray-500 mb-1">
+                    <div className="text-sm text-muted-foreground mb-1">
                       {t("patient_name")}
                     </div>
                     <div className="font-semibold text-lg">
@@ -184,13 +186,17 @@ export function PaymentReconciliationShow({
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-500 mb-1">{t("age")}</div>
+                    <div className="text-sm text-muted-foreground mb-1">
+                      {t("age")}
+                    </div>
                     <div className="font-medium">
                       {formatPatientAge(payment.account.patient, true)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-500 mb-1">{t("sex")}</div>
+                    <div className="text-sm text-muted-foreground mb-1">
+                      {t("sex")}
+                    </div>
                     <div className="font-medium">
                       {payment.account.patient.gender
                         ? t(`GENDER__${payment.account.patient.gender}`)
@@ -207,7 +213,7 @@ export function PaymentReconciliationShow({
             <CardContent className="pt-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <div className="text-sm text-gray-500 mb-1">
+                  <div className="text-sm text-muted-foreground mb-1">
                     {t(
                       payment.is_credit_note
                         ? "refund_amount"
@@ -220,7 +226,7 @@ export function PaymentReconciliationShow({
                   />
                 </div>
                 <div className="text-right">
-                  <div className="text-sm text-gray-500 mb-1">
+                  <div className="text-sm text-muted-foreground mb-1">
                     {t("payment_date")}
                   </div>
                   <div className="font-medium">
@@ -355,13 +361,13 @@ export function PaymentReconciliationShow({
                         {payment.target_invoice.status}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       {payment.target_invoice.number} (#
                       {payment.target_invoice.id})
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-gray-500 mb-1">
+                    <div className="text-sm text-muted-foreground mb-1">
                       {t("invoice_amount")}
                     </div>
                     <div className="font-bold">
@@ -407,7 +413,7 @@ export function PaymentReconciliationShow({
                 <div className="relative pl-6">
                   <div className="absolute left-0 top-2 size-2 rounded-full bg-primary" />
                   <p className="font-medium">{t("payment_recorded")}</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {payment.payment_datetime
                       ? format(new Date(payment.payment_datetime), "PPP p")
                       : format(new Date(), "PPP p")}
@@ -417,7 +423,7 @@ export function PaymentReconciliationShow({
                   <div className="relative pl-6">
                     <div className="absolute left-0 top-2 size-2 rounded-full bg-destructive" />
                     <p className="font-medium">{t("payment_cancelled")}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {format(new Date(), "PPP p")}
                     </p>
                   </div>
@@ -548,24 +554,24 @@ export function PaymentReconciliationShow({
 
           <div className="space-y-6 p-2">
             <div>
-              <div className="text-xs text-gray-500 mb-1">
+              <div className="text-xs text-muted-foreground mb-1">
                 {t("created_by")}
               </div>
               <div className="text-sm font-medium">
                 {formatName(payment.created_by)}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-muted-foreground">
                 {format(new Date(payment.created_date), "PPP p")}
               </div>
             </div>
             <div>
-              <div className="text-xs text-gray-500 mb-1">
+              <div className="text-xs text-muted-foreground mb-1">
                 {t("last_modified_by")}
               </div>
               <div className="text-sm font-medium">
                 {formatName(payment.updated_by)}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-muted-foreground">
                 {format(new Date(payment.modified_date), "PPP p")}
               </div>
             </div>

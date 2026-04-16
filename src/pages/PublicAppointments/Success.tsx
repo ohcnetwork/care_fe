@@ -56,35 +56,35 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
           <CareIcon icon="l-check" className="size-8 text-green-600" />
         </div>
 
-        <h1 className="text-2xl font-medium text-gray-900 mb-2">
+        <h1 className="text-2xl font-medium text-foreground mb-2">
           {t("appointment_booking_success")}
         </h1>
       </div>
 
       <div className="grid grid-cols-2 gap-8">
         <div>
-          <h2 className="text-sm font-medium text-gray-500 mb-1">
+          <h2 className="text-sm font-medium text-muted-foreground mb-1">
             {t("doctor_nurse")}:
           </h2>
           <p className="text-lg font-medium">{formatName(userData)}</p>
         </div>
 
         <div>
-          <h2 className="text-sm font-medium text-gray-500 mb-1">
+          <h2 className="text-sm font-medium text-muted-foreground mb-1">
             {t("patient")}:
           </h2>
           <p className="text-lg font-medium">{appointmentData?.patient.name}</p>
         </div>
 
         <div>
-          <h2 className="text-sm font-medium text-gray-500 mb-1">
+          <h2 className="text-sm font-medium text-muted-foreground mb-1">
             {t("date")}:
           </h2>
           <p className="text-lg font-medium">{appointmentDate}</p>
         </div>
 
         <div>
-          <h2 className="text-sm font-medium text-gray-500 mb-1">
+          <h2 className="text-sm font-medium text-muted-foreground mb-1">
             {t("time")}:
           </h2>
           <p className="text-lg font-medium">{appointmentTimeSlot}</p>
@@ -92,10 +92,10 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
       </div>
 
       <div className="mt-12 text-left space-y-2">
-        <p className="text-gray-900">
+        <p className="text-foreground">
           {formatName(userData)} {t("doc_will_visit_patient")}
         </p>
-        <p className="text-gray-600">{t("thank_you_for_choosing")}</p>
+        <p className="text-soft-foreground">{t("thank_you_for_choosing")}</p>
       </div>
     </div>
   );

@@ -71,7 +71,7 @@ export const Demography = (props: PatientProps) => {
       <div className="mr-6 flex flex-col items-start justify-between rounded-md border border-orange-300 bg-orange-50 p-4 sm:flex-row">
         {/* Emergency Contact Section */}
         <div className="flex-1">
-          <div className="text-sm font-normal leading-5 text-gray-600">
+          <div className="text-sm font-normal leading-5 text-soft-foreground">
             {t("emergency_contact")}
           </div>
 
@@ -79,7 +79,7 @@ export const Demography = (props: PatientProps) => {
             <div>
               <a
                 href={`tel:${props.number}`}
-                className="text-sm font-medium text-black hover:text-secondary-500"
+                className="text-sm font-medium text-foreground hover:text-secondary-500"
               >
                 {(props.number && formatPhoneNumberIntl(props.number)) || "-"}
               </a>
@@ -100,10 +100,10 @@ export const Demography = (props: PatientProps) => {
         </div>
 
         <div className="ml-0 mt-4 flex-1 sm:ml-4 sm:mt-0">
-          <div className="text-sm font-normal leading-5 text-gray-600">
+          <div className="text-sm font-normal leading-5 text-soft-foreground">
             {t("emergency_contact_person_name")}
           </div>
-          <div className="mt-1 text-sm font-semibold leading-5 text-gray-900">
+          <div className="mt-1 text-sm font-semibold leading-5 text-foreground">
             -
           </div>
         </div>
@@ -163,7 +163,7 @@ export const Demography = (props: PatientProps) => {
             <div>
               <a
                 href={`tel:${patientData.phone_number}`}
-                className="text-sm font-medium text-black hover:text-secondary-500"
+                className="text-sm font-medium text-foreground hover:text-secondary-500"
               >
                 {patientData.phone_number &&
                   formatPhoneNumberIntl(patientData.phone_number)}
@@ -211,7 +211,7 @@ export const Demography = (props: PatientProps) => {
             <div className="flex flex-col gap-2">
               <span>
                 {formatPatientAddress(patientData.address) || (
-                  <span className="text-gray-500 font-medium">
+                  <span className="text-muted-foreground font-medium">
                     {t("no_address_provided")}
                   </span>
                 )}
@@ -226,7 +226,7 @@ export const Demography = (props: PatientProps) => {
             <div className="flex flex-col gap-2">
               <span>
                 {formatPatientAddress(patientData.permanent_address) || (
-                  <span className="text-gray-500 font-medium">
+                  <span className="text-muted-foreground font-medium">
                     {t("no_address_provided")}
                   </span>
                 )}
@@ -288,7 +288,7 @@ export const Demography = (props: PatientProps) => {
   return (
     <div>
       <section className="mt-8 w-full items-start gap-6 px-3 md:px-0 lg:flex 2xl:gap-8">
-        <div className="sticky top-20 hidden text-sm font-medium text-gray-600 lg:flex lg:basis-1/5 lg:flex-col gap-2">
+        <div className="sticky top-20 hidden text-sm font-medium text-soft-foreground lg:flex lg:basis-1/5 lg:flex-col gap-2">
           {data
             .filter((s) => !s.hidden)
             .map((subtab, i) => (
@@ -296,8 +296,8 @@ export const Demography = (props: PatientProps) => {
                 key={i}
                 className={`cursor-pointer rounded-lg p-3 transition-colors duration-300 text-left ${
                   activeSection === subtab.id
-                    ? "bg-white text-green-800"
-                    : "hover:bg-white hover:text-green-800"
+                    ? "bg-background text-green-800"
+                    : "hover:bg-background hover:text-green-800"
                 }`}
                 onClick={() => scrollToSection(subtab.id)}
               >
@@ -313,10 +313,10 @@ export const Demography = (props: PatientProps) => {
               { label: t("abha_address"), value: "-" },
             ].map((info, i) => (
               <div className="sm:col-span-1" key={i}>
-                <p className="text-normal text-sm text-gray-600 sm:col-span-1">
+                <p className="text-normal text-sm text-soft-foreground sm:col-span-1">
                   {info.label}:
                 </p>
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-sm font-semibold text-foreground">
                   {info.value}
                 </p>
               </div>
@@ -329,7 +329,7 @@ export const Demography = (props: PatientProps) => {
                 <div
                   key={i}
                   id={subtab.id}
-                  className="group mt-4 rounded-md bg-white pb-2 pl-5 pt-5 shadow-sm"
+                  className="group mt-4 rounded-md bg-background pb-2 pl-5 pt-5 shadow-sm"
                 >
                   <hr className="mb-1 mr-5 h-1 w-5 border-0 bg-blue-500" />
                   <div className="flex flex-row items-center justify-between gap-x-4 mb-4 mr-4">
@@ -357,10 +357,10 @@ export const Demography = (props: PatientProps) => {
                       typeof detail === "object" &&
                       "label" in detail ? (
                         <div className="sm:col-span-1" key={j}>
-                          <div className="text-sm font-normal leading-5 text-gray-500">
+                          <div className="text-sm font-normal leading-5 text-muted-foreground">
                             {detail.label}
                           </div>
-                          <div className="mt-1 text-sm font-semibold leading-5 text-gray-900">
+                          <div className="mt-1 text-sm font-semibold leading-5 text-foreground">
                             {detail.value || "-"}
                           </div>
                         </div>

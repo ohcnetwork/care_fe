@@ -40,7 +40,9 @@ export function EmptyState({
         <div className="rounded-full bg-primary/10 p-3 mb-3">{icon}</div>
       )}
       <h3 className="text-lg font-semibold mb-1">{title}</h3>
-      {description && <p className="text-sm text-gray-500">{description}</p>}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
       {action && <div className="mt-5">{action}</div>}
     </Card>
   );

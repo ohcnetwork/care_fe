@@ -51,7 +51,7 @@ function ProductKnowledgeCard({
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
-              <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
+              <div className="p-2 rounded-lg bg-muted-background text-soft-foreground">
                 <CareIcon icon="l-folder" className="h-5 w-5" />
               </div>
             </div>
@@ -70,17 +70,17 @@ function ProductKnowledgeCard({
                   {t(product.status)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate text-lg">
+              <h3 className="font-medium text-foreground truncate text-lg">
                 {product.name}
               </h3>
               {product.alternate_identifier && (
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {t("product_knowledge_alternate_identifier")}:{" "}
                   {product.alternate_identifier}
                 </p>
               )}
               {product.code?.code && (
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {product.code.system} | {product.code.code}
                 </p>
               )}
@@ -109,7 +109,7 @@ function ProductKnowledgeTableRow({
   const { t } = useTranslation();
 
   return (
-    <TableRow className="hover:bg-gray-50 cursor-pointer">
+    <TableRow className="hover:bg-soft-background cursor-pointer">
       <TableCell
         className="font-medium cursor-pointer"
         onClick={() =>
@@ -119,13 +119,13 @@ function ProductKnowledgeTableRow({
         }
       >
         <div className="flex items-center space-x-3">
-          <div className="p-1 rounded bg-gray-100 text-gray-600">
+          <div className="p-1 rounded bg-muted-background text-soft-foreground">
             <CareIcon icon="l-folder" className="h-4 w-4" />
           </div>
           <div>
-            <div className="font-medium text-gray-900">{product.name}</div>
+            <div className="font-medium text-foreground">{product.name}</div>
             {product.alternate_identifier && (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 {t("product_knowledge_alternate_identifier")}:{" "}
                 {product.alternate_identifier}
               </div>
@@ -216,7 +216,7 @@ export function ProductKnowledgeList({
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         {/* Search */}
         <div className="relative w-full sm:w-auto">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-placeholder-foreground">
             <CareIcon icon="l-search" className="size-5" />
           </span>
           <Input
@@ -254,7 +254,7 @@ export function ProductKnowledgeList({
 
       {/* Results count */}
       {productsResponse && productsResponse.count > 0 && (
-        <div className="mb-4 text-sm text-gray-600">
+        <div className="mb-4 text-sm text-soft-foreground">
           {t("showing")} {products.length} {t("of")} {productsResponse.count}{" "}
           {t("products")}
         </div>

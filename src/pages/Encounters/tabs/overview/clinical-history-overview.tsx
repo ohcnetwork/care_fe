@@ -39,14 +39,14 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
     <div
       {...props}
       className={cn(
-        "bg-white rounded-lg p-4 border border-gray-200",
+        "bg-background rounded-lg p-4 border border-border",
         props.className,
       )}
     >
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex flex-row gap-3">
           <div className="flex flex-col items-start gap-1 whitespace-nowrap">
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-sm font-medium text-soft-foreground">
               {t("blood_group")}:
             </span>
             <Badge variant="yellow">
@@ -58,7 +58,7 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
           </div>
           {!!allergies?.results.length && (
             <div className="flex flex-col items-start gap-1">
-              <span className="text-sm font-medium text-gray-600">
+              <span className="text-sm font-medium text-soft-foreground">
                 {t("allergies")}:
               </span>
               <Badge variant="destructive">

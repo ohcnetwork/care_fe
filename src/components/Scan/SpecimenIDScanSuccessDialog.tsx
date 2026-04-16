@@ -59,23 +59,23 @@ export function SpecimenIDScanSuccessDialog({
         <div className="p-4 sm:p-6 space-y-4">
           {/* Service Request Info */}
           {(serviceRequestTitle || serviceRequestId) && (
-            <div className="rounded-lg bg-gray-50 border border-gray-100">
-              <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-100">
-                <div className="flex items-center gap-2 text-gray-600">
+            <div className="rounded-lg bg-soft-background border border-soft-border">
+              <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-soft-border">
+                <div className="flex items-center gap-2 text-soft-foreground">
                   <FileText className="size-4 shrink-0" />
                   <span className="font-medium">{t("service_request")}</span>
                 </div>
               </div>
               <div className="px-3 sm:px-4 py-2 sm:py-3">
                 {serviceRequestTitle && (
-                  <div className="text-gray-900 font-medium text-sm sm:text-base mb-1 break-words">
+                  <div className="text-foreground font-medium text-sm sm:text-base mb-1 break-words">
                     {serviceRequestTitle}
                   </div>
                 )}
                 {serviceRequestId && (
-                  <div className="text-gray-500 text-xs sm:text-sm flex items-center gap-1.5 flex-wrap">
+                  <div className="text-muted-foreground text-xs sm:text-sm flex items-center gap-1.5 flex-wrap">
                     <span>{t("request_id")}:</span>
-                    <code className="bg-gray-100 px-1.5 py-0.5 rounded break-all">
+                    <code className="bg-muted-background px-1.5 py-0.5 rounded break-all">
                       {serviceRequestId}
                     </code>
                   </div>
@@ -85,45 +85,45 @@ export function SpecimenIDScanSuccessDialog({
           )}
 
           {/* Specimen Info */}
-          <div className="rounded-lg bg-gray-50 border border-gray-100">
-            <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-100">
-              <div className="flex items-center gap-2 text-gray-600">
+          <div className="rounded-lg bg-soft-background border border-soft-border">
+            <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-soft-border">
+              <div className="flex items-center gap-2 text-soft-foreground">
                 <TestTube className="size-4 shrink-0" />
                 <span className="font-medium">{t("specimen_details")}</span>
               </div>
             </div>
             <div className="px-3 sm:px-4 py-2 sm:py-3 space-y-3">
               <div className="flex items-center gap-2">
-                <div className="text-gray-500 text-xs sm:text-sm w-full break-words">
+                <div className="text-muted-foreground text-xs sm:text-sm w-full break-words">
                   {t("specimen_id")}:{" "}
-                  <code className="bg-gray-100 px-1.5 py-0.5 rounded break-all">
+                  <code className="bg-muted-background px-1.5 py-0.5 rounded break-all">
                     {specimenId}
                   </code>
                 </div>
               </div>
-              <Separator className="bg-gray-200" />
+              <Separator className="bg-strong-background" />
               <div className="flex items-start sm:items-center gap-2">
                 <TestTube
                   className="size-5 shrink-0 mt-0.5 sm:mt-0"
                   style={{ color: tubeColor }}
                 />
                 <div className="min-w-0">
-                  <div className="text-xs sm:text-sm text-gray-500">
+                  <div className="text-xs sm:text-sm text-muted-foreground">
                     {t("container_cap")}
                   </div>
-                  <div className="font-medium text-gray-900 text-sm sm:text-base break-words">
+                  <div className="font-medium text-foreground text-sm sm:text-base break-words">
                     {cap}
                   </div>
                 </div>
               </div>
-              <Separator className="bg-gray-200" />
+              <Separator className="bg-strong-background" />
               <div className="flex items-start sm:items-center gap-2">
                 <Droplet className="size-5 text-red-500 shrink-0 mt-0.5 sm:mt-0" />
                 <div className="min-w-0">
-                  <div className="text-xs sm:text-sm text-gray-500">
+                  <div className="text-xs sm:text-sm text-muted-foreground">
                     {t("specimen_type")}
                   </div>
-                  <div className="font-medium text-gray-900 text-sm sm:text-base break-words">
+                  <div className="font-medium text-foreground text-sm sm:text-base break-words">
                     {specimen}
                   </div>
                 </div>

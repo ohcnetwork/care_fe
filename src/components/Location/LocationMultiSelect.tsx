@@ -84,9 +84,9 @@ function BaseLocationTreeNode({
     <div className="space-y-1">
       <div
         className={cn(
-          "group flex items-center py-1 rounded-md hover:bg-gray-50 transition-colors my-1",
+          "group flex items-center py-1 rounded-md hover:bg-soft-background transition-colors my-1",
           isSelected && "bg-primary-100/50 border border-primary-200",
-          shouldShowExpand && "cursor-pointer hover:bg-gray-100",
+          shouldShowExpand && "cursor-pointer hover:bg-muted-background",
           isMobile ? "mr-3" : "mr-5",
           className,
         )}
@@ -95,13 +95,13 @@ function BaseLocationTreeNode({
       >
         {isLoading ? (
           <Button variant="ghost" size="icon" className="size-6">
-            <div className="size-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+            <div className="size-4 animate-spin rounded-full border-2 border-strong-border border-t-soft-foreground" />
           </Button>
         ) : shouldShowExpand ? (
           <Button
             variant="ghost"
             size="icon"
-            className="size-6 hover:bg-gray-100"
+            className="size-6 hover:bg-muted-background"
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand(location.id);
@@ -123,7 +123,7 @@ function BaseLocationTreeNode({
           <Button
             variant="ghost"
             size="icon"
-            className="ml-2 size-8 shrink-0 rounded-lg border shadow-sm hover:bg-white hover:border-gray-300"
+            className="ml-2 size-8 shrink-0 rounded-lg border shadow-sm hover:bg-background hover:border-strong-border"
             onClick={(e) => {
               e.stopPropagation();
               onSelect(location.id);
@@ -154,8 +154,8 @@ function BaseLocationTreeNode({
                   ];
                 return (
                   <div className="flex items-center flex-1 text-sm gap-2 h-8 w-0">
-                    <ChildIcon className="size-4 shrink-0 text-gray-600" />
-                    <span className="truncate font-medium text-gray-900">
+                    <ChildIcon className="size-4 shrink-0 text-soft-foreground" />
+                    <span className="truncate font-medium text-foreground">
                       {childLocation.name}
                     </span>
                   </div>
@@ -248,13 +248,13 @@ function SearchResultTreeNode({
 
   const renderLocationInfo = (location: LocationRead) => (
     <div className="flex items-center flex-1 text-sm gap-2 min-w-0">
-      <Icon className="size-4 shrink-0 text-gray-600" />
+      <Icon className="size-4 shrink-0 text-soft-foreground" />
       <div className="flex flex-col min-w-0 justify-center flex-1 h-8 w-0">
-        <span className="truncate font-medium text-gray-900">
+        <span className="truncate font-medium text-foreground">
           {location.name}
         </span>
         {level === 0 && path.length > 0 && (
-          <span className="text-xs text-gray-500 truncate">
+          <span className="text-xs text-muted-foreground truncate">
             {path.join(" > ")}
           </span>
         )}
@@ -299,7 +299,7 @@ function SelectedLocationPill({
   onRemove: (id: string) => void;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5">
+    <div className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5">
       <span className="text-sm font-medium text-nowrap truncate max-w-[100px] sm:max-w-none">
         {location.name}
       </span>
@@ -325,7 +325,7 @@ function LoadingSkeleton() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="h-8 w-full animate-pulse rounded-md bg-gray-200"
+            className="h-8 w-full animate-pulse rounded-md bg-strong-background"
           />
         ))}
       </div>
@@ -496,7 +496,7 @@ export default function LocationMultiSelect({
       }
 
       return (
-        <div className="p-4 text-sm text-gray-500 h-72 text-center">
+        <div className="p-4 text-sm text-muted-foreground h-72 text-center">
           {t("no_locations_found")}
         </div>
       );
@@ -522,7 +522,7 @@ export default function LocationMultiSelect({
     }
 
     return (
-      <div className="p-4 text-sm text-gray-500">
+      <div className="p-4 text-sm text-muted-foreground">
         {t("no_locations_available")}
       </div>
     );

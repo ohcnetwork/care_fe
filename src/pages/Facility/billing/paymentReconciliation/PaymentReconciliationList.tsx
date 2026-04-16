@@ -38,10 +38,10 @@ export function PaymentReconciliationList({
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-700 mb-2">
+              <h1 className="text-2xl font-bold text-muted-foreground mb-2">
                 {t("payment_reconciliations")}
               </h1>
-              <p className="text-gray-600 text-sm">
+              <p className="text-soft-foreground text-sm">
                 {accountId
                   ? t("view_and_manage_account_payments")
                   : t("view_and_manage_payments")}

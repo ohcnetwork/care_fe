@@ -73,7 +73,7 @@ export function RoleOrgAccessEditor({
 
   return (
     <div className="space-y-2">
-      <Label className="text-sm font-medium text-gray-900">
+      <Label className="text-sm font-medium text-foreground">
         {t("role_organizations")}
       </Label>
 
@@ -81,10 +81,10 @@ export function RoleOrgAccessEditor({
         {entries.map((entry, index) => (
           <div
             key={`${entry.organization || "new"}-${index}`}
-            className="grid gap-2 rounded-lg border border-gray-200 bg-white p-3 md:grid-cols-[1fr_1fr_auto] md:items-end"
+            className="grid gap-2 rounded-lg border border-border bg-background p-3 md:grid-cols-[1fr_1fr_auto] md:items-end"
           >
             <div className="space-y-1">
-              <Label className="text-xs text-gray-500">
+              <Label className="text-xs text-muted-foreground">
                 {t("role_organization")}
               </Label>
               <AccessibleRoleOrgSelect
@@ -100,7 +100,7 @@ export function RoleOrgAccessEditor({
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs text-gray-500">
+              <Label className="text-xs text-muted-foreground">
                 {t("designation")}
               </Label>
               <RoleSelect
@@ -130,7 +130,7 @@ export function RoleOrgAccessEditor({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="size-8 text-gray-400 hover:text-red-600"
+                className="size-8 text-placeholder-foreground hover:text-red-600"
                 onClick={() => removeEntry(index)}
                 disabled={disabled || entries.length <= 1}
               >
@@ -146,7 +146,7 @@ export function RoleOrgAccessEditor({
         type="button"
         variant="ghost"
         size="sm"
-        className="text-xs text-gray-500"
+        className="text-xs text-muted-foreground"
         onClick={addEntry}
         disabled={disabled}
       >
@@ -208,13 +208,13 @@ export function RoleOrgAccessSummary({
   const isPending = isAssigning || isRemoving;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white">
-      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+    <div className="rounded-lg border border-border bg-background">
+      <div className="flex items-center justify-between border-b border-soft-border px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="flex size-6 items-center justify-center rounded bg-gray-100 text-gray-600">
+          <div className="flex size-6 items-center justify-center rounded bg-muted-background text-soft-foreground">
             <ShieldCheck className="size-3.5" />
           </div>
-          <h3 className="text-sm font-semibold text-gray-900">
+          <h3 className="text-sm font-semibold text-foreground">
             {t("role_organizations")}
           </h3>
         </div>
@@ -236,20 +236,20 @@ export function RoleOrgAccessSummary({
               {memberships.map((membership) => (
                 <div
                   key={membership.id}
-                  className="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2.5"
+                  className="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-gray-900">
+                    <p className="truncate text-sm font-medium text-foreground">
                       {membership.organization.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {membership.role.name}
                     </p>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-7 shrink-0 text-gray-400 hover:text-red-600"
+                    className="size-7 shrink-0 text-placeholder-foreground hover:text-red-600"
                     onClick={() =>
                       removeRole({
                         orgId: membership.organization.id,
@@ -268,14 +268,14 @@ export function RoleOrgAccessSummary({
               ))}
 
               {memberships.length === 0 && (
-                <p className="py-4 text-center text-sm text-gray-400">
+                <p className="py-4 text-center text-sm text-placeholder-foreground">
                   {t("no_role_organizations_assigned")}
                 </p>
               )}
 
               {/* Add new assignment */}
-              <div className="space-y-3 rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-3">
-                <p className="text-xs font-medium text-gray-600">
+              <div className="space-y-3 rounded-lg border border-dashed border-strong-border bg-soft-background/50 p-3">
+                <p className="text-xs font-medium text-soft-foreground">
                   {t("add_access")}
                 </p>
                 <div className="space-y-2">
@@ -317,7 +317,7 @@ export function RoleOrgAccessSummary({
 
       <div className="p-3">
         {memberships.length === 0 ? (
-          <p className="py-4 text-center text-sm text-gray-400">
+          <p className="py-4 text-center text-sm text-placeholder-foreground">
             {t("no_role_organizations_assigned")}
           </p>
         ) : (
@@ -325,10 +325,10 @@ export function RoleOrgAccessSummary({
             {memberships.map((membership) => (
               <div
                 key={membership.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5"
+                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-gray-900">
+                  <p className="truncate text-sm font-medium text-foreground">
                     {membership.organization.name}
                   </p>
                   <Badge variant="secondary" className="mt-0.5 text-[10px]">

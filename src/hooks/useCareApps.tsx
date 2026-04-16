@@ -49,7 +49,7 @@ const withSuspense = (
               aria-label="Error"
               className="size-4 text-red-500"
             />
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-soft-foreground">
               {t("error_loading_encounter_tab")}
             </p>
           </div>
@@ -63,7 +63,7 @@ const withSuspense = (
                 aria-label="Loading"
                 className="size-4 animate-spin"
               />
-              <p className="text-sm text-gray-600">{t("loading")}</p>
+              <p className="text-sm text-soft-foreground">{t("loading")}</p>
             </div>
           }
         >

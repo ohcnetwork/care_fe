@@ -292,7 +292,7 @@ export function PatientIdentifierSelector({
             {/* Search Type Selector */}
             {allIdentifierConfigs.length > 2 ? (
               <div>
-                <label className="text-xs text-gray-600 mb-1.5 ml-1 block">
+                <label className="text-xs text-soft-foreground mb-1.5 ml-1 block">
                   {t("search_by")}
                 </label>
                 <Select value={searchType} onValueChange={setSearchType}>
@@ -339,11 +339,11 @@ export function PatientIdentifierSelector({
                   placeholder={selectedConfig?.config.display || t("search")}
                   value={searchTerm}
                   onChange={(value) => setSearchTerm(value || "")}
-                  className="border-gray-300"
+                  className="border-strong-border"
                 />
               ) : (
                 <>
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-placeholder-foreground pointer-events-none z-10" />
                   <Input
                     ref={inputRef}
                     type="text"
@@ -358,7 +358,7 @@ export function PatientIdentifierSelector({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 size-6 text-gray-400 hover:bg-transparent"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 size-6 text-placeholder-foreground hover:bg-transparent"
                   onClick={() => setSearchTerm("")}
                   aria-label={t("clear")}
                 >
@@ -369,8 +369,8 @@ export function PatientIdentifierSelector({
 
             {/* Search Results */}
             {searchStateMessage ? (
-              <Card className="flex flex-col items-center justify-center border bg-gray-50 rounded-sm shadow-none">
-                <div className="text-sm text-gray-950 text-center p-5">
+              <Card className="flex flex-col items-center justify-center border bg-soft-background rounded-sm shadow-none">
+                <div className="text-sm text-foreground text-center p-5">
                   {searchStateMessage}
                 </div>
                 {hasNoResults && onRegisterNewPatient && (
@@ -388,7 +388,7 @@ export function PatientIdentifierSelector({
               </Card>
             ) : (
               <>
-                <div className="text-xs text-gray-700">
+                <div className="text-xs text-muted-foreground">
                   <Trans
                     i18nKey="found_patient_with_this"
                     values={{
@@ -410,9 +410,9 @@ export function PatientIdentifierSelector({
                           key={patient.id}
                           value={patient.id}
                           onSelect={() => handlePatientSelect(patient)}
-                          className="px-4 py-2.5 cursor-pointer hover:bg-gray-50 aria-selected:bg-gray-50"
+                          className="px-4 py-2.5 cursor-pointer hover:bg-soft-background aria-selected:bg-soft-background"
                         >
-                          <span className="text-sm text-gray-900">
+                          <span className="text-sm text-foreground">
                             {patient.name}
                           </span>
                         </CommandItem>
@@ -435,11 +435,11 @@ export function PatientIdentifierSelector({
           </CardContent>
         </Card>
       ) : (
-        <Card className="p-0 bg-gray-50">
+        <Card className="p-0 bg-soft-background">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-500">{t("patient")}</p>
+                <p className="text-xs text-muted-foreground">{t("patient")}</p>
                 <p className="font-medium">{selectedPatient.name}</p>
               </div>
               <Button

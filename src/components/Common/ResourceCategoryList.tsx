@@ -73,10 +73,10 @@ function ItemCard<T extends BaseSearchableItem>({
               </div>
             </div>
             <div className="flex flex-col">
-              <h3 className="text-base font-semibold text-gray-900 truncate">
+              <h3 className="text-base font-semibold text-foreground truncate">
                 {displayTitle}
               </h3>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {item.category?.title}
               </span>
             </div>
@@ -123,7 +123,7 @@ function CategoryCard({
               </div>
             </div>
 
-            <h3 className="text-base font-semibold text-gray-900 truncate">
+            <h3 className="text-base font-semibold text-foreground truncate">
               {category.title}
             </h3>
           </div>
@@ -237,7 +237,7 @@ function ResourceCategoryBreadcrumb({
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               {index === breadcrumbItems.length - 1 ? (
-                <BreadcrumbPage className="font-semibold text-gray-900">
+                <BreadcrumbPage className="font-semibold text-foreground">
                   {item.title}
                 </BreadcrumbPage>
               ) : (
@@ -411,7 +411,9 @@ export function ResourceCategoryList<
 
         <div className="flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
           <div className="flex flex-col items-start space-x-2">
-            <h1 className="text-2xl font-bold text-gray-700">{baseTitle}</h1>
+            <h1 className="text-2xl font-bold text-muted-foreground">
+              {baseTitle}
+            </h1>
             <ResourceCategoryBreadcrumb
               currentCategory={currentCategory}
               onNavigate={onNavigate}
@@ -452,7 +454,7 @@ export function ResourceCategoryList<
       {/* Search Section */}
       {!isLeafCategory && (
         <div className="relative w-full sm:w-auto mb-4">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-placeholder-foreground">
             <CareIcon icon="l-search" className="size-5" />
           </span>
           <Input
@@ -487,7 +489,7 @@ export function ResourceCategoryList<
           <div className="grid gap-2">
             {/* Show categories */}
             {categories.length > 0 && isSearching && (
-              <h3 className="text-sm font-medium text-gray-500 mt-2">
+              <h3 className="text-sm font-medium text-muted-foreground mt-2">
                 {t("categories")}
               </h3>
             )}
@@ -504,7 +506,7 @@ export function ResourceCategoryList<
 
             {items.length > 0 && isSearching && itemSearchConfig && (
               <>
-                <h3 className="text-sm font-medium text-gray-500 mt-4">
+                <h3 className="text-sm font-medium text-muted-foreground mt-4">
                   {t("items")}
                 </h3>
                 {items.map((item) => (

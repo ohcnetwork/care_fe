@@ -99,7 +99,7 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
       <div>
         <Button
           variant="outline"
-          className="text-gray-950 font-semibold border-gray-300 mb-4"
+          className="text-foreground font-semibold border-strong-border mb-4"
           onClick={() =>
             navigate(
               `/facility/${facilityId}/locations/${locationId}/medication_dispense/`,
@@ -113,14 +113,14 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
         </Button>
       </div>
       {dispenseOrder && (
-        <Card className="flex gap-4 mb-4 p-4 rounded-none shadow-none bg-gray-100">
+        <Card className="flex gap-4 mb-4 p-4 rounded-none shadow-none bg-muted-background">
           <PatientHeader
             patient={dispenseOrder.patient}
             facilityId={facilityId}
           />
           {prescriptionTags && prescriptionTags.length > 0 && (
             <div className="flex flex-col gap-1 items-start mt-5">
-              <span className="text-xs text-gray-700">
+              <span className="text-xs text-muted-foreground">
                 {t("prescription_tags")}:
               </span>
               <div className="flex flex-wrap items-start gap-2 text-sm whitespace-nowrap">
@@ -141,32 +141,38 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
       )}
 
       {/* Dispense Order Header */}
-      <div className="bg-white border rounded-md p-4 mb-4">
+      <div className="bg-background border rounded-md p-4 mb-4">
         <div className="flex md:flex-row flex-col items-start md:items-center justify-between gap-4">
           <div className="flex flex-row gap-2">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-foreground">
               {dispenseOrder.name}
             </h2>
             {dispenseOrder.note && (
-              <p className="text-sm text-gray-600">{dispenseOrder.note}</p>
+              <p className="text-sm text-soft-foreground">
+                {dispenseOrder.note}
+              </p>
             )}
-            <div className="flex items-center gap-4 text-sm text-gray-700">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
               {dispenseOrder.created_by && (
                 <div>
-                  <span className="text-gray-500">{t("created_by")}:</span>{" "}
+                  <span className="text-muted-foreground">
+                    {t("created_by")}:
+                  </span>{" "}
                   <span className="font-medium">
                     {formatName(dispenseOrder.created_by)}
                   </span>
                 </div>
               )}
               <div>
-                <span className="text-gray-500">{t("created_at")}:</span>{" "}
+                <span className="text-muted-foreground">
+                  {t("created_at")}:
+                </span>{" "}
                 <span className="font-medium">
                   {formatDateTime(dispenseOrder.created_date)}
                 </span>
               </div>
               <div>
-                <span className="text-gray-500">{t("location")}:</span>{" "}
+                <span className="text-muted-foreground">{t("location")}:</span>{" "}
                 <span className="font-medium">
                   {dispenseOrder.location.name}
                 </span>
@@ -192,7 +198,7 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
                 trigger={
                   <Button
                     variant="outline"
-                    className="border-gray-400 font-semibold"
+                    className="border-stronger-border font-semibold"
                   >
                     <RotateCcw className="size-4" />
                     {t("medication_return")}
@@ -202,7 +208,7 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
             )}
             <Button
               variant="outline"
-              className="border-gray-400 font-semibold"
+              className="border-stronger-border font-semibold"
               onClick={() =>
                 navigate(
                   `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/print`,

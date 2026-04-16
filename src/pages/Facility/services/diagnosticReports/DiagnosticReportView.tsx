@@ -116,7 +116,7 @@ export default function DiagnosticReportView({
               {report.code ? (
                 <p className="flex flex-col gap-1">
                   {report.code.display}
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-muted-foreground">
                     {report.code.system} <br />
                     {report.code.code}
                   </span>
@@ -130,13 +130,13 @@ export default function DiagnosticReportView({
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <div className="text-sm font-medium text-gray-500">
+                <div className="text-sm font-medium text-muted-foreground">
                   {t("category")}
                 </div>
                 <div>{report.category?.display || "-"}</div>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-500">
+                <div className="text-sm font-medium text-muted-foreground">
                   {t("status")}
                 </div>
                 <div>
@@ -148,20 +148,20 @@ export default function DiagnosticReportView({
                 </div>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-500">
+                <div className="text-sm font-medium text-muted-foreground">
                   {t("report_date")}
                 </div>
                 <div>{format(new Date(report.created_date), "dd-MM-yyyy")}</div>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-500">
+                <div className="text-sm font-medium text-muted-foreground">
                   {t("requested_by")}
                 </div>
                 <div>{formatName(report.requester)}</div>
               </div>
               {report.note && (
                 <div className="col-span-full">
-                  <div className="text-sm font-medium text-gray-500">
+                  <div className="text-sm font-medium text-muted-foreground">
                     {t("notes")}
                   </div>
                   <div className="whitespace-pre-wrap">{report.note}</div>
@@ -169,7 +169,7 @@ export default function DiagnosticReportView({
               )}
               {report.conclusion && (
                 <div className="col-span-full">
-                  <div className="text-sm font-medium text-gray-500">
+                  <div className="text-sm font-medium text-muted-foreground">
                     {t("conclusion")}
                   </div>
                   <div className="whitespace-pre-wrap">{report.conclusion}</div>

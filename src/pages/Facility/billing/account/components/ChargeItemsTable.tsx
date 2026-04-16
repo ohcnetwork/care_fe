@@ -82,7 +82,10 @@ function PriceComponentRow({ label, components }: PriceComponentRowProps) {
     <>
       {components.map((component, index) => {
         return (
-          <TableRow key={`${label}-${index}`} className="text-xs text-gray-500">
+          <TableRow
+            key={`${label}-${index}`}
+            className="text-xs text-muted-foreground"
+          >
             <TableCell></TableCell>
             <TableCell></TableCell>
             <TableCell>
@@ -431,10 +434,10 @@ export function ChargeItemsTable({
         />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
-          <Table className="rounded-lg border shadow-sm w-full bg-white">
-            <TableHeader className="bg-gray-100">
+          <Table className="rounded-lg border shadow-sm w-full bg-card">
+            <TableHeader className="bg-muted-background">
               <TableRow className="border-b">
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5 w-10">
                   <Checkbox
                     checked={
                       !!chargeItems?.length &&
@@ -446,37 +449,37 @@ export function ChargeItemsTable({
                     aria-label={t("select_all")}
                   />
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5 w-10"></TableHead>
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("created_by")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("item")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("resource")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("unit_price")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("quantity")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("total")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("performer")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[120px]">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5 w-[120px]">
                   {t("status")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[60px]">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5 w-[60px]">
                   {t("actions")}
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="bg-white">
+            <TableBody className="bg-card">
               {chargeItems.flatMap((item) => {
                 const isExpanded = expandedItems[item.id] || false;
                 const linkedResource = getLinkedResource(item);
@@ -490,9 +493,9 @@ export function ChargeItemsTable({
                 const mainRow = (
                   <TableRow
                     key={item.id}
-                    className={`border-b hover:bg-gray-50 ${selectedItems.has(item.id) ? "bg-primary/5" : ""}`}
+                    className={`border-b hover:bg-soft-background ${selectedItems.has(item.id) ? "bg-primary/5" : ""}`}
                   >
-                    <TableCell className="border-x p-3 text-gray-950">
+                    <TableCell className="border-x p-3 text-foreground">
                       <Checkbox
                         checked={selectedItems.has(item.id)}
                         onCheckedChange={(checked: CheckedState) =>
@@ -501,7 +504,7 @@ export function ChargeItemsTable({
                         aria-label={t("select_item")}
                       />
                     </TableCell>
-                    <TableCell className="border-x p-3 text-gray-950">
+                    <TableCell className="border-x p-3 text-foreground">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -516,51 +519,51 @@ export function ChargeItemsTable({
                       </Button>
                     </TableCell>
                     <TableCell className="border-x p-3 text-xs">
-                      <p className="text-gray-950">
+                      <p className="text-foreground">
                         {formatName(item.created_by)}
                       </p>
-                      <p className="text-gray-500">
+                      <p className="text-muted-foreground">
                         {formatDateTime(item.created_date)}
                       </p>
                     </TableCell>
                     <TableCell className="bor-medium">
                       {item.title}
                       {item.description && (
-                        <p className="text-xs text-gray-500 whitespace-pre-wrap">
+                        <p className="text-xs text-muted-foreground whitespace-pre-wrap">
                           {item.description}
                         </p>
                       )}
                     </TableCell>
-                    <TableCell className="border-x p-3 text-gray-950">
+                    <TableCell className="border-x p-3 text-foreground">
                       {linkedResource !== "" ? (
                         <Link
                           href={linkedResource}
-                          className="flex items-center gap-0.5 underline text-gray-600"
+                          className="flex items-center gap-0.5 underline text-soft-foreground"
                         >
                           {t(item.service_resource)}
                           <ExternalLinkIcon className="size-3" />
                         </Link>
                       ) : (
-                        <span className="text-gray-500">
+                        <span className="text-muted-foreground">
                           {t(item.service_resource)}
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="border-x p-3 text-gray-950">
+                    <TableCell className="border-x p-3 text-foreground">
                       <MonetaryDisplay
                         amount={getBaseComponent(item)?.amount || "0"}
                       />
                     </TableCell>
-                    <TableCell className="border-x p-3 text-gray-950">
+                    <TableCell className="border-x p-3 text-foreground">
                       {round(item.quantity)}
                     </TableCell>
-                    <TableCell className="border-x p-3 text-gray-950 font-medium">
+                    <TableCell className="border-x p-3 text-foreground font-medium">
                       <MonetaryDisplay amount={item.total_price} />
                     </TableCell>
-                    <TableCell className="border-x p-3 text-gray-950">
+                    <TableCell className="border-x p-3 text-foreground">
                       {formatName(item.performer_actor)}
                     </TableCell>
-                    <TableCell className="border-x p-3 text-gray-950">
+                    <TableCell className="border-x p-3 text-foreground">
                       <div className="flex items-center gap-1">
                         <Badge variant={CHARGE_ITEM_STATUS_COLORS[item.status]}>
                           {t(item.status)}
@@ -568,7 +571,7 @@ export function ChargeItemsTable({
                         {item.paid_invoice && (
                           <Link
                             href={`/facility/${facilityId}/billing/invoices/${item.paid_invoice.id}`}
-                            className="flex items-center gap-0.5 underline text-gray-600"
+                            className="flex items-center gap-0.5 underline text-soft-foreground"
                             title={t("view_invoice")}
                           >
                             {item.paid_invoice.number}
@@ -577,7 +580,7 @@ export function ChargeItemsTable({
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="border-x p-3 text-gray-950">
+                    <TableCell className="border-x p-3 text-foreground">
                       <ChargeItemActionsMenu
                         item={item}
                         facilityId={facilityId}
@@ -619,7 +622,7 @@ export function ChargeItemsTable({
                 const mrpRow = mrpAmount ? (
                   <TableRow
                     key={`${item.id}-mrp`}
-                    className="text-xs text-gray-500"
+                    className="text-xs text-muted-foreground"
                   >
                     <TableCell></TableCell>
                     <TableCell></TableCell>
@@ -645,7 +648,7 @@ export function ChargeItemsTable({
                   >
                     <TableCell></TableCell>
                     <TableCell></TableCell>
-                    <TableCell className="text-gray-950">
+                    <TableCell className="text-foreground">
                       {t("total")}
                     </TableCell>
                     <TableCell></TableCell>

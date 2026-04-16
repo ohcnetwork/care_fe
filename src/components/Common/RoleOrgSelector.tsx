@@ -149,15 +149,15 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
   const renderOrganizationCommand = (className?: string) => {
     return (
       <Command className={className}>
-        <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
-          <span className="font-semibold text-base text-gray-900">
+        <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-background z-10">
+          <span className="font-semibold text-base text-foreground">
             {t("select_organization")}
           </span>
-          <span className="text-sm text-gray-500 mt-0.5">
+          <span className="text-sm text-muted-foreground mt-0.5">
             {t("select_organization_description")}
           </span>
         </div>
-        <div className="flex items-center border-b px-3 sticky top-[48px] bg-white z-10">
+        <div className="flex items-center border-b px-3 sticky top-[48px] bg-background z-10">
           <CommandInput
             placeholder={t("search_organizations")}
             onValueChange={setOrgSearchQuery}
@@ -169,8 +169,8 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
           <CommandEmpty>
             {isLoadingAvailableOrganizations ? (
               <div className="flex items-center justify-center py-6">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                <span className="ml-2 text-sm text-gray-500">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-sm text-muted-foreground">
                   {t("loading_organizations")}
                 </span>
               </div>
@@ -209,7 +209,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
         {currentSelection && (
           <div className="md:m-0 m-2 flex items-center justify-between px-3 py-2 bg-sky-50/50 border-sky-200 rounded-md">
             <div className="flex flex-col">
-              <span className="text-xs text-gray-500 mb-0.5">
+              <span className="text-xs text-muted-foreground mb-0.5">
                 {t("selected")}
               </span>
               <span className="font-medium text-sm text-sky-900">
@@ -280,7 +280,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="size-8 p-0 text-gray-500 hover:text-gray-900"
+                  className="size-8 p-0 text-muted-foreground hover:text-foreground"
                   onClick={() => handleRemoveOrganization(index)}
                 >
                   <X className="size-4" />
@@ -302,7 +302,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                         onClick={() => setOpen(true)}
                         type="button" // Prevents unintended form submission
                       >
-                        <span className="truncate text-gray-500">
+                        <span className="truncate text-muted-foreground">
                           {currentSelection
                             ? currentSelection.name
                             : t("select_organization")}
@@ -324,7 +324,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                       aria-expanded={open}
                       className="w-full justify-between border-dashed"
                     >
-                      <span className="truncate text-gray-500">
+                      <span className="truncate text-muted-foreground">
                         {currentSelection
                           ? currentSelection.name
                           : t("select_organization")}

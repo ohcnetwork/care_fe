@@ -76,15 +76,15 @@ function TagConfigCard({
                 </Badge>
               )}
             </div>
-            <h3 className="font-medium text-gray-900 text-lg">
+            <h3 className="font-medium text-foreground text-lg">
               {config.display}
             </h3>
-            <p className="mt-1 text-sm text-gray-500 capitalize">
+            <p className="mt-1 text-sm text-muted-foreground capitalize">
               {t(config.resource)} | {t("priority")}: {config.priority}
             </p>
             {config.description && (
               <ExpandableText>
-                <ExpandableTextContent className="mt-2 text-sm text-gray-600">
+                <ExpandableTextContent className="mt-2 text-sm text-soft-foreground">
                   {config.description}
                 </ExpandableTextContent>
                 <ExpandableTextExpandButton>
@@ -201,7 +201,7 @@ export default function TagConfigTable({
       <div className="hidden md:block">
         <div className="rounded-lg border">
           <Table>
-            <TableHeader className="bg-gray-100">
+            <TableHeader className="bg-muted-background">
               <TableRow>
                 <TableHead>{t("display")}</TableHead>
                 <TableHead>{t("category")}</TableHead>
@@ -212,15 +212,18 @@ export default function TagConfigTable({
                 <TableHead>{t("actions")}</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="bg-white">
+            <TableBody className="bg-background">
               {sortedConfigs.map((config: TagConfig) => (
-                <TableRow key={config.id} className="divide-x hover:bg-gray-50">
+                <TableRow
+                  key={config.id}
+                  className="divide-x hover:bg-soft-background"
+                >
                   <TableCell className="font-medium">
                     <div className="flex flex-col text-sm break-words whitespace-normal">
                       <span>{config.display}</span>
                       {config.description && (
                         <ExpandableText>
-                          <ExpandableTextContent className="text-gray-500">
+                          <ExpandableTextContent className="text-muted-foreground">
                             {config.description}
                           </ExpandableTextContent>
                           <ExpandableTextExpandButton>

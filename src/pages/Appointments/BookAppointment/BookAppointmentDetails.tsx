@@ -108,7 +108,7 @@ export const BookAppointmentDetails = ({
   return (
     <div className="w-full">
       <div className="flex flex-row gap-4 justify-center">
-        <div className="flex flex-col gap-8 p-4 w-114 bg-white shadow rounded-lg">
+        <div className="flex flex-col gap-8 p-4 w-114 bg-card shadow rounded-lg">
           <AppointmentFormSection
             facilityId={facilityId}
             selectedTags={selectedTags}
@@ -119,7 +119,7 @@ export const BookAppointmentDetails = ({
             setSelectedResource={handleResourceChange}
           />
         </div>
-        <div className="hidden sm:flex sm:flex-col lg:flex-row gap-6 bg-white shadow rounded-lg p-4 w-full sm:max-h-full">
+        <div className="hidden sm:flex sm:flex-col lg:flex-row gap-6 bg-card shadow rounded-lg p-4 w-full sm:max-h-full">
           <AppointmentDateSelection
             facilityId={facilityId}
             resourceId={selectedResource.resource?.id}

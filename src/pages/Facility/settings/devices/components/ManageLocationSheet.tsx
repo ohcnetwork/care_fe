@@ -155,9 +155,9 @@ export default function ManageLocationSheet({
             <div>
               {locationsData?.results?.length === 0 ? (
                 <div className="p-2">
-                  <div className="h-full space-y-2 rounded-lg bg-white px-4 py-8 border border-secondary-300">
+                  <div className="h-full space-y-2 rounded-lg bg-card px-4 py-8 border border-secondary-300">
                     <div className="flex w-full items-center justify-center">
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-muted-foreground">
                         {t("no_locations_found")}
                       </span>
                     </div>

@@ -382,11 +382,11 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
             {t("back")}
           </BackButton>
         </div>
-        <div className="pb-4 mb-2 border-b border-gray-200">
+        <div className="pb-4 mb-2 border-b border-border">
           <div className="flex flex-col">
             <h4 className="font-semibold">{pageTitle}</h4>
             {!patientId && (
-              <span className="text-sm text-gray-700">
+              <span className="text-sm text-muted-foreground">
                 {t("patient_create_description")}
               </span>
             )}
@@ -413,7 +413,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
               />
               <AccordionItem
                 value="patient-basics"
-                className="bg-white flex flex-col gap-4 p-6 shadow rounded-md"
+                className="bg-background flex flex-col gap-4 p-6 shadow rounded-md"
               >
                 <AccordionTrigger className="flex justify-between">
                   <div className="flex gap-3 items-center w-full">
@@ -429,7 +429,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
               </AccordionItem>
               <AccordionItem
                 value="additional-details"
-                className="bg-white flex flex-col gap-4 p-6 shadow rounded-md"
+                className="bg-background flex flex-col gap-4 p-6 shadow rounded-md"
               >
                 <AccordionTrigger className="flex justify-between">
                   <div className="flex gap-3 items-center w-full">
@@ -446,7 +446,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-            <div className="w-full border-t border-gray-200 py-6 mt-6">
+            <div className="w-full border-t border-border py-6 mt-6">
               <div className="max-w-2xl mx-auto flex justify-end">
                 <Button
                   variant="primary_gradient"
@@ -670,7 +670,7 @@ const PatientBasicsContent = ({
                               }}
                             />
                             {field.value && (
-                              <span className="text-xs text-gray-500 absolute right-9 top-3.25 md:top-2.5">
+                              <span className="text-xs text-muted-foreground absolute right-9 top-3.25 md:top-2.5">
                                 {t("year_of_birth")}:{" "}
                                 {new Date().getFullYear() - Number(field.value)}
                               </span>
@@ -750,7 +750,7 @@ const PatientBasicsContent = ({
             <FormItem>
               <FormLabel>
                 {t("patient_tags")}{" "}
-                <span className="text-gray-500 text-sm italic">
+                <span className="text-muted-foreground text-sm italic">
                   ({t("optional")})
                 </span>
               </FormLabel>
@@ -924,7 +924,7 @@ const AdditionalDetailsContent = ({
 
       <div className="flex items-center mb-4 bg-red-50 p-4 rounded-md border border-red-200">
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-black">
+          <p className="text-sm font-medium text-foreground">
             {t("deceased_status")}
           </p>
           <div className="flex items-center gap-2">
@@ -935,10 +935,10 @@ const AdditionalDetailsContent = ({
               }}
             />
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-black">
+              <span className="text-sm font-medium text-foreground">
                 {t("mark_as_deceased")}
               </span>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-muted-foreground">
                 {t("use_only_if_patient_has_passed_away_before_registration")}
               </p>
             </div>

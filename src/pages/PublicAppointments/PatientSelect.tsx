@@ -45,7 +45,7 @@ function PatientCard({
         "cursor-pointer transition-all duration-200 rounded-xl shadow-md border",
         selectedPatient === patient.id
           ? "border-primary shadow-lg"
-          : "hover:border-gray-300",
+          : "hover:border-strong-border",
       )}
     >
       <CardHeader>
@@ -55,7 +55,7 @@ function PatientCard({
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="flex justify-between">
-          <span className="text-sm text-gray-700 font-medium">
+          <span className="text-sm text-muted-foreground font-medium">
             {t("date_of_birth_age")}:
           </span>
           <span className="text-sm font-semibold">
@@ -63,7 +63,9 @@ function PatientCard({
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-sm text-gray-700 font-medium">{t("sex")}:</span>
+          <span className="text-sm text-muted-foreground font-medium">
+            {t("sex")}:
+          </span>
           <span className="text-sm font-semibold">
             {t(`GENDER__${patient.gender}`)}
           </span>
@@ -247,7 +249,7 @@ export default function PatientSelect({
 
       {/* Sticky bottom bar */}
       {selectedPatient && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 shadow-lg">
           <div className="container mx-auto max-w-4xl flex justify-end gap-3">
             <Button variant="outline" onClick={() => setSelectedPatient(null)}>
               {t("cancel")}

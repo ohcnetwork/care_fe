@@ -197,12 +197,12 @@ function ServiceRequestForm({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm relative">
+      <div className="rounded-lg border border-border bg-card shadow-sm relative">
         <div className="absolute left-0 top-4 w-1 h-4 bg-purple-500 rounded-r-full" />
-        <CollapsibleTrigger className="flex flex-col gap-3 w-full items-start text-left p-2 pl-6 hover:bg-gray-50 cursor-pointer">
+        <CollapsibleTrigger className="flex flex-col gap-3 w-full items-start text-left p-2 pl-6 hover:bg-soft-background cursor-pointer">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-foreground">
                 {serviceRequest.service_request.title}
               </p>
               <Badge
@@ -223,7 +223,7 @@ function ServiceRequestForm({
               )}
               <div className="flex items-center gap-1">
                 {activityDefinition && (
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-muted-foreground">
                     <MonetaryDisplay
                       amount={activityDefinition.charge_item_definitions.reduce(
                         (acc: Decimal, curr: ChargeItemDefinitionBase) =>
@@ -244,7 +244,7 @@ function ServiceRequestForm({
                   }}
                   disabled={disabled}
                 >
-                  <Pencil className="h-4 w-4 text-gray-600" />
+                  <Pencil className="h-4 w-4 text-soft-foreground" />
                 </Button>
                 <DropdownMenu
                   open={isDropdownOpen}
@@ -261,7 +261,7 @@ function ServiceRequestForm({
                       }}
                       disabled={disabled}
                     >
-                      <MoreVerticalIcon className="h-4 w-4 text-gray-600" />
+                      <MoreVerticalIcon className="h-4 w-4 text-soft-foreground" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -301,7 +301,7 @@ function ServiceRequestForm({
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="p-4 space-y-4 border-t border-gray-100">
+          <div className="p-4 space-y-4 border-t border-soft-border">
             <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
               <div className="space-y-2">
                 <Label>
@@ -967,7 +967,7 @@ export function ServiceRequestQuestion({
       ))}
 
       {isLoadingSelectedAD && (
-        <div className="rounded-md border border-gray-200 p-4 space-y-4">
+        <div className="rounded-md border border-border p-4 space-y-4">
           <div className="flex items-start justify-between">
             <div className="space-y-2">
               <Skeleton className="h-4 w-[200px]" />
@@ -1005,8 +1005,8 @@ export function ServiceRequestQuestion({
           />
         </div>
         {serviceRequests.length > 1 && (
-          <div className="flex items-center gap-2 border border-gray-400 rounded-md">
-            <span className="text-xs font-medium text-gray-800 whitespace-nowrap pl-3">
+          <div className="flex items-center gap-2 border border-stronger-border rounded-md">
+            <span className="text-xs font-medium text-foreground whitespace-nowrap pl-3">
               {t("requester")}:
             </span>
             <UserSelector

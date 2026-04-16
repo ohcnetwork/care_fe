@@ -95,7 +95,7 @@ function AppointmentDialog({
                 <p className="text-base font-semibold">
                   {formatScheduleResourceName(appointment)}
                 </p>
-                <p className="text-sm font-semibold text-gray-600">
+                <p className="text-sm font-semibold text-soft-foreground">
                   {formatAppointmentSlotTime(appointment)}
                 </p>
               </div>
@@ -104,7 +104,7 @@ function AppointmentDialog({
                 <p className="font-semibold text-base">
                   {appointment.patient.name}
                 </p>
-                <p className="text-sm text-gray-600 font-medium">
+                <p className="text-sm text-soft-foreground font-medium">
                   {formatPatientAge(appointment.patient, true)},{" "}
                   {t(`GENDER__${appointment.patient.gender}`)}
                 </p>

@@ -219,7 +219,7 @@ export default function FacilityForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Information */}
-        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
+        <div className="space-y-4 rounded-lg border border-border p-4">
           <h3 className="text-lg font-medium">{t("basic_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
             <FormField
@@ -304,7 +304,7 @@ export default function FacilityForm({
         </div>
 
         {/* Contact Information */}
-        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
+        <div className="space-y-4 rounded-lg border border-border p-4">
           <h3 className="text-lg font-medium">{t("contact_info")}</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
             <FormField
@@ -393,7 +393,7 @@ export default function FacilityForm({
         </div>
 
         {/* Location Information */}
-        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
+        <div className="space-y-4 rounded-lg border border-border p-4">
           <LocationPicker
             latitude={form.watch("latitude")}
             longitude={form.watch("longitude")}
@@ -407,13 +407,13 @@ export default function FacilityForm({
         </div>
 
         {/* Visibility Settings */}
-        <div className="space-y-4 rounded-lg border border-gray-200 p-4">
+        <div className="space-y-4 rounded-lg border border-border p-4">
           <h3 className="text-lg font-medium">{t("visibility_settings")}</h3>
           <FormField
             control={form.control}
             name="is_public"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-border p-4">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -424,7 +424,7 @@ export default function FacilityForm({
                   <FormLabel className="text-base">
                     {t("make_facility_public")}
                   </FormLabel>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {t("make_facility_public_description")}
                   </p>
                 </div>

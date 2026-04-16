@@ -51,7 +51,7 @@ function ActivityDefinitionCard({
         <div className="flex flex-wrap flex-col md:flex-row items-start justify-between gap-1">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
-              <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
+              <div className="p-2 rounded-lg bg-muted-background text-soft-foreground">
                 <CareIcon icon="l-clipboard-alt" className="h-5 w-5" />
               </div>
             </div>
@@ -67,15 +67,15 @@ function ActivityDefinitionCard({
                   {t(definition.classification)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate text-lg">
+              <h3 className="font-medium text-foreground truncate text-lg">
                 {definition.title}
               </h3>
               {definition.description && (
-                <p className="mt-1 text-sm text-gray-500 line-clamp-2">
+                <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
                   {definition.description}
                 </p>
               )}
-              <div className="mt-2 text-xs text-gray-400">
+              <div className="mt-2 text-xs text-placeholder-foreground">
                 {t("kind")}: {t(definition.kind)}
               </div>
               {definition.tags.length > 0 && (
@@ -110,16 +110,18 @@ function ActivityDefinitionTableRow({
   const { t } = useTranslation();
 
   return (
-    <TableRow className="hover:bg-gray-50">
+    <TableRow className="hover:bg-soft-background">
       <TableCell className="font-medium">
         <div className="flex items-center space-x-3">
-          <div className="p-1 rounded bg-gray-100 text-gray-600">
+          <div className="p-1 rounded bg-muted-background text-soft-foreground">
             <CareIcon icon="l-clipboard-alt" className="h-4 w-4" />
           </div>
           <div>
-            <div className="font-medium text-gray-900">{definition.title}</div>
+            <div className="font-medium text-foreground">
+              {definition.title}
+            </div>
             {definition.description && (
-              <div className="text-sm text-gray-500 truncate max-w-xs">
+              <div className="text-sm text-muted-foreground truncate max-w-xs">
                 {definition.description}
               </div>
             )}
@@ -139,7 +141,7 @@ function ActivityDefinitionTableRow({
           {t(definition.status)}
         </Badge>
       </TableCell>
-      <TableCell className="text-sm text-gray-500">
+      <TableCell className="text-sm text-muted-foreground">
         {t(definition.kind)}
       </TableCell>
       <TableCell>
@@ -149,7 +151,7 @@ function ActivityDefinitionTableRow({
               <TagBadge key={tag.id} tag={tag} className="text-xs" />
             ))
           ) : (
-            <span className="text-gray-400">—</span>
+            <span className="text-placeholder-foreground">—</span>
           )}
         </div>
       </TableCell>
@@ -223,7 +225,7 @@ export function ActivityDefinitionList({
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         {/* Search */}
         <div className="relative w-full sm:w-auto">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-placeholder-foreground">
             <CareIcon icon="l-search" className="size-5" />
           </span>
           <Input
@@ -261,7 +263,7 @@ export function ActivityDefinitionList({
 
       {/* Results count */}
       {activityDefinitionsResponse && activityDefinitionsResponse.count > 0 && (
-        <div className="mb-4 text-sm text-gray-600">
+        <div className="mb-4 text-sm text-soft-foreground">
           {t("showing")} {activityDefinitions.length} {t("of")}{" "}
           {activityDefinitionsResponse.count} {t("activity_definitions")}
         </div>

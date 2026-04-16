@@ -44,7 +44,7 @@ export default function ScheduleExceptions({
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center text-center text-gray-500 py-16">
+      <div className="flex flex-col items-center text-center text-muted-foreground py-16">
         <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
         <p>{t("no_scheduled_exceptions_found")}</p>
       </div>
@@ -101,7 +101,7 @@ const ScheduleExceptionItem = (
   return (
     <div
       className={cn(
-        "rounded-lg bg-white py-2 shadow-sm",
+        "rounded-lg bg-card py-2 shadow-sm",
         isPending && "opacity-50",
       )}
     >
@@ -109,10 +109,10 @@ const ScheduleExceptionItem = (
         <div className="flex">
           <ColoredIndicator className="my-1 mr-2.5 h-5 w-1.5 rounded-r" />
           <div className="flex flex-col">
-            <span className="space-x-1 text-lg font-semibold text-gray-700">
+            <span className="space-x-1 text-lg font-semibold text-muted-foreground">
               {props.reason}
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-muted-foreground">
               <span className="font-medium">
                 {formatTimeShort(props.start_time)} -{" "}
                 {formatTimeShort(props.end_time)}

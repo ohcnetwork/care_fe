@@ -88,7 +88,7 @@ export default function ChargeItemPriceDisplay({
         {surchargeComponents.map((component, index) => (
           <div
             key={`surcharge-${index}`}
-            className="flex justify-between text-gray-500"
+            className="flex justify-between text-muted-foreground"
           >
             <span className="max-w-40">
               {component.code?.display || t("surcharge")}
@@ -100,12 +100,12 @@ export default function ChargeItemPriceDisplay({
         {discountComponents.map((component, index) => (
           <div
             key={`discount-${index}`}
-            className="flex justify-between gap-2 text-gray-500"
+            className="flex justify-between gap-2 text-muted-foreground"
           >
             <span className="max-w-40">
               {component.code?.display || t("discount")}
               {component.conditions?.length ? (
-                <span className="ml-1 text-xs text-gray-400">
+                <span className="ml-1 text-xs text-placeholder-foreground">
                   ({t("conditional")})*
                 </span>
               ) : null}
@@ -117,7 +117,7 @@ export default function ChargeItemPriceDisplay({
         {taxComponents.map((component, index) => (
           <div
             key={`tax-${index}`}
-            className="flex justify-between text-gray-500"
+            className="flex justify-between text-muted-foreground"
           >
             <span className="max-w-40">
               {component.code?.display || t("tax")}
@@ -127,14 +127,14 @@ export default function ChargeItemPriceDisplay({
         ))}
 
         {mrpAmount && (
-          <div className="flex justify-between text-gray-500">
+          <div className="flex justify-between text-muted-foreground">
             <span>{t("mrp")}</span>
             <MonetaryDisplay amount={mrpAmount} />
           </div>
         )}
 
         {purchasePriceAmount && (
-          <div className="flex justify-between text-gray-500">
+          <div className="flex justify-between text-muted-foreground">
             <span>{t("purchase_price")}</span>
             <MonetaryDisplay amount={purchasePriceAmount} />
           </div>
@@ -143,7 +143,7 @@ export default function ChargeItemPriceDisplay({
         {showAsterisk && (
           <>
             <Separator />
-            <p className="text-xs text-gray-400 mt-2">
+            <p className="text-xs text-placeholder-foreground mt-2">
               *{t("conditional_discounts_not_applied")}
             </p>
           </>

@@ -79,7 +79,7 @@ export default function GenericFilter({
       </div>
       <div className="p-3 max-h-[30vh] overflow-y-auto">
         {filteredOptions.length === 0 ? (
-          <div className="text-sm text-gray-500 text-center py-4">
+          <div className="text-sm text-muted-foreground text-center py-4">
             {t("no_results_found")}
           </div>
         ) : (
@@ -132,7 +132,7 @@ function FilterOptionsList({
       {options.map((option, index) => (
         <div
           key={option.value}
-          className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
+          className="flex items-center space-x-3 p-2 rounded-md hover:bg-soft-background transition-colors cursor-pointer"
           ref={index === focusItemIndex ? setFocusItemRef : null}
           onFocus={() => setFocusItemIndex(index)}
           tabIndex={index}
@@ -165,7 +165,7 @@ function FilterOptionsList({
           ) : (
             <Checkbox
               checked={selectedValues.includes(option.value)}
-              className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 pointer-events-none"
+              className="h-4 w-4 text-blue-600 border-strong-border focus:ring-blue-500 pointer-events-none"
             />
           )}
           {showColorIndicators && (
@@ -176,7 +176,9 @@ function FilterOptionsList({
               )}
             />
           )}
-          <span className="text-sm text-gray-700 flex-1">{option.label}</span>
+          <span className="text-sm text-muted-foreground flex-1">
+            {option.label}
+          </span>
         </div>
       ))}
     </div>
@@ -204,7 +206,7 @@ export const GenericSelectedBadge = ({
         {t(selectedValue)}
       </Badge>
       {selectedLength > 1 && (
-        <span className="text-xs bg-gray-100 text-gray-500 px-1 rounded-md whitespace-nowrap">
+        <span className="text-xs bg-muted-background text-muted-foreground px-1 rounded-md whitespace-nowrap">
           +{selectedLength - 1}
         </span>
       )}

@@ -324,9 +324,9 @@ export default function FacilityOrganizationSelector(
         <button
           type="button"
           onClick={() => setNavigationLevels([])}
-          className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
+          className="text-sm font-medium text-muted-foreground hover:text-primary-600 cursor-pointer"
         >
-          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+          <X className="h-4 w-4 text-placeholder-foreground flex-shrink-0" />
         </button>
         {navigationLevels.map((org, index) => (
           <div key={org.id} className="flex items-center gap-2">
@@ -336,11 +336,11 @@ export default function FacilityOrganizationSelector(
                 setNavigationLevels(navigationLevels.slice(0, index + 1));
                 setFacilityOrgSearch("");
               }}
-              className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
+              className="text-sm font-medium text-muted-foreground hover:text-primary-600 cursor-pointer"
             >
               {org.name}
             </button>
-            <ChevronRight className="h-3 w-3 text-gray-400 flex-shrink-0" />
+            <ChevronRight className="h-3 w-3 text-placeholder-foreground flex-shrink-0" />
           </div>
         ))}
       </div>
@@ -350,24 +350,24 @@ export default function FacilityOrganizationSelector(
   const renderOrganizationCommand = (className?: string) => {
     return (
       <Command className={className}>
-        <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
-          <span className="font-semibold text-base text-gray-900">
+        <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-card z-10">
+          <span className="font-semibold text-base text-foreground">
             {t("select_department")}
           </span>
-          <span className="text-sm text-gray-500 mt-0.5">
+          <span className="text-sm text-muted-foreground mt-0.5">
             {t("select_department_description")}
           </span>
         </div>
-        <div className="flex items-center px-3 py-2 border-b sticky top-[48px] bg-white z-10">
+        <div className="flex items-center px-3 py-2 border-b sticky top-[48px] bg-card z-10">
           {navigationLevels.length > 0 ? (
             renderNavigationPath()
           ) : (
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-muted-foreground">
               {t("select_from_list")}
             </span>
           )}
         </div>
-        <div className="flex items-center border-b px-3 sticky top-[96px] bg-white z-10">
+        <div className="flex items-center border-b px-3 sticky top-[96px] bg-card z-10">
           <CommandInput
             placeholder={t("search_organizations")}
             onValueChange={setFacilityOrgSearch}
@@ -380,8 +380,8 @@ export default function FacilityOrganizationSelector(
             {isLoadingRoot ||
             organizationQueries[navigationLevels.length - 1]?.isLoading ? (
               <div className="flex items-center justify-center py-6">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                <span className="ml-2 text-sm text-gray-500">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-sm text-muted-foreground">
                   {t("loading_organizations")}
                 </span>
               </div>
@@ -426,7 +426,7 @@ export default function FacilityOrganizationSelector(
         {currentSelection && (
           <div className="md:m-0 m-2 flex items-center justify-between px-3 py-2  bg-sky-50/50 border-sky-200 rounded-md ">
             <div className="flex flex-col">
-              <span className="text-xs text-gray-500 mb-0.5">
+              <span className="text-xs text-muted-foreground mb-0.5">
                 {t("selected")}
               </span>
               <span className="font-medium text-sm text-sky-900">
@@ -516,7 +516,7 @@ export default function FacilityOrganizationSelector(
                       onClick={() => setOpen(true)}
                       type="button" // Prevents unintended form submission
                     >
-                      <span className="truncate text-gray-500">
+                      <span className="truncate text-muted-foreground">
                         {currentSelection
                           ? currentSelection.name
                           : t("select_department")}
@@ -538,7 +538,7 @@ export default function FacilityOrganizationSelector(
                     aria-expanded={open}
                     className="w-full justify-between border-dashed"
                   >
-                    <span className="truncate text-gray-500">
+                    <span className="truncate text-muted-foreground">
                       {currentSelection
                         ? currentSelection.name
                         : t("select_department")}
@@ -576,7 +576,7 @@ export default function FacilityOrganizationSelector(
                         "size-8 p-0",
                         isPreferred
                           ? "text-yellow-500 hover:text-yellow-600"
-                          : "text-gray-400 hover:text-yellow-500",
+                          : "text-placeholder-foreground hover:text-yellow-500",
                       )}
                       type="button"
                       onClick={(e) => handleTogglePreferred(e, org)}
@@ -598,7 +598,7 @@ export default function FacilityOrganizationSelector(
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="size-8 p-0 text-gray-500 hover:text-gray-900"
+                    className="size-8 p-0 text-muted-foreground hover:text-foreground"
                     type="button"
                     onClick={() => handleRemoveOrganization(index)}
                   >

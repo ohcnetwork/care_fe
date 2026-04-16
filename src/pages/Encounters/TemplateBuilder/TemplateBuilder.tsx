@@ -840,13 +840,13 @@ function PreviewContent({
       {format === "html" && contentState.html && (
         <div
           ref={shadowHostCallback}
-          className="flex-1 border rounded-md p-4 bg-white overflow-auto min-h-[400px]"
+          className="flex-1 border rounded-md p-4 bg-background overflow-auto min-h-[400px]"
         />
       )}
       {format === "pdf" && contentState.pdf && (
         <iframe
           src={contentState.pdf}
-          className="flex-1 border rounded-md bg-white min-h-[400px] w-full"
+          className="flex-1 border rounded-md bg-background min-h-[400px] w-full"
           title={t("preview_template")}
         />
       )}

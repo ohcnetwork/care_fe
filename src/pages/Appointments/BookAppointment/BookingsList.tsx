@@ -48,22 +48,22 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
     <div className="mt-2">
       <Tabs defaultValue="upcoming">
         <div className="flex flex-col gap-2">
-          <TabsList className="grid grid-cols-3 bg-gray-100 h-10 w-full sm:w-fit">
+          <TabsList className="grid grid-cols-3 bg-muted-background h-10 w-full sm:w-fit">
             <TabsTrigger
               value="upcoming"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
             >
               {t("upcoming")}
             </TabsTrigger>
             <TabsTrigger
               value="past"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
             >
               {t("past")}
             </TabsTrigger>
             <TabsTrigger
               value="cancelled"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
             >
               {t("cancelled")}
             </TabsTrigger>
@@ -109,23 +109,23 @@ const AppointmentCard = ({
   const { t } = useTranslation();
 
   return (
-    <div className="p-3 shadow rounded-lg bg-white mt-1">
+    <div className="p-3 shadow rounded-lg bg-card mt-1">
       <div className="flex flex-col gap-3">
         <div className="flex flex-row gap-6">
           <div className="flex flex-col">
-            <span className="font-medium text-gray-950">
+            <span className="font-medium text-foreground">
               {format(appointment.token_slot.start_datetime, "EEE, dd MMM")}
             </span>
-            <span className="text-sm text-gray-600 font-medium">
+            <span className="text-sm text-soft-foreground font-medium">
               {appointment.token_slot.availability.name}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="font-medium text-gray-950">
+            <span className="font-medium text-foreground">
               {format(appointment.token_slot.start_datetime, "hh:mm a")} -{" "}
               {format(appointment.token_slot.end_datetime, "hh:mm a")}
             </span>
-            <span className="text-sm text-gray-600 font-medium">
+            <span className="text-sm text-soft-foreground font-medium">
               {t("duration")}:{" "}
               {differenceInMinutes(
                 appointment.token_slot.end_datetime,
@@ -135,12 +135,12 @@ const AppointmentCard = ({
             </span>
           </div>
         </div>
-        <div className="px-2 py-1 rounded-sm bg-gray-50">
+        <div className="px-2 py-1 rounded-sm bg-soft-background">
           <div className="flex flex-col gap-1">
             <div className="flex flex-row gap-1">
               <ScheduleResourceIcon resource={appointment} className="size-5" />
               <div className="flex items-center justify-center gap-2">
-                <span className="text-sm font-medium text-gray-950">
+                <span className="text-sm font-medium text-foreground">
                   {formatScheduleResourceName(appointment)}
                 </span>
               </div>
@@ -148,7 +148,7 @@ const AppointmentCard = ({
             {showFacilityInfo && (
               <div className="flex gap-1 items-center">
                 <Avatar name={appointment.facility.name} className="size-5" />
-                <span className="text-sm font-medium text-gray-950">
+                <span className="text-sm font-medium text-foreground">
                   {appointment.facility.name}
                 </span>
               </div>
@@ -157,7 +157,7 @@ const AppointmentCard = ({
         </div>
         <Button
           variant="outline"
-          className="w-full border borde-gray-400 text-gray-950 font-semibold"
+          className="w-full border border-stronger-border text-foreground font-semibold"
           asChild
         >
           <Link
@@ -184,41 +184,41 @@ const AppointmentTable = ({
 
   return (
     <Table className="border-separate border-spacing-y-2 border-spacing-x-0">
-      <TableHeader className="bg-gray-100 border border-gray-200  border-y border-l rounded-tl-md align-middle">
+      <TableHeader className="bg-muted-background border border-border  border-y border-l rounded-tl-md align-middle">
         <TableRow className="divide-x">
-          <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
+          <TableHead className="w-14 border-y bg-muted-background text-muted-foreground text-sm">
             {t("date")}
           </TableHead>
-          <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
+          <TableHead className="w-14 border-y bg-muted-background text-muted-foreground text-sm">
             {t("time")}
           </TableHead>
-          <TableHead className="w-30 border-y bg-gray-100 text-gray-700 text-sm">
+          <TableHead className="w-30 border-y bg-muted-background text-muted-foreground text-sm">
             {t("resource")}
           </TableHead>
-          <TableHead className="w-14 border-y bg-gray text-gray-700 text-sm">
+          <TableHead className="w-14 border-y bg-gray text-muted-foreground text-sm">
             {t("status")}
           </TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody className="bg-white">
+      <TableBody className="bg-background">
         {appointments.map((appointment) => (
           <Link
             key={appointment.id}
             href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`}
             className="contents"
           >
-            <TableRow className="shadow bg-white space-y-3 rounded-lg cursor-pointer hover:bg-gray-50">
+            <TableRow className="shadow bg-background space-y-3 rounded-lg cursor-pointer hover:bg-soft-background">
               <TableCell className="p-4">
                 <div className="flex gap-2 items-start justify-start">
                   <CalendarDays size={16} className="mt-1" />
                   <div className="flex flex-col">
-                    <span className="font-medium text-gray-950">
+                    <span className="font-medium text-foreground">
                       {format(
                         appointment.token_slot.start_datetime,
                         "EEE, dd MMM",
                       )}
                     </span>
-                    <span className="text-sm text-gray-600 font-medium">
+                    <span className="text-sm text-soft-foreground font-medium">
                       {appointment.token_slot.availability.name}
                     </span>
                   </div>
@@ -227,11 +227,11 @@ const AppointmentTable = ({
 
               <TableCell>
                 <div className="flex flex-col">
-                  <span className="font-medium text-gray-950">
+                  <span className="font-medium text-foreground">
                     {format(appointment.token_slot.start_datetime, "hh:mm a")} -{" "}
                     {format(appointment.token_slot.end_datetime, "hh:mm a")}
                   </span>
-                  <span className="text-sm text-gray-600 font-medium">
+                  <span className="text-sm text-soft-foreground font-medium">
                     {t("duration")}:{" "}
                     {differenceInMinutes(
                       appointment.token_slot.end_datetime,
@@ -251,7 +251,7 @@ const AppointmentTable = ({
                         className="size-5"
                       />
                       <div className="flex items-center justify-center gap-2">
-                        <span className="text-sm font-medium text-gray-950">
+                        <span className="text-sm font-medium text-foreground">
                           {formatScheduleResourceName(appointment)}
                         </span>
                       </div>
@@ -263,7 +263,7 @@ const AppointmentTable = ({
                           name={appointment.facility.name}
                           className="size-5"
                         />
-                        <span className="text-sm font-medium text-gray-950">
+                        <span className="text-sm font-medium text-foreground">
                           {appointment.facility.name}
                         </span>
                       </div>
@@ -379,7 +379,7 @@ export const BookingListContent = ({
       <div ref={ref} />
       {isFetchingNextPage && <CardListSkeleton count={2} />}
       {!hasNextPage && !isFetchingNextPage && (
-        <div className="border-b border-gray-300 pb-2" />
+        <div className="border-b border-strong-border pb-2" />
       )}
     </div>
   );

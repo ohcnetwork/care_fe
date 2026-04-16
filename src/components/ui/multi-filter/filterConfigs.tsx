@@ -274,12 +274,12 @@ export const locationFilter = (
       const location = locations[0];
       return (
         <div className="flex items-center gap-2 min-w-0 shrink-0">
-          <MapPin className="h-3 w-3 text-gray-600 shrink-0" />
+          <MapPin className="h-3 w-3 text-soft-foreground shrink-0" />
           <span className="text-sm whitespace-nowrap truncate max-w-[150px]">
             {location.name}
           </span>
           {locations.length > 1 && (
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               +{locations.length - 1}
             </span>
           )}

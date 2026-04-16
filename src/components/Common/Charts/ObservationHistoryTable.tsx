@@ -94,7 +94,7 @@ export const ObservationHistoryTable = ({
 
   if (!data?.pages[0]?.results.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center text-gray-500">
+      <div className="flex h-[200px] items-center justify-center text-muted-foreground">
         {t("no_data_available")}
       </div>
     );
@@ -133,7 +133,7 @@ export const ObservationHistoryTable = ({
                       <span>{name}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-gray-500">
+                  <TableCell className="text-sm text-muted-foreground">
                     {observation.note}
                   </TableCell>
                 </TableRow>

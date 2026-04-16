@@ -105,7 +105,7 @@ export default function UserAvatar({ username }: { username: string }) {
         aspectRatio={1}
       />
       <div>
-        <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 flex justify-between">
+        <div className="my-4 overflow-visible rounded-lg bg-background px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 flex justify-between">
           <div className="flex items-center">
             <Avatar
               name={formatName(userData, true)}
@@ -139,7 +139,7 @@ export default function UserAvatar({ username }: { username: string }) {
                 </Button>
               )}
 
-              <p className="text-xs leading-5 text-gray-500">
+              <p className="text-xs leading-5 text-muted-foreground">
                 {t("change_avatar_note", {
                   maxSize: careConfig.imageUploadMaxSizeInMB,
                 })}

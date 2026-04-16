@@ -56,14 +56,14 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
         hideBorder && "border-none shadow-none",
       )}
     >
-      <CardHeader className="bg-gray-100 px-4 pt-2 pb-1">
+      <CardHeader className="bg-muted-background px-4 pt-2 pb-1">
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-1 flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-950 truncate">
+              <h3 className="text-lg font-semibold text-foreground truncate">
                 {encounter.patient.name}
               </h3>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-muted-foreground">
                 {formatPatientAge(encounter.patient, true)},{" "}
                 {t(`GENDER__${encounter.patient.gender}`)}
               </p>
@@ -80,10 +80,10 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           <EncounterActions encounter={encounter} />
         </div>
       </CardHeader>
-      <CardContent className="px-4 py-2 pt-2 bg-white space-y-2">
-        <div className="flex gap-1 items-center text-gray-600">
-          <Clock className="size-3 text-gray-500 shrink-0" />
-          <span className="text-xs text-gray-700">
+      <CardContent className="px-4 py-2 pt-2 bg-background space-y-2">
+        <div className="flex gap-1 items-center text-soft-foreground">
+          <Clock className="size-3 text-muted-foreground shrink-0" />
+          <span className="text-xs text-muted-foreground">
             {encounter.period.start &&
               formatDateTime(encounter.period.start, "DD/MM/YYYY, hh:mm A")}
             {encounter.period.end &&
@@ -93,12 +93,12 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
 
         {/* Doctor and Location Row */}
         {(encounter.care_team?.[0] || encounter.current_location) && (
-          <div className="flex flex-col md:flex-row justify-start md:items-center gap-2 md:gap-3 text-gray-600">
+          <div className="flex flex-col md:flex-row justify-start md:items-center gap-2 md:gap-3 text-soft-foreground">
             {/* Primary Doctor */}
             {encounter.care_team?.[0] && (
               <div className="flex items-center gap-1 min-w-0">
-                <Stethoscope className="size-3 text-gray-500 shrink-0" />
-                <span className="text-xs font-medium text-gray-700 truncate">
+                <Stethoscope className="size-3 text-muted-foreground shrink-0" />
+                <span className="text-xs font-medium text-muted-foreground truncate">
                   {formatName(encounter.care_team[0].member)}
                 </span>
               </div>
@@ -108,7 +108,9 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
             {encounter.current_location && (
               <>
                 {encounter.care_team?.[0] && (
-                  <span className="text-gray-300 hidden md:inline">|</span>
+                  <span className="text-disabled-foreground hidden md:inline">
+                    |
+                  </span>
                 )}
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -117,10 +119,10 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                         const LocationIcon =
                           LocationTypeIcons[encounter.current_location.form];
                         return (
-                          <LocationIcon className="size-3 text-gray-500 shrink-0" />
+                          <LocationIcon className="size-3 text-muted-foreground shrink-0" />
                         );
                       })()}
-                      <span className="text-xs font-medium text-gray-700 truncate">
+                      <span className="text-xs font-medium text-muted-foreground truncate">
                         {encounter.current_location.name}
                       </span>
                     </div>
@@ -167,11 +169,11 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                 tag={tag}
                 hierarchyDisplay
                 variant="outline"
-                className="bg-gray-100 text-gray-700 border-gray-200 px-2 py-1 text-xs"
+                className="bg-muted-background text-muted-foreground border-border px-2 py-1 text-xs"
               />
             ))}
             {remainingCount > 0 && (
-              <Badge className="bg-gray-100 text-gray-700 border-gray-200 px-2 py-1 text-xs">
+              <Badge className="bg-muted-background text-muted-foreground border-border px-2 py-1 text-xs">
                 +{remainingCount}
                 {t("more")}
               </Badge>
@@ -189,7 +191,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
               year_of_birth: encounter.patient.year_of_birth?.toString() || "",
               partial_id: encounter.patient.id.slice(0, 5),
             }).toString()}`}
-            className="text-gray-700 underline hover:text-gray-900 text-sm font-medium"
+            className="text-muted-foreground underline hover:text-foreground text-sm font-medium"
           >
             {t("patient_home")}
           </Link>

@@ -104,7 +104,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
           </div>
           {selectedUser && (
             <div className="space-y-4">
-              <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+              <div className="rounded-lg border border-border p-4 space-y-4">
                 <div className="flex items-start gap-4">
                   <Avatar
                     name={formatName(selectedUser, true)}
@@ -113,16 +113,16 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                   />
                   <div className="flex flex-col flex-1">
                     <TooltipComponent content={formatName(selectedUser)}>
-                      <p className="font-medium text-gray-900 truncate max-w-56 sm:max-w-48 md:max-w-64 lg:max-w-64 xl:max-w-36">
+                      <p className="font-medium text-foreground truncate max-w-56 sm:max-w-48 md:max-w-64 lg:max-w-64 xl:max-w-36">
                         {formatName(selectedUser)}
                       </p>
                     </TooltipComponent>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
                   <div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {t("username")}
                     </span>
                     <p className="text-sm font-medium">
@@ -130,7 +130,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {t("user_type")}
                     </span>
                     <p className="text-sm font-medium">
@@ -138,7 +138,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {t("phone_number")}
                     </span>
                     <p className="text-sm font-medium truncate">
@@ -216,7 +216,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
   const ManageUsers = () => {
     if (!users?.results?.length) {
       return (
-        <div className="h-full space-y-2 mt-2 text-center rounded-lg bg-white px-7 py-12 border border-secondary-300 text-lg text-secondary-600">
+        <div className="h-full space-y-2 mt-2 text-center rounded-lg bg-background px-7 py-12 border border-secondary-300 text-lg text-secondary-600">
           {t("no_user_assigned")}
         </div>
       );
@@ -226,7 +226,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
         {users?.results.map((user) => (
           <div
             key={user.id}
-            className="rounded-lg border border-gray-200 bg-white p-4 shadow-xs relative"
+            className="rounded-lg border border-border bg-background p-4 shadow-xs relative"
           >
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4">
@@ -238,14 +238,14 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                 <div>
                   <h3 className="inline-flex">
                     <TooltipComponent content={formatName(user)}>
-                      <p className="text-sm font-medium text-gray-900 truncate max-w-32 sm:max-w-96 md:max-w-32 lg:max-w-28 xl:max-w-36">
+                      <p className="text-sm font-medium text-foreground truncate max-w-32 sm:max-w-96 md:max-w-32 lg:max-w-28 xl:max-w-36">
                         {formatName(user)}
                       </p>
                     </TooltipComponent>
                   </h3>
                   <p>
                     <TooltipComponent content={user.username}>
-                      <p className="text-sm text-gray-500 truncate sm:max-w-96 md:max-w-32 lg:max-w-32 xl:max-w-36">
+                      <p className="text-sm text-muted-foreground truncate sm:max-w-96 md:max-w-32 lg:max-w-32 xl:max-w-36">
                         {user.username}
                       </p>
                     </TooltipComponent>
@@ -265,14 +265,14 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
             </div>
             <div className="mt-4 grid grid-cols-2  gap-y-2">
               <div className="text-sm">
-                <div className="text-gray-500">{t("phone_number")}</div>
+                <div className="text-muted-foreground">{t("phone_number")}</div>
                 <div className="font-medium">
                   {user.phone_number &&
                     formatPhoneNumberIntl(user.phone_number)}
                 </div>
               </div>
               <div className="text-sm ml-4">
-                <div className="text-gray-500">{t("user_type")}</div>
+                <div className="text-muted-foreground">{t("user_type")}</div>
                 <div className="font-medium">{user.user_type}</div>
               </div>
             </div>

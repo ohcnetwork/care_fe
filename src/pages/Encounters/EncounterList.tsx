@@ -106,7 +106,7 @@ function EmptyState() {
         <CareIcon icon="l-folder-open" className="size-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_encounters_found")}</h3>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         {t("no_encounters_found_description")}
       </p>
     </Card>
@@ -483,7 +483,7 @@ export function EncounterList({
           : t("all"),
       })}
       componentRight={
-        <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
+        <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-border">
           {isFetching
             ? t("loading")
             : t("entity_count", {
@@ -494,7 +494,7 @@ export function EncounterList({
       }
     >
       <div className="space-y-4 mt-4 flex flex-col">
-        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col overflow-auto">
+        <div className="rounded-lg border border-border bg-card shadow-xs flex flex-col overflow-auto">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
@@ -522,7 +522,7 @@ export function EncounterList({
                     })
                   }
                   placeholder={t("filter_by_identifier")}
-                  className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+                  className="w-full sm:w-auto rounded-md h-9 text-muted-foreground shadow-sm"
                   patientId={qParams.patient_filter}
                   patientName={qParams.patient_name}
                 />

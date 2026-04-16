@@ -75,12 +75,12 @@ function SelectedItemCard({
   onRemove: () => void;
 }) {
   return (
-    <div className="w-full flex flex-row justify-between rounded-sm border border-gray-200 bg-white px-2 py-1">
+    <div className="w-full flex flex-row justify-between rounded-sm border border-border bg-background px-2 py-1">
       <div className="flex flex-col gap-1 grow-1 self-center">
         <div className="flex items-center gap-1">
-          <p className="my-px font-medium text-sm text-gray-900">{title}</p>
+          <p className="my-px font-medium text-sm text-foreground">{title}</p>
           {link && (
-            <Link href={link} basePath="/" className="text-gray-900">
+            <Link href={link} basePath="/" className="text-foreground">
               <ExternalLinkIcon className="size-3" />
             </Link>
           )}
@@ -89,8 +89,8 @@ function SelectedItemCard({
           <div className="grid grid-cols-1 gap-1 md:grid-cols-2">
             {details.map(({ label, value }, index) => (
               <div key={index} className="flex text-sm">
-                <span className="text-gray-500">{label}: </span>
-                <span className="ml-1 text-gray-900">{value}</span>
+                <span className="text-muted-foreground">{label}: </span>
+                <span className="ml-1 text-foreground">{value}</span>
               </div>
             ))}
           </div>
@@ -105,7 +105,7 @@ function SelectedItemCard({
         className="p-0! py-0! cursor-pointer hover:bg-transparent"
         variant="ghost"
       >
-        <Trash2 className="size-4 text-gray-500" />
+        <Trash2 className="size-4 text-muted-foreground" />
       </Button>
     </div>
   );
@@ -119,7 +119,7 @@ function SmallSelectedItemCard({
   onRemove: () => void;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5">
+    <div className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5">
       <span className="text-sm font-medium text-nowrap truncate max-w-[100px] sm:max-w-none">
         {title}
       </span>
@@ -228,7 +228,7 @@ function RequirementsContent({
             <div className="rounded-full bg-primary/10 p-3 mb-2">
               <Search className="size-4 text-primary" />
             </div>
-            <p className="text-sm sm:text-base font-medium text-gray-500">
+            <p className="text-sm sm:text-base font-medium text-muted-foreground">
               {t("no_results_found")}
             </p>
           </Card>

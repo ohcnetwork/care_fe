@@ -86,7 +86,7 @@ function MonetaryAmountInput({
   return (
     <div className="relative">
       {!hideCurrency && (
-        <span className="font-medium absolute left-3 top-1/2 -translate-y-1/2 text-gray-600">
+        <span className="font-medium absolute left-3 top-1/2 -translate-y-1/2 text-soft-foreground">
           {CURRENCY_SYMBOL}
         </span>
       )}

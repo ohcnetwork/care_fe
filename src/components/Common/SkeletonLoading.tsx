@@ -2,33 +2,33 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const TableSkeleton = ({ count }: { count: number }) => (
-  <div className="overflow-x-auto rounded-lg border border-gray-200">
-    <table className="relative min-w-full divide-y divide-gray-200">
+  <div className="overflow-x-auto rounded-lg border border-border">
+    <table className="relative min-w-full divide-y divide-border">
       {/* Header Skeleton */}
       <thead>
         <tr>
-          <th className="sticky top-0 z-10 bg-gray-100 px-4 py-3 text-left text-sm font-medium text-gray-600">
+          <th className="sticky top-0 z-10 bg-muted-background px-4 py-3 text-left text-sm font-medium text-soft-foreground">
             <Skeleton className="h-4 w-24" />
           </th>
-          <th className="bg-gray-100 px-6 py-3 text-left text-sm font-medium text-gray-600">
+          <th className="bg-muted-background px-6 py-3 text-left text-sm font-medium text-soft-foreground">
             <Skeleton className="h-4 w-16" />
           </th>
-          <th className="bg-gray-100 px-10 py-3 text-left text-sm font-medium text-gray-600">
+          <th className="bg-muted-background px-10 py-3 text-left text-sm font-medium text-soft-foreground">
             <Skeleton className="h-4 w-20" />
           </th>
-          <th className="bg-gray-100 px-4 py-3 text-left text-sm font-medium text-gray-600">
+          <th className="bg-muted-background px-4 py-3 text-left text-sm font-medium text-soft-foreground">
             <Skeleton className="h-4 w-24" />
           </th>
-          <th className="bg-gray-100 px-4 py-3 text-left text-sm font-medium text-gray-600">
+          <th className="bg-muted-background px-4 py-3 text-left text-sm font-medium text-soft-foreground">
             <Skeleton className="h-4 w-20" />
           </th>
         </tr>
       </thead>
       {/* Body Skeleton */}
-      <tbody className="divide-y divide-gray-200 bg-white animate-pulse">
+      <tbody className="divide-y divide-border bg-background animate-pulse">
         {Array.from({ length: count }).map((_, i) => (
-          <tr key={i} className="hover:bg-gray-50">
-            <td className="sticky left-0 z-10 bg-white px-4 py-4 lg:pr-20">
+          <tr key={i} className="hover:bg-soft-background">
+            <td className="sticky left-0 z-10 bg-background px-4 py-4 lg:pr-20">
               <div className="flex items-center gap-3">
                 <Skeleton className="size-10 rounded-full" />
                 <div className="flex flex-col">
@@ -59,9 +59,9 @@ export const TableSkeleton = ({ count }: { count: number }) => (
 export const CardListSkeleton = ({ count }: { count: number }) =>
   Array.from({ length: count }, (_, index) => (
     <div key={index}>
-      <div className="p-4 rounded-lg bg-gray-100 animate-pulse">
+      <div className="p-4 rounded-lg bg-muted-background animate-pulse">
         <div className="flex items-start gap-3">
-          <div className="size-8 rounded-full bg-gray-200" />
+          <div className="size-8 rounded-full bg-strong-background" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-4 w-3/4" />
@@ -123,8 +123,8 @@ export function CardListWithHeaderSkeleton({ count }: { count: number }) {
     <div className="container mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <div className="h-8 w-48 animate-pulse rounded-md bg-gray-200" />
-          <div className="h-4 w-32 animate-pulse rounded-md bg-gray-200" />
+          <div className="h-8 w-48 animate-pulse rounded-md bg-strong-background" />
+          <div className="h-4 w-32 animate-pulse rounded-md bg-strong-background" />
         </div>
       </div>
       <CardGridSkeleton count={count} />

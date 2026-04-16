@@ -52,7 +52,7 @@ export function ResponsibilitySwitcher({ selectedResponsibilityId }: Props) {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-background"
               tooltip={t("responsibilities")}
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
@@ -63,7 +63,7 @@ export function ResponsibilitySwitcher({ selectedResponsibilityId }: Props) {
                   {selectedItem?.organization.name || t("responsibilities")}
                 </span>
                 {selectedItem?.role && (
-                  <span className="truncate text-xs text-gray-500">
+                  <span className="truncate text-xs text-muted-foreground">
                     {selectedItem.role.name}
                   </span>
                 )}

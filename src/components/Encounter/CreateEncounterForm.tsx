@@ -177,7 +177,7 @@ export default function CreateEncounterForm({
               i18nKey="begin_clinical_encounter"
               values={{ patientName }}
               components={{
-                strong: <strong className="font-semibold text-gray-950" />,
+                strong: <strong className="font-semibold text-foreground" />,
               }}
             />
           </SheetDescription>
@@ -210,7 +210,7 @@ export default function CreateEncounterForm({
                         />
                         <Input
                           type="time"
-                          className="border-gray-400 text-sm sm:py-px shadow-sm"
+                          className="border-stronger-border text-sm sm:py-px shadow-sm"
                           value={date.toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -259,7 +259,7 @@ export default function CreateEncounterForm({
                               <div className="text-sm font-bold">
                                 {t(`encounter_class__${value}`)}
                               </div>
-                              <div className="whitespace-normal break-words text-center text-xs text-gray-500">
+                              <div className="whitespace-normal break-words text-center text-xs text-muted-foreground">
                                 {t(`encounter_class_description__${value}`)}
                               </div>
                             </div>
@@ -379,7 +379,7 @@ export default function CreateEncounterForm({
                   setIsOpen(false);
                   form.reset();
                 }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+                className="bg-background text-foreground border border-strong-border hover:bg-muted-background"
               >
                 {t("cancel")}
                 <ShortcutBadge actionId="cancel-action" />
@@ -389,7 +389,10 @@ export default function CreateEncounterForm({
                 disabled={isPending || !form.watch("organizations").length}
               >
                 {isPending ? t("creating") : t("create_encounter")}
-                <ShortcutBadge actionId="submit-action" className="bg-white" />
+                <ShortcutBadge
+                  actionId="submit-action"
+                  className="bg-background"
+                />
               </Button>
             </div>
           </form>

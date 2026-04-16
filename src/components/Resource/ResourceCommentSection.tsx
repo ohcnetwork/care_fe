@@ -93,7 +93,7 @@ const CommentSection = ({ id }: { id: string }) => {
           ) : (
             <div>
               {resourceComments?.results?.length === 0 ? (
-                <div className="p-flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
+                <div className="p-flex w-full justify-center border-b border-secondary-200 bg-background p-5 text-center text-2xl font-bold text-secondary-500">
                   <span>{t("no_comments_available")}</span>
                 </div>
               ) : (
@@ -137,7 +137,7 @@ export default CommentSection;
 export const Comment = ({ comment, created_by, created_date }: CommentRead) => (
   <div
     className={cn(
-      "mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800",
+      "mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-background p-4 text-secondary-800",
     )}
   >
     <div className="flex items-start gap-3">
@@ -152,12 +152,12 @@ export const Comment = ({ comment, created_by, created_date }: CommentRead) => (
       </TooltipComponent>
       <div className="flex flex-col grow mt-1">
         <div className="flex items-center justify-between w-full">
-          <span className="text-gray-700 font-medium text-xs md:text-sm">
+          <span className="text-muted-foreground font-medium text-xs md:text-sm">
             {formatName(created_by)}
           </span>
           <RelativeDateTooltip
             date={created_date}
-            className="text-gray-500 text-xs"
+            className="text-muted-foreground text-xs"
           />
         </div>
         <div className="break-words whitespace-pre-wrap mt-1">

@@ -301,7 +301,7 @@ export default function CreateScheduleTemplateSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit">
+      <SheetContent className="flex min-w-full flex-col bg-muted-background sm:min-w-fit">
         <SheetHeader>
           <SheetTitle>{t("create_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -400,7 +400,7 @@ export default function CreateScheduleTemplateSheet({
                 control={form.control}
                 name="is_public"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4 bg-white">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-border p-4 bg-card">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -411,7 +411,7 @@ export default function CreateScheduleTemplateSheet({
                       <FormLabel className="text-base">
                         {t("make_template_public")}
                       </FormLabel>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {t("make_template_public_description")}
                       </p>
                     </div>
@@ -423,7 +423,7 @@ export default function CreateScheduleTemplateSheet({
                 {form.watch("availabilities")?.map((_, index) => (
                   <div
                     key={index}
-                    className="flex flex-col rounded-lg bg-white p-4 shadow-sm"
+                    className="flex flex-col rounded-lg bg-card p-4 shadow-sm"
                   >
                     <div className="flex items-center justify-between pb-6">
                       <div className="flex items-center gap-2">
@@ -439,7 +439,7 @@ export default function CreateScheduleTemplateSheet({
                         type="button"
                         variant="secondary"
                         size="sm"
-                        className="text-gray-600 hover:text-gray-900"
+                        className="text-soft-foreground hover:text-foreground"
                         onClick={() => {
                           const availabilities =
                             form.getValues("availabilities");
@@ -504,7 +504,7 @@ export default function CreateScheduleTemplateSheet({
                                           `SCHEDULE_AVAILABILITY_TYPE__${type}`,
                                         )}
                                       </p>
-                                      <p className="text-xs text-gray-500">
+                                      <p className="text-xs text-muted-foreground">
                                         {t(
                                           `SCHEDULE_AVAILABILITY_TYPE_DESCRIPTION__${type}`,
                                         )}
@@ -570,7 +570,7 @@ export default function CreateScheduleTemplateSheet({
                         "appointment" && (
                         <>
                           <div className="flex flex-wrap mt-0 pt-2 gap-2">
-                            <div className="w-full gap-x-2 grid grid-cols-[auto_1fr_auto] mb-2 bg-gray-50 p-3 rounded-lg">
+                            <div className="w-full gap-x-2 grid grid-cols-[auto_1fr_auto] mb-2 bg-soft-background p-3 rounded-lg">
                               <CareIcon
                                 icon="l-bolt"
                                 className="text-lg text-blue-600"
@@ -767,7 +767,7 @@ export default function CreateScheduleTemplateSheet({
                 <span>{t("add_another_session")}</span>
               </Button>
 
-              <SheetFooter className="absolute inset-x-0 bottom-0 border-t border-gray-200 bg-white p-6">
+              <SheetFooter className="absolute inset-x-0 bottom-0 border-t border-border bg-card p-6">
                 <SheetClose asChild>
                   <Button
                     variant="outline"

@@ -94,11 +94,11 @@ export function LocationCard({
   });
 
   return (
-    <Card className={cn("overflow-hidden bg-white h-full", className)}>
+    <Card className={cn("overflow-hidden bg-card h-full", className)}>
       <div className="flex flex-col h-full">
         <div className="p-4 sm:p-6">
           <div className="flex items-start gap-4">
-            <div className="size-12 shrink-0 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500">
+            <div className="size-12 shrink-0 rounded-lg bg-soft-background flex items-center justify-center text-muted-foreground">
               <Icon className="size-5" />
             </div>
 
@@ -106,7 +106,7 @@ export function LocationCard({
               <h3 className="truncate text-base sm:text-lg font-semibold">
                 {location.name}
               </h3>
-              <p className="text-sm text-gray-500 truncate">
+              <p className="text-sm text-muted-foreground truncate">
                 {t(`location_form__${location.form}`)}
               </p>
 
@@ -216,7 +216,7 @@ export function LocationCard({
           </div>
         </div>
 
-        <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
+        <div className="mt-auto border-t border-soft-border bg-soft-background p-4">
           <div className="flex justify-between items-center">
             <div className="ml-auto">
               {location.form !== "bd" && onView && (

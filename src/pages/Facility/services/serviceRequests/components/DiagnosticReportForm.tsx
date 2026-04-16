@@ -730,14 +730,14 @@ export function DiagnosticReportForm({
 
           return (
             <div key={component.code.code}>
-              <Label className="text-sm/10 mb-1 block text-gray-950">
+              <Label className="text-sm/10 mb-1 block text-foreground">
                 {componentIndex + 1}.{" "}
                 {component.code.display || component.code.code}
               </Label>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-stretch sm:items-center">
                 {component.permitted_unit && (
                   <div className="w-full sm:w-32">
-                    <Label className="text-sm font-medium mb-1 block text-gray-700">
+                    <Label className="text-sm font-medium mb-1 block text-muted-foreground">
                       {t("unit")}
                     </Label>
                     <Select
@@ -774,7 +774,7 @@ export function DiagnosticReportForm({
                 )}
 
                 <div className="flex-1">
-                  <Label className="text-sm font-medium mb-1 block text-gray-700">
+                  <Label className="text-sm font-medium mb-1 block text-muted-foreground">
                     {t("result")}
                   </Label>
                   <Input
@@ -828,8 +828,8 @@ export function DiagnosticReportForm({
   return (
     <Card
       className={cn(
-        "shadow-none border-gray-300 rounded-lg cursor-pointer bg-white",
-        isExpanded && "bg-gray-100",
+        "shadow-none border-strong-border rounded-lg cursor-pointer bg-background",
+        isExpanded && "bg-muted-background",
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
@@ -839,8 +839,8 @@ export function DiagnosticReportForm({
               <div className="flex items-center gap-2">
                 <CardTitle>
                   <p className="flex items-center gap-1.5">
-                    <NotepadText className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
-                    <span className="text-base/9 text-gray-950 font-medium">
+                    <NotepadText className="size-6 text-foreground font-normal text-base stroke-[1.5px]" />{" "}
+                    <span className="text-base/9 text-foreground font-medium">
                       {t("test_results_entry")}
                     </span>
                   </p>
@@ -854,7 +854,7 @@ export function DiagnosticReportForm({
                       className="size-5"
                       imageUrl={fullReport.created_by.profile_picture_url}
                     />
-                    <span className="text-sm/9 text-gray-700 font-medium">
+                    <span className="text-sm/9 text-muted-foreground font-medium">
                       {formatName(fullReport.created_by)}
                     </span>
                   </div>
@@ -872,7 +872,7 @@ export function DiagnosticReportForm({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-10 border border-gray-400 bg-white shadow p-4"
+                    className="size-10 border border-stronger-border bg-background shadow p-4"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsExpanded(!isExpanded);
@@ -891,7 +891,7 @@ export function DiagnosticReportForm({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <CardContent className="px-2 bg-gray-100">
+          <CardContent className="px-2 bg-muted-background">
             <PLUGIN_Component
               __name="ServiceRequestAction"
               serviceRequestId={serviceRequestId}
@@ -914,12 +914,12 @@ export function DiagnosticReportForm({
                     return (
                       <Card
                         key={definition.id}
-                        className="mb-4 shadow-none rounded-lg border-gray-200 bg-gray-50"
+                        className="mb-4 shadow-none rounded-lg border-border bg-soft-background"
                       >
                         <CardContent className="p-4">
                           <div className="grid gap-4">
                             <div className="flex justify-between items-start">
-                              <Label className="text-base font-semibold text-gray-950">
+                              <Label className="text-base font-semibold text-foreground">
                                 {definition.title || definition.code?.display}
                               </Label>
                             </div>
@@ -935,12 +935,12 @@ export function DiagnosticReportForm({
                                 <div
                                   key={index}
                                   className={cn(
-                                    "space-y-1 bg-gray-200/50 p-4 rounded-lg",
-                                    isErrored && "bg-gray-100",
+                                    "space-y-1 bg-strong-background/50 p-4 rounded-lg",
+                                    isErrored && "bg-muted-background",
                                   )}
                                 >
                                   <div className="flex justify-between items-center">
-                                    <Label className="text-sm font-semibold text-gray-950">
+                                    <Label className="text-sm font-semibold text-foreground">
                                       {t("observation") + " " + (index + 1)}
                                     </Label>
                                     {isErrored ? (
@@ -976,7 +976,7 @@ export function DiagnosticReportForm({
                                     <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-stretch sm:items-center">
                                       {definition.permitted_unit && (
                                         <div className="w-full sm:w-32">
-                                          <Label className="text-sm font-medium mb-1 block text-gray-700">
+                                          <Label className="text-sm font-medium mb-1 block text-muted-foreground">
                                             {t("unit")}
                                           </Label>
                                           <Select
@@ -1012,7 +1012,7 @@ export function DiagnosticReportForm({
                                       )}
 
                                       <div className="flex-1">
-                                        <Label className="text-sm font-medium mb-1 block text-gray-700">
+                                        <Label className="text-sm font-medium mb-1 block text-muted-foreground">
                                           {t("result")}
                                         </Label>
                                         <Input
@@ -1085,17 +1085,17 @@ export function DiagnosticReportForm({
                   })}
 
                 {fullReport.status !== DiagnosticReportStatus.final && (
-                  <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-gray-50">
+                  <Card className="mb-4 shadow-none rounded-lg border-border bg-soft-background">
                     <CardContent className="p-4 space-y-2">
                       <Label
                         htmlFor="conclusion"
-                        className="text-base font-semibold text-gray-950"
+                        className="text-base font-semibold text-foreground"
                       >
                         {t("conclusion")}
                       </Label>
                       <textarea
                         id="conclusion"
-                        className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg border border-gray-300 p-2"
+                        className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg border border-strong-border p-2"
                         placeholder={t("enter_conclusion")}
                         value={conclusion}
                         onChange={(e) => setConclusion(e.target.value)}
@@ -1138,15 +1138,15 @@ export function DiagnosticReportForm({
 
                   {fullReport?.status ===
                     DiagnosticReportStatus.preliminary && (
-                    <Card className="mt-4 bg-gray-50 border-gray-200 shadow-none cursor-auto">
+                    <Card className="mt-4 bg-soft-background border-border shadow-none cursor-auto">
                       <CardContent className="p-4">
                         <div className="space-y-4">
                           <div className="flex flex-col items-center justify-between gap-1">
-                            <CloudUpload className="size-10 border border-gray-100 rounded-md p-2 bg-white" />
+                            <CloudUpload className="size-10 border border-soft-border rounded-md p-2 bg-background" />
                             <Label className="text-base font-medium">
                               {t("choose_file")}
                             </Label>
-                            <div className="text-sm text-gray-500 mb-2">
+                            <div className="text-sm text-muted-foreground mb-2">
                               {t("allowed_formats_are", {
                                 formats:
                                   BACKEND_ALLOWED_EXTENSIONS.slice(0, 5).join(
@@ -1158,7 +1158,7 @@ export function DiagnosticReportForm({
                             </div>
                             <Label
                               htmlFor="file_upload_diagnostic_report"
-                              className="inline-flex items-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground border-gray-300 shadow-sm"
+                              className="inline-flex items-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground border-strong-border shadow-sm"
                             >
                               <Upload className="mr-2 size-4" />
                               <span
@@ -1194,9 +1194,9 @@ export function DiagnosticReportForm({
                 </div>
               </div>
             ) : (
-              <div className="space-y-4 bg-gray-50 rounded-lg p-4">
-                <div className="text-gray-500 flex justify-center items-center">
-                  <p className="mt-2 text-sm text-gray-500 text-center">
+              <div className="space-y-4 bg-soft-background rounded-lg p-4">
+                <div className="text-muted-foreground flex justify-center items-center">
+                  <p className="mt-2 text-sm text-muted-foreground text-center">
                     {!hasCollectedSpecimens
                       ? t("collect_specimen_before_report")
                       : t("no_test_results_recorded")}

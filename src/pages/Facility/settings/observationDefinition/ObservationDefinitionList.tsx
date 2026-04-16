@@ -60,13 +60,13 @@ function ObservationDefinitionCard({
                 {t(definition.status)}
               </Badge>
             </div>
-            <p className="text-lg font-medium text-gray-900">
+            <p className="text-lg font-medium text-foreground">
               {definition.title}
             </p>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               {t(definition.category)}
             </p>
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-placeholder-foreground">
               {t(definition.permitted_data_type)}
             </p>
           </div>
@@ -119,12 +119,12 @@ export default function ObservationDefinitionList({
     <Page title={t("observation_definitions")} hideTitleOnPage>
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">
+          <h1 className="text-2xl font-bold text-muted-foreground">
             {t("observation_definitions")}
           </h1>
           <div className="mb-6 flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
             <div>
-              <p className="text-gray-600 text-sm">
+              <p className="text-soft-foreground text-sm">
                 {t("manage_observation_definitions")}
               </p>
             </div>
@@ -143,7 +143,7 @@ export default function ObservationDefinitionList({
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
             <div className="w-full md:w-auto">
               <div className="relative w-full md:w-auto">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-placeholder-foreground">
                   <CareIcon icon="l-search" className="size-5" />
                 </span>
                 <Input
@@ -214,7 +214,7 @@ export default function ObservationDefinitionList({
             <div className="hidden md:block">
               <div className="rounded-lg border">
                 <Table>
-                  <TableHeader className="bg-gray-100">
+                  <TableHeader className="bg-muted-background">
                     <TableRow>
                       <TableHead>{t("title")}</TableHead>
                       <TableHead>{t("category")}</TableHead>
@@ -223,7 +223,7 @@ export default function ObservationDefinitionList({
                       <TableHead>{t("actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody className="bg-white">
+                  <TableBody className="bg-background">
                     {observationDefinitions.map(
                       (definition: ObservationDefinitionReadSpec) => (
                         <TableRow key={definition.slug} className="divide-x">

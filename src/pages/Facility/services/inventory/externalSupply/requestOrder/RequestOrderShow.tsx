@@ -352,7 +352,7 @@ export function RequestOrderShow({
             </BackButton>
             <div>
               <h4>{requestOrder.name}</h4>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-muted-foreground">
                 <Trans
                   i18nKey="delivery_request_from_to"
                   values={{
@@ -363,7 +363,9 @@ export function RequestOrderShow({
                     to: requestOrder.destination?.name || t("destination"),
                   }}
                   components={{
-                    strong: <span className="font-semibold text-gray-700" />,
+                    strong: (
+                      <span className="font-semibold text-muted-foreground" />
+                    ),
                   }}
                 />
               </p>
@@ -411,7 +413,10 @@ export function RequestOrderShow({
               requestOrder.status !== RequestOrderStatus.entered_in_error && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="border-gray-400 px-2">
+                    <Button
+                      variant="outline"
+                      className="border-stronger-border px-2"
+                    >
                       <CareIcon icon="l-ellipsis-v" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -486,20 +491,20 @@ export function RequestOrderShow({
           <CardContent className="space-y-1 p-4">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("deliver_to")}
                 </label>
-                <div className="text-lg font-semibold text-gray-950">
+                <div className="text-lg font-semibold text-foreground">
                   {requestOrder.destination.name}
                 </div>
               </div>
 
               {requestOrder.origin && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-muted-foreground">
                     {t("origin")}
                   </label>
-                  <div className="text-lg font-semibold text-gray-950">
+                  <div className="text-lg font-semibold text-foreground">
                     {requestOrder.origin.name}
                   </div>
                 </div>
@@ -507,17 +512,17 @@ export function RequestOrderShow({
 
               {requestOrder.supplier && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-muted-foreground">
                     {t("supplier")}
                   </label>
-                  <div className="text-lg font-semibold text-gray-950">
+                  <div className="text-lg font-semibold text-foreground">
                     {requestOrder.supplier.name}
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("priority")}
                 </label>
                 <div>
@@ -533,7 +538,7 @@ export function RequestOrderShow({
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("tags_proper")}
                 </label>
                 <div className="flex flex-wrap gap-1">
@@ -573,7 +578,7 @@ export function RequestOrderShow({
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("status")}
                 </label>
                 <div>
@@ -587,14 +592,14 @@ export function RequestOrderShow({
               </div>
               {requestOrder.created_by && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-muted-foreground">
                     {t("created_by")}
                   </label>
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-md font-semibold text-gray-950">
+                    <span className="text-md font-semibold text-foreground">
                       {formatName(requestOrder.created_by)}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {formatDateTime(requestOrder.created_date)}
                     </span>
                   </div>
@@ -604,7 +609,7 @@ export function RequestOrderShow({
 
             {requestOrder.note && (
               <div className="pt-3">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("note")}
                 </label>
                 <p className="text-sm whitespace-pre-wrap">
@@ -615,11 +620,11 @@ export function RequestOrderShow({
           </CardContent>
         </Card>
 
-        <Card className="-mt-4 mx-5 rounded-t-none shadow-none bg-gray-100">
+        <Card className="-mt-4 mx-5 rounded-t-none shadow-none bg-muted-background">
           <CardContent className="space-y-1 px-5 py-2 grid lg:grid-cols-2 ">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("category")}
                 </label>
                 <div className="text-base font-semibold">
@@ -628,7 +633,7 @@ export function RequestOrderShow({
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("intent")}
                 </label>
                 <div className="text-base font-semibold">
@@ -637,7 +642,7 @@ export function RequestOrderShow({
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("reason")}
                 </label>
                 <div className="text-base font-semibold">
@@ -657,7 +662,7 @@ export function RequestOrderShow({
                   ? t("requested_items")
                   : t("items_to_dispatch"),
                 component: (
-                  <div className="space-y-2 p-2 bg-gray-100 rounded-md border border-gray-200">
+                  <div className="space-y-2 p-2 bg-muted-background rounded-md border border-border">
                     {isLoadingSupplyRequests ? (
                       <TableSkeleton count={3} />
                     ) : (
@@ -710,7 +715,7 @@ export function RequestOrderShow({
                                         {isNegative(
                                           supplyRequest.remaining_quantity,
                                         ) && (
-                                          <span className="text-sm text-gray-500 ml-1">
+                                          <span className="text-sm text-muted-foreground ml-1">
                                             (
                                             {t("extra_supplied_quantity", {
                                               quantity: round(

@@ -177,12 +177,12 @@ export const COLOR_OPTIONS = {
   },
   secondary: {
     label: "Secondary",
-    class: "bg-gray-100",
+    class: "bg-muted-background",
     hex: "#f9fafb",
   },
   outline: {
     label: "Outline",
-    class: "bg-gray-300",
+    class: "bg-strong-background",
     hex: "#e5e7eb",
   },
   danger: {

@@ -33,8 +33,12 @@ function EncounterNode({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center text-sm">
-        <span className="size-2 rounded-full bg-gray-400 mr-2" />
-        <span className={!end ? "font-semibold" : "text-gray-700 font-medium"}>
+        <span className="size-2 rounded-full bg-stronger-border mr-2" />
+        <span
+          className={
+            !end ? "font-semibold" : "text-muted-foreground font-medium"
+          }
+        >
           <Link
             href={`/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
             basePath={`/facility/${encounter.facility.id}`}
@@ -50,14 +54,14 @@ function EncounterNode({
       </div>
       {created_by && (
         <div className="flex items-center text-sm pl-6">
-          <span className="text-gray-700 font-normal">
+          <span className="text-muted-foreground font-normal">
             {t("associated_by", { name: formatName(created_by) })}
           </span>
         </div>
       )}
       {children}
       {start && (
-        <div className="pl-6 flex items-center text-sm font-normal text-gray-700 italic">
+        <div className="pl-6 flex items-center text-sm font-normal text-muted-foreground italic">
           {format(new Date(start), "MMM d, yyyy h:mm a")}
         </div>
       )}
@@ -72,17 +76,17 @@ export const DeviceEncounterCard = ({ encounterData }: EncounterCardProps) => {
     <div className={`relative flex gap-8 pl-12 pt-0.5`}>
       <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center">
         <div
-          className={`absolute w-px bg-gray-200 h-full ${!end ? "top-3" : "-top-3"}`}
+          className={`absolute w-px bg-border h-full ${!end ? "top-3" : "-top-3"}`}
         />
         <div
-          className={`size-6 rounded-full ${!end ? "bg-green-100" : "bg-gray-100"} flex items-center justify-center z-10`}
+          className={`size-6 rounded-full ${!end ? "bg-green-100" : "bg-muted-background"} flex items-center justify-center z-10`}
         >
           <CareIcon
             icon={!end ? "l-location-point" : "l-check"}
-            className={`size-4 ${!end ? "text-green-600" : "text-gray-600"}`}
+            className={`size-4 ${!end ? "text-green-600" : "text-soft-foreground"}`}
           />
         </div>
-        {!end && <div className="flex-1 w-px bg-gray-200" />}
+        {!end && <div className="flex-1 w-px bg-border" />}
       </div>
       <div className="flex flex-col gap-2">
         <EncounterNode

@@ -183,7 +183,7 @@ export function CreateMedicationReturnSheet({
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-6"
                 >
-                  <Card className="p-0 bg-gray-50">
+                  <Card className="p-0 bg-soft-background">
                     <CardContent className="space-y-4 p-4 rounded-md">
                       <FormField
                         control={form.control}
@@ -211,7 +211,7 @@ export function CreateMedicationReturnSheet({
                           <FormItem>
                             <FormLabel>
                               {t("note")}
-                              <span className="text-gray-500 text-sm italic">
+                              <span className="text-muted-foreground text-sm italic">
                                 {" "}
                                 ({t("optional")})
                               </span>

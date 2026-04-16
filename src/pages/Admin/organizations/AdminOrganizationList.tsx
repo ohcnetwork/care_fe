@@ -116,12 +116,12 @@ export default function AdminOrganizationList({
         <div className="container mx-auto space-y-4">
           <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-foreground">
                 {isRoleOrg
                   ? t("role_organizations_admin_title")
                   : t("suppliers")}
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {isRoleOrg
                   ? t("role_organizations_admin_description")
                   : t("manage_suppliers_description")}
@@ -170,16 +170,16 @@ export default function AdminOrganizationList({
             />
 
             <ResizablePanel defaultSize={75} className="pl-0 md:pl-4">
-              <div className="h-full rounded-lg bg-white md:shadow-lg">
+              <div className="h-full rounded-lg bg-card md:shadow-lg">
                 {organizationId && org ? (
                   <div className="space-y-6 p-5">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <h2 className="text-xl font-bold text-gray-900">
+                        <h2 className="text-xl font-bold text-foreground">
                           {org.name}
                         </h2>
                         {org.description && (
-                          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
                             {org.description}
                           </p>
                         )}
@@ -196,7 +196,7 @@ export default function AdminOrganizationList({
                   </div>
                 ) : (
                   <div className="flex h-full items-center justify-center p-8">
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-placeholder-foreground">
                       {t("select_organization_prompt_description")}
                     </p>
                   </div>
@@ -251,7 +251,7 @@ export default function AdminOrganizationList({
           />
 
           <ResizablePanel defaultSize={80} className="pl-0 md:pl-4">
-            <div className="space-y-3 overflow-hidden rounded-lg md:bg-white md:shadow-lg sm:space-y-4">
+            <div className="space-y-3 overflow-hidden rounded-lg md:bg-card md:shadow-lg sm:space-y-4">
               {organizationId && (
                 <div className="md:pt-4 flex items-center mx-auto max-w-4xl">
                   <Breadcrumb className="md:px-5 md:pt-5">
@@ -259,7 +259,7 @@ export default function AdminOrganizationList({
                       <BreadcrumbItem>
                         <BreadcrumbLink
                           asChild
-                          className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
+                          className="text-sm text-foreground cursor-pointer hover:underline hover:underline-offset-2"
                           onClick={() =>
                             navigate(`/admin/organizations/${organizationType}`)
                           }
@@ -273,7 +273,7 @@ export default function AdminOrganizationList({
                           <BreadcrumbItem>
                             <BreadcrumbLink
                               asChild
-                              className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
+                              className="text-sm text-foreground cursor-pointer hover:underline hover:underline-offset-2"
                               onClick={() => handleParentClick(parent.id)}
                             >
                               <button type="button">{parent.name}</button>
@@ -283,7 +283,7 @@ export default function AdminOrganizationList({
                         </React.Fragment>
                       ))}
                       <BreadcrumbItem key={org?.id}>
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-foreground">
                           {org?.name}
                         </span>
                       </BreadcrumbItem>
@@ -303,7 +303,7 @@ export default function AdminOrganizationList({
                     </div>
                     <div className="mt-2">
                       {org.description && (
-                        <p className="text-sm text-gray-500 break-all whitespace-normal">
+                        <p className="text-sm text-muted-foreground break-all whitespace-normal">
                           {org.description}
                         </p>
                       )}
@@ -360,10 +360,10 @@ function FlatOrgSidebar({
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-lg">
-      <div className="border-b border-gray-100 p-3">
+    <div className="flex h-full flex-col rounded-lg border border-border bg-card shadow-lg">
+      <div className="border-b border-soft-border p-3">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-400" />
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-placeholder-foreground" />
           <Input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -394,7 +394,7 @@ function FlatOrgSidebar({
                       "w-full rounded-md px-3 py-2 text-left text-sm transition-colors",
                       isSelected
                         ? "bg-primary-100 font-medium text-primary-900"
-                        : "text-gray-700 hover:bg-gray-50",
+                        : "text-muted-foreground hover:bg-soft-background",
                     )}
                   >
                     <span className="block truncate">{org.name}</span>
@@ -402,7 +402,9 @@ function FlatOrgSidebar({
                       <span
                         className={cn(
                           "block truncate text-xs",
-                          isSelected ? "text-primary-600" : "text-gray-400",
+                          isSelected
+                            ? "text-primary-600"
+                            : "text-placeholder-foreground",
                         )}
                       >
                         {org.description}
@@ -413,7 +415,7 @@ function FlatOrgSidebar({
               })}
             </div>
           ) : (
-            <p className="px-3 py-4 text-center text-sm text-gray-400">
+            <p className="px-3 py-4 text-center text-sm text-placeholder-foreground">
               {t("no_organizations_found")}
             </p>
           )}

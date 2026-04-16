@@ -158,7 +158,7 @@ function PatientIndex() {
         {appointments && appointments.length > 0 ? (
           appointments.map((appointment) => getAppointmentCard(appointment))
         ) : (
-          <div className="col-span-full text-center bg-white shadow-sm rounded p-4 font-medium">
+          <div className="col-span-full text-center bg-card shadow-sm rounded p-4 font-medium">
             {t("no_appointments")}
           </div>
         )}

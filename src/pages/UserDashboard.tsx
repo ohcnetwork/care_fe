@@ -102,7 +102,7 @@ export default function UserDashboard() {
                 user: [user.prefix, user.first_name].filter(Boolean).join(" "),
               })}
             </h1>
-            <p className="text-sm md:text-base text-gray-500">
+            <p className="text-sm md:text-base text-muted-foreground">
               {new Date().toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
@@ -189,7 +189,7 @@ export default function UserDashboard() {
       {availableTabs.length > 0 && (
         <div className="w-full">
           <div
-            className="flex border-b border-gray-200"
+            className="flex border-b border-border"
             role="tablist"
             aria-label="Dashboard Sections"
           >
@@ -204,7 +204,7 @@ export default function UserDashboard() {
                 className={`px-4 py-2 text-sm md:text-base font-medium transition-all duration-75 ${
                   activeTab === tab
                     ? "border-b-2 border-green-600 text-green-700"
-                    : "text-gray-500"
+                    : "text-muted-foreground"
                 }`}
               >
                 {tab}
@@ -225,7 +225,7 @@ export default function UserDashboard() {
                       key={facility.id}
                       href={`/facility/${facility.id}/overview`}
                     >
-                      <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
+                      <Card className="transition-all hover:shadow-md hover:border-primary/20 border-border">
                         <CardContent className="flex items-center gap-3 p-3 md:p-4">
                           <Avatar
                             name={facility.name}
@@ -235,11 +235,11 @@ export default function UserDashboard() {
                             <h3 className="font-medium truncate text-sm md:text-base">
                               {facility.name}
                             </h3>
-                            <p className="text-xs md:text-sm text-gray-500 truncate">
+                            <p className="text-xs md:text-sm text-muted-foreground truncate">
                               {t("view_facility_details")}
                             </p>
                           </div>
-                          <ChevronRight className="size-4 md:size-5 text-gray-500" />
+                          <ChevronRight className="size-4 md:size-5 text-muted-foreground" />
                         </CardContent>
                       </Card>
                     </Link>
@@ -262,7 +262,7 @@ export default function UserDashboard() {
                       href={`/responsibilities/${association.id}`}
                       className="h-full"
                     >
-                      <Card className="h-full transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
+                      <Card className="h-full transition-all hover:shadow-md hover:border-primary/20 border-border">
                         <CardContent className="flex h-full items-center gap-3 p-3 md:p-4">
                           <Avatar
                             name={association.name}
@@ -273,12 +273,12 @@ export default function UserDashboard() {
                               {association.name}
                             </h3>
                             {roleName && (
-                              <p className="text-xs md:text-sm text-gray-500 truncate">
+                              <p className="text-xs md:text-sm text-muted-foreground truncate">
                                 {roleName}
                               </p>
                             )}
                           </div>
-                          <ChevronRight className="size-4 md:size-5 text-gray-500" />
+                          <ChevronRight className="size-4 md:size-5 text-muted-foreground" />
                         </CardContent>
                       </Card>
                     </Link>
@@ -297,7 +297,7 @@ export default function UserDashboard() {
                     key={governanceOrg.id}
                     href={`/organization/${governanceOrg.id}`}
                   >
-                    <Card className="transition-all hover:shadow-md hover:border-primary/20 border-gray-200">
+                    <Card className="transition-all hover:shadow-md hover:border-primary/20 border-border">
                       <CardContent className="flex items-center gap-3 p-3 md:p-4">
                         <Avatar
                           name={governanceOrg.name}
@@ -307,7 +307,7 @@ export default function UserDashboard() {
                           <h3 className="font-medium truncate text-sm md:text-base">
                             {governanceOrg.name}
                           </h3>
-                          <p className="text-xs md:text-sm text-gray-500 truncate">
+                          <p className="text-xs md:text-sm text-muted-foreground truncate">
                             {"org_type" in governanceOrg &&
                               getOrgLabel(
                                 governanceOrg.org_type,
@@ -315,7 +315,7 @@ export default function UserDashboard() {
                               )}
                           </p>
                         </div>
-                        <ChevronRight className="size-4 md:size-5 text-gray-500" />
+                        <ChevronRight className="size-4 md:size-5 text-muted-foreground" />
                       </CardContent>
                     </Card>
                   </Link>
@@ -343,17 +343,17 @@ const TabContent = ({
       role="tabpanel"
       aria-labelledby={tabId}
     >
-      <p className="text-sm text-gray-800 font-normal px-1">{description}</p>
+      <p className="text-sm text-foreground font-normal px-1">{description}</p>
 
       {isLoading ? (
         <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="border-gray-200">
+            <Card key={i} className="border-border">
               <CardContent className="flex items-center gap-3 p-3 md:p-4">
-                <div className="size-12 md:size-14 rounded-md bg-gray-100 animate-pulse" />
+                <div className="size-12 md:size-14 rounded-md bg-muted-background animate-pulse" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
-                  <div className="h-3 w-16 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-4 w-24 bg-muted-background rounded animate-pulse" />
+                  <div className="h-3 w-16 bg-muted-background rounded animate-pulse" />
                 </div>
               </CardContent>
             </Card>

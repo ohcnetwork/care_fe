@@ -60,7 +60,7 @@ export function FacilityDetailsPage({ id }: Props) {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Card className="overflow-hidden bg-white border border-gray-200">
+        <Card className="overflow-hidden bg-card border border-border">
           <div className="flex flex-col sm:flex-row m-6">
             <Skeleton className="size-64 shrink-0 rounded-lg" />
             <div className="px-4 space-y-2 flex-1">
@@ -110,7 +110,7 @@ export function FacilityDetailsPage({ id }: Props) {
         </Button>
         <LoginHeader />
       </div>
-      <Card className="overflow-hidden bg-white border border-gray-200">
+      <Card className="overflow-hidden bg-card border border-border">
         <div className="flex flex-col sm:flex-row  m-6">
           <div className="size-64 shrink-0 overflow-hidden rounded-lg">
             <Avatar
@@ -122,7 +122,7 @@ export function FacilityDetailsPage({ id }: Props) {
           <div className="px-4 space-y-2">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold">{facility.name}</h1>
-              <p className="text-lg text-gray-500">
+              <p className="text-lg text-muted-foreground">
                 {[facility.address].filter(Boolean).join(", ")}
                 {facility.latitude && facility.longitude && (
                   <FacilityMapsLink
@@ -159,7 +159,7 @@ export function FacilityDetailsPage({ id }: Props) {
           </>
         )}
         {users.length === 0 && (
-          <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow-sm">
+          <div className="h-full space-y-2 rounded-lg bg-card p-7 shadow-sm">
             <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
               {t("no_users_found")}
             </div>

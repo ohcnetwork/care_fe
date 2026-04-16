@@ -419,7 +419,7 @@ export function EncounterCommandDialog({
         onOpenChange={onOpenChange}
         className="md:max-w-2xl"
       >
-        <div className="border-b border-gray-100 shadow-xs">
+        <div className="border-b border-soft-border shadow-xs">
           <CommandInput
             placeholder={t("search_encounter_command")}
             className="border-none focus:ring-0 text-base sm:text-sm"
@@ -444,14 +444,14 @@ export function EncounterCommandDialog({
                     key={`${group.group}-${action.id}`}
                     value={`${group.group} ${action.id} ${action.label}`}
                     onSelect={() => handleSelect(action.id)}
-                    className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
+                    className="rounded-md cursor-pointer hover:bg-muted-background flex justify-between aria-selected:bg-muted-background"
                     autoFocus={false}
                     disabled={action.disabled}
                   >
                     {action.icon}
                     <span className="flex-1">{action.label}</span>
                     {action.shortcut && (
-                      <CommandShortcut className="ml-2 text-xs text-gray-500 bg-white border border-gray-200 shadow-xs px-1.5 py-0.5 rounded">
+                      <CommandShortcut className="ml-2 text-xs text-muted-foreground bg-background border border-border shadow-xs px-1.5 py-0.5 rounded">
                         {action.shortcut}
                       </CommandShortcut>
                     )}
@@ -469,7 +469,7 @@ export function EncounterCommandDialog({
               <PLUGIN_Component
                 __name="EncounterActions"
                 encounter={encounter}
-                className="rounded-md cursor-pointer text-gray-600 hover:bg-gray-100 flex justify-baseline aria-selected:bg-gray-100 w-full p-2"
+                className="rounded-md cursor-pointer text-soft-foreground hover:bg-muted-background flex justify-baseline aria-selected:bg-muted-background w-full p-2"
               />
             </CommandGroup>
           )}

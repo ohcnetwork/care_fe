@@ -124,14 +124,14 @@ export default function ChangePaymentAccountSheet({
 
         <div className="py-4 space-y-4">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700">
+            <p className="text-sm font-medium text-muted-foreground">
               {t("selected_payments")} ({payments.length})
             </p>
             <div className="max-h-32 overflow-y-auto space-y-1 rounded-md border p-2">
               {payments.map((payment) => (
                 <div
                   key={payment.id}
-                  className="text-sm text-gray-600 flex justify-between"
+                  className="text-sm text-soft-foreground flex justify-between"
                 >
                   <span className="truncate">
                     {t(payment.reconciliation_type)}
@@ -143,7 +143,7 @@ export default function ChangePaymentAccountSheet({
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700">
+            <p className="text-sm font-medium text-muted-foreground">
               {t("select_target_account")}
             </p>
             {isLoading ? (
@@ -161,10 +161,10 @@ export default function ChangePaymentAccountSheet({
                   <button
                     key={account.id}
                     type="button"
-                    className={`w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50 ${
+                    className={`w-full text-left rounded-md border p-3 transition-colors hover:bg-soft-background ${
                       selectedAccountId === account.id
                         ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "border-gray-200"
+                        : "border-border"
                     }`}
                     onClick={() => setSelectedAccountId(account.id)}
                   >

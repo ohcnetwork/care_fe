@@ -79,7 +79,7 @@ export function FileListTable({
   const getArchivedMessage = (file: FileReadMinimal) => {
     return (
       <div className="flex flex-row gap-2 justify-end">
-        <span className="text-gray-200/90 self-center uppercase font-bold">
+        <span className="text-disabled-foreground/90 self-center uppercase font-bold">
           {t("archived")}
         </span>
         <Button
@@ -179,19 +179,19 @@ export function FileListTable({
                 key={file.id}
                 className={cn(
                   "overflow-hidden",
-                  file.is_archived ? "bg-white/50" : "bg-white",
+                  file.is_archived ? "bg-background/50" : "bg-background",
                 )}
               >
                 <CardContent className="p-4 space-y-4">
                   <div className="flex items-start gap-3">
-                    <span className="p-2 rounded-full bg-gray-100 shrink-0">
+                    <span className="p-2 rounded-full bg-muted-background shrink-0">
                       <CareIcon icon={icons[filetype]} className="text-xl" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium text-gray-900 truncate">
+                      <div className="font-medium text-foreground truncate">
                         {fileName}
                       </div>
-                      <div className="mt-1 text-sm text-gray-500">
+                      <div className="mt-1 text-sm text-muted-foreground">
                         {filetype}
                       </div>
                     </div>
@@ -199,7 +199,7 @@ export function FileListTable({
 
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <div className="text-gray-500">{t("date")}</div>
+                      <div className="text-muted-foreground">{t("date")}</div>
                       <div className="font-medium">
                         {dayjs(file.created_date).format(
                           "DD MMM YYYY, hh:mm A",
@@ -207,7 +207,9 @@ export function FileListTable({
                       </div>
                     </div>
                     <div>
-                      <div className="text-gray-500">{t("shared_by")}</div>
+                      <div className="text-muted-foreground">
+                        {t("shared_by")}
+                      </div>
                       <div className="font-medium">
                         {formatName(file.uploaded_by)}
                       </div>
@@ -226,7 +228,7 @@ export function FileListTable({
             );
           })
         ) : (
-          <div className="text-center py-4 text-gray-500">
+          <div className="text-center py-4 text-muted-foreground">
             {t("no_files_found")}
           </div>
         )}
@@ -237,19 +239,19 @@ export function FileListTable({
           {showHeader && (
             <TableHeader>
               <TableRow className="shadow-sm rounded overflow-hidden">
-                <TableHead className="w-[20%] bg-white rounded-l">
+                <TableHead className="w-[20%] bg-background rounded-l">
                   {t("file_name")}
                 </TableHead>
-                <TableHead className="w-[20%] rounded-y bg-white">
+                <TableHead className="w-[20%] rounded-y bg-background">
                   {t("file_type")}
                 </TableHead>
-                <TableHead className="w-[25%] rounded-y bg-white">
+                <TableHead className="w-[25%] rounded-y bg-background">
                   {t("date")}
                 </TableHead>
-                <TableHead className="w-[20%] rounded-y bg-white">
+                <TableHead className="w-[20%] rounded-y bg-background">
                   {t("shared_by")}
                 </TableHead>
-                <TableHead className="w-[15%] text-right rounded-r bg-white"></TableHead>
+                <TableHead className="w-[15%] text-right rounded-r bg-background"></TableHead>
               </TableRow>
             </TableHeader>
           )}
@@ -267,11 +269,11 @@ export function FileListTable({
                     <TableCell
                       className={cn(
                         "font-medium rounded-l-md rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
+                        file.is_archived ? "bg-background/50" : "bg-background",
                       )}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="p-2 rounded-full bg-gray-100 shrink-0">
+                        <span className="p-2 rounded-full bg-muted-background shrink-0">
                           <CareIcon
                             icon={icons[filetype]}
                             className="text-xl"
@@ -279,12 +281,12 @@ export function FileListTable({
                         </span>
                         {file.name && file.name.length > 20 ? (
                           <TooltipComponent content={fileName}>
-                            <span className="text-gray-900 truncate block">
+                            <span className="text-foreground truncate block">
                               {fileName}
                             </span>
                           </TooltipComponent>
                         ) : (
-                          <span className="text-gray-900 truncate block">
+                          <span className="text-foreground truncate block">
                             {fileName}
                           </span>
                         )}
@@ -293,7 +295,7 @@ export function FileListTable({
                     <TableCell
                       className={cn(
                         "rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
+                        file.is_archived ? "bg-background/50" : "bg-background",
                       )}
                     >
                       {filetype}
@@ -301,7 +303,7 @@ export function FileListTable({
                     <TableCell
                       className={cn(
                         "rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
+                        file.is_archived ? "bg-background/50" : "bg-background",
                       )}
                     >
                       <TooltipComponent
@@ -317,7 +319,7 @@ export function FileListTable({
                     <TableCell
                       className={cn(
                         "rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
+                        file.is_archived ? "bg-background/50" : "bg-background",
                       )}
                     >
                       {formatName(file.uploaded_by)}
@@ -325,7 +327,7 @@ export function FileListTable({
                     <TableCell
                       className={cn(
                         "text-right rounded-r-md rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
+                        file.is_archived ? "bg-background/50" : "bg-background",
                       )}
                     >
                       {file.is_archived ? (

@@ -32,14 +32,14 @@ export const EmptyState = ({
   return (
     <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-8 text-center">
       <div className="rounded-full bg-secondary/10 p-3">
-        <CareIcon icon="l-tablets" className="text-3xl text-gray-500" />
+        <CareIcon icon="l-tablets" className="text-3xl text-muted-foreground" />
       </div>
       <div className="max-w-[200px] space-y-1">
         <h3 className="font-medium">
           {message ||
             (searching ? t("no_matches_found") : t("no_prescriptions"))}
         </h3>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           {description ||
             (searching
               ? t("no_medications_match_query", { searchQuery })
@@ -78,25 +78,25 @@ export default function MedicationRequestTable() {
           <TabsList>
             <TabsTrigger
               value="prescriptions"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              className="data-[state=active]:bg-background rounded-md px-4 font-semibold"
             >
               {t("prescriptions")}
             </TabsTrigger>
             <TabsTrigger
               value="ongoing"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              className="data-[state=active]:bg-background rounded-md px-4 font-semibold"
             >
               {t("medication_statements")}
             </TabsTrigger>
             <TabsTrigger
               value="administration"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              className="data-[state=active]:bg-background rounded-md px-4 font-semibold"
             >
               {t("medicine_administration")}
             </TabsTrigger>
             <TabsTrigger
               value="dispense_history"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              className="data-[state=active]:bg-background rounded-md px-4 font-semibold"
             >
               {t("dispense_history")}
             </TabsTrigger>

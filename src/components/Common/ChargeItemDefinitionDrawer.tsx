@@ -71,7 +71,7 @@ export function ChargeItemDefinitionDrawer({
 
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto w-full px-4 py-4">
-            <div className="bg-gray-100 rounded-lg p-4">
+            <div className="bg-muted-background rounded-lg p-4">
               <ChargeItemDefinitionForm
                 facilityId={facilityId}
                 categorySlug={initialData ? undefined : categorySlug}

@@ -62,9 +62,9 @@ export const SummaryPanelActionsTab = () => {
   }[];
 
   return (
-    <div className="flex flex-col gap-2 bg-gray-100 @sm:bg-white p-2 @sm:p-3 rounded-lg border border-gray-200 @sm:shadow @sm:overflow-x-auto">
+    <div className="flex flex-col gap-2 bg-muted-background @sm:bg-background p-2 @sm:p-3 rounded-lg border border-border @sm:shadow @sm:overflow-x-auto">
       <div className="flex pl-1 @xs:hidden">
-        <h6 className="text-gray-950 font-semibold">{t("actions")}</h6>
+        <h6 className="text-foreground font-semibold">{t("actions")}</h6>
       </div>
       <div>
         <div className="flex flex-col sm:@sm:flex-row gap-3 sm:@sm:gap-4">
@@ -103,7 +103,7 @@ export const SummaryPanelActionsTab = () => {
           <HospitalizationDetails />
           <DischargeDetails />
         </div>
-        <div className="sm:@sm:flex-1 flex flex-col gap-2 border-t border-gray-300 border-dashed sm:@sm:border-none pt-3 sm:@sm:pt-0 mt-3">
+        <div className="sm:@sm:flex-1 flex flex-col gap-2 border-t border-strong-border border-dashed sm:@sm:border-none pt-3 sm:@sm:pt-0 mt-3">
           <Button
             variant="outline_primary"
             className="justify-start sm:@sm:justify-center"

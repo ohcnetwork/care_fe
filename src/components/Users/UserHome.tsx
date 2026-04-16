@@ -8,6 +8,7 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { userChildProps } from "@/components/Common/UserColumns";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import UserAppearanceTab from "@/components/Users/UserAppearanceTab";
 import UserAvailabilityTab from "@/components/Users/UserAvailabilityTab";
 import UserBanner from "@/components/Users/UserBanner";
 import UserDepartmentsTab from "@/components/Users/UserDepartmentsTab";
@@ -79,6 +80,8 @@ export default function UserHome(props: UserHomeProps) {
     return <Loading />;
   }
 
+  const isOwnProfile = username === authUser.username;
+
   const TABS = {
     PROFILE: {
       body: UserSummaryTab,
@@ -91,6 +94,10 @@ export default function UserHome(props: UserHomeProps) {
     AVAILABILITY: {
       body: UserAvailabilityTab,
       hidden: !props.facilityId || !canViewSchedule,
+    },
+    APPEARANCE: {
+      body: UserAppearanceTab,
+      hidden: !isOwnProfile,
     },
   } satisfies Record<string, TabChildProp>;
 

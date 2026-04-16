@@ -58,11 +58,11 @@ function TokenCategoryCard({
                 {t(tokenCategory.resource_type)}
               </Badge>
             </div>
-            <h3 className="font-medium text-gray-900 text-lg">
+            <h3 className="font-medium text-foreground text-lg">
               {t("name")}: {tokenCategory.name}
             </h3>
             {tokenCategory.shorthand && (
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {t("shorthand")}: {tokenCategory.shorthand}
               </p>
             )}
@@ -120,12 +120,12 @@ export default function TokenCategoryList({
     <Page title={t("token_categories")} hideTitleOnPage>
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">
+          <h1 className="text-2xl font-bold text-muted-foreground">
             {t("token_categories")}
           </h1>
           <div className="mb-6 flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
             <div>
-              <p className="text-gray-600 text-sm">
+              <p className="text-soft-foreground text-sm">
                 {t("manage_token_categories")}
               </p>
             </div>
@@ -145,7 +145,7 @@ export default function TokenCategoryList({
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
             <div className="w-full md:w-auto">
               <div className="relative w-full md:w-auto">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-placeholder-foreground">
                   <CareIcon icon="l-search" className="size-5" />
                 </span>
                 <Input
@@ -205,7 +205,7 @@ export default function TokenCategoryList({
             <div className="hidden md:block">
               <div className="rounded-lg border">
                 <Table>
-                  <TableHeader className="bg-gray-100">
+                  <TableHeader className="bg-muted-background">
                     <TableRow>
                       <TableHead>{t("name")}</TableHead>
                       <TableHead>{t("resource_type")}</TableHead>
@@ -213,7 +213,7 @@ export default function TokenCategoryList({
                       <TableHead>{t("actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody className="bg-white">
+                  <TableBody className="bg-card">
                     {tokenCategories.map((tokenCategory: TokenCategoryRead) => (
                       <TableRow key={tokenCategory.id} className="divide-x">
                         <TableCell className="font-medium">

@@ -171,7 +171,7 @@ export default function AddChargeItemSheet({
           <div className="m-3">
             <div className="flex flex-col sm:flex-row gap-2 mb-4 justify-between">
               <div className="relative">
-                <SearchIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <SearchIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-placeholder-foreground pointer-events-none" />
                 <Input
                   placeholder={t("search_charge_items")}
                   value={qParams.search || ""}
@@ -198,7 +198,7 @@ export default function AddChargeItemSheet({
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-gray-100">
+                    <TableRow className="bg-muted-background">
                       <TableHead className="w-12">
                         <Checkbox
                           checked={
@@ -259,7 +259,7 @@ export default function AddChargeItemSheet({
             <Pagination totalCount={response?.count || 0} />
           </div>
         </div>
-        <SheetFooter className="bg-white p-3 gap-2">
+        <SheetFooter className="bg-background p-3 gap-2">
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
@@ -277,7 +277,7 @@ export default function AddChargeItemSheet({
             }
           >
             <span>{t("add_selected_items")}</span>
-            <ShortcutBadge actionId="submit-action" className="bg-white" />
+            <ShortcutBadge actionId="submit-action" className="bg-background" />
           </Button>
         </SheetFooter>
       </SheetContent>

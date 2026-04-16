@@ -40,7 +40,7 @@ const BrowserWarning = () => {
         hideCancel
       />
 
-      <div className="sticky top-0 z-50 flex h-32 w-full items-center justify-center bg-gray-700/85 text-center text-gray-300">
+      <div className="sticky top-0 z-50 flex h-32 w-full items-center justify-center bg-muted-foreground/85 text-center text-disabled-foreground">
         <div>
           <h2 className="text-lg font-medium">{t("unsupported_browser")}</h2>
           <p className="text-sm">

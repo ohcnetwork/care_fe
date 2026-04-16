@@ -31,7 +31,7 @@ export default function PrescriptionsView({
         <Button
           data-shortcut-id="go-back"
           variant="outline"
-          className="text-gray-950 font-semibold border-gray-300 mb-4"
+          className="text-foreground font-semibold border-strong-border mb-4"
           size="sm"
           onClick={() => window.history.back()}
         >

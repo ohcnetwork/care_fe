@@ -93,7 +93,7 @@ export function MedicationStatementList({
     }
     return (
       <MedicationStatementListLayout className={className}>
-        <p className="text-gray-500">{t("no_medication_statements")}</p>
+        <p className="text-muted-foreground">{t("no_medication_statements")}</p>
       </MedicationStatementListLayout>
     );
   }
@@ -113,10 +113,10 @@ export function MedicationStatementList({
         {Object.entries(groupedByYear).map(([year, groupedByDate]) => {
           return (
             <div key={year}>
-              <h2 className="text-sm font-medium text-indigo-700 border-y border-gray-300 py-2 w-fit pr-10">
+              <h2 className="text-sm font-medium text-indigo-700 border-y border-strong-border py-2 w-fit pr-10">
                 {year}
               </h2>
-              <div className="border-l border-gray-300 pt-5 ml-4">
+              <div className="border-l border-strong-border pt-5 ml-4">
                 {Object.entries(groupedByDate).map(([date, medications]) => {
                   return (
                     <div key={date} className="pb-6">

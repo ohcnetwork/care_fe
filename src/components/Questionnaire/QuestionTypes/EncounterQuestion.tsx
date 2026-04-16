@@ -344,7 +344,7 @@ export function EncounterQuestion({
 
       {/* Mark for discharge button - Show if not already discharged */}
       {encounter.status !== EncounterStatus.DISCHARGED && (
-        <div className="col-span-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
+        <div className="col-span-2 border border-border rounded-lg p-2 bg-soft-background">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
             <div className="space-y-1">
               <h3 className="text-sm font-medium">{t("discharge_patient")}</h3>
@@ -384,7 +384,7 @@ export function EncounterQuestion({
 
       {/* Hospitalization Details - Only show for relevant encounter classes */}
       {["imp", "obsenc", "emer"].includes(encounter.encounter_class) && (
-        <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
+        <div className="col-span-2 border border-border rounded-lg p-4 space-y-4">
           <h3 className="text-lg font-semibold break-words">
             {t("hospitalization_details")}
           </h3>
@@ -524,7 +524,7 @@ export function EncounterQuestion({
                       />
                       <Input
                         type="time"
-                        className="flex-1 border-t-0 sm:border-t text-sm border-gray-200 h-9"
+                        className="flex-1 border-t-0 sm:border-t text-sm border-border h-9"
                         value={
                           encounter.period.end
                             ? new Date(encounter.period.end).toLocaleTimeString(

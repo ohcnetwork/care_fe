@@ -169,7 +169,7 @@ export default function AddChargeItemsBillingSheet({
                     {selectedItems.map((item, index) => (
                       <div
                         key={index}
-                        className="bg-white rounded-lg border p-4 space-y-3"
+                        className="bg-card rounded-lg border p-4 space-y-3"
                       >
                         {/* Title and Remove Button */}
                         <div className="flex items-start justify-between gap-2">
@@ -189,7 +189,7 @@ export default function AddChargeItemsBillingSheet({
                         {/* Quantity and Price */}
                         <div className="flex flex-wrap gap-4 items-center">
                           <div className="space-y-1">
-                            <label className="text-sm text-gray-500">
+                            <label className="text-sm text-muted-foreground">
                               {t("quantity")}
                             </label>
                             <Input
@@ -204,7 +204,7 @@ export default function AddChargeItemsBillingSheet({
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-sm text-gray-500">
+                            <label className="text-sm text-muted-foreground">
                               {t("price")}
                             </label>
                             <div className="flex items-center gap-1">
@@ -220,7 +220,7 @@ export default function AddChargeItemsBillingSheet({
                                 .price_components?.length > 0 && (
                                 <Popover>
                                   <PopoverTrigger>
-                                    <InfoIcon className="h-4 w-4 text-gray-700 cursor-pointer" />
+                                    <InfoIcon className="h-4 w-4 text-muted-foreground cursor-pointer" />
                                   </PopoverTrigger>
                                   <PopoverContent
                                     side="right"
@@ -240,7 +240,7 @@ export default function AddChargeItemsBillingSheet({
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-sm text-gray-500">
+                            <label className="text-sm text-muted-foreground">
                               {t("performer")}
                             </label>
                             <UserSelector
@@ -299,7 +299,7 @@ export default function AddChargeItemsBillingSheet({
                                 .price_components?.length > 0 && (
                                 <Popover>
                                   <PopoverTrigger>
-                                    <InfoIcon className="size-4 text-gray-700 cursor-pointer" />
+                                    <InfoIcon className="size-4 text-muted-foreground cursor-pointer" />
                                   </PopoverTrigger>
                                   <PopoverContent
                                     side="right"

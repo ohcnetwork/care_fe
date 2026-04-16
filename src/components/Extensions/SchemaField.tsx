@@ -88,7 +88,10 @@ export function SchemaField<TFieldValues extends FieldValues>({
 
     return (
       <div
-        className={cn("space-y-4 p-4 border rounded-lg bg-gray-50", className)}
+        className={cn(
+          "space-y-4 p-4 border rounded-lg bg-soft-background",
+          className,
+        )}
       >
         <div>
           <h4 className="text-sm font-medium">{metadata.label}</h4>
@@ -723,7 +726,7 @@ export function SchemaField<TFieldValues extends FieldValues>({
             </p>
           )}
         </div>
-        <div className="pl-4 border-l-2 border-gray-200 space-y-3">
+        <div className="pl-4 border-l-2 border-border space-y-3">
           {visibleNestedFields.map((nestedMeta) => {
             const nestedPath = `${fieldPath}.${nestedMeta.name}`;
             const isRequired =

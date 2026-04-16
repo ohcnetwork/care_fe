@@ -123,7 +123,7 @@ export default function SpecimenDefinitionForm({
       <Page title={t("update_specimen_definition")} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("update_specimen_definition")}
             </h1>
           </div>
@@ -339,7 +339,7 @@ function SpecimenDefinitionFormContent({
     >
       <div className="container mx-auto max-w-3xl">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-foreground">
             {isEditMode
               ? t("update_specimen_definition")
               : t("create_specimen_definition")}
@@ -580,7 +580,7 @@ function SpecimenDefinitionFormContent({
                 </div>
 
                 {/* Type Tested Information */}
-                <div className="space-y-4 rounded-md border bg-gray-50 px-2 py-4">
+                <div className="space-y-4 rounded-md border bg-soft-background px-2 py-4">
                   <h3 className="text-base font-medium">
                     {t("type_tested_information")}
                   </h3>
@@ -702,7 +702,7 @@ function SpecimenDefinitionFormContent({
                     />
                   </div>
 
-                  <div className="space-y-4 rounded-md border bg-gray-50 shadow-sm p-2">
+                  <div className="space-y-4 rounded-md border bg-soft-background shadow-sm p-2">
                     <h4 className="text-sm font-medium">
                       {t("container_information")}
                     </h4>

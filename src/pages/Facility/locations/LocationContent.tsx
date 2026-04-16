@@ -58,8 +58,10 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
         <div className="rounded-full bg-yellow-100 p-3 mb-3">
           <Lock className="size-6 text-yellow-700" />
         </div>
-        <p className="text-sm font-medium text-gray-700">{t("occupied")}</p>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-sm font-medium text-muted-foreground">
+          {t("occupied")}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
           {t("this_bed_is_currently_occupied")}
         </p>
         <Button
@@ -79,8 +81,10 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
         <div className="mt-4">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="size-8 animate-spin text-gray-400" />
-              <p className="text-sm text-gray-500 mt-2">{t("loading")}</p>
+              <Loader2 className="size-8 animate-spin text-placeholder-foreground" />
+              <p className="text-sm text-muted-foreground mt-2">
+                {t("loading")}
+              </p>
             </div>
           ) : firstAssociation?.encounter ? (
             <EncounterInfoCard
@@ -89,8 +93,8 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
             />
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Lock className="size-8 text-gray-400 mb-2" />
-              <p className="text-sm font-medium text-gray-700">
+              <Lock className="size-8 text-placeholder-foreground mb-2" />
+              <p className="text-sm font-medium text-muted-foreground">
                 {t("no_encounter_associated")}
               </p>
             </div>
@@ -116,7 +120,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
       className={cn(
         "border rounded-lg overflow-hidden shadow-xs h-full flex flex-col",
         isOccupied
-          ? "bg-white border-gray-200"
+          ? "bg-background border-border"
           : "bg-green-50 border-green-200",
       )}
     >
@@ -160,7 +164,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
           <OccupiedBedSheet location={location} facilityId={facilityId} />
         ) : (
           <div className="flex flex-col items-center justify-center py-4 h-auto">
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-sm text-soft-foreground mb-3">
               {t("ready_for_admission")}
             </p>
           </div>
@@ -182,25 +186,25 @@ function LocationCard({ location, onClick }: LocationCardProps) {
 
   return (
     <div
-      className="border border-gray-200 rounded-lg overflow-hidden shadow-xs hover:shadow-md transition-shadow cursor-pointer"
+      className="border border-border rounded-lg overflow-hidden shadow-xs hover:shadow-md transition-shadow cursor-pointer"
       onClick={onClick}
     >
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+      <div className="px-4 py-3 bg-soft-background border-b border-border flex justify-between items-center">
         <div className="flex items-center">
-          <Icon className="size-4 mr-2 text-gray-600" />
+          <Icon className="size-4 mr-2 text-soft-foreground" />
           <span className="font-medium">{location.name}</span>
         </div>
-        <ArrowRight className="size-4 text-gray-400" />
+        <ArrowRight className="size-4 text-placeholder-foreground" />
       </div>
 
       <div className="p-4">
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+        <p className="text-sm text-soft-foreground mb-3 line-clamp-2">
           {location.description}
         </p>
 
         <div className="flex justify-between text-sm">
           <div className="flex items-center">
-            <span className="capitalize text-gray-600">
+            <span className="capitalize text-soft-foreground">
               {t(`location_form__${location.form}`)}
             </span>
           </div>
@@ -317,7 +321,7 @@ export default function LocationContent({
   });
 
   return (
-    <div className="flex-1 p-6 space-y-4 rounded-lg bg-white shadow-lg">
+    <div className="flex-1 p-6 space-y-4 rounded-lg bg-background shadow-lg">
       <div className="flex flex-col gap-4">
         {!hideBreadcrumbs && selectedLocation && (
           <Breadcrumbs
@@ -346,7 +350,7 @@ export default function LocationContent({
         <CardGridSkeleton count={6} />
       ) : !children?.results?.length ? (
         <Card className="col-span-full">
-          <CardContent className="p-6 text-center text-gray-500">
+          <CardContent className="p-6 text-center text-muted-foreground">
             {searchQuery ? t("no_locations_found") : t("no_locations")}
           </CardContent>
         </Card>
@@ -375,7 +379,7 @@ export default function LocationContent({
                   {/* Non-bed locations */}
                   {nonBedLocations.length > 0 && (
                     <div className="space-y-4">
-                      <h3 className="text-lg font-medium text-gray-700">
+                      <h3 className="text-lg font-medium text-muted-foreground">
                         {t("locations")}
                       </h3>
                       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -394,7 +398,7 @@ export default function LocationContent({
                   {/* Bed locations */}
                   {bedLocations.length > 0 && (
                     <div className="space-y-4">
-                      <h3 className="text-lg font-medium text-gray-700">
+                      <h3 className="text-lg font-medium text-muted-foreground">
                         {t("beds")}
                       </h3>
                       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">

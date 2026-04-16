@@ -110,7 +110,7 @@ export function SpecimenDefinitionDetail({
             </Button>
             <div className="flex items-start justify-between p-2">
               <div>
-                <h1 className="text-2xl font-semibold text-gray-500">
+                <h1 className="text-2xl font-semibold text-muted-foreground">
                   {specimenDefinition.title}
                 </h1>
               </div>
@@ -153,7 +153,7 @@ export function SpecimenDefinitionDetail({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {specimenDefinition.derived_from_uri && (
                   <div>
-                    <p className="text-sm font-medium text-gray-400">
+                    <p className="text-sm font-medium text-placeholder-foreground">
                       {t("derived_from_uri")}
                     </p>
                     <p className="break-all">
@@ -164,7 +164,7 @@ export function SpecimenDefinitionDetail({
               </div>
 
               <div>
-                <p className="text-sm font-medium text-gray-400">
+                <p className="text-sm font-medium text-placeholder-foreground">
                   {t("description")}
                 </p>
                 <p className="text-pretty whitespace-pre-wrap">
@@ -177,7 +177,7 @@ export function SpecimenDefinitionDetail({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {specimenDefinition.type_collected && (
                   <div>
-                    <p className="text-sm font-medium text-gray-400">
+                    <p className="text-sm font-medium text-placeholder-foreground">
                       {t("type_collected")}
                     </p>
                     <p>{specimenDefinition.type_collected.display}</p>
@@ -186,7 +186,7 @@ export function SpecimenDefinitionDetail({
 
                 {specimenDefinition.collection && (
                   <div>
-                    <p className="text-sm font-medium text-gray-400">
+                    <p className="text-sm font-medium text-placeholder-foreground">
                       {t("collection_method")}
                     </p>
                     <p>{specimenDefinition.collection.display}</p>
@@ -197,14 +197,16 @@ export function SpecimenDefinitionDetail({
               {specimenDefinition.patient_preparation &&
                 specimenDefinition.patient_preparation.length > 0 && (
                   <div>
-                    <p className="text-sm font-medium text-gray-400">
+                    <p className="text-sm font-medium text-placeholder-foreground">
                       {t("patient_preparation")}
                     </p>
                     <div>
                       {specimenDefinition.patient_preparation.map(
                         (prep, index) => (
                           <div key={index} className="flex items-start gap-1">
-                            <span className="text-gray-400">•</span>
+                            <span className="text-placeholder-foreground">
+                              •
+                            </span>
                             <div>
                               <p>{prep.display}</p>
                             </div>
@@ -218,13 +220,13 @@ export function SpecimenDefinitionDetail({
             {/* Type Tested Information */}
             {specimenDefinition.type_tested && (
               <div className="space-y-6 border rounded-md shadow-sm py-2 px-4">
-                <p className="text-md font-semibold text-gray-400">
+                <p className="text-md font-semibold text-placeholder-foreground">
                   {t("type_tested_information")}
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-sm font-medium text-gray-400">
+                    <p className="text-sm font-medium text-placeholder-foreground">
                       {t("is_derived")}
                     </p>
                     <Badge variant="outline">
@@ -236,7 +238,7 @@ export function SpecimenDefinitionDetail({
                   {/* Additional Information */}
                   {specimenDefinition.type_tested.requirement && (
                     <div>
-                      <p className="text-sm font-medium text-gray-400">
+                      <p className="text-sm font-medium text-placeholder-foreground">
                         {t("requirement")}
                       </p>
                       <p>{specimenDefinition.type_tested.requirement}</p>
@@ -244,7 +246,7 @@ export function SpecimenDefinitionDetail({
                   )}
                   {specimenDefinition.type_tested.retention_time && (
                     <div>
-                      <p className="text-sm font-medium text-gray-400">
+                      <p className="text-sm font-medium text-placeholder-foreground">
                         {t("retention_time")}
                       </p>
                       <p>
@@ -255,7 +257,7 @@ export function SpecimenDefinitionDetail({
                     </div>
                   )}
                   <div>
-                    <p className="text-sm font-medium text-gray-400">
+                    <p className="text-sm font-medium text-placeholder-foreground">
                       {t("single_use")}
                     </p>
                     <Badge variant="outline">
@@ -269,8 +271,8 @@ export function SpecimenDefinitionDetail({
                 {/* Container Information */}
                 {specimenDefinition.type_tested.container && (
                   <>
-                    <div className="space-y-6 border rounded-md bg-gray-50 py-2 px-4">
-                      <p className="text-md font-semibold text-gray-400">
+                    <div className="space-y-6 border rounded-md bg-soft-background py-2 px-4">
+                      <p className="text-md font-semibold text-placeholder-foreground">
                         {t("container_information")}
                       </p>
 
@@ -278,7 +280,7 @@ export function SpecimenDefinitionDetail({
                         {specimenDefinition.type_tested.container
                           .description && (
                           <div>
-                            <p className="text-sm font-medium text-gray-400">
+                            <p className="text-sm font-medium text-placeholder-foreground">
                               {t("description")}
                             </p>
                             <p>
@@ -292,7 +294,7 @@ export function SpecimenDefinitionDetail({
                         {specimenDefinition.type_tested.container
                           .preparation && (
                           <div>
-                            <p className="text-sm font-medium text-gray-400">
+                            <p className="text-sm font-medium text-placeholder-foreground">
                               {t("preparation")}
                             </p>
                             <p>
@@ -308,7 +310,7 @@ export function SpecimenDefinitionDetail({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {specimenDefinition.type_tested.container.capacity && (
                           <div>
-                            <p className="text-sm font-medium text-gray-400">
+                            <p className="text-sm font-medium text-placeholder-foreground">
                               {t("capacity")}
                             </p>
                             <p>
@@ -322,7 +324,7 @@ export function SpecimenDefinitionDetail({
                         {specimenDefinition.type_tested.container
                           .minimum_volume && (
                           <div>
-                            <p className="text-sm font-medium text-gray-400">
+                            <p className="text-sm font-medium text-placeholder-foreground">
                               {t("minimum_volume")}
                             </p>
                             <p>
@@ -341,7 +343,7 @@ export function SpecimenDefinitionDetail({
 
                       {specimenDefinition.type_tested.container.cap && (
                         <div>
-                          <p className="text-sm font-medium text-gray-400">
+                          <p className="text-sm font-medium text-placeholder-foreground">
                             {t("cap")}
                           </p>
                           <p className="font-medium">

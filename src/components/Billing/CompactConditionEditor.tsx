@@ -489,7 +489,7 @@ export function CompactConditionEditor({
               return (
                 <div
                   key={index}
-                  className="flex gap-2 items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
+                  className="flex gap-2 items-center justify-between text-sm text-soft-foreground bg-soft-background px-3 py-2 rounded border"
                 >
                   <ConditionOperationSummary condition={condition} />
                   <Button
@@ -509,7 +509,7 @@ export function CompactConditionEditor({
 
         {/* Add new condition */}
         {isAdding ? (
-          <div className="space-y-3 p-3 bg-gray-50 rounded border">
+          <div className="space-y-3 p-3 bg-soft-background rounded border">
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center flex-wrap">
               <FormField
                 control={form.control}

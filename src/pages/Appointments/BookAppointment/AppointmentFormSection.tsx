@@ -35,7 +35,7 @@ export const AppointmentFormSection = ({
   return (
     <>
       <div className="flex flex-col">
-        <Label className="mb-2 text-sm font-medium text-gray-950">
+        <Label className="mb-2 text-sm font-medium text-foreground">
           {t("select_resource_type")}
         </Label>
         <RadioInput
@@ -57,7 +57,7 @@ export const AppointmentFormSection = ({
         />
       </div>
       <div className="flex flex-col">
-        <Label className="mb-2 text-sm font-medium text-gray-950">
+        <Label className="mb-2 text-sm font-medium text-foreground">
           {t(`schedulable_resource__${selectedResource.resource_type}`)}
         </Label>
         <ScheduleResourceSelector
@@ -77,7 +77,7 @@ export const AppointmentFormSection = ({
         />
       </div>
       <div className="w-full">
-        <Label className="mb-2 text-sm font-medium text-gray-950">
+        <Label className="mb-2 text-sm font-medium text-foreground">
           {t("reason_for_visit_label")}
           <span className="font-normal italic">({t("optional")})</span>
         </Label>

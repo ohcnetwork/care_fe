@@ -197,7 +197,7 @@ export default function CreateTokenForm({
                 i18nKey="create_token_for_patient"
                 values={{ patientName: patient?.name }}
                 components={{
-                  strong: <strong className="font-semibold text-gray-950" />,
+                  strong: <strong className="font-semibold text-foreground" />,
                 }}
               />
             ) : (
@@ -213,7 +213,7 @@ export default function CreateTokenForm({
             <div className="space-y-6">
               {/* Resource Type Selection */}
               <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-900">
+                <label className="text-sm font-medium text-foreground">
                   {t("select_resource_type")}
                 </label>
                 <div className="grid grid-cols-1 gap-3 mt-1">
@@ -240,7 +240,7 @@ export default function CreateTokenForm({
                         <div className="text-sm font-semibold">
                           {t(`resource_type__${type}`)}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted-foreground">
                           {t(`resource_type_description__${type}`)}
                         </div>
                       </div>
@@ -250,7 +250,7 @@ export default function CreateTokenForm({
               </div>
 
               {/* Separator */}
-              <div className="border-t border-gray-200" />
+              <div className="border-t border-border" />
 
               {/* Form Fields */}
               <div className="space-y-5">
@@ -289,7 +289,7 @@ export default function CreateTokenForm({
                       <FormLabel>{t("category")}</FormLabel>
                       <FormControl>
                         {isLoadingCategories ? (
-                          <div className="flex items-center justify-center py-8 text-gray-500">
+                          <div className="flex items-center justify-center py-8 text-muted-foreground">
                             {t("loading_categories")}
                           </div>
                         ) : categories && categories.length > 0 ? (
@@ -311,7 +311,7 @@ export default function CreateTokenForm({
                             }
                           />
                         ) : (
-                          <div className="flex items-center justify-center py-8 text-gray-500">
+                          <div className="flex items-center justify-center py-8 text-muted-foreground">
                             {t("no_categories_found")}
                           </div>
                         )}
@@ -348,7 +348,7 @@ export default function CreateTokenForm({
                   setIsOpen(false);
                   form.reset();
                 }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+                className="bg-background text-foreground border border-strong-border hover:bg-muted-background"
                 data-shortcut-id="cancel-action"
               >
                 {t("cancel")}
@@ -362,7 +362,10 @@ export default function CreateTokenForm({
                 }
               >
                 {isPending ? t("creating") : t("create_token")}
-                <ShortcutBadge actionId="submit-action" className="bg-white" />
+                <ShortcutBadge
+                  actionId="submit-action"
+                  className="bg-background"
+                />
               </Button>
             </div>
           </form>

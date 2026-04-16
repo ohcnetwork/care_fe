@@ -95,7 +95,7 @@ export default function ActivityDefinitionForm({
       <Page title={t("edit_activity_definition")} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("edit_activity_definition")}
             </h1>
           </div>
@@ -436,7 +436,7 @@ function ActivityDefinitionFormContent({
     >
       <div className="container mx-auto max-w-3xl">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-foreground">
             {isEditMode
               ? t("edit_activity_definition")
               : t("create_activity_definition")}
@@ -446,13 +446,13 @@ function ActivityDefinitionFormContent({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Basic Information Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("basic_information")}
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {t("basic_details_of_the_activity")}
                   </p>
                 </div>
@@ -701,12 +701,12 @@ function ActivityDefinitionFormContent({
             </div>
 
             {/* Additional Details Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("additional_details")}{" "}
-                    <span className="text-sm font-normal text-gray-500">
+                    <span className="text-sm font-normal text-muted-foreground">
                       ({t("optional")})
                     </span>
                   </h2>
@@ -741,19 +741,19 @@ function ActivityDefinitionFormContent({
             </div>
 
             {/* Requirements Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("requirements")}
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {t("Specify the requirements for this activity")}
                   </p>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="rounded-lg border border-gray-200 shadow-sm p-4">
+                  <div className="rounded-lg border border-border shadow-sm p-4">
                     <FormLabel>{t("specimen_requirements")}</FormLabel>
                     <div className="mt-2">
                       <RequirementsSelector
@@ -817,7 +817,7 @@ function ActivityDefinitionFormContent({
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-gray-200 shadow-sm p-4">
+                  <div className="rounded-lg border border-border shadow-sm p-4">
                     <FormLabel>{t("observation_requirements")}</FormLabel>
                     <div className="mt-2">
                       <RequirementsSelector
@@ -883,7 +883,7 @@ function ActivityDefinitionFormContent({
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-gray-200 shadow-sm p-4">
+                  <div className="rounded-lg border border-border shadow-sm p-4">
                     <FormLabel>{t("charge_item_definitions")}</FormLabel>
                     <div className="mt-2">
                       <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
@@ -923,7 +923,7 @@ function ActivityDefinitionFormContent({
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-gray-200 shadow-sm p-4">
+                  <div className="rounded-lg border border-border shadow-sm p-4">
                     <FormLabel>{t("healthcare_service")}</FormLabel>
                     <div className="mt-2">
                       <FormField
@@ -948,7 +948,7 @@ function ActivityDefinitionFormContent({
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-gray-200 shadow-sm p-4">
+                  <div className="rounded-lg border border-border shadow-sm p-4">
                     <FormLabel>{t("locations")}</FormLabel>
                     <div className="mt-2">
                       <RequirementsSelector
@@ -992,13 +992,13 @@ function ActivityDefinitionFormContent({
             </div>
 
             {/* Diagnostic Report Section */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-border bg-background p-4">
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-base font-medium text-gray-900">
+                  <h2 className="text-base font-medium text-foreground">
                     {t("diagnostic_report", { count: 1 })}
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {t("specify_diagnostic_report_codes")}
                   </p>
                 </div>
@@ -1015,13 +1015,13 @@ function ActivityDefinitionFormContent({
                             {(field.value || []).map((code, index) => (
                               <div
                                 key={index}
-                                className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
+                                className="flex items-center gap-2 rounded-md border border-border bg-soft-background px-3 py-2 text-sm"
                               >
                                 <div className="flex-1">
                                   <span className="font-medium">
                                     {code.display}
                                   </span>
-                                  <span className="ml-2 text-gray-500">
+                                  <span className="ml-2 text-muted-foreground">
                                     ({code.code})
                                   </span>
                                 </div>
@@ -1029,7 +1029,7 @@ function ActivityDefinitionFormContent({
                                   type="button"
                                   variant="ghost"
                                   size="sm"
-                                  className="h-auto p-1 hover:bg-gray-100"
+                                  className="h-auto p-1 hover:bg-muted-background"
                                   onClick={() => {
                                     const newCodes = (field.value || []).filter(
                                       (_, i) => i !== index,

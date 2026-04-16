@@ -57,7 +57,7 @@ function EmptyState() {
       <h3 className="text-lg font-semibold mb-1">
         {t("no_questionnaires_found")}
       </h3>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         {t("adjust_questionnaire_filters")}
       </p>
     </Card>
@@ -85,14 +85,14 @@ const RenderCard = ({
           {questionnaireList.map((questionnaire: QuestionnaireRead) => (
             <Card
               key={questionnaire.id}
-              className="overflow-hidden bg-white rounded-lg cursor-pointer"
+              className="overflow-hidden bg-card rounded-lg cursor-pointer"
               onClick={() =>
                 navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
               }
             >
               <CardContent className="p-6 relative flex flex-col">
                 <div className="flex flex-row gap-2 justify-between items-center mb-4 border-b pb-2">
-                  <p className="mt-2 text-l text-left font-bold text-gray-900 line-clamp-1 text-ellipsis ">
+                  <p className="mt-2 text-l text-left font-bold text-foreground line-clamp-1 text-ellipsis ">
                     {questionnaire.title}
                   </p>
                   <Badge
@@ -104,19 +104,21 @@ const RenderCard = ({
                 </div>
                 {questionnaire.description?.trim() ? (
                   <div className="mb-4 flex-1">
-                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       {t("description")}
                     </h3>
-                    <p className="text-sm text-gray-900 line-clamp-2">
+                    <p className="text-sm text-foreground line-clamp-2">
                       {questionnaire.description}
                     </p>
                   </div>
                 ) : (
                   <div className="mb-4 flex-1">
-                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <h3 className="text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       {t("description")}
                     </h3>
-                    <p className="text-2xl font-light text-gray-500">-</p>
+                    <p className="text-2xl font-light text-muted-foreground">
+                      -
+                    </p>
                   </div>
                 )}
 
@@ -130,7 +132,7 @@ const RenderCard = ({
                         `/admin/questionnaire/${questionnaire.slug}/edit`,
                       );
                     }}
-                    className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
+                    className="font-semibold shadow-strong-border text-foreground border-stronger-border"
                   >
                     <EyeIcon className="size-4 mr-1" />
                     {t("view")}
@@ -156,14 +158,14 @@ const RenderTable = ({
   const { t } = useTranslation();
 
   return (
-    <div className="hidden md:block overflow-hidden rounded-lg bg-white shadow-sm overflow-x-auto">
+    <div className="hidden md:block overflow-hidden rounded-lg bg-card shadow-sm overflow-x-auto">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : questionnaireList.length === 0 ? (
         <EmptyState />
       ) : (
-        <Table className="min-w-full divide-y divide-gray-200">
-          <TableHeader className="bg-gray-100 text-gray-700">
+        <Table className="min-w-full divide-y divide-border">
+          <TableHeader className="bg-muted-background text-muted-foreground">
             <TableRow>
               <TableHead className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                 {t("title")}
@@ -173,11 +175,11 @@ const RenderTable = ({
               </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="divide-y divide-gray-200 bg-white">
+          <TableBody className="divide-y divide-border bg-card">
             {questionnaireList.map((questionnaire: QuestionnaireRead) => (
               <TableRow
                 key={questionnaire.id}
-                className="cursor-pointer hover:bg-gray-50"
+                className="cursor-pointer hover:bg-soft-background"
                 onClick={() =>
                   navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
                 }
@@ -187,7 +189,7 @@ const RenderTable = ({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <span className="text-sm text-left font-semibold text-gray-950 truncate">
+                          <span className="text-sm text-left font-semibold text-foreground truncate">
                             {questionnaire.title}
                           </span>
                         </TooltipTrigger>
@@ -200,13 +202,13 @@ const RenderTable = ({
                 </TableCell>
                 <TableCell className="px-6 py-2">
                   <div className="flex items-center justify-between space-x-4">
-                    <div className="truncate text-sm text-gray-900 break-words whitespace-normal">
+                    <div className="truncate text-sm text-foreground break-words whitespace-normal">
                       {questionnaire.description}
                     </div>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
+                      className="font-semibold shadow-strong-border text-foreground border-stronger-border"
                     >
                       <EyeIcon className="size-4 mr-0" />
                       {t("view")}
@@ -248,7 +250,9 @@ export function QuestionnaireList() {
       <div className="mb-4">
         <div className="mb-2">
           <h1 className="text-2xl font-bold">{t("questionnaire_other")}</h1>
-          <p className="text-gray-600">{t("manage_and_view_questionnaires")}</p>
+          <p className="text-soft-foreground">
+            {t("manage_and_view_questionnaires")}
+          </p>
         </div>
 
         <div className="mt-8 mb-4">
@@ -280,7 +284,7 @@ export function QuestionnaireList() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:max-w-md">
-            <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
+            <Search className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
             <Input
               placeholder={t("search_forms")}
               className="pl-10 w-full"

@@ -49,7 +49,7 @@ function EmptyState() {
         <CareIcon icon="l-folder-open" className="size-6 text-primary" />
       </div>
       <h3 className="text-lg font-semibold mb-1">{t("no_resources_found")}</h3>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         {t("adjust_resource_filters")}
       </p>
     </Card>
@@ -98,7 +98,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
     <Page
       title={t("resource")}
       componentRight={
-        <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
+        <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-border">
           {isLoading
             ? t("loading")
             : t("entity_count", {
@@ -109,7 +109,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
       }
     >
       <div className="space-y-4 mt-4">
-        <div className="border border-gray-200 rounded-lg">
+        <div className="border border-border rounded-lg">
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4 sm:pb-4 pb-0">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">

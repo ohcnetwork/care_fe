@@ -120,7 +120,7 @@ export default function GeoLocationPicker({
         />
       </div>
 
-      <div className="h-[25rem] w-full rounded-lg border border-gray-200 overflow-hidden">
+      <div className="h-[25rem] w-full rounded-lg border border-border overflow-hidden">
         <Map
           height={400}
           center={latitude && longitude ? [latitude, longitude] : undefined}
@@ -133,7 +133,7 @@ export default function GeoLocationPicker({
           )}
         </Map>
       </div>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-muted-foreground">
         {t("click_on_map_to_select_location")}
       </p>
     </div>

@@ -103,9 +103,9 @@ const ResetPassword = (props: ResetPasswordProps) => {
   if (isError) navigate("/invalid-reset");
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-muted-background">
       <form
-        className="w-full max-w-md mx-auto rounded-lg bg-white shadow-lg p-6"
+        className="w-full max-w-md mx-auto rounded-lg bg-background shadow-lg p-6"
         onSubmit={(e) => {
           handleSubmit(e);
         }}

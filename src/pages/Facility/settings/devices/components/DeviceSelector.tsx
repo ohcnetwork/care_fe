@@ -118,7 +118,7 @@ export function DeviceSearch({
       {value ? (
         <DeviceItem device={value} />
       ) : (
-        <span className="text-gray-500">{t("select_device")}</span>
+        <span className="text-muted-foreground">{t("select_device")}</span>
       )}
       <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
     </Button>

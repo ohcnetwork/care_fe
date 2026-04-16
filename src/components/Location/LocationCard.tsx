@@ -35,11 +35,11 @@ const LocationBreadcrumb = ({ location }: { location: LocationRead }) => {
     <div className="flex flex-row items-center gap-1">
       {breadcrumb.map((location, ind) => (
         <div key={location.id} className="flex flex-row items-center gap-1">
-          <span className="text-sm font-medium text-gray-500">
+          <span className="text-sm font-medium text-muted-foreground">
             {location.name}
           </span>
           {ind !== breadcrumb.length - 1 && (
-            <ArrowRight className="size-4 text-gray-400" />
+            <ArrowRight className="size-4 text-placeholder-foreground" />
           )}
         </div>
       ))}
@@ -91,14 +91,14 @@ export function LocationCard({
                     )}
                   />
                 </div>
-                <span className="text-sm font-medium text-gray-800">
+                <span className="text-sm font-medium text-foreground">
                   {location.name}
                 </span>
               </div>
             </div>
             <div className="flex flex-col items-end">
               <div className="mt-4 flex justify-center sm:justify-end">
-                <div className="flex flex-row text-xs text-gray-500 gap-4">
+                <div className="flex flex-row text-xs text-muted-foreground gap-4">
                   <div className="flex flex-col">
                     <span className="text-xs font-medium">
                       {t("start_time")}
@@ -128,7 +128,9 @@ export function LocationCard({
                         </>
                       ) : (
                         // eslint-disable-next-line i18next/no-literal-string
-                        <span className="text-xs text-gray-500">-- : --</span>
+                        <span className="text-xs text-muted-foreground">
+                          -- : --
+                        </span>
                       )}
                     </div>
                   </div>
@@ -147,7 +149,7 @@ export function LocationCard({
           />
           <div className="flex flex-col">
             <Label htmlFor="keep-bed-as-active">{t("bed_hold")}</Label>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               {t("keep_bed_as_active")}
             </span>
           </div>

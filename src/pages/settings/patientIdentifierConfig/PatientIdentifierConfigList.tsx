@@ -67,11 +67,11 @@ function PatientIdentifierConfigCard({
                 {t(config.status)}
               </Badge>
             </div>
-            <h3 className="font-medium text-gray-900">
+            <h3 className="font-medium text-foreground">
               {config.config.display}
             </h3>
             {config.config.system && (
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {config.config.system} | {config.config.use}
               </p>
             )}
@@ -138,12 +138,12 @@ export default function PatientIdentifierConfigList({
     <Page title={t("patient_identifier_config")} hideTitleOnPage>
       <div className="container mx-auto">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-700">
+          <h1 className="text-2xl font-bold text-muted-foreground">
             {t("patient_identifier_config")}
           </h1>
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-gray-600 text-sm">
+              <p className="text-soft-foreground text-sm">
                 {facilityId
                   ? t("manage_patient_identifier_config")
                   : t("manage_instance_patient_identifier_config")}
@@ -214,7 +214,7 @@ export default function PatientIdentifierConfigList({
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
             <div className="w-full md:w-auto">
               <div className="relative w-full md:w-auto">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-placeholder-foreground">
                   <CareIcon icon="l-search" className="size-5" />
                 </span>
                 <Input
@@ -274,7 +274,7 @@ export default function PatientIdentifierConfigList({
             <div className="hidden md:block">
               <div className="rounded-lg border">
                 <Table>
-                  <TableHeader className="bg-gray-100">
+                  <TableHeader className="bg-muted-background">
                     <TableRow>
                       <TableHead>{t("display")}</TableHead>
                       <TableHead>{t("system")}</TableHead>
@@ -283,7 +283,7 @@ export default function PatientIdentifierConfigList({
                       <TableHead>{t("actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody className="bg-white">
+                  <TableBody className="bg-background">
                     {configs.map((config: PatientIdentifierConfig) => (
                       <TableRow key={config.id} className="divide-x">
                         <TableCell className="font-medium">

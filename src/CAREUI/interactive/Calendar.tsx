@@ -71,7 +71,7 @@ export default function Calendar(props: Props) {
   return (
     <div className={`${props.className} w-full`}>
       <div className="mb-4 flex items-center justify-between">
-        <span className="sm:text-lg font-semibold text-gray-950">
+        <span className="sm:text-lg font-semibold text-foreground">
           {currentMonth.toLocaleString("default", {
             month: "long",
             year: "numeric",
@@ -90,7 +90,7 @@ export default function Calendar(props: Props) {
             variant="outline"
             size="lg"
             onClick={handlePrevMonth}
-            className="rounded-lg bg-white py-2 px-2.5"
+            className="rounded-lg bg-background py-2 px-2.5"
           >
             <CareIcon icon="l-angle-left" />
           </Button>
@@ -100,7 +100,7 @@ export default function Calendar(props: Props) {
             variant="outline"
             size="lg"
             onClick={handleNextMonth}
-            className="rounded-lg bg-white py-2 px-2.5"
+            className="rounded-lg bg-background py-2 px-2.5"
           >
             <CareIcon icon="l-angle-right" />
           </Button>
@@ -128,7 +128,7 @@ export default function Calendar(props: Props) {
               key={index}
               ref={isToday ? todayRef : null}
               className={cn(
-                "relative md:min-h-16 min-h-12 rounded-lg transition-all bg-gray-50",
+                "relative md:min-h-16 min-h-12 rounded-lg transition-all bg-soft-background",
                 isToday &&
                   highlightToday &&
                   "ring-2 ring-primary-400 shadow-lg",
@@ -137,7 +137,7 @@ export default function Calendar(props: Props) {
               {props.renderDay?.(date) ?? (
                 <span
                   className={cn(
-                    "block text-right p-2 transition-all rounded-lg bg-white text-gray-900",
+                    "block text-right p-2 transition-all rounded-lg bg-background text-foreground",
                     isToday &&
                       highlightToday &&
                       "bg-primary-50 font-bold text-primary-900",

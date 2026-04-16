@@ -140,7 +140,7 @@ export default function MedicationBillForm({
 
         {/* Patient Header */}
         {prescription?.encounter?.patient && (
-          <div className="mb-4 rounded-none shadow-none bg-gray-100 p-4">
+          <div className="mb-4 rounded-none shadow-none bg-muted-background p-4">
             <PatientHeader
               patient={prescription.encounter.patient}
               facilityId={facilityId}
@@ -148,7 +148,9 @@ export default function MedicationBillForm({
             <div className="flex flex-wrap gap-4 mt-2 text-sm">
               {prescription.encounter.current_location && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-gray-500">{t("location")}:</span>
+                  <span className="text-muted-foreground">
+                    {t("location")}:
+                  </span>
                   <span className="font-medium">
                     {prescription.encounter.current_location.name}
                   </span>
@@ -157,7 +159,7 @@ export default function MedicationBillForm({
               {prescription.encounter.organizations &&
                 prescription.encounter.organizations.length > 0 && (
                   <div className="flex items-center gap-1.5">
-                    <span className="text-gray-500">
+                    <span className="text-muted-foreground">
                       {t("departments", {
                         count: prescription.encounter.organizations.length,
                       })}
@@ -224,7 +226,7 @@ export default function MedicationBillForm({
 
         {/* Add Medication Row */}
         {!isLoading && (
-          <div className="mt-2 bg-white rounded-lg shadow-sm">
+          <div className="mt-2 bg-background rounded-lg shadow-sm">
             <ProductKnowledgeSelect
               value={undefined}
               onChange={(product) => {
@@ -448,7 +450,7 @@ export default function MedicationBillForm({
               <Trans
                 i18nKey="confirm_action_description"
                 values={{ action: t("mark_as_already_given").toLowerCase() }}
-                components={{ 1: <strong className="text-gray-900" /> }}
+                components={{ 1: <strong className="text-foreground" /> }}
               />{" "}
               {t("you_cannot_change_once_submitted")}
               <p className="mt-2">
@@ -493,7 +495,7 @@ export default function MedicationBillForm({
               <Trans
                 i18nKey="confirm_action_description"
                 values={{ action: t("remove_medication").toLowerCase() }}
-                components={{ 1: <strong className="text-gray-900" /> }}
+                components={{ 1: <strong className="text-foreground" /> }}
               />{" "}
               {t("you_cannot_change_once_submitted")}
               <p className="mt-2">

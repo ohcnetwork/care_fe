@@ -71,7 +71,7 @@ export default function TokenCategoryForm({
       <Page title={t("edit_token_category")} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("edit_token_category")}
             </h1>
           </div>
@@ -88,11 +88,11 @@ export default function TokenCategoryForm({
     >
       <div className="container mx-auto max-w-3xl">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-foreground">
             {isEditMode ? t("edit_token_category") : t("create_token_category")}
           </h1>
           {isEditMode && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               {t("edit_token_category_description")}
             </p>
           )}
@@ -102,7 +102,7 @@ export default function TokenCategoryForm({
           tokenCategoryId={tokenCategoryId}
           existingData={existingData}
           onSuccess={onSuccess}
-          containerClassName="rounded-lg border border-gray-200 bg-white p-6"
+          containerClassName="rounded-lg border border-border bg-card p-6"
         />
       </div>
     </Page>

@@ -174,9 +174,9 @@ function ValidationErrorDisplay({
           return (
             <div
               key={`server-${index}`}
-              className="bg-white rounded p-3 border border-red-100 shadow-xs"
+              className="bg-card rounded p-3 border border-red-100 shadow-xs"
             >
-              <div className="font-medium text-gray-900 mb-1">
+              <div className="font-medium text-foreground mb-1">
                 {getErrorTitle(error)}
               </div>
               <div className="text-sm text-red-600 flex items-start gap-2">
@@ -230,16 +230,16 @@ function ValidationErrorDisplay({
                 key={`${form.questionnaire.id}-${index}`}
                 className="space-y-3"
               >
-                <h3 className="font-medium text-gray-900">
+                <h3 className="font-medium text-foreground">
                   {form.questionnaire.title}
                 </h3>
                 <div className="space-y-3">
                   {form.errors.map((error, errorIndex) => (
                     <div
                       key={errorIndex}
-                      className="bg-white rounded p-3 border border-red-100 shadow-xs"
+                      className="bg-card rounded p-3 border border-red-100 shadow-xs"
                     >
-                      <div className="text-sm text-gray-600 mb-1">
+                      <div className="text-sm text-soft-foreground mb-1">
                         {findQuestionText(form, error.question_id)}
                       </div>
                       <div className="text-sm text-red-600 flex items-start gap-2">
@@ -959,7 +959,7 @@ export function QuestionnaireForm({
   return (
     <div className="flex gap-4">
       {/* Left Navigation */}
-      <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
+      <div className="w-64 border-r border-border p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
         <BackButton className="w-full">
           <ArrowLeft />
           <span>{t("back_to_encounter")}</span>
@@ -968,9 +968,9 @@ export function QuestionnaireForm({
           <div key={form.questionnaire.id} className="space-y-2">
             <button
               className={cn(
-                "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
+                "w-full text-left px-2 py-1 rounded hover:bg-muted-background font-medium",
                 activeQuestionnaireId === form.questionnaire.id &&
-                  "bg-gray-100 text-green-600",
+                  "bg-muted-background text-green-600",
               )}
               onClick={() => scrollToQuestion(form.questionnaire.id)}
               disabled={isPending}
@@ -984,9 +984,9 @@ export function QuestionnaireForm({
                   <button
                     key={group.id}
                     className={cn(
-                      "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
+                      "w-full text-left px-2 py-1 rounded text-sm hover:bg-muted-background",
                       activeGroupId === group.id &&
-                        "bg-gray-100 text-green-600",
+                        "bg-muted-background text-green-600",
                     )}
                     onClick={() =>
                       scrollToQuestion(form.questionnaire.id, group.id)
@@ -1015,7 +1015,7 @@ export function QuestionnaireForm({
                   {form.questionnaire.title}
                 </h2>
                 {form.questionnaire.description && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {form.questionnaire.description}
                   </p>
                 )}

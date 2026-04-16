@@ -67,7 +67,7 @@ export default function FileUploadDropdown({
           }}
           aria-label={t("choose_file")}
         >
-          <Label className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium">
+          <Label className="flex items-center w-full text-primary-900 hover:text-foreground py-1 font-medium">
             <CareIcon icon="l-file-upload-alt" />
             <span>{t("choose_file")}</span>
             {fileUpload.Input({

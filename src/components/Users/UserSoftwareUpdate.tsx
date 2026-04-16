@@ -47,14 +47,14 @@ export default function UserSoftwareUpdate() {
     : null;
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:p-6">
+    <div className="overflow-hidden rounded-lg bg-background px-4 py-5 shadow-sm sm:rounded-lg sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h3 className="text-lg font-medium text-gray-900">
+          <h3 className="text-lg font-medium text-foreground">
             {t("software_update")}
           </h3>
           {lastUpdatedText && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               {t("last_updated")}: {lastUpdatedText}
             </p>
           )}

@@ -178,10 +178,10 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                                 {videoDevices.map((camera) => (
                                   <div
                                     key={camera.deviceId}
-                                    className={`p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 ${
+                                    className={`p-3 rounded-lg border cursor-pointer transition-all hover:bg-soft-background ${
                                       selectedDeviceId === camera.deviceId
                                         ? "border-green-500 bg-green-50"
-                                        : "border-gray-200"
+                                        : "border-border"
                                     }`}
                                     onClick={() => {
                                       setSelectedDeviceId(camera.deviceId);
@@ -243,9 +243,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                           captureImage();
                           setPreview?.(true);
                         }}
-                        className="bg-white rounded-full size-18 flex items-center justify-center cursor-pointer [&_svg]:px-0 !p-0"
+                        className="bg-background rounded-full size-18 flex items-center justify-center cursor-pointer [&_svg]:px-0 !p-0"
                       >
-                        <div className="size-16 rounded-full bg-white border-2 border-black flex items-center justify-center"></div>
+                        <div className="size-16 rounded-full bg-background border-2 border-black flex items-center justify-center"></div>
                       </Button>
                     </>
                   )}
@@ -315,7 +315,7 @@ const CameraPermissionRequesting = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gray-50">
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-soft-background">
       <div className="text-primary-500">
         <Loader2 className="size-10 animate-spin" />
       </div>
@@ -323,7 +323,7 @@ const CameraPermissionRequesting = () => {
         <span className="text-lg font-semibold">
           {t("requesting_camera_access")}
         </span>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-muted-foreground">
           {t("allow_camera_access")}
         </span>
       </div>
@@ -336,7 +336,7 @@ const CameraPermissionDenied = () => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center">
-      <div className="bg-white rounded-2xl border border-gray-200 flex flex-row items-center p-6 gap-4 mx-4">
+      <div className="bg-background rounded-2xl border border-border flex flex-row items-center p-6 gap-4 mx-4">
         <div>
           <img
             src="/images/camera_block.svg"
@@ -345,11 +345,11 @@ const CameraPermissionDenied = () => {
           />
         </div>
         <div className="flex flex-col items-center">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6">
+          <h2 className="text-xl font-semibold text-foreground mb-6">
             {t("camera_permission_denied")}
           </h2>
 
-          <ol className="space-y-4 text-gray-600">
+          <ol className="space-y-4 text-soft-foreground">
             <li className="flex items-start gap-2">
               <span className="font-medium">1.</span>
               {t("click_the_settings_icon_in_browser_address_bar")}

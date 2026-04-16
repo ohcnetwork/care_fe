@@ -252,7 +252,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           facility={facilityData}
                           trigger={
                             <Button
-                              className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
+                              className="flex justify-start items-center border border-border rounded-md p-2 shadow-sm"
                               variant="outline"
                               size="sm"
                             >
@@ -264,7 +264,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         <PLUGIN_Component
                           __name="FacilityHomeActions"
                           facility={facilityData}
-                          className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
+                          className="flex justify-start items-center border border-border rounded-md p-2 shadow-sm"
                         />
                       </DropdownMenuGroup>
                     </DropdownMenuContent>
@@ -293,7 +293,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="col-span-1 sm:col-span-2 flex flex-col">
                         <span className="font-semibold">{t("address")}</span>
-                        <span className="text-gray-700 whitespace-pre-wrap break-words text-sm">
+                        <span className="text-muted-foreground whitespace-pre-wrap break-words text-sm">
                           {facilityData.address}
                         </span>
                       </div>
@@ -302,7 +302,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         <span className="font-semibold">
                           {t("mobile_number")}
                         </span>
-                        <span className="text-gray-700 truncate text-sm">
+                        <span className="text-muted-foreground truncate text-sm">
                           <ContactLink
                             tel={formatPhoneNumberIntl(
                               String(facilityData?.phone_number),
@@ -337,7 +337,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             <span className="font-semibold truncate">
                               {item.label}
                             </span>
-                            <span className="text-gray-700 text-sm truncate">
+                            <span className="text-muted-foreground text-sm truncate">
                               {item.value}
                             </span>
                           </div>
@@ -384,12 +384,12 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-3 border rounded-md border-gray-300">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-3 border rounded-md border-strong-border">
                       <div>
                         <p className="text-sm font-medium">
                           {t("delete_facility")}
                         </p>
-                        <p className="text-sm text-gray-700">
+                        <p className="text-sm text-muted-foreground">
                           {t("delete_facility_description")}
                         </p>
                       </div>

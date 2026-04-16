@@ -66,7 +66,10 @@ function PriceComponentRow({ label, components }: PriceComponentRowProps) {
     <>
       {components.map((component, index) => {
         return (
-          <TableRow key={`${label}-${index}`} className="text-xs text-gray-500">
+          <TableRow
+            key={`${label}-${index}`}
+            className="text-xs text-muted-foreground"
+          >
             <TableCell className="pl-12"></TableCell>
             <TableCell>
               {component.code && `${component.code.display} `}({label})
@@ -102,9 +105,9 @@ function LocationGroupRow({
 }: LocationGroupRowProps) {
   const { t } = useTranslation();
   return (
-    <TableRow className="bg-gray-50 border-b-2 border-gray-200 shadow-md">
+    <TableRow className="bg-soft-background border-b-2 border-border shadow-md">
       <TableCell
-        className="border-x p-4 font-semibold text-gray-900"
+        className="border-x p-4 font-semibold text-foreground"
         colSpan={9}
       >
         <div className="flex items-center justify-between">
@@ -118,7 +121,7 @@ function LocationGroupRow({
                 {t(location.status)}
               </Badge>
             </div>
-            <div className="text-xs font-normal text-gray-700 flex items-center gap-2">
+            <div className="text-xs font-normal text-muted-foreground flex items-center gap-2">
               {[
                 location.start_datetime &&
                   format(
@@ -131,7 +134,7 @@ function LocationGroupRow({
                 .filter(Boolean)
                 .join(" - ")}{" "}
               {location.end_datetime && (
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-muted-foreground">
                   {(() => {
                     const start = new Date(location.start_datetime);
                     const end = new Date(location.end_datetime);
@@ -363,37 +366,37 @@ export function BedChargeItemsTable({
         />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
-          <Table className="rounded-lg border shadow-sm w-full bg-white">
-            <TableHeader className="bg-gray-100">
+          <Table className="rounded-lg border shadow-sm w-full bg-background">
+            <TableHeader className="bg-muted-background">
               <TableRow className="border-b">
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-10"></TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5 w-10"></TableHead>
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("item")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("resource")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("unit_price")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("quantity")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("total")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5">
                   {t("performer")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[120px]">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5 w-[120px]">
                   {t("status")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[60px]">
+                <TableHead className="border-x p-3 text-muted-foreground text-sm font-medium leading-5 w-[60px]">
                   {t("actions")}
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="bg-white">
+            <TableBody className="bg-background">
               {locationHistory.length > 0 &&
                 locationHistory.flatMap((location) => {
                   const items = groupedChargeItems[location.id] || [];
@@ -427,9 +430,9 @@ export function BedChargeItemsTable({
                           const mainRow = (
                             <TableRow
                               key={item.id}
-                              className="border-b hover:bg-gray-50"
+                              className="border-b hover:bg-soft-background"
                             >
-                              <TableCell className="border-x p-3 text-gray-950 pl-6">
+                              <TableCell className="border-x p-3 text-foreground pl-6">
                                 <div className="flex items-center gap-2">
                                   <Button
                                     variant="ghost"
@@ -445,40 +448,40 @@ export function BedChargeItemsTable({
                                   </Button>
                                 </div>
                               </TableCell>
-                              <TableCell className="border-x p-3 text-gray-950">
+                              <TableCell className="border-x p-3 text-foreground">
                                 <div className="font-medium">
                                   {item.title}
                                   {item.description && (
-                                    <p className="text-xs text-gray-500 whitespace-pre-wrap">
+                                    <p className="text-xs text-muted-foreground whitespace-pre-wrap">
                                       {item.description}
                                     </p>
                                   )}
                                 </div>
                               </TableCell>
-                              <TableCell className="border-x p-3 text-gray-950">
+                              <TableCell className="border-x p-3 text-foreground">
                                 {item.service_resource ===
                                   ChargeItemServiceResource.bed_association &&
                                   item.service_resource_id && (
-                                    <span className="text-gray-500">
+                                    <span className="text-muted-foreground">
                                       {t("bed_association")}
                                     </span>
                                   )}
                               </TableCell>
-                              <TableCell className="border-x p-3 text-gray-950">
+                              <TableCell className="border-x p-3 text-foreground">
                                 <MonetaryDisplay
                                   amount={getBaseComponent(item)?.amount || "0"}
                                 />
                               </TableCell>
-                              <TableCell className="border-x p-3 text-gray-950">
+                              <TableCell className="border-x p-3 text-foreground">
                                 {round(item.quantity)}
                               </TableCell>
-                              <TableCell className="border-x p-3 text-gray-950 font-medium">
+                              <TableCell className="border-x p-3 text-foreground font-medium">
                                 <MonetaryDisplay amount={item.total_price} />
                               </TableCell>
-                              <TableCell className="border-x p-3 text-gray-950 font-semibold">
+                              <TableCell className="border-x p-3 text-foreground font-semibold">
                                 {formatName(item.performer_actor)}
                               </TableCell>
-                              <TableCell className="border-x p-3 text-gray-950">
+                              <TableCell className="border-x p-3 text-foreground">
                                 <div className="flex items-center space-x-2">
                                   <Badge
                                     variant={
@@ -489,7 +492,7 @@ export function BedChargeItemsTable({
                                   </Badge>
                                 </div>
                               </TableCell>
-                              <TableCell className="border-x p-3 text-gray-950">
+                              <TableCell className="border-x p-3 text-foreground">
                                 <ChargeItemActionsMenu
                                   item={item}
                                   facilityId={facilityId}
@@ -531,7 +534,7 @@ export function BedChargeItemsTable({
                               className="bg-muted/30 font-medium border-b"
                             >
                               <TableCell className="pl-12"></TableCell>
-                              <TableCell className="text-gray-950">
+                              <TableCell className="text-foreground">
                                 {t("total")}
                               </TableCell>
                               <TableCell className="p-3">

@@ -27,11 +27,11 @@ export function DefinitionListItem({
 
   return (
     <div>
-      <dt className="text-sm font-medium text-gray-500">{term}</dt>
+      <dt className="text-sm font-medium text-muted-foreground">{term}</dt>
       {description ? (
         <dd className="mt-1">{description}</dd>
       ) : (
-        <dd className="mt-1 text-gray-500">{t("not_specified")}</dd>
+        <dd className="mt-1 text-muted-foreground">{t("not_specified")}</dd>
       )}
     </div>
   );

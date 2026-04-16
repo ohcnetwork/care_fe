@@ -71,13 +71,13 @@ export default function PatientTokensList({
 
   if (isLoading) {
     return (
-      <Card className="bg-white shadow-sm">
+      <Card className="bg-background shadow-sm">
         <CardHeader className="p-4">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
+            <div className="h-8 w-8 bg-strong-background rounded animate-pulse" />
             <div className="space-y-2">
-              <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-              <div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-20 bg-strong-background rounded animate-pulse" />
+              <div className="h-3 w-16 bg-strong-background rounded animate-pulse" />
             </div>
           </div>
         </CardHeader>
@@ -97,7 +97,7 @@ export default function PatientTokensList({
           <DatePicker
             date={selectedDate}
             onChange={handleDateChange}
-            className="border-gray-300"
+            className="border-strong-border"
             dateFormat={
               selectedDate.toDateString() === new Date().toDateString()
                 ? `'Today (${selectedDate.toLocaleDateString("default", {
@@ -131,14 +131,14 @@ export default function PatientTokensList({
           >
             <Card
               className={cn(
-                "bg-white shadow-sm rounded-md",
-                isExpanded && "bg-gray-100 rounded-t-none",
+                "bg-background shadow-sm rounded-md",
+                isExpanded && "bg-muted-background rounded-t-none",
               )}
             >
               <CollapsibleTrigger asChild>
                 <CardHeader
                   className={cn(
-                    "p-2 px-4 cursor-pointer rounded-md hover:bg-gray-50 transition-colors",
+                    "p-2 px-4 cursor-pointer rounded-md hover:bg-soft-background transition-colors",
                     isExpanded && "rounded-none",
                   )}
                 >
@@ -152,7 +152,7 @@ export default function PatientTokensList({
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-soft-foreground">
                           {formatScheduleResourceName(token)}
                         </p>
                       </div>
@@ -173,7 +173,7 @@ export default function PatientTokensList({
               </CollapsibleTrigger>
 
               <CollapsibleContent>
-                <CardContent className="p-1 bg-gray-100 border-gray-100 rounded-md">
+                <CardContent className="p-1 bg-muted-background border-soft-border rounded-md">
                   <div
                     id={`print-token-${token.id}`}
                     className="print:block print:w-[400px] print:border print:rounded-md"

@@ -181,14 +181,14 @@ export default function AdminOrganizationFormSheet({
             className="space-y-6 py-4"
           >
             {isRoleOrganizationPage && (
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                <div className="flex items-center gap-2 text-gray-600">
+              <div className="rounded-lg border border-border bg-soft-background p-4">
+                <div className="flex items-center gap-2 text-soft-foreground">
                   <ShieldCheck className="size-4" />
                   <span className="text-xs font-semibold uppercase tracking-wider">
                     {t("role_organization_record")}
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-muted-foreground">
                   {t("role_organization_record_description")}
                 </p>
               </div>

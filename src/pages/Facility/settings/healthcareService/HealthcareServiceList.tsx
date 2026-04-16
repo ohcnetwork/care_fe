@@ -48,10 +48,10 @@ export default function HealthcareServiceList({
       <div className="container mx-auto">
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-700">
+            <h1 className="text-2xl font-bold text-muted-foreground">
               {t("healthcare_services")}
             </h1>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm text-soft-foreground">
               {t("manage_healthcare_services")}
             </p>
           </div>
@@ -68,7 +68,7 @@ export default function HealthcareServiceList({
           </Button>
         </div>
         <div className=" relative w-full md:w-auto mb-6">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-placeholder-foreground">
             <CareIcon icon="l-search" className="size-5" />
           </span>
           <Input

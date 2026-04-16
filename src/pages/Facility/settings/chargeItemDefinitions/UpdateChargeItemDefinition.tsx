@@ -93,7 +93,7 @@ export function UpdateChargeItemDefinition({
     >
       <div className="container">
         <div className="mb-4">
-          <p className="text-gray-600">
+          <p className="text-soft-foreground">
             {t("update_charge_item_definition_description")}
           </p>
         </div>

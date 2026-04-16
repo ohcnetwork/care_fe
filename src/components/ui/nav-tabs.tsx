@@ -103,7 +103,7 @@ export const NavTabs = <TabKey extends string>({
             key={option}
             value={option}
             className={cn(
-              "border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none",
+              "border-b-3 px-1.5 sm:px-2.5 py-2 text-soft-foreground font-semibold hover:text-foreground data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none",
               tabTriggerClassName,
             )}
             onClick={() => onTabChange(option)}
@@ -125,7 +125,7 @@ export const NavTabs = <TabKey extends string>({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="text-gray-500 font-semibold hover:text-gray-900 hover:bg-transparent pb-2.5 px-2.5 rounded-none"
+                className="text-muted-foreground font-semibold hover:text-foreground hover:bg-transparent pb-2.5 px-2.5 rounded-none"
               >
                 {t("count_more", { count: showMoreTabs.length })}
                 <ChevronDown className="ml-1 h-4 w-4" />
@@ -136,7 +136,7 @@ export const NavTabs = <TabKey extends string>({
                 <DropdownMenuItem
                   key={option}
                   onClick={() => onTabChange(option)}
-                  className="text-gray-950 font-medium text-sm"
+                  className="text-foreground font-medium text-sm"
                 >
                   {tabs[option].label}
                 </DropdownMenuItem>

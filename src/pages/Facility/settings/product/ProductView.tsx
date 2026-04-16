@@ -94,7 +94,7 @@ export default function ProductView({ facilityId, productId }: Props) {
               </Badge>
             </div>
             {product.batch?.lot_number && (
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-1 text-sm text-soft-foreground">
                 {t("lot_number")}: {product.batch.lot_number}
               </p>
             )}
@@ -118,35 +118,47 @@ export default function ProductView({ facilityId, productId }: Props) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-gray-500">{t("status")}</p>
+              <p className="text-sm text-muted-foreground">{t("status")}</p>
               <p className="font-medium">{t(product.status)}</p>
             </div>
             {product.batch?.lot_number && (
               <div>
-                <p className="text-sm text-gray-500">{t("lot_number")}</p>
-                <p className="text-gray-700">{product.batch.lot_number}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("lot_number")}
+                </p>
+                <p className="text-muted-foreground">
+                  {product.batch.lot_number}
+                </p>
               </div>
             )}
             {product.expiration_date && (
               <div>
-                <p className="text-sm text-gray-500">{t("expiration_date")}</p>
-                <p className="text-gray-700">
+                <p className="text-sm text-muted-foreground">
+                  {t("expiration_date")}
+                </p>
+                <p className="text-muted-foreground">
                   {format(new Date(product.expiration_date), "PPP")}
                 </p>
               </div>
             )}
             {product.standard_pack_size != null && (
               <div>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {t("standard_pack_size")}
                 </p>
-                <p className="text-gray-700">{product.standard_pack_size}</p>
+                <p className="text-muted-foreground">
+                  {product.standard_pack_size}
+                </p>
               </div>
             )}
             {product.purchase_price != null && (
               <div>
-                <p className="text-sm text-gray-500">{t("purchase_price")}</p>
-                <p className="text-gray-700">{product.purchase_price}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("purchase_price")}
+                </p>
+                <p className="text-muted-foreground">
+                  {product.purchase_price}
+                </p>
               </div>
             )}
           </CardContent>
@@ -160,7 +172,7 @@ export default function ProductView({ facilityId, productId }: Props) {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50">
+            <div className="rounded-lg border bg-soft-background/50 p-4 transition-colors hover:bg-soft-background">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -177,7 +189,7 @@ export default function ProductView({ facilityId, productId }: Props) {
                   <h3 className="font-medium">
                     {product.product_knowledge.name}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {product.product_knowledge.slug}
                   </p>
                 </div>
@@ -209,14 +221,14 @@ export default function ProductView({ facilityId, productId }: Props) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50">
+              <div className="rounded-lg border bg-soft-background/50 p-4 transition-colors hover:bg-soft-background">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <h3 className="font-medium">
                       {product.charge_item_definition.title ||
                         product.charge_item_definition.slug}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {product.charge_item_definition.slug}
                     </p>
                   </div>

@@ -229,7 +229,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             <h1 className="text-3xl font-bold tracking-tight">
               {t("search_patients")}
             </h1>
-            <p className="text-gray-500">
+            <p className="text-muted-foreground">
               {canCreatePatient
                 ? t("search_patient_page_text")
                 : t("search_only_patient_page_text")}
@@ -260,7 +260,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                           <h3 className="text-lg font-semibold">
                             {t("no_patient_record_found")}
                           </h3>
-                          <p className="text-sm text-gray-500 mb-6">
+                          <p className="text-sm text-muted-foreground mb-6">
                             {t("no_patient_record_text", {
                               text: getSearchOptions(
                                 t,
@@ -280,7 +280,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-lg border border-gray-200">
+                      <div className="rounded-lg border border-border">
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -304,7 +304,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                 <TableCell className="font-medium">
                                   {patient.name}
                                   {!patientList?.partial && (
-                                    <p className="text-xs text-gray-500 text-wrap line-clamp-2">
+                                    <p className="text-xs text-muted-foreground text-wrap line-clamp-2">
                                       {"address" in patient && patient.address}
                                     </p>
                                   )}
@@ -520,7 +520,7 @@ function AddPatientButton({
     >
       <CareIcon icon="l-plus" className="size-4" />
       {t("add_new_patient")}
-      <ShortcutBadge actionId="submit-action" className="bg-white" />
+      <ShortcutBadge actionId="submit-action" className="bg-background" />
     </Button>
   );
 }

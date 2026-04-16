@@ -109,7 +109,7 @@ export default function FileUploadDialog({
               <div>
                 <Label
                   htmlFor="upload-file-name-0"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-muted-foreground"
                 >
                   {t("enter_file_name")}
                 </Label>
@@ -141,7 +141,7 @@ export default function FileUploadDialog({
               >
                 <div className="flex gap-4 items-start w-full">
                   {file.type.startsWith("image/") && previewUrls[index] && (
-                    <div className="flex items-center justify-center mt-2 md:mt-0 rounded-lg border border-gray-300 shadow-md overflow-hidden">
+                    <div className="flex items-center justify-center mt-2 md:mt-0 rounded-lg border border-strong-border shadow-md overflow-hidden">
                       <img
                         src={previewUrls[index]}
                         alt="Preview"
@@ -151,7 +151,7 @@ export default function FileUploadDialog({
                   )}
 
                   <div className="flex flex-col gap-2 flex-1">
-                    <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-200 md:p-2 border border-gray-200">
+                    <div className="flex items-center justify-between gap-2 rounded-md bg-secondary-200 md:p-2 border border-border">
                       <span
                         className="flex items-center text-sm truncate"
                         title={file.name}
@@ -195,7 +195,7 @@ export default function FileUploadDialog({
                           fileUpload.setError(null);
                         }}
                         placeholder={t("enter_file_name")}
-                        className="border border-gray-300 focus:border-gray-400 rounded-md px-3 py-2 w-full text-sm"
+                        className="border border-strong-border focus:border-stronger-border rounded-md px-3 py-2 w-full text-sm"
                       />
                       {fileUpload.error && (
                         <p className="mt-2 text-sm text-red-600">

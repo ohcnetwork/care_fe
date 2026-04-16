@@ -53,12 +53,12 @@ export function ServiceRequestDetails({
     activityDefinition?.observation_result_requirements ?? [];
 
   return (
-    <div className="bg-gray-100 rounded-lg border border-gray-200">
+    <div className="bg-muted-background rounded-lg border border-border">
       <div className="py-3 flex items-center justify-between">
-        <div className="text-sm text-gray-600">
-          <div className="font-semibold text-gray-600 text-xl flex items-center gap-2">
-            <div className="h-8 w-1.5 bg-gray-400 rounded-r-sm" />
-            <div className="flex items-center gap-2 text-gray-700">
+        <div className="text-sm text-soft-foreground">
+          <div className="font-semibold text-soft-foreground text-xl flex items-center gap-2">
+            <div className="h-8 w-1.5 bg-stronger-border rounded-r-sm" />
+            <div className="flex items-center gap-2 text-muted-foreground">
               {activityDefinition.title}
             </div>
           </div>
@@ -71,18 +71,20 @@ export function ServiceRequestDetails({
             <Badge variant="destructive">{t("do not perform")}</Badge>
           )}
           <div className="gap-2">
-            <div className="text-sm text-gray-600 mb-1">{t("intent")}</div>
+            <div className="text-sm text-soft-foreground mb-1">
+              {t("intent")}
+            </div>
             <div className="flex gap-2 font-semibold">{t(request.intent)}</div>
           </div>
         </div>
       </div>
 
-      <div className="p-4 m-3 mt-1 bg-white rounded-lg shadow-md ">
+      <div className="p-4 m-3 mt-1 bg-background rounded-lg shadow-md ">
         <div className="flex flex-col md:flex-row">
           <div className="flex flex-col gap-6 mb-4 min-w-[50%]">
             <div className="flex  gap-4">
               <div className="gap-2">
-                <div className="text-sm text-gray-600 mb-1">
+                <div className="text-sm text-soft-foreground mb-1">
                   {t("priority")}
                 </div>
                 <div className="flex gap-2">
@@ -94,7 +96,9 @@ export function ServiceRequestDetails({
                 </div>
               </div>
               <div className="gap-2">
-                <div className="text-sm text-gray-600 mb-1">{t("status")}</div>
+                <div className="text-sm text-soft-foreground mb-1">
+                  {t("status")}
+                </div>
                 <div className="flex gap-2">
                   <Badge
                     variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}
@@ -106,7 +110,7 @@ export function ServiceRequestDetails({
             </div>
 
             <div>
-              <div className="text-sm text-gray-600 mb-1">
+              <div className="text-sm text-soft-foreground mb-1">
                 {t("observation_definitions")}
               </div>
               <div className="font-sm font-normal flex flex-wrap gap-1">
@@ -120,45 +124,47 @@ export function ServiceRequestDetails({
               </div>
             </div>
             <div>
-              <div className="text-sm text-gray-600 mb-1">{t("specimen")}</div>
+              <div className="text-sm text-soft-foreground mb-1">
+                {t("specimen")}
+              </div>
               <div className="font-sm font-normal flex flex-wrap gap-1">
                 {formatSpecimenRequirements(specimenRequirements)}
               </div>
             </div>
             {request.body_site && (
               <div>
-                <div className="text-sm text-gray-600 mb-1">
+                <div className="text-sm text-soft-foreground mb-1">
                   {t("body_site")}
                 </div>
-                <div className="font-semibold text-gray-700">
+                <div className="font-semibold text-muted-foreground">
                   {request.body_site.display}
                 </div>
               </div>
             )}
           </div>
-          <div className="border-l border-gray-200 mx-4" />
+          <div className="border-l border-border mx-4" />
           <div className="flex flex-col gap-6">
             {activityDefinition.healthcare_service && (
               <div>
-                <div className="text-sm text-gray-600 mb-1">
+                <div className="text-sm text-soft-foreground mb-1">
                   {t("healthcare_service")}
                 </div>
-                <div className="font-semibold text-gray-700">
+                <div className="font-semibold text-muted-foreground">
                   {activityDefinition.healthcare_service.name}
                 </div>
               </div>
             )}
             <div>
-              <div className="text-sm text-gray-600 mb-1">
+              <div className="text-sm text-soft-foreground mb-1">
                 {t("requested by")}
               </div>
-              <div className="font-semibold text-gray-700">
+              <div className="font-semibold text-muted-foreground">
                 {request.requester && formatName(request.requester)}
               </div>
             </div>
             {request.encounter.current_location && (
               <div>
-                <div className="text-sm text-gray-600 mb-1">
+                <div className="text-sm text-soft-foreground mb-1">
                   {t("patient_location")}
                 </div>
                 <LocationNode
@@ -169,10 +175,10 @@ export function ServiceRequestDetails({
             )}
             {request.patient_instruction && (
               <div>
-                <div className="text-sm text-gray-600 mb-1">
+                <div className="text-sm text-soft-foreground mb-1">
                   {t("patient_instruction")}
                 </div>
-                <div className="text-sm text-gray-950">
+                <div className="text-sm text-foreground">
                   {request.patient_instruction}
                 </div>
               </div>
@@ -181,8 +187,10 @@ export function ServiceRequestDetails({
         </div>
         {request.note && (
           <div className="mt-4">
-            <div className="text-sm text-gray-600 mb-1">{t("note")}:</div>
-            <div className="text-sm text-gray-950 ">{request.note}</div>
+            <div className="text-sm text-soft-foreground mb-1">
+              {t("note")}:
+            </div>
+            <div className="text-sm text-foreground ">{request.note}</div>
           </div>
         )}
       </div>

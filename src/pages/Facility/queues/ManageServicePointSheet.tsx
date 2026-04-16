@@ -70,7 +70,7 @@ export default function ManageServicePointSheet({
         </SheetHeader>
         <Separator className="my-3" />
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-950 font-medium">
+          <div className="text-sm text-foreground font-medium">
             {subQueues.length} {t("service_points_available")}
           </div>
           <SubQueueFormSheet
@@ -146,7 +146,7 @@ function SubQueueCard({
   return (
     <Card
       className={cn(
-        "bg-gray-50 duration-200 border-gray-200 shadow-none rounded-sm",
+        "bg-soft-background duration-200 border-border shadow-none rounded-sm",
         editSubQueue && "border border-dashed",
       )}
     >
@@ -155,7 +155,7 @@ function SubQueueCard({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 flex-1">
               <div className="flex-1 min-w-0">
-                <span className="font-medium text-gray-900 truncate">
+                <span className="font-medium text-foreground truncate">
                   {subQueue.name}
                 </span>
               </div>

@@ -307,7 +307,7 @@ export default function ServiceRequestShow({
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 relative">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-soft-background relative">
       <div className="flex-1 p-4 max-w-6xl">
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-2">
@@ -315,7 +315,7 @@ export default function ServiceRequestShow({
               variant="outline"
               size="sm"
               onClick={() => goBack()}
-              className="font-semibold border border-gray-400 text-gray-950 underline underline-offset-2"
+              className="font-semibold border border-stronger-border text-foreground underline underline-offset-2"
             >
               <ArrowLeft />
               {t("back")}
@@ -334,7 +334,7 @@ export default function ServiceRequestShow({
                           <AlertDialogTrigger asChild>
                             <Button
                               variant="outline"
-                              className="font-semibold border border-gray-400"
+                              className="font-semibold border border-stronger-border"
                             >
                               {t("mark_as_complete")}
                               <ShortcutBadge actionId="mark-as-complete" />
@@ -385,7 +385,7 @@ export default function ServiceRequestShow({
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="border-gray-400 px-2"
+                        className="border-stronger-border px-2"
                         disabled={isCancellingServiceRequest}
                       >
                         <CareIcon icon="l-ellipsis-v" />

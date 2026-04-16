@@ -44,8 +44,8 @@ function CodeDisplay({ code }: { code: Code | null }) {
   return (
     <div className="space-y-1">
       <p className="text-sm font-medium">{code.display}</p>
-      <p className="text-xs text-gray-500">{code.system}</p>
-      <p className="text-xs text-gray-500">{code.code}</p>
+      <p className="text-xs text-muted-foreground">{code.system}</p>
+      <p className="text-xs text-muted-foreground">{code.code}</p>
     </div>
   );
 }
@@ -153,7 +153,7 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
               </Badge>
             </div>
             {isCodePresent(product.code) && (
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-1 text-sm text-soft-foreground">
                 {product.code.system} | {product.code.code}
               </p>
             )}
@@ -189,20 +189,22 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-gray-500">{t("product_type")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("product_type")}
+              </p>
               <p className="font-medium">{t(product.product_type)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {t("product_knowledge_alternate_identifier")}
               </p>
-              <p className="text-gray-700">
+              <p className="text-muted-foreground">
                 {product.alternate_identifier || "-"}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">{t("base_unit")}</p>
-              <div className="rounded-lg border bg-gray-50/50 p-3">
+              <p className="text-sm text-muted-foreground">{t("base_unit")}</p>
+              <div className="rounded-lg border bg-soft-background/50 p-3">
                 <CodeDisplay code={product.base_unit} />
               </div>
             </div>
@@ -222,11 +224,11 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
                 {product.names.map((name: ProductName, index) => (
                   <div
                     key={index}
-                    className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
+                    className="rounded-lg border bg-soft-background/50 p-4 transition-colors hover:bg-soft-background"
                   >
                     <div className="space-y-2">
                       <p className="font-medium">{name.name}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {t(name.name_type)}
                       </p>
                     </div>
@@ -251,13 +253,13 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
                   {product.storage_guidelines.map((guideline, index) => (
                     <div
                       key={index}
-                      className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
+                      className="rounded-lg border bg-soft-background/50 p-4 transition-colors hover:bg-soft-background"
                     >
                       <div className="space-y-4">
                         <p className="text-sm font-medium">{guideline.note}</p>
                         <Separator />
                         <div>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-muted-foreground">
                             {t("stability_duration")}
                           </p>
                           <p className="font-medium">
@@ -284,10 +286,10 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
               <div className="grid gap-6">
                 {product.definitional.dosage_form && (
                   <div>
-                    <p className="mb-2 text-sm text-gray-500">
+                    <p className="mb-2 text-sm text-muted-foreground">
                       {t("dosage_form")}
                     </p>
-                    <div className="rounded-lg border bg-gray-50/50 p-3">
+                    <div className="rounded-lg border bg-soft-background/50 p-3">
                       <CodeDisplay code={product.definitional.dosage_form} />
                     </div>
                   </div>
@@ -295,7 +297,7 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
                 {product.definitional.intended_routes &&
                   product.definitional.intended_routes.length > 0 && (
                     <div>
-                      <p className="mb-2 text-sm text-gray-500">
+                      <p className="mb-2 text-sm text-muted-foreground">
                         {t("intended_routes")}
                       </p>
                       <div className="space-y-2">
@@ -303,7 +305,7 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
                           (route, index) => (
                             <div
                               key={index}
-                              className="rounded-lg border bg-gray-50/50 p-3"
+                              className="rounded-lg border bg-soft-background/50 p-3"
                             >
                               <CodeDisplay code={route} />
                             </div>

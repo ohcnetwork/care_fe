@@ -108,7 +108,7 @@ export default function ScheduleChargeItemDefinitionSelector({
       <SheetTrigger asChild>
         <Button variant="outline" size="icon" className="h-8 w-full gap-2">
           <WalletMinimal className="size-4" />
-          <span className="text-gray-950 font-medium">
+          <span className="text-foreground font-medium">
             {t("manage_charges")}
           </span>
         </Button>
@@ -189,7 +189,11 @@ export default function ScheduleChargeItemDefinitionSelector({
               name="re_visit_charge_item_definition"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={!reVisitDays ? "text-gray-400" : ""}>
+                  <FormLabel
+                    className={
+                      !reVisitDays ? "text-placeholder-foreground" : ""
+                    }
+                  >
                     {t("re_visit_consultation_charge")}
                   </FormLabel>
                   <FormControl>
@@ -213,7 +217,7 @@ export default function ScheduleChargeItemDefinitionSelector({
               )}
             />
 
-            <div className="flex justify-end gap-4 border-t pt-4 sticky bottom-0 bg-white">
+            <div className="flex justify-end gap-4 border-t pt-4 sticky bottom-0 bg-background">
               <Button
                 variant="outline"
                 type="button"

@@ -204,7 +204,7 @@ export default function OrganizationUsers({
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                   {users?.results?.length === 0 ? (
                     <Card className="col-span-full">
-                      <CardContent className="p-6 text-center text-gray-500">
+                      <CardContent className="p-6 text-center text-muted-foreground">
                         {t("no_users_found")}
                       </CardContent>
                     </Card>
@@ -223,7 +223,7 @@ export default function OrganizationUsers({
                                 <Button
                                   variant="link"
                                   size="sm"
-                                  className="underline text-gray-500"
+                                  className="underline text-muted-foreground"
                                 >
                                   <span>{t("edit")}</span>
                                 </Button>

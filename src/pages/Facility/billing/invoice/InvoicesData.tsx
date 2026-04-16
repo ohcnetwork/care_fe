@@ -131,7 +131,7 @@ export default function InvoicesData({
             <div className="relative flex-1">
               <CareIcon
                 icon="l-search"
-                className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500 pointer-events-none z-10"
+                className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none z-10"
               />
               <Input
                 placeholder={t("search_invoices")}

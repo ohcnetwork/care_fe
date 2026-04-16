@@ -84,8 +84,8 @@ function EncounterCard({
       className={cn(
         "rounded-md relative cursor-pointer transition-colors w-full lg:w-80",
         isSelected
-          ? "bg-white border-primary-600 shadow-md"
-          : "bg-gray-100 hover:bg-gray-100 shadow-none",
+          ? "bg-background border-primary-600 shadow-md"
+          : "bg-muted-background hover:bg-muted-background shadow-none",
       )}
       onClick={() => onSelect(encounter.id)}
     >
@@ -98,14 +98,14 @@ function EncounterCard({
             <span className="text-base font-semibold">
               {t(`encounter_class__${encounter.encounter_class}`)}
             </span>
-            <span className="text-sm font-medium text-gray-700 block truncate">
+            <span className="text-sm font-medium text-muted-foreground block truncate">
               {isSameFacility && careTeam.length > 0 ? (
                 <span className="flex items-center gap-1">
                   <span className="truncate">
                     {formatName(careTeam[0].member)}
                   </span>
                   {additionalMembersCount > 0 && (
-                    <span className="text-xs text-gray-500 shrink-0">
+                    <span className="text-xs text-muted-foreground shrink-0">
                       +{additionalMembersCount}
                     </span>
                   )}
@@ -116,8 +116,8 @@ function EncounterCard({
             </span>
             {encounter.tags.length > 0 && (
               <div className="hidden md:flex items-center py-1 pr-1 gap-2">
-                <Tags className="size-4 text-gray-700" />
-                <span className="text-sm text-gray-700 font-medium">
+                <Tags className="size-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground font-medium">
                   {t("encounter_tag_count", {
                     count: encounter.tags.length,
                   })}
@@ -126,7 +126,7 @@ function EncounterCard({
             )}
           </div>
           <div className="flex flex-col gap-1 pt-0.5 items-end">
-            <span className="text-sm text-gray-600 whitespace-nowrap">
+            <span className="text-sm text-soft-foreground whitespace-nowrap">
               {encounter.period.start && (
                 <span>
                   {format(new Date(encounter.period.start!), "dd MMM")}
@@ -162,18 +162,18 @@ function EncounterCard({
         )}
         {isSameFacility && additionalMembersCount > 0 && (
           <div className="md:hidden flex flex-col gap-1">
-            <span className="text-xs text-gray-500 font-medium">
+            <span className="text-xs text-muted-foreground font-medium">
               {t("care_team")}:
             </span>
             <div className="flex flex-wrap gap-2">
               {careTeam.map((member, index) => (
                 <span
                   key={`${member.member.id}-${index}`}
-                  className="text-sm text-gray-700 truncate max-w-32"
+                  className="text-sm text-muted-foreground truncate max-w-32"
                 >
                   {formatName(member.member)}
                   {member.role.display && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {" "}
                       ({member.role.display})
                     </span>
@@ -193,7 +193,7 @@ function EncounterCard({
         {cardContent}
       </HoverCardTrigger>
       <HoverCardContent
-        className="w-96 p-0 border border-gray-200 rounded-lg shadow-lg"
+        className="w-96 p-0 border border-border rounded-lg shadow-lg"
         side="right"
         align="start"
       >
@@ -418,7 +418,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
         <CardListSkeleton count={1} />
       ) : (
         <div>
-          <h2 className="mb-2 text-xs font-medium text-gray-600 uppercase">
+          <h2 className="mb-2 text-xs font-medium text-soft-foreground uppercase">
             {t("chosen_encounter")}
           </h2>
           <div className="space-y-2">
@@ -437,7 +437,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       <div>
         <div className="mb-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-medium text-gray-600 uppercase">
+            <h2 className="text-xs font-medium text-soft-foreground uppercase">
               {t("other_encounters")}
             </h2>
           </div>
@@ -497,14 +497,14 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
               [],
             )
           ) : (
-            <div className="px-4 py-8 text-center text-gray-500">
+            <div className="px-4 py-8 text-center text-muted-foreground">
               {t("no_encounters_found")}
             </div>
           )}
           <div ref={ref} />
           {isFetchingNextPage && <CardListSkeleton count={5} />}
           {!hasNextPage && !isFetching && (
-            <div className="border-b border-gray-300 pb-2" />
+            <div className="border-b border-strong-border pb-2" />
           )}
         </div>
       </div>
@@ -521,7 +521,7 @@ export default function EncounterHistorySelector() {
   return (
     <>
       <div className="lg:hidden">
-        <h2 className="px-2 mb-2 text-xs font-medium text-gray-600 uppercase">
+        <h2 className="px-2 mb-2 text-xs font-medium text-soft-foreground uppercase">
           {t("chosen_encounter")}
         </h2>
         <Drawer open={isOpen} onOpenChange={setIsOpen}>
@@ -561,7 +561,7 @@ const EncounterSheetTrigger = () => {
   }
 
   return (
-    <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-white border-primary-600">
+    <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-background border-primary-600">
       <CardContent className="flex flex-col px-4 py-3 gap-2">
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
         <div className="flex justify-between items-start">
@@ -569,13 +569,13 @@ const EncounterSheetTrigger = () => {
             <span className="text-base font-semibold">
               {t(`encounter_class__${encounter.encounter_class}`)}
             </span>
-            <span className="text-sm font-medium text-gray-700 truncate max-w-40">
+            <span className="text-sm font-medium text-muted-foreground truncate max-w-40">
               {encounter.facility.name}
             </span>
           </div>
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-1 -mt-2">
-              <span className="text-sm text-gray-600 whitespace-nowrap">
+              <span className="text-sm text-soft-foreground whitespace-nowrap">
                 {encounter.period.start && (
                   <span>
                     {format(new Date(encounter.period.start!), "dd MMM")}
@@ -625,7 +625,7 @@ const EncounterDetailsHoverCard = ({
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+      <div className="flex items-center justify-between p-4 border-b border-soft-border">
         <div className="flex flex-col gap-1">
           <span className="text-base font-semibold">
             {t(`encounter_class__${encounter.encounter_class}`)}
@@ -634,7 +634,7 @@ const EncounterDetailsHoverCard = ({
             {t(`encounter_status__${encounter.status}`)}
           </Badge>
         </div>
-        <div className="flex items-center gap-1 text-sm text-gray-600">
+        <div className="flex items-center gap-1 text-sm text-soft-foreground">
           <Calendar className="size-4" />
           <span>
             {encounter.period.start && (
@@ -658,12 +658,12 @@ const EncounterDetailsHoverCard = ({
       <div className="p-4 space-y-3">
         {/* Facility */}
         <div className="flex items-start gap-2">
-          <Building2 className="size-4 text-gray-500 mt-0.5" />
+          <Building2 className="size-4 text-muted-foreground mt-0.5" />
           <div className="flex flex-col">
-            <span className="text-xs text-gray-500 font-medium">
+            <span className="text-xs text-muted-foreground font-medium">
               {t("facility")}
             </span>
-            <span className="text-sm text-gray-800 truncate max-w-72">
+            <span className="text-sm text-foreground truncate max-w-72">
               {encounter.facility.name}
             </span>
           </div>
@@ -672,12 +672,12 @@ const EncounterDetailsHoverCard = ({
         {/* Location */}
         {encounter.current_location && (
           <div className="flex items-start gap-2">
-            <MapPin className="size-4 text-gray-500 mt-0.5" />
+            <MapPin className="size-4 text-muted-foreground mt-0.5" />
             <div className="flex flex-col">
-              <span className="text-xs text-gray-500 font-medium">
+              <span className="text-xs text-muted-foreground font-medium">
                 {t("location")}
               </span>
-              <span className="text-sm text-gray-800 truncate max-w-72">
+              <span className="text-sm text-foreground truncate max-w-72">
                 {encounter.current_location.name}
               </span>
             </div>
@@ -689,10 +689,10 @@ const EncounterDetailsHoverCard = ({
           <div className="flex items-start gap-2">
             <div className="size-4" />
             <div className="flex flex-col">
-              <span className="text-xs text-gray-500 font-medium">
+              <span className="text-xs text-muted-foreground font-medium">
                 {t("priority")}
               </span>
-              <span className="text-sm text-gray-800">
+              <span className="text-sm text-foreground">
                 {t(`encounter_priority__${encounter.priority}`)}
               </span>
             </div>
@@ -702,9 +702,9 @@ const EncounterDetailsHoverCard = ({
         {/* Care Team */}
         {encounter.care_team.length > 0 && (
           <div className="flex items-start gap-2">
-            <Users className="size-4 text-gray-500 mt-0.5" />
+            <Users className="size-4 text-muted-foreground mt-0.5" />
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-gray-500 font-medium">
+              <span className="text-xs text-muted-foreground font-medium">
                 {t("care_team")}
               </span>
               <div className="flex flex-col gap-1">
@@ -713,11 +713,11 @@ const EncounterDetailsHoverCard = ({
                     key={`${member.member.id}-${index}`}
                     className="flex items-center gap-2"
                   >
-                    <span className="text-sm text-gray-800 truncate max-w-48">
+                    <span className="text-sm text-foreground truncate max-w-48">
                       {formatName(member.member)}
                     </span>
                     {member.role.display && (
-                      <span className="text-xs text-gray-500 truncate max-w-24">
+                      <span className="text-xs text-muted-foreground truncate max-w-24">
                         ({member.role.display})
                       </span>
                     )}
@@ -731,9 +731,9 @@ const EncounterDetailsHoverCard = ({
         {/* Tags */}
         {encounter.tags.length > 0 && (
           <div className="flex items-start gap-2">
-            <Tags className="size-4 text-gray-500 mt-0.5" />
+            <Tags className="size-4 text-muted-foreground mt-0.5" />
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-gray-500 font-medium">
+              <span className="text-xs text-muted-foreground font-medium">
                 {t("tags")}
               </span>
               <div className="flex flex-wrap gap-1">
@@ -750,7 +750,7 @@ const EncounterDetailsHoverCard = ({
           <div className="flex items-start gap-2">
             <div className="size-4" />
             <div className="flex flex-col gap-1">
-              <span className="text-xs text-gray-500 font-medium">
+              <span className="text-xs text-muted-foreground font-medium">
                 {t("departments")}
               </span>
               <div className="flex flex-wrap gap-1">

@@ -75,12 +75,12 @@ export function RecordItem<T>({
             <TableCell
               key={field.key.toString()}
               className={cn(
-                "p-2 text-sm whitespace-pre-wrap border border-gray-200",
+                "p-2 text-sm whitespace-pre-wrap border border-border",
                 "nth-2:rounded-l-md",
                 "nth-last-1:rounded-r-md",
                 isHighlightedUser
                   ? "bg-emerald-100!"
-                  : "bg-white even:bg-gray-100",
+                  : "bg-background even:bg-muted-background",
               )}
             >
               <div className="text-sm">{displayValue}</div>
@@ -90,7 +90,7 @@ export function RecordItem<T>({
 
         <TableCell
           className={
-            "p-2 text-sm border border-gray-200 bg-white even:bg-gray-100 nth-last-1:rounded-r-md"
+            "p-2 text-sm border border-border bg-background even:bg-muted-background nth-last-1:rounded-r-md"
           }
         >
           {hasAdditionalInfo && (
@@ -111,7 +111,7 @@ export function RecordItem<T>({
           <TableCell className="border-0 bg-transparent p-0" />
           <TableCell
             colSpan={displayFields.length + 1}
-            className="px-4 py-2 border-x border border-gray-200 bg-gray-50 rounded-b-md"
+            className="px-4 py-2 border-x border border-border bg-soft-background rounded-b-md"
           >
             <div className="space-y-3 ">
               {expandableFieldsWithValues!.map(({ field }, index) => {

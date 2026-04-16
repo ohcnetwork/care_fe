@@ -102,7 +102,7 @@ export function ExternalPurchasesList({
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("purchase_orders")}
             </h1>
           </div>
@@ -137,7 +137,7 @@ export function ExternalPurchasesList({
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="border-b-3 px-2.5 py-1 font-semibold text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                className="border-b-3 px-2.5 py-1 font-semibold text-soft-foreground hover:text-foreground data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
               >
                 {t(tab.label)}
               </TabsTrigger>

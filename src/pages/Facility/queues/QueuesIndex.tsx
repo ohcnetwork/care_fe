@@ -93,11 +93,11 @@ function QueueRow({
   });
 
   return (
-    <TableRow className="hover:bg-gray-200">
-      <TableCell className="font-medium text-gray-700 w-12 border-r border-gray-200 bg-white">
+    <TableRow className="hover:bg-strong-background">
+      <TableCell className="font-medium text-muted-foreground w-12 border-r border-border bg-background">
         {index + 1}
       </TableCell>
-      <TableCell className="border-r border-gray-200 bg-white">
+      <TableCell className="border-r border-border bg-background">
         <div className="flex items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
             <Link href={queueLink} className="font-medium underline">
@@ -117,14 +117,14 @@ function QueueRow({
           <Button
             variant="outline"
             size="sm"
-            className="h-7 px-3 text-xs border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            className="h-7 px-3 text-xs border-strong-border bg-background text-muted-foreground hover:bg-soft-background"
             asChild
           >
             <Link href={queueLink}>{t("open")}</Link>
           </Button>
         </div>
       </TableCell>
-      <TableCell className="border-r border-gray-200 bg-white">
+      <TableCell className="border-r border-border bg-background">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -135,14 +135,14 @@ function QueueRow({
           </Button>
         </div>
       </TableCell>
-      <TableCell className="w-12 border-r border-gray-200 bg-white rounded-r-md">
+      <TableCell className="w-12 border-r border-border bg-background rounded-r-md">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
               <MoreVertical className="size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="border border-gray-200">
+          <DropdownMenuContent align="end" className="border border-border">
             <DropdownMenuItem asChild>
               <Link href={queueLink} className="flex items-center gap-2">
                 <Notebook className="size-4 mr-2" />
@@ -183,12 +183,12 @@ function SubQueueCard({ subQueue }: SubQueueCardProps) {
   const { t } = useTranslation();
 
   return (
-    <Card className="hover:shadow-md transition-all bg-gray-50 duration-200 border-gray-200 shadow-none rounded-sm">
+    <Card className="hover:shadow-md transition-all bg-soft-background duration-200 border-border shadow-none rounded-sm">
       <CardContent className="py-1 px-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1">
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-base text-gray-900 truncate">
+              <h3 className="font-medium text-base text-foreground truncate">
                 {subQueue.name}
               </h3>
             </div>
@@ -307,10 +307,10 @@ export default function QueuesIndex({
     <Page title={t("token_queues")} hideTitleOnPage>
       <div className="container mx-auto px-4 py-6">
         {/* Header Section - Date, Practitioner, Create Queue */}
-        <div className="mb-8 flex flex-wrap gap-4 items-end bg-white p-4 rounded-lg border border-gray-200">
+        <div className="mb-8 flex flex-wrap gap-4 items-end bg-background p-4 rounded-lg border border-border">
           {/* Date Filter */}
           <div className="flex flex-col gap-2 flex-1 lg:flex-initial">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-muted-foreground">
               {t("date")}
             </label>
             <DatePicker
@@ -322,7 +322,7 @@ export default function QueuesIndex({
           {/* Resource Picker - Only show for Practitioner resource type */}
           {resourceType === SchedulableResourceType.Practitioner && (
             <div className="flex flex-col gap-2 flex-1 lg:flex-initial">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-muted-foreground">
                 {t("selected_practitioner")}
               </label>
               <PractitionerSelector
@@ -387,18 +387,18 @@ export default function QueuesIndex({
             ) : (
               <div className="overflow-hidden">
                 <Table className="p-0">
-                  <TableHeader className="bg-gray-100">
+                  <TableHeader className="bg-muted-background">
                     <TableRow className="rounded-md">
-                      <TableHead className="w-12 border-r border-gray-200 text-gray-700">
+                      <TableHead className="w-12 border-r border-border text-muted-foreground">
                         #
                       </TableHead>
-                      <TableHead className="border-r border-gray-200 text-gray-700">
+                      <TableHead className="border-r border-border text-muted-foreground">
                         {t("queue_title")}
                       </TableHead>
-                      <TableHead className="w-16 border-r border-gray-200 text-gray-700">
+                      <TableHead className="w-16 border-r border-border text-muted-foreground">
                         {t("status")}
                       </TableHead>
-                      <TableHead className="w-12 border-r border-gray-200 text-gray-700">
+                      <TableHead className="w-12 border-r border-border text-muted-foreground">
                         {t("settings")}
                       </TableHead>
                     </TableRow>
@@ -421,11 +421,11 @@ export default function QueuesIndex({
           </div>
 
           {/* Service Points Section - Takes up 1/3 of the width */}
-          <div className="bg-white rounded-lg border border-gray-200 p-2 shadow">
+          <div className="bg-background rounded-lg border border-border p-2 shadow">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div>
-                  <div className="text-base font-medium text-gray-900">
+                  <div className="text-base font-medium text-foreground">
                     {t("service_points")} - {subQueues.length}
                   </div>
                 </div>

@@ -213,7 +213,7 @@ export function AccountList({
                   })
                 }
                 placeholder={t("filter_by_identifier")}
-                className="w-full sm:w-auto sm:max-w-xs rounded-md h-9 text-gray-500 shadow-sm"
+                className="w-full sm:w-auto sm:max-w-xs rounded-md h-9 text-muted-foreground shadow-sm"
                 patientId={qParams.patient_filter}
                 patientName={qParams.patient_name}
               />
@@ -277,7 +277,7 @@ export function AccountList({
                           {account.name}
                         </div>
                         {!hidePatientName && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600 wrap-break-word">
+                          <div className="flex items-center gap-1 text-sm text-soft-foreground wrap-break-word">
                             {account.patient.name}
                           </div>
                         )}
@@ -288,13 +288,13 @@ export function AccountList({
                     className={cn(
                       "border-x p-3 text-base font-medium leading-6",
                       isPositive(account.total_balance)
-                        ? "text-gray-950"
+                        ? "text-foreground"
                         : "text-green-700 italic",
                     )}
                   >
                     <MonetaryDisplay amount={account.total_balance} />
                   </TableCell>
-                  <TableCell className="text-base font-medium leading-6 text-gray-950">
+                  <TableCell className="text-base font-medium leading-6 text-foreground">
                     <MonetaryDisplay
                       amount={account.total_billable_charge_items}
                     />
@@ -314,7 +314,7 @@ export function AccountList({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <span className="text-gray-950 font-medium">
+                    <span className="text-foreground font-medium">
                       {account.service_period?.start
                         ? formatDate(account.service_period?.start)
                         : formatDate(account.created_date)}

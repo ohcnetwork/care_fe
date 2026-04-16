@@ -136,7 +136,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
 
         {/* Patient Header */}
         {patient && (
-          <div className="mb-4 rounded-none shadow-none bg-gray-100">
+          <div className="mb-4 rounded-none shadow-none bg-muted-background">
             <PatientHeader patient={patient} facilityId={facilityId} />
           </div>
         )}
@@ -190,7 +190,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
 
         {/* Add Medication Row */}
         {!isLoading && (
-          <div className="mt-2 bg-white rounded-lg shadow-sm">
+          <div className="mt-2 bg-background rounded-lg shadow-sm">
             <ProductKnowledgeSelect
               value={undefined}
               onChange={(product) => {
@@ -415,7 +415,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
               <Trans
                 i18nKey="confirm_action_description"
                 values={{ action: t("mark_as_already_given").toLowerCase() }}
-                components={{ 1: <strong className="text-gray-900" /> }}
+                components={{ 1: <strong className="text-foreground" /> }}
               />{" "}
               {t("you_cannot_change_once_submitted")}
               <p className="mt-2">
@@ -460,7 +460,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
               <Trans
                 i18nKey="confirm_action_description"
                 values={{ action: t("remove_medication").toLowerCase() }}
-                components={{ 1: <strong className="text-gray-900" /> }}
+                components={{ 1: <strong className="text-foreground" /> }}
               />{" "}
               {t("you_cannot_change_once_submitted")}
               <p className="mt-2">

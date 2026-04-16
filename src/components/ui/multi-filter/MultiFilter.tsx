@@ -193,7 +193,7 @@ export default function MultiFilter({
           variant="ghost"
           onClick={handleClearAll}
           className={cn(
-            "text-sm text-gray-950 underline items-center w-auto self-start",
+            "text-sm text-foreground underline items-center w-auto self-start",
             clearAllButtonClassName,
           )}
         >
@@ -257,12 +257,14 @@ function FilterList({
             onFocus={() => setFocusItemIndex(index)}
           >
             <div className="flex items-center gap-2">
-              <span className="border border-dotted border-gray-600 rounded w-3 h-3 mb-0.5"></span>
+              <span className="border border-dotted border-soft-foreground rounded w-3 h-3 mb-0.5"></span>
               <span className="text-sm">{t(filter.label)}</span>
             </div>
             <div className="flex items-center gap-2">
               {selected.length > 0 && (
-                <span className="text-xs text-gray-500">{selected.length}</span>
+                <span className="text-xs text-muted-foreground">
+                  {selected.length}
+                </span>
               )}
               <ChevronRight className="h-4 w-4" />
             </div>

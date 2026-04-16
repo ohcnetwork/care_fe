@@ -12,7 +12,7 @@ export function LocationHistory({ history }: LocationHistoryProps) {
   const { t } = useTranslation();
   if (history.length === 0) {
     return (
-      <div className="text-sm text-gray-500 w-full flex justify-center m-3">
+      <div className="text-sm text-muted-foreground w-full flex justify-center m-3">
         {t("no_location_history_available")}
       </div>
     );

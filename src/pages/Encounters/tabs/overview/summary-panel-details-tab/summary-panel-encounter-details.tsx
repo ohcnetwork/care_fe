@@ -51,12 +51,12 @@ export const SummaryPanelEncounterDetails = () => {
   if (!encounter) return null;
   return (
     <div className="flex flex-col gap-2">
-      <div className="xl:hidden flex flex-col sm:flex-row p-3 bg-white -mt-1 rounded-lg gap-4 shadow">
-        <div className="flex flex-col gap-4 sm:border-r border-gray-200 pr-4">
+      <div className="xl:hidden flex flex-col sm:flex-row p-3 bg-background -mt-1 rounded-lg gap-4 shadow">
+        <div className="flex flex-col gap-4 sm:border-r border-border pr-4">
           <div className="flex flex-row gap-8">
             <div className="flex flex-col gap-4">
               <div>
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-muted-foreground">
                   {t("status")}:
                 </span>
                 <div>
@@ -65,7 +65,7 @@ export const SummaryPanelEncounterDetails = () => {
               </div>
 
               <div>
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-muted-foreground">
                   {t("encounter_class")}:
                 </span>
                 <div>
@@ -73,7 +73,7 @@ export const SummaryPanelEncounterDetails = () => {
                 </div>
               </div>
               <div>
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-muted-foreground">
                   {t("priority")}:
                 </span>
                 <div>
@@ -88,7 +88,7 @@ export const SummaryPanelEncounterDetails = () => {
 
               {encounter.current_location && (
                 <div>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-muted-foreground">
                     {t("location")}:
                   </span>
                   <div>
@@ -110,7 +110,7 @@ export const SummaryPanelEncounterDetails = () => {
 
             <div className="flex flex-col gap-4">
               <div>
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-muted-foreground">
                   {t("dep_and_teams")}:
                 </span>
                 <div className="flex flex-wrap gap-2">
@@ -132,7 +132,7 @@ export const SummaryPanelEncounterDetails = () => {
                 </div>
               </div>
               <div>
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-muted-foreground">
                   {t("encounter_tags")}:
                 </span>
                 <div className="flex flex-wrap gap-2">
@@ -143,13 +143,15 @@ export const SummaryPanelEncounterDetails = () => {
                       ))}
                     </>
                   ) : (
-                    <p className="text-sm text-gray-500">{t("no_tags")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("no_tags")}
+                    </p>
                   )}
                 </div>
               </div>
               {encounter.hospitalization?.re_admission && (
                 <div>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-muted-foreground">
                     {t("hospitalisation")}:
                   </span>
                   <div>
@@ -162,14 +164,17 @@ export const SummaryPanelEncounterDetails = () => {
           {canWriteSelectedEncounter && (
             <Button
               variant="outline"
-              className="hidden sm:flex flex-row w-full text-gray-950"
+              className="hidden sm:flex flex-row w-full text-foreground"
               asChild
             >
               <Link
                 href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
               >
-                <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
-                <span className="text-gray-950">{t("update_encounter")}</span>
+                <SquarePen
+                  className="size-3 text-foreground"
+                  strokeWidth={1.5}
+                />
+                <span className="text-foreground">{t("update_encounter")}</span>
               </Link>
             </Button>
           )}
@@ -178,14 +183,14 @@ export const SummaryPanelEncounterDetails = () => {
         <div className="flex flex-col gap-4">
           <div className="flex flex-row gap-6">
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-muted-foreground">
                 {t("start_date")}:
               </span>
-              <div className="text-sm text-gray-950 font-semibold">
+              <div className="text-sm text-foreground font-semibold">
                 {encounter.period.start ? (
                   <>
                     {format(encounter.period.start, "dd MMM yyyy")},{" "}
-                    <span className="text-gray-600">
+                    <span className="text-soft-foreground">
                       {format(encounter.period.start, "hh:mma")}
                     </span>
                   </>
@@ -195,14 +200,14 @@ export const SummaryPanelEncounterDetails = () => {
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-muted-foreground">
                 {t("end_date")}:
               </span>
-              <div className="text-sm text-gray-950 font-semibold">
+              <div className="text-sm text-foreground font-semibold">
                 {encounter.period.end ? (
                   <>
                     {format(encounter.period.end, "dd MMM yyyy")},{" "}
-                    <span className="text-gray-600">
+                    <span className="text-soft-foreground">
                       {format(encounter.period.end, "hh:mma")}
                     </span>
                   </>
@@ -213,16 +218,16 @@ export const SummaryPanelEncounterDetails = () => {
             </div>
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-muted-foreground">
               {t("account")}:
             </span>
-            <div className="text-sm text-gray-950 font-semibold">
+            <div className="text-sm text-foreground font-semibold">
               {account?.results[0]?.name || "--"}
             </div>
           </div>
 
           <div className="flex flex-row gap-2">
-            <div className="text-sm text-gray-950 font-semibold flex flex-wrap gap-6">
+            <div className="text-sm text-foreground font-semibold flex flex-wrap gap-6">
               {patient?.instance_identifiers
                 ?.filter(({ config }) => !config.config.auto_maintained)
                 .map((identifier) => (
@@ -230,7 +235,7 @@ export const SummaryPanelEncounterDetails = () => {
                     key={identifier.config.id}
                     className="flex flex-col items-start"
                   >
-                    <span className="text-gray-600 md:w-auto">
+                    <span className="text-soft-foreground md:w-auto">
                       {identifier.config.config.display}:{" "}
                     </span>
                     <span className="font-semibold">{identifier.value}</span>
@@ -241,7 +246,7 @@ export const SummaryPanelEncounterDetails = () => {
 
           {encounter.care_team.length > 0 && (
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-muted-foreground">
                 {t("care_team")}:
               </span>
               <div className="flex flex-wrap items-center gap-2">
@@ -251,12 +256,12 @@ export const SummaryPanelEncounterDetails = () => {
                 ).map((member) => (
                   <div
                     key={member.member.id}
-                    className="flex flex-col px-2 py-1 rounded-lg border border-gray-200 bg-gray-100"
+                    className="flex flex-col px-2 py-1 rounded-lg border border-border bg-muted-background"
                   >
-                    <span className="text-sm md:text-base font-medium text-gray-950">
+                    <span className="text-sm md:text-base font-medium text-foreground">
                       {formatName(member.member)}
                     </span>
-                    <span className="text-xs md:text-sm text-gray-600">
+                    <span className="text-xs md:text-sm text-soft-foreground">
                       {member.role.display}
                     </span>
                   </div>
@@ -282,14 +287,14 @@ export const SummaryPanelEncounterDetails = () => {
       {canWriteSelectedEncounter && (
         <Button
           variant="outline"
-          className="sm:hidden w-full text-gray-950"
+          className="sm:hidden w-full text-foreground"
           asChild
         >
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
           >
-            <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
-            <span className="text-gray-950">{t("update_encounter")}</span>
+            <SquarePen className="size-3 text-foreground" strokeWidth={1.5} />
+            <span className="text-foreground">{t("update_encounter")}</span>
           </Link>
         </Button>
       )}

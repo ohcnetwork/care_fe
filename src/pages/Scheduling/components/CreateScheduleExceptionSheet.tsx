@@ -205,7 +205,7 @@ export default function CreateScheduleExceptionSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[45rem]">
+      <SheetContent className="flex min-w-full flex-col bg-muted-background sm:min-w-[45rem]">
         <SheetHeader>
           <SheetTitle>{t("add_schedule_exceptions")}</SheetTitle>
           <SheetDescription>
@@ -214,7 +214,7 @@ export default function CreateScheduleExceptionSheet({
         </SheetHeader>
 
         <div className="-mx-6 mb-16 overflow-auto px-6 pb-16 pt-6">
-          <div className="rounded-md bg-white p-4 shadow-sm">
+          <div className="rounded-md bg-card p-4 shadow-sm">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}

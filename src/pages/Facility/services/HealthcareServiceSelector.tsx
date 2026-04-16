@@ -105,7 +105,9 @@ export const HealthcareServiceSelector = ({
           <span className="truncate">{selected.name}</span>
         </div>
       ) : (
-        <span className="text-gray-400">{t("select_healthcare_service")}</span>
+        <span className="text-placeholder-foreground">
+          {t("select_healthcare_service")}
+        </span>
       )}
       <CaretDownIcon className="ml-auto" />
     </Button>
@@ -172,7 +174,7 @@ export const HealthcareServiceSelector = ({
                     {service.name}
                   </span>
                   {service.extra_details && (
-                    <span className="text-xs text-gray-500 truncate">
+                    <span className="text-xs text-muted-foreground truncate">
                       {service.extra_details}
                     </span>
                   )}

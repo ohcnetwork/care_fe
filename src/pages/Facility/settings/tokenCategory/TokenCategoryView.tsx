@@ -29,17 +29,17 @@ function LoadingSkeleton() {
     <div className="container mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <div className="h-8 w-48 animate-pulse rounded-md bg-gray-200" />
-          <div className="h-4 w-32 animate-pulse rounded-md bg-gray-200" />
+          <div className="h-8 w-48 animate-pulse rounded-md bg-strong-background" />
+          <div className="h-4 w-32 animate-pulse rounded-md bg-strong-background" />
         </div>
       </div>
       <div className="space-y-6">
-        <div className="rounded-lg border border-gray-200 p-6">
+        <div className="rounded-lg border border-border p-6">
           <div className="space-y-4">
-            <div className="h-6 w-32 animate-pulse rounded-md bg-gray-200" />
+            <div className="h-6 w-32 animate-pulse rounded-md bg-strong-background" />
             <div className="space-y-2">
-              <div className="h-4 w-full animate-pulse rounded-md bg-gray-200" />
-              <div className="h-4 w-3/4 animate-pulse rounded-md bg-gray-200" />
+              <div className="h-4 w-full animate-pulse rounded-md bg-strong-background" />
+              <div className="h-4 w-3/4 animate-pulse rounded-md bg-strong-background" />
             </div>
           </div>
         </div>
@@ -161,7 +161,7 @@ export default function TokenCategoryView({
               </Badge>
             </div>
             {tokenCategory.shorthand && (
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-1 text-sm text-soft-foreground">
                 {t("shorthand")}: {tokenCategory.shorthand}
               </p>
             )}
@@ -199,17 +199,25 @@ export default function TokenCategoryView({
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-gray-500">{t("name")}</p>
+              <p className="text-sm text-muted-foreground">{t("name")}</p>
               <p className="font-medium">{tokenCategory.name}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">{t("resource_type")}</p>
-              <p className="text-gray-700">{t(tokenCategory.resource_type)}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("resource_type")}
+              </p>
+              <p className="text-muted-foreground">
+                {t(tokenCategory.resource_type)}
+              </p>
             </div>
             {tokenCategory.shorthand && (
               <div>
-                <p className="text-sm text-gray-500">{t("shorthand")}</p>
-                <p className="text-gray-700">{tokenCategory.shorthand}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("shorthand")}
+                </p>
+                <p className="text-muted-foreground">
+                  {tokenCategory.shorthand}
+                </p>
               </div>
             )}
           </CardContent>

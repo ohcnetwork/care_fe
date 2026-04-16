@@ -29,7 +29,7 @@ export const ScheduleResourceIcon = ({
     case SchedulableResourceType.Location: {
       const IconComponent = LocationTypeIcons[resource.resource.form];
       return (
-        <div className="p-2 bg-gray-100 flex justify-center rounded-lg items-center">
+        <div className="p-2 bg-muted-background flex justify-center rounded-lg items-center">
           <IconComponent className={cn("size-5", className)} />
         </div>
       );
@@ -40,7 +40,7 @@ export const ScheduleResourceIcon = ({
       const getIconName = (name: string): DuoToneIconName =>
         `d-${name}` as DuoToneIconName;
       return (
-        <div className="p-2 bg-gray-100 rounded-lg flex items-center justify-center">
+        <div className="p-2 bg-muted-background rounded-lg flex items-center justify-center">
           <CareIcon
             icon={
               resource.resource.styling_metadata?.careIcon

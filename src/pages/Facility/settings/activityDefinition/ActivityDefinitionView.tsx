@@ -52,8 +52,8 @@ function CodeDisplay({ code }: { code: Code | null }) {
   return (
     <div className="space-y-1">
       <p className="text-sm font-medium">{code.display}</p>
-      <p className="text-xs text-gray-500">{code.system}</p>
-      <p className="text-xs text-gray-500">{code.code}</p>
+      <p className="text-xs text-muted-foreground">{code.system}</p>
+      <p className="text-xs text-muted-foreground">{code.code}</p>
     </div>
   );
 }
@@ -162,7 +162,7 @@ export default function ActivityDefinitionView({
                 {t(definition.status)}
               </Badge>
             </div>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm text-soft-foreground">
               {definition.code.system} | {definition.code.code}
             </p>
           </div>
@@ -217,16 +217,18 @@ export default function ActivityDefinitionView({
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-gray-500">{t("category")}</p>
+              <p className="text-sm text-muted-foreground">{t("category")}</p>
               <p className="font-medium">{definition.category.title}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">{t("description")}</p>
-              <p className="text-gray-700">{definition.description}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("description")}
+              </p>
+              <p className="text-muted-foreground">{definition.description}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">{t("usage")}</p>
-              <p className="text-gray-700">{definition.usage}</p>
+              <p className="text-sm text-muted-foreground">{t("usage")}</p>
+              <p className="text-muted-foreground">{definition.usage}</p>
             </div>
           </CardContent>
         </Card>
@@ -238,19 +240,25 @@ export default function ActivityDefinitionView({
           <CardContent className="space-y-6">
             <div className="grid gap-6">
               <div>
-                <p className="mb-2 text-sm text-gray-500">{t("code")}</p>
-                <div className="rounded-lg border bg-gray-50/50 p-3">
+                <p className="mb-2 text-sm text-muted-foreground">
+                  {t("code")}
+                </p>
+                <div className="rounded-lg border bg-soft-background/50 p-3">
                   <CodeDisplay code={definition.code} />
                 </div>
               </div>
               <div>
-                <p className="mb-1 text-sm text-gray-500">{t("kind")}</p>
+                <p className="mb-1 text-sm text-muted-foreground">
+                  {t("kind")}
+                </p>
                 <p className="font-medium">{t(definition.kind)}</p>
               </div>
               {definition.body_site && (
                 <div>
-                  <p className="mb-2 text-sm text-gray-500">{t("body_site")}</p>
-                  <div className="rounded-lg border bg-gray-50/50 p-3">
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    {t("body_site")}
+                  </p>
+                  <div className="rounded-lg border bg-soft-background/50 p-3">
                     <CodeDisplay code={definition.body_site} />
                   </div>
                 </div>
@@ -272,7 +280,7 @@ export default function ActivityDefinitionView({
                 {definition.specimen_requirements.map((specimen) => (
                   <div
                     key={specimen.id}
-                    className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
+                    className="rounded-lg border bg-soft-background/50 p-4 transition-colors hover:bg-soft-background"
                   >
                     <div className="space-y-2">
                       <div className="flex items-center gap-1">
@@ -285,7 +293,7 @@ export default function ActivityDefinitionView({
                           <ExternalLinkIcon className="size-3" />
                         </Link>
                       </div>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-soft-foreground">
                         {specimen.description}
                       </p>
                     </div>
@@ -310,7 +318,7 @@ export default function ActivityDefinitionView({
                   (observation) => (
                     <div
                       key={observation.id}
-                      className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
+                      className="rounded-lg border bg-soft-background/50 p-4 transition-colors hover:bg-soft-background"
                     >
                       <div className="space-y-2">
                         <div className="flex items-center gap-1">
@@ -323,12 +331,14 @@ export default function ActivityDefinitionView({
                             <ExternalLinkIcon className="size-3" />
                           </Link>
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-soft-foreground">
                           {observation.description}
                         </p>
                         <Separator />
                         <div className="pt-2">
-                          <p className="text-sm text-gray-500">{t("code")}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {t("code")}
+                          </p>
                           <CodeDisplay code={observation.code} />
                         </div>
                       </div>
@@ -353,7 +363,7 @@ export default function ActivityDefinitionView({
                 {definition.charge_item_definitions.map((chargeItem) => (
                   <div
                     key={chargeItem.slug}
-                    className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
+                    className="rounded-lg border bg-soft-background/50 p-4 transition-colors hover:bg-soft-background"
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-4">
@@ -372,7 +382,7 @@ export default function ActivityDefinitionView({
                         />
                       </div>
                       {chargeItem.description && (
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-soft-foreground">
                           {chargeItem.description}
                         </p>
                       )}
@@ -393,7 +403,7 @@ export default function ActivityDefinitionView({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50">
+              <div className="rounded-lg border bg-soft-background/50 p-4 transition-colors hover:bg-soft-background">
                 <div className="flex items-start gap-3">
                   <div className="shrink-0 flex items-center justify-center size-10 rounded-lg bg-primary-100 text-primary-700">
                     <CareIcon
@@ -413,7 +423,7 @@ export default function ActivityDefinitionView({
                       {definition.healthcare_service.name}
                     </p>
                     {definition.healthcare_service.extra_details && (
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-soft-foreground">
                         {definition.healthcare_service.extra_details}
                       </p>
                     )}
@@ -437,12 +447,12 @@ export default function ActivityDefinitionView({
                 {definition.locations.map((location) => (
                   <div
                     key={location.id}
-                    className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
+                    className="rounded-lg border bg-soft-background/50 p-4 transition-colors hover:bg-soft-background"
                   >
                     <div className="space-y-2">
                       <p className="font-medium">{location.name}</p>
                       {location.description && (
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-soft-foreground">
                           {location.description}
                         </p>
                       )}
@@ -467,7 +477,7 @@ export default function ActivityDefinitionView({
                 {definition.diagnostic_report_codes.map((code, index) => (
                   <div
                     key={index}
-                    className="rounded-lg border bg-gray-50/50 p-2 transition-colors hover:bg-gray-50"
+                    className="rounded-lg border bg-soft-background/50 p-2 transition-colors hover:bg-soft-background"
                   >
                     <div className="space-y-2">
                       <div className="pt-2">
@@ -487,7 +497,7 @@ export default function ActivityDefinitionView({
               <CardTitle>{t("derived_from")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-700 break-all">
+              <p className="text-sm text-muted-foreground break-all">
                 {definition.derived_from_uri}
               </p>
             </CardContent>

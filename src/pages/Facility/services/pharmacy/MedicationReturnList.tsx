@@ -80,7 +80,7 @@ export default function MedicationReturnList({
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("medication_return")}
             </h1>
           </div>
@@ -102,7 +102,7 @@ export default function MedicationReturnList({
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                  className="border-b-2 px-2 sm:px-4 py-2 text-soft-foreground hover:text-foreground data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
                 >
                   {t(tab.label)}
                 </TabsTrigger>
@@ -123,7 +123,7 @@ export default function MedicationReturnList({
                 })
               }
               placeholder={t("filter_by_identifier")}
-              className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+              className="w-full sm:w-auto rounded-md h-9 text-muted-foreground shadow-sm"
               patientId={qParams.patient_external_id}
               patientName={qParams.patient_name}
             />
@@ -195,7 +195,7 @@ function MedicationReturnTable({
             <TableCell className="font-medium">{delivery.name}</TableCell>
             <TableCell>{delivery.patient?.name}</TableCell>
             <TableCell>{delivery.destination.name}</TableCell>
-            <TableCell className="text-sm text-gray-600">
+            <TableCell className="text-sm text-soft-foreground">
               {formatDateTime(delivery.created_date)}
             </TableCell>
             <TableCell>

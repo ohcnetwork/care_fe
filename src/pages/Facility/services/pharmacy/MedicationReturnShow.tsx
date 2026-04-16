@@ -296,10 +296,10 @@ export default function MedicationReturnShow({
       <Page title={t("medication_return")} hideTitleOnPage>
         <div className="space-y-4">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-8 bg-strong-background rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-strong-background rounded w-1/2 mb-2"></div>
+            <div className="h-4 bg-strong-background rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-strong-background rounded w-1/4"></div>
           </div>
         </div>
       </Page>
@@ -311,7 +311,9 @@ export default function MedicationReturnShow({
       <Page title={t("medication_return")} hideTitleOnPage>
         <div className="space-y-4">
           <div className="text-center py-8">
-            <p className="text-gray-500">{t("medication_return_not_found")}</p>
+            <p className="text-muted-foreground">
+              {t("medication_return_not_found")}
+            </p>
           </div>
         </div>
       </Page>
@@ -336,14 +338,16 @@ export default function MedicationReturnShow({
             <div>
               <h4>{deliveryOrder.name}</h4>
               {deliveryOrder.patient && (
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-muted-foreground">
                   <Trans
                     i18nKey="medication_return_for_patient"
                     values={{
                       patient: deliveryOrder.patient.name,
                     }}
                     components={{
-                      strong: <span className="font-semibold text-gray-700" />,
+                      strong: (
+                        <span className="font-semibold text-muted-foreground" />
+                      ),
                     }}
                   />
                 </p>
@@ -449,10 +453,10 @@ export default function MedicationReturnShow({
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
               {deliveryOrder.patient && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-muted-foreground">
                     {t("patient")}
                   </label>
-                  <div className="text-lg font-semibold text-gray-950">
+                  <div className="text-lg font-semibold text-foreground">
                     <Button
                       variant="link"
                       className="p-0 h-auto text-lg font-semibold"
@@ -467,16 +471,16 @@ export default function MedicationReturnShow({
               )}
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("return_to")}
                 </label>
-                <div className="text-lg font-semibold text-gray-950">
+                <div className="text-lg font-semibold text-foreground">
                   {deliveryOrder.destination.name}
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("status")}
                 </label>
                 <div>
@@ -491,7 +495,7 @@ export default function MedicationReturnShow({
 
               {deliveryOrder.note && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-muted-foreground">
                     {t("note")}
                   </label>
                   <p className="text-sm whitespace-pre-wrap">
@@ -502,7 +506,7 @@ export default function MedicationReturnShow({
 
               {deliveryOrder.patient_invoice_id && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-muted-foreground">
                     {t("invoice")}
                   </label>
                   <div>
@@ -608,8 +612,8 @@ export default function MedicationReturnShow({
               <div className="space-y-2">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-strong-background rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-strong-background rounded w-1/2"></div>
                   </div>
                 ))}
               </div>
@@ -698,7 +702,7 @@ export default function MedicationReturnShow({
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-6 bg-gray-50 p-4 rounded-md">
+            <div className="space-y-6 bg-soft-background p-4 rounded-md">
               <div className="space-y-4">
                 <Label>{t("receiving_status")}</Label>
                 <RadioGroup
@@ -710,7 +714,7 @@ export default function MedicationReturnShow({
                 >
                   <Label
                     htmlFor={SupplyDeliveryStatus.completed}
-                    className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-gray-300 bg-white hover:border-gray-400"
+                    className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-strong-border bg-background hover:border-stronger-border"
                   >
                     <RadioGroupItem
                       value={SupplyDeliveryStatus.completed}
@@ -722,7 +726,7 @@ export default function MedicationReturnShow({
                   </Label>
                   <Label
                     htmlFor={SupplyDeliveryStatus.abandoned}
-                    className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-gray-300 bg-white hover:border-gray-400"
+                    className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-strong-border bg-background hover:border-stronger-border"
                   >
                     <RadioGroupItem
                       value={SupplyDeliveryStatus.abandoned}
@@ -750,7 +754,7 @@ export default function MedicationReturnShow({
                   >
                     <Label
                       htmlFor={SupplyDeliveryCondition.normal}
-                      className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-gray-300 bg-white hover:border-gray-400"
+                      className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-strong-border bg-background hover:border-stronger-border"
                     >
                       <RadioGroupItem
                         value={SupplyDeliveryCondition.normal}
@@ -762,7 +766,7 @@ export default function MedicationReturnShow({
                     </Label>
                     <Label
                       htmlFor={SupplyDeliveryCondition.damaged}
-                      className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-gray-300 bg-white hover:border-gray-400"
+                      className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-strong-border bg-background hover:border-stronger-border"
                     >
                       <RadioGroupItem
                         value={SupplyDeliveryCondition.damaged}

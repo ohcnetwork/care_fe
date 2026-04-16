@@ -21,8 +21,8 @@ export const DepartmentsAndTeams = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2 p-1 space-y-1">
-      <div className="flex justify-between items-center pl-2 text-gray-950">
+    <div className="bg-muted-background rounded-md w-full border border-border pt-2 p-1 space-y-1">
+      <div className="flex justify-between items-center pl-2 text-foreground">
         <span className=" font-semibold">{t("departments_and_teams")}</span>
         {canEdit && (
           <Button variant="ghost" size="sm" onClick={manageDepartments}>
@@ -30,7 +30,7 @@ export const DepartmentsAndTeams = () => {
           </Button>
         )}
       </div>
-      <div className="space-y-2 bg-white rounded-md p-2 shadow">
+      <div className="space-y-2 bg-background rounded-md p-2 shadow">
         {encounter.organizations.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {encounter.organizations.map((org) => (

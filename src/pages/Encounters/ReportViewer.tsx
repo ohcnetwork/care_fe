@@ -382,7 +382,7 @@ export default function ReportViewer({
     return (
       <Page title={t("reports")}>
         <EmptyState
-          icon={<FileText className="size-6 text-gray-400" />}
+          icon={<FileText className="size-6 text-placeholder-foreground" />}
           title={t("template_not_found")}
           action={
             <BackButton fallbackUrl="/">
@@ -409,7 +409,7 @@ export default function ReportViewer({
           >
             <ChevronLeft className="size-4" />
           </BackButton>
-          <h3 className="text-gray-800 truncate">{template.name}</h3>
+          <h3 className="text-foreground truncate">{template.name}</h3>
         </div>
       }
       options={
@@ -450,7 +450,7 @@ export default function ReportViewer({
         </div>
       }
     >
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-8rem)] gap-0 mt-2 bg-white rounded-lg border">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-8rem)] gap-0 mt-2 bg-background rounded-lg border">
         {/* Mobile: Drawer trigger */}
         {reports.length > 0 && (
           <div className="lg:hidden mb-2">
@@ -490,11 +490,11 @@ export default function ReportViewer({
             )}
           >
             <div className="flex items-center justify-between px-4 py-3 h-11 border-b">
-              <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                 <History className="size-4" />
                 {t("report_history")}
               </div>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-placeholder-foreground">
                 {reports.length} {t("version")}
               </span>
             </div>
@@ -530,8 +530,8 @@ export default function ReportViewer({
                   )}
                 </Button>
 
-                <div className="flex items-center gap-2 text-sm text-gray-500 min-w-0">
-                  <span className="font-medium text-gray-700 truncate">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+                  <span className="font-medium text-muted-foreground truncate">
                     {selectedReport.name || template.name}
                   </span>
                   {selectedReportIndex === 0 && reports.length > 0 && (
@@ -546,13 +546,15 @@ export default function ReportViewer({
           <div className="flex-1 overflow-hidden flex items-start justify-center">
             {isLoadingDetail && (
               <div className="flex items-center justify-center h-full w-full">
-                <Loader className="size-8 animate-spin text-gray-400" />
+                <Loader className="size-8 animate-spin text-placeholder-foreground" />
               </div>
             )}
 
             {!selectedReportId && !isGenerating && (
               <EmptyState
-                icon={<FileText className="size-6 text-gray-400" />}
+                icon={
+                  <FileText className="size-6 text-placeholder-foreground" />
+                }
                 title={t("no_reports_found")}
                 description={t("no_reports_found_description")}
                 action={
@@ -589,7 +591,9 @@ export default function ReportViewer({
                 title={t("report_preview")}
               >
                 <EmptyState
-                  icon={<FileText className="size-6 text-gray-400" />}
+                  icon={
+                    <FileText className="size-6 text-placeholder-foreground" />
+                  }
                   title={t("pdf_preview_not_supported")}
                   description={t("pdf_preview_not_supported_description")}
                   action={
@@ -626,29 +630,29 @@ function ReportHistoryTrigger({
 
   if (!selectedReport) {
     return (
-      <Card className="relative rounded-md cursor-pointer w-full bg-gray-50 border-gray-200">
+      <Card className="relative rounded-md cursor-pointer w-full bg-soft-background border-border">
         <CardContent className="flex items-center justify-between px-4 py-3 gap-2">
           <div className="flex flex-col items-start gap-1">
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-sm font-medium text-soft-foreground">
               {t("select_report")}
             </span>
           </div>
-          <ChevronDown className="size-5 text-gray-400" />
+          <ChevronDown className="size-5 text-placeholder-foreground" />
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="relative rounded-md cursor-pointer w-full bg-white border-primary-600">
+    <Card className="relative rounded-md cursor-pointer w-full bg-background border-primary-600">
       <CardContent className="flex items-center justify-between px-4 py-3 gap-2">
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
         <div className="flex flex-col items-start gap-1 min-w-0 flex-1">
-          <span className="flex text-sm font-semibold text-gray-900 truncate w-full items-start">
+          <span className="flex text-sm font-semibold text-foreground truncate w-full items-start">
             {selectedReport.name || template.name}
           </span>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               {formatDateTime(selectedReport.created_date)}
             </span>
             {isLatest && (
@@ -658,7 +662,7 @@ function ReportHistoryTrigger({
             )}
           </div>
         </div>
-        <ChevronDown className="size-5 text-gray-400 shrink-0" />
+        <ChevronDown className="size-5 text-placeholder-foreground shrink-0" />
       </CardContent>
     </Card>
   );
@@ -684,8 +688,8 @@ function ReportList({
             key={report.id}
             onClick={() => onSelectReport(report.id)}
             className={cn(
-              "rounded-md relative cursor-pointer transition-colors w-full bg-gray-50 hover:bg-gray-100 shadow-none",
-              isSelected && "bg-white border-primary-600 shadow-md",
+              "rounded-md relative cursor-pointer transition-colors w-full bg-soft-background hover:bg-muted-background shadow-none",
+              isSelected && "bg-background border-primary-600 shadow-md",
             )}
           >
             {isSelected && (
@@ -700,16 +704,16 @@ function ReportList({
               <div className="flex items-center gap-2">
                 <span
                   className={cn(
-                    "text-sm font-medium text-gray-700 truncate",
-                    isSelected && "text-gray-900",
+                    "text-sm font-medium text-muted-foreground truncate",
+                    isSelected && "text-foreground",
                   )}
                 >
                   {report.name}
                 </span>
               </div>
-              <span className="flex gap-1 items-center text-xs text-gray-500">
+              <span className="flex gap-1 items-center text-xs text-muted-foreground">
                 {formatDateTime(report.created_date, "DD MMM YYYY, hh:mm a")}
-                <Dot className="size-2.5 shrink-0 text-gray-700" />
+                <Dot className="size-2.5 shrink-0 text-muted-foreground" />
                 {relativeTime(report.created_date)}
               </span>
             </CardContent>

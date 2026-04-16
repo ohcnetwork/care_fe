@@ -109,7 +109,7 @@ export function ManageQueueFinishedTab({
                       <ExternalLink className="size-3" />
                     </Link>
                   ) : (
-                    <span className="text-gray-500">-</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -123,7 +123,7 @@ export function ManageQueueFinishedTab({
                 </TableCell>
                 <TableCell>
                   {token.sub_queue?.name || (
-                    <span className="text-gray-500">-</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -153,12 +153,12 @@ export function ManageQueueFinishedTab({
           </TableBody>
         </Table>
       ) : (
-        <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-20 border border-gray-100">
-          <DoorOpenIcon className="size-8 text-gray-700" />
-          <span className="text-lg font-semibold text-gray-700">
+        <div className="flex flex-col gap-2 items-center justify-center bg-muted-background rounded-lg py-20 border border-soft-border">
+          <DoorOpenIcon className="size-8 text-muted-foreground" />
+          <span className="text-lg font-semibold text-muted-foreground">
             {t("no_tokens_finished")}
           </span>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-muted-foreground">
             {t("no_patient_is_finished")}
           </span>
         </div>
@@ -246,7 +246,7 @@ function FinishedTokenOptions({
       <DropdownMenu>
         <DropdownMenuTrigger
           disabled={isUpdating}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+          className="p-2 hover:bg-muted-background rounded-md transition-colors"
         >
           <MoreHorizontal className="size-4" />
         </DropdownMenuTrigger>

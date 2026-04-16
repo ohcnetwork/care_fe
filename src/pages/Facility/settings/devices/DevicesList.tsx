@@ -81,7 +81,7 @@ export default function DevicesList({ facilityId }: Props) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
           <PageTitle title={t("devices")} className="mt-2" />
-          <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-gray-200">
+          <Badge className="bg-purple-50 text-purple-700 ml-2 rounded-xl px-3 py-0.5 m-3 w-max border-border">
             {isLoading
               ? t("loading")
               : t("entity_count", {
@@ -138,7 +138,7 @@ export default function DevicesList({ facilityId }: Props) {
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
+          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder={t("search_devices")}
             value={qParams.search_text || ""}
@@ -207,7 +207,7 @@ export default function DevicesList({ facilityId }: Props) {
               ))
             ) : (
               <Card className="col-span-full">
-                <CardContent className="p-6 text-center text-gray-500">
+                <CardContent className="p-6 text-center text-muted-foreground">
                   {qParams.search_text || qParams.care_type
                     ? t("no_devices_matching_filters")
                     : t("no_devices_available")}

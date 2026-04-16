@@ -211,10 +211,10 @@ export default function BedAvailabilityDashboard({
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-foreground">
               {t("bed_availability_dashboard")}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-soft-foreground">
               {facility?.name} - {t("real_time_bed_status")}
             </p>
           </div>
@@ -307,7 +307,7 @@ export default function BedAvailabilityDashboard({
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 size-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-placeholder-foreground size-4" />
           <Input
             type="text"
             placeholder={t("search_wards_units")}
@@ -323,7 +323,7 @@ export default function BedAvailabilityDashboard({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-soft-foreground">
                 {t("total_beds")}
               </CardTitle>
             </CardHeader>
@@ -374,7 +374,7 @@ export default function BedAvailabilityDashboard({
 
         {/* Ward/Unit Cards */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-foreground">
             {t("wards_units")} ({filteredWards.length})
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -386,8 +386,8 @@ export default function BedAvailabilityDashboard({
 
         {filteredWards.length === 0 && (
           <div className="text-center py-12">
-            <Bed className="mx-auto size-12 text-gray-400 mb-4" />
-            <p className="text-gray-600">
+            <Bed className="mx-auto size-12 text-placeholder-foreground mb-4" />
+            <p className="text-soft-foreground">
               {searchQuery || selectedWard !== "all" || selectedStatus !== "all"
                 ? t("no_wards_match_filters")
                 : t("no_wards_found")}
@@ -440,19 +440,23 @@ function WardCard({ ward }: WardCardProps) {
                 <div className="text-lg font-bold text-green-600">
                   {ward.available}
                 </div>
-                <div className="text-xs text-gray-600">{t("available")}</div>
+                <div className="text-xs text-soft-foreground">
+                  {t("available")}
+                </div>
               </div>
               <div>
                 <div className="text-lg font-bold text-blue-600">
                   {ward.occupied}
                 </div>
-                <div className="text-xs text-gray-600">{t("occupied")}</div>
+                <div className="text-xs text-soft-foreground">
+                  {t("occupied")}
+                </div>
               </div>
               <div>
-                <div className="text-lg font-bold text-gray-600">
+                <div className="text-lg font-bold text-soft-foreground">
                   {ward.total}
                 </div>
-                <div className="text-xs text-gray-600">{t("total")}</div>
+                <div className="text-xs text-soft-foreground">{t("total")}</div>
               </div>
             </div>
 
@@ -462,7 +466,7 @@ function WardCard({ ward }: WardCardProps) {
                 <span>{t("occupancy_rate")}</span>
                 <span className="font-medium">{occupancyRate}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-strong-background rounded-full h-2">
                 <div
                   className={cn(
                     "h-2 rounded-full transition-all duration-300",
@@ -502,7 +506,7 @@ function WardCard({ ward }: WardCardProps) {
               return (
                 <div
                   key={bed.id}
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50"
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-soft-background"
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative size-8">
@@ -515,7 +519,7 @@ function WardCard({ ward }: WardCardProps) {
                     <div>
                       <div className="font-medium">{bed.name}</div>
                       {bed.current_encounter && (
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-soft-foreground">
                           {t("admitted")}
                         </div>
                       )}

@@ -105,7 +105,7 @@ export const CodingField = ({
             "shrink-0 sm:hidden",
             isVerified
               ? "bg-transparent border-none shadow-none hover:bg-transparent hover:border-none hover:shadow-none"
-              : "hover:border-gray-400 hover:bg-gray-100",
+              : "hover:border-stronger-border hover:bg-muted-background",
           )}
         >
           {isVerified ? (
@@ -138,7 +138,7 @@ export const CodingField = ({
               <Input
                 {...field}
                 placeholder={t("unverified")}
-                className={!field.value ? "text-gray-500" : ""}
+                className={!field.value ? "text-muted-foreground" : ""}
                 readOnly
               />
             </FormControl>
@@ -157,7 +157,7 @@ export const CodingField = ({
           "hidden sm:flex shrink-0 items-center",
           isVerified
             ? "bg-transparent border-none shadow-none hover:bg-transparent hover:border-none hover:shadow-none"
-            : "hover:border-gray-400 hover:bg-gray-100",
+            : "hover:border-stronger-border hover:bg-muted-background",
         )}
       >
         {isVerified ? (

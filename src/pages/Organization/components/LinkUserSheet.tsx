@@ -148,7 +148,7 @@ export default function LinkUserSheet({
           />
           {selectedUser && (
             <div className="space-y-4">
-              <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+              <div className="rounded-lg border border-border p-4 space-y-4">
                 <div className="flex gap-4 flex-row">
                   <Avatar
                     name={formatName(selectedUser, true)}
@@ -162,9 +162,9 @@ export default function LinkUserSheet({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
                   <div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {t("username")}
                     </span>
                     <p className="text-sm font-medium truncate">
@@ -172,7 +172,7 @@ export default function LinkUserSheet({
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {isServiceAccount
                         ? t("service_account_type")
                         : t("user_type")}
@@ -182,7 +182,7 @@ export default function LinkUserSheet({
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {t("phone_number")}
                     </span>
                     <p className="text-sm font-medium truncate">

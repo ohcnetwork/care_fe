@@ -81,7 +81,7 @@ export function ServiceSwitcher() {
         <div className="w-full px-2">
           <Button
             variant="ghost"
-            className="w-full flex items-center justify-between gap-3 py-6 px-2 rounded-md bg-white border border-gray-200"
+            className="w-full flex items-center justify-between gap-3 py-6 px-2 rounded-md bg-background border border-border"
             onClick={() => setOpenDialog(true)}
           >
             <div className="flex min-w-0 items-center gap-2">
@@ -89,10 +89,10 @@ export function ServiceSwitcher() {
               <div className="min-w-0 flex-1">
                 <TooltipComponent content={selectedService?.name}>
                   <div className="flex min-w-0 flex-col items-start">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {t("current_service")}
                     </span>
-                    <span className="w-full truncate text-sm font-medium text-gray-900">
+                    <span className="w-full truncate text-sm font-medium text-foreground">
                       {selectedService?.name}
                     </span>
                   </div>
@@ -188,7 +188,7 @@ export function ServiceSelectorDialog({
           <DialogTitle>{getCurrentService()}</DialogTitle>
         </DialogHeader>
         <Command className="pt-3 pb-2" shouldFilter={false}>
-          <div className="border border-gray-200">
+          <div className="border border-border">
             <CommandInput
               className="border-0 ring-0"
               placeholder={t("search")}
@@ -207,8 +207,8 @@ export function ServiceSelectorDialog({
               <CommandEmpty>
                 {isLoading ? (
                   <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                    <span className="ml-2 text-sm text-gray-500">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    <span className="ml-2 text-sm text-muted-foreground">
                       {t("loading")}
                     </span>
                   </div>

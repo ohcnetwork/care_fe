@@ -127,7 +127,7 @@ export function LandingPage() {
           <div className="flex justify-end items-center gap-2">
             <Button
               variant="ghost"
-              className="text-sm font-medium hover:bg-gray-100 px-6"
+              className="text-sm font-medium hover:bg-muted-background px-6"
               onClick={() => navigate("/patient/home")}
             >
               {t("home")}
@@ -139,7 +139,7 @@ export function LandingPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem className="text-xs text-gray-500">
+                <DropdownMenuItem className="text-xs text-muted-foreground">
                   <span className="font-medium">{tokenData.phoneNumber}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -179,7 +179,7 @@ export function LandingPage() {
         </div>
 
         {/* Search Section */}
-        <div className="w-full max-w-[620px] mx-auto px-4 sm:px-6 py-4 bg-gray-100 rounded-md">
+        <div className="w-full max-w-[620px] mx-auto px-4 sm:px-6 py-4 bg-muted-background rounded-md">
           <div className="text-center mb-4 space-x-1">
             <span className="text-sm md:text-base block sm:inline">
               <Trans
@@ -192,9 +192,12 @@ export function LandingPage() {
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-2">
             <div className="relative w-full sm:w-9/12" data-search-container>
-              <div className="rounded-lg border border-gray-200 hover:shadow-lg transition-shadow">
-                <div className="flex items-center px-2 bg-white rounded-lg">
-                  <CareIcon icon="l-search" className="size-5 text-gray-400" />
+              <div className="rounded-lg border border-border hover:shadow-lg transition-shadow">
+                <div className="flex items-center px-2 bg-background rounded-lg">
+                  <CareIcon
+                    icon="l-search"
+                    className="size-5 text-placeholder-foreground"
+                  />
                   <input
                     ref={inputRef}
                     type="text"
@@ -208,7 +211,7 @@ export function LandingPage() {
                     placeholder={t(`landing_search_placeholder`, {
                       orgType,
                     })}
-                    className="w-full border-0 bg-transparent px-3 py-2 text-sm outline-hidden placeholder:text-gray-500 cursor-pointer shadow-none ring-0"
+                    className="w-full border-0 bg-transparent px-3 py-2 text-sm outline-hidden placeholder:text-muted-foreground cursor-pointer shadow-none ring-0"
                   />
                   {(searchQuery || selectedOrganization) && (
                     <Button
@@ -222,14 +225,14 @@ export function LandingPage() {
                     >
                       <CareIcon
                         icon="l-times"
-                        className="size-4 text-gray-400"
+                        className="size-4 text-placeholder-foreground"
                       />
                     </Button>
                   )}
                 </div>
               </div>
               {isOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 rounded-md border border-gray-200 bg-white shadow-lg z-10">
+                <div className="absolute top-full left-0 right-0 mt-1 rounded-md border border-border bg-background shadow-lg z-10">
                   <Command>
                     <CommandGroup className="overflow-y-auto max-h-60 md:max-h-80">
                       {filteredOrganizations.length === 0 ? (
@@ -273,12 +276,12 @@ export function LandingPage() {
 
         {/* Login Section */}
         {!isLoggedIn && (
-          <div className="w-full max-w-[620px] flex flex-col items-center justify-center bg-gray-100 p-4 rounded-lg">
+          <div className="w-full max-w-[620px] flex flex-col items-center justify-center bg-muted-background p-4 rounded-lg">
             <div className="text-sm font-medium mb-4 md:mb-6 text-center">
               {t("login_already_registered")}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-full justify-center">
-              <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/staff_background.png')] bg-auto bg-center bg-no-repeat">
+              <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-card hover:shadow-md transition-all bg-[url('/images/staff_background.png')] bg-auto bg-center bg-no-repeat">
                 <div className="rounded-full bg-green-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
                   <CareIcon
                     icon="d-health-worker"
@@ -298,7 +301,7 @@ export function LandingPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/patient_background.png')] bg-auto bg-center bg-no-repeat">
+              <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-card hover:shadow-md transition-all bg-[url('/images/patient_background.png')] bg-auto bg-center bg-no-repeat">
                 <div className="rounded-full bg-indigo-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
                   <CareIcon
                     icon="d-patient"

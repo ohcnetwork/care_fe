@@ -116,7 +116,7 @@ export const Authenticate = () => {
           <div className="w-full max-w-[400px] space-y-6">
             <Card className="mx-4">
               <CardHeader className="space-y-1 px-4">
-                <CardTitle className="text-3xl font-bold text-black text-center">
+                <CardTitle className="text-3xl font-bold text-foreground text-center">
                   {t("authenticate_your_account")}
                 </CardTitle>
               </CardHeader>
@@ -180,7 +180,7 @@ export const Authenticate = () => {
                     )}
 
                     <div className="mt-5 text-center">
-                      <p className="text-sm text-gray-500 font-base">
+                      <p className="text-sm text-muted-foreground font-base">
                         {currentMethod === "backup"
                           ? ""
                           : t("cant_access_code")}

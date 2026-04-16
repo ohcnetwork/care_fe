@@ -326,7 +326,7 @@ export default function LocationForm({
             control={form.control}
             name="enableBulkCreation"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-border p-4">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -335,7 +335,7 @@ export default function LocationForm({
                 </FormControl>
                 <div className="space-y-1 leading-none">
                   <FormLabel>{t("create_multiple_beds")}</FormLabel>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {t("create_multiple_beds_description")}
                   </p>
                 </div>
@@ -400,7 +400,7 @@ export default function LocationForm({
                 control={form.control}
                 name="customizeNames"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-border p-4">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -409,7 +409,7 @@ export default function LocationForm({
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>{t("customize_bed_names")}</FormLabel>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {t("customize_bed_names_description")}
                       </p>
                     </div>
@@ -418,7 +418,7 @@ export default function LocationForm({
               />
 
               {form.watch("customizeNames") ? (
-                <div className="space-y-4 border border-gray-200 rounded-md p-4">
+                <div className="space-y-4 border border-border rounded-md p-4">
                   <div className="flex justify-between items-center flex-wrap gap-2">
                     <h4 className="font-medium">{t("individual_bed_names")}</h4>
                     <Button
@@ -470,11 +470,11 @@ export default function LocationForm({
               ) : (
                 <div className="rounded-md p-4">
                   <h4 className="font-medium mb-2">{t("preview_bed_names")}</h4>
-                  <div className="text-sm text-gray-700 flex flex-wrap gap-2">
+                  <div className="text-sm text-muted-foreground flex flex-wrap gap-2">
                     {bedFields.map((field) => (
                       <div
                         key={field.id}
-                        className="px-3 py-1 bg-gray-100 rounded-md shadow-xs"
+                        className="px-3 py-1 bg-muted-background rounded-md shadow-xs"
                       >
                         {field.name}
                       </div>

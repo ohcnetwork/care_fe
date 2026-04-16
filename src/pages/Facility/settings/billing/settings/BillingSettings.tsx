@@ -48,12 +48,12 @@ export function BillingSettings() {
   return (
     <Page title={t("invoice_number_expression")}>
       <section className="w-full max-w-5xl mx-auto mt-8">
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 flex flex-col gap-6">
+        <div className="bg-card border border-border rounded-xl shadow-sm p-8 flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-foreground">
               {t("invoice_number_expression")}
             </h2>
-            <div className="text-gray-500 text-sm mt-1">
+            <div className="text-muted-foreground text-sm mt-1">
               <div className="font-semibold mb-1">
                 {t("invoice_number_expression_supported_variables")}
               </div>
@@ -66,7 +66,7 @@ export function BillingSettings() {
                 {t("invoice_number_expression_other_characters")}
               </div>
               <div className="mb-1">{t("arithmetic_help")}</div>
-              <pre className="bg-gray-100 rounded px-3 py-2 text-xs font-mono text-gray-700 overflow-x-auto">
+              <pre className="bg-muted-background rounded px-3 py-2 text-xs font-mono text-muted-foreground overflow-x-auto">
                 {t("invoice_number_expression_example_value")}
               </pre>
             </div>
@@ -106,9 +106,9 @@ export function BillingSettings() {
               </>
             ) : (
               <>
-                <span className="font-mono bg-gray-100 px-3 py-2 rounded text-base border border-gray-200 min-w-[200px] text-gray-800 w-full block">
+                <span className="font-mono bg-muted-background px-3 py-2 rounded text-base border border-border min-w-[200px] text-foreground w-full block">
                   {facility.invoice_number_expression || (
-                    <span className="text-gray-400">-</span>
+                    <span className="text-placeholder-foreground">-</span>
                   )}
                 </span>
                 <Button

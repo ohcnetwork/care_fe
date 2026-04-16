@@ -157,7 +157,7 @@ export const FormDialog = ({
         open={open}
         onOpenChange={setOpen}
       >
-        <div className="border-b border-gray-100 shadow-xs">
+        <div className="border-b border-soft-border shadow-xs">
           <CommandInput
             placeholder={t("search_forms")}
             className="border-none focus:ring-0"
@@ -177,7 +177,7 @@ export const FormDialog = ({
                   <CommandItem
                     key={questionnaire.slug}
                     value={`${questionnaire.slug} - ${questionnaire.title}`}
-                    className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
+                    className="rounded-md cursor-pointer hover:bg-muted-background flex justify-between aria-selected:bg-muted-background"
                     onSelect={() => {
                       navigate(
                         `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.slug}`,

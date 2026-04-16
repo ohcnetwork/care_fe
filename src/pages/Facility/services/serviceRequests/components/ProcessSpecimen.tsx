@@ -134,18 +134,18 @@ export function ProcessSpecimen({
                 </div>
                 {process.method &&
                   process.description !== process.method.display && (
-                    <div className="text-sm text-gray-600 mt-0.5">
+                    <div className="text-sm text-soft-foreground mt-0.5">
                       {process.description}
                     </div>
                   )}
               </div>
               <div>
                 {process.performer_object && (
-                  <div className="text-sm text-gray-600 mt-0.5">
+                  <div className="text-sm text-soft-foreground mt-0.5">
                     {t("performed_by")}: {formatName(process.performer_object)}
                   </div>
                 )}
-                <div className="text-sm text-gray-600 mt-0.5">
+                <div className="text-sm text-soft-foreground mt-0.5">
                   {t("performed_on")}:{" "}
                   {process.time_date_time
                     ? new Date(process.time_date_time).toLocaleString("en-US", {
@@ -211,8 +211,8 @@ export function ProcessSpecimen({
           </DialogHeader>
           <div className="space-y-4 py-4">
             {noteDialog.method && (
-              <div className="rounded-md bg-gray-50 p-3">
-                <Label className="text-sm text-gray-600">
+              <div className="rounded-md bg-soft-background p-3">
+                <Label className="text-sm text-soft-foreground">
                   {t("processing_method")}
                 </Label>
                 <div className="font-medium mt-1">
@@ -233,7 +233,7 @@ export function ProcessSpecimen({
                 placeholder={t("process_specimen__textarea_placeholder")}
                 className="min-h-[100px]"
               />
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {t("process_specimen__dialog_text_area_description")}
               </p>
             </div>

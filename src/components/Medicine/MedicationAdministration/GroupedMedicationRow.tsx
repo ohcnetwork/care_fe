@@ -96,7 +96,7 @@ const IndividualMedicationRow: React.FC<{
       {/* Medication details - indented */}
       <div
         className={cn(
-          "p-3 pl-12 border-t border-r border-gray-100 bg-gray-50 min-w-0",
+          "p-3 pl-12 border-t border-r border-soft-border bg-soft-background min-w-0",
           isInactive && "opacity-50",
         )}
       >
@@ -104,7 +104,7 @@ const IndividualMedicationRow: React.FC<{
           <DosageInstructionList
             instructions={medication.dosage_instruction}
             className={cn(
-              "text-sm font-medium text-gray-700",
+              "text-sm font-medium text-muted-foreground",
               isInactive && medication.status === "ended" && "line-through",
             )}
             gap="sm"
@@ -125,7 +125,7 @@ const IndividualMedicationRow: React.FC<{
                     </Badge>
                   )}
                   {medication.note && (
-                    <div className="text-xs text-gray-500 mt-0.5 italic wrap-break-word">
+                    <div className="text-xs text-muted-foreground mt-0.5 italic wrap-break-word">
                       {medication.note}
                     </div>
                   )}
@@ -140,7 +140,7 @@ const IndividualMedicationRow: React.FC<{
             {t(medication.status)}
           </Badge>
         </div>
-        <div className="text-xs text-gray-500 mt-0.5">
+        <div className="text-xs text-muted-foreground mt-0.5">
           {t("added_on")}:{" "}
           {format(
             new Date(medication.authored_on || medication.created_date),
@@ -180,10 +180,10 @@ const IndividualMedicationRow: React.FC<{
           <div
             key={`${medication.id}-${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
             className={cn(
-              "p-2 border-t border-r border-gray-100 bg-gray-50",
+              "p-2 border-t border-r border-soft-border bg-soft-background",
               isInactive && "opacity-50",
               hasAdmins && "bg-green-50/50",
-              isLastSlotOfDay && "border-r-4 border-r-gray-200",
+              isLastSlotOfDay && "border-r-4 border-r-border",
             )}
           >
             <div className="flex flex-wrap gap-1">
@@ -229,7 +229,7 @@ const IndividualMedicationRow: React.FC<{
       {/* Actions column */}
       <div
         className={cn(
-          "p-2 flex items-center justify-center border-t border-gray-100 bg-gray-50",
+          "p-2 flex items-center justify-center border-t border-soft-border bg-soft-background",
           isInactive && "opacity-50",
         )}
       >
@@ -296,23 +296,23 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
       {/* Group Header Row */}
       <div
         className={cn(
-          "grid grid-cols-subgrid col-span-full border-t border-gray-200",
-          !group.hasActiveRequests && "bg-gray-50 opacity-60",
+          "grid grid-cols-subgrid col-span-full border-t border-border",
+          !group.hasActiveRequests && "bg-soft-background opacity-60",
         )}
       >
         {/* Product name column */}
-        <div className="p-4 border-r border-gray-200">
+        <div className="p-4 border-r border-border">
           <div className="flex items-start gap-2">
             {hasMultipleRequests ? (
               <CollapsibleTrigger asChild>
                 <button
                   type="button"
-                  className="mt-0.5 p-0.5 rounded hover:bg-gray-200 transition-colors"
+                  className="mt-0.5 p-0.5 rounded hover:bg-strong-background transition-colors"
                 >
                   {isExpanded ? (
-                    <ChevronDown className="size-4 text-gray-500" />
+                    <ChevronDown className="size-4 text-muted-foreground" />
                   ) : (
-                    <ChevronRight className="size-4 text-gray-500" />
+                    <ChevronRight className="size-4 text-muted-foreground" />
                   )}
                 </button>
               </CollapsibleTrigger>
@@ -325,8 +325,9 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
               <div className="flex items-center gap-2 flex-wrap">
                 <span
                   className={cn(
-                    "font-semibold text-gray-900 text-wrap break-all",
-                    !group.hasActiveRequests && "line-through text-gray-500",
+                    "font-semibold text-foreground text-wrap break-all",
+                    !group.hasActiveRequests &&
+                      "line-through text-muted-foreground",
                   )}
                 >
                   {group.productName}
@@ -343,7 +344,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                 <DosageInstructionList
                   instructions={latestActiveRequest.dosage_instruction}
                   className="mt-0.5"
-                  itemClassName="text-sm text-gray-600"
+                  itemClassName="text-sm text-soft-foreground"
                   gap="sm"
                   renderItem={(di) => {
                     const freq = formatFrequency(di);
@@ -351,11 +352,19 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                       <div>
                         <div>
                           {formatDosage(di)}
-                          {freq && <span className="text-gray-400"> · </span>}
+                          {freq && (
+                            <span className="text-placeholder-foreground">
+                              {" "}
+                              ·{" "}
+                            </span>
+                          )}
                           {freq}
                           {di.method?.display && (
                             <>
-                              <span className="text-gray-400"> · </span>
+                              <span className="text-placeholder-foreground">
+                                {" "}
+                                ·{" "}
+                              </span>
                               {di.method.display}
                             </>
                           )}
@@ -366,7 +375,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                           </Badge>
                         )}
                         {latestActiveRequest.note && (
-                          <div className="text-xs text-gray-500 mt-0.5 italic whitespace-pre-wrap">
+                          <div className="text-xs text-muted-foreground mt-0.5 italic whitespace-pre-wrap">
                             {latestActiveRequest.note}
                           </div>
                         )}
@@ -392,7 +401,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
 
               {/* Last administered */}
               {group.lastAdministeredTime && (
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="text-xs text-muted-foreground mt-1">
                   {t("last_administered")}:{" "}
                   {formatDistanceToNow(new Date(group.lastAdministeredTime))}{" "}
                   {t("ago")}
@@ -425,9 +434,9 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
             <div
               key={`${group.productId}-${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
               className={cn(
-                "p-3 border-t border-r border-gray-200",
+                "p-3 border-t border-r border-border",
                 hasAdmins && "bg-green-50",
-                isLastSlotOfDay && "border-r-4 border-r-gray-200",
+                isLastSlotOfDay && "border-r-4 border-r-border",
               )}
             >
               {/* Administration badges */}
@@ -464,7 +473,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                     );
                   })}
                   {slotAdmins.length > 3 && (
-                    <span className="text-xs text-gray-600 px-1.5 py-0.5 bg-gray-100 rounded font-medium">
+                    <span className="text-xs text-soft-foreground px-1.5 py-0.5 bg-muted-background rounded font-medium">
                       +{slotAdmins.length - 3} {t("more")}
                     </span>
                   )}
@@ -488,7 +497,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
         })}
 
         {/* Actions column */}
-        <div className="p-3 flex items-center justify-center border-t border-gray-200">
+        <div className="p-3 flex items-center justify-center border-t border-border">
           {group.hasActiveRequests && canWrite && (
             <Tooltip>
               <TooltipTrigger asChild>

@@ -543,10 +543,10 @@ export default function DispenseDrawer({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="h-[90vh] p-0 flex flex-col bg-gray-50"
+        className="h-[90vh] p-0 flex flex-col bg-soft-background"
       >
-        <div className="sticky top-0 z-10 border-b bg-gray-50 border-gray-200">
-          <div className="absolute inset-x-0 top-0 h-2 w-16 mx-auto rounded-3xl bg-gray-300 mt-2" />
+        <div className="sticky top-0 z-10 border-b bg-soft-background border-border">
+          <div className="absolute inset-x-0 top-0 h-2 w-16 mx-auto rounded-3xl bg-strong-background mt-2" />
           <SheetHeader className="max-w-6xl mx-auto w-full py-5 flex flex-row justify-between items-center pt-7">
             <SheetTitle className="text-xl font-semibold m-0">
               {t("dispense")}
@@ -565,7 +565,7 @@ export default function DispenseDrawer({
           <div className="my-4 px-3 md:mr-4">
             <Button
               variant="outline"
-              className="w-full justify-between border-gray-300 text-left h-auto py-1 px-2 bg-gray-50 hover:bg-gray-100"
+              className="w-full justify-between border-strong-border text-left h-auto py-1 px-2 bg-soft-background hover:bg-muted-background"
               onClick={handleLocationSelectorClick}
             >
               <div className="flex items-center gap-2">
@@ -576,10 +576,10 @@ export default function DispenseDrawer({
                   strokeWidth={1.5}
                 />
                 <div className="flex flex-col justify-start items-start">
-                  <span className="text-sm font-normal text-gray-700">
+                  <span className="text-sm font-normal text-muted-foreground">
                     {t("selected_location")}
                   </span>
-                  <span className="text-sm font-medium text-gray-950">
+                  <span className="text-sm font-medium text-foreground">
                     {currentLocation.id === selectedLocation.id
                       ? selectedLocation.path
                       : buildLocationPath(currentLocation)}
@@ -636,27 +636,27 @@ export default function DispenseDrawer({
                       <Table className="w-full border-separate border-spacing-y-2 px-1">
                         <TableHeader>
                           <TableRow className="divide-x">
-                            <TableHead className="rounded-tl-md bg-gray-100 text-gray-700">
+                            <TableHead className="rounded-tl-md bg-muted-background text-muted-foreground">
                               {t("items")}
                             </TableHead>
-                            <TableHead className="bg-gray-100 text-gray-700">
+                            <TableHead className="bg-muted-background text-muted-foreground">
                               {t("select_lot")}
                             </TableHead>
-                            <TableHead className="bg-gray-100 text-gray-700">
+                            <TableHead className="bg-muted-background text-muted-foreground">
                               {t("quantity")}
                             </TableHead>
-                            <TableHead className="bg-gray-100 text-gray-700">
+                            <TableHead className="bg-muted-background text-muted-foreground">
                               {t("base_amount")}
                             </TableHead>
-                            <TableHead className="bg-gray-100 text-gray-700">
+                            <TableHead className="bg-muted-background text-muted-foreground">
                               {t("expiry")}
                             </TableHead>
-                            <TableHead className="bg-gray-100 rounded-tr-md text-gray-700 text-center">
+                            <TableHead className="bg-muted-background rounded-tr-md text-muted-foreground text-center">
                               {t("actions")}
                             </TableHead>
                           </TableRow>
                         </TableHeader>
-                        <TableBody className="bg-white">
+                        <TableBody className="bg-background">
                           {fields.map((field, index) => {
                             const productKnowledge =
                               field.productKnowledge as ProductKnowledgeBase;
@@ -664,9 +664,9 @@ export default function DispenseDrawer({
                             return (
                               <TableRow
                                 key={field.id}
-                                className="hover:bg-gray-50 rounded-md shadow-sm divide-x"
+                                className="hover:bg-soft-background rounded-md shadow-sm divide-x"
                               >
-                                <TableCell className="font-medium text-gray-950 text-base">
+                                <TableCell className="font-medium text-foreground text-base">
                                   {productKnowledge.name}
                                 </TableCell>
                                 {productKnowledgeInventoriesMap[
@@ -678,7 +678,7 @@ export default function DispenseDrawer({
                                   >
                                     <div className="flex items-center justify-center py-3 gap-2">
                                       <Loader2 className="size-4 animate-spin" />
-                                      <span className="text-sm text-gray-500">
+                                      <span className="text-sm text-muted-foreground">
                                         {t("loading_stock")}
                                       </span>
                                     </div>
@@ -759,7 +759,7 @@ export default function DispenseDrawer({
                                                         type="number"
                                                         min={0}
                                                         {...formField}
-                                                        className="border-gray-300 border rounded-md w-24"
+                                                        className="border-strong-border border rounded-md w-24"
                                                         autoFocus
                                                       />
                                                     </FormControl>
@@ -775,7 +775,7 @@ export default function DispenseDrawer({
                                         .filter(
                                           (lot) => lot.selectedInventoryId,
                                         ).length === 0 && (
-                                        <div className="text-sm text-gray-500 py-2">
+                                        <div className="text-sm text-muted-foreground py-2">
                                           {t("select_lots_first")}
                                         </div>
                                       )}
@@ -799,7 +799,7 @@ export default function DispenseDrawer({
                                           return (
                                             <div
                                               key={lot.selectedInventoryId}
-                                              className="py-2.5 text-gray-950 font-normal text-base"
+                                              className="py-2.5 text-foreground font-normal text-base"
                                             >
                                               {selectedInventory?.product.charge_item_definition?.price_components
                                                 .filter(
@@ -820,7 +820,7 @@ export default function DispenseDrawer({
                                         .filter(
                                           (lot) => lot.selectedInventoryId,
                                         ).length === 0 && (
-                                        <div className="text-sm text-gray-500 py-2">
+                                        <div className="text-sm text-muted-foreground py-2">
                                           -
                                         </div>
                                       )}
@@ -844,7 +844,7 @@ export default function DispenseDrawer({
                                           return (
                                             <div
                                               key={lot.selectedInventoryId}
-                                              className="py-2.5 text-gray-950 font-normal text-base"
+                                              className="py-2.5 text-foreground font-normal text-base"
                                             >
                                               {selectedInventory?.product
                                                 .expiration_date
@@ -862,7 +862,7 @@ export default function DispenseDrawer({
                                         .filter(
                                           (lot) => lot.selectedInventoryId,
                                         ).length === 0 && (
-                                        <div className="text-sm text-gray-500 py-2">
+                                        <div className="text-sm text-muted-foreground py-2">
                                           -
                                         </div>
                                       )}
@@ -875,7 +875,7 @@ export default function DispenseDrawer({
                                     size="icon"
                                     type="button"
                                     onClick={() => remove(index)}
-                                    className="hover:text-red-600 hover:bg-white"
+                                    className="hover:text-red-600 hover:bg-background"
                                     aria-label={t("remove_item", {
                                       name: productKnowledge.name,
                                     })}
@@ -924,9 +924,9 @@ export default function DispenseDrawer({
         </div>
         {/* Footer */}
         {fields.length === 0 ? null : (
-          <div className="sticky bottom-0 py-4 bg-white border-t px-4">
+          <div className="sticky bottom-0 py-4 bg-background border-t px-4">
             <div className="max-w-6xl mx-auto w-full flex justify-between items-center">
-              <div className="text-xs text-gray-950 font-medium italic">
+              <div className="text-xs text-foreground font-medium italic">
                 {t("selected_items_count", {
                   count: itemsCount,
                 })}
@@ -961,7 +961,7 @@ export default function DispenseDrawer({
         <DialogContent className="w-xs xl:w-sm">
           <DialogHeader>
             <DialogTitle>{t("change_location_confirm")}</DialogTitle>
-            <DialogDescription className="text-gray-700 mt-2">
+            <DialogDescription className="text-muted-foreground mt-2">
               <Trans
                 i18nKey="items_added_current_location_warning"
                 components={{ strong: <strong className="font-semibold" /> }}

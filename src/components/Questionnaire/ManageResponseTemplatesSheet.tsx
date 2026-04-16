@@ -102,7 +102,9 @@ function MedicationName({
 
   if (isLoading) {
     return (
-      <span className="animate-pulse text-gray-400">{t("loading")}...</span>
+      <span className="animate-pulse text-placeholder-foreground">
+        {t("loading")}...
+      </span>
     );
   }
 
@@ -178,7 +180,7 @@ function MedicationsPreview({
             return (
               <div
                 key={idx}
-                className="flex items-center gap-2 text-xs text-primary-700 bg-white/60 rounded px-2 py-1.5"
+                className="flex items-center gap-2 text-xs text-primary-700 bg-background/60 rounded px-2 py-1.5"
               >
                 <span className="size-1 rounded-full bg-primary-500 shrink-0" />
                 <span className="flex-1 min-w-0">
@@ -193,7 +195,7 @@ function MedicationsPreview({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-5 shrink-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                    className="size-5 shrink-0 text-placeholder-foreground hover:text-red-600 hover:bg-red-50"
                     onClick={() => onMedicationRemove(idx)}
                   >
                     <X className="size-3" />
@@ -227,15 +229,15 @@ function MedicationsPreview({
                 "w-full h-auto justify-between items-start gap-2 rounded px-2 py-1.5 font-normal transition-colors whitespace-pre-wrap",
                 showAddButton && onMedicationSelect
                   ? "cursor-pointer hover:bg-primary-100/50 active:bg-primary-50"
-                  : "cursor-default bg-white/50",
+                  : "cursor-default bg-background/50",
               )}
             >
               <div className="flex-1 min-w-0 text-left">
-                <div className="font-medium text-gray-900 text-xs leading-tight">
+                <div className="font-medium text-foreground text-xs leading-tight">
                   <MedicationName medication={med} />
                 </div>
                 {dosageLines.length > 0 && (
-                  <div className="text-xs text-gray-500 mt-0.5 leading-tight">
+                  <div className="text-xs text-muted-foreground mt-0.5 leading-tight">
                     {dosageLines.map((line, i) => (
                       <div key={i}>{line}</div>
                     ))}
@@ -317,10 +319,10 @@ function ActivityDefinitionsPreview({
             return (
               <div
                 key={idx}
-                className="flex items-center gap-2 text-xs text-purple-700 bg-white/60 rounded px-2 py-1.5"
+                className="flex items-center gap-2 text-xs text-purple-700 bg-background/60 rounded px-2 py-1.5"
               >
                 <span className="size-1 rounded-full bg-purple-500 shrink-0" />
-                <span className="flex-1 min-w-0 font-medium text-gray-900">
+                <span className="flex-1 min-w-0 font-medium text-foreground">
                   {ad.service_request?.title ||
                     ad.slug ||
                     t("unknown_activity_definition")}
@@ -329,7 +331,7 @@ function ActivityDefinitionsPreview({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-5 shrink-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                    className="size-5 shrink-0 text-placeholder-foreground hover:text-red-600 hover:bg-red-50"
                     onClick={() => onActivityDefinitionRemove(idx)}
                   >
                     <X className="size-3" />
@@ -354,10 +356,10 @@ function ActivityDefinitionsPreview({
                 "w-full h-auto justify-between items-start gap-2 rounded px-2 py-1.5 font-normal transition-colors",
                 showAddButton && onActivityDefinitionSelect
                   ? "cursor-pointer hover:bg-purple-100/50 active:bg-purple-50"
-                  : "cursor-default bg-white/50",
+                  : "cursor-default bg-background/50",
               )}
             >
-              <div className="flex-1 min-w-0 text-left font-medium text-gray-900 text-xs leading-tight">
+              <div className="flex-1 min-w-0 text-left font-medium text-foreground text-xs leading-tight">
                 {ad.service_request?.title ||
                   ad.slug ||
                   t("unknown_activity_definition")}
@@ -427,7 +429,7 @@ function TemplateCard({
         "border rounded-lg transition-all overflow-hidden",
         isApplied && "border-green-500 bg-green-50/50",
         isApplying && "border-primary-500 bg-primary-50/50",
-        !isApplied && !isApplying && "border-gray-200 hover:border-gray-300",
+        !isApplied && !isApplying && "border-border hover:border-strong-border",
         expanded && "shadow-sm",
       )}
     >
@@ -435,7 +437,7 @@ function TemplateCard({
       <CollapsibleTrigger
         className={cn(
           "w-full flex items-start gap-2 p-2 transition-colors select-none",
-          hasContent && "hover:bg-gray-50/50 cursor-pointer",
+          hasContent && "hover:bg-soft-background/50 cursor-pointer",
         )}
         asChild
       >
@@ -443,7 +445,7 @@ function TemplateCard({
           {hasContent && (
             <ChevronDownIcon
               className={cn(
-                "size-4 shrink-0 text-gray-400 transition-transform mt-0.5",
+                "size-4 shrink-0 text-placeholder-foreground transition-transform mt-0.5",
                 expanded && "rotate-180",
               )}
             />
@@ -451,11 +453,11 @@ function TemplateCard({
           {!hasContent && <div className="w-4" />}
 
           <div className="flex-1 min-w-0 text-left">
-            <h4 className="font-semibold text-sm text-gray-900 line-clamp-1">
+            <h4 className="font-semibold text-sm text-foreground line-clamp-1">
               {template.name}
             </h4>
             {template.description && (
-              <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                 {template.description}
               </p>
             )}
@@ -494,7 +496,7 @@ function TemplateCard({
                 variant="outline"
                 onClick={() => onApply(template)}
                 disabled={disabled || !hasContent}
-                className="h-7 hover:text-gray-950"
+                className="h-7 hover:text-foreground"
               >
                 {t("apply")}
               </Button>
@@ -528,7 +530,7 @@ function TemplateCard({
 
       {/* Expanded content */}
       <CollapsibleContent>
-        <div className="space-y-2 bg-gray-50/30">
+        <div className="space-y-2 bg-soft-background/30">
           <MedicationsPreview
             medications={medications}
             onMedicationSelect={onMedicationSelect}
@@ -838,7 +840,7 @@ export default function ManageResponseTemplatesSheet({
       )}
 
       <div className="relative mt-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-placeholder-foreground" />
         <Input
           placeholder={t("search_templates")}
           value={searchQuery}
@@ -850,7 +852,7 @@ export default function ManageResponseTemplatesSheet({
             type="button"
             variant="ghost"
             size="icon"
-            className="absolute right-1 top-1/2 -translate-y-1/2 size-7 text-gray-400 hover:text-gray-600"
+            className="absolute right-1 top-1/2 -translate-y-1/2 size-7 text-placeholder-foreground hover:text-soft-foreground"
             onClick={() => setSearchQuery("")}
           >
             <X className="size-4" />
@@ -903,7 +905,9 @@ export default function ManageResponseTemplatesSheet({
       {/* Preview of items being saved (for saving current medications/activities) */}
       {savingCurrent && (
         <div className="space-y-2">
-          <h3 className="text-xs font-medium text-gray-700">{t("preview")}</h3>
+          <h3 className="text-xs font-medium text-muted-foreground">
+            {t("preview")}
+          </h3>
           {editableMedications.length > 0 && (
             <MedicationsPreview
               medications={editableMedications}
@@ -928,7 +932,7 @@ export default function ManageResponseTemplatesSheet({
           )}
           {editableMedications.length === 0 &&
             editableActivityDefinitions.length === 0 && (
-              <p className="text-xs text-gray-500 italic">
+              <p className="text-xs text-muted-foreground italic">
                 {t("no_items_to_save")}
               </p>
             )}
@@ -962,7 +966,7 @@ export default function ManageResponseTemplatesSheet({
           )}
           {editableMedications.length === 0 &&
             editableActivityDefinitions.length === 0 && (
-              <p className="text-xs text-gray-500 italic">
+              <p className="text-xs text-muted-foreground italic">
                 {t("no_items_in_template")}
               </p>
             )}
@@ -1107,7 +1111,7 @@ export default function ManageResponseTemplatesSheet({
       >
         <SheetTrigger asChild>{trigger ?? defaultTrigger}</SheetTrigger>
         <SheetContent className="flex flex-col sm:max-w-lg p-0 overflow-y-auto">
-          <SheetHeader className="p-4 space-y-2 bg-gray-100 border border-b-gray-200">
+          <SheetHeader className="p-4 space-y-2 bg-muted-background border border-b-border">
             <div className="flex items-center gap-2">
               {viewMode === "create" && (
                 <Button

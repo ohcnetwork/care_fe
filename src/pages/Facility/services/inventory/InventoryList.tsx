@@ -108,7 +108,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
               options={Object.values(InventoryStatusOptions)}
               label={t("status")}
               onClear={() => updateQuery({ status: undefined })}
-              className="w-full sm:w-auto h-9 border-gray-300"
+              className="w-full sm:w-auto h-9 border-strong-border"
               placeholder={t("filter_by_status")}
             />
           </div>
@@ -130,7 +130,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
               options={Object.keys(SORT_OPTIONS)}
               label={t("net_content")}
               onClear={() => updateQuery({ ordering: undefined })}
-              className="w-full sm:w-auto h-9 border-gray-300"
+              className="w-full sm:w-auto h-9 border-strong-border"
               placeholder={t("sort_by_net_content")}
             />
           </div>
@@ -172,7 +172,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                       {inventory.product.product_knowledge.name}
                       <CareIcon
                         icon="l-external-link-alt"
-                        className="size-4 text-gray-500"
+                        className="size-4 text-muted-foreground"
                       />
                     </Link>
                   </TableCell>

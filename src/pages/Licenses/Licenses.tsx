@@ -62,12 +62,12 @@ const SbomViewer = ({ data: { sbom } }: { data: LicensesSbom }) => {
   const { t } = useTranslation();
 
   return (
-    <Card className="rounded-lg bg-white p-4 shadow-md transition-all duration-300">
+    <Card className="rounded-lg bg-card p-4 shadow-md transition-all duration-300">
       <div className="mb-4">
         <h2 className="mb-2 text-xl font-semibold text-primary md:text-2xl">
           {t("spdx_sbom_version") + ": " + sbom.spdxVersion}
         </h2>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           {t("created_on")} {format(sbom.creationInfo.created, "PPP")}
         </p>
       </div>
@@ -104,7 +104,7 @@ const SbomPackage = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="block rounded-md border border-gray-200 p-2 transition-all duration-300 hover:shadow-lg">
+    <div className="block rounded-md border border-border p-2 transition-all duration-300 hover:shadow-lg">
       <a
         target="_blank"
         rel="noopener noreferrer"

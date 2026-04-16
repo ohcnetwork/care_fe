@@ -54,7 +54,7 @@ export function PatientHoverCard({
           <PatientHoverCardTrigger patient={patient} disabled={disabled} />
         </PopoverTrigger>
         <PopoverContent
-          className="flex flex-col border border-gray-200 shadow-lg p-4 rounded-md gap-4 w-100"
+          className="flex flex-col border border-border shadow-lg p-4 rounded-md gap-4 w-100"
           side="bottom"
           align="start"
         >
@@ -84,7 +84,8 @@ function PatientHoverCardTrigger({
       data-slot="patient-info-hover-card-trigger"
       className={cn(
         "flex w-fit gap-3 items-center rounded-md",
-        !disabled && "hover:bg-gray-50 active:bg-gray-50 cursor-pointer",
+        !disabled &&
+          "hover:bg-soft-background active:bg-soft-background cursor-pointer",
       )}
     >
       <div className="size-12">
@@ -103,7 +104,7 @@ function PatientHoverCardTrigger({
           </h5>
           {!disabled && <ChevronDown size={16} />}
         </div>
-        <span className="flex flex-start text-gray-700">
+        <span className="flex flex-start text-muted-foreground">
           {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
         </span>
       </div>

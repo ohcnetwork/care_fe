@@ -71,12 +71,12 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row justify-between items-start mt-2 gap-4">
         <div className="flex flex-col gap-2 w-full">
-          <Label className="text-gray-950 text-sm font-medium">
+          <Label className="text-foreground text-sm font-medium">
             {t("search_patients")}
           </Label>
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative">
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-placeholder-foreground" />
               <Input
                 type="search"
                 placeholder={t("search_by_patient_name")}
@@ -107,14 +107,14 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                 }
               }}
               placeholder={t("filter_by_identifier")}
-              className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+              className="w-full sm:w-auto rounded-md h-9 text-muted-foreground shadow-sm"
               patientId={patient}
               patientName={patient_name}
             />
           </div>
         </div>
         <div className="flex flex-col gap-2 w-full sm:items-end">
-          <Label className="text-gray-950 text-sm font-medium">
+          <Label className="text-foreground text-sm font-medium">
             {t("service_points")}
           </Label>
           <ServicePointsDropDown />
@@ -134,9 +134,9 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
               patient: patient,
             }}
             emptyState={
-              <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
-                <DoorOpenIcon className="size-6 text-gray-700" />
-                <span className="text-sm font-semibold text-gray-700">
+              <div className="flex flex-col gap-2 items-center justify-center bg-muted-background rounded-lg py-10 border border-soft-border">
+                <DoorOpenIcon className="size-6 text-muted-foreground" />
+                <span className="text-sm font-semibold text-muted-foreground">
                   {t("no_patient_is_waiting")}
                 </span>
               </div>
@@ -164,9 +164,9 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             {assignedServicePoints.map((subQueue, index) => (
               <>
                 {index > 0 && (
-                  <hr className="h-px w-full border border-gray-300 border-dashed" />
+                  <hr className="h-px w-full border border-strong-border border-dashed" />
                 )}
-                <div className="flex flex-col p-1 rounded-lg bg-gray-200">
+                <div className="flex flex-col p-1 rounded-lg bg-strong-background">
                   <div className="flex items-center justify-between p-1 pb-2">
                     <div className="flex flex-col">
                       <span className="text-sm font-medium">
@@ -198,9 +198,9 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                           sub_queue: subQueue.id,
                         }}
                         emptyState={
-                          <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-3 border border-gray-100">
-                            <DoorOpenIcon className="size-6 text-gray-700" />
-                            <span className="text-sm font-semibold text-gray-700">
+                          <div className="flex flex-col gap-2 items-center justify-center bg-muted-background rounded-lg py-3 border border-soft-border">
+                            <DoorOpenIcon className="size-6 text-muted-foreground" />
+                            <span className="text-sm font-semibold text-muted-foreground">
                               {t("no_patient_is_being_served")}
                             </span>
                             <CallNextPatientButton
@@ -225,7 +225,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                         sub_queue: subQueue.id,
                       }}
                       header={
-                        <div className="border border-gray-300 border-dashed" />
+                        <div className="border border-strong-border border-dashed" />
                       }
                     />
                   </div>
@@ -249,7 +249,7 @@ export function QueueColumn({
   options?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 p-3 rounded-lg bg-gray-100 border border-gray-200 min-w-xs flex-1">
+    <div className="flex flex-col gap-3 p-3 rounded-lg bg-muted-background border border-border min-w-xs flex-1">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold">{title}</span>
@@ -469,9 +469,9 @@ function AwaitingRecallDialog({
               status: TokenStatus.UNFULFILLED,
             }}
             emptyState={
-              <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
-                <EyeIcon className="size-6 text-gray-700" />
-                <span className="text-sm font-semibold text-gray-700">
+              <div className="flex flex-col gap-2 items-center justify-center bg-muted-background rounded-lg py-10 border border-soft-border">
+                <EyeIcon className="size-6 text-muted-foreground" />
+                <span className="text-sm font-semibold text-muted-foreground">
                   {t("no_tokens_awaiting_recall")}
                 </span>
               </div>

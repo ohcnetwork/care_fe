@@ -159,7 +159,7 @@ export function PLUGIN_Component(props: PluginComponentProps) {
                     aria-label="Loading"
                     className="size-4 animate-spin"
                   />
-                  <p className="text-sm text-gray-600">{t("loading")}</p>
+                  <p className="text-sm text-soft-foreground">{t("loading")}</p>
                 </div>
               }
             >

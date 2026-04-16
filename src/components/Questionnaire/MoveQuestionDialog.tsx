@@ -59,7 +59,7 @@ function QuestionTreeNode({
     <div className="space-y-1">
       <div
         className={cn(
-          "flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100",
+          "flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-muted-background",
           isSelected && "bg-blue-100 text-blue-800",
         )}
         style={{ paddingLeft: `${level}rem` }}
@@ -218,7 +218,7 @@ export default function MoveQuestionDialog({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label className="text-sm font-medium">{t("moving")}:</Label>
-            <div className="p-3 bg-gray-50 rounded-lg space-y-1">
+            <div className="p-3 bg-soft-background rounded-lg space-y-1">
               {selectedQuestions.length !== 0 ? (
                 selectedQuestions.map((question) => (
                   <div
@@ -226,7 +226,7 @@ export default function MoveQuestionDialog({
                     className="text-sm flex items-center gap-3 mt-1"
                   >
                     <div className="flex items-center gap-3">
-                      <ArrowRight className="w-3 h-3 text-gray-400" />
+                      <ArrowRight className="w-3 h-3 text-placeholder-foreground" />
                       <span>{question.text}</span>
                     </div>
                     <Button
@@ -241,7 +241,7 @@ export default function MoveQuestionDialog({
                   </div>
                 ))
               ) : (
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-muted-foreground">
                   {t("no_questions_selected")}
                 </div>
               )}

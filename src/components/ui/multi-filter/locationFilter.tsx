@@ -28,7 +28,7 @@ export default function RenderLocationFilter({
 
   if (!facilityId) {
     return (
-      <div className="p-4 text-sm text-gray-500 text-center">
+      <div className="p-4 text-sm text-muted-foreground text-center">
         {t("facility_required_for_location_filter")}
       </div>
     );

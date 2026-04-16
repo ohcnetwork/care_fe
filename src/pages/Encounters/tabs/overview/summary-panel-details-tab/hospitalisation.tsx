@@ -29,8 +29,8 @@ export const HospitalizationDetails = () => {
   if (!hasHospitalization) return null;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2 p-1 space-y-1">
-      <div className="flex justify-between items-center text-gray-950 pl-2">
+    <div className="bg-muted-background rounded-md w-full border border-border pt-2 p-1 space-y-1">
+      <div className="flex justify-between items-center text-foreground pl-2">
         <span className="font-semibold">{t("hospitalisation_details")}</span>
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" asChild>
@@ -42,19 +42,19 @@ export const HospitalizationDetails = () => {
           </Button>
         )}
       </div>
-      <div className="flex flex-col gap-2 bg-white rounded-md shadow p-2">
+      <div className="flex flex-col gap-2 bg-background rounded-md shadow p-2">
         <div className="flex justify-between items-center">
-          <span className="text-gray-950 font-semibold">
+          <span className="text-foreground font-semibold">
             {t("hospitalisation")}
           </span>
           {encounter.hospitalization?.re_admission && (
             <Badge variant="blue">{t("re_admission")}</Badge>
           )}
         </div>
-        <div className="flex flex-row gap-2 bg-gray-100 rounded-md border border-gray-200">
+        <div className="flex flex-row gap-2 bg-muted-background rounded-md border border-border">
           <div className="flex flex-col p-2">
             <span className="text-sm">{t("admission_source")}</span>
-            <span className="text-sm text-black font-semibold">
+            <span className="text-sm text-foreground font-semibold">
               {t(
                 encounter.hospitalization?.admit_source
                   ? `encounter_admit_sources__${encounter.hospitalization?.admit_source}`
@@ -64,7 +64,7 @@ export const HospitalizationDetails = () => {
           </div>
           <div className="flex flex-col p-2">
             <span className="text-sm">{t("diet_preference")}</span>
-            <span className="text-sm text-black font-semibold">
+            <span className="text-sm text-foreground font-semibold">
               {t(
                 encounter.hospitalization?.diet_preference
                   ? `encounter_diet_preference__${encounter.hospitalization?.diet_preference}`

@@ -245,7 +245,7 @@ export default function Autocomplete({
           <Button
             variant="outline"
             size="icon"
-            className="rounded-l-none border-l-0 text-gray-400 h-auto"
+            className="rounded-l-none border-l-0 text-placeholder-foreground h-auto"
             onClick={handleClear}
             title={t("clear")}
             hidden={disabled}
@@ -283,7 +283,7 @@ export default function Autocomplete({
             <span
               className={cn(
                 inputValue && "truncate",
-                !selectedOption && "text-gray-500",
+                !selectedOption && "text-muted-foreground",
               )}
             >
               {displayText}
@@ -304,7 +304,7 @@ export default function Autocomplete({
         <Button
           variant="outline"
           size="icon"
-          className="rounded-l-none border-l-0 text-gray-400 h-auto"
+          className="rounded-l-none border-l-0 text-placeholder-foreground h-auto"
           onClick={handleClear}
           title={t("clear")}
           hidden={disabled}

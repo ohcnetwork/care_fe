@@ -41,8 +41,8 @@ export function EncounterAccordionLayout({
             <CardTitle className="text-base mt-1">{t(title)}:</CardTitle>
             <div
               className={cn(
-                "flex rounded-md border border-gray-500 lg:border-0 lg:divide-x-0 mt-1",
-                (editLink || actionButton) && "divide-x divide-gray-500",
+                "flex rounded-md border border-stronger-border lg:border-0 lg:divide-x-0 mt-1",
+                (editLink || actionButton) && "divide-x divide-border",
               )}
             >
               {!readOnly && editLink && (
@@ -51,7 +51,7 @@ export function EncounterAccordionLayout({
                     asChild
                     variant="ghost"
                     size="icon"
-                    className="hover:bg-transparent text-gray-500 hover:text-gray-500"
+                    className="hover:bg-transparent text-muted-foreground hover:text-muted-foreground"
                   >
                     <Link href={editLink}>
                       <SquarePen className="size-4" />
@@ -66,13 +66,13 @@ export function EncounterAccordionLayout({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="hover:bg-transparent text-gray-500 hover:text-gray-500"
+                    className="hover:bg-transparent text-muted-foreground hover:text-muted-foreground"
                     aria-label={isExpanded ? t("collapse") : t("expand")}
                   >
                     {isExpanded ? (
-                      <ChevronsDownUp className="size-4 text-gray-500" />
+                      <ChevronsDownUp className="size-4 text-muted-foreground" />
                     ) : (
-                      <ChevronsUpDown className="size-4 text-gray-500" />
+                      <ChevronsUpDown className="size-4 text-muted-foreground" />
                     )}
                   </Button>
                 </CollapsibleTrigger>

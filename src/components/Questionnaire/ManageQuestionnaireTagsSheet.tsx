@@ -300,7 +300,9 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
             </Badge>
           ))}
           {(!selectedTags || selectedTags.length === 0) && (
-            <p className="text-sm text-gray-500">{t("no_tags_selected")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("no_tags_selected")}
+            </p>
           )}
         </div>
       </div>
@@ -323,7 +325,7 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
       <Collapsible
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
-        className="rounded-lg border border-gray-200 p-4"
+        className="rounded-lg border border-border p-4"
       >
         <CollapsibleTrigger asChild>
           <Button
@@ -422,12 +424,12 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] px-4 flex flex-col h-full overflow-hidden">
             <div className="mb-2 border-b pb-2">
               <h2 className="text-base font-semibold">{t("manage_tags")}</h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {t("manage_tags_description")}
               </p>
             </div>
             <div className="flex-1 overflow-y-auto pr-1">{bodyContent}</div>
-            <div className="mt-4 border-t pt-4 sticky bottom-0 bg-white">
+            <div className="mt-4 border-t pt-4 sticky bottom-0 bg-background">
               {footerActions}
             </div>
           </div>
@@ -452,7 +454,7 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
           <SheetDescription>{t("manage_tags_description")}</SheetDescription>
         </SheetHeader>
         {bodyContent}
-        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
           {footerActions}
         </SheetFooter>
       </SheetContent>

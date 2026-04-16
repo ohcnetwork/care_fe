@@ -83,7 +83,7 @@ export const EncounterDevicesTab = () => {
             <CardContent className="p-0">
               {data?.results?.length ? (
                 <Table className="w-full overflow-x-auto whitespace-nowrap">
-                  <TableHeader className="bg-gray-50">
+                  <TableHeader className="bg-soft-background">
                     <TableRow>
                       <TableHead className="w-1/2">{t("name")}</TableHead>
                       <TableHead className="w-1/3">{t("type")}</TableHead>
@@ -95,7 +95,7 @@ export const EncounterDevicesTab = () => {
                       return (
                         <TableRow
                           key={device.id}
-                          className="hover:bg-gray-50/50"
+                          className="hover:bg-soft-background/50"
                         >
                           <TableCell className="font-medium">
                             <Link
@@ -104,12 +104,12 @@ export const EncounterDevicesTab = () => {
                               className="group flex items-start gap-1"
                             >
                               <div>
-                                <div className="flex items-center gap-1 text-gray-900 group-hover:text-primary-600 group-hover:underline">
+                                <div className="flex items-center gap-1 text-foreground group-hover:text-primary-600 group-hover:underline">
                                   <span>{device.registered_name}</span>
                                   <ExternalLink className="size-3 opacity-70 group-hover:opacity-100" />
                                 </div>
                                 {device.user_friendly_name && (
-                                  <div className="text-sm text-gray-500">
+                                  <div className="text-sm text-muted-foreground">
                                     {device.user_friendly_name}
                                   </div>
                                 )}
@@ -152,7 +152,7 @@ export const EncounterDevicesTab = () => {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="p-6 text-center text-gray-500">
+                <div className="p-6 text-center text-muted-foreground">
                   {t("no_devices_available")}
                 </div>
               )}

@@ -309,7 +309,7 @@ export default function PaymentsData({
               updateQuery({ ordering: value });
             }}
           >
-            <SelectTrigger className="border-gray-400 text-gray-950 rounded-sm">
+            <SelectTrigger className="border-stronger-border text-foreground rounded-sm">
               <SelectValue placeholder={t("sort_by")} />
             </SelectTrigger>
             <SelectContent align="end">

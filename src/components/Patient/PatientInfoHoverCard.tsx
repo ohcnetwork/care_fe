@@ -44,7 +44,7 @@ export const PatientInfoHoverCard = ({
           </div>
           <div className="flex flex-col">
             <h5 className="text-lg font-semibold">{patient.name}</h5>
-            <span className="text-gray-700 text-sm font-medium">
+            <span className="text-muted-foreground text-sm font-medium">
               {formatPatientAge(patient, true)},{" "}
               {t(`GENDER__${patient.gender}`)}
             </span>
@@ -58,7 +58,7 @@ export const PatientInfoHoverCard = ({
       </div>
       <div className="flex items-center gap-2">
         {!isPatientHomePage && facilityId && (
-          <Button variant="outline" className="text-gray-950" asChild>
+          <Button variant="outline" className="text-foreground" asChild>
             <Link
               basePath="/"
               href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
@@ -74,7 +74,7 @@ export const PatientInfoHoverCard = ({
           </Button>
         )}
 
-        <Button variant="outline" className="text-gray-950" asChild>
+        <Button variant="outline" className="text-foreground" asChild>
           <Link
             basePath="/"
             href={
@@ -88,7 +88,7 @@ export const PatientInfoHoverCard = ({
         </Button>
       </div>
       <div className="flex flex-col gap-3">
-        <div className="grid grid-cols-2 gap-3 border-t border-gray-200 pt-4">
+        <div className="grid grid-cols-2 gap-3 border-t border-border pt-4">
           {"instance_identifiers" in patient &&
             patient.instance_identifiers
               ?.filter(({ config }) => !config.config.auto_maintained)
@@ -97,7 +97,7 @@ export const PatientInfoHoverCard = ({
                   key={identifier.config.id}
                   className="flex flex-col gap-0.5 text-sm"
                 >
-                  <span className="font-medium text-gray-700">
+                  <span className="font-medium text-muted-foreground">
                     {identifier.config.config.display}:{" "}
                   </span>
                   <span className="font-semibold">{identifier.value}</span>
@@ -105,40 +105,42 @@ export const PatientInfoHoverCard = ({
               ))}
           {patient.phone_number && (
             <div className="flex flex-col gap-1 text-sm font-medium">
-              <span className="text-gray-700">{t("contact")}</span>
+              <span className="text-muted-foreground">{t("contact")}</span>
               <a
                 className="flex flex-row gap-2 items-center"
                 href={`tel:${patient.phone_number}`}
               >
                 <Phone size={14} strokeWidth={1.5} />
-                <span className="text-gray-950">{patient.phone_number}</span>
+                <span className="text-foreground">{patient.phone_number}</span>
               </a>
             </div>
           )}
           {patient.emergency_phone_number &&
             patient.phone_number !== patient.emergency_phone_number && (
               <div className="flex flex-col gap-1 text-sm font-medium">
-                <span className="text-gray-700">{t("emergency_contact")}</span>
+                <span className="text-muted-foreground">
+                  {t("emergency_contact")}
+                </span>
 
                 <a
                   className="flex flex-row gap-2 items-center"
                   href={`tel:${patient.emergency_phone_number}`}
                 >
                   <Phone size={14} strokeWidth={1.5} />
-                  <span className="text-gray-950">
+                  <span className="text-foreground">
                     {patient.emergency_phone_number}
                   </span>
                 </a>
               </div>
             )}
         </div>
-        <div className="flex items-start border-t border-gray-200 pt-2">
+        <div className="flex items-start border-t border-border pt-2">
           <div className="flex flex-col gap-1 text-sm font-medium w-full">
-            <span className="text-gray-700">{t("location")}</span>
+            <span className="text-muted-foreground">{t("location")}</span>
             <div className="flex items-end justify-between gap-2 w-full">
-              <span className="text-gray-950 my-auto whitespace-break-spaces">
+              <span className="text-foreground my-auto whitespace-break-spaces">
                 {formatPatientAddress(patient.address) || (
-                  <span className="text-gray-500">
+                  <span className="text-muted-foreground">
                     {t("no_address_provided")}
                   </span>
                 )}
@@ -148,7 +150,7 @@ export const PatientInfoHoverCard = ({
           </div>
         </div>
         {hasPatientTags && (
-          <div className="flex items-start border-t border-gray-200 pt-2">
+          <div className="flex items-start border-t border-border pt-2">
             <PatientTagsDisplay patient={patient} />
           </div>
         )}

@@ -158,7 +158,7 @@ export function LocationPicker({
   const getDisplayValue = () => {
     if (!value) {
       return (
-        <span className="text-gray-500">
+        <span className="text-muted-foreground">
           {placeholder || t("select_location")}
         </span>
       );
@@ -169,7 +169,7 @@ export function LocationPicker({
 
     return (
       <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-gray-500 flex-shrink-0" />
+        <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
         <span className="truncate">{value.name}</span>
       </div>
     );
@@ -197,8 +197,8 @@ export function LocationPicker({
           aria-expanded={open}
           className={cn(
             "justify-between h-10 min-h-10 px-3 py-2",
-            "hover:bg-gray-50 hover:text-gray-900",
-            "focus:ring-2 focus:ring-gray-300 focus:ring-offset-2",
+            "hover:bg-soft-background hover:text-foreground",
+            "focus:ring-2 focus:ring-ring focus:ring-offset-2",
             "transition-all duration-200",
             disabled && "opacity-50 cursor-not-allowed",
             className,
@@ -225,11 +225,11 @@ export function LocationPicker({
       >
         <div className="flex flex-col">
           {/* Header with current location */}
-          <div className="px-4 py-3 border-b bg-gray-50">
+          <div className="px-4 py-3 border-b bg-soft-background">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Home className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-600">
+                <Home className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-soft-foreground">
                   {getCurrentLevelTitle()}
                 </span>
                 {breadcrumbs.length > 0 && (
@@ -243,7 +243,7 @@ export function LocationPicker({
                   variant="ghost"
                   size="sm"
                   onClick={handleClearSelection}
-                  className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
+                  className="h-6 px-2 text-xs text-muted-foreground hover:text-muted-foreground"
                 >
                   <X className="h-3 w-3 mr-1" />
                   {t("clear")}
@@ -254,25 +254,25 @@ export function LocationPicker({
 
           {/* Breadcrumb Navigation */}
           {breadcrumbs.length > 0 && (
-            <div className="px-4 py-2 border-b bg-gray-100">
+            <div className="px-4 py-2 border-b bg-muted-background">
               <div className="flex items-center gap-1 text-xs">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleBackToRoot}
-                  className="h-6 px-2 text-xs hover:bg-white"
+                  className="h-6 px-2 text-xs hover:bg-background"
                 >
                   <Home className="h-3 w-3 mr-1" />
                   {t("root")}
                 </Button>
                 {breadcrumbs.map((breadcrumb, index) => (
                   <div key={breadcrumb.id} className="flex items-center">
-                    <ChevronRight className="h-3 w-3 mx-1 text-gray-500" />
+                    <ChevronRight className="h-3 w-3 mx-1 text-muted-foreground" />
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleBreadcrumbClick(index)}
-                      className="h-6 px-2 text-xs hover:bg-white"
+                      className="h-6 px-2 text-xs hover:bg-background"
                     >
                       {breadcrumb.name}
                     </Button>
@@ -285,7 +285,7 @@ export function LocationPicker({
           <Command className="border-0">
             <div className="px-3 py-2 border-b">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <CommandInput
                   placeholder={t("search_locations")}
                   value={searchQuery}
@@ -310,17 +310,17 @@ export function LocationPicker({
                   </div>
                 ) : error ? (
                   <div className="p-6 text-center">
-                    <div className="text-gray-500 text-sm">
+                    <div className="text-muted-foreground text-sm">
                       {t("failed_to_load_locations")}
                     </div>
                   </div>
                 ) : searchQuery ? (
-                  <div className="p-6 text-center text-gray-500">
+                  <div className="p-6 text-center text-muted-foreground">
                     <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <div className="text-sm">{t("no_location_found")}</div>
                   </div>
                 ) : (
-                  <div className="p-6 text-center text-gray-500">
+                  <div className="p-6 text-center text-muted-foreground">
                     <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <div className="text-sm">{t("no_locations_found")}</div>
                   </div>
@@ -339,11 +339,11 @@ export function LocationPicker({
                       key={location.id}
                       value={location.name}
                       onSelect={() => handleLocationSelect(location)}
-                      className="flex items-center justify-between px-3 py-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 last:border-b-0"
+                      className="flex items-center justify-between px-3 py-3 cursor-pointer hover:bg-soft-background hover:text-foreground transition-colors duration-150 border-b border-border last:border-b-0"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="flex-shrink-0">
-                          <Icon className="h-5 w-5 text-gray-500" />
+                          <Icon className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="font-medium text-sm truncate">
@@ -353,10 +353,10 @@ export function LocationPicker({
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {value?.id === location.id && (
-                          <Check className="h-4 w-4 text-gray-700" />
+                          <Check className="h-4 w-4 text-muted-foreground" />
                         )}
                         {location.has_children && (
-                          <ChevronRight className="h-4 w-4 text-gray-500" />
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         )}
                       </div>
                     </CommandItem>

@@ -129,14 +129,14 @@ export function LocationTable({
                   mass: 0.8,
                 }}
                 className={cn(
-                  "hover:bg-gray-50 group",
+                  "hover:bg-soft-background group",
                   canView && "cursor-pointer",
                 )}
                 onClick={canView ? () => onView?.(location) : undefined}
               >
                 <TableCell>
                   <div className="font-medium flex items-center gap-2 py-2">
-                    <Icon className="size-4 text-gray-500" />
+                    <Icon className="size-4 text-muted-foreground" />
                     <span
                       className={
                         location.mode === "instance"
@@ -151,7 +151,7 @@ export function LocationTable({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span className="cursor-help">
-                              <FolderOpen className="size-3 text-gray-400" />
+                              <FolderOpen className="size-3 text-placeholder-foreground" />
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>

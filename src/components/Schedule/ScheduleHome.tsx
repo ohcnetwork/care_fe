@@ -142,7 +142,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
               <PopoverTrigger asChild>
                 <div
                   className={cn(
-                    "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-[state=open]:bg-white",
+                    "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-muted-background hover:bg-background data-[state=open]:bg-background",
                     templatesQuery.isLoading &&
                       "opacity-50 pointer-events-none",
                     "transition-all duration-200 ease-in-out",
@@ -163,7 +163,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
                     <span
                       className={cn(
                         "text-base",
-                        isToday ? "text-gray-900" : "text-gray-500",
+                        isToday ? "text-foreground" : "text-muted-foreground",
                       )}
                     >
                       {date.getDate()}
@@ -198,13 +198,13 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
 
       <div className="space-y-4">
         <div className="flex items-end justify-between gap-3 md:gap-0">
-          <div className="flex bg-gray-100 rounded-lg p-0 md:p-1 gap-1 max-w-min">
+          <div className="flex bg-muted-background rounded-lg p-0 md:p-1 gap-1 max-w-min">
             <Button
               variant={view === "schedule" ? "outline" : "ghost"}
               onClick={() => setQParams({ tab: "schedule" })}
               className={cn(
                 view === "schedule" && "shadow-sm",
-                "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
+                "hover:bg-background text-xs sm:text-sm px-2 md:px-4",
               )}
             >
               {t("schedule")}
@@ -214,7 +214,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
               onClick={() => setQParams({ tab: "exceptions" })}
               className={cn(
                 view === "exceptions" && "shadow-sm",
-                "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
+                "hover:bg-background text-xs sm:text-sm px-2 md:px-4",
               )}
             >
               {t("exceptions")}
@@ -303,7 +303,7 @@ function DayDetailsPopover({
   return (
     <PopoverContent className="p-6" align="center" sideOffset={5}>
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-soft-foreground">
           {date.toLocaleDateString("default", {
             day: "numeric",
             month: "short",
@@ -331,12 +331,12 @@ function DayDetailsPopover({
       <ScrollArea className="max-h-[22rem] overflow-auto">
         {bookedSlots > 0 && (
           <>
-            <hr className="bg-gray-200 h-px my-3" />
+            <hr className="bg-strong-background h-px my-3" />
             <Link
-              className="flex items-center gap-2 text-sm text-gray-500 underline underline-offset-2"
+              className="flex items-center gap-2 text-sm text-muted-foreground underline underline-offset-2"
               href={`/facility/${facilityId}/appointments?practitioners=${resourceId}&date_from=${dateQueryString(date)}&date_to=${dateQueryString(date)}`}
             >
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 {t("appointments_scheduled_for_day_link", {
                   count: bookedSlots,
                 })}
@@ -346,7 +346,7 @@ function DayDetailsPopover({
           </>
         )}
 
-        <hr className="bg-gray-200 h-px my-3" />
+        <hr className="bg-strong-background h-px my-3" />
 
         {templates.map((template) => (
           <div key={template.id}>
@@ -380,12 +380,12 @@ function DayDetailsPopover({
                   style={diagonalStripes}
                 />
                 <div>
-                  <p className="text-sm text-black font-medium">
+                  <p className="text-sm text-foreground font-medium">
                     {t("exception")}: {exception.reason}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-soft-foreground">
                     <span>{formatTimeShort(exception.start_time)}</span>
-                    <span className="px-2 text-gray-300">-</span>
+                    <span className="px-2 text-disabled-foreground">-</span>
                     <span>{formatTimeShort(exception.end_time)}</span>
                   </p>
                 </div>
@@ -413,11 +413,11 @@ function ScheduleTemplateAvailabilityItem({
     return (
       <div key={availability.id}>
         <h4 className="font-medium text-base">{availability.name}</h4>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-soft-foreground">
           <span>
             {t(`SCHEDULE_AVAILABILITY_TYPE__${availability.slot_type}`)}
           </span>
-          <span className="px-2 text-gray-300">|</span>
+          <span className="px-2 text-disabled-foreground">|</span>
           <span className="text-sm">
             {/* TODO: handle multiple days of week */}
             {formatAvailabilityTime(availability.availability)}
@@ -451,17 +451,17 @@ function ScheduleTemplateAvailabilityItem({
   return (
     <div key={availability.id}>
       <h4 className="font-medium text-base">{availability.name}</h4>
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-soft-foreground">
         <span>
           {t(`SCHEDULE_AVAILABILITY_TYPE__${availability.slot_type}`)}
         </span>
-        <span className="px-2 text-gray-300">|</span>
+        <span className="px-2 text-disabled-foreground">|</span>
         <span className="text-sm">
           {formatAvailabilityTime(availability.availability)}
         </span>
       </p>
       {availability.slot_type === "appointment" && (
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-soft-foreground">
           {availableSlots === intendedSlots ? (
             t("session_slots_info", {
               slots: availableSlots,

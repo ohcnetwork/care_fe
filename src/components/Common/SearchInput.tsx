@@ -55,15 +55,15 @@ interface SearchInputProps extends Omit<
 const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
   const { t } = useTranslation();
   return (
-    <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
+    <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-muted-foreground">
       {open ? (
-        <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
+        <span className="border border-strong-border rounded px-1 py-0.5 bg-background text-muted-foreground">
           <kbd>{t("esc")}</kbd>
         </span>
       ) : (
         <ShortcutBadge
           actionId="search-input-shortcut"
-          className="text-gray-500"
+          className="text-muted-foreground"
         />
       )}
     </div>
@@ -286,12 +286,12 @@ export default function SearchInput({
     return (
       <div
         className={cn(
-          "border rounded-lg border-gray-200 bg-white shadow-sm",
+          "border rounded-lg border-border bg-background shadow-sm",
           className,
         )}
       >
         <div className="flex items-center rounded-lg p-3">
-          <div className="text-gray-500 text-sm">
+          <div className="text-muted-foreground text-sm">
             {t("no_search_options_available")}
           </div>
         </div>
@@ -303,7 +303,7 @@ export default function SearchInput({
     <div
       className={cn(
         !isSingleOption &&
-          "border rounded-lg border-gray-200 bg-white shadow-sm",
+          "border rounded-lg border-border bg-background shadow-sm",
         className,
       )}
     >
@@ -335,7 +335,7 @@ export default function SearchInput({
                   <CommandGroup>
                     <div className="p-4">
                       <div className="mb-4">
-                        <p className="text-sm font-medium text-gray-600">
+                        <p className="text-sm font-medium text-soft-foreground">
                           {t("search_by")}
                         </p>
                         <div className="flex mt-2">
@@ -355,9 +355,9 @@ export default function SearchInput({
                           </Button>
                         </div>
                       </div>
-                      <hr className="border-gray-200 mb-3" />
+                      <hr className="border-border mb-3" />
                       <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-2">
+                        <p className="text-xs font-semibold text-muted-foreground mb-2">
                           {t("choose_other_search_type")}
                         </p>
                         <div className="space-y-2">
@@ -379,7 +379,8 @@ export default function SearchInput({
                                 className={cn(
                                   "flex items-center p-2 rounded-md cursor-pointer",
                                   {
-                                    "bg-gray-100": focusedIndex === index,
+                                    "bg-muted-background":
+                                      focusedIndex === index,
                                     "hover:bg-secondary-100": true,
                                   },
                                 )}
@@ -391,7 +392,7 @@ export default function SearchInput({
                                 </span>
                                 {focusedIndex === index && (
                                   <kbd
-                                    className="ml-2 border border-gray-300 rounded px-1 bg-white text-xs text-gray-500"
+                                    className="ml-2 border border-strong-border rounded px-1 bg-background text-xs text-muted-foreground"
                                     title={t("press_enter_to_select")}
                                   >
                                     ⏎ Enter
@@ -426,7 +427,7 @@ export default function SearchInput({
       </div>
 
       {enableOptionButtons && !isSingleOption && (
-        <div className="flex flex-wrap gap-2 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
+        <div className="flex flex-wrap gap-2 p-2 border-t rounded-b-lg bg-soft-background border-t-soft-border">
           {safeOptions.map((option, i) => (
             <Button
               key={option.key}
@@ -436,7 +437,7 @@ export default function SearchInput({
               className={cn(
                 selectedOption?.key === option.key
                   ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                  : "bg-muted-background text-muted-foreground hover:bg-strong-background",
                 buttonClassName,
               )}
             >
@@ -449,7 +450,7 @@ export default function SearchInput({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full flex items-center justify-center text-gray-500"
+          className="w-full flex items-center justify-center text-muted-foreground"
           onClick={() => {
             setSearchValue("");
             inputRef.current?.focus();

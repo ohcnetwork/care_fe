@@ -389,10 +389,10 @@ export function DeliveryOrderShow({
       <Page title={t("delivery_order_details")} hideTitleOnPage>
         <div className="space-y-4">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-8 bg-strong-background rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-strong-background rounded w-1/2 mb-2"></div>
+            <div className="h-4 bg-strong-background rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-strong-background rounded w-1/4"></div>
           </div>
         </div>
       </Page>
@@ -404,7 +404,9 @@ export function DeliveryOrderShow({
       <Page title={t("delivery_order_details")} hideTitleOnPage>
         <div className="space-y-4">
           <div className="text-center py-8">
-            <p className="text-gray-500">{t("delivery_order_not_found")}</p>
+            <p className="text-muted-foreground">
+              {t("delivery_order_not_found")}
+            </p>
           </div>
         </div>
       </Page>
@@ -447,7 +449,7 @@ export function DeliveryOrderShow({
             </BackButton>
             <div>
               <h4>{deliveryOrder.name}</h4>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-muted-foreground">
                 <Trans
                   i18nKey="delivery_request_from_to"
                   values={{
@@ -458,7 +460,9 @@ export function DeliveryOrderShow({
                     to: deliveryOrder.destination?.name || t("destination"),
                   }}
                   components={{
-                    strong: <span className="font-semibold text-gray-700" />,
+                    strong: (
+                      <span className="font-semibold text-muted-foreground" />
+                    ),
                   }}
                 />
               </p>
@@ -575,20 +579,20 @@ export function DeliveryOrderShow({
           <CardContent className="space-y-1 p-4">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("deliver_to")}
                 </label>
-                <div className="text-lg font-semibold text-gray-950">
+                <div className="text-lg font-semibold text-foreground">
                   {deliveryOrder.destination.name}
                 </div>
               </div>
 
               {deliveryOrder.origin && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-muted-foreground">
                     {t("origin")}
                   </label>
-                  <div className="text-lg font-semibold text-gray-950">
+                  <div className="text-lg font-semibold text-foreground">
                     {deliveryOrder.origin.name}
                   </div>
                 </div>
@@ -596,17 +600,17 @@ export function DeliveryOrderShow({
 
               {deliveryOrder.supplier && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-muted-foreground">
                     {t("supplier")}
                   </label>
-                  <div className="text-lg font-semibold text-gray-950">
+                  <div className="text-lg font-semibold text-foreground">
                     {deliveryOrder.supplier.name}
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-muted-foreground">
                   {t("status")}
                 </label>
                 <div>
@@ -621,7 +625,7 @@ export function DeliveryOrderShow({
 
               {deliveryOrder.note && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-muted-foreground">
                     {t("note")}
                   </label>
                   <p className="text-sm whitespace-pre-wrap">
@@ -632,7 +636,7 @@ export function DeliveryOrderShow({
 
               <div className="flex flex-wrap gap-1">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-muted-foreground">
                     {t("tags_proper")}
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -691,10 +695,10 @@ export function DeliveryOrderShow({
 
                 return (
                   <div key={`${field.extensionName}-${field.name}`}>
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-muted-foreground">
                       {field.label}
                     </label>
-                    <div className="text-lg font-semibold text-gray-950">
+                    <div className="text-lg font-semibold text-foreground">
                       {displayValue}
                     </div>
                   </div>
@@ -702,14 +706,14 @@ export function DeliveryOrderShow({
               })}
               {deliveryOrder.created_by && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-muted-foreground">
                     {t("created_by")}
                   </label>
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-md font-semibold text-gray-950">
+                    <span className="text-md font-semibold text-foreground">
                       {formatName(deliveryOrder.created_by)}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {formatDateTime(deliveryOrder.created_date)}
                     </span>
                   </div>
@@ -795,8 +799,8 @@ export function DeliveryOrderShow({
               <div className="space-y-2">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-strong-background rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-strong-background rounded w-1/2"></div>
                   </div>
                 ))}
               </div>
@@ -933,7 +937,7 @@ export function DeliveryOrderShow({
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-6 bg-gray-50 p-4 rounded-md">
+            <div className="space-y-6 bg-soft-background p-4 rounded-md">
               <div className="space-y-4">
                 <Label>{t("receiving_status")}</Label>
                 <RadioGroup
@@ -945,7 +949,7 @@ export function DeliveryOrderShow({
                 >
                   <Label
                     htmlFor={SupplyDeliveryStatus.completed}
-                    className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-gray-300 bg-white hover:border-gray-400"
+                    className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-strong-border bg-background hover:border-stronger-border"
                   >
                     <RadioGroupItem
                       value={SupplyDeliveryStatus.completed}
@@ -957,7 +961,7 @@ export function DeliveryOrderShow({
                   </Label>
                   <Label
                     htmlFor={SupplyDeliveryStatus.abandoned}
-                    className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-gray-300 bg-white hover:border-gray-400"
+                    className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-strong-border bg-background hover:border-stronger-border"
                   >
                     <RadioGroupItem
                       value={SupplyDeliveryStatus.abandoned}
@@ -985,7 +989,7 @@ export function DeliveryOrderShow({
                   >
                     <Label
                       htmlFor={SupplyDeliveryCondition.normal}
-                      className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-gray-300 bg-white hover:border-gray-400"
+                      className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-strong-border bg-background hover:border-stronger-border"
                     >
                       <RadioGroupItem
                         value={SupplyDeliveryCondition.normal}
@@ -997,7 +1001,7 @@ export function DeliveryOrderShow({
                     </Label>
                     <Label
                       htmlFor={SupplyDeliveryCondition.damaged}
-                      className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-gray-300 bg-white hover:border-gray-400"
+                      className="flex items-center justify-center px-4 py-3 rounded-md border-[1.5px] cursor-pointer transition-all border-strong-border bg-background hover:border-stronger-border"
                     >
                       <RadioGroupItem
                         value={SupplyDeliveryCondition.damaged}

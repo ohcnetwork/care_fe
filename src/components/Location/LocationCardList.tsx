@@ -29,7 +29,7 @@ export function LocationCardList({
       {locations?.map((location) => (
         <Card
           key={location.id}
-          className="cursor-pointer hover:bg-gray-50 transition-colors"
+          className="cursor-pointer hover:bg-soft-background transition-colors"
           onClick={() => onLocationClick(location)}
         >
           <CardHeader className="p-4">

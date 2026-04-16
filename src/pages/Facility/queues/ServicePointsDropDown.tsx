@@ -35,7 +35,7 @@ export const ServicePointsDropDown = () => {
 
   return (
     <div className="flex">
-      <div className="flex w-full sm:w-auto gap-1 rounded-r-none border border-r-0 border-gray-300 rounded-l-md p-1 bg-white">
+      <div className="flex w-full sm:w-auto gap-1 rounded-r-none border border-r-0 border-strong-border rounded-l-md p-1 bg-background">
         {assignedServicePointIds.length === 0 ? (
           <span className="text-sm font-medium">
             {t("assign_service_points")}
@@ -51,17 +51,17 @@ export const ServicePointsDropDown = () => {
                 return (
                   <div
                     key={subQueue.id}
-                    className="flex w-48 items-center justify-center gap-1 border border-gray-300 py-0.5 px-1.5 rounded-sm bg-gray-50 whitespace-nowrap"
+                    className="flex w-48 items-center justify-center gap-1 border border-strong-border py-0.5 px-1.5 rounded-sm bg-soft-background whitespace-nowrap"
                   >
                     <div className="bg-primary-200 border border-primary-500 w-2 h-2 rounded-full" />
-                    <span className="text-sm text-gray-950 font-medium truncate">
+                    <span className="text-sm text-foreground font-medium truncate">
                       {subQueue.name}
                     </span>
                   </div>
                 );
               })}
             {activeServicePointCount > defaultServicePoints && (
-              <span className="text-sm text-gray-950 font-medium">
+              <span className="text-sm text-foreground font-medium">
                 {"+"}
                 {t("count_more", {
                   count: activeServicePointCount - defaultServicePoints,
@@ -75,18 +75,18 @@ export const ServicePointsDropDown = () => {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="rounded-l-none w-10 h-9 border border-gray-300 bg-white"
+            className="rounded-l-none w-10 h-9 border border-strong-border bg-background"
           >
             <ChevronDownIcon />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="min-w-55 rounded-lg border border-gray-300 shadow-xl  w-full"
+          className="min-w-55 rounded-lg border border-strong-border shadow-xl  w-full"
         >
           <div className="flex flex-col gap-2 p-2 items-start justify-start">
             <div className="w-full">
-              <DropdownMenuLabel className="text-xs font-medium px-3 text-gray-600">
+              <DropdownMenuLabel className="text-xs font-medium px-3 text-soft-foreground">
                 {t("assigned_service_points")}
               </DropdownMenuLabel>
               <div>
@@ -97,7 +97,7 @@ export const ServicePointsDropDown = () => {
                   return (
                     <div
                       key={subQueue.id}
-                      className="flex items-center justify-between rounded-sm w-full p-1 hover:bg-gray-100 cursor-pointer"
+                      className="flex items-center justify-between rounded-sm w-full p-1 hover:bg-muted-background cursor-pointer"
                       onClick={() => {
                         toggleServicePoint(subQueue.id, !isSelected);
                       }}
@@ -118,7 +118,7 @@ export const ServicePointsDropDown = () => {
                 })}
               </div>
             </div>
-            <div className="border-t border-gray-200 w-full pt-3 pb-1 px-1">
+            <div className="border-t border-border w-full pt-3 pb-1 px-1">
               <Button className="w-full" onClick={() => setIsOpen(false)}>
                 {t("done")}
               </Button>

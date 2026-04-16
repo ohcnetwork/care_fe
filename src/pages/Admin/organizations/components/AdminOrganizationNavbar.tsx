@@ -46,7 +46,7 @@ function OrganizationTreeNode({
   return (
     <div className="space-y-1">
       <div
-        className={`flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100 ${isSelected ? "bg-blue-100 text-blue-800" : ""}`}
+        className={`flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-muted-background ${isSelected ? "bg-blue-100 text-blue-800" : ""}`}
         style={{ paddingLeft: `${level}rem` }}
       >
         {organization.has_children ? (
@@ -60,7 +60,7 @@ function OrganizationTreeNode({
             }}
           >
             {isLoading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-strong-border border-t-soft-foreground" />
             ) : isExpanded ? (
               <ChevronDown className="h-4 w-4" />
             ) : (
@@ -136,7 +136,7 @@ export default function AdminOrganizationNavbar({
     .sort((left, right) => left.name.localeCompare(right.name));
 
   return (
-    <div className="h-full bg-white rounded-lg shadow-lg min-w-64 hidden md:block">
+    <div className="h-full bg-card rounded-lg shadow-lg min-w-64 hidden md:block">
       <ScrollArea className="h-full min-h-[calc(100vh-14rem)]">
         <div className="p-4">
           {isLoadingOrganizations ? (

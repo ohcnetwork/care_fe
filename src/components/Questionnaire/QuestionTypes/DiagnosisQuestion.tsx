@@ -144,7 +144,7 @@ function ClinicalStatusSelect({
       <SelectTrigger className="h-8 md:h-9">
         <SelectValue
           placeholder={
-            <span className="text-gray-500">
+            <span className="text-muted-foreground">
               {t("diagnosis_status_placeholder")}
             </span>
           }
@@ -178,7 +178,7 @@ function VerificationStatusSelect({
       <SelectTrigger className="h-8 md:h-9">
         <SelectValue
           placeholder={
-            <span className="text-gray-500">
+            <span className="text-muted-foreground">
               {t("diagnosis_verification_placeholder")}
             </span>
           }
@@ -668,7 +668,7 @@ export function DiagnosisQuestion({
           {!isMobile && (
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-50">
+                <TableRow className="bg-soft-background">
                   <TableHead className="w-[30%]">{t("diagnosis")}</TableHead>
                   <TableHead className="w-[15%] text-center">
                     {t("onset_date")}
@@ -788,7 +788,7 @@ const DiagnosisTableRow = ({
             >
               {diagnosis.code.display}
             </div>
-            <div className="text-xs px-2 py-0.5 rounded-full shrink-0 bg-gray-100 text-gray-700">
+            <div className="text-xs px-2 py-0.5 rounded-full shrink-0 bg-muted-background text-muted-foreground">
               {t(`Diagnosis_${diagnosis.category}__title`)}
             </div>
           </div>
@@ -901,7 +901,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
   );
   const { t } = useTranslation();
   return (
-    <div className="group hover:bg-gray-50">
+    <div className="group hover:bg-soft-background">
       {/* Mobile View - Card Layout */}
       <Card
         className={cn("mb-2 rounded-lg", {
@@ -917,9 +917,9 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
           <CollapsibleTrigger asChild>
             <CardHeader
               className={cn(
-                "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
+                "p-2 rounded-lg shadow-none bg-soft-background cursor-pointer active:bg-muted-background transition-colors",
                 {
-                  "bg-gray-200 border border-gray-300": !isOpen,
+                  "bg-strong-background border border-strong-border": !isOpen,
                 },
               )}
             >
@@ -928,13 +928,13 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-start gap-1">
                       <CardTitle
-                        className="text-base text-gray-950 break-words"
+                        className="text-base text-foreground break-words"
                         title={diagnosis.code.display}
                       >
                         <span className="mr-2">{diagnosis.code.display}</span>
                         <div
                           className={cn(
-                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap bg-gray-100 text-gray-700",
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap bg-muted-background text-muted-foreground",
                           )}
                         >
                           {t(`Diagnosis_${diagnosis.category}__title`)}
@@ -955,7 +955,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                           e.stopPropagation();
                           onRemove?.();
                         }}
-                        className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
+                        className="h-10 w-10 p-4 border border-stronger-border bg-background shadow text-destructive"
                       >
                         <MinusCircledIcon className="h-5 w-5" />
                       </Button>
@@ -963,7 +963,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-10 w-10 border border-gray-400 bg-white shadow p-4"
+                      className="h-10 w-10 border border-stronger-border bg-background shadow p-4"
                     >
                       {isOpen ? (
                         <ChevronsDownUp className="h-5 w-5" />
@@ -974,7 +974,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   </div>
                 </div>
                 {!isOpen && (
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
                     <span>
                       {t("diagnosed_on")}{" "}
                       {diagnosis.onset?.onset_datetime
@@ -984,13 +984,13 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                           )
                         : ""}
                     </span>
-                    <span className="text-gray-300">|</span>
+                    <span className="text-disabled-foreground">|</span>
                     <span>{t(diagnosis.clinical_status)}</span>
-                    <span className="text-gray-300">|</span>
+                    <span className="text-disabled-foreground">|</span>
                     <span>{t(diagnosis.verification_status)}</span>
                     {diagnosis.severity && (
                       <>
-                        <span className="text-gray-300">|</span>
+                        <span className="text-disabled-foreground">|</span>
                         <Badge variant="outline" className="py-0 font-medium">
                           {t(diagnosis.severity)}
                         </Badge>
@@ -1002,7 +1002,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
             </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
+            <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-soft-background">
               <DiagnosisDetailsForm
                 diagnosis={diagnosis}
                 onUpdate={onUpdate || (() => {})}

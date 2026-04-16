@@ -168,7 +168,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
           <div className="space-y-3">
             {!userData.mfa_enabled ? (
               <>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-muted-foreground">
                   {t("two_factor_authentication_not_active")}
                 </p>
                 <Button
@@ -191,7 +191,7 @@ export const TwoFactorAuth = ({ userData }: userChildProps) => {
               </>
             ) : (
               <>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-muted-foreground">
                   {t("two_factor_authentication_active")}
                 </p>
                 <div className="flex flex-col md:flex-row gap-2">

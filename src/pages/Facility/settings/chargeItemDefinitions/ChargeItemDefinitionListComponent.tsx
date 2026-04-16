@@ -60,11 +60,11 @@ function ChargeItemCard({
                   {t(definition.status)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate text-lg font-medium">
+              <h3 className="font-medium text-foreground truncate text-lg font-medium">
                 {definition.title}
               </h3>
               {definition.description && (
-                <p className="mt-1 text-sm text-gray-500 line-clamp-2">
+                <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
                   {definition.description}
                 </p>
               )}
@@ -100,13 +100,15 @@ function ChargeItemTableRow({
   const { t } = useTranslation();
 
   return (
-    <TableRow className="hover:bg-gray-50">
+    <TableRow className="hover:bg-soft-background">
       <TableCell className="font-medium">
         <div className="flex items-center space-x-3">
           <div>
-            <div className="font-medium text-gray-900">{definition.title}</div>
+            <div className="font-medium text-foreground">
+              {definition.title}
+            </div>
             {definition.description && (
-              <div className="text-sm text-gray-500 truncate max-w-xs">
+              <div className="text-sm text-muted-foreground truncate max-w-xs">
                 {definition.description}
               </div>
             )}
@@ -121,10 +123,10 @@ function ChargeItemTableRow({
           {t(definition.status)}
         </Badge>
       </TableCell>
-      <TableCell className="text-sm text-gray-500">
+      <TableCell className="text-sm text-muted-foreground">
         {definition.category.title}
       </TableCell>
-      <TableCell className="text-sm text-gray-500">
+      <TableCell className="text-sm text-muted-foreground">
         {definition.price_components.length > 0
           ? `${definition.price_components.length} ${t("price_components")}`
           : t("no_price_components")}
@@ -136,7 +138,7 @@ function ChargeItemTableRow({
               <TagBadge key={tag.id} tag={tag} className="text-xs" />
             ))
           ) : (
-            <span className="text-gray-400">—</span>
+            <span className="text-placeholder-foreground">—</span>
           )}
         </div>
       </TableCell>
@@ -208,7 +210,7 @@ export function ChargeItemList({
     <div>
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative w-full sm:w-auto">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-placeholder-foreground">
             <CareIcon icon="l-search" className="size-5" />
           </span>
           <Input
@@ -234,7 +236,7 @@ export function ChargeItemList({
 
       {/* Results count */}
       {chargeItemsResponse && chargeItemsResponse.count > 0 && (
-        <div className="mb-4 text-sm text-gray-600">
+        <div className="mb-4 text-sm text-soft-foreground">
           {t("showing")} {chargeItems.length} {t("of")}{" "}
           {chargeItemsResponse.count} {t("charge_items")}
         </div>

@@ -150,7 +150,7 @@ export default function LocationView({
           <BreadcrumbItem>
             <BreadcrumbLink
               asChild={!isNested}
-              className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
+              className="text-sm text-foreground cursor-pointer hover:underline hover:underline-offset-2"
               onClick={isNested && onBackToParent ? onBackToParent : undefined}
             >
               {isNested ? (
@@ -167,13 +167,13 @@ export default function LocationView({
             <React.Fragment key={breadcrumb.id}>
               <BreadcrumbItem>
                 {index === breadcrumbs.length - 1 ? (
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-foreground">
                     {breadcrumb.name}
                   </span>
                 ) : (
                   <BreadcrumbLink
                     asChild={!isNested}
-                    className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
+                    className="text-sm text-foreground cursor-pointer hover:underline hover:underline-offset-2"
                     onClick={
                       isNested
                         ? () => handleBreadcrumbClick(breadcrumb.id)
@@ -303,7 +303,7 @@ export default function LocationView({
                     />
                   ) : (
                     <Card>
-                      <CardContent className="p-4 text-center text-gray-500">
+                      <CardContent className="p-4 text-center text-muted-foreground">
                         {searchQuery
                           ? t("no_locations_found")
                           : t("no_child_locations_found")}
@@ -337,7 +337,7 @@ export default function LocationView({
                     </div>
                   ) : (
                     <Card>
-                      <CardContent className="p-4 text-center text-gray-500">
+                      <CardContent className="p-4 text-center text-muted-foreground">
                         {searchQuery
                           ? t("no_locations_found")
                           : t("no_child_locations_found")}

@@ -193,7 +193,7 @@ function DepartmentFilterDropdown({
           return (
             filteredSelectedOrgs.length > 0 && (
               <>
-                <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   {t("selected_departments")}
                 </div>
                 {filteredSelectedOrgs.map((org) => (
@@ -221,7 +221,7 @@ function DepartmentFilterDropdown({
                           {org.name}
                         </span>
                         {org.parent && org.parent.name && (
-                          <span className="text-xs text-gray-400 truncate block">
+                          <span className="text-xs text-placeholder-foreground truncate block">
                             {org.parent.name}
                           </span>
                         )}
@@ -238,7 +238,7 @@ function DepartmentFilterDropdown({
         {/* Available Departments */}
         {nonSelectedOrgs.length > 0 && (
           <>
-            <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {t("available_departments")}
             </div>
             {nonSelectedOrgs.map((org) =>
@@ -277,7 +277,7 @@ function DepartmentFilterDropdown({
                         (isSearching ||
                           (org.parent.org_type !== "root" &&
                             org.parent.level_cache > 0)) && (
-                          <span className="text-xs text-gray-400 truncate block">
+                          <span className="text-xs text-placeholder-foreground truncate block">
                             {org.parent.name}
                           </span>
                         )}
@@ -290,14 +290,14 @@ function DepartmentFilterDropdown({
         )}
 
         {isLoading && (
-          <div className="px-2 py-4 text-sm text-gray-500 text-center flex items-center justify-center gap-2">
+          <div className="px-2 py-4 text-sm text-muted-foreground text-center flex items-center justify-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             {t("loading")}
           </div>
         )}
 
         {!isLoading && filteredOrgs.length === 0 && (
-          <div className="px-2 py-4 text-sm text-gray-500 text-center">
+          <div className="px-2 py-4 text-sm text-muted-foreground text-center">
             {t("no_departments_found")}
           </div>
         )}
@@ -326,7 +326,7 @@ export default function RenderDepartmentFilter({
 
   if (!facilityId) {
     return (
-      <div className="p-4 text-sm text-gray-500 text-center">
+      <div className="p-4 text-sm text-muted-foreground text-center">
         {t("facility_required_for_department_filter")}
       </div>
     );

@@ -41,8 +41,10 @@ export default function FacilityServicesPage({
     <Page title={t("services")} hideTitleOnPage>
       <div className="container mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">{t("services")}</h1>
-          <p className="mt-1 text-sm text-gray-600">
+          <h1 className="text-2xl font-bold text-foreground">
+            {t("services")}
+          </h1>
+          <p className="mt-1 text-sm text-soft-foreground">
             {t("discover_healthcare_services")}
           </p>
         </div>

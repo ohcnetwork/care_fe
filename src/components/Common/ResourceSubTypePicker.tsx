@@ -140,31 +140,31 @@ export function ResourceSubTypePicker({
       </SelectTrigger>
 
       <SelectContent className="p-0 min-w-[320px]">
-        <div className="px-4 py-3 border-b bg-gray-50">
+        <div className="px-4 py-3 border-b bg-soft-background">
           <div className="flex items-center gap-2">
-            <Home className="size-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-600 truncate">
+            <Home className="size-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-soft-foreground truncate">
               {t(getCurrentLevelTitle())}
             </span>
           </div>
         </div>
 
         {breadcrumbs.length > 0 && (
-          <div className="px-4 py-2 border-b bg-gray-100">
+          <div className="px-4 py-2 border-b bg-muted-background">
             <div className="flex items-center gap-1 text-xs">
               <button
                 type="button"
-                className="h-6 px-2 rounded hover:bg-white text-gray-700"
+                className="h-6 px-2 rounded hover:bg-background text-muted-foreground"
                 onClick={handleBackToRoot}
               >
                 {t("root")}
               </button>
               {breadcrumbs.map((bc, idx) => (
                 <div key={bc.value} className="flex items-center">
-                  <ChevronRight className="size-3 mx-1 text-gray-500" />
+                  <ChevronRight className="size-3 mx-1 text-muted-foreground" />
                   <button
                     type="button"
-                    className="h-6 px-2 rounded hover:bg-white text-gray-700"
+                    className="h-6 px-2 rounded hover:bg-background text-muted-foreground"
                     onClick={() =>
                       setBreadcrumbs(breadcrumbs.slice(0, idx + 1))
                     }
@@ -186,17 +186,17 @@ export function ResourceSubTypePicker({
                 key={node.value}
                 className={cn(
                   "flex items-center justify-between p-3 cursor-pointer",
-                  "hover:bg-gray-50 hover:text-gray-900 transition-colors border-b border-gray-200",
+                  "hover:bg-soft-background hover:text-foreground transition-colors border-b border-border",
                 )}
                 onClick={() => handleNavigate(node)}
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <FolderOpen className="size-4.5 text-gray-500" />
+                  <FolderOpen className="size-4.5 text-muted-foreground" />
                   <div className="font-medium text-sm truncate">
                     {t(node.title)}
                   </div>
                 </div>
-                <ChevronRight className="size-4 text-gray-500" />
+                <ChevronRight className="size-4 text-muted-foreground" />
               </div>
             ))}
 
@@ -210,10 +210,10 @@ export function ResourceSubTypePicker({
                 onSelect={() => {
                   handleSelect(leaf.value as string);
                 }}
-                className="p-3 border-b border-gray-200"
+                className="p-3 border-b border-border"
               >
                 <span className="flex items-center gap-2">
-                  <Folder className="size-4.5 text-gray-500" />
+                  <Folder className="size-4.5 text-muted-foreground" />
                   {t(leaf.title)}
                 </span>
               </SelectItem>

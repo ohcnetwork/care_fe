@@ -113,7 +113,7 @@ const SegmentedDigit = ({ digit }: { digit: string }) => {
               key={cellIndex}
               className={cn(
                 "size-1.5 m-px",
-                cell ? "bg-gray-400" : "bg-transparent",
+                cell ? "bg-stronger-border" : "bg-transparent",
               )}
             ></div>
           ))}
@@ -199,7 +199,7 @@ export default function SessionExpired() {
   const shouldShowTime = seconds > 0;
 
   return (
-    <div className="flex flex-col items-center justify-center w-full fixed inset-0 bg-white">
+    <div className="flex flex-col items-center justify-center w-full fixed inset-0 bg-background">
       <div className="relative flex items-center justify-center size-72 md:size-96">
         {/* Ripples */}
         <div className="absolute inset-0 flex items-center justify-center">
@@ -209,8 +209,8 @@ export default function SessionExpired() {
         </div>
 
         {/* Timer Display */}
-        <div className="absolute flex flex-col items-center justify-center size-40 p-4 bg-gray-50 rounded-full border border-white shadow-lg z-10">
-          <div className="bg-gray-200 p-2 rounded-full shadow-inner mb-1 flex w-full items-center justify-center relative">
+        <div className="absolute flex flex-col items-center justify-center size-40 p-4 bg-soft-background rounded-full border border-white shadow-lg z-10">
+          <div className="bg-strong-background p-2 rounded-full shadow-inner mb-1 flex w-full items-center justify-center relative">
             <div className="flex-shrink min-w-0 scale-65">
               {seconds === 0 ? (
                 <SegmentedTime timeStr="··:··" scaleFactor={scaleFactor} />
@@ -221,7 +221,7 @@ export default function SessionExpired() {
           </div>
 
           {/* Breathing Text */}
-          <div className="text-xs text-center uppercase font-medium text-gray-400 mt-1 h-4 transition">
+          <div className="text-xs text-center uppercase font-medium text-placeholder-foreground mt-1 h-4 transition">
             {t("breathe")}{" "}
             <span className="block animate-fade">
               {breathState === "in" ? t("in") : t("out")}
@@ -230,10 +230,10 @@ export default function SessionExpired() {
         </div>
       </div>
       <div className="max-w-lg mx-auto text-center px-4">
-        <h1 className="mt-2 text-xl md:text-4xl text-gray-950 font-bold">
+        <h1 className="mt-2 text-xl md:text-4xl text-foreground font-bold">
           {t("welcome_back")}
         </h1>
-        <p className="max-w-md mx-auto px-2 text-sm md:text-base mt-2 text-gray-600">
+        <p className="max-w-md mx-auto px-2 text-sm md:text-base mt-2 text-soft-foreground">
           {t("session_expired_message")}
         </p>
         <Button

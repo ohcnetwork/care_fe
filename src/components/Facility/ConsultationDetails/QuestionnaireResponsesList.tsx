@@ -173,7 +173,7 @@ function QuestionGroup({
     return (
       <TableRow key={question.id} className="flex flex-col md:table-row">
         <TableCell className="py-1 pl-0 align-top">
-          <div className="text-sm text-gray-600 break-words whitespace-normal">
+          <div className="text-sm text-soft-foreground break-words whitespace-normal">
             {question.text}
           </div>
         </TableCell>
@@ -187,10 +187,12 @@ function QuestionGroup({
                 {idx > 0 && ", "}
                 {val.value && formatValue(val.value, question.type)}
                 {val.unit && (
-                  <span className="ml-1 text-gray-600">{val.unit.code}</span>
+                  <span className="ml-1 text-soft-foreground">
+                    {val.unit.code}
+                  </span>
                 )}
                 {val.coding && (
-                  <span className="ml-1 text-gray-600">
+                  <span className="ml-1 text-soft-foreground">
                     {val.coding.display} ({val.coding.code})
                   </span>
                 )}
@@ -212,7 +214,7 @@ function QuestionGroup({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="max-w-[90vw] p-3">
-                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">
                     {response.note}
                   </p>
                 </PopoverContent>
@@ -225,8 +227,8 @@ function QuestionGroup({
   };
 
   return (
-    <div className="border border-gray-200 rounded-md px-3 py-1.5">
-      <h3 className="text-sm font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
+    <div className="border border-border rounded-md px-3 py-1.5">
+      <h3 className="text-sm font-semibold text-foreground border-b border-border pb-1 mb-1">
         {group.text}
       </h3>
       <div
@@ -308,7 +310,7 @@ function ResponseActionsMenu({
           <Button
             variant="ghost"
             size="icon"
-            className="size-7 text-gray-500"
+            className="size-7 text-muted-foreground"
             aria-label={t("more_actions")}
           >
             <MoreVertical className="size-4" />
@@ -391,7 +393,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
         result.push(
           <div
             key={`group-${result.length}`}
-            className="border border-gray-200 rounded-md px-3 py-1.5"
+            className="border border-border rounded-md px-3 py-1.5"
           >
             <div className="w-full">
               <Table className="table-fixed w-full">
@@ -414,7 +416,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                         className="flex flex-col md:table-row"
                       >
                         <TableCell className="py-1 pl-0 align-top">
-                          <div className="text-sm text-gray-600 break-words whitespace-normal">
+                          <div className="text-sm text-soft-foreground break-words whitespace-normal">
                             {question.text}
                           </div>
                         </TableCell>
@@ -429,12 +431,12 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                                 {val.value &&
                                   formatValue(val.value, question.type)}
                                 {val.unit && (
-                                  <span className="ml-1 text-gray-600">
+                                  <span className="ml-1 text-soft-foreground">
                                     {val.unit.code}
                                   </span>
                                 )}
                                 {val.coding && (
-                                  <span className="ml-1 text-gray-600">
+                                  <span className="ml-1 text-soft-foreground">
                                     {val.coding.display} ({val.coding.code})
                                   </span>
                                 )}
@@ -456,7 +458,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                                   </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="max-w-[90vw] p-3">
-                                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">
                                     {response.note}
                                   </p>
                                 </PopoverContent>
@@ -516,16 +518,16 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
         )}
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-gray-200 pt-2 text-xs text-gray-500">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-border pt-2 text-xs text-muted-foreground">
         <div>
-          <span className="text-gray-600">{t("filed_by")}</span>{" "}
-          <span className="font-medium text-gray-700">
+          <span className="text-soft-foreground">{t("filed_by")}</span>{" "}
+          <span className="font-medium text-muted-foreground">
             {formatName(item.created_by)}
           </span>
         </div>
         <div>
-          <span className="text-gray-600">{t("at")}</span>{" "}
-          <span className="font-medium text-gray-700">
+          <span className="text-soft-foreground">{t("at")}</span>{" "}
+          <span className="font-medium text-muted-foreground">
             {formatDateTime(item.created_date)}
           </span>
         </div>
@@ -570,7 +572,7 @@ export function ResponseCard({
           <CardHeader
             className={cn(
               "flex flex-row items-center py-2 px-3",
-              isEnteredInError && "hover:bg-gray-50",
+              isEnteredInError && "hover:bg-soft-background",
             )}
           >
             {showTitle && (
@@ -579,7 +581,7 @@ export function ResponseCard({
                   "text-base font-medium",
                   onTitleClick &&
                     !isEnteredInError &&
-                    "cursor-pointer hover:bg-gray-100 rounded px-1.5 py-0.5",
+                    "cursor-pointer hover:bg-muted-background rounded px-1.5 py-0.5",
                 )}
                 onClick={(e) => {
                   if (
@@ -604,7 +606,7 @@ export function ResponseCard({
               {isEnteredInError && (
                 <ChevronDown
                   className={cn(
-                    "size-4 transition-transform text-gray-500",
+                    "size-4 transition-transform text-muted-foreground",
                     isExpanded && "rotate-180",
                   )}
                 />
@@ -691,12 +693,9 @@ export default function QuestionnaireResponsesList({
           </div>
         ) : responses.length === 0 ? (
           <Card
-            className={cn(
-              "p-4",
-              isPrintPreview && "shadow-none border-gray-200",
-            )}
+            className={cn("p-4", isPrintPreview && "shadow-none border-border")}
           >
-            <div className="text-sm font-medium text-gray-500">
+            <div className="text-sm font-medium text-muted-foreground">
               {t("no_responses_found")}
             </div>
           </Card>

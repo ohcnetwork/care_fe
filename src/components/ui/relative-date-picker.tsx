@@ -128,7 +128,7 @@ export function RelativeDatePicker({
 
   return (
     <div className="flex flex-col h-[200px]">
-      <div className="flex flex-col gap-2 p-2 items-center border-b border-gray-200">
+      <div className="flex flex-col gap-2 p-2 items-center border-b border-border">
         <div className="grid grid-cols-2 gap-2">
           <Select
             value={selected.value.toString()}

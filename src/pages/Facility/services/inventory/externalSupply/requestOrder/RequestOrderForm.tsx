@@ -254,7 +254,7 @@ export default function RequestOrderForm({
       <Page title={title} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{title}</h1>
           </div>
           <FormSkeleton rows={10} />
         </div>
@@ -266,7 +266,7 @@ export default function RequestOrderForm({
     <Page title={title} hideTitleOnPage shortCutContext="facility:inventory">
       <div className="container mx-auto max-w-5xl">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
             {title}
             <Badge
               variant={
@@ -286,9 +286,9 @@ export default function RequestOrderForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <input type="submit" hidden />
-            <Card className="p-0 bg-white">
+            <Card className="p-0 bg-background">
               <CardContent className="space-y-4 p-4 rounded-md">
-                <div className="space-y-4 border border-gray-100 rounded-md p-4 bg-gray-50">
+                <div className="space-y-4 border border-soft-border rounded-md p-4 bg-soft-background">
                   <FormField
                     control={form.control}
                     name="name"
@@ -367,7 +367,7 @@ export default function RequestOrderForm({
                           >
                             <FormControl>
                               <SelectTrigger
-                                className="border border-gray-400"
+                                className="border border-stronger-border"
                                 ref={field.ref}
                               >
                                 <SelectValue placeholder={t("select_intent")} />
@@ -396,7 +396,7 @@ export default function RequestOrderForm({
                       <FormItem>
                         <FormLabel>
                           {t("note")}
-                          <span className="text-gray-500 text-sm italic">
+                          <span className="text-muted-foreground text-sm italic">
                             ({t("optional")})
                           </span>
                         </FormLabel>
@@ -448,7 +448,7 @@ export default function RequestOrderForm({
                               <div
                                 key={reason}
                                 className={cn(
-                                  "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
+                                  "flex items-center space-x-2 rounded-md border border-border bg-background p-2",
                                   field.value === reason &&
                                     "border-primary bg-primary/10",
                                 )}
@@ -482,7 +482,7 @@ export default function RequestOrderForm({
                                 <div
                                   key={category}
                                   className={cn(
-                                    "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
+                                    "flex items-center space-x-2 rounded-md border border-border bg-background p-2",
                                     field.value === category &&
                                       "border-primary bg-primary/10",
                                   )}
@@ -522,7 +522,7 @@ export default function RequestOrderForm({
                                 <div
                                   key={priority}
                                   className={cn(
-                                    "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
+                                    "flex items-center space-x-2 rounded-md border border-border bg-background p-2",
                                     field.value === priority &&
                                       "border-primary bg-primary/10",
                                   )}

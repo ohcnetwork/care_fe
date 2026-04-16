@@ -112,7 +112,7 @@ export default function RequestOrderTable({
                 <span className="font-medium">
                   {formatName(request.created_by)}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted-foreground">
                   {formatDateTime(request.created_date)}
                 </span>
               </div>
@@ -120,7 +120,7 @@ export default function RequestOrderTable({
             <TableCell>
               <Button
                 variant="outline"
-                className="shadow-sm font-semibold text-gray-950"
+                className="shadow-sm font-semibold text-foreground"
                 onClick={() =>
                   navigate(
                     getInventoryBasePath(

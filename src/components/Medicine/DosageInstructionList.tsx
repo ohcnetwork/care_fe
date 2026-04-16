@@ -34,7 +34,9 @@ export function DosageInstructionList({
   const pb = gap === "sm" ? "pb-1" : "pb-1.5";
 
   return (
-    <div className={cn("divide-y divide-dashed divide-gray-300", className)}>
+    <div
+      className={cn("divide-y divide-dashed divide-strong-border", className)}
+    >
       {instructions.map((di, idx) => (
         <div
           key={idx}

@@ -108,12 +108,12 @@ export default function DispenseOrderListSelector({
                           "DD/MM/YYYY hh:mm A",
                         )}
                     </span>
-                    <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                       {t("location")}: {selectedDispenseOrder.location.name}
                     </span>
                   </div>
                 </div>
-                <ChevronDown className="size-5 text-gray-500 shrink-0 ml-2" />
+                <ChevronDown className="size-5 text-muted-foreground shrink-0 ml-2" />
               </Button>
             ) : (
               <Button variant="outline" className="w-full">
@@ -160,8 +160,8 @@ function DispenseOrderList({
             className={cn(
               "rounded-md relative cursor-pointer transition-colors w-full",
               isSelected
-                ? "bg-white border-primary-600 shadow-md"
-                : "bg-gray-100 hover:bg-gray-100 shadow-none",
+                ? "bg-background border-primary-600 shadow-md"
+                : "bg-muted-background hover:bg-muted-background shadow-none",
             )}
             onClick={() => onSelectDispenseOrder(dispenseOrder)}
           >
@@ -173,7 +173,7 @@ function DispenseOrderList({
                 <PackageIcon
                   className={cn(
                     "size-5",
-                    isSelected ? "text-primary-600" : "text-gray-500",
+                    isSelected ? "text-primary-600" : "text-muted-foreground",
                   )}
                 />
                 <div className="flex flex-col -mt-1">
@@ -184,7 +184,7 @@ function DispenseOrderList({
                         "DD/MM/YYYY hh:mm A",
                       )}
                   </span>
-                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                  <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                     {t("location")}: {dispenseOrder.location.name}
                   </span>
                 </div>

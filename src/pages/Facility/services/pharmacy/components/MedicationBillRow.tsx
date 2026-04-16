@@ -119,7 +119,7 @@ export function MedicationBillRow({
   const displayProductKnowledge = effectiveProductKnowledge;
 
   return (
-    <TableRow className="bg-white hover:bg-gray-50/50 shadow-sm rounded-lg">
+    <TableRow className="bg-background hover:bg-soft-background/50 shadow-sm rounded-lg">
       <TableCell className={cn(tableCellClass, "rounded-l-lg")}>
         <FormField
           control={form.control}
@@ -144,7 +144,7 @@ export function MedicationBillRow({
           )}
         >
           <div>
-            <div className="font-medium text-gray-950 text-base flex items-center">
+            <div className="font-medium text-foreground text-base flex items-center">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="whitespace-pre-wrap wrap-break-word">
@@ -175,22 +175,22 @@ export function MedicationBillRow({
                         side="bottom"
                       >
                         <div className="space-y-3">
-                          <div className="font-semibold text-sm text-gray-950 underline">
+                          <div className="font-semibold text-sm text-foreground underline">
                             {t("substitution_details")} :
                           </div>
                           <div className="space-y-3 text-sm max-w-md">
                             {hasNoProductKnowledge && (
                               <div>
                                 <div className="flex items-center gap-1 mb-1">
-                                  <span className="font-medium text-gray-600">
+                                  <span className="font-medium text-soft-foreground">
                                     {t("original_medication")}:
                                   </span>
-                                  <div className="text-gray-950 font-medium">
+                                  <div className="text-foreground font-medium">
                                     {field.medication?.medication?.display ||
                                       t("unknown")}
                                   </div>
                                 </div>
-                                <div className="text-xs text-gray-500 italic">
+                                <div className="text-xs text-muted-foreground italic">
                                   {t("no_product_knowledge_linked")}
                                 </div>
                               </div>
@@ -199,20 +199,20 @@ export function MedicationBillRow({
                               <>
                                 <div>
                                   <div className="flex items-center gap-1 mb-1">
-                                    <span className="font-medium text-gray-600">
+                                    <span className="font-medium text-soft-foreground">
                                       {t("original_medication")}:
                                     </span>
-                                    <div className="text-gray-950 font-medium">
+                                    <div className="text-foreground font-medium">
                                       {productKnowledge.name}
                                     </div>
                                   </div>
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-1 mb-1">
-                                    <span className="font-medium text-gray-600">
+                                    <span className="font-medium text-soft-foreground">
                                       {t("substituted_with")}:
                                     </span>
-                                    <div className="text-gray-950 font-medium">
+                                    <div className="text-foreground font-medium">
                                       {
                                         substitution.substitutedProductKnowledge
                                           ?.name
@@ -222,10 +222,10 @@ export function MedicationBillRow({
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-1">
-                                    <span className="font-medium text-gray-600">
+                                    <span className="font-medium text-soft-foreground">
                                       {t("substitution_type")}:
                                     </span>
-                                    <div className="text-gray-950 font-medium">
+                                    <div className="text-foreground font-medium">
                                       {getSubstitutionTypeDisplay(
                                         t,
                                         substitution.type,
@@ -233,7 +233,7 @@ export function MedicationBillRow({
                                       ({substitution.type})
                                     </div>
                                   </div>
-                                  <div className="text-gray-700 text-xs italic leading-relaxed">
+                                  <div className="text-muted-foreground text-xs italic leading-relaxed">
                                     {getSubstitutionTypeDescription(
                                       t,
                                       substitution.type,
@@ -242,10 +242,10 @@ export function MedicationBillRow({
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-1">
-                                    <span className="font-medium text-gray-600">
+                                    <span className="font-medium text-soft-foreground">
                                       {t("substitution_reason")}:
                                     </span>
-                                    <div className="text-gray-950 font-medium">
+                                    <div className="text-foreground font-medium">
                                       {getSubstitutionReasonDisplay(
                                         t,
                                         substitution.reason,
@@ -253,7 +253,7 @@ export function MedicationBillRow({
                                       ({substitution.reason})
                                     </div>
                                   </div>
-                                  <div className="text-gray-700 text-xs italic leading-relaxed">
+                                  <div className="text-muted-foreground text-xs italic leading-relaxed">
                                     {getSubstitutionReasonDescription(
                                       t,
                                       substitution.reason,
@@ -294,7 +294,7 @@ export function MedicationBillRow({
                   )}
                 </div>
                 {(substitution || hasNoProductKnowledge) && (
-                  <div className="text-gray-500 font-normal italic line-through text-sm">
+                  <div className="text-muted-foreground font-normal italic line-through text-sm">
                     {hasNoProductKnowledge
                       ? field.medication?.medication?.display
                       : productKnowledge?.name}
@@ -303,7 +303,7 @@ export function MedicationBillRow({
               </div>
             </div>
             {field.medication ? (
-              <div className="text-sm text-gray-700 font-medium">
+              <div className="text-sm text-muted-foreground font-medium">
                 {field.dosageInstructions?.map((di, idx) => {
                   const line = [
                     formatDosage(di),
@@ -318,13 +318,13 @@ export function MedicationBillRow({
                     </div>
                   );
                 })}
-                <span className="text-gray-700 font-semibold text-sm">
+                <span className="text-muted-foreground font-semibold text-sm">
                   = {formatTotalUnits(field.dosageInstructions, t("units"))}
                 </span>
               </div>
             ) : (
               <div
-                className="text-sm text-gray-500 cursor-pointer hover:text-gray-900 underline"
+                className="text-sm text-muted-foreground cursor-pointer hover:text-foreground underline"
                 onClick={() => {
                   if (displayProductKnowledge) {
                     onEditDosage(index, displayProductKnowledge);
@@ -338,11 +338,11 @@ export function MedicationBillRow({
 
                   if (currentDosageInstructions?.dose_and_rate?.dose_quantity) {
                     return (
-                      <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
+                      <div className="text-sm text-muted-foreground font-medium flex items-center gap-1">
                         {formatDosage(currentDosageInstructions)} ×{" "}
                         {formatFrequency(currentDosageInstructions)} ×{" "}
                         {formatDuration(currentDosageInstructions) || "-"} ={" "}
-                        <span className="text-gray-700 font-semibold text-sm">
+                        <span className="text-muted-foreground font-semibold text-sm">
                           {formatTotalUnits(
                             [currentDosageInstructions],
                             t("units"),
@@ -357,7 +357,7 @@ export function MedicationBillRow({
               </div>
             )}
             {field.medication?.note && (
-              <span className="mt-4 text-xs text-gray-600 break-words whitespace-pre-wrap">
+              <span className="mt-4 text-xs text-soft-foreground break-words whitespace-pre-wrap">
                 {field.medication.note}
               </span>
             )}
@@ -366,7 +366,7 @@ export function MedicationBillRow({
             <Button
               variant="outline"
               size="sm"
-              className="border-gray-400 border text-gray-950 hover:bg-gray-50"
+              className="border-stronger-border border text-foreground hover:bg-soft-background"
               type="button"
               disabled={!isChecked}
               onClick={() => {
@@ -380,7 +380,7 @@ export function MedicationBillRow({
       </TableCell>
       <TableCell className={tableCellClass}>
         {needsProductSelection ? (
-          <div className="text-sm text-gray-500 py-2">
+          <div className="text-sm text-muted-foreground py-2">
             {t("select_product_first")}
           </div>
         ) : productKnowledgeInventoriesMap[displayProductKnowledge!.id] ===
@@ -461,7 +461,7 @@ export function MedicationBillRow({
                             type="number"
                             min={0}
                             {...formField}
-                            className="border-gray-300 border rounded-md w-24"
+                            className="border-strong-border border rounded-md w-24"
                             placeholder="0"
                             disabled={!isChecked}
                             autoFocus
@@ -478,7 +478,7 @@ export function MedicationBillRow({
             form.watch(`items.${index}.lots`) as MedicationBillLotItem[]
           ).filter((lot: MedicationBillLotItem) => lot.selectedInventoryId)
             .length === 0 && (
-            <div className="text-sm text-gray-500 py-2">
+            <div className="text-sm text-muted-foreground py-2">
               {t("select_lots_first")}
             </div>
           )}
@@ -506,13 +506,13 @@ export function MedicationBillRow({
               <div
                 key={lot.selectedInventoryId}
                 className={cn(
-                  "py-1.5 text-gray-950 font-normal text-sm",
-                  !isChecked && "opacity-60 text-gray-500",
+                  "py-1.5 text-foreground font-normal text-sm",
+                  !isChecked && "opacity-60 text-muted-foreground",
                 )}
               >
                 <MonetaryDisplay amount={prices.basePrice} />
                 {hasDiscount && (
-                  <span className="text-xs text-gray-500 ml-1">
+                  <span className="text-xs text-muted-foreground ml-1">
                     (
                     {discountComponents
                       .map((component) =>

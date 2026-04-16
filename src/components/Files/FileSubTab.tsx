@@ -170,7 +170,7 @@ export const FilesPage = ({
   const getArchivedMessage = (file: FileReadMinimal) => {
     return (
       <div className="flex flex-row gap-2 justify-end">
-        <span className="text-gray-200/90 self-center uppercase font-bold">
+        <span className="text-disabled-foreground/90 self-center uppercase font-bold">
           {t("archived")}
         </span>
         <Button
@@ -295,19 +295,19 @@ export const FilesPage = ({
                 key={file.id}
                 className={cn(
                   "overflow-hidden",
-                  file.is_archived ? "bg-white/50" : "bg-white",
+                  file.is_archived ? "bg-background/50" : "bg-background",
                 )}
               >
                 <CardContent className="p-4 space-y-4">
                   <div className="flex items-start gap-3">
-                    <span className="p-2 rounded-full bg-gray-100 shrink-0">
+                    <span className="p-2 rounded-full bg-muted-background shrink-0">
                       <CareIcon icon={icons[filetype]} className="text-xl" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium text-gray-900 truncate">
+                      <div className="font-medium text-foreground truncate">
                         {fileName}
                       </div>
-                      <div className="mt-1 text-sm text-gray-500">
+                      <div className="mt-1 text-sm text-muted-foreground">
                         {filetype}
                       </div>
                     </div>
@@ -315,7 +315,7 @@ export const FilesPage = ({
 
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <div className="text-gray-500">{t("date")}</div>
+                      <div className="text-muted-foreground">{t("date")}</div>
                       <div className="font-medium">
                         {dayjs(file.created_date).format(
                           "DD MMM YYYY, hh:mm A",
@@ -323,7 +323,9 @@ export const FilesPage = ({
                       </div>
                     </div>
                     <div>
-                      <div className="text-gray-500">{t("shared_by")}</div>
+                      <div className="text-muted-foreground">
+                        {t("shared_by")}
+                      </div>
                       <div className="font-medium">
                         {file.uploaded_by ? formatName(file.uploaded_by) : ""}
                       </div>
@@ -342,7 +344,7 @@ export const FilesPage = ({
             );
           })
         : !filesLoading && (
-            <div className="text-center py-4 text-gray-500">
+            <div className="text-center py-4 text-muted-foreground">
               {t("no_files_found")}
             </div>
           )}
@@ -354,19 +356,19 @@ export const FilesPage = ({
       <Table className="border-separate border-spacing-y-3 mx-2 lg:max-w-[calc(100%-16px)]">
         <TableHeader>
           <TableRow className="shadow rounded overflow-hidden">
-            <TableHead className="w-[20%] bg-white rounded-l">
+            <TableHead className="w-[20%] bg-background rounded-l">
               {t("file_name")}
             </TableHead>
-            <TableHead className="w-[20%] rounded-y bg-white">
+            <TableHead className="w-[20%] rounded-y bg-background">
               {t("file_type")}
             </TableHead>
-            <TableHead className="w-[25%] rounded-y bg-white">
+            <TableHead className="w-[25%] rounded-y bg-background">
               {t("date")}
             </TableHead>
-            <TableHead className="w-[20%] rounded-y bg-white">
+            <TableHead className="w-[20%] rounded-y bg-background">
               {t("shared_by")}
             </TableHead>
-            <TableHead className="w-[15%] text-right rounded-r bg-white"></TableHead>
+            <TableHead className="w-[15%] text-right rounded-r bg-background"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -383,11 +385,11 @@ export const FilesPage = ({
                     <TableCell
                       className={cn(
                         "font-medium rounded-l-md rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
+                        file.is_archived ? "bg-background/50" : "bg-background",
                       )}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="p-2 rounded-full bg-gray-100 shrink-0">
+                        <span className="p-2 rounded-full bg-muted-background shrink-0">
                           <CareIcon
                             icon={icons[filetype]}
                             className="text-xl"
@@ -395,12 +397,12 @@ export const FilesPage = ({
                         </span>
                         {file.name && file.name.length > 20 ? (
                           <TooltipComponent content={fileName}>
-                            <span className="text-gray-900 truncate block">
+                            <span className="text-foreground truncate block">
                               {fileName}
                             </span>
                           </TooltipComponent>
                         ) : (
-                          <span className="text-gray-900 truncate block">
+                          <span className="text-foreground truncate block">
                             {fileName}
                           </span>
                         )}
@@ -409,7 +411,7 @@ export const FilesPage = ({
                     <TableCell
                       className={cn(
                         "rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
+                        file.is_archived ? "bg-background/50" : "bg-background",
                       )}
                     >
                       {filetype}
@@ -417,7 +419,7 @@ export const FilesPage = ({
                     <TableCell
                       className={cn(
                         "rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
+                        file.is_archived ? "bg-background/50" : "bg-background",
                       )}
                     >
                       <TooltipComponent
@@ -433,7 +435,7 @@ export const FilesPage = ({
                     <TableCell
                       className={cn(
                         "rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
+                        file.is_archived ? "bg-background/50" : "bg-background",
                       )}
                     >
                       {file.uploaded_by ? formatName(file.uploaded_by) : ""}
@@ -441,7 +443,7 @@ export const FilesPage = ({
                     <TableCell
                       className={cn(
                         "text-right rounded-r-md rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
+                        file.is_archived ? "bg-background/50" : "bg-background",
                       )}
                     >
                       {file.is_archived ? (
@@ -497,7 +499,7 @@ export const FilesPage = ({
       />
       <div className="flex flex-wrap items-center gap-2 -mt-2 ">
         <div className="relative flex-1 min-w-72 max-w-96 ml-2">
-          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
+          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="search-by-filename"
             name="name"
@@ -539,7 +541,7 @@ export const FilesPage = ({
                 permissions={encounter?.permissions || []}
                 trigger={
                   <Button variant="primary" asChild>
-                    <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer">
+                    <div className="flex items-center gap-1 text-foreground py-0.5 cursor-pointer">
                       <CareIcon
                         icon="l-file-export"
                         className="size-4 text-green-600"

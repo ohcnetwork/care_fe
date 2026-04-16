@@ -22,7 +22,7 @@ export function CreateChargeItemDefinition({
     >
       <div className="container">
         <div className="mb-4">
-          <p className="text-gray-600">
+          <p className="text-soft-foreground">
             {t("create_charge_item_definition_description")}
           </p>
         </div>

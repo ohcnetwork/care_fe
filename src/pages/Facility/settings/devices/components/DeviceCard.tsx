@@ -43,7 +43,7 @@ export default function DeviceCard({ device, encounter }: Props) {
             <div className="flex items-start gap-2 min-w-0">
               <div className="mt-1">
                 <DeviceTypeIcon
-                  className="size-5 text-gray-500"
+                  className="size-5 text-muted-foreground"
                   type={device.care_type}
                 />
               </div>

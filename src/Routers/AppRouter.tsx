@@ -135,7 +135,7 @@ export default function AppRouter() {
         )}
         <main
           id="pages"
-          className="flex flex-col flex-1 max-w-full min-h-[calc(100svh-(--spacing(4)))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border border-gray-200 rounded-lg shadow-sm bg-gray-50 focus:outline-hidden"
+          className="flex flex-col flex-1 max-w-full min-h-[calc(100svh-(--spacing(4)))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border border-border rounded-lg shadow-sm bg-soft-background focus:outline-hidden"
         >
           <Button onClick={() => setCommandDialogOpen(true)} className="hidden">
             <ShortcutBadge actionId="show-shortcuts" />
@@ -146,7 +146,7 @@ export default function AppRouter() {
             onOpenChange={setCommandDialogOpen}
           />
           <BrowserWarning />
-          <div className="relative z-10 flex h-16 bg-white shadow-sm shrink-0 md:hidden">
+          <div className="relative z-10 flex h-16 bg-background shadow-sm shrink-0 md:hidden">
             <div className="flex items-center">
               {shouldShowSidebar && <SidebarTrigger />}
             </div>

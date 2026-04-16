@@ -110,9 +110,9 @@ export function PinPageDialog({ url }: PinPageDialogProps) {
 
           {isAlreadyPinned || isLimitReached ? (
             <div className="py-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-soft-foreground">
                 {t("pin_page_current_url")}:{" "}
-                <code className="bg-gray-100 px-1 py-0.5 rounded text-xs break-all">
+                <code className="bg-muted-background px-1 py-0.5 rounded text-xs break-all">
                   {currentUrl}
                 </code>
               </p>
@@ -132,7 +132,7 @@ export function PinPageDialog({ url }: PinPageDialogProps) {
               </div>
               <div className="space-y-2">
                 <Label>{t("url")}</Label>
-                <p className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-md border break-all">
+                <p className="text-sm text-soft-foreground bg-soft-background px-3 py-2 rounded-md border break-all">
                   {currentUrl}
                 </p>
                 <div className="flex items-center space-x-2">

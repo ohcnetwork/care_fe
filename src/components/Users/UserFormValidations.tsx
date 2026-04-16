@@ -31,14 +31,14 @@ export const ValidationHelper = ({
     <div>
       {isInputEmpty &&
         validations.map((validation, index) => (
-          <div key={index} className="text-gray-500 mb-2 text-sm">
+          <div key={index} className="text-muted-foreground mb-2 text-sm">
             <Trans i18nKey={validation.description} />
           </div>
         ))}
       {!isInputEmpty &&
         !allValid &&
         unfulfilledValidations.map((validation, index) => (
-          <div key={index} className="text-gray-500 mb-2 text-sm">
+          <div key={index} className="text-muted-foreground mb-2 text-sm">
             <Trans i18nKey={validation.description} />
           </div>
         ))}
@@ -63,7 +63,7 @@ export const validateRule = (
   return (
     <div>
       {isInitialRender ? (
-        <CareIcon icon="l-circle" className="text-sm text-gray-500" />
+        <CareIcon icon="l-circle" className="text-sm text-muted-foreground" />
       ) : isConditionMet ? (
         <CareIcon icon="l-check-circle" className="text-sm text-green-500" />
       ) : (
@@ -72,7 +72,7 @@ export const validateRule = (
       <span
         className={cn(
           isInitialRender
-            ? "text-black text-sm"
+            ? "text-foreground text-sm"
             : isConditionMet
               ? "text-primary-500 text-sm"
               : "text-red-500 text-sm",

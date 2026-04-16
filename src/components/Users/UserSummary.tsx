@@ -53,7 +53,7 @@ export default function UserSummaryTab({
 
   const renderBasicInformation = () => {
     return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-background">
         <BasicInfoDetails user={userData} />
       </div>
     );
@@ -61,7 +61,7 @@ export default function UserSummaryTab({
 
   const renderContactInformation = () => {
     return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-background">
         <ContactInfoDetails user={userData} />
       </div>
     );
@@ -69,7 +69,7 @@ export default function UserSummaryTab({
 
   const renderGeoOrgDetails = () => {
     return (
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-background">
         <GeoOrgDetails user={userData} />
       </div>
     );
@@ -216,7 +216,7 @@ export default function UserSummaryTab({
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-md border p-3 sm:p-4">
                 <div className="space-y-1">
                   <h3 className="text-sm font-medium">{t("delete_account")}</h3>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-muted-foreground">
                     {t("delete_account_note")}
                   </p>
                 </div>
@@ -246,7 +246,7 @@ function DeveloperModeSection() {
             <h3 className="text-sm font-medium">
               {t("production_environment_warning")}
             </h3>
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-muted-foreground">
               {t("production_environment_warning_description")}
             </p>
           </div>

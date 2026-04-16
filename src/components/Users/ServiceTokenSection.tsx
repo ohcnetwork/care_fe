@@ -78,7 +78,7 @@ export default function ServiceTokenSection({
 
   return (
     <>
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-white">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow-sm sm:rounded-lg bg-background">
         <div className="space-y-4">
           <div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
             <div className="flex gap-2">
@@ -123,7 +123,7 @@ export default function ServiceTokenSection({
                 <KeyRoundIcon className="size-5 text-green-600" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-bold text-gray-900">
+                <DialogTitle className="text-xl font-bold text-foreground">
                   {t("token_generated_successfully")}
                 </DialogTitle>
                 <DialogDescription className="text-sm">
@@ -133,19 +133,19 @@ export default function ServiceTokenSection({
             </div>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <p className="text-xs font-medium text-gray-500 mb-2">
+            <div className="rounded-lg border border-border bg-soft-background p-4">
+              <p className="text-xs font-medium text-muted-foreground mb-2">
                 {t("service_account_token")}
               </p>
-              <div className="relative bg-white p-3 rounded border border-gray-200">
-                <code className="block break-all font-mono text-sm text-gray-900 pr-8">
+              <div className="relative bg-background p-3 rounded border border-border">
+                <code className="block break-all font-mono text-sm text-foreground pr-8">
                   {generatedToken}
                 </code>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleCopyToken}
-                  className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-gray-100"
+                  className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-muted-background"
                 >
                   <CopyIcon className="size-4" />
                 </Button>
@@ -175,7 +175,9 @@ export default function ServiceTokenSection({
                 username: userData.username,
               })}
             </p>
-            <p className="text-sm text-gray-600">{t("revoke_token_warning")}</p>
+            <p className="text-sm text-soft-foreground">
+              {t("revoke_token_warning")}
+            </p>
           </div>
         }
         variant="destructive"

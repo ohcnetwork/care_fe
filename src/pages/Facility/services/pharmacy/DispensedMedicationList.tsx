@@ -155,17 +155,17 @@ function MedicationTable({ medications }: MedicationTableProps) {
   };
 
   return (
-    <div className="overflow-hidden rounded-md border bg-white shadow-sm">
+    <div className="overflow-hidden rounded-md border bg-background shadow-sm">
       <Table>
-        <TableHeader className="bg-gray-50">
+        <TableHeader className="bg-soft-background">
           <TableRow>
-            <TableHead className="text-gray-700 font-semibold">
+            <TableHead className="text-muted-foreground font-semibold">
               {t("medication")}
             </TableHead>
-            <TableHead className="text-gray-700 font-semibold w-24">
+            <TableHead className="text-muted-foreground font-semibold w-24">
               {t("quantity")}
             </TableHead>
-            <TableHead className="text-gray-700 font-semibold w-40">
+            <TableHead className="text-muted-foreground font-semibold w-40">
               {t("status")}
             </TableHead>
           </TableRow>
@@ -178,10 +178,13 @@ function MedicationTable({ medications }: MedicationTableProps) {
             const expiryDate = medication.item.product.expiration_date;
 
             return (
-              <TableRow key={medication.id} className="hover:bg-gray-50">
+              <TableRow
+                key={medication.id}
+                className="hover:bg-soft-background"
+              >
                 <TableCell>
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-gray-900 font-medium">
+                    <span className="text-foreground font-medium">
                       {medication.item.product.product_knowledge.name}
                     </span>
                     {instructions.map((di, idx) => {
@@ -189,24 +192,29 @@ function MedicationTable({ medications }: MedicationTableProps) {
                         .filter(Boolean)
                         .join(" · ");
                       return text ? (
-                        <span key={idx} className="text-sm text-gray-500">
+                        <span
+                          key={idx}
+                          className="text-sm text-muted-foreground"
+                        >
                           {text}
                         </span>
                       ) : null;
                     })}
                     {(batchNumber || expiryDate) && (
-                      <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                         {batchNumber && (
                           <span className="flex items-center gap-1">
-                            <span className="text-gray-400">{t("batch")}:</span>
-                            <span className="font-medium text-gray-600">
+                            <span className="text-placeholder-foreground">
+                              {t("batch")}:
+                            </span>
+                            <span className="font-medium text-soft-foreground">
                               {batchNumber}
                             </span>
                           </span>
                         )}
                         {expiryDate && (
                           <span className="flex items-center gap-1">
-                            <span className="text-gray-400">
+                            <span className="text-placeholder-foreground">
                               {t("expiry")}:
                             </span>
                             <span
@@ -218,7 +226,7 @@ function MedicationTable({ medications }: MedicationTableProps) {
                                         Date.now() + 90 * 24 * 60 * 60 * 1000,
                                       )
                                     ? "text-amber-600"
-                                    : "text-gray-600"
+                                    : "text-soft-foreground"
                               }`}
                             >
                               {new Date(expiryDate).toLocaleDateString()}
@@ -229,7 +237,7 @@ function MedicationTable({ medications }: MedicationTableProps) {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="text-gray-900 font-medium">
+                <TableCell className="text-foreground font-medium">
                   {medication.quantity ? round(medication.quantity) : "-"}
                 </TableCell>
                 <TableCell>
@@ -434,10 +442,10 @@ function InvoiceCard({
     switch (invoice.status) {
       case InvoiceStatus.draft:
         return {
-          bgColor: "bg-gray-50",
-          borderColor: "border-gray-200",
-          statusColor: "text-gray-600",
-          icon: <ReceiptIcon className="size-5 text-gray-400" />,
+          bgColor: "bg-soft-background",
+          borderColor: "border-border",
+          statusColor: "text-soft-foreground",
+          icon: <ReceiptIcon className="size-5 text-placeholder-foreground" />,
         };
       case InvoiceStatus.issued:
         return {
@@ -455,10 +463,10 @@ function InvoiceCard({
         };
       default:
         return {
-          bgColor: "bg-gray-50",
-          borderColor: "border-gray-200",
-          statusColor: "text-gray-600",
-          icon: <ReceiptIcon className="size-5 text-gray-400" />,
+          bgColor: "bg-soft-background",
+          borderColor: "border-border",
+          statusColor: "text-soft-foreground",
+          icon: <ReceiptIcon className="size-5 text-placeholder-foreground" />,
         };
     }
   };
@@ -474,7 +482,9 @@ function InvoiceCard({
             <div className="flex items-center gap-2">
               {config.icon}
               <div>
-                <p className="font-semibold text-gray-900">{invoice.number}</p>
+                <p className="font-semibold text-foreground">
+                  {invoice.number}
+                </p>
                 <Badge
                   variant={INVOICE_STATUS_COLORS[invoice.status]}
                   className="mt-1"
@@ -532,10 +542,12 @@ function InvoiceCard({
           {/* Amount Details */}
           <div className="mb-4 space-y-2">
             <div className="flex justify-between items-center">
-              <p className="text-sm text-gray-500">{t("invoice_total")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("invoice_total")}
+              </p>
               <MonetaryDisplay
                 amount={invoice.total_gross}
-                className="text-lg font-bold text-gray-900"
+                className="text-lg font-bold text-foreground"
               />
             </div>
             {new Decimal(actualPaidAmount).greaterThan(0) && (
@@ -572,7 +584,7 @@ function InvoiceCard({
               (p) => p.status === PaymentReconciliationStatus.active,
             ) && (
               <div className="mb-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">
+                <p className="text-sm font-medium text-muted-foreground mb-2">
                   {t("payment_history")}
                 </p>
                 <div className="space-y-2">
@@ -592,17 +604,17 @@ function InvoiceCard({
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-medium text-gray-900">
+                              <span className="font-medium text-foreground">
                                 {getPaymentLabel(payment)}
                               </span>
                               {getPaymentReference(payment) && (
-                                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                                <span className="text-xs bg-muted-background text-soft-foreground px-2 py-0.5 rounded">
                                   Ref: {getPaymentReference(payment)}
                                 </span>
                               )}
                             </div>
                             {payment.payment_datetime && (
-                              <p className="text-xs text-gray-500 mt-0.5">
+                              <p className="text-xs text-muted-foreground mt-0.5">
                                 {new Date(
                                   payment.payment_datetime,
                                 ).toLocaleDateString("en-US", {
@@ -891,7 +903,7 @@ function BillingSummaryPanel({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-semibold text-foreground">
           {t("billing_summary")}
         </h2>
         <ViewDefaultAccountButton
@@ -903,11 +915,11 @@ function BillingSummaryPanel({
 
       {/* Total Value */}
       {activeInvoices.length > 0 && (
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">{t("total_value")}</p>
+        <div className="flex items-center justify-between p-3 bg-soft-background rounded-lg">
+          <p className="text-sm text-soft-foreground">{t("total_value")}</p>
           <MonetaryDisplay
             amount={totals.total}
-            className="text-lg font-bold text-gray-900"
+            className="text-lg font-bold text-foreground"
           />
         </div>
       )}
@@ -920,17 +932,19 @@ function BillingSummaryPanel({
               <div className="flex items-center gap-2">
                 <ReceiptIcon className="size-5 text-amber-600" />
                 <div>
-                  <p className="font-semibold text-gray-900">
+                  <p className="font-semibold text-foreground">
                     {t("unbilled_items")}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {unbilledItems.length}{" "}
                     {unbilledItems.length === 1 ? t("item") : t("items")}
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-xs text-gray-500">{t("total_value")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("total_value")}
+                </p>
                 <MonetaryDisplay
                   amount={unbilledTotal}
                   className="font-bold text-amber-700"
@@ -976,7 +990,7 @@ function BillingSummaryPanel({
               </span>
             </div>
             <div className="text-right">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 {hasOutstanding ? t("amount_outstanding") : t("amount_paid")}
               </p>
               <MonetaryDisplay
@@ -1004,11 +1018,11 @@ function BillingSummaryPanel({
         </div>
       ) : (
         !hasUnbilledItems && (
-          <Card className="bg-gray-50 border-dashed">
+          <Card className="bg-soft-background border-dashed">
             <CardContent className="p-8">
-              <div className="text-center text-gray-500">
+              <div className="text-center text-muted-foreground">
                 <ReceiptIcon className="size-12 mx-auto mb-3 opacity-30" />
-                <p className="font-medium text-gray-600">
+                <p className="font-medium text-soft-foreground">
                   {t("no_invoices_yet")}
                 </p>
                 <p className="text-sm mt-1">
@@ -1246,7 +1260,7 @@ export default function DispensedMedicationList({
       <div className="lg:col-span-3 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-foreground">
             {t("medications")}
           </h2>
           <div className="flex items-center gap-2">

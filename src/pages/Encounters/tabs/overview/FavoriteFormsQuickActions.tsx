@@ -57,9 +57,9 @@ export const FavoriteFormsQuickActions = (
           <Link
             key={form.id}
             href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${form.slug}`}
-            className="inline-flex w-auto items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-gray-200 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-colors text-sm font-medium text-gray-700"
+            className="inline-flex w-auto items-center gap-1.5 px-3 py-1.5 rounded-md bg-background border border-border shadow-sm hover:bg-soft-background hover:border-strong-border transition-colors text-sm font-medium text-muted-foreground"
           >
-            <FileText className="size-3.5 text-gray-500" />
+            <FileText className="size-3.5 text-muted-foreground" />
             <span>{form.title}</span>
           </Link>
         ))}

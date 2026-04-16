@@ -15,20 +15,22 @@ export const AuditLogs = () => {
     <div className="p-2">
       <div className="space-y-2">
         <div>
-          <p className="text-sm text-gray-500">{t("last_modified_by")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("last_modified_by")}
+          </p>
           <p className="text-sm font-semibold">
             {formatName(encounter.updated_by)}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             {formatDateTime(encounter.modified_date)}
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-500">{t("created_by")}</p>
+          <p className="text-sm text-muted-foreground">{t("created_by")}</p>
           <p className="text-sm font-semibold">
             {formatName(encounter.created_by)}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             {formatDateTime(encounter.created_date)}
           </p>
         </div>

@@ -51,7 +51,7 @@ export function LocationActionButtons({
       label: t("move_to_another_bed"),
       onClick: onMove,
       variant: "outline",
-      className: "border-gray-400 shadow-sm",
+      className: "border-stronger-border shadow-sm",
     });
   }
 

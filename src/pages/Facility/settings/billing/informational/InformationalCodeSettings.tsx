@@ -56,7 +56,7 @@ export function InformationalCodeSettings() {
               <TableHead>{t("code")}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="bg-white">
+          <TableBody className="bg-background">
             {filteredCodes.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={2} className="text-center h-24">
@@ -70,7 +70,7 @@ export function InformationalCodeSettings() {
                 <TableRow key={code.code}>
                   <TableCell>{code.display}</TableCell>
                   <TableCell>
-                    <code className="px-2 py-1 rounded bg-gray-100 text-sm">
+                    <code className="px-2 py-1 rounded bg-muted-background text-sm">
                       {code.code}
                     </code>
                   </TableCell>

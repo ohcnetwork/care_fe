@@ -108,11 +108,11 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
     return (
       <Page title="">
         <div className="flex flex-col items-center justify-center min-h-[50vh]">
-          <FileText className="size-16 text-gray-300 mb-4" />
+          <FileText className="size-16 text-disabled-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">
             {t("consent_not_found")}
           </h2>
-          <p className="text-gray-500 mb-4">
+          <p className="text-muted-foreground mb-4">
             {t("consent_not_found_description")}
           </p>
           <Link
@@ -188,7 +188,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                                     </Badge>
                                   )}
                                 </div>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-muted-foreground">
                                   {formatDateTime(attachment.created_date)}
                                 </p>
                               </div>
@@ -206,7 +206,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                                       )
                                     }
                                   >
-                                    <span className="flex flex-row items-center gap-1 text-sm text-gray-600">
+                                    <span className="flex flex-row items-center gap-1 text-sm text-soft-foreground">
                                       <CareIcon icon="l-eye" />
                                       <span className="hidden sm:inline">
                                         {t("view")}
@@ -224,7 +224,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                                     )
                                   }
                                 >
-                                  <span className="flex flex-row items-center gap-1 text-sm text-gray-600">
+                                  <span className="flex flex-row items-center gap-1 text-sm text-soft-foreground">
                                     <Download className="size-4 mr-1" />
                                     <span className="hidden sm:inline">
                                       {t("download")}
@@ -239,13 +239,13 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <div className="rounded-full bg-gray-100 p-3 mb-4">
-                        <FileText className="size-6 text-gray-400" />
+                      <div className="rounded-full bg-muted-background p-3 mb-4">
+                        <FileText className="size-6 text-placeholder-foreground" />
                       </div>
                       <h4 className="text-base font-medium mb-2">
                         {t("no_files_attached")}
                       </h4>
-                      <p className="text-sm text-gray-500 mb-4 max-w-md">
+                      <p className="text-sm text-muted-foreground mb-4 max-w-md">
                         {t("attach_files_to_consent_description")}
                       </p>
                     </div>
@@ -275,19 +275,19 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
               <Card className="p-5 shadow-none">
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">
+                    <h3 className="text-sm font-medium text-muted-foreground">
                       {t("category")}
                     </h3>
-                    <p className="text-base font-semibold text-gray-700">
+                    <p className="text-base font-semibold text-muted-foreground">
                       {t(`consent_category__${consent.category}`)}
                     </p>
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">
+                    <h3 className="text-sm font-medium text-muted-foreground">
                       {t("consent_given_on")}
                     </h3>
-                    <p className="text-base font-semibold text-gray-700">
+                    <p className="text-base font-semibold text-muted-foreground">
                       {formatDateTime(consent.date, "MMMM D, YYYY")}
                       {" , "}
                       {format(consent.date, "h:mm a")}
@@ -295,10 +295,10 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">
+                    <h3 className="text-sm font-medium text-muted-foreground">
                       {t("valid_period")}
                     </h3>
-                    <p className="text-base font-semibold text-gray-700">
+                    <p className="text-base font-semibold text-muted-foreground">
                       {consent.period.start
                         ? `${format(new Date(consent.period.start), "MMMM d, yyyy")}${" , "} ${format(new Date(consent.period.start), "h:mm a")}`
                         : t("na")}
@@ -310,10 +310,10 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">
+                    <h3 className="text-sm font-medium text-muted-foreground">
                       {t("decision")}
                     </h3>
-                    <p className="text-base font-semibold text-gray-700">
+                    <p className="text-base font-semibold text-muted-foreground">
                       {consent.decision === "permit"
                         ? t("permitted")
                         : t("denied")}
@@ -321,10 +321,10 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">
+                    <h3 className="text-sm font-medium text-muted-foreground">
                       {t("status")}
                     </h3>
-                    <p className="text-base font-semibold text-gray-700">
+                    <p className="text-base font-semibold text-muted-foreground">
                       {t(`consent_status__${consent.status}`)}
                     </p>
                   </div>

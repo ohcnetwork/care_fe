@@ -58,7 +58,7 @@ export const UpcomingAppointmentCard = ({
 
   return (
     <div className="space-y-2">
-      <h5 className="font-semibold text-gray-900">
+      <h5 className="font-semibold text-foreground">
         {t("upcoming_appointment")}
       </h5>
       <AppointmentRow appointment={appointment} patientId={patientId} />
@@ -66,7 +66,7 @@ export const UpcomingAppointmentCard = ({
         <button
           type="button"
           onClick={onViewAllAppointments}
-          className="text-sm font-medium text-gray-700 hover:text-gray-900 underline"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground underline"
         >
           {t("view_all_appointments", { count: totalCount })}
         </button>
@@ -87,23 +87,23 @@ const AppointmentRow = ({
   return (
     <Link
       href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`}
-      className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 p-3 border-1 border-blue-500 rounded-lg bg-white hover:bg-gray-50 transition-colors"
+      className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4 p-3 border-1 border-blue-500 rounded-lg bg-background hover:bg-soft-background transition-colors"
     >
       <div className="flex flex-row items-center gap-2 sm:gap-4 flex-1 min-w-0 w-full">
         <div className="flex items-center gap-2 min-w-0">
           <ScheduleResourceIcon resource={appointment} className="size-5" />
-          <span className="font-medium text-gray-900 truncate text-sm">
+          <span className="font-medium text-foreground truncate text-sm">
             {formatScheduleResourceName(appointment)}
           </span>
         </div>
-        <div className="hidden sm:block h-5 w-px bg-gray-300" />
-        <span className="text-sm text-gray-700 whitespace-nowrap">
+        <div className="hidden sm:block h-5 w-px bg-strong-background" />
+        <span className="text-sm text-muted-foreground whitespace-nowrap">
           {format(appointment.token_slot.start_datetime, "hh:mm a")}
           {"; "}
           {format(appointment.token_slot.start_datetime, "dd/MM/yyyy")}
         </span>
-        <div className="hidden sm:block h-5 w-px bg-gray-300" />
-        <span className="hidden sm:block text-sm text-gray-600 truncate">
+        <div className="hidden sm:block h-5 w-px bg-strong-background" />
+        <span className="hidden sm:block text-sm text-soft-foreground truncate">
           {appointment.token_slot.availability.name}
         </span>
       </div>
@@ -112,7 +112,7 @@ const AppointmentRow = ({
           {t(appointment.status)}
         </Badge>
         <span className="flex items-center">
-          <ChevronRight className="size-5 text-gray-400 flex-shrink-0" />
+          <ChevronRight className="size-5 text-placeholder-foreground flex-shrink-0" />
         </span>
       </div>
     </Link>

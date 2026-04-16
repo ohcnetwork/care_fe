@@ -236,7 +236,7 @@ export function AppointmentQuestion({
                   className="w-full justify-start"
                   disabled={disabled || !selectedResource.resource}
                 >
-                  <span className="text-gray-500">
+                  <span className="text-muted-foreground">
                     {selectedResource.resource
                       ? t("select_appointment_slot")
                       : t("select_resource")}

@@ -45,7 +45,9 @@ export const PatientTagsDisplay = ({
         className,
       )}
     >
-      {showLabel && <span className="text-gray-700">{t("patient_tags")}:</span>}
+      {showLabel && (
+        <span className="text-muted-foreground">{t("patient_tags")}:</span>
+      )}
       <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">
         {allTags.map((tag) => (
           <Badge

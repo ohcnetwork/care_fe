@@ -83,7 +83,7 @@ export default function EditScheduleTemplateSheet({
       <SheetTrigger asChild>
         {trigger || <Button variant="outline" size="sm"></Button>}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-128">
+      <SheetContent className="flex min-w-full flex-col bg-muted-background sm:min-w-128">
         <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -104,7 +104,7 @@ export default function EditScheduleTemplateSheet({
 
           {template.availabilities.length === 0 && (
             <div className="mt-4">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {t("no_availabilities_yet")}
               </p>
             </div>
@@ -213,7 +213,7 @@ const ScheduleTemplateEditor = ({
   }
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm">
+    <div className="rounded-lg bg-card p-4 shadow-sm">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -407,7 +407,7 @@ const AvailabilityEditor = ({
   })();
 
   return (
-    <div className="mt-4 rounded-lg bg-white p-4 shadow-sm">
+    <div className="mt-4 rounded-lg bg-card p-4 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CareIcon icon="l-clock" className="text-lg text-blue-600" />
@@ -429,51 +429,51 @@ const AvailabilityEditor = ({
       <div className="space-y-4">
         {availability.slot_type === "appointment" && (
           <div className="grid md:grid-cols-2 gap-3">
-            <div className="flex flex-col rounded-md bg-gray-50 p-3">
-              <span className="text-sm font-medium text-gray-600">
+            <div className="flex flex-col rounded-md bg-soft-background p-3">
+              <span className="text-sm font-medium text-soft-foreground">
                 {t("slot_configuration")}
               </span>
               <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-2xl font-semibold text-gray-900">
+                <span className="text-2xl font-semibold text-foreground">
                   {availability.slot_size_in_minutes}
                 </span>
-                <span className="text-sm font-normal text-gray-500">
+                <span className="text-sm font-normal text-muted-foreground">
                   {t("minutes")}
                 </span>
-                <span className="mx-1 text-gray-400">×</span>
-                <span className="text-2xl font-semibold text-gray-900">
+                <span className="mx-1 text-placeholder-foreground">×</span>
+                <span className="text-2xl font-semibold text-foreground">
                   {availability.tokens_per_slot}
                 </span>
-                <span className="text-sm font-normal text-gray-500">
+                <span className="text-sm font-normal text-muted-foreground">
                   {t("patients")}
                 </span>
               </div>
-              <span className="mt-1 text-sm text-gray-500">
+              <span className="mt-1 text-sm text-muted-foreground">
                 ≈ {tokenDuration?.toFixed(1).replace(".0", "")}{" "}
                 {t("minutes_per_patient")}{" "}
               </span>
             </div>
 
-            <div className="flex flex-col rounded-md bg-gray-50 p-3">
-              <span className="text-sm font-medium text-gray-600">
+            <div className="flex flex-col rounded-md bg-soft-background p-3">
+              <span className="text-sm font-medium text-soft-foreground">
                 {t("session_capacity")}
               </span>
               <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-2xl font-semibold text-gray-900">
+                <span className="text-2xl font-semibold text-foreground">
                   {totalSlots}
                 </span>
-                <span className="text-sm font-normal text-gray-500">
+                <span className="text-sm font-normal text-muted-foreground">
                   {t("slots")}
                 </span>
-                <span className="mx-1 text-gray-400">×</span>
-                <span className="text-2xl font-semibold text-gray-900">
+                <span className="mx-1 text-placeholder-foreground">×</span>
+                <span className="text-2xl font-semibold text-foreground">
                   {availability.tokens_per_slot}
                 </span>
-                <span className="text-sm font-normal text-gray-500">
+                <span className="text-sm font-normal text-muted-foreground">
                   {t("patients")}
                 </span>
               </div>
-              <span className="mt-1 text-sm text-gray-500">
+              <span className="mt-1 text-sm text-muted-foreground">
                 = {totalSlots ? totalSlots * availability.tokens_per_slot : 0}{" "}
                 {t("total_patients")}
               </span>
@@ -482,26 +482,26 @@ const AvailabilityEditor = ({
         )}
 
         <div>
-          <span className="text-sm font-medium text-gray-500">
+          <span className="text-sm font-medium text-muted-foreground">
             {t("remarks")}
           </span>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-soft-foreground">
             {availability.reason || t("no_remarks")}
           </p>
         </div>
 
         <div>
-          <span className="text-sm font-medium text-gray-500">
+          <span className="text-sm font-medium text-muted-foreground">
             {t("schedule")}
           </span>
           <div className="mt-2 space-y-1 pl-2">
             {Object.entries(availabilitiesByDay).map(([day, times]) => (
               <p key={day} className="flex items-center gap-2 text-sm">
-                <span className="font-medium w-24 text-gray-600">
+                <span className="font-medium w-24 text-soft-foreground">
                   {DayOfWeek[parseInt(day)].charAt(0) +
                     DayOfWeek[parseInt(day)].slice(1).toLowerCase()}
                 </span>
-                <span className="text-gray-500">
+                <span className="text-muted-foreground">
                   {times
                     .map((time) => formatAvailabilityTime([time]))
                     .join(", ")}
@@ -697,7 +697,7 @@ const NewAvailabilityCard = ({
   };
 
   return (
-    <div className="mt-4 rounded-lg bg-white p-4 shadow-sm">
+    <div className="mt-4 rounded-lg bg-card p-4 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CareIcon icon="l-clock" className="text-lg text-blue-600" />
@@ -745,7 +745,7 @@ const NewAvailabilityCard = ({
                     {["appointment", "open", "closed"].map((type) => (
                       <SelectItem key={type} value={type}>
                         <p>{t(`SCHEDULE_AVAILABILITY_TYPE__${type}`)}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {t(`SCHEDULE_AVAILABILITY_TYPE_DESCRIPTION__${type}`)}
                         </p>
                       </SelectItem>
@@ -804,7 +804,7 @@ const NewAvailabilityCard = ({
           {form.watch("slot_type") === "appointment" && (
             <>
               <div className="flex flex-wrap mt-0 pt-2 gap-2">
-                <div className="w-full gap-x-2 grid grid-cols-[auto_1fr_auto] mb-2 bg-gray-50 p-3 rounded-lg">
+                <div className="w-full gap-x-2 grid grid-cols-[auto_1fr_auto] mb-2 bg-soft-background p-3 rounded-lg">
                   <CareIcon icon="l-bolt" className="text-lg text-blue-600" />
                   <Label
                     htmlFor={"auto-fill"}

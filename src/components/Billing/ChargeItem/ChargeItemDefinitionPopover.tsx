@@ -30,7 +30,9 @@ export default function ChargeItemDefinitionPopover({
 
   if (!hasPriceComponents) {
     return (
-      <span className={cn("text-sm text-gray-500", className)}>{t("na")}</span>
+      <span className={cn("text-sm text-muted-foreground", className)}>
+        {t("na")}
+      </span>
     );
   }
 
@@ -58,15 +60,15 @@ export default function ChargeItemDefinitionPopover({
           <div>
             <p className="font-medium text-sm">{chargeItemDefinition.title}</p>
             {chargeItemDefinition.description && (
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-soft-foreground mt-1">
                 {chargeItemDefinition.description}
               </p>
             )}
           </div>
           {chargeItemDefinition.purpose && (
             <div>
-              <p className="text-xs text-gray-500">{t("purpose")}</p>
-              <p className="text-xs text-gray-700">
+              <p className="text-xs text-muted-foreground">{t("purpose")}</p>
+              <p className="text-xs text-muted-foreground">
                 {chargeItemDefinition.purpose}
               </p>
             </div>

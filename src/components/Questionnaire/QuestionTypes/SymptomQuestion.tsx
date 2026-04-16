@@ -346,7 +346,7 @@ const SymptomRow = React.memo(function SymptomRow({
     return (
       <div className="space-y-3">
         <div>
-          <div className="text-sm font-medium text-gray-700 mb-1">
+          <div className="text-sm font-medium text-muted-foreground mb-1">
             {t("onset_date")}
           </div>
           <CombinedDatePicker
@@ -362,7 +362,7 @@ const SymptomRow = React.memo(function SymptomRow({
           />
         </div>
         <div>
-          <div className="text-sm font-medium text-gray-700 mb-1">
+          <div className="text-sm font-medium text-muted-foreground mb-1">
             {t("status")}
           </div>
           <StatusSelect
@@ -372,7 +372,7 @@ const SymptomRow = React.memo(function SymptomRow({
           />
         </div>
         <div>
-          <div className="text-sm font-medium text-gray-700 mb-1">
+          <div className="text-sm font-medium text-muted-foreground mb-1">
             {t("severity")}
           </div>
           <SeveritySelect
@@ -382,7 +382,7 @@ const SymptomRow = React.memo(function SymptomRow({
           />
         </div>
         <div>
-          <div className="text-sm font-medium text-gray-700 mb-1">
+          <div className="text-sm font-medium text-muted-foreground mb-1">
             {t("verification_status")}
           </div>
           <VerificationStatusSelect
@@ -393,7 +393,7 @@ const SymptomRow = React.memo(function SymptomRow({
           />
         </div>
         <div>
-          <div className="text-sm font-medium text-gray-700 mb-1">
+          <div className="text-sm font-medium text-muted-foreground mb-1">
             {t("note")}
           </div>
           <NotesInput
@@ -409,7 +409,7 @@ const SymptomRow = React.memo(function SymptomRow({
   // For mobile view - Card Layout
   if (isMobile) {
     return (
-      <div className="group hover:bg-gray-50">
+      <div className="group hover:bg-soft-background">
         <Card
           className={cn(
             "mb-2 rounded-lg border-0 shadow-none",
@@ -424,9 +424,9 @@ const SymptomRow = React.memo(function SymptomRow({
             <CollapsibleTrigger asChild>
               <CardHeader
                 className={cn(
-                  "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
+                  "p-2 rounded-lg shadow-none bg-soft-background cursor-pointer active:bg-muted-background transition-colors",
                   {
-                    "bg-gray-200 border border-gray-300": !isOpen,
+                    "bg-strong-background border border-strong-border": !isOpen,
                   },
                 )}
               >
@@ -434,7 +434,7 @@ const SymptomRow = React.memo(function SymptomRow({
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0 mr-2">
                       <CardTitle
-                        className="text-base text-gray-950 break-words"
+                        className="text-base text-foreground break-words"
                         title={symptom.code.display}
                       >
                         {symptom.code.display}
@@ -453,7 +453,7 @@ const SymptomRow = React.memo(function SymptomRow({
                             e.stopPropagation();
                             handleRemove();
                           }}
-                          className="h-10 w-10 p-4 border border-gray-400 bg-white shadow text-destructive"
+                          className="h-10 w-10 p-4 border border-stronger-border bg-background shadow text-destructive"
                         >
                           <MinusCircledIcon className="size-5" />
                         </Button>
@@ -461,7 +461,7 @@ const SymptomRow = React.memo(function SymptomRow({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-10 w-10 border border-gray-400 bg-white shadow p-4 pointer-events-none"
+                        className="h-10 w-10 border border-stronger-border bg-background shadow p-4 pointer-events-none"
                       >
                         {isOpen ? (
                           <ChevronsDownUp className="size-5" />
@@ -472,7 +472,7 @@ const SymptomRow = React.memo(function SymptomRow({
                     </div>
                   </div>
                   {!isOpen && (
-                    <div className="text-sm mt-1 text-gray-600">
+                    <div className="text-sm mt-1 text-soft-foreground">
                       Onset{" "}
                       {symptom.onset?.onset_datetime
                         ? format(
@@ -490,7 +490,7 @@ const SymptomRow = React.memo(function SymptomRow({
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
+              <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-soft-background">
                 <div>
                   <div className="block text-sm font-medium  mb-1">
                     {t("onset_date")}
@@ -917,10 +917,10 @@ export function SymptomQuestion({
         <>
           {/* Desktop View - Table */}
           {!isMobile && (
-            <div className="rounded-lg border border-gray-200">
+            <div className="rounded-lg border border-border">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gray-50">
+                  <TableRow className="bg-soft-background">
                     <TableHead className="w-[40%]">{t("symptom")}</TableHead>
                     <TableHead className="text-center">
                       {t("onset_date")}

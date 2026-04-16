@@ -166,8 +166,8 @@ export function DiagnosticReportReview({
   return (
     <Card
       className={cn(
-        "shadow-none border-gray-300 rounded-lg cursor-pointer bg-white",
-        isExpanded && "bg-gray-100",
+        "shadow-none border-strong-border rounded-lg cursor-pointer bg-background",
+        isExpanded && "bg-muted-background",
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
@@ -177,8 +177,8 @@ export function DiagnosticReportReview({
               <div className="flex items-center gap-2">
                 <CardTitle>
                   <p className="flex items-center gap-1.5">
-                    <FileCheck2 className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
-                    <span className="text-base/9 text-gray-950 font-medium">
+                    <FileCheck2 className="size-6 text-foreground font-normal text-base stroke-[1.5px]" />{" "}
+                    <span className="text-base/9 text-foreground font-medium">
                       {t("result_review")}
                     </span>
                   </p>
@@ -192,7 +192,7 @@ export function DiagnosticReportReview({
                       className="size-5"
                       imageUrl={fullReport.created_by.profile_picture_url}
                     />
-                    <span className="text-sm/9 text-gray-700 font-medium">
+                    <span className="text-sm/9 text-muted-foreground font-medium">
                       {formatName(fullReport.created_by)}
                     </span>
                   </div>
@@ -207,7 +207,7 @@ export function DiagnosticReportReview({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-10 border border-gray-400 bg-white shadow p-4"
+                  className="size-10 border border-stronger-border bg-background shadow p-4"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsExpanded(!isExpanded);
@@ -225,10 +225,10 @@ export function DiagnosticReportReview({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <CardContent className="px-2 bg-gray-100">
+          <CardContent className="px-2 bg-muted-background">
             {fullReport && (
               <div className="space-y-6">
-                <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
+                <Card className="shadow-none rounded-lg border-border bg-soft-background">
                   <CardHeader className="p-4 pb-0">
                     <CardTitle className="text-base font-semibold">
                       {fullReport?.code?.display}
@@ -236,7 +236,7 @@ export function DiagnosticReportReview({
                   </CardHeader>
                   <CardContent className="p-4">
                     {fullReport.observations.length == 0 && (
-                      <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border cursor-default text-center">
+                      <p className="text-foreground whitespace-pre-wrap p-2 rounded-lg bg-background border cursor-default text-center">
                         {t("no_observations_entered")}
                       </p>
                     )}
@@ -249,13 +249,13 @@ export function DiagnosticReportReview({
                   </CardContent>
                 </Card>
 
-                <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
+                <Card className="shadow-none rounded-lg border-border bg-soft-background">
                   <CardContent className="p-4 space-y-2">
                     <Label htmlFor="conclusion" className="font-medium">
                       {t("conclusion")}
                     </Label>
                     {fullReport?.status === DiagnosticReportStatus.final ? (
-                      <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border border-gray-200 cursor-default">
+                      <p className="text-foreground whitespace-pre-wrap p-2 rounded-lg bg-background border border-border cursor-default">
                         {fullReport?.conclusion || t("no_conclusion_entered")}
                       </p>
                     ) : (
@@ -272,7 +272,7 @@ export function DiagnosticReportReview({
                 </Card>
 
                 {files?.results && files.results.length > 0 && (
-                  <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
+                  <Card className="shadow-none rounded-lg border-border bg-soft-background">
                     <CardHeader className="p-4 pb-0">
                       <CardTitle className="text-base font-medium">
                         {t("uploaded_files")}

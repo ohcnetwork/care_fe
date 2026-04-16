@@ -79,7 +79,7 @@ export default function PrescriptionView({
               ? formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")
               : t("all_prescriptions")}
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {prescription && prescriptionId
               ? `${t("prescribed_by")}: ${formatName(prescription.prescribed_by)}`
               : t("medications_from_all_prescriptions")}
@@ -91,7 +91,7 @@ export default function PrescriptionView({
               asChild
               variant="outline"
               size="sm"
-              className="text-gray-950 hover:text-gray-700 h-9"
+              className="text-foreground hover:text-muted-foreground h-9"
             >
               <Link
                 href={
@@ -119,7 +119,7 @@ export default function PrescriptionView({
               variant="outline"
               disabled={!hasMedications}
               size="sm"
-              className="text-gray-950 hover:text-gray-700 h-9"
+              className="text-foreground hover:text-muted-foreground h-9"
             >
               <Link href={`../../prescription/${prescriptionId}/print`}>
                 <CareIcon icon="l-print" className="mr-2" />
@@ -132,7 +132,7 @@ export default function PrescriptionView({
               variant="outline"
               disabled={!hasMedications}
               size="sm"
-              className="text-gray-950 hover:text-gray-700 h-9"
+              className="text-foreground hover:text-muted-foreground h-9"
             >
               <Link href={`../${encounterId}/prescriptions/print`}>
                 <CareIcon icon="l-print" className="mr-2" />
@@ -148,7 +148,7 @@ export default function PrescriptionView({
           <div className="relative flex-1">
             <CareIcon
               icon="l-search"
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4"
             />
             <Input
               placeholder={t("search_medications")}
@@ -161,7 +161,7 @@ export default function PrescriptionView({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 px-2 text-gray-500 hover:text-foreground"
+              className="h-6 px-2 text-muted-foreground hover:text-foreground"
               onClick={() => setSearchQuery("")}
             >
               <CareIcon icon="l-times" className="text-lg" />
@@ -169,7 +169,7 @@ export default function PrescriptionView({
           )}
         </div>
         {prescription?.note && (
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-soft-foreground">
             <p className="font-semibold mb-1">{t("note")}</p>
             <Markdown
               content={prescription?.note}

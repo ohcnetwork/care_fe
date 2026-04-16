@@ -119,7 +119,7 @@ export function DispenseHistory({
   if (!medications.length) {
     return (
       <EmptyState
-        icon={<TabletsIcon className="text-gray-500" />}
+        icon={<TabletsIcon className="text-muted-foreground" />}
         title={t("no_dispense_history")}
         action={
           <DispenseButtonSection
@@ -145,51 +145,67 @@ export function DispenseHistory({
 
       <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
         <Table>
-          <TableHeader className="bg-gray-100 text-gray-700">
+          <TableHeader className="bg-muted-background text-muted-foreground">
             <TableRow className="divide-x">
-              <TableHead className="text-gray-700">{t("medicine")}</TableHead>
-              <TableHead className="text-gray-700">{t("dosage")}</TableHead>
-              <TableHead className="text-gray-700">{t("frequency")}</TableHead>
-              <TableHead className="text-gray-700">{t("quantity")}</TableHead>
-              <TableHead className="text-gray-700">{t("location")}</TableHead>
-              <TableHead className="text-gray-700">{t("status")}</TableHead>
-              <TableHead className="text-gray-700">{t("bill_time")}</TableHead>
-              <TableHead className="text-gray-700">{t("actions")}</TableHead>
+              <TableHead className="text-muted-foreground">
+                {t("medicine")}
+              </TableHead>
+              <TableHead className="text-muted-foreground">
+                {t("dosage")}
+              </TableHead>
+              <TableHead className="text-muted-foreground">
+                {t("frequency")}
+              </TableHead>
+              <TableHead className="text-muted-foreground">
+                {t("quantity")}
+              </TableHead>
+              <TableHead className="text-muted-foreground">
+                {t("location")}
+              </TableHead>
+              <TableHead className="text-muted-foreground">
+                {t("status")}
+              </TableHead>
+              <TableHead className="text-muted-foreground">
+                {t("bill_time")}
+              </TableHead>
+              <TableHead className="text-muted-foreground">
+                {t("actions")}
+              </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="bg-white">
+          <TableBody className="bg-background">
             {medications.map((medication: MedicationDispenseRead) => {
               const instructions = medication.dosage_instruction ?? [];
 
               return (
                 <TableRow
                   key={medication.id}
-                  className="hover:bg-gray-50 divide-x"
+                  className="hover:bg-soft-background divide-x"
                 >
-                  <TableCell className="text-gray-950 font-semibold">
+                  <TableCell className="text-foreground font-semibold">
                     {medication.item.product.product_knowledge.name}
                   </TableCell>
-                  <TableCell className="text-gray-950">
+                  <TableCell className="text-foreground">
                     <DosageInstructionList
                       instructions={instructions}
                       renderItem={(di) => formatDosage(di) || "-"}
                     />
                   </TableCell>
-                  <TableCell className="text-gray-950">
+                  <TableCell className="text-foreground">
                     <DosageInstructionList
                       instructions={instructions}
                       renderItem={(di) => formatFrequency(di) || "-"}
                     />
                   </TableCell>
-                  <TableCell className="text-gray-950 font-medium">
+                  <TableCell className="text-foreground font-medium">
                     {medication.quantity ? round(medication.quantity) : "-"}
                   </TableCell>
-                  <TableCell className="text-gray-950 font-medium">
+                  <TableCell className="text-foreground font-medium">
                     {medication.location.name}
                     {medication.location.id !== medication.item.location.id &&
                       ` (${medication.item.location.name})`}
                   </TableCell>
-                  <TableCell className="text-gray-950">
+                  <TableCell className="text-foreground">
                     <Badge
                       variant={
                         MEDICATION_DISPENSE_STATUS_COLORS[medication.status]
@@ -198,7 +214,7 @@ export function DispenseHistory({
                       {t(medication.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-gray-950">
+                  <TableCell className="text-foreground">
                     {formatDateTime(
                       medication.when_prepared.toString(),
                       "hh:mm A, DD/MM/YYYY",

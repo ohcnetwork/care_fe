@@ -182,8 +182,8 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
             return (
               <FormItem>
                 <FormLabel aria-required>{t("contexts")}</FormLabel>
-                <div className="rounded-lg border border-gray-200 bg-white p-3">
-                  <p className="mb-2.5 text-xs text-gray-500">
+                <div className="rounded-lg border border-border bg-background p-3">
+                  <p className="mb-2.5 text-xs text-muted-foreground">
                     {t("select_context")}
                   </p>
                   <div className="space-y-2">
@@ -197,7 +197,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                             "flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 transition-colors",
                             isChecked
                               ? "border-primary-200 bg-primary-50/50"
-                              : "border-gray-200 hover:bg-gray-50",
+                              : "border-border hover:bg-soft-background",
                           )}
                         >
                           <Checkbox
@@ -207,7 +207,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                               toggleContext(context, Boolean(value))
                             }
                           />
-                          <span className="text-sm font-medium text-gray-700">
+                          <span className="text-sm font-medium text-muted-foreground">
                             {t(getRoleContextLabelKey(context))}
                           </span>
                         </label>
@@ -237,12 +237,12 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
               <FormItem className="flex min-h-80 flex-col">
                 <div className="flex items-center justify-between">
                   <FormLabel aria-required>{t("permissions")}</FormLabel>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-placeholder-foreground">
                     {selectedPermissions.length} {t("selected")}
                   </span>
                 </div>
-                <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
-                  <div className="space-y-2 border-b border-gray-100 p-3">
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-background">
+                  <div className="space-y-2 border-b border-soft-border p-3">
                     <div className="flex gap-2">
                       <Button
                         type="button"
@@ -278,7 +278,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                     </div>
 
                     <div className="relative">
-                      <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-400" />
+                      <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-placeholder-foreground" />
                       <Input
                         placeholder={t("search_permissions")}
                         aria-label={t("search_permissions")}
@@ -299,7 +299,9 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                             htmlFor={permission.slug}
                             className={cn(
                               "flex cursor-pointer items-start gap-2.5 rounded-md px-2.5 py-2 transition-colors",
-                              checked ? "bg-primary-50/50" : "hover:bg-gray-50",
+                              checked
+                                ? "bg-primary-50/50"
+                                : "hover:bg-soft-background",
                             )}
                           >
                             <Checkbox
@@ -314,11 +316,11 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                               className="mt-0.5"
                             />
                             <div className="min-w-0 flex-1">
-                              <div className="text-sm font-medium text-gray-700">
+                              <div className="text-sm font-medium text-muted-foreground">
                                 {permission.name}
                               </div>
                               {permission.description && (
-                                <div className="text-xs text-gray-400">
+                                <div className="text-xs text-placeholder-foreground">
                                   {permission.description}
                                 </div>
                               )}
@@ -331,12 +333,12 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                       })}
 
                       {permissionsLoading ? (
-                        <div className="py-4 text-center text-sm text-gray-400">
+                        <div className="py-4 text-center text-sm text-placeholder-foreground">
                           {t("loading")}
                         </div>
                       ) : (
                         permissions.length === 0 && (
-                          <div className="py-4 text-center text-sm text-gray-400">
+                          <div className="py-4 text-center text-sm text-placeholder-foreground">
                             {t("no_matching_permissions")}
                           </div>
                         )

@@ -89,7 +89,7 @@ export function TOTPSetupDialog({
             )}
             <div className="flex flex-col space-y-2">
               <p className="text-lg font-semibold">{t("scan_qr")}</p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {t("use_authenticator_app")}
               </p>
             </div>
@@ -97,7 +97,7 @@ export function TOTPSetupDialog({
 
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 <Trans
                   i18nKey="cant_scan_copy_key"
                   components={{
@@ -126,7 +126,10 @@ export function TOTPSetupDialog({
                 <code className="text-indigo-600 text-sm select-all">
                   {setupData.secret_key}
                 </code>
-                <CareIcon icon="l-copy" className="size-4 text-gray-500" />
+                <CareIcon
+                  icon="l-copy"
+                  className="size-4 text-muted-foreground"
+                />
               </div>
             )}
           </div>

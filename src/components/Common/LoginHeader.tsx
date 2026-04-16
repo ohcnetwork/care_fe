@@ -39,7 +39,7 @@ export const LoginHeader = () => {
         <div className="flex justify-end items-center gap-2">
           <Button
             variant="ghost"
-            className="text-sm font-medium hover:bg-gray-100 px-6"
+            className="text-sm font-medium hover:bg-muted-background px-6"
             onClick={() => navigate("/patient/home")}
           >
             {t("home")}
@@ -51,7 +51,7 @@ export const LoginHeader = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem className="text-xs text-gray-500">
+              <DropdownMenuItem className="text-xs text-muted-foreground">
                 <span className="font-medium">{tokenData.phoneNumber}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -73,7 +73,7 @@ export const LoginHeader = () => {
       <div className="flex justify-end items-center">
         <Button
           variant="ghost"
-          className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
+          className="text-sm font-medium hover:bg-muted-background rounded-full px-6"
           onClick={() =>
             navigate(
               `/login?mode=${

@@ -84,7 +84,7 @@ function ConsentCard({
                     )}
                   </>
                 ) : (
-                  <span className="text-gray-500 italic">
+                  <span className="text-muted-foreground italic">
                     {t("no_files_attached")}
                   </span>
                 )}
@@ -108,7 +108,7 @@ function ConsentCard({
 
         <div className="flex flex-col justify-between w-full gap-4 text-sm">
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               {t("consent_given_on")}
             </span>
             <p className="font-medium text-xs w-full">
@@ -116,7 +116,9 @@ function ConsentCard({
             </p>
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-gray-500">{t("valid_period")}</span>
+            <span className="text-xs text-muted-foreground">
+              {t("valid_period")}
+            </span>
             <p className="font-medium text-xs w-full">
               {renderDateTime(consent.period.start)}
               {" - "}

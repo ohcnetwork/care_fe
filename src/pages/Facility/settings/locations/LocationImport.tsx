@@ -200,7 +200,7 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+            <div className="border-2 border-dashed border-strong-border rounded-lg p-8 text-center">
               <input
                 type="file"
                 accept=".csv"
@@ -210,18 +210,20 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
               />
               <label htmlFor="csv-upload" className="cursor-pointer">
                 <div className="flex flex-col items-center gap-4">
-                  <Upload className="h-12 w-12 text-gray-400" />
+                  <Upload className="h-12 w-12 text-placeholder-foreground" />
                   <div>
                     <p className="text-lg font-medium">
                       Click to upload CSV file
                     </p>
-                    <p className="text-sm text-gray-500">or drag and drop</p>
+                    <p className="text-sm text-muted-foreground">
+                      or drag and drop
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-placeholder-foreground">
                     Expected columns: location, type, description (repeated for
                     each hierarchy level)
                   </p>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-muted-foreground mt-2">
                     Location types can use labels like "bed", "room", "ward",
                     etc. The last description column is optional.
                   </p>
@@ -255,7 +257,7 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
               </Alert>
             )}
 
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+            <div className="mt-4 p-4 bg-soft-background rounded-lg">
               <h4 className="font-medium text-sm mb-2">
                 Valid Location Types:
               </h4>
@@ -333,7 +335,7 @@ const HierarchicalLocationPreview = ({
           onOpenChange={() => toggleExpanded(location.name)}
         >
           <CollapsibleTrigger asChild>
-            <div className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-gray-200">
+            <div className="flex items-center gap-3 p-3 hover:bg-soft-background rounded-lg cursor-pointer transition-colors border border-transparent hover:border-border">
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 {/* Indentation for hierarchy levels */}
                 <div
@@ -343,9 +345,9 @@ const HierarchicalLocationPreview = ({
                   {hasChildren && (
                     <div className="flex items-center justify-center w-4 h-4 mr-2">
                       {isExpanded ? (
-                        <ChevronDown className="h-3 w-3 text-gray-500" />
+                        <ChevronDown className="h-3 w-3 text-muted-foreground" />
                       ) : (
-                        <ChevronRight className="h-3 w-3 text-gray-500" />
+                        <ChevronRight className="h-3 w-3 text-muted-foreground" />
                       )}
                     </div>
                   )}
@@ -360,7 +362,7 @@ const HierarchicalLocationPreview = ({
                 {/* Location Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-medium text-gray-900 truncate">
+                    <h4 className="font-medium text-foreground truncate">
                       {location.name}
                     </h4>
                     <Badge variant="outline" className="text-xs">
@@ -376,7 +378,7 @@ const HierarchicalLocationPreview = ({
                     </Badge>
                   </div>
                   {location.description && (
-                    <p className="text-sm text-gray-500 truncate mt-1">
+                    <p className="text-sm text-muted-foreground truncate mt-1">
                       {location.description}
                     </p>
                   )}
@@ -405,7 +407,7 @@ const HierarchicalLocationPreview = ({
 
           {hasChildren && (
             <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up overflow-hidden">
-              <div className="ml-6 border-l-2 border-gray-200">
+              <div className="ml-6 border-l-2 border-border">
                 {location.children.map((child) =>
                   renderLocationItem(child, depth + 1),
                 )}
@@ -419,7 +421,7 @@ const HierarchicalLocationPreview = ({
 
   if (locations.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         <p>No locations to preview</p>
       </div>
     );
@@ -459,11 +461,11 @@ const HierarchicalLocationPreview = ({
         </div>
       </div>
 
-      <div className="border rounded-lg bg-white">
+      <div className="border rounded-lg bg-card">
         {locations.map((location) => renderLocationItem(location))}
       </div>
 
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-muted-foreground">
         <p>Total locations: {countTotalLocations(locations)}</p>
       </div>
     </div>

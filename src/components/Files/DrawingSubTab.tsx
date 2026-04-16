@@ -109,16 +109,16 @@ const ExcalidrawPreview = memo(
     }, [elements, files, svgKey]);
 
     return (
-      <div className="h-60 md:h-40 w-full overflow-hidden rounded-md border border-gray-200 bg-white flex items-center justify-center">
+      <div className="h-60 md:h-40 w-full overflow-hidden rounded-md border border-border bg-background flex items-center justify-center">
         {isLoading ? (
           <div className="flex items-center justify-center h-full w-full">
             <CareIcon
               icon="l-spinner"
-              className="animate-spin text-2xl text-gray-400"
+              className="animate-spin text-2xl text-placeholder-foreground"
             />
           </div>
         ) : elements.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-gray-400">
+          <div className="flex flex-col items-center justify-center text-placeholder-foreground">
             <CareIcon icon="l-image" className="text-2xl mb-1" />
             <span className="text-xs">{t("empty_drawing")}</span>
           </div>
@@ -202,7 +202,7 @@ export const DrawingPage = ({
     <div className="p-4 -ml-4 -mt-2">
       <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
         <div className="relative flex-1 min-w-72 max-w-96">
-          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
+          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="search-by-name"
             placeholder={t("search_drawings")}
@@ -223,7 +223,7 @@ export const DrawingPage = ({
       ) : (
         <>
           {data?.results.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+            <div className="flex flex-col items-center justify-center p-8 text-muted-foreground">
               <CareIcon icon="l-image" className="text-4xl mb-2" />
               <p className="text-lg font-medium">{t("no_drawings_so_far")}</p>
               {canEdit && (
@@ -241,7 +241,7 @@ export const DrawingPage = ({
                   }}
                 >
                   <div className="relative">
-                    <div className="h-60 md:h-40 w-full bg-gray-50">
+                    <div className="h-60 md:h-40 w-full bg-soft-background">
                       <ExcalidrawPreview
                         elements={drawing.object_value.elements}
                         files={drawing.object_value.files}
@@ -265,13 +265,19 @@ export const DrawingPage = ({
                         {drawing.name}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500 space-y-1">
+                    <div className="text-xs text-muted-foreground space-y-1">
                       <p className="flex items-center gap-1">
-                        <CareIcon icon="l-calender" className="text-gray-400" />
+                        <CareIcon
+                          icon="l-calender"
+                          className="text-placeholder-foreground"
+                        />
                         {new Date(drawing.created_date).toLocaleDateString()}
                       </p>
                       <p className="flex items-center gap-1">
-                        <CareIcon icon="l-user" className="text-gray-400" />
+                        <CareIcon
+                          icon="l-user"
+                          className="text-placeholder-foreground"
+                        />
                         {formatName(drawing.created_by)}
                       </p>
                     </div>

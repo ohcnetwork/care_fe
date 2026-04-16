@@ -123,7 +123,7 @@ export default function EditUserRoleSheet({
             </SheetDescription>
           </SheetHeader>
           <div className="space-y-6 py-4">
-            <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+            <div className="rounded-lg border border-border p-4 space-y-4">
               <div className="flex items-start gap-4">
                 <Avatar
                   name={formatName(userRole.user, true)}
@@ -137,10 +137,10 @@ export default function EditUserRoleSheet({
                 </div>
               </div>
 
-              <div className="flex flex-col flex-wrap gap-2 pt-2 border-t border-gray-200">
+              <div className="flex flex-col flex-wrap gap-2 pt-2 border-t border-border">
                 <div className="flex flex-wrap">
                   <div className="mr-3">
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {t("username")}
                     </span>
                     <p className="text-sm font-medium truncate ">
@@ -148,14 +148,14 @@ export default function EditUserRoleSheet({
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {t("current_role")}
                     </span>
                     <p className="text-sm font-medium">{userRole.role.name}</p>
                   </div>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-muted-foreground">
                     {t("last_login")}{" "}
                   </span>
                   <UserStatusIndicator user={userRole.user} />

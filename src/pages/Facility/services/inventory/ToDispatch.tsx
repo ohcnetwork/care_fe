@@ -54,10 +54,10 @@ export function ToDispatch({ facilityId, locationId, internal, tab }: Props) {
       <div className="space-y-2">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {t("to_dispatch")}
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               <Trans
                 i18nKey="to_dispatch_description"
                 values={{
