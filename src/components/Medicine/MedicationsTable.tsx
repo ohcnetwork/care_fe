@@ -20,6 +20,7 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 
+import { DosageInstructionList } from "./DosageInstructionList";
 import {
   formatDosage,
   formatDuration,
@@ -79,10 +80,7 @@ export const MedicationsTable = ({
         <TableBody>
           {(showInactive ? medications : activeMedications).map(
             (medication: MedicationRequestRead) => {
-              const instruction = medication.dosage_instruction[0];
-              const dosage = formatDosage(instruction);
-              // Duration is now rendered via formatDuration(instruction)
-              const remarks = formatSig(instruction);
+              const instructions = medication.dosage_instruction;
               const notes = medication.note;
               const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
                 medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
@@ -102,25 +100,53 @@ export const MedicationsTable = ({
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
                     {displayMedicationName(medication)}
                   </TableCell>
-                  <TableCell className="py-2 px-3">{dosage}</TableCell>
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
-                    {" "}
-                    {formatFrequency(instruction) || "-"}
-                    {(instruction?.additional_instruction ?? []).length > 0 && (
-                      <div className="text-sm text-gray-600 space-y-1">
-                        {instruction.additional_instruction?.map(
-                          (item: { display: string }, index: number) => (
-                            <div key={index}>{item.display}</div>
-                          ),
-                        )}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="py-2 px-3">
-                    {formatDuration(instruction) || "-"}
+                    <DosageInstructionList
+                      instructions={instructions}
+                      renderItem={(di) => formatDosage(di) || "-"}
+                    />
                   </TableCell>
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
-                    {[remarks, notes].filter(Boolean).join("\n")}
+                    <DosageInstructionList
+                      instructions={instructions}
+                      renderItem={(di) => {
+                        const freq = formatFrequency(di);
+                        const additionalInstr = di.additional_instruction ?? [];
+                        return (
+                          <>
+                            {freq || "-"}
+                            {additionalInstr.length > 0 && (
+                              <div className="text-sm text-gray-600 space-y-1">
+                                {additionalInstr.map(
+                                  (item: { display: string }, aIdx: number) => (
+                                    <div key={aIdx}>{item.display}</div>
+                                  ),
+                                )}
+                              </div>
+                            )}
+                          </>
+                        );
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell className="py-2 px-3 break-words whitespace-normal">
+                    <DosageInstructionList
+                      instructions={instructions}
+                      renderItem={(di) => formatDuration(di) || "-"}
+                    />
+                  </TableCell>
+                  <TableCell className="py-2 px-3 break-words whitespace-normal">
+                    <DosageInstructionList
+                      instructions={instructions}
+                      renderItem={(di) => (
+                        <>
+                          {formatSig(di) || "-"}
+                          {notes && (
+                            <div className="text-sm text-gray-600">{notes}</div>
+                          )}
+                        </>
+                      )}
+                    />
                   </TableCell>
                 </TableRow>
               );
