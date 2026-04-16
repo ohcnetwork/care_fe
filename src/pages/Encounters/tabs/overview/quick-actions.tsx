@@ -8,6 +8,7 @@ import {
   AllergyIcon,
   HealthWorkerIcon,
   MedicineIcon,
+  StethoscopeIcon,
   TestTubeIcon,
 } from "@/CAREUI/icons/CustomIcons";
 
@@ -45,6 +46,13 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
         title={t("add_medication")}
         href={`questionnaire/medication_request`}
         actionId="add-medication-request"
+      />
+      <QuickAction
+        icon={<StethoscopeIcon className="text-violet-700 size-8" />}
+        title={t("add_diagnosis")}
+        shortcut={getShortcutDisplay("add-diagnosis")}
+        href={`questionnaire/diagnosis`}
+        actionId="add-diagnosis"
       />
       <FormDialog
         subjectType="encounter"
