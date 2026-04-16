@@ -50,7 +50,6 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
       <QuickAction
         icon={<StethoscopeIcon className="text-violet-700 size-8" />}
         title={t("add_diagnosis")}
-        shortcut={getShortcutDisplay("add-diagnosis")}
         href={`questionnaire/diagnosis`}
         actionId="add-diagnosis"
       />
