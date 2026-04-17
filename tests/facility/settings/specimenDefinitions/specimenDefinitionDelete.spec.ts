@@ -87,6 +87,6 @@ test.describe("Specimen Definitions Delete", () => {
 
     // Verify the definition exists with retired status
     await expect(page.getByText(definitionTitle)).toBeVisible();
-    await expect(page.getByText(DELETED_STATUS)).toBeVisible();
+    await expect(page.getByText(DELETED_STATUS, { exact: true })).toBeVisible();
   });
 });

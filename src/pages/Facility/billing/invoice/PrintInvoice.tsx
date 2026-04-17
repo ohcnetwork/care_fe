@@ -38,6 +38,7 @@ import {
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
@@ -136,10 +137,9 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
     <PrintPreview
       title={`${t("invoice")} ${invoice.number}`}
       watermark={getWatermark()}
-      autoPrint={{
-        enabled: !isLoadingDispenses,
-      }}
+      disabled={isLoadingDispenses}
       facility={facility}
+      templateSlug={PrintTemplateType.invoice}
     >
       <DisablingCover
         disabled={isLoadingDispenses}

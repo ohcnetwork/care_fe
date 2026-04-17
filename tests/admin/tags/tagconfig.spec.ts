@@ -54,9 +54,9 @@ test.describe("Tag Configuration Management", () => {
 
   test("should display existing tag configurations", async ({ page }) => {
     // Verify the tag config table is visible
-    await expect(page.locator(".rounded-md.overflow-x-auto")).toBeVisible();
+    await expect(page.getByRole("table")).toBeVisible();
 
-    // Verify table headers are present (adjust based on actual table structure)
+    // Verify table headers are present
     await expect(page.locator("thead")).toBeVisible();
 
     // Verify table body is present
@@ -197,11 +197,18 @@ test.describe("Tag Configuration Management", () => {
     await expect(displayNameInput).toHaveValue(childTagName);
 
     // Update the child tag
-    await page.getByRole("textbox", { name: "Display name *" }).click();
-    await page
-      .getByRole("textbox", { name: "Display name *" })
-      .fill(updatedChildTagName);
-    await page.getByRole("button", { name: "Update tag config" }).click();
+    const displayNameField = page.getByRole("textbox", {
+      name: "Display name *",
+    });
+    await displayNameField.click();
+    await displayNameField.fill(updatedChildTagName);
+    // Trigger change event by pressing Tab to ensure form validation runs
+    await displayNameField.press("Tab");
+    const updateButton = page.getByRole("button", {
+      name: "Update tag config",
+    });
+    await expect(updateButton).toBeEnabled();
+    await updateButton.click();
 
     // Verify the update was successful
     await page.getByRole("button", { name: "Back" }).click();
