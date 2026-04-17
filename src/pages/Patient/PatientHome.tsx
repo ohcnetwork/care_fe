@@ -285,7 +285,6 @@ export default function PatientHome() {
                   patientId={patientData.id}
                   facility={facility}
                   tokenId={token_id}
-                  queueId={queue_id}
                 />
               )}
             </div>

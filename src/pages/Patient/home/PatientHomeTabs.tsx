@@ -35,9 +35,8 @@ export default function PatientHomeTabs({
 }: PatientHomeTabsProps) {
   const { t } = useTranslation();
   const isTab = useBreakpoints({ default: true, lg: false });
-  const [{ token_id, queue_id }] = useQueryParams<{
+  const [{ token_id }] = useQueryParams<{
     token_id?: string;
-    queue_id?: string;
   }>();
 
   const tabs = [
@@ -103,7 +102,6 @@ export default function PatientHomeTabs({
             patientId={patientId}
             facility={facility}
             tokenId={token_id}
-            queueId={queue_id}
           />
         )}
       </div>

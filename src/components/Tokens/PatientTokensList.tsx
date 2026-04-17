@@ -29,14 +29,12 @@ interface PatientTokensListProps {
   patientId: string;
   facility: FacilityRead;
   tokenId?: string;
-  queueId?: string;
 }
 
 export default function PatientTokensList({
   patientId,
   facility,
   tokenId,
-  queueId: _queueId,
 }: PatientTokensListProps) {
   const { t } = useTranslation();
   const [expandedTokens, setExpandedTokens] = useState<Set<string>>(new Set());
