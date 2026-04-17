@@ -1245,7 +1245,7 @@ export function InvoiceShow({
                                 <TableCell
                                   className={cn(tableCellClass, "font-medium")}
                                 >
-                                  <span className="flex justify-between items-center flex-wrap gap-2">
+                                  <div className="flex justify-between items-center flex-wrap gap-2">
                                     <div className="flex flex-col">
                                       <span>
                                         {payment.payment_datetime
@@ -1294,7 +1294,7 @@ export function InvoiceShow({
                                         </>
                                       </Button>
                                     </div>
-                                  </span>
+                                  </div>
                                 </TableCell>
                                 <TableCell
                                   className={cn(tableCellClass, "text-left")}
@@ -1393,7 +1393,7 @@ export function InvoiceShow({
                               <TableCell
                                 className={cn(tableCellClass, "font-medium")}
                               >
-                                <span className="flex justify-between items-center flex-wrap gap-2">
+                                <div className="flex justify-between items-center flex-wrap gap-2">
                                   <div className="flex flex-col">
                                     <span>
                                       {creditNote.payment_datetime
@@ -1442,7 +1442,7 @@ export function InvoiceShow({
                                       </>
                                     </Button>
                                   </div>
-                                </span>
+                                </div>
                               </TableCell>
                               <TableCell
                                 className={cn(tableCellClass, "text-left")}

@@ -137,10 +137,8 @@ export default function ChangePaymentAccountSheet({
                     {t(payment.reconciliation_type)}
                     <span className="font-mono text-xs">{payment.id}</span>
                   </span>
-                  <div>
-                    {" - "}
-                    <MonetaryDisplay amount={payment.amount} />
-                  </div>
+                  {" - "}
+                  <MonetaryDisplay amount={payment.amount} />
                 </div>
               ))}
             </div>
