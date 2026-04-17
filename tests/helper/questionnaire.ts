@@ -76,9 +76,7 @@ export async function expectFieldError(page: Page, labelText: string) {
  */
 export async function submitAndExpectSuccess(page: Page) {
   await submitForm(page);
-  await expectToast(page, /questionnaire submitted successfully/i, {
-    timeout: 15000,
-  });
+  await expectToast(page, /questionnaire submitted successfully/i);
 }
 
 /**
@@ -91,7 +89,8 @@ export async function verifySubmittedValues(
   expectedValues: string[],
   excludedValues: string[] = [],
 ) {
-  await page.waitForURL(/\/encounter\/[^/]+\/updates/, { timeout: 10000 });
+  await page.waitForURL(/\/encounter\/[^/]+\/updates/);
+  await page.waitForLoadState("networkidle");
 
   for (const val of expectedValues) {
     const locator = page.getByText(val, { exact: true }).first();
