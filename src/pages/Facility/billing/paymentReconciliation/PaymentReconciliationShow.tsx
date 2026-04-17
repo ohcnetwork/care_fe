@@ -126,12 +126,12 @@ export function PaymentReconciliationShow({
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-bold">
             {t(payment.is_credit_note ? "refund" : "payment")}
-            <span className="text-lg font-normal text-gray-500">
-              #{payment.id}
-            </span>
           </h1>
+          <p className="text-sm text-gray-500">
+            {t("payment_id")}: {payment.id}
+          </p>
           <div className="flex flex-wrap gap-2 mt-2">
             <Badge
               variant={PAYMENT_RECONCILIATION_STATUS_COLORS[payment.status]}
