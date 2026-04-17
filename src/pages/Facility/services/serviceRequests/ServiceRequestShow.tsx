@@ -672,41 +672,18 @@ export default function ServiceRequestShow({
                     {t("service_request_completion_note_description")}
                   </SheetDescription>
                 </SheetHeader>
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-900">
-                    {t("completion_note")}
-                  </p>
-                  <Textarea
-                    value={completionNote}
-                    onChange={(e) => setCompletionNote(e.target.value)}
-                    placeholder={t("enter_note")}
-                    className="min-h-14"
-                  />
-                </div>
-                <div className="flex flex-row items-start justify-start gap-2 pt-2">
-                  <Button
-                    variant="primary"
-                    onClick={() =>
-                      completeServiceRequest({
-                        status: Status.completed,
-                        note: completionNote.trim() || null,
-                      })
-                    }
-                    disabled={isCompletingServiceRequest}
-                  >
-                    <CheckIcon className="size-4" />
-                    {isCompletingServiceRequest
-                      ? t("updating")
-                      : `${t("save")} & ${t("complete")}`}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsCompleteDialogOpen(false)}
-                    disabled={isCompletingServiceRequest}
-                  >
-                    {t("cancel")}
-                  </Button>
-                </div>
+                <CompletionNoteContent
+                  note={completionNote}
+                  isUpdating={isCompletingServiceRequest}
+                  onNoteChange={setCompletionNote}
+                  onComplete={() =>
+                    completeServiceRequest({
+                      status: Status.completed,
+                      note: completionNote.trim() || null,
+                    })
+                  }
+                  onCancel={() => setIsCompleteDialogOpen(false)}
+                />
               </SheetContent>
             </Sheet>
           ) : (
@@ -723,41 +700,18 @@ export default function ServiceRequestShow({
                     {t("service_request_completion_note_description")}
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-900">
-                    {t("completion_note")}
-                  </p>
-                  <Textarea
-                    value={completionNote}
-                    onChange={(e) => setCompletionNote(e.target.value)}
-                    placeholder={t("enter_note")}
-                    className="min-h-14"
-                  />
-                </div>
-                <div className="flex flex-row items-start justify-start gap-2">
-                  <Button
-                    variant="primary"
-                    onClick={() =>
-                      completeServiceRequest({
-                        status: Status.completed,
-                        note: completionNote.trim() || null,
-                      })
-                    }
-                    disabled={isCompletingServiceRequest}
-                  >
-                    <CheckIcon className="size-4" />
-                    {isCompletingServiceRequest
-                      ? t("updating")
-                      : `${t("save")} & ${t("complete")}`}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsCompleteDialogOpen(false)}
-                    disabled={isCompletingServiceRequest}
-                  >
-                    {t("cancel")}
-                  </Button>
-                </div>
+                <CompletionNoteContent
+                  note={completionNote}
+                  isUpdating={isCompletingServiceRequest}
+                  onNoteChange={setCompletionNote}
+                  onComplete={() =>
+                    completeServiceRequest({
+                      status: Status.completed,
+                      note: completionNote.trim() || null,
+                    })
+                  }
+                  onCancel={() => setIsCompleteDialogOpen(false)}
+                />
               </DialogContent>
             </Dialog>
           )}
@@ -766,3 +720,46 @@ export default function ServiceRequestShow({
     </div>
   );
 }
+
+interface CompletionNoteContentProps {
+  note: string;
+  isUpdating: boolean;
+  onNoteChange: (note: string) => void;
+  onComplete: () => void;
+  onCancel: () => void;
+}
+
+const CompletionNoteContent = ({
+  note,
+  isUpdating,
+  onNoteChange,
+  onComplete,
+  onCancel,
+}: CompletionNoteContentProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-gray-900">
+          {t("completion_note")}
+        </p>
+        <Textarea
+          value={note}
+          onChange={(e) => onNoteChange(e.target.value)}
+          placeholder={t("enter_note")}
+          className="min-h-14"
+        />
+      </div>
+      <div className="flex flex-row items-start justify-start gap-2 pt-2 sm:pt-0">
+        <Button variant="primary" onClick={onComplete} disabled={isUpdating}>
+          <CheckIcon className="size-4" />
+          {isUpdating ? t("updating") : `${t("save")} & ${t("complete")}`}
+        </Button>
+        <Button variant="outline" onClick={onCancel} disabled={isUpdating}>
+          {t("cancel")}
+        </Button>
+      </div>
+    </>
+  );
+};
