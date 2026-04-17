@@ -84,7 +84,7 @@ export async function submitAndExpectSuccess(page: Page) {
 /**
  * After submission, waits for navigation to the encounter updates page,
  * then asserts that `expectedValues` are visible and `excludedValues` are
- * NOT visible on the page.
+ * NOT visible anywhere on the page.
  */
 export async function verifySubmittedValues(
   page: Page,

@@ -9,13 +9,11 @@ import {
   submitForm,
   verifySubmittedValues,
 } from "tests/helper/questionnaire";
-import { ensureQuestionnaireExists } from "tests/helper/questionnaireSetup";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 const QUESTIONNAIRE_SLUG = "enable-when-string-test";
-const FIXTURE_PATH = "tests/fixtures/questionnaires/enableWhenTest.json";
 
 // Operator match values — must match the fixture's enable_when answers
 const EQUALS_MATCH = "Doctor";
@@ -25,10 +23,6 @@ const NOT_EQUALS_NON_MATCH = "Premium";
 
 test.describe("Enable When — String Operators", () => {
   test.use({ storageState: "tests/.auth/user.json" });
-
-  test.beforeAll(async () => {
-    await ensureQuestionnaireExists(QUESTIONNAIRE_SLUG, FIXTURE_PATH);
-  });
 
   test.beforeEach(async ({ page }) => {
     const facilityId = getFacilityId();
@@ -149,7 +143,7 @@ test.describe("Enable When — String Operators", () => {
     }) => {
       const patientName = faker.person.firstName();
       const middleName = faker.person.middleName();
-      const nickname = faker.internet.username();
+      const nickname = faker.person.firstName();
 
       await test.step("Fill other sources with safe values", async () => {
         await fillStringField(page, "Professional Type", EQUALS_NON_MATCH);

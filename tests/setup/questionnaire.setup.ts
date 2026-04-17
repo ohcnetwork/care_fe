@@ -1,17 +1,14 @@
 import * as fs from "fs";
 import * as path from "path";
 
-/**
- * Ensures a questionnaire exists on the backend. If the slug already exists,
- * this is a no-op. Otherwise it loads the fixture JSON, assigns all role-based
- * organizations, and creates the questionnaire via the API.
- *
- * Call this inside `test.beforeAll()` for any enable_when test suite.
- */
-export async function ensureQuestionnaireExists(
-  slug: string,
-  fixtureRelativePath: string,
-) {
+import { test } from "@playwright/test";
+
+test.use({ storageState: "tests/.auth/user.json" });
+
+test("ensure enable-when questionnaire exists", async () => {
+  const slug = "enable-when-string-test";
+  const fixturePath = "tests/fixtures/questionnaires/enableWhenTest.json";
+
   const authFile = path.resolve("tests/.auth/user.json");
   if (!fs.existsSync(authFile)) {
     throw new Error("Auth file not found — run auth setup first");
@@ -38,7 +35,10 @@ export async function ensureQuestionnaireExists(
   const checkRes = await fetch(`${apiUrl}/api/v1/questionnaire/${slug}/`, {
     headers,
   });
-  if (checkRes.status === 200) return;
+  if (checkRes.status === 200) {
+    console.log(`✅ Questionnaire already exists: ${slug}`);
+    return;
+  }
   if (checkRes.status !== 404) {
     const errorText = await checkRes.text();
     throw new Error(
@@ -58,9 +58,11 @@ export async function ensureQuestionnaireExists(
   };
   const organizationIds = orgData.results.map((org) => org.id);
 
-  // Load fixture and upload
-  const fixturePath = path.resolve(fixtureRelativePath);
-  const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf-8"));
+  // Load fixture and create
+  const fixture = JSON.parse(
+    fs.readFileSync(path.resolve(fixturePath), "utf-8"),
+  );
+  fixture.slug = slug;
   fixture.organizations = organizationIds;
 
   const createRes = await fetch(`${apiUrl}/api/v1/questionnaire/`, {
@@ -74,4 +76,5 @@ export async function ensureQuestionnaireExists(
       `Failed to create questionnaire: ${createRes.status} — ${errorText}`,
     );
   }
-}
+  console.log(`✅ Questionnaire created: ${slug}`);
+});
