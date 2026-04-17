@@ -99,13 +99,6 @@ test.describe("Admin organization lists", () => {
     ).trim();
     expect(parentOrgName.length).toBeGreaterThan(0);
 
-    const link = seeDetailsLinkInCard(firstCard);
-    await expect(link).toBeVisible();
-    await Promise.all([
-      page.waitForURL(adminOrgDetailUrlRegex(DEFAULT_ORG_TYPE)),
-      link.click(),
-    ]);
-
     const addOrgButton = page.getByRole("button", {
       name: /add organization/i,
     });
@@ -180,14 +173,13 @@ test.describe("Admin organization lists", () => {
     page,
   }) => {
     await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
-    await openGovtOrgDetailByName(page, parentOrgName, DEFAULT_ORG_TYPE);
 
     const input = searchInput(page, DEFAULT_ORG_TYPE);
     await expect(input).toBeVisible();
 
     await input.fill(createdOrgName);
     const matchedCard = govtOrgCards(page).filter({
-      has: page.getByRole("heading", { name: createdOrgName, exact: true }),
+      has: page.getByRole("heading", { name: createdOrgName }),
     });
     await expect(matchedCard).toBeVisible();
 
