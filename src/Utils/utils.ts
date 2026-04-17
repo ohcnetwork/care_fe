@@ -442,9 +442,9 @@ export function deepFreeze<T>(obj: T): T {
 
 export const goBack = (fallback?: string) => {
   if (window.history.length > 1) {
-    history.back();
+    return history.back();
   } else if (fallback) {
-    navigate(fallback);
+    return navigate(fallback);
   }
   history.back();
 };

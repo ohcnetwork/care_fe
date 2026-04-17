@@ -212,6 +212,7 @@ test.describe("Tag Configuration Management", () => {
 
     // Verify the update was successful
     await page.getByRole("button", { name: "Back" }).click();
+    await page.getByRole("button", { name: "Back" }).click();
     await page
       .getByRole("row", { name: parentTagName })
       .getByRole("button")
@@ -257,7 +258,7 @@ test.describe("Tag Configuration Management", () => {
 
     // Verify child tag is properly categorized
     await page.getByRole("button", { name: "View" }).click();
-    await page.getByRole("button", { name: parentTagName }).click();
+    await page.getByRole("link", { name: parentTagName }).click();
     await expect(page.getByRole("cell", { name: /Child/i })).toBeVisible();
   });
 
