@@ -1280,11 +1280,18 @@ export const PrintChargeItems = (props: {
                                               className="bg-transparent hover:bg-transparent"
                                             >
                                               <TableCell>
-                                                {payment.payment_datetime &&
-                                                  formatDateTime(
-                                                    payment.payment_datetime,
-                                                    "DD-MM-YY",
-                                                  )}
+                                                <div className="flex flex-col mr-1">
+                                                  <span>
+                                                    {payment.payment_datetime &&
+                                                      formatDateTime(
+                                                        payment.payment_datetime,
+                                                        "DD-MM-YY",
+                                                      )}
+                                                  </span>
+                                                  <span className="font-mono text-xs text-gray-500">
+                                                    {payment.id}
+                                                  </span>
+                                                </div>
                                               </TableCell>
                                               <TableCell>
                                                 {payment.target_invoice?.number}
@@ -1502,11 +1509,18 @@ export const PrintChargeItems = (props: {
                                               className="bg-transparent hover:bg-transparent"
                                             >
                                               <TableCell>
-                                                {payment.payment_datetime &&
-                                                  formatDateTime(
-                                                    payment.payment_datetime,
-                                                    "DD-MM-YY",
-                                                  )}
+                                                <div className="flex flex-col">
+                                                  <span>
+                                                    {payment.payment_datetime &&
+                                                      formatDateTime(
+                                                        payment.payment_datetime,
+                                                        "DD-MM-YY",
+                                                      )}
+                                                  </span>
+                                                  <span className="font-mono text-xs text-gray-500">
+                                                    {payment.id}
+                                                  </span>
+                                                </div>
                                               </TableCell>
                                               <TableCell>
                                                 {payment.target_invoice?.number}
