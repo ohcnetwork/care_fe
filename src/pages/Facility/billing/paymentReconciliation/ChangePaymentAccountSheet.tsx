@@ -133,9 +133,11 @@ export default function ChangePaymentAccountSheet({
                   key={payment.id}
                   className="text-sm text-gray-600 flex justify-between"
                 >
-                  <span className="truncate">
+                  <span className="truncate flex flex-col">
                     {t(payment.reconciliation_type)}
+                    <span className="font-mono text-xs">{payment.id}</span>
                   </span>
+                  {" - "}
                   <MonetaryDisplay amount={payment.amount} />
                 </div>
               ))}
