@@ -102,3 +102,33 @@ export async function verifySubmittedValues(
     await expect(page.getByText(val, { exact: true })).not.toBeVisible();
   }
 }
+
+/**
+ * Selects a boolean (Yes/No) radio option for a question identified by its label.
+ */
+export async function selectBooleanOption(
+  page: Page,
+  labelText: string,
+  option: "Yes" | "No",
+) {
+  const label = page.getByText(labelText, { exact: true });
+  await label.scrollIntoViewIfNeeded();
+  const container = getQuestionContainer(page, labelText);
+  // RadioInput renders duplicate radio ids ("true"/"false") across multiple
+  // boolean questions on the same page, breaking accessible-name lookup.
+  // Click the Label text inside the container instead; the native htmlFor
+  // association triggers the underlying radio.
+  await container.getByText(option, { exact: true }).click();
+}
+
+/**
+ * Clears a boolean selection by clicking the currently selected option again.
+ * Only works when the question is not required (per RadioInput behavior).
+ */
+export async function clearBooleanField(
+  page: Page,
+  labelText: string,
+  currentOption: "Yes" | "No",
+) {
+  await selectBooleanOption(page, labelText, currentOption);
+}
