@@ -15,11 +15,11 @@ import { getPatientId } from "tests/support/patientId";
 
 const QUESTIONNAIRE_SLUG = "enable-when-string-test";
 
-// Operator match values — must match the fixture's enable_when answers
-const EQUALS_MATCH = "Doctor";
-const EQUALS_NON_MATCH = "Engineer";
-const NOT_EQUALS_MATCH = "Standard";
-const NOT_EQUALS_NON_MATCH = "Premium";
+// Values that trigger (show) or keep safe (hide) dependent fields
+const EQUALS_TRIGGER = "Doctor"; // equals "Doctor" → dependents show
+const EQUALS_SAFE = "Engineer"; // not "Doctor" → dependents stay hidden
+const NOT_EQUALS_TRIGGER = "Premium"; // ≠ "Standard" → dependents show
+const NOT_EQUALS_SAFE = "Standard"; // = "Standard" → dependents stay hidden
 
 test.describe("Enable When — String Operators", () => {
   test.use({ storageState: "tests/.auth/user.json" });
@@ -49,13 +49,13 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Fill other sources with safe values and submit", async () => {
-        await fillStringField(page, "Professional Type", EQUALS_NON_MATCH);
-        await fillStringField(page, "Category", NOT_EQUALS_MATCH);
+        await fillStringField(page, "Professional Type", EQUALS_SAFE);
+        await fillStringField(page, "Category", NOT_EQUALS_SAFE);
         await submitAndExpectSuccess(page);
       });
 
       await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [EQUALS_NON_MATCH, NOT_EQUALS_MATCH]);
+        await verifySubmittedValues(page, [EQUALS_SAFE, NOT_EQUALS_SAFE]);
       });
     });
 
@@ -67,13 +67,13 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Fill other sources with safe values and submit", async () => {
-        await fillStringField(page, "Professional Type", EQUALS_NON_MATCH);
-        await fillStringField(page, "Category", NOT_EQUALS_MATCH);
+        await fillStringField(page, "Professional Type", EQUALS_SAFE);
+        await fillStringField(page, "Category", NOT_EQUALS_SAFE);
         await submitAndExpectSuccess(page);
       });
 
       await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [EQUALS_NON_MATCH, NOT_EQUALS_MATCH]);
+        await verifySubmittedValues(page, [EQUALS_SAFE, NOT_EQUALS_SAFE]);
       });
     });
 
@@ -146,8 +146,8 @@ test.describe("Enable When — String Operators", () => {
       const nickname = faker.person.firstName();
 
       await test.step("Fill other sources with safe values", async () => {
-        await fillStringField(page, "Professional Type", EQUALS_NON_MATCH);
-        await fillStringField(page, "Category", NOT_EQUALS_MATCH);
+        await fillStringField(page, "Professional Type", EQUALS_SAFE);
+        await fillStringField(page, "Category", NOT_EQUALS_SAFE);
       });
 
       await test.step("Fill source — dependents appear", async () => {
@@ -171,7 +171,7 @@ test.describe("Enable When — String Operators", () => {
         await submitAndExpectSuccess(page);
         await verifySubmittedValues(
           page,
-          [EQUALS_NON_MATCH, NOT_EQUALS_MATCH],
+          [EQUALS_SAFE, NOT_EQUALS_SAFE],
           [middleName, nickname],
         );
       });
@@ -189,7 +189,7 @@ test.describe("Enable When — String Operators", () => {
       page,
     }) => {
       await test.step("Type non-matching value — dependent stays hidden", async () => {
-        await fillStringField(page, "Professional Type", EQUALS_NON_MATCH);
+        await fillStringField(page, "Professional Type", EQUALS_SAFE);
         await checkVisibility(page, "Medical License Number", false);
       });
 
@@ -198,7 +198,7 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [EQUALS_NON_MATCH]);
+        await verifySubmittedValues(page, [EQUALS_SAFE]);
       });
     });
 
@@ -206,7 +206,7 @@ test.describe("Enable When — String Operators", () => {
       page,
     }) => {
       await test.step("Type non-matching value — dependent stays hidden", async () => {
-        await fillStringField(page, "Professional Type", EQUALS_NON_MATCH);
+        await fillStringField(page, "Professional Type", EQUALS_SAFE);
         await checkVisibility(page, "Specialization", false);
       });
 
@@ -215,7 +215,7 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [EQUALS_NON_MATCH]);
+        await verifySubmittedValues(page, [EQUALS_SAFE]);
       });
     });
 
@@ -223,7 +223,7 @@ test.describe("Enable When — String Operators", () => {
       page,
     }) => {
       await test.step("Type matching value — dependent appears", async () => {
-        await fillStringField(page, "Professional Type", EQUALS_MATCH);
+        await fillStringField(page, "Professional Type", EQUALS_TRIGGER);
         await checkVisibility(page, "Medical License Number", true);
       });
 
@@ -239,7 +239,7 @@ test.describe("Enable When — String Operators", () => {
       const licenseNumber = faker.string.alphanumeric(8);
 
       await test.step("Type matching value and fill required dependent", async () => {
-        await fillStringField(page, "Professional Type", EQUALS_MATCH);
+        await fillStringField(page, "Professional Type", EQUALS_TRIGGER);
         await checkVisibility(page, "Medical License Number", true);
         await fillStringField(page, "Medical License Number", licenseNumber);
       });
@@ -249,7 +249,7 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [EQUALS_MATCH, licenseNumber]);
+        await verifySubmittedValues(page, [EQUALS_TRIGGER, licenseNumber]);
       });
     });
 
@@ -259,7 +259,7 @@ test.describe("Enable When — String Operators", () => {
       const licenseNumber = faker.string.alphanumeric(8);
 
       await test.step("Type matching value — optional dependent appears", async () => {
-        await fillStringField(page, "Professional Type", EQUALS_MATCH);
+        await fillStringField(page, "Professional Type", EQUALS_TRIGGER);
         await checkVisibility(page, "Specialization", true);
       });
 
@@ -272,7 +272,7 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [EQUALS_MATCH, licenseNumber]);
+        await verifySubmittedValues(page, [EQUALS_TRIGGER, licenseNumber]);
       });
     });
 
@@ -283,11 +283,11 @@ test.describe("Enable When — String Operators", () => {
       const specialization = faker.lorem.word();
 
       await test.step("Fill other sources with safe values", async () => {
-        await fillStringField(page, "Category", NOT_EQUALS_MATCH);
+        await fillStringField(page, "Category", NOT_EQUALS_SAFE);
       });
 
       await test.step("Type matching value — dependents appear", async () => {
-        await fillStringField(page, "Professional Type", EQUALS_MATCH);
+        await fillStringField(page, "Professional Type", EQUALS_TRIGGER);
         await checkVisibility(page, "Medical License Number", true);
         await checkVisibility(page, "Specialization", true);
       });
@@ -298,7 +298,7 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Change to non-matching — dependents hide", async () => {
-        await fillStringField(page, "Professional Type", EQUALS_NON_MATCH);
+        await fillStringField(page, "Professional Type", EQUALS_SAFE);
         await checkVisibility(page, "Medical License Number", false);
         await checkVisibility(page, "Specialization", false);
       });
@@ -307,7 +307,7 @@ test.describe("Enable When — String Operators", () => {
         await submitAndExpectSuccess(page);
         await verifySubmittedValues(
           page,
-          [EQUALS_NON_MATCH],
+          [EQUALS_SAFE],
           [licenseNumber, specialization],
         );
       });
@@ -325,7 +325,7 @@ test.describe("Enable When — String Operators", () => {
       page,
     }) => {
       await test.step("Type matching value — dependent stays hidden", async () => {
-        await fillStringField(page, "Category", NOT_EQUALS_MATCH);
+        await fillStringField(page, "Category", NOT_EQUALS_SAFE);
         await checkVisibility(page, "Specify Other Category", false);
       });
 
@@ -334,7 +334,7 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [NOT_EQUALS_MATCH]);
+        await verifySubmittedValues(page, [NOT_EQUALS_SAFE]);
       });
     });
 
@@ -342,7 +342,7 @@ test.describe("Enable When — String Operators", () => {
       page,
     }) => {
       await test.step("Type matching value — dependent stays hidden", async () => {
-        await fillStringField(page, "Category", NOT_EQUALS_MATCH);
+        await fillStringField(page, "Category", NOT_EQUALS_SAFE);
         await checkVisibility(page, "Category Notes", false);
       });
 
@@ -351,7 +351,7 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [NOT_EQUALS_MATCH]);
+        await verifySubmittedValues(page, [NOT_EQUALS_SAFE]);
       });
     });
 
@@ -359,7 +359,7 @@ test.describe("Enable When — String Operators", () => {
       page,
     }) => {
       await test.step("Type non-matching value — dependent appears", async () => {
-        await fillStringField(page, "Category", NOT_EQUALS_NON_MATCH);
+        await fillStringField(page, "Category", NOT_EQUALS_TRIGGER);
         await checkVisibility(page, "Specify Other Category", true);
       });
 
@@ -375,7 +375,7 @@ test.describe("Enable When — String Operators", () => {
       const otherCategory = faker.lorem.word();
 
       await test.step("Type non-matching value and fill required dependent", async () => {
-        await fillStringField(page, "Category", NOT_EQUALS_NON_MATCH);
+        await fillStringField(page, "Category", NOT_EQUALS_TRIGGER);
         await checkVisibility(page, "Specify Other Category", true);
         await fillStringField(page, "Specify Other Category", otherCategory);
       });
@@ -385,10 +385,7 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [
-          NOT_EQUALS_NON_MATCH,
-          otherCategory,
-        ]);
+        await verifySubmittedValues(page, [NOT_EQUALS_TRIGGER, otherCategory]);
       });
     });
 
@@ -398,7 +395,7 @@ test.describe("Enable When — String Operators", () => {
       const otherCategory = faker.lorem.word();
 
       await test.step("Type non-matching value — optional dependent appears", async () => {
-        await fillStringField(page, "Category", NOT_EQUALS_NON_MATCH);
+        await fillStringField(page, "Category", NOT_EQUALS_TRIGGER);
         await checkVisibility(page, "Category Notes", true);
       });
 
@@ -411,10 +408,7 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [
-          NOT_EQUALS_NON_MATCH,
-          otherCategory,
-        ]);
+        await verifySubmittedValues(page, [NOT_EQUALS_TRIGGER, otherCategory]);
       });
     });
 
@@ -425,7 +419,7 @@ test.describe("Enable When — String Operators", () => {
       const categoryNotes = faker.lorem.sentence();
 
       await test.step("Type non-matching value — dependents appear", async () => {
-        await fillStringField(page, "Category", NOT_EQUALS_NON_MATCH);
+        await fillStringField(page, "Category", NOT_EQUALS_TRIGGER);
         await checkVisibility(page, "Specify Other Category", true);
         await checkVisibility(page, "Category Notes", true);
       });
@@ -436,7 +430,7 @@ test.describe("Enable When — String Operators", () => {
       });
 
       await test.step("Change to matching value — dependents hide", async () => {
-        await fillStringField(page, "Category", NOT_EQUALS_MATCH);
+        await fillStringField(page, "Category", NOT_EQUALS_SAFE);
         await checkVisibility(page, "Specify Other Category", false);
         await checkVisibility(page, "Category Notes", false);
       });
@@ -445,7 +439,7 @@ test.describe("Enable When — String Operators", () => {
         await submitAndExpectSuccess(page);
         await verifySubmittedValues(
           page,
-          [NOT_EQUALS_MATCH],
+          [NOT_EQUALS_SAFE],
           [otherCategory, categoryNotes],
         );
       });
