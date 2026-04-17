@@ -116,13 +116,24 @@ test.describe("Department Selector Infinite Scroll", () => {
     await test.step("Scroll to bottom to trigger infinite scroll", async () => {
       const initialCount = await items.count();
 
+      // Set up listener for the next-page API request before scrolling
+      const nextPageRequest = page.waitForResponse(
+        (resp) =>
+          resp.url().includes("/organizations/") &&
+          resp.url().includes("offset=") &&
+          resp.status() === 200,
+      );
+
       // Scroll the command list to the bottom to trigger the sentinel
       const commandList = page.locator("[cmdk-list]");
       await commandList.evaluate((el) => {
         el.scrollTop = el.scrollHeight;
       });
 
-      // Wait for more items to load
+      // Verify the paginated API request was fired
+      await nextPageRequest;
+
+      // Verify more items rendered from the response
       await expect(async () => {
         const newCount = await items.count();
         expect(newCount).toBeGreaterThan(initialCount);
