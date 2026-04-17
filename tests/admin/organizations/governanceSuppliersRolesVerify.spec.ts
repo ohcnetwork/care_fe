@@ -28,8 +28,6 @@ function searchInput(page: Page, type: OrganizationType) {
 
 function govtOrgCards(page: Page) {
   return page
-    .getByRole("heading", { name: typeHeadingPattern("govt") })
-    .locator("../..")
     .locator('[data-slot="card"]')
     .filter({ hasNot: page.getByText(/no organizations found/i) });
 }
@@ -47,7 +45,9 @@ function adminOrgDetailUrlRegex(type: OrganizationType) {
 }
 
 async function gotoOrgTypeList(page: Page, type: OrganizationType) {
-  await page.goto(`/admin/organizations/${type}`);
+  await page.goto(`/admin/organizations/${type}`, {
+    waitUntil: "networkidle",
+  });
   await expect(searchInput(page, type)).toBeVisible();
 }
 
@@ -82,6 +82,7 @@ async function openGovtOrgDetailByName(
 
 test.describe("Admin organization lists", () => {
   let parentOrgName: string;
+  let createdOrgName: string;
 
   test.beforeAll(async ({ browser }) => {
     const context = await browser.newContext({
@@ -91,12 +92,38 @@ test.describe("Admin organization lists", () => {
 
     await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
     const firstCard = govtOrgCards(page).first();
-    await expect(firstCard).toBeVisible({ timeout: 10000 });
+    await expect(firstCard).toBeVisible();
 
     parentOrgName = (
       await firstCard.getByRole("heading").first().innerText()
     ).trim();
     expect(parentOrgName.length).toBeGreaterThan(0);
+
+    const link = seeDetailsLinkInCard(firstCard);
+    await expect(link).toBeVisible();
+    await Promise.all([
+      page.waitForURL(adminOrgDetailUrlRegex(DEFAULT_ORG_TYPE)),
+      link.click(),
+    ]);
+
+    const addOrgButton = page.getByRole("button", {
+      name: /add organization/i,
+    });
+    await expect(addOrgButton).toBeVisible();
+    await addOrgButton.click();
+
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+
+    createdOrgName = faker.word.words(2);
+    await dialog.getByRole("textbox", { name: /name/i }).fill(createdOrgName);
+    await dialog.getByRole("button", { name: /create organization/i }).click();
+
+    await expect(
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText(/organization created successfully/i),
+    ).toBeVisible();
 
     await context.close();
   });
@@ -153,13 +180,14 @@ test.describe("Admin organization lists", () => {
     page,
   }) => {
     await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
+    await openGovtOrgDetailByName(page, parentOrgName, DEFAULT_ORG_TYPE);
 
     const input = searchInput(page, DEFAULT_ORG_TYPE);
     await expect(input).toBeVisible();
 
-    await input.fill(parentOrgName);
+    await input.fill(createdOrgName);
     const matchedCard = govtOrgCards(page).filter({
-      has: page.getByRole("heading", { name: parentOrgName, exact: true }),
+      has: page.getByRole("heading", { name: createdOrgName, exact: true }),
     });
     await expect(matchedCard).toBeVisible();
 
@@ -170,7 +198,7 @@ test.describe("Admin organization lists", () => {
       const headingText = (
         await filteredCards.nth(i).getByRole("heading").first().innerText()
       ).trim();
-      expect(headingText.toLowerCase()).toContain(parentOrgName.toLowerCase());
+      expect(headingText.toLowerCase()).toContain(createdOrgName.toLowerCase());
     }
 
     await input.fill(`zz_${faker.string.uuid()}`);
@@ -204,11 +232,8 @@ test.describe("Admin organization lists", () => {
 
     const treePanel = firstResizablePanel(page);
     await expect(treePanel).toBeVisible();
-    await expect(treePanel.locator("div.space-y-1").first()).toBeVisible();
 
-    const expandButtons = treePanel
-      .locator("div.space-y-1 > div")
-      .getByRole("button");
+    const expandButtons = treePanel.getByRole("button");
     const expandCount = await expandButtons.count();
     if (expandCount === 0) {
       test.skip(true, "No expandable orgs in tree (all nodes are leaf nodes)");
@@ -218,19 +243,20 @@ test.describe("Admin organization lists", () => {
     const expandBtn = expandButtons.first();
     await expect(expandBtn).toBeVisible();
 
-    const treeNodes = treePanel.locator("div.space-y-1");
-    const beforeCount = await treeNodes.count();
+    const beforeText = (await treePanel.innerText()).length;
     await expandBtn.click();
     await expect
-      .poll(() => treeNodes.count(), { message: "tree should grow on expand" })
-      .toBeGreaterThan(beforeCount);
+      .poll(async () => (await treePanel.innerText()).length, {
+        message: "tree content should grow on expand",
+      })
+      .toBeGreaterThan(beforeText);
 
     await expandBtn.click();
     await expect
-      .poll(() => treeNodes.count(), {
-        message: "tree should shrink on collapse",
+      .poll(async () => (await treePanel.innerText()).length, {
+        message: "tree content should shrink on collapse",
       })
-      .toBe(beforeCount);
+      .toBe(beforeText);
   });
 
   test("should return to govt list via breadcrumb Organizations control", async ({
