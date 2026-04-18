@@ -76,7 +76,10 @@ test.describe("Discount Component Settings", () => {
       name: /create discount component/i,
     });
     await expect(dialog).toBeVisible();
-    const discountValueInput = dialog.getByRole("spinbutton").first();
+    const amountInput = dialog.locator('input[name="amount"]');
+    const factorInput = dialog.locator('input[name="factor"]');
+    const discountValueInput =
+      (await amountInput.count()) > 0 ? amountInput : factorInput;
     await expect(discountValueInput).toBeVisible();
     await discountValueInput.fill(discountValue);
 
@@ -103,7 +106,10 @@ test.describe("Discount Component Settings", () => {
     await expect(dialog).toBeVisible();
     await dialog.getByRole("textbox", { name: /name/i }).fill(componentName);
 
-    const discountValueInput = dialog.getByRole("spinbutton").first();
+    const amountInput = dialog.locator('input[name="amount"]');
+    const factorInput = dialog.locator('input[name="factor"]');
+    const discountValueInput =
+      (await amountInput.count()) > 0 ? amountInput : factorInput;
     await expect(discountValueInput).toBeVisible();
     await discountValueInput.fill(discountValue);
 
@@ -138,7 +144,10 @@ test.describe("Discount Component Settings", () => {
       .getByRole("textbox", { name: /name/i })
       .fill(`${componentName} with condition`);
 
-    const discountValueInput = dialog.getByRole("spinbutton").first();
+    const amountInput = dialog.locator('input[name="amount"]');
+    const factorInput = dialog.locator('input[name="factor"]');
+    const discountValueInput =
+      (await amountInput.count()) > 0 ? amountInput : factorInput;
     await expect(discountValueInput).toBeVisible();
     await discountValueInput.fill(discountValue);
 
