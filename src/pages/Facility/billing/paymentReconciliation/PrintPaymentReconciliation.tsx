@@ -156,6 +156,11 @@ export function PrintPaymentReconciliation({
                 value={formatDateTime(payment.created_date, "DD-MM-YYYY")}
                 width="w-24"
               />
+              <DetailRow
+                label={t("payment_id")}
+                value={payment.id}
+                width="w-24"
+              />
               {payment.account.patient?.instance_identifiers
                 ?.filter(
                   ({ config }) =>
