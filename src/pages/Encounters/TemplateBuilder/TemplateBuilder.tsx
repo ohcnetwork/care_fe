@@ -236,7 +236,7 @@ export default function TemplateBuilder({
     const isValid = await form.trigger();
     if (!isValid) return;
 
-    if (!form.formState.isDirty) {
+    if (isEditing && !form.formState.isDirty) {
       toast.success(t("template_updated"));
       return;
     }
