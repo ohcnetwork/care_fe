@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, LogOut, SquarePen, User2Icon } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
@@ -17,14 +16,13 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { useAccessibleRoleOrganizationsList } from "@/hooks/useAccessibleRoleOrganizationsList";
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
-import organizationApi from "@/types/organization/organizationApi";
 
 enum DashboardTabs {
   TAB_FACILITIES = "Facilities",
@@ -50,12 +48,8 @@ export default function UserDashboard() {
   const governance = organizations.filter((org) => org.org_type === "govt");
 
   // Fetch accessible role organizations from dedicated API (includes user's role per org)
-  const { data: accessibleRoleOrgs, isLoading: isLoadingRoleOrgs } = useQuery({
-    queryKey: ["accessibleRoleOrganizations", "dashboard"],
-    queryFn: query(organizationApi.accessibleRoleOrganizations, {
-      queryParams: {},
-    }),
-  });
+  const { data: accessibleRoleOrgs, isLoading: isLoadingRoleOrgs } =
+    useAccessibleRoleOrganizationsList();
   const responsibilityItems = accessibleRoleOrgs?.results || [];
   // Extract organizations for tab items
   const responsibilities = responsibilityItems.map((item) => item.organization);
