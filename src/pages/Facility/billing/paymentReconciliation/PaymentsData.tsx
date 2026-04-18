@@ -424,12 +424,19 @@ export default function PaymentsData({
                     </TableCell>
                   )}
                   <TableCell>
-                    {payment.payment_datetime
-                      ? format(
-                          new Date(payment.payment_datetime),
-                          "MMM d, yyyy hh:mm a",
-                        )
-                      : "-"}
+                    <div className="flex flex-col">
+                      <span>
+                        {payment.payment_datetime
+                          ? format(
+                              new Date(payment.payment_datetime),
+                              "MMM d, yyyy hh:mm a",
+                            )
+                          : "-"}
+                      </span>
+                      <span className="font-mono text-xs text-gray-500">
+                        {payment.id}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell>
                     {payment.target_invoice && (
