@@ -166,18 +166,37 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
       .getByRole("button")
       .filter({ hasText: threadTitle });
 
-    // User B navigates to the same encounter, clicks Notes tab, waits for thread to appear
-    await expect(async () => {
-      await userBPage.goto(encounterUrl);
-      await userBPage.waitForLoadState("networkidle");
-      const notesTab = userBPage.getByRole("tab", { name: "Notes" });
-      await expect(notesTab).toBeVisible();
-      await notesTab.click();
-      await expect(
-        userBPage.getByRole("button", { name: "New", exact: true }),
-      ).toBeVisible();
-      await expect(threadButton).toBeVisible();
-    }).toPass({ intervals: [5_000, 5_000, 10_000, 10_000], timeout: 90_000 });
+    // Wait for a threads list GET response that contains our thread title.
+    // This avoids race conditions where User B fetches the list before
+    // User A's create has propagated. React Query refetches on tab click.
+    const threadsListPromise = userBPage.waitForResponse(
+      async (resp) => {
+        if (
+          !resp.url().includes("/thread/") ||
+          resp.request().method() !== "GET" ||
+          !resp.ok()
+        ) {
+          return false;
+        }
+        try {
+          const body = await resp.json();
+          return (
+            Array.isArray(body?.results) &&
+            body.results.some(
+              (t: { title?: string }) => t.title === threadTitle,
+            )
+          );
+        } catch {
+          return false;
+        }
+      },
+      { timeout: 30_000 },
+    );
+
+    await userBPage.goto(encounterUrl);
+    await userBPage.getByRole("tab", { name: "Notes" }).click();
+    await threadsListPromise;
+    await expect(threadButton).toBeVisible();
 
     // User B explicitly selects the thread created by User A
     await threadButton.click();
