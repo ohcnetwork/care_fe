@@ -258,7 +258,7 @@ test.describe("Tag Configuration Management", () => {
 
     // Verify child tag is properly categorized
     await page.getByRole("button", { name: "View" }).click();
-    await page.getByRole("link", { name: parentTagName }).click();
+    await page.getByRole("button", { name: parentTagName }).click();
     await expect(page.getByRole("cell", { name: /Child/i })).toBeVisible();
   });
 
