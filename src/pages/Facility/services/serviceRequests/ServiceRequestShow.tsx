@@ -329,9 +329,7 @@ export default function ServiceRequestShow({
     isFinal ||
     CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE.includes(request.category);
   const canShowCompleteCta =
-    !disableEdit &&
-    (!request?.activity_definition?.diagnostic_report_codes ||
-      canMarkAsComplete);
+    !request?.activity_definition?.diagnostic_report_codes || canMarkAsComplete;
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 relative">
@@ -631,7 +629,7 @@ export default function ServiceRequestShow({
         </div>
       )}
 
-      {canShowCompleteCta && (
+      {canShowCompleteCta && !disableEdit && (
         <>
           <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-white border-gray-300 p-2">
             <div className="flex w-full items-center justify-between px-4 py-3 gap-2 bg-white">
