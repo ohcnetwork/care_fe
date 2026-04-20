@@ -85,6 +85,12 @@ export default function TransferPaymentSheet({
       toast.success(t("payment_transferred_successfully"));
       queryClient.invalidateQueries({ queryKey: ["account", account.id] });
       queryClient.invalidateQueries({ queryKey: ["payments", account.id] });
+      queryClient.invalidateQueries({
+        queryKey: ["account", selectedAccountId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["payments", selectedAccountId],
+      });
       onOpenChange(false);
       setSelectedAccountId(null);
       setAmount("");
