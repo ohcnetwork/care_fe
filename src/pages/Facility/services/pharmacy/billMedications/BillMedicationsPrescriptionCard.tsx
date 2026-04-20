@@ -552,7 +552,7 @@ const MedicineLineItem = ({
       }
 
       const quantity = computeMedicationDispenseQuantity(
-        effectiveDosageInstructions[0],
+        effectiveDosageInstructions,
       );
       const autoSelectedLots = selectEligibleInventoryItems(data.results, {
         quantity: decimal(quantity),
@@ -911,11 +911,22 @@ const MedicineLineItemMedication = ({
                 : productKnowledge?.name}
             </span>
           )}
-          <span className="text-sm text-gray-700 font-medium flex items-center gap-1 whitespace-nowrap capitalize">
-            {formatMedicationLine(
-              (dosageInstructions ?? medication?.dosage_instruction)?.[0],
+          <div className="flex flex-col gap-0.5">
+            {(dosageInstructions ?? medication?.dosage_instruction)?.map(
+              (instruction, index) => {
+                const line = formatMedicationLine(instruction);
+                if (!line) return null;
+                return (
+                  <span
+                    key={index}
+                    className="text-sm text-gray-700 font-medium flex items-center gap-1 whitespace-nowrap capitalize"
+                  >
+                    {line}
+                  </span>
+                );
+              },
             )}
-          </span>
+          </div>
         </div>
         <div className="flex gap-1">
           {medication?.dispense_status ===
