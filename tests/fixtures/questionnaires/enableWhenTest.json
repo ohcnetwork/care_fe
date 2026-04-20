@@ -1,0 +1,125 @@
+{
+  "title": "Enable When String Test",
+  "slug": "enable-when-string-test",
+  "description": "Tests enable_when with string operators: exists, equals, not_equals",
+  "version": "1.0",
+  "status": "active",
+  "subject_type": "encounter",
+  "questions": [
+    {
+      "id": "a1000001-0001-4000-8000-000000000001",
+      "link_id": "S-001",
+      "text": "Patient Name",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000002",
+      "link_id": "S-002",
+      "text": "Middle Name",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-001",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000003",
+      "link_id": "S-003",
+      "text": "Nickname",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-001",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000004",
+      "link_id": "S-004",
+      "text": "Professional Type",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000005",
+      "link_id": "S-005",
+      "text": "Medical License Number",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-004",
+          "operator": "equals",
+          "answer": "Doctor"
+        }
+      ]
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000006",
+      "link_id": "S-006",
+      "text": "Specialization",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-004",
+          "operator": "equals",
+          "answer": "Doctor"
+        }
+      ]
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000007",
+      "link_id": "S-007",
+      "text": "Category",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000008",
+      "link_id": "S-008",
+      "text": "Specify Other Category",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-007",
+          "operator": "not_equals",
+          "answer": "Standard"
+        }
+      ]
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000009",
+      "link_id": "S-009",
+      "text": "Category Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-007",
+          "operator": "not_equals",
+          "answer": "Standard"
+        }
+      ]
+    }
+  ],
+  "tags": []
+}

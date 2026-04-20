@@ -17,13 +17,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 
 import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import ConsentFormSheet from "@/components/Consent/ConsentFormSheet";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
+import FileUploadDropdown from "@/components/Files/FileUploadDropdown";
 
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
@@ -152,20 +152,11 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                     {t("supporting_documents")}
                   </h3>
                   {canWrite && (
-                    <Button
-                      variant="outline"
-                      className="flex flex-row items-center"
-                      asChild
-                    >
-                      <Label className="flex flex-row items-center cursor-pointer w-fit">
-                        <CareIcon icon="l-file-upload" className="mr-1" />
-                        <span>{t("add_files")}</span>
-                        {fileUpload.Input({
-                          className: "hidden",
-                          ref: fileInputRef,
-                        })}
-                      </Label>
-                    </Button>
+                    <FileUploadDropdown
+                      fileUpload={fileUpload}
+                      showAudioCapture={false}
+                      inputRef={fileInputRef}
+                    />
                   )}
                 </div>
 

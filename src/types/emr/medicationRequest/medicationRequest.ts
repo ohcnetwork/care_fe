@@ -6,7 +6,7 @@ import {
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { UserReadMinimal } from "@/types/user/user";
-import { add, divide, isZero, multiply, round, roundUp } from "@/Utils/decimal";
+import { add, divide, isZero, multiply, roundUp } from "@/Utils/decimal";
 import Decimal from "decimal.js";
 
 export const MEDICATION_REQUEST_STATUS_COLORS = {
@@ -1523,18 +1523,34 @@ export function computeTotalDoseQuantity(
 // ─── Consumers of computeTotalDoseQuantity ──────────────────────────
 
 export function computeMedicationDispenseQuantity(
-  instruction: MedicationRequestDosageInstruction,
+  instructions: MedicationRequestDosageInstruction[] | undefined,
 ): string {
   const DEFAULT_QTY = "1";
-  const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
-  if (!doseValue) return DEFAULT_QTY;
+  if (!instructions?.length) return DEFAULT_QTY;
 
-  const unitCode = instruction.dose_and_rate?.dose_quantity?.unit?.code;
-  const nonVolumetric = ["{tbl}", "{count}"];
-  if (unitCode && !nonVolumetric.includes(unitCode)) return DEFAULT_QTY;
+  // Sum across all dosage instructions
+  let totalQty = 0;
+  let hasAnyDose = false;
 
-  if (instruction.as_needed_boolean) return round(doseValue);
+  for (const instruction of instructions) {
+    const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
+    if (!doseValue) continue;
 
-  const total = computeTotalDoseQuantity(instruction);
-  return total ? roundUp(total) : doseValue;
+    const unitCode = instruction.dose_and_rate?.dose_quantity?.unit?.code;
+    const nonVolumetric = ["{tbl}", "{count}"];
+    if (unitCode && !nonVolumetric.includes(unitCode)) continue;
+
+    hasAnyDose = true;
+
+    if (instruction.as_needed_boolean) {
+      totalQty += parseFloat(doseValue);
+      continue;
+    }
+
+    const total = computeTotalDoseQuantity(instruction);
+    totalQty += parseFloat(String(total ?? doseValue));
+  }
+
+  if (!hasAnyDose) return DEFAULT_QTY;
+  return totalQty > 0 ? roundUp(String(totalQty)) : DEFAULT_QTY;
 }
