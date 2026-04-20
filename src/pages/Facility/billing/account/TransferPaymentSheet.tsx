@@ -79,12 +79,12 @@ export default function TransferPaymentSheet({
     (a) => a.id !== account.id,
   );
 
-  const { mutateAsync: submitTransfer, isPending } = useMutation({
+  const { mutate: submitTransfer, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
     onSuccess: () => {
       toast.success(t("payment_transferred_successfully"));
-      queryClient.invalidateQueries({ queryKey: ["account"] });
-      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["account", account.id] });
+      queryClient.invalidateQueries({ queryKey: ["payments", account.id] });
       onOpenChange(false);
       setSelectedAccountId(null);
       setAmount("");
