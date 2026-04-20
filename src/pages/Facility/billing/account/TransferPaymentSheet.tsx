@@ -22,6 +22,7 @@ import {
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { cn } from "@/lib/utils";
 import batchApi from "@/types/base/batch/batchApi";
 import {
   ACCOUNT_BILLING_STATUS_COLORS,
@@ -115,7 +116,6 @@ export default function TransferPaymentSheet({
       amount,
       tendered_amount: amount,
       returned_amount: "0",
-      note: t("transfer_payment_note"),
     };
 
     submitTransfer({
@@ -128,6 +128,7 @@ export default function TransferPaymentSheet({
             ...basePayment,
             account: account.id,
             is_credit_note: true,
+            note: t("outgoing_transfer_note"),
           },
         },
         {
@@ -138,6 +139,7 @@ export default function TransferPaymentSheet({
             ...basePayment,
             account: selectedAccountId,
             is_credit_note: false,
+            note: t("incoming_transfer_note"),
           },
         },
       ],
@@ -195,11 +197,12 @@ export default function TransferPaymentSheet({
                   <button
                     key={acc.id}
                     type="button"
-                    className={`w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50 ${
+                    className={cn(
+                      "w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50",
                       selectedAccountId === acc.id
                         ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "border-gray-200"
-                    }`}
+                        : "border-gray-200",
+                    )}
                     onClick={() => setSelectedAccountId(acc.id)}
                   >
                     <div className="flex items-center justify-between">

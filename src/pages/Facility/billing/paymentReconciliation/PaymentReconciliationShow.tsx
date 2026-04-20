@@ -26,6 +26,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
+  getPaymentTypeLabelKey,
   PAYMENT_RECONCILIATION_METHOD_MAP,
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
@@ -146,7 +147,14 @@ export function PaymentReconciliationShow({
             <Badge variant="outline">
               {t(PAYMENT_RECONCILIATION_METHOD_MAP[payment.method])}
             </Badge>
-            <Badge variant="outline">{t(payment.reconciliation_type)}</Badge>
+            <Badge variant="outline">
+              {t(
+                getPaymentTypeLabelKey(
+                  payment.reconciliation_type,
+                  payment.is_credit_note,
+                ),
+              )}
+            </Badge>
           </div>
         </div>
         <div className="flex gap-2">
@@ -263,7 +271,12 @@ export function PaymentReconciliationShow({
                 <div>
                   <InfoItem
                     label={t("reconciliation_type")}
-                    value={humanize(payment.reconciliation_type)}
+                    value={t(
+                      getPaymentTypeLabelKey(
+                        payment.reconciliation_type,
+                        payment.is_credit_note,
+                      ),
+                    )}
                   />
                 </div>
                 <div className="space-y-4">
