@@ -550,6 +550,10 @@ export function QuestionnaireForm({
 
   // Check if questionnaire is saveable as draft (no structured questions)
   const isDraftSaveable = useMemo(() => {
+    if (import.meta.env.REACT_ENABLE_QUESTIONNAIRE_DRAFT !== "true") {
+      return false;
+    }
+
     if (!questionnaireSlug || questionnaireForms.length > 1) {
       return false;
     }
