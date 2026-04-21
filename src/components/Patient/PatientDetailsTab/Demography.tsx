@@ -160,7 +160,10 @@ export const Demography = (props: PatientProps) => {
 
   const extensionInformation: Data = {
     id: "additional-details",
-    allowEdit: true,
+    allowEdit:
+      (canWritePatient ||
+        careConfig.patientRegistration.globalPatientEditAccessEnabled) &&
+      !!facilityId,
     details: extensionFields
       .map((field) => {
         const value = getExtensionValue(
@@ -168,7 +171,7 @@ export const Demography = (props: PatientProps) => {
           field.extensionName,
           field.name,
         );
-        return { label: field.label, value: value as string };
+        return { label: field.label, value: String(value) };
       })
       .filter((field) => field.value !== undefined && field.value !== ""),
   };
