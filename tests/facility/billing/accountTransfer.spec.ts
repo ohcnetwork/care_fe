@@ -3,7 +3,6 @@ import { Page, expect, test } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -86,25 +85,6 @@ async function updateAccount(
   return (await res.json()) as AccountInfo;
 }
 
-async function listAccounts(
-  facilityId: string,
-  patientId: string,
-  status?: string,
-): Promise<AccountInfo[]> {
-  const params = new URLSearchParams({
-    patient: patientId,
-    limit: "50",
-  });
-  if (status) params.set("status", status);
-  const res = await fetch(
-    `${getApiUrl()}/api/v1/facility/${facilityId}/account/?${params}`,
-    { headers: getApiHeaders() },
-  );
-  if (!res.ok) throw new Error(`Failed to list accounts: ${res.status}`);
-  const data = (await res.json()) as { results: AccountInfo[] };
-  return data.results;
-}
-
 async function getAccount(
   facilityId: string,
   accountId: string,
@@ -170,9 +150,43 @@ async function deactivateAccount(
   }
 }
 
+async function createPatient(): Promise<string> {
+  const phone = `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`;
+  // Fetch a govt organization for geo_organization (required field)
+  const orgRes = await fetch(
+    `${getApiUrl()}/api/v1/organization/?org_type=govt&limit=1`,
+    { headers: getApiHeaders() },
+  );
+  if (!orgRes.ok)
+    throw new Error(`Failed to fetch organizations: ${orgRes.status}`);
+  const orgData = (await orgRes.json()) as { results: { id: string }[] };
+  const geoOrg = orgData.results[0]?.id;
+  if (!geoOrg)
+    throw new Error("No govt organization found for geo_organization");
+
+  const res = await fetch(`${getApiUrl()}/api/v1/patient/`, {
+    method: "POST",
+    headers: getApiHeaders(),
+    body: JSON.stringify({
+      name: `Transfer Test ${faker.string.alphanumeric(6)}`,
+      gender: "male",
+      phone_number: phone,
+      date_of_birth: "1990-01-15",
+      geo_organization: geoOrg,
+      identifiers: [],
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to create patient: ${res.status} — ${text}`);
+  }
+  const data = (await res.json()) as { id: string };
+  return data.id;
+}
+
 test.describe("Account Transfer Payment", () => {
   const facilityId = getFacilityId();
-  const patientId = getPatientId();
+  let patientId: string;
 
   let sourceAccount: AccountInfo;
   let targetAccount: AccountInfo;
@@ -180,11 +194,8 @@ test.describe("Account Transfer Payment", () => {
   let nonActiveAccounts: AccountInfo[];
 
   test.beforeAll(async () => {
-    // Clean up any active accounts from previous runs
-    const existingActive = await listAccounts(facilityId, patientId, "active");
-    for (const acct of existingActive) {
-      await deactivateAccount(facilityId, acct);
-    }
+    // Create a dedicated patient so we don't interfere with other tests
+    patientId = await createPatient();
 
     const suffix = faker.string.alphanumeric(6);
 
