@@ -12,79 +12,20 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   const [audioURL, setAudioURL] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
-  const [blob, setBlob] = useState<Blob | null>(null);
-  const [waveform, setWaveform] = useState<number[]>([]); // Decibel waveform
 
   const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
-  const animationFrameIdRef = useRef<number | null>(null);
-  const audioURLRef = useRef<string>("");
-  const isRecordingRef = useRef<boolean>(false);
-  const isUnmountingRef = useRef<boolean>(false);
-  const handleDataRef = useRef<((e: BlobEvent) => void) | null>(null);
-  const cleanupPromiseRef = useRef<Promise<void> | null>(null);
-  const recorderRef = useRef<MediaRecorder | null>(null);
+  const audioURLRef = useRef("");
+  const isRecordingRef = useRef(false);
 
   useEffect(() => {
     isRecordingRef.current = isRecording;
   }, [isRecording]);
 
-  // Sync recorderRef with recorder state for unmount cleanup
   useEffect(() => {
-    recorderRef.current = recorder;
-  }, [recorder]);
-
-  const revokeAudioURL = (): void => {
-    if (audioURLRef.current) {
-      URL.revokeObjectURL(audioURLRef.current);
-      audioURLRef.current = "";
+    if (!isRecording && recorder && audioURL) {
+      setRecorder(null);
     }
-  };
-
-  const cleanupAudioResources = async (): Promise<void> => {
-    // If cleanup is already in progress, wait for it to complete
-    if (cleanupPromiseRef.current) {
-      await cleanupPromiseRef.current;
-      return;
-    }
-
-    // Create and store cleanup promise to prevent concurrent cleanups
-    const cleanupPromise = (async (): Promise<void> => {
-      if (animationFrameIdRef.current !== null) {
-        cancelAnimationFrame(animationFrameIdRef.current);
-        animationFrameIdRef.current = null;
-      }
-      if (sourceRef.current) {
-        try {
-          sourceRef.current.disconnect();
-        } catch {
-          // Ignore if already disconnected
-        }
-        sourceRef.current = null;
-      }
-      if (analyserRef.current) {
-        try {
-          analyserRef.current.disconnect();
-        } catch {
-          // Ignore if already disconnected
-        }
-        analyserRef.current = null;
-      }
-      if (audioContextRef.current) {
-        try {
-          await audioContextRef.current.close();
-        } catch {
-          // Ignore if already closed
-        }
-        audioContextRef.current = null;
-      }
-    })();
-
-    cleanupPromiseRef.current = cleanupPromise;
-    await cleanupPromise;
-    cleanupPromiseRef.current = null;
-  };
+  }, [isRecording, recorder, audioURL]);
 
   useEffect(() => {
     const initializeRecorder = async () => {
@@ -110,103 +51,31 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
       return;
     }
 
+    if (isRecording) {
+      recorder.start();
+    } else {
+      recorder.stream.getTracks().forEach((t) => t.stop());
+      recorder.stop();
+    }
+
     const handleData = (e: BlobEvent) => {
-      // Prevent state updates after unmount
-      if (isUnmountingRef.current) {
-        return;
+      if (audioURLRef.current) {
+        URL.revokeObjectURL(audioURLRef.current);
       }
-      revokeAudioURL();
       const url = URL.createObjectURL(e.data);
       audioURLRef.current = url;
       setAudioURL(url);
-      const blob = new Blob([e.data], { type: "audio/mpeg" });
-      setBlob(blob);
-      // Clear recorder after data is available and recording has stopped
-      if (!isRecordingRef.current) {
-        setRecorder(null);
-      }
     };
 
-    // Store reference for cleanup
-    handleDataRef.current = handleData;
-
-    // Attach listener before stopping to ensure we capture the data
     recorder.addEventListener("dataavailable", handleData);
-
-    if (isRecording) {
-      const initializeRecording = async () => {
-        try {
-          // Wait for any pending cleanup before starting
-          await cleanupAudioResources();
-          recorder.start();
-          await setupAudioAnalyser();
-        } catch (error) {
-          // Handle start errors (e.g., already started, no stream)
-          console.error("Failed to start recorder:", error);
-          setIsRecording(false);
-        }
-      };
-      void initializeRecording();
-    } else {
-      // Correct order: stop recorder first, then stop tracks
-      recorder.stop();
-      if (recorder.stream) {
-        recorder.stream.getTracks().forEach((track) => track.stop());
-      }
-      void cleanupAudioResources();
-    }
     return () => {
       recorder.removeEventListener("dataavailable", handleData);
-      void cleanupAudioResources();
-      // Note: revokeAudioURL() is not called here to avoid race condition
-      // when handleData creates a new URL and setRecorder(null) triggers this cleanup.
-      // URL revocation is handled in: handleData (replaces old), resetRecording, and unmount effect.
-    };
-  }, [recorder, isRecording]);
-
-  const setupAudioAnalyser = async (): Promise<void> => {
-    // Wait for cleanup to complete before creating new resources
-    await cleanupAudioResources();
-
-    // Use recorderRef to ensure we have the latest recorder instance
-    const currentRecorder = recorderRef.current;
-    if (!currentRecorder?.stream) {
-      return;
-    }
-
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) {
-      return;
-    }
-    audioContextRef.current = new AudioContextClass();
-    analyserRef.current = audioContextRef.current.createAnalyser();
-    analyserRef.current.fftSize = 32;
-    const bufferLength = analyserRef.current.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    sourceRef.current = audioContextRef.current.createMediaStreamSource(
-      currentRecorder.stream,
-    );
-    sourceRef.current.connect(analyserRef.current);
-
-    const updateWaveform = (): void => {
-      if (isRecordingRef.current && analyserRef.current) {
-        analyserRef.current.getByteFrequencyData(dataArray);
-        const normalizedWaveform = Array.from(dataArray).map((value) =>
-          Math.min(100, (value / 255) * 100),
-        );
-        setWaveform(normalizedWaveform);
-        animationFrameIdRef.current = requestAnimationFrame(updateWaveform);
-      } else {
-        if (animationFrameIdRef.current !== null) {
-          cancelAnimationFrame(animationFrameIdRef.current);
-          animationFrameIdRef.current = null;
-        }
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => {});
+        audioContextRef.current = null;
       }
     };
-
-    updateWaveform();
-  };
+  }, [recorder, isRecording]);
 
   const startRecording = () => {
     setIsRecording(true);
@@ -214,95 +83,21 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
 
   const stopRecording = () => {
     setIsRecording(false);
-    setWaveform([]);
   };
 
   const resetRecording = () => {
-    revokeAudioURL();
-    setAudioURL("");
-    setBlob(null);
-    setWaveform([]);
-  };
-
-  // Recorder-change effect: handles cleanup when recorder changes
-
-  useEffect(() => {
-    if (!recorder) {
-      return;
+    if (audioURLRef.current) {
+      URL.revokeObjectURL(audioURLRef.current);
+      audioURLRef.current = "";
     }
-
-    return () => {
-      // Skip cleanup on unmount - the unmount-only effect handles it
-      if (isUnmountingRef.current) {
-        return;
-      }
-
-      // Only stop recorder and tracks, don't set isUnmountingRef
-      // Listener removal is handled by the main recorder effect cleanup
-      try {
-        if (recorder.state !== "inactive") {
-          recorder.stop();
-        }
-        if (recorder.stream) {
-          recorder.stream.getTracks().forEach((track) => track.stop());
-        }
-      } catch {
-        // Ignore errors during cleanup
-      }
-    };
-  }, [recorder]);
-
-  // Unmount-only effect: handles final cleanup when component unmounts
-  // Registered after recorder-change effect so its cleanup runs first on unmount
-  // and sets isUnmountingRef before recorder-change cleanup executes
-  useEffect(() => {
-    return () => {
-      // Set flag immediately so recorder-change cleanup can detect unmount
-      isUnmountingRef.current = true;
-
-      const cleanup = async () => {
-        // Remove listener before stopping to prevent state updates
-        // Use recorderRef to access the latest recorder instance
-        if (recorderRef.current) {
-          try {
-            // Only remove listener if handleDataRef exists
-            if (handleDataRef.current) {
-              recorderRef.current.removeEventListener(
-                "dataavailable",
-                handleDataRef.current,
-              );
-            }
-
-            // Always stop recorder and tracks if recorder exists
-            if (recorderRef.current.state !== "inactive") {
-              recorderRef.current.stop();
-            }
-            if (recorderRef.current.stream) {
-              recorderRef.current.stream
-                .getTracks()
-                .forEach((track) => track.stop());
-            }
-          } catch {
-            // Ignore errors during cleanup
-          }
-        }
-
-        // Await cleanup to handle async AudioContext.close()
-        await cleanupAudioResources();
-        revokeAudioURL();
-      };
-
-      void cleanup();
-    };
-  }, []); // Empty dependency array for unmount-only cleanup
+    setAudioURL("");
+  };
 
   return {
     audioURL,
     isRecording,
     startRecording,
     stopRecording,
-    blob,
-    waveform,
     resetRecording,
   };
 };
@@ -332,4 +127,5 @@ async function requestRecorder() {
     );
   }
 }
+
 export default useVoiceRecorder;
