@@ -130,8 +130,8 @@ test.describe("Enable When — Boolean Operators", () => {
         await submitAndExpectSuccess(page);
       });
 
-      await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [allergies]);
+      await test.step("Verify submitted values on overview and optional absent", async () => {
+        await verifySubmittedValues(page, [allergies], ["Allergy Notes"]);
       });
     });
 
@@ -273,8 +273,12 @@ test.describe("Enable When — Boolean Operators", () => {
         await submitAndExpectSuccess(page);
       });
 
-      await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [cigarettesPerDay]);
+      await test.step("Verify submitted values on overview and optional absent", async () => {
+        await verifySubmittedValues(
+          page,
+          [cigarettesPerDay],
+          ["Smoking Duration"],
+        );
       });
     });
 
@@ -305,7 +309,7 @@ test.describe("Enable When — Boolean Operators", () => {
         await submitAndExpectSuccess(page);
         await verifySubmittedValues(
           page,
-          [],
+          ["No"],
           [cigarettesPerDay, smokingDuration],
         );
       });
@@ -415,8 +419,12 @@ test.describe("Enable When — Boolean Operators", () => {
         await submitAndExpectSuccess(page);
       });
 
-      await test.step("Verify submitted values on overview", async () => {
-        await verifySubmittedValues(page, [reason]);
+      await test.step("Verify submitted values on overview and optional absent", async () => {
+        await verifySubmittedValues(
+          page,
+          [reason],
+          ["Additional Observations"],
+        );
       });
     });
 
@@ -445,7 +453,7 @@ test.describe("Enable When — Boolean Operators", () => {
 
       await test.step("Submit and verify hidden values not on overview", async () => {
         await submitAndExpectSuccess(page);
-        await verifySubmittedValues(page, [], [reason, observations]);
+        await verifySubmittedValues(page, ["Yes"], [reason, observations]);
       });
     });
   });
