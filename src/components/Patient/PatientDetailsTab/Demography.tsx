@@ -168,10 +168,9 @@ export const Demography = (props: PatientProps) => {
       .map((field) => {
         const value = getExtensionValue(
           patientData.extensions as NamespacedExtensionData,
-          field.extensionName,
-          field.name,
+          field,
         );
-        return { label: field.label, value: String(value) };
+        return { label: field.label, value: value ? String(value) : "" };
       })
       .filter((field) => field.value !== undefined && field.value !== ""),
   };
