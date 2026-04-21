@@ -118,6 +118,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             patientName={patient_name}
             qParams={qParams}
             setQueryParams={setQueryParams}
+            hideSearchLabel
           />
         </CollapsibleContent>
       </Collapsible>
@@ -289,6 +290,7 @@ function FilterControls({
   patientName,
   qParams,
   setQueryParams,
+  hideSearchLabel,
 }: {
   search: string | undefined;
   patient: string | undefined;
@@ -298,14 +300,17 @@ function FilterControls({
     params: Record<string, string | undefined>,
     options?: { overwrite?: boolean; replace?: boolean },
   ) => void;
+  hideSearchLabel?: boolean;
 }) {
   const { t } = useTranslation();
   return (
     <>
       <div className="flex flex-col gap-2 w-full">
-        <Label className="text-gray-950 text-sm font-medium">
-          {t("search_patients")}
-        </Label>
+        {!hideSearchLabel && (
+          <Label className="text-gray-950 text-sm font-medium">
+            {t("search_patients")}
+          </Label>
+        )}
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative w-full sm:w-64">
             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
@@ -346,7 +351,7 @@ function FilterControls({
           />
         </div>
       </div>
-      <div className="flex flex-col gap-2 w-full lg:w-auto lg:max-w-[55%] lg:items-end min-w-0">
+      <div className="pt-3 lg:pt-0 flex flex-col gap-2 w-full lg:w-auto lg:max-w-[55%] lg:items-end min-w-0">
         <Label className="text-gray-950 text-sm font-medium">
           {t("service_points")}
         </Label>
