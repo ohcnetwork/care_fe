@@ -421,46 +421,52 @@ export function AccountShow({
               </Button>
             </div>
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="border-gray-400">
-                <MoreVertical className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {isAccountBillableAndActive && (
-                <>
-                  <DropdownMenuItem
-                    className="lg:hidden"
-                    onClick={() =>
-                      setCloseAccountStatus({
-                        ...closeAccountStatus,
-                        sheetOpen: true,
-                      })
-                    }
-                  >
-                    {t("settle_close")}
-                    <ShortcutBadge actionId="settle-close-account" />
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      setPaymentSheet({
-                        isOpen: true,
-                        isCreditNote: true,
-                      })
-                    }
-                  >
-                    <CareIcon icon="l-plus" className="mr-2 size-4" />
-                    {t("record_credit_note")}
-                  </DropdownMenuItem>
-                </>
-              )}
-              <DropdownMenuItem onClick={() => setTransferPaymentOpen(true)}>
-                <CareIcon icon="l-exchange" className="mr-2 size-4" />
-                {t("transfer_payment")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {account.status == AccountStatus.active && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-gray-400"
+                >
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {!isAccountBillingClosed(account) && (
+                  <>
+                    <DropdownMenuItem
+                      className="lg:hidden"
+                      onClick={() =>
+                        setCloseAccountStatus({
+                          ...closeAccountStatus,
+                          sheetOpen: true,
+                        })
+                      }
+                    >
+                      {t("settle_close")}
+                      <ShortcutBadge actionId="settle-close-account" />
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setPaymentSheet({
+                          isOpen: true,
+                          isCreditNote: true,
+                        })
+                      }
+                    >
+                      <CareIcon icon="l-plus" className="mr-2 size-4" />
+                      {t("record_credit_note")}
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuItem onClick={() => setTransferPaymentOpen(true)}>
+                  <CareIcon icon="l-exchange" className="mr-2 size-4" />
+                  {t("transfer_payment")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </Card>
       <div className="bg-gray-100 p-3 space-y-4 rounded-lg">
