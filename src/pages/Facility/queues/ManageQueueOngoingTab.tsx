@@ -74,7 +74,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-start mt-2 gap-4">
+      <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-start mt-2 gap-4">
         <div className="flex flex-col gap-2 w-full">
           <Label className="text-gray-950 text-sm font-medium">
             {t("search_patients")}
@@ -118,7 +118,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             />
           </div>
         </div>
-        <div className="flex flex-col gap-2 w-full sm:w-auto sm:items-end">
+        <div className="flex flex-col gap-2 w-full lg:w-auto lg:max-w-[55%] lg:items-end min-w-0">
           <Label className="text-gray-950 text-sm font-medium">
             {t("service_points")}
           </Label>
@@ -126,13 +126,13 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
         </div>
       </div>
 
-      {/* Mobile section toggle */}
+      {/* Mobile/tablet section toggle */}
       <Tabs
         value={mobileSection}
         onValueChange={(value) =>
           setMobileSection(value as "waiting" | "serving")
         }
-        className="md:hidden"
+        className="lg:hidden"
       >
         <TabsList className="w-full">
           <TabsTrigger value="waiting" className="flex-1">
@@ -144,12 +144,12 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
         </TabsList>
       </Tabs>
 
-      <div className="flex flex-col md:flex-row md:space-x-4 gap-4 md:gap-0 md:overflow-x-auto w-full">
+      <div className="flex flex-col lg:flex-row lg:space-x-4 gap-4 lg:gap-0 lg:overflow-x-auto w-full">
         {/* Waiting tokens list */}
         <div
           className={cn(
             "flex flex-col flex-1 min-w-0",
-            mobileSection === "waiting" ? "flex" : "hidden md:flex",
+            mobileSection === "waiting" ? "flex" : "hidden lg:flex",
           )}
         >
           <QueueColumn title={t("waiting")}>
@@ -178,7 +178,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
         <div
           className={cn(
             "flex flex-col flex-1 min-w-0",
-            mobileSection === "serving" ? "flex" : "hidden md:flex",
+            mobileSection === "serving" ? "flex" : "hidden lg:flex",
           )}
         >
           <QueueColumn
@@ -286,14 +286,14 @@ export function QueueColumn({
   options?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 p-3 rounded-lg bg-gray-100 border border-gray-200 w-full md:min-w-xs md:flex-1">
+    <div className="flex flex-col gap-3 p-3 rounded-lg bg-gray-100 border border-gray-200 w-full lg:min-w-xs lg:flex-1">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold">{title}</span>
         </div>
         {options}
       </div>
-      <div className="max-h-[65svh] md:h-[calc(100vh-21.5rem)] overflow-y-auto pb-2">
+      <div className="max-h-[65svh] lg:h-[calc(100vh-21.5rem)] overflow-y-auto pb-2">
         {children}
       </div>
     </div>

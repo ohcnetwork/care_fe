@@ -20,9 +20,9 @@ export const ServicePointsDropDown = () => {
     useQueueServicePoints();
   const defaultServicePoints = useBreakpoints({
     default: 1,
-    sm: 3,
-    md: 4,
-    lg: 6,
+    lg: 3,
+    xl: 4,
+    "2xl": 6,
   });
 
   if (!allServicePoints) {

@@ -70,7 +70,7 @@ export function ManageQueueFinishedTab({
       {tokens.length > 0 ? (
         <>
           {/* Desktop table */}
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -160,7 +160,7 @@ export function ManageQueueFinishedTab({
           </div>
 
           {/* Mobile card list */}
-          <div className="md:hidden flex flex-col gap-3">
+          <div className="lg:hidden flex flex-col gap-3">
             {tokens.map((token, index) => (
               <FinishedTokenCard
                 key={token.id}
@@ -174,7 +174,7 @@ export function ManageQueueFinishedTab({
           </div>
         </>
       ) : (
-        <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-16 md:py-20 px-4 text-center border border-gray-100">
+        <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-16 lg:py-20 px-4 text-center border border-gray-100">
           <DoorOpenIcon className="size-8 text-gray-700" />
           <span className="text-lg font-semibold text-gray-700">
             {t("no_tokens_finished")}
