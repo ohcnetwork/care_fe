@@ -297,7 +297,7 @@ function FacilityPrintLayout({
     <div className="flex flex-col min-h-[calc(100vh-80px)] print:min-h-screen">
       {pageStyle && <style>{pageStyle}</style>}
       {hideFacilityHeader ? null : headerImage?.url ? (
-        <div className="flex justify-between items-start mb-4 pb-2">
+        <div className="flex justify-between items-start mb-2 pb-2">
           <img
             src={headerImage.url}
             alt="Custom Header"
