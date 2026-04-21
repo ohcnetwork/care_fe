@@ -8,6 +8,7 @@ import {
   selectBooleanOption,
   submitAndExpectSuccess,
   submitForm,
+  verifyLabelledValues,
   verifySubmittedValues,
 } from "tests/helper/questionnaire";
 import { getEncounterId } from "tests/support/encounterId";
@@ -52,11 +53,11 @@ test.describe("Enable When — Boolean Operators", () => {
       });
 
       await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifySubmittedValues(
-          page,
-          ["No", "Yes"],
-          ["List Known Allergies"],
-        );
+        await verifyLabelledValues(page, [
+          ["Is Smoker", "No"],
+          ["Is Conscious", "Yes"],
+        ]);
+        await verifySubmittedValues(page, [], ["List Known Allergies"]);
       });
     });
 
@@ -74,7 +75,11 @@ test.describe("Enable When — Boolean Operators", () => {
       });
 
       await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifySubmittedValues(page, ["No", "Yes"], ["Allergy Notes"]);
+        await verifyLabelledValues(page, [
+          ["Is Smoker", "No"],
+          ["Is Conscious", "Yes"],
+        ]);
+        await verifySubmittedValues(page, [], ["Allergy Notes"]);
       });
     });
 
@@ -165,11 +170,11 @@ test.describe("Enable When — Boolean Operators", () => {
       });
 
       await test.step("Verify hidden values not on overview", async () => {
-        await verifySubmittedValues(
-          page,
-          ["No", "Yes"],
-          [allergies, allergyNotes],
-        );
+        await verifyLabelledValues(page, [
+          ["Is Smoker", "No"],
+          ["Is Conscious", "Yes"],
+        ]);
+        await verifySubmittedValues(page, [], [allergies, allergyNotes]);
       });
     });
   });
@@ -195,11 +200,11 @@ test.describe("Enable When — Boolean Operators", () => {
       });
 
       await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifySubmittedValues(
-          page,
-          ["No", "Yes"],
-          ["Cigarettes Per Day"],
-        );
+        await verifyLabelledValues(page, [
+          ["Is Smoker", "No"],
+          ["Is Conscious", "Yes"],
+        ]);
+        await verifySubmittedValues(page, [], ["Cigarettes Per Day"]);
       });
     });
 
@@ -217,7 +222,11 @@ test.describe("Enable When — Boolean Operators", () => {
       });
 
       await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifySubmittedValues(page, ["No", "Yes"], ["Smoking Duration"]);
+        await verifyLabelledValues(page, [
+          ["Is Smoker", "No"],
+          ["Is Conscious", "Yes"],
+        ]);
+        await verifySubmittedValues(page, [], ["Smoking Duration"]);
       });
     });
 
@@ -307,9 +316,10 @@ test.describe("Enable When — Boolean Operators", () => {
 
       await test.step("Submit and verify hidden values not on overview", async () => {
         await submitAndExpectSuccess(page);
+        await verifyLabelledValues(page, [["Is Smoker", "No"]]);
         await verifySubmittedValues(
           page,
-          ["No"],
+          [],
           [cigarettesPerDay, smokingDuration],
         );
       });
@@ -337,11 +347,11 @@ test.describe("Enable When — Boolean Operators", () => {
       });
 
       await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifySubmittedValues(
-          page,
-          ["Yes", "No"],
-          ["Reason for Unconsciousness"],
-        );
+        await verifyLabelledValues(page, [
+          ["Is Conscious", "Yes"],
+          ["Is Smoker", "No"],
+        ]);
+        await verifySubmittedValues(page, [], ["Reason for Unconsciousness"]);
       });
     });
 
@@ -359,11 +369,11 @@ test.describe("Enable When — Boolean Operators", () => {
       });
 
       await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
-        await verifySubmittedValues(
-          page,
-          ["Yes", "No"],
-          ["Additional Observations"],
-        );
+        await verifyLabelledValues(page, [
+          ["Is Conscious", "Yes"],
+          ["Is Smoker", "No"],
+        ]);
+        await verifySubmittedValues(page, [], ["Additional Observations"]);
       });
     });
 
@@ -453,7 +463,8 @@ test.describe("Enable When — Boolean Operators", () => {
 
       await test.step("Submit and verify hidden values not on overview", async () => {
         await submitAndExpectSuccess(page);
-        await verifySubmittedValues(page, ["Yes"], [reason, observations]);
+        await verifyLabelledValues(page, [["Is Conscious", "Yes"]]);
+        await verifySubmittedValues(page, [], [reason, observations]);
       });
     });
   });

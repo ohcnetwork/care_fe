@@ -104,6 +104,27 @@ export async function verifySubmittedValues(
 }
 
 /**
+ * Verifies that specific question labels have expected values on the overview page.
+ * Scopes value assertion to the same table row as the label, avoiding false positives
+ * from generic values like "Yes"/"No" appearing elsewhere on the page.
+ */
+export async function verifyLabelledValues(
+  page: Page,
+  pairs: [label: string, value: string][],
+) {
+  await page.waitForURL(/\/encounter\/[^/]+\/updates/);
+  await page.waitForLoadState("networkidle");
+
+  for (const [label, value] of pairs) {
+    const row = page.locator("tr", {
+      has: page.locator("td", { hasText: label }),
+    });
+    await row.first().scrollIntoViewIfNeeded();
+    await expect(row.locator("td").nth(1)).toContainText(value);
+  }
+}
+
+/**
  * Selects a boolean (Yes/No) radio option for a question identified by its label.
  */
 export async function selectBooleanOption(
