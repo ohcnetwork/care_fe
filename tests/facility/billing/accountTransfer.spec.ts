@@ -13,6 +13,7 @@ interface AccountInfo {
   status: string;
   billing_status: string;
   total_paid?: string;
+  patient?: string;
 }
 
 function getApiHeaders(): { Authorization: string; "Content-Type": string } {
@@ -73,7 +74,7 @@ async function updateAccount(
       body: JSON.stringify({
         ...account,
         ...updates,
-        patient: (account as Record<string, unknown>).patient ?? undefined,
+        patient: account.patient ?? undefined,
         service_period: { start: new Date().toISOString() },
       }),
     },
