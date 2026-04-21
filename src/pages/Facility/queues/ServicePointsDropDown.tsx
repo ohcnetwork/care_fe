@@ -45,7 +45,7 @@ export const ServicePointsDropDown = () => {
           type="button"
           className="flex w-full sm:w-auto items-stretch text-left rounded-md border border-gray-300 bg-white hover:bg-gray-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-500"
         >
-          <div className="flex min-w-0 flex-1 sm:flex-initial sm:w-auto gap-1 p-1 overflow-hidden items-center">
+          <div className="flex min-w-0 flex-1 gap-1 p-1 overflow-hidden items-center">
             {assignedServicePointIds.length === 0 ? (
               <span className="text-sm font-medium px-2 py-1 text-gray-600 whitespace-nowrap">
                 {t("assign_service_points")}
