@@ -14,7 +14,6 @@ import {
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { goBack } from "@/Utils/utils";
 
 interface Props {
   facilityId?: string;
@@ -53,14 +52,12 @@ export default function EncounterQuestionnaire({
 
   const handleSubmit = () => {
     if (encounterId && facilityId) {
-      if (questionnaireSlug) {
-        const targetTab = SLUG_TO_TAB_MAP[questionnaireSlug] || "updates";
-        navigate(
-          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/${targetTab}`,
-        );
-      } else {
-        goBack();
-      }
+      const targetTab = questionnaireSlug
+        ? SLUG_TO_TAB_MAP[questionnaireSlug] || "updates"
+        : "updates";
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/${targetTab}`,
+      );
     } else if (facilityId) {
       navigate(`/facility/${facilityId}/patient/${patientId}/updates`);
     } else {
