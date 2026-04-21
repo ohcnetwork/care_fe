@@ -41,21 +41,6 @@ test("ensure enable-when questionnaire exists", async () => {
     headers,
   });
 
-  // Fetch organization IDs (required for both create and update)
-  const orgRes = await fetch(`${apiUrl}/api/v1/organization/?org_type=role`, {
-    headers,
-  });
-  if (!orgRes.ok) {
-    throw new Error(`Failed to fetch organizations: ${orgRes.status}`);
-  }
-  const orgData = (await orgRes.json()) as {
-    results: { id: string }[];
-  };
-  const organizationIds = orgData.results.map((org) => org.id);
-
-  fixture.slug = slug;
-  fixture.organizations = organizationIds;
-
   if (checkRes.status === 200) {
     const existing = (await checkRes.json()) as { version?: string };
     if (existing.version === fixture.version) {
@@ -68,6 +53,7 @@ test("ensure enable-when questionnaire exists", async () => {
     console.log(
       `♻️ Questionnaire version changed (${existing.version} → ${fixture.version}), updating: ${slug}`,
     );
+    await prepareFixture(fixture, slug, apiUrl, headers);
     const updateRes = await fetch(`${apiUrl}/api/v1/questionnaire/${slug}/`, {
       method: "PUT",
       headers,
@@ -90,6 +76,7 @@ test("ensure enable-when questionnaire exists", async () => {
     );
   }
 
+  await prepareFixture(fixture, slug, apiUrl, headers);
   const createRes = await fetch(`${apiUrl}/api/v1/questionnaire/`, {
     method: "POST",
     headers,
@@ -103,3 +90,22 @@ test("ensure enable-when questionnaire exists", async () => {
   }
   console.log(`✅ Questionnaire created: ${slug}`);
 });
+
+async function prepareFixture(
+  fixture: Record<string, unknown>,
+  slug: string,
+  apiUrl: string,
+  headers: Record<string, string>,
+) {
+  const orgRes = await fetch(`${apiUrl}/api/v1/organization/?org_type=role`, {
+    headers,
+  });
+  if (!orgRes.ok) {
+    throw new Error(`Failed to fetch organizations: ${orgRes.status}`);
+  }
+  const orgData = (await orgRes.json()) as {
+    results: { id: string }[];
+  };
+  fixture.slug = slug;
+  fixture.organizations = orgData.results.map((org) => org.id);
+}

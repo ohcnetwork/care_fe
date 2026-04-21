@@ -16,15 +16,6 @@ import { getPatientId } from "tests/support/patientId";
 
 const QUESTIONNAIRE_SLUG = "enable-when-test";
 
-// The shared fixture also contains string enable_when rules. Fill the two
-// string sources with "safe" values so their required dependents stay hidden
-// and do not block submission in boolean-focused tests.
-const CATEGORY_SAFE = "Standard"; // Category = Standard → Specify Other Category hidden
-
-async function hideStringDependents(page: import("@playwright/test").Page) {
-  await fillStringField(page, "Category", CATEGORY_SAFE);
-}
-
 test.describe("Enable When — Boolean Operators", () => {
   test.use({ storageState: "tests/.auth/user.json" });
 
@@ -39,10 +30,6 @@ test.describe("Enable When — Boolean Operators", () => {
     await expect(
       page.getByText("Has Allergies", { exact: true }),
     ).toBeVisible();
-
-    // Pre-fill string sources with safe values so their required dependents
-    // stay hidden and do not block boolean-focused form submissions.
-    await hideStringDependents(page);
   });
 
   // ──────────────────────────────────────────────
@@ -58,8 +45,18 @@ test.describe("Enable When — Boolean Operators", () => {
         await checkVisibility(page, "List Known Allergies", false);
       });
 
-      await test.step("Submit the form", async () => {
+      await test.step("Fill other sources with safe values and submit", async () => {
+        await selectBooleanOption(page, "Is Smoker", "No");
+        await selectBooleanOption(page, "Is Conscious", "Yes");
         await submitAndExpectSuccess(page);
+      });
+
+      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+        await verifySubmittedValues(
+          page,
+          ["No", "Yes"],
+          ["List Known Allergies"],
+        );
       });
     });
 
@@ -70,8 +67,14 @@ test.describe("Enable When — Boolean Operators", () => {
         await checkVisibility(page, "Allergy Notes", false);
       });
 
-      await test.step("Submit the form", async () => {
+      await test.step("Fill other sources with safe values and submit", async () => {
+        await selectBooleanOption(page, "Is Smoker", "No");
+        await selectBooleanOption(page, "Is Conscious", "Yes");
         await submitAndExpectSuccess(page);
+      });
+
+      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+        await verifySubmittedValues(page, ["No", "Yes"], ["Allergy Notes"]);
       });
     });
 
@@ -155,9 +158,18 @@ test.describe("Enable When — Boolean Operators", () => {
         await checkVisibility(page, "Allergy Notes", false);
       });
 
-      await test.step("Submit and verify hidden values not on overview", async () => {
+      await test.step("Fill other sources so form is submittable, then submit", async () => {
+        await selectBooleanOption(page, "Is Smoker", "No");
+        await selectBooleanOption(page, "Is Conscious", "Yes");
         await submitAndExpectSuccess(page);
-        await verifySubmittedValues(page, [], [allergies, allergyNotes]);
+      });
+
+      await test.step("Verify hidden values not on overview", async () => {
+        await verifySubmittedValues(
+          page,
+          ["No", "Yes"],
+          [allergies, allergyNotes],
+        );
       });
     });
   });
@@ -177,8 +189,17 @@ test.describe("Enable When — Boolean Operators", () => {
         await checkVisibility(page, "Cigarettes Per Day", false);
       });
 
-      await test.step("Form submits successfully", async () => {
+      await test.step("Fill other sources with safe values and submit", async () => {
+        await selectBooleanOption(page, "Is Conscious", "Yes");
         await submitAndExpectSuccess(page);
+      });
+
+      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+        await verifySubmittedValues(
+          page,
+          ["No", "Yes"],
+          ["Cigarettes Per Day"],
+        );
       });
     });
 
@@ -190,8 +211,13 @@ test.describe("Enable When — Boolean Operators", () => {
         await checkVisibility(page, "Smoking Duration", false);
       });
 
-      await test.step("Form submits successfully", async () => {
+      await test.step("Fill other sources with safe values and submit", async () => {
+        await selectBooleanOption(page, "Is Conscious", "Yes");
         await submitAndExpectSuccess(page);
+      });
+
+      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+        await verifySubmittedValues(page, ["No", "Yes"], ["Smoking Duration"]);
       });
     });
 
@@ -289,7 +315,7 @@ test.describe("Enable When — Boolean Operators", () => {
   // ──────────────────────────────────────────────
   // BOOLEAN 'not_equals' operator
   // Source: Is Conscious → Dependents: Reason for Unconsciousness [required], Additional Observations [optional]
-  // Match value: true (dependents show when source ≠ Yes, i.e., when No or unset)
+  // Match value: "Yes" (dependents show when source ≠ Yes, i.e., when No is selected)
   // ──────────────────────────────────────────────
 
   test.describe("'not_equals' operator", () => {
@@ -301,8 +327,17 @@ test.describe("Enable When — Boolean Operators", () => {
         await checkVisibility(page, "Reason for Unconsciousness", false);
       });
 
-      await test.step("Form submits successfully", async () => {
+      await test.step("Fill other sources with safe values and submit", async () => {
+        await selectBooleanOption(page, "Is Smoker", "No");
         await submitAndExpectSuccess(page);
+      });
+
+      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+        await verifySubmittedValues(
+          page,
+          ["Yes", "No"],
+          ["Reason for Unconsciousness"],
+        );
       });
     });
 
@@ -314,8 +349,17 @@ test.describe("Enable When — Boolean Operators", () => {
         await checkVisibility(page, "Additional Observations", false);
       });
 
-      await test.step("Form submits successfully", async () => {
+      await test.step("Fill other sources with safe values and submit", async () => {
+        await selectBooleanOption(page, "Is Smoker", "No");
         await submitAndExpectSuccess(page);
+      });
+
+      await test.step("Verify submitted values on overview and hidden dependent absent", async () => {
+        await verifySubmittedValues(
+          page,
+          ["Yes", "No"],
+          ["Additional Observations"],
+        );
       });
     });
 
