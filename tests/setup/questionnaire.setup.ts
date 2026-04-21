@@ -53,11 +53,12 @@ test("ensure enable-when questionnaire exists", async () => {
     console.log(
       `♻️ Questionnaire version changed (${existing.version} → ${fixture.version}), updating: ${slug}`,
     );
-    await prepareFixture(fixture, slug, apiUrl, headers);
+    // PUT endpoint doesn't accept organizations — only send questionnaire fields
+    const { organizations: _orgs, ...updateBody } = { ...fixture, slug };
     const updateRes = await fetch(`${apiUrl}/api/v1/questionnaire/${slug}/`, {
       method: "PUT",
       headers,
-      body: JSON.stringify(fixture),
+      body: JSON.stringify(updateBody),
     });
     if (!updateRes.ok) {
       const errorText = await updateRes.text();

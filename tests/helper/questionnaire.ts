@@ -116,10 +116,12 @@ export async function verifyLabelledValues(
   await page.waitForLoadState("networkidle");
 
   for (const [label, value] of pairs) {
-    const row = page.locator("tr", {
-      has: page.locator("td", { hasText: label }),
-    });
-    await row.first().scrollIntoViewIfNeeded();
+    const row = page
+      .locator("tr", {
+        has: page.locator("td", { hasText: label }),
+      })
+      .first();
+    await row.scrollIntoViewIfNeeded();
     await expect(row.locator("td").nth(1)).toContainText(value);
   }
 }
