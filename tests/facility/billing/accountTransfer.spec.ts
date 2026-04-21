@@ -342,6 +342,50 @@ test.describe("Account Transfer Payment", () => {
     await expect(
       page.getByText(/payment.*transferred.*successfully/i),
     ).toBeVisible();
+
+    // Verify outgoing transfer on source account's Payments tab
+    await page.goto(
+      `/facility/${facilityId}/billing/account/${sourceAccount.id}/payments`,
+    );
+    await expect(page.getByText("Outgoing Transfer").first()).toBeVisible();
+
+    // Click View on the outgoing transfer to see payment detail
+    const outgoingRow = page
+      .locator("tr", { hasText: "Outgoing Transfer" })
+      .first();
+    await outgoingRow.getByRole("link", { name: /view/i }).click();
+    await page.waitForURL(/\/billing\/payments\//);
+
+    // Verify payment detail page for outgoing transfer
+    await expect(page.getByText("Outgoing Transfer").first()).toBeVisible();
+    await expect(page.getByText("Cash").first()).toBeVisible();
+    await expect(page.getByText("Active")).toBeVisible();
+    await expect(page.getByText("Complete")).toBeVisible();
+    await expect(
+      page.getByText("Transferred to another account"),
+    ).toBeVisible();
+
+    // Verify incoming transfer on target account's Payments tab
+    await page.goto(
+      `/facility/${facilityId}/billing/account/${targetAccount.id}/payments`,
+    );
+    await expect(page.getByText("Incoming Transfer").first()).toBeVisible();
+
+    // Click View on the incoming transfer to see payment detail
+    const incomingRow = page
+      .locator("tr", { hasText: "Incoming Transfer" })
+      .first();
+    await incomingRow.getByRole("link", { name: /view/i }).click();
+    await page.waitForURL(/\/billing\/payments\//);
+
+    // Verify payment detail page for incoming transfer
+    await expect(page.getByText("Incoming Transfer").first()).toBeVisible();
+    await expect(page.getByText("Cash").first()).toBeVisible();
+    await expect(page.getByText("Active")).toBeVisible();
+    await expect(page.getByText("Complete")).toBeVisible();
+    await expect(
+      page.getByText("Transferred from another account"),
+    ).toBeVisible();
   });
 
   test("should show error when transfer amount exceeds total paid", async ({
