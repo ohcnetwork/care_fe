@@ -360,7 +360,9 @@ function ActivityDefinitionFormContent({
           queryKey: ["activityDefinition", activityDefinitionSlug],
         });
         toast.success(t("activity_definition_created_successfully"));
-        navigate(`/facility/${facilityId}/settings/activity_definitions`);
+        navigate(`/facility/${facilityId}/settings/activity_definitions`, {
+          replace: true,
+        });
       },
     });
 
@@ -382,6 +384,9 @@ function ActivityDefinitionFormContent({
         toast.success(t("activity_definition_updated_successfully"));
         navigate(
           `/facility/${facilityId}/settings/activity_definitions/${activityDefinition.slug}`,
+          {
+            replace: true,
+          },
         );
       },
     });
