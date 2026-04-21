@@ -8,11 +8,13 @@ import Page from "@/components/Common/Page";
 import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm";
 
 import query from "@/Utils/request/query";
+
 import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import { goBack } from "@/Utils/utils";
 
 interface Props {
   facilityId?: string;
@@ -92,7 +94,6 @@ export default function EncounterQuestionnaire({
               encounterId={encounterId}
               questionnaireSlug={questionnaireSlug}
               onSubmit={handleSubmit}
-              onCancel={goBack}
             />
           </CardContent>
         </Card>
