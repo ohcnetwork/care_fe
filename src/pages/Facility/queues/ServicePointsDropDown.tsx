@@ -18,13 +18,18 @@ export const ServicePointsDropDown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { assignedServicePointIds, allServicePoints, toggleServicePoint } =
     useQueueServicePoints();
-  const defaultServicePoints = useBreakpoints({ default: 4, sm: 6 });
+  const defaultServicePoints = useBreakpoints({
+    default: 1,
+    sm: 3,
+    md: 4,
+    lg: 6,
+  });
 
   if (!allServicePoints) {
     return (
-      <div className="flex">
-        <Skeleton className="h-11 w-40 rounded-r-none rounded-l-md" />
-        <Skeleton className="h-11 w-10 rounded-l-none rounded-r-md" />
+      <div className="flex w-full sm:w-auto">
+        <Skeleton className="h-9 w-full sm:w-40 rounded-r-none rounded-l-md" />
+        <Skeleton className="h-9 w-10 rounded-l-none rounded-r-md shrink-0" />
       </div>
     );
   }
@@ -34,14 +39,14 @@ export const ServicePointsDropDown = () => {
   ).length;
 
   return (
-    <div className="flex">
-      <div className="flex w-full sm:w-auto gap-1 rounded-r-none border border-r-0 border-gray-300 rounded-l-md p-1 bg-white">
+    <div className="flex w-full sm:w-auto">
+      <div className="flex min-w-0 flex-1 sm:flex-initial sm:w-auto gap-1 rounded-r-none border border-r-0 border-gray-300 rounded-l-md p-1 bg-white overflow-hidden items-center">
         {assignedServicePointIds.length === 0 ? (
-          <span className="text-sm font-medium">
+          <span className="text-sm font-medium px-2 py-1 text-gray-600">
             {t("assign_service_points")}
           </span>
         ) : (
-          <div className="flex gap-1 items-center justify-center">
+          <div className="flex gap-1 items-center min-w-0 flex-wrap sm:flex-nowrap">
             {allServicePoints
               .filter((subQueue) =>
                 assignedServicePointIds.includes(subQueue.id),
@@ -51,9 +56,9 @@ export const ServicePointsDropDown = () => {
                 return (
                   <div
                     key={subQueue.id}
-                    className="flex w-48 items-center justify-center gap-1 border border-gray-300 py-0.5 px-1.5 rounded-sm bg-gray-50 whitespace-nowrap"
+                    className="flex max-w-40 items-center gap-1 border border-gray-300 py-0.5 px-1.5 rounded-sm bg-gray-50 min-w-0"
                   >
-                    <div className="bg-primary-200 border border-primary-500 w-2 h-2 rounded-full" />
+                    <div className="bg-primary-200 border border-primary-500 w-2 h-2 rounded-full shrink-0" />
                     <span className="text-sm text-gray-950 font-medium truncate">
                       {subQueue.name}
                     </span>
@@ -61,7 +66,7 @@ export const ServicePointsDropDown = () => {
                 );
               })}
             {activeServicePointCount > defaultServicePoints && (
-              <span className="text-sm text-gray-950 font-medium">
+              <span className="text-sm text-gray-950 font-medium whitespace-nowrap px-1">
                 {"+"}
                 {t("count_more", {
                   count: activeServicePointCount - defaultServicePoints,
@@ -75,14 +80,14 @@ export const ServicePointsDropDown = () => {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="rounded-l-none w-10 h-9 border border-gray-300 bg-white"
+            className="rounded-l-none w-10 h-9 border border-gray-300 bg-white shrink-0"
           >
             <ChevronDownIcon />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="min-w-55 rounded-lg border border-gray-300 shadow-xl  w-full"
+          className="w-[min(90vw,20rem)] max-h-[60vh] overflow-y-auto rounded-lg border border-gray-300 shadow-xl"
         >
           <div className="flex flex-col gap-2 p-2 items-start justify-start">
             <div className="w-full">

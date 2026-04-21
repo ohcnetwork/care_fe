@@ -24,6 +24,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import { getTokenQueueStatusCount } from "@/pages/Facility/queues/utils";
@@ -59,6 +60,9 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   });
   const [qParams, setQueryParams] = useQueryParams();
   const { autoRefresh, search, patient, patient_name } = qParams;
+  const [mobileSection, setMobileSection] = useState<"waiting" | "serving">(
+    "waiting",
+  );
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
     queryFn: query(tokenQueueApi.summary, {
@@ -69,13 +73,13 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start mt-2 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-start mt-2 gap-4">
         <div className="flex flex-col gap-2 w-full">
           <Label className="text-gray-950 text-sm font-medium">
             {t("search_patients")}
           </Label>
           <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative">
+            <div className="relative w-full sm:w-64">
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
               <Input
                 type="search"
@@ -87,7 +91,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                     { overwrite: false, replace: true },
                   )
                 }
-                className="pl-10 w-full sm:w-64 h-9"
+                className="pl-10 w-full h-9"
               />
             </div>
             <PatientIdentifierFilter
@@ -113,7 +117,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             />
           </div>
         </div>
-        <div className="flex flex-col gap-2 w-full sm:items-end">
+        <div className="flex flex-col gap-2 w-full sm:w-auto sm:items-end">
           <Label className="text-gray-950 text-sm font-medium">
             {t("service_points")}
           </Label>
@@ -121,119 +125,161 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
         </div>
       </div>
 
-      <div className="flex space-x-4 overflow-x-auto w-full">
+      {/* Mobile section toggle */}
+      <div className="flex md:hidden rounded-lg bg-gray-100 border border-gray-200 p-1 gap-1">
+        <button
+          type="button"
+          onClick={() => setMobileSection("waiting")}
+          className={cn(
+            "flex-1 text-sm font-medium rounded-md py-2 transition-colors",
+            mobileSection === "waiting"
+              ? "bg-white shadow text-gray-950"
+              : "text-gray-600",
+          )}
+        >
+          {t("waiting")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileSection("serving")}
+          className={cn(
+            "flex-1 text-sm font-medium rounded-md py-2 transition-colors",
+            mobileSection === "serving"
+              ? "bg-white shadow text-gray-950"
+              : "text-gray-600",
+          )}
+        >
+          {t("called_plus_now_serving")}
+        </button>
+      </div>
+
+      <div className="flex flex-col md:flex-row md:space-x-4 gap-4 md:gap-0 md:overflow-x-auto w-full">
         {/* Waiting tokens list */}
-        <QueueColumn title={t("waiting")}>
-          <OngoingQueueTokenCardsList
-            facilityId={facilityId}
-            queueId={queueId}
-            qParams={{
-              sub_queue_is_null: true,
-              status: TokenStatus.CREATED,
-              patient_name: search || "",
-              patient: patient,
-            }}
-            emptyState={
-              <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
-                <DoorOpenIcon className="size-6 text-gray-700" />
-                <span className="text-sm font-semibold text-gray-700">
-                  {t("no_patient_is_waiting")}
-                </span>
-              </div>
-            }
-          />
-        </QueueColumn>
+        <div
+          className={cn(
+            "flex flex-col flex-1 min-w-0",
+            mobileSection === "waiting" ? "flex" : "hidden md:flex",
+          )}
+        >
+          <QueueColumn title={t("waiting")}>
+            <OngoingQueueTokenCardsList
+              facilityId={facilityId}
+              queueId={queueId}
+              qParams={{
+                sub_queue_is_null: true,
+                status: TokenStatus.CREATED,
+                patient_name: search || "",
+                patient: patient,
+              }}
+              emptyState={
+                <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
+                  <DoorOpenIcon className="size-6 text-gray-700" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    {t("no_patient_is_waiting")}
+                  </span>
+                </div>
+              }
+            />
+          </QueueColumn>
+        </div>
 
         {/* Called + Now Serving tokens list */}
-        <QueueColumn
-          title={t("called_plus_now_serving")}
-          options={
-            summary && (
-              <AwaitingRecallTrigger
-                queueId={queueId}
-                facilityId={facilityId}
-                count={getTokenQueueStatusCount(
-                  summary,
-                  TokenStatus.UNFULFILLED,
-                )}
-              />
-            )
-          }
+        <div
+          className={cn(
+            "flex flex-col flex-1 min-w-0",
+            mobileSection === "serving" ? "flex" : "hidden md:flex",
+          )}
         >
-          <div className="flex flex-col gap-4">
-            {assignedServicePoints.map((subQueue, index) => (
-              <>
-                {index > 0 && (
-                  <hr className="h-px w-full border border-gray-300 border-dashed" />
-                )}
-                <div className="flex flex-col p-1 rounded-lg bg-gray-200">
-                  <div className="flex items-center justify-between p-1 pb-2">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">
-                        {subQueue.name}
-                      </span>
-                      <span className="text-xs">
-                        {t("category")}:{" "}
-                        {preferredServicePointCategories?.[subQueue.id]?.name ??
-                          t("all")}
-                      </span>
+          <QueueColumn
+            title={t("called_plus_now_serving")}
+            options={
+              summary && (
+                <AwaitingRecallTrigger
+                  queueId={queueId}
+                  facilityId={facilityId}
+                  count={getTokenQueueStatusCount(
+                    summary,
+                    TokenStatus.UNFULFILLED,
+                  )}
+                />
+              )
+            }
+          >
+            <div className="flex flex-col gap-4">
+              {assignedServicePoints.map((subQueue, index) => (
+                <div key={subQueue.id} className="flex flex-col gap-4">
+                  {index > 0 && (
+                    <hr className="h-px w-full border border-gray-300 border-dashed" />
+                  )}
+                  <div className="flex flex-col p-1 rounded-lg bg-gray-200">
+                    <div className="flex items-start justify-between gap-2 p-1 pb-2 flex-wrap">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-medium truncate">
+                          {subQueue.name}
+                        </span>
+                        <span className="text-xs">
+                          {t("category")}:{" "}
+                          {preferredServicePointCategories?.[subQueue.id]
+                            ?.name ?? t("all")}
+                        </span>
+                      </div>
+                      <InServiceColumnOptions
+                        facilityId={facilityId}
+                        queueId={queueId}
+                        subQueueId={subQueue.id}
+                        tokens={[]}
+                      />
                     </div>
-                    <InServiceColumnOptions
-                      facilityId={facilityId}
-                      queueId={queueId}
-                      subQueueId={subQueue.id}
-                      tokens={[]}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-1 pt-2">
-                      <span className="text-sm font-medium">
-                        {t("now_serving")}
-                      </span>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1 pt-2">
+                        <span className="text-sm font-medium">
+                          {t("now_serving")}
+                        </span>
+                        <OngoingQueueTokenCardsList
+                          facilityId={facilityId}
+                          queueId={queueId}
+                          qParams={{
+                            status: TokenStatus.IN_PROGRESS,
+                            sub_queue: subQueue.id,
+                          }}
+                          emptyState={
+                            <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-3 border border-gray-100">
+                              <DoorOpenIcon className="size-6 text-gray-700" />
+                              <span className="text-sm font-semibold text-gray-700 text-center">
+                                {t("no_patient_is_being_served")}
+                              </span>
+                              <CallNextPatientButton
+                                subQueueId={subQueue.id}
+                                facilityId={facilityId}
+                                queueId={queueId}
+                                variant="outline"
+                                size="lg"
+                              >
+                                <Megaphone />
+                                {t("call_next_patient")}
+                              </CallNextPatientButton>
+                            </div>
+                          }
+                        />
+                      </div>
                       <OngoingQueueTokenCardsList
                         facilityId={facilityId}
                         queueId={queueId}
                         qParams={{
-                          status: TokenStatus.IN_PROGRESS,
+                          status: TokenStatus.CREATED,
                           sub_queue: subQueue.id,
                         }}
-                        emptyState={
-                          <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-3 border border-gray-100">
-                            <DoorOpenIcon className="size-6 text-gray-700" />
-                            <span className="text-sm font-semibold text-gray-700">
-                              {t("no_patient_is_being_served")}
-                            </span>
-                            <CallNextPatientButton
-                              subQueueId={subQueue.id}
-                              facilityId={facilityId}
-                              queueId={queueId}
-                              variant="outline"
-                              size="lg"
-                            >
-                              <Megaphone />
-                              {t("call_next_patient")}
-                            </CallNextPatientButton>
-                          </div>
+                        header={
+                          <div className="border border-gray-300 border-dashed" />
                         }
                       />
                     </div>
-                    <OngoingQueueTokenCardsList
-                      facilityId={facilityId}
-                      queueId={queueId}
-                      qParams={{
-                        status: TokenStatus.CREATED,
-                        sub_queue: subQueue.id,
-                      }}
-                      header={
-                        <div className="border border-gray-300 border-dashed" />
-                      }
-                    />
                   </div>
                 </div>
-              </>
-            ))}
-          </div>
-        </QueueColumn>
+              ))}
+            </div>
+          </QueueColumn>
+        </div>
       </div>
     </div>
   );
@@ -249,14 +295,14 @@ export function QueueColumn({
   options?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 p-3 rounded-lg bg-gray-100 border border-gray-200 min-w-xs flex-1">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-3 p-3 rounded-lg bg-gray-100 border border-gray-200 w-full md:min-w-xs md:flex-1">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold">{title}</span>
         </div>
         {options}
       </div>
-      <div className="h-[calc(100vh-21.5rem)] overflow-y-auto pb-2">
+      <div className="max-h-[65svh] md:h-[calc(100vh-21.5rem)] overflow-y-auto pb-2">
         {children}
       </div>
     </div>
@@ -374,12 +420,12 @@ function AwaitingRecallTrigger({
         <Button
           variant="link"
           size="lg"
-          className="underline font-semibold"
+          className="underline font-semibold px-1 sm:px-3"
           disabled={count === 0}
           onClick={() => setShowAwaitingRecallDialog(true)}
         >
           <EyeIcon />
-          <span>{t("awaiting_recall")}</span>
+          <span className="hidden sm:inline">{t("awaiting_recall")}</span>
         </Button>
         <div>
           <Badge size="sm">{count}</Badge>
@@ -457,7 +503,7 @@ function AwaitingRecallDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{t("awaiting_recall")}</DialogTitle>
         </DialogHeader>

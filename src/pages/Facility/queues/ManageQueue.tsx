@@ -124,8 +124,8 @@ export function ManageQueuePage({
       hideTitleOnPage
     >
       <div className="flex flex-col gap-6">
-        <div className="flex justify-between gap-3">
-          <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap justify-between gap-3">
+          <div className="flex gap-2 items-center min-w-0 flex-1">
             <BackButton
               // TODO: move queue index page for practitioner to similar pattern path
               to={
@@ -139,11 +139,11 @@ export function ManageQueuePage({
               <ChevronLeft />
             </BackButton>
             {resource && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 <ScheduleResourceIcon resource={resource} />
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-black">
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-semibold text-black truncate">
                       {t("queue_of_resource", {
                         resource: formatScheduleResourceName(resource),
                       })}
@@ -151,7 +151,7 @@ export function ManageQueuePage({
                     {queue.is_primary && (
                       <Badge
                         variant={queue.is_primary ? "primary" : "secondary"}
-                        className="hidden sm:block text-xs"
+                        className="hidden sm:block text-xs shrink-0"
                       >
                         {t("primary")}
                       </Badge>
@@ -165,7 +165,7 @@ export function ManageQueuePage({
               </div>
             )}
           </div>
-          <div className="flex gap-5 items-center justify-center">
+          <div className="flex gap-5 items-center justify-end shrink-0">
             <div className="hidden sm:flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
               <Switch
                 checked={shouldAutoRefresh}
@@ -350,7 +350,7 @@ function ManageServicePointsDialog({
 
   if (!allServicePoints) {
     return (
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[95vw] max-w-md">
         <DialogHeader>
           <Skeleton className="h-6 w-48" />
         </DialogHeader>
@@ -369,11 +369,11 @@ function ManageServicePointsDialog({
   return (
     <Dialog {...props}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[95vw] max-w-md">
         <DialogHeader>
           <DialogTitle>{t("assigned_service_points")}</DialogTitle>
         </DialogHeader>
-        <div>
+        <div className="max-h-[60vh] overflow-y-auto -mx-2 px-2">
           {allServicePoints.map((subQueue) => {
             const isSelected = assignedServicePointIds.includes(subQueue.id);
             return (
