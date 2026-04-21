@@ -527,12 +527,19 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                             <TableCell
                               className={cn(tableCellClass, "font-medium")}
                             >
-                              {payment.payment_datetime
-                                ? format(
-                                    new Date(payment.payment_datetime),
-                                    "d MMM yyyy, hh:mm a",
-                                  )
-                                : "-"}
+                              <div className="flex flex-col">
+                                <span>
+                                  {payment.payment_datetime
+                                    ? format(
+                                        new Date(payment.payment_datetime),
+                                        "d MMM yyyy, hh:mm a",
+                                      )
+                                    : "-"}
+                                </span>
+                                <span className="font-mono text-xs text-gray-500">
+                                  {payment.id}
+                                </span>
+                              </div>
                             </TableCell>
                             <TableCell
                               className={cn(tableCellClass, "text-left")}
@@ -619,12 +626,19 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                             <TableCell
                               className={cn(tableCellClass, "font-medium")}
                             >
-                              {creditNote.payment_datetime
-                                ? format(
-                                    new Date(creditNote.payment_datetime),
-                                    "d MMM yyyy, hh:mm a",
-                                  )
-                                : "-"}
+                              <div className="flex flex-col">
+                                <span>
+                                  {creditNote.payment_datetime
+                                    ? format(
+                                        new Date(creditNote.payment_datetime),
+                                        "d MMM yyyy, hh:mm a",
+                                      )
+                                    : "-"}
+                                </span>
+                                <span className="font-mono text-xs text-gray-500">
+                                  {creditNote.id}
+                                </span>
+                              </div>
                             </TableCell>
                             <TableCell
                               className={cn(tableCellClass, "text-left")}

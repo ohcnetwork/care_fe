@@ -26,6 +26,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
+  getPaymentTypeLabelKey,
   PAYMENT_RECONCILIATION_METHOD_MAP,
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
@@ -126,12 +127,12 @@ export function PaymentReconciliationShow({
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-bold">
             {t(payment.is_credit_note ? "refund" : "payment")}
-            <span className="text-lg font-normal text-gray-500">
-              #{payment.id}
-            </span>
           </h1>
+          <p className="text-sm text-gray-500">
+            {t("payment_id")}: {payment.id}
+          </p>
           <div className="flex flex-wrap gap-2 mt-2">
             <Badge
               variant={PAYMENT_RECONCILIATION_STATUS_COLORS[payment.status]}
@@ -146,7 +147,14 @@ export function PaymentReconciliationShow({
             <Badge variant="outline">
               {t(PAYMENT_RECONCILIATION_METHOD_MAP[payment.method])}
             </Badge>
-            <Badge variant="outline">{t(payment.reconciliation_type)}</Badge>
+            <Badge variant="outline">
+              {t(
+                getPaymentTypeLabelKey(
+                  payment.reconciliation_type,
+                  payment.is_credit_note,
+                ),
+              )}
+            </Badge>
           </div>
         </div>
         <div className="flex gap-2">
@@ -263,7 +271,12 @@ export function PaymentReconciliationShow({
                 <div>
                   <InfoItem
                     label={t("reconciliation_type")}
-                    value={humanize(payment.reconciliation_type)}
+                    value={t(
+                      getPaymentTypeLabelKey(
+                        payment.reconciliation_type,
+                        payment.is_credit_note,
+                      ),
+                    )}
                   />
                 </div>
                 <div className="space-y-4">
