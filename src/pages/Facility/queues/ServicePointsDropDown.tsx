@@ -111,9 +111,8 @@ export const ServicePointsDropDown = () => {
                     <div className="flex items-center space-x-3 p-1">
                       <Checkbox
                         checked={isSelected}
-                        onCheckedChange={(checked) =>
-                          toggleServicePoint(subQueue.id, checked as boolean)
-                        }
+                        className="pointer-events-none"
+                        tabIndex={-1}
                       />
                       <span className="text-sm font-medium">
                         {subQueue.name}
