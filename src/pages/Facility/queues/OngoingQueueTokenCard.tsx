@@ -147,43 +147,43 @@ function useTokenActions({
     });
   }
 
-  assignedServicePoints
-    .filter((service) => service.id !== token.sub_queue?.id)
-    .forEach((service) => {
-      items.push({
-        key: `assign_${service.id}`,
-        label: token.sub_queue
-          ? t("reassign_service_point", { name: service.name })
-          : t("mark_as_in_service", { name: service.name }),
-        icon: token.sub_queue ? (
-          <RedoDot className="size-4 mr-2" />
-        ) : (
-          <TicketCheck className="size-4 mr-2" />
-        ),
-        onSelect: () =>
-          updateToken({
-            status: TokenStatus.IN_PROGRESS,
-            note: token.note,
-            sub_queue: service.id,
-          }),
-      });
-    });
+  const otherServicePoints = assignedServicePoints.filter(
+    (service) => service.id !== token.sub_queue?.id,
+  );
 
-  assignedServicePoints
-    .filter((service) => service.id !== token.sub_queue?.id)
-    .forEach((service) => {
-      items.push({
-        key: `call_to_${service.id}`,
-        label: t("call_to", { name: service.name }),
-        icon: <Megaphone className="size-4 mr-2" />,
-        onSelect: () =>
-          updateToken({
-            status: TokenStatus.CREATED,
-            note: token.note,
-            sub_queue: service.id,
-          }),
-      });
+  otherServicePoints.forEach((service) => {
+    items.push({
+      key: `assign_${service.id}`,
+      label: token.sub_queue
+        ? t("reassign_service_point", { name: service.name })
+        : t("mark_as_in_service", { name: service.name }),
+      icon: token.sub_queue ? (
+        <RedoDot className="size-4 mr-2" />
+      ) : (
+        <TicketCheck className="size-4 mr-2" />
+      ),
+      onSelect: () =>
+        updateToken({
+          status: TokenStatus.IN_PROGRESS,
+          note: token.note,
+          sub_queue: service.id,
+        }),
     });
+  });
+
+  otherServicePoints.forEach((service) => {
+    items.push({
+      key: `call_to_${service.id}`,
+      label: t("call_to", { name: service.name }),
+      icon: <Megaphone className="size-4 mr-2" />,
+      onSelect: () =>
+        updateToken({
+          status: TokenStatus.CREATED,
+          note: token.note,
+          sub_queue: service.id,
+        }),
+    });
+  });
 
   items.push({
     key: "mark_as_complete",
@@ -294,7 +294,7 @@ function OngoingQueueTokenCardInner({
   ) => (
     <span key={item.key}>
       {item.separatorBefore && <Separator />}
-      <Item onClick={item.onSelect}>
+      <Item onSelect={item.onSelect}>
         {item.icon}
         <span className={item.danger ? "text-danger-700" : undefined}>
           {item.label}
@@ -331,12 +331,7 @@ function OngoingQueueTokenCardInner({
             {/* Kebab (visible on all sizes as primary action trigger) */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t("actions")}
-                  onClick={(e) => e.preventDefault()}
-                >
+                <Button variant="ghost" size="icon" aria-label={t("actions")}>
                   <MoreHorizontal className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
