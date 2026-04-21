@@ -53,22 +53,16 @@ import {
 } from "@/components/ui/multi-filter/utils/Utils";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import {
+  getPaymentTypeLabelKey,
   PAYMENT_RECONCILIATION_METHOD_MAP,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
   PaymentReconciliationRead,
-  PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 import ChangePaymentAccountSheet from "./ChangePaymentAccountSheet";
-
-const typeMap: Record<PaymentReconciliationType, string> = {
-  payment: "Payment",
-  adjustment: "Adjustment",
-  advance: "Advance",
-};
 
 const SORT_OPTIONS = {
   "-payment_datetime": "sort_by_latest_payment",
@@ -456,7 +450,14 @@ export default function PaymentsData({
                       </Button>
                     )}
                   </TableCell>
-                  <TableCell>{typeMap[payment.reconciliation_type]}</TableCell>
+                  <TableCell>
+                    {t(
+                      getPaymentTypeLabelKey(
+                        payment.reconciliation_type,
+                        payment.is_credit_note,
+                      ),
+                    )}
+                  </TableCell>
                   <TableCell>{t(payment.issuer_type)}</TableCell>
                   <TableCell>
                     {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}
