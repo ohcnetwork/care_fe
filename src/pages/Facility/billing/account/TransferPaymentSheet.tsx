@@ -152,6 +152,11 @@ export default function TransferPaymentSheet({
   const handleSubmit = () => {
     if (!selectedAccountId || !amount || parseFloat(amount) <= 0) return;
 
+    if (parseFloat(amount) > parseFloat(account.total_paid || "0")) {
+      toast.error(t("transfer_amount_exceeds_total_paid"));
+      return;
+    }
+
     const now = format(new Date(), "yyyy-MM-dd'T'HH:mm");
     const basePayment = {
       reconciliation_type: PaymentReconciliationType.adjustment,

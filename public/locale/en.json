@@ -6087,6 +6087,7 @@
   "tpr": "TPR",
   "trade_name": "Trade Name",
   "transfer_allowed": "Transfer Allowed",
+  "transfer_amount_exceeds_total_paid": "Transfer amount cannot exceed the total paid amount",
   "transfer_blocked": "Transfer Blocked",
   "transfer_payment": "Transfer Payment",
   "transfer_payment_description": "Transfer a payment amount from this account to another account",
