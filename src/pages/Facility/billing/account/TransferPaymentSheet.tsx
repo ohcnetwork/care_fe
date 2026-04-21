@@ -81,7 +81,7 @@ export default function TransferPaymentSheet({
   );
 
   const { mutate: submitTransfer, isPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       toast.success(t("payment_transferred_successfully"));
       queryClient.invalidateQueries({ queryKey: ["account", account.id] });
@@ -97,7 +97,55 @@ export default function TransferPaymentSheet({
       setAmount("");
     },
     onError: (error) => {
-      toast.error(error.message || t("payment_transfer_failed"));
+      const errorData = error.cause as {
+        results?: Array<{
+          reference_id: string;
+          status_code: number;
+          data: {
+            detail?: string;
+            errors?: Array<{
+              msg?: string;
+              error?: string;
+              type?: string;
+              loc?: string[];
+            }>;
+            non_field_errors?: string[];
+          };
+        }>;
+      };
+
+      if (errorData?.results) {
+        const failedResults = errorData.results.filter(
+          (result) => result.status_code >= 400,
+        );
+
+        if (failedResults.length > 0) {
+          for (const result of failedResults) {
+            if (result.data?.detail) {
+              toast.error(result.data.detail);
+              return;
+            }
+
+            const errors = result.data?.errors || [];
+            if (errors.length > 0) {
+              const message =
+                errors[0].msg ||
+                errors[0].error ||
+                t("payment_transfer_failed");
+              toast.error(message);
+              return;
+            }
+
+            const nonFieldErrors = result.data?.non_field_errors || [];
+            if (nonFieldErrors.length > 0) {
+              toast.error(nonFieldErrors[0]);
+              return;
+            }
+          }
+        }
+      }
+
+      toast.error(t("payment_transfer_failed"));
     },
   });
 
