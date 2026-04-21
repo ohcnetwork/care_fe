@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -126,32 +127,22 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
       </div>
 
       {/* Mobile section toggle */}
-      <div className="flex md:hidden rounded-lg bg-gray-100 border border-gray-200 p-1 gap-1">
-        <button
-          type="button"
-          onClick={() => setMobileSection("waiting")}
-          className={cn(
-            "flex-1 text-sm font-medium rounded-md py-2 transition-colors",
-            mobileSection === "waiting"
-              ? "bg-white shadow text-gray-950"
-              : "text-gray-600",
-          )}
-        >
-          {t("waiting")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setMobileSection("serving")}
-          className={cn(
-            "flex-1 text-sm font-medium rounded-md py-2 transition-colors",
-            mobileSection === "serving"
-              ? "bg-white shadow text-gray-950"
-              : "text-gray-600",
-          )}
-        >
-          {t("called_plus_now_serving")}
-        </button>
-      </div>
+      <Tabs
+        value={mobileSection}
+        onValueChange={(value) =>
+          setMobileSection(value as "waiting" | "serving")
+        }
+        className="md:hidden"
+      >
+        <TabsList className="w-full">
+          <TabsTrigger value="waiting" className="flex-1">
+            {t("waiting")}
+          </TabsTrigger>
+          <TabsTrigger value="serving" className="flex-1">
+            {t("called_plus_now_serving")}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <div className="flex flex-col md:flex-row md:space-x-4 gap-4 md:gap-0 md:overflow-x-auto w-full">
         {/* Waiting tokens list */}
