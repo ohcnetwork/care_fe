@@ -181,7 +181,7 @@ export default function TransferPaymentSheet({
             ...basePayment,
             account: account.id,
             is_credit_note: true,
-            note: t("outgoing_transfer_note"),
+            note: t("outgoing_transfer_note", { account: selectedAccountId }),
           },
         },
         {
@@ -192,7 +192,7 @@ export default function TransferPaymentSheet({
             ...basePayment,
             account: selectedAccountId,
             is_credit_note: false,
-            note: t("incoming_transfer_note"),
+            note: t("incoming_transfer_note", { account: account.id }),
           },
         },
       ],
