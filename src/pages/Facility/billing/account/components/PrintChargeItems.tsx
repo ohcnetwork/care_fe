@@ -34,7 +34,10 @@ import {
 import useAppHistory from "@/hooks/useAppHistory";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import {
+  getPaymentTypeLabelKey,
+  PAYMENT_RECONCILIATION_METHOD_MAP,
+} from "@/types/billing/paymentReconciliation/paymentReconciliation";
 
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import accountApi from "@/types/billing/account/accountApi";
@@ -47,6 +50,7 @@ import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
   PaymentReconciliationRead,
   PaymentReconciliationStatus,
+  PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
@@ -1225,6 +1229,12 @@ export const PrintChargeItems = (props: {
                                         ),
                                       ),
                                     );
+                                    const paymentTypeLabel = t(
+                                      getPaymentTypeLabelKey(
+                                        paymentType as PaymentReconciliationType,
+                                        false,
+                                      ),
+                                    );
 
                                     if (summaryMode) {
                                       // In summary mode, show only payment type with total
@@ -1237,7 +1247,7 @@ export const PrintChargeItems = (props: {
                                             colSpan={2}
                                             className="font-semibold capitalize"
                                           >
-                                            {t(paymentType)}
+                                            {paymentTypeLabel}
                                           </TableCell>
                                           <TableCell className="text-right font-semibold">
                                             <MonetaryDisplay
@@ -1259,7 +1269,7 @@ export const PrintChargeItems = (props: {
                                               colSpan={3}
                                               className="capitalize"
                                             >
-                                              {t(paymentType)}
+                                              {paymentTypeLabel}
                                             </TableCell>
                                             <TableCell className="text-right">
                                               <MonetaryDisplay
@@ -1299,7 +1309,10 @@ export const PrintChargeItems = (props: {
                                               {hidePaymentTypeGrouping && (
                                                 <TableCell className="text-left capitalize">
                                                   {t(
-                                                    payment.reconciliation_type,
+                                                    getPaymentTypeLabelKey(
+                                                      payment.reconciliation_type,
+                                                      payment.is_credit_note,
+                                                    ),
                                                   )}
                                                 </TableCell>
                                               )}
@@ -1454,6 +1467,12 @@ export const PrintChargeItems = (props: {
                                         ),
                                       ),
                                     );
+                                    const paymentTypeLabel = t(
+                                      getPaymentTypeLabelKey(
+                                        paymentType as PaymentReconciliationType,
+                                        true,
+                                      ),
+                                    );
 
                                     if (summaryMode) {
                                       // In summary mode, show only payment type with total
@@ -1466,7 +1485,7 @@ export const PrintChargeItems = (props: {
                                             colSpan={2}
                                             className="font-semibold capitalize"
                                           >
-                                            {t(paymentType)}
+                                            {paymentTypeLabel}
                                           </TableCell>
                                           <TableCell className="text-right font-semibold">
                                             <MonetaryDisplay
@@ -1488,7 +1507,7 @@ export const PrintChargeItems = (props: {
                                               colSpan={3}
                                               className="capitalize"
                                             >
-                                              {t(paymentType)}
+                                              {paymentTypeLabel}
                                             </TableCell>
                                             <TableCell className="text-right">
                                               <MonetaryDisplay
@@ -1528,7 +1547,10 @@ export const PrintChargeItems = (props: {
                                               {hidePaymentTypeGrouping && (
                                                 <TableCell className="text-left capitalize">
                                                   {t(
-                                                    payment.reconciliation_type,
+                                                    getPaymentTypeLabelKey(
+                                                      payment.reconciliation_type,
+                                                      payment.is_credit_note,
+                                                    ),
                                                   )}
                                                 </TableCell>
                                               )}
