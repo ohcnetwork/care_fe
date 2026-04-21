@@ -152,7 +152,6 @@ export const PractitionerSelector = ({
     queryFn: query(scheduleApi.appointments.availableUsers, {
       pathParams: { facilityId },
       queryParams: {
-        limit: 10,
         ...(showAllOrgs
           ? {}
           : {
@@ -160,6 +159,10 @@ export const PractitionerSelector = ({
             }),
       },
     }),
+    select: (data: { users: UserReadMinimal[] }) =>
+      data.users.filter((user) =>
+        formatName(user).toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     enabled: open && !!searchQuery && searchQuery.length > 0,
   });
 
@@ -317,7 +320,7 @@ export const PractitionerSelector = ({
             </div>
           </div>
 
-          <Command className="border-0" shouldFilter={false}>
+          <Command className="border-0">
             <div className="px-3 py-2 border-b">
               <div className="relative">
                 <CommandInput
@@ -432,46 +435,44 @@ export const PractitionerSelector = ({
 
               {/* Search Results - Practitioners */}
               {searchQuery &&
-                allPractitioners?.users?.length &&
-                allPractitioners?.users?.length > 0 && (
-                  <CommandGroup heading={t("practitioners")}>
-                    {allPractitioners?.users?.map((user) => {
-                      const isSelected = selected?.some(
-                        (s) => s.id === user.id,
-                      );
+              allPractitioners?.length &&
+              allPractitioners?.length > 0 ? (
+                <CommandGroup heading={t("practitioners")}>
+                  {allPractitioners?.map((user) => {
+                    const isSelected = selected?.some((s) => s.id === user.id);
 
-                      return (
-                        <CommandItem
-                          key={user.id}
-                          value={getItemValue(user)}
-                          onSelect={() => {
-                            if (!isSelected) {
-                              handleUserSelect(user);
-                            }
-                          }}
-                          className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
-                        >
-                          <Avatar
-                            imageUrl={user.profile_picture_url}
-                            name={formatName(user, true)}
-                            className="size-6 rounded-full"
-                          />
-                          <div className="flex flex-col min-w-0 flex-1">
-                            <span
-                              className="truncate text-sm font-medium"
-                              title={formatName(user)}
-                            >
-                              {formatName(user)}
-                            </span>
-                          </div>
-                          {isSelected && (
-                            <CheckIcon className="h-4 w-4 text-gray-700" />
-                          )}
-                        </CommandItem>
-                      );
-                    })}
-                  </CommandGroup>
-                )}
+                    return (
+                      <CommandItem
+                        key={user.id}
+                        value={getItemValue(user)}
+                        onSelect={() => {
+                          if (!isSelected) {
+                            handleUserSelect(user);
+                          }
+                        }}
+                        className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
+                      >
+                        <Avatar
+                          imageUrl={user.profile_picture_url}
+                          name={formatName(user, true)}
+                          className="size-6 rounded-full"
+                        />
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <span
+                            className="truncate text-sm font-medium"
+                            title={formatName(user)}
+                          >
+                            {formatName(user)}
+                          </span>
+                        </div>
+                        {isSelected && (
+                          <CheckIcon className="h-4 w-4 text-gray-700" />
+                        )}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              ) : null}
             </CommandList>
           </Command>
         </div>

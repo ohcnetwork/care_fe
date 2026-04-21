@@ -18,6 +18,7 @@ async function createBasicValueSet(page: Page, status?: string) {
     await page.getByRole("option", { name: status }).click();
   }
   await page.getByRole("button", { name: "Save ValueSet" }).click();
+  await page.waitForURL("**/admin/valuesets");
 }
 
 test.describe("ValueSet List", () => {
@@ -42,7 +43,9 @@ test.describe("ValueSet List", () => {
     page,
   }) => {
     await createBasicValueSet(page, "Draft");
-    await page.getByRole("tab", { name: "Draft" }).click();
+    const draftTab = page.getByRole("tab", { name: "Draft" });
+    await expect(draftTab).toBeVisible();
+    await draftTab.click();
     await page.getByRole("textbox", { name: "Search ValueSets" }).fill(name);
     await expect(page.getByRole("cell", { name: `${name}` })).toBeVisible();
     await expect(page.getByRole("cell", { name: description })).toBeVisible();
@@ -53,7 +56,9 @@ test.describe("ValueSet List", () => {
     page,
   }) => {
     await createBasicValueSet(page, "Retired");
-    await page.getByRole("tab", { name: "Retired" }).click();
+    const retiredTab = page.getByRole("tab", { name: "Retired" });
+    await expect(retiredTab).toBeVisible();
+    await retiredTab.click();
     await page.getByRole("textbox", { name: "Search ValueSets" }).fill(name);
     await expect(page.getByRole("cell", { name: `${name}` })).toBeVisible();
     await expect(page.getByRole("cell", { name: description })).toBeVisible();
@@ -64,7 +69,9 @@ test.describe("ValueSet List", () => {
     page,
   }) => {
     await createBasicValueSet(page, "Unknown");
-    await page.getByRole("tab", { name: "Unknown" }).click();
+    const unknownTab = page.getByRole("tab", { name: "Unknown" });
+    await expect(unknownTab).toBeVisible();
+    await unknownTab.click();
     await page.getByRole("textbox", { name: "Search ValueSets" }).fill(name);
     await expect(page.getByRole("cell", { name: `${name}` })).toBeVisible();
     await expect(page.getByRole("cell", { name: description })).toBeVisible();
