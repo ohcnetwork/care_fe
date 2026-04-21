@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import {
   Table,
   TableBody,
@@ -33,6 +33,7 @@ import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
 import { FilterBadges, FilterButton } from "@/components/Files/FileFilters";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
+import FileUploadDropdown from "@/components/Files/FileUploadDropdown";
 
 import useFileManager from "@/hooks/useFileManager";
 import useFileUpload from "@/hooks/useFileUpload";
@@ -274,55 +275,11 @@ export const FilesPage = ({
   const FileUploadButtons = () => {
     if (!canEdit) return <></>;
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline_primary"
-            className="flex flex-row items-center mr-2"
-          >
-            <CareIcon icon="l-file-upload" className="mr-1" />
-            <span>{t("add_files")}</span>
-            <CareIcon icon="l-angle-down" className="ml-1" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-[calc(100vw-2.5rem)] sm:w-full"
-        >
-          <DropdownMenuItem
-            className="flex flex-row items-center"
-            onSelect={(e) => {
-              e.preventDefault();
-            }}
-            aria-label={t("choose_file")}
-          >
-            <Label
-              htmlFor={`file_upload_${type}`}
-              className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
-            >
-              <CareIcon icon="l-file-upload-alt" />
-              <span>{t("choose_file")}</span>
-            </Label>
-            {fileUpload.Input({ className: "hidden" })}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => fileUpload.handleCameraCapture()}
-            className="flex items-center text-primary-900 font-medium"
-            aria-label={t("open_camera")}
-          >
-            <CareIcon icon="l-camera" />
-            <span>{t("open_camera")}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => fileUpload.handleAudioCapture()}
-            className="flex items-center text-primary-900 font-medium"
-            aria-label={t("record")}
-          >
-            <CareIcon icon="l-microphone" />
-            <span>{t("record")}</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <FileUploadDropdown
+        fileUpload={fileUpload}
+        buttonVariant="outline_primary"
+        buttonClassName="flex flex-row items-center mr-2"
+      />
     );
   };
 

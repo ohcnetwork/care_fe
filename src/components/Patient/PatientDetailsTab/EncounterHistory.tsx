@@ -48,7 +48,7 @@ const EncounterHistory = (props: PatientProps) => {
       queryParams: {
         patient: patientId,
         limit: 5,
-        offset: ((qParams.page ?? 1) - 1) * 5,
+        offset: ((qParams.page || 1) - 1) * 5,
       },
     }),
     enabled: canViewPatients,
@@ -131,7 +131,7 @@ const EncounterHistory = (props: PatientProps) => {
                     )}
                   >
                     <PaginationComponent
-                      cPage={qParams.page ?? 1}
+                      cPage={qParams.page || 1}
                       defaultPerPage={5}
                       data={{ totalCount: encounterData?.count ?? 0 }}
                       onChange={(page) => setQueryParams({ page })}

@@ -249,6 +249,11 @@ const careConfig = {
       env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION,
       false,
     ),
+
+    globalPatientEditAccessEnabled: booleanFromString(
+      env.REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED,
+      false,
+    ),
   },
 
   i18nUrl: env.REACT_CUSTOM_REMOTE_I18N_URL,

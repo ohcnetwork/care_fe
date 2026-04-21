@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import useFilters from "@/hooks/useFilters";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
@@ -84,7 +85,7 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
   }
 
   if (!dispenseOrder) {
-    return null;
+    return <ErrorPage />;
   }
 
   // Filter medications by current status

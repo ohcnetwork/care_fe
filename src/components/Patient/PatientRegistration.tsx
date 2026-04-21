@@ -268,8 +268,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     mutationFn: mutate(patientApi.create),
     onSuccess: (resp: PatientRead) => {
       toast.success(t("patient_registration_success"));
-      // Lets navigate the user to the verify page as the patient is not accessible to the user yet
-      navigate(`/facility/${facilityId}/patients/verify`, {
+      // Navigate the user to the patients home page to access the newly created patient
+      navigate(`/facility/${facilityId}/patients/home`, {
         query: {
           phone_number: resp.phone_number,
           year_of_birth: resp.year_of_birth,
@@ -601,7 +601,6 @@ const PatientBasicsContent = ({
                   value: g.id,
                   label: t(`GENDER__${g.id}`),
                 }))}
-                required={true}
               />
             </FormControl>
             <FormMessage />
@@ -757,7 +756,6 @@ const PatientBasicsContent = ({
               </FormLabel>
               <FormControl>
                 <TagSelectorPopover
-                  facilityId={facilityId}
                   selected={selectedTags}
                   onChange={(tags) => {
                     field.onChange(tags.map((tag) => tag.id));

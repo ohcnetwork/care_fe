@@ -63,9 +63,14 @@ import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import {
+  isAccountActiveAndBillable,
+  isAccountBillingClosed,
+} from "@/pages/Facility/billing/account/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ReportType } from "@/types/emr/report/report";
 import AccountSheet from "./AccountSheet";
+import TransferPaymentSheet from "./TransferPaymentSheet";
 import BedChargeItemsTable from "./components/BedChargeItemsTable";
 import ChargeItemsTable from "./components/ChargeItemsTable";
 
@@ -108,6 +113,7 @@ export function AccountShow({
     isOpen: boolean;
     isCreditNote: boolean;
   }>({ isOpen: false, isCreditNote: false });
+  const [transferPaymentOpen, setTransferPaymentOpen] = useState(false);
   const queryClient = useQueryClient();
   const [closeAccountStatus, setCloseAccountStatus] = useState<{
     sheetOpen: boolean;
@@ -154,22 +160,18 @@ export function AccountShow({
     "2xl": 12,
   });
 
-  const isAccountBillingClosed =
-    account?.billing_status === AccountBillingStatus.closed_baddebt ||
-    account?.billing_status === AccountBillingStatus.closed_voided ||
-    account?.billing_status === AccountBillingStatus.closed_completed ||
-    account?.billing_status === AccountBillingStatus.closed_combined;
+  const isBillingClosed = !!account && isAccountBillingClosed(account);
 
   useEffect(() => {
     if (account) {
       setCloseAccountStatus({
         sheetOpen: false,
-        reason: isAccountBillingClosed
+        reason: isBillingClosed
           ? account?.billing_status
           : AccountBillingStatus.closed_baddebt,
       });
     }
-  }, [account, isAccountBillingClosed]);
+  }, [account, isBillingClosed]);
 
   const rebalanceMutation = useMutation({
     mutationFn: mutate(accountApi.rebalanceAccount, {
@@ -269,6 +271,9 @@ export function AccountShow({
     );
   }
 
+  const isAccountBillableAndActive =
+    !!account && isAccountActiveAndBillable(account);
+
   const tabs = {
     invoices: {
       label: t("invoices"),
@@ -289,6 +294,7 @@ export function AccountShow({
           facilityId={facilityId}
           accountId={accountId}
           patientId={account.patient.id}
+          canAddChargeItems={isAccountBillableAndActive}
         />
       ),
       shortcutId: "switch-to-charge-items-tab",
@@ -318,7 +324,11 @@ export function AccountShow({
     bed_charge_items: {
       label: t("bed_charge_items"),
       component: (
-        <BedChargeItemsTable facilityId={facilityId} account={account} />
+        <BedChargeItemsTable
+          facilityId={facilityId}
+          account={account}
+          canAddChargeItems={isAccountBillableAndActive}
+        />
       ),
       shortcutId: "switch-to-bed-charge-items-tab",
     },
@@ -337,153 +347,120 @@ export function AccountShow({
           className="flex-1 p-0 bg-transparent shadow-none"
         />
         <div className="flex gap-2">
-          <div className="hidden lg:flex gap-2">
-            {account.status === AccountStatus.active &&
-              !isAccountBillingClosed && (
-                <Button
-                  variant="ghost"
-                  className="text-gray-950 gap-1 flex flex-row items-center justify-between"
-                  onClick={() =>
-                    setCloseAccountStatus({
-                      ...closeAccountStatus,
-                      sheetOpen: true,
-                    })
-                  }
-                >
-                  <CareIcon icon="l-check" className="size-5" />
-                  <span className="underline">{t("settle_close")}</span>
-                  <ShortcutBadge actionId="settle-close-account" />
-                </Button>
-              )}
-            {account.status === AccountStatus.active &&
-              !isAccountBillingClosed && (
+          {isAccountBillableAndActive && (
+            <div className="hidden lg:flex gap-2">
+              <Button
+                variant="ghost"
+                className="text-gray-950 gap-1 flex flex-row items-center justify-between"
+                onClick={() =>
+                  setCloseAccountStatus({
+                    ...closeAccountStatus,
+                    sheetOpen: true,
+                  })
+                }
+              >
+                <CareIcon icon="l-check" className="size-5" />
+                <span className="underline">{t("settle_close")}</span>
+                <ShortcutBadge actionId="settle-close-account" />
+              </Button>
+              <Button
+                variant="outline"
+                className="border-gray-400 text-gray-950"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
+                  )
+                }
+              >
+                <CareIcon icon="l-plus" className="mr-2 size-4" />
+                {t("create_invoice")}
+                <ShortcutBadge actionId="create-invoice" />
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() =>
+                  setPaymentSheet({
+                    isOpen: true,
+                    isCreditNote: false,
+                  })
+                }
+              >
+                <CareIcon icon="l-plus" className="size-4" />
+                {t("add_credit_payment")}
+                <ShortcutBadge actionId="credit-payment-account" />
+              </Button>
+            </div>
+          )}
+          {isAccountBillableAndActive && (
+            <div className="lg:hidden flex justify-end gap-2">
+              <Button
+                variant="outline"
+                className="border-gray-400 text-gray-950"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
+                  )
+                }
+              >
+                <CareIcon icon="l-plus" className="size-4" />
+                {t("invoice")}
+                <ShortcutBadge actionId="create-invoice" />
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() =>
+                  setPaymentSheet({
+                    isOpen: true,
+                    isCreditNote: false,
+                  })
+                }
+              >
+                <CareIcon icon="l-plus" className="size-4" />
+                {t("credit")}
+                <ShortcutBadge actionId="record-payment-account" />
+              </Button>
+            </div>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="border-gray-400">
+                <MoreVertical className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {isAccountBillableAndActive && (
                 <>
-                  <Button
-                    variant="outline"
-                    className="border-gray-400 text-gray-950"
+                  <DropdownMenuItem
+                    className="lg:hidden"
                     onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                      )
+                      setCloseAccountStatus({
+                        ...closeAccountStatus,
+                        sheetOpen: true,
+                      })
+                    }
+                  >
+                    {t("settle_close")}
+                    <ShortcutBadge actionId="settle-close-account" />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      setPaymentSheet({
+                        isOpen: true,
+                        isCreditNote: true,
+                      })
                     }
                   >
                     <CareIcon icon="l-plus" className="mr-2 size-4" />
-                    {t("create_invoice")}
-                    <ShortcutBadge actionId="create-invoice" />
-                  </Button>
-
-                  <div className="flex gap-2">
-                    <Button
-                      variant="primary"
-                      onClick={() =>
-                        setPaymentSheet({
-                          isOpen: true,
-                          isCreditNote: false,
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-plus" className="size-4" />
-                      {t("add_credit_payment")}
-                      <ShortcutBadge actionId="credit-payment-account" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="border-gray-400"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() =>
-                            setPaymentSheet({
-                              isOpen: true,
-                              isCreditNote: true,
-                            })
-                          }
-                        >
-                          <CareIcon icon="l-plus" className="mr-2 size-4" />
-                          {t("record_credit_note")}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                    {t("record_credit_note")}
+                  </DropdownMenuItem>
                 </>
               )}
-          </div>
-
-          {account.status === AccountStatus.active &&
-            !isAccountBillingClosed && (
-              <div className="lg:hidden w-full flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  className="border-gray-400 text-gray-950"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                    )
-                  }
-                >
-                  <CareIcon icon="l-plus" className="size-4" />
-                  {t("invoice")}
-                  <ShortcutBadge actionId="create-invoice" />
-                </Button>
-
-                <Button
-                  variant="primary"
-                  onClick={() =>
-                    setPaymentSheet({
-                      isOpen: true,
-                      isCreditNote: false,
-                    })
-                  }
-                >
-                  <CareIcon icon="l-plus" className="size-4" />
-                  {t("credit")}
-                  <ShortcutBadge actionId="record-payment-account" />
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="border-gray-400"
-                    >
-                      <MoreVertical className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {account.status === AccountStatus.active &&
-                      !isAccountBillingClosed && (
-                        <DropdownMenuItem
-                          onClick={() =>
-                            setCloseAccountStatus({
-                              ...closeAccountStatus,
-                              sheetOpen: true,
-                            })
-                          }
-                        >
-                          {t("settle_close")}
-                          <ShortcutBadge actionId="settle-close-account" />
-                        </DropdownMenuItem>
-                      )}
-                    <DropdownMenuItem
-                      onClick={() =>
-                        setPaymentSheet({
-                          isOpen: true,
-                          isCreditNote: true,
-                        })
-                      }
-                    >
-                      {t("record_credit_note")}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
+              <DropdownMenuItem onClick={() => setTransferPaymentOpen(true)}>
+                <CareIcon icon="l-exchange" className="mr-2 size-4" />
+                {t("transfer_payment")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </Card>
       <div className="bg-gray-100 p-3 space-y-4 rounded-lg">
@@ -709,7 +686,7 @@ export function AccountShow({
             </span>
             <BillingLifecycleStepper
               account={account}
-              isAccountBillingClosed={isAccountBillingClosed}
+              isAccountBillingClosed={isBillingClosed}
               canUpdateAccount={canUpdateAccount}
               onAdvance={advanceBillingStatus}
               onSettleClose={() =>
@@ -753,6 +730,13 @@ export function AccountShow({
         facilityId={facilityId}
         accountId={accountId}
         isCreditNote={paymentSheet.isCreditNote}
+        account={account}
+      />
+
+      <TransferPaymentSheet
+        open={transferPaymentOpen}
+        onOpenChange={setTransferPaymentOpen}
+        facilityId={facilityId}
         account={account}
       />
 

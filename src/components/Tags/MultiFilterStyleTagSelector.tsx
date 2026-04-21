@@ -72,34 +72,35 @@ export function MultiFilterStyleTagSelector({
   const isMobile = useIsMobile();
   const { t } = useTranslation();
 
-  // Fetch top-level tags
+  // Fetch top-level tags (both instance and facility tags in one call)
   const { data: rootTags, isLoading: isLoadingRoot } = useQuery({
-    queryKey: ["tags", resource, search],
-    queryFn: query(tagConfigApi.list, {
+    queryKey: ["tags", resource, search, facilityId],
+    queryFn: query.debounced(tagConfigApi.list, {
       queryParams: {
         resource,
         status: "active",
         ...(search ? { display: search } : { parent_is_null: true }),
-        ...(facilityId ? { facility: facilityId } : {}),
+        ...(facilityId && { facility: facilityId }),
       },
     }),
     enabled: open || mobileDrawerOpen,
   });
 
-  // Fetch children for active group popover
+  // Fetch children for active group popover (both instance and facility tags in one call)
   const { data: childTags, isLoading: isLoadingChildren } = useQuery({
     queryKey: [
       "tags",
       resource,
       "parent",
       groupPopoverOpen || selectedGroup?.id,
+      facilityId,
     ],
     queryFn: query(tagConfigApi.list, {
       queryParams: {
         resource,
         parent: groupPopoverOpen || selectedGroup?.id,
         status: "active",
-        ...(facilityId ? { facility: facilityId } : {}),
+        ...(facilityId && { facility: facilityId }),
       },
     }),
     enabled:

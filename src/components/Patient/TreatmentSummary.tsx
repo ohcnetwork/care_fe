@@ -1,8 +1,9 @@
 import {
   formatDosage,
   formatDuration,
-  formatFrequency,
+  formatFrequencyWithInstructions,
   formatSig,
+  joinInstructionTexts,
 } from "@/components/Medicine/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
@@ -14,6 +15,7 @@ import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { usePermissions } from "@/context/PermissionContext";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { completedEncounterStatus } from "@/types/emr/encounter/encounter";
@@ -24,12 +26,11 @@ import medicationStatementApi from "@/types/emr/medicationStatement/medicationSt
 import patientApi from "@/types/emr/patient/patientApi";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import symptomApi from "@/types/emr/symptom/symptomApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Loader } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -63,6 +64,7 @@ export default function TreatmentSummary({
   patientId,
 }: TreatmentSummaryProps) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacilitySilently();
 
   const { data: encounter, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounter", encounterId],
@@ -144,7 +146,7 @@ export default function TreatmentSummary({
       queryParams: {
         encounter: encounterId,
         facility: facilityId,
-        product_type: "medication",
+        medications_only: true,
       },
       pageSize: 100,
     }),
@@ -195,48 +197,24 @@ export default function TreatmentSummary({
     medicationStatementLoading ||
     serviceRequestsLoading;
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center">
-        <PrintPreview
-          title={`${t("treatment_summary")} - ${encounter.patient.name}`}
-        >
-          <div className="flex items-center justify-center h-full">
-            <Loader />
-          </div>
-        </PrintPreview>
-      </div>
-    );
-  }
-
   return (
     <div className="flex justify-center items-center">
       <PrintPreview
         title={`${t("treatment_summary")} - ${encounter.patient.name}`}
+        facility={facility}
+        disabled={isLoading}
+        templateSlug={PrintTemplateType.treatment_summary}
       >
         <div className="py-2 max-w-4xl mx-auto">
           <div className="space-y-6">
-            {/* Header */}
             <div className="flex justify-between items-start pb-2 border-b border-gray-200">
-              <div className="space-y-4 flex-1">
-                <div>
-                  <h1 className="text-3xl font-semibold">
-                    {encounter.facility?.name}
-                  </h1>
-                  <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mt-1">
-                    {t("treatment_summary")}
-                  </h2>
-                </div>
-              </div>
-              <img
-                src={careConfig.mainLogo?.dark}
-                alt="Care Logo"
-                className="h-10 w-auto object-contain ml-6"
-              />
+              <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold">
+                {t("treatment_summary")}
+              </h2>
             </div>
 
             {/* Patient Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-6">
               <div className="space-y-3">
                 <div className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center">
                   <span className="text-gray-600">{t("patient")}</span>
@@ -544,26 +522,34 @@ export default function TreatmentSummary({
                       { key: "duration" },
                       { key: "instructions" },
                     ]}
+                    classNameCell="whitespace-pre-line"
                     rows={medications?.results.map((medication) => {
-                      const instruction = medication.dosage_instruction[0];
-                      const additionalInstructions =
-                        instruction?.additional_instruction
-                          ?.map((item) => item.display)
-                          .filter(Boolean)
-                          .join(", ");
-                      const remarks = formatSig(instruction);
-                      const notes = medication.note;
-                      const freqText = formatFrequency(instruction);
+                      const instructions = medication.dosage_instruction;
                       return {
                         medicine: displayMedicationName(medication),
                         status: t(`medication_status__${medication.status}`),
-                        dosage: formatDosage(instruction),
-                        frequency:
-                          [freqText, additionalInstructions]
+                        dosage: joinInstructionTexts(
+                          instructions,
+                          formatDosage,
+                        ),
+                        frequency: joinInstructionTexts(
+                          instructions,
+                          formatFrequencyWithInstructions,
+                        ),
+                        duration: joinInstructionTexts(
+                          instructions,
+                          formatDuration,
+                        ),
+                        instructions: joinInstructionTexts(instructions, (di) =>
+                          [
+                            formatSig(di) || "-",
+                            medication.note
+                              ? `(${t("note")}: ${medication.note})`
+                              : "",
+                          ]
                             .filter(Boolean)
-                            .join(", ") || "-",
-                        duration: formatDuration(instruction) || "-",
-                        instructions: `${remarks || "-"}${notes ? ` (${t("note")}: ${notes})` : ""}`,
+                            .join(" "),
+                        ),
                       };
                     })}
                   />
