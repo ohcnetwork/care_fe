@@ -3,6 +3,11 @@ import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleRe
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -36,11 +41,13 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  ChevronDownIcon,
   DoorOpenIcon,
   EyeIcon,
   Megaphone,
   SearchIcon,
   SettingsIcon,
+  SlidersHorizontalIcon,
 } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useState } from "react";
@@ -64,6 +71,8 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const [mobileSection, setMobileSection] = useState<"waiting" | "serving">(
     "waiting",
   );
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilterCount = [search, patient].filter(Boolean).length;
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
     queryFn: query(tokenQueueApi.summary, {
@@ -74,56 +83,54 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-start mt-2 gap-4">
-        <div className="flex flex-col gap-2 w-full">
-          <Label className="text-gray-950 text-sm font-medium">
-            {t("search_patients")}
-          </Label>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative w-full sm:w-64">
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
-              <Input
-                type="search"
-                placeholder={t("search_by_patient_name")}
-                value={search || ""}
-                onChange={(e) =>
-                  setQueryParams(
-                    { search: e.target.value || "" },
-                    { overwrite: false, replace: true },
-                  )
-                }
-                className="pl-10 w-full h-9"
-              />
-            </div>
-            <PatientIdentifierFilter
-              onSelect={(patientId, patientName) => {
-                if (patientId && patientName) {
-                  setQueryParams(
-                    {
-                      patient: patientId,
-                      patient_name: patientName,
-                    },
-                    { overwrite: false, replace: true },
-                  );
-                } else {
-                  delete qParams.patient;
-                  delete qParams.patient_name;
-                  setQueryParams(qParams, { replace: true });
-                }
-              }}
-              placeholder={t("filter_by_identifier")}
-              className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
-              patientId={patient}
-              patientName={patient_name}
+      {/* Mobile/tablet: collapsible filter trigger */}
+      <Collapsible
+        open={filtersOpen}
+        onOpenChange={setFiltersOpen}
+        className="lg:hidden"
+      >
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="outline"
+            className="w-full justify-between h-9 text-sm font-medium"
+          >
+            <span className="flex items-center gap-2">
+              <SlidersHorizontalIcon className="size-4" />
+              {t("search_patients")}
+              {activeFilterCount > 0 && (
+                <Badge variant="primary" size="sm">
+                  {activeFilterCount}
+                </Badge>
+              )}
+            </span>
+            <ChevronDownIcon
+              className={cn(
+                "size-4 transition-transform",
+                filtersOpen && "rotate-180",
+              )}
             />
-          </div>
-        </div>
-        <div className="flex flex-col gap-2 w-full lg:w-auto lg:max-w-[55%] lg:items-end min-w-0">
-          <Label className="text-gray-950 text-sm font-medium">
-            {t("service_points")}
-          </Label>
-          <ServicePointsDropDown />
-        </div>
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-3">
+          <FilterControls
+            search={search}
+            patient={patient}
+            patientName={patient_name}
+            qParams={qParams}
+            setQueryParams={setQueryParams}
+          />
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Desktop: inline filters */}
+      <div className="hidden lg:flex flex-col lg:flex-row justify-between items-stretch lg:items-start mt-2 gap-4">
+        <FilterControls
+          search={search}
+          patient={patient}
+          patientName={patient_name}
+          qParams={qParams}
+          setQueryParams={setQueryParams}
+        />
       </div>
 
       {/* Mobile/tablet section toggle */}
@@ -276,6 +283,79 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   );
 }
 
+function FilterControls({
+  search,
+  patient,
+  patientName,
+  qParams,
+  setQueryParams,
+}: {
+  search: string | undefined;
+  patient: string | undefined;
+  patientName: string | undefined;
+  qParams: Record<string, string | undefined>;
+  setQueryParams: (
+    params: Record<string, string | undefined>,
+    options?: { overwrite?: boolean; replace?: boolean },
+  ) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <>
+      <div className="flex flex-col gap-2 w-full">
+        <Label className="text-gray-950 text-sm font-medium">
+          {t("search_patients")}
+        </Label>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative w-full sm:w-64">
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+            <Input
+              type="search"
+              placeholder={t("search_by_patient_name")}
+              value={search || ""}
+              onChange={(e) =>
+                setQueryParams(
+                  { search: e.target.value || "" },
+                  { overwrite: false, replace: true },
+                )
+              }
+              className="pl-10 w-full h-9"
+            />
+          </div>
+          <PatientIdentifierFilter
+            onSelect={(patientId, patientNameVal) => {
+              if (patientId && patientNameVal) {
+                setQueryParams(
+                  {
+                    patient: patientId,
+                    patient_name: patientNameVal,
+                  },
+                  { overwrite: false, replace: true },
+                );
+              } else {
+                const next = { ...qParams };
+                delete next.patient;
+                delete next.patient_name;
+                setQueryParams(next, { replace: true });
+              }
+            }}
+            placeholder={t("filter_by_identifier")}
+            className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+            patientId={patient}
+            patientName={patientName}
+          />
+        </div>
+      </div>
+      <div className="flex flex-col gap-2 w-full lg:w-auto lg:max-w-[55%] lg:items-end min-w-0">
+        <Label className="text-gray-950 text-sm font-medium">
+          {t("service_points")}
+        </Label>
+        <ServicePointsDropDown />
+      </div>
+    </>
+  );
+}
+
 export function QueueColumn({
   title,
   children,
@@ -293,7 +373,7 @@ export function QueueColumn({
         </div>
         {options}
       </div>
-      <div className="max-h-[65svh] lg:h-[calc(100vh-21.5rem)] overflow-y-auto pb-2">
+      <div className="lg:h-[calc(100vh-21.5rem)] lg:overflow-y-auto pb-2">
         {children}
       </div>
     </div>
