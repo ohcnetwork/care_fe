@@ -1,3 +1,4 @@
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,10 +61,12 @@ function useTokenActions({
   facilityId,
   token,
   onCancelClick,
+  onEnteredInErrorClick,
 }: {
   facilityId: string;
   token: TokenRead;
   onCancelClick: () => void;
+  onEnteredInErrorClick: () => void;
 }): TokenActionItem[] {
   const { t } = useTranslation();
   const { assignedServicePoints } = useQueueServicePoints();
@@ -219,12 +222,7 @@ function useTokenActions({
       key: "mark_as_entered_in_error",
       label: t("mark_as_entered_in_error"),
       icon: <OctagonX className="size-4 mr-2 text-danger-700" />,
-      onSelect: () =>
-        updateToken({
-          status: TokenStatus.ENTERED_IN_ERROR,
-          note: token.note,
-          sub_queue: null,
-        }),
+      onSelect: onEnteredInErrorClick,
       danger: true,
       separatorBefore: !cancellable,
     });
@@ -244,6 +242,8 @@ export function OngoingQueueTokenCard({
 }) {
   const { t } = useTranslation();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showEnteredInErrorDialog, setShowEnteredInErrorDialog] =
+    useState(false);
 
   if (!token) {
     return (
@@ -261,6 +261,8 @@ export function OngoingQueueTokenCard({
       options={options}
       showCancelDialog={showCancelDialog}
       setShowCancelDialog={setShowCancelDialog}
+      showEnteredInErrorDialog={showEnteredInErrorDialog}
+      setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
       t={t}
     />
   );
@@ -272,6 +274,8 @@ function OngoingQueueTokenCardInner({
   options,
   showCancelDialog,
   setShowCancelDialog,
+  showEnteredInErrorDialog,
+  setShowEnteredInErrorDialog,
   t,
 }: {
   facilityId: string;
@@ -279,12 +283,15 @@ function OngoingQueueTokenCardInner({
   options?: React.ReactNode;
   showCancelDialog: boolean;
   setShowCancelDialog: (open: boolean) => void;
+  showEnteredInErrorDialog: boolean;
+  setShowEnteredInErrorDialog: (open: boolean) => void;
   t: (key: string, options?: Record<string, unknown>) => string;
 }) {
   const actions = useTokenActions({
     facilityId,
     token,
     onCancelClick: () => setShowCancelDialog(true),
+    onEnteredInErrorClick: () => setShowEnteredInErrorDialog(true),
   });
 
   const renderItem = (
@@ -378,7 +385,70 @@ function OngoingQueueTokenCardInner({
         onOpenChange={setShowCancelDialog}
         token={token}
       />
+      <EnteredInErrorDialog
+        open={showEnteredInErrorDialog}
+        onOpenChange={setShowEnteredInErrorDialog}
+        facilityId={facilityId}
+        token={token}
+      />
     </ContextMenu>
+  );
+}
+
+function EnteredInErrorDialog({
+  open,
+  onOpenChange,
+  facilityId,
+  token,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  facilityId: string;
+  token: TokenRead;
+}) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const { mutate: updateToken, isPending } = useMutation({
+    mutationFn: mutate(tokenApi.update, {
+      pathParams: {
+        facility_id: facilityId,
+        queue_id: token.queue.id,
+        id: token.id,
+      },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["infinite-tokens", facilityId, token.queue.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facilityId, token.queue.id],
+      });
+      onOpenChange(false);
+    },
+  });
+
+  return (
+    <ConfirmActionDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("mark_as_entered_in_error")}
+      description={t("mark_as_entered_in_error_confirmation", {
+        patientName: token.patient?.name,
+        tokenNumber: renderTokenNumber(token),
+      })}
+      onConfirm={() =>
+        updateToken({
+          status: TokenStatus.ENTERED_IN_ERROR,
+          note: token.note,
+          sub_queue: null,
+        })
+      }
+      cancelText={t("cancel")}
+      confirmText={t("mark_as_entered_in_error")}
+      variant="destructive"
+      disabled={isPending}
+    />
   );
 }
 

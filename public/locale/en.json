@@ -6535,5 +6535,6 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
+  "mark_as_entered_in_error_confirmation": "Are you sure you want to mark the token {{tokenNumber}} for {{patientName}} as entered in error? This action cannot be undone.",
   "℞": "℞"
 }
