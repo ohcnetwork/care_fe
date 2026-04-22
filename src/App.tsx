@@ -42,16 +42,14 @@ const App = () => {
           <PubSubProvider>
             <ShortcutProvider>
               <PluginEngine>
-                <HistoryAPIProvider>
-                  <OverrideProvider>
-                    <AuthUserProvider
-                      unauthorized={<Routers.PublicRouter />}
-                      otpAuthorized={<Routers.PatientRouter />}
-                    >
-                      <Routers.AppRouter />
-                    </AuthUserProvider>
-                  </OverrideProvider>
-                </HistoryAPIProvider>
+                <OverrideProvider>
+                  <AuthUserProvider
+                    unauthorized={<Routers.PublicRouter />}
+                    otpAuthorized={<Routers.PatientRouter />}
+                  >
+                    <Routers.AppRouter />
+                  </AuthUserProvider>
+                </OverrideProvider>
                 <Toaster
                   position="top-center"
                   theme="light"
