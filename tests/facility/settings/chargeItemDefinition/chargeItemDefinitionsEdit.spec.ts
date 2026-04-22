@@ -17,7 +17,7 @@ test.describe("Charge Item Definition Edit operations", () => {
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    title = faker.commerce.productName();
+    title = faker.string.alphanumeric(10);
     basePrice = faker.commerce.price({ dec: 0 });
     mrp = faker.commerce.price({ dec: 0 });
     purchasePrice = faker.commerce.price({ dec: 0 });
@@ -34,7 +34,12 @@ test.describe("Charge Item Definition Edit operations", () => {
   });
 
   test("edit charge item definition", async ({ page }) => {
-    await page.getByRole("link", { name: "Edit" }).first().click();
+    await page
+      .locator('[data-slot="table-body"]')
+      .getByRole("row")
+      .first()
+      .getByRole("link", { name: "Edit" })
+      .click();
     await page
       .getByRole("textbox", { name: /title/i })
       .fill(title + " - edited");
@@ -52,13 +57,17 @@ test.describe("Charge Item Definition Edit operations", () => {
       .fill(purchasePrice);
     await page.getByRole("button", { name: /update/i }).click();
 
-    await expect(page.getByText(/updated successfully/i)).toBeVisible();
-
-    await page
-      .getByRole("textbox", { name: /Search/i })
-      .fill(title + " - edited");
     await expect(
-      page.getByRole("table").getByText(title + " - edited"),
+      page.locator("li[data-sonner-toast]").getByText(/updated successfully/i),
     ).toBeVisible();
+
+    await expect(async () => {
+      const searchBox = page.getByRole("textbox", { name: /Search/i });
+      await searchBox.clear();
+      await searchBox.fill(title + " - edited");
+      await expect(
+        page.getByRole("table").getByText(title + " - edited"),
+      ).toBeVisible();
+    }).toPass({ intervals: [1_000, 2_000, 3_000], timeout: 15_000 });
   });
 });

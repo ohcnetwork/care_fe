@@ -118,3 +118,13 @@ export interface PaymentReconciliationRead extends PaymentReconciliationBase {
 export interface PaymentReconciliationCancel {
   reason: PaymentReconciliationStatus;
 }
+
+export const getPaymentTypeLabelKey = (
+  reconciliationType: PaymentReconciliationType,
+  isCreditNote: boolean | undefined,
+): string => {
+  if (reconciliationType === PaymentReconciliationType.adjustment) {
+    return isCreditNote ? "outgoing_transfer" : "incoming_transfer";
+  }
+  return reconciliationType;
+};

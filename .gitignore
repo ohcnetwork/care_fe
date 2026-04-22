@@ -5,6 +5,8 @@
 /.pnp
 .pnp.js
 
+.claude/
+
 # testing
 /coverage
 
@@ -74,3 +76,4 @@ public/sbom/*
 public/_headers
 
 namespaceMapping.json
+dump.rdb

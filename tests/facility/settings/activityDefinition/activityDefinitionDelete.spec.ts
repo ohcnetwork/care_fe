@@ -14,20 +14,34 @@ test.beforeAll(() => {
 });
 
 test.beforeEach(async ({ page }) => {
-  createdAD = await createActivityDefinition(page, facilityId);
+  createdAD = await createActivityDefinition(page, facilityId, false, {
+    status: "Active",
+  });
 });
 
 test.describe("activity definition deletion", () => {
   test("should delete activity definition", async ({ page }) => {
+    // Register response waiter BEFORE navigation to ensure we catch the API response
+    const detailApiResponse = page.waitForResponse(
+      (resp) =>
+        resp
+          .url()
+          .includes(`/activity_definition/f-${facilityId}-${createdAD.slug}`) &&
+        resp.request().method() === "GET" &&
+        resp.ok(),
+    );
     await page.goto(
       `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdAD.slug}`,
     );
+    await detailApiResponse;
 
     await expect(
       page.getByRole("heading", { name: createdAD.title }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: /delete/i }).click();
+    const deleteButton = page.getByRole("button", { name: /delete/i });
+    await expect(deleteButton).toBeVisible();
+    await deleteButton.click();
 
     const dialog = page.getByRole("alertdialog");
     await expect(dialog).toBeVisible();
@@ -43,9 +57,15 @@ test.describe("activity definition deletion", () => {
       `/facility/${facilityId}/settings/activity_definitions`,
     );
 
+    const retiredApiResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/activity_definition/") &&
+        resp.request().method() === "GET",
+    );
     await page.goto(
       `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdAD.slug}`,
     );
+    await retiredApiResponse;
 
     await expect(page.getByText(/retired/i)).toBeVisible();
   });

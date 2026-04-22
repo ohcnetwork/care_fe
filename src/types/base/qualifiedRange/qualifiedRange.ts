@@ -1,3 +1,4 @@
+import { Code } from "@/types/base/code/code";
 import { Condition, conditionSchema } from "@/types/base/condition/condition";
 import { round, zodDecimal } from "@/Utils/decimal";
 import { t } from "i18next";
@@ -5,8 +6,8 @@ import { z } from "zod";
 
 export interface Interpretation {
   display: string;
-  icon?: string;
-  color?: string;
+  highlight?: boolean;
+  code?: Code;
 }
 
 export interface NumericRange {
@@ -28,6 +29,8 @@ export enum InterpretationType {
 export interface QualifiedRange {
   // used for local state management
   id?: number;
+  title?: string;
+  default_interpretation?: Interpretation;
   conditions?: Condition[];
   ranges: NumericRange[];
   normal_coded_value_set?: string;
@@ -39,12 +42,20 @@ export interface QualifiedRange {
 //To do: Translations not being loaded for playwright tests, need to debug and fix
 const interpretationSchema = z.object({
   display: z.string().min(1, "Display is required"),
-  icon: z.string().optional(),
-  color: z.string().optional(),
+  highlight: z.boolean().optional(),
+  code: z.object({ code: z.string(), display: z.string() }).optional(),
+});
+
+const defaultInterpretationSchema = z.object({
+  display: z.string(),
+  highlight: z.boolean().optional(),
+  code: z.object({ code: z.string(), display: z.string() }).optional(),
 });
 export const qualifiedRangeSchema = z.array(
   z
     .object({
+      title: z.string().optional(),
+      default_interpretation: defaultInterpretationSchema.optional(),
       conditions: z.array(conditionSchema).optional(),
       ranges: z.array(
         z

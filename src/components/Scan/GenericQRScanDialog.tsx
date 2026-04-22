@@ -80,9 +80,11 @@ export function GenericQRScanDialog({
   }
 
   function handleScanError() {
-    setScanning(false);
-    setHasPermission(false);
-    toast.error(t("camera_permission_denied"));
+    if (open) {
+      setScanning(false);
+      setHasPermission(false);
+      toast.error(t("camera_permission_denied"));
+    }
   }
 
   function handleContinue(scannedValue?: string) {
