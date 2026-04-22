@@ -13,7 +13,7 @@ import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
-const QUESTIONNAIRE_SLUG = "enable-when-string-test";
+const QUESTIONNAIRE_SLUG = "enable-when-test";
 
 // Values that trigger (show) or keep safe (hide) dependent fields
 const EQUALS_TRIGGER = "Doctor"; // equals "Doctor" → dependents show

@@ -12,7 +12,6 @@ import ProductionWarningBanner from "@/components/Common/ProductionWarningBanner
 import Integrations from "@/Integrations";
 import PluginEngine from "@/PluginEngine";
 import AuthUserProvider from "@/Providers/AuthUserProvider";
-import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
@@ -41,16 +40,14 @@ const App = () => {
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
             <ShortcutProvider>
-              <HistoryAPIProvider>
-                <AuthUserProvider
-                  unauthorized={<Routers.PublicRouter />}
-                  otpAuthorized={<Routers.PatientRouter />}
-                >
-                  <PluginEngine>
-                    <Routers.AppRouter />
-                  </PluginEngine>
-                </AuthUserProvider>
-              </HistoryAPIProvider>
+              <AuthUserProvider
+                unauthorized={<Routers.PublicRouter />}
+                otpAuthorized={<Routers.PatientRouter />}
+              >
+                <PluginEngine>
+                  <Routers.AppRouter />
+                </PluginEngine>
+              </AuthUserProvider>
               <Toaster
                 position="top-center"
                 theme="light"

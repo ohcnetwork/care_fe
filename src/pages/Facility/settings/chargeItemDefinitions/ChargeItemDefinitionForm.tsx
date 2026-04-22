@@ -65,7 +65,7 @@ import facilityApi from "@/types/facility/facilityApi";
 import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+import { generateSlug, goBack } from "@/Utils/utils";
 
 interface ChargeItemDefinitionFormProps {
   facilityId: string;
@@ -87,19 +87,18 @@ export function ChargeItemDefinitionForm({
     if (categorySlug) {
       navigate(
         `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}`,
+        {
+          replace: true,
+        },
       );
     } else {
-      navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+      navigate(`/facility/${facilityId}/settings/charge_item_definitions`, {
+        replace: true,
+      });
     }
   },
   onCancel = () => {
-    if (categorySlug) {
-      navigate(
-        `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}`,
-      );
-    } else {
-      navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
-    }
+    goBack();
   },
 }: ChargeItemDefinitionFormProps) {
   const { t } = useTranslation();
