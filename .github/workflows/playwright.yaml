@@ -123,6 +123,8 @@ jobs:
       - name: Start care docker containers
         run: |
           cd care
+          # Pin postgres to 17 to avoid PG 18+ data directory layout change
+          sed -i 's|image: postgres:alpine|image: postgres:17-alpine|' docker-compose.yaml
           echo DISABLE_RATELIMIT=True >> docker/.local.env
           echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
           echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
