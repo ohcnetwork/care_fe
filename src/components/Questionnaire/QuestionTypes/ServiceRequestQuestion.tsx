@@ -37,7 +37,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { add } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString, formatName } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { getBasePrice } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
@@ -61,7 +61,9 @@ import { Decimal } from "decimal.js";
 
 import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
 import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
-import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
+import { isBefore } from "date-fns";
 
 export function buildServiceRequestForTemplate(
   serviceRequest: ServiceRequestApplyActivityDefinitionSpec,
@@ -394,17 +396,65 @@ function ServiceRequestForm({
 
               <div className="space-y-2">
                 <Label>{t("occurrence")}</Label>
-                <CombinedDatePicker
-                  value={
-                    serviceRequest.service_request.occurance
-                      ? new Date(serviceRequest.service_request.occurance)
-                      : undefined
-                  }
-                  onChange={(date) =>
-                    onUpdate?.({ occurance: dateQueryString(date) })
-                  }
-                  disabled={disabled}
-                />
+                <div className="flex flex-col sm:flex-row">
+                  <DatePicker
+                    date={
+                      serviceRequest.service_request.occurance
+                        ? new Date(serviceRequest.service_request.occurance)
+                        : new Date()
+                    }
+                    onChange={(newDate) => {
+                      if (!newDate) return;
+                      const current = serviceRequest.service_request.occurance
+                        ? new Date(serviceRequest.service_request.occurance)
+                        : new Date();
+                      const updated = new Date(newDate);
+                      updated.setHours(current.getHours());
+                      updated.setMinutes(current.getMinutes());
+                      onUpdate?.({ occurance: updated.toISOString() });
+                    }}
+                    disabled={
+                      disabled
+                        ? () => true
+                        : (date: Date) =>
+                            isBefore(date, new Date().setHours(0, 0, 0, 0))
+                    }
+                    dateFormat="d/M/yyyy"
+                    className="flex-1"
+                  />
+                  <Input
+                    type="time"
+                    className="flex-1 border-t-0 sm:border-t text-sm border-gray-200 h-9"
+                    value={
+                      serviceRequest.service_request.occurance
+                        ? new Date(
+                            serviceRequest.service_request.occurance,
+                          ).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })
+                        : new Date().toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })
+                    }
+                    onChange={(e) => {
+                      const [hours, minutes] = e.target.value
+                        .split(":")
+                        .map(Number);
+                      if (isNaN(hours) || isNaN(minutes)) return;
+                      const updated = new Date(
+                        serviceRequest.service_request.occurance || new Date(),
+                      );
+                      updated.setHours(hours);
+                      updated.setMinutes(minutes);
+                      onUpdate?.({ occurance: updated.toISOString() });
+                    }}
+                    disabled={disabled}
+                  />
+                </div>
               </div>
             </div>
           </div>
