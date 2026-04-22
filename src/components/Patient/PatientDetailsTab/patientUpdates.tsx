@@ -9,12 +9,11 @@ import { Button } from "@/components/ui/button";
 
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 
+import { goBack } from "@/Utils/utils";
 import { PatientProps } from ".";
 
 export const Updates = (props: PatientProps) => {
@@ -22,7 +21,6 @@ export const Updates = (props: PatientProps) => {
   const patientId = patientData.id;
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-  const { goBack } = useAppHistory();
   const {
     canViewPatientQuestionnaireResponses,
     canSubmitPatientQuestionnaireResponses,
