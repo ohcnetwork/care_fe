@@ -125,7 +125,11 @@ jobs:
           echo DISABLE_RATELIMIT=True >> docker/.local.env
           echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
           echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
-          make docker_config_file=docker-compose.local.yaml up load-fixtures
+          if ! make docker_config_file=docker-compose.local.yaml up load-fixtures; then
+            echo "::error::Docker containers failed to start. Dumping logs..."
+            docker compose -f docker-compose.yaml -f docker-compose.local.yaml logs --tail=200
+            exit 1
+          fi
           cd ..
         env:
           JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
