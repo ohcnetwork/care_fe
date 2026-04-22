@@ -115,7 +115,7 @@ function ProductKnowledgeTableRow({
   return (
     <TableRow className="hover:bg-gray-50 cursor-pointer">
       <TableCell
-        className="font-medium cursor-pointer max-w-40"
+        className="font-medium cursor-pointer"
         onClick={() =>
           navigate(
             `/facility/${facilityId}/settings/product_knowledge/${product.slug}`,
@@ -288,7 +288,7 @@ export function ProductKnowledgeList({
           {/* Desktop Table View */}
           <div className="hidden lg:block">
             <div className="border rounded-lg overflow-hidden">
-              <Table>
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[35%]">{t("name")}</TableHead>
