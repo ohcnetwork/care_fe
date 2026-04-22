@@ -2799,7 +2799,7 @@
   "incoming_deliveries_description": "Items are in transit or have arrived at <strong>{{ location }}</strong>. Verify and mark them as received.",
   "incoming_orders": "Incoming Orders",
   "incoming_transfer": "Incoming Transfer",
-  "incoming_transfer_note": "Transferred from another account",
+  "incoming_transfer_note": "Transferred from account {{account}}",
   "incomplete": "Incomplete",
   "incomplete_patient_details_warning": "Patient details are incomplete. Please update the details before proceeding.",
   "inconsistent_dosage_units_error": "Dosage units must be same",
@@ -4044,7 +4044,7 @@
   "outgoing_deliveries_description": "These deliveries are being sent from <strong>{{location}}</strong> to other locations.",
   "outgoing_orders": "Outgoing Orders",
   "outgoing_transfer": "Outgoing Transfer",
-  "outgoing_transfer_note": "Transferred to another account",
+  "outgoing_transfer_note": "Transferred to account {{account}}",
   "outstanding": "Outstanding",
   "outstanding_balance": "Outstanding Balance",
   "overpaid_amount": "Overpaid amount to be refunded",
@@ -4083,6 +4083,7 @@
   "partially_completed_medication_return": "Partially completed medication return",
   "partially_dispensed": "Partially Dispensed",
   "participants": "Participants",
+  "particulars": "Particulars",
   "passed_away_on": "Passed away on {{date}}, at {{time}}",
   "passport_number": "Passport Number",
   "password": "Password",
@@ -6536,5 +6537,6 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
+  "mark_as_entered_in_error_confirmation": "Are you sure you want to mark the token {{tokenNumber}} for {{patientName}} as entered in error? This action cannot be undone.",
   "℞": "℞"
 }
