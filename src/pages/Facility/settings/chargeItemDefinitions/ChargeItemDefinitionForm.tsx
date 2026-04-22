@@ -273,9 +273,7 @@ export function ChargeItemDefinitionForm({
 
   // Get current form values
   const priceComponents = form.watch("price_components");
-  const rawBasePrice = form.watch("base_price");
-  const basePrice =
-    rawBasePrice && !isNaN(Number(rawBasePrice)) ? rawBasePrice : "0";
+  const basePrice = form.watch("base_price") || "0";
 
   const { isDirty } = form.formState;
 
