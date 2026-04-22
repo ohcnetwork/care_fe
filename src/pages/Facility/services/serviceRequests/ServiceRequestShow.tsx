@@ -330,11 +330,12 @@ export default function ServiceRequestShow({
     CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE.includes(request.category);
   const canShowCompleteCta =
     !request?.activity_definition?.diagnostic_report_codes || canMarkAsComplete;
+  const canShowMarkAsCompleteFootBar = canShowCompleteCta && !disableEdit;
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 relative">
       <div
-        className={`flex-1 p-4 max-w-6xl ${canShowCompleteCta && !disableEdit ? "pb-28" : ""}`}
+        className={`flex-1 p-4 max-w-6xl ${canShowMarkAsCompleteFootBar ? "pb-28" : ""}`}
       >
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-2">
@@ -629,7 +630,7 @@ export default function ServiceRequestShow({
         </div>
       )}
 
-      {canShowCompleteCta && !disableEdit && (
+      {canShowMarkAsCompleteFootBar && (
         <>
           <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-white border-gray-300 p-2">
             <div className="flex w-full items-center justify-between px-4 py-3 gap-2 bg-white">
