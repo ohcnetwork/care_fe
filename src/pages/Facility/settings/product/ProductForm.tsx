@@ -62,6 +62,7 @@ import {
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 const formSchema = z.object({
   status: z.nativeEnum(ProductStatusOptions),
   product_knowledge: z.string().min(1, "Product Knowledge is required"),
@@ -144,13 +145,11 @@ export function ProductFormContent({
   slug,
   containerClassName,
   onSuccess = (product: ProductRead) =>
-    navigate(`/facility/${facilityId}/settings/product/${product.id}`),
+    navigate(`/facility/${facilityId}/settings/product/${product.id}`, {
+      replace: true,
+    }),
   onCancel = () => {
-    if (productId) {
-      navigate(`/facility/${facilityId}/settings/product/${productId}`);
-    } else {
-      navigate(`/facility/${facilityId}/settings/product`);
-    }
+    goBack();
   },
   disableButtons = false,
   enabled = true,
