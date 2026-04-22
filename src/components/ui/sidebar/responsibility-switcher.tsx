@@ -1,5 +1,4 @@
 import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
 import { ShieldCheck } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -22,8 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavMain } from "@/components/ui/sidebar/nav-main";
 
-import query from "@/Utils/request/query";
-import organizationApi from "@/types/organization/organizationApi";
+import { useAccessibleRoleOrganizationsList } from "@/hooks/useAccessibleRoleOrganizationsList";
 
 interface Props {
   selectedResponsibilityId: string;
@@ -33,12 +31,7 @@ export function ResponsibilitySwitcher({ selectedResponsibilityId }: Props) {
   const { isMobile } = useSidebar();
   const { t } = useTranslation();
 
-  const { data } = useQuery({
-    queryKey: ["accessibleRoleOrganizations", "sidebar"],
-    queryFn: query(organizationApi.accessibleRoleOrganizations, {
-      queryParams: {},
-    }),
-  });
+  const { data } = useAccessibleRoleOrganizationsList();
 
   const items = data?.results || [];
   const selectedItem = items.find(
@@ -113,12 +106,7 @@ export function ResponsibilitySwitcher({ selectedResponsibilityId }: Props) {
 }
 
 export function ResponsibilityNav() {
-  const { data } = useQuery({
-    queryKey: ["accessibleRoleOrganizations", "sidebar"],
-    queryFn: query(organizationApi.accessibleRoleOrganizations, {
-      queryParams: {},
-    }),
-  });
+  const { data } = useAccessibleRoleOrganizationsList();
 
   const items = data?.results || [];
 

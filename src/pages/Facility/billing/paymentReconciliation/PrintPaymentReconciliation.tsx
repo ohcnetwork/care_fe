@@ -20,6 +20,7 @@ import Loading from "@/components/Common/Loading";
 
 import PrintFooter from "@/components/Common/PrintFooter";
 import {
+  getPaymentTypeLabelKey,
   PAYMENT_RECONCILIATION_METHOD_MAP,
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
   PaymentReconciliationOutcome,
@@ -156,6 +157,11 @@ export function PrintPaymentReconciliation({
                 value={formatDateTime(payment.created_date, "DD-MM-YYYY")}
                 width="w-24"
               />
+              <DetailRow
+                label={t("payment_id")}
+                value={payment.id}
+                width="w-24"
+              />
               {payment.account.patient?.instance_identifiers
                 ?.filter(
                   ({ config }) =>
@@ -223,8 +229,12 @@ export function PrintPaymentReconciliation({
               <TableBody>
                 <TableRow>
                   <TableCell>
-                    {payment.reconciliation_type.charAt(0).toUpperCase() +
-                      payment.reconciliation_type.slice(1)}
+                    {t(
+                      getPaymentTypeLabelKey(
+                        payment.reconciliation_type,
+                        payment.is_credit_note,
+                      ),
+                    )}
                   </TableCell>
                   <TableCell>
                     {payment.kind.charAt(0).toUpperCase() +
