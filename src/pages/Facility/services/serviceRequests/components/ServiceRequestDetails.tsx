@@ -184,7 +184,7 @@ export function ServiceRequestDetails({
                   {t("occurrence")}
                 </div>
                 <div className="font-semibold text-gray-700">
-                  {format(request.occurance, "PPP")}
+                  {format(request.occurance, "d MMM yyyy, hh:mm a")}
                 </div>
               </div>
             )}

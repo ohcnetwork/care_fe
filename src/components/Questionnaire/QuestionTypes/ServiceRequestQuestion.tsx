@@ -396,7 +396,7 @@ function ServiceRequestForm({
 
               <div className="space-y-2">
                 <Label>{t("occurrence")}</Label>
-                <div className="flex flex-col sm:flex-row">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <DatePicker
                     date={
                       serviceRequest.service_request.occurance
