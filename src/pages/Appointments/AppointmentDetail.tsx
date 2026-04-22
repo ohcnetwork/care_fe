@@ -49,7 +49,7 @@ import {
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName, getReadableDuration } from "@/Utils/utils";
+import { formatName, getReadableDuration, goBack } from "@/Utils/utils";
 import {
   AvatarIcon,
   CalendarIcon,
@@ -101,7 +101,6 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import { cn } from "@/lib/utils";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
@@ -124,7 +123,6 @@ export default function AppointmentDetail(props: Props) {
   const queryClient = useQueryClient();
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
-  const { goBack } = useAppHistory();
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
   const [{ from_queue }] = useQueryParams();
@@ -158,7 +156,7 @@ export default function AppointmentDetail(props: Props) {
     // If facility query failed (no access to facility)
     if (!facility) {
       toast.error(t("no_permission_to_view_page"));
-      goBack(`/`);
+      goBack("/");
       return;
     }
 
@@ -207,7 +205,7 @@ export default function AppointmentDetail(props: Props) {
     <Page title={t("appointment_details")} hideTitleOnPage>
       <div className="container mx-auto max-w-7xl mt-4">
         <div className="flex gap-2 items-center mb-2">
-          <BackButton size="icon" variant="ghost">
+          <BackButton variant="ghost">
             <ChevronLeft />
           </BackButton>
           <h4 className="font-semibold text-gray-800">

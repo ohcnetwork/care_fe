@@ -31,9 +31,8 @@ import {
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import mutate from "@/Utils/request/mutate";
+import BackButton from "@/components/Common/BackButton";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   usePluginDevice,
@@ -58,7 +57,6 @@ interface Props {
 
 export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const [qParams] = useQueryParams<{ type?: string }>();
 
   const queryClient = useQueryClient();
@@ -571,20 +569,9 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
         )}
 
         <div className="flex items-center justify-end">
-          <Button
-            variant="outline"
-            type="button"
-            className="m-4"
-            onClick={() => {
-              if (device) {
-                goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
-              } else {
-                goBack(`/facility/${facilityId}/settings/devices`);
-              }
-            }}
-          >
+          <BackButton variant="outline" className="m-4">
             {t("cancel")}
-          </Button>
+          </BackButton>
           <Button type="submit" disabled={isPending || !form.formState.isDirty}>
             {isPending ? t("saving") : t("save")}
           </Button>

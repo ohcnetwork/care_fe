@@ -40,10 +40,12 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       .click({ timeout: 5000 });
 
     await page.goto(bioChembasePath + "/inventory/internal/receive");
-    // verify item in table row 1
-    tableRow1 = page.locator("table tbody tr").nth(0);
-    await expect(tableRow1).toContainText(orderName);
-    await expect(tableRow1).toContainText("Pharmacy");
+    // verify item appears in table
+    const orderRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: orderName });
+    await expect(orderRow.first()).toBeVisible();
+    await expect(orderRow.first()).toContainText("Pharmacy");
     await page.goto(bioChembasePath + "/inventory/internal/receive");
   }
 
@@ -87,14 +89,19 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
   });
 
   test("switch location and create delivery order", async ({ page }) => {
-    const row1 = page.locator("table tbody tr").nth(0);
-    await expect(row1).toContainText(orderName);
-    await row1.getByRole("button", { name: "See Details" }).click();
+    const orderRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: orderName });
+    await expect(orderRow.first()).toBeVisible();
+    await orderRow.first().getByRole("button", { name: "See Details" }).click();
     let tableRow1 = page.locator("table tbody tr").nth(0);
     await expect(tableRow1).toContainText("Paracetamol");
     await expect(tableRow1).toContainText("5");
     await page.getByRole("link", { name: "Create Delivery Order" }).click();
     await page.getByRole("button", { name: "Create" }).click();
+    await expect(
+      page.getByRole("button", { name: "Load from order" }),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Load from order" }).click();
     await page.getByRole("button", { name: "Done" }).click();
     await page.getByRole("button", { name: "Select stock" }).nth(1).click();
@@ -104,19 +111,26 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await page.getByRole("button", { name: "Mark as Approved" }).click();
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
     await page.getByRole("tab", { name: "Outgoing Deliveries" }).click();
-    const deliveryRow1 = page.locator("table tbody tr").nth(0);
-    await expect(deliveryRow1).toContainText(orderName);
+    const deliveryRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: orderName });
+    await expect(deliveryRow.first()).toBeVisible();
   });
 
   test("approve incoming delivery order", async ({ page }) => {
-    const row1 = page.locator("table tbody tr").nth(0);
-    await expect(row1).toContainText(orderName);
-    await row1.getByRole("button", { name: "See Details" }).click();
+    const orderRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: orderName });
+    await expect(orderRow.first()).toBeVisible();
+    await orderRow.first().getByRole("button", { name: "See Details" }).click();
     let tableRow1 = page.locator("table tbody tr").nth(0);
     await expect(tableRow1).toContainText("Paracetamol");
     await expect(tableRow1).toContainText("5");
     await page.getByRole("link", { name: "Create Delivery Order" }).click();
     await page.getByRole("button", { name: "Create" }).click();
+    await expect(
+      page.getByRole("button", { name: "Load from order" }),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Load from order" }).click();
     await page.getByRole("button", { name: "Done" }).click();
     await page.getByRole("button", { name: "Select stock" }).nth(1).click();
@@ -126,14 +140,19 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await page.getByRole("button", { name: "Mark as Approved" }).click();
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
     await page.getByRole("tab", { name: "Outgoing Deliveries" }).click();
-    const deliveryRow1 = page.locator("table tbody tr").nth(0);
-    await expect(deliveryRow1).toContainText(orderName);
+    const deliveryRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: orderName });
+    await expect(deliveryRow.first()).toBeVisible();
 
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     await page.getByRole("tab", { name: "Incoming Deliveries" }).click();
-    const incomingDeliveryRow1 = page.locator("table tbody tr").nth(0);
-    await expect(incomingDeliveryRow1).toContainText(orderName);
-    await incomingDeliveryRow1
+    const incomingDeliveryRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: orderName });
+    await expect(incomingDeliveryRow.first()).toBeVisible();
+    await incomingDeliveryRow
+      .first()
       .getByRole("button", { name: "View Details" })
       .click();
     await page
@@ -145,7 +164,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     await page.getByRole("tab", { name: "Incoming Deliveries" }).click();
     await page.getByRole("tab", { name: "Completed" }).click();
-    const completedDeliveryRow1 = page.locator("table tbody tr").nth(0);
-    await expect(completedDeliveryRow1).toContainText(orderName);
+    const completedDeliveryRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: orderName });
+    await expect(completedDeliveryRow.first()).toBeVisible();
   });
 });

@@ -46,7 +46,10 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
-import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
+import {
+  getCompletedDeliveryQuantity,
+  getInventoryBasePath,
+} from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import { ProductRead } from "@/types/inventory/product/product";
 import {
@@ -265,7 +268,7 @@ export function RequestOrderShow({
             delivery.supplied_inventory_item?.product?.product_knowledge?.id ||
               ""
           ]?.quantity || 0,
-          delivery.supplied_item_quantity,
+          getCompletedDeliveryQuantity(delivery),
         ),
         product: delivery.supplied_inventory_item?.product,
       };

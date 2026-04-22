@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, X } from "lucide-react";
 import { navigate } from "raviger";
 import React, { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -71,10 +71,12 @@ export default function ObservationDefinitionForm({
   facilityId,
   observationSlug,
   onSuccess,
+  onCancel,
 }: {
   facilityId: string;
   observationSlug?: string;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -114,6 +116,7 @@ export default function ObservationDefinitionForm({
       observationSlug={observationSlug}
       existingData={existingData}
       onSuccess={onSuccess}
+      onCancel={onCancel}
     />
   );
 }
@@ -124,11 +127,14 @@ function ObservationDefinitionFormContent({
   existingData,
   onSuccess = () =>
     navigate(`/facility/${facilityId}/settings/observation_definitions`),
+  onCancel = () =>
+    navigate(`/facility/${facilityId}/settings/observation_definitions`),
 }: {
   facilityId: string;
   observationSlug?: string;
   existingData?: ObservationDefinitionReadSpec;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -249,6 +255,15 @@ function ObservationDefinitionFormContent({
             method: null,
             permitted_unit: null,
           },
+  });
+
+  const {
+    fields: componentFields,
+    append: appendComponent,
+    remove: removeComponent,
+  } = useFieldArray({
+    control: form.control,
+    name: "component",
   });
 
   const rootQualifiedRanges = form.watch("qualified_ranges");
@@ -741,7 +756,7 @@ function ObservationDefinitionFormContent({
                   </p>
                 </div>
 
-                {(form.watch("component") ?? [])?.length === 0 ? (
+                {componentFields.length === 0 ? (
                   <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4">
                     <p className="mb-2 text-sm text-gray-500">
                       {t("observation_components_description")}
@@ -754,17 +769,12 @@ function ObservationDefinitionFormContent({
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        const currentComponents =
-                          form.getValues("component") || [];
-                        form.setValue("component", [
-                          ...currentComponents,
-                          {
-                            code: { code: "", display: "", system: "" },
-                            permitted_data_type: QuestionType.quantity,
-                            permitted_unit: null,
-                            qualified_ranges: [],
-                          },
-                        ]);
+                        appendComponent({
+                          code: { code: "", display: "", system: "" },
+                          permitted_data_type: QuestionType.quantity,
+                          permitted_unit: null,
+                          qualified_ranges: [],
+                        });
                       }}
                     >
                       <PlusCircle className="mr-2 h-4 w-4" />
@@ -773,9 +783,9 @@ function ObservationDefinitionFormContent({
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {(form.watch("component") ?? []).map((_, index) => (
+                    {componentFields.map((componentField, index) => (
                       <div
-                        key={index}
+                        key={componentField.id}
                         className="relative rounded-lg border border-gray-200 bg-gray-50 p-4"
                       >
                         <div className="absolute right-3 top-3">
@@ -784,14 +794,7 @@ function ObservationDefinitionFormContent({
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 rounded-full hover:bg-gray-100"
-                            onClick={() => {
-                              const currentComponents =
-                                form.getValues("component") || [];
-                              form.setValue(
-                                "component",
-                                currentComponents.filter((_, i) => i !== index),
-                              );
-                            }}
+                            onClick={() => removeComponent(index)}
                           >
                             <X className="h-4 w-4 text-gray-500" />
                           </Button>
@@ -937,17 +940,12 @@ function ObservationDefinitionFormContent({
                       variant="outline"
                       className="w-full"
                       onClick={() => {
-                        const currentComponents =
-                          form.getValues("component") || [];
-                        form.setValue("component", [
-                          ...currentComponents,
-                          {
-                            code: { code: "", display: "", system: "" },
-                            permitted_data_type: QuestionType.quantity,
-                            permitted_unit: null,
-                            qualified_ranges: [],
-                          },
-                        ]);
+                        appendComponent({
+                          code: { code: "", display: "", system: "" },
+                          permitted_data_type: QuestionType.quantity,
+                          permitted_unit: null,
+                          qualified_ranges: [],
+                        });
                       }}
                     >
                       <PlusCircle className="mr-2 h-4 w-4" />
@@ -959,15 +957,7 @@ function ObservationDefinitionFormContent({
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/observation_definitions`,
-                  )
-                }
-              >
+              <Button type="button" variant="outline" onClick={onCancel}>
                 {t("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
