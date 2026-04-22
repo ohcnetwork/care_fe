@@ -1,5 +1,6 @@
 import { Avatar } from "@/components/Common/Avatar";
 import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
+import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,6 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { formatPatientAge } from "@/Utils/utils";
 import { Phone } from "lucide-react";
 import { Link, usePath } from "raviger";
@@ -25,8 +25,15 @@ export const PatientInfoHoverCard = ({
 
   const path = usePath();
   const isPatientHomePage = path?.endsWith(
-    `/facility/${facilityId}/patients/verify`,
+    `/facility/${facilityId}/patients/home`,
   );
+
+  const hasPatientTags =
+    "instance_tags" in patient &&
+    (patient.instance_tags.length > 0 ||
+      ("facility_tags" in patient &&
+        patient.facility_tags &&
+        patient.facility_tags.length > 0));
 
   return (
     <>
@@ -43,13 +50,18 @@ export const PatientInfoHoverCard = ({
             </span>
           </div>
         </div>
+        {"deceased_datetime" in patient && patient.deceased_datetime && (
+          <Badge variant="destructive" className="text-xs h-5 mt-1">
+            {t("deceased")}
+          </Badge>
+        )}
       </div>
       <div className="flex items-center gap-2">
         {!isPatientHomePage && facilityId && (
           <Button variant="outline" className="text-gray-950" asChild>
             <Link
               basePath="/"
-              href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+              href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                 {
                   phone_number: patient.phone_number,
                   year_of_birth: patient.year_of_birth?.toString() ?? "",
@@ -135,25 +147,9 @@ export const PatientInfoHoverCard = ({
             </div>
           </div>
         </div>
-        {"instance_tags" in patient && patient.instance_tags.length > 0 && (
+        {hasPatientTags && (
           <div className="flex items-start border-t border-gray-200 pt-2">
-            <div className="flex flex-col gap-1 text-sm font-medium w-full">
-              <span className="text-gray-700">{t("patient_tags")}:</span>
-              <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">
-                <>
-                  {patient.instance_tags.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant="secondary"
-                      className="capitalize"
-                      title={tag.description}
-                    >
-                      {getTagHierarchyDisplay(tag)}
-                    </Badge>
-                  ))}
-                </>
-              </div>
-            </div>
+            <PatientTagsDisplay patient={patient} />
           </div>
         )}
       </div>

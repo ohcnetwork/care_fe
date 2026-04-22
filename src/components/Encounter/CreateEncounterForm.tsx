@@ -365,6 +365,7 @@ export default function CreateEncounterForm({
                           field.onChange(tags.map((tag) => tag.id));
                         }}
                         resource={TagResource.ENCOUNTER}
+                        facilityId={facilityId}
                       />
                     </FormControl>
                     <FormMessage />

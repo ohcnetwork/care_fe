@@ -4,7 +4,6 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
 
@@ -14,12 +13,13 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 
+import { goBack } from "@/Utils/utils";
+import { Button } from "@/components/ui/button";
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
 
@@ -29,7 +29,6 @@ interface Props {
 
 export function FacilityDetailsPage({ id }: Props) {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const { data: facilityResponse, isLoading } = useQuery({
     queryKey: ["facility", id],
     queryFn: query(publicFacilityApi.getAny, {

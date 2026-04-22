@@ -7,8 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import Page from "@/components/Common/Page";
 import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import query from "@/Utils/request/query";
 import {
   PatientDeceasedInfo,
@@ -33,7 +31,6 @@ export default function EncounterQuestionnaire({
 }: Props) {
   const { t } = useTranslation();
 
-  const { goBack } = useAppHistory();
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(encounterApi.get, {
@@ -81,7 +78,6 @@ export default function EncounterQuestionnaire({
                   navigate(`/patient/${patientId}/updates`);
                 }
               }}
-              onCancel={() => goBack()}
             />
           </CardContent>
         </Card>

@@ -98,9 +98,10 @@ export function EncounterProvider({
   ] = useQueryParams();
 
   const { data: patient, isLoading: isPatientLoading } = useQuery({
-    queryKey: ["patient", patientId],
+    queryKey: ["patient", patientId, facilityId],
     queryFn: query(patientApi.get, {
       pathParams: { id: patientId },
+      queryParams: { facility: facilityId },
       silent: true,
     }),
   });

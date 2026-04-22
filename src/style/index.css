@@ -342,15 +342,18 @@
       --print-scale: 1;
     }
 
-    /* Isolated print styles to prevents blank pages */
+    /* Isolated print styles — shared by single-print and multi-print */
     #single-print,
-    #single-print * {
+    #single-print *,
+    #multi-print,
+    #multi-print * {
       visibility: visible;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
 
-    #single-print {
+    #single-print,
+    #multi-print {
       display: block !important;
       position: fixed;
       left: 0;
@@ -361,14 +364,29 @@
       overflow: visible;
     }
 
-    /* Collapse all other content when this is present */
-    body:has(#single-print) *:not(#single-print):not(#single-print *) {
+    /* Collapse everything else for single-print (only when multi-print is NOT also active) */
+    body:has(#single-print):not(:has(#multi-print))
+      *:not(#single-print):not(#single-print *) {
       height: 0 !important;
       min-height: 0 !important;
       max-height: 0 !important;
       padding: 0 !important;
       margin: 0 !important;
       overflow: hidden !important;
+    }
+
+    /* Collapse everything else for multi-print, and suppress any open single-print card */
+    body:has(#multi-print) *:not(#multi-print):not(#multi-print *) {
+      height: 0 !important;
+      min-height: 0 !important;
+      max-height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+    }
+
+    body:has(#multi-print) #single-print {
+      display: none !important;
     }
 
     /* Auto-fit content to page width */

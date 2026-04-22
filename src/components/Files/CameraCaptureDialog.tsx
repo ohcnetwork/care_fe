@@ -114,7 +114,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       clearTimeout(timer);
       stopStream();
     };
-  }, [open]);
+  }, [open, cameraFacingMode]);
 
   const handleClose = () => {
     setPreviewImage(null);

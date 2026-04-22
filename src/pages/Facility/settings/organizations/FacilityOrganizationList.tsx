@@ -41,7 +41,7 @@ export default function FacilityOrganizationList({
     Set<string>
   >(new Set([]));
 
-  const { facility, facilityId } = useCurrentFacility();
+  const { facilityId, facility } = useCurrentFacility();
 
   const { data: org } = useQuery({
     queryKey: ["facilityOrganization", organizationId],

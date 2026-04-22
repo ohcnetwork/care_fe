@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-query";
 import {
   CheckIcon,
-  ChevronLeft,
   ChevronRight,
   Package,
   PlusIcon,
@@ -77,10 +76,9 @@ import { UserReadMinimal } from "@/types/user/user";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { formatDateTime, formatName, goBack } from "@/Utils/utils";
 
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
-import BackButton from "@/components/Common/BackButton";
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import {
@@ -264,7 +262,7 @@ export function CreateInvoicePage({
         onSuccess?.();
       } else {
         onSuccess?.();
-        navigate(invoiceUrl);
+        navigate(invoiceUrl, { replace: true });
       }
     },
   });
@@ -417,14 +415,6 @@ export function CreateInvoicePage({
       {showHeader && (
         <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center border-b-3 border-double pb-4">
           <div className="flex gap-3 sm:gap-6 flex-col md:flex-row">
-            <BackButton
-              variant="link"
-              className="px-0 justify-start"
-              fallbackUrl={`/facility/${facilityId}/billing/account/${accountId}`}
-            >
-              <ChevronLeft />
-              <span>{t("back")}</span>
-            </BackButton>
             <div className="h-auto w-px bg-gray-300" aria-hidden="true" />
             {account?.patient && (
               <>
@@ -924,16 +914,22 @@ export function CreateInvoicePage({
             </Collapsible>
 
             <div className="flex justify-end space-x-4">
-              <BackButton
+              <Button
                 type="button"
                 variant="ghost"
                 className="text-base font-semibold"
-                {...(onCancel && { onClick: onCancel })}
+                onClick={() => {
+                  if (onCancel) {
+                    onCancel();
+                  } else {
+                    goBack();
+                  }
+                }}
                 disabled={createMutation.isPending}
                 data-shortcut-id="go-back"
               >
                 <span className="underline">{t("cancel")}</span>
-              </BackButton>
+              </Button>
               {dispenseOrderId && (
                 <Button
                   type="button"
