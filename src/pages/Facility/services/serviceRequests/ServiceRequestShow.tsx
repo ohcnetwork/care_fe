@@ -334,7 +334,7 @@ export default function ServiceRequestShow({
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 relative">
       <div
-        className={`flex-1 p-4 max-w-6xl ${canShowCompleteCta ? "pb-28" : ""}`}
+        className={`flex-1 p-4 max-w-6xl ${canShowCompleteCta && !disableEdit ? "pb-28" : ""}`}
       >
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-2">
@@ -691,7 +691,7 @@ export default function ServiceRequestShow({
                 if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
               }}
             >
-              <DialogContent className="sm:max-w-lg shadow-lg border-white/20 border-5">
+              <DialogContent className="sm:max-w-lg shadow-lg border-white/20">
                 <DialogHeader>
                   <DialogTitle>{t("add_completion_note")}</DialogTitle>
                   <DialogDescription>
@@ -747,12 +747,13 @@ const CompletionNoteContent = ({
           onChange={(e) => onNoteChange(e.target.value)}
           placeholder={t("enter_note")}
           className="min-h-14"
+          aria-label={t("completion_note")}
         />
       </div>
       <div className="flex flex-row items-start justify-start gap-2 pt-2 sm:pt-0">
         <Button variant="primary" onClick={onComplete} disabled={isUpdating}>
           <CheckIcon className="size-4" />
-          {isUpdating ? t("updating") : `${t("save")} & ${t("complete")}`}
+          {isUpdating ? t("updating") : `${t("save_and_complete")}`}
         </Button>
         <Button variant="outline" onClick={onCancel} disabled={isUpdating}>
           {t("cancel")}
