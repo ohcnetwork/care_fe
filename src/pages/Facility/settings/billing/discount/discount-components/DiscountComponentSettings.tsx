@@ -65,6 +65,7 @@ export function DiscountComponentSettings() {
     deleteComponent({
       discount_monetary_components: updatedComponents,
       discount_codes: facility.discount_codes,
+      discount_configuration: facility.discount_configuration ?? null,
     });
 
     setComponentToDelete(undefined);
@@ -107,14 +108,14 @@ export function DiscountComponentSettings() {
           <CreateDiscountMonetaryComponentSheet />
         </div>
 
-        <div className="rounded-md border overflow-hidden mt-4">
-          <Table>
+        <div className="rounded-md border overflow-x-auto md:overflow-hidden mt-4">
+          <Table className="w-full md:table-fixed">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-20" />
                 <TableHead>{t("name")}</TableHead>
                 <TableHead>{t("discount_code")}</TableHead>
-                <TableHead>{t("value")}</TableHead>
+                <TableHead className="w-20">{t("value")}</TableHead>
                 <TableHead className="w-24"></TableHead>
               </TableRow>
             </TableHeader>
@@ -137,18 +138,29 @@ export function DiscountComponentSettings() {
                         {component.isInstance ? t("instance") : t("facility")}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {component.title}
+                    <TableCell className="font-medium min-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="flex-1 min-w-0 truncate"
+                          title={component.title}
+                        >
+                          {component.title}
+                        </span>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="min-w-0">
                       {component.code && (
-                        <div className="flex items-center gap-2">
-                          <code className="px-2 py-1 rounded bg-gray-100 text-sm">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <code
+                            className="truncate px-2 py-1 rounded bg-gray-100 text-sm"
+                            title={component.code.code}
+                          >
                             {component.code.code}
                           </code>
-                          <span className="text-sm">
+                          <span
+                            className="hidden lg:inline flex-1 min-w-0 text-sm truncate"
+                            title={component.code.display}
+                          >
                             • {component.code.display}
                           </span>
                         </div>

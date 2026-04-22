@@ -12,7 +12,6 @@ import ProductionWarningBanner from "@/components/Common/ProductionWarningBanner
 import Integrations from "@/Integrations";
 import PluginEngine from "@/PluginEngine";
 import AuthUserProvider from "@/Providers/AuthUserProvider";
-import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
@@ -41,27 +40,25 @@ const App = () => {
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
             <ShortcutProvider>
-              <PluginEngine>
-                <HistoryAPIProvider>
-                  <AuthUserProvider
-                    unauthorized={<Routers.PublicRouter />}
-                    otpAuthorized={<Routers.PatientRouter />}
-                  >
-                    <Routers.AppRouter />
-                  </AuthUserProvider>
-                </HistoryAPIProvider>
-                <Toaster
-                  position="top-center"
-                  theme="light"
-                  richColors
-                  expand
-                  // For `richColors` to work, pass at-least an empty object.
-                  // Refer: https://github.com/shadcn-ui/ui/issues/2234.
-                  toastOptions={{}}
-                  closeButton
-                />
-                <AppUpdateNotifier />
-              </PluginEngine>
+              <AuthUserProvider
+                unauthorized={<Routers.PublicRouter />}
+                otpAuthorized={<Routers.PatientRouter />}
+              >
+                <PluginEngine>
+                  <Routers.AppRouter />
+                </PluginEngine>
+              </AuthUserProvider>
+              <Toaster
+                position="top-center"
+                theme="light"
+                richColors
+                expand
+                // For `richColors` to work, pass at-least an empty object.
+                // Refer: https://github.com/shadcn-ui/ui/issues/2234.
+                toastOptions={{}}
+                closeButton
+              />
+              <AppUpdateNotifier />
             </ShortcutProvider>
           </PubSubProvider>
         </Suspense>

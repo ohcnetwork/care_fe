@@ -53,6 +53,7 @@ export interface Organization {
   updated_at: string;
   metadata: Metadata | null;
   permissions: string[];
+  managing_organizations?: OrganizationParent[];
 }
 
 export interface OrganizationCreate {

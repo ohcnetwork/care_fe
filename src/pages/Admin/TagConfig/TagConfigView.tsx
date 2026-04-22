@@ -14,8 +14,6 @@ import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -25,6 +23,7 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
+import BackButton from "@/components/Common/BackButton";
 import TagConfigTable from "./components/TagConfigTable";
 
 interface TagConfigViewProps {
@@ -38,7 +37,6 @@ export default function TagConfigView({
 }: TagConfigViewProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { goBack } = useAppHistory();
 
   // Fetch tag details
   const { data: tagConfig, isLoading } = useQuery({
@@ -146,18 +144,10 @@ export default function TagConfigView({
   return (
     <Page title={tagConfig.display} hideTitleOnPage>
       <div className="container mx-auto space-y-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={(e) => {
-            e.preventDefault();
-            goBack();
-          }}
-          className="shrink-0"
-        >
+        <BackButton variant="outline" size="sm" className="shrink-0">
           <CareIcon icon="l-arrow-left" className="size-5" />
           {t("back")}
-        </Button>
+        </BackButton>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -231,14 +221,16 @@ export default function TagConfigView({
                   {tagConfig.system_generated ? t("yes") : t("no")}
                 </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  {t("has_children")}
-                </label>
-                <div className="mt-1 text-sm">
-                  {tagConfig.has_children ? t("yes") : t("no")}
+              {!tagConfig.parent && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">
+                    {t("has_children")}
+                  </label>
+                  <div className="mt-1 text-sm">
+                    {tagConfig.has_children ? t("yes") : t("no")}
+                  </div>
                 </div>
-              </div>
+              )}
               <div>
                 <label className="text-sm font-medium text-gray-600">
                   {t("managing_organization")}
@@ -286,45 +278,43 @@ export default function TagConfigView({
         </Card>
 
         {/* Child Tags Section */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <CareIcon icon="l-sitemap" className="size-5" />
-                {t("child_tags")}
-              </CardTitle>
-              <TagConfigFormDrawer
-                title={t("add_child_tag")}
-                parentId={tagId}
-                onSuccess={handleAddChildSuccess}
-                facilityId={facilityId}
-                trigger={
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!!tagConfig.parent}
-                  >
-                    <CareIcon icon="l-plus" className="size-4 mr-2" />
-                    {t("add_child_tag")}
-                  </Button>
-                }
+        {!tagConfig.parent && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <CareIcon icon="l-sitemap" className="size-5" />
+                  {t("child_tags")}
+                </CardTitle>
+                <TagConfigFormDrawer
+                  title={t("add_child_tag")}
+                  parentId={tagId}
+                  onSuccess={handleAddChildSuccess}
+                  facilityId={facilityId}
+                  trigger={
+                    <Button variant="outline" size="sm">
+                      <CareIcon icon="l-plus" className="size-4 mr-2" />
+                      {t("add_child_tag")}
+                    </Button>
+                  }
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <TagConfigTable
+                configs={children}
+                isLoading={isLoadingChildren}
+                onView={handleViewChild}
+                onArchive={handleArchiveChild}
+                showChildrenColumn={false}
+                showArchiveAction={true}
+                emptyStateTitle={t("no_child_tags_found")}
+                emptyStateDescription={t("no_child_tags_found_description")}
+                emptyStateIcon={"l-sitemap" as IconName}
               />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <TagConfigTable
-              configs={children}
-              isLoading={isLoadingChildren}
-              onView={handleViewChild}
-              onArchive={handleArchiveChild}
-              showChildrenColumn={false}
-              showArchiveAction={true}
-              emptyStateTitle={t("no_child_tags_found")}
-              emptyStateDescription={t("no_child_tags_found_description")}
-              emptyStateIcon={"l-sitemap" as IconName}
-            />
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </Page>
   );

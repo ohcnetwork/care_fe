@@ -29,6 +29,10 @@ import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import {
+  hasResponsibilityUsersAccessViaNullRoleAssignment,
+  useAccessibleRoleOrganizationsList,
+} from "@/hooks/useAccessibleRoleOrganizationsList";
 import { useCareApps } from "@/hooks/useCareApps";
 import OrganizationLayoutSkeleton from "@/pages/Organization/components/OrganizationLayoutSkeleton";
 import {
@@ -39,12 +43,15 @@ import {
 import organizationApi from "@/types/organization/organizationApi";
 import { Bot } from "lucide-react";
 
+export type RouteContext = "responsibility" | "organization";
+
 interface Props {
   // NavOrganizationId is used to show the organization switcher in the sidebar, it may not the parent organization
   navOrganizationId?: string;
   id: string;
   children: (props: { orgPermissions: string[] }) => React.ReactNode;
   setOrganization?: (org: Organization) => void;
+  routeContext?: RouteContext;
 }
 
 export default function OrganizationLayout({
@@ -52,20 +59,18 @@ export default function OrganizationLayout({
   navOrganizationId,
   children,
   setOrganization,
+  routeContext,
 }: Props) {
   const path = usePath() || "";
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const careApps = useCareApps();
+  const { data: accessibleRoleData } = useAccessibleRoleOrganizationsList();
 
   const organizationTabs = careApps.flatMap(
     (c) => (!c.isLoading && c.organizationTabs) || [],
   );
-
-  const baseUrl = navOrganizationId
-    ? `/organization/${navOrganizationId}/children`
-    : `/organization`;
 
   const { data: org, isLoading } = useQuery({
     queryKey: ["organization", id],
@@ -89,18 +94,41 @@ export default function OrganizationLayout({
     return <div>{t("organization_not_found")}</div>;
   }
 
+  const isRoleOrg = org.org_type === OrgType.ROLE;
+
+  // Determine route context from prop or org type
+  const effectiveContext: RouteContext =
+    routeContext || (isRoleOrg ? "responsibility" : "organization");
+
+  const canShowUsersForNullRoleResponsibility =
+    effectiveContext === "responsibility" &&
+    hasResponsibilityUsersAccessViaNullRoleAssignment(
+      id,
+      accessibleRoleData?.results,
+    );
+
+  const baseUrl = navOrganizationId
+    ? `/organization/${navOrganizationId}/children`
+    : effectiveContext === "responsibility"
+      ? `/responsibilities`
+      : `/organization`;
+
   const navItems: NavigationLink[] = [
     {
       url: `${baseUrl}/${id}`,
       name: t("organizations"),
       icon: <CareIcon icon="d-hospital" />,
-      visibility: hasPermission("can_view_organization", org.permissions),
+      // Role orgs are flat — no child organizations
+      visibility:
+        !isRoleOrg && hasPermission("can_view_organization", org.permissions),
     },
     {
       url: `${baseUrl}/${id}/users`,
       name: t("users"),
       icon: <CareIcon icon="d-people" />,
-      visibility: hasPermission("can_list_organization_users", org.permissions),
+      visibility:
+        hasPermission("can_list_organization_users", org.permissions) ||
+        canShowUsersForNullRoleResponsibility,
     },
     {
       url: `${baseUrl}/${id}/patients`,
@@ -120,7 +148,10 @@ export default function OrganizationLayout({
       url: `${baseUrl}/${id}/service_accounts`,
       name: t("service_accounts"),
       icon: <Bot className="size-4" />,
-      visibility: hasPermission("can_list_organization_users", org.permissions),
+      // Role orgs don't have service accounts
+      visibility:
+        !isRoleOrg &&
+        hasPermission("can_list_organization_users", org.permissions),
     },
     ...organizationTabs.map((tab) => ({
       url: `${baseUrl}/${id}/${tab.slug}`,
@@ -175,95 +206,99 @@ export default function OrganizationLayout({
         </div>
       )}
 
-      {/* Desktop Navigation */}
-      <div className="mt-4 min-w-0 hidden lg:block">
-        <Menubar className="w-full h-full overflow-x-auto">
-          {navItems
-            .filter((item) => item.visibility)
-            .map((item) => (
-              <MenubarMenu key={item.url}>
-                <MenubarTrigger
-                  className={`${
-                    path === item.url
-                      ? "font-medium text-primary-700 bg-gray-100"
-                      : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
-                  }`}
-                  asChild
-                >
-                  <Link href={item.url} className="cursor-pointer">
-                    <div className="mr-2">{item.icon}</div>
-                    {item.name}
-                  </Link>
-                </MenubarTrigger>
-              </MenubarMenu>
-            ))}
-        </Menubar>
-      </div>
-
-      {/* Mobile Navigation */}
-      <div className="mt-4">
-        <div className="block lg:hidden">
-          <DropdownMenu
-            open={isMobileMenuOpen}
-            onOpenChange={setIsMobileMenuOpen}
-          >
-            <DropdownMenuTrigger asChild className="py-2">
-              <Button
-                variant="outline"
-                className="w-full flex justify-between items-center py-3 px-4"
-              >
-                <div className="flex items-center py-2">
-                  {activeNavItem && (
-                    <div className="mr-2 size-5">{activeNavItem.icon}</div>
-                  )}
-                  <span className="font-medium text-base">
-                    {activeNavItem ? activeNavItem.name : t("navigation")}
-                  </span>
-                </div>
-                <CareIcon
-                  icon={isMobileMenuOpen ? "l-angle-up" : "l-angle-down"}
-                  className="ml-2 size-4"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              sideOffset={5}
-              className="w-[var(--radix-dropdown-menu-trigger-width)]"
-            >
-              {visibleNavItems.map((item) => (
-                <DropdownMenuItem
-                  key={item.url}
-                  className={cn(
-                    "flex justify-between items-center py-3",
-                    path === item.url
-                      ? "font-medium text-primary-700 bg-gray-100"
-                      : "text-gray-700",
-                  )}
-                  asChild
-                >
-                  <Link
-                    href={item.url}
-                    className="flex items-center w-full"
-                    onClick={() => setIsMobileMenuOpen(false)}
+      {/* Desktop Navigation — hide when only one tab visible */}
+      {visibleNavItems.length > 1 && (
+        <div className="mt-4 min-w-0 hidden lg:block">
+          <Menubar className="w-full h-full overflow-x-auto">
+            {navItems
+              .filter((item) => item.visibility)
+              .map((item) => (
+                <MenubarMenu key={item.url}>
+                  <MenubarTrigger
+                    className={`${
+                      path === item.url
+                        ? "font-medium text-primary-700 bg-gray-100"
+                        : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
+                    }`}
+                    asChild
                   >
-                    <div className="flex items-center text-base">
+                    <Link href={item.url} className="cursor-pointer">
                       <div className="mr-2">{item.icon}</div>
                       {item.name}
-                    </div>
-                    {path === item.url && (
-                      <DropdownMenuCheckboxItem
-                        checked
-                        className="pointer-events-none pr-1"
-                      />
-                    )}
-                  </Link>
-                </DropdownMenuItem>
+                    </Link>
+                  </MenubarTrigger>
+                </MenubarMenu>
               ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          </Menubar>
         </div>
-      </div>
+      )}
+
+      {/* Mobile Navigation */}
+      {visibleNavItems.length > 1 && (
+        <div className="mt-4">
+          <div className="block lg:hidden">
+            <DropdownMenu
+              open={isMobileMenuOpen}
+              onOpenChange={setIsMobileMenuOpen}
+            >
+              <DropdownMenuTrigger asChild className="py-2">
+                <Button
+                  variant="outline"
+                  className="w-full flex justify-between items-center py-3 px-4"
+                >
+                  <div className="flex items-center py-2">
+                    {activeNavItem && (
+                      <div className="mr-2 size-5">{activeNavItem.icon}</div>
+                    )}
+                    <span className="font-medium text-base">
+                      {activeNavItem ? activeNavItem.name : t("navigation")}
+                    </span>
+                  </div>
+                  <CareIcon
+                    icon={isMobileMenuOpen ? "l-angle-up" : "l-angle-down"}
+                    className="ml-2 size-4"
+                  />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                sideOffset={5}
+                className="w-[var(--radix-dropdown-menu-trigger-width)]"
+              >
+                {visibleNavItems.map((item) => (
+                  <DropdownMenuItem
+                    key={item.url}
+                    className={cn(
+                      "flex justify-between items-center py-3",
+                      path === item.url
+                        ? "font-medium text-primary-700 bg-gray-100"
+                        : "text-gray-700",
+                    )}
+                    asChild
+                  >
+                    <Link
+                      href={item.url}
+                      className="flex items-center w-full"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <div className="flex items-center text-base">
+                        <div className="mr-2">{item.icon}</div>
+                        {item.name}
+                      </div>
+                      {path === item.url && (
+                        <DropdownMenuCheckboxItem
+                          checked
+                          className="pointer-events-none pr-1"
+                        />
+                      )}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      )}
 
       {/* Page Content */}
       <div className="mt-4">

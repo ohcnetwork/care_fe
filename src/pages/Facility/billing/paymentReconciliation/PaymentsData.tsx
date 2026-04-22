@@ -53,22 +53,16 @@ import {
 } from "@/components/ui/multi-filter/utils/Utils";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import {
+  getPaymentTypeLabelKey,
   PAYMENT_RECONCILIATION_METHOD_MAP,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
   PaymentReconciliationRead,
-  PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 import ChangePaymentAccountSheet from "./ChangePaymentAccountSheet";
-
-const typeMap: Record<PaymentReconciliationType, string> = {
-  payment: "Payment",
-  adjustment: "Adjustment",
-  advance: "Advance",
-};
 
 const SORT_OPTIONS = {
   "-payment_datetime": "sort_by_latest_payment",
@@ -132,7 +126,7 @@ export default function PaymentsData({
       queryParams: {
         account: accountId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         created_date_after: qParams.created_date_after
           ? dateTimeQueryString(new Date(qParams.created_date_after))
@@ -424,12 +418,19 @@ export default function PaymentsData({
                     </TableCell>
                   )}
                   <TableCell>
-                    {payment.payment_datetime
-                      ? format(
-                          new Date(payment.payment_datetime),
-                          "MMM d, yyyy hh:mm a",
-                        )
-                      : "-"}
+                    <div className="flex flex-col">
+                      <span>
+                        {payment.payment_datetime
+                          ? format(
+                              new Date(payment.payment_datetime),
+                              "MMM d, yyyy hh:mm a",
+                            )
+                          : "-"}
+                      </span>
+                      <span className="font-mono text-xs text-gray-500">
+                        {payment.id}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell>
                     {payment.target_invoice && (
@@ -449,7 +450,14 @@ export default function PaymentsData({
                       </Button>
                     )}
                   </TableCell>
-                  <TableCell>{typeMap[payment.reconciliation_type]}</TableCell>
+                  <TableCell>
+                    {t(
+                      getPaymentTypeLabelKey(
+                        payment.reconciliation_type,
+                        payment.is_credit_note,
+                      ),
+                    )}
+                  </TableCell>
                   <TableCell>{t(payment.issuer_type)}</TableCell>
                   <TableCell>
                     {PAYMENT_RECONCILIATION_METHOD_MAP[payment.method]}

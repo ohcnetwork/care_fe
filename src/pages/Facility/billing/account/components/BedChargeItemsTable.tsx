@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
-import { useQueryParams } from "raviger";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { EmptyState } from "@/components/ui/empty-state";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -47,7 +49,7 @@ import queryClient from "@/Utils/request/queryClient";
 import { formatName } from "@/Utils/utils";
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
-import encounterApi from "@/types/emr/encounter/encounterApi";
+import { AccountRead } from "@/types/billing/account/Account";
 import { LocationAssociationRead } from "@/types/location/association";
 import { differenceInDays, differenceInHours, format } from "date-fns";
 import ChargeItemActionsMenu from "./ChargeItemActions";
@@ -90,11 +92,13 @@ interface LocationGroupRowProps {
     locationId: string;
     status: boolean;
   }) => void;
+  canAddChargeItems: boolean;
 }
 
 function LocationGroupRow({
   location,
   setAddChargeItemState,
+  canAddChargeItems,
 }: LocationGroupRowProps) {
   const { t } = useTranslation();
   return (
@@ -145,21 +149,23 @@ function LocationGroupRow({
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setAddChargeItemState({
-                serviceRequestId: location.id,
-                locationId: location.id,
-                status: true,
-              })
-            }
-            className=""
-          >
-            <PlusIcon className="size-4 mr-2" />
-            {t("add_charge_items")}
-          </Button>
+          {canAddChargeItems && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setAddChargeItemState({
+                  serviceRequestId: location.id,
+                  locationId: location.id,
+                  status: true,
+                })
+              }
+              className=""
+            >
+              <PlusIcon className="size-4 mr-2" />
+              {t("add_charge_items")}
+            </Button>
+          )}
         </div>
       </TableCell>
     </TableRow>
@@ -185,15 +191,19 @@ function groupChargeItemsByLocation(
 
 export interface BedChargeItemsTableProps {
   facilityId: string;
-  accountId: string;
+  account: AccountRead;
+  canAddChargeItems?: boolean;
 }
 
 export function BedChargeItemsTable({
   facilityId,
-  accountId,
+  account,
+  canAddChargeItems = true,
 }: BedChargeItemsTableProps) {
   const { t } = useTranslation();
-  const [{ encounterId }] = useQueryParams();
+  const encounterId = account.primary_encounter?.id;
+  const accountId = account.id;
+
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
     {},
   );
@@ -210,16 +220,7 @@ export function BedChargeItemsTable({
   const [selectedChargeItem, setSelectedChargeItem] =
     useState<ChargeItemRead | null>(null);
 
-  const { data: encounter, isLoading: isEncounterLoading } = useQuery({
-    queryKey: ["encounter", encounterId],
-    queryFn: query(encounterApi.get, {
-      pathParams: { id: encounterId },
-      queryParams: facilityId ? { facility: facilityId } : {},
-    }),
-    enabled: !!encounterId,
-  });
-
-  const locationHistory = encounter?.location_history || [];
+  const locationHistory = account.primary_encounter?.location_history || [];
 
   const { data: chargeItems, isLoading } = useQuery({
     queryKey: [
@@ -235,7 +236,7 @@ export function BedChargeItemsTable({
         status: qParams.status,
         service_resource: ChargeItemServiceResource.bed_association,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
   }) as {
@@ -302,6 +303,7 @@ export function BedChargeItemsTable({
             queryKey: ["chargeItems", accountId],
           });
         }}
+        accountId={accountId}
       />
       <div className="mb-4">
         {/* Desktop Tabs */}
@@ -345,14 +347,20 @@ export function BedChargeItemsTable({
           </SelectContent>
         </Select>
       </div>
-      {isLoading || isEncounterLoading ? (
+      {isLoading ? (
         <TableSkeleton count={3} />
-      ) : encounterId == undefined || !encounterId || !encounter ? (
-        <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
-          <div className="text-center text-gray-500 py-4">
-            {t("no_encounter_associated")}
-          </div>
-        </div>
+      ) : !encounterId || !locationHistory.length ? (
+        <EmptyState
+          icon={<CareIcon icon="l-bed" className="text-primary size-6" />}
+          title={
+            !encounterId ? t("no_encounter_associated") : t("no_locations")
+          }
+          description={
+            !encounterId
+              ? t("no_encounter_associated_description")
+              : t("no_locations_description")
+          }
+        />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
           <Table className="rounded-lg border shadow-sm w-full bg-white">
@@ -386,13 +394,7 @@ export function BedChargeItemsTable({
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
-              {!locationHistory.length ? (
-                <TableRow>
-                  <TableCell colSpan={9} className="text-center text-gray-500">
-                    {t("no_locations")}
-                  </TableCell>
-                </TableRow>
-              ) : (
+              {locationHistory.length > 0 &&
                 locationHistory.flatMap((location) => {
                   const items = groupedChargeItems[location.id] || [];
 
@@ -401,15 +403,21 @@ export function BedChargeItemsTable({
                       key={`location-${location.id}`}
                       location={location}
                       setAddChargeItemState={setAddChargeItemState}
+                      canAddChargeItems={canAddChargeItems}
                     />,
                     ...(items.length === 0
                       ? [
                           <TableRow key={`${location.id}-no-items`}>
-                            <TableCell
-                              colSpan={9}
-                              className="text-center text-gray-500 py-4"
-                            >
-                              {t("no_charge_items_for_location")}
+                            <TableCell colSpan={9} className="py-4">
+                              <EmptyState
+                                icon={
+                                  <CareIcon
+                                    icon="l-receipt"
+                                    className="text-primary size-6"
+                                  />
+                                }
+                                title={t("no_charge_items_for_location")}
+                              />
                             </TableCell>
                           </TableRow>,
                         ]
@@ -551,8 +559,7 @@ export function BedChargeItemsTable({
                           ].filter(Boolean);
                         })),
                   ];
-                })
-              )}
+                })}
             </TableBody>
           </Table>
         </div>

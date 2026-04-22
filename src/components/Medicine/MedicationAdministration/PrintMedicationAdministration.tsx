@@ -21,6 +21,7 @@ import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
+import useCurrentFacilitySilently from "@/pages/Facility/utils/useCurrentFacility";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
@@ -29,6 +30,7 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import query from "@/Utils/request/query";
 import {
   formatName,
@@ -67,6 +69,7 @@ export const PrintMedicationAdministration = (props: {
 }) => {
   const { facilityId, encounterId, patientId } = props;
   const { t } = useTranslation();
+  const { facility } = useCurrentFacilitySilently();
 
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
@@ -129,7 +132,7 @@ export const PrintMedicationAdministration = (props: {
         med.requested_product?.name ||
         med.medication?.display ||
         "Unknown Medication";
-      const isPRN = med.dosage_instruction[0]?.as_needed_boolean || false;
+      const isPRN = med.dosage_instruction.some((di) => di.as_needed_boolean);
       const isActive = ACTIVE_MEDICATION_STATUSES.includes(
         med.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
       );
@@ -237,6 +240,8 @@ export const PrintMedicationAdministration = (props: {
     <PrintPreview
       title={`${t("drug_chart")} - ${encounter?.patient.name}`}
       disabled={!hasData}
+      facility={facility}
+      templateSlug={PrintTemplateType.medication_administration}
     >
       {/* Print Options - hidden when printing */}
       <div className="print:hidden mb-4 p-3 bg-gray-50 rounded-lg border flex items-center gap-6 flex-wrap">
@@ -437,24 +442,37 @@ const DrugChartTable = ({
           {groups.map((group) => {
             // Get the latest active request for display
             const latestRequest = group.requests[0];
-            const dosage = latestRequest.dosage_instruction[0];
-            const doseText = formatDosage(dosage);
-            const routeText = dosage?.route?.display;
-            const frequencyText = isPRN
-              ? t("as_needed")
-              : formatFrequency(dosage);
+            const instructions = latestRequest.dosage_instruction;
 
             return (
               <tr key={group.productId} className={cn(isPRN && "bg-pink-50")}>
                 <td className="border-r-2 border-b border-gray-400 p-1.5 align-top">
-                  <div className="font-bold text-[11px] leading-tight">
+                  <div className="font-bold text-[11px] leading-tight text-wrap break-all">
                     {group.productName}
                   </div>
-                  <div className="text-[9px] text-gray-600 mt-0.5 leading-snug">
-                    {[doseText, routeText, frequencyText]
+                  {instructions.map((di, idx) => {
+                    const doseText = formatDosage(di);
+                    const routeText = di.route?.display;
+                    const frequencyText = isPRN
+                      ? t("as_needed")
+                      : formatFrequency(di);
+                    const summary = [doseText, routeText, frequencyText]
                       .filter(Boolean)
-                      .join(" · ")}
-                  </div>
+                      .join(" · ");
+                    return summary ? (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "text-[9px] text-gray-600 leading-snug",
+                          idx === 0 && "mt-0.5",
+                          idx > 0 &&
+                            "mt-0.5 pt-0.5 border-t border-dashed border-gray-300",
+                        )}
+                      >
+                        {summary}
+                      </div>
+                    ) : null;
+                  })}
                   {group.requests.length > 1 && (
                     <div className="text-[8px] text-gray-400 mt-0.5">
                       ({group.requests.length} {t("orders")})
