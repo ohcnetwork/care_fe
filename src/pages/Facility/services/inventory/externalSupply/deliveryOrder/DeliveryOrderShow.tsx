@@ -497,50 +497,49 @@ export function DeliveryOrderShow({
                 </Button>
               )}
 
-            {deliveryOrder.status !== DeliveryOrderStatus.entered_in_error &&
-              deliveryOrder.status !== DeliveryOrderStatus.abandoned && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <EllipsisVertical className="size-4" />
+            {deliveryOrder.status === DeliveryOrderStatus.draft && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <EllipsisVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        setDeliveryOrderStatusDialog({
+                          open: true,
+                          status: DeliveryOrderStatus.entered_in_error,
+                        })
+                      }
+                      disabled={isUpdating}
+                      className="w-full flex justify-stretch"
+                    >
+                      <CareIcon icon="l-exclamation-circle" />
+                      <span>{t("mark_as_entered_in_error")}</span>
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          setDeliveryOrderStatusDialog({
-                            open: true,
-                            status: DeliveryOrderStatus.entered_in_error,
-                          })
-                        }
-                        disabled={isUpdating}
-                        className="w-full flex justify-stretch"
-                      >
-                        <CareIcon icon="l-exclamation-circle" />
-                        <span>{t("mark_as_entered_in_error")}</span>
-                      </Button>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          setDeliveryOrderStatusDialog({
-                            open: true,
-                            status: DeliveryOrderStatus.abandoned,
-                          })
-                        }
-                        disabled={isUpdating}
-                        className="w-full flex justify-stretch"
-                      >
-                        <CareIcon icon="l-ban" />
-                        <span>{t("mark_as_abandoned")}</span>
-                      </Button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        setDeliveryOrderStatusDialog({
+                          open: true,
+                          status: DeliveryOrderStatus.abandoned,
+                        })
+                      }
+                      disabled={isUpdating}
+                      className="w-full flex justify-stretch"
+                    >
+                      <CareIcon icon="l-ban" />
+                      <span>{t("mark_as_abandoned")}</span>
+                    </Button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 
