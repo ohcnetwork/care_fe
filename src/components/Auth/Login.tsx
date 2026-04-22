@@ -107,8 +107,7 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
-  const [resendOtpCountdown, setResendOtpCountdown] =
-    useState(resendOtpTimeout);
+  const [resendOtpCountdown, setResendOtpCountdown] = useState(0);
 
   // Timer Function for resend OTP
   useEffect(() => {
@@ -121,7 +120,7 @@ const Login = (props: LoginProps) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [resendOtpCountdown]);
 
   // Remember the last login mode
   useEffect(() => {
@@ -190,12 +189,13 @@ const Login = (props: LoginProps) => {
   });
 
   // Forgot Password Mutation
-  const { mutate: submitForgetPassword } = useMutation({
-    mutationFn: mutate(authApi.forgotPassword),
-    onSuccess: () => {
-      toast.success(t("password_sent"));
-    },
-  });
+  const { mutate: submitForgetPassword, isPending: forgotPasswordPending } =
+    useMutation({
+      mutationFn: mutate(authApi.forgotPassword),
+      onSuccess: () => {
+        toast.success(t("password_sent"));
+      },
+    });
 
   // Login form validation
   const handleChange = (e: any) => {
@@ -494,9 +494,9 @@ const Login = (props: LoginProps) => {
                             type="submit"
                             className="w-full"
                             variant="primary"
-                            disabled={isLoading}
+                            disabled={isLoading || forgotPasswordPending}
                           >
-                            {isLoading ? (
+                            {isLoading || forgotPasswordPending ? (
                               <CircularProgress className="text-white" />
                             ) : (
                               t("send_reset_link")
@@ -656,9 +656,9 @@ const Login = (props: LoginProps) => {
                               type="submit"
                               className="w-full"
                               variant="primary"
-                              disabled={isLoading}
+                              disabled={isLoading || forgotPasswordPending}
                             >
-                              {isLoading ? (
+                              {isLoading || forgotPasswordPending ? (
                                 <CircularProgress className="text-white" />
                               ) : (
                                 t("send_reset_link")

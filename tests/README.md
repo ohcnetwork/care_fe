@@ -25,7 +25,7 @@ npm run playwright:test:ui
 npm run playwright:test:headed
 
 # Run specific test file
-npx playwright test tests/login.spec.ts
+npx playwright test tests/auth/login.spec.ts
 
 # Run tests in a specific browser
 npx playwright test --project=chromium
@@ -39,21 +39,33 @@ npm run playwright:show-report
 Before running tests, ensure:
 
 1. **Backend is running** - See [CARE Backend Setup](https://care-be-docs.ohc.network/)
-2. **Frontend dev server is running**: `npm run dev`
-3. **Environment variables** - Create `.env.local` with:
+2. **Environment variables** - Create `.env.local` with:
    ```env
    REACT_CARE_API_URL=http://127.0.0.1:9000
    ```
+
+Note: The Playwright configuration is set to automatically start a production server using `npm run preview` via the `webServer` command. You do not need to have `npm run dev` running in a separate terminal to execute tests.
 
 ## Test Structure
 
 ```
 tests/
-├── auth.setup.ts           # Authentication setup
-├── login.spec.ts          # Login functionality tests
-├── homepage.spec.ts       # Homepage tests
-├── authenticated.spec.ts  # Tests requiring authentication
-└── .auth/                 # Stored authentication state (gitignored)
+├── admin/                   # Administrative (Patient ID, Questionnaire, Tags) tests
+├── auth/                    # Authentication and landing page tests
+│   ├── authenticated.spec.ts
+│   ├── homepage.spec.ts
+│   └── login.spec.ts
+├── billing/                 # Billing and financial workflow tests
+├── facility/                # Extensive patient, encounter, and settings tests
+├── organization/            # Organization-level management tests
+├── setup/                   # Test setup projects for different roles
+│   ├── auth.setup.ts
+│   ├── facilityAdmin.setup.ts
+│   ├── patientAccount.setup.ts
+│   └── ...                  # Includes nurse, facility, and patient setups
+├── .auth/                   # Stored authentication state (gitignored)
+├── globalSetup.ts           # Global configuration at the root level
+└── ...                      # Other domain-specific suites (helper/, support/, etc.)
 ```
 
 ## Writing Tests
@@ -120,7 +132,7 @@ test("authenticated test", async ({ page }) => {
 npx playwright test --debug
 
 # Debug specific test
-npx playwright test tests/login.spec.ts --debug
+npx playwright test tests/auth/login.spec.ts --debug
 ```
 
 ### VS Code Integration
@@ -144,7 +156,7 @@ npx playwright show-trace trace.zip
 See `playwright.config.ts` for configuration options:
 
 - **baseURL**: http://localhost:4000
-- **Browsers**: Chromium, Firefox, WebKit
+- **Browsers**: Runs tests on Chromium by default (as configured in `playwright.config.ts`)
 - **Retries**: 2 on CI, 0 locally
 - **Trace**: Captured on first retry
 

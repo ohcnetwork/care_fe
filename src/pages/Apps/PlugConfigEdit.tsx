@@ -185,7 +185,6 @@ export function PlugConfigEdit({ slug }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (isReadOnly) {
       return;
     }
@@ -203,7 +202,6 @@ export function PlugConfigEdit({ slug }: Props) {
       );
       return;
     }
-
     const configPayload = { ...config, meta };
     upsertConfig(configPayload);
   };

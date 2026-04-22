@@ -75,3 +75,4 @@ public/sbom/*
 public/_headers
 
 namespaceMapping.json
+dump.rdb
