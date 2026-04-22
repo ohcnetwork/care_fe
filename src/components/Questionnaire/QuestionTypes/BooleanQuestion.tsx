@@ -38,12 +38,14 @@ export function BooleanQuestion({
       onValueChange={(value) => {
         clearError();
         updateQuestionnaireResponseCB(
-          [
-            {
-              type: "boolean",
-              value: { true: true, false: false }[value] ?? undefined,
-            },
-          ],
+          value === ""
+            ? []
+            : [
+                {
+                  type: "boolean",
+                  value: { true: true, false: false }[value] ?? undefined,
+                },
+              ],
           questionnaireResponse.question_id,
           questionnaireResponse.note,
         );

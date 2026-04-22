@@ -29,6 +29,10 @@ import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import {
+  hasResponsibilityUsersAccessViaNullRoleAssignment,
+  useAccessibleRoleOrganizationsList,
+} from "@/hooks/useAccessibleRoleOrganizationsList";
 import { useCareApps } from "@/hooks/useCareApps";
 import OrganizationLayoutSkeleton from "@/pages/Organization/components/OrganizationLayoutSkeleton";
 import {
@@ -62,6 +66,7 @@ export default function OrganizationLayout({
   const { hasPermission } = usePermissions();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const careApps = useCareApps();
+  const { data: accessibleRoleData } = useAccessibleRoleOrganizationsList();
 
   const organizationTabs = careApps.flatMap(
     (c) => (!c.isLoading && c.organizationTabs) || [],
@@ -95,6 +100,13 @@ export default function OrganizationLayout({
   const effectiveContext: RouteContext =
     routeContext || (isRoleOrg ? "responsibility" : "organization");
 
+  const canShowUsersForNullRoleResponsibility =
+    effectiveContext === "responsibility" &&
+    hasResponsibilityUsersAccessViaNullRoleAssignment(
+      id,
+      accessibleRoleData?.results,
+    );
+
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
     : effectiveContext === "responsibility"
@@ -111,14 +123,12 @@ export default function OrganizationLayout({
         !isRoleOrg && hasPermission("can_view_organization", org.permissions),
     },
     {
-      // For responsibilities, users is the landing page (no /users suffix)
-      url:
-        effectiveContext === "responsibility"
-          ? `${baseUrl}/${id}`
-          : `${baseUrl}/${id}/users`,
+      url: `${baseUrl}/${id}/users`,
       name: t("users"),
       icon: <CareIcon icon="d-people" />,
-      visibility: hasPermission("can_list_organization_users", org.permissions),
+      visibility:
+        hasPermission("can_list_organization_users", org.permissions) ||
+        canShowUsersForNullRoleResponsibility,
     },
     {
       url: `${baseUrl}/${id}/patients`,

@@ -1,4 +1,4 @@
-import { navigate, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 
 import DeviceForm from "@/pages/Facility/settings/devices/components/DeviceForm";
 
+import { goBack } from "@/Utils/utils";
 import DeviceTypeIcon from "./components/DeviceTypeIcon";
 
 interface Props {
@@ -35,7 +36,7 @@ export default function CreateDevice({ facilityId }: Props) {
           facilityId={facilityId}
           onSuccess={() => {
             toast.success(t("device_registered"));
-            navigate(`/facility/${facilityId}/settings/devices`);
+            goBack();
           }}
         />
       </div>
