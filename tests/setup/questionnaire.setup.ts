@@ -6,7 +6,7 @@ import { test } from "@playwright/test";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test("ensure enable-when questionnaire exists", async () => {
-  const slug = "enable-when-string-test";
+  const slug = "enable-when-test";
   const fixturePath = "tests/fixtures/questionnaires/enableWhenTest.json";
 
   const authFile = path.resolve("tests/.auth/user.json");
@@ -31,14 +31,45 @@ test("ensure enable-when questionnaire exists", async () => {
     "Content-Type": "application/json",
   };
 
+  // Load fixture early so we can compare versions with any existing questionnaire
+  const fixture = JSON.parse(
+    fs.readFileSync(path.resolve(fixturePath), "utf-8"),
+  );
+
   // Check if questionnaire already exists
   const checkRes = await fetch(`${apiUrl}/api/v1/questionnaire/${slug}/`, {
     headers,
   });
+
   if (checkRes.status === 200) {
-    console.log(`✅ Questionnaire already exists: ${slug}`);
+    const existing = (await checkRes.json()) as { version?: string };
+    if (existing.version === fixture.version) {
+      console.log(
+        `✅ Questionnaire already exists at version ${existing.version}: ${slug}`,
+      );
+      return;
+    }
+    // Version mismatch — update in place with new content
+    console.log(
+      `♻️ Questionnaire version changed (${existing.version} → ${fixture.version}), updating: ${slug}`,
+    );
+    // PUT endpoint doesn't accept organizations — only send questionnaire fields
+    const { organizations: _orgs, ...updateBody } = { ...fixture, slug };
+    const updateRes = await fetch(`${apiUrl}/api/v1/questionnaire/${slug}/`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(updateBody),
+    });
+    if (!updateRes.ok) {
+      const errorText = await updateRes.text();
+      throw new Error(
+        `Failed to update questionnaire: ${updateRes.status} — ${errorText}`,
+      );
+    }
+    console.log(`✅ Questionnaire updated: ${slug}`);
     return;
   }
+
   if (checkRes.status !== 404) {
     const errorText = await checkRes.text();
     throw new Error(
@@ -46,25 +77,7 @@ test("ensure enable-when questionnaire exists", async () => {
     );
   }
 
-  // Fetch organization IDs (required for questionnaire creation)
-  const orgRes = await fetch(`${apiUrl}/api/v1/organization/?org_type=role`, {
-    headers,
-  });
-  if (!orgRes.ok) {
-    throw new Error(`Failed to fetch organizations: ${orgRes.status}`);
-  }
-  const orgData = (await orgRes.json()) as {
-    results: { id: string }[];
-  };
-  const organizationIds = orgData.results.map((org) => org.id);
-
-  // Load fixture and create
-  const fixture = JSON.parse(
-    fs.readFileSync(path.resolve(fixturePath), "utf-8"),
-  );
-  fixture.slug = slug;
-  fixture.organizations = organizationIds;
-
+  await prepareFixture(fixture, slug, apiUrl, headers);
   const createRes = await fetch(`${apiUrl}/api/v1/questionnaire/`, {
     method: "POST",
     headers,
@@ -78,3 +91,22 @@ test("ensure enable-when questionnaire exists", async () => {
   }
   console.log(`✅ Questionnaire created: ${slug}`);
 });
+
+async function prepareFixture(
+  fixture: Record<string, unknown>,
+  slug: string,
+  apiUrl: string,
+  headers: Record<string, string>,
+) {
+  const orgRes = await fetch(`${apiUrl}/api/v1/organization/?org_type=role`, {
+    headers,
+  });
+  if (!orgRes.ok) {
+    throw new Error(`Failed to fetch organizations: ${orgRes.status}`);
+  }
+  const orgData = (await orgRes.json()) as {
+    results: { id: string }[];
+  };
+  fixture.slug = slug;
+  fixture.organizations = orgData.results.map((org) => org.id);
+}
