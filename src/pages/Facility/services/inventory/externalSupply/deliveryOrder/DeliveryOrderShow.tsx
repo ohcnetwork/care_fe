@@ -173,6 +173,7 @@ function getDeliveryOrderStatusActions(
   anyCompletedSupplyDeliveries: boolean,
 ) {
   const isPendingOrCompleted = [
+    DeliveryOrderStatus.draft,
     DeliveryOrderStatus.pending,
     DeliveryOrderStatus.completed,
   ].includes(status);
