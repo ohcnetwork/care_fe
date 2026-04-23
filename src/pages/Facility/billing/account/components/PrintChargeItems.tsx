@@ -480,7 +480,7 @@ export const PrintChargeItems = (props: {
                         </div>
                         <div className="space-y-1">
                           <DetailRow
-                            label={`${t("account_id")}`}
+                            label={`${t("bill_id")}`}
                             value={account?.id}
                             width="w-24"
                           />
