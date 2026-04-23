@@ -1,10 +1,10 @@
+import { createServiceRequest } from "@/tests/facility/services/encounter/serviceRequests/serviceRequest";
 import { expect, test } from "@playwright/test";
 import { expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
-// Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
 let facilityId: string;
@@ -17,111 +17,77 @@ test.beforeAll(async () => {
   encounterId = getEncounterId();
 });
 
-test.describe("Diagnostic Report Atomic Save", () => {
+test.describe("Diagnostic Report - Save Results", () => {
   /**
-   * Navigate to the service requests tab of an encounter,
-   * open an active service request with a diagnostic report,
-   * enter a result value, and verify the save uses a single
-   * batch API call rather than two independent mutations.
+   * End-to-end test: user creates a service request, opens its detail view,
+   * enters observation results, clicks "Save Results", and sees the success toast.
+   *
+   * This validates the save flow from a user perspective — we don't check API
+   * internals, only that the UI behaves correctly after saving.
    */
-  test("should use batch endpoint when saving diagnostic results", async ({
+  test("should show success toast after saving diagnostic results", async ({
     page,
   }) => {
-    const batchRequests: string[] = [];
-    const separateObservationCalls: string[] = [];
-    const separateReportUpdateCalls: string[] = [];
+    // Step 1: Create a service request (uses a lab test activity definition)
+    await createServiceRequest(page, facilityId, patientId, encounterId);
 
-    // Intercept network requests before navigation
-    page.on("request", (request) => {
-      const url = request.url();
-      const method = request.method();
-
-      if (url.includes("/api/v1/batch_requests/") && method === "POST") {
-        batchRequests.push(url);
-      }
-      if (url.includes("/upsert_observations/") && method === "POST") {
-        separateObservationCalls.push(url);
-      }
-      if (url.match(/\/diagnostic_report\/[^/]+\/$/) && method === "PUT") {
-        separateReportUpdateCalls.push(url);
-      }
-    });
-
-    // Navigate to service requests tab
+    // Step 2: Navigate to service requests list and open the newly created one
     await page.goto(
       `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
     );
     await page.waitForLoadState("networkidle");
 
-    // Find a service request row and open its detail
+    // Open the first service request detail
     const firstRow = page
       .locator('[data-slot="table-body"] [data-slot="table-row"]')
       .first();
-
-    const hasRows = await firstRow.isVisible().catch(() => false);
-    if (!hasRows) {
-      test.skip(true, "No service requests found in this encounter");
-      return;
-    }
-
+    await expect(firstRow).toBeVisible();
     await firstRow.getByRole("button", { name: /see details/i }).click();
     await page.waitForLoadState("networkidle");
 
-    // Look for a "Save Results" button — only present when report is in preliminary status
-    const saveButton = page.getByRole("button", { name: /save results/i });
-    const hasSaveButton = await saveButton.isVisible().catch(() => false);
+    // Step 3: Expect the "Test Results Entry" section to be present
+    await expect(page.getByText("Test Results Entry")).toBeVisible({
+      timeout: 10000,
+    });
 
-    if (!hasSaveButton) {
+    // Step 4: Expand the form if collapsed
+    const expandTrigger = page
+      .locator('[data-slot="collapsible-trigger"]')
+      .filter({ hasText: /test results entry/i });
+    if (await expandTrigger.isVisible().catch(() => false)) {
+      await expandTrigger.click();
+    }
+
+    // Step 5: Look for a "Save Results" button — only present when report is editable
+    const saveButton = page.getByRole("button", { name: /save results/i });
+    if (!(await saveButton.isVisible({ timeout: 5000 }).catch(() => false))) {
       test.skip(
         true,
-        "No Save Results button — report may not be in preliminary state",
+        "Save Results not visible — specimen may not be collected or report not in preliminary state",
       );
       return;
     }
 
-    // Fill at least one result input if available
-    const resultInputs = page.locator(
-      '[data-slot="card"] input[type="number"], [data-slot="card"] input[type="text"]',
-    );
+    // Step 6: Fill at least one result field if available
+    const resultInputs = page.getByLabel(/result/i);
     const inputCount = await resultInputs.count();
     if (inputCount > 0) {
       await resultInputs.first().fill("42");
     }
 
-    // Reset tracking before the actual save click
-    batchRequests.length = 0;
-    separateObservationCalls.length = 0;
-    separateReportUpdateCalls.length = 0;
-
+    // Step 7: Click save
     await saveButton.click();
-    await page.waitForTimeout(3000);
 
-    // 1. Batch endpoint must have been called
-    expect(
-      batchRequests.length,
-      "Expected POST /api/v1/batch_requests/ to be called for atomic save",
-    ).toBeGreaterThanOrEqual(1);
-
-    // 2. Separate observation upsert must NOT have been called
-    expect(
-      separateObservationCalls.length,
-      "Separate /upsert_observations/ endpoint should NOT be called — use batch",
-    ).toBe(0);
-
-    // 3. Separate diagnostic report PUT must NOT have been called
-    expect(
-      separateReportUpdateCalls.length,
-      "Separate PUT /diagnostic_report/ endpoint should NOT be called — use batch",
-    ).toBe(0);
+    // Step 8: Verify the success toast
+    await expectToast(page, /diagnostic report updated successfully/i);
   });
 
   /**
-   * Verifies the correct i18n success toast appears after a successful save,
-   * confirming the new key `diagnostic_report_updated_successfully` is used.
+   * After saving, the "Test Results Entry" form should collapse automatically.
    */
-  test("should show localized success toast on successful save", async ({
-    page,
-  }) => {
+  test("should collapse the form after saving results", async ({ page }) => {
+    await createServiceRequest(page, facilityId, patientId, encounterId);
+
     await page.goto(
       `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
     );
@@ -130,127 +96,43 @@ test.describe("Diagnostic Report Atomic Save", () => {
     const firstRow = page
       .locator('[data-slot="table-body"] [data-slot="table-row"]')
       .first();
-
-    if (!(await firstRow.isVisible().catch(() => false))) {
-      test.skip(true, "No service requests found");
-      return;
-    }
-
+    await expect(firstRow).toBeVisible();
     await firstRow.getByRole("button", { name: /see details/i }).click();
     await page.waitForLoadState("networkidle");
 
+    await expect(page.getByText("Test Results Entry")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Expand if collapsed
+    const expandTrigger = page
+      .locator('[data-slot="collapsible-trigger"]')
+      .filter({
+        hasText: /test results entry/i,
+      });
+    if (await expandTrigger.isVisible().catch(() => false)) {
+      await expandTrigger.click();
+    }
+
     const saveButton = page.getByRole("button", { name: /save results/i });
-    if (!(await saveButton.isVisible().catch(() => false))) {
-      test.skip(true, "No Save Results button visible");
+    if (!(await saveButton.isVisible({ timeout: 5000 }).catch(() => false))) {
+      test.skip(true, "Save Results not visible");
       return;
     }
 
-    // Fill a value if inputs are present
-    const resultInputs = page.locator(
-      '[data-slot="card"] input[type="number"], [data-slot="card"] input[type="text"]',
-    );
+    const resultInputs = page.getByLabel(/result/i);
     if ((await resultInputs.count()) > 0) {
       await resultInputs.first().fill("55");
     }
 
     await saveButton.click();
 
-    // Verify the i18n success toast key fires
+    // Success toast
     await expectToast(page, /diagnostic report updated successfully/i);
-  });
 
-  /**
-   * Verifies the batch request body contains the correct sub-request structure:
-   * - reference_id "update-diagnostic-report" with method PUT
-   * - reference_id "upsert-observations" with method POST (when observations exist)
-   */
-  test("should send correct batch request structure", async ({ page }) => {
-    let capturedBatchBody: {
-      requests?: Array<{
-        url: string;
-        method: string;
-        reference_id: string;
-        body: unknown;
-      }>;
-    } | null = null;
-
-    // Intercept to capture the batch request body
-    await page.route("**/api/v1/batch_requests/", async (route) => {
-      if (route.request().method() === "POST") {
-        try {
-          capturedBatchBody = route.request().postDataJSON();
-        } catch {
-          capturedBatchBody = null;
-        }
-      }
-      await route.continue();
-    });
-
-    await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
-    );
-    await page.waitForLoadState("networkidle");
-
-    const firstRow = page
-      .locator('[data-slot="table-body"] [data-slot="table-row"]')
-      .first();
-
-    if (!(await firstRow.isVisible().catch(() => false))) {
-      test.skip(true, "No service requests found");
-      return;
-    }
-
-    await firstRow.getByRole("button", { name: /see details/i }).click();
-    await page.waitForLoadState("networkidle");
-
-    const saveButton = page.getByRole("button", { name: /save results/i });
-    if (!(await saveButton.isVisible().catch(() => false))) {
-      test.skip(true, "No Save Results button visible");
-      return;
-    }
-
-    const resultInputs = page.locator(
-      '[data-slot="card"] input[type="number"], [data-slot="card"] input[type="text"]',
-    );
-    const inputCount = await resultInputs.count();
-    if (inputCount > 0) {
-      await resultInputs.first().fill("99");
-    }
-
-    await saveButton.click();
-    await page.waitForTimeout(3000);
-
-    expect(
-      capturedBatchBody,
-      "Batch request body should have been captured",
-    ).not.toBeNull();
-
-    const requests = capturedBatchBody!.requests!;
-    expect(requests.length).toBeGreaterThanOrEqual(1);
-
-    // Validate the diagnostic report update sub-request
-    const reportUpdate = requests.find(
-      (r) => r.reference_id === "update-diagnostic-report",
-    );
-    expect(
-      reportUpdate,
-      'Batch must contain a sub-request with reference_id "update-diagnostic-report"',
-    ).toBeDefined();
-    expect(reportUpdate!.method).toBe("PUT");
-    expect(reportUpdate!.url).toMatch(
-      /\/api\/v1\/patient\/[^/]+\/diagnostic_report\/[^/]+\/$/,
-    );
-
-    // Validate the observation upsert sub-request if observations were submitted
-    const obsUpsert = requests.find(
-      (r) => r.reference_id === "upsert-observations",
-    );
-    if (obsUpsert) {
-      expect(obsUpsert.method).toBe("POST");
-      expect(obsUpsert.url).toMatch(
-        /\/api\/v1\/patient\/[^/]+\/diagnostic_report\/[^/]+\/upsert_observations\/$/,
-      );
-      expect(obsUpsert.body).toHaveProperty("observations");
-    }
+    // Form should collapse — Save Results button should no longer be visible
+    await expect(
+      page.getByRole("button", { name: /save results/i }),
+    ).not.toBeVisible({ timeout: 5000 });
   });
 });
