@@ -2,8 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useEffect } from "react";
 
-import query from "@/Utils/request/query";
+import { usePermissions } from "@/context/PermissionContext";
+import {
+  hasResponsibilityUsersAccessViaNullRoleAssignment,
+  useAccessibleRoleOrganizationsList,
+} from "@/hooks/useAccessibleRoleOrganizationsList";
 import organizationApi from "@/types/organization/organizationApi";
+import query from "@/Utils/request/query";
 
 import OrganizationUsers from "./OrganizationUsers";
 
@@ -14,8 +19,11 @@ interface Props {
 /**
  * Landing page for /responsibilities/:id
  * Checks if the user can list organization users. If not, redirects to patients.
+ * Entries from accessible_role_organizations with role null still get Users
+ * even when organization.permissions omits can_list_organization_users.
  */
 export default function ResponsibilityLanding({ id }: Props) {
+  const { hasPermission } = usePermissions();
   const { data: org, isLoading } = useQuery({
     queryKey: ["organization", id],
     queryFn: query(organizationApi.get, {
@@ -24,17 +32,26 @@ export default function ResponsibilityLanding({ id }: Props) {
     enabled: !!id,
   });
 
+  const { data: accessibleData, isLoading: isLoadingAccessible } =
+    useAccessibleRoleOrganizationsList();
+
+  const canListUsersViaNullRole =
+    hasResponsibilityUsersAccessViaNullRoleAssignment(
+      id,
+      accessibleData?.results,
+    );
   const canListUsers =
-    org?.permissions?.includes("can_list_organization_users") ?? false;
+    hasPermission("can_list_organization_users", org?.permissions) ||
+    canListUsersViaNullRole;
 
   useEffect(() => {
-    if (!isLoading && org && !canListUsers) {
+    if (!isLoading && !isLoadingAccessible && org && !canListUsers) {
       navigate(`/responsibilities/${id}/patients`, { replace: true });
     }
-  }, [isLoading, org, canListUsers, id]);
+  }, [isLoading, isLoadingAccessible, org, canListUsers, id]);
 
-  // While loading or if user can list users, show users page
-  if (isLoading || canListUsers) {
+  // Wait for accessible list so null-role access is not redirected away early
+  if (isLoading || isLoadingAccessible || canListUsers) {
     return <OrganizationUsers id={id} routeContext="responsibility" />;
   }
 

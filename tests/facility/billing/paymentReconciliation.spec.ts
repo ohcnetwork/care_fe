@@ -81,11 +81,12 @@ test.describe("Payment Reconciliation", () => {
 
     await page.getByRole("textbox", { name: "Payment Date" }).fill(paymentDate);
 
-    // Fill Reference Number
-    const referenceNumber = faker.string.alphanumeric(10).toUpperCase();
-    await page
-      .getByRole("textbox", { name: "Reference Number" })
-      .fill(referenceNumber);
+    // Fill Reference Number (not available for Cash)
+    const refField = page.getByRole("textbox", { name: "Reference Number" });
+    if (selectedMethod !== "Cash") {
+      const referenceNumber = faker.string.alphanumeric(10).toUpperCase();
+      await refField.fill(referenceNumber);
+    }
 
     // Fill Notes
     const notes = faker.lorem.sentence();
