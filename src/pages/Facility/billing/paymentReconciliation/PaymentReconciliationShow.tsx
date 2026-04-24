@@ -22,8 +22,6 @@ import { Separator } from "@/components/ui/separator";
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   getPaymentTypeLabelKey,
@@ -36,7 +34,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge, goBack } from "@/Utils/utils";
 
 // Helper for friendly display of enum values
 function humanize(str: string): string {
@@ -61,7 +59,6 @@ export function PaymentReconciliationShow({
   paymentReconciliationId: string;
 }) {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const queryClient = useQueryClient();
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);

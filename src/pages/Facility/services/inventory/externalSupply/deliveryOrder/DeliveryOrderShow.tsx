@@ -9,13 +9,12 @@ import {
   Printer,
   Truck,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -431,20 +430,25 @@ export function DeliveryOrderShow({
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <BackButton
+            <Button
               size="icon"
+              variant="outline"
               className="shrink-0"
-              to={getInventoryBasePath(
-                facilityId,
-                locationId,
-                internal,
-                false,
-                isRequester,
-                "",
-              )}
+              onClick={() =>
+                navigate(
+                  getInventoryBasePath(
+                    facilityId,
+                    locationId,
+                    internal,
+                    false,
+                    isRequester,
+                    "",
+                  ),
+                )
+              }
             >
               <ChevronLeft />
-            </BackButton>
+            </Button>
             <div>
               <h4>{deliveryOrder.name}</h4>
               <p className="text-sm text-gray-700">

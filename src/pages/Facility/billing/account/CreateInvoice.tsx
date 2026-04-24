@@ -76,10 +76,9 @@ import { UserReadMinimal } from "@/types/user/user";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { formatDateTime, formatName, goBack } from "@/Utils/utils";
 
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
-import BackButton from "@/components/Common/BackButton";
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import {
@@ -915,16 +914,22 @@ export function CreateInvoicePage({
             </Collapsible>
 
             <div className="flex justify-end space-x-4">
-              <BackButton
+              <Button
                 type="button"
                 variant="ghost"
                 className="text-base font-semibold"
-                {...(onCancel && { onClick: onCancel })}
+                onClick={() => {
+                  if (onCancel) {
+                    onCancel();
+                  } else {
+                    goBack();
+                  }
+                }}
                 disabled={createMutation.isPending}
                 data-shortcut-id="go-back"
               >
                 <span className="underline">{t("cancel")}</span>
-              </BackButton>
+              </Button>
               {dispenseOrderId && (
                 <Button
                   type="button"
