@@ -19,15 +19,29 @@ export enum MonetaryComponentType {
   informational = "informational",
 }
 
-export interface MonetaryComponent {
-  monetary_component_type: MonetaryComponentType;
+interface SharedMonetaryFields {
   code?: Code;
   factor?: string | null;
   amount?: string | null;
   tax_included_amount?: string;
   conditions?: Condition[];
+}
+
+export interface StandardMonetaryComponent extends SharedMonetaryFields {
+  monetary_component_type: Exclude<
+    MonetaryComponentType,
+    MonetaryComponentType.discount
+  >;
+}
+
+export interface DiscountMonetaryComponent extends SharedMonetaryFields {
+  monetary_component_type: MonetaryComponentType.discount;
   global_component?: boolean;
 }
+
+export type MonetaryComponent =
+  | StandardMonetaryComponent
+  | DiscountMonetaryComponent;
 
 export enum DiscountApplicabilityOrder {
   total_desc = "total_desc",
@@ -39,9 +53,9 @@ export interface DiscountConfiguration {
   applicability_order: DiscountApplicabilityOrder;
 }
 
-export interface MonetaryComponentRead extends MonetaryComponent {
+export type MonetaryComponentRead = MonetaryComponent & {
   title: string;
-}
+};
 
 export const MonetaryComponentOrder = {
   informational: 1,
@@ -50,6 +64,15 @@ export const MonetaryComponentOrder = {
   discount: 4,
   tax: 5,
 } as const satisfies Record<MonetaryComponentType, number>;
+
+/**
+ * Type guard to check if a component is a DiscountMonetaryComponent
+ */
+export function isDiscountComponent(
+  component: MonetaryComponent,
+): component is DiscountMonetaryComponent {
+  return component.monetary_component_type === MonetaryComponentType.discount;
+}
 
 // Utility functions for monetary component operations
 

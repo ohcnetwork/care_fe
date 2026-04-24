@@ -1,3 +1,4 @@
+import { clearQueuePractitionerCache } from "@/atoms/queuePractitionerAtom";
 import { clearScheduleServiceTypeCache } from "@/atoms/scheduleServiceTypeAtom";
 import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 
@@ -98,6 +99,7 @@ export async function clearAllCaches(): Promise<void> {
   queryClient.clear();
   clearQueryPersistenceCache();
   clearScheduleServiceTypeCache();
+  clearQueuePractitionerCache();
 }
 
 /**

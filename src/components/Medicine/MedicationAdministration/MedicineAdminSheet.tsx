@@ -75,7 +75,7 @@ const MedicineListItem = ({
             <span className="font-medium">
               {displayMedicationName(medicine)}
             </span>
-            {medicine.dosage_instruction[0]?.as_needed_boolean && (
+            {medicine.dosage_instruction.some((di) => di.as_needed_boolean) && (
               <span className="text-sm text-rose-500">
                 {t("as_needed_prn")}
               </span>

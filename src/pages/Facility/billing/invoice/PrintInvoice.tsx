@@ -38,6 +38,7 @@ import {
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
@@ -69,6 +70,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
         phone_number: patient?.phone_number ?? "",
         year_of_birth: patient?.year_of_birth?.toString() ?? "",
         partial_id: patient ? getPartialId(patient) : "",
+        facility: facilityId,
       },
     }),
     enabled: !!patient,
@@ -135,10 +137,9 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
     <PrintPreview
       title={`${t("invoice")} ${invoice.number}`}
       watermark={getWatermark()}
-      autoPrint={{
-        enabled: !isLoadingDispenses,
-      }}
+      disabled={isLoadingDispenses}
       facility={facility}
+      templateSlug={PrintTemplateType.invoice}
     >
       <DisablingCover
         disabled={isLoadingDispenses}
@@ -526,12 +527,19 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                             <TableCell
                               className={cn(tableCellClass, "font-medium")}
                             >
-                              {payment.payment_datetime
-                                ? format(
-                                    new Date(payment.payment_datetime),
-                                    "d MMM yyyy, hh:mm a",
-                                  )
-                                : "-"}
+                              <div className="flex flex-col">
+                                <span>
+                                  {payment.payment_datetime
+                                    ? format(
+                                        new Date(payment.payment_datetime),
+                                        "d MMM yyyy, hh:mm a",
+                                      )
+                                    : "-"}
+                                </span>
+                                <span className="font-mono text-xs text-gray-500">
+                                  {payment.id}
+                                </span>
+                              </div>
                             </TableCell>
                             <TableCell
                               className={cn(tableCellClass, "text-left")}
@@ -618,12 +626,19 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                             <TableCell
                               className={cn(tableCellClass, "font-medium")}
                             >
-                              {creditNote.payment_datetime
-                                ? format(
-                                    new Date(creditNote.payment_datetime),
-                                    "d MMM yyyy, hh:mm a",
-                                  )
-                                : "-"}
+                              <div className="flex flex-col">
+                                <span>
+                                  {creditNote.payment_datetime
+                                    ? format(
+                                        new Date(creditNote.payment_datetime),
+                                        "d MMM yyyy, hh:mm a",
+                                      )
+                                    : "-"}
+                                </span>
+                                <span className="font-mono text-xs text-gray-500">
+                                  {creditNote.id}
+                                </span>
+                              </div>
                             </TableCell>
                             <TableCell
                               className={cn(tableCellClass, "text-left")}

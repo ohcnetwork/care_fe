@@ -1,5 +1,6 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { RoleBase } from "@/types/emr/role/role";
 
 import {
   Organization,
@@ -7,6 +8,11 @@ import {
   OrganizationUpdate,
   OrganizationUserRole,
 } from "./organization";
+
+export interface AccessibleRoleOrganization {
+  organization: Organization;
+  role: RoleBase | null;
+}
 
 export default {
   listMine: {
@@ -30,6 +36,12 @@ export default {
     method: HttpMethod.PUT,
     TRes: Type<Organization>(),
     TBody: Type<OrganizationUpdate>(),
+  },
+  manageManagingOrganization: {
+    path: "/api/v1/organization/{id}/managing_organization/",
+    method: HttpMethod.POST,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ organization: string; action: "add" | "remove" }>(),
   },
   delete: {
     path: "/api/v1/organization/{id}/",
@@ -68,6 +80,11 @@ export default {
     path: "/api/v1/patient/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<PatientRead>>(),
+  },
+  accessibleRoleOrganizations: {
+    path: "/api/v1/organization/accessible_role_organizations/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<AccessibleRoleOrganization>>(),
   },
   getPublicOrganizations: {
     path: "/api/v1/govt/organization/",
