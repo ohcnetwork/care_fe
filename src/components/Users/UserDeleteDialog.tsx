@@ -8,11 +8,10 @@ import { buttonVariants } from "@/components/ui/button";
 
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
-import mutate from "@/Utils/request/mutate";
 import { UserBase } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
+import mutate from "@/Utils/request/mutate";
+import { goBack } from "@/Utils/utils";
 
 interface ConfirmDialogProps {
   user: UserBase;
@@ -24,7 +23,6 @@ const CONFIRMATION_TEXT = "Delete Account";
 
 const UserDeleteDialog = (props: ConfirmDialogProps) => {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
 
   const [open, setOpen] = useState(false);
 
