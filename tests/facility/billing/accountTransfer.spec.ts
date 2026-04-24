@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Page, expect, test } from "@playwright/test";
-import fs from "fs";
-import path from "path";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -13,25 +12,6 @@ interface AccountInfo {
   billing_status: string;
   total_paid?: string;
   patient?: string;
-}
-
-function getApiHeaders(): { Authorization: string; "Content-Type": string } {
-  const authFile = path.resolve("tests/.auth/user.json");
-  const storageState = JSON.parse(fs.readFileSync(authFile, "utf-8"));
-  const localStorage = storageState.origins?.[0]?.localStorage ?? [];
-  const tokenEntry = localStorage.find(
-    (item: { name: string; value: string }) =>
-      item.name === "care_access_token",
-  );
-  if (!tokenEntry) throw new Error("No access token in auth storage state");
-  return {
-    Authorization: `Bearer ${tokenEntry.value}`,
-    "Content-Type": "application/json",
-  };
-}
-
-function getApiUrl(): string {
-  return process.env.REACT_CARE_API_URL || "http://localhost:9000";
 }
 
 async function createAccount(
