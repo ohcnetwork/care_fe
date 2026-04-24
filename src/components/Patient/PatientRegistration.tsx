@@ -36,7 +36,6 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import {
   ExtensionEntityType,
   getCombinedExtensionProps,
@@ -63,7 +62,7 @@ import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, goBack } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -88,7 +87,6 @@ interface QParams {
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   useShortcutSubContext();
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
   const [{ phone_number, flow }] = useQueryParams<QParams>();
 
@@ -279,6 +277,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
             open_schedule: "true",
           }),
         },
+        replace: true,
       });
     },
   });

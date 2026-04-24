@@ -27,15 +27,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import {
   TERMINOLOGY_SYSTEMS,
   ValueSetBase,
   ValueSetRead,
   ValueSetStatus,
 } from "@/types/valueSet/valueSet";
-import { valuesOf } from "@/Utils/utils";
+import { goBack, valuesOf } from "@/Utils/utils";
 
 import { generateSlug } from "@/Utils/utils";
 import { CodingField } from "./CodingField";
@@ -368,8 +366,6 @@ export function ValueSetForm({
       ),
     }),
   });
-
-  const { goBack } = useAppHistory();
 
   const form = useForm({
     resolver: zodResolver(valuesetFormSchema),
