@@ -6,6 +6,8 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Badge } from "@/components/ui/badge";
 
 import Loading from "@/components/Common/Loading";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
 import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import query from "@/Utils/request/query";
@@ -13,6 +15,7 @@ import { formatDateTime, formatName } from "@/Utils/utils";
 
 export default function PrintResourceLetter({ id }: { id: string }) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacilitySilently();
 
   const { data, isLoading } = useQuery({
     queryKey: ["resource_request_letter", id],
@@ -25,7 +28,11 @@ export default function PrintResourceLetter({ id }: { id: string }) {
     return <Loading />;
   }
   return (
-    <PrintPreview title={t("request_letter")}>
+    <PrintPreview
+      title={t("request_letter")}
+      facility={facility}
+      templateSlug={PrintTemplateType.resource_letter}
+    >
       <div className="bg-white">
         <div className="mx-4">
           {/* Header */}
