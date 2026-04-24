@@ -389,8 +389,7 @@ export function SupplyDeliveryTable({
             {extensionFields.map((field) => {
               const value = getExtensionValue(
                 delivery.extensions as NamespacedExtensionData,
-                field.extensionName,
-                field.name,
+                field,
               );
               return (
                 <TableCell key={`${field.extensionName}-${field.name}`}>

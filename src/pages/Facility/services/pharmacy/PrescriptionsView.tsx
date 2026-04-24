@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
 
+import { goBack } from "@/Utils/utils";
 import MedicationDispenseList from "./MedicationDispenseList";
 
 export enum PharmacyMedicationTab {
@@ -33,7 +34,7 @@ export default function PrescriptionsView({
           variant="outline"
           className="text-gray-950 font-semibold border-gray-300 mb-4"
           size="sm"
-          onClick={() => window.history.back()}
+          onClick={() => goBack()}
         >
           <ArrowLeft />
           {t("back_to_prescription_queue")}
