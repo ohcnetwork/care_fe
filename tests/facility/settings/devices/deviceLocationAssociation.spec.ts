@@ -74,7 +74,7 @@ test.describe("Device Location Association", () => {
 
     // Click on first location result
     const locationItem = page.locator('[data-slot="command-item"]').first();
-    await expect(locationItem).toBeVisible({ timeout: 5000 });
+    await expect(locationItem).toBeVisible();
     await locationItem.click();
 
     // Click associate button in the sheet
@@ -114,7 +114,7 @@ test.describe("Device Location Association", () => {
 
     // Click on first location result
     const locationItem = page.locator('[data-slot="command-item"]').first();
-    await expect(locationItem).toBeVisible({ timeout: 5000 });
+    await expect(locationItem).toBeVisible();
     await locationItem.click();
 
     await page.getByRole("button", { name: "Associate" }).last().click();
@@ -146,7 +146,9 @@ test.describe("Device Location Association", () => {
 
     // Verify location appears in location history
     await expect(page.getByText("Location History")).toBeVisible();
-    await expect(page.getByText(/bed 5/i)).toBeVisible();
+    await expect(
+      page.getByRole("listitem").filter({ hasText: /bed 5/i }).first(),
+    ).toBeVisible();
   });
 
   test("should display location history", async ({ page }) => {

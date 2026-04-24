@@ -1245,13 +1245,22 @@ export function InvoiceShow({
                                 <TableCell
                                   className={cn(tableCellClass, "font-medium")}
                                 >
-                                  <span className="flex justify-between items-center flex-wrap gap-2">
-                                    {payment.payment_datetime
-                                      ? format(
-                                          new Date(payment.payment_datetime),
-                                          "d MMM yyyy, hh:mm a",
-                                        )
-                                      : "-"}
+                                  <div className="flex justify-between items-center flex-wrap gap-2">
+                                    <div className="flex flex-col">
+                                      <span>
+                                        {payment.payment_datetime
+                                          ? format(
+                                              new Date(
+                                                payment.payment_datetime,
+                                              ),
+                                              "d MMM yyyy, hh:mm a",
+                                            )
+                                          : "-"}
+                                      </span>
+                                      <span className="font-mono text-xs text-gray-500">
+                                        {payment.id}
+                                      </span>
+                                    </div>
 
                                     <div className="flex gap-2">
                                       <Button
@@ -1285,7 +1294,7 @@ export function InvoiceShow({
                                         </>
                                       </Button>
                                     </div>
-                                  </span>
+                                  </div>
                                 </TableCell>
                                 <TableCell
                                   className={cn(tableCellClass, "text-left")}
@@ -1384,13 +1393,22 @@ export function InvoiceShow({
                               <TableCell
                                 className={cn(tableCellClass, "font-medium")}
                               >
-                                <span className="flex justify-between items-center flex-wrap gap-2">
-                                  {creditNote.payment_datetime
-                                    ? format(
-                                        new Date(creditNote.payment_datetime),
-                                        "d MMM yyyy, hh:mm a",
-                                      )
-                                    : "-"}
+                                <div className="flex justify-between items-center flex-wrap gap-2">
+                                  <div className="flex flex-col">
+                                    <span>
+                                      {creditNote.payment_datetime
+                                        ? format(
+                                            new Date(
+                                              creditNote.payment_datetime,
+                                            ),
+                                            "d MMM yyyy, hh:mm a",
+                                          )
+                                        : "-"}
+                                    </span>
+                                    <span className="font-mono text-xs text-gray-500">
+                                      {creditNote.id}
+                                    </span>
+                                  </div>
 
                                   <div className="flex gap-2">
                                     <Button
@@ -1424,7 +1442,7 @@ export function InvoiceShow({
                                       </>
                                     </Button>
                                   </div>
-                                </span>
+                                </div>
                               </TableCell>
                               <TableCell
                                 className={cn(tableCellClass, "text-left")}
@@ -1671,6 +1689,10 @@ export function InvoiceShow({
                           >
                             <span className="text-gray-600">
                               {index + 1}.{" "}
+                              <span className="font-mono text-xs">
+                                {payment.id}
+                              </span>
+                              {" - "}
                               {
                                 PAYMENT_RECONCILIATION_METHOD_MAP[
                                   payment.method
@@ -1713,6 +1735,10 @@ export function InvoiceShow({
                           >
                             <span className="text-gray-600">
                               {index + 1}.{" "}
+                              <span className="font-mono text-xs">
+                                {creditNote.id}
+                              </span>
+                              {" - "}
                               {
                                 PAYMENT_RECONCILIATION_METHOD_MAP[
                                   creditNote.method

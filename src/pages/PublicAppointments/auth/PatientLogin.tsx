@@ -30,12 +30,12 @@ import { PhoneInput } from "@/components/ui/phone-input";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import { useAuthContext } from "@/hooks/useAuthUser";
 
-import mutate from "@/Utils/request/mutate";
 import { LoginByOtpResponse, TokenData } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
+import mutate from "@/Utils/request/mutate";
+import { goBack } from "@/Utils/utils";
 
 const FormSchema = z.object({
   pin: z.string().min(5, {
@@ -52,7 +52,6 @@ export default function PatientLogin({
   staffId: string;
   page: string;
 }) {
-  const { goBack } = useAppHistory();
   const { t } = useTranslation();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState("");
