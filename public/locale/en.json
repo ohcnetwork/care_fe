@@ -963,6 +963,7 @@
   "beta": "beta",
   "bill": "Bill",
   "bill_all_pending_prescriptions": "Bill All Pending Prescriptions",
+  "bill_id": "Bill ID",
   "bill_medication": "Bill Medication",
   "bill_medications": "Bill Medications",
   "bill_selected": "Bill Selected",
@@ -3261,6 +3262,7 @@
   "mark_as_deceased": "Mark as deceased",
   "mark_as_draft": "Mark as Draft",
   "mark_as_entered_in_error": "Mark as entered in error",
+  "mark_as_entered_in_error_confirmation": "Are you sure you want to mark the token {{tokenNumber}} for {{patientName}} as entered in error? This action cannot be undone.",
   "mark_as_entered_in_error_warning": "Mark as Entered in Error with Active Payments",
   "mark_as_error": "Mark as error",
   "mark_as_error_confirmation_message": "Are you sure you want to mark this payment as entered in error? This indicates that the payment record was created by mistake and should not have been recorded.",
@@ -6537,6 +6539,5 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "mark_as_entered_in_error_confirmation": "Are you sure you want to mark the token {{tokenNumber}} for {{patientName}} as entered in error? This action cannot be undone.",
   "℞": "℞"
 }
