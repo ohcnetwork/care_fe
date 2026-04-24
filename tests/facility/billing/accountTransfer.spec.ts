@@ -362,7 +362,7 @@ test.describe("Account Transfer Payment", () => {
     await expect(page.getByText("Active")).toBeVisible();
     await expect(page.getByText("Complete")).toBeVisible();
     await expect(
-      page.getByText("Transferred to another account"),
+      page.getByText(`Transferred to account ${targetAccount.id}`),
     ).toBeVisible();
 
     // Verify incoming transfer on target account's Payments tab
@@ -384,7 +384,7 @@ test.describe("Account Transfer Payment", () => {
     await expect(page.getByText("Active")).toBeVisible();
     await expect(page.getByText("Complete")).toBeVisible();
     await expect(
-      page.getByText("Transferred from another account"),
+      page.getByText(`Transferred from account ${sourceAccount.id}`),
     ).toBeVisible();
   });
 
