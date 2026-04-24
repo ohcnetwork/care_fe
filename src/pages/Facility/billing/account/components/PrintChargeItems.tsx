@@ -12,7 +12,6 @@ import { usePermissions } from "@/context/PermissionContext";
 
 import { DisablingCover } from "@/components/Common/DisablingCover";
 import PrintFooter from "@/components/Common/PrintFooter";
-import { Button } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -30,8 +29,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import useAppHistory from "@/hooks/useAppHistory";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -61,6 +58,7 @@ import useFilters from "@/hooks/useFilters";
 import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import BackButton from "@/components/Common/BackButton";
 
 interface DetailRowProps {
   label: string;
@@ -95,7 +93,6 @@ export const PrintChargeItems = (props: {
   const { facilityId, accountId } = props;
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const { hasPermission } = usePermissions();
   const { canManageLockedInvoice } = getPermissions(
     hasPermission,
@@ -214,9 +211,7 @@ export const PrintChargeItems = (props: {
         <p className="text-gray-500">
           {t("no_permission_to_print_charge_items")}
         </p>
-        <Button variant="outline" onClick={() => goBack()}>
-          {t("go_back")}
-        </Button>
+        <BackButton variant="outline">{t("go_back")}</BackButton>
       </div>
     );
   }
@@ -446,7 +441,7 @@ export const PrintChargeItems = (props: {
                           <DetailRow
                             label={t("name")}
                             value={account?.patient?.name}
-                            width="w-16"
+                            width="w-22"
                           />
                           <DetailRow
                             label={`${t("age")} / ${t("sex")}`}
@@ -455,12 +450,22 @@ export const PrintChargeItems = (props: {
                                 ? `${formatPatientAge(account.patient, true)}, ${t(`GENDER__${account.patient.gender}`)}`
                                 : undefined
                             }
-                            width="w-16"
+                            width="w-22"
                           />
                           <DetailRow
                             label={`${t("address")}`}
                             value={account?.patient?.address}
-                            width="w-16"
+                            width="w-22"
+                          />
+                          <DetailRow
+                            label={t("mobile_number")}
+                            value={
+                              account?.patient &&
+                              formatPhoneNumberIntl(
+                                account.patient.phone_number,
+                              )
+                            }
+                            width="w-22"
                           />
                           {account?.primary_encounter?.current_location && (
                             <DetailRow
@@ -469,11 +474,16 @@ export const PrintChargeItems = (props: {
                                 account?.primary_encounter?.current_location
                                   ?.name
                               }
-                              width="w-16"
+                              width="w-22"
                             />
                           )}
                         </div>
                         <div className="space-y-1">
+                          <DetailRow
+                            label={`${t("bill_id")}`}
+                            value={account?.id}
+                            width="w-24"
+                          />
                           <DetailRow
                             label={`${t("date")}`}
                             value={formatDateTime(new Date(), "DD-MM-YYYY")}
@@ -493,16 +503,7 @@ export const PrintChargeItems = (props: {
                                 width="w-24"
                               />
                             ))}
-                          <DetailRow
-                            label={t("mobile_number")}
-                            value={
-                              account?.patient &&
-                              formatPhoneNumberIntl(
-                                account.patient.phone_number,
-                              )
-                            }
-                            width="w-24"
-                          />
+
                           {account?.primary_encounter && (
                             <>
                               <DetailRow

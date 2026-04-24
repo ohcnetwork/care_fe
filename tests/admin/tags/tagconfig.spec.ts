@@ -212,6 +212,7 @@ test.describe("Tag Configuration Management", () => {
 
     // Verify the update was successful
     await page.getByRole("button", { name: "Back" }).click();
+    await page.getByRole("button", { name: "Back" }).click();
     await page
       .getByRole("row", { name: parentTagName })
       .getByRole("button")

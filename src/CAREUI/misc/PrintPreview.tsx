@@ -15,8 +15,8 @@ import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
 
+import BackButton from "@/components/Common/BackButton";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import useAutoPrint from "@/hooks/useAutoPrint";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { FacilityRead } from "@/types/facility/facility";
@@ -46,7 +46,6 @@ type Props = {
 
 export default function PrintPreview(props: Props) {
   const isMobile = useBreakpoints({ default: true, md: false });
-  const { goBack } = useAppHistory();
   const { t } = useTranslation();
   useShortcutSubContext();
 
@@ -120,14 +119,10 @@ export default function PrintPreview(props: Props) {
         options={
           <div className="flex items-center gap-2">
             {props.showBackButton !== false && (
-              <Button
-                variant="outline"
-                onClick={() => goBack()}
-                data-shortcut-id="go-back"
-              >
+              <BackButton variant="outline" data-shortcut-id="go-back">
                 <CareIcon icon="l-arrow-left" className="text-lg" />
                 {t("back")}
-              </Button>
+              </BackButton>
             )}
             <Button
               variant="primary"
@@ -302,7 +297,7 @@ function FacilityPrintLayout({
     <div className="flex flex-col min-h-[calc(100vh-80px)] print:min-h-screen">
       {pageStyle && <style>{pageStyle}</style>}
       {hideFacilityHeader ? null : headerImage?.url ? (
-        <div className="flex justify-between items-start mb-4 pb-2">
+        <div className="flex justify-between items-start mb-2 pb-2">
           <img
             src={headerImage.url}
             alt="Custom Header"

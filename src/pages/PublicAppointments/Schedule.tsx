@@ -19,12 +19,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString, formatName } from "@/Utils/utils";
+import { dateQueryString, formatName, goBack } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
@@ -44,7 +43,6 @@ interface AppointmentsProps {
 
 export function ScheduleAppointment(props: AppointmentsProps) {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const { facilityId, staffId, appointmentId } = props;
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
