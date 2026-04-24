@@ -29,6 +29,7 @@ import PaginationComponent from "@/components/Common/Pagination";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
+import { TooltipComponent } from "@/components/ui/tooltip";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
@@ -84,15 +85,22 @@ export function LocationSwitcher() {
             className="w-full flex items-center justify-between gap-3 py-6 px-2 rounded-md bg-white border border-gray-200"
             onClick={() => setOpenDialog(true)}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               <MapPinIcon className="size-5 text-green-600" />
-              <div className="flex flex-col items-start">
-                <span className="text-xs text-gray-500">
-                  {t("current_location")}
-                </span>
-                <span className="text-sm font-medium text-gray-900">
-                  {location?.name}
-                </span>
+              <div className="min-w-0 flex-1">
+                <TooltipComponent
+                  content={location?.name}
+                  className="hidden lg:block max-w-xs"
+                >
+                  <div className="flex min-w-0 flex-col items-start">
+                    <span className="text-xs text-gray-500">
+                      {t("current_location")}
+                    </span>
+                    <span className="w-full truncate text-left text-sm font-medium text-gray-900">
+                      {location?.name}
+                    </span>
+                  </div>
+                </TooltipComponent>
               </div>
             </div>
             <CareIcon icon="l-sort" />
@@ -208,21 +216,24 @@ export function LocationSelectorDialog({
     const locationList = buildLocationPath(location);
 
     return (
-      <div className="flex flex-row items-center gap-1 text-sm font-normal">
+      <div className="flex flex-row items-center gap-1 text-sm font-normal flex-wrap">
         <span className="text-gray-500">{t("current_location")}:</span>
-        <div className="flex flex-row gap-1 items-center p-1 rounded-md bg-gray-100">
+        <div className="flex flex-row gap-1 items-center p-2 rounded-md bg-gray-100 flex-wrap overflow-hidden">
           {locationList.map((loc, index) => (
-            <div className="flex flex-row gap-1 items-center" key={loc.id}>
+            <div
+              className="flex flex-row gap-1 items-center truncate max-w-xs"
+              key={loc.id}
+            >
               {loc.has_children ? (
                 <Button
                   variant="link"
-                  className="p-0 text-nowrap h-5"
+                  className="p-0 text-nowrap h-5 justify-start overflow-hidden"
                   onClick={() => handleLocationClick(loc)}
                 >
-                  {loc.name}
+                  <span className="text-nowrap h-5 truncate">{loc.name}</span>
                 </Button>
               ) : (
-                <span className="text-nowrap h-5">{loc.name}</span>
+                <span className="text-nowrap h-5 truncate">{loc.name}</span>
               )}
               {index < locationList.length - 1 && (
                 <CareIcon icon="l-arrow-right" />
@@ -246,7 +257,7 @@ export function LocationSelectorDialog({
       }}
     >
       <DialogContent className="p-3 min-w-[calc(50vw)]">
-        <DialogHeader>
+        <DialogHeader className="overflow-hidden">
           <DialogTitle>{getCurrentLocation()}</DialogTitle>
         </DialogHeader>
         {locationLevel.length > 0 && (
