@@ -56,7 +56,7 @@ function ProductKnowledgeCard({
                 <CareIcon icon="l-folder" className="h-5 w-5" />
               </div>
             </div>
-            <div className="flex-1 min-w-0 overflow-hidden">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2 mb-1">
                 <Badge
                   variant={PRODUCT_KNOWLEDGE_TYPE_COLORS[product.product_type]}
@@ -72,7 +72,7 @@ function ProductKnowledgeCard({
                 </Badge>
               </div>
               <h3
-                className="font-medium text-gray-900 truncate text-lg"
+                className="font-medium text-gray-900 text-lg"
                 title={product.name}
               >
                 {product.name}
