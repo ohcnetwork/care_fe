@@ -1,0 +1,239 @@
+{
+  "title": "Enable When Test",
+  "slug": "enable-when-test",
+  "description": "Tests enable_when with string and boolean operators: exists, equals, not_equals",
+  "version": "2.1",
+  "status": "active",
+  "subject_type": "encounter",
+  "questions": [
+    {
+      "id": "a1000001-0001-4000-8000-000000000001",
+      "link_id": "S-001",
+      "text": "Patient Name",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000002",
+      "link_id": "S-002",
+      "text": "Middle Name",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-001",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000003",
+      "link_id": "S-003",
+      "text": "Nickname",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-001",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000004",
+      "link_id": "S-004",
+      "text": "Professional Type",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000005",
+      "link_id": "S-005",
+      "text": "Medical License Number",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-004",
+          "operator": "equals",
+          "answer": "Doctor"
+        }
+      ]
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000006",
+      "link_id": "S-006",
+      "text": "Specialization",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-004",
+          "operator": "equals",
+          "answer": "Doctor"
+        }
+      ]
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000007",
+      "link_id": "S-007",
+      "text": "Category",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000008",
+      "link_id": "S-008",
+      "text": "Specify Other Category",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-007",
+          "operator": "not_equals",
+          "answer": "Standard"
+        }
+      ]
+    },
+    {
+      "id": "a1000001-0001-4000-8000-000000000009",
+      "link_id": "S-009",
+      "text": "Category Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-007",
+          "operator": "not_equals",
+          "answer": "Standard"
+        }
+      ]
+    },
+    {
+      "id": "b1000001-0001-4000-8000-000000000001",
+      "link_id": "B-001",
+      "text": "Has Allergies",
+      "type": "boolean",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "b1000001-0001-4000-8000-000000000002",
+      "link_id": "B-002",
+      "text": "List Known Allergies",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "B-001",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    },
+    {
+      "id": "b1000001-0001-4000-8000-000000000003",
+      "link_id": "B-003",
+      "text": "Allergy Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "B-001",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    },
+    {
+      "id": "b1000001-0001-4000-8000-000000000004",
+      "link_id": "B-004",
+      "text": "Is Smoker",
+      "type": "boolean",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "b1000001-0001-4000-8000-000000000005",
+      "link_id": "B-005",
+      "text": "Cigarettes Per Day",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "B-004",
+          "operator": "equals",
+          "answer": "Yes"
+        }
+      ]
+    },
+    {
+      "id": "b1000001-0001-4000-8000-000000000006",
+      "link_id": "B-006",
+      "text": "Smoking Duration",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "B-004",
+          "operator": "equals",
+          "answer": "Yes"
+        }
+      ]
+    },
+    {
+      "id": "b1000001-0001-4000-8000-000000000007",
+      "link_id": "B-007",
+      "text": "Is Conscious",
+      "type": "boolean",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "b1000001-0001-4000-8000-000000000008",
+      "link_id": "B-008",
+      "text": "Reason for Unconsciousness",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "B-007",
+          "operator": "not_equals",
+          "answer": "Yes"
+        }
+      ]
+    },
+    {
+      "id": "b1000001-0001-4000-8000-000000000009",
+      "link_id": "B-009",
+      "text": "Additional Observations",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "B-007",
+          "operator": "not_equals",
+          "answer": "Yes"
+        }
+      ]
+    }
+  ],
+  "tags": []
+}

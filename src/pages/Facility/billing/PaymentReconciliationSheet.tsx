@@ -119,10 +119,6 @@ const PAYMENT_TYPES = [
     label: "payment",
   },
   {
-    value: PaymentReconciliationType.adjustment,
-    label: "adjustment",
-  },
-  {
     value: PaymentReconciliationType.advance,
     label: "advance",
   },

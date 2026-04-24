@@ -125,14 +125,17 @@ test.describe("Diagnosis", () => {
 
     const diagnosisHistoryRow = historyDialog
       .locator('[data-slot="table-body"] tr')
-      .filter({ hasText: diagnosisName });
+      .filter({ hasText: diagnosisName })
+      .filter({ hasText: status });
 
-    await expect(diagnosisHistoryRow).toContainText(status);
-    await expect(diagnosisHistoryRow).toContainText(severity);
-    await expect(diagnosisHistoryRow).toContainText(verification);
+    await expect(diagnosisHistoryRow.first()).toContainText(status);
+    await expect(diagnosisHistoryRow.first()).toContainText(severity);
+    await expect(diagnosisHistoryRow.first()).toContainText(verification);
   });
 
   test("verify duplicate diagnosis cannot be added", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
+
     await page
       .getByRole("combobox")
       .filter({ hasText: /Add (another )?Diagnosis/i })
@@ -178,16 +181,11 @@ test.describe("Diagnosis", () => {
   test("add and display diagnosis with severity", async ({ page }) => {
     await addDiagnosis(page, "severe");
 
-    expect(
-      page
-        .locator("div")
-        .filter({ hasText: /^DiagnosisStatusSeverityVerificationOnset/ })
-        .nth(1),
-    ).toBeVisible();
     const diagnosisRow = page
       .locator("div")
       .filter({ hasText: /^DiagnosisStatusSeverityVerificationOnset/ })
       .nth(1);
+    await expect(diagnosisRow).toBeVisible();
     await expect(diagnosisRow.getByText("Status")).toBeVisible();
     await expect(diagnosisRow.getByText("Severity")).toBeVisible();
     await expect(diagnosisRow.getByText("Verification")).toBeVisible();
