@@ -533,7 +533,10 @@ export function ObservationInterpretation<
       )}
 
       <Sheet open={isSheetOpen} onOpenChange={handleSheetState}>
-        <SheetContent className="sm:max-w-3xl flex flex-col">
+        <SheetContent
+          className="sm:max-w-3xl flex flex-col"
+          onInteractOutside={(e) => e.preventDefault()}
+        >
           <SheetHeader>
             <SheetTitle>{t("add_edit_interpretation")}</SheetTitle>
             <SheetDescription>{t("configure_interpretation")}</SheetDescription>
