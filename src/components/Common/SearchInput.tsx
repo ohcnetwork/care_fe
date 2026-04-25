@@ -12,12 +12,6 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import {
@@ -180,6 +174,7 @@ export default function SearchInput({
     useState(initialOptionIndex);
   const [searchValue, setSearchValue] = useState("");
   const [open, setOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Safe access to options
@@ -215,9 +210,12 @@ export default function SearchInput({
     }
   }, [selectedOption?.value]);
 
-  const unselectedOptions = safeOptions.filter(
-    (option) => option.key !== selectedOption?.key,
-  );
+  // When popover opens, highlight the currently active option
+  useEffect(() => {
+    if (open) {
+      setHighlightedIndex(selectedOptionIndex);
+    }
+  }, [open, selectedOptionIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -226,6 +224,7 @@ export default function SearchInput({
         e.stopPropagation();
         inputRef.current?.focus();
         setOpen(true);
+        return;
       }
 
       if (e.key === "Escape") {
@@ -235,12 +234,34 @@ export default function SearchInput({
         } else {
           setSearchValue("");
         }
+        return;
+      }
+
+      if (!open) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setHighlightedIndex((prev) =>
+          prev < safeOptions.length - 1 ? prev + 1 : prev,
+        );
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        setHighlightedIndex(0);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        setHighlightedIndex(safeOptions.length - 1);
+      } else if (e.key === "Enter" && highlightedIndex >= 0) {
+        e.preventDefault();
+        handleOptionChange(highlightedIndex);
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open]);
+  }, [open, highlightedIndex, safeOptions.length, handleOptionChange]);
 
   useEffect(() => {
     if (autoFocus) {
@@ -297,73 +318,37 @@ export default function SearchInput({
               className="absolute p-0"
               onEscapeKeyDown={(event) => event.preventDefault()}
             >
-              <Command>
-                <CommandList>
-                  <CommandGroup>
-                    <div className="p-4">
-                      <div className="mb-4">
-                        <p className="text-sm font-medium text-gray-600">
-                          {t("search_by")}
-                        </p>
-                        <div className="flex mt-2">
-                          <Button
-                            onClick={() => {
-                              setOpen(false);
-                              if (inputRef.current) {
-                                inputRef.current.focus();
-                              }
-                            }}
-                            variant="outline"
-                            size="xs"
-                            className="bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
-                          >
-                            <CareIcon icon="l-check" className="mr-1" />
-                            {t(safeOptions[selectedOptionIndex]?.display || "")}
-                          </Button>
-                        </div>
-                      </div>
-                      <hr className="border-gray-200 mb-3" />
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-2">
-                          {t("choose_other_search_type")}
-                        </p>
-                        <div className="space-y-2">
-                          {unselectedOptions.map((option, index) => {
-                            if (selectedOption.key === option.key) return null;
-
-                            return (
-                              <CommandItem
-                                key={option.key}
-                                value={option.key}
-                                onSelect={() =>
-                                  handleOptionChange(
-                                    safeOptions.findIndex(
-                                      (option) =>
-                                        option.key ===
-                                        unselectedOptions[index].key,
-                                    ),
-                                  )
-                                }
-                                className="group flex items-center p-2 rounded-md cursor-pointer hover:bg-secondary-100"
-                              >
-                                <span className="flex-1 text-sm">
-                                  {t(option.display)}
-                                </span>
-                                <kbd
-                                  className="ml-2 border border-gray-300 rounded px-1 bg-white text-xs text-gray-500 hidden group-data-[selected=true]:block"
-                                  title={t("press_enter_to_select")}
-                                >
-                                  ⏎ {t("enter")}
-                                </kbd>
-                              </CommandItem>
-                            );
-                          })}
-                        </div>
-                      </div>
+              <div className="p-4">
+                <p className="text-sm font-medium text-gray-600 mb-3">
+                  {t("search_by")}
+                </p>
+                <div
+                  role="listbox"
+                  aria-label={t("search_by")}
+                  className="space-y-1"
+                >
+                  {safeOptions.map((option, i) => (
+                    <div
+                      key={option.key}
+                      role="option"
+                      aria-selected={i === highlightedIndex}
+                      onClick={() => handleOptionChange(i)}
+                      onMouseEnter={() => setHighlightedIndex(i)}
+                      className={cn(
+                        "flex items-center p-2 rounded-md cursor-pointer text-sm",
+                        i === highlightedIndex
+                          ? "bg-primary-100 text-primary-700"
+                          : "hover:bg-secondary-100",
+                      )}
+                    >
+                      {i === selectedOptionIndex && (
+                        <CareIcon icon="l-check" className="mr-1" />
+                      )}
+                      {t(option.display)}
                     </div>
-                  </CommandGroup>
-                </CommandList>
-              </Command>
+                  ))}
+                </div>
+              </div>
             </PopoverContent>
           </Popover>
         )}
