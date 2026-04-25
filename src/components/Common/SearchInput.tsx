@@ -295,13 +295,7 @@ export default function SearchInput({
         className,
       )}
     >
-      <div
-        role="searchbox"
-        aria-expanded={open}
-        aria-controls="search-options"
-        aria-haspopup="listbox"
-        className="flex items-center rounded-t-lg gap-1"
-      >
+      <div className="flex items-center rounded-t-lg gap-1">
         {!isSingleOption && (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
