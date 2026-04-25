@@ -28,7 +28,10 @@ import {
   AccountStatus,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
-import { PaymentReconciliationRead } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import {
+  getPaymentTypeLabelKey,
+  PaymentReconciliationRead,
+} from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -133,9 +136,16 @@ export default function ChangePaymentAccountSheet({
                   key={payment.id}
                   className="text-sm text-gray-600 flex justify-between"
                 >
-                  <span className="truncate">
-                    {t(payment.reconciliation_type)}
+                  <span className="truncate flex flex-col">
+                    {t(
+                      getPaymentTypeLabelKey(
+                        payment.reconciliation_type,
+                        payment.is_credit_note,
+                      ),
+                    )}
+                    <span className="font-mono text-xs">{payment.id}</span>
                   </span>
+                  {" - "}
                   <MonetaryDisplay amount={payment.amount} />
                 </div>
               ))}
