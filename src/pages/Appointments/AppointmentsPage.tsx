@@ -196,6 +196,29 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     cacheBlacklist: ["date_from", "date_to"],
   });
 
+  useEffect(() => {
+    const defaultFilters: Record<string, string> = {};
+
+    if (practitionerFilterEnabled && !qParams.practitioners) {
+      defaultFilters.practitioners = authUser.id;
+    }
+
+    if (!qParams.date_from && !qParams.date_to) {
+      Object.assign(defaultFilters, getDefaultDateFilter());
+    }
+
+    if (Object.keys(defaultFilters).length > 0) {
+      updateQuery(defaultFilters);
+    }
+  }, [
+    practitionerFilterEnabled,
+    authUser.id,
+    qParams.practitioners,
+    qParams.date_from,
+    qParams.date_to,
+    updateQuery,
+  ]);
+
   useShortcutSubContext();
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
