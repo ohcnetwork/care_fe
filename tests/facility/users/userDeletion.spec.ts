@@ -63,10 +63,8 @@ test.describe("User Deletion Access Control", () => {
 
       // Login as staff user
       await page.getByRole("button", { name: "Log in as Staff" }).click();
-      await page.getByRole("textbox", { name: "Username" }).fill("staff_2_0");
-      await page
-        .getByRole("textbox", { name: "Password" })
-        .fill("Coronasafe@123");
+      await page.getByRole("textbox", { name: "Username" }).fill("care-staff");
+      await page.getByRole("textbox", { name: "Password" }).fill("Ohcn@123");
       await page.getByRole("button", { name: "Login" }).click();
 
       // Wait for successful login

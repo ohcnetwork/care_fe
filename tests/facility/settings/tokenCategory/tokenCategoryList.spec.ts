@@ -75,8 +75,8 @@ test.describe("Token Category List - Permission Tests", () => {
       await page.goto("/login");
       await page
         .getByRole("textbox", { name: /username/i })
-        .fill("volunteer_2_0");
-      await page.getByLabel(/password/i).fill("Coronasafe@123");
+        .fill("care-volunteer");
+      await page.getByLabel(/password/i).fill("Ohcn@123");
       await page.getByRole("button", { name: /login/i }).click();
       await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
 
