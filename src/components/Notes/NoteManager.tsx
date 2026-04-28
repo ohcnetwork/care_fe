@@ -145,7 +145,7 @@ function MessageItem({
         </TooltipComponent>
         <div
           className={cn(
-            "p-3 rounded-lg break-words whitespace-pre-wrap w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
+            "p-3 rounded-lg break-words whitespace-pre-wrap min-w-0 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
             isCurrentUser
               ? "bg-white text-black rounded-tr-none border border-gray-200"
               : "bg-gray-100 rounded-tl-none border border-gray-200",
@@ -638,7 +638,7 @@ export function NoteManager({
                 <>
                   {/* Messages List */}
                   {isMobile ? (
-                    <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain -mx-2 px-2">
+                    <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-y-contain -mx-2 px-2">
                       <div className="flex flex-col-reverse py-2 min-h-full">
                         {messages.map((message, i) => (
                           <MessageItem
