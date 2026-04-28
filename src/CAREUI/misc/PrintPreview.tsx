@@ -293,6 +293,42 @@ function FacilityPrintLayout({
   const footerImage = printTemplate?.branding?.footer_image;
   const logo = printTemplate?.branding?.logo;
   const pageStyle = buildPageStyle(printTemplate);
+  const logoUrl = logo?.url || undefined;
+  const alignment = logoUrl ? (logo?.alignment ?? "right") : "right";
+  const hasCustomDims = !!(logoUrl && (logo?.width || logo?.height));
+
+  const facilityInfo = (
+    <div className="text-left">
+      <h1 className="text-2xl font-semibold">{facility.name}</h1>
+      {facility.address && (
+        <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
+          {facility.address}
+          {facility.phone_number && (
+            <p className="text-gray-500 text-xs">{facility.phone_number}</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  const logoImg = (
+    <img
+      src={logoUrl ?? careConfig.mainLogo?.dark}
+      alt={logoUrl ? "Facility brand mark" : "Care Logo"}
+      className={cn(
+        "object-contain mb-2 sm:mb-0",
+        !hasCustomDims && "h-10 w-auto",
+      )}
+      style={
+        logoUrl
+          ? {
+              ...(logo?.width ? { width: `${logo.width}px` } : {}),
+              ...(logo?.height ? { height: `${logo.height}px` } : {}),
+            }
+          : undefined
+      }
+    />
+  );
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-80px)] print:min-h-screen">
@@ -310,34 +346,24 @@ function FacilityPrintLayout({
             }
           />
         </div>
+      ) : alignment === "center" ? (
+        <div className="flex flex-col items-center mb-3 pb-2 border-b border-gray-200 gap-2">
+          {logoImg}
+          <div className="w-full">{facilityInfo}</div>
+        </div>
       ) : (
         <div className="flex justify-between items-start mb-3 pb-2 border-b border-gray-200">
-          <div className="text-left">
-            <h1 className="text-2xl font-semibold">{facility.name}</h1>
-            {facility.address && (
-              <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
-                {facility.address}
-                {facility.phone_number && (
-                  <p className="text-gray-500 text-xs">
-                    {facility.phone_number}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-          <img
-            src={logo?.url ?? careConfig.mainLogo?.dark}
-            alt={logo?.url ? "Logo" : "Care Logo"}
-            className="h-10 w-auto object-contain mb-2 sm:mb-0"
-            style={
-              logo?.url
-                ? {
-                    ...(logo.width ? { width: `${logo.width}px` } : {}),
-                    ...(logo.height ? { height: `${logo.height}px` } : {}),
-                  }
-                : undefined
-            }
-          />
+          {alignment === "left" ? (
+            <>
+              {logoImg}
+              {facilityInfo}
+            </>
+          ) : (
+            <>
+              {facilityInfo}
+              {logoImg}
+            </>
+          )}
         </div>
       )}
       <div className="flex-1">{children}</div>
