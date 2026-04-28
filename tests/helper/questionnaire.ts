@@ -38,6 +38,34 @@ export async function clearStringField(page: Page, labelText: string) {
 }
 
 /**
+ * Fills a decimal (type="number") input field identified by its label.
+ */
+export async function fillDecimalField(
+  page: Page,
+  labelText: string,
+  value: string,
+) {
+  const label = page.getByText(labelText, { exact: true });
+  await label.scrollIntoViewIfNeeded();
+  const container = getQuestionContainer(page, labelText);
+  const input = container.locator('input[type="number"]').first();
+  await input.fill(value);
+}
+
+/**
+ * Clears a decimal input field identified by its label.
+ * Uses triple-click + backspace + tab to fully clear the React state.
+ */
+export async function clearDecimalField(page: Page, labelText: string) {
+  const label = page.getByText(labelText, { exact: true });
+  await label.scrollIntoViewIfNeeded();
+  const container = getQuestionContainer(page, labelText);
+  const input = container.locator('input[type="number"]').first();
+  await input.clear();
+  await input.press("Tab");
+}
+
+/**
  * Asserts whether a field label is visible or hidden.
  */
 export async function checkVisibility(

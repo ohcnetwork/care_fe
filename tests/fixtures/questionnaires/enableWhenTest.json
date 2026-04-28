@@ -1,8 +1,8 @@
 {
   "title": "Enable When Test",
   "slug": "enable-when-test",
-  "description": "Tests enable_when with string and boolean operators: exists, equals, not_equals",
-  "version": "2.1",
+  "description": "Tests enable_when with string, boolean, and decimal operators: exists, equals, not_equals, greater, less, greater_or_equals, less_or_equals",
+  "version": "3.0",
   "status": "active",
   "subject_type": "encounter",
   "questions": [
@@ -231,6 +231,272 @@
           "question": "B-007",
           "operator": "not_equals",
           "answer": "Yes"
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000001",
+      "link_id": "D-001",
+      "text": "Patient Score",
+      "type": "decimal",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000002",
+      "link_id": "D-002",
+      "text": "Score Interpretation",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-001",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000003",
+      "link_id": "D-003",
+      "text": "Score Comments",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-001",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000004",
+      "link_id": "D-004",
+      "text": "Exact Match Score",
+      "type": "decimal",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000005",
+      "link_id": "D-005",
+      "text": "Match Diagnosis",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-004",
+          "operator": "equals",
+          "answer": "10"
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000006",
+      "link_id": "D-006",
+      "text": "Match Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-004",
+          "operator": "equals",
+          "answer": "10"
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000007",
+      "link_id": "D-007",
+      "text": "Non-Standard Score",
+      "type": "decimal",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000008",
+      "link_id": "D-008",
+      "text": "Deviation Reason",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-007",
+          "operator": "not_equals",
+          "answer": "10"
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000009",
+      "link_id": "D-009",
+      "text": "Deviation Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-007",
+          "operator": "not_equals",
+          "answer": "10"
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000010",
+      "link_id": "D-010",
+      "text": "High Score",
+      "type": "decimal",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000011",
+      "link_id": "D-011",
+      "text": "High Alert Action",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-010",
+          "operator": "greater",
+          "answer": 10
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000012",
+      "link_id": "D-012",
+      "text": "High Alert Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-010",
+          "operator": "greater",
+          "answer": 10
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000013",
+      "link_id": "D-013",
+      "text": "Low Score",
+      "type": "decimal",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000014",
+      "link_id": "D-014",
+      "text": "Low Alert Action",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-013",
+          "operator": "less",
+          "answer": 10
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000015",
+      "link_id": "D-015",
+      "text": "Low Alert Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-013",
+          "operator": "less",
+          "answer": 10
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000016",
+      "link_id": "D-016",
+      "text": "Threshold Score GTE",
+      "type": "decimal",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000017",
+      "link_id": "D-017",
+      "text": "GTE Alert Action",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-016",
+          "operator": "greater_or_equals",
+          "answer": 10
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000018",
+      "link_id": "D-018",
+      "text": "GTE Alert Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-016",
+          "operator": "greater_or_equals",
+          "answer": 10
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000019",
+      "link_id": "D-019",
+      "text": "Threshold Score LTE",
+      "type": "decimal",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000020",
+      "link_id": "D-020",
+      "text": "LTE Alert Action",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-019",
+          "operator": "less_or_equals",
+          "answer": 10
+        }
+      ]
+    },
+    {
+      "id": "d1000001-0001-4000-8000-000000000021",
+      "link_id": "D-021",
+      "text": "LTE Alert Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "D-019",
+          "operator": "less_or_equals",
+          "answer": 10
         }
       ]
     }
