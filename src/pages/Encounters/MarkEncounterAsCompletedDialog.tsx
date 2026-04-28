@@ -62,7 +62,7 @@ export function MarkEncounterAsCompletedDialog({
           <AlertDialogAction
             className={buttonVariants({ variant: "primary" })}
             onClick={() => {
-              if (completeEverything) {
+              if (completeEverythingToMark) {
                 completeEverything();
               } else {
                 completeEncounter();
