@@ -488,7 +488,7 @@ export function NoteManager({
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-[calc(100vh-15rem)] lg:h-full overflow-hidden">
+    <div className="flex h-full overflow-hidden">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200 min-w-0 overflow-hidden">
         <div className="p-4 border-b border-gray-200">

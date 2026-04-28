@@ -12,7 +12,7 @@ export const EncounterNotesTab = () => {
   } = useEncounter();
 
   return (
-    <div className="h-full">
+    <div className="h-[calc(100vh-15rem)] lg:h-full">
       <NoteManager
         canAccess={canReadSelectedEncounter}
         canWrite={canWriteSelectedEncounter}
