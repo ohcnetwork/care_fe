@@ -488,7 +488,7 @@ export function NoteManager({
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <div className="flex h-[calc(100vh-15rem)] lg:h-full overflow-hidden">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200 min-w-0 overflow-hidden">
         <div className="p-4 border-b border-gray-200">
@@ -565,7 +565,7 @@ export function NoteManager({
               </div>
             </div>
 
-            <ScrollArea className="flex-1">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
               <div className="space-y-2 p-4">
                 {threadsData?.results.length === 0 ? (
                   <div className="text-center py-6">
@@ -588,7 +588,7 @@ export function NoteManager({
                   ))
                 )}
               </div>
-            </ScrollArea>
+            </div>
           </div>
         </SheetContent>
       </Sheet>
