@@ -726,6 +726,57 @@ export function ServiceRequestQuestion({
     }
   }, [questionnaireResponse.values, serviceRequests]);
 
+  // Effect to fetch activity definitions for any service requests whose
+  // definitions are not yet cached (e.g. when added via Scribe or other
+  // flows that bypass the picker/template handlers).
+  useEffect(() => {
+    if (!facilityId) return;
+
+    const missingSlugs = Array.from(
+      new Set(
+        serviceRequests
+          .map((sr) => sr.activity_definition)
+          .filter((slug) => slug && !activityDefinitionsMap[slug]),
+      ),
+    );
+
+    if (missingSlugs.length === 0) return;
+
+    let cancelled = false;
+    const controller = new AbortController();
+
+    Promise.all(
+      missingSlugs.map((slug) =>
+        query(activityDefinitionApi.retrieveActivityDefinition, {
+          pathParams: {
+            facilityId,
+            activityDefinitionSlug: slug,
+          },
+        })({ signal: controller.signal })
+          .then((data) => [slug, data] as const)
+          .catch(() => null),
+      ),
+    ).then((results) => {
+      if (cancelled) return;
+      const fetched = results.filter(
+        (r): r is readonly [string, ActivityDefinitionReadSpec] => r !== null,
+      );
+      if (fetched.length === 0) return;
+      setActivityDefinitionsMap((prev) => {
+        const next = { ...prev };
+        for (const [slug, data] of fetched) {
+          if (!next[slug]) next[slug] = data;
+        }
+        return next;
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [serviceRequests, activityDefinitionsMap, facilityId]);
+
   const handleActivityDefinitionSelect = (
     value:
       | ActivityDefinitionReadSpec
