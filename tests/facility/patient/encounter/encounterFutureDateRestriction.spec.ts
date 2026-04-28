@@ -1,6 +1,16 @@
+import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { format, subDays } from "date-fns";
 import { getFacilityId } from "tests/support/facilityId";
+
+const encounterClasses = [
+  "Inpatient",
+  "Ambulatory",
+  "Observation",
+  "Emergency",
+  "Virtual",
+  "Home Health",
+];
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -18,6 +28,13 @@ async function openEncounterForm(page: import("@playwright/test").Page) {
     page.getByRole("button", { name: "Create Encounter" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Create Encounter" }).click();
+}
+
+async function selectRandomEncounterClass(
+  page: import("@playwright/test").Page,
+) {
+  const randomClass = faker.helpers.arrayElement(encounterClasses);
+  await page.getByRole("button", { name: randomClass }).click();
 }
 
 async function selectFutureDateInCalendar(
@@ -73,8 +90,8 @@ test.describe("Encounter Future Date Restriction", () => {
   }) => {
     await openEncounterForm(page);
 
-    // Select encounter class
-    await page.getByRole("button", { name: "Inpatient" }).click();
+    // Select a random encounter class
+    await selectRandomEncounterClass(page);
 
     // Set status to Planned
     await page.getByRole("combobox", { name: "Status" }).click();
@@ -98,31 +115,17 @@ test.describe("Encounter Future Date Restriction", () => {
   }) => {
     await openEncounterForm(page);
 
-    // Select encounter class
-    await page.getByRole("button", { name: "Inpatient" }).click();
+    // Select a random encounter class
+    await selectRandomEncounterClass(page);
 
     // Set status to Planned first (allows future dates)
     await page.getByRole("combobox", { name: "Status" }).click();
     await page.getByRole("option", { name: "Planned" }).click();
 
     // Select a future date while Planned
-    await page
-      .locator('[data-slot="form-item"]')
-      .filter({ hasText: "Date and Time" })
-      .locator('[data-slot="popover-trigger"]')
-      .click();
-
-    const nextMonthBtn = page.getByRole("button", {
-      name: "Go to the Next Month",
-    });
-    await expect(nextMonthBtn).toBeVisible();
-    await nextMonthBtn.click();
-
-    await page
-      .getByRole("gridcell")
-      .filter({ hasText: /^15$/ })
-      .getByRole("button")
-      .click();
+    const futureDayButton = await selectFutureDateInCalendar(page);
+    await expect(futureDayButton).toBeEnabled();
+    await futureDayButton.click();
 
     // Switch status to In Progress (future date now becomes invalid)
     await page.getByRole("combobox", { name: "Status" }).click();
