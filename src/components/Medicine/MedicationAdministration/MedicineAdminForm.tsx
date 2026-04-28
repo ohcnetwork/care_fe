@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { getDosageFromInstruction } from "@/components/Medicine/MedicationAdministration/utils";
 import {
   formatDosage,
   formatDuration,
@@ -47,6 +49,150 @@ interface MedicineAdminFormProps {
   compact?: boolean;
   otherGroupRequests?: MedicationRequestRead[];
 }
+
+interface DosageInstructionSelectorProps {
+  medication: MedicationRequestRead;
+  administrationRequest: MedicationAdministrationRequest;
+  onChange: (request: MedicationAdministrationRequest) => void;
+  formId: string;
+}
+
+function findSelectedDosageIndex(
+  medication: MedicationRequestRead,
+  administrationRequest: MedicationAdministrationRequest,
+): number {
+  const idx = medication.dosage_instruction.findIndex((di) => {
+    const doseValue = di.dose_and_rate?.dose_quantity?.value;
+    const doseUnit = di.dose_and_rate?.dose_quantity?.unit?.code;
+    return (
+      doseValue === administrationRequest.dosage?.dose?.value &&
+      doseUnit === administrationRequest.dosage?.dose?.unit?.code
+    );
+  });
+  return idx >= 0 ? idx : 0;
+}
+
+const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
+  medication,
+  administrationRequest,
+  onChange,
+  formId,
+}) => {
+  const { t } = useTranslation();
+  const selectedIndex = findSelectedDosageIndex(
+    medication,
+    administrationRequest,
+  );
+  const hasSingleInstruction = medication.dosage_instruction.length === 1;
+  const allDosagesAreSame = medication.dosage_instruction.every(
+    (di, _, arr) => {
+      const firstDose = arr[0]?.dose_and_rate?.dose_quantity;
+      const currentDose = di.dose_and_rate?.dose_quantity;
+      return (
+        firstDose?.value === currentDose?.value &&
+        firstDose?.unit?.code === currentDose?.unit?.code
+      );
+    },
+  );
+
+  const handleSelectDosage = (idx: number) => {
+    const instruction = medication.dosage_instruction[idx];
+    if (instruction) {
+      onChange({
+        ...administrationRequest,
+        dosage: getDosageFromInstruction(instruction),
+      });
+    }
+  };
+
+  // If there's only one instruction or all dosages are the same, show read-only display)
+  if (hasSingleInstruction || allDosagesAreSame) {
+    return (
+      <div className="space-y-2">
+        {medication.dosage_instruction.map((di, idx) => (
+          <div
+            key={idx}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-gray-50 rounded-lg"
+          >
+            <div>
+              <Label className="text-xs text-gray-500">{t("dosage")}</Label>
+              <p className="font-medium">{formatDosage(di)}</p>
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">{t("frequency")}</Label>
+              <p className="font-medium">{formatFrequency(di) || "-"}</p>
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">{t("route")}</Label>
+              <p className="font-medium">{di?.route?.display || t("oral")}</p>
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">{t("duration")}</Label>
+              <p className="font-medium">{formatDuration(di) || "-"}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <Label>{t("select_dosage_instruction")}</Label>
+      <RadioGroup
+        value={String(selectedIndex)}
+        onValueChange={(value) => handleSelectDosage(parseInt(value, 10))}
+        className="space-y-2"
+      >
+        {medication.dosage_instruction.map((di, idx) => {
+          const isSelected = idx === selectedIndex;
+          return (
+            <div
+              key={idx}
+              className={cn(
+                "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                isSelected
+                  ? "bg-primary-50 border-primary-300"
+                  : "bg-gray-50 border-gray-200 hover:border-gray-300",
+              )}
+              onClick={() => handleSelectDosage(idx)}
+            >
+              <RadioGroupItem
+                value={String(idx)}
+                id={`${formId}-dosage-${idx}`}
+                className="mt-1"
+              />
+              <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <Label className="text-xs text-gray-500">{t("dosage")}</Label>
+                  <p className="font-medium">{formatDosage(di)}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">
+                    {t("frequency")}
+                  </Label>
+                  <p className="font-medium">{formatFrequency(di) || "-"}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">{t("route")}</Label>
+                  <p className="font-medium">
+                    {di?.route?.display || t("oral")}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">
+                    {t("duration")}
+                  </Label>
+                  <p className="font-medium">{formatDuration(di) || "-"}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </RadioGroup>
+    </div>
+  );
+};
 
 export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   medication,
@@ -423,32 +569,12 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-gray-50 rounded-lg">
-        <div>
-          <Label className="text-xs text-gray-500">{t("dosage")}</Label>
-          <p className="font-medium">
-            {formatDosage(medication.dosage_instruction[0])}
-          </p>
-        </div>
-        <div>
-          <Label className="text-xs text-gray-500">{t("frequency")}</Label>
-          <p className="font-medium">
-            {formatFrequency(medication.dosage_instruction[0]) || "-"}
-          </p>
-        </div>
-        <div>
-          <Label className="text-xs text-gray-500">{t("route")}</Label>
-          <p className="font-medium">
-            {medication.dosage_instruction[0]?.route?.display || t("oral")}
-          </p>
-        </div>
-        <div>
-          <Label className="text-xs text-gray-500">{t("duration")}</Label>
-          <p className="font-medium">
-            {formatDuration(medication.dosage_instruction[0]) || "-"}
-          </p>
-        </div>
-      </div>
+      <DosageInstructionSelector
+        medication={medication}
+        administrationRequest={administrationRequest}
+        onChange={onChange}
+        formId={formId}
+      />
 
       {/* All prescriptions in the group */}
       {otherGroupRequests && otherGroupRequests.length > 0 && (
@@ -459,9 +585,13 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           </div>
           <div className="space-y-1.5">
             {otherGroupRequests.map((req) => {
-              const dosage = req.dosage_instruction[0];
               const isCurrentMedication = req.id === medication.id;
               const canSelect = !isCurrentMedication && onMedicationChange;
+              const instructionSummaries = req.dosage_instruction.map((di) => {
+                const dosage = formatDosage(di);
+                const freq = formatFrequency(di);
+                return { dosage, freq };
+              });
               return (
                 <button
                   type="button"
@@ -482,26 +612,32 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                         className="size-4 text-primary-600"
                       />
                     )}
-                    <span
-                      className={
-                        isCurrentMedication
-                          ? "text-primary-700 font-medium"
-                          : "text-gray-700"
-                      }
-                    >
-                      {formatDosage(dosage)}
-                    </span>
-                    {formatFrequency(dosage) && (
-                      <span
-                        className={
-                          isCurrentMedication
-                            ? "text-primary-500"
-                            : "text-gray-400"
-                        }
-                      >
-                        · {formatFrequency(dosage)}
-                      </span>
-                    )}
+                    <div className="flex flex-col gap-0.5">
+                      {instructionSummaries.map((summary, idx) => (
+                        <div key={idx} className="flex items-center gap-1">
+                          <span
+                            className={
+                              isCurrentMedication
+                                ? "text-primary-700 font-medium"
+                                : "text-gray-700"
+                            }
+                          >
+                            {summary.dosage}
+                          </span>
+                          {summary.freq && (
+                            <span
+                              className={
+                                isCurrentMedication
+                                  ? "text-primary-500"
+                                  : "text-gray-400"
+                              }
+                            >
+                              · {summary.freq}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <Badge
                     variant={req.status === "active" ? "green" : "secondary"}

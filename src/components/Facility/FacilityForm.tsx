@@ -146,18 +146,18 @@ export default function FacilityForm({
   const onSubmit: (data: FacilityFormValues) => void = (
     data: FacilityFormValues,
   ) => {
+    const payload = {
+      ...data,
+      latitude: data.latitude ? String(data.latitude) : undefined,
+      longitude: data.longitude ? String(data.longitude) : undefined,
+      print_templates: Array.isArray(facilityData?.print_templates)
+        ? facilityData.print_templates
+        : [],
+    };
     if (facilityId) {
-      updateFacility({
-        ...data,
-        latitude: data.latitude ? String(data.latitude) : undefined,
-        longitude: data.longitude ? String(data.longitude) : undefined,
-      });
+      updateFacility(payload);
     } else {
-      createFacility({
-        ...data,
-        latitude: data.latitude ? String(data.latitude) : undefined,
-        longitude: data.longitude ? String(data.longitude) : undefined,
-      });
+      createFacility(payload);
     }
   };
 
@@ -213,7 +213,7 @@ export default function FacilityForm({
         is_public: facilityData.is_public,
       });
     }
-  }, [facilityData]);
+  }, [facilityData, form]);
 
   return (
     <Form {...form}>

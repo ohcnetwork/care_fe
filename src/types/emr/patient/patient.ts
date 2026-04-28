@@ -51,12 +51,14 @@ export interface PatientRead extends PatientListRead, Permissions {
   updated_by?: UserReadMinimal;
   instance_identifiers: PatientIdentifier[];
   facility_identifiers: PatientIdentifier[];
+  extensions?: Record<string, Record<string, unknown>>;
 }
 
 export interface PatientUpdate extends PatientBase {
   age?: number;
   geo_organization?: string;
   identifiers: PatientIdentifierCreate[];
+  extensions?: Record<string, Record<string, unknown>>;
 }
 
 export interface PatientCreate extends PatientUpdate {
@@ -88,6 +90,7 @@ export interface PatientSearchRetrieveRequest {
   phone_number: string;
   year_of_birth: string;
   partial_id: string;
+  facility?: string;
 }
 
 export function getPartialId(patient: PartialPatientModel | PatientListRead) {

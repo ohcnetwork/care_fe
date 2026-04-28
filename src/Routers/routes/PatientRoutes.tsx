@@ -3,8 +3,8 @@ import { Suspense, lazy } from "react";
 
 import Loading from "@/components/Common/Loading";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
-import { PatientHome } from "@/components/Patient/PatientHome";
 import PatientIndex from "@/components/Patient/PatientIndex";
+import { PatientProfile } from "@/components/Patient/PatientProfile";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { PatientRegistration } from "@/components/Patient/PatientRegistration";
@@ -12,7 +12,7 @@ import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 import ClinicalHistoryPage from "@/pages/Patient/History";
-import VerifyPatient from "@/pages/Patient/VerifyPatient";
+import PatientHome from "@/pages/Patient/PatientHome";
 import careConfig from "@careConfig";
 
 const ExcalidrawEditor = lazy(
@@ -81,23 +81,23 @@ const PatientRoutes: AppRoutes = {
     return acc;
   }, {}),
 
-  "/facility/:facilityId/patients/verify": () => <VerifyPatient />,
-  "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
+  "/facility/:facilityId/patients/home": () => <PatientHome />,
+  "/patient/:id": ({ id }) => <PatientProfile id={id} page="demography" />,
   ...patientTabs.reduce((acc: AppRoutes, tab) => {
     acc["/patient/:id/" + tab.route] = ({ id }) => (
-      <PatientHome id={id} page={tab.route} />
+      <PatientProfile id={id} page={tab.route} />
     );
     return acc;
   }, {}),
   "/facility/:facilityId/patient/create": () => <PatientRegistration />,
   "/facility/:facilityId/patient/:id": ({ facilityId, id }) => (
-    <PatientHome facilityId={facilityId} id={id} page="demography" />
+    <PatientProfile facilityId={facilityId} id={id} page="demography" />
   ),
   ...patientTabs.reduce((acc: AppRoutes, tab) => {
     acc["/facility/:facilityId/patient/:id/" + tab.route] = ({
       facilityId,
       id,
-    }) => <PatientHome facilityId={facilityId} id={id} page={tab.route} />;
+    }) => <PatientProfile facilityId={facilityId} id={id} page={tab.route} />;
     return acc;
   }, {}),
   "/facility/:facilityId/patient/:id/update": ({ id }) => (

@@ -8,7 +8,7 @@ import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
-import { PatientHome } from "@/components/Patient/PatientHome";
+import { PatientProfile } from "@/components/Patient/PatientProfile";
 
 import useSidebarState from "@/hooks/useSidebarState";
 
@@ -31,7 +31,7 @@ const DashboardRoutes = {
   }) => <AppointmentSuccess appointmentId={appointmentId} />,
   "/patient/home": () => <PatientIndex />,
   "/patient/:id": ({ id }: { id: string }) => (
-    <PatientHome id={id} page="demography" />
+    <PatientProfile id={id} page="demography" />
   ),
   "/patient/:id/:tab": ({
     id,
@@ -39,7 +39,7 @@ const DashboardRoutes = {
   }: {
     id: string;
     tab: (typeof patientTabs)[number]["route"];
-  }) => <PatientHome id={id} page={tab} />,
+  }) => <PatientProfile id={id} page={tab} />,
 };
 
 const AppointmentRoutes = {

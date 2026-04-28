@@ -103,9 +103,7 @@ export const Account = () => {
         {!account ? (
           <EmptyState message={t("no_account_found")} />
         ) : (
-          <Link
-            href={`/facility/${facilityId}/billing/account/${account.id}?encounterId=${encounter.id}`}
-          >
+          <Link href={`/facility/${facilityId}/billing/account/${account.id}`}>
             <div
               className={cn(
                 "flex flex-row bg-gray-100 rounded-md p-2 border border-gray-200 justify-between",

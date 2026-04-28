@@ -64,6 +64,9 @@ export function ChargeItemDefinitionDetail({
         queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
         navigate(
           `/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition?.category.slug}`,
+          {
+            replace: true,
+          },
         );
       },
     });
@@ -75,6 +78,7 @@ export function ChargeItemDefinitionDetail({
       status: ChargeItemDefinitionStatus.retired,
       category: chargeItemDefinition.category.slug,
       slug_value: chargeItemDefinition.slug_config.slug_value,
+      discount_configuration: null,
     });
   };
 
@@ -151,9 +155,7 @@ export function ChargeItemDefinitionDetail({
   return (
     <Page title={chargeItemDefinition.title} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
-        <BackButton
-          fallbackUrl={`/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition.category.slug}`}
-        >
+        <BackButton>
           <ArrowLeft />
           {t("back")}
         </BackButton>

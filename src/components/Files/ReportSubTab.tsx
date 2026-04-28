@@ -28,6 +28,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
 import { FilterBadges, FilterButton } from "@/components/Files/FileFilters";
+import { EmptyState } from "@/components/ui/empty-state";
 
 import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
@@ -40,14 +41,24 @@ import {
   ReportReadList,
   ReportType,
 } from "@/types/emr/report/report";
+import { navigate } from "raviger";
 import { toast } from "sonner";
 
 interface ReportTabProps {
   associatingId: string;
   reportType?: ReportType;
+  facilityId?: string;
+  patientId?: string;
+  encounterId?: string;
 }
 
-export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
+export function ReportSubTab({
+  associatingId,
+  reportType,
+  facilityId,
+  patientId,
+  encounterId,
+}: ReportTabProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
   const { qParams, updateQuery, Pagination } = useFilters({
@@ -87,11 +98,23 @@ export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
     return iconMap[reportType] || "l-file-alt";
   };
 
+  const canNavigateToPreview = !!(facilityId && patientId && encounterId);
+
+  const handleView = (report: ReportReadList) => {
+    if (canNavigateToPreview) {
+      navigate(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/report/${report.id}`,
+      );
+    } else {
+      viewFile(report);
+    }
+  };
+
   const DetailButtons = ({ report }: { report: ReportReadList }) => {
     return (
       <div className="flex flex-row gap-2 justify-end">
         <Button
-          onClick={() => viewFile(report)}
+          onClick={() => handleView(report)}
           variant="secondary"
           className="w-auto flex flex-row justify-stretch items-center"
         >
@@ -144,7 +167,7 @@ export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
         <Button
           variant="secondary"
           onClick={() => {
-            viewFile(report);
+            handleView(report);
           }}
         >
           <span className="flex flex-row items-center gap-1">
@@ -158,62 +181,58 @@ export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
 
   const RenderCards = () => (
     <div className="xl:hidden flex flex-col gap-3 pt-3 px-2">
-      {filteredReports && filteredReports.length > 0
-        ? filteredReports.map((report) => {
-            return (
-              <Card
-                key={report.id}
-                className={cn(
-                  report.is_archived ? "bg-white/50 opacity-70" : "bg-white",
-                )}
-              >
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <span className="p-2 rounded-full bg-gray-100 shrink-0">
-                        <CareIcon
-                          icon={getReportTypeIcon(report.report_type)}
-                          className="text-xl"
-                        />
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate w-full">
-                          {report.name}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {t(report.report_type)}
-                        </p>
-                      </div>
+      {filteredReports &&
+        filteredReports.length > 0 &&
+        filteredReports.map((report) => {
+          return (
+            <Card
+              key={report.id}
+              className={cn(
+                report.is_archived ? "bg-white/50 opacity-70" : "bg-white",
+              )}
+            >
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <span className="p-2 rounded-full bg-gray-100 shrink-0">
+                      <CareIcon
+                        icon={getReportTypeIcon(report.report_type)}
+                        className="text-xl"
+                      />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 truncate w-full">
+                        {report.name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {t(report.report_type)}
+                      </p>
                     </div>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <div className="text-gray-500">{t("date")}</div>
-                      <div className="font-medium">
-                        {dayjs(report.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
-                        )}
-                      </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <div className="text-gray-500">{t("date")}</div>
+                    <div className="font-medium">
+                      {dayjs(report.created_date).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
                     </div>
                   </div>
+                </div>
 
-                  <div className="pt-2 flex justify-end">
-                    {report.is_archived ? (
-                      getArchivedMessage(report)
-                    ) : (
-                      <DetailButtons report={report} />
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
-        : !reportsLoading && (
-            <div className="text-center py-8 text-gray-500">
-              {t("no_reports_found")}
-            </div>
-          )}
+                <div className="pt-2 flex justify-end">
+                  {report.is_archived ? (
+                    getArchivedMessage(report)
+                  ) : (
+                    <DetailButtons report={report} />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
     </div>
   );
 
@@ -235,87 +254,81 @@ export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredReports && filteredReports.length > 0
-            ? filteredReports.map((report) => {
-                return (
-                  <TableRow
-                    key={report.id}
-                    className={cn("shadow rounded-md overflow-hidden group")}
+          {filteredReports &&
+            filteredReports.length > 0 &&
+            filteredReports.map((report) => {
+              return (
+                <TableRow
+                  key={report.id}
+                  className={cn("shadow rounded-md overflow-hidden group")}
+                >
+                  <TableCell
+                    className={cn(
+                      "font-medium rounded-l-md rounded-y-md group-hover:bg-transparent",
+                      report.is_archived ? "bg-white/50" : "bg-white",
+                    )}
                   >
-                    <TableCell
-                      className={cn(
-                        "font-medium rounded-l-md rounded-y-md group-hover:bg-transparent",
-                        report.is_archived ? "bg-white/50" : "bg-white",
-                      )}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="p-2 rounded-full bg-gray-100 shrink-0">
-                          <CareIcon
-                            icon={getReportTypeIcon(report.report_type)}
-                            className="text-xl"
-                          />
-                        </span>
-                        {report.name && report.name.length > 30 ? (
-                          <TooltipComponent content={report.name}>
-                            <span className="text-gray-900 truncate block">
-                              {report.name}
-                            </span>
-                          </TooltipComponent>
-                        ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="p-2 rounded-full bg-gray-100 shrink-0">
+                        <CareIcon
+                          icon={getReportTypeIcon(report.report_type)}
+                          className="text-xl"
+                        />
+                      </span>
+                      {report.name && report.name.length > 30 ? (
+                        <TooltipComponent content={report.name}>
                           <span className="text-gray-900 truncate block">
                             {report.name}
                           </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "rounded-y-md group-hover:bg-transparent",
-                        report.is_archived ? "bg-white/50" : "bg-white",
-                      )}
-                    >
-                      {t(report.report_type)}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "rounded-y-md group-hover:bg-transparent",
-                        report.is_archived ? "bg-white/50" : "bg-white",
-                      )}
-                    >
-                      <TooltipComponent
-                        content={dayjs(report.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
-                        )}
-                      >
-                        <span>
-                          {dayjs(report.created_date).format("DD MMM YYYY")}
-                        </span>
-                      </TooltipComponent>
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "text-right rounded-r-md rounded-y-md group-hover:bg-transparent",
-                        report.is_archived ? "bg-white/50" : "bg-white",
-                      )}
-                    >
-                      {report.is_archived ? (
-                        getArchivedMessage(report)
+                        </TooltipComponent>
                       ) : (
-                        <div className="flex flex-row gap-2 justify-end">
-                          <DetailButtons report={report} />
-                        </div>
+                        <span className="text-gray-900 truncate block">
+                          {report.name}
+                        </span>
                       )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            : !reportsLoading && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    {t("no_reports_found")}
+                    </div>
+                  </TableCell>
+                  <TableCell
+                    className={cn(
+                      "rounded-y-md group-hover:bg-transparent",
+                      report.is_archived ? "bg-white/50" : "bg-white",
+                    )}
+                  >
+                    {t(report.report_type)}
+                  </TableCell>
+                  <TableCell
+                    className={cn(
+                      "rounded-y-md group-hover:bg-transparent",
+                      report.is_archived ? "bg-white/50" : "bg-white",
+                    )}
+                  >
+                    <TooltipComponent
+                      content={dayjs(report.created_date).format(
+                        "DD MMM YYYY, hh:mm A",
+                      )}
+                    >
+                      <span>
+                        {dayjs(report.created_date).format("DD MMM YYYY")}
+                      </span>
+                    </TooltipComponent>
+                  </TableCell>
+                  <TableCell
+                    className={cn(
+                      "text-right rounded-r-md rounded-y-md group-hover:bg-transparent",
+                      report.is_archived ? "bg-white/50" : "bg-white",
+                    )}
+                  >
+                    {report.is_archived ? (
+                      getArchivedMessage(report)
+                    ) : (
+                      <div className="flex flex-row gap-2 justify-end">
+                        <DetailButtons report={report} />
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
-              )}
+              );
+            })}
         </TableBody>
       </Table>
     </div>
@@ -388,9 +401,18 @@ export function ReportSubTab({ associatingId, reportType }: ReportTabProps) {
         archivedLabel="archived_reports"
       />
 
-      {/* Report List */}
-      <RenderCards />
-      <RenderTable />
+      {!reportsLoading && filteredReports.length === 0 ? (
+        <EmptyState
+          icon={<CareIcon icon="l-file-alt" className="text-primary size-6" />}
+          title={t("no_reports_found")}
+          description={t("no_reports_found_description")}
+        />
+      ) : (
+        <>
+          <RenderCards />
+          <RenderTable />
+        </>
+      )}
 
       {/* Pagination */}
       {filteredReports.length > 0 && (
