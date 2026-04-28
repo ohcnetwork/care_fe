@@ -54,7 +54,7 @@ export async function fillDecimalField(
 
 /**
  * Clears a decimal input field identified by its label.
- * Uses triple-click + backspace + tab to fully clear the React state.
+ * Uses clear() + Tab to ensure the React onChange fires with an empty value.
  */
 export async function clearDecimalField(page: Page, labelText: string) {
   const label = page.getByText(labelText, { exact: true });
