@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import { WidgetSlot } from "@/components/AIWidgets/WidgetSlot";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
@@ -49,6 +50,7 @@ export const EncounterOverviewTab = () => {
           <div className="flex flex-col gap-4">
             {canWrite && <QuickActions />}
             {canWrite && <FavoriteFormsQuickActions />}
+            <WidgetSlot encounterId={encounterId} />
             {<ClinicalHistoryOverview />}
             <div className="xl:hidden">
               <SummaryPanel />
