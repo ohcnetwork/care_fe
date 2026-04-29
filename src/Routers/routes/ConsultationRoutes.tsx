@@ -11,6 +11,7 @@ import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
+import ReportViewer from "@/pages/Encounters/ReportViewer";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
 const ExcalidrawEditor = lazy(
@@ -24,6 +25,14 @@ const consultationRoutes: AppRoutes = {
         facilityId={facilityId}
         patientId={patientId}
         prescriptionId={prescriptionId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/prescriptions/print":
+    ({ facilityId, patientId, encounterId }) => (
+      <PrintPrescription
+        facilityId={facilityId}
+        patientId={patientId}
+        encounterId={encounterId}
       />
     ),
   ...[
@@ -92,6 +101,14 @@ const consultationRoutes: AppRoutes = {
   "/organization/:organizationId/patient/:patientId/encounter/:encounterId/treatment_summary":
     ({ encounterId, patientId }) => (
       <TreatmentSummary encounterId={encounterId} patientId={patientId} />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/template/:templateSlug":
+    ({ encounterId, templateSlug }) => (
+      <ReportViewer encounterId={encounterId} templateSlug={templateSlug} />
+    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/:reportId":
+    ({ encounterId, reportId }) => (
+      <ReportViewer encounterId={encounterId} reportId={reportId} />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (

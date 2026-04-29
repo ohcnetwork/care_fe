@@ -1,13 +1,9 @@
 import { booleanFromString } from "@/common/utils";
 import { AnimatedCounter } from "@/components/Common/AnimatedCounter";
 import BackButton from "@/components/Common/BackButton";
-import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
-import {
-  resourceTypeToResourcePathSlug,
-  useScheduleResource,
-} from "@/components/Schedule/useScheduleResource";
+import { useScheduleResource } from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { NavTabs } from "@/components/ui/nav-tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -45,7 +42,6 @@ import {
 import { TokenStatus } from "@/types/tokens/token/token";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
@@ -104,8 +100,7 @@ export function ManageQueuePage({
   );
 
   if (isQueueLoading || !queue) {
-    // TODO: build appropriate loading skeleton...
-    return <Loading />;
+    return <QueueManagementSkeleton />;
   }
 
   const shouldAutoRefresh = booleanFromString(
@@ -125,26 +120,21 @@ export function ManageQueuePage({
       hideTitleOnPage
     >
       <div className="flex flex-col gap-6">
-        <div className="flex justify-between gap-3">
-          <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap justify-between gap-3">
+          <div className="flex gap-2 items-center min-w-0 flex-1">
             <BackButton
               // TODO: move queue index page for practitioner to similar pattern path
-              to={
-                resourceType === SchedulableResourceType.Practitioner
-                  ? `/facility/${facilityId}/queues?date=${dateQueryString(queue.date)}&resource_id=${resourceId}`
-                  : `/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues?date=${dateQueryString(queue.date)}&resource_id=${resourceId}`
-              }
               size="icon"
               variant="ghost"
             >
               <ChevronLeft />
             </BackButton>
             {resource && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 <ScheduleResourceIcon resource={resource} />
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-black">
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-semibold text-black truncate">
                       {t("queue_of_resource", {
                         resource: formatScheduleResourceName(resource),
                       })}
@@ -152,7 +142,7 @@ export function ManageQueuePage({
                     {queue.is_primary && (
                       <Badge
                         variant={queue.is_primary ? "primary" : "secondary"}
-                        className="hidden sm:block text-xs"
+                        className="hidden sm:block text-xs shrink-0"
                       >
                         {t("primary")}
                       </Badge>
@@ -166,14 +156,17 @@ export function ManageQueuePage({
               </div>
             )}
           </div>
-          <div className="flex gap-5 items-center justify-center">
+          <div className="flex gap-5 items-center justify-end shrink-0">
             <div className="hidden sm:flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
               <Switch
                 checked={shouldAutoRefresh}
                 onCheckedChange={(checked) =>
-                  setQueryParams({
-                    autoRefresh: checked ? "true" : "false",
-                  })
+                  setQueryParams(
+                    {
+                      autoRefresh: checked ? "true" : "false",
+                    },
+                    { replace: true },
+                  )
                 }
               />
               <div className="flex items-center gap-1">
@@ -210,9 +203,12 @@ export function ManageQueuePage({
                     <Switch
                       checked={shouldAutoRefresh}
                       onCheckedChange={(checked) =>
-                        setQueryParams({
-                          autoRefresh: checked ? "true" : "false",
-                        })
+                        setQueryParams(
+                          {
+                            autoRefresh: checked ? "true" : "false",
+                          },
+                          { replace: true },
+                        )
                       }
                     />
                   </div>
@@ -290,6 +286,48 @@ export function ManageQueuePage({
   );
 }
 
+function QueueManagementSkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Header Section */}
+      <div className="flex justify-between gap-3">
+        <div className="flex gap-2 items-center">
+          <Skeleton className="size-10 rounded-md" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+        <div className="flex gap-5 items-center">
+          <div className="hidden sm:flex items-center gap-2">
+            <Skeleton className="h-5 w-10 rounded-full" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="size-10 rounded-md" />
+        </div>
+      </div>
+
+      {/* Tabs Section */}
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-4 border-b">
+          <Skeleton className="h-10 w-32 mb-[-1px]" />
+          <Skeleton className="h-10 w-32 mb-[-1px]" />
+        </div>
+
+        {/* Content Area */}
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full rounded-lg" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Skeleton className="h-64 w-full rounded-lg" />
+            <Skeleton className="h-64 w-full rounded-lg" />
+            <Skeleton className="h-64 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ManageServicePointsDialog({
   trigger,
   ...props
@@ -302,17 +340,31 @@ function ManageServicePointsDialog({
     useQueueServicePoints();
 
   if (!allServicePoints) {
-    return <Loading />;
+    return (
+      <DialogContent className="w-[95vw] max-w-md">
+        <DialogHeader>
+          <Skeleton className="h-6 w-48" />
+        </DialogHeader>
+        <div className="space-y-2">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex items-center space-x-3 p-3">
+              <Skeleton className="size-4 rounded" />
+              <Skeleton className="h-4 flex-1" />
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    );
   }
 
   return (
     <Dialog {...props}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[95vw] max-w-md">
         <DialogHeader>
           <DialogTitle>{t("assigned_service_points")}</DialogTitle>
         </DialogHeader>
-        <div>
+        <div className="max-h-[60vh] overflow-y-auto -mx-2 px-2">
           {allServicePoints.map((subQueue) => {
             const isSelected = assignedServicePointIds.includes(subQueue.id);
             return (
@@ -326,9 +378,8 @@ function ManageServicePointsDialog({
                 <div className="flex items-center space-x-3">
                   <Checkbox
                     checked={isSelected}
-                    onCheckedChange={(checked) =>
-                      toggleServicePoint(subQueue.id, checked as boolean)
-                    }
+                    className="pointer-events-none"
+                    tabIndex={-1}
                   />
                   <span className="text-sm font-medium">{subQueue.name}</span>
                 </div>

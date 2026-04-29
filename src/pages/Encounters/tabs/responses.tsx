@@ -66,7 +66,10 @@ interface LeftPanelProps {
   responseId?: string;
   questionnaireTitle: string;
   questionnaireSlug?: string;
-  setQueryParams: (params: any) => void;
+  handleQuestionnaireChange: (
+    questionnaireSlug?: string,
+    questionnaireTitle?: string,
+  ) => void;
   onResponseClick: (response: QuestionnaireResponse) => void;
 }
 
@@ -77,7 +80,7 @@ function LeftPanel({
   responseId,
   questionnaireTitle,
   questionnaireSlug,
-  setQueryParams,
+  handleQuestionnaireChange,
   onResponseClick,
 }: LeftPanelProps) {
   const { t } = useTranslation();
@@ -91,10 +94,7 @@ function LeftPanel({
           }
           subjectType="encounter"
           onSelect={(q) => {
-            setQueryParams({
-              questionnaireSlug: q.slug,
-              questionnaireTitle: q.title,
-            });
+            handleQuestionnaireChange(q.slug, q.title);
           }}
           trigger={
             <Button
@@ -114,7 +114,7 @@ function LeftPanel({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setQueryParams({});
+                      handleQuestionnaireChange();
                     }}
                     className="h-5 w-5 p-0 hover:bg-gray-100"
                   >
@@ -178,6 +178,22 @@ export const EncounterResponsesTab = ({
     if (isMobile) setIsDrawerOpen(false);
   };
 
+  const handleQuestionnaireChange = (
+    questionnaireSlug?: string,
+    questionnaireTitle?: string,
+  ) => {
+    if (questionnaireSlug && questionnaireTitle) {
+      setQueryParams({ ...qParams, questionnaireSlug, questionnaireTitle });
+    } else {
+      const {
+        questionnaireSlug: _questionnaireSlug,
+        questionnaireTitle: _questionnaireTitle,
+        ...rest
+      } = qParams;
+      setQueryParams(rest);
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row h-full">
       <div className="hidden md:flex md:w-1/5 flex flex-col gap-3 pt-1 md:h-full md:overflow-y-auto">
@@ -188,7 +204,7 @@ export const EncounterResponsesTab = ({
           responseId={responseId}
           questionnaireSlug={questionnaireSlug}
           questionnaireTitle={questionnaireTitle || ""}
-          setQueryParams={setQueryParams}
+          handleQuestionnaireChange={handleQuestionnaireChange}
           onResponseClick={handleResponseClick}
         />
       </div>
@@ -214,7 +230,7 @@ export const EncounterResponsesTab = ({
                     responseId={responseId}
                     questionnaireSlug={questionnaireSlug}
                     questionnaireTitle={questionnaireTitle || ""}
-                    setQueryParams={setQueryParams}
+                    handleQuestionnaireChange={handleQuestionnaireChange}
                     onResponseClick={handleResponseClick}
                   />
                 </div>

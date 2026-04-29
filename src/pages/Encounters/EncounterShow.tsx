@@ -19,7 +19,6 @@ import { Card } from "@/components/ui/card";
 import { CommandShortcut } from "@/components/ui/command";
 import { NavTabs } from "@/components/ui/nav-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
@@ -38,11 +37,10 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import {
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
-  inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { LocationTypeIcons } from "@/types/location/location";
-import { entriesOf } from "@/Utils/utils";
+import { entriesOf, goBack } from "@/Utils/utils";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -83,7 +81,6 @@ export const EncounterShow = (props: Props) => {
 
   const { t } = useTranslation();
   const pluginTabs = useCareAppEncounterTabs();
-  const { goBack } = useAppHistory();
   const showMoreAfterIndex = useBreakpoints({
     default: 2,
     xs: 2,
@@ -96,12 +93,14 @@ export const EncounterShow = (props: Props) => {
 
   const canAccess = canReadClinicalData || canReadSelectedEncounter;
   const hasToken = primaryEncounter?.appointment?.token;
-  const isEncounterActive =
-    primaryEncounter?.appointment?.id &&
-    !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
+  // const isEncounterActive =
+  //   primaryEncounter?.appointment?.id &&
+  //   !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
+
+  const hasAppointmentId = primaryEncounter?.appointment?.id;
 
   // Header is shown either when token is present or encounter is active and has an appointment
-  const canViewAppointmentEncounterHeader = hasToken || isEncounterActive;
+  const canViewAppointmentEncounterHeader = hasToken || hasAppointmentId;
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {

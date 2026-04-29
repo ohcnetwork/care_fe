@@ -1,5 +1,6 @@
 import { BatchSuccessResponse } from "@/types/base/batch/batch";
 import {
+  DiscountConfiguration,
   MonetaryComponent,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -81,6 +82,7 @@ export interface ApplyChargeItemDefinitionRequest {
   service_resource?: ChargeItemServiceResource;
   service_resource_id?: string;
   performer_actor?: string;
+  account?: string;
 }
 
 export interface ApplyMultipleChargeItemDefinitionRequest {
@@ -97,6 +99,7 @@ export interface ChargeItemUpdate extends Omit<
 
 export interface ChargeItemRead extends ChargeItemBase {
   total_price_components: MonetaryComponent[];
+  discount_configuration: DiscountConfiguration | null;
   charge_item_definition: ChargeItemDefinitionBase;
   service_resource: ChargeItemServiceResource;
   service_resource_id?: string;

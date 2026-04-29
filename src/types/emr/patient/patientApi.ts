@@ -32,6 +32,7 @@ export default {
     path: "/api/v1/patient/{id}/",
     method: HttpMethod.GET,
     TRes: Type<PatientRead>(),
+    TQuery: Type<{ facility?: string }>(),
   },
 
   // Patient Search
@@ -78,6 +79,18 @@ export default {
     path: "/api/v1/patient/{external_id}/remove_instance_tags/",
     method: HttpMethod.POST,
     TBody: Type<{ tags: string[] }>(),
+    TRes: Type<PatientRead>(),
+  },
+  setFacilityTags: {
+    path: "/api/v1/patient/{external_id}/set_facility_tags/",
+    method: HttpMethod.POST,
+    TBody: Type<{ tags: string[]; facility: string | null }>(),
+    TRes: Type<PatientRead>(),
+  },
+  removeFacilityTags: {
+    path: "/api/v1/patient/{external_id}/remove_facility_tags/",
+    method: HttpMethod.POST,
+    TBody: Type<{ tags: string[]; facility: string | null }>(),
     TRes: Type<PatientRead>(),
   },
 } as const;

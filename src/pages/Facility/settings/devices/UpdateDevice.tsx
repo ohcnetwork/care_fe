@@ -8,11 +8,10 @@ import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import query from "@/Utils/request/query";
 import deviceApi from "@/types/device/deviceApi";
 
+import { goBack } from "@/Utils/utils";
 import DeviceForm from "./components/DeviceForm";
 import DeviceTypeIcon from "./components/DeviceTypeIcon";
 
@@ -23,7 +22,6 @@ interface Props {
 
 export default function UpdateDevice({ facilityId, deviceId }: Props) {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
 
   const { data: device, isLoading } = useQuery({
     queryKey: ["device", facilityId, deviceId],
@@ -52,7 +50,7 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
             device={device}
             onSuccess={() => {
               toast.success(t("device_updated"));
-              goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
+              goBack();
             }}
           />
         </div>

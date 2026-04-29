@@ -39,6 +39,26 @@
                 ]
             },
             {
+                "title": "GRBS",
+                "codes": [
+                    {
+                        "code": "2339-0",
+                        "system": "http://loinc.org",
+                        "display": "GRBS"
+                    }
+                ]
+            },
+            {
+                "title": "Body weight",
+                "codes": [
+                    {
+                        "code": "29463-7",
+                        "system": "http://loinc.org",
+                        "display": "Weight"
+                    }
+                ]
+            },
+            {
                 "title": "Respiratory Rate",
                 "codes": [
                     {
@@ -80,16 +100,6 @@
                         "code": "8280-0",
                         "system": "http://loinc.org",
                         "display": "Girth"
-                    }
-                ]
-            },
-            {
-                "title": "Body weight",
-                "codes": [
-                    {
-                        "code": "29463-7",
-                        "system": "http://loinc.org",
-                        "display": "Weight"
                     }
                 ]
             }

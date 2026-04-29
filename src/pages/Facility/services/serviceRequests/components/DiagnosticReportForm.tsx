@@ -210,7 +210,6 @@ export function DiagnosticReportForm({
     if (fullReport) {
       // When we get the full report details, ensure UI is in correct state
       setSelectedReportCode(fullReport.code || null);
-      setIsExpanded(true);
     }
   }, [fullReport]);
 
@@ -252,6 +251,7 @@ export function DiagnosticReportForm({
         queryClient.invalidateQueries({
           queryKey: ["diagnosticReport", latestReport?.id],
         });
+        setIsExpanded(false);
       },
       onError: () => {
         toast.success(t("failed_to_update_conclusion"));

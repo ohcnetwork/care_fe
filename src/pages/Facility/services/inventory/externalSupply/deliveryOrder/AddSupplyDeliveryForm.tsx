@@ -262,6 +262,7 @@ export function AddSupplyDeliveryForm({
       inputPlaceholder={t("search_order")}
       noOptionsMessage={t("no_orders_found")}
       className="px-10"
+      popoverContentClassName="w-auto"
     />
   );
 
@@ -465,6 +466,7 @@ export function AddSupplyDeliveryForm({
                     amount: "0",
                   },
                 ],
+          discount_configuration: null,
         };
 
         const newChargeItem =
@@ -938,30 +940,29 @@ export function AddSupplyDeliveryForm({
                 <h4>{t("add_items_to_delivery")}</h4>
                 <p>{t("add_items_to_delivery_description")}</p>
                 <div className="flex flex-row gap-2 items-center mt-2">
-                  {qParams.supplyOrder
-                    ? supplyRequests?.results?.length &&
-                      supplyRequests?.results?.length > 0 && (
-                        <>
-                          <Button
-                            type="button"
-                            variant="outline_primary"
-                            onClick={loadFromSupplyRequests}
-                          >
-                            {t("load_from_order")} ({supplyRequests?.count}{" "}
-                            {t("items")}
-                            )
-                            <ShortcutBadge actionId="load-from-order" />
-                          </Button>
-                          <p>- {t("or")} -</p>
-                        </>
-                      )
-                    : requestOrders?.results &&
-                      requestOrders.results.length > 0 && (
-                        <>
-                          {renderRequestOrderSelector()}
-                          <p>- {t("or")} -</p>
-                        </>
-                      )}
+                  {qParams.supplyOrder ? (
+                    supplyRequests?.results?.length &&
+                    supplyRequests?.results?.length > 0 && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline_primary"
+                          onClick={loadFromSupplyRequests}
+                        >
+                          {t("load_from_order")} ({supplyRequests?.count}{" "}
+                          {t("items")}
+                          )
+                          <ShortcutBadge actionId="load-from-order" />
+                        </Button>
+                        <p>- {t("or")} -</p>
+                      </>
+                    )
+                  ) : (
+                    <>
+                      {renderRequestOrderSelector()}
+                      <p>- {t("or")} -</p>
+                    </>
+                  )}
                   <Button
                     type="button"
                     variant="outline_primary"

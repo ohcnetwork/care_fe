@@ -1,13 +1,14 @@
 import {
-  Ambulance,
   BadgeCheck,
   Ban,
   BedDouble,
   Calendar,
   CirclePause,
   CircleX,
+  DoorOpen,
   FileQuestion,
   Home,
+  HouseHeart,
   LoaderCircle,
   LucideIcon,
   MonitorSmartphone,
@@ -142,11 +143,11 @@ export const ENCOUNTER_STATUS_COLORS = {
 
 export const ENCOUNTER_CLASS_ICONS = {
   imp: BedDouble,
-  amb: Ambulance,
+  amb: DoorOpen,
   obsenc: Stethoscope,
   emer: Siren,
   vr: MonitorSmartphone,
-  hh: Home,
+  hh: HouseHeart,
 } as const satisfies Record<EncounterClass, LucideIcon>;
 
 export const ENCOUNTER_STATUS_ICONS = {

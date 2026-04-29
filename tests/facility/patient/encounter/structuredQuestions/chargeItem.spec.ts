@@ -35,10 +35,7 @@ test.describe("Charge Item Questionnaire", () => {
 
     await page.goto(targetUrl);
 
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: "Select charge item definition" })
-      .click();
+    await page.getByRole("combobox").filter({ hasText: "Add charges" }).click();
     await page.getByText("Medications").click();
     await page.getByText(randomMedicationsList).click();
 

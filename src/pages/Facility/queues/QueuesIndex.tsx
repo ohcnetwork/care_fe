@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 import {
   CheckIcon,
   MoreVertical,
@@ -21,13 +22,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -58,7 +52,9 @@ import { UserReadMinimal } from "@/types/user/user";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
 import queryClient from "@/Utils/request/queryClient";
-import { dateQueryString, formatName } from "@/Utils/utils";
+import { dateQueryString } from "@/Utils/utils";
+import { queuePractitionerAtom } from "@/atoms/queuePractitionerAtom";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
 import { Link } from "raviger";
@@ -231,13 +227,17 @@ export default function QueuesIndex({
   });
 
   const { id: currentUserId } = useAuthUser();
+  const [cachedPractitionerId, setCachedPractitionerId] = useAtom(
+    queuePractitionerAtom(facilityId),
+  );
 
   // Set default resourceId for practitioners
+  // Priority: URL param > prop > cached value > current user
   const effectiveResourceId =
     qParams.resource_id ||
     resourceId ||
     (resourceType === SchedulableResourceType.Practitioner
-      ? currentUserId.toString()
+      ? cachedPractitionerId || currentUserId
       : undefined);
 
   // Fetch available users for practitioner resource type
@@ -250,6 +250,11 @@ export default function QueuesIndex({
   });
 
   const availableUsers = availableUsersData?.users || [];
+
+  // Find the selected practitioner
+  const selectedPractitioner = availableUsers.find(
+    (user) => user.id === effectiveResourceId,
+  );
 
   // Set default date to today if no date is specified
   useEffect(() => {
@@ -269,11 +274,15 @@ export default function QueuesIndex({
   };
 
   // Handle resource selection
-  const handleResourceChange = (selectedResourceId: string) => {
-    updateQuery({ resource_id: selectedResourceId });
+  const handleResourceChange = (users: UserReadMinimal[]) => {
+    const userId = users[0]?.id;
+    updateQuery({ resource_id: userId });
+    if (resourceType === SchedulableResourceType.Practitioner && userId) {
+      setCachedPractitionerId(userId);
+    }
   };
 
-  // Fetch queues
+  // Fetch queues with all query parameters
   const { data: queuesResponse, isLoading: queuesLoading } = useQuery({
     queryKey: ["tokenQueues", facilityId, effectiveResourceId, qParams],
     queryFn: query(tokenQueueApi.list, {
@@ -283,7 +292,7 @@ export default function QueuesIndex({
         resource_id: effectiveResourceId,
         date: qParams.date,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
   });
@@ -310,7 +319,7 @@ export default function QueuesIndex({
         {/* Header Section - Date, Practitioner, Create Queue */}
         <div className="mb-8 flex flex-wrap gap-4 items-end bg-white p-4 rounded-lg border border-gray-200">
           {/* Date Filter */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 flex-1 lg:flex-initial">
             <label className="text-sm font-medium text-gray-700">
               {t("date")}
             </label>
@@ -322,30 +331,21 @@ export default function QueuesIndex({
 
           {/* Resource Picker - Only show for Practitioner resource type */}
           {resourceType === SchedulableResourceType.Practitioner && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 flex-1 lg:flex-initial">
               <label className="text-sm font-medium text-gray-700">
                 {t("selected_practitioner")}
               </label>
-              <Select
-                value={qParams.resource_id || effectiveResourceId}
-                onValueChange={handleResourceChange}
-              >
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder={t("select_practitioner")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableUsers.map((user: UserReadMinimal) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {formatName(user)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <PractitionerSelector
+                facilityId={facilityId}
+                selected={selectedPractitioner ? [selectedPractitioner] : []}
+                onSelect={handleResourceChange}
+                multiple={false}
+              />
             </div>
           )}
 
           {/* Create Queue Button */}
-          <div className="ml-auto">
+          <div className="w-full flex justify-center lg:w-auto lg:ml-auto">
             <QueueFormSheet
               facilityId={facilityId}
               resourceType={resourceType}
