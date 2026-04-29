@@ -330,7 +330,7 @@ export default function ServiceRequestShow({
     CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE.includes(request.category);
   const canShowCompleteCta =
     !request?.activity_definition?.diagnostic_report_codes || canMarkAsComplete;
-  const canShowMarkAsCompleteFootBar = canShowCompleteCta && !disableEdit;
+  const canShowMarkAsCompleteFootBar = canMarkAsComplete && !disableEdit;
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 relative">
