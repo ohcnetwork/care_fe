@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { ShieldAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { PLUGIN_Component } from "@/PluginEngine";
+
 import { EmptyState } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -47,9 +49,18 @@ export const EncounterOverviewTab = () => {
       {canReadClinicalData ? (
         <div className="flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
           <div className="flex flex-col gap-4">
+            {encounter && (
+              <PLUGIN_Component
+                __name="EncounterOverviewTop"
+                encounter={encounter}
+                patientId={patientId}
+                encounterId={encounterId}
+              />
+            )}
             {canWrite && <QuickActions />}
             {canWrite && <FavoriteFormsQuickActions />}
             {<ClinicalHistoryOverview />}
+
             <div className="xl:hidden">
               <SummaryPanel />
             </div>
