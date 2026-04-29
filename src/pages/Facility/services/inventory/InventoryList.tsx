@@ -26,8 +26,10 @@ import useFilters from "@/hooks/useFilters";
 
 import { isLessThan, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { Button } from "@/components/ui/button";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { SupplyDeliveriesDrawer } from "@/pages/Facility/services/inventory/SupplyDeliveriesDrawer";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import { InventoryStatusOptions } from "@/types/inventory/product/inventory";
@@ -55,6 +57,11 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
 
   // State to store the selected product knowledge object
   const [selectedProductKnowledge, setSelectedProductKnowledge] = useState<
+    ProductKnowledgeBase | undefined
+  >(undefined);
+
+  // State for deliveries drawer
+  const [deliveriesDrawerProduct, setDeliveriesDrawerProduct] = useState<
     ProductKnowledgeBase | undefined
   >(undefined);
 
@@ -163,13 +170,23 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
             <TableBody>
               {data?.results?.map((inventory) => (
                 <TableRow key={inventory.id}>
-                  <TableCell className="font-semibold">
+                  <TableCell className="flex gap-2 font-semibold">
+                    <Button
+                      variant="link"
+                      className="p-0 cursor-pointer"
+                      onClick={() =>
+                        setDeliveriesDrawerProduct(
+                          inventory.product.product_knowledge,
+                        )
+                      }
+                    >
+                      <span>{inventory.product.product_knowledge.name}</span>
+                    </Button>
                     <Link
                       href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
                       basePath="/"
                       className="flex items-center gap-2"
                     >
-                      {inventory.product.product_knowledge.name}
                       <CareIcon
                         icon="l-external-link-alt"
                         className="size-4 text-gray-500"
@@ -226,6 +243,26 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
       <div className="mt-8 flex justify-center">
         <Pagination totalCount={data?.count || 0} />
       </div>
+
+      <SupplyDeliveriesDrawer
+        open={!!deliveriesDrawerProduct}
+        onOpenChange={(open) => {
+          if (!open) setDeliveriesDrawerProduct(undefined);
+        }}
+        title={
+          deliveriesDrawerProduct
+            ? t("deliveries_for", { product: deliveriesDrawerProduct.name })
+            : undefined
+        }
+        facilityId={facilityId}
+        queryParams={{
+          destination: locationId,
+          supplied_inventory_item_product_knowledge:
+            deliveriesDrawerProduct?.id,
+          ordering: "-created_date",
+        }}
+        linkToProduct
+      />
     </Page>
   );
 }

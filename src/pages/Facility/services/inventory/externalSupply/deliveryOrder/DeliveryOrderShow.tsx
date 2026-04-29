@@ -147,14 +147,12 @@ function AllSupplyDeliveriesComponent({
           <TableSkeleton count={3} />
         ) : allSupplyDeliveries?.results &&
           allSupplyDeliveries.results.length > 0 ? (
-          <>
-            <SupplyDeliveryTable
-              deliveries={allSupplyDeliveries.results}
-              internal={internal}
-              facilityId={facilityId}
-              linkToProduct
-            />
-          </>
+          <SupplyDeliveryTable
+            deliveries={allSupplyDeliveries.results}
+            internal={internal}
+            facilityId={facilityId}
+            linkToProduct
+          />
         ) : (
           <EmptyState
             icon={<Truck className="size-5 text-primary-600" />}
