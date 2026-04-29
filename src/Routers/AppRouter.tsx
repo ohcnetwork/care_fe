@@ -15,6 +15,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { useOrganizationRoutes, usePluginRoutes } from "@/hooks/useCareApps";
 import useSidebarState from "@/hooks/useSidebarState";
 
+import AIWidgetsRoutes from "@/Routers/routes/AIWidgetsRoutes";
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
 import OrganizationRoutes from "@/Routers/routes/OrganizationRoutes";
@@ -74,6 +75,7 @@ const Routes: AppRoutes = {
   ...PatientRoutes,
   ...ResourceRoutes,
   ...ScheduleRoutes,
+  ...AIWidgetsRoutes,
   ...UserRoutes,
   ...OrganizationRoutes,
 
