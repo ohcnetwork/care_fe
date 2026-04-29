@@ -1,4 +1,4 @@
-export type WidgetType = "markdown" | "cited-summary" | "ranked-list";
+export type WidgetType = "markdown" | "cited-summary" | "ranked-list" | "score";
 
 export interface Widget {
   id: string;
@@ -53,6 +53,22 @@ export interface CitedSummaryOutput {
   summary: string;
   citations: Array<{ tag: string; tool: string }>;
   grounded_count?: number;
+}
+
+export type ScoreSeverity = "low" | "moderate" | "high" | "critical";
+
+export interface ScoreOutput {
+  title: string;
+  score: number;
+  scale?: string;
+  severity?: ScoreSeverity;
+  interpretation?: string;
+  components?: Array<{
+    name: string;
+    value: string;
+    contribution: number;
+  }>;
+  source_note?: string;
 }
 
 export interface RankedListOutput {

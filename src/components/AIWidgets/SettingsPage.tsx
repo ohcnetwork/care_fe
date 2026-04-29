@@ -1,6 +1,7 @@
 import { useAtom } from "jotai";
 import {
   CheckCircle2,
+  Gauge,
   ListChecks,
   PenSquare,
   Plus,
@@ -37,6 +38,7 @@ const TYPE_META: Record<
   markdown: { label: "Markdown", icon: PenSquare },
   "cited-summary": { label: "Cited summary", icon: Quote },
   "ranked-list": { label: "Ranked list", icon: ListChecks },
+  score: { label: "Score", icon: Gauge },
 };
 
 export function AIWidgetsSettingsPage() {

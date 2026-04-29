@@ -2,6 +2,7 @@ import {
   CitedSummaryOutput,
   MarkdownOutput,
   RankedListOutput,
+  ScoreOutput,
   Widget,
 } from "@/components/AIWidgets/types";
 
@@ -15,7 +16,27 @@ export function outputToText(widget: Widget, output: unknown): string {
   if (widget.type === "ranked-list") {
     return rankedListOutputToText(output as RankedListOutput);
   }
+  if (widget.type === "score") {
+    return scoreOutputToText(output as ScoreOutput);
+  }
   return JSON.stringify(output, null, 2);
+}
+
+function scoreOutputToText(out: ScoreOutput): string {
+  const parts: string[] = [];
+  const headline = `${out.title}: ${out.score}${out.scale ? ` ${out.scale}` : ""}${
+    out.severity ? ` (${out.severity})` : ""
+  }`;
+  parts.push(headline);
+  if (out.interpretation) parts.push(out.interpretation);
+  if (out.components?.length) {
+    parts.push("");
+    out.components.forEach((c) => {
+      parts.push(`- ${c.name}: ${c.value} (+${c.contribution})`);
+    });
+  }
+  if (out.source_note) parts.push("", out.source_note);
+  return parts.join("\n").trim();
 }
 
 function markdownOutputToText(out: MarkdownOutput): string {

@@ -44,6 +44,11 @@ const TYPE_OPTIONS: {
     label: "Ranked list",
     description: "Items with score and rationale.",
   },
+  {
+    value: "score",
+    label: "Score",
+    description: "Single clinical score with severity and components.",
+  },
 ];
 
 interface Props {

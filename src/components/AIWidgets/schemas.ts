@@ -42,6 +42,30 @@ export const SCHEMAS: Record<WidgetType, Record<string, unknown>> = {
     },
     required: ["summary", "citations"],
   },
+  score: {
+    type: "object",
+    properties: {
+      title: { type: "string" },
+      score: { type: "number" },
+      scale: { type: "string" },
+      severity: { type: "string" },
+      interpretation: { type: "string" },
+      components: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            value: { type: "string" },
+            contribution: { type: "number" },
+          },
+          required: ["name", "value", "contribution"],
+        },
+      },
+      source_note: { type: "string" },
+    },
+    required: ["title", "score"],
+  },
   "ranked-list": {
     type: "object",
     properties: {
@@ -73,4 +97,6 @@ export const TYPE_HINTS: Record<WidgetType, string> = {
     "Return a concise narrative summary (3-5 sentences) and a list of citations naming the tools that grounded the summary (each citation has a short human-readable 'tag' and the underlying 'tool' name).",
   "ranked-list":
     "Return a ranked list of items, most important first. For each item: name, a one-sentence 'why' rationale, a numeric score 0-100, and a score_label of 'Low' | 'Mod' | 'High'.",
+  score:
+    "Return a clinical score: a title (e.g., 'NEWS2 Score'), the numeric score, optional scale (e.g., '/ 21'), severity ('low' | 'moderate' | 'high' | 'critical'), a one-sentence interpretation, and optional components (each with name, the human-readable value used, and the points it contributed).",
 };

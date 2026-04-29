@@ -17,6 +17,7 @@ import aiWidgetsApi from "@/components/AIWidgets/api";
 import { CitedSummaryWidget } from "@/components/AIWidgets/renderers/CitedSummaryWidget";
 import { MarkdownWidget } from "@/components/AIWidgets/renderers/MarkdownWidget";
 import { RankedListWidget } from "@/components/AIWidgets/renderers/RankedListWidget";
+import { ScoreWidget } from "@/components/AIWidgets/renderers/ScoreWidget";
 import { SCHEMAS } from "@/components/AIWidgets/schemas";
 import { outputToText } from "@/components/AIWidgets/summarize";
 import {
@@ -24,6 +25,7 @@ import {
   CitedSummaryOutput,
   MarkdownOutput,
   RankedListOutput,
+  ScoreOutput,
   Widget,
 } from "@/components/AIWidgets/types";
 
@@ -181,6 +183,9 @@ function RenderedOutput({
     }
     if (widget.type === "ranked-list") {
       return <RankedListWidget output={response.output as RankedListOutput} />;
+    }
+    if (widget.type === "score") {
+      return <ScoreWidget output={response.output as ScoreOutput} />;
     }
     return null;
   })();

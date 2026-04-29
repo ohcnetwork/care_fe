@@ -41,4 +41,12 @@ export const TEMPLATES: WidgetTemplate[] = [
     prompt:
       "Based on the documented encounter, list 3-5 specific clinical questions that aren't yet answered. Use sections: a 'Questions' section listing each as a bullet with the question in bold and a 'why it matters' note underneath, and a 'Suggested next steps' section.",
   },
+  {
+    name: "NEWS2 score",
+    type: "score",
+    model: "gpt-4.1-mini",
+    description: "Compute NEWS2 from latest vitals and submitted forms.",
+    prompt:
+      "Compute the NEWS2 score for this patient using the most recent vital signs (respiratory rate, oxygen saturation, supplemental oxygen, temperature, systolic BP, heart rate, level of consciousness). Pull values from recent observations and submitted form responses. Title 'NEWS2 Score'. Provide the total score, scale '/ 20', severity (low / moderate / high / critical) per RCP NEWS2 v2 thresholds, a one-sentence interpretation, and components for each parameter (name, value used, contribution). If a parameter is missing, state 'unknown' in the value and contribute 0. Add a source_note: 'RCP NEWS2 v2 thresholds'.",
+  },
 ];
