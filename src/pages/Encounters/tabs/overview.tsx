@@ -49,6 +49,8 @@ export const EncounterOverviewTab = () => {
       {canReadClinicalData ? (
         <div className="flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
           <div className="flex flex-col gap-4">
+            {canWrite && <QuickActions />}
+            {canWrite && <FavoriteFormsQuickActions />}
             {encounter && (
               <PLUGIN_Component
                 __name="EncounterOverviewTop"
@@ -57,8 +59,6 @@ export const EncounterOverviewTab = () => {
                 encounterId={encounterId}
               />
             )}
-            {canWrite && <QuickActions />}
-            {canWrite && <FavoriteFormsQuickActions />}
             {<ClinicalHistoryOverview />}
 
             <div className="xl:hidden">
