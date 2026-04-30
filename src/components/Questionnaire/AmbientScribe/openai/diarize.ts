@@ -76,25 +76,50 @@ export async function classifySpeaker({
   previousSpeaker,
   signal,
 }: DiarizeOptions): Promise<Exclude<SpeakerRole, "unknown">> {
-  const res = await fetch(CHAT_URL, {
-    method: "POST",
-    signal,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const startedAt = performance.now();
+  let res: Response;
+  try {
+    res = await fetch(CHAT_URL, {
+      method: "POST",
+      signal,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: buildUserMessage(recent, utterance) },
+        ],
+        temperature: 0,
+        response_format: { type: "json_schema", json_schema: JSON_SCHEMA },
+      }),
+    });
+  } catch (networkErr) {
+    recordUsage({
+      source: "diarize",
       model: MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: buildUserMessage(recent, utterance) },
-      ],
-      temperature: 0,
-      response_format: { type: "json_schema", json_schema: JSON_SCHEMA },
-    }),
-  });
+      latencyMs: Math.round(performance.now() - startedAt),
+      status: "error",
+      errorMessage:
+        networkErr instanceof Error ? networkErr.message : "network_error",
+      preview: { input: utterance },
+    });
+    throw networkErr;
+  }
+
+  const latencyMs = Math.round(performance.now() - startedAt);
 
   if (!res.ok) {
+    recordUsage({
+      source: "diarize",
+      model: MODEL,
+      latencyMs,
+      status: "error",
+      errorMessage: `HTTP ${res.status}`,
+      preview: { input: utterance },
+    });
     // Non-fatal: caller can fall back to previousSpeaker.
     throw new Error(`Diarization failed (${res.status})`);
   }
@@ -103,21 +128,37 @@ export async function classifySpeaker({
     choices?: { message?: { content?: string } }[];
     usage?: { prompt_tokens?: number; completion_tokens?: number };
   };
+  const raw = data?.choices?.[0]?.message?.content;
+  let parsed: DiarizeResult | null = null;
+  let parseError: string | null = null;
+  if (!raw) {
+    parseError = "response was empty";
+  } else {
+    try {
+      parsed = JSON.parse(raw) as DiarizeResult;
+    } catch {
+      parseError = "response was not valid JSON";
+    }
+  }
+
   recordUsage({
     source: "diarize",
     model: MODEL,
     promptTokens: data.usage?.prompt_tokens ?? 0,
     completionTokens: data.usage?.completion_tokens ?? 0,
+    latencyMs,
+    status: parsed ? "success" : "error",
+    errorMessage: parsed ? undefined : (parseError ?? "unknown"),
+    preview: {
+      input: utterance,
+      output: parsed
+        ? `${parsed.speaker} (${parsed.confidence.toFixed(2)})`
+        : raw,
+    },
   });
-  const raw = data?.choices?.[0]?.message?.content;
-  if (!raw) {
-    throw new Error("Diarization response was empty");
-  }
-  let parsed: DiarizeResult;
-  try {
-    parsed = JSON.parse(raw) as DiarizeResult;
-  } catch {
-    throw new Error("Diarization response was not valid JSON");
+
+  if (!parsed) {
+    throw new Error(`Diarization ${parseError ?? "failed"}`);
   }
 
   if (

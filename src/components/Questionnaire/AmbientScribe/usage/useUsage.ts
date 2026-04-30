@@ -1,8 +1,12 @@
 import { useSyncExternalStore } from "react";
 
 import {
+  type LogEntry,
+  type UsageRecord,
   type UsageSummary,
   getAccountSummary,
+  getLogs,
+  getRecentCalls,
   getSessionSummary,
   subscribe,
 } from "./usageTracker";
@@ -10,6 +14,8 @@ import {
 interface UsageSnapshot {
   session: UsageSummary;
   account: UsageSummary;
+  recentCalls: UsageRecord[];
+  logs: LogEntry[];
 }
 
 let cachedSnapshot: UsageSnapshot | null = null;
@@ -22,6 +28,10 @@ function getSnapshot(): UsageSnapshot {
     cachedSnapshot = {
       session: { ...getSessionSummary() },
       account: { ...getAccountSummary() },
+      // Slice so the toolbar gets a fresh array reference per snapshot —
+      // important for `useSyncExternalStore` change detection.
+      recentCalls: getRecentCalls().slice(),
+      logs: getLogs().slice(),
     };
   }
   return cachedSnapshot;

@@ -4,6 +4,8 @@ import type {
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
+import type { AudioMetrics } from "./audio/useAudioCapture";
+
 export type ScribeStatus =
   | "idle"
   | "connecting"
@@ -67,6 +69,8 @@ export interface ScribeHandle {
   transcript: TranscriptTurn[];
   waveform: number[];
   provenance: ProvenanceMap;
+  /** Live audio metadata (sample rate, fft size, device label, …). */
+  audioMetrics: AudioMetrics;
   /**
    * Wall-clock timestamp (ms) of the most recent successful `start()`
    * transition into "listening". `undefined` while idle. Consumers can

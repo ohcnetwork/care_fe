@@ -12,6 +12,8 @@
 
 export type UsageSource = "diarize" | "form_fill" | "realtime" | "translate";
 
+export type CallStatus = "success" | "error";
+
 export interface UsageRecord {
   ts: number;
   source: UsageSource;
@@ -22,6 +24,24 @@ export interface UsageRecord {
   audioInputSeconds?: number;
   /** USD estimate using `PRICING` below. */
   costUsd: number;
+  /** Round-trip latency in ms (request → response). Undefined for the
+   * realtime audio-second tick records (no per-call latency). */
+  latencyMs?: number;
+  status: CallStatus;
+  errorMessage?: string;
+  /** Optional small input/output snippets for inspection in the dev tool. */
+  preview?: { input?: string; output?: string };
+}
+
+export type LogLevel = "debug" | "info" | "warn" | "error";
+
+export interface LogEntry {
+  ts: number;
+  level: LogLevel;
+  /** Tag — e.g. "session", "realtime", "translate", "heartbeat". */
+  source: string;
+  message: string;
+  data?: unknown;
 }
 
 export interface UsageBucket {
@@ -133,12 +153,35 @@ function estimateCost(input: {
   return cost;
 }
 
+// Ring-buffer caps. Memory-only, no persistence — these are dev-tooling.
+const RECENT_CALLS_LIMIT = 200;
+const LOGS_LIMIT = 500;
+// Maximum size of `preview.input` / `preview.output` strings stored on a
+// `UsageRecord`. Prevents the toolbar from holding onto large transcripts
+// or schema bodies. The dev tool can inspect anything beyond this in the
+// network panel.
+const PREVIEW_MAX_CHARS = 600;
+
 let session: UsageSummary = emptySummary();
 let account: UsageSummary = loadAccount();
+let recentCalls: UsageRecord[] = [];
+let logs: LogEntry[] = [];
 const subscribers = new Set<() => void>();
 
 function notify() {
   for (const cb of subscribers) cb();
+}
+
+function pushBounded<T>(buffer: T[], item: T, limit: number): T[] {
+  buffer.push(item);
+  if (buffer.length > limit) buffer.splice(0, buffer.length - limit);
+  return buffer;
+}
+
+function trimPreview(value: string | undefined): string | undefined {
+  if (!value) return value;
+  if (value.length <= PREVIEW_MAX_CHARS) return value;
+  return value.slice(0, PREVIEW_MAX_CHARS) + "…";
 }
 
 export interface RecordInput {
@@ -149,6 +192,10 @@ export interface RecordInput {
   audioInputSeconds?: number;
   /** Override the pricing-derived cost (USD). Optional. */
   costUsd?: number;
+  latencyMs?: number;
+  status?: CallStatus;
+  errorMessage?: string;
+  preview?: { input?: string; output?: string };
 }
 
 export function recordUsage(input: RecordInput) {
@@ -172,16 +219,37 @@ export function recordUsage(input: RecordInput) {
     completionTokens,
     audioInputSeconds,
     costUsd,
+    latencyMs: input.latencyMs,
+    status: input.status ?? "success",
+    errorMessage: input.errorMessage,
+    preview: input.preview
+      ? {
+          input: trimPreview(input.preview.input),
+          output: trimPreview(input.preview.output),
+        }
+      : undefined,
   };
 
   addInto(session, record);
   addInto(account, record);
   persistAccount(account);
+  pushBounded(recentCalls, record, RECENT_CALLS_LIMIT);
+  notify();
+}
+
+export function appendLog(entry: Omit<LogEntry, "ts"> & { ts?: number }) {
+  pushBounded(
+    logs,
+    { ...entry, ts: entry.ts ?? Date.now() } as LogEntry,
+    LOGS_LIMIT,
+  );
   notify();
 }
 
 export function resetSession() {
   session = emptySummary();
+  recentCalls = [];
+  logs = [];
   notify();
 }
 
@@ -191,12 +259,25 @@ export function clearAccount() {
   notify();
 }
 
+export function clearLogs() {
+  logs = [];
+  notify();
+}
+
 export function getSessionSummary(): UsageSummary {
   return session;
 }
 
 export function getAccountSummary(): UsageSummary {
   return account;
+}
+
+export function getRecentCalls(): UsageRecord[] {
+  return recentCalls;
+}
+
+export function getLogs(): LogEntry[] {
+  return logs;
 }
 
 export function subscribe(cb: () => void): () => void {

@@ -67,25 +67,51 @@ export async function translateToEnglish({
   // rather than as the next conversational turn directed at it.
   const userMessage = `<TRANSCRIPT_FRAGMENT>\n${trimmed}\n</TRANSCRIPT_FRAGMENT>`;
 
-  const res = await fetch(CHAT_URL, {
-    method: "POST",
-    signal,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const startedAt = performance.now();
+  let res: Response;
+  try {
+    res = await fetch(CHAT_URL, {
+      method: "POST",
+      signal,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userMessage },
+        ],
+        temperature: 0,
+        response_format: { type: "json_schema", json_schema: RESPONSE_SCHEMA },
+      }),
+    });
+  } catch (networkErr) {
+    recordUsage({
+      source: "translate",
       model: MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userMessage },
-      ],
-      temperature: 0,
-      response_format: { type: "json_schema", json_schema: RESPONSE_SCHEMA },
-    }),
-  });
+      latencyMs: Math.round(performance.now() - startedAt),
+      status: "error",
+      errorMessage:
+        networkErr instanceof Error ? networkErr.message : "network_error",
+      preview: { input: trimmed },
+    });
+    throw networkErr;
+  }
+
+  const latencyMs = Math.round(performance.now() - startedAt);
 
   if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    recordUsage({
+      source: "translate",
+      model: MODEL,
+      latencyMs,
+      status: "error",
+      errorMessage: `HTTP ${res.status}: ${body.slice(0, 200)}`,
+      preview: { input: trimmed },
+    });
     throw new Error(`Translation call failed (${res.status})`);
   }
 
@@ -94,28 +120,41 @@ export async function translateToEnglish({
     usage?: { prompt_tokens?: number; completion_tokens?: number };
   };
 
+  const raw = data?.choices?.[0]?.message?.content?.trim();
+
+  let english: string | null = null;
+  let parseError: string | null = null;
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as { english?: unknown };
+      if (typeof parsed.english === "string" && parsed.english.trim()) {
+        english = parsed.english.trim();
+      } else {
+        parseError = "missing `english` field";
+      }
+    } catch {
+      parseError = "response was not valid JSON";
+    }
+  } else {
+    parseError = "response was empty";
+  }
+
   recordUsage({
     source: "translate",
     model: MODEL,
     promptTokens: data.usage?.prompt_tokens ?? 0,
     completionTokens: data.usage?.completion_tokens ?? 0,
+    latencyMs,
+    status: english ? "success" : "error",
+    errorMessage: english ? undefined : (parseError ?? "unknown"),
+    preview: {
+      input: trimmed,
+      output: english ?? raw,
+    },
   });
 
-  const raw = data?.choices?.[0]?.message?.content?.trim();
-  if (!raw) {
-    throw new Error("Translation response was empty");
+  if (!english) {
+    throw new Error(`Translation ${parseError ?? "failed"}`);
   }
-
-  let parsed: { english?: unknown };
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    throw new Error("Translation response was not valid JSON");
-  }
-
-  const english = parsed?.english;
-  if (typeof english !== "string" || !english.trim()) {
-    throw new Error("Translation response was missing `english` field");
-  }
-  return english.trim();
+  return english;
 }

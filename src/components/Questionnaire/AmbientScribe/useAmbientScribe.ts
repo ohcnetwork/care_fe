@@ -8,6 +8,7 @@ import type {
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
+import { playErrorCue, playStartCue, playStopCue } from "./audio/cues";
 import { useAudioCapture } from "./audio/useAudioCapture";
 import { FILLABLE_TYPES, collectFillable } from "./openai/buildAnswerSchema";
 import { classifySpeaker } from "./openai/diarize";
@@ -22,7 +23,7 @@ import type {
   SpeakerRole,
   TranscriptTurn,
 } from "./types";
-import { recordUsage, resetSession } from "./usage/usageTracker";
+import { appendLog, recordUsage, resetSession } from "./usage/usageTracker";
 
 const REALTIME_MODEL = "gpt-4o-mini-transcribe";
 // How often (ms) we flush an incremental audio-seconds usage record while
@@ -352,8 +353,10 @@ export function useAmbientScribe({
 
   const handleFatal = useCallback((err: unknown) => {
     const message = err instanceof Error ? err.message : "Unknown error";
+    appendLog({ level: "error", source: "session", message, data: err });
     setErrorMessage(message);
     setStatus("error");
+    playErrorCue();
   }, []);
 
   // Bumped on every realtime data-channel event. The heartbeat below uses
@@ -367,8 +370,13 @@ export function useAmbientScribe({
   // connection failed. Try to recover transparently before showing an
   // error. We forward to a ref so we don't depend on `reconnect`'s
   // identity here (avoids a circular hook-deps issue).
-  const handleUnexpectedClose = useCallback(() => {
+  const handleUnexpectedClose = useCallback((reason?: string) => {
     if (isStoppedRef.current) return;
+    appendLog({
+      level: "warn",
+      source: "realtime",
+      message: `Unexpected close (${reason ?? "no reason"}) — reconnecting`,
+    });
     void reconnectRef.current();
   }, []);
 
@@ -441,6 +449,16 @@ export function useAmbientScribe({
       }
 
       if (updatesByForm.size === 0) return;
+
+      const totalApplied = Array.from(updatesByForm.values()).reduce(
+        (sum, list) => sum + list.length,
+        0,
+      );
+      appendLog({
+        level: "info",
+        source: "form_fill",
+        message: `Applied ${totalApplied} field${totalApplied === 1 ? "" : "s"} from AI`,
+      });
 
       setForms((prev) =>
         prev.map((form) => {
@@ -575,6 +593,7 @@ export function useAmbientScribe({
     reconnectAttemptsRef.current = 0;
     // Each new session is its own usage scope.
     resetSession();
+    appendLog({ level: "info", source: "session", message: "Session start" });
     try {
       const stream = await audio.start();
       await transcription.connect(stream);
@@ -583,6 +602,12 @@ export function useAmbientScribe({
       lastAudioTickRef.current = startedAt;
       lastEventAtRef.current = startedAt;
       setStatus("listening");
+      appendLog({
+        level: "info",
+        source: "realtime",
+        message: "Connected to realtime transcription",
+      });
+      playStartCue();
     } catch (err) {
       audio.stop();
       handleFatal(err);
@@ -609,22 +634,38 @@ export function useAmbientScribe({
 
     if (reconnectAttemptsRef.current >= MAX_CONSECUTIVE_RECONNECTS) {
       reconnectingRef.current = false;
+      appendLog({
+        level: "error",
+        source: "reconnect",
+        message: `Giving up after ${MAX_CONSECUTIVE_RECONNECTS} consecutive failures`,
+      });
       setErrorMessage("scribe_connection_lost");
       setStatus("error");
       transcription.disconnect();
       audio.stop();
       setSessionStartedAt(undefined);
+      playErrorCue();
       return;
     }
 
     reconnectingRef.current = true;
     reconnectAttemptsRef.current += 1;
+    appendLog({
+      level: "info",
+      source: "reconnect",
+      message: `Reconnecting (attempt ${reconnectAttemptsRef.current}/${MAX_CONSECUTIVE_RECONNECTS})`,
+    });
     setStatus("connecting");
 
     transcription.disconnect();
     const stream = audio.getStream();
     if (!stream) {
       reconnectingRef.current = false;
+      appendLog({
+        level: "error",
+        source: "reconnect",
+        message: "No active microphone stream — aborting reconnect",
+      });
       setErrorMessage("scribe_connection_lost");
       setStatus("error");
       return;
@@ -635,6 +676,11 @@ export function useAmbientScribe({
       lastEventAtRef.current = Date.now();
       reconnectingRef.current = false;
       setStatus("listening");
+      appendLog({
+        level: "info",
+        source: "reconnect",
+        message: "Reconnected successfully",
+      });
       // If the session stays healthy for a while, treat the previous
       // outage as transient and forgive the consecutive-attempt count.
       const settledAt = reconnectAttemptsRef.current;
@@ -648,10 +694,16 @@ export function useAmbientScribe({
       }, RECONNECT_STABILITY_RESET_MS);
     } catch (err) {
       reconnectingRef.current = false;
+      appendLog({
+        level: "error",
+        source: "reconnect",
+        message: err instanceof Error ? err.message : "Reconnect failed",
+      });
       setErrorMessage(err instanceof Error ? err.message : "reconnect_failed");
       setStatus("error");
       audio.stop();
       setSessionStartedAt(undefined);
+      playErrorCue();
     }
   }, [audio, transcription]);
 
@@ -672,9 +724,11 @@ export function useAmbientScribe({
       if (lastEventAtRef.current === 0) return;
       const since = Date.now() - lastEventAtRef.current;
       if (since > HEARTBEAT_STALL_MS) {
-        console.warn(
-          `[AmbientScribe] No realtime events for ${(since / 1000).toFixed(0)}s — reconnecting`,
-        );
+        appendLog({
+          level: "warn",
+          source: "heartbeat",
+          message: `No realtime events for ${(since / 1000).toFixed(0)}s — reconnecting`,
+        });
         void reconnectRef.current();
       }
     }, HEARTBEAT_CHECK_INTERVAL_MS);
@@ -682,6 +736,10 @@ export function useAmbientScribe({
   }, [status]);
 
   const stop = useCallback(() => {
+    if (!isStoppedRef.current) {
+      appendLog({ level: "info", source: "session", message: "Session stop" });
+      playStopCue();
+    }
     isStoppedRef.current = true;
     reconnectingRef.current = false;
     reconnectAttemptsRef.current = 0;
@@ -781,6 +839,7 @@ export function useAmbientScribe({
       errorMessage,
       transcript,
       waveform: audio.waveform,
+      audioMetrics: audio.metrics,
       provenance,
       sessionStartedAt,
       start,
@@ -790,6 +849,7 @@ export function useAmbientScribe({
       clearProvenanceFor,
     }),
     [
+      audio.metrics,
       audio.waveform,
       clearProvenanceFor,
       enabled,

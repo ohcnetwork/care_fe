@@ -5,6 +5,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const BAR_COUNT = 32;
 const HALF_COUNT = BAR_COUNT / 2;
 
+export interface AudioMetrics {
+  /** Sample rate of the AudioContext driving the analyser, in Hz. */
+  sampleRate: number;
+  /** FFT size used by the analyser; bins = fftSize / 2. */
+  fftSize: number;
+  /** Bit depth being shipped to the realtime API (PCM16 → 16). */
+  bitDepth: number;
+  /** Channel count from the requested constraints. */
+  channelCount: number;
+  /** Latest active audio track's `MediaTrackSettings`, if available. */
+  trackSettings?: MediaTrackSettings;
+  /** Active input device label, when the browser exposes it. */
+  deviceLabel?: string;
+}
+
 export interface AudioCaptureHandle {
   isActive: boolean;
   waveform: number[];
@@ -12,6 +27,8 @@ export interface AudioCaptureHandle {
   start: () => Promise<MediaStream>;
   stop: () => void;
   getStream: () => MediaStream | null;
+  /** Live audio metadata for the dev tool. Empty fields when inactive. */
+  metrics: AudioMetrics;
 }
 
 /**
@@ -23,12 +40,20 @@ export interface AudioCaptureHandle {
  * The pattern (AnalyserNode + requestAnimationFrame + getByteFrequencyData)
  * mirrors the existing `useVoiceRecorder` hook at src/Utils/useVoiceRecorder.ts.
  */
+const EMPTY_METRICS: AudioMetrics = {
+  sampleRate: 0,
+  fftSize: 0,
+  bitDepth: 16,
+  channelCount: 1,
+};
+
 export function useAudioCapture(): AudioCaptureHandle {
   const [isActive, setIsActive] = useState(false);
   const [waveform, setWaveform] = useState<number[]>(() =>
     new Array(BAR_COUNT).fill(0),
   );
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [metrics, setMetrics] = useState<AudioMetrics>(EMPTY_METRICS);
 
   const streamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -87,6 +112,17 @@ export function useAudioCapture(): AudioCaptureHandle {
       source.connect(analyser);
       analyserRef.current = analyser;
 
+      const track = stream.getAudioTracks()[0];
+      const trackSettings = track?.getSettings();
+      setMetrics({
+        sampleRate: ctx.sampleRate,
+        fftSize: analyser.fftSize,
+        bitDepth: 16,
+        channelCount: trackSettings?.channelCount ?? 1,
+        trackSettings,
+        deviceLabel: track?.label,
+      });
+
       const bins = new Uint8Array(analyser.frequencyBinCount);
       // We focus on the lower ~half of the spectrum where speech energy
       // sits; that gives more visible motion than spreading across the
@@ -143,6 +179,7 @@ export function useAudioCapture(): AudioCaptureHandle {
     cleanup();
     setIsActive(false);
     setWaveform(new Array(BAR_COUNT).fill(0));
+    setMetrics(EMPTY_METRICS);
   }, [cleanup]);
 
   useEffect(() => {
@@ -151,5 +188,13 @@ export function useAudioCapture(): AudioCaptureHandle {
 
   const getStream = useCallback(() => streamRef.current, []);
 
-  return { isActive, waveform, errorMessage, start, stop, getStream };
+  return {
+    isActive,
+    waveform,
+    errorMessage,
+    start,
+    stop,
+    getStream,
+    metrics,
+  };
 }

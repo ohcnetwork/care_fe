@@ -84,29 +84,55 @@ export async function runFormFill({
     "Return only the JSON object described by the response schema.",
   ].join("\n");
 
-  const res = await fetch(CHAT_URL, {
-    method: "POST",
-    signal,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userMessage },
-      ],
-      temperature: 0,
-      response_format: {
-        type: "json_schema",
-        json_schema: schema,
+  const startedAt = performance.now();
+  let res: Response;
+  try {
+    res = await fetch(CHAT_URL, {
+      method: "POST",
+      signal,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
-    }),
-  });
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userMessage },
+        ],
+        temperature: 0,
+        response_format: {
+          type: "json_schema",
+          json_schema: schema,
+        },
+      }),
+    });
+  } catch (networkErr) {
+    recordUsage({
+      source: "form_fill",
+      model: MODEL,
+      latencyMs: Math.round(performance.now() - startedAt),
+      status: "error",
+      errorMessage:
+        networkErr instanceof Error ? networkErr.message : "network_error",
+      preview: {
+        input: `${fillable.length} fields, ${transcript.length} turns`,
+      },
+    });
+    throw networkErr;
+  }
+
+  const latencyMs = Math.round(performance.now() - startedAt);
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
+    recordUsage({
+      source: "form_fill",
+      model: MODEL,
+      latencyMs,
+      status: "error",
+      errorMessage: `HTTP ${res.status}: ${body.slice(0, 200)}`,
+    });
     throw new Error(`Form-fill call failed (${res.status}): ${body}`);
   }
 
@@ -114,25 +140,41 @@ export async function runFormFill({
     choices?: { message?: { content?: string } }[];
     usage?: { prompt_tokens?: number; completion_tokens?: number };
   };
+  const raw = data?.choices?.[0]?.message?.content;
+
+  let updates: FillUpdate[] = [];
+  let parseError: string | null = null;
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as { updates?: FillUpdate[] };
+      if (parsed.updates && Array.isArray(parsed.updates)) {
+        updates = parsed.updates.filter(
+          (u) =>
+            typeof u.question_id === "string" &&
+            typeof u.confidence === "number" &&
+            u.confidence >= 0.7,
+        );
+      } else {
+        parseError = "missing `updates` array";
+      }
+    } catch {
+      parseError = "response was not valid JSON";
+    }
+  }
+
   recordUsage({
     source: "form_fill",
     model: MODEL,
     promptTokens: data.usage?.prompt_tokens ?? 0,
     completionTokens: data.usage?.completion_tokens ?? 0,
+    latencyMs,
+    status: parseError ? "error" : "success",
+    errorMessage: parseError ?? undefined,
+    preview: {
+      input: `${fillable.length} fields, ${transcript.length} turns`,
+      output: `${updates.length} update${updates.length === 1 ? "" : "s"}${updates.length ? `: ${updates.map((u) => u.question_id).join(", ")}` : ""}`,
+    },
   });
-  const raw = data?.choices?.[0]?.message?.content;
-  if (!raw) return [];
 
-  try {
-    const parsed = JSON.parse(raw) as { updates?: FillUpdate[] };
-    if (!parsed.updates || !Array.isArray(parsed.updates)) return [];
-    return parsed.updates.filter(
-      (u) =>
-        typeof u.question_id === "string" &&
-        typeof u.confidence === "number" &&
-        u.confidence >= 0.7,
-    );
-  } catch {
-    return [];
-  }
+  return updates;
 }

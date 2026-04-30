@@ -1225,7 +1225,7 @@ export function QuestionnaireForm({
         {/* Floating scribe launcher + drawer for screens smaller than xl. */}
         {scribe.enabled && <AmbientScribeFloating scribe={scribe} />}
         {/* Dev-only usage debug toolbar. Renders nothing in production. */}
-        {scribe.enabled && <ScribeDebugToolbar />}
+        {scribe.enabled && <ScribeDebugToolbar scribe={scribe} />}
       </div>
     </ScribeProvenanceProvider>
   );
