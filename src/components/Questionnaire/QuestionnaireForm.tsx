@@ -46,6 +46,7 @@ import BackButton from "@/components/Common/BackButton";
 import { validateEncounterQuestion } from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { ArrowLeft } from "lucide-react";
+import { AmbientScribe } from "./AmbientScribe";
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
@@ -1193,6 +1194,12 @@ export function QuestionnaireForm({
           className="p-4 space-y-6 max-w-4xl m-2"
         />
       </div>
+
+      {/* Ambient Scribe Panel */}
+      <AmbientScribe
+        formState={questionnaireForms}
+        setFormState={setQuestionnaireForms}
+      />
     </div>
   );
 }
