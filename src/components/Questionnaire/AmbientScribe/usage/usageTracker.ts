@@ -10,7 +10,7 @@
  * This is dev-tooling only — the data never leaves the browser.
  */
 
-export type UsageSource = "diarize" | "form_fill" | "realtime";
+export type UsageSource = "diarize" | "form_fill" | "realtime" | "translate";
 
 export interface UsageRecord {
   ts: number;

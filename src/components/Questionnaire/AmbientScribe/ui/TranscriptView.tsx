@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -14,6 +14,20 @@ export function TranscriptView({ turns, className }: TranscriptViewProps) {
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
+  // Per-turn override: which turns the doctor has chosen to display in
+  // the source language instead of the (default) English translation.
+  const [showSourceIds, setShowSourceIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+
+  const toggleSource = useCallback((turnId: string) => {
+    setShowSourceIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(turnId)) next.delete(turnId);
+      else next.add(turnId);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -59,6 +73,11 @@ export function TranscriptView({ turns, className }: TranscriptViewProps) {
             : turn.speaker === "patient"
               ? t("patient")
               : "…";
+        const canToggle =
+          !!turn.originalText && turn.originalText !== turn.text;
+        const showSource = canToggle && showSourceIds.has(turn.id);
+        const displayText =
+          showSource && turn.originalText ? turn.originalText : turn.text;
         return (
           <div
             key={turn.id}
@@ -74,7 +93,7 @@ export function TranscriptView({ turns, className }: TranscriptViewProps) {
           >
             <div
               className={cn(
-                "mb-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                "mb-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide",
                 turn.speaker === "doctor"
                   ? "text-primary-800"
                   : turn.speaker === "patient"
@@ -82,10 +101,49 @@ export function TranscriptView({ turns, className }: TranscriptViewProps) {
                     : "text-gray-500",
               )}
             >
-              {speakerLabel}
+              <span>{speakerLabel}</span>
+              {turn.translating && (
+                <span
+                  aria-hidden
+                  className="relative inline-flex size-1.5"
+                  title={t("translating") ?? "Translating…"}
+                >
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75 animate-ping" />
+                  <span className="relative inline-flex size-1.5 rounded-full bg-primary-500" />
+                </span>
+              )}
+              {canToggle && (
+                <button
+                  type="button"
+                  onClick={() => toggleSource(turn.id)}
+                  title={
+                    showSource
+                      ? (t("show_translated") ?? "Show English translation")
+                      : (t("show_source") ?? "Show original transcript")
+                  }
+                  aria-pressed={!showSource}
+                  className={cn(
+                    "ml-auto inline-flex items-center rounded px-1.5 py-px",
+                    "normal-case tracking-normal text-[9px] font-semibold",
+                    "transition-colors cursor-pointer select-none",
+                    "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-400",
+                    showSource
+                      ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      : "bg-primary-100 text-primary-700 hover:bg-primary-200",
+                  )}
+                >
+                  {showSource ? (t("source") ?? "Source") : "EN"}
+                </button>
+              )}
             </div>
-            <div className="text-gray-900 whitespace-pre-wrap break-words">
-              {turn.text}
+            <div
+              className={cn(
+                "text-gray-900 whitespace-pre-wrap break-words",
+                "transition-opacity duration-200",
+                turn.translating && "text-gray-500",
+              )}
+            >
+              {displayText}
             </div>
           </div>
         );

@@ -23,11 +23,17 @@ import { useUsage } from "@/components/Questionnaire/AmbientScribe/usage/useUsag
 
 const SOURCE_LABEL: Record<UsageSource, string> = {
   realtime: "Realtime STT",
+  translate: "Translation",
   diarize: "Diarization",
   form_fill: "Form fill",
 };
 
-const SOURCE_ORDER: UsageSource[] = ["realtime", "diarize", "form_fill"];
+const SOURCE_ORDER: UsageSource[] = [
+  "realtime",
+  "translate",
+  "diarize",
+  "form_fill",
+];
 
 function formatUsd(value: number): string {
   if (value === 0) return "$0.0000";

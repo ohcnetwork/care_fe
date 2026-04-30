@@ -12,6 +12,7 @@ import { useAudioCapture } from "./audio/useAudioCapture";
 import { FILLABLE_TYPES, collectFillable } from "./openai/buildAnswerSchema";
 import { classifySpeaker } from "./openai/diarize";
 import { runFormFill } from "./openai/formFiller";
+import { translateToEnglish } from "./openai/translate";
 import { useRealtimeTranscription } from "./openai/useRealtimeTranscription";
 import type {
   FillUpdate,
@@ -181,11 +182,17 @@ export function useAmbientScribe({
   }, []);
 
   // Finalize the partial turn tied to `itemId` (or create one if none
-  // exists) and schedule diarization + form-fill.
+  // exists) and schedule diarization, translation, and form-fill.
   //
   // The `finalized` turn is computed synchronously from the latest transcript
   // ref BEFORE calling setState, so we never depend on a side effect inside
   // the React updater (which can lag in concurrent / batched scenarios).
+  //
+  // Translation runs in parallel with diarization (gpt-4o-mini-transcribe
+  // doesn't translate reliably). The form-fill is scheduled AFTER the
+  // translation resolves so the rolling fill always operates on English
+  // text — both for consistency in the LLM prompt and because the doctor
+  // is reading the transcript in English in the side panel.
   const onCompleted = useCallback(
     (itemId: string, finalText: string) => {
       const existingTurnId = pendingItemIdsRef.current.get(itemId);
@@ -195,18 +202,22 @@ export function useAmbientScribe({
         ? transcriptRef.current.find((t) => t.id === existingTurnId)
         : undefined;
 
+      const sourceText = finalText || existing?.text || "";
+      const willTranslate = !!apiKey && !!sourceText.trim();
       const finalized: TranscriptTurn = existing
         ? {
             ...existing,
-            text: finalText || existing.text,
+            text: sourceText,
             status: "final",
+            translating: willTranslate,
           }
         : {
             id: existingTurnId ?? makeTurnId(),
             speaker: "unknown",
-            text: finalText,
+            text: sourceText,
             status: "final",
             createdAt: Date.now(),
+            translating: willTranslate,
           };
 
       setTranscript((prev) => {
@@ -221,27 +232,61 @@ export function useAmbientScribe({
 
       if (!finalized.text.trim()) return;
 
-      // Speaker classification (fire-and-forget).
-      if (apiKey) {
-        const previousSpeaker: SpeakerRole =
-          getPreviousSpeaker(transcriptRef.current) ?? "doctor";
-        classifySpeaker({
-          apiKey,
-          recent: transcriptRef.current,
-          utterance: finalized.text,
-          previousSpeaker,
-        })
-          .then((speaker) => {
-            setTranscript((prev) =>
-              prev.map((t) => (t.id === finalized.id ? { ...t, speaker } : t)),
-            );
-          })
-          .catch(() => {
-            // Non-fatal; leave as "unknown".
-          });
+      if (!apiKey) {
+        scheduleFill();
+        return;
       }
 
-      scheduleFill();
+      // Speaker classification (fire-and-forget).
+      const previousSpeaker: SpeakerRole =
+        getPreviousSpeaker(transcriptRef.current) ?? "doctor";
+      classifySpeaker({
+        apiKey,
+        recent: transcriptRef.current,
+        utterance: finalized.text,
+        previousSpeaker,
+      })
+        .then((speaker) => {
+          setTranscript((prev) =>
+            prev.map((t) => (t.id === finalized.id ? { ...t, speaker } : t)),
+          );
+        })
+        .catch(() => {
+          // Non-fatal; leave as "unknown".
+        });
+
+      // Translation pipeline. We always send the call (gpt-4o-mini echoes
+      // English unchanged, so the cost of guessing wrong is one cheap
+      // round-trip). Once it resolves we replace the display text and
+      // stash the source-language string in `originalText` for tooltips.
+      translateToEnglish({ apiKey, text: finalized.text })
+        .then((english) => {
+          setTranscript((prev) =>
+            prev.map((t) => {
+              if (t.id !== finalized.id) return t;
+              const translated = english || t.text;
+              const sameAsSource = translated === t.text;
+              return {
+                ...t,
+                text: translated,
+                originalText: sameAsSource ? t.originalText : t.text,
+                translating: false,
+              };
+            }),
+          );
+        })
+        .catch(() => {
+          // Translation failed — keep source text and continue. gpt-4o
+          // form-fill handles non-English input gracefully as a fallback.
+          setTranscript((prev) =>
+            prev.map((t) =>
+              t.id === finalized.id ? { ...t, translating: false } : t,
+            ),
+          );
+        })
+        .finally(() => {
+          scheduleFill();
+        });
     },
     [apiKey, scheduleFill],
   );

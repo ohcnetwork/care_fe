@@ -16,7 +16,19 @@ export type SpeakerRole = "doctor" | "patient" | "unknown";
 export interface TranscriptTurn {
   id: string;
   speaker: SpeakerRole;
+  /**
+   * Display text. Originally the source-language transcription; once
+   * `translateToEnglish` resolves we replace this with the English
+   * version and move the source-language string into `originalText`.
+   */
   text: string;
+  /**
+   * Source-language text, populated only when `text` was replaced by an
+   * English translation. The UI surfaces this on hover.
+   */
+  originalText?: string;
+  /** True while a translation request is in flight for this turn. */
+  translating?: boolean;
   status: "partial" | "final";
   createdAt: number;
 }
