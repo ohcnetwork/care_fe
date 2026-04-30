@@ -7,21 +7,28 @@ import { recordUsage } from "@/components/Questionnaire/AmbientScribe/usage/usag
 import { buildAnswerSchema } from "./buildAnswerSchema";
 
 const CHAT_URL = "https://api.openai.com/v1/chat/completions";
-const MODEL = "gpt-4o";
+// `gpt-4o-mini` is plenty smart for schema-constrained extraction, has a
+// much higher TPM ceiling than `gpt-4o` (~200k vs ~30k on tier-1), and
+// costs ~16× less per token. The TPM headroom is the key driver — large
+// forms were tripping `gpt-4o`'s rate limit during real conversations.
+const MODEL = "gpt-4o-mini";
 
 const SYSTEM_PROMPT = `You are an expert clinical scribe assisting a doctor during a patient consultation.
-You will be given:
-- A running transcript of the conversation, with speaker labels.
-- A JSON list of the form fields that can be filled ("fillable"), each with id, text, description, current value, and for choice questions the allowed option values.
 
-Your job: extract answers that the conversation CLEARLY supports and return them in the requested JSON shape.
+You will be given three blocks of context, in this order:
+1. FORM DEFINITION — a JSON list of fillable fields with their id, text, optional description, and (for choice fields) a {value: display} option map.
+2. CURRENT VALUES — a JSON object mapping field id → its existing value (only fields that already have a value).
+3. TRANSCRIPT — the running conversation so far, with speaker labels.
+
+Your job: extract answers that the transcript CLEARLY supports and return them in the requested JSON shape.
+
 Rules:
 - Only emit an update when the transcript provides justification. Do NOT guess.
 - Prefer the doctor's summarization or the patient's own words for symptom descriptions; normalize numbers (e.g. "a hundred and ten over seventy" -> 110 for systolic if asked).
 - For choice fields, the value MUST be one of the provided option values (case-exact).
 - For date fields, use ISO format YYYY-MM-DD. For time, use 24h HH:MM.
 - Confidence is 0..1; only emit updates with confidence >= 0.7.
-- If a field was already filled and the transcript does NOT contradict it, skip it.
+- If a field already has a value in CURRENT VALUES and the transcript does not contradict it, skip it.
 - Return an empty updates array if nothing new can be extracted with confidence.`;
 
 interface RunFillArgs {
@@ -46,20 +53,52 @@ function serializeTranscript(turns: TranscriptTurn[]): string {
     .join("\n");
 }
 
-function serializeFillable(fillable: FillableQuestionSnapshot[]): string {
+/**
+ * Serializes the *immutable* part of the form: id, text, description, and
+ * (for choice fields) the value→display option map. Compact JSON (no
+ * pretty-print) to minimize tokens. We deliberately omit `type` and
+ * `required` because:
+ *   - `type` is already encoded as a `const` per question in the response
+ *     schema (see buildAnswerSchema.ts), so the model already knows it.
+ *   - `required` doesn't affect extraction; the orchestrator decides what
+ *     to do with required-but-unanswered fields, not the model.
+ * Empty `description`s are omitted — they cost real tokens at scale.
+ *
+ * The output of this function MUST be deterministic across calls within a
+ * session so OpenAI's automatic prompt-caching (≥1024 token prefix match)
+ * can kick in. No `currentValue`, no timestamps, no random ordering.
+ */
+function serializeFormDefinition(fillable: FillableQuestionSnapshot[]): string {
   return JSON.stringify(
-    fillable.map((f) => ({
-      id: f.id,
-      text: f.text,
-      description: f.description,
-      type: f.fillType,
-      required: f.required,
-      options: f.options?.map((o) => o.value),
-      current_value: f.currentValue ?? null,
-    })),
-    null,
-    2,
+    fillable.map((f) => {
+      const item: Record<string, unknown> = { id: f.id, text: f.text };
+      if (f.description) item.description = f.description;
+      if (f.fillType === "choice" && f.options && f.options.length > 0) {
+        // {value: display} map — about half the tokens of the previous
+        // [{value, display}, …] array form for typical option sets.
+        const optMap: Record<string, string> = {};
+        for (const o of f.options) optMap[o.value] = o.display ?? o.value;
+        item.options = optMap;
+      }
+      return item;
+    }),
   );
+}
+
+/**
+ * Serializes the *volatile* per-call state: only the field ids that have
+ * a value, mapped to that value. Excluded from the cached prefix so it
+ * can change every call without invalidating the cache.
+ */
+function serializeCurrentValues(fillable: FillableQuestionSnapshot[]): string {
+  const filled: Record<string, unknown> = {};
+  for (const f of fillable) {
+    if (f.currentValue !== null && f.currentValue !== undefined) {
+      filled[f.id] = f.currentValue;
+    }
+  }
+  if (Object.keys(filled).length === 0) return "{}";
+  return JSON.stringify(filled);
 }
 
 export async function runFormFill({
@@ -74,14 +113,21 @@ export async function runFormFill({
 
   const schema = buildAnswerSchema(fillable);
 
-  const userMessage = [
-    "TRANSCRIPT SO FAR:",
+  // Two-message layout designed for OpenAI's automatic prompt caching.
+  // The static block (system + FORM DEFINITION) is identical across every
+  // call in a session, so once warm OpenAI charges those tokens at half
+  // price and they don't pressure the TPM ceiling the same way.
+  // CURRENT VALUES + TRANSCRIPT are volatile and intentionally placed
+  // *after* the static block so they don't break the cacheable prefix.
+  const formDefinitionMessage = `FORM DEFINITION:\n${serializeFormDefinition(fillable)}`;
+  const volatileMessage = [
+    `CURRENT VALUES:`,
+    serializeCurrentValues(fillable),
+    ``,
+    `TRANSCRIPT:`,
     serializeTranscript(transcript),
-    "",
-    "FILLABLE FIELDS:",
-    serializeFillable(fillable),
-    "",
-    "Return only the JSON object described by the response schema.",
+    ``,
+    `Return only the JSON object described by the response schema.`,
   ].join("\n");
 
   const startedAt = performance.now();
@@ -98,7 +144,8 @@ export async function runFormFill({
         model: MODEL,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userMessage },
+          { role: "user", content: formDefinitionMessage },
+          { role: "user", content: volatileMessage },
         ],
         temperature: 0,
         response_format: {
@@ -138,9 +185,17 @@ export async function runFormFill({
 
   const data = (await res.json()) as {
     choices?: { message?: { content?: string } }[];
-    usage?: { prompt_tokens?: number; completion_tokens?: number };
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      // OpenAI returns `prompt_tokens_details.cached_tokens` when prompt
+      // caching kicks in. Useful as a dev signal that the static prefix
+      // is being recognized; surfaced below in the call preview.
+      prompt_tokens_details?: { cached_tokens?: number };
+    };
   };
   const raw = data?.choices?.[0]?.message?.content;
+  const cachedTokens = data.usage?.prompt_tokens_details?.cached_tokens ?? 0;
 
   let updates: FillUpdate[] = [];
   let parseError: string | null = null;
@@ -171,7 +226,7 @@ export async function runFormFill({
     status: parseError ? "error" : "success",
     errorMessage: parseError ?? undefined,
     preview: {
-      input: `${fillable.length} fields, ${transcript.length} turns`,
+      input: `${fillable.length} fields, ${transcript.length} turns${cachedTokens ? ` · ${cachedTokens} cached` : ""}`,
       output: `${updates.length} update${updates.length === 1 ? "" : "s"}${updates.length ? `: ${updates.map((u) => u.question_id).join(", ")}` : ""}`,
     },
   });

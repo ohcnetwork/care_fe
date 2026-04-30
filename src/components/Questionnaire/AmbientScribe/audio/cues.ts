@@ -108,6 +108,28 @@ export function playErrorCue() {
 }
 
 /**
+ * Soft single mid-low tone. Plays when the session pauses to reconnect
+ * (server-initiated close, ICE blip, heartbeat stall). Intentionally
+ * quiet and brief — reconnects are usually transient, so the cue should
+ * be a subtle "stand by", not an alarm.
+ */
+export function playReconnectStartCue() {
+  playSequence([{ freq: 440, start: 0, duration: 0.14, gain: 0.65 }]);
+}
+
+/**
+ * Two-note ascend, slightly quieter and tighter than `playStartCue` so it
+ * reads as "we're back" rather than "fresh session start". Plays after a
+ * successful reconnect.
+ */
+export function playReconnectSuccessCue() {
+  playSequence([
+    { freq: 587.33, start: 0, duration: 0.08, gain: 0.7 }, // D5
+    { freq: 880, start: 0.07, duration: 0.14, gain: 0.7 }, // A5
+  ]);
+}
+
+/**
  * Suppress / unsuppress all cues. Useful as a future user-facing toggle —
  * not currently surfaced in the UI.
  */

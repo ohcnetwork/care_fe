@@ -8,7 +8,13 @@ import type {
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
-import { playErrorCue, playStartCue, playStopCue } from "./audio/cues";
+import {
+  playErrorCue,
+  playReconnectStartCue,
+  playReconnectSuccessCue,
+  playStartCue,
+  playStopCue,
+} from "./audio/cues";
 import { useAudioCapture } from "./audio/useAudioCapture";
 import { FILLABLE_TYPES, collectFillable } from "./openai/buildAnswerSchema";
 import { classifySpeaker } from "./openai/diarize";
@@ -194,6 +200,11 @@ export function useAmbientScribe({
   // the realtime-hook callbacks, the heartbeat) can invoke the latest
   // version without depending on its identity.
   const reconnectRef = useRef<() => Promise<void>>(async () => {});
+  // Wall-clock ms of the most recent user edit on any question. The
+  // autoscroll-on-AI-fill behavior is suppressed for a short grace
+  // window after a user edit so we don't yank the page away while the
+  // doctor is actively typing/correcting a field.
+  const lastUserEditAtRef = useRef(0);
 
   useEffect(() => {
     formsRef.current = forms;
@@ -404,6 +415,10 @@ export function useAmbientScribe({
         string,
         { questionId: string; values: ResponseValue[] }[]
       >();
+      // Question IDs that flipped from "no provenance" → "ai" in this
+      // batch. These are the candidates for the autoscroll target —
+      // re-fills of already-AI fields don't pull focus.
+      const newlyFilled = new Set<string>();
 
       for (const update of updates) {
         const existing = currentProv[update.question_id];
@@ -439,6 +454,10 @@ export function useAmbientScribe({
         const bucket = updatesByForm.get(owningFormId) ?? [];
         bucket.push({ questionId: update.question_id, values });
         updatesByForm.set(owningFormId, bucket);
+
+        if (!existing) {
+          newlyFilled.add(update.question_id);
+        }
 
         nextProv[update.question_id] = {
           status: "ai",
@@ -480,6 +499,21 @@ export function useAmbientScribe({
 
       if (provChanged) {
         setProvenance(nextProv);
+      }
+
+      // Autoscroll to the first newly-filled question (in document order)
+      // unless the doctor was just typing — the grace window prevents
+      // yanking focus away mid-edit.
+      if (
+        newlyFilled.size > 0 &&
+        Date.now() - lastUserEditAtRef.current > SCROLL_USER_EDIT_GRACE_MS
+      ) {
+        let firstId: string | undefined;
+        for (const form of currentForms) {
+          firstId = findFirstInOrder(form.questionnaire.questions, newlyFilled);
+          if (firstId) break;
+        }
+        if (firstId) scrollToQuestion(firstId);
       }
     },
     [setForms],
@@ -656,6 +690,12 @@ export function useAmbientScribe({
       message: `Reconnecting (attempt ${reconnectAttemptsRef.current}/${MAX_CONSECUTIVE_RECONNECTS})`,
     });
     setStatus("connecting");
+    // Only cue on the first attempt of a streak — back-to-back retries
+    // would just be noise. Subsequent successes still play the success
+    // cue so the doctor knows the session is back.
+    if (reconnectAttemptsRef.current === 1) {
+      playReconnectStartCue();
+    }
 
     transcription.disconnect();
     const stream = audio.getStream();
@@ -681,6 +721,7 @@ export function useAmbientScribe({
         source: "reconnect",
         message: "Reconnected successfully",
       });
+      playReconnectSuccessCue();
       // If the session stays healthy for a while, treat the previous
       // outage as transient and forgive the consecutive-attempt count.
       const settledAt = reconnectAttemptsRef.current;
@@ -791,6 +832,9 @@ export function useAmbientScribe({
 
   const markEdited = useCallback(
     (questionId: string, values: ResponseValue[]) => {
+      // Track every edit (even on questions without provenance) so the
+      // AI-fill autoscroll can back off while the doctor is typing.
+      lastUserEditAtRef.current = Date.now();
       const prov = provenanceRef.current[questionId];
       if (!prov) return;
       if (values.length === 0) {
@@ -877,6 +921,48 @@ function findQuestion(questions: Question[], id: string): Question | undefined {
     }
   }
   return undefined;
+}
+
+/**
+ * Returns the first question id (in DFS document order) from `questions`
+ * that exists in `candidates`. Used by autoscroll to pick a single target
+ * when the AI applies a batch of updates in one round.
+ */
+function findFirstInOrder(
+  questions: Question[],
+  candidates: Set<string>,
+): string | undefined {
+  for (const q of questions) {
+    if (candidates.has(q.id)) return q.id;
+    if (q.type === "group" && q.questions) {
+      const found = findFirstInOrder(q.questions, candidates);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
+const SCROLL_USER_EDIT_GRACE_MS = 2000;
+
+/**
+ * Smoothly scrolls the input wrapper for `questionId` into view. Skips the
+ * scroll silently if the element isn't in the DOM (e.g. inside a collapsed
+ * group). Wrapped in rAF so it runs after the form has re-rendered with
+ * the freshly applied AI value.
+ */
+function scrollToQuestion(questionId: string) {
+  if (typeof window === "undefined") return;
+  window.requestAnimationFrame(() => {
+    const el = document.querySelector(
+      `[data-question-id="${CSS.escape(questionId)}"]`,
+    );
+    if (el && "scrollIntoView" in el) {
+      (el as HTMLElement).scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  });
 }
 
 function getPreviousSpeaker(turns: TranscriptTurn[]): SpeakerRole | null {

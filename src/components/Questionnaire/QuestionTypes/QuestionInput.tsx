@@ -535,7 +535,7 @@ export function QuestionInput({
     : "";
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" data-question-id={question.id}>
       <div className={provenanceGutter}>{renderInput()}</div>
       {error && <p className="text-sm font-medium text-red-500">{error}</p>}
     </div>
