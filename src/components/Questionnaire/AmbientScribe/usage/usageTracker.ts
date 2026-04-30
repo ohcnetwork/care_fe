@@ -73,6 +73,12 @@ const PRICING: Record<
     inPerToken: 0.15 / 1_000_000,
     outPerToken: 0.6 / 1_000_000,
   },
+  // GPT-5 family mini-tier — current default for form-fill (Mar 2026).
+  // List pricing as published by OpenAI on launch.
+  "gpt-5.4-mini": {
+    inPerToken: 0.75 / 1_000_000,
+    outPerToken: 4.5 / 1_000_000,
+  },
   // realtime transcription (audio-only billing)
   "gpt-4o-mini-transcribe": {
     audioPerSec: 0.003 / 60,

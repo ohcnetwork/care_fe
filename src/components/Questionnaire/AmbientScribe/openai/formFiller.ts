@@ -7,11 +7,18 @@ import { recordUsage } from "@/components/Questionnaire/AmbientScribe/usage/usag
 import { buildAnswerSchema } from "./buildAnswerSchema";
 
 const CHAT_URL = "https://api.openai.com/v1/chat/completions";
-// `gpt-4o-mini` is plenty smart for schema-constrained extraction, has a
-// much higher TPM ceiling than `gpt-4o` (~200k vs ~30k on tier-1), and
-// costs ~16× less per token. The TPM headroom is the key driver — large
-// forms were tripping `gpt-4o`'s rate limit during real conversations.
-const MODEL = "gpt-4o-mini";
+// `gpt-5.4-mini` (current mini-tier, March 2026) is the live form-fill
+// brain. It's noticeably smarter than `gpt-4o-mini` on ambiguous
+// transcript extraction (negation, multi-turn references, pragmatic
+// inferences), 2-3× faster on tokens-per-second, and has a 400k context
+// window so we never need to slice the transcript.
+//
+// Reasoning is explicitly disabled (`reasoning_effort: "none"` below).
+// The "thinking" pipeline would add several seconds of TTFT and tax the
+// per-call output budget — both unacceptable for a 3s-debounced rolling
+// fill loop. `none` keeps TTFT sub-200ms and behaviour close to a
+// classic non-reasoning chat model.
+const MODEL = "gpt-5.4-mini";
 
 const SYSTEM_PROMPT = `You are an expert clinical scribe assisting a doctor during a patient consultation.
 
@@ -148,6 +155,10 @@ export async function runFormFill({
           { role: "user", content: volatileMessage },
         ],
         temperature: 0,
+        // GPT-5 family knob — `none` skips the internal reasoning phase
+        // and keeps the call shaped like a classic chat completion. See
+        // the MODEL comment above for why.
+        reasoning_effort: "none",
         response_format: {
           type: "json_schema",
           json_schema: schema,
