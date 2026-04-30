@@ -109,7 +109,12 @@ export function AmbientScribePanel({
       {scribe.errorMessage && (
         <div className="flex items-start gap-2 mx-3 my-2 px-3 py-2 rounded-md bg-red-50 border border-red-200 text-xs text-red-800">
           <AlertTriangle className="size-3.5 mt-0.5 shrink-0" />
-          <span className="break-words">{scribe.errorMessage}</span>
+          <span className="break-words">
+            {/* If the orchestrator emitted a known i18n key (e.g.
+                `scribe_connection_lost`) we translate; otherwise fall back
+                to the raw text from the underlying error. */}
+            {t(scribe.errorMessage, { defaultValue: scribe.errorMessage })}
+          </span>
         </div>
       )}
 

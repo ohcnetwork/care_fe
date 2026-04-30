@@ -37,6 +37,24 @@ const MAX_FILL_INTERVAL_MS = 12000;
 // belt-and-braces fallback for missing `transcription.completed` events.
 const WATCHDOG_INTERVAL_MS = 5000;
 
+// --- Realtime session liveness ----------------------------------------------
+// Heartbeat: how often (ms) we check whether the realtime data channel has
+// gone silent. The OpenAI Realtime API caps transcription_session lifetime
+// at ~30 minutes and ICE may drop on network changes — both can leave the
+// peer half-alive (audio still flowing locally, but no more events arrive).
+const HEARTBEAT_CHECK_INTERVAL_MS = 5000;
+// Treat this many ms without ANY data-channel event as a stalled session.
+// The server emits `speech_started`/`speech_stopped` events even on quiet
+// audio, so going this long with absolute silence is a strong signal that
+// the session is dead.
+const HEARTBEAT_STALL_MS = 45000;
+// Cap consecutive automatic reconnects so a hard failure (e.g. revoked key,
+// rate-limit) doesn't loop forever. Resets after a stable period.
+const MAX_CONSECUTIVE_RECONNECTS = 3;
+// After this many ms of stable "listening" post-reconnect, the consecutive
+// reconnect counter is reset to 0 — we treat the session as healthy again.
+const RECONNECT_STABILITY_RESET_MS = 30000;
+
 function makeTurnId() {
   return `turn_${Date.now().toString(36)}_${Math.random()
     .toString(36)
@@ -161,6 +179,20 @@ export function useAmbientScribe({
   // Forward reference for runFillInternal so scheduleFill can call the latest
   // version without TDZ issues.
   const runFillRef = useRef<() => void>(() => {});
+  // Wall-clock (ms) of the most recent realtime data-channel event. Bumped
+  // by `handleActivity` for ANY event type. The heartbeat compares this
+  // against `Date.now()` to detect a stalled session.
+  const lastEventAtRef = useRef<number>(0);
+  // Number of consecutive auto-reconnect attempts since the last healthy
+  // window. Reset to 0 after RECONNECT_STABILITY_RESET_MS of "listening".
+  const reconnectAttemptsRef = useRef(0);
+  // Guards against re-entry: heartbeat may try to reconnect while another
+  // reconnect is in flight (e.g. SDP exchange running).
+  const reconnectingRef = useRef(false);
+  // Forward reference for `reconnect` so callbacks defined before it (e.g.
+  // the realtime-hook callbacks, the heartbeat) can invoke the latest
+  // version without depending on its identity.
+  const reconnectRef = useRef<() => Promise<void>>(async () => {});
 
   useEffect(() => {
     formsRef.current = forms;
@@ -324,11 +356,29 @@ export function useAmbientScribe({
     setStatus("error");
   }, []);
 
+  // Bumped on every realtime data-channel event. The heartbeat below uses
+  // this to detect "session is open but nothing's coming through" stalls.
+  const handleActivity = useCallback(() => {
+    lastEventAtRef.current = Date.now();
+  }, []);
+
+  // The realtime session was closed without us asking — typically the
+  // OpenAI session timed out (~30 min cap) or the underlying ICE
+  // connection failed. Try to recover transparently before showing an
+  // error. We forward to a ref so we don't depend on `reconnect`'s
+  // identity here (avoids a circular hook-deps issue).
+  const handleUnexpectedClose = useCallback(() => {
+    if (isStoppedRef.current) return;
+    void reconnectRef.current();
+  }, []);
+
   const transcription = useRealtimeTranscription({
     apiKey,
     onDelta,
     onCompleted,
     onError: handleFatal,
+    onActivity: handleActivity,
+    onUnexpectedClose: handleUnexpectedClose,
   });
 
   // Apply AI updates: convert to ResponseValue[], guard against ai_edited,
@@ -522,6 +572,7 @@ export function useAmbientScribe({
     setErrorMessage(undefined);
     setStatus("connecting");
     isStoppedRef.current = false;
+    reconnectAttemptsRef.current = 0;
     // Each new session is its own usage scope.
     resetSession();
     try {
@@ -530,6 +581,7 @@ export function useAmbientScribe({
       const startedAt = Date.now();
       setSessionStartedAt(startedAt);
       lastAudioTickRef.current = startedAt;
+      lastEventAtRef.current = startedAt;
       setStatus("listening");
     } catch (err) {
       audio.stop();
@@ -537,8 +589,103 @@ export function useAmbientScribe({
     }
   }, [apiKey, audio, enabled, handleFatal, status, transcription]);
 
+  /**
+   * Recover from an unexpected realtime session loss without disturbing
+   * the doctor:
+   *   1. Tear down the dead transcription session (audio capture stays up
+   *      so the mic permission, AnalyserNode, and waveform animation are
+   *      uninterrupted).
+   *   2. Re-mint an ephemeral key and open a new realtime session against
+   *      the SAME `MediaStream`.
+   *   3. On success, flip back to "listening" and arm a stability timer
+   *      that resets the consecutive-attempt counter.
+   *   4. On hard failure (or after `MAX_CONSECUTIVE_RECONNECTS`), surface
+   *      a translated error and stop the audio capture so the doctor sees
+   *      a clear "needs restart" state instead of a stuck UI.
+   */
+  const reconnect = useCallback(async () => {
+    if (isStoppedRef.current) return;
+    if (reconnectingRef.current) return;
+
+    if (reconnectAttemptsRef.current >= MAX_CONSECUTIVE_RECONNECTS) {
+      reconnectingRef.current = false;
+      setErrorMessage("scribe_connection_lost");
+      setStatus("error");
+      transcription.disconnect();
+      audio.stop();
+      setSessionStartedAt(undefined);
+      return;
+    }
+
+    reconnectingRef.current = true;
+    reconnectAttemptsRef.current += 1;
+    setStatus("connecting");
+
+    transcription.disconnect();
+    const stream = audio.getStream();
+    if (!stream) {
+      reconnectingRef.current = false;
+      setErrorMessage("scribe_connection_lost");
+      setStatus("error");
+      return;
+    }
+
+    try {
+      await transcription.connect(stream);
+      lastEventAtRef.current = Date.now();
+      reconnectingRef.current = false;
+      setStatus("listening");
+      // If the session stays healthy for a while, treat the previous
+      // outage as transient and forgive the consecutive-attempt count.
+      const settledAt = reconnectAttemptsRef.current;
+      window.setTimeout(() => {
+        if (
+          !isStoppedRef.current &&
+          reconnectAttemptsRef.current === settledAt
+        ) {
+          reconnectAttemptsRef.current = 0;
+        }
+      }, RECONNECT_STABILITY_RESET_MS);
+    } catch (err) {
+      reconnectingRef.current = false;
+      setErrorMessage(err instanceof Error ? err.message : "reconnect_failed");
+      setStatus("error");
+      audio.stop();
+      setSessionStartedAt(undefined);
+    }
+  }, [audio, transcription]);
+
+  useEffect(() => {
+    reconnectRef.current = reconnect;
+  }, [reconnect]);
+
+  // Liveness heartbeat: while listening, watch for the data channel
+  // going silent. The OpenAI Realtime transcription session is capped at
+  // ~30 minutes and ICE can drop on network changes — both leave the
+  // peer half-alive (audio still flowing locally, but no further events
+  // arrive). Trigger a transparent reconnect if we hit the stall window.
+  useEffect(() => {
+    if (status !== "listening") return;
+    const id = setInterval(() => {
+      if (isStoppedRef.current) return;
+      if (reconnectingRef.current) return;
+      if (lastEventAtRef.current === 0) return;
+      const since = Date.now() - lastEventAtRef.current;
+      if (since > HEARTBEAT_STALL_MS) {
+        console.warn(
+          `[AmbientScribe] No realtime events for ${(since / 1000).toFixed(0)}s — reconnecting`,
+        );
+        void reconnectRef.current();
+      }
+    }, HEARTBEAT_CHECK_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [status]);
+
   const stop = useCallback(() => {
     isStoppedRef.current = true;
+    reconnectingRef.current = false;
+    reconnectAttemptsRef.current = 0;
+    lastEventAtRef.current = 0;
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
       debounceRef.current = null;

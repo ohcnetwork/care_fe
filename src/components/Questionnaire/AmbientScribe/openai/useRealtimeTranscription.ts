@@ -16,6 +16,19 @@ export interface TranscriptionEvents {
 interface UseRealtimeTranscriptionArgs extends TranscriptionEvents {
   apiKey?: string;
   onError: (error: Error) => void;
+  /**
+   * Fires when the realtime session closes WITHOUT a preceding explicit
+   * `disconnect()` from us — i.e. the OpenAI side dropped the data channel
+   * (session timeout, ICE failure, server-side error). The orchestrator
+   * uses this to attempt reconnection so the doctor doesn't have to.
+   */
+  onUnexpectedClose?: (reason?: string) => void;
+  /**
+   * Fires for every event received on the data channel, regardless of
+   * type. Used as a heartbeat signal to detect "session is open but no
+   * transcript activity for too long" stalls.
+   */
+  onActivity?: () => void;
 }
 
 export interface RealtimeTranscriptionHandle {
@@ -35,12 +48,20 @@ export function useRealtimeTranscription({
   onDelta,
   onCompleted,
   onError,
+  onUnexpectedClose,
+  onActivity,
 }: UseRealtimeTranscriptionArgs): RealtimeTranscriptionHandle {
   const [isConnected, setIsConnected] = useState(false);
   const sessionRef = useRef<RealtimeTranscriptionSession | null>(null);
+  // Set to true right before we call `session.close()` ourselves so we can
+  // distinguish "we asked for it" closes (stop / reconnect) from "the
+  // server / network kicked us" closes (which trigger reconnect logic).
+  const expectedCloseRef = useRef(false);
 
   const handleEvent = useCallback(
     (event: RealtimeServerEvent) => {
+      onActivity?.();
+
       if (event.type === "conversation.item.input_audio_transcription.delta") {
         const e = event as {
           item_id?: string;
@@ -61,7 +82,19 @@ export function useRealtimeTranscription({
         return;
       }
     },
-    [onDelta, onCompleted],
+    [onActivity, onDelta, onCompleted],
+  );
+
+  const handleClose = useCallback(
+    (reason?: string) => {
+      setIsConnected(false);
+      if (expectedCloseRef.current) {
+        expectedCloseRef.current = false;
+        return;
+      }
+      onUnexpectedClose?.(reason);
+    },
+    [onUnexpectedClose],
   );
 
   const connect = useCallback(
@@ -72,21 +105,28 @@ export function useRealtimeTranscription({
       if (sessionRef.current) {
         return;
       }
+      // Reset the flag for the new session.
+      expectedCloseRef.current = false;
       const session = await startRealtimeTranscription({
         apiKey,
         mediaStream: stream,
         onEvent: handleEvent,
         onOpen: () => setIsConnected(true),
-        onClose: () => setIsConnected(false),
+        onClose: handleClose,
         onError,
       });
       sessionRef.current = session;
     },
-    [apiKey, handleEvent, onError],
+    [apiKey, handleClose, handleEvent, onError],
   );
 
   const disconnect = useCallback(() => {
-    sessionRef.current?.close();
+    if (sessionRef.current) {
+      // Mark the upcoming close as expected so handleClose doesn't fire
+      // onUnexpectedClose and trigger a reconnect.
+      expectedCloseRef.current = true;
+      sessionRef.current.close();
+    }
     sessionRef.current = null;
     setIsConnected(false);
   }, []);

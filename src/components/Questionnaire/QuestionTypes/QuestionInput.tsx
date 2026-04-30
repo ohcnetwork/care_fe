@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 
+import { useFieldProvenance } from "@/components/Questionnaire/AmbientScribe/context";
 import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { AppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/AppointmentQuestion";
 
@@ -185,6 +186,7 @@ export function QuestionInput({
   questionnaireSlug,
 }: QuestionInputProps) {
   const { t } = useTranslation();
+  const provenance = useFieldProvenance(question.id);
   const questionnaireResponse = questionnaireResponses.find(
     (v) => v.question_id === question.id,
   );
@@ -518,9 +520,23 @@ export function QuestionInput({
 
   const error = errors.find((e) => e.question_id === question.id)?.error;
 
+  // Code-editor-style "gutter" rendered via a `before:` pseudo-element so it
+  // never causes layout shift when toggling. Color encodes provenance:
+  //   - AI-filled         → primary-500 (matches the rest of the scribe UI)
+  //   - AI-edited by user → orange-400  (matches the existing "Edited" pill)
+  const provenanceGutter = provenance
+    ? cn(
+        "relative",
+        "before:absolute before:left-0 before:top-0 before:bottom-0",
+        "before:w-1 before:rounded-l-sm before:transition-colors",
+        provenance.status === "ai" && "before:bg-primary-500",
+        provenance.status === "ai_edited" && "before:bg-orange-400",
+      )
+    : "";
+
   return (
     <div className="space-y-2">
-      {renderInput()}
+      <div className={provenanceGutter}>{renderInput()}</div>
       {error && <p className="text-sm font-medium text-red-500">{error}</p>}
     </div>
   );
