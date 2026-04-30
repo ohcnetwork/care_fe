@@ -47,6 +47,10 @@ interface ImportMetaEnv {
   readonly REACT_DECIMAL_ROUNDING_METHOD?: string;
   readonly REACT_MAX_FORM_DIALOG_FAVORITES?: string;
 
+  // Ambient Scribe (experimental, POC only)
+  readonly REACT_ENABLE_AMBIENT_SCRIBE?: string;
+  readonly REACT_AI_VOICE_OPENAI_API_KEY?: string;
+
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;
   readonly REACT_SENTRY_ENVIRONMENT?: string;

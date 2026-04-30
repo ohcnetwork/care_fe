@@ -360,6 +360,20 @@ const careConfig = {
   maxFormDialogFavorites: env.REACT_MAX_FORM_DIALOG_FAVORITES
     ? parseInt(env.REACT_MAX_FORM_DIALOG_FAVORITES, 10)
     : 5,
+
+  /**
+   * Experimental feature flags. These are NOT production-ready surfaces; they
+   * are gated off by default and opt-in per-environment.
+   */
+  experiments: {
+    /**
+     * Ambient Scribe: live transcription + continuous form auto-fill during a
+     * doctor-patient conversation, powered by the OpenAI Realtime API. POC only;
+     * ships the API key in the browser bundle, so keep disabled in production.
+     */
+    ambientScribe: booleanFromString(env.REACT_ENABLE_AMBIENT_SCRIBE, false),
+    openAIApiKey: env.REACT_AI_VOICE_OPENAI_API_KEY,
+  },
 } as const;
 
 export default careConfig;

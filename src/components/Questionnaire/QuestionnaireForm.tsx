@@ -15,10 +15,16 @@ import { Button } from "@/components/ui/button";
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
+import careConfig from "@careConfig";
+
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import { AmbientScribePanel } from "@/components/Questionnaire/AmbientScribe/AmbientScribePanel";
+import { ScribeProvenanceProvider } from "@/components/Questionnaire/AmbientScribe/context";
+import { ScribeDebugToolbar } from "@/components/Questionnaire/AmbientScribe/ui/ScribeDebugToolbar";
+import { useAmbientScribe } from "@/components/Questionnaire/AmbientScribe/useAmbientScribe";
 import batchApi from "@/types/base/batch/batchApi";
 import { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
@@ -385,6 +391,17 @@ export function QuestionnaireForm({
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
   const [draftMismatchError, setDraftMismatchError] = useState(false);
+
+  const ambientScribeEnabled =
+    careConfig.experiments.ambientScribe &&
+    !!careConfig.experiments.openAIApiKey;
+
+  const scribe = useAmbientScribe({
+    enabled: ambientScribeEnabled,
+    apiKey: careConfig.experiments.openAIApiKey,
+    forms: questionnaireForms,
+    setForms: setQuestionnaireForms,
+  });
 
   const {
     data: questionnaireData,
@@ -960,239 +977,307 @@ export function QuestionnaireForm({
   };
 
   return (
-    <div className="flex gap-4">
-      {/* Left Navigation */}
-      <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
-        <BackButton className="w-full">
-          <ArrowLeft />
-          <span>{t("back_to_encounter")}</span>
-        </BackButton>
-        {questionnaireForms.map((form) => (
-          <div key={form.questionnaire.id} className="space-y-2">
-            <button
-              className={cn(
-                "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
-                activeQuestionnaireId === form.questionnaire.id &&
-                  "bg-gray-100 text-green-600",
-              )}
-              onClick={() => scrollToQuestion(form.questionnaire.id)}
-              disabled={isPending}
-            >
-              {form.questionnaire.title}
-            </button>
-            <div className="pl-4 space-y-1">
-              {form.questionnaire.questions
-                .filter((q) => q.type === "group")
-                .map((group) => (
-                  <button
-                    key={group.id}
-                    className={cn(
-                      "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
-                      activeGroupId === group.id &&
-                        "bg-gray-100 text-green-600",
-                    )}
-                    onClick={() =>
-                      scrollToQuestion(form.questionnaire.id, group.id)
-                    }
-                    disabled={isPending}
-                  >
-                    {group.text}
-                  </button>
-                ))}
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
-        {/* Questionnaire Forms */}
-        {questionnaireForms.map((form, index) => (
-          <div
-            key={`${form.questionnaire.id}-${index}`}
-            className="rounded-lg py-6 space-y-6"
-            data-questionnaire-id={form.questionnaire.id}
-          >
-            <div className="flex justify-between items-center max-w-4xl p-2">
-              <div className="space-y-1">
-                <h2 className="text-xl font-semibold">
-                  {form.questionnaire.title}
-                </h2>
-                {form.questionnaire.description && (
-                  <p className="text-sm text-gray-500">
-                    {form.questionnaire.description}
-                  </p>
+    <ScribeProvenanceProvider provenance={scribe.provenance}>
+      <div className="flex gap-4">
+        {/* Left Navigation */}
+        <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
+          <BackButton className="w-full">
+            <ArrowLeft />
+            <span>{t("back_to_encounter")}</span>
+          </BackButton>
+          {questionnaireForms.map((form) => (
+            <div key={form.questionnaire.id} className="space-y-2">
+              <button
+                className={cn(
+                  "w-full text-left px-2 py-1 rounded hover:bg-gray-100 font-medium",
+                  activeQuestionnaireId === form.questionnaire.id &&
+                    "bg-gray-100 text-green-600",
                 )}
-              </div>
-              {form.questionnaire.slug !== questionnaireSlug && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setQuestionnaireForms((prev) =>
-                      prev.filter(
-                        (f) => f.questionnaire.id !== form.questionnaire.id,
-                      ),
-                    );
-                  }}
-                  disabled={isPending}
-                >
-                  <CareIcon icon="l-times-circle" />
-                  <span>Remove</span>
-                </Button>
-              )}
-            </div>
-
-            <QuestionRenderer
-              facilityId={facilityId}
-              encounterId={encounterId}
-              questions={form.questionnaire.questions}
-              responses={form.responses}
-              questionnaireId={form.questionnaire.id}
-              questionnaireSlug={form.questionnaire.slug}
-              onResponseChange={(
-                values: ResponseValue[],
-                questionId: string,
-                note?: string,
-              ) => {
-                setQuestionnaireForms((existingForms) =>
-                  existingForms.map((formItem) =>
-                    formItem.questionnaire.id === form.questionnaire.id
-                      ? {
-                          ...formItem,
-                          responses: formItem.responses.map((r) =>
-                            r.question_id === questionId
-                              ? { ...r, values, note: note }
-                              : r,
-                          ),
-                          errors: [],
-                        }
-                      : formItem,
-                  ),
-                );
-                if (!isDirty) {
-                  setIsDirty(true);
-                }
-              }}
-              disabled={isPending}
-              activeGroupId={activeGroupId}
-              errors={form.errors}
-              patientId={patientId}
-              clearError={(questionId: string) => {
-                setQuestionnaireForms((prev) =>
-                  prev.map((f) =>
-                    f.questionnaire.id === form.questionnaire.id
-                      ? {
-                          ...f,
-                          errors: f.errors.filter(
-                            (e) => e.question_id !== questionId,
-                          ),
-                        }
-                      : f,
-                  ),
-                );
-              }}
-            />
-          </div>
-        ))}
-
-        {/* Search and Add Questionnaire */}
-
-        {encounterId !== "preview" && (
-          <>
-            <div
-              key={`${questionnaireForms.length}`}
-              className="flex gap-4 items-center max-w-4xl px-2"
-            >
-              <QuestionnaireSearch
-                subjectType={subjectType}
-                onSelect={(selected) => {
-                  if (
-                    questionnaireForms.some(
-                      (form) => form.questionnaire.id === selected.id,
-                    )
-                  ) {
-                    return;
-                  }
-
-                  setQuestionnaireForms((prev) => [
-                    ...prev,
-                    {
-                      questionnaire: selected,
-                      responses: initializeResponses(selected.questions),
-                      errors: [],
-                    },
-                  ]);
-                }}
+                onClick={() => scrollToQuestion(form.questionnaire.id)}
                 disabled={isPending}
-              />
+              >
+                {form.questionnaire.title}
+              </button>
+              <div className="pl-4 space-y-1">
+                {form.questionnaire.questions
+                  .filter((q) => q.type === "group")
+                  .map((group) => (
+                    <button
+                      key={group.id}
+                      className={cn(
+                        "w-full text-left px-2 py-1 rounded text-sm hover:bg-gray-100",
+                        activeGroupId === group.id &&
+                          "bg-gray-100 text-green-600",
+                      )}
+                      onClick={() =>
+                        scrollToQuestion(form.questionnaire.id, group.id)
+                      }
+                      disabled={isPending}
+                    >
+                      {group.text}
+                    </button>
+                  ))}
+              </div>
             </div>
-
-            {/* Submit and Cancel Buttons */}
-            {questionnaireForms.length > 0 && (
-              <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
-                <BackButton variant="outline" disabled={isPending}>
-                  {t("cancel")}
-                </BackButton>
-                {isDraftSaveable && (
+          ))}
+        </div>
+        {/* Ambient Scribe panel (xl+ only; drawer on smaller screens) */}
+        {scribe.enabled && (
+          <div className="hidden xl:block w-[360px] shrink-0 sticky top-6 h-[calc(100vh-3rem)]">
+            <AmbientScribePanel scribe={scribe} embedded />
+          </div>
+        )}
+        {/* Main Content */}
+        <div className="flex-1 overflow-y-auto w-full pb-8 space-y-2">
+          {/* Questionnaire Forms */}
+          {questionnaireForms.map((form, index) => (
+            <div
+              key={`${form.questionnaire.id}-${index}`}
+              className="rounded-lg py-6 space-y-6"
+              data-questionnaire-id={form.questionnaire.id}
+            >
+              <div className="flex justify-between items-center max-w-4xl p-2">
+                <div className="space-y-1">
+                  <h2 className="text-xl font-semibold">
+                    {form.questionnaire.title}
+                  </h2>
+                  {form.questionnaire.description && (
+                    <p className="text-sm text-gray-500">
+                      {form.questionnaire.description}
+                    </p>
+                  )}
+                </div>
+                {form.questionnaire.slug !== questionnaireSlug && (
                   <Button
                     type="button"
-                    variant="outline_primary"
-                    onClick={handleSaveDraft}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setQuestionnaireForms((prev) =>
+                        prev.filter(
+                          (f) => f.questionnaire.id !== form.questionnaire.id,
+                        ),
+                      );
+                    }}
                     disabled={isPending}
+                  >
+                    <CareIcon icon="l-times-circle" />
+                    <span>Remove</span>
+                  </Button>
+                )}
+              </div>
+
+              <QuestionRenderer
+                facilityId={facilityId}
+                encounterId={encounterId}
+                questions={form.questionnaire.questions}
+                responses={form.responses}
+                questionnaireId={form.questionnaire.id}
+                questionnaireSlug={form.questionnaire.slug}
+                onResponseChange={(
+                  values: ResponseValue[],
+                  questionId: string,
+                  note?: string,
+                ) => {
+                  setQuestionnaireForms((existingForms) =>
+                    existingForms.map((formItem) =>
+                      formItem.questionnaire.id === form.questionnaire.id
+                        ? {
+                            ...formItem,
+                            responses: formItem.responses.map((r) =>
+                              r.question_id === questionId
+                                ? { ...r, values, note: note }
+                                : r,
+                            ),
+                            errors: [],
+                          }
+                        : formItem,
+                    ),
+                  );
+                  if (scribe.enabled) {
+                    scribe.markEdited(questionId, values);
+                  }
+                  if (!isDirty) {
+                    setIsDirty(true);
+                  }
+                }}
+                disabled={isPending}
+                activeGroupId={activeGroupId}
+                errors={form.errors}
+                patientId={patientId}
+                clearError={(questionId: string) => {
+                  setQuestionnaireForms((prev) =>
+                    prev.map((f) =>
+                      f.questionnaire.id === form.questionnaire.id
+                        ? {
+                            ...f,
+                            errors: f.errors.filter(
+                              (e) => e.question_id !== questionId,
+                            ),
+                          }
+                        : f,
+                    ),
+                  );
+                }}
+              />
+            </div>
+          ))}
+
+          {/* Search and Add Questionnaire */}
+
+          {encounterId !== "preview" && (
+            <>
+              <div
+                key={`${questionnaireForms.length}`}
+                className="flex gap-4 items-center max-w-4xl px-2"
+              >
+                <QuestionnaireSearch
+                  subjectType={subjectType}
+                  onSelect={(selected) => {
+                    if (
+                      questionnaireForms.some(
+                        (form) => form.questionnaire.id === selected.id,
+                      )
+                    ) {
+                      return;
+                    }
+
+                    setQuestionnaireForms((prev) => [
+                      ...prev,
+                      {
+                        questionnaire: selected,
+                        responses: initializeResponses(selected.questions),
+                        errors: [],
+                      },
+                    ]);
+                  }}
+                  disabled={isPending}
+                />
+              </div>
+
+              {/* Submit and Cancel Buttons */}
+              {questionnaireForms.length > 0 && (
+                <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
+                  <BackButton variant="outline" disabled={isPending}>
+                    {t("cancel")}
+                  </BackButton>
+                  {isDraftSaveable && (
+                    <Button
+                      type="button"
+                      variant="outline_primary"
+                      onClick={handleSaveDraft}
+                      disabled={isPending}
+                      className="relative"
+                    >
+                      {isDraftPending ? (
+                        <>
+                          <span className="opacity-0">
+                            {t("save_as_draft")}
+                          </span>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="size-5 animate-spin rounded-full border-b-2 border-primary-600" />
+                          </div>
+                        </>
+                      ) : (
+                        t("save_as_draft")
+                      )}
+                    </Button>
+                  )}
+                  <Button
+                    type="submit"
+                    onClick={handleSubmit}
+                    disabled={isPending || hasErrors}
                     className="relative"
                   >
-                    {isDraftPending ? (
+                    {isSubmitPending ? (
                       <>
-                        <span className="opacity-0">{t("save_as_draft")}</span>
+                        <span className="opacity-0">{t("submit")}</span>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="size-5 animate-spin rounded-full border-b-2 border-primary-600" />
+                          <div className="size-5 animate-spin rounded-full border-b-2 border-white" />
                         </div>
                       </>
                     ) : (
-                      t("save_as_draft")
+                      t("submit")
                     )}
                   </Button>
-                )}
-                <Button
-                  type="submit"
-                  onClick={handleSubmit}
-                  disabled={isPending || hasErrors}
-                  className="relative"
-                >
-                  {isSubmitPending ? (
-                    <>
-                      <span className="opacity-0">{t("submit")}</span>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="size-5 animate-spin rounded-full border-b-2 border-white" />
-                      </div>
-                    </>
-                  ) : (
-                    t("submit")
-                  )}
-                </Button>
-              </div>
-            )}
+                </div>
+              )}
 
-            <ValidationErrorDisplay
-              questionnaireForms={questionnaireForms}
-              serverErrors={serverErrors}
-            />
-          </>
-        )}
+              <ValidationErrorDisplay
+                questionnaireForms={questionnaireForms}
+                serverErrors={serverErrors}
+              />
+            </>
+          )}
 
-        <PLUGIN_Component
-          __name="Scribe"
-          formState={questionnaireForms}
-          setFormState={setQuestionnaireForms}
-        />
+          <PLUGIN_Component
+            __name="Scribe"
+            formState={questionnaireForms}
+            setFormState={setQuestionnaireForms}
+          />
 
-        <DebugPreview
-          data={questionnaireForms}
-          title={t("questionnaire_form")}
-          className="p-4 space-y-6 max-w-4xl m-2"
-        />
+          <DebugPreview
+            data={questionnaireForms}
+            title={t("questionnaire_form")}
+            className="p-4 space-y-6 max-w-4xl m-2"
+          />
+        </div>
+        {/* Floating scribe launcher + drawer for screens smaller than xl. */}
+        {scribe.enabled && <AmbientScribeFloating scribe={scribe} />}
+        {/* Dev-only usage debug toolbar. Renders nothing in production. */}
+        {scribe.enabled && <ScribeDebugToolbar />}
       </div>
-    </div>
+    </ScribeProvenanceProvider>
+  );
+}
+
+function AmbientScribeFloating({
+  scribe,
+}: {
+  scribe: ReturnType<typeof useAmbientScribe>;
+}) {
+  const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
+  const isActive =
+    scribe.status === "listening" || scribe.status === "connecting";
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-label={t("ambient_scribe")}
+        className={cn(
+          "xl:hidden fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full px-4 py-3 shadow-xl transition-colors",
+          isActive
+            ? "bg-red-600 text-white"
+            : "bg-linear-to-br from-primary-600 to-purple-600 text-white",
+        )}
+      >
+        {isActive && (
+          <span
+            aria-hidden
+            className="absolute inset-0 rounded-full bg-red-500/40 animate-ping"
+          />
+        )}
+        <CareIcon icon="l-microphone" className="size-5 relative z-10" />
+        <span className="text-sm font-semibold relative z-10">
+          {t("ambient_scribe")}
+        </span>
+      </button>
+      {open && (
+        <div
+          className="xl:hidden fixed inset-0 z-50 bg-black/50 flex justify-end"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm h-full p-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AmbientScribePanel scribe={scribe} className="h-full" />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

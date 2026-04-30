@@ -2,6 +2,9 @@ import { cn } from "@/lib/utils";
 
 import { Label } from "@/components/ui/label";
 
+import { useFieldProvenance } from "@/components/Questionnaire/AmbientScribe/context";
+import { FieldProvenanceBadge } from "@/components/Questionnaire/AmbientScribe/ui/FieldProvenanceBadge";
+
 import type { Question } from "@/types/questionnaire/question";
 
 interface QuestionLabelProps {
@@ -21,6 +24,7 @@ export function QuestionLabel({
   isSubQuestion = false,
 }: QuestionLabelProps) {
   const defaultClass = groupLabel ? defaultGroupClass : defaultInputClass;
+  const provenance = useFieldProvenance(question.id);
 
   return (
     <Label className={className ?? defaultClass}>
@@ -49,6 +53,9 @@ export function QuestionLabel({
             <span className="text-sm text-gray-500">
               ({question.unit.code})
             </span>
+          )}
+          {!groupLabel && provenance && (
+            <FieldProvenanceBadge provenance={provenance} />
           )}
         </div>
       </div>
