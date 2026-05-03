@@ -133,6 +133,10 @@ export default function query<
  * - The `AbortSignal` is passed through to the underlying `fetch` call
  * - When aborted, both the `sleep` promise and the fetch request are cancelled automatically
  * - TanStack Query handles the abortion and cleanup of previous in-flight requests
+ *
+ * @param route - The API route definition.
+ * @param options - Additional options for the API call (path params, query params, debounceInterval, etc.).
+ * @returns A query function that can be used with TanStack Query.
  */
 const debouncedQuery = <Route extends ApiRoute<unknown, unknown, unknown>>(
   route: Route,
@@ -164,6 +168,10 @@ query.debounced = debouncedQuery;
  *   }),
  * });
  * ```
+ *
+ * @param route - The API route definition.
+ * @param options - Additional options for the API call (path params, query params, pageSize, maxPages, etc.).
+ * @returns A query function that can be used with TanStack Query.
  */
 const paginatedQuery = <
   Route extends ApiRoute<PaginatedResponse<unknown>, unknown, unknown>,
@@ -184,7 +192,11 @@ const paginatedQuery = <
     let page = 0;
     let count = 0;
 
-    const pageSize = options?.pageSize ?? RESULTS_PER_PAGE_LIMIT;
+    const pageSize =
+      options?.pageSize ??
+      options?.queryParams?.limit ??
+      RESULTS_PER_PAGE_LIMIT;
+    const startOffset = options?.queryParams?.offset ?? 0;
 
     while (hasNextPage) {
       const res = await query(route, {
@@ -192,7 +204,7 @@ const paginatedQuery = <
         queryParams: {
           ...options?.queryParams,
           limit: pageSize,
-          offset: page * pageSize,
+          offset: startOffset + page * pageSize,
         } as RouteQueryParams<Route> & {
           limit?: number;
           offset?: number;
@@ -206,7 +218,7 @@ const paginatedQuery = <
         hasNextPage = false;
       }
 
-      if (items.length >= res.count) {
+      if (items.length + startOffset >= res.count) {
         hasNextPage = false;
       }
 
