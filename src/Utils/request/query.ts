@@ -201,10 +201,18 @@ const paginatedQuery = <
     let count = 0;
 
     const pageSize =
-      options?.pageSize ??
-      options?.queryParams?.limit ??
+      Number(options?.pageSize) ||
+      Number(options?.queryParams?.limit) ||
       RESULTS_PER_PAGE_LIMIT;
-    const startOffset = options?.queryParams?.offset ?? 0;
+    const startOffset = Number(options?.queryParams?.offset) || 0;
+
+    if (!Number.isInteger(pageSize) || pageSize <= 0) {
+      throw new RangeError("query.paginated requires a positive pageSize.");
+    }
+
+    if (!Number.isInteger(startOffset) || startOffset < 0) {
+      throw new RangeError("query.paginated requires a non-negative offset.");
+    }
 
     while (hasNextPage) {
       const res = await query(route, {
