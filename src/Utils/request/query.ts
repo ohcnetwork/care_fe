@@ -8,7 +8,6 @@ import {
   HTTPError,
   PaginatedResponse,
   QueryParams,
-  RouteQueryParams,
 } from "@/Utils/request/types";
 import { getResponseBody, makeHeaders, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
@@ -190,8 +189,7 @@ const paginatedQuery = <
   >,
 >(
   route: Route,
-  options?: Omit<ApiCallOptions<Route>, "queryParams"> & {
-    queryParams?: RouteQueryParams<Route>;
+  options?: ApiCallOptions<Route> & {
     pageSize?: number;
     maxPages?: number;
   },
