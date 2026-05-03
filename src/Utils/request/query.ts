@@ -12,6 +12,16 @@ import {
 import { getResponseBody, makeHeaders, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
+/**
+ * Low-level function to make an API call.
+ * This function handles URL construction, header generation, and response parsing.
+ *
+ * @param route - The API route definition.
+ * @param options - Additional options for the API call (path params, query params, body, etc.).
+ * @returns A promise that resolves to the response data.
+ * @throws {HTTPError} If the request fails.
+ * @throws {Error} If a network error occurs.
+ */
 export async function callApi<
   Route extends ApiRoute<unknown, unknown, unknown>,
 >(
