@@ -21,7 +21,11 @@ export type QueryParams = Record<string, QueryParamValue>;
  * @template TBody - The type of the request body (defaults to `unknown`).
  * @template TQuery - The type of the query parameters (defaults to `QueryParams`).
  */
-export interface ApiRoute<TRes, TBody = unknown, TQuery = QueryParams> {
+export interface ApiRoute<
+  TRes,
+  TBody = unknown,
+  TQuery extends QueryParams = QueryParams,
+> {
   /** The base URL for the API (optional, defaults to careConfig.apiUrl). */
   baseUrl?: string;
   /** The HTTP method for the request. */
@@ -37,7 +41,7 @@ export interface ApiRoute<TRes, TBody = unknown, TQuery = QueryParams> {
   /** Whether to skip authentication for this route. */
   noAuth?: boolean;
   /** Default query parameters to include in every request to this route. */
-  defaultQueryParams?: QueryParams;
+  defaultQueryParams?: TQuery;
 }
 
 /**
@@ -57,17 +61,10 @@ type PathParams<T extends string> = {
 
 /**
  * Derives the query parameter type from an ApiRoute.
- * Falls back to QueryParams if TQuery is not specified or not compatible.
  */
 export type RouteQueryParams<
   Route extends ApiRoute<unknown, unknown, unknown>,
-> = Route extends {
-  TQuery?: infer TQuery;
-}
-  ? TQuery extends QueryParams
-    ? TQuery
-    : QueryParams
-  : QueryParams;
+> = NonNullable<Route["TQuery"]>;
 
 /**
  * Options for making an API call.

@@ -7,10 +7,19 @@ import {
   ApiRoute,
   HTTPError,
   PaginatedResponse,
+  QueryParams,
   RouteQueryParams,
 } from "@/Utils/request/types";
 import { getResponseBody, makeHeaders, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
+
+/**
+ * Represents query parameters for a paginated request.
+ */
+interface PaginationQueryParams extends QueryParams {
+  limit?: number;
+  offset?: number;
+}
 
 /**
  * Low-level function to make an API call.
@@ -174,14 +183,15 @@ query.debounced = debouncedQuery;
  * @returns A query function that can be used with TanStack Query.
  */
 const paginatedQuery = <
-  Route extends ApiRoute<PaginatedResponse<unknown>, unknown, unknown>,
+  Route extends ApiRoute<
+    PaginatedResponse<unknown>,
+    unknown,
+    PaginationQueryParams
+  >,
 >(
   route: Route,
   options?: Omit<ApiCallOptions<Route>, "queryParams"> & {
-    queryParams?: RouteQueryParams<Route> & {
-      limit?: number;
-      offset?: number;
-    };
+    queryParams?: RouteQueryParams<Route>;
     pageSize?: number;
     maxPages?: number;
   },
@@ -205,9 +215,6 @@ const paginatedQuery = <
           ...options?.queryParams,
           limit: pageSize,
           offset: startOffset + page * pageSize,
-        } as RouteQueryParams<Route> & {
-          limit?: number;
-          offset?: number;
         },
       })({ signal });
 
