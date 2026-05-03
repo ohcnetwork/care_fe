@@ -11,6 +11,12 @@ export default {
       prescription?: string;
       product_type?: string;
       medications_only?: boolean;
+      facility?: string;
+      ordering?: string;
+      status?: string;
+      exclude_dispense_status?: string;
+      limit?: number | string;
+      offset?: number | string;
     }>(),
     defaultQueryParams: {
       ordering: "-created_date",

@@ -566,7 +566,11 @@ interface ManageResponseTemplatesSheetProps {
   disabled?: boolean;
   currentMedications?: MedicationRequestCreate[];
   currentActivityDefinitions?: ActivityDefinitionTemplateSpec[];
-  key_filter: string;
+  key_filter:
+    | "activity_definition"
+    | "medication_request"
+    | "questionnaire"
+    | "service_request";
   facilityOrganizations?: string[];
 }
 

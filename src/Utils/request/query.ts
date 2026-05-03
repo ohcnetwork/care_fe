@@ -7,11 +7,14 @@ import {
   ApiRoute,
   HTTPError,
   PaginatedResponse,
+  RouteQueryParams,
 } from "@/Utils/request/types";
 import { getResponseBody, makeHeaders, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
-export async function callApi<Route extends ApiRoute<unknown, unknown>>(
+export async function callApi<
+  Route extends ApiRoute<unknown, unknown, unknown>,
+>(
   { baseUrl, path, method, noAuth, defaultQueryParams }: Route,
   options?: ApiCallOptions<Route>,
 ): Promise<Route["TRes"]> {
@@ -84,10 +87,9 @@ export async function callApi<Route extends ApiRoute<unknown, unknown>>(
  * });
  * ```
  */
-export default function query<Route extends ApiRoute<unknown, unknown>>(
-  route: Route,
-  options?: ApiCallOptions<Route>,
-) {
+export default function query<
+  Route extends ApiRoute<unknown, unknown, unknown>,
+>(route: Route, options?: ApiCallOptions<Route>) {
   return ({ signal }: { signal: AbortSignal }) => {
     return callApi(route, { ...options, signal });
   };
@@ -122,7 +124,7 @@ export default function query<Route extends ApiRoute<unknown, unknown>>(
  * - When aborted, both the `sleep` promise and the fetch request are cancelled automatically
  * - TanStack Query handles the abortion and cleanup of previous in-flight requests
  */
-const debouncedQuery = <Route extends ApiRoute<unknown, unknown>>(
+const debouncedQuery = <Route extends ApiRoute<unknown, unknown, unknown>>(
   route: Route,
   options?: ApiCallOptions<Route> & { debounceInterval?: number },
 ) => {
@@ -154,10 +156,17 @@ query.debounced = debouncedQuery;
  * ```
  */
 const paginatedQuery = <
-  Route extends ApiRoute<PaginatedResponse<unknown>, unknown>,
+  Route extends ApiRoute<PaginatedResponse<unknown>, unknown, unknown>,
 >(
   route: Route,
-  options?: ApiCallOptions<Route> & { pageSize?: number; maxPages?: number },
+  options?: Omit<ApiCallOptions<Route>, "queryParams"> & {
+    queryParams?: RouteQueryParams<Route> & {
+      limit?: number;
+      offset?: number;
+    };
+    pageSize?: number;
+    maxPages?: number;
+  },
 ) => {
   return async ({ signal }: { signal: AbortSignal }) => {
     const items: Route["TRes"]["results"] = [];
@@ -171,9 +180,12 @@ const paginatedQuery = <
       const res = await query(route, {
         ...options,
         queryParams: {
+          ...options?.queryParams,
           limit: pageSize,
           offset: page * pageSize,
-          ...options?.queryParams,
+        } as RouteQueryParams<Route> & {
+          limit?: number;
+          offset?: number;
         },
       })({ signal });
 

@@ -129,11 +129,11 @@ function formatDoseRange(range?: DoseRange): string {
  */
 export function buildMedicationForTemplate(
   medication: MedicationRequestCreate,
-): Record<string, unknown> {
-  const medicationForTemplate: Record<string, unknown> = {
+): MedicationRequestTemplateSpec {
+  const medicationForTemplate = {
     ...medication,
     requested_product: medication.requested_product_internal?.slug || undefined,
-  };
+  } as Partial<MedicationRequestTemplateSpec> & Record<string, unknown>;
 
   // Handle medication field based on whether we have a product slug
   if (medication.requested_product) {
@@ -148,7 +148,7 @@ export function buildMedicationForTemplate(
   delete medicationForTemplate.requested_product_internal;
   delete medicationForTemplate.id;
 
-  return medicationForTemplate;
+  return medicationForTemplate as MedicationRequestTemplateSpec;
 }
 
 /**
@@ -531,7 +531,7 @@ export function MedicationRequestQuestion({
         facility: facilityId,
         template_data: {
           medication_request: [medicationForTemplate],
-          service_request: [],
+          activity_definition: [],
         },
         users: [authUser.username],
         facility_organizations: selectedOrganizations || [],

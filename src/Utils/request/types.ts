@@ -8,10 +8,11 @@ type QueryParamValue =
 
 export type QueryParams = Record<string, QueryParamValue>;
 
-export interface ApiRoute<TData, TBody = unknown> {
+export interface ApiRoute<TData, TBody = unknown, TQuery = QueryParams> {
   baseUrl?: string;
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   TBody?: TBody;
+  TQuery?: TQuery;
   path: string;
   TRes: TData;
   noAuth?: boolean;
@@ -27,9 +28,21 @@ type PathParams<T extends string> = {
   [_ in ExtractRouteParams<T>]: string;
 };
 
-export interface ApiCallOptions<Route extends ApiRoute<unknown, unknown>> {
+export type RouteQueryParams<
+  Route extends ApiRoute<unknown, unknown, unknown>,
+> = Route extends {
+  TQuery?: infer TQuery;
+}
+  ? TQuery extends QueryParams
+    ? TQuery
+    : QueryParams
+  : QueryParams;
+
+export interface ApiCallOptions<
+  Route extends ApiRoute<unknown, unknown, unknown>,
+> {
   pathParams?: PathParams<Route["path"]>;
-  queryParams?: QueryParams;
+  queryParams?: RouteQueryParams<Route>;
   body?: Route["TBody"];
   silent?: boolean | ((response: Response) => boolean);
   signal?: AbortSignal;
