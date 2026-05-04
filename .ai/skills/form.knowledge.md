@@ -39,8 +39,6 @@ _Per-user adjustments to the default type-mapping table in `form.skill.md`._
 
 ### CRITICAL — Vital signs and measurements
 
-Confirmed against production examples (`/Users/abhimanyurajeesh/Desktop/examples/`,
-2026-04-27 review):
 
 - **Vitals are `decimal`, NOT `quantity`.** This includes HR, RR, SpO₂, temp,
   weight, height, BMI, lab values, scores, glucose.
@@ -57,9 +55,10 @@ Confirmed against production examples (`/Users/abhimanyurajeesh/Desktop/examples
 - **Do NOT set the `unit` or `answer_unit` fields** on the question. The
   schema has them but the production form builder never emits them, and the
   backend's choice-vs-quantity validator can misclassify the question if you do.
-- **Blood Pressure** = `group` with `is_component: true`, coded with LOINC
-  panel `85354-9`, containing systolic + diastolic decimal children. Add
-  `styling_metadata.containerClasses: "grid grid-cols-2"` for layout.
+- **Blood Pressure** = `group` with `is_component: true`, containing systolic +
+  diastolic decimal children. Add `styling_metadata.containerClasses: "grid grid-cols-2"`
+  for layout. The panel's `code` (LOINC `85354-9`) should only be included when
+  the user explicitly requests coded fields (see global policy above).
 
 ### Other production conventions
 
