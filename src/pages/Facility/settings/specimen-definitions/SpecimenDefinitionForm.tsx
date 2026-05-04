@@ -35,6 +35,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { Code, CodeSchema } from "@/types/base/code/code";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import {
   ContainerSpec,
   Preference,
@@ -180,10 +181,7 @@ function SpecimenDefinitionFormContent({
 
   const formSchema = z.object({
     title: z.string().min(1, t("field_required")),
-    slug_value: z
-      .string()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 })),
+    slug_value: slugValueSchema(),
     status: z.nativeEnum(SpecimenDefinitionStatus),
     description: z.string().min(1, t("field_required")),
     derived_from_uri: z

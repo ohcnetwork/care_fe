@@ -42,6 +42,7 @@ import {
   ResourceCategoryUpdate,
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import { ResourceSubTypePicker } from "./ResourceSubTypePicker";
 
 interface ResourceCategoryFormProps {
@@ -69,10 +70,7 @@ export function ResourceCategoryForm({
 
   const formSchema = z.object({
     title: z.string().min(1, t("field_required")),
-    slug_value: z
-      .string()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 })),
+    slug_value: slugValueSchema(),
     description: z.string().optional(),
     resource_sub_type: z.nativeEnum(ResourceCategorySubType),
   });

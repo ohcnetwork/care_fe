@@ -51,6 +51,7 @@ import {
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import {
   MRP_CODE,
   PURCHASE_PRICE_CODE,
@@ -123,18 +124,7 @@ export function ChargeItemDefinitionForm({
   ) =>
     z.object({
       title: z.string().min(1, { message: t("title_is_required") }),
-      slug_value: z
-        .string()
-        .trim()
-        .min(5, {
-          message: t("character_count_validation", { min: 5, max: 25 }),
-        })
-        .max(25, {
-          message: t("character_count_validation", { min: 5, max: 25 }),
-        })
-        .regex(/^[a-z0-9_-]+$/, {
-          message: t("slug_format_message"),
-        }),
+      slug_value: slugValueSchema(),
       category: z.string().min(1, { message: t("field_required") }),
       _categoryName: z.string().optional(),
       status: z.nativeEnum(ChargeItemDefinitionStatus),

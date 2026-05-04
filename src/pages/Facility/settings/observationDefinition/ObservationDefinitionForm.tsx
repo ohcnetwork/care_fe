@@ -53,6 +53,7 @@ import {
   QualifiedRange,
   qualifiedRangeSchema,
 } from "@/types/base/qualifiedRange/qualifiedRange";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import {
   OBSERVATION_DEFINITION_CATEGORY,
   type ObservationDefinitionCreateSpec,
@@ -141,10 +142,7 @@ function ObservationDefinitionFormContent({
   const formSchema = z
     .object({
       title: z.string().min(1, t("field_required")),
-      slug_value: z
-        .string()
-        .min(5, t("character_count_validation", { min: 5, max: 25 }))
-        .max(25, t("character_count_validation", { min: 5, max: 25 })),
+      slug_value: slugValueSchema(),
       description: z.string().min(1, t("field_required")),
       status: z.nativeEnum(ObservationDefinitionStatus),
       category: z.enum(
