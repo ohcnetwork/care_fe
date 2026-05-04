@@ -364,6 +364,49 @@ const initializeResponses = (
   return responses;
 };
 
+/**
+ * Rehydrate a draft's responses after JSON deserialization.
+ *
+ * Drafts are persisted via JSON, so values that aren't natively JSON
+ * representable (e.g. `Date`) come back as strings. Each response value
+ * `type` may register its own rehydrator below to convert the raw stored
+ * value back into the runtime shape the form expects.
+ *
+ * Types not listed here pass through unchanged.
+ */
+
+type DraftValueRehydrator = (value: ResponseValue) => ResponseValue;
+
+const rehydrateDateValue: DraftValueRehydrator = (value) => {
+  const rawValue = value.value as unknown;
+  if (typeof rawValue !== "string" || !rawValue) {
+    return value;
+  }
+  const parsed = new Date(rawValue);
+  if (isNaN(parsed.getTime())) {
+    return value;
+  }
+  return { ...value, value: parsed } as ResponseValue;
+};
+
+const DRAFT_VALUE_REHYDRATORS: Partial<
+  Record<ResponseValue["type"], DraftValueRehydrator>
+> = {
+  dateTime: rehydrateDateValue,
+};
+
+const rehydrateDraftResponses = (
+  responses: QuestionnaireResponse[],
+): QuestionnaireResponse[] => {
+  return responses.map((response) => ({
+    ...response,
+    values: response.values.map((value) => {
+      const rehydrator = DRAFT_VALUE_REHYDRATORS[value.type];
+      return rehydrator ? rehydrator(value) : value;
+    }),
+  }));
+};
+
 export function QuestionnaireForm({
   questionnaireSlug,
   patientId,
@@ -600,13 +643,19 @@ export function QuestionnaireForm({
             return;
           }
 
-          // Restore the draft state
+          // Restore the draft state. Date/dateTime values are serialized as
+          // strings in the draft JSON; rehydrate them back to Date objects so
+          // downstream consumers (e.g., DatePicker, toISOString on submit)
+          // continue to work as they do for freshly entered values.
+          const restoredResponses = rehydrateDraftResponses(
+            draftQuestionnaireResponses?.responses ||
+              initializeResponses(questionnaire.questions),
+          );
+
           setQuestionnaireForms([
             {
               questionnaire,
-              responses:
-                draftQuestionnaireResponses?.responses ||
-                initializeResponses(questionnaire.questions),
+              responses: restoredResponses,
               errors: [],
             },
           ]);
