@@ -121,21 +121,25 @@ export const EncounterShow = (props: Props) => {
     updates: {
       label: t(`ENCOUNTER_TAB__updates`),
       component: <EncounterOverviewTab />,
+      shortcutId: "encounter-overview",
     },
     plots: {
       label: t(`ENCOUNTER_TAB__plots`),
       visible: canReadClinicalData,
       component: <EncounterPlotsTab />,
+      shortcutId: "plots",
     },
     observations: {
       label: t(`ENCOUNTER_TAB__observations`),
       visible: canReadClinicalData,
       component: <EncounterObservationsTab />,
+      shortcutId: "observations",
     },
     medicines: {
       label: t(`ENCOUNTER_TAB__medicines`),
       visible: canReadClinicalData,
       component: <EncounterMedicinesTab />,
+      shortcutId: "medicines",
     },
     responses: {
       label: t(`ENCOUNTER_TAB__qnr_responses`),
@@ -147,34 +151,41 @@ export const EncounterShow = (props: Props) => {
           canAccess={canAccess}
         />
       ),
+      shortcutId: "responses",
     },
     service_requests: {
       label: t(`ENCOUNTER_TAB__service_requests`),
       visible: canReadClinicalData,
       component: <EncounterServiceRequestTab />,
+      shortcutId: "service-requests",
     },
     diagnostic_reports: {
       label: t(`ENCOUNTER_TAB__diagnostic_reports`),
       visible: canReadClinicalData,
       component: <EncounterDiagnosticReportsTab />,
+      shortcutId: "diagnostic-reports",
     },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
       visible: canReadClinicalData,
       component: <EncounterFilesTab />,
+      shortcutId: "files",
     },
     notes: {
       label: t(`ENCOUNTER_TAB__notes`),
       visible: canReadClinicalData,
       component: <EncounterNotesTab />,
+      shortcutId: "notes",
     },
     devices: {
       label: t(`ENCOUNTER_TAB__devices`),
       component: <EncounterDevicesTab />,
+      shortcutId: "devices",
     },
     consents: {
       label: t(`ENCOUNTER_TAB__consents`),
       component: <EncounterConsentsTab />,
+      shortcutId: "consents",
     },
 
     ...Object.fromEntries(
@@ -243,7 +254,7 @@ export const EncounterShow = (props: Props) => {
                   <Button
                     variant="primary_gradient"
                     onClick={() => setActionsOpen(true)}
-                    className="text-base font-semibold rounded-md w-full"
+                    className="text-base font-semibold rounded-md w-full md:w-auto"
                   >
                     {t("encounter_actions")}
                     <ShortcutBadge
@@ -349,7 +360,6 @@ export const EncounterShow = (props: Props) => {
                     : undefined,
               })
             }
-            enableIndexShortcut
           />
         </div>
       </div>

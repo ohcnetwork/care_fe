@@ -1,3 +1,4 @@
+import { HeartPulse, Stethoscope } from "lucide-react";
 import { Link } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -41,6 +42,20 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
         href={`questionnaire/medication_request`}
         actionId="add-medication-request"
       />
+      <QuickAction
+        icon={<HeartPulse className="text-orange-700 size-8" />}
+        title={t("add_symptom")}
+        href={`questionnaire/symptom`}
+        actionId="add-symptoms"
+        hidden
+      />
+      <QuickAction
+        icon={<Stethoscope className="text-purple-700 size-8" />}
+        title={t("add_diagnosis")}
+        href={`questionnaire/diagnosis`}
+        actionId="add-diagnosis"
+        hidden
+      />
       <FormDialog
         subjectType="encounter"
         questionnaireTag="encounter_actions"
@@ -63,6 +78,7 @@ export function QuickAction({
   href,
   basePath,
   onClick,
+  hidden,
   ...props
 }: {
   icon: React.ReactNode;
@@ -72,9 +88,12 @@ export function QuickAction({
   props?: React.ComponentProps<"div">;
   basePath?: string;
   onClick?: () => void;
+  hidden?: boolean;
 }) {
-  const className =
-    "flex-1 flex flex-row md:flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white";
+  const className = cn(
+    "flex-1 flex flex-row md:flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white",
+    hidden && "hidden",
+  );
 
   if (href) {
     return (

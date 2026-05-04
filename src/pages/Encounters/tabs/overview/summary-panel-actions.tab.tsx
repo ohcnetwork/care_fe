@@ -83,7 +83,9 @@ export const SummaryPanelActionsTab = () => {
             >
               <NotebookPen />
               {action.label}
-              {"shortcut" in action && action.shortcut}
+              <span className="ml-auto">
+                {"shortcut" in action && action.shortcut}
+              </span>
             </Button>
           ))}
 
@@ -115,6 +117,9 @@ export const SummaryPanelActionsTab = () => {
           >
             <CheckIcon />
             {t("mark_as_completed")}
+            <span className="ml-auto">
+              <ShortcutBadge actionId="mark-as-completed" />
+            </span>
           </Button>
         </div>
       </div>
