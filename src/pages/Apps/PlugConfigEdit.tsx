@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -44,8 +44,9 @@ export function PlugConfigEdit({ slug }: Props) {
     typeof window === "undefined"
       ? null
       : new URLSearchParams(window.location.search).get("appUrl");
-  const buildTimeConfig = getBuildTimePlugConfigs().find(
-    (config) => config.slug === slug,
+  const buildTimeConfig = useMemo(
+    () => getBuildTimePlugConfigs().find((config) => config.slug === slug),
+    [slug],
   );
   const isReadOnly = !isNew && !!buildTimeConfig;
   const { t } = useTranslation();

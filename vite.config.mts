@@ -159,7 +159,15 @@ function resolveScopedAliasImport(
     ),
   ];
 
-  return candidates.find((candidate) => fs.existsSync(candidate)) ?? basePath;
+  const isFile = (candidate: string) => {
+    try {
+      return fs.statSync(candidate).isFile();
+    } catch {
+      return false;
+    }
+  };
+
+  return candidates.find(isFile) ?? basePath;
 }
 
 function rewriteLocalPluginImports(rootDir: string, id: string, code: string) {
@@ -178,7 +186,11 @@ function rewriteLocalPluginImports(rootDir: string, id: string, code: string) {
         `@/${requestPath}`,
       );
 
-      if (!resolvedImport || !fs.existsSync(resolvedImport)) {
+      if (
+        !resolvedImport ||
+        !fs.existsSync(resolvedImport) ||
+        !fs.statSync(resolvedImport).isFile()
+      ) {
         return match;
       }
 
@@ -191,6 +203,34 @@ function rewriteLocalPluginImports(rootDir: string, id: string, code: string) {
   }
 
   return rewrittenCode;
+}
+
+// When a local plugin's CSS imports `tailwindcss/*` directly (used by the
+// plugin's standalone build), strip those imports in dev. The host care_fe
+// app already provides Tailwind v4 theme/preflight/utilities and scans
+// apps/** via @source, so these imports would otherwise (a) re-run preflight
+// over the entire host page and (b) emit no utilities (the utilities.css
+// import isn't a v4 entry-point so it can't scan sources from here).
+function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
+  if (!id.endsWith(".css")) {
+    return null;
+  }
+
+  const pluginRoot = getPluginRootFromImporter(rootDir, id);
+  if (!pluginRoot) {
+    return null;
+  }
+
+  const stripped = code.replace(
+    /@import\s+["']tailwindcss(?:\/[^"']*)?["'](?:\s+layer\([^)]*\))?\s*;?/g,
+    "",
+  );
+
+  if (stripped === code) {
+    return null;
+  }
+
+  return stripped;
 }
 
 function createLocalPluginModule(rootDir: string, command: "serve" | "build") {
@@ -252,7 +292,11 @@ function localPluginDevSupport(): Plugin {
       }
     },
     transform(code: string, id: string) {
-      return rewriteLocalPluginImports(rootDir, id, code);
+      const cssStripped = stripPluginTailwindImports(rootDir, id, code);
+      const source = cssStripped ?? code;
+      const rewritten = rewriteLocalPluginImports(rootDir, id, source);
+      if (rewritten !== null) return rewritten;
+      return cssStripped;
     },
     configureServer(server: ViteDevServer) {
       const appsDir = path.join(rootDir, "apps");
@@ -465,6 +509,20 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         "@careConfig": path.resolve(__dirname, "./care.config.ts"),
         "@core": path.resolve(__dirname, "src/"),
       },
+      // Dedupe shared packages so locally-served plugin source (apps/*) resolves
+      // these from the main app's node_modules instead of the plugin's own copy.
+      // Without this, hooks break with "Should have a queue" / hook order errors
+      // due to duplicate React (and friends) instances.
+      dedupe: [
+        "react",
+        "react-dom",
+        "react-i18next",
+        "i18next",
+        "@tanstack/react-query",
+        "raviger",
+        "sonner",
+        "decimal.js",
+      ],
     },
     // optimizeDeps: {
     //   include: getPluginDependencies(),
