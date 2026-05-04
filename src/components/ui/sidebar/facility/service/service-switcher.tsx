@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, MapPinIcon } from "lucide-react";
+import { HeartPulse, Loader2 } from "lucide-react";
 import { navigate, usePath } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +31,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { TooltipComponent } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import useCurrentService from "@/pages/Facility/services/utils/useCurrentService";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
@@ -50,19 +51,6 @@ export function ServiceSwitcher() {
     setSelectedService(service as HealthcareServiceReadSpec);
   }, [service]);
 
-  if (state === "collapsed") {
-    return (
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => navigate(fallbackUrl)}
-        className="w-8 h-8"
-      >
-        <CareIcon icon="l-home-alt" />
-      </Button>
-    );
-  }
-
   return (
     <Fragment>
       <ServiceSelectorDialog
@@ -73,33 +61,51 @@ export function ServiceSwitcher() {
         setOpen={setOpenDialog}
       />
       <div className="flex flex-col items-start gap-4">
-        <Button variant="ghost" onClick={() => navigate(fallbackUrl)}>
-          <CareIcon icon="l-arrow-left" />
-          <span className="underline underline-offset-2">{t("home")}</span>
-        </Button>
-
-        <div className="w-full px-2">
+        {state === "collapsed" ? (
           <Button
             variant="ghost"
-            className="w-full flex items-center justify-between gap-3 py-6 px-2 rounded-md bg-white border border-gray-200"
+            size="icon"
+            onClick={() => navigate(fallbackUrl)}
+            className="w-8 h-8"
+          >
+            <CareIcon icon="l-home-alt" />
+          </Button>
+        ) : (
+          <Button variant="ghost" onClick={() => navigate(fallbackUrl)}>
+            <CareIcon icon="l-arrow-left" />
+            <span className="underline underline-offset-2">{t("home")}</span>
+          </Button>
+        )}
+
+        <div className={cn("w-full", state === "expanded" ? "px-2" : "px-0")}>
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full flex items-center justify-between gap-3 rounded-md bg-white border border-gray-200 px-2",
+              state === "expanded" && "py-6",
+            )}
             onClick={() => setOpenDialog(true)}
           >
             <div className="flex min-w-0 items-center gap-2">
-              <MapPinIcon className="size-5 text-green-600" />
-              <div className="min-w-0 flex-1">
+              <HeartPulse className="size-5 text-green-600" />
+              <div
+                className={cn(
+                  state === "collapsed" ? "hidden" : "min-w-0 flex-1",
+                )}
+              >
                 <TooltipComponent content={selectedService?.name}>
                   <div className="flex min-w-0 flex-col items-start">
                     <span className="text-xs text-gray-500">
                       {t("current_service")}
                     </span>
-                    <span className="w-full truncate text-sm font-medium text-gray-900">
+                    <span className="truncate text-sm font-medium text-gray-900">
                       {selectedService?.name}
                     </span>
                   </div>
                 </TooltipComponent>
               </div>
             </div>
-            <CareIcon icon="l-sort" />
+            {state == "expanded" && <CareIcon icon="l-sort" />}
           </Button>
           <Separator className="mt-4" />
         </div>
