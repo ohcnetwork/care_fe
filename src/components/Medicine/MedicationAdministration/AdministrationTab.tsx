@@ -34,6 +34,7 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { DiscontinueConfirmDialog } from "./DiscontinueConfirmDialog";
 import { GroupedMedicationRow } from "./GroupedMedicationRow";
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
@@ -123,8 +124,11 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { facilityId } = useCurrentFacilitySilently();
+  const { selectedEncounter: encounter } = useEncounter();
+  const currentDate = encounter?.period?.end
+    ? new Date(encounter.period.end)
+    : new Date();
 
-  const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [showStopped, setShowStopped] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
