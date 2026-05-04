@@ -43,7 +43,7 @@ test.describe("Charge Item Definition Creation", () => {
     // Title required
     await expect(page.getByText(/title.*required/i)).toBeVisible();
     // Slug required/length
-    await expect(page.getByText(/slug.*atleast 5.*atmost 25/i)).toBeVisible();
+    await expect(page.getByText(/slug.*atleast 5.*atmost 36/i)).toBeVisible();
     // Base Price required/invalid
     await expect(page.getByText(/base price.*required/i)).toBeVisible();
   });

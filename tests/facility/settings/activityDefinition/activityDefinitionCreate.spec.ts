@@ -56,7 +56,7 @@ test.describe("activity definition form", () => {
     await slugInput.click();
     await slugInput.fill("abc");
     await expect(getFieldErrorMessage(slugInput)).toContainText(
-      /atleast 5.*atmost 25/i,
+      /atleast 5.*atmost 36/i,
     );
   });
 

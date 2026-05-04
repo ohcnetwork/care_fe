@@ -49,13 +49,13 @@ test.describe("Activity Definition Resource Category List", () => {
 
     const slugInput = page.getByPlaceholder(/enter category slug/i);
     await expect(getFieldErrorMessage(slugInput)).toContainText(
-      /atleast 5.*atmost 25/i,
+      /atleast 5.*atmost 36/i,
     );
 
     await slugInput.click();
     await slugInput.fill("abc");
     await expect(getFieldErrorMessage(slugInput)).toContainText(
-      /atleast 5.*atmost 25/i,
+      /atleast 5.*atmost 36/i,
     );
   });
 
