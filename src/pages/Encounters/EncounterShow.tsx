@@ -15,7 +15,6 @@ import { Card } from "@/components/ui/card";
 import { NavTabs } from "@/components/ui/nav-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
 import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
@@ -38,7 +37,7 @@ import {
 import { PatientRead } from "@/types/emr/patient/patient";
 import { LocationTypeIcons } from "@/types/location/location";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { entriesOf } from "@/Utils/utils";
+import { entriesOf, goBack } from "@/Utils/utils";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -79,7 +78,6 @@ export const EncounterShow = (props: Props) => {
 
   const { t } = useTranslation();
   const pluginTabs = useCareAppEncounterTabs();
-  const { goBack } = useAppHistory();
   const showMoreAfterIndex = useBreakpoints({
     default: 2,
     xs: 2,
