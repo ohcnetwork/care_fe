@@ -2,7 +2,7 @@ import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Hash, MoreVertical } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -109,10 +109,23 @@ export function AccountShow({
 }) {
   const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [paymentSheet, setPaymentSheet] = useState<{
+  const [qParams, setQueryParams] = useQueryParams<{ payment?: string }>();
+  const paymentSheet = {
+    isOpen: qParams.payment === "advance" || qParams.payment === "credit",
+    isCreditNote: qParams.payment === "credit",
+  };
+  const setPaymentSheet = (next: {
     isOpen: boolean;
     isCreditNote: boolean;
-  }>({ isOpen: false, isCreditNote: false });
+  }) => {
+    const { payment: _payment, ...rest } = qParams;
+    setQueryParams(
+      next.isOpen
+        ? { ...rest, payment: next.isCreditNote ? "credit" : "advance" }
+        : rest,
+      { replace: true },
+    );
+  };
   const [transferPaymentOpen, setTransferPaymentOpen] = useState(false);
   const queryClient = useQueryClient();
   const [closeAccountStatus, setCloseAccountStatus] = useState<{

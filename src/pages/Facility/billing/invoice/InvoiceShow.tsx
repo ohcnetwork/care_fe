@@ -100,7 +100,16 @@ export function InvoiceShow({
   invoiceId: string;
 }) {
   const { t } = useTranslation();
-  const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
+  const [qParams, setQueryParams] = useQueryParams<{
+    payment?: string;
+    sourceUrl?: string;
+    relatedInvoices?: string;
+  }>();
+  const isPaymentSheetOpen = qParams.payment === "open";
+  const setIsPaymentSheetOpen = (open: boolean) => {
+    const { payment: _payment, ...rest } = qParams;
+    setQueryParams(open ? { ...rest, payment: "open" } : rest, {});
+  };
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedChargeItems, setSelectedChargeItems] = useState<
     ChargeItemRead[]
@@ -338,7 +347,7 @@ export function InvoiceShow({
     invoice?.status !== InvoiceStatus.entered_in_error &&
     invoice?.status !== InvoiceStatus.cancelled;
 
-  const [{ sourceUrl, relatedInvoices }] = useQueryParams();
+  const { sourceUrl, relatedInvoices } = qParams;
 
   const alertButtonText = (() => {
     if (sourceUrl?.includes("medication_return")) {

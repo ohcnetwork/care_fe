@@ -102,7 +102,7 @@ import {
   ReceiptIcon,
   SendIcon,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -298,7 +298,14 @@ function InvoiceCard({
 }: InvoiceCardProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [paymentSheetOpen, setPaymentSheetOpen] = useState(false);
+  const [qParams, setQueryParams] = useQueryParams<{ payment?: string }>();
+  const paymentSheetOpen = qParams.payment === invoice.id;
+  const setPaymentSheetOpen = (open: boolean) => {
+    const { payment: _payment, ...rest } = qParams;
+    setQueryParams(open ? { ...rest, payment: invoice.id } : rest, {
+      replace: true,
+    });
+  };
   const [cancelInvoiceDialogOpen, setCancelInvoiceDialogOpen] = useState(false);
   const [cancelPaymentId, setCancelPaymentId] = useState<string | null>(null);
 
