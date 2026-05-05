@@ -1,4 +1,5 @@
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePo
 import {
   getQueueTokenStatus,
   QUEUE_TOKEN_STATUS_COLORS,
+  QueueTokenStatus,
   renderTokenNumber,
   TokenRead,
   TokenStatus,
@@ -33,7 +35,6 @@ import {
   BringToFront,
   Check,
   CircleDot,
-  ExternalLink,
   Megaphone,
   MoreHorizontal,
   OctagonX,
@@ -315,27 +316,59 @@ function OngoingQueueTokenCardInner({
       <ContextMenuTrigger>
         <div
           className={cn(
-            "relative flex flex-col md:flex-row gap-2 md:gap-3 items-stretch md:items-center justify-between p-3 bg-gray-50 rounded-lg shadow",
+            "flex flex-row justify-between items-center gap-2 p-3 bg-gray-50 rounded-lg shadow",
             token.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
           )}
         >
-          <div className="flex items-center justify-between gap-2 md:w-auto w-full min-w-0">
-            <Link
-              basePath="/"
-              href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
-              className="font-semibold hover:underline transition-colors min-w-0"
-            >
+          <div className="flex flex-row justify-between items-center w-full">
+            <div className="flex flex-col items-start gap-2 md:w-auto w-full min-w-0">
               <span className="font-semibold flex items-center gap-1 min-w-0">
                 <span className="truncate">
                   {token.patient
                     ? token.patient.name
                     : renderTokenNumber(token)}
                 </span>
-                <ExternalLink className="size-4 shrink-0" />
               </span>
-            </Link>
-            {/* Kebab (visible on all sizes as primary action trigger) */}
+              {token.patient && (
+                <PatientTagsDisplay
+                  patient={token.patient}
+                  className="text-xs flex-1"
+                  showLabel={false}
+                />
+              )}
+            </div>
+            <div className="flex md:flex-row flex-col w-full md:w-auto items-center gap-2 md:gap-3">
+              <Button variant="outline" asChild size="sm">
+                <Link
+                  basePath="/"
+                  href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+                >
+                  {t("encounter")}
+                </Link>
+              </Button>
+              <div className="flex gap-2 items-center justify-center py-1 px-2 bg-gray-100 border border-gray-200 rounded-lg whitespace-nowrap">
+                {getQueueTokenStatus(token) !== QueueTokenStatus.WAITING && (
+                  <>
+                    <Badge
+                      variant={
+                        QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]
+                      }
+                      className="h-2 w-2 rounded-full p-0 border"
+                    />
+                    <span className="text-sm sm:text-base font-medium text-black">
+                      {t(`token_status__${getQueueTokenStatus(token)}`)}:
+                    </span>
+                  </>
+                )}
+
+                <span className="text-base sm:text-lg font-bold text-black">
+                  {renderTokenNumber(token)}
+                </span>
+              </div>
+              {options}
+              {/* Kebab (visible on all sizes as primary action trigger) */}
+              {/* <div className="hidden md:block w-px self-stretch -my-6 bg-gray-200" />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label={t("actions")}>
@@ -347,31 +380,21 @@ function OngoingQueueTokenCardInner({
                   renderItem(item, DropdownMenuItem, DropdownMenuSeparator),
                 )}
               </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div className="flex w-full md:w-auto items-center flex-wrap gap-2 md:gap-3">
-            <Button variant="outline" asChild size="sm">
-              <Link
-                basePath="/"
-                href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
-              >
-                {t("encounter")}
-              </Link>
-            </Button>
-            <div className="flex gap-2 items-center justify-center p-1 bg-gray-100 border border-gray-200 rounded-lg">
-              <Badge
-                variant={QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]}
-                className="h-2 w-2 rounded-full p-0 border"
-              />
-              <span className="text-sm sm:text-base font-medium text-black">
-                {t(`token_status__${getQueueTokenStatus(token)}`)}:
-              </span>
-              <span className="text-base sm:text-lg font-bold text-black">
-                {renderTokenNumber(token)}
-              </span>
+            </DropdownMenu> */}
             </div>
-            {options}
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label={t("actions")}>
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[220px]">
+              {actions.map((item) =>
+                renderItem(item, DropdownMenuItem, DropdownMenuSeparator),
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent collisionPadding={8} avoidCollisions>
