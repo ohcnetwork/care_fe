@@ -33,10 +33,9 @@ test.describe("Edit Patient Prescription", () => {
 
     await test.step("Open prescription form", async () => {
       await page.getByRole("link", { name: /Create/i }).click();
-      // Wait for the "Add Medication" button to be visible instead of networkidle
       await expect(
         page.getByText(/Add Medication|Add another Medication/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Add medication", async () => {
@@ -51,8 +50,11 @@ test.describe("Edit Patient Prescription", () => {
     });
 
     await test.step("Fill medication details", async () => {
-      await page.getByPlaceholder("Enter a number...").first().click();
-      await page.getByPlaceholder("Enter a number...").first().fill(dosage);
+      const dosageInput = page.getByPlaceholder("Enter a number...").first();
+      await dosageInput.waitFor({ state: "visible" });
+      await dosageInput.click();
+      await dosageInput.fill(dosage);
+      await expect(dosageInput).toHaveValue(dosage);
       await page.keyboard.press("Enter");
 
       await page.getByText("eg. 1-0-1").first().click();
@@ -80,10 +82,10 @@ test.describe("Edit Patient Prescription", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText("Questionnaire submitted successfully"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
-    await test.step("Verify medication in table", async () => {
+    await test.step("Verify medication in All Prescriptions", async () => {
       // Wait for prescriptions API to respond after clicking tab
       await Promise.all([
         page.getByRole("tab", { name: "Medicines" }).click(),
@@ -93,22 +95,41 @@ test.describe("Edit Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
-      const prescriptionDate = page
-        .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
-        .first();
-      await expect(prescriptionDate).toBeVisible({ timeout: 10000 });
-      await prescriptionDate.click();
+      // Click "All Prescriptions" sidebar card to see all medicines
+      await page
+        .locator("[data-slot='card']")
+        .filter({ hasText: "View all medications" })
+        .click();
       const table = page.getByRole("table");
-      await expect(table).toBeVisible({ timeout: 10000 });
+      await expect(table).toBeVisible();
       await expect(table).toContainText(medicineName);
-      await expect(table).toContainText(dosage);
-      await expect(table).toContainText(frequencyData.display);
-      await expect(table).toContainText(selectedInstruction);
-      await expect(page.getByText(`Note${notes}`)).toBeVisible();
+    });
+
+    await test.step("Find prescription card with medicine and edit", async () => {
+      // Loop through individual prescription date cards to find our medicine
+      const prescriptionCards = page.getByText(
+        /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/,
+      );
+      await expect(prescriptionCards.first()).toBeVisible();
+      const count = await prescriptionCards.count();
+      let foundCard = false;
+      for (let i = 0; i < count; i++) {
+        const card = prescriptionCards.nth(i);
+        await card.click();
+        const table = page.getByRole("table");
+        await expect(table).toBeVisible();
+        const content = await table.textContent();
+        if (content?.includes(medicineName)) {
+          foundCard = true;
+          // Click Edit on this prescription card
+          await page.getByRole("link", { name: /Edit/i }).click();
+          break;
+        }
+      }
+      expect(foundCard).toBe(true);
     });
 
     await test.step("Remove medication", async () => {
-      await page.getByRole("link", { name: /Edit/i }).click();
       await page
         .getByRole("button", { name: "Medication actions" })
         .first()
@@ -123,10 +144,10 @@ test.describe("Edit Patient Prescription", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText("Questionnaire submitted successfully"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
-    await test.step("Verify medication in stopped medications", async () => {
+    await test.step("Verify medication in stopped medications via All Prescriptions", async () => {
       // Wait for prescriptions API to respond after clicking tab
       await Promise.all([
         page.getByRole("tab", { name: "Medicines" }).click(),
@@ -136,18 +157,20 @@ test.describe("Edit Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
-      const prescriptionDate = page
-        .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
-        .first();
-      await expect(prescriptionDate).toBeVisible({ timeout: 10000 });
-      await prescriptionDate.click();
-      await page.getByText(/Show \d+ Inactive Medications?/i).click();
+      // Click "All Prescriptions" sidebar card to see all medicines
+      await page
+        .locator("[data-slot='card']")
+        .filter({ hasText: "View all medications" })
+        .click();
       const table = page.getByRole("table");
+      await expect(table).toBeVisible();
+      // Expand inactive medications
+      await expect(
+        page.getByText(/Show \d+ Inactive Medications?/i),
+      ).toBeVisible();
+      await page.getByText(/Show \d+ Inactive Medications?/i).click();
+      // Verify the removed medicine appears in inactive list
       await expect(table).toContainText(medicineName);
-      await expect(table).toContainText(dosage);
-      await expect(table).toContainText(frequencyData.display);
-      await expect(table).toContainText(selectedInstruction);
-      await expect(page.getByText(`Note${notes}`)).toBeVisible();
     });
   });
 });

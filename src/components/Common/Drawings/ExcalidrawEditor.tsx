@@ -31,11 +31,10 @@ import { Input } from "@/components/ui/input";
 
 import Loading from "@/components/Common/Loading";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
+import metaArtifactApi from "@/types/metaArtifact/metaArtifactApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import metaArtifactApi from "@/types/metaArtifact/metaArtifactApi";
+import { goBack } from "@/Utils/utils";
 
 type Props = {
   associatingId: string;
@@ -57,7 +56,6 @@ export default function ExcalidrawEditor({
   const [name, setName] = useState("");
   const [isDirty, setIsDirty] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const { goBack } = useAppHistory();
 
   const { mutate: saveDrawing } = useMutation({
     mutationFn: mutate(metaArtifactApi.upsert),

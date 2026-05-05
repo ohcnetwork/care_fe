@@ -98,9 +98,11 @@ export function DispensedItemsSheet({
                         </TableCell>
                         <TableCell>
                           {round(item.charge_item.quantity)}{" "}
+                          {/* Unit label from first instruction (unit is consistent across instructions) */}
                           {
-                            item.dosage_instruction?.[0]?.dose_and_rate
-                              ?.dose_quantity?.unit?.display
+                            item.dosage_instruction?.find(
+                              (di) => di.dose_and_rate?.dose_quantity?.unit,
+                            )?.dose_and_rate?.dose_quantity?.unit?.display
                           }
                         </TableCell>
                         <TableCell>
