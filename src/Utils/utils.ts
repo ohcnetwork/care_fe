@@ -10,6 +10,7 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
+import { navigate } from "raviger";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -436,6 +437,14 @@ export function deepFreeze<T>(obj: T): T {
 
   Object.freeze(obj);
   Object.values(obj).forEach(deepFreeze);
-
   return obj;
 }
+
+export const goBack = (fallback?: string) => {
+  if (window.history.length > 1) {
+    return history.back();
+  } else if (fallback) {
+    return navigate(fallback);
+  }
+  history.back();
+};

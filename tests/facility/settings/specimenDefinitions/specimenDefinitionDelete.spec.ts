@@ -72,7 +72,9 @@ test.describe("Specimen Definitions Delete", () => {
 
     // Filter by retired status
     await page.getByRole("combobox").filter({ hasText: "Status" }).click();
-    await page.getByRole("option", { name: DELETED_STATUS }).click();
+    await page
+      .getByRole("option", { name: DELETED_STATUS, exact: true })
+      .click();
 
     // Wait for filter to apply
     await expect(page).toHaveURL(/status=retired/);
@@ -85,6 +87,6 @@ test.describe("Specimen Definitions Delete", () => {
 
     // Verify the definition exists with retired status
     await expect(page.getByText(definitionTitle)).toBeVisible();
-    await expect(page.getByText(DELETED_STATUS)).toBeVisible();
+    await expect(page.getByText(DELETED_STATUS, { exact: true })).toBeVisible();
   });
 });

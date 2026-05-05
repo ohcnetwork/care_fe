@@ -24,7 +24,10 @@ import UserSelector from "@/components/Common/UserSelector";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { RoleBase } from "@/types/emr/role/role";
+import {
+  RoleBase,
+  getRoleContextForOrganizationType,
+} from "@/types/emr/role/role";
 import organizationApi from "@/types/organization/organizationApi";
 import { UserReadMinimal } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
@@ -62,6 +65,14 @@ export default function LinkUserSheet({
       setSelectedUser(preSelectedUser);
     }
   }, [preSelectedUser]);
+
+  const { data: organization } = useQuery({
+    queryKey: ["organization", organizationId],
+    queryFn: query(organizationApi.get, {
+      pathParams: { id: organizationId },
+    }),
+    enabled: !!organizationId,
+  });
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
@@ -188,7 +199,14 @@ export default function LinkUserSheet({
                   {t("select_role")}
                 </Label>
                 <div>
-                  <RoleSelect value={selectedRole} onChange={setSelectedRole} />
+                  <RoleSelect
+                    value={selectedRole}
+                    onChange={setSelectedRole}
+                    context={getRoleContextForOrganizationType(
+                      organization?.org_type,
+                    )}
+                    disabled={!organization}
+                  />
                 </div>
               </div>
               <Button
