@@ -19,7 +19,7 @@ test.describe("Manage care team for an encounter", () => {
   let selectedRole: string;
   let selectedUsername: string;
 
-  const TEST_USERNAMES = ["care-admin", "administrator_2_0"];
+  const TEST_USERNAMES = ["care-doctor", "admin"];
   const TEST_ROLES = [
     "Primary healthcare service",
     "Acupuncturist",
@@ -216,8 +216,12 @@ test.describe("Manage care team for an encounter", () => {
       await openCareTeamDialog(page);
 
       const dialog = page.getByRole("dialog", { name: "Manage Care Team" });
-      await expect(dialog.getByText(selectedUsername)).not.toBeVisible();
-      await expect(dialog.getByText(selectedRole)).not.toBeVisible();
+      await expect(
+        dialog.getByText(selectedUsername, { exact: true }),
+      ).not.toBeVisible();
+      await expect(
+        dialog.getByText(selectedRole, { exact: true }),
+      ).not.toBeVisible();
     });
   });
 
