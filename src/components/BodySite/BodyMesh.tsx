@@ -1,5 +1,6 @@
+import { Html } from "@react-three/drei";
 import { ThreeEvent } from "@react-three/fiber";
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import * as THREE from "three";
 
 import { BodyRegion } from "@/components/BodySite/bodySiteRegions";
@@ -7,17 +8,32 @@ import { BodyRegion } from "@/components/BodySite/bodySiteRegions";
 interface BodyMeshProps {
   region: BodyRegion;
   selected: boolean;
+  highlighted: boolean;
+  focused: boolean;
   onSelect: (region: BodyRegion) => void;
 }
 
-const BASE_COLOR = "#d8b4a0";
+const BASE_COLOR = "#e6c2ad";
 const HOVER_COLOR = "#f59e0b";
 const SELECTED_COLOR = "#0ea5e9";
+const HIGHLIGHTED_COLOR = "#34d399";
+const FOCUSED_COLOR = "#a78bfa";
 
-export function BodyMesh({ region, selected, onSelect }: BodyMeshProps) {
+export const BodyMesh = forwardRef<THREE.Mesh, BodyMeshProps>(function BodyMesh(
+  { region, selected, highlighted, focused, onSelect },
+  ref,
+) {
   const [hovered, setHovered] = useState(false);
 
-  const color = selected ? SELECTED_COLOR : hovered ? HOVER_COLOR : BASE_COLOR;
+  const color = selected
+    ? SELECTED_COLOR
+    : focused
+      ? FOCUSED_COLOR
+      : hovered
+        ? HOVER_COLOR
+        : highlighted
+          ? HIGHLIGHTED_COLOR
+          : BASE_COLOR;
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
@@ -44,7 +60,11 @@ export function BodyMesh({ region, selected, onSelect }: BodyMeshProps) {
   const geometry = (() => {
     switch (region.shape.kind) {
       case "sphere":
-        return <sphereGeometry args={[region.shape.radius, 32, 32]} />;
+        return (
+          <sphereGeometry
+            args={[region.shape.radius, region.shape.widthSegments ?? 32, 32]}
+          />
+        );
       case "box":
         return <boxGeometry args={region.shape.size} />;
       case "cylinder":
@@ -67,8 +87,11 @@ export function BodyMesh({ region, selected, onSelect }: BodyMeshProps) {
     }
   })();
 
+  const showLabel = hovered || focused;
+
   return (
     <mesh
+      ref={ref}
       position={region.position}
       rotation={rotation}
       onClick={handleClick}
@@ -76,15 +99,31 @@ export function BodyMesh({ region, selected, onSelect }: BodyMeshProps) {
       onPointerOut={handlePointerOut}
       castShadow
       receiveShadow
+      userData={{ regionId: region.id }}
     >
       {geometry}
       <meshStandardMaterial
         color={color}
-        roughness={0.6}
+        roughness={0.55}
         metalness={0.05}
-        emissive={selected ? SELECTED_COLOR : "#000000"}
-        emissiveIntensity={selected ? 0.3 : 0}
+        emissive={selected || highlighted || focused ? color : "#000000"}
+        emissiveIntensity={selected ? 0.35 : highlighted || focused ? 0.2 : 0}
+        transparent={highlighted && !selected}
+        opacity={highlighted && !selected ? 0.95 : 1}
       />
+      {showLabel && (
+        <Html
+          position={[0, 0, 0]}
+          center
+          distanceFactor={6}
+          style={{ pointerEvents: "none" }}
+        >
+          <div className="rounded bg-black/80 px-2 py-1 text-[10px] text-white whitespace-nowrap shadow-lg">
+            <div className="font-medium">{region.code.display}</div>
+            <div className="text-[9px] opacity-70">{region.code.code}</div>
+          </div>
+        </Html>
+      )}
     </mesh>
   );
-}
+});
