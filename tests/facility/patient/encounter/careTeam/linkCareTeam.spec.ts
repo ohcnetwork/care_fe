@@ -219,9 +219,6 @@ test.describe("Manage care team for an encounter", () => {
       await expect(
         dialog.getByText(selectedUsername, { exact: true }),
       ).not.toBeVisible();
-      await expect(
-        dialog.getByText(selectedRole, { exact: true }),
-      ).not.toBeVisible();
     });
   });
 

@@ -47,6 +47,7 @@ test.describe("Resource Request Creation", () => {
         .getByRole("combobox")
         .filter({ hasText: "Start typing to search..." })
         .click();
+      await page.getByPlaceholder("Search option...").fill("fac");
       await page.getByRole("option").first().click();
       await page
         .getByRole("textbox", { name: "Name of Contact Person at" })

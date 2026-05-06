@@ -44,6 +44,7 @@ test("ensure facility org prerequisites", async () => {
   const requiredUsers = [
     { username: "care-fac-admin", roleName: "Facility Admin" },
     { username: "care-nurse", roleName: "Nurse" },
+    { username: "care-staff", roleName: "Staff" },
   ];
 
   // Get available roles
