@@ -26,6 +26,7 @@ import {
   findRegionByCode,
   searchRegions,
 } from "@/components/BodySite/bodySiteRegions";
+import KeyboardShortcuts from "@/components/BodySite/KeyboardShortcuts";
 import { useWebGLSupport } from "@/components/BodySite/useWebGLSupport";
 import { CameraView } from "@/components/BodySite/views";
 
@@ -389,6 +390,7 @@ export default function BodySiteSelector3D(props: Props) {
             </Button>
           </div>
         )}
+        <KeyboardShortcuts />
       </div>
 
       {/* Search results dropdown */}
