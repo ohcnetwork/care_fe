@@ -78,7 +78,7 @@ export function PlugConfigEdit({ slug }: Props) {
     queryKey: ["app-store-app", appUrl],
     queryFn: ({ signal }) =>
       fetchAppStoreJson<AppStoreAppDefinition>(appUrl!, signal),
-    enabled: isNew && Boolean(appUrl),
+    enabled: Boolean(appUrl),
   });
 
   const [config, setConfig] = useState({
@@ -104,40 +104,79 @@ export function PlugConfigEdit({ slug }: Props) {
   }, [buildTimeConfig, existingConfig]);
 
   useEffect(() => {
-    if (!appDefinition || !isNew) {
+    if (!appDefinition) {
       return;
     }
 
-    const [firstOption] = getCatalogSetupOptions(appDefinition);
+    if (!isNew && !existingConfig) {
+      return;
+    }
+
+    const setupOptions = getCatalogSetupOptions(appDefinition);
+    const [firstOption] = setupOptions;
     if (!firstOption) {
       return;
     }
 
-    setSelectedSetupId((current) => current ?? firstOption.id);
-    setAppBaseUrl(
-      (current) => current || firstOption.appBaseUrl?.defaultValue || "",
-    );
+    // When editing, match the existing config to find the correct preset
+    let matchedOptionId: string | undefined;
+    if (!isNew && existingConfig?.meta?.config) {
+      const existingCfg = existingConfig.meta.config as Record<string, unknown>;
+      const matched = setupOptions.find((option) => {
+        if (option.id === "raw-setup") return false;
+        const presetCfg = (option.config ?? {}) as Record<string, unknown>;
+        const presetKeys = Object.keys(presetCfg);
+        if (presetKeys.length === 0) return false;
+        return presetKeys.every((key) => existingCfg[key] === presetCfg[key]);
+      });
+      matchedOptionId = matched?.id;
+    }
+
+    setSelectedSetupId(matchedOptionId ?? "raw-setup");
+
+    const activeOption =
+      setupOptions.find((o) => o.id === matchedOptionId) ?? firstOption;
+
+    setAppBaseUrl((current) => {
+      if (current) return current;
+      if (!isNew && existingConfig?.meta?.url) {
+        const existingUrl = String(existingConfig.meta.url);
+        const suffixIndex = existingUrl.lastIndexOf("/assets/remoteEntry");
+        return suffixIndex > 0
+          ? existingUrl.slice(0, suffixIndex)
+          : existingUrl;
+      }
+      return activeOption.appBaseUrl?.defaultValue || "";
+    });
     setEnvironmentValues((current) => {
       if (Object.keys(current).length > 0) {
         return current;
       }
 
       const nextEnvironmentFields = getGroupedEnvironmentFields(
-        firstOption.environments,
+        activeOption.environments,
       );
+
+      const existingEnv =
+        !isNew && existingConfig?.meta?.config
+          ? (existingConfig.meta.config as Record<string, string>)
+          : {};
 
       return Object.fromEntries(
         [
           ...nextEnvironmentFields.mandatory,
           ...nextEnvironmentFields.defaults,
           ...nextEnvironmentFields.optional,
-        ].map((field) => [field.key, field.defaultValue ?? ""]),
+        ].map((field) => [
+          field.key,
+          existingEnv[field.key] ?? field.defaultValue ?? "",
+        ]),
       );
     });
-  }, [appDefinition, isNew]);
+  }, [appDefinition, isNew, existingConfig]);
 
   useEffect(() => {
-    if (!appDefinition || !selectedSetupId || !isNew) {
+    if (!appDefinition || !selectedSetupId) {
       return;
     }
 
@@ -156,7 +195,7 @@ export function PlugConfigEdit({ slug }: Props) {
     );
 
     setConfig({
-      slug: nextConfig.slug,
+      slug: isNew ? nextConfig.slug : slug,
       meta: JSON.stringify(nextConfig.meta, null, 2),
     });
     setHealthStatus("idle");
@@ -168,6 +207,7 @@ export function PlugConfigEdit({ slug }: Props) {
     environmentValues,
     customEnvironmentRows,
     isNew,
+    slug,
   ]);
 
   const { mutate: upsertConfig } = useMutation({
@@ -230,11 +270,6 @@ export function PlugConfigEdit({ slug }: Props) {
 
     if (!request) {
       setHealthStatus("success");
-      setHealthMessage(
-        t("health_check_not_required", {
-          defaultValue: "This plug does not require a health check.",
-        }),
-      );
       return;
     }
 
@@ -248,29 +283,15 @@ export function PlugConfigEdit({ slug }: Props) {
 
       if (response.status !== request.successStatus) {
         setHealthStatus("failed");
-        setHealthMessage(
-          t("health_check_failed", {
-            defaultValue:
-              "Health check failed. Verify the API URL and server-side deployment before enabling the plug.",
-          }),
-        );
+        setHealthMessage(t("health_check_failed"));
         return;
       }
 
       setHealthStatus("success");
-      setHealthMessage(
-        t("health_check_passed", {
-          defaultValue: "Health check passed. The plug can now be enabled.",
-        }),
-      );
+      setHealthMessage(t("health_check_passed"));
     } catch {
       setHealthStatus("failed");
-      setHealthMessage(
-        t("health_check_unreachable", {
-          defaultValue:
-            "Health check could not reach the configured API. Verify networking and CORS before enabling the plug.",
-        }),
-      );
+      setHealthMessage(t("health_check_unreachable_message"));
     }
   };
 
@@ -288,10 +309,17 @@ export function PlugConfigEdit({ slug }: Props) {
     ? getGroupedEnvironmentFields(selectedSetup.environments)
     : undefined;
   const requiresHealthCheck = Boolean(appDefinition?.healthCheck?.url);
-  const canSave = !requiresHealthCheck || healthStatus === "success";
+  const hasMissingMandatory = groupedEnvironmentFields
+    ? groupedEnvironmentFields.mandatory.some(
+        (field) => !environmentValues[field.key]?.trim(),
+      )
+    : false;
+  const canSave =
+    !hasMissingMandatory &&
+    (!requiresHealthCheck || healthStatus === "success");
 
   return (
-    <div className="p-4">
+    <div className="mx-auto max-w-5xl">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold">
@@ -315,7 +343,7 @@ export function PlugConfigEdit({ slug }: Props) {
         )}
       </div>
 
-      {isNew && appDefinition && (
+      {appDefinition && (
         <Card className="mb-4">
           <CardHeader>
             <CardTitle>{appDefinition.name}</CardTitle>
@@ -523,59 +551,45 @@ export function PlugConfigEdit({ slug }: Props) {
                 })}
               </p>
             )}
+            {requiresHealthCheck && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex gap-2 items-center">
+                    {t("server_health_check")}{" "}
+                    {healthStatus === "success" && (
+                      <Badge variant="primary">{t("healthy")}</Badge>
+                    )}
+                    {healthStatus === "failed" && (
+                      <Badge variant="destructive">{t("unhealthy")}</Badge>
+                    )}
+                  </CardTitle>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t("server_health_check", {
-                    defaultValue: "Server-side API health check",
-                  })}
-                </CardTitle>
-                <CardDescription>
-                  {requiresHealthCheck
-                    ? t("server_health_check_description", {
-                        defaultValue:
-                          "Verify the associated server-side APIs before enabling the plug.",
-                      })
-                    : t("server_health_check_not_configured", {
-                        defaultValue:
-                          "This plug definition does not declare a health-check endpoint.",
-                      })}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-wrap items-center gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleHealthCheck}
-                  disabled={healthStatus === "checking"}
-                >
-                  {healthStatus === "checking"
-                    ? t("checking", { defaultValue: "Checking" })
-                    : t("run_health_check", {
-                        defaultValue: "Run health check",
-                      })}
-                </Button>
-                {healthStatus === "success" && (
-                  <Badge variant="secondary">
-                    {t("healthy", { defaultValue: "Healthy" })}
-                  </Badge>
-                )}
-                {healthStatus === "failed" && (
-                  <Badge variant="outline">
-                    {t("unhealthy", { defaultValue: "Unhealthy" })}
-                  </Badge>
-                )}
-                {healthMessage && (
-                  <p className="text-sm text-gray-600">{healthMessage}</p>
-                )}
-              </CardContent>
-            </Card>
+                  <CardDescription>
+                    {t("server_health_check_not_configured")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleHealthCheck}
+                    disabled={healthStatus === "checking"}
+                  >
+                    {healthStatus === "checking"
+                      ? t("checking")
+                      : t("run_health_check")}
+                  </Button>
+                  {healthMessage && (
+                    <div className="text-sm text-gray-600">{healthMessage}</div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </CardContent>
         </Card>
       )}
 
-      {isNew && appDefinitionError && (
+      {appDefinitionError && (
         <Card className="mb-4 border-red-200">
           <CardHeader>
             <CardTitle>
@@ -601,7 +615,7 @@ export function PlugConfigEdit({ slug }: Props) {
             onChange={(e) =>
               setConfig((prev) => ({ ...prev, slug: e.target.value }))
             }
-            readOnly={isReadOnly}
+            readOnly={isReadOnly || !isNew}
             required
           />
         </div>
