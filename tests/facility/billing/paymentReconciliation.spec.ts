@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -13,62 +12,7 @@ const paymentMethods = [
   "Direct Deposit",
 ];
 
-const LOCATION_NAME = "Bio-Chemistry Lab";
-
-async function ensureLocationHasOrganization(facilityId: string) {
-  const apiUrl = getApiUrl();
-  const headers = getApiHeaders();
-
-  // Get the Bio-Chemistry Lab location
-  const locRes = await fetch(
-    `${apiUrl}/api/v1/facility/${facilityId}/location/?name=${encodeURIComponent(LOCATION_NAME)}`,
-    { headers },
-  );
-  if (!locRes.ok) return;
-  const locData = await locRes.json();
-  const location = locData.results?.find(
-    (l: { name: string }) => l.name === LOCATION_NAME,
-  );
-  if (!location) return;
-
-  // Check if any organization is already linked
-  const orgRes = await fetch(
-    `${apiUrl}/api/v1/facility/${facilityId}/location/${location.id}/organizations/`,
-    { headers },
-  );
-  if (!orgRes.ok) return;
-  const orgData = await orgRes.json();
-  if (orgData.results?.length > 0) return;
-
-  // Find the Administration organization
-  const facOrgRes = await fetch(
-    `${apiUrl}/api/v1/facility/${facilityId}/organizations/?limit=50`,
-    { headers },
-  );
-  if (!facOrgRes.ok) return;
-  const facOrgData = await facOrgRes.json();
-  const adminOrg = facOrgData.results?.find(
-    (o: { name: string }) => o.name === "Administration",
-  );
-  if (!adminOrg) return;
-
-  // Link Administration org to the location
-  await fetch(
-    `${apiUrl}/api/v1/facility/${facilityId}/location/${location.id}/organizations_add/`,
-    {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ organization: adminOrg.id }),
-    },
-  );
-}
-
 test.describe("Payment Reconciliation", () => {
-  test.beforeAll(async () => {
-    const facilityId = getFacilityId();
-    await ensureLocationHasOrganization(facilityId);
-  });
-
   test.beforeEach(async ({ page }) => {
     const facilityId = getFacilityId();
     const accountId = getAccountId();
