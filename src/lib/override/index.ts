@@ -73,6 +73,11 @@ export {
   useResolvedComponent,
 } from "./contexts";
 
+// API route overrides — let plugs hook into specific API calls without
+// touching any UI.
+export { addApiOverride, clearApiOverrides, getApiOverride } from "./api";
+export type { ApiOverrideContext, ApiOverrideFn } from "./api";
+
 // Types
 export type {
   AnyProps,

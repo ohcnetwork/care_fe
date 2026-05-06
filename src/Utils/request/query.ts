@@ -2,6 +2,7 @@ import careConfig from "@careConfig";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
+import { getApiOverride } from "@/lib/override/api";
 import {
   ApiCallOptions,
   ApiRoute,
@@ -89,6 +90,21 @@ export default function query<Route extends ApiRoute<unknown, unknown>>(
   options?: ApiCallOptions<Route>,
 ) {
   return ({ signal }: { signal: AbortSignal }) => {
+    const override = getApiOverride(route);
+    if (override) {
+      return override(
+        {
+          pathParams: options?.pathParams,
+          queryParams: options?.queryParams,
+          signal,
+          pathname:
+            typeof window !== "undefined"
+              ? window.location.pathname
+              : undefined,
+        },
+        () => callApi(route, { ...options, signal }),
+      );
+    }
     return callApi(route, { ...options, signal });
   };
 }
