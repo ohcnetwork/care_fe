@@ -563,6 +563,7 @@ export default function BodySiteSelector3D(props: Props) {
               highlightedIds={highlightedIds}
               focusedId={focusedRegion?.id}
               view={view3D}
+              regionFilter={regionFilter}
               onSelect={handleSelect}
             />
           </Suspense>

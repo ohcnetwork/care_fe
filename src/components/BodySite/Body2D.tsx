@@ -38,84 +38,13 @@ interface Props {
   ) => void;
 }
 
-const FRONT_BODY_PATH = `
-  M 100,15
-  C 125,15 125,55 122,65
-  L 125,75
-  L 145,82
-  C 158,86 165,95 168,108
-  L 168,140
-  L 165,225
-  L 162,250
-  L 168,255
-  L 162,260
-  L 155,255
-  L 145,220
-  L 138,200
-  L 132,225
-  L 125,260
-  L 122,300
-  L 120,350
-  L 118,420
-  L 120,470
-  L 124,485
-  L 105,488
-  L 102,440
-  L 100,360
-  L 98,440
-  L 95,488
-  L 76,485
-  L 80,470
-  L 82,420
-  L 80,350
-  L 78,300
-  L 75,260
-  L 68,225
-  L 62,200
-  L 55,220
-  L 45,255
-  L 38,260
-  L 32,255
-  L 38,250
-  L 32,225
-  L 32,140
-  L 35,108
-  C 38,95 45,86 58,82
-  L 78,75
-  L 81,65
-  C 78,55 78,15 100,15
-  Z
-`
-  .replace(/\s+/g, " ")
-  .trim();
-
-const BACK_BODY_PATH = FRONT_BODY_PATH;
-
-// Anatomical landmark overlays — purely decorative guide lines that help
-// orient the user without affecting hit-areas. Tuned to the silhouette above.
-const FRONT_LANDMARKS: Array<{ d: string; opacity?: number }> = [
-  // Clavicle
-  { d: "M 75,90 Q 100,86 125,90", opacity: 0.4 },
-  // Midline (sternum to navel)
-  { d: "M 100,95 L 100,180", opacity: 0.25 },
-  // Linea alba below navel
-  { d: "M 100,182 L 100,225", opacity: 0.2 },
-  // Iliac crests
-  { d: "M 80,225 Q 100,222 120,225", opacity: 0.25 },
-  // Inguinal creases
-  { d: "M 90,235 Q 100,250 110,235", opacity: 0.25 },
-];
-
-const BACK_LANDMARKS: Array<{ d: string; opacity?: number }> = [
-  // Spine groove
-  { d: "M 100,80 L 100,235", opacity: 0.35 },
-  // Trapezius hint
-  { d: "M 75,90 Q 100,80 125,90", opacity: 0.3 },
-  // Iliac crests (back)
-  { d: "M 78,225 Q 100,222 122,225", opacity: 0.3 },
-  // Gluteal cleft
-  { d: "M 100,238 L 100,290", opacity: 0.4 },
-];
+// Body silhouette and landmarks live in a shared module so the 2D chart and
+// the extruded 3D body use the exact same artwork.
+import {
+  BACK_LANDMARKS,
+  BODY_SILHOUETTE_PATH,
+  FRONT_LANDMARKS,
+} from "@/components/BodySite/bodySilhouette";
 
 const SELECTED_COLOR = "#0ea5e9";
 const HIGHLIGHTED_COLOR = "#34d399";
@@ -249,7 +178,7 @@ export default function Body2D({
 
       {/* Body silhouette */}
       <path
-        d={view === "front" ? FRONT_BODY_PATH : BACK_BODY_PATH}
+        d={BODY_SILHOUETTE_PATH}
         fill="url(#skinGradient)"
         stroke="#a07c63"
         strokeWidth="0.8"
