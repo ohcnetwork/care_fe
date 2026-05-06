@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import AnnotationList from "@/components/BodySite/AnnotationList";
 import BodySiteSelector3D from "@/components/BodySite/BodySiteSelector3D";
 import { BodyAnnotation } from "@/components/BodySite/bodyAnnotation";
 import { ClinicalUseCase } from "@/components/BodySite/bodySiteRegions";
@@ -90,13 +91,22 @@ export default function BodySitePreview() {
           />
         )}
         {demo === "annotations" && (
-          <BodySiteSelector3D
-            value={annotationsValue}
-            onSelect={setAnnotationsValue}
-            annotations={annotations}
-            onAnnotationsChange={setAnnotations}
-            height={680}
-          />
+          <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
+            <BodySiteSelector3D
+              value={annotationsValue}
+              onSelect={setAnnotationsValue}
+              annotations={annotations}
+              onAnnotationsChange={setAnnotations}
+              height={680}
+            />
+            <AnnotationList
+              annotations={annotations}
+              onDelete={(id) =>
+                setAnnotations(annotations.filter((a) => a.id !== id))
+              }
+              onClear={() => setAnnotations([])}
+            />
+          </div>
         )}
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">

@@ -91,6 +91,32 @@ const FRONT_BODY_PATH = `
 
 const BACK_BODY_PATH = FRONT_BODY_PATH;
 
+// Anatomical landmark overlays — purely decorative guide lines that help
+// orient the user without affecting hit-areas. Tuned to the silhouette above.
+const FRONT_LANDMARKS: Array<{ d: string; opacity?: number }> = [
+  // Clavicle
+  { d: "M 75,90 Q 100,86 125,90", opacity: 0.4 },
+  // Midline (sternum to navel)
+  { d: "M 100,95 L 100,180", opacity: 0.25 },
+  // Linea alba below navel
+  { d: "M 100,182 L 100,225", opacity: 0.2 },
+  // Iliac crests
+  { d: "M 80,225 Q 100,222 120,225", opacity: 0.25 },
+  // Inguinal creases
+  { d: "M 90,235 Q 100,250 110,235", opacity: 0.25 },
+];
+
+const BACK_LANDMARKS: Array<{ d: string; opacity?: number }> = [
+  // Spine groove
+  { d: "M 100,80 L 100,235", opacity: 0.35 },
+  // Trapezius hint
+  { d: "M 75,90 Q 100,80 125,90", opacity: 0.3 },
+  // Iliac crests (back)
+  { d: "M 78,225 Q 100,222 122,225", opacity: 0.3 },
+  // Gluteal cleft
+  { d: "M 100,238 L 100,290", opacity: 0.4 },
+];
+
 const SELECTED_COLOR = "#0ea5e9";
 const HIGHLIGHTED_COLOR = "#34d399";
 const HOVER_COLOR = "#f59e0b";
@@ -232,15 +258,26 @@ export default function Body2D({
         style={{ cursor: placeMode ? "crosshair" : "default" }}
       />
 
-      <line
-        x1="100"
-        y1="80"
-        x2="100"
-        y2="220"
-        stroke="#c9a896"
-        strokeWidth="0.3"
-        strokeDasharray="2 3"
-        opacity="0.4"
+      {/* Anatomical landmarks (decorative reference lines) */}
+      {(view === "front" ? FRONT_LANDMARKS : BACK_LANDMARKS).map((lm, i) => (
+        <path
+          key={i}
+          d={lm.d}
+          fill="none"
+          stroke="#a07c63"
+          strokeWidth="0.5"
+          strokeLinecap="round"
+          opacity={lm.opacity ?? 0.3}
+          pointerEvents="none"
+        />
+      ))}
+      {/* Soft ground shadow */}
+      <ellipse
+        cx="100"
+        cy="490"
+        rx="40"
+        ry="3"
+        fill="rgba(0,0,0,0.08)"
         pointerEvents="none"
       />
 
