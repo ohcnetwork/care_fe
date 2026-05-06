@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import AnnotationEditor from "@/components/BodySite/AnnotationEditor";
 import Body2D from "@/components/BodySite/Body2D";
 import { Body2DView } from "@/components/BodySite/body2DLayout";
 import {
@@ -98,7 +99,12 @@ export default function BodySiteSelector3D(props: Props) {
   const [annotationTool, setAnnotationTool] = useState<AnnotationType | null>(
     null,
   );
+  const [editingAnnotation, setEditingAnnotation] = useState<{
+    annotation: BodyAnnotation;
+    anchor: { x: number; y: number };
+  } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const bodyAreaRef = useRef<HTMLDivElement>(null);
 
   // Annotation mode forces 2D
   useEffect(() => {
@@ -425,7 +431,7 @@ export default function BodySiteSelector3D(props: Props) {
       )}
 
       {/* Body view */}
-      <div className="relative flex-1 overflow-hidden">
+      <div ref={bodyAreaRef} className="relative flex-1 overflow-hidden">
         {mode === "2d" ? (
           <Body2D
             view={view2D}
@@ -437,13 +443,9 @@ export default function BodySiteSelector3D(props: Props) {
             annotationTool={annotationsEnabled ? annotationTool : null}
             annotations={annotations}
             onAnnotationsChange={onAnnotationsChange}
-            onAnnotationFocus={(anno) => {
-              if (onAnnotationsChange) {
-                onAnnotationsChange(
-                  annotations?.filter((a) => a.id !== anno.id) ?? [],
-                );
-              }
-            }}
+            onAnnotationClick={(anno, anchor) =>
+              setEditingAnnotation({ annotation: anno, anchor })
+            }
           />
         ) : (
           <Suspense
@@ -461,6 +463,33 @@ export default function BodySiteSelector3D(props: Props) {
               onSelect={handleSelect}
             />
           </Suspense>
+        )}
+
+        {/* Annotation editor popover */}
+        {editingAnnotation && bodyAreaRef.current && (
+          <AnnotationEditor
+            annotation={editingAnnotation.annotation}
+            anchor={editingAnnotation.anchor}
+            containerWidth={bodyAreaRef.current.clientWidth}
+            containerHeight={bodyAreaRef.current.clientHeight}
+            onSave={(updated) => {
+              if (onAnnotationsChange && annotations) {
+                onAnnotationsChange(
+                  annotations.map((a) => (a.id === updated.id ? updated : a)),
+                );
+              }
+            }}
+            onDelete={() => {
+              if (onAnnotationsChange && annotations) {
+                onAnnotationsChange(
+                  annotations.filter(
+                    (a) => a.id !== editingAnnotation.annotation.id,
+                  ),
+                );
+              }
+            }}
+            onClose={() => setEditingAnnotation(null)}
+          />
         )}
       </div>
 

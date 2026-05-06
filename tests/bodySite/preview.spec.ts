@@ -79,28 +79,54 @@ test.describe("Body Site Selector preview", () => {
     await expect(page.locator("text=2 sites selected")).toBeHidden();
   });
 
-  test("annotations: place a wound marker and clear it", async ({ page }) => {
+  test("annotations: place, edit, and delete a wound marker", async ({
+    page,
+  }) => {
     await page.goto("/preview/body-site");
     await page
       .getByRole("button", { name: /annotations \(wounds, pain, scars\)/i })
       .click();
 
     // Pick the Wound tool
-    await page.getByRole("button", { name: "Wound", exact: true }).click();
+    await page
+      .getByRole("toolbar", { name: /annotation tools/i })
+      .getByRole("button", { name: "Wound", exact: true })
+      .click();
 
-    // Click on the body silhouette to place a marker
     const body = page.getByRole("img", { name: /body front view/i });
     const box = await body.boundingBox();
     if (!box) throw new Error("body bounding box missing");
-    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.4);
+    // Place at upper torso area
+    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.35);
 
-    // The clear-annotations button should now appear
     await expect(
       page.getByRole("button", { name: /clear 1 annotation/i }),
     ).toBeVisible();
 
-    // Clear and verify gone
-    await page.getByRole("button", { name: /clear 1 annotation/i }).click();
+    // Switch to "Select region" so subsequent clicks open the editor
+    await page
+      .getByRole("toolbar", { name: /annotation tools/i })
+      .getByRole("button", { name: /select region/i })
+      .click();
+
+    // Click the placed annotation marker
+    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.35);
+
+    // Editor dialog should open
+    const dialog = page.getByRole("dialog", { name: /edit annotation/i });
+    await expect(dialog).toBeVisible();
+
+    // Add a note
+    await dialog.getByLabel(/note/i).fill("2 cm laceration");
+    // Pick severity 3
+    await dialog.getByRole("button", { name: /^severity 3$/i }).click();
+    await dialog.getByRole("button", { name: /^save$/i }).click();
+    await expect(dialog).toBeHidden();
+
+    // Re-open editor and delete
+    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.35);
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: /^delete$/i }).click();
     await expect(
       page.getByRole("button", { name: /clear 1 annotation/i }),
     ).toBeHidden();

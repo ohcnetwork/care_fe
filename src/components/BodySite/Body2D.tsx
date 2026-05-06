@@ -30,7 +30,12 @@ interface Props {
   annotationTool?: AnnotationType | null;
   annotations?: BodyAnnotation[];
   onAnnotationsChange?: (annotations: BodyAnnotation[]) => void;
-  onAnnotationFocus?: (annotation: BodyAnnotation) => void;
+  /** Called when an existing annotation is clicked. Receives the annotation
+   *  and its container-relative pixel coords for anchoring an editor popover. */
+  onAnnotationClick?: (
+    annotation: BodyAnnotation,
+    anchor: { x: number; y: number },
+  ) => void;
 }
 
 const FRONT_BODY_PATH = `
@@ -120,7 +125,7 @@ export default function Body2D({
   annotationTool,
   annotations = [],
   onAnnotationsChange,
-  onAnnotationFocus,
+  onAnnotationClick,
 }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -178,7 +183,12 @@ export default function Body2D({
     anno: BodyAnnotation,
   ) => {
     event.stopPropagation();
-    if (onAnnotationFocus) onAnnotationFocus(anno);
+    if (!onAnnotationClick || !svgRef.current) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    onAnnotationClick(anno, {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    });
   };
 
   const annotationsForView = annotations.filter((a) => a.view === view);
