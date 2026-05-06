@@ -1,6 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { ChevronDown, MoreVerticalIcon, Pencil } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -419,10 +424,6 @@ export function ServiceRequestQuestion({
     (questionnaireResponse.values?.[0]
       ?.value as unknown as ServiceRequestApplyActivityDefinitionSpec[]) || [],
   );
-  const [activityDefinitionsMap, setActivityDefinitionsMap] = useState<
-    Record<string, ActivityDefinitionReadSpec>
-  >({});
-
   const [serviceRequestToAddToTemplate, setServiceRequestToAddToTemplate] =
     useState<ServiceRequestApplyActivityDefinitionSpec | null>(null);
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
@@ -660,10 +661,6 @@ export function ServiceRequestQuestion({
         ],
         questionnaireResponse.question_id,
       );
-      setActivityDefinitionsMap((prev) => ({
-        ...prev,
-        [selectedActivityDefinition]: selectedActivityDefinitionData,
-      }));
       setSelectedActivityDefinition(null);
     }
   }, [
@@ -726,56 +723,39 @@ export function ServiceRequestQuestion({
     }
   }, [questionnaireResponse.values, serviceRequests]);
 
-  // Effect to fetch activity definitions for any service requests whose
-  // definitions are not yet cached (e.g. when added via Scribe or other
-  // flows that bypass the picker/template handlers).
-  useEffect(() => {
-    if (!facilityId) return;
-
-    const missingSlugs = Array.from(
-      new Set(
-        serviceRequests
-          .map((sr) => sr.activity_definition)
-          .filter((slug) => slug && !activityDefinitionsMap[slug]),
+  // Fetch activity definitions for every service request currently in the
+  // form. Uses react-query's cache for dedup, cancellation, and sharing
+  // across instances (covers Scribe/template flows that bypass the picker).
+  const uniqueActivityDefinitionSlugs = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          serviceRequests
+            .map((sr) => sr.activity_definition)
+            .filter((slug): slug is string => !!slug),
+        ),
       ),
-    );
+    [serviceRequests],
+  );
 
-    if (missingSlugs.length === 0) return;
+  const activityDefinitionQueries = useQueries({
+    queries: uniqueActivityDefinitionSlugs.map((slug) => ({
+      queryKey: ["activity_definition", slug],
+      queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
+        pathParams: { facilityId, activityDefinitionSlug: slug },
+      }),
+      enabled: !!facilityId,
+    })),
+  });
 
-    let cancelled = false;
-    const controller = new AbortController();
-
-    Promise.all(
-      missingSlugs.map((slug) =>
-        query(activityDefinitionApi.retrieveActivityDefinition, {
-          pathParams: {
-            facilityId,
-            activityDefinitionSlug: slug,
-          },
-        })({ signal: controller.signal })
-          .then((data) => [slug, data] as const)
-          .catch(() => null),
-      ),
-    ).then((results) => {
-      if (cancelled) return;
-      const fetched = results.filter(
-        (r): r is readonly [string, ActivityDefinitionReadSpec] => r !== null,
-      );
-      if (fetched.length === 0) return;
-      setActivityDefinitionsMap((prev) => {
-        const next = { ...prev };
-        for (const [slug, data] of fetched) {
-          if (!next[slug]) next[slug] = data;
-        }
-        return next;
-      });
+  const activityDefinitionsMap = useMemo(() => {
+    const map: Record<string, ActivityDefinitionReadSpec> = {};
+    uniqueActivityDefinitionSlugs.forEach((slug, i) => {
+      const data = activityDefinitionQueries[i]?.data;
+      if (data) map[slug] = data;
     });
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [serviceRequests, activityDefinitionsMap, facilityId]);
+    return map;
+  }, [uniqueActivityDefinitionSlugs, activityDefinitionQueries]);
 
   const handleActivityDefinitionSelect = (
     value:
@@ -802,11 +782,11 @@ export function ServiceRequestQuestion({
         },
       )({ signal: new AbortController().signal });
 
-      // Store the activity definition in the map
-      setActivityDefinitionsMap((prev) => ({
-        ...prev,
-        [templateSR.slug]: activityDefinitionData,
-      }));
+      // Seed the react-query cache so useQueries doesn't refetch.
+      queryClient.setQueryData(
+        ["activity_definition", templateSR.slug],
+        activityDefinitionData,
+      );
 
       const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec = {
         service_request: {
@@ -872,11 +852,11 @@ export function ServiceRequestQuestion({
               },
             )({ signal: new AbortController().signal });
 
-            // Store the activity definition in the map
-            setActivityDefinitionsMap((prev) => ({
-              ...prev,
-              [templateSR.slug]: activityDefinitionData,
-            }));
+            // Seed the react-query cache so useQueries doesn't refetch.
+            queryClient.setQueryData(
+              ["activity_definition", templateSR.slug],
+              activityDefinitionData,
+            );
 
             // Create the service request, merging template data with activity definition
             const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec =
