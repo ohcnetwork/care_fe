@@ -10,6 +10,11 @@ import { Input } from "@/components/ui/input";
 import Body2D from "@/components/BodySite/Body2D";
 import { Body2DView } from "@/components/BodySite/body2DLayout";
 import {
+  ANNOTATION_TYPES,
+  AnnotationType,
+  BodyAnnotation,
+} from "@/components/BodySite/bodyAnnotation";
+import {
   BODY_REGIONS,
   BodyRegion,
   ClinicalUseCase,
@@ -48,6 +53,10 @@ type Props = (SingleProps | MultiProps) & {
   defaultMode?: BodySiteRenderMode;
   /** Persist mode preference to localStorage under this key. */
   modePreferenceKey?: string;
+  /** Enable free-form annotation mode (wound/burn/pain markers placed at
+   *  arbitrary points on the 2D body). */
+  annotations?: BodyAnnotation[];
+  onAnnotationsChange?: (annotations: BodyAnnotation[]) => void;
 };
 
 const STORAGE_KEY_DEFAULT = "body-site-render-mode";
@@ -70,7 +79,11 @@ export default function BodySiteSelector3D(props: Props) {
     useCase,
     defaultMode = "2d",
     modePreferenceKey = STORAGE_KEY_DEFAULT,
+    annotations,
+    onAnnotationsChange,
   } = props;
+
+  const annotationsEnabled = !!onAnnotationsChange;
 
   const { t } = useTranslation();
   const webglSupported = useWebGLSupport();
@@ -82,7 +95,15 @@ export default function BodySiteSelector3D(props: Props) {
   const [view3D, setView3D] = useState<CameraView>("front");
   const [search, setSearch] = useState("");
   const [focusedIdx, setFocusedIdx] = useState<number | null>(null);
+  const [annotationTool, setAnnotationTool] = useState<AnnotationType | null>(
+    null,
+  );
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Annotation mode forces 2D
+  useEffect(() => {
+    if (annotationTool && mode !== "2d") setMode("2d");
+  }, [annotationTool, mode]);
 
   // Persist mode preference
   useEffect(() => {
@@ -346,6 +367,63 @@ export default function BodySiteSelector3D(props: Props) {
         </div>
       )}
 
+      {/* Annotation tool palette (only when annotations are enabled) */}
+      {annotationsEnabled && mode === "2d" && (
+        <div
+          className="z-10 flex flex-wrap items-center gap-1 border-b border-gray-200 bg-white px-2 py-1.5"
+          role="toolbar"
+          aria-label={t("body_site_annotation_toolbar")}
+        >
+          <span className="text-xs text-gray-500 mr-2">
+            {t("body_site_annotation_label")}:
+          </span>
+          <Button
+            type="button"
+            size="sm"
+            variant={annotationTool === null ? "primary" : "ghost"}
+            className="h-7 px-2 text-xs"
+            onClick={() => setAnnotationTool(null)}
+            aria-pressed={annotationTool === null}
+          >
+            {t("body_site_annotation_select")}
+          </Button>
+          {ANNOTATION_TYPES.map((meta) => (
+            <Button
+              key={meta.type}
+              type="button"
+              size="sm"
+              variant={annotationTool === meta.type ? "primary" : "ghost"}
+              className="h-7 px-2 text-xs"
+              onClick={() => setAnnotationTool(meta.type)}
+              aria-pressed={annotationTool === meta.type}
+              style={
+                annotationTool === meta.type
+                  ? { backgroundColor: meta.color, borderColor: meta.color }
+                  : undefined
+              }
+            >
+              <span
+                className="inline-block size-2 rounded-full mr-1"
+                style={{ backgroundColor: meta.color }}
+                aria-hidden
+              />
+              {t(meta.labelKey)}
+            </Button>
+          ))}
+          {annotations && annotations.length > 0 && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="h-7 px-2 text-xs ml-auto text-red-600"
+              onClick={() => onAnnotationsChange?.([])}
+            >
+              {t("body_site_annotation_clear", { count: annotations.length })}
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Body view */}
       <div className="relative flex-1 overflow-hidden">
         {mode === "2d" ? (
@@ -356,6 +434,16 @@ export default function BodySiteSelector3D(props: Props) {
             focusedId={focusedRegion?.id}
             regionFilter={regionFilter}
             onSelect={handleSelect}
+            annotationTool={annotationsEnabled ? annotationTool : null}
+            annotations={annotations}
+            onAnnotationsChange={onAnnotationsChange}
+            onAnnotationFocus={(anno) => {
+              if (onAnnotationsChange) {
+                onAnnotationsChange(
+                  annotations?.filter((a) => a.id !== anno.id) ?? [],
+                );
+              }
+            }}
           />
         ) : (
           <Suspense

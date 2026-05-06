@@ -1,17 +1,33 @@
 import { useState } from "react";
 
 import BodySiteSelector3D from "@/components/BodySite/BodySiteSelector3D";
+import { BodyAnnotation } from "@/components/BodySite/bodyAnnotation";
 import { ClinicalUseCase } from "@/components/BodySite/bodySiteRegions";
 
 import { Code } from "@/types/base/code/code";
 
-type Demo = "single" | "multi" | "im-injection";
+type Demo = "single" | "multi" | "im-injection" | "annotations";
 
 export default function BodySitePreview() {
   const [demo, setDemo] = useState<Demo>("single");
   const [singleValue, setSingleValue] = useState<Code | null>(null);
   const [multiValue, setMultiValue] = useState<Code[]>([]);
   const [injectionValue, setInjectionValue] = useState<Code | null>(null);
+  const [annotationsValue, setAnnotationsValue] = useState<Code | null>(null);
+  const [annotations, setAnnotations] = useState<BodyAnnotation[]>([]);
+
+  const currentPayload = (() => {
+    switch (demo) {
+      case "single":
+        return singleValue;
+      case "multi":
+        return multiValue;
+      case "im-injection":
+        return injectionValue;
+      case "annotations":
+        return { selected: annotationsValue, annotations };
+    }
+  })();
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
@@ -29,8 +45,9 @@ export default function BodySitePreview() {
           {(
             [
               ["single", "Single select"],
-              ["multi", "Multi-select (wound mapping)"],
+              ["multi", "Multi-select (e.g. wound mapping)"],
               ["im-injection", "IM injection sites only"],
+              ["annotations", "Annotations (wounds, pain, scars)"],
             ] as Array<[Demo, string]>
           ).map(([k, label]) => (
             <button
@@ -72,22 +89,23 @@ export default function BodySitePreview() {
             height={640}
           />
         )}
+        {demo === "annotations" && (
+          <BodySiteSelector3D
+            value={annotationsValue}
+            onSelect={setAnnotationsValue}
+            annotations={annotations}
+            onAnnotationsChange={setAnnotations}
+            height={680}
+          />
+        )}
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
             <h2 className="text-sm font-medium text-gray-900 mb-2">
-              Selected SNOMED CT code
+              Selected payload
             </h2>
             <pre className="rounded bg-gray-50 p-3 text-xs text-gray-800 overflow-auto max-h-64">
-              {JSON.stringify(
-                demo === "single"
-                  ? singleValue
-                  : demo === "multi"
-                    ? multiValue
-                    : injectionValue,
-                null,
-                2,
-              )}
+              {JSON.stringify(currentPayload, null, 2)}
             </pre>
           </div>
 
@@ -97,7 +115,12 @@ export default function BodySitePreview() {
               <li>2D mode is default — faster on low-end devices</li>
               <li>3D mode rotates with drag, scroll to zoom</li>
               <li>Type a region name (RUQ, deltoid, biceps) to find it fast</li>
-              <li>Multi-select: click again to deselect</li>
+              <li>Multi-select: click a region again to deselect</li>
+              <li>
+                Annotations: pick a marker type (Wound, Burn, Pain, …) and click
+                anywhere on the body to place it. Each annotation captures the
+                nearest SNOMED region. Click a marker to remove it.
+              </li>
               <li>Mode preference persists across page loads</li>
             </ul>
           </div>

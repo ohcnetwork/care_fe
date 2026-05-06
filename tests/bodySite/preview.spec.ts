@@ -79,6 +79,33 @@ test.describe("Body Site Selector preview", () => {
     await expect(page.locator("text=2 sites selected")).toBeHidden();
   });
 
+  test("annotations: place a wound marker and clear it", async ({ page }) => {
+    await page.goto("/preview/body-site");
+    await page
+      .getByRole("button", { name: /annotations \(wounds, pain, scars\)/i })
+      .click();
+
+    // Pick the Wound tool
+    await page.getByRole("button", { name: "Wound", exact: true }).click();
+
+    // Click on the body silhouette to place a marker
+    const body = page.getByRole("img", { name: /body front view/i });
+    const box = await body.boundingBox();
+    if (!box) throw new Error("body bounding box missing");
+    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.4);
+
+    // The clear-annotations button should now appear
+    await expect(
+      page.getByRole("button", { name: /clear 1 annotation/i }),
+    ).toBeVisible();
+
+    // Clear and verify gone
+    await page.getByRole("button", { name: /clear 1 annotation/i }).click();
+    await expect(
+      page.getByRole("button", { name: /clear 1 annotation/i }),
+    ).toBeHidden();
+  });
+
   test("IM injection use case restricts to injection sites", async ({
     page,
   }) => {
