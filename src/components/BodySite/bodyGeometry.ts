@@ -50,6 +50,22 @@ export function viewBoxTo3D(
   return [x, y, z];
 }
 
+/**
+ * Inverse of viewBoxTo3D: given a 3D world point on the body surface
+ * (e.g. from a raycaster hit), return the corresponding 2D viewBox
+ * coordinates and which face was hit.
+ */
+export function pointToViewBox(point: { x: number; y: number; z: number }): {
+  cx: number;
+  cy: number;
+  view: "front" | "back";
+} {
+  const cx = point.x / SCALE + VIEWBOX_W / 2;
+  const cy = -point.y / SCALE + VIEWBOX_H / 2;
+  const view = point.z >= 0 ? "front" : "back";
+  return { cx, cy, view };
+}
+
 function pathToShape(d: string): THREE.Shape {
   const shape = new THREE.Shape();
   // Tokenise path commands. Supports M, L, C, Z (sufficient for our path).

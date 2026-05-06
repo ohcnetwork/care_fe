@@ -163,12 +163,13 @@ export default function Body2D({
     >
       <defs>
         <linearGradient id="skinGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f4d4c0" />
-          <stop offset="100%" stopColor="#e6c2ad" />
+          <stop offset="0%" stopColor="#fadcc6" />
+          <stop offset="50%" stopColor="#f0c9ad" />
+          <stop offset="100%" stopColor="#e3b495" />
         </linearGradient>
         <filter id="bodyShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-          <feOffset dx="1" dy="2" result="offsetBlur" />
+          <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" />
+          <feOffset dx="0.8" dy="1.5" result="offsetBlur" />
           <feMerge>
             <feMergeNode in="offsetBlur" />
             <feMergeNode in="SourceGraphic" />

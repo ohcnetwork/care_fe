@@ -11,68 +11,75 @@
 export const VIEWBOX_W = 200;
 export const VIEWBOX_H = 500;
 
-// Clockwise from top of head: head → right side → right arm/hand →
-// right armpit → right torso → right hip → right thigh/leg/foot →
-// crotch → left foot/leg/thigh → left hip → left torso → left armpit →
-// left arm/hand → left shoulder → left side of head → close.
+// Clockwise from top of head, traced anatomically:
+// head → right neck/shoulder → right arm → right hand → inner arm → armpit
+// → right torso → right hip → outer right thigh → outer calf → right foot
+// → inner right calf → inner thigh → crotch → inner left thigh →
+// left foot → outer left calf → outer left thigh → left hip → left torso
+// → left armpit → inner left arm → left hand → outer left arm → left
+// shoulder/neck → left head → close.
 //
-// Bezier control points were tuned empirically to give smooth shoulder
-// slopes, a slight waist, hip flare, and tapered limbs without producing
-// the "Lego-figure" segmented look of stacked primitives.
+// Each region of the path is a smooth bezier rather than a polyline so
+// the extruded 3D mesh has rounded edges. Feet are explicit small
+// rounded shapes below the ankles, not a long horizontal "puddle".
 export const BODY_SILHOUETTE_PATH = `
-  M 100,15
-  C 122,15 130,32 130,46
-  C 130,58 126,68 122,75
-  L 120,82
-  C 134,84 148,88 156,96
-  C 161,103 163,112 164,124
-  C 166,150 167,176 168,200
-  C 169,218 170,232 169,242
-  C 173,246 174,256 168,262
-  C 162,266 156,265 154,260
-  C 152,252 152,244 152,236
-  L 152,160
-  C 152,140 150,124 148,115
-  L 144,108
-  C 142,135 140,160 138,182
-  C 136,200 136,216 138,234
-  C 142,238 144,238 146,240
-  C 144,260 138,290 132,322
-  C 130,335 128,346 126,355
-  C 122,385 119,418 116,448
-  L 114,462
-  L 122,478
-  L 105,478
-  L 103,440
-  L 102,360
-  L 102,250
+  M 100,18
+  C 122,18 130,32 130,46
+  C 130,60 124,72 120,78
+  L 117,84
+  L 116,90
+  C 130,92 144,98 152,108
+  C 158,140 162,180 162,220
+  L 164,242
+  C 168,248 170,260 164,266
+  C 158,272 154,272 152,266
+  C 152,254 154,246 154,240
+  L 152,220
+  C 152,180 150,140 144,108
+  L 144,114
+  C 142,140 138,170 137,200
+  C 138,220 142,232 145,242
+  C 144,275 140,310 132,348
+  L 130,358
+  C 128,395 124,425 119,452
+  L 117,460
+  C 113,470 116,478 124,478
+  L 132,478
+  C 138,478 138,470 134,466
+  L 124,458
+  L 122,452
+  C 118,425 114,395 110,358
+  L 108,348
+  C 105,310 102,275 102,250
   L 100,244
   L 98,250
-  L 98,360
-  L 97,440
-  L 95,478
-  L 78,478
-  L 86,462
-  L 84,448
-  C 81,418 78,385 74,355
-  C 72,346 70,335 68,322
-  C 62,290 56,260 54,240
-  C 56,238 58,238 62,234
-  C 64,216 64,200 62,182
-  C 60,160 58,135 56,108
-  L 52,115
-  C 50,124 48,140 48,160
-  L 48,236
-  C 48,244 48,252 46,260
-  C 44,265 38,266 32,262
-  C 26,256 27,246 31,242
-  C 30,232 31,218 32,200
-  C 33,176 34,150 36,124
-  C 37,112 39,103 44,96
-  C 52,88 66,84 80,82
-  L 78,75
-  C 74,68 70,58 70,46
-  C 70,32 78,15 100,15
+  C 98,275 95,310 92,348
+  L 90,358
+  C 86,395 82,425 78,452
+  L 76,458
+  L 66,466
+  C 62,470 62,478 68,478
+  L 76,478
+  C 84,478 87,470 83,460
+  L 81,452
+  C 76,425 72,395 70,358
+  L 68,348
+  C 60,310 56,275 55,242
+  C 58,232 62,220 63,200
+  C 62,170 58,140 56,114
+  L 56,108
+  C 50,140 48,180 48,220
+  L 46,240
+  C 46,246 46,254 48,266
+  C 46,272 42,272 36,266
+  C 30,260 32,248 36,242
+  L 38,220
+  C 38,180 42,140 48,108
+  C 56,98 70,92 84,90
+  L 83,84
+  L 80,78
+  C 76,72 70,60 70,46
+  C 70,32 78,18 100,18
   Z
 `
   .replace(/\s+/g, " ")
