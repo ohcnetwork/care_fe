@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Box, Search, X } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -6,6 +7,9 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+import valueSetApi from "@/types/valueSet/valueSetApi";
+import query from "@/Utils/request/query";
 
 import AnnotationEditor from "@/components/BodySite/AnnotationEditor";
 import Body2D from "@/components/BodySite/Body2D";
@@ -58,6 +62,12 @@ type Props = (SingleProps | MultiProps) & {
    *  arbitrary points on the 2D body). */
   annotations?: BodyAnnotation[];
   onAnnotationsChange?: (annotations: BodyAnnotation[]) => void;
+  /** Backend value set slug to search via the SNOMED API. The local taxonomy
+   *  remains the primary source; API results expand the search beyond the
+   *  curated regions, so any concept in the value set is selectable. */
+  valueSetSlug?: string;
+  /** Disable backend-augmented search (e.g. for offline / preview use). */
+  apiSearchDisabled?: boolean;
 };
 
 const STORAGE_KEY_DEFAULT = "body-site-render-mode";
@@ -82,6 +92,8 @@ export default function BodySiteSelector3D(props: Props) {
     modePreferenceKey = STORAGE_KEY_DEFAULT,
     annotations,
     onAnnotationsChange,
+    valueSetSlug = "system-body-site",
+    apiSearchDisabled = false,
   } = props;
 
   const annotationsEnabled = !!onAnnotationsChange;
@@ -149,6 +161,38 @@ export default function BodySiteSelector3D(props: Props) {
 
   const highlightedIds = useMemo(() => new Set(searchMatches), [searchMatches]);
 
+  // Backend-augmented SNOMED search. The local taxonomy is still primary —
+  // we just append API-only matches below local hits so the picker isn't
+  // capped at the curated 50 regions. Errors fail silently so offline/preview
+  // contexts still work with local search alone.
+  const apiSearchEnabled = !apiSearchDisabled && search.trim().length >= 2;
+  const apiSearch = useQuery({
+    queryKey: ["body-site-search", valueSetSlug, search],
+    queryFn: query.debounced(valueSetApi.expand, {
+      pathParams: { slug: valueSetSlug },
+      body: { count: 15, search },
+      silent: true,
+    }),
+    enabled: apiSearchEnabled,
+    staleTime: 30_000,
+    retry: false,
+  });
+  const apiResults: Code[] = useMemo(() => {
+    const results = apiSearch.data?.results ?? [];
+    const localCodes = new Set(
+      searchMatches
+        .map((id) => regions.find((r) => r.id === id)?.code.code)
+        .filter((c): c is string => !!c),
+    );
+    return results
+      .filter((r) => r.code && r.display && !localCodes.has(r.code))
+      .map((r) => ({
+        system: r.system,
+        code: r.code,
+        display: r.display,
+      }));
+  }, [apiSearch.data, searchMatches, regions]);
+
   // Selection state
   const selectedRegions = useMemo(() => {
     if (props.multiple) {
@@ -164,6 +208,15 @@ export default function BodySiteSelector3D(props: Props) {
     () => new Set(selectedRegions.map((r) => r.id)),
     [selectedRegions],
   );
+
+  // The full list of currently-selected codes — including ones that don't
+  // correspond to a body region we have a layout for (e.g. obscure SNOMED
+  // concepts pulled in via the API search). Used to render the status bar
+  // and the multi-select chip count.
+  const selectedCodes: Code[] = useMemo(() => {
+    if (props.multiple) return props.value ?? [];
+    return props.value ? [props.value] : [];
+  }, [props]);
 
   const focusedRegion = focusedIdx != null ? regions[focusedIdx] : undefined;
 
@@ -181,27 +234,28 @@ export default function BodySiteSelector3D(props: Props) {
     }
   }, [searchMatches, regions, view2D, view3D, mode]);
 
-  const handleSelect = (region: BodyRegion) => {
+  const handleSelectCode = (code: Code) => {
     if (props.multiple) {
       const current = props.value ?? [];
       const exists = current.find(
-        (c) => c.code === region.code.code && c.system === region.code.system,
+        (c) => c.code === code.code && c.system === code.system,
       );
       if (exists) {
         props.onSelect(
           current.filter(
-            (c) =>
-              !(c.code === region.code.code && c.system === region.code.system),
+            (c) => !(c.code === code.code && c.system === code.system),
           ),
         );
       } else {
-        props.onSelect([...current, region.code]);
+        props.onSelect([...current, code]);
       }
     } else {
-      props.onSelect(region.code);
+      props.onSelect(code);
     }
     setSearch("");
   };
+
+  const handleSelect = (region: BodyRegion) => handleSelectCode(region.code);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (regions.length === 0) return;
@@ -225,8 +279,8 @@ export default function BodySiteSelector3D(props: Props) {
   const view2DButtons: Body2DView[] = ["front", "back"];
   const view3DButtons: CameraView[] = ["front", "back", "left", "right"];
 
-  const selectedSummary = selectedRegions
-    .map((r) => r.code.display)
+  const selectedSummary = selectedCodes
+    .map((c) => c.display)
     .filter(Boolean)
     .join(", ");
 
@@ -340,34 +394,81 @@ export default function BodySiteSelector3D(props: Props) {
       {/* Search results dropdown */}
       {search.trim() && (
         <div className="absolute top-14 left-2 z-20 w-full max-w-md">
-          <div className="rounded-md border border-gray-200 bg-white shadow-lg max-h-64 overflow-auto">
-            {searchMatches.length === 0 ? (
+          <div className="rounded-md border border-gray-200 bg-white shadow-lg max-h-72 overflow-auto">
+            {searchMatches.length === 0 &&
+            apiResults.length === 0 &&
+            !apiSearch.isFetching ? (
               <div className="p-3 text-sm text-gray-500">
                 {t("no_results_found")}
               </div>
             ) : (
-              searchMatches.slice(0, 10).map((id) => {
-                const r = regions.find((x) => x.id === id);
-                if (!r) return null;
-                const isSelected = selectedIds.has(id);
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => handleSelect(r)}
-                    className={cn(
-                      "flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50",
-                      isSelected && "bg-sky-50",
-                    )}
-                  >
-                    <span className="flex items-center gap-2">
-                      {isSelected && <span className="text-sky-600">●</span>}
-                      {r.code.display}
-                    </span>
-                    <span className="text-xs text-gray-400">{r.code.code}</span>
-                  </button>
-                );
-              })
+              <>
+                {searchMatches.length > 0 && (
+                  <div className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wide text-gray-400">
+                    {t("body_site_search_local")}
+                  </div>
+                )}
+                {searchMatches.slice(0, 10).map((id) => {
+                  const r = regions.find((x) => x.id === id);
+                  if (!r) return null;
+                  const isSelected = selectedIds.has(id);
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => handleSelect(r)}
+                      className={cn(
+                        "flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50",
+                        isSelected && "bg-sky-50",
+                      )}
+                    >
+                      <span className="flex items-center gap-2">
+                        {isSelected && <span className="text-sky-600">●</span>}
+                        {r.code.display}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {r.code.code}
+                      </span>
+                    </button>
+                  );
+                })}
+
+                {apiResults.length > 0 && (
+                  <div className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wide text-gray-400 border-t border-gray-100 mt-1">
+                    {t("body_site_search_snomed")}
+                  </div>
+                )}
+                {apiResults.map((code) => {
+                  const isSelected = props.multiple
+                    ? (props.value ?? []).some(
+                        (c) => c.code === code.code && c.system === code.system,
+                      )
+                    : props.value?.code === code.code;
+                  return (
+                    <button
+                      key={`api-${code.code}`}
+                      type="button"
+                      onClick={() => handleSelectCode(code)}
+                      className={cn(
+                        "flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50",
+                        isSelected && "bg-sky-50",
+                      )}
+                    >
+                      <span className="flex items-center gap-2">
+                        {isSelected && <span className="text-sky-600">●</span>}
+                        {code.display}
+                      </span>
+                      <span className="text-xs text-gray-400">{code.code}</span>
+                    </button>
+                  );
+                })}
+
+                {apiSearch.isFetching && (
+                  <div className="px-3 py-2 text-xs text-gray-400">
+                    {t("searching")}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -497,26 +598,24 @@ export default function BodySiteSelector3D(props: Props) {
       <div className="border-t border-gray-200 bg-white/95 px-3 py-2 text-xs">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-gray-700">
-            {selectedRegions.length === 0 ? (
+            {selectedCodes.length === 0 ? (
               <span className="text-gray-500">{t("body_site_3d_hint")}</span>
             ) : props.multiple ? (
               <span>
                 <span className="font-medium">
-                  {t("selected_count", { count: selectedRegions.length })}:
+                  {t("selected_count", { count: selectedCodes.length })}:
                 </span>{" "}
                 <span className="text-gray-600">{selectedSummary}</span>
               </span>
             ) : (
               <span>
                 <span className="font-medium">{t("selected")}:</span>{" "}
-                {selectedRegions[0].code.display}{" "}
-                <span className="text-gray-400">
-                  ({selectedRegions[0].code.code})
-                </span>
+                {selectedCodes[0].display}{" "}
+                <span className="text-gray-400">({selectedCodes[0].code})</span>
               </span>
             )}
           </div>
-          {props.multiple && selectedRegions.length > 0 && (
+          {props.multiple && selectedCodes.length > 0 && (
             <Button
               type="button"
               size="sm"
