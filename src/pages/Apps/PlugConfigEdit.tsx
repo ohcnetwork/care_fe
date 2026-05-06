@@ -565,7 +565,7 @@ export function PlugConfigEdit({ slug }: Props) {
                   </CardTitle>
 
                   <CardDescription>
-                    {t("server_health_check_not_configured")}
+                    {t("server_health_check_description")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-wrap items-center gap-3">
