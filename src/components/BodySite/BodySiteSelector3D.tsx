@@ -1,4 +1,4 @@
-import { Search, X } from "lucide-react";
+import { Box, Search, X } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -7,9 +7,12 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import Body2D from "@/components/BodySite/Body2D";
+import { Body2DView } from "@/components/BodySite/body2DLayout";
 import {
   BODY_REGIONS,
   BodyRegion,
+  ClinicalUseCase,
   findRegionByCode,
   searchRegions,
 } from "@/components/BodySite/bodySiteRegions";
@@ -20,61 +23,156 @@ import { Code } from "@/types/base/code/code";
 
 const BodyScene = lazy(() => import("@/components/BodySite/BodyScene"));
 
-interface Props {
+export type BodySiteRenderMode = "2d" | "3d";
+
+interface SingleProps {
+  multiple?: false;
   value?: Code | null;
   onSelect: (code: Code) => void;
-  className?: string;
-  height?: number | string;
-  /** Optional list of SNOMED codes to restrict the picker to. */
-  allowedCodes?: string[];
 }
 
-export default function BodySiteSelector3D({
-  value,
-  onSelect,
-  className,
-  height = 520,
-  allowedCodes,
-}: Props) {
+interface MultiProps {
+  multiple: true;
+  value?: Code[] | null;
+  onSelect: (codes: Code[]) => void;
+}
+
+type Props = (SingleProps | MultiProps) & {
+  className?: string;
+  height?: number | string;
+  /** Restrict to a list of SNOMED codes. */
+  allowedCodes?: string[];
+  /** Restrict to regions relevant for a clinical workflow. */
+  useCase?: ClinicalUseCase;
+  /** Initial render mode. Defaults to 2d (more accessible / lower-end devices). */
+  defaultMode?: BodySiteRenderMode;
+  /** Persist mode preference to localStorage under this key. */
+  modePreferenceKey?: string;
+};
+
+const STORAGE_KEY_DEFAULT = "body-site-render-mode";
+
+function readPreferredMode(
+  key: string,
+  fallback: BodySiteRenderMode,
+): BodySiteRenderMode {
+  if (typeof window === "undefined") return fallback;
+  const stored = window.localStorage.getItem(key);
+  if (stored === "2d" || stored === "3d") return stored;
+  return fallback;
+}
+
+export default function BodySiteSelector3D(props: Props) {
+  const {
+    className,
+    height = 560,
+    allowedCodes,
+    useCase,
+    defaultMode = "2d",
+    modePreferenceKey = STORAGE_KEY_DEFAULT,
+  } = props;
+
   const { t } = useTranslation();
   const webglSupported = useWebGLSupport();
 
-  const [view, setView] = useState<CameraView>("front");
+  const [mode, setMode] = useState<BodySiteRenderMode>(() =>
+    readPreferredMode(modePreferenceKey, defaultMode),
+  );
+  const [view2D, setView2D] = useState<Body2DView>("front");
+  const [view3D, setView3D] = useState<CameraView>("front");
   const [search, setSearch] = useState("");
   const [focusedIdx, setFocusedIdx] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const regions = useMemo(
-    () =>
-      allowedCodes
-        ? BODY_REGIONS.filter((r) => allowedCodes.includes(r.code.code))
-        : BODY_REGIONS,
-    [allowedCodes],
+  // Persist mode preference
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(modePreferenceKey, mode);
+  }, [mode, modePreferenceKey]);
+
+  // Force 2D when WebGL is unavailable
+  useEffect(() => {
+    if (!webglSupported && mode === "3d") setMode("2d");
+  }, [webglSupported, mode]);
+
+  const regions = useMemo(() => {
+    let result = BODY_REGIONS;
+    if (allowedCodes) {
+      result = result.filter((r) => allowedCodes.includes(r.code.code));
+    }
+    if (useCase) {
+      result = result.filter((r) => r.useCases?.includes(useCase));
+    }
+    return result;
+  }, [allowedCodes, useCase]);
+
+  const allowedRegionIds = useMemo(
+    () => new Set(regions.map((r) => r.id)),
+    [regions],
+  );
+  const regionFilter = useMemo(
+    () => (region: BodyRegion) => allowedRegionIds.has(region.id),
+    [allowedRegionIds],
   );
 
   const searchMatches = useMemo(() => {
     if (!search.trim()) return [];
-    return searchRegions(search).filter((id) =>
-      regions.some((r) => r.id === id),
-    );
-  }, [search, regions]);
+    return searchRegions(search).filter((id) => allowedRegionIds.has(id));
+  }, [search, allowedRegionIds]);
 
   const highlightedIds = useMemo(() => new Set(searchMatches), [searchMatches]);
 
-  const selected = findRegionByCode(value);
+  // Selection state
+  const selectedRegions = useMemo(() => {
+    if (props.multiple) {
+      return (props.value ?? [])
+        .map((code) => findRegionByCode(code))
+        .filter((r): r is BodyRegion => !!r);
+    }
+    const single = findRegionByCode(props.value ?? undefined);
+    return single ? [single] : [];
+  }, [props]);
+
+  const selectedIds = useMemo(
+    () => new Set(selectedRegions.map((r) => r.id)),
+    [selectedRegions],
+  );
+
   const focusedRegion = focusedIdx != null ? regions[focusedIdx] : undefined;
 
-  // When a search match exists, swing the camera to a view that shows it.
+  // Auto-rotate to relevant view when searching
   useEffect(() => {
     if (searchMatches.length === 0) return;
     const first = regions.find((r) => r.id === searchMatches[0]);
     if (!first) return;
-    if (first.view === "back" && view === "front") setView("back");
-    if (first.view === "front" && view === "back") setView("front");
-  }, [searchMatches, regions, view]);
+    if (mode === "2d") {
+      if (first.view === "back" && view2D === "front") setView2D("back");
+      if (first.view === "front" && view2D === "back") setView2D("front");
+    } else {
+      if (first.view === "back" && view3D === "front") setView3D("back");
+      if (first.view === "front" && view3D === "back") setView3D("front");
+    }
+  }, [searchMatches, regions, view2D, view3D, mode]);
 
   const handleSelect = (region: BodyRegion) => {
-    onSelect(region.code);
+    if (props.multiple) {
+      const current = props.value ?? [];
+      const exists = current.find(
+        (c) => c.code === region.code.code && c.system === region.code.system,
+      );
+      if (exists) {
+        props.onSelect(
+          current.filter(
+            (c) =>
+              !(c.code === region.code.code && c.system === region.code.system),
+          ),
+        );
+      } else {
+        props.onSelect([...current, region.code]);
+      }
+    } else {
+      props.onSelect(region.code);
+    }
     setSearch("");
   };
 
@@ -97,6 +195,14 @@ export default function BodySiteSelector3D({
     }
   };
 
+  const view2DButtons: Body2DView[] = ["front", "back"];
+  const view3DButtons: CameraView[] = ["front", "back", "left", "right"];
+
+  const selectedSummary = selectedRegions
+    .map((r) => r.code.display)
+    .filter(Boolean)
+    .join(", ");
+
   return (
     <div
       ref={containerRef}
@@ -105,14 +211,14 @@ export default function BodySiteSelector3D({
       tabIndex={0}
       onKeyDown={handleKeyDown}
       className={cn(
-        "relative w-full rounded-lg border border-gray-200 bg-gradient-to-b from-gray-50 to-gray-100 overflow-hidden focus:outline-hidden focus:ring-2 focus:ring-primary-500",
+        "relative flex w-full flex-col rounded-lg border border-gray-200 bg-gradient-to-b from-gray-50 to-gray-100 overflow-hidden focus:outline-hidden focus:ring-2 focus:ring-primary-500",
         className,
       )}
       style={{ height }}
     >
-      {/* Top toolbar: search + view controls */}
-      <div className="absolute top-2 left-2 right-2 z-10 flex flex-wrap items-center gap-2 pointer-events-none">
-        <div className="pointer-events-auto relative flex-1 min-w-[180px] max-w-md">
+      {/* Top toolbar: search + view + mode */}
+      <div className="z-10 flex flex-wrap items-center gap-2 border-b border-gray-200 bg-white/95 p-2">
+        <div className="relative flex-1 min-w-[180px] max-w-md">
           <Search
             className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-gray-400"
             aria-hidden
@@ -122,7 +228,7 @@ export default function BodySiteSelector3D({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("body_site_search_placeholder")}
-            className="pl-8 pr-8 h-9 bg-white/95 shadow-sm"
+            className="pl-8 pr-8 h-9"
             aria-label={t("body_site_search_placeholder")}
           />
           {search && (
@@ -136,30 +242,77 @@ export default function BodySiteSelector3D({
             </button>
           )}
         </div>
+
+        {/* View buttons */}
         <div
-          className="pointer-events-auto flex items-center gap-1 rounded-md bg-white/95 p-1 shadow-sm"
+          className="flex items-center gap-1 rounded-md bg-gray-50 p-1"
           role="group"
           aria-label={t("body_site_view_controls")}
         >
-          {(["front", "back", "left", "right"] as CameraView[]).map((v) => (
+          {mode === "2d"
+            ? view2DButtons.map((v) => (
+                <Button
+                  key={v}
+                  type="button"
+                  size="sm"
+                  variant={view2D === v ? "primary" : "ghost"}
+                  className="h-7 px-2 text-xs"
+                  onClick={() => setView2D(v)}
+                  aria-pressed={view2D === v}
+                >
+                  {t(`body_site_view_${v}`)}
+                </Button>
+              ))
+            : view3DButtons.map((v) => (
+                <Button
+                  key={v}
+                  type="button"
+                  size="sm"
+                  variant={view3D === v ? "primary" : "ghost"}
+                  className="h-7 px-2 text-xs"
+                  onClick={() => setView3D(v)}
+                  aria-pressed={view3D === v}
+                >
+                  {t(`body_site_view_${v}`)}
+                </Button>
+              ))}
+        </div>
+
+        {/* 2D / 3D mode toggle */}
+        {webglSupported && (
+          <div
+            className="flex items-center gap-1 rounded-md bg-gray-50 p-1"
+            role="group"
+            aria-label={t("body_site_mode_toggle")}
+          >
             <Button
-              key={v}
               type="button"
               size="sm"
-              variant={view === v ? "primary" : "ghost"}
+              variant={mode === "2d" ? "primary" : "ghost"}
               className="h-7 px-2 text-xs"
-              onClick={() => setView(v)}
-              aria-pressed={view === v}
+              onClick={() => setMode("2d")}
+              aria-pressed={mode === "2d"}
             >
-              {t(`body_site_view_${v}`)}
+              {t("body_site_mode_2d")}
             </Button>
-          ))}
-        </div>
+            <Button
+              type="button"
+              size="sm"
+              variant={mode === "3d" ? "primary" : "ghost"}
+              className="h-7 px-2 text-xs"
+              onClick={() => setMode("3d")}
+              aria-pressed={mode === "3d"}
+            >
+              <Box className="size-3 mr-1" aria-hidden />
+              {t("body_site_mode_3d")}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Search results dropdown */}
       {search.trim() && (
-        <div className="absolute top-12 left-2 z-20 w-full max-w-md pointer-events-auto">
+        <div className="absolute top-14 left-2 z-20 w-full max-w-md">
           <div className="rounded-md border border-gray-200 bg-white shadow-lg max-h-64 overflow-auto">
             {searchMatches.length === 0 ? (
               <div className="p-3 text-sm text-gray-500">
@@ -169,14 +322,21 @@ export default function BodySiteSelector3D({
               searchMatches.slice(0, 10).map((id) => {
                 const r = regions.find((x) => x.id === id);
                 if (!r) return null;
+                const isSelected = selectedIds.has(id);
                 return (
                   <button
                     key={id}
                     type="button"
                     onClick={() => handleSelect(r)}
-                    className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50"
+                    className={cn(
+                      "flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50",
+                      isSelected && "bg-sky-50",
+                    )}
                   >
-                    <span>{r.code.display}</span>
+                    <span className="flex items-center gap-2">
+                      {isSelected && <span className="text-sky-600">●</span>}
+                      {r.code.display}
+                    </span>
                     <span className="text-xs text-gray-400">{r.code.code}</span>
                   </button>
                 );
@@ -186,49 +346,70 @@ export default function BodySiteSelector3D({
         </div>
       )}
 
-      {/* 3D scene */}
-      {webglSupported ? (
-        <Suspense
-          fallback={
-            <div className="flex h-full items-center justify-center text-sm text-gray-500">
-              {t("loading")}
-            </div>
-          }
-        >
-          <BodyScene
-            selectedId={selected?.id}
+      {/* Body view */}
+      <div className="relative flex-1 overflow-hidden">
+        {mode === "2d" ? (
+          <Body2D
+            view={view2D}
+            selectedIds={selectedIds}
             highlightedIds={highlightedIds}
             focusedId={focusedRegion?.id}
-            view={view}
+            regionFilter={regionFilter}
             onSelect={handleSelect}
           />
-        </Suspense>
-      ) : (
-        <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
-          <p className="text-sm font-medium text-gray-700">
-            {t("body_site_webgl_unavailable_title")}
-          </p>
-          <p className="text-xs text-gray-500 max-w-md">
-            {t("body_site_webgl_unavailable_description")}
-          </p>
-        </div>
-      )}
+        ) : (
+          <Suspense
+            fallback={
+              <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                {t("loading")}
+              </div>
+            }
+          >
+            <BodyScene
+              selectedId={selectedRegions[0]?.id}
+              highlightedIds={highlightedIds}
+              focusedId={focusedRegion?.id}
+              view={view3D}
+              onSelect={handleSelect}
+            />
+          </Suspense>
+        )}
+      </div>
 
       {/* Bottom status bar */}
-      <div className="absolute bottom-2 left-2 right-2 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        <div className="rounded-md bg-white/90 px-3 py-1.5 text-xs text-gray-700 shadow-sm">
-          {selected ? (
-            <span>
-              <span className="font-medium">{t("selected")}:</span>{" "}
-              {selected.code.display}{" "}
-              <span className="text-gray-400">({selected.code.code})</span>
-            </span>
-          ) : (
-            <span className="text-gray-500">{t("body_site_3d_hint")}</span>
+      <div className="border-t border-gray-200 bg-white/95 px-3 py-2 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="text-gray-700">
+            {selectedRegions.length === 0 ? (
+              <span className="text-gray-500">{t("body_site_3d_hint")}</span>
+            ) : props.multiple ? (
+              <span>
+                <span className="font-medium">
+                  {t("selected_count", { count: selectedRegions.length })}:
+                </span>{" "}
+                <span className="text-gray-600">{selectedSummary}</span>
+              </span>
+            ) : (
+              <span>
+                <span className="font-medium">{t("selected")}:</span>{" "}
+                {selectedRegions[0].code.display}{" "}
+                <span className="text-gray-400">
+                  ({selectedRegions[0].code.code})
+                </span>
+              </span>
+            )}
+          </div>
+          {props.multiple && selectedRegions.length > 0 && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="h-6 px-2 text-xs"
+              onClick={() => props.onSelect([])}
+            >
+              {t("clear_all")}
+            </Button>
           )}
-        </div>
-        <div className="rounded-md bg-white/90 px-3 py-1.5 text-xs text-gray-500 shadow-sm">
-          {t("body_site_3d_drag_hint")}
         </div>
       </div>
     </div>

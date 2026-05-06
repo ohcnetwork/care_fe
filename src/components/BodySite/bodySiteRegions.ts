@@ -41,6 +41,13 @@ export type BodyGroup =
   | "leg-left"
   | "leg-right";
 
+export type ClinicalUseCase =
+  | "im-injection"
+  | "iv-cannulation"
+  | "subcut-injection"
+  | "auscultation"
+  | "wound";
+
 export interface BodyRegion {
   id: string;
   code: Code;
@@ -54,6 +61,8 @@ export interface BodyRegion {
   aliases?: string[];
   /** Whether this is a small / detail region (used for level-of-detail rendering) */
   detail?: boolean;
+  /** Clinical workflows where this region is commonly selected */
+  useCases?: ClinicalUseCase[];
 }
 
 const snomed = (code: string, display: string): Code => ({
@@ -617,7 +626,157 @@ export const BODY_REGIONS: BodyRegion[] = [
     view: "any",
     group: "leg-left",
   },
+
+  // ── Clinical injection / cannulation sub-sites ─────────────────────────
+  {
+    id: "deltoid-right",
+    code: snomed("181468005", "Right deltoid"),
+    shape: { kind: "sphere", radius: 0.14 },
+    position: [-ARM_OFFSET - 0.05, SHOULDER_Y - 0.15, 0.18],
+    side: "right",
+    view: "front",
+    group: "arm-right",
+    detail: true,
+    aliases: ["deltoid IM right", "right deltoid muscle"],
+    useCases: ["im-injection"],
+  },
+  {
+    id: "deltoid-left",
+    code: snomed("181469002", "Left deltoid"),
+    shape: { kind: "sphere", radius: 0.14 },
+    position: [ARM_OFFSET + 0.05, SHOULDER_Y - 0.15, 0.18],
+    side: "left",
+    view: "front",
+    group: "arm-left",
+    detail: true,
+    aliases: ["deltoid IM left", "left deltoid muscle"],
+    useCases: ["im-injection"],
+  },
+  {
+    id: "ventrogluteal-right",
+    code: snomed("700013004", "Right ventrogluteal region"),
+    shape: { kind: "sphere", radius: 0.14 },
+    position: [-0.45, PELVIS_Y - 0.05, -0.05],
+    side: "right",
+    view: "any",
+    group: "leg-right",
+    detail: true,
+    aliases: ["ventrogluteal IM right", "right hip injection"],
+    useCases: ["im-injection"],
+  },
+  {
+    id: "ventrogluteal-left",
+    code: snomed("700014005", "Left ventrogluteal region"),
+    shape: { kind: "sphere", radius: 0.14 },
+    position: [0.45, PELVIS_Y - 0.05, -0.05],
+    side: "left",
+    view: "any",
+    group: "leg-left",
+    detail: true,
+    aliases: ["ventrogluteal IM left", "left hip injection"],
+    useCases: ["im-injection"],
+  },
+  {
+    id: "vastus-lateralis-right",
+    code: snomed("244310005", "Right vastus lateralis"),
+    shape: { kind: "sphere", radius: 0.16 },
+    position: [-LEG_OFFSET - 0.18, HIP_Y - 0.45, 0.18],
+    side: "right",
+    view: "front",
+    group: "leg-right",
+    detail: true,
+    aliases: ["vastus lateralis IM right", "anterolateral thigh right"],
+    useCases: ["im-injection"],
+  },
+  {
+    id: "vastus-lateralis-left",
+    code: snomed("244311009", "Left vastus lateralis"),
+    shape: { kind: "sphere", radius: 0.16 },
+    position: [LEG_OFFSET + 0.18, HIP_Y - 0.45, 0.18],
+    side: "left",
+    view: "front",
+    group: "leg-left",
+    detail: true,
+    aliases: ["vastus lateralis IM left", "anterolateral thigh left"],
+    useCases: ["im-injection"],
+  },
+  {
+    id: "dorsogluteal-right",
+    code: snomed("60066007", "Right gluteal region"),
+    shape: { kind: "sphere", radius: 0.14 },
+    position: [-0.3, PELVIS_Y, -0.32],
+    side: "right",
+    view: "back",
+    group: "leg-right",
+    detail: true,
+    aliases: ["dorsogluteal IM right"],
+    useCases: ["im-injection"],
+  },
+  {
+    id: "dorsogluteal-left",
+    code: snomed("36475000", "Left gluteal region"),
+    shape: { kind: "sphere", radius: 0.14 },
+    position: [0.3, PELVIS_Y, -0.32],
+    side: "left",
+    view: "back",
+    group: "leg-left",
+    detail: true,
+    aliases: ["dorsogluteal IM left"],
+    useCases: ["im-injection"],
+  },
+  {
+    id: "antecubital-right",
+    code: snomed("66480000", "Right antecubital fossa"),
+    shape: { kind: "sphere", radius: 0.1 },
+    position: [-ARM_OFFSET - 0.1, 1.2, 0.18],
+    side: "right",
+    view: "front",
+    group: "arm-right",
+    detail: true,
+    aliases: ["right cubital fossa", "right IV site", "AC right"],
+    useCases: ["iv-cannulation"],
+  },
+  {
+    id: "antecubital-left",
+    code: snomed("66480001", "Left antecubital fossa"),
+    shape: { kind: "sphere", radius: 0.1 },
+    position: [ARM_OFFSET + 0.1, 1.2, 0.18],
+    side: "left",
+    view: "front",
+    group: "arm-left",
+    detail: true,
+    aliases: ["left cubital fossa", "left IV site", "AC left"],
+    useCases: ["iv-cannulation"],
+  },
+  {
+    id: "abdomen-sc-right",
+    code: snomed("818983003", "Right side of abdomen"),
+    shape: { kind: "sphere", radius: 0.1 },
+    position: [-0.45, ABDOMEN_Y - 0.18, 0.32],
+    side: "right",
+    view: "front",
+    group: "torso",
+    detail: true,
+    aliases: ["right abdomen SC", "right SC injection"],
+    useCases: ["subcut-injection"],
+  },
+  {
+    id: "abdomen-sc-left",
+    code: snomed("818984009", "Left side of abdomen"),
+    shape: { kind: "sphere", radius: 0.1 },
+    position: [0.45, ABDOMEN_Y - 0.18, 0.32],
+    side: "left",
+    view: "front",
+    group: "torso",
+    detail: true,
+    aliases: ["left abdomen SC", "left SC injection"],
+    useCases: ["subcut-injection"],
+  },
 ];
+
+export function regionsForUseCase(useCase: ClinicalUseCase): BodyRegion[] {
+  return BODY_REGIONS.filter((r) => r.useCases?.includes(useCase));
+}
 
 export function findRegionByCode(code?: Code | null): BodyRegion | undefined {
   if (!code) return undefined;
