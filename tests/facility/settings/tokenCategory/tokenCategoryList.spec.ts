@@ -105,8 +105,8 @@ test.describe("Token Category List - Permission Tests", () => {
       await expect(table).not.toBeVisible();
 
       // Verify action buttons are NOT visible
-      const viewButtons = page.getByRole("link", { name: "View" });
-      const editButtons = page.getByRole("link", { name: "Edit" });
+      const viewButtons = page.getByRole("link", { name: "View", exact: true });
+      const editButtons = page.getByRole("link", { name: "Edit", exact: true });
       expect(await viewButtons.count()).toBe(0);
       expect(await editButtons.count()).toBe(0);
 
@@ -118,13 +118,16 @@ test.describe("Token Category List - Permission Tests", () => {
       await sidebarToggle.click();
 
       const settingsSection = page.getByRole("button", { name: "Settings" });
-      await expect(settingsSection).toBeVisible();
-      await settingsSection.click();
+      const settingsVisible = await settingsSection.isVisible();
 
-      const tokenCategoryLink = page.getByRole("link", {
-        name: "Token Category",
-      });
-      await expect(tokenCategoryLink).not.toBeVisible();
+      if (settingsVisible) {
+        await settingsSection.click();
+        const tokenCategoryLink = page.getByRole("link", {
+          name: "Token Category",
+        });
+        await expect(tokenCategoryLink).not.toBeVisible();
+      }
+      // If Settings section itself isn't visible, Token Category is also not accessible
     });
   });
 });

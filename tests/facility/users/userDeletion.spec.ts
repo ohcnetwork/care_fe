@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
 
 /**
  * User Deletion Access Control Tests
@@ -69,16 +70,12 @@ test.describe("User Deletion Access Control", () => {
 
       // Wait for successful login
       await expect(page).toHaveURL(/(?!.*login)/, { timeout: 15000 });
+      await page.waitForLoadState("networkidle");
 
-      // Navigate to first available facility
-      const firstFacilityLink = page
-        .getByRole("link")
-        .filter({ hasText: "View" })
-        .first();
-      await expect(firstFacilityLink).toBeVisible({ timeout: 10000 });
-      await firstFacilityLink.click();
-      await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-      await page.getByRole("link", { name: "Users" }).click();
+      // Navigate directly to facility users page
+      const facilityId = getFacilityId();
+      await page.goto(`/facility/${facilityId}/users`);
+      await page.waitForLoadState("networkidle");
 
       // Wait for users page to load by checking for See Details button
       const seeDetailsButton = page
