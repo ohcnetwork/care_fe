@@ -29,16 +29,17 @@ import PaginationComponent from "@/components/Common/Pagination";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
+import { TooltipComponent } from "@/components/ui/tooltip";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
+import { buildLocationPath, getLocationPath } from "@/types/location/utils";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 
 export function LocationSwitcher() {
   const { t } = useTranslation();
-  const { facilityId } = useCurrentLocation();
-  const { location: extractedLocation } = useCurrentLocation();
+  const { facilityId, location: extractedLocation } = useCurrentLocation();
   const { state } = useSidebar();
   const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [openDialog, setOpenDialog] = useState(false);
@@ -84,15 +85,22 @@ export function LocationSwitcher() {
             className="w-full flex items-center justify-between gap-3 py-6 px-2 rounded-md bg-white border border-gray-200"
             onClick={() => setOpenDialog(true)}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               <MapPinIcon className="size-5 text-green-600" />
-              <div className="flex flex-col items-start">
-                <span className="text-xs text-gray-500">
-                  {t("current_location")}
-                </span>
-                <span className="text-sm font-medium text-gray-900">
-                  {location?.name}
-                </span>
+              <div className="min-w-0 flex-1">
+                <TooltipComponent
+                  content={location?.name}
+                  className="hidden lg:block max-w-xs"
+                >
+                  <div className="flex min-w-0 flex-col items-start">
+                    <span className="text-xs text-gray-500">
+                      {t("current_location")}
+                    </span>
+                    <span className="w-full truncate text-left text-sm font-medium text-gray-900">
+                      {location?.name}
+                    </span>
+                  </div>
+                </TooltipComponent>
               </div>
             </div>
             <CareIcon icon="l-sort" />
@@ -136,7 +144,7 @@ export function LocationSelectorDialog({
     ? locationLevel[locationLevel.length - 1].id
     : "";
 
-  const { data: locations, isLoading: isLoading } = useQuery({
+  const { data: locations, isLoading } = useQuery({
     queryKey: [
       "locations",
       facilityId,
@@ -144,17 +152,16 @@ export function LocationSelectorDialog({
       searchValue,
       currentPage,
     ],
-    queryFn: query(locationApi.list, {
+    queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        ...(currentParentId !== "" && {
-          parent: currentParentId,
-        }),
         mode: "kind",
-        ...(myLocations && !currentParentId && { mine: true }),
-        ...(searchValue && { name: searchValue }),
         limit: resultsPerPage,
         offset: (currentPage - 1) * resultsPerPage,
+        parent: !searchValue && currentParentId ? currentParentId : undefined,
+        mine:
+          myLocations && !currentParentId && !searchValue ? true : undefined,
+        name: searchValue || undefined,
       },
     }),
     enabled: open,
@@ -162,7 +169,7 @@ export function LocationSelectorDialog({
 
   const handleSelect = (location: LocationRead) => {
     if (location.has_children) {
-      setLocationLevel([...locationLevel, location]);
+      setLocationLevel(buildLocationPath(location));
     } else {
       handleConfirmSelection(location);
     }
@@ -188,13 +195,7 @@ export function LocationSelectorDialog({
   };
 
   const handleLocationClick = (location: LocationRead) => {
-    let currentLocation = location;
-    const locationList = [location];
-    while (currentLocation?.parent && currentLocation.parent.id) {
-      locationList.unshift(currentLocation.parent);
-      currentLocation = currentLocation.parent;
-    }
-    setLocationLevel(locationList);
+    setLocationLevel(buildLocationPath(location));
     setSearchValue("");
     setCurrentPage(1);
   };
@@ -210,47 +211,38 @@ export function LocationSelectorDialog({
   );
 
   const getCurrentLocation = () => {
-    if (!location) return <></>;
-    let locationList = [location];
-    let currentLocation = location;
-    while (currentLocation?.parent && currentLocation.parent.id) {
-      locationList.unshift(currentLocation.parent);
-      currentLocation = currentLocation.parent;
-    }
-    if (locationList.length > 0) {
-      return (
-        <div className="flex flex-row items-center gap-1 text-sm font-normal">
-          <span className="text-gray-500">{t("current_location")}:</span>
-          <div className="flex flex-row gap-1 items-center p-1 rounded-md bg-gray-100">
-            {locationList.map((location, index) => (
-              <div
-                className="flex flex-row gap-1 items-center"
-                key={location.id}
-              >
-                {location.has_children ? (
-                  <Button
-                    variant="link"
-                    className="p-0 text-nowrap h-5"
-                    onClick={() => handleLocationClick(location)}
-                  >
-                    {location?.name}
-                  </Button>
-                ) : (
-                  <span className="text-nowrap h-5">{location?.name}</span>
-                )}
-                {((index === 0 && locationList.length > 1) ||
-                  (index > 0 && index < locationList.length - 1)) && (
-                  <div>
-                    <CareIcon icon="l-arrow-right" />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+    if (!location) return null;
+
+    const locationList = buildLocationPath(location);
+
+    return (
+      <div className="flex flex-row items-center gap-1 text-sm font-normal flex-wrap">
+        <span className="text-gray-500">{t("current_location")}:</span>
+        <div className="flex flex-row gap-1 items-center p-2 rounded-md bg-gray-100 flex-wrap overflow-hidden">
+          {locationList.map((loc, index) => (
+            <div
+              className="flex flex-row gap-1 items-center truncate max-w-xs"
+              key={loc.id}
+            >
+              {loc.has_children ? (
+                <Button
+                  variant="link"
+                  className="p-0 text-nowrap h-5 justify-start overflow-hidden"
+                  onClick={() => handleLocationClick(loc)}
+                >
+                  <span className="text-nowrap h-5 truncate">{loc.name}</span>
+                </Button>
+              ) : (
+                <span className="text-nowrap h-5 truncate">{loc.name}</span>
+              )}
+              {index < locationList.length - 1 && (
+                <CareIcon icon="l-arrow-right" />
+              )}
+            </div>
+          ))}
         </div>
-      );
-    }
-    return <></>;
+      </div>
+    );
   };
 
   return (
@@ -265,17 +257,19 @@ export function LocationSelectorDialog({
       }}
     >
       <DialogContent className="p-3 min-w-[calc(50vw)]">
-        <DialogHeader>
+        <DialogHeader className="overflow-hidden">
           <DialogTitle>{getCurrentLocation()}</DialogTitle>
         </DialogHeader>
         {locationLevel.length > 0 && (
           <div className="flex flex-row justify-between gap-1 bg-gray-100 p-1 overflow-auto">
             <div className="flex flex-row gap-1 items-center">
               {locationLevel.map((level, index) => (
-                <>
+                <div
+                  key={level.id}
+                  className="flex flex-row gap-1 items-center"
+                >
                   {level.has_children ? (
                     <Button
-                      key={level.id}
                       variant="link"
                       className="w-full text-nowrap text-xs border bg-gray-100 border-gray-200 rounded-md p-2"
                       onClick={() => handleLocationClick(level)}
@@ -283,18 +277,14 @@ export function LocationSelectorDialog({
                       {level.name}
                     </Button>
                   ) : (
-                    <div
-                      key={level.id}
-                      className="w-full text-xs border bg-gray-100 border-gray-200 rounded-md p-2"
-                    >
-                      {level?.name}
+                    <div className="w-full text-xs border bg-gray-100 border-gray-200 rounded-md p-2">
+                      {level.name}
                     </div>
                   )}
-                  {((index === 0 && locationLevel.length > 1) ||
-                    (index > 0 && index < locationLevel.length - 1)) && (
+                  {index < locationLevel.length - 1 && (
                     <CareIcon icon="l-arrow-right" />
                   )}
-                </>
+                </div>
               ))}
             </div>
             <div className="flex flex-row gap-2">
@@ -360,6 +350,7 @@ export function LocationSelectorDialog({
                     location={location}
                     handleSelect={handleSelect}
                     handleConfirmSelection={handleConfirmSelection}
+                    isSearching={!!searchValue}
                   />
                 ))}
               </CommandGroup>
@@ -383,12 +374,16 @@ function LocationCommandItem({
   location,
   handleSelect,
   handleConfirmSelection,
+  isSearching = false,
 }: {
   location: LocationRead;
   handleSelect: (location: LocationRead) => void;
   handleConfirmSelection: (location: LocationRead) => void;
+  isSearching?: boolean;
 }) {
   const { t } = useTranslation();
+  const path = isSearching ? getLocationPath(location, " > ", true) : "";
+
   return (
     <CommandItem
       key={location.id}
@@ -400,7 +395,12 @@ function LocationCommandItem({
       }
       className="flex items-start sm:items-center justify-between"
     >
-      <span>{location.name}</span>
+      <div className="flex flex-col min-w-0">
+        <span className="truncate">{location.name}</span>
+        {isSearching && path && (
+          <span className="text-xs text-gray-500 truncate">{path}</span>
+        )}
+      </div>
       <div>
         <Button variant="white" size="xs" className="p-2 mr-4 w-full shadow">
           <CareIcon icon="l-corner-down-left" />

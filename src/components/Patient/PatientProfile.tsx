@@ -41,11 +41,12 @@ export const PatientProfile = (props: {
   const { hasPermission } = usePermissions();
   useShortcutSubContext();
   const { data: patientData, isLoading } = useQuery({
-    queryKey: ["patient", id],
+    queryKey: ["patient", id, facilityId],
     queryFn: query(patientApi.get, {
       pathParams: {
         id,
       },
+      queryParams: { facility: facilityId },
     }),
     enabled: !!id,
   });

@@ -15,7 +15,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -33,6 +32,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import {
   AgeOperationEqualityValue,
@@ -50,7 +50,6 @@ import {
   TagOperationValue,
 } from "@/types/base/condition/condition";
 import {
-  COLOR_OPTIONS,
   CustomValueSet,
   getRangeSummary,
   getValuesetSummary,
@@ -66,7 +65,15 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import valueSetApi from "@/types/valueSet/valueSetApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Edit, Trash2, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Edit,
+  Highlighter,
+  Plus,
+  Ruler,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { FieldValues, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -83,6 +90,7 @@ export function ObservationInterpretation<
   name = "qualified_ranges",
   onCancel,
   onSheetOpen,
+  facilityId,
 }: {
   form: UseFormReturn<TFieldValues>;
   qualifiedRanges: QualifiedRange[];
@@ -93,6 +101,7 @@ export function ObservationInterpretation<
   name?: string;
   onSheetOpen?: () => void;
   onCancel?: () => void;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -228,7 +237,11 @@ export function ObservationInterpretation<
         selectedInterpretationType === InterpretationType.ranges
           ? [
               {
-                interpretation: { display: "", icon: "", color: "" },
+                interpretation: {
+                  display: "",
+                  highlight: false,
+                  code: undefined,
+                },
                 min: undefined,
                 max: undefined,
               },
@@ -238,26 +251,44 @@ export function ObservationInterpretation<
         selectedInterpretationType === InterpretationType.valuesets
           ? [
               {
-                interpretation: { display: "", icon: "", color: "" },
+                interpretation: {
+                  display: "",
+                  highlight: false,
+                  code: undefined,
+                },
                 valueset: "",
               },
             ]
           : [],
       _interpretation_type: selectedInterpretationType,
     };
-
-    const updatedRanges = [...(qualifiedRanges || []), newRange];
-    setQualifiedRanges(updatedRanges);
-
-    form.setValue(name as any, updatedRanges as any);
-
     setEditedRange(newRange);
     handleSheetState(true);
   };
 
   const handleEditInterpretation = (index: number) => {
     handleSheetState(true);
-    const rangeToEdit = { ...qualifiedRanges[index], id: index };
+    const sourceRange = qualifiedRanges[index];
+    const rangeToEdit: QualifiedRange = {
+      ...sourceRange,
+      id: index,
+      conditions: sourceRange.conditions?.map((condition) => ({
+        ...condition,
+      })),
+      ranges: sourceRange.ranges?.map((range) => ({
+        ...range,
+        interpretation: { ...range.interpretation },
+      })),
+      valueset_interpretation: sourceRange.valueset_interpretation?.map(
+        (valuesetInterpretation) => ({
+          ...valuesetInterpretation,
+          interpretation: { ...valuesetInterpretation.interpretation },
+        }),
+      ),
+      default_interpretation: sourceRange.default_interpretation
+        ? { ...sourceRange.default_interpretation }
+        : undefined,
+    };
     setEditedRange(rangeToEdit);
     setSelectedInterpretationType(rangeToEdit._interpretation_type);
 
@@ -290,7 +321,11 @@ export function ObservationInterpretation<
     if (editedRange && editedRange.id !== undefined) {
       const editingIndex = editedRange.id;
       let newRanges = [...qualifiedRanges];
-      newRanges[editingIndex] = editedRange;
+      if (editingIndex >= newRanges.length) {
+        newRanges = [...newRanges, editedRange];
+      } else {
+        newRanges[editingIndex] = editedRange;
+      }
       newRanges = [
         ...newRanges.map((r) => ({
           ...r,
@@ -332,66 +367,45 @@ export function ObservationInterpretation<
 
   const getInterpretationSummary = (range: QualifiedRange, index: number) => {
     const rangeCount = range.ranges.length;
+    const conditionCount = range.conditions?.length ?? 0;
     const valuesetCount = range.valueset_interpretation?.length || 0;
-    let operationSummary = (range.conditions ?? [])
-      .slice(0, 2)
-      .map((condition, index) => {
-        return (
-          <ConditionOperationSummary
-            key={`condition-${index}`}
-            condition={condition}
-          />
-        );
-      });
-    if ((range.conditions?.length ?? 0) > 2) {
-      operationSummary.push(<span>+{range.conditions!.length - 2}...</span>);
-    }
-    const rangeSummary = range.ranges?.slice(0, 2).map((range, index) => {
-      return <span key={`range-${index}`}>{getRangeSummary(range)}</span>;
+    const hasDefault = !!range.default_interpretation;
+
+    const rangeSummary = range.ranges?.map((r, i) => {
+      return <span key={`range-${i}`}>{getRangeSummary(r)}</span>;
     });
-    const valuesetSummary = range.valueset_interpretation
-      ?.slice(0, 2)
-      .map((valueset, index) => {
-        return (
-          <span key={`valueset-${index}`}>{getValuesetSummary(valueset)}</span>
-        );
-      });
-    if (range.ranges.length > 2) {
-      rangeSummary.push(<span>+{range.ranges.length - 2}...</span>);
-    }
-    if (
-      range.valueset_interpretation?.length &&
-      range.valueset_interpretation.length > 2
-    ) {
-      valuesetSummary?.push(
-        <span>+{range.valueset_interpretation.length - 2}...</span>,
-      );
-    }
+    const valuesetSummary = range.valueset_interpretation?.map(
+      (valueset, i) => (
+        <span key={`valueset-${i}`}>{getValuesetSummary(valueset)}</span>
+      ),
+    );
+
     return (
-      <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-start flex-1 text-sm">
-        <span>#{index + 1}</span>
-        {operationSummary.length > 0 && (
-          <div className="flex flex-col gap-1 sm:w-1/2">
-            <span className="text-xs font-medium">{t("conditions")}</span>
-            <div className="flex flex-col gap-1 text-gray-500">
-              {operationSummary}
-            </div>
-          </div>
-        )}
-        {rangeCount > 0 && (
-          <div className="flex flex-col gap-1 sm:w-1/2">
-            <span className="text-xs font-medium">{t("effect")}</span>
-            <div className="flex flex-col gap-1 text-gray-500">
-              {rangeSummary}
-            </div>
-          </div>
-        )}
-        {valuesetCount > 0 && (
-          <div className="flex flex-col gap-1 sm:w-1/2">
-            <span className="text-xs font-medium">{t("effect")}</span>
-            <div className="flex flex-col gap-1 text-gray-500">
-              {valuesetSummary}
-            </div>
+      <div className="flex flex-col gap-2 flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="inline-flex items-center justify-center size-6 rounded-full bg-gray-900 text-white text-xs font-medium shrink-0">
+            {index + 1}
+          </span>
+          {range.title && (
+            <span className="text-sm font-medium text-gray-900">
+              {range.title}
+            </span>
+          )}
+          {hasDefault && (
+            <span className="inline-flex items-center rounded-md border border-gray-200 px-1.5 py-0.5 text-[10px] text-gray-600">
+              {t("default_interpretation")} {t("enabled")}
+            </span>
+          )}
+        </div>
+        {(conditionCount > 0 || rangeCount > 0 || valuesetCount > 0) && (
+          <div className="flex flex-col gap-1 sm:pl-8 text-xs text-gray-500">
+            {range.conditions?.map((condition, i) => (
+              <div key={`condition-${i}`} className="text-gray-600">
+                <ConditionOperationSummary condition={condition} shortDisplay />
+              </div>
+            ))}
+            {rangeSummary}
+            {valuesetSummary}
           </div>
         )}
       </div>
@@ -403,20 +417,13 @@ export function ObservationInterpretation<
     field: keyof QualifiedRange | undefined,
     value: any,
   ) => {
-    if (field && value !== undefined) {
+    if (field) {
       const updatedRange = {
         ...range,
         [field]: value,
       };
       setEditedRange(updatedRange);
-
-      // Update form state if we have a field name
-      if (editedRange && editedRange.id !== undefined) {
-        const fieldPath = `${name}.${editedRange.id}.${field}`;
-        form.setValue(fieldPath as any, value as any);
-      }
     } else {
-      // Full range update
       setEditedRange(range);
     }
   };
@@ -465,11 +472,16 @@ export function ObservationInterpretation<
       )}
 
       {qualifiedRanges?.length === 0 ? (
-        <p className="text-sm text-gray-500 py-4 text-center">
-          {t("no_interpretations_configured")}
-        </p>
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="size-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+            <Ruler className="size-5 text-gray-400" />
+          </div>
+          <p className="text-sm text-gray-500">
+            {t("no_interpretations_configured")}
+          </p>
+        </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {qualifiedRanges?.map((range, index) => {
             const errors = form.getFieldState(
               `${name}.${index}` as any,
@@ -479,36 +491,40 @@ export function ObservationInterpretation<
               <div
                 key={index}
                 className={cn(
-                  "flex flex-col sm:flex-row gap-2 items-center justify-between p-3 rounded-md border",
+                  "group flex flex-col sm:flex-row gap-3 items-start p-3 rounded-lg border transition-colors",
                   wouldBeAffectedByTypeChange(range, index)
-                    ? "bg-red-50 border-red-300"
-                    : "bg-gray-50 border-gray-200",
-                  errors ? "border border-red-500" : "",
+                    ? "bg-red-50 border-red-200"
+                    : "bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50/50",
+                  errors && "border-red-400 bg-red-50/50",
                 )}
               >
                 {getInterpretationSummary(range, index)}
-                {wouldBeAffectedByTypeChange(range, index) && (
-                  <span className="text-sm text-red-500">
-                    {t("type_changed_values_need_to_be_updated")}
-                  </span>
-                )}
-                <div className="flex flex-row justify-between gap-1 w-full sm:w-auto">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditInterpretation(index)}
-                  >
-                    <Edit className="size-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveInterpretation(index)}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                <div className="flex flex-col gap-0.5 shrink-0 w-full sm:w-auto">
+                  {wouldBeAffectedByTypeChange(range, index) && (
+                    <span className="text-xs text-red-500 mb-1">
+                      {t("type_changed_values_need_to_be_updated")}
+                    </span>
+                  )}
+                  <div className="flex items-center gap-0.5 self-end">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 text-gray-400 hover:text-gray-700"
+                      onClick={() => handleEditInterpretation(index)}
+                    >
+                      <Edit className="size-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 text-gray-400 hover:text-red-600"
+                      onClick={() => handleRemoveInterpretation(index)}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
@@ -517,7 +533,7 @@ export function ObservationInterpretation<
       )}
 
       <Sheet open={isSheetOpen} onOpenChange={handleSheetState}>
-        <SheetContent className="sm:max-w-xl">
+        <SheetContent className="sm:max-w-3xl flex flex-col">
           <SheetHeader>
             <SheetTitle>{t("add_edit_interpretation")}</SheetTitle>
             <SheetDescription>{t("configure_interpretation")}</SheetDescription>
@@ -533,6 +549,7 @@ export function ObservationInterpretation<
               interpretationType={selectedInterpretationType}
               //handleTypeChange={handleTypeChange}
               fieldName={`${name}.${editedRange.id || 0}`}
+              facilityId={facilityId}
             />
           )}
         </SheetContent>
@@ -578,6 +595,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
   interpretationType,
   //handleTypeChange,
   fieldName,
+  facilityId,
 }: {
   form: UseFormReturn<TFieldValues>;
   editedRange: QualifiedRange;
@@ -591,6 +609,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
   interpretationType: InterpretationType;
   //handleTypeChange: (newType: InterpretationType) => void;
   fieldName: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
 
@@ -620,50 +639,35 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
       (editedRange.valueset_interpretation || []).length === 0);
 
   return (
-    <div>
-      <div className="flex flex-col gap-3 mt-6 p-3 max-h-[calc(100vh-200px)] overflow-y-auto">
+    <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex flex-col gap-5 flex-1 overflow-y-auto py-2 px-0.5">
+        <FormField
+          control={form.control}
+          name={`${fieldName}.title` as any}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  {...field}
+                  value={editedRange.title ?? ""}
+                  placeholder={t("interpretation_title_placeholder")}
+                  className="h-10 text-base font-medium border-0 border-b border-gray-200 rounded-none px-0 focus-visible:ring-0 focus-visible:border-gray-900 placeholder:text-gray-300 placeholder:font-normal"
+                  onChange={(e) =>
+                    setEditedRange(editedRange, "title", e.target.value)
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <ConditionComponent
           conditions={editedRange.conditions ?? []}
           setConditions={handleSetConditions}
           form={form}
           fieldName={`${fieldName}.conditions`}
+          facilityId={facilityId}
         />
-        {/* TODO: Hide interpretation type selector until BE is ready*/}
-        {/*         <div>
-          <div className="flex flex-col sm:flex-row justify-between gap-2 bg-gray-50 rounded-md px-2 pt-1 pb-2 border border-gray-200">
-            <span className="text-sm font-medium mt-2">
-              {t("interpretation_type")}
-            </span>
-            <div className="flex flex-row">
-              <RadioGroup
-                value={interpretationType}
-                onValueChange={(newType) => {
-                  handleTypeChange(newType as InterpretationType);
-                }}
-                className="flex flex-row gap-6 mt-2 flex-1"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value={InterpretationType.ranges}
-                    id="ranges"
-                  />
-                  <FormLabel htmlFor="ranges" className="text-sm">
-                    {t("numeric_ranges")}
-                  </FormLabel>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value={InterpretationType.valuesets}
-                    id="valuesets"
-                  />
-                  <FormLabel htmlFor="valuesets" className="text-sm">
-                    {t("value_sets")}
-                  </FormLabel>
-                </div>
-              </RadioGroup>
-            </div>
-          </div>
-        </div> */}
         {interpretationType === InterpretationType.ranges ? (
           <NumericRangeComponent
             form={form}
@@ -679,12 +683,30 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
             fieldName={fieldName}
           />
         )}
+        <DefaultInterpretationComponent
+          form={form}
+          defaultInterpretation={editedRange.default_interpretation}
+          setDefaultInterpretation={(value) =>
+            setEditedRange(editedRange, "default_interpretation", value)
+          }
+          fieldName={`${fieldName}.default_interpretation`}
+        />
       </div>
-      <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 mt-auto border-t border-gray-100">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          className="w-full sm:w-auto"
+        >
           {t("cancel")}
         </Button>
-        <Button type="button" onClick={handleSave} disabled={isDisabled}>
+        <Button
+          type="button"
+          onClick={handleSave}
+          disabled={isDisabled}
+          className="w-full sm:w-auto"
+        >
           {t("save")}
         </Button>
       </div>
@@ -699,6 +721,7 @@ export function RenderConditionInput({
   handleSetValueType,
   form,
   fieldName,
+  facilityId,
 }: {
   condition: Condition;
   index: number;
@@ -713,6 +736,7 @@ export function RenderConditionInput({
   handleSetValueType: (value: string, index: number) => void;
   form: UseFormReturn<any>;
   fieldName: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const operation = condition.operation;
@@ -733,11 +757,11 @@ export function RenderConditionInput({
           <FormField
             control={form.control}
             name={`${fieldName}.value` as any}
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <FormControl>
                   <Select
-                    value={field.value}
+                    value={condition.value as string}
                     onValueChange={(value) => {
                       handleSetValue(value, index);
                     }}
@@ -772,11 +796,11 @@ export function RenderConditionInput({
           <FormField
             control={form.control}
             name={`${fieldName}.value.value_type` as any}
-            render={({ field }) => (
+            render={() => (
               <FormItem className="flex-1">
                 <FormControl>
                   <Select
-                    value={field.value || valueType}
+                    value={valueType}
                     onValueChange={(value) => {
                       handleSetValueType(value, index);
                     }}
@@ -861,7 +885,7 @@ export function RenderConditionInput({
                       {...field}
                       type="number"
                       placeholder={t("min")}
-                      className="w-full h-9"
+                      className="w-full min-w-30 h-9"
                       value={min}
                       onChange={(e) => {
                         handleSetValue(
@@ -892,7 +916,7 @@ export function RenderConditionInput({
                       {...field}
                       type="number"
                       placeholder={t("max")}
-                      className="w-full h-9"
+                      className="w-full min-w-30 h-9"
                       value={max}
                       onChange={(e) => {
                         handleSetValue(
@@ -925,11 +949,11 @@ export function RenderConditionInput({
           <FormField
             control={form.control}
             name={`${fieldName}.value` as any}
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <FormControl>
                   <Select
-                    value={field.value}
+                    value={condition.value as string}
                     onValueChange={(value) => {
                       handleSetValue(value, index);
                     }}
@@ -1078,6 +1102,7 @@ export function RenderConditionInput({
                   <FormItem>
                     <FormControl>
                       <TagSelectorPopover
+                        facilityId={facilityId}
                         selected={selectedTags}
                         resource={tagResource}
                         onChange={(tags) => {
@@ -1108,11 +1133,13 @@ export function ConditionComponent<
   setConditions,
   form,
   fieldName,
+  facilityId,
 }: {
   conditions: Condition[];
   setConditions: (value: Condition[]) => void;
   form: UseFormReturn<TFieldValues>;
   fieldName: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const { data } = useQuery({
@@ -1199,139 +1226,124 @@ export function ConditionComponent<
   };
 
   return (
-    <div className="flex flex-col gap-3 bg-white rounded-md p-3 border border-gray-200">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-medium text-gray-700">
+        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">
           {t("conditions")}
         </h3>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           type="button"
           onClick={handleAddCondition}
+          className="h-7 text-xs gap-1"
         >
-          {t("add_condition")}
+          <Plus className="size-3" />
+          {t("add")}
         </Button>
       </div>
-      {conditions.length > 0 &&
-        conditions.map((condition, index) => {
-          const metric = metrics?.find((m) => m.name === condition.metric);
-          if (!metric) return null;
-          return (
-            <div
-              key={index}
-              className="flex flex-col gap-2 bg-gray-50 rounded-md p-3 border border-gray-200"
-            >
-              <div className="text-sm flex justify-between flex-1">
-                {t("condition")} {index + 1}
+      {conditions.length > 0 && (
+        <div className="flex flex-col divide-y divide-gray-100 rounded-lg border border-gray-200">
+          {conditions.map((condition, index) => {
+            const metric = metrics?.find((m) => m.name === condition.metric);
+            if (!metric) return null;
+            return (
+              <div key={index} className="flex gap-2 p-2.5 items-start">
+                <div className="flex flex-col sm:flex-row gap-2 flex-1 min-w-0">
+                  <FormField
+                    control={form.control}
+                    name={`${fieldName}.${index}.metric` as any}
+                    render={() => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Select
+                            value={condition.metric}
+                            onValueChange={(value) => {
+                              handleSetMetric(value, index);
+                            }}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder={t("select_a_metric")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {metrics?.map((metric: Metrics) => (
+                                <SelectItem
+                                  key={metric.name}
+                                  value={metric.name}
+                                >
+                                  {t(`condition_metric__${metric.name}`)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`${fieldName}.${index}.operation` as any}
+                    render={() => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Select
+                            value={condition.operation}
+                            onValueChange={(value) => {
+                              handleSetOperation(
+                                value as ConditionOperation,
+                                index,
+                              );
+                            }}
+                          >
+                            <SelectTrigger className="h-8 text-xs max-w-40">
+                              <SelectValue
+                                placeholder={t("select_an_operation")}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {metric.allowed_operations.map(
+                                (operation: ConditionOperation) => (
+                                  <SelectItem key={operation} value={operation}>
+                                    {t(`condition_operation__${operation}`)}
+                                  </SelectItem>
+                                ),
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {condition.operation && (
+                    <div className="flex-1">
+                      <RenderConditionInput
+                        condition={condition}
+                        index={index}
+                        handleSetValue={handleSetValue}
+                        handleSetValueType={handleSetValueType}
+                        form={form}
+                        fieldName={`${fieldName}.${index}`}
+                        facilityId={facilityId}
+                      />
+                    </div>
+                  )}
+                </div>
                 <Button
                   size="icon"
                   variant="ghost"
                   type="button"
+                  className="size-7 shrink-0 text-gray-400 hover:text-red-600 mt-0.5"
                   onClick={() => handleRemoveCondition(index)}
                 >
-                  <Trash2 className="size-4" />
+                  <X className="size-3.5" />
                 </Button>
               </div>
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-col sm:flex-row gap-2 flex-1">
-                  <div className="flex flex-col gap-2 flex-1">
-                    <FormLabel className="text-sm">{t("type")}</FormLabel>
-                    <FormField
-                      control={form.control}
-                      name={`${fieldName}.${index}.metric` as any}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Select
-                              value={field.value}
-                              onValueChange={(value) => {
-                                handleSetMetric(value, index);
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue
-                                  placeholder={t("select_a_metric")}
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {metrics?.map((metric: Metrics) => (
-                                  <SelectItem
-                                    key={metric.name}
-                                    value={metric.name}
-                                  >
-                                    {t(`condition_metric__${metric.name}`)}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2 flex-1">
-                    <FormLabel className="text-sm">{t("comperator")}</FormLabel>
-                    <FormField
-                      control={form.control}
-                      name={`${fieldName}.${index}.operation` as any}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Select
-                              value={field.value}
-                              onValueChange={(value) => {
-                                handleSetOperation(
-                                  value as ConditionOperation,
-                                  index,
-                                );
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue
-                                  placeholder={t("select_an_operation")}
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {metric.allowed_operations.map(
-                                  (operation: ConditionOperation) => (
-                                    <SelectItem
-                                      key={operation}
-                                      value={operation}
-                                    >
-                                      {t(`condition_operation__${operation}`)}
-                                    </SelectItem>
-                                  ),
-                                )}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                {condition.operation && (
-                  <div className="flex flex-col gap-2">
-                    <FormLabel className="text-sm">{t("value")}</FormLabel>
-                    <RenderConditionInput
-                      condition={condition}
-                      index={index}
-                      handleSetValue={handleSetValue}
-                      handleSetValueType={handleSetValueType}
-                      form={form}
-                      fieldName={`${fieldName}.${index}`}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -1342,11 +1354,13 @@ function InterpretationComponent<
   interpretation,
   setInterpretation,
   fieldName,
+  disableDisplay = false,
 }: {
   form: UseFormReturn<TFieldValues>;
   interpretation: Interpretation;
   setInterpretation: (interpretation: Interpretation) => void;
   fieldName: string;
+  disableDisplay?: boolean;
 }) {
   const { t } = useTranslation();
   const handleDisplayChange = (value: string) => {
@@ -1356,34 +1370,27 @@ function InterpretationComponent<
     });
   };
 
-  const handleIconChange = (value: string) => {
+  const handleHighlightChange = (value: boolean) => {
     setInterpretation({
       ...interpretation,
-      icon: value,
-    });
-  };
-
-  const handleColorChange = (value: string) => {
-    setInterpretation({
-      ...interpretation,
-      color: value,
+      highlight: value,
     });
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full justify-between">
-      <div className="flex flex-col gap-2 flex-1">
-        <FormLabel className="text-sm">{t("display")}</FormLabel>
+    <div className="flex items-center gap-2 w-full">
+      {!disableDisplay && (
         <FormField
           control={form.control}
           name={`${fieldName}.display` as any}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex-1">
               <FormControl>
                 <Input
                   {...field}
-                  value={field.value}
-                  className="h-9"
+                  value={interpretation.display}
+                  placeholder={t("display")}
+                  className="h-8 text-xs"
                   onChange={(e) => handleDisplayChange(e.target.value)}
                 />
               </FormControl>
@@ -1391,49 +1398,69 @@ function InterpretationComponent<
             </FormItem>
           )}
         />
-      </div>
-      <div className="flex flex-col gap-2 flex-1">
-        <FormLabel className="text-sm">{t("icon")}</FormLabel>
-        <Input
-          value={interpretation.icon}
-          onChange={(e) => handleIconChange(e.target.value)}
-          className="h-9"
+      )}
+      <label className="inline-flex items-center gap-1.5 cursor-pointer shrink-0">
+        <Switch
+          checked={interpretation.highlight ?? false}
+          onCheckedChange={handleHighlightChange}
         />
-      </div>
-      <div className="flex flex-col gap-2 flex-1">
-        <FormLabel className="text-sm">{t("color")}</FormLabel>
-        <FormField
-          control={form.control}
-          name={`${fieldName}.color` as any}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Select value={field.value} onValueChange={handleColorChange}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder={t("select_a_value")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(COLOR_OPTIONS).map(([key, value]) => (
-                      <SelectItem key={key} value={value.hex}>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`w-4 h-4 rounded-full ${value.class}`}
-                          />
-                          {value.label}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+        <Highlighter className="size-3 text-gray-400" />
+      </label>
     </div>
   );
 }
+function DefaultInterpretationComponent<
+  TFieldValues extends FieldValues = FieldValues,
+>({
+  form,
+  defaultInterpretation,
+  setDefaultInterpretation,
+  fieldName,
+}: {
+  form: UseFormReturn<TFieldValues>;
+  defaultInterpretation?: Interpretation;
+  setDefaultInterpretation: (
+    interpretation: Interpretation | undefined,
+  ) => void;
+  fieldName: string;
+}) {
+  const { t } = useTranslation();
+  const isEnabled = !!defaultInterpretation;
+
+  const handleToggle = (enabled: boolean) => {
+    if (enabled) {
+      setDefaultInterpretation({ display: "", highlight: true });
+    } else {
+      setDefaultInterpretation(undefined);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+          {t("default_interpretation")}
+        </h3>
+        <Switch checked={isEnabled} onCheckedChange={handleToggle} />
+      </div>
+      <p className="text-xs text-gray-400">
+        {t("default_interpretation_description")}
+      </p>
+      {isEnabled && defaultInterpretation && (
+        <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-2.5">
+          <InterpretationComponent
+            form={form}
+            interpretation={defaultInterpretation}
+            setInterpretation={setDefaultInterpretation}
+            fieldName={fieldName}
+            disableDisplay
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
   form,
   ranges,
@@ -1477,7 +1504,7 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
     setRanges([
       ...ranges,
       {
-        interpretation: { display: "", icon: "", color: "" },
+        interpretation: { display: "", highlight: false, code: undefined },
         min: undefined,
         max: undefined,
       },
@@ -1489,100 +1516,99 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
   };
 
   return (
-    <div className="flex flex-col gap-3 bg-white rounded-md p-3 border border-gray-200">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-medium text-gray-700">{t("ranges")}</h3>
+        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+          {t("ranges")}
+        </h3>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           type="button"
           onClick={handleAddRange}
+          className="h-7 text-xs gap-1"
         >
-          {t("add_range")}
+          <Plus className="size-3" />
+          {t("add")}
         </Button>
       </div>
-      {ranges.map((range, index) => {
-        const { min, max } = range;
-        return (
-          <div
-            key={index}
-            className="flex flex-col gap-2 bg-gray-50 rounded-md p-3 border border-gray-200"
-          >
-            <div className="flex text-sm items-center justify-between">
-              {t("range")} {index + 1}
-              <Button
-                variant="ghost"
-                size="icon"
-                type="button"
-                onClick={() => handleRemoveRange(index)}
-              >
-                <Trash2 className="size-4" />
-              </Button>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              {range?.interpretation && (
-                <InterpretationComponent
-                  form={form}
-                  interpretation={range.interpretation}
-                  setInterpretation={(value) =>
-                    handleSetInterpretation(value, index)
-                  }
-                  fieldName={`${fieldName}.ranges.${index}.interpretation`}
-                />
-              )}
-              <div className="flex flex-row gap-2">
-                <div className="flex flex-col gap-2 flex-1">
-                  <FormLabel className="text-sm">{t("min")}</FormLabel>
-                  <FormField
-                    control={form.control}
-                    name={`${fieldName}.ranges.${index}.min` as any}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            value={min}
-                            className="h-9"
-                            onChange={(e) =>
-                              handleSetMin(e.target.value, index)
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+      {ranges.length > 0 && (
+        <div className="flex flex-col divide-y divide-gray-100 rounded-lg border border-gray-200">
+          {ranges.map((range, index) => {
+            const { min, max } = range;
+            return (
+              <div key={index} className="flex gap-2 p-2.5 items-start">
+                <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                  {range?.interpretation && (
+                    <InterpretationComponent
+                      form={form}
+                      interpretation={range.interpretation}
+                      setInterpretation={(value) =>
+                        handleSetInterpretation(value, index)
+                      }
+                      fieldName={`${fieldName}.ranges.${index}.interpretation`}
+                    />
+                  )}
+                  <div className="flex items-center gap-1.5">
+                    <FormField
+                      control={form.control}
+                      name={`${fieldName}.ranges.${index}.min` as any}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              value={min}
+                              placeholder={t("min")}
+                              className="h-8 text-xs"
+                              onChange={(e) =>
+                                handleSetMin(e.target.value, index)
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <span className="text-gray-300 text-xs shrink-0">–</span>
+                    <FormField
+                      control={form.control}
+                      name={`${fieldName}.ranges.${index}.max` as any}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              value={max}
+                              placeholder={t("max")}
+                              className="h-8 text-xs"
+                              onChange={(e) =>
+                                handleSetMax(e.target.value, index)
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
-                <div className="flex flex-col gap-2 flex-1">
-                  <FormLabel className="text-sm">{t("max")}</FormLabel>
-                  <FormField
-                    control={form.control}
-                    name={`${fieldName}.ranges.${index}.max` as any}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            value={max}
-                            className="h-9"
-                            onChange={(e) =>
-                              handleSetMax(e.target.value, index)
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  className="size-7 shrink-0 text-gray-400 hover:text-red-600 mt-0.5"
+                  onClick={() => handleRemoveRange(index)}
+                >
+                  <X className="size-3.5" />
+                </Button>
               </div>
-            </div>
-          </div>
-        );
-      })}
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -1635,7 +1661,10 @@ function CustomValueSetInterpretationComponent<
   const handleAddValueset = () => {
     setValuesetInterpretations([
       ...valuesetInterpretations,
-      { valueset: "", interpretation: { display: "", icon: "", color: "" } },
+      {
+        valueset: "",
+        interpretation: { display: "", highlight: false, code: undefined },
+      },
     ]);
   };
 
@@ -1646,65 +1675,66 @@ function CustomValueSetInterpretationComponent<
   };
 
   return (
-    <div className="flex flex-col gap-3 bg-white rounded-md p-3 border border-gray-200">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-medium text-gray-700">
+        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">
           {t("custom_valueset_interpretations")}
         </h3>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           type="button"
           onClick={handleAddValueset}
+          className="h-7 text-xs gap-1"
         >
+          <Plus className="size-3" />
           {t("add")}
         </Button>
       </div>
-      {valuesetInterpretations.map((valuesetInterpretation, index) => (
-        <div
-          key={index}
-          className="flex flex-col gap-2 bg-gray-50 rounded-md p-3 border border-gray-200"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-sm">
-              {t("valueset_interpretation")} {index + 1}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              type="button"
-              onClick={() => handleRemoveValueset(index)}
-            >
-              <Trash2 className="size-4" />
-            </Button>
-          </div>
-          <Select
-            value={valuesetInterpretation.valueset}
-            onValueChange={(value) => handleSetValueset(value, index)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t("select_a_value_set")} />
-            </SelectTrigger>
-            <SelectContent>
-              {valuesets?.results?.map((valueset) => (
-                <SelectItem key={valueset.slug} value={valueset.slug}>
-                  {valueset.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {valuesetInterpretation.valueset && (
-            <InterpretationComponent
-              form={form}
-              interpretation={valuesetInterpretation.interpretation}
-              setInterpretation={(value) =>
-                handleSetInterpretation(value, index)
-              }
-              fieldName={`${fieldName}.valueset_interpretation.${index}.interpretation`}
-            />
-          )}
+      {valuesetInterpretations.length > 0 && (
+        <div className="flex flex-col divide-y divide-gray-100 rounded-lg border border-gray-200">
+          {valuesetInterpretations.map((valuesetInterpretation, index) => (
+            <div key={index} className="flex gap-2 p-2.5 items-start">
+              <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                <Select
+                  value={valuesetInterpretation.valueset}
+                  onValueChange={(value) => handleSetValueset(value, index)}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder={t("select_a_value_set")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {valuesets?.results?.map((valueset) => (
+                      <SelectItem key={valueset.slug} value={valueset.slug}>
+                        {valueset.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {valuesetInterpretation.valueset && (
+                  <InterpretationComponent
+                    form={form}
+                    interpretation={valuesetInterpretation.interpretation}
+                    setInterpretation={(value) =>
+                      handleSetInterpretation(value, index)
+                    }
+                    fieldName={`${fieldName}.valueset_interpretation.${index}.interpretation`}
+                  />
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                type="button"
+                className="size-7 shrink-0 text-gray-400 hover:text-red-600 mt-0.5"
+                onClick={() => handleRemoveValueset(index)}
+              >
+                <X className="size-3.5" />
+              </Button>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }

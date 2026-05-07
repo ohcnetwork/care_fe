@@ -20,7 +20,7 @@ import { RoleSelect } from "@/components/Common/RoleSelect";
 
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
-import { RoleBase } from "@/types/emr/role/role";
+import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
 interface Props {
@@ -121,7 +121,11 @@ export default function LinkUserToDepartmentSheet({
 
           <div className="space-y-2">
             <Label>{t("select_role")}</Label>
-            <RoleSelect value={selectedRole} onChange={setSelectedRole} />
+            <RoleSelect
+              value={selectedRole}
+              onChange={setSelectedRole}
+              context={RoleContext.FACILITY}
+            />
           </div>
 
           <Button
