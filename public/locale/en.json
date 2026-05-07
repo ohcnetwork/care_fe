@@ -2181,6 +2181,7 @@
   "encounter_discharge_disposition__rehab": "Rehabilitation",
   "encounter_discharge_disposition__snf": "Skilled nursing facility",
   "encounter_duration_confirmation": "The duration of this encounter would be",
+  "encounter_future_date_restriction": "Future date is only allowed for planned encounters",
   "encounter_id": "Encounter ID",
   "encounter_locations": "Encounter Locations",
   "encounter_manage_organization_description": "Add or remove organizations from this encouter",
