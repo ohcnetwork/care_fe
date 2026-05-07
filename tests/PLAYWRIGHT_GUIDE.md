@@ -54,11 +54,11 @@ test.describe("Feature Name", () => {
 
 Use one of these storage states depending on the role needed:
 
-| Storage State | Role | Credentials |
-|--------------|------|-------------|
-| `tests/.auth/user.json` | Admin | `admin` / `admin` |
-| `tests/.auth/facilityAdmin.json` | Facility Admin | `facility_admin_2_0` / `Coronasafe@123` |
-| `tests/.auth/nurse.json` | Nurse | `nurse_2_0` / `Coronasafe@123` |
+| Storage State                    | Role           | Credentials                   |
+| -------------------------------- | -------------- | ----------------------------- |
+| `tests/.auth/user.json`          | Admin          | `admin` / `admin`             |
+| `tests/.auth/facilityAdmin.json` | Facility Admin | `care-fac-admin` / `Ohcn@123` |
+| `tests/.auth/nurse.json`         | Nurse          | `care-nurse` / `Ohcn@123`     |
 
 ```typescript
 // Most tests use admin
@@ -123,7 +123,9 @@ const uniqueName = `Test ${Date.now()}`;
 const status = faker.helpers.arrayElement(["Active", "Inactive"]);
 
 // Phone numbers (Indian format)
-const phone = `9${Math.floor(Math.random() * 1000000000).toString().padStart(9, "0")}`;
+const phone = `9${Math.floor(Math.random() * 1000000000)
+  .toString()
+  .padStart(9, "0")}`;
 
 // Slugs (auto-generated from names in the app)
 import { expectedSlug } from "tests/helper/utils";
@@ -136,6 +138,7 @@ const nonExistent = faker.string.uuid();
 ## Form Interactions
 
 ### Text Input
+
 ```typescript
 await page.getByRole("textbox", { name: "Name" }).fill("value");
 
@@ -144,6 +147,7 @@ await page.getByRole("textbox", { name: "Name" }).pressSequentially("value");
 ```
 
 ### Select / Combobox
+
 ```typescript
 await page.getByRole("combobox", { name: "Status", exact: true }).click();
 await page.getByRole("option", { name: "Active" }).first().click();
@@ -152,21 +156,25 @@ await page.getByRole("option", { name: "Active" }).first().click();
 **IMPORTANT:** Use `exact: true` when the label might partially match other elements. Use `.first()` on options when multiple matches are possible.
 
 ### Radio Button
+
 ```typescript
 await page.getByRole("radio", { name: "Male", exact: true }).click();
 ```
 
 ### Checkbox
+
 ```typescript
 await page.getByRole("checkbox", { name: "Create Multiple Beds" }).click();
 ```
 
 ### Number Input
+
 ```typescript
 await page.getByRole("spinbutton", { name: "PIN Code" }).fill("302020");
 ```
 
 ### Date Input (DD/MM/YYYY fields)
+
 ```typescript
 await page.getByPlaceholder("DD", { exact: true }).fill("16");
 await page.getByPlaceholder("MM", { exact: true }).fill("06");
@@ -174,6 +182,7 @@ await page.getByPlaceholder("YYYY", { exact: true }).fill("2009");
 ```
 
 ### Tab Navigation
+
 ```typescript
 await page.getByRole("tab", { name: "Age" }).click();
 ```
@@ -183,6 +192,7 @@ await page.getByRole("tab", { name: "Age" }).click();
 Import from `tests/helper/ui`:
 
 ### Command Selector (User picker, Service picker)
+
 ```typescript
 import { selectFromCommand } from "tests/helper/ui";
 
@@ -194,6 +204,7 @@ await selectFromCommand(page, trigger, {
 ```
 
 ### ValueSet Selector (Codes, body sites, diagnostic codes)
+
 ```typescript
 import { selectFromValueSet } from "tests/helper/ui";
 
@@ -205,6 +216,7 @@ await selectFromValueSet(page, trigger, {
 ```
 
 ### Requirements Selector (Multi-select with Plus buttons)
+
 ```typescript
 import { selectFromRequirements } from "tests/helper/ui";
 
@@ -216,6 +228,7 @@ await selectFromRequirements(page, trigger, {
 ```
 
 ### Location Multi-Select
+
 ```typescript
 import { selectFromLocationMultiSelect } from "tests/helper/ui";
 
@@ -228,6 +241,7 @@ await selectFromLocationMultiSelect(page, trigger, {
 ```
 
 ### Category Picker (Hierarchical navigation)
+
 ```typescript
 import { selectFromCategoryPicker } from "tests/helper/ui";
 
@@ -239,6 +253,7 @@ await selectFromCategoryPicker(page, trigger, {
 ```
 
 ### Filter Select
+
 ```typescript
 import { selectFromFilterSelect } from "tests/helper/ui";
 
@@ -246,6 +261,7 @@ await selectFromFilterSelect(page, /status/i, "active");
 ```
 
 ### Tab or Menu Item (responsive)
+
 ```typescript
 import { clickTabOrMenuItem } from "tests/helper/ui";
 
@@ -255,6 +271,7 @@ await clickTabOrMenuItem(page, /service requests/i);
 ## Assertions
 
 ### Toast Notifications
+
 ```typescript
 import { expectToast } from "tests/helper/ui";
 
@@ -266,14 +283,18 @@ await expectToast(page, "Saved", { timeout: 15000 });
 ```
 
 ### Form Field Errors
+
 ```typescript
 import { getFieldErrorMessage } from "tests/helper/error";
 
 const nameField = page.getByRole("textbox", { name: "Name" });
-await expect(getFieldErrorMessage(nameField)).toContainText("This field is required");
+await expect(getFieldErrorMessage(nameField)).toContainText(
+  "This field is required",
+);
 ```
 
 ### Table Content
+
 ```typescript
 const tableBody = page.locator('[data-slot="table-body"]');
 await expect(tableBody).toContainText("expected text");
@@ -287,6 +308,7 @@ await page.getByRole("row").filter({ hasText: departmentName }).click();
 ```
 
 ### Table Badges
+
 ```typescript
 import { verifyTableBadges } from "tests/helper/ui";
 
@@ -294,6 +316,7 @@ await verifyTableBadges(page, "Active", "My Item Name");
 ```
 
 ### Visibility
+
 ```typescript
 await expect(element).toBeVisible();
 await expect(element).toBeVisible({ timeout: 10000 });
@@ -301,6 +324,7 @@ await expect(element).not.toBeVisible();
 ```
 
 ### Values
+
 ```typescript
 await expect(element).toHaveValue("expected value");
 await expect(element).toContainText("partial text");
@@ -311,6 +335,7 @@ await expect(element).toBeEnabled();
 ## Buttons and Actions
 
 ### Submit / Create
+
 ```typescript
 await page.getByRole("button", { name: "Create" }).click();
 await page.getByRole("button", { name: "Save" }).click();
@@ -318,6 +343,7 @@ await page.getByRole("button", { name: "Submit" }).click();
 ```
 
 ### Edit
+
 ```typescript
 // Button with title attribute
 await page.locator("button[title='Edit Location']").first().click();
@@ -327,6 +353,7 @@ await page.getByRole("button", { name: /Edit/i }).click();
 ```
 
 ### Delete / Destructive
+
 ```typescript
 await page.getByRole("button", { name: "Delete" }).click();
 // Confirm in dialog
@@ -334,6 +361,7 @@ await page.getByRole("button", { name: "Confirm" }).click();
 ```
 
 ### Cancel
+
 ```typescript
 await page.getByRole("button", { name: "Cancel" }).click();
 ```
@@ -341,11 +369,13 @@ await page.getByRole("button", { name: "Cancel" }).click();
 ## Navigation
 
 ### URL Navigation
+
 ```typescript
 await page.goto(`/facility/${facilityId}/settings/locations`);
 ```
 
 ### Sidebar
+
 ```typescript
 await page.getByRole("button", { name: "Toggle Sidebar" }).click();
 await page.getByRole("button", { name: "Patients", exact: true }).click();
@@ -353,11 +383,13 @@ await page.getByRole("link", { name: /search patients/i }).click();
 ```
 
 ### Link Click
+
 ```typescript
 await page.getByRole("link", { name: "View Profile" }).click();
 ```
 
 ### Wait for Navigation
+
 ```typescript
 await page.waitForURL(/\/facility\/[^/]+\/overview$/);
 await page.waitForURL("**/patients/**", { timeout: 10000 });
@@ -371,12 +403,20 @@ For complex pages, extract form helpers as local functions:
 test.describe("Department Creation", () => {
   // Extract form interaction into helpers
   async function openCreateForm(page: Page) {
-    await page.getByRole("button", { name: "Add Department/Team" }).first().click();
+    await page
+      .getByRole("button", { name: "Add Department/Team" })
+      .first()
+      .click();
   }
 
-  async function fillForm(page: Page, options: { name?: string; type?: string }) {
+  async function fillForm(
+    page: Page,
+    options: { name?: string; type?: string },
+  ) {
     if (options.name) {
-      await page.getByRole("textbox", { name: "Name" }).pressSequentially(options.name);
+      await page
+        .getByRole("textbox", { name: "Name" })
+        .pressSequentially(options.name);
     }
     if (options.type) {
       await page.getByRole("combobox", { name: "Type" }).click();
@@ -444,7 +484,7 @@ Name files as: `featureName.spec.ts` or `featureAction.spec.ts` (e.g., `location
 import { BODY_SITES, KNOWN_USERNAMES } from "tests/helper/commonConstants";
 
 // BODY_SITES: Array of SNOMED body site names for selectFromValueSet
-// KNOWN_USERNAMES: ["admin", "doctor_2_0", "nurse_2_0", "staff_2_0", ...]
+// KNOWN_USERNAMES: ["admin", "care-doctor", "care-nurse", "care-staff", "care-admin", "care-volunteer", "care-fac-admin", "care-role-admin", "care-role-manager", "care-role-member"]
 ```
 
 ## Running Specific Tests
