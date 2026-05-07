@@ -19,3 +19,4 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Naming**: PascalCase for components/classes, camelCase for variables/functions
 - **Components**: Organized by feature, maintain separation of concerns
 - **Error Handling**: Use dedicated error handlers, TypeScript strict null checks
+- **Data hooks**: Use `useApiQuery` / `useApiMutation` from `@/hooks` instead of TanStack's `useQuery` / `useMutation`. Same signature; participates in the plug override registry when `queryFn` / `mutationFn` is built via `query(route, …)` / `mutate(route, …)`. Direct imports of the originals from `@tanstack/react-query` are blocked at pre-commit.

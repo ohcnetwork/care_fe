@@ -205,6 +205,26 @@ const config = [
     },
   },
 
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/hooks/useApiMutation.ts", "src/hooks/useApiQuery.ts"],
+    rules: {
+      "no-restricted-imports": [
+        dynamicRules({ error: isPreCommit, warn: DEFAULT }),
+        {
+          paths: [
+            {
+              name: "@tanstack/react-query",
+              importNames: ["useMutation", "useQuery"],
+              message:
+                "Use useApiMutation / useApiQuery from @/hooks instead of TanStack's useMutation / useQuery.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // Add prettier recommended config last
   eslintPluginPrettierRecommended,
 ];

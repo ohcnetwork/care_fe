@@ -1,76 +1,103 @@
+import type {
+  UseMutationOptions,
+  UseQueryOptions,
+} from "@tanstack/react-query";
+
+import type { ApiRoute } from "@/Utils/request/types";
+
 /**
- * API route override registry.
- *
- * Lets plugs wrap or replace specific API calls (`mutate` / `query`)
- * without touching any UI. Routes are matched by `${METHOD} ${path}` so
- * plugs can register against their own duplicate route definitions.
- *
- * The registry is exposed on `window.__careApiOverrides` so plugs loaded
- * via Module Federation can register without importing host modules.
+ * Registry of per-route overrides for `useApiMutation` / `useApiQuery`.
+ * Plugs register via `window.__careOverrides`; an override returns
+ * replacement options, or `null` to pass through.
  */
-import type { ApiCallOptions, ApiRoute } from "@/Utils/request/types";
 
-type Route = ApiRoute<unknown, unknown>;
-
-export interface ApiOverrideContext<R extends Route> {
-  pathParams?: ApiCallOptions<R>["pathParams"];
-  queryParams?: ApiCallOptions<R>["queryParams"];
-  body?: R["TBody"];
-  signal?: AbortSignal;
-  /** `window.location.pathname` at the time the request was issued. */
-  pathname?: string;
+export interface ApiOverrideContext {
+  pathname: string;
+  pathParams: Record<string, string | number | undefined>;
+  queryParams: Record<string, string | number | boolean | undefined>;
 }
 
-export type ApiOverrideFn<R extends Route> = (
-  ctx: ApiOverrideContext<R>,
-  next: () => Promise<R["TRes"]>,
-) => Promise<R["TRes"]>;
+export type MutationOverride<R extends ApiRoute<unknown, unknown>> = (
+  hostOptions: UseMutationOptions<R["TRes"], Error, R["TBody"]>,
+  ctx: ApiOverrideContext,
+) => UseMutationOptions<R["TRes"], Error, R["TBody"]> | null | undefined;
 
-const registry = new Map<string, ApiOverrideFn<Route>>();
+export type QueryOverride<R extends ApiRoute<unknown, unknown>> = (
+  hostOptions: UseQueryOptions<R["TRes"], Error>,
+  ctx: ApiOverrideContext,
+) => UseQueryOptions<R["TRes"], Error> | null | undefined;
 
-const keyOf = (route: { path: string; method?: string }) =>
-  `${(route.method ?? "GET").toUpperCase()} ${route.path}`;
+type AnyMutationOverride = MutationOverride<ApiRoute<unknown, unknown>>;
+type AnyQueryOverride = QueryOverride<ApiRoute<unknown, unknown>>;
 
-export function addApiOverride<R extends Route>(
+const mutationOverrides = new Map<string, AnyMutationOverride>();
+const queryOverrides = new Map<string, AnyQueryOverride>();
+
+const keyOf = (route: ApiRoute<unknown, unknown>) =>
+  `${route.method ?? "GET"} ${route.path}`;
+
+export function addMutationOverride<R extends ApiRoute<unknown, unknown>>(
   route: R,
-  fn: ApiOverrideFn<R>,
+  override: MutationOverride<R>,
 ): () => void {
   const key = keyOf(route);
-  if (registry.has(key)) {
-    console.warn(`[override] replacing existing override for "${key}"`);
-  }
-  const stored = fn as unknown as ApiOverrideFn<Route>;
-  registry.set(key, stored);
-
+  mutationOverrides.set(key, override as AnyMutationOverride);
   return () => {
-    if (registry.get(key) === stored) {
-      registry.delete(key);
+    if (mutationOverrides.get(key) === (override as AnyMutationOverride)) {
+      mutationOverrides.delete(key);
     }
   };
 }
 
-export function getApiOverride<R extends Route>(
+export function addQueryOverride<R extends ApiRoute<unknown, unknown>>(
   route: R,
-): ApiOverrideFn<R> | undefined {
-  return registry.get(keyOf(route)) as ApiOverrideFn<R> | undefined;
+  override: QueryOverride<R>,
+): () => void {
+  const key = keyOf(route);
+  queryOverrides.set(key, override as AnyQueryOverride);
+  return () => {
+    if (queryOverrides.get(key) === (override as AnyQueryOverride)) {
+      queryOverrides.delete(key);
+    }
+  };
 }
 
-export function clearApiOverrides(): void {
-  registry.clear();
+export function getMutationOverride<R extends ApiRoute<unknown, unknown>>(
+  route: R,
+): MutationOverride<R> | undefined {
+  return mutationOverrides.get(keyOf(route)) as MutationOverride<R> | undefined;
 }
 
+export function getQueryOverride<R extends ApiRoute<unknown, unknown>>(
+  route: R,
+): QueryOverride<R> | undefined {
+  return queryOverrides.get(keyOf(route)) as QueryOverride<R> | undefined;
+}
+
+export function clearOverrides(): void {
+  mutationOverrides.clear();
+  queryOverrides.clear();
+}
+
+/** Bridge for federated plugs. */
 declare global {
   interface Window {
-    __careApiOverrides?: {
-      add: typeof addApiOverride;
-      clear: typeof clearApiOverrides;
+    __careOverrides?: {
+      addMutation: (
+        route: ApiRoute<unknown, unknown>,
+        override: AnyMutationOverride,
+      ) => () => void;
+      addQuery: (
+        route: ApiRoute<unknown, unknown>,
+        override: AnyQueryOverride,
+      ) => () => void;
     };
   }
 }
 
 if (typeof window !== "undefined") {
-  window.__careApiOverrides = {
-    add: addApiOverride,
-    clear: clearApiOverrides,
+  window.__careOverrides = {
+    addMutation: (route, override) => addMutationOverride(route, override),
+    addQuery: (route, override) => addQueryOverride(route, override),
   };
 }

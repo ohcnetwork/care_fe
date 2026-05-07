@@ -16,6 +16,7 @@ import scheduleApi from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
 
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
+import { useApiMutation } from "@/hooks/useApiMutation";
 import { Appointment } from "@/types/scheduling/schedule";
 import { AppointmentDateSelection } from "./AppointmentDateSelection";
 import { AppointmentFormSection } from "./AppointmentFormSection";
@@ -69,8 +70,8 @@ export const BookAppointmentDetails = ({
     }
   };
 
-  const { mutateAsync: createAppointment, isPending: isCreating } = useMutation(
-    {
+  const { mutateAsync: createAppointment, isPending: isCreating } =
+    useApiMutation({
       mutationFn: mutate(scheduleApi.slots.createAppointment, {
         pathParams: { facilityId, slotId: selectedSlotId ?? "" },
       }),
@@ -81,8 +82,7 @@ export const BookAppointmentDetails = ({
           `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}?showSuccess=true`,
         );
       },
-    },
-  );
+    });
 
   const handleSubmit = async () => {
     if (!selectedResource || !selectedSlotId) {
