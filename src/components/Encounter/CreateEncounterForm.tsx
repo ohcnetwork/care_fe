@@ -300,7 +300,23 @@ export default function CreateEncounterForm({
                   <FormItem>
                     <FormLabel>{t("status")}</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        if (value !== EncounterStatus.PLANNED) {
+                          const currentStartDate = form.getValues("start_date");
+                          const parsedDate = new Date(currentStartDate);
+                          if (
+                            !isNaN(parsedDate.getTime()) &&
+                            parsedDate > new Date()
+                          ) {
+                            form.setValue(
+                              "start_date",
+                              new Date().toISOString(),
+                              { shouldValidate: true },
+                            );
+                          }
+                        }
+                      }}
                       defaultValue={field.value}
                     >
                       <FormControl>
