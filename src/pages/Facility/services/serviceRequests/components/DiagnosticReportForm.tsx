@@ -898,6 +898,16 @@ export function DiagnosticReportForm({
             />
             {hasReport && fullReport ? (
               <div className="space-y-6">
+                {fullReport.status !== DiagnosticReportStatus.final && (
+                  <PLUGIN_Component
+                    __name="DiagnosticReportOverride"
+                    observationDefinitions={observationDefinitions}
+                    handleComponentValueChange={handleComponentValueChange}
+                    handleValueChange={handleValueChange}
+                    handleUnitChange={handleUnitChange}
+                    disabled={disableEdit}
+                  />
+                )}
                 {fullReport.status !== DiagnosticReportStatus.final &&
                   observationDefinitions.map((definition) => {
                     const observationsList = observations[definition.id] || [

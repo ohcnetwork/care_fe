@@ -13,6 +13,7 @@ CARE is a Digital Public Good building an open source EMR + Hospital Management 
 Clone the [care backend](https://github.com/ohcnetwork/care) alongside this repo and create a Python 3.13 venv with dependencies installed.
 
 **Start backend services:**
+
 ```bash
 # Ensure PostgreSQL and Redis are running
 pg_isready || sudo pg_ctlcluster 16 main start
@@ -24,6 +25,7 @@ DJANGO_SETTINGS_MODULE=config.settings.local DJANGO_READ_DOT_ENV_FILE=true .venv
 ```
 
 **Database commands:**
+
 ```bash
 cd <care-backend-dir>
 .venv/bin/python manage.py migrate                    # Run migrations
@@ -32,25 +34,35 @@ cd <care-backend-dir>
 
 **Backend fixture credentials:**
 
-| Role | Username | Password |
-|------|----------|----------|
-| Doctor | `doctor_2_0` | `Coronasafe@123` |
-| Admin | `administrator_2_0` | `Coronasafe@123` |
-| Nurse | `nurse_2_0` | `Coronasafe@123` |
-| Staff | `staff_2_0` | `Coronasafe@123` |
-| Facility Admin | `facility_admin_2_0` | `Coronasafe@123` |
+| Role           | Username         | Password   |
+| -------------- | ---------------- | ---------- |
+| Doctor         | `care-doctor`    | `Ohcn@123` |
+| Admin          | `care-admin`     | `Ohcn@123` |
+| Nurse          | `care-nurse`     | `Ohcn@123` |
+| Staff          | `care-staff`     | `Ohcn@123` |
+| Volunteer      | `care-volunteer` | `Ohcn@123` |
+| Facility Admin | `care-fac-admin` | `Ohcn@123` |
+
+**Managing organization users** (Health Department):
+
+| Role    | Username            | Password   |
+| ------- | ------------------- | ---------- |
+| Admin   | `care-role-admin`   | `Ohcn@123` |
+| Manager | `care-role-manager` | `Ohcn@123` |
+| Member  | `care-role-member`  | `Ohcn@123` |
 
 **Playwright E2E test credentials** (used in `tests/setup/*.setup.ts`):
 
-| Storage State | Username | Password |
-|--------------|----------|----------|
-| `tests/.auth/user.json` | `admin` | `admin` |
-| `tests/.auth/nurse.json` | `nurse_2_0` | `Coronasafe@123` |
-| `tests/.auth/facilityAdmin.json` | `facility_admin_2_0` | `Coronasafe@123` |
+| Storage State                    | Username         | Password   |
+| -------------------------------- | ---------------- | ---------- |
+| `tests/.auth/user.json`          | `admin`          | `admin`    |
+| `tests/.auth/nurse.json`         | `care-nurse`     | `Ohcn@123` |
+| `tests/.auth/facilityAdmin.json` | `care-fac-admin` | `Ohcn@123` |
 
 ### Frontend Setup
 
 The frontend is configured via `.env.local` to use the local backend:
+
 ```
 REACT_CARE_API_URL=http://127.0.0.1:9000
 ```
@@ -79,6 +91,7 @@ npm run playwright:test:ui                              # Interactive Playwright
 ```
 
 **Running tests efficiently:**
+
 - Use `--workers=4` for parallel execution (CI runs setup with 1 worker, then chromium with 4 workers)
 - Use `--shard=N/TOTAL` to split across multiple processes
 - Run specific test directories to iterate faster: `npx playwright test tests/auth/`
@@ -99,12 +112,14 @@ npm run playwright:db-status     # Check snapshot info
 ```
 
 The `globalSetup` automatically restores the DB snapshot before each local test run (skipped on CI). To set up for the first time:
+
 ```bash
 npm run playwright:db-reset      # Creates snapshot with fixtures
 npm run playwright:test           # Tests run against clean DB, auto-restores on next run
 ```
 
 **Test structure:**
+
 - `tests/setup/` — Authentication & fixture setup (runs before tests)
 - `tests/auth/` — Login, session, homepage tests
 - `tests/facility/` — Facility management, settings, patients, encounters
@@ -114,6 +129,7 @@ npm run playwright:test           # Tests run against clean DB, auto-restores on
 - `tests/support/` — ID management (facility, patient, encounter IDs)
 
 **Writing new tests:**
+
 - Use `faker` for data generation — avoid hardcoded names/slugs that collide on re-run
 - Use `Date.now()` or `faker.string.alphanumeric()` for unique identifiers
 - Don't rely on cleanup — the DB snapshot system handles state reset
@@ -165,7 +181,10 @@ const { data } = useQuery({
   queryFn: query(userApi.list),
 });
 // With path/query params:
-queryFn: query(userApi.get, { pathParams: { username }, queryParams: { search } })
+queryFn: query(userApi.get, {
+  pathParams: { username },
+  queryParams: { search },
+});
 ```
 
 Mutations use `mutate()` wrapper from `src/Utils/request/mutate.ts`:
@@ -189,6 +208,7 @@ Errors handled globally — session expiry redirects to `/session-expired`, 400/
 ### UI Components
 
 Built on **shadcn/ui** + **Radix UI primitives** + **Tailwind CSS v4** (shadcn/ui pattern):
+
 - `src/components/ui/` — Base UI primitives (Button, Dialog, Form, Select, etc.). Do not modify these directly.
 - `src/CAREUI/` — Custom healthcare icon library, use `lucide-react` unless you are explicitly asked to use CAREUI icons.
 - Forms use `react-hook-form` + `zod` validation with the custom `<Form>` component

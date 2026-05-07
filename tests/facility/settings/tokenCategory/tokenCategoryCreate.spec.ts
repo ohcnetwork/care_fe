@@ -161,8 +161,8 @@ test.describe("Token Category Create - Permission Tests", () => {
     test.beforeEach(async ({ page }) => {
       // Login as nurse
       await page.goto("/login");
-      await page.getByRole("textbox", { name: /username/i }).fill("nurse_2_0");
-      await page.getByLabel(/password/i).fill("Coronasafe@123");
+      await page.getByRole("textbox", { name: /username/i }).fill("care-nurse");
+      await page.getByLabel(/password/i).fill("Ohcn@123");
       await page.getByRole("button", { name: /login/i }).click();
       await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
 
