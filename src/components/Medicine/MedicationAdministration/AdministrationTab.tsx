@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { Link, usePathParams } from "raviger";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -128,13 +128,21 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const currentDate = encounter?.period?.end
     ? new Date(encounter.period.end)
     : new Date();
-
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
   const [showStopped, setShowStopped] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [endSlotIndex, setEndSlotIndex] = useState(
     Math.floor(currentDate.getHours() / 6),
   );
+
+  useEffect(() => {
+    const date = encounter?.period?.end
+      ? new Date(encounter.period.end)
+      : new Date();
+    setEndSlotDate(date);
+    setEndSlotIndex(Math.floor(date.getHours() / 6));
+  }, [encounter?.id]);
+
   // Calculate visible slots based on end slot
   const visibleSlots = useMemo(() => {
     const slots = [];
