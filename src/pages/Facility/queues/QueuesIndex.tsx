@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 import {
   CheckIcon,
   MoreVertical,
@@ -52,6 +53,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
 import queryClient from "@/Utils/request/queryClient";
 import { dateQueryString } from "@/Utils/utils";
+import { queuePractitionerAtom } from "@/atoms/queuePractitionerAtom";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
@@ -225,13 +227,17 @@ export default function QueuesIndex({
   });
 
   const { id: currentUserId } = useAuthUser();
+  const [cachedPractitionerId, setCachedPractitionerId] = useAtom(
+    queuePractitionerAtom(facilityId),
+  );
 
   // Set default resourceId for practitioners
+  // Priority: URL param > prop > cached value > current user
   const effectiveResourceId =
     qParams.resource_id ||
     resourceId ||
     (resourceType === SchedulableResourceType.Practitioner
-      ? currentUserId
+      ? cachedPractitionerId || currentUserId
       : undefined);
 
   // Fetch available users for practitioner resource type
@@ -269,7 +275,11 @@ export default function QueuesIndex({
 
   // Handle resource selection
   const handleResourceChange = (users: UserReadMinimal[]) => {
-    updateQuery({ resource_id: users[0]?.id });
+    const userId = users[0]?.id;
+    updateQuery({ resource_id: userId });
+    if (resourceType === SchedulableResourceType.Practitioner && userId) {
+      setCachedPractitionerId(userId);
+    }
   };
 
   // Fetch queues with all query parameters
