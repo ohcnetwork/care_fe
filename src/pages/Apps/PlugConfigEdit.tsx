@@ -132,10 +132,15 @@ export function PlugConfigEdit({ slug }: Props) {
       matchedOptionId = matched?.id;
     }
 
-    setSelectedSetupId(matchedOptionId ?? "raw-setup");
+    const defaultOption = setupOptions.find((o) => o.default);
+    const resolvedSetupId = isNew
+      ? (defaultOption?.id ?? firstOption.id)
+      : (matchedOptionId ?? "raw-setup");
+
+    setSelectedSetupId(resolvedSetupId);
 
     const activeOption =
-      setupOptions.find((o) => o.id === matchedOptionId) ?? firstOption;
+      setupOptions.find((o) => o.id === resolvedSetupId) ?? firstOption;
 
     setAppBaseUrl((current) => {
       if (current) return current;

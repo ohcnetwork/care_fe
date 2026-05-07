@@ -105,6 +105,7 @@ export function getCatalogSetupOptions(
       id: configuration.id,
       title: configuration.title,
       description: configuration.description,
+      default: configuration.default,
       config: configuration.config,
       appBaseUrl: configuration.appBaseUrl,
       environments: configuration.environments ?? {},

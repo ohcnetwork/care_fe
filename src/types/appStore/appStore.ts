@@ -57,6 +57,7 @@ export interface AppStoreConfigurationTemplate {
   id: string;
   title: string;
   description?: string;
+  default?: boolean;
   config?: Record<string, unknown>;
   appBaseUrl?: AppStoreSetupAppBaseUrlField;
   environments?: AppStoreEnvironmentGroups;
@@ -88,6 +89,7 @@ export interface AppStoreSetupOption {
   id: string;
   title: string;
   description?: string;
+  default?: boolean;
   config?: Record<string, unknown>;
   appBaseUrl?: AppStoreSetupAppBaseUrlField;
   environments: AppStoreEnvironmentGroups;
