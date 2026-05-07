@@ -447,8 +447,10 @@ export function ResourceDefinitionCategoryPicker<T>({
     }
 
     return (
-      <div className="flex items-center gap-1 truncate">
-        <span className="truncate">{selectedDefinition.title}</span>
+      <div className="flex items-center gap-1 min-w-0">
+        <span className="wrap-break-word text-wrap">
+          {selectedDefinition.title}
+        </span>
       </div>
     );
   };
@@ -807,7 +809,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 role="combobox"
                 aria-expanded={open}
                 className={cn(
-                  "justify-between px-3 py-2 w-full shadow-xs border border-gray-300 font-medium",
+                  "justify-between px-3 py-2 w-full shadow-xs border border-gray-300 font-medium h-auto min-h-9",
                   disabled && "opacity-50 cursor-not-allowed",
                   className,
                 )}
@@ -918,11 +920,12 @@ export function ResourceDefinitionCategoryPicker<T>({
           <div className="flex relative">
             <PopoverTrigger asChild ref={ref}>
               <Button
+                type="button"
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
                 className={cn(
-                  "justify-between px-3 py-2 w-full shadow-xs border-gray-300",
+                  "justify-between px-3 py-2 w-full shadow-xs border-gray-300 h-auto min-h-9",
                   "hover:bg-gray-50 hover:text-gray-900",
                   "transition-all duration-200",
                   disabled && "opacity-50 cursor-not-allowed",
@@ -932,6 +935,12 @@ export function ResourceDefinitionCategoryPicker<T>({
                 data-shortcut-id={shortcutId}
                 onClick={() => {
                   if (!open) {
+                    setOpen(true);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
                     setOpen(true);
                   }
                 }}

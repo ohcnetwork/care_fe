@@ -7,7 +7,6 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -25,7 +24,7 @@ import useFilters from "@/hooks/useFilters";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { Organization } from "@/types/organization/organization";
+import { Organization, OrgType } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 import FacilityOrganizationFormSheet from "./components/AdminOrganizationFormSheet";
@@ -66,17 +65,14 @@ function OrganizationCard({
     <Card key={org.id}>
       <CardContent className="p-4">
         <div className="space-y-4">
-          <div className="flex items-center justify-between flex-wrap">
-            <div className="space-y-1 mb-2">
+          <div className="flex flex-wrap items-center justify-between">
+            <div className="mb-2">
               <h3 className="text-lg font-semibold">{org.name}</h3>
-              <div className="flex items-center gap-2 capitalize">
-                <Badge
-                  variant="indigo"
-                  className=" border border-transparent py-1"
-                >
-                  {org.org_type}
-                </Badge>
-              </div>
+              {org.description && (
+                <p className="mt-0.5 text-sm text-gray-500">
+                  {org.description}
+                </p>
+              )}
             </div>
             <div className="flex flex-row gap-2">
               <FacilityOrganizationFormSheet
@@ -137,6 +133,9 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
     limit: 12,
     disableCache: true,
   });
+  const isFlatOrgType =
+    organizationType === OrgType.ROLE ||
+    organizationType === OrgType.PRODUCT_SUPPLIER;
 
   const { data: children, isLoading } = useQuery({
     queryKey: ["organization", "list", organizationType, id, qParams],
@@ -150,41 +149,45 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
         name: qParams.search || undefined,
       },
     }),
+    enabled: !isFlatOrgType,
   });
 
+  // Flat org types are handled by the sidebar layout in AdminOrganizationList
+  if (isFlatOrgType) {
+    return null;
+  }
+
   return (
-    <div className="space-y-6 mx-auto max-w-4xl md:pt-3">
-      <div className="flex flex-col lg:flex-row justify-between item-start lg:items-center  gap-4">
-        <div className="flex flex-col items-start md:flex-row sm:items-center gap-4 w-full lg:justify-between">
-          <div className="w-full lg:w-1/3 relative">
+    <div className="mx-auto max-w-4xl space-y-6 md:pt-3">
+      <div className="flex flex-col gap-4 lg:flex-row item-start lg:items-center lg:justify-between">
+        <div className="flex w-full flex-col items-start gap-4 md:flex-row sm:items-center lg:justify-between">
+          <div className="relative w-full lg:w-1/3">
             <div className="relative">
               <CareIcon
                 icon="l-search"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+                className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500"
               />
               <Input
                 placeholder={t("search_by_department_team_name")}
                 value={qParams.search || ""}
-                onChange={(e) => {
-                  updateQuery({ search: e.target.value || undefined });
+                onChange={(event) => {
+                  updateQuery({ search: event.target.value || undefined });
                 }}
                 className="w-full pl-8"
               />
             </div>
           </div>
           <div className="w-full md:w-auto">
-            {
-              <FacilityOrganizationFormSheet
-                organizationType={organizationType}
-                parentId={id}
-              />
-            }
+            <FacilityOrganizationFormSheet
+              organizationType={organizationType}
+              parentId={id}
+            />
           </div>
         </div>
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1  gap-3">
+        <div className="grid grid-cols-1 gap-3">
           <CardListSkeleton count={4} />
         </div>
       ) : (

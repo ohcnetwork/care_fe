@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Hospital } from "lucide-react";
+import { ChevronDown, Hospital, Printer } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -19,6 +19,13 @@ import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
+import PrintTemplateSheet from "@/components/Facility/PrintTemplateSheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -222,11 +229,46 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
             <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
               {canUpdateFacility && (
-                <div className="flex max-sm:flex-col mt-10 sm:mt-4">
-                  <PLUGIN_Component
-                    __name="FacilityHomeActions"
-                    facility={facilityData}
-                  />
+                <div className="flex gap-1 max-sm:flex-col mt-10 sm:mt-4">
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="cursor-pointer font-semibold"
+                        aria-label="More Options"
+                        type="button"
+                      >
+                        {t("configurations")}
+                        <ChevronDown className="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-full min-w-48"
+                    >
+                      <DropdownMenuGroup className="flex flex-col gap-1">
+                        <PrintTemplateSheet
+                          facility={facilityData}
+                          trigger={
+                            <Button
+                              className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
+                              variant="outline"
+                              size="sm"
+                            >
+                              <Printer className="size-4" />
+                              {t("print_templates")}
+                            </Button>
+                          }
+                        />
+                        <PLUGIN_Component
+                          __name="FacilityHomeActions"
+                          facility={facilityData}
+                          className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
+                        />
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <EditFacilitySheet
                     facilityId={facilityId}
                     trigger={

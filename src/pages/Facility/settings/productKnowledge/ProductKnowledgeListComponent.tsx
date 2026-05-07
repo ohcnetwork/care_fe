@@ -189,7 +189,7 @@ export function ProductKnowledgeList({
         facility: facilityId,
         category: categorySlug,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         name: qParams.search,
         product_type: qParams.product_type,
         status: qParams.status,

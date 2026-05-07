@@ -10,7 +10,6 @@ import { z } from "zod";
 export enum ConditionOperation {
   equality = "equality",
   in_range = "in_range",
-  intersects_any = "intersects_any",
   has_tag = "has_tag",
 }
 
@@ -147,8 +146,10 @@ export function getConditionDiscriminatorValue(
 
 export function ConditionOperationSummary({
   condition,
+  shortDisplay = false,
 }: {
   condition: Condition;
+  shortDisplay?: boolean;
 }) {
   const { t } = useTranslation();
   const conditionName = t(`condition_metric__${condition.metric}`);
@@ -179,16 +180,22 @@ export function ConditionOperationSummary({
         typeof condition.value === "object" && "value_type" in condition.value
           ? condition?.value.value_type
           : "";
-      return `${conditionName} is equal to ${valueDisplay} ${valueType}`;
+      return shortDisplay
+        ? `${valueDisplay} ${valueType}`
+        : `${conditionName} is equal to ${valueDisplay} ${valueType}`;
     }
     case ConditionOperation.in_range: {
       const valueType =
         "value_type" in condition.value ? condition?.value.value_type : "";
-      return `${conditionName} is in range ${condition.value.min} to ${condition.value.max} ${valueType}`;
+      return shortDisplay
+        ? `${condition.value.min} to ${condition.value.max} ${valueType}`
+        : `${conditionName} is in range ${condition.value.min} to ${condition.value.max} ${valueType}`;
     }
     case ConditionOperation.has_tag: {
       const tagDisplay = tags.map((tag) => tag.display).join(", ");
-      return `Has any of the following ${tagResource} tag(s): ${tagDisplay}`;
+      return shortDisplay
+        ? `${tagDisplay}`
+        : `Has any of the following ${tagResource} tag(s): ${tagDisplay}`;
     }
   }
 }
@@ -280,7 +287,7 @@ export const removeConditionType = (
 ): QualifiedRange[] => {
   return qualifiedRanges.map((range) => ({
     ...range,
-    conditions: range.conditions.map((condition) => ({
+    conditions: range.conditions?.map((condition) => ({
       ...stripConditionType(condition as ConditionForm),
     })),
   }));

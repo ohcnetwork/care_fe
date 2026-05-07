@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import { expectToast } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -73,6 +74,14 @@ test.describe("Facility Creation", () => {
       .getByRole("textbox", { name: "Phone Number *" })
       .fill(phoneNumber);
     await page.getByRole("spinbutton", { name: "PIN Code *" }).fill(pinCode);
+
+    // Select the State in the government organization selector
+    const stateCombobox = page
+      .getByRole("combobox")
+      .filter({ hasText: "Select..." });
+    await stateCombobox.click();
+    await page.getByRole("option").first().click();
+
     await page.getByRole("textbox", { name: "Address *" }).fill(address);
     await page.getByRole("button", { name: "Create Facility" }).click();
 
@@ -129,6 +138,14 @@ test.describe("Facility Creation", () => {
       .getByRole("textbox", { name: "Phone Number *" })
       .fill(phoneNumber);
     await page.getByRole("spinbutton", { name: "PIN Code *" }).fill(pinCode);
+
+    // Select the State in the government organization selector
+    const stateCombobox = page
+      .getByRole("combobox")
+      .filter({ hasText: "Select..." });
+    await stateCombobox.click();
+    await page.getByRole("option").first().click();
+
     await page.getByRole("textbox", { name: "Address *" }).fill(address);
     await page
       .getByRole("combobox")
@@ -154,7 +171,7 @@ test.describe("Facility Creation", () => {
       .fill(facilityName);
     await page.getByRole("link", { name: "View Facility" }).click();
 
-    // Verify facility details
+    // Verify facility details (link navigates to /settings/general)
     await expect(
       page.getByRole("heading", { name: facilityName }),
     ).toBeVisible();
@@ -361,9 +378,7 @@ test.describe("Facility Creation", () => {
     await editDialog.getByRole("button", { name: "Update Facility" }).click();
 
     // Verify success message
-    await expect(
-      page.getByText(/Facility updated successfully|Updated successfully/i),
-    ).toBeVisible();
+    await expectToast(page, /Facility updated successfully/i);
 
     // Wait for dialog to close
     await expect(editDialog).not.toBeVisible();
@@ -443,9 +458,7 @@ test.describe("Facility Creation", () => {
     await updateButton.click();
 
     // Verify success message
-    await expect(
-      page.getByText(/Facility updated successfully|Updated successfully/i),
-    ).toBeVisible();
+    await expectToast(page, /Facility updated successfully/i);
 
     // Wait for dialog to close
     await expect(editDialog).not.toBeVisible();

@@ -3,18 +3,18 @@ import {
   ChevronLeft,
   Edit,
   EllipsisVertical,
+  Eye,
   Hash,
   MoreVertical,
   Printer,
   Truck,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -45,12 +45,14 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useSidebar } from "@/components/ui/sidebar";
 import {
   getExtensionFieldsWithName,
   getExtensionValue,
   NamespacedExtensionData,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
+import { cn } from "@/lib/utils";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
@@ -149,6 +151,8 @@ function AllSupplyDeliveriesComponent({
             <SupplyDeliveryTable
               deliveries={allSupplyDeliveries.results}
               internal={internal}
+              facilityId={facilityId}
+              linkToProduct
             />
           </>
         ) : (
@@ -175,7 +179,7 @@ export function DeliveryOrderShow({
 
   const allExtensions = getExtensions(
     ExtensionEntityType.supply_delivery_order,
-    "read",
+    "retrieve",
   );
 
   const extensionFields = useMemo(
@@ -199,6 +203,7 @@ export function DeliveryOrderShow({
     open: false,
     status: null,
   });
+  const { open: isSidebarOpen } = useSidebar();
 
   const { data: deliveryOrder, isLoading } = useQuery({
     queryKey: ["deliveryOrders", deliveryOrderId],
@@ -224,6 +229,10 @@ export function DeliveryOrderShow({
       }),
       enabled: !!deliveryOrderId,
     });
+
+  const supplyOrderId = supplyDeliveries?.results?.find(
+    (delivery) => delivery.supply_request && delivery.supply_request.id,
+  )?.supply_request?.order?.id;
 
   const { mutate: upsertSupplyDeliveries, isPending: isUpsertingDeliveries } =
     useMutation({
@@ -411,23 +420,35 @@ export function DeliveryOrderShow({
       shortCutContext="facility:inventory:delivery"
       className="max-w-[100vw] mx-auto"
     >
-      <div className="space-y-6">
+      <div
+        className={cn(
+          "space-y-6",
+          isSidebarOpen
+            ? "md:max-w-[calc(100vw-22.5rem)]"
+            : "md:max-w-[calc(100vw-9rem)]",
+        )}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <BackButton
+            <Button
               size="icon"
+              variant="outline"
               className="shrink-0"
-              to={getInventoryBasePath(
-                facilityId,
-                locationId,
-                internal,
-                false,
-                isRequester,
-                "",
-              )}
+              onClick={() =>
+                navigate(
+                  getInventoryBasePath(
+                    facilityId,
+                    locationId,
+                    internal,
+                    false,
+                    isRequester,
+                    "",
+                  ),
+                )
+              }
             >
               <ChevronLeft />
-            </BackButton>
+            </Button>
             <div>
               <h4>{deliveryOrder.name}</h4>
               <p className="text-sm text-gray-700">
@@ -448,6 +469,18 @@ export function DeliveryOrderShow({
             </div>
           </div>
           <div className="flex items-center justify-end gap-2">
+            {supplyOrderId && (
+              <Button variant="outline" asChild>
+                <Link
+                  href={`/inventory/internal/${isRequester ? "receive" : "dispatch"}/orders/${supplyOrderId}`}
+                >
+                  <Eye className="size-4" />{" "}
+                  {isRequester
+                    ? t("view_stock_request")
+                    : t("view_dispatch_request")}
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" asChild>
               <Link href={`${deliveryOrderId}/print`}>
                 <Printer className="size-4" /> {t("print")}
@@ -645,15 +678,20 @@ export function DeliveryOrderShow({
               {extensionFields.map((field) => {
                 const value = getExtensionValue(
                   deliveryOrder.extensions as NamespacedExtensionData,
-                  field.extensionName,
-                  field.name,
+                  field,
+                  {
+                    delivery_order: deliveryOrder,
+                    supply_deliveries: supplyDeliveries,
+                  },
                 );
                 if (value === undefined || value === null) return null;
 
                 const displayValue =
-                  field.format === "date" || field.format === "date-time"
-                    ? formatDateTime(value as string)
-                    : String(value);
+                  typeof value === "number"
+                    ? value.toFixed(2)
+                    : field.format === "date" || field.format === "date-time"
+                      ? formatDateTime(value as string)
+                      : String(value);
 
                 return (
                   <div key={`${field.extensionName}-${field.name}`}>

@@ -141,7 +141,7 @@ export default function MedicationDispenseHistory({
             ? "completed,entered_in_error,abandoned"
             : "draft,in_progress",
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         created_by: qParams.created_by,
         created_date_after: qParams.created_date_after,
         created_date_before: qParams.created_date_before,
