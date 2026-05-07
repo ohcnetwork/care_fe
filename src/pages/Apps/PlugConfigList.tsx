@@ -773,20 +773,20 @@ export function PlugConfigList() {
   return (
     <div className="min-h-screen">
       {appStoreUnavailable ? (
-        <div className="mx-auto max-w-2xl pt-20">
-          <Card className="border-gray-300 shadow-xl">
-            <CardHeader className="space-y-4 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                <Info className="size-8 text-muted-foreground" />
-              </div>
-              <CardTitle className="text-2xl">
-                {t("app_store_not_configured")}
-              </CardTitle>
-              <CardDescription className="text-base">
-                {t("app_store_not_configured_description")}
-              </CardDescription>
-            </CardHeader>
-          </Card>
+        <div className="mx-auto max-w-5xl space-y-6">
+          <EmptyState
+            title={t("app_store_not_configured")}
+            description={t("app_store_not_configured_description")}
+            icon={<Info />}
+            action={
+              <Button onClick={() => navigate("/admin/apps/new")}>
+                <Plus />
+                {t("manual_setup")}
+              </Button>
+            }
+            className="mx-auto max-w-5xl"
+          />
+          <InstalledAppsSection storeApps={[]} />
         </div>
       ) : (
         <AppStoreShell
