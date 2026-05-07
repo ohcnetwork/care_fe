@@ -1,4 +1,3 @@
-import { useMutation } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { navigate } from "raviger";
@@ -10,11 +9,11 @@ import { scheduleServiceTypeAtom } from "@/atoms/scheduleServiceTypeAtom";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
-import mutate from "@/Utils/request/mutate";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import scheduleApi from "@/types/scheduling/scheduleApi";
+import mutate from "@/Utils/request/mutate";
 
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
 import { Appointment } from "@/types/scheduling/schedule";
