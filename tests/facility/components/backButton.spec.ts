@@ -16,7 +16,7 @@ test.describe("Back button should not appear when page is opened in a new tab wi
     await page.getByRole("button", { name: /add new patient/i }).click();
 
     // Verify back button IS visible (has history)
-    const backButtonOriginal = page.getByRole("link", { name: /back/i });
+    const backButtonOriginal = page.getByRole("button", { name: /back/i });
     await expect(backButtonOriginal).toBeVisible();
 
     // Get the current patient registration URL
@@ -27,7 +27,7 @@ test.describe("Back button should not appear when page is opened in a new tab wi
     await newPage.goto(patientRegUrl);
 
     // Verify back button is NOT visible (no history)
-    const backButton = newPage.getByRole("link", { name: /back/i });
+    const backButton = newPage.getByRole("button", { name: /back/i });
     await expect(backButton).not.toBeVisible();
   });
 
@@ -39,7 +39,7 @@ test.describe("Back button should not appear when page is opened in a new tab wi
     await page.getByRole("button", { name: "Go to account" }).first().click();
 
     // Verify back button IS visible (has history)
-    const backButtonOriginal = page.getByRole("link", { name: /back/i });
+    const backButtonOriginal = page.getByRole("button", { name: /back/i });
     await expect(backButtonOriginal).toBeVisible();
 
     // Get the current URL
@@ -50,7 +50,7 @@ test.describe("Back button should not appear when page is opened in a new tab wi
     await newPage.goto(accountUrl);
 
     // Verify back button is NOT visible (no history)
-    const backButton = newPage.getByRole("link", { name: /back/i });
+    const backButton = newPage.getByRole("button", { name: /back/i });
     await expect(backButton).not.toBeVisible();
   });
 });

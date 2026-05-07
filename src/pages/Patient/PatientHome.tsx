@@ -23,7 +23,6 @@ import PatientTokensList from "@/components/Tokens/PatientTokensList";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { UpcomingAppointmentCard } from "@/pages/Appointments/components/UpcomingAppointmentCard";
@@ -33,6 +32,7 @@ import PatientHomeTabs from "@/pages/Patient/home/PatientHomeTabs";
 import { PLUGIN_Component } from "@/PluginEngine";
 import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
 import { useAtomValue } from "jotai";
 import { Link, navigate, useQueryParams } from "raviger";
@@ -53,7 +53,6 @@ export default function PatientHome() {
     useQueryParams<QParams>();
   const queryClient = useQueryClient();
 
-  const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
 
   const pharmacyDispenseService = useAtomValue(
