@@ -62,7 +62,7 @@ export default function TokenCardWithButton({
     <>
       <TokenCard
         showlogo={false}
-        token={currentToken}
+        token={token}
         facility={facility}
         id={`token-card-${token.id}`}
         className={cardClassName}
