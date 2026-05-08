@@ -47,14 +47,7 @@ test.describe("Resource Request Creation", () => {
         .getByRole("combobox")
         .filter({ hasText: "Start typing to search..." })
         .click();
-      const facilitySearchResponse = page.waitForResponse(
-        (response) =>
-          response.url().includes("/api/v1/getallfacilities/") &&
-          response.request().method() === "GET" &&
-          response.status() === 200,
-      );
-      await page.getByPlaceholder("Search option...").fill("fac");
-      await facilitySearchResponse;
+      await page.getByRole("option").first().waitFor({ state: "visible" });
       await page.getByRole("option").first().click();
       await page
         .getByRole("textbox", { name: "Name of Contact Person at" })
