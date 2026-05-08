@@ -55,6 +55,7 @@ test.describe("Resource Request Creation", () => {
       );
       await page.getByPlaceholder("Search option...").fill("fac");
       await facilitySearchResponse;
+      await page.getByRole("option").first().waitFor({ state: "visible" });
       await page.getByRole("option").first().click();
       await page
         .getByRole("textbox", { name: "Name of Contact Person at" })
