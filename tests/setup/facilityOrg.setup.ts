@@ -5,6 +5,59 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 /**
+ * Ensures a second facility exists in the DB for resource request tests.
+ * If only one facility exists, creates a new one by copying key fields
+ * from the existing facility.
+ */
+test("ensure second facility exists for resource requests", async () => {
+  const apiUrl = getApiUrl();
+  const headers = getApiHeaders();
+
+  const listRes = await fetch(`${apiUrl}/api/v1/facility/?limit=2`, {
+    headers,
+  });
+  if (!listRes.ok) return;
+  const listData = await listRes.json();
+  if (listData.count !== 1) return;
+
+  const existing = listData.results?.[0];
+  if (!existing) return;
+
+  // Fetch full details to get geo_organization
+  const detailRes = await fetch(`${apiUrl}/api/v1/facility/${existing.id}/`, {
+    headers,
+  });
+  if (!detailRes.ok) return;
+  const detail = await detailRes.json();
+
+  const geoOrgId =
+    detail.geo_organization?.id ?? detail.geo_organization ?? null;
+  if (!geoOrgId) return;
+
+  const createRes = await fetch(`${apiUrl}/api/v1/facility/`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      name: "Second Test Facility",
+      facility_type: detail.facility_type ?? "2",
+      phone_number: "+919876543210",
+      pincode: detail.pincode ?? 682001,
+      address: "Test Address for Second Facility",
+      geo_organization: geoOrgId,
+      features: [],
+    }),
+  });
+
+  if (createRes.ok) {
+    const created = await createRes.json();
+    console.log(`✅ Second facility created: ${created.id}`);
+  } else {
+    const err = await createRes.text();
+    console.warn(`⚠️ Failed to create second facility: ${err}`);
+  }
+});
+
+/**
  * Ensures the facility's Administration organization has the required users
  * and is linked to the Bio-Chemistry Lab location.
  *
