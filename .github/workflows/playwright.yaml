@@ -42,6 +42,7 @@ jobs:
               - 'tests/**'
               - 'src/**'
               - 'package.json'
+              - 'package-lock.json'
               - 'playwright.config.ts'
 
   # Build application once and cache for all test shards
