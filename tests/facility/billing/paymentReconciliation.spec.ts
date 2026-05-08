@@ -39,12 +39,10 @@ test.describe("Payment Reconciliation", () => {
 
     await page
       .locator('[data-slot="command-item"]')
-      .first()
-      .waitFor({ state: "visible" });
+      .filter({ hasText: "Bio-Chemistry Lab" })
+      .click();
 
-    await page.locator('[data-slot="command-item"]').first().click();
-
-    const paymentTypes = [/^Payment$/, /^Adjustment$/, /^Advance$/];
+    const paymentTypes = [/^Payment$/, /^Advance$/];
     const selectedType = faker.helpers.arrayElement(paymentTypes);
 
     await page.locator("label").filter({ hasText: selectedType }).click();
@@ -139,7 +137,7 @@ test.describe("Payment Reconciliation", () => {
 
     await page.locator("label").filter({ hasText: "Cash" }).click();
 
-    // Select the first location
+    // Select the location
     await page
       .getByRole("combobox")
       .filter({ hasText: "Select Location" })
@@ -147,10 +145,8 @@ test.describe("Payment Reconciliation", () => {
 
     await page
       .locator('[data-slot="command-item"]')
-      .first()
-      .waitFor({ state: "visible" });
-
-    await page.locator('[data-slot="command-item"]').first().click();
+      .filter({ hasText: "Bio-Chemistry Lab" })
+      .click();
     // Enter Amount Paid
     const paymentAmount = faker.number.int({ min: 100, max: 5000 }).toString();
     await page
