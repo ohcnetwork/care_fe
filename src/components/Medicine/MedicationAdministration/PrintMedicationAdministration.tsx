@@ -102,7 +102,7 @@ export const PrintMedicationAdministration = (props: {
           encounter: encounterId,
           status: "completed",
         },
-        pageSize: 1000,
+        pageSize: 200,
       }),
       enabled: !!patientId,
     });
