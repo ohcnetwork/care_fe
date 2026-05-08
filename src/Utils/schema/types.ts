@@ -35,6 +35,24 @@ export type XUIInputControl =
 export type XUIControl = XUILayoutControl | XUIInputControl;
 
 /**
+ * Known extension contexts where a field can render.
+ * Hosts pass one of these values to filter extension fields, and
+ * extension authors declare the same string values in their schema's
+ * `x-ui.contexts` array.
+ */
+export enum ExtensionContext {
+  registration = "registration",
+  patient_edit = "patient_edit",
+  patient_summary = "patient_summary",
+  account_form = "account_form",
+  payment_reconciliation_form = "payment_reconciliation_form",
+  supply_delivery_order_form = "supply_delivery_order_form",
+  supply_delivery_order_summary = "supply_delivery_order_summary",
+  supply_delivery_form = "supply_delivery_form",
+  supply_delivery_table = "supply_delivery_table",
+}
+
+/**
  * x-ui extension for custom UI hints
  */
 export interface XUI {
@@ -44,6 +62,14 @@ export interface XUI {
   variant?: string;
   /** Generic metadata for dynamic/complex controls (e.g., autocomplete config, API endpoints) */
   metadata?: Record<string, unknown>;
+  /**
+   * Host contexts in which this field should render. Strict opt-in:
+   * a field with no `contexts` (or an empty array) renders nowhere.
+   *
+   * @example
+   *   "x-ui": { "contexts": ["registration", "patient_edit", "patient_summary"] }
+   */
+  contexts?: ExtensionContext[];
 }
 
 /**
@@ -186,6 +212,12 @@ export interface ExtensionFieldMetadata {
   uiVariant?: string;
   /** Generic metadata from x-ui for dynamic controls (e.g., autocomplete, custom widgets) */
   uiMetadata?: Record<string, unknown>;
+  /**
+   * Host contexts in which this field should render.
+   * Strict opt-in: missing/empty means the field renders in NO context.
+   * Const/hidden fields bypass context filtering for data integrity.
+   */
+  contexts?: ExtensionContext[];
 }
 
 /**

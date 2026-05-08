@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import {
   ConditionalRule,
+  ExtensionContext,
   ExtensionFieldMetadata,
   ExtensionSchemaResult,
   FieldCondition,
@@ -197,6 +198,7 @@ function extractPropertyMetadata(
     uiControl: xui?.control,
     uiVariant: xui?.variant,
     uiMetadata: xui?.metadata,
+    contexts: xui?.contexts,
   };
 
   // Add numeric constraints
@@ -635,6 +637,101 @@ export function extractSchemaInfo(
     defaults: extractDefaults(schema),
     fieldMetadata: extractFieldMetadata(schema),
     conditionalRules: extractConditionalRules(schema),
+  };
+}
+
+/** True if the field opts into `context` (const/hidden fields always pass). */
+function fieldMatchesContext(
+  field: ExtensionFieldMetadata,
+  context: ExtensionContext,
+): boolean {
+  if (field.isConst || field.type === "hidden") {
+    return true;
+  }
+
+  return field.contexts?.includes(context) ?? false;
+}
+
+/** Recursively filter metadata to fields opted into `context`; nested fields filtered independently. */
+export function filterFieldsByContext(
+  fields: ExtensionFieldMetadata[],
+  context: ExtensionContext,
+): ExtensionFieldMetadata[] {
+  return fields
+    .filter((field) => fieldMatchesContext(field, context))
+    .map((field) =>
+      field.nestedFields
+        ? {
+            ...field,
+            nestedFields: filterFieldsByContext(field.nestedFields, context),
+          }
+        : field,
+    );
+}
+
+/** Keep only top-level defaults whose key survived context filtering. */
+export function filterDefaultsByContext(
+  defaults: Record<string, unknown>,
+  filteredFields: ExtensionFieldMetadata[],
+): Record<string, unknown> {
+  const survivingNames = new Set(filteredFields.map((f) => f.name));
+  return Object.fromEntries(
+    Object.entries(defaults).filter(([key]) => survivingNames.has(key)),
+  );
+}
+
+/** Drop rules whose controlling field is filtered out; prune then/else targets to surviving fields. */
+export function filterConditionalRulesByContext(
+  rules: ConditionalRule[],
+  filteredFields: ExtensionFieldMetadata[],
+): ConditionalRule[] {
+  const surviving = new Set(filteredFields.map((f) => f.name));
+  const isAlive = (path: string) => surviving.has(path.split(".")[0]);
+
+  const pruneEffects = (
+    effects: ConditionalRule["then"],
+  ): ConditionalRule["then"] => ({
+    requiredFields: effects.requiredFields.filter(isAlive),
+    visibleFields: effects.visibleFields.filter(isAlive),
+  });
+
+  const hasEffects = (effects: ConditionalRule["then"]) =>
+    effects.requiredFields.length > 0 || effects.visibleFields.length > 0;
+
+  return rules.flatMap((rule) => {
+    // Drop rule if any trigger field was filtered out.
+    const allTriggersAlive = rule.conditions.every((c) => isAlive(c.field));
+    if (!allTriggersAlive) return [];
+
+    // Prune then/else targets to only surviving fields.
+    const then = pruneEffects(rule.then);
+    const elseEffects = rule.else ? pruneEffects(rule.else) : undefined;
+
+    // Drop rule if nothing's left to do.
+    if (!hasEffects(then) && !(elseEffects && hasEffects(elseEffects))) {
+      return [];
+    }
+
+    return [{ conditions: rule.conditions, then, else: elseEffects }];
+  });
+}
+
+/** Apply context filtering to fields, defaults, and conditional rules; pass-through if no context given. */
+export function applyContextFilter(
+  result: ExtensionSchemaResult,
+  context?: ExtensionContext,
+): ExtensionSchemaResult {
+  if (!context) {
+    return result;
+  }
+  const fieldMetadata = filterFieldsByContext(result.fieldMetadata, context);
+  return {
+    fieldMetadata,
+    defaults: filterDefaultsByContext(result.defaults, fieldMetadata),
+    conditionalRules: filterConditionalRulesByContext(
+      result.conditionalRules,
+      fieldMetadata,
+    ),
   };
 }
 
