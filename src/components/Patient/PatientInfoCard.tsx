@@ -16,7 +16,17 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import { Pencil, SettingsIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
+
+interface PatientInfoCardProps {
+  patient: PublicPatientRead | PatientListRead | PatientRead;
+  tags: TagConfig[];
+  facilityId: string;
+  onTagsUpdate: () => void;
+  children?: React.ReactNode;
+  tagEntityType: TagEntityType;
+  tagEntityId: string;
+  editUrl?: string;
+}
 
 export const PatientInfoCard = ({
   patient,
@@ -27,18 +37,7 @@ export const PatientInfoCard = ({
   tagEntityType,
   tagEntityId,
   editUrl,
-}: {
-  patient: PublicPatientRead | PatientListRead | PatientRead;
-  tags: TagConfig[];
-  facilityId: string;
-  onTagsUpdate: () => void;
-  children?: React.ReactNode;
-  tagEntityType: TagEntityType;
-  tagEntityId: string;
-  editUrl?: string;
-}) => {
-  const { t } = useTranslation();
-
+}: PatientInfoCardProps) => {
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
@@ -46,12 +45,12 @@ export const PatientInfoCard = ({
           <div className="flex items-center gap-2">
             <PatientHoverCard patient={patient} facilityId={facilityId} />
             {editUrl && (
-              <Link href={editUrl}>
-                <Button variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm">
+                <Link href={editUrl}>
                   <Pencil className="h-4 w-4 mr-1" />
                   {t("edit")}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )}
           </div>
           {children}
