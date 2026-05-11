@@ -16,6 +16,8 @@ import {
   AppStoreCategoryPage,
   AppStoreDetailsPage,
   AppStoreDeveloperPage,
+  FeaturedAppsPage,
+  InstalledAppsPage,
   PlugConfigList,
 } from "@/pages/Apps/PlugConfigList";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
@@ -44,7 +46,9 @@ const AdminRoutes: AppRoutes = {
   "/admin/tag_config/:id": ({ id }) => <TagConfigView tagId={id} />,
   "/admin/rbac/permissions": () => <PermissionsIndex />,
   "/admin/rbac/roles": () => <RolesIndex />,
-  "/admin/apps": () => <PlugConfigList />,
+  "/admin/apps/all": () => <PlugConfigList />,
+  "/admin/apps/featured": () => <FeaturedAppsPage />,
+  "/admin/apps": () => <InstalledAppsPage />,
   "/admin/apps/categories/:slug": ({ slug }) => (
     <AppStoreCategoryPage slug={slug} />
   ),
