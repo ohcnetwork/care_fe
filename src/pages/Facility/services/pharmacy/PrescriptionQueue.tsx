@@ -51,6 +51,7 @@ import {
   FilterDateRange,
   longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
+import { cn } from "@/lib/utils";
 import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
 import {
   ENCOUNTER_CLASS_ICONS,
@@ -87,8 +88,11 @@ export default function PrescriptionQueue({
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    cacheBlacklist: ["patient_external_id", "patient_name"],
+    cacheBlacklist: ["patient_external_id", "patient_name", "status"],
   });
+
+  const currentTab: PrescriptionStatus =
+    qParams.status || PrescriptionStatus.active;
 
   const tagIds = qParams.tags?.split(",") || [];
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
@@ -164,7 +168,7 @@ export default function PrescriptionQueue({
     queryFn: query.debounced(prescriptionApi.summary, {
       pathParams: { facilityId },
       queryParams: {
-        status: qParams.status || PrescriptionStatus.active,
+        status: currentTab,
         patient_external_id: qParams.patient_external_id,
         encounter_class: qParams.encounter_class,
         tags: qParams.tags,
@@ -182,9 +186,8 @@ export default function PrescriptionQueue({
   });
 
   const isFilteredByPatient = !!qParams.patient_external_id;
-  const isActiveStatusFilter =
-    (qParams.status || PrescriptionStatus.active) === PrescriptionStatus.active;
-  const showBillingSelection = isFilteredByPatient && isActiveStatusFilter;
+  const showBillingSelection =
+    isFilteredByPatient && currentTab === PrescriptionStatus.active;
 
   // State for selected prescription IDs
   const [selectedPrescriptionIds, setSelectedPrescriptionIds] = useState<
@@ -264,7 +267,7 @@ export default function PrescriptionQueue({
       {/* Priority tabs with original styling */}
       <div className="mb-4 pt-6">
         <Tabs
-          value={qParams.status || "active"}
+          value={currentTab}
           onValueChange={(value) => updateQuery({ status: value })}
           className="w-full"
         >
@@ -277,9 +280,15 @@ export default function PrescriptionQueue({
               <TabsTrigger
                 key={key}
                 value={key}
-                className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                className="relative px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none font-semibold transition-colors whitespace-nowrap ease-in-out"
               >
                 {t(`prescription_status__${key}`)}
+                <div
+                  className={cn(
+                    "absolute inset-x-0 bg-primary-700 h-0.75 rounded-t-md -bottom-px transition-opacity duration-200 ease-in-out",
+                    currentTab === key ? "opacity-100" : "opacity-0",
+                  )}
+                />
               </TabsTrigger>
             ))}
           </TabsList>
@@ -294,7 +303,7 @@ export default function PrescriptionQueue({
               patient_name: patientName,
             })
           }
-          placeholder={t("filter_by_identifier")}
+          placeholder={t("or_search_by_id")}
           className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
           patientId={qParams.patient_external_id}
           patientName={qParams.patient_name}
@@ -402,7 +411,7 @@ export default function PrescriptionQueue({
                 <TableHead className="w-1/3">
                   {t("tags", { count: 2 })}
                 </TableHead>
-                <TableHead>{t("action")}</TableHead>
+                <TableHead>{t("actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -509,11 +518,13 @@ export default function PrescriptionQueue({
                   <TableCell>
                     <div className="flex gap-4 items-center">
                       <span className="font-semibold underline">
-                        <Link
-                          href={`/medication_requests/patient/${item.encounter.patient.id}/prescriptions/${item.id}`}
-                        >
-                          {t("view_prescription")}
-                        </Link>
+                        <Button variant="link" className="underline">
+                          <Link
+                            href={`/medication_requests/patient/${item.encounter.patient.id}/prescriptions/${item.id}`}
+                          >
+                            {t("view_prescription")}
+                          </Link>
+                        </Button>
                       </span>
                       {item.status === PrescriptionStatus.active &&
                         !isFilteredByPatient && (
