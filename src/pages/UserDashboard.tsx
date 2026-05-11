@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -226,9 +227,11 @@ export default function UserDashboard() {
                             className="size-12 md:size-14"
                           />
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-medium truncate text-sm md:text-base">
-                              {facility.name}
-                            </h3>
+                            <TooltipComponent content={facility.name}>
+                              <h3 className="font-medium truncate text-sm md:text-base">
+                                {facility.name}
+                              </h3>
+                            </TooltipComponent>
                             <p className="text-xs md:text-sm text-gray-500 truncate">
                               {t("view_facility_details")}
                             </p>

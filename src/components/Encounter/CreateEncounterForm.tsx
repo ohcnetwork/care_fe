@@ -86,20 +86,36 @@ export default function CreateEncounterForm({
   const { t } = useTranslation();
   useShortcutSubContext();
 
-  const encounterFormSchema = z.object({
-    status: z.enum([
-      EncounterStatus.PLANNED,
-      EncounterStatus.IN_PROGRESS,
-      EncounterStatus.ON_HOLD,
-    ] as const),
-    encounter_class: z.enum(careConfig.encounterClasses),
-    priority: z.enum(ENCOUNTER_PRIORITY),
-    organizations: z.array(z.string()).min(1, {
-      message: t("at_least_one_department_is_required"),
-    }),
-    start_date: z.string(),
-    tags: z.array(z.string()),
-  });
+  const encounterFormSchema = z
+    .object({
+      status: z.enum([
+        EncounterStatus.PLANNED,
+        EncounterStatus.IN_PROGRESS,
+        EncounterStatus.ON_HOLD,
+      ] as const),
+      encounter_class: z.enum(careConfig.encounterClasses),
+      priority: z.enum(ENCOUNTER_PRIORITY),
+      organizations: z.array(z.string()).min(1, {
+        message: t("at_least_one_department_is_required"),
+      }),
+      start_date: z.string(),
+      tags: z.array(z.string()),
+    })
+    .refine(
+      (data) => {
+        if (
+          data.status !== EncounterStatus.PLANNED &&
+          new Date(data.start_date) > new Date()
+        ) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message: t("encounter_future_date_restriction"),
+        path: ["start_date"],
+      },
+    );
 
   const form = useForm({
     resolver: zodResolver(encounterFormSchema),
@@ -112,6 +128,8 @@ export default function CreateEncounterForm({
       tags: [],
     },
   });
+
+  const selectedStatus = form.watch("status");
 
   const tagIds = form.watch("tags");
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
@@ -199,6 +217,10 @@ export default function CreateEncounterForm({
                       <div className="flex gap-2">
                         <DatePicker
                           date={date}
+                          disabled={(date) =>
+                            selectedStatus !== EncounterStatus.PLANNED &&
+                            date > new Date()
+                          }
                           onChange={(newDate) => {
                             if (!newDate) return;
                             const updatedDate = new Date(newDate);
@@ -259,7 +281,7 @@ export default function CreateEncounterForm({
                               <div className="text-sm font-bold">
                                 {t(`encounter_class__${value}`)}
                               </div>
-                              <div className="whitespace-normal break-words text-center text-xs text-gray-500">
+                              <div className="whitespace-normal wrap-break-word text-center text-xs text-gray-500">
                                 {t(`encounter_class_description__${value}`)}
                               </div>
                             </div>
