@@ -37,6 +37,7 @@ export const PatientInfoCard = ({
   tagEntityId,
   editUrl,
 }: PatientInfoCardProps) => {
+  const { t } = useTranslation();
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
