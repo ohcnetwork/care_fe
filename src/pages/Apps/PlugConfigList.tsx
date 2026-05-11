@@ -563,16 +563,42 @@ function AppStoreContent({
                   ) : undefined
                 }
                 actions={
-                  <Button
-                    className="w-full gap-2 shadow-sm"
-                    onClick={() =>
-                      navigate(
-                        `/admin/apps/store/${app.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(app.appUrl, baseUrl))}`,
-                      )
-                    }
-                  >
-                    <span>{t("view_details")}</span>
-                  </Button>
+                  installedAppSlugs?.has(app.slug) ? (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1 gap-2"
+                        onClick={() =>
+                          navigate(
+                            `/admin/apps/store/${app.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(app.appUrl, baseUrl))}`,
+                          )
+                        }
+                      >
+                        <span>{t("view_details")}</span>
+                      </Button>
+                      <Button
+                        className="flex-1 gap-2 shadow-sm"
+                        onClick={() =>
+                          navigate(
+                            `/admin/apps/${app.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(app.appUrl, baseUrl))}`,
+                          )
+                        }
+                      >
+                        <span>{t("edit_config")}</span>
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      className="w-full gap-2 shadow-sm"
+                      onClick={() =>
+                        navigate(
+                          `/admin/apps/store/${app.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(app.appUrl, baseUrl))}`,
+                        )
+                      }
+                    >
+                      <span>{t("view_details")}</span>
+                    </Button>
+                  )
                 }
               />
             );

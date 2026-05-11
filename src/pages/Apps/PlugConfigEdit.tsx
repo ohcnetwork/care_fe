@@ -1,7 +1,8 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -39,6 +40,7 @@ interface Props {
 
 export function PlugConfigEdit({ slug }: Props) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const isNew = slug === "new";
   const appUrl =
     typeof window === "undefined"
@@ -153,14 +155,15 @@ export function PlugConfigEdit({ slug }: Props) {
       }
       return activeOption.appBaseUrl?.defaultValue || "";
     });
+
+    const environmentFields = getGroupedEnvironmentFields(
+      activeOption.environments,
+    );
+
     setEnvironmentValues((current) => {
       if (Object.keys(current).length > 0) {
         return current;
       }
-
-      const nextEnvironmentFields = getGroupedEnvironmentFields(
-        activeOption.environments,
-      );
 
       const existingEnv =
         !isNew && existingConfig?.meta?.config
@@ -169,15 +172,54 @@ export function PlugConfigEdit({ slug }: Props) {
 
       return Object.fromEntries(
         [
-          ...nextEnvironmentFields.mandatory,
-          ...nextEnvironmentFields.defaults,
-          ...nextEnvironmentFields.optional,
+          ...environmentFields.mandatory,
+          ...environmentFields.defaults,
+          ...environmentFields.optional,
         ].map((field) => [
           field.key,
           existingEnv[field.key] ?? field.defaultValue ?? "",
         ]),
       );
     });
+
+    // Restore custom environment rows from existing config
+    if (!isNew && existingConfig?.meta?.config) {
+      setCustomEnvironmentRows((current) => {
+        if (
+          current.length !== 1 ||
+          current[0].key !== "" ||
+          current[0].value !== ""
+        ) {
+          return current;
+        }
+
+        const existingEnv = existingConfig.meta.config as Record<
+          string,
+          string
+        >;
+        const knownKeys = new Set(
+          [
+            ...environmentFields.mandatory,
+            ...environmentFields.defaults,
+            ...environmentFields.optional,
+          ].map((field) => field.key),
+        );
+
+        const presetCfg = (activeOption.config ?? {}) as Record<
+          string,
+          unknown
+        >;
+        for (const key of Object.keys(presetCfg)) {
+          knownKeys.add(key);
+        }
+
+        const customRows = Object.entries(existingEnv)
+          .filter(([key]) => !knownKeys.has(key))
+          .map(([key, value]) => ({ key, value: String(value) }));
+
+        return customRows.length > 0 ? customRows : [{ key: "", value: "" }];
+      });
+    }
   }, [appDefinition, isNew, existingConfig]);
 
   useEffect(() => {
@@ -219,14 +261,28 @@ export function PlugConfigEdit({ slug }: Props) {
     mutationFn: isNew
       ? mutate(plugConfigApi.create)
       : mutate(plugConfigApi.update, { pathParams: { slug } }),
-    onSuccess: () => navigate("/admin/apps"),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["list-configs"] });
+      await queryClient.invalidateQueries({ queryKey: ["plug-config"] });
+      toast.success(
+        isNew
+          ? appUrl
+            ? t("app_installed_successfully")
+            : t("config_created_successfully")
+          : t("config_updated_successfully"),
+      );
+      navigate("/admin/apps");
+    },
   });
 
   const { mutate: deleteConfig } = useMutation({
     mutationFn: mutate(plugConfigApi.delete, {
       pathParams: { slug },
     }),
-    onSuccess: () => navigate("/admin/apps"),
+    onSuccess: () => {
+      toast.success(t("config_deleted_successfully"));
+      navigate("/admin/apps");
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -620,7 +676,8 @@ export function PlugConfigEdit({ slug }: Props) {
             onChange={(e) =>
               setConfig((prev) => ({ ...prev, slug: e.target.value }))
             }
-            readOnly={isReadOnly || !isNew}
+            readOnly={isReadOnly || !!appUrl}
+            disabled={isReadOnly || !!appUrl}
             required
           />
         </div>
@@ -633,7 +690,9 @@ export function PlugConfigEdit({ slug }: Props) {
             onChange={(e) =>
               setConfig((prev) => ({ ...prev, meta: e.target.value }))
             }
-            readOnly={isReadOnly}
+            readOnly={
+              isReadOnly || (!!appUrl && selectedSetupId !== "raw-setup")
+            }
             rows={10}
           />
           {configError && (
