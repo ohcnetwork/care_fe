@@ -16,7 +16,6 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import { Pencil, SettingsIcon } from "lucide-react";
 import { Link } from "raviger";
-
 interface PatientInfoCardProps {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   tags: TagConfig[];
