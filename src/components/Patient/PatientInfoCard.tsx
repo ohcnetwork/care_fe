@@ -16,6 +16,8 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import { Pencil, SettingsIcon } from "lucide-react";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
+
 interface PatientInfoCardProps {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   tags: TagConfig[];
@@ -38,6 +40,7 @@ export const PatientInfoCard = ({
   editUrl,
 }: PatientInfoCardProps) => {
   const { t } = useTranslation();
+
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
@@ -72,7 +75,6 @@ export const PatientInfoCard = ({
                 </span>
               )}
             </div>
-
             <TagAssignmentSheet
               entityType={tagEntityType}
               entityId={tagEntityId}
