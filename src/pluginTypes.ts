@@ -119,6 +119,7 @@ export type DiagnosticReportOverrideComponentType = React.FC<{
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
+  CareIssueManagementWidget: React.FC;
   PatientHomeActions: PatientHomeActionsComponentType;
   PatientInfoCardQuickActions: PatientInfoCardQuickActionsComponentType;
   EncounterActions: EncounterActionsComponentType;
