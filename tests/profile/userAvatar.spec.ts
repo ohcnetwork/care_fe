@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("User Profile Avatar Modification", () => {
-  const username = "doctor_2_0";
+  const username = "care-doctor";
   const validImagePath = "tests/fixtures/images/avatar.jpg";
   const secondImagePath = "tests/fixtures/images/test-image.jpg";
   const invalidFilePath = "tests/fixtures/images/sample_file.xlsx";
