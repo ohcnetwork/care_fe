@@ -81,7 +81,7 @@ export type BillMedicationLineItemSchemaType = z.infer<
   typeof billMedicationLineItemSchema
 >;
 
-export const billMedicationsByPrescriptionsFormSchema = z
+export const billMedicationsFormSchema = z
   .object({
     /** Medicines added from prescriptions */
     prescriptions: z.array(

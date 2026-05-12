@@ -26,7 +26,7 @@ import {
   InventoryItemsSelector,
   LotSelection,
 } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
-import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
+import { billMedicationsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
 import { isMedicationDispenseable } from "@/pages/Facility/services/pharmacy/billMedications/utils/utils";
 import { MedicineInfoPopover } from "@/pages/Facility/services/pharmacy/components/MedicineInfoPopover";
@@ -70,7 +70,7 @@ import {
   XCircleIcon,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -81,7 +81,7 @@ export const BillMedicationsPrescriptionCard = ({
   name,
   onRemove,
 }: {
-  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+  form: UseFormReturn<z.infer<typeof billMedicationsFormSchema>>;
   name: `prescriptions.${number}`;
   onRemove: () => void;
 }) => {
@@ -111,9 +111,8 @@ export const BillMedicationsPrescriptionCard = ({
       <HeaderRow form={form} name={name} />
 
       {fields.map((field, index) => (
-        <>
+        <React.Fragment key={field.id}>
           <MedicineLineItem
-            key={`${name}.items.${index}`}
             name={`${name}.items.${index}`}
             form={form}
             onRemove={() =>
@@ -147,11 +146,8 @@ export const BillMedicationsPrescriptionCard = ({
               )
             }
           />
-          <div
-            key={`${name}.items.${index}.divider`}
-            className="col-span-7 h-px bg-gray-200"
-          />
-        </>
+          <div className="col-span-7 h-px bg-gray-200" />
+        </React.Fragment>
       ))}
 
       {fields.length === 0 && (
@@ -169,7 +165,7 @@ export const BillMedicationsPrescriptionCard = ({
 export const BillMedicationsOtherItemsCard = ({
   form,
 }: {
-  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+  form: UseFormReturn<z.infer<typeof billMedicationsFormSchema>>;
 }) => {
   const { t } = useTranslation();
   const items = form.watch("otherItems");
@@ -200,7 +196,7 @@ export const BillMedicationsOtherItemsCard = ({
       <HeaderRow />
 
       {items.map((_, index) => (
-        <>
+        <React.Fragment key={`otherItems.${index}`}>
           <MedicineLineItem
             key={`otherItems.${index}`}
             name={`otherItems.${index}`}
@@ -208,7 +204,7 @@ export const BillMedicationsOtherItemsCard = ({
             onRemove={() => remove(index)}
           />
           <div className="col-span-7 h-px bg-gray-200" />
-        </>
+        </React.Fragment>
       ))}
 
       {items.length === 0 && (
@@ -228,7 +224,7 @@ const PrescriptionSummary = ({
   name,
   onRemove,
 }: {
-  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+  form: UseFormReturn<z.infer<typeof billMedicationsFormSchema>>;
   name: `prescriptions.${number}`;
   onRemove: () => void;
 }) => {
@@ -405,9 +401,7 @@ const HeaderRow = ({
   form,
   name,
 }: {
-  form?: UseFormReturn<
-    z.infer<typeof billMedicationsByPrescriptionsFormSchema>
-  >;
+  form?: UseFormReturn<z.infer<typeof billMedicationsFormSchema>>;
   name?: `prescriptions.${number}`;
 }) => {
   const { t } = useTranslation();
@@ -492,7 +486,7 @@ const HeaderRow = ({
 };
 
 interface MedicineLineItemProps {
-  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+  form: UseFormReturn<z.infer<typeof billMedicationsFormSchema>>;
   name: `prescriptions.${number}.items.${number}` | `otherItems.${number}`;
   onRemove: () => void;
   onMarkAsGiven?: () => void;
@@ -873,7 +867,7 @@ const MedicineLineItemMedication = ({
   form,
   name,
 }: {
-  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+  form: UseFormReturn<z.infer<typeof billMedicationsFormSchema>>;
   name: `prescriptions.${number}.items.${number}` | `otherItems.${number}`;
 }) => {
   const { t } = useTranslation();

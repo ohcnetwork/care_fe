@@ -127,15 +127,17 @@ const PrescriptionCard = ({
   const isActive = prescription.status === PrescriptionStatus.active;
 
   const medications = prescription.medications.filter((medication) => {
-    if (filters?.medicationSearch) {
-      return displayMedicationName(medication)
+    const matchesSearch =
+      !filters?.medicationSearch ||
+      displayMedicationName(medication)
         .toLowerCase()
         .includes(filters.medicationSearch.toLowerCase());
-    }
-    if (filters?.medicationDispenseStatus) {
-      return medication.dispense_status === filters.medicationDispenseStatus;
-    }
-    return true;
+
+    const matchesStatus =
+      !filters?.medicationDispenseStatus ||
+      medication.dispense_status === filters.medicationDispenseStatus;
+
+    return matchesSearch && matchesStatus;
   });
 
   return (

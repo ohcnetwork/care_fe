@@ -1,11 +1,11 @@
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
-import { billMedicationsByPrescriptionsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
+import { billMedicationsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 interface Props {
-  form: UseFormReturn<z.infer<typeof billMedicationsByPrescriptionsFormSchema>>;
+  form: UseFormReturn<z.infer<typeof billMedicationsFormSchema>>;
 }
 
 export const AddMedicationTrigger = ({ form }: Props) => {
