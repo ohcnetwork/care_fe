@@ -2,7 +2,6 @@ import careConfig from "@careConfig";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import { attachRouteMeta } from "@/Utils/request/routeMeta";
 import {
   ApiCallOptions,
   ApiRoute,
@@ -71,13 +70,9 @@ export async function callApi<Route extends ApiRoute<unknown, unknown>>(
 /**
  * Creates a TanStack Query compatible query function.
  *
- * The returned function is also tagged with the originating route + params,
- * so `useApiQuery` can find an override for it without the call site having
- * to specify the route separately.
- *
  * Example:
  * ```tsx
- * const { data, isLoading } = useApiQuery({
+ * const { data, isLoading } = useQuery({
  *   queryKey: ["prescription", consultationId],
  *   queryFn: query(MedicineRoutes.prescription, {
  *     pathParams: { consultationId },
@@ -93,13 +88,9 @@ export default function query<Route extends ApiRoute<unknown, unknown>>(
   route: Route,
   options?: ApiCallOptions<Route>,
 ) {
-  const fn = ({ signal }: { signal: AbortSignal }) =>
-    callApi(route, { ...options, signal });
-  return attachRouteMeta(fn, {
-    route,
-    pathParams: options?.pathParams,
-    queryParams: options?.queryParams,
-  });
+  return ({ signal }: { signal: AbortSignal }) => {
+    return callApi(route, { ...options, signal });
+  };
 }
 
 /**
@@ -135,15 +126,10 @@ const debouncedQuery = <Route extends ApiRoute<unknown, unknown>>(
   route: Route,
   options?: ApiCallOptions<Route> & { debounceInterval?: number },
 ) => {
-  const fn = async ({ signal }: { signal: AbortSignal }) => {
+  return async ({ signal }: { signal: AbortSignal }) => {
     await sleep(options?.debounceInterval ?? 500);
     return query(route, { ...options })({ signal });
   };
-  return attachRouteMeta(fn, {
-    route,
-    pathParams: options?.pathParams,
-    queryParams: options?.queryParams,
-  });
 };
 query.debounced = debouncedQuery;
 
@@ -173,7 +159,7 @@ const paginatedQuery = <
   route: Route,
   options?: ApiCallOptions<Route> & { pageSize?: number; maxPages?: number },
 ) => {
-  const fn = async ({ signal }: { signal: AbortSignal }) => {
+  return async ({ signal }: { signal: AbortSignal }) => {
     const items: Route["TRes"]["results"] = [];
     let hasNextPage = true;
     let page = 0;
@@ -210,10 +196,5 @@ const paginatedQuery = <
       results: items,
     };
   };
-  return attachRouteMeta(fn, {
-    route,
-    pathParams: options?.pathParams,
-    queryParams: options?.queryParams,
-  });
 };
 query.paginated = paginatedQuery;

@@ -39,7 +39,14 @@
  *   );
  * }
  * ```
+ *
+ * Federated plugs cannot import from this module directly. They register via
+ * `window.__careOverrides.addComponent(key, { component, condition?, … })`,
+ * which is wired up by `./bridge` (imported here as a side effect).
  */
+
+// Install the `window.__careOverrides` bridge for federated plugs.
+import "./bridge";
 
 // Core API
 export { register } from "./register";
@@ -72,21 +79,6 @@ export {
   useResolutionMap,
   useResolvedComponent,
 } from "./contexts";
-
-// API hook overrides — let plugs replace `useApiMutation` / `useApiQuery`
-// options for a given route.
-export {
-  addMutationOverride,
-  addQueryOverride,
-  clearOverrides as clearApiOverrides,
-  getMutationOverride,
-  getQueryOverride,
-} from "./api";
-export type {
-  ApiOverrideContext,
-  MutationOverride,
-  QueryOverride,
-} from "./api";
 
 // Types
 export type {

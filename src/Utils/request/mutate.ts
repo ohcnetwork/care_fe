@@ -1,20 +1,26 @@
 import { callApi } from "@/Utils/request/query";
-import { attachRouteMeta } from "@/Utils/request/routeMeta";
 import { ApiCallOptions, ApiRoute } from "@/Utils/request/types";
 
 /**
- * Builds a `mutationFn` for `useApiMutation`. The returned function is
- * tagged with its route so plugs can override it.
+ * Creates a TanStack Query compatible mutation function.
+ *
+ * Example:
+ * ```tsx
+ * const { mutate: createPrescription, isPending } = useMutation({
+ *   mutationFn: mutate(MedicineRoutes.createPrescription, {
+ *     pathParams: { consultationId },
+ *   }),
+ *   onSuccess: () => {
+ *     toast.success(t("medication_request_prescribed"));
+ *   },
+ * });
+ * ```
  */
 export default function mutate<Route extends ApiRoute<unknown, unknown>>(
   route: Route,
   options?: ApiCallOptions<Route>,
 ) {
-  const fn = (variables: Route["TBody"]) =>
-    callApi(route, { ...options, body: variables });
-  return attachRouteMeta(fn, {
-    route,
-    pathParams: options?.pathParams,
-    queryParams: options?.queryParams,
-  });
+  return (variables: Route["TBody"]) => {
+    return callApi(route, { ...options, body: variables });
+  };
 }

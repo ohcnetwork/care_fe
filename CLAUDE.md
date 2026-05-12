@@ -160,7 +160,7 @@ export default {
 Queries use `query()` wrapper from `src/Utils/request/query.ts`:
 
 ```typescript
-const { data } = useApiQuery({
+const { data } = useQuery({
   queryKey: ["users"],
   queryFn: query(userApi.list),
 });
@@ -171,18 +171,12 @@ queryFn: query(userApi.get, { pathParams: { username }, queryParams: { search } 
 Mutations use `mutate()` wrapper from `src/Utils/request/mutate.ts`:
 
 ```typescript
-const { mutate } = useApiMutation({
+const { mutate } = useMutation({
   mutationFn: mutate(userApi.create),
 });
 ```
 
 Also available: `query.debounced()` and `query.paginated()` for specialized use cases.
-
-> Use `useApiQuery` / `useApiMutation` from `@/hooks` instead of TanStack's
-> `useQuery` / `useMutation`. Same signature, same behavior — plus federated
-> plugs can override calls built via `query(route, …)` / `mutate(route, …)`.
-> Direct imports of `useQuery` / `useMutation` from `@tanstack/react-query`
-> are blocked at pre-commit.
 
 Errors handled globally — session expiry redirects to `/session-expired`, 400/406 show toast notifications. Use `silent: true` to suppress.
 

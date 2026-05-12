@@ -16,7 +16,7 @@ Do not run lint or prettier. For missing i18n keys, simply add the key to the en
 - Build Tool: Vite 6.3.5 for fast development and optimized builds
 - Styling: Tailwind CSS 4.1.3 with custom healthcare-specific design system
 - UI Components: shadcn/ui as primary system, CAREUI for healthcare-specific components
-- State Management: @tanstack/react-query for server state, React hooks for client state. Always use `useApiQuery` / `useApiMutation` from `@/hooks` instead of TanStack's `useQuery` / `useMutation` — they share the same signature but participate in the plug override registry when `queryFn` / `mutationFn` is built via `query(route, …)` / `mutate(route, …)`. Direct imports of the originals from `@tanstack/react-query` are blocked by the pre-commit lint rule.
+- State Management: @tanstack/react-query for server state, React hooks for client state
 - Routing: raviger for application routing
 - Forms: react-hook-form with zod validation for medical data integrity
 - Internationalization: i18next for multi-language healthcare interfaces
