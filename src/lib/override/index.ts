@@ -40,12 +40,18 @@
  * }
  * ```
  *
- * Federated plugs cannot import from this module directly. They register via
- * `window.__careOverrides.addComponent(key, { component, condition?, … })`,
- * which is wired up by `./bridge` (imported here as a side effect).
+ * ### For federated plugs
+ *
+ * Plugs run in their own module graph and cannot import this file. They
+ * register through the global bridge instead:
+ *
+ *     window.__careOverrides.addComponent(key, { component, condition?, … })
+ *
+ * The bridge below installs that global at host bootstrap.
  */
 
-// Install the `window.__careOverrides` bridge for federated plugs.
+// Side-effect import: installs `window.__careOverrides` so federated plugs
+// can reach the registry. Must run before any plug manifest is evaluated.
 import "./bridge";
 
 // Core API

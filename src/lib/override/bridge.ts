@@ -1,16 +1,21 @@
 /**
- * Bridge that exposes the component-override registry to federated plugs.
+ * Plug → host bridge for the component-override registry.
  *
- * Plugs cannot import host modules directly, so we hang a tiny surface off
- * `window.__careOverrides`. The host's `addOverride` function is forwarded
- * verbatim — see `register()` / `addOverride()` in `@/lib/override` for the
- * full API.
+ * Federated plug bundles run in their own module graph and cannot import
+ * from `@/lib/override` directly. To let them register overrides, we expose
+ * a minimal surface on `window.__careOverrides`:
+ *
+ *   window.__careOverrides.addComponent(key, { component, condition?, … })
+ *
+ * Imported once as a side effect from `./index.ts` so the global is in
+ * place before any plug manifest evaluates.
  */
 import { addOverride } from "./registry";
 
 declare global {
   interface Window {
     __careOverrides?: {
+      /** Register a component override. Mirrors `addOverride` from the registry. */
       addComponent: typeof addOverride;
     };
   }
