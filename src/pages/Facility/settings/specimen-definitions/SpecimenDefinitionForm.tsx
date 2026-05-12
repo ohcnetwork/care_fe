@@ -36,6 +36,7 @@ import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { slugValueSchema } from "@/types/base/slug/schema";
+import { generateSlugValue } from "@/types/base/slug/utils";
 import {
   ContainerSpec,
   Preference,
@@ -49,7 +50,6 @@ import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefini
 import { zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 
@@ -234,7 +234,7 @@ function SpecimenDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || "", 25), {
+        form.setValue("slug_value", generateSlugValue(value.title), {
           shouldValidate: true,
         });
       }

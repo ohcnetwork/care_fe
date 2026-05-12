@@ -33,7 +33,7 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+
 import {
   ResourceCategoryCreate,
   ResourceCategoryRead,
@@ -43,6 +43,7 @@ import {
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import { slugValueSchema } from "@/types/base/slug/schema";
+import { generateSlugValue } from "@/types/base/slug/utils";
 import { ResourceSubTypePicker } from "./ResourceSubTypePicker";
 
 interface ResourceCategoryFormProps {
@@ -121,7 +122,7 @@ export function ResourceCategoryForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || "", 25), {
+        form.setValue("slug_value", generateSlugValue(value.title), {
           shouldValidate: true,
         });
       }
@@ -225,7 +226,7 @@ export function ResourceCategoryForm({
                         if (!isEditing) {
                           form.setValue(
                             "slug_value",
-                            generateSlug(e.target.value || "", 25),
+                            generateSlugValue(e.target.value),
                             {
                               shouldValidate: true,
                             },

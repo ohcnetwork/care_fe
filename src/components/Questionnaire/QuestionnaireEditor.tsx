@@ -104,7 +104,7 @@ import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
 
-import { generateSlug } from "@/Utils/utils";
+import { generateSlugValue } from "@/types/base/slug/utils";
 import { CodingEditor } from "./CodingEditor";
 import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
@@ -629,7 +629,7 @@ export default function QuestionnaireEditor({
     });
 
     if (field === "title") {
-      const next = generateSlug((value as string) || "", 25);
+      const next = generateSlugValue(value as string);
       form.setValue("slug", next, {
         shouldValidate: true,
         shouldDirty: false,

@@ -46,9 +46,9 @@ import {
 import templateApi from "@/types/emr/template/templateApi";
 
 import queryClient from "@/Utils/request/queryClient";
-import { generateSlug } from "@/Utils/utils";
 import { cn } from "@/lib/utils";
 import { slugValueSchema } from "@/types/base/slug/schema";
+import { generateSlugValue } from "@/types/base/slug/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DOMPurify from "dompurify";
 import { navigate } from "raviger";
@@ -178,7 +178,7 @@ export default function TemplateBuilder({
     if (isEditing) return;
     const subscription = form.watch((value, { name }) => {
       if (name === "name") {
-        form.setValue("slug_value", generateSlug(value.name || "", 25), {
+        form.setValue("slug_value", generateSlugValue(value.name), {
           shouldValidate: true,
         });
       }

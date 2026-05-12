@@ -368,44 +368,6 @@ export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
 }
 
 /**
- * Generates a URL-safe slug from a given string.
- *
- * @param title - The string to convert to a slug
- * @param maxLength - Maximum length of the slug (default: 50)
- * @returns A URL-safe slug string
- *
- * @example
- * generateSlug("Hello World!") // "hello-world"
- * generateSlug("Café & Résumé") // "cafe-resume"
- * generateSlug("Special @#$% Characters") // "special-characters"
- */
-export function generateSlug(title: string, maxLength: number = 50): string {
-  if (!title || typeof title !== "string") {
-    return "";
-  }
-
-  return (
-    title
-      // Convert to lowercase
-      .toLowerCase()
-      // Normalize unicode characters (handles accented characters)
-      .normalize("NFD")
-      // Remove diacritics (accents, umlauts, etc.)
-      .replace(/[\u0300-\u036f]/g, "")
-      // Replace special characters and spaces with hyphens
-      .replace(/[^\w\s-]/g, "")
-      // Replace multiple spaces or hyphens with single hyphen
-      .replace(/[\s-]+/g, "-")
-      // Remove leading and trailing hyphens
-      .replace(/^-+|-+$/g, "")
-      // Limit length
-      .slice(0, maxLength)
-      // Remove trailing hyphens after truncation
-      .replace(/-+$/, "")
-  );
-}
-
-/**
  * Returns a formatted string of items, truncated if longer than maxItems
  * Eg.Formatted string like "item1, item2 ... +{count} more"
  * @param items Array of items to format

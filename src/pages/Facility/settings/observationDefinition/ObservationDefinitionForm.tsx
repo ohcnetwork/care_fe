@@ -54,6 +54,7 @@ import {
   qualifiedRangeSchema,
 } from "@/types/base/qualifiedRange/qualifiedRange";
 import { slugValueSchema } from "@/types/base/slug/schema";
+import { generateSlugValue } from "@/types/base/slug/utils";
 import {
   OBSERVATION_DEFINITION_CATEGORY,
   type ObservationDefinitionCreateSpec,
@@ -65,7 +66,6 @@ import {
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
 import { ObservationInterpretation } from "./ObservationInterpretation";
 
 export default function ObservationDefinitionForm({
@@ -281,7 +281,7 @@ function ObservationDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || "", 25), {
+        form.setValue("slug_value", generateSlugValue(value.title), {
           shouldValidate: true,
         });
       }

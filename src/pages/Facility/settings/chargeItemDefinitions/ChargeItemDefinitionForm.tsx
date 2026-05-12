@@ -52,6 +52,7 @@ import {
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { slugValueSchema } from "@/types/base/slug/schema";
+import { generateSlugValue } from "@/types/base/slug/utils";
 import {
   MRP_CODE,
   PURCHASE_PRICE_CODE,
@@ -66,7 +67,7 @@ import facilityApi from "@/types/facility/facilityApi";
 import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug, goBack } from "@/Utils/utils";
+import { goBack } from "@/Utils/utils";
 
 interface ChargeItemDefinitionFormProps {
   facilityId: string;
@@ -251,7 +252,7 @@ export function ChargeItemDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || "", 25), {
+        form.setValue("slug_value", generateSlugValue(value.title), {
           shouldValidate: true,
         });
       }

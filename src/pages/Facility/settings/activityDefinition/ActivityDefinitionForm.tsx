@@ -44,6 +44,7 @@ import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefi
 import SpecimenDefinitionForm from "@/pages/Facility/settings/specimen-definitions/SpecimenDefinitionForm";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { slugValueSchema } from "@/types/base/slug/schema";
+import { generateSlugValue } from "@/types/base/slug/utils";
 import {
   ChargeItemDefinitionBase,
   ChargeItemDefinitionStatus,
@@ -65,7 +66,6 @@ import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareS
 import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
 
 export default function ActivityDefinitionForm({
   facilityId,
@@ -337,7 +337,7 @@ function ActivityDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || "", 25), {
+        form.setValue("slug_value", generateSlugValue(value.title), {
           shouldValidate: true,
         });
       }

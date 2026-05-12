@@ -35,10 +35,10 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { slugValueSchema } from "@/types/base/slug/schema";
+import { generateSlugValue } from "@/types/base/slug/utils";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
   ProductKnowledgeBase,
@@ -355,10 +355,8 @@ function ProductKnowledgeFormContent({
                               if (!isEditMode) {
                                 form.setValue(
                                   "slug_value",
-                                  generateSlug(e.target.value || "", 25),
-                                  {
-                                    shouldValidate: true,
-                                  },
+                                  generateSlugValue(e.target.value),
+                                  { shouldValidate: true },
                                 );
                               }
                             }}

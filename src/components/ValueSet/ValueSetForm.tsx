@@ -35,7 +35,7 @@ import {
 } from "@/types/valueSet/valueSet";
 import { goBack, valuesOf } from "@/Utils/utils";
 
-import { generateSlug } from "@/Utils/utils";
+import { generateSlugValue } from "@/types/base/slug/utils";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
@@ -410,7 +410,7 @@ export function ValueSetForm({
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
-                    form.setValue("slug", generateSlug(e.target.value, 25), {
+                    form.setValue("slug", generateSlugValue(e.target.value), {
                       shouldValidate: true,
                       shouldDirty: false,
                     });
