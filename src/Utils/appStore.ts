@@ -5,6 +5,7 @@ import {
   AppStoreSummary,
 } from "@/types/appStore/appStore";
 import { PlugConfig } from "@/types/plugConfig";
+import careConfig from "@careConfig";
 
 export async function fetchAppStoreJson<T>(
   url: string,
@@ -104,6 +105,7 @@ export function getCatalogSetupOptions(
       id: configuration.id,
       title: configuration.title,
       description: configuration.description,
+      default: configuration.default,
       config: configuration.config,
       appBaseUrl: configuration.appBaseUrl,
       environments: configuration.environments ?? {},
@@ -172,6 +174,7 @@ export function buildHealthCheckRequest(
   const setupContext = {
     ...environmentValues,
     ...prefixCustomEnvironmentValues(customEnvironmentValues),
+    apiUrl: careConfig.apiUrl,
     appBaseUrl: appBaseUrl ?? "",
     remoteEntryUrl: appBaseUrl
       ? buildRemoteEntryUrl(appBaseUrl)
