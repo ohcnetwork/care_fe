@@ -13,7 +13,6 @@ import {
   evaluateComputedField,
 } from "@/Utils/schema/computedField";
 import {
-  applyContextFilter,
   createExtensionValidationSchema,
   extractSchemaInfo,
 } from "@/Utils/schema/extensionSchema";
@@ -102,10 +101,7 @@ export function getExtensionFieldsWithName(
   return extensions
     .filter(({ schema }) => schema !== undefined)
     .flatMap(({ config, schema }) => {
-      const { fieldMetadata } = applyContextFilter(
-        extractSchemaInfo(schema),
-        context,
-      );
+      const { fieldMetadata } = extractSchemaInfo(schema, context);
       return fieldMetadata.map((field) => ({
         ...field,
         extensionName: config.name,
@@ -127,7 +123,7 @@ export function processExtensions(
     .map(({ config, schema }) => ({
       config,
       schema,
-      ...applyContextFilter(extractSchemaInfo(schema), context),
+      ...extractSchemaInfo(schema, context),
     }));
 }
 
@@ -150,8 +146,8 @@ export function getExtensionProps(
   schema: JSONSchema2020 | undefined,
   context?: ExtensionContext,
 ) {
-  const { defaults, fieldMetadata, conditionalRules } = applyContextFilter(
-    extractSchemaInfo(schema),
+  const { defaults, fieldMetadata, conditionalRules } = extractSchemaInfo(
+    schema,
     context,
   );
   const validation = createExtensionValidationSchema(
@@ -280,7 +276,7 @@ export function useExtensions<TForm extends FieldValues>({
   basePath = "extensions",
 }: UseExtensionsOptions<TForm>): UseExtensionsReturn {
   const { defaults, fieldMetadata, conditionalRules } = useMemo(
-    () => applyContextFilter(extractSchemaInfo(schema), context),
+    () => extractSchemaInfo(schema, context),
     [schema, context],
   );
 
@@ -360,7 +356,7 @@ export function withExtensions<T extends z.ZodObject<z.ZodRawShape>>(
 interface UseEntityExtensionsOptions<TForm extends FieldValues> {
   entityType: ExtensionEntityType;
   schemaType?: ExtensionSchemaType;
-  /** Optional host slot. If set, fields without it in `x-ui.contexts` are filtered out. */
+  /** If context(optional) is passed, fields without it in `x-ui.contexts` are filtered out. */
   context?: ExtensionContext;
   form: UseFormReturn<TForm>;
   existingData?: NamespacedExtensionData;
