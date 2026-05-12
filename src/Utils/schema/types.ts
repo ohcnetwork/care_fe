@@ -65,8 +65,8 @@ export interface XUI {
   /** Generic metadata for dynamic/complex controls (e.g., autocomplete config, API endpoints) */
   metadata?: Record<string, unknown>;
   /**
-   * Host contexts in which this field should render. Strict opt-in:
-   * a field with no `contexts` (or an empty array) renders nowhere.
+   * Contexts in which this field should render
+   * A field with no `contexts` renders nowhere if context is passed during extension usage
    *
    * @example
    *   "x-ui": { "contexts": ["registration", "patient_edit", "patient_summary"] }
