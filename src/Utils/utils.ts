@@ -338,14 +338,17 @@ export const readFileAsDataURL = async (file: File) => {
 
   return result_base64 as string;
 };
-export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
+export function getWeeklyIntervalsFromTodayTill(
+  pastDate?: Date | string,
+  endDate?: Date | string,
+) {
   if (!pastDate) {
     return [];
   }
 
   const intervals = [];
   let current = startOfDay(new Date(pastDate));
-  let currentEnd = endOfDay(new Date());
+  let currentEnd = endOfDay(endDate ?? new Date());
 
   while (currentEnd >= current) {
     let currentStart = new Date(currentEnd);

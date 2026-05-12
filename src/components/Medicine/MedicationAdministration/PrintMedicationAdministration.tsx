@@ -165,10 +165,49 @@ export const PrintMedicationAdministration = (props: {
     };
   }, [medicationRequests, showDiscontinued]);
 
+  const latestAdminDate = useMemo(() => {
+    if (!medicationAdministrations?.results?.length) return null;
+
+    const visibleGroups = [
+      ...groupedMedications.regular,
+      ...groupedMedications.prn,
+    ];
+    const visibleRequestIds = new Set(
+      visibleGroups.flatMap((g) => g.requests.map((r) => r.id)),
+    );
+
+    const relevantAdmins = medicationAdministrations.results.filter((admin) =>
+      visibleRequestIds.has(admin.request),
+    );
+
+    if (!relevantAdmins.length) return null;
+
+    return new Date(
+      Math.max(
+        ...relevantAdmins.map((a) =>
+          new Date(a.occurrence_period_start).getTime(),
+        ),
+      ),
+    );
+  }, [medicationAdministrations?.results, groupedMedications]);
+
   // Get date range for the chart
   const dateRange = useMemo(() => {
     if (!encounter?.period?.start) return [];
-    const intervals = getWeeklyIntervalsFromTodayTill(encounter.period.start);
+    let effectiveEndDate = encounter?.period?.end
+      ? new Date(encounter.period.end)
+      : undefined;
+    if (
+      latestAdminDate &&
+      effectiveEndDate &&
+      latestAdminDate > effectiveEndDate
+    ) {
+      effectiveEndDate = latestAdminDate;
+    }
+    const intervals = getWeeklyIntervalsFromTodayTill(
+      encounter.period.start,
+      effectiveEndDate,
+    );
     if (intervals.length === 0) return [];
 
     // Get the most recent week
@@ -183,7 +222,7 @@ export const PrintMedicationAdministration = (props: {
     }
 
     return dates.slice(0, 7); // Max 7 days
-  }, [encounter]);
+  }, [encounter, latestAdminDate]);
 
   // Index administrations by request ID, date, and time slot
   const adminIndex = useMemo(() => {
