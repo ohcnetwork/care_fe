@@ -40,3 +40,73 @@
 - Risk: Re-export cycles if apps/ import from src/ (already happens - care_hello_fe imports Page component)
 - Federation globals: **federation** methods already in globals.d.ts and usable in dev mode
 - Implementation points: scripts/setup-care-apps.ts, vite.config.mts, care.config.ts (optional), src/PluginEngine.tsx (routing logic)
+
+## Cloning Components Into a Plugin (`scripts/clone-component.ts`)
+
+When a plugin needs to reuse a component from the host app, use the
+`clone-component` CLI to copy the file along with every local file it
+transitively imports into the plugin's `src/` tree.
+
+### Invocation
+
+```bash
+# via npm script
+npm run clone-component -- <source> <target-app> [flags]
+
+# or directly with tsx
+npx tsx scripts/clone-component.ts <source> <target-app> [flags]
+```
+
+Arguments:
+
+- `<source>` — the entry component. Accepts:
+  - workspace-relative path: `src/components/Common/Loading.tsx`
+  - absolute path
+  - host alias: `@/components/ui/button`, `@core/components/ui/button`, `@careConfig`
+- `<target-app>` — directory name under `apps/` (e.g. `care_voice_fe`, `care_ask_fe`).
+
+Flags:
+
+- `-f, --force` — overwrite files that already exist in the plugin.
+- `-n, --dry-run` — report what would be copied without writing anything.
+- `-h, --help` — show usage.
+
+### What it does
+
+- Walks the import graph starting from `<source>` through `import`, `export … from`, dynamic `import()`, and `require()` statements.
+- Resolves each specifier the same way Vite/TS does (extension probing, `index.*` for directories) for `.ts/.tsx/.js/.jsx/.mjs/.cjs/.json/.css/.scss` and common image/asset extensions.
+- Copies every resolved file into `apps/<target-app>/src/...` preserving the path under `src/`.
+- Rewrites host-only path aliases to ones the plugin tsconfig understands:
+  - `@core/foo` → `@/foo`
+  - `@careConfig` → `@/care.config` (and copies `care.config.ts` into `apps/<target-app>/src/`)
+  - `@/foo` is left as-is (plugins use the same `@/*` alias).
+- Skips existing files unless `--force` is passed.
+- Copies binary assets (images, fonts, lottie, etc.) byte-for-byte without rewriting.
+
+### Output
+
+A summary is printed at the end:
+
+- `✓ Copied` — files written (or that would be written under `--dry-run`).
+- `• Skipped` — files already present in the target app; re-run with `--force` to replace.
+- `• External packages referenced` — bare-specifier imports encountered (e.g. `react`, `@radix-ui/react-slot`). Add any missing entries to the plugin's `package.json` before building.
+- `! Unresolved imports` — specifiers that could not be resolved to a file in `src/` or `care.config.ts`. These need manual attention (often host-only modules outside `src/` such as `vite-env.d.ts`-style globals).
+
+### Examples
+
+```bash
+# Preview what cloning a button would pull in.
+npm run clone-component -- @/components/ui/button care_voice_fe --dry-run
+
+# Actually copy a page component into a plugin and overwrite collisions.
+npm run clone-component -- src/pages/Appointments/BookAppointment/BookAppointmentDetails.tsx care_ask_fe --force
+
+# Copy the host care.config.ts shim into a plugin.
+npm run clone-component -- @careConfig care_voice_fe
+```
+
+### Caveats
+
+- Only files under `src/` (and `care.config.ts`) are followed. Imports that resolve outside those roots are reported as unresolved.
+- The CLI does not install npm dependencies or update the plugin's `package.json` — review the "External packages" list and add anything missing.
+- Once cloned, files are independent copies. They will not stay in sync with the host; re-run with `--force` to refresh.
