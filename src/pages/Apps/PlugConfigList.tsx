@@ -9,7 +9,7 @@ import {
   Info,
   Layers,
   LayoutGrid,
-  Link,
+  LinkIcon,
   Plug,
   Plus,
   Search,
@@ -17,7 +17,7 @@ import {
   Star,
   TriangleAlert,
 } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { type ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -272,11 +272,11 @@ function AppCard({
 function BrowseLinks({
   links,
   activeSlug,
-  onOpen,
+  getHref,
 }: {
   links: AppStoreBrowseLink[];
   activeSlug?: string;
-  onOpen: (link: AppStoreBrowseLink) => void;
+  getHref: (link: AppStoreBrowseLink) => string;
 }) {
   const { t } = useTranslation();
   if (links.length === 0) {
@@ -294,12 +294,14 @@ function BrowseLinks({
           key={link.slug}
           variant={activeSlug === link.slug ? "default" : "ghost"}
           className="w-full justify-between gap-3 transition-all"
-          onClick={() => onOpen(link)}
+          asChild
         >
-          <span className="truncate text-left">{link.name}</span>
-          <Badge variant="secondary" className="shrink-0 text-xs">
-            {link.appCount}
-          </Badge>
+          <Link href={getHref(link)}>
+            <span className="truncate text-left">{link.name}</span>
+            <Badge variant="secondary" className="shrink-0 text-xs">
+              {link.appCount}
+            </Badge>
+          </Link>
         </Button>
       ))}
     </div>
@@ -410,26 +412,32 @@ function AppStoreShell({
                 <Button
                   variant={activeView === "all" ? "default" : "ghost"}
                   className="w-full justify-start gap-3 transition-all"
-                  onClick={() => navigate("/admin/apps/all")}
+                  asChild
                 >
-                  <LayoutGrid />
-                  <span>{t("all_published_apps")}</span>
+                  <Link href="/admin/apps/all">
+                    <LayoutGrid />
+                    <span>{t("all_published_apps")}</span>
+                  </Link>
                 </Button>
                 <Button
                   variant={activeView === "featured" ? "default" : "ghost"}
                   className="w-full justify-start gap-3 transition-all"
-                  onClick={() => navigate("/admin/apps/featured")}
+                  asChild
                 >
-                  <Star />
-                  <span>{t("featured_apps")}</span>
+                  <Link href="/admin/apps/featured">
+                    <Star />
+                    <span>{t("featured_apps")}</span>
+                  </Link>
                 </Button>
                 <Button
                   variant={activeView === "installed" ? "default" : "ghost"}
                   className="w-full justify-start gap-3 transition-all"
-                  onClick={() => navigate("/admin/apps")}
+                  asChild
                 >
-                  <CircleCheck />
-                  <span>{t("installed_apps")}</span>
+                  <Link href="/admin/apps">
+                    <CircleCheck />
+                    <span>{t("installed_apps")}</span>
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -446,9 +454,7 @@ function AppStoreShell({
                   <BrowseLinks
                     links={categories}
                     activeSlug={activeCategorySlug}
-                    onOpen={(link) =>
-                      navigate(`/admin/apps/categories/${link.slug}`)
-                    }
+                    getHref={(link) => `/admin/apps/categories/${link.slug}`}
                   />
                 </CardContent>
               </Card>
@@ -466,9 +472,7 @@ function AppStoreShell({
                   <BrowseLinks
                     links={developers}
                     activeSlug={activeDeveloperSlug}
-                    onOpen={(link) =>
-                      navigate(`/admin/apps/developers/${link.slug}`)
-                    }
+                    getHref={(link) => `/admin/apps/developers/${link.slug}`}
                   />
                 </CardContent>
               </Card>
@@ -485,10 +489,12 @@ function AppStoreShell({
                 <Button
                   variant="outline"
                   className="w-full justify-start gap-3 transition-all"
-                  onClick={() => navigate("/admin/apps/new")}
+                  asChild
                 >
-                  <Plus />
-                  <span>{t("manual_setup")}</span>
+                  <Link href="/admin/apps/new">
+                    <Plus />
+                    <span>{t("manual_setup")}</span>
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -568,35 +574,29 @@ function AppStoreContent({
                       <Button
                         variant="outline"
                         className="flex-1 gap-2"
-                        onClick={() =>
-                          navigate(
-                            `/admin/apps/store/${app.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(app.appUrl, baseUrl))}`,
-                          )
-                        }
+                        asChild
                       >
-                        <span>{t("view_details")}</span>
+                        <Link
+                          href={`/admin/apps/store/${app.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(app.appUrl, baseUrl))}`}
+                        >
+                          <span>{t("view_details")}</span>
+                        </Link>
                       </Button>
-                      <Button
-                        className="flex-1 gap-2 shadow-sm"
-                        onClick={() =>
-                          navigate(
-                            `/admin/apps/${app.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(app.appUrl, baseUrl))}`,
-                          )
-                        }
-                      >
-                        <span>{t("edit_config")}</span>
+                      <Button className="flex-1 gap-2 shadow-sm" asChild>
+                        <Link
+                          href={`/admin/apps/${app.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(app.appUrl, baseUrl))}`}
+                        >
+                          <span>{t("edit_config")}</span>
+                        </Link>
                       </Button>
                     </div>
                   ) : (
-                    <Button
-                      className="w-full gap-2 shadow-sm"
-                      onClick={() =>
-                        navigate(
-                          `/admin/apps/store/${app.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(app.appUrl, baseUrl))}`,
-                        )
-                      }
-                    >
-                      <span>{t("view_details")}</span>
+                    <Button className="w-full gap-2 shadow-sm" asChild>
+                      <Link
+                        href={`/admin/apps/store/${app.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(app.appUrl, baseUrl))}`}
+                      >
+                        <span>{t("view_details")}</span>
+                      </Link>
                     </Button>
                   )
                 }
@@ -715,26 +715,25 @@ function InstalledAppsSection({
                       <Button
                         variant="outline"
                         className="flex-1 gap-2"
-                        onClick={() =>
-                          navigate(
-                            `/admin/apps/store/${matchingStoreApp.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(matchingStoreApp.appUrl, baseUrl))}`,
-                          )
-                        }
+                        asChild
                       >
-                        <span>{t("view_details")}</span>
+                        <Link
+                          href={`/admin/apps/store/${matchingStoreApp.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(matchingStoreApp.appUrl, baseUrl))}`}
+                        >
+                          <span>{t("view_details")}</span>
+                        </Link>
                       </Button>
                     )}
-                    <Button
-                      className="flex-1 gap-2 shadow-sm"
-                      onClick={() =>
-                        navigate(
+                    <Button className="flex-1 gap-2 shadow-sm" asChild>
+                      <Link
+                        href={
                           matchingStoreApp && baseUrl
                             ? `/admin/apps/${config.slug}?appUrl=${encodeURIComponent(resolveAppStoreUrl(matchingStoreApp.appUrl, baseUrl))}`
-                            : `/admin/apps/${config.slug}`,
-                        )
-                      }
-                    >
-                      <span>{ctaLabel}</span>
+                            : `/admin/apps/${config.slug}`
+                        }
+                      >
+                        <span>{ctaLabel}</span>
+                      </Link>
                     </Button>
                   </div>
                 }
@@ -762,9 +761,11 @@ function InstalledAppsSection({
             )
           }
           action={
-            <Button onClick={() => navigate("/admin/apps/all")}>
-              <ShoppingBag className="size-4" />
-              <span>{t("browse_app_store")}</span>
+            <Button asChild>
+              <Link href="/admin/apps/all">
+                <ShoppingBag className="size-4" />
+                <span>{t("browse_app_store")}</span>
+              </Link>
             </Button>
           }
         />
@@ -805,9 +806,11 @@ export function PlugConfigList() {
             description={t("app_store_not_configured_description")}
             icon={<Info />}
             action={
-              <Button onClick={() => navigate("/admin/apps/new")}>
-                <Plus />
-                {t("manual_setup")}
+              <Button asChild>
+                <Link href="/admin/apps/new">
+                  <Plus />
+                  {t("manual_setup")}
+                </Link>
               </Button>
             }
             className="mx-auto max-w-5xl"
@@ -1075,8 +1078,8 @@ export function AppStoreDetailsPage({ slug }: { slug: string }) {
         description={t("app_details_unavailable_description")}
         icon={<TriangleAlert />}
         action={
-          <Button variant="outline" onClick={() => navigate("/admin/apps/all")}>
-            {t("all_published_apps")}
+          <Button variant="outline" asChild>
+            <Link href="/admin/apps/all">{t("all_published_apps")}</Link>
           </Button>
         }
         className="mx-auto max-w-5xl"
@@ -1087,29 +1090,31 @@ export function AppStoreDetailsPage({ slug }: { slug: string }) {
   const iconUrl = appDefinition.iconUrl
     ? resolveAppStoreUrl(appDefinition.iconUrl, appUrl)
     : undefined;
-  const handleStartSetup = () => {
-    navigate(`/admin/apps/new?appUrl=${encodeURIComponent(appUrl)}`);
-  };
-  const handleEditConfig = () => {
-    navigate(`/admin/apps/${slug}?appUrl=${encodeURIComponent(appUrl)}`);
-  };
 
   return (
     <div className="mx-auto max-w-5xl space-y-4">
       {/* Back button */}
       <div className="flex justify-between">
-        <Button variant="outline" onClick={() => navigate("/admin/apps")}>
-          <ArrowLeft className="size-3" />
-          <span>{t("back")}</span>
+        <Button variant="outline" asChild>
+          <Link href="/admin/apps">
+            <ArrowLeft className="size-3" />
+            <span>{t("back")}</span>
+          </Link>
         </Button>
         {isInstalled ? (
-          <Button onClick={handleEditConfig}>
-            <span>{t("edit_config")}</span>
+          <Button asChild>
+            <Link
+              href={`/admin/apps/${slug}?appUrl=${encodeURIComponent(appUrl)}`}
+            >
+              <span>{t("edit_config")}</span>
+            </Link>
           </Button>
         ) : (
-          <Button onClick={handleStartSetup}>
-            <Plus className="size-4" />
-            <span>{t("start_setup")}</span>
+          <Button asChild>
+            <Link href={`/admin/apps/new?appUrl=${encodeURIComponent(appUrl)}`}>
+              <Plus className="size-4" />
+              <span>{t("start_setup")}</span>
+            </Link>
           </Button>
         )}
       </div>
@@ -1169,7 +1174,7 @@ export function AppStoreDetailsPage({ slug }: { slug: string }) {
               </code>
             </div>
             <div className="flex items-center gap-2 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-              <Link className="size-4 shrink-0 text-muted-foreground" />
+              <LinkIcon className="size-4 shrink-0 text-muted-foreground" />
               <span className="mr-1 shrink-0 text-xs font-medium text-muted-foreground hidden sm:block">
                 {t("remote_entry")}
               </span>
