@@ -40,18 +40,19 @@ export type XUIControl = XUILayoutControl | XUIInputControl;
  * extension authors declare the same string values in their schema's
  * `x-ui.contexts` array.
  */
-export const ExtensionContexts = [
-  "registration",
-  "patient_edit",
-  "patient_summary",
-  "account_form",
-  "payment_reconciliation_form",
-  "supply_delivery_order_form",
-  "supply_delivery_order_summary",
-  "supply_delivery_form",
-  "supply_delivery_table",
-] as const;
-export type ExtensionContext = (typeof ExtensionContexts)[number];
+export const ExtensionContexts = {
+  registration: "registration",
+  patient_edit: "patient_edit",
+  patient_summary: "patient_summary",
+  account_form: "account_form",
+  payment_reconciliation_form: "payment_reconciliation_form",
+  supply_delivery_order_form: "supply_delivery_order_form",
+  supply_delivery_order_summary: "supply_delivery_order_summary",
+  supply_delivery_form: "supply_delivery_form",
+  supply_delivery_table: "supply_delivery_table",
+} as const;
+export type ExtensionContext =
+  (typeof ExtensionContexts)[keyof typeof ExtensionContexts];
 
 /**
  * x-ui extension for custom UI hints
