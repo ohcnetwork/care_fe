@@ -26,7 +26,7 @@ test.describe("Product Knowledge Delete operations", () => {
     const productName = faker.commerce.productName();
 
     name = productName;
-    slug = productName.replace(/\s+/g, "-").slice(0, 25);
+    slug = productName.replace(/\s+/g, "-").slice(0, 36);
     baseUnit = faker.helpers.arrayElement(baseUnitOptions);
     categoryName = "Medications";
 

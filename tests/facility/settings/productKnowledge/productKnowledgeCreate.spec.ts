@@ -46,7 +46,7 @@ test.describe("Product Knowledge Creation", () => {
     const productName = faker.commerce.productName();
 
     name = productName;
-    slug = productName.replace(/\s+/g, "-").slice(0, 25);
+    slug = productName.replace(/\s+/g, "-").slice(0, 36);
     productType = faker.helpers.arrayElement(productTypeOptions);
     baseUnit = faker.helpers.arrayElement(baseUnitOptions);
     dosageForm = faker.helpers.arrayElement(dosageFormOptions);

@@ -35,6 +35,7 @@ import {
 } from "@/types/valueSet/valueSet";
 import { goBack, valuesOf } from "@/Utils/utils";
 
+import { slugValueSchema } from "@/types/base/slug/schema";
 import { generateSlugValue } from "@/types/base/slug/utils";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
@@ -305,12 +306,7 @@ export function ValueSetForm({
   const { t } = useTranslation();
   const valuesetFormSchema = z.object({
     name: z.string().trim().min(1, t("field_required")),
-    slug: z
-      .string()
-      .trim()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 }))
-      .regex(/^[-\w]+$/, { message: t("slug_format_message") }),
+    slug: slugValueSchema(),
     description: z.string(),
     status: z.enum([
       ValueSetStatus.ACTIVE,

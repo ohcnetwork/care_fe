@@ -7,7 +7,7 @@ import * as path from "path";
  * @returns The expected slug value
  */
 export function expectedSlug(title: string): string {
-  return title.toLowerCase().replace(/\s+/g, "-").slice(0, 25);
+  return title.toLowerCase().replace(/\s+/g, "-").slice(0, 36);
 }
 
 export function getApiHeaders(): {

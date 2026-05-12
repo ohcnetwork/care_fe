@@ -272,7 +272,7 @@ test.describe("Specimen Definitions Create", () => {
     expect(slugValue).toContain(expectedSlugPattern);
   });
 
-  test("verify slug validation of 5 - 25 character", async ({ page }) => {
+  test("verify slug validation of 5 - 36 character", async ({ page }) => {
     await page.getByRole("button", { name: "Add Definition" }).click();
 
     await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);

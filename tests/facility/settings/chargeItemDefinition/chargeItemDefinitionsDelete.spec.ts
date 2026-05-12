@@ -15,7 +15,7 @@ test.describe("Charge Item Definition Delete operations", () => {
     facilityId = getFacilityId();
     const chargeItemName = faker.string.alphanumeric(10);
     title = chargeItemName;
-    slug = chargeItemName.replace(/\s+/g, "-").slice(0, 25);
+    slug = chargeItemName.replace(/\s+/g, "-").slice(0, 36);
     basePrice = faker.commerce.price({ dec: 0 });
     categoryName = "Consumables";
 
