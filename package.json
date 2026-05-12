@@ -51,7 +51,8 @@
     "unimported": "unimported",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./tests --write",
-    "sort-locales": "node ./scripts/sort-locales.js"
+    "sort-locales": "node ./scripts/sort-locales.js",
+    "clone-component": "tsx scripts/clone-component.ts"
   },
   "dependencies": {
     "@dmitryrechkin/json-schema-to-zod": "^1.0.1",
