@@ -702,7 +702,7 @@ export function PlugConfigEdit({ slug }: Props) {
         <div className="flex gap-2">
           {!isReadOnly && (
             <Button type="submit" disabled={!canSave}>
-              {t("save")}
+              {isNew ? t("save") : t("update")}
             </Button>
           )}
           <Button

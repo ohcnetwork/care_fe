@@ -1039,6 +1039,14 @@ export function AppStoreDetailsPage({ slug }: { slug: string }) {
       fetchAppStoreJson<AppStoreAppDefinition>(appUrl!, signal),
     enabled: Boolean(appUrl),
   });
+  const { data: installedConfigsData } = useQuery({
+    queryKey: ["list-configs"],
+    queryFn: query(plugConfigApi.list),
+  });
+  const isInstalled = useMemo(() => {
+    const configs = mergePlugConfigs(installedConfigsData?.configs ?? []);
+    return configs.some((config) => config.slug === slug);
+  }, [installedConfigsData, slug]);
   const readmeUrl = resolveRepositoryReadmeUrl(
     appDefinition?.source.repository,
   );
@@ -1082,6 +1090,9 @@ export function AppStoreDetailsPage({ slug }: { slug: string }) {
   const handleStartSetup = () => {
     navigate(`/admin/apps/new?appUrl=${encodeURIComponent(appUrl)}`);
   };
+  const handleEditConfig = () => {
+    navigate(`/admin/apps/${slug}?appUrl=${encodeURIComponent(appUrl)}`);
+  };
 
   return (
     <div className="mx-auto max-w-5xl space-y-4">
@@ -1091,10 +1102,16 @@ export function AppStoreDetailsPage({ slug }: { slug: string }) {
           <ArrowLeft className="size-3" />
           <span>{t("back")}</span>
         </Button>
-        <Button onClick={handleStartSetup}>
-          <Plus className="size-4" />
-          <span>{t("start_setup")}</span>
-        </Button>
+        {isInstalled ? (
+          <Button onClick={handleEditConfig}>
+            <span>{t("edit_config")}</span>
+          </Button>
+        ) : (
+          <Button onClick={handleStartSetup}>
+            <Plus className="size-4" />
+            <span>{t("start_setup")}</span>
+          </Button>
+        )}
       </div>
 
       {/* Compact app info card */}
