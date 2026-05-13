@@ -298,13 +298,24 @@ function InvoiceCard({
 }: InvoiceCardProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [qParams, setQueryParams] = useQueryParams<{ payment?: string }>();
-  const paymentSheetOpen = qParams.payment === invoice.id;
+  const [qParams, setQueryParams] = useQueryParams<{
+    is_payment?: string;
+    payment_invoice_id?: string;
+  }>();
+  const paymentSheetOpen =
+    qParams.is_payment === "true" && qParams.payment_invoice_id === invoice.id;
   const setPaymentSheetOpen = (open: boolean) => {
-    const { payment: _payment, ...rest } = qParams;
-    setQueryParams(open ? { ...rest, payment: invoice.id } : rest, {
-      replace: true,
-    });
+    const {
+      is_payment: _isPayment,
+      payment_invoice_id: _paymentInvoiceId,
+      ...rest
+    } = qParams;
+    setQueryParams(
+      open
+        ? { ...rest, is_payment: "true", payment_invoice_id: invoice.id }
+        : rest,
+      { replace: true },
+    );
   };
   const [cancelInvoiceDialogOpen, setCancelInvoiceDialogOpen] = useState(false);
   const [cancelPaymentId, setCancelPaymentId] = useState<string | null>(null);

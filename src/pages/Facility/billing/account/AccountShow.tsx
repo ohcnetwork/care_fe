@@ -109,22 +109,29 @@ export function AccountShow({
 }) {
   const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [qParams, setQueryParams] = useQueryParams<{ payment?: string }>();
-  const paymentSheet = {
-    isOpen: qParams.payment === "advance" || qParams.payment === "credit",
-    isCreditNote: qParams.payment === "credit",
-  };
-  const setPaymentSheet = (next: {
-    isOpen: boolean;
-    isCreditNote: boolean;
-  }) => {
-    const { payment: _payment, ...rest } = qParams;
+  const [qParams, setQueryParams] = useQueryParams<{
+    is_payment?: string;
+    is_credit_note?: string;
+  }>();
+  const isPaymentSheetOpen = qParams.is_payment === "true";
+  const isCreditNote = qParams.is_credit_note === "true";
+  const openPaymentSheet = (creditNote: boolean) => {
     setQueryParams(
-      next.isOpen
-        ? { ...rest, payment: next.isCreditNote ? "credit" : "advance" }
-        : rest,
+      {
+        ...qParams,
+        is_payment: "true",
+        ...(creditNote && { is_credit_note: "true" }),
+      },
       { replace: true },
     );
+  };
+  const closePaymentSheet = () => {
+    const {
+      is_payment: _isPayment,
+      is_credit_note: _isCreditNote,
+      ...rest
+    } = qParams;
+    setQueryParams(rest, { replace: true });
   };
   const [transferPaymentOpen, setTransferPaymentOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -389,15 +396,7 @@ export function AccountShow({
                 {t("create_invoice")}
                 <ShortcutBadge actionId="create-invoice" />
               </Button>
-              <Button
-                variant="primary"
-                onClick={() =>
-                  setPaymentSheet({
-                    isOpen: true,
-                    isCreditNote: false,
-                  })
-                }
-              >
+              <Button variant="primary" onClick={() => openPaymentSheet(false)}>
                 <CareIcon icon="l-plus" className="size-4" />
                 {t("add_credit_payment")}
                 <ShortcutBadge actionId="credit-payment-account" />
@@ -419,15 +418,7 @@ export function AccountShow({
                 {t("invoice")}
                 <ShortcutBadge actionId="create-invoice" />
               </Button>
-              <Button
-                variant="primary"
-                onClick={() =>
-                  setPaymentSheet({
-                    isOpen: true,
-                    isCreditNote: false,
-                  })
-                }
-              >
+              <Button variant="primary" onClick={() => openPaymentSheet(false)}>
                 <CareIcon icon="l-plus" className="size-4" />
                 {t("credit")}
                 <ShortcutBadge actionId="record-payment-account" />
@@ -460,14 +451,7 @@ export function AccountShow({
                       {t("settle_close")}
                       <ShortcutBadge actionId="settle-close-account" />
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        setPaymentSheet({
-                          isOpen: true,
-                          isCreditNote: true,
-                        })
-                      }
-                    >
+                    <DropdownMenuItem onClick={() => openPaymentSheet(true)}>
                       <CareIcon icon="l-plus" className="mr-2 size-4" />
                       {t("record_credit_note")}
                     </DropdownMenuItem>
@@ -744,11 +728,13 @@ export function AccountShow({
       />
 
       <PaymentReconciliationSheet
-        open={paymentSheet.isOpen}
-        onOpenChange={(isOpen) => setPaymentSheet({ ...paymentSheet, isOpen })}
+        open={isPaymentSheetOpen}
+        onOpenChange={(open) =>
+          open ? openPaymentSheet(isCreditNote) : closePaymentSheet()
+        }
         facilityId={facilityId}
         accountId={accountId}
-        isCreditNote={paymentSheet.isCreditNote}
+        isCreditNote={isCreditNote}
         account={account}
       />
 

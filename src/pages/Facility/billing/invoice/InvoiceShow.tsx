@@ -101,14 +101,14 @@ export function InvoiceShow({
 }) {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{
-    payment?: string;
+    is_payment?: string;
     sourceUrl?: string;
     relatedInvoices?: string;
   }>();
-  const isPaymentSheetOpen = qParams.payment === "open";
+  const isPaymentSheetOpen = qParams.is_payment === "true";
   const setIsPaymentSheetOpen = (open: boolean) => {
-    const { payment: _payment, ...rest } = qParams;
-    setQueryParams(open ? { ...rest, payment: "open" } : rest, {});
+    const { is_payment: _isPayment, ...rest } = qParams;
+    setQueryParams(open ? { ...rest, is_payment: "true" } : rest, {});
   };
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedChargeItems, setSelectedChargeItems] = useState<
