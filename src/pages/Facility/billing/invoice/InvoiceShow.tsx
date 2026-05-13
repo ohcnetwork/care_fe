@@ -108,7 +108,9 @@ export function InvoiceShow({
   const isPaymentSheetOpen = qParams.is_payment === "true";
   const setIsPaymentSheetOpen = (open: boolean) => {
     const { is_payment: _isPayment, ...rest } = qParams;
-    setQueryParams(open ? { ...rest, is_payment: "true" } : rest, {});
+    setQueryParams(open ? { ...rest, is_payment: "true" } : rest, {
+      replace: true,
+    });
   };
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedChargeItems, setSelectedChargeItems] = useState<
