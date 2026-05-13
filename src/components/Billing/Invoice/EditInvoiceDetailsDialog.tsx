@@ -97,8 +97,8 @@ export function EditInvoiceDetailsDialog({
       status: invoice.status,
       account: invoice.account.id,
       charge_items: invoice.charge_items.map((item) => item.id),
-      payment_terms: values.payment_terms || undefined,
-      note: values.note || undefined,
+      payment_terms: values.payment_terms || "",
+      note: values.note || "",
       issue_date: values.issue_date || undefined,
     };
     updateInvoice(payload);

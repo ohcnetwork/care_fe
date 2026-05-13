@@ -630,7 +630,7 @@ export function InvoiceShow({
                 </Badge>
               )}
             </div>
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               {invoice.status === InvoiceStatus.draft && (
                 <>
                   <Button
@@ -655,96 +655,101 @@ export function InvoiceShow({
                   </Button>
                 </>
               )}
-              <Button
-                variant="outline"
-                className="border-gray-400 gap-1"
-                onClick={() => {
-                  if (relatedInvoices) {
-                    // Navigate to multi-invoice print with all invoices
-                    const allInvoiceIds = [
-                      ...relatedInvoices.split(","),
-                      invoiceId,
-                    ].join(",");
-                    navigate(
-                      `/facility/${facilityId}/billing/invoices/${allInvoiceIds}/print`,
-                    );
-                  } else {
-                    // Navigate to single invoice print
-                    navigate(
-                      `/facility/${facilityId}/billing/invoice/${invoiceId}/print`,
-                    );
-                  }
-                }}
-              >
-                <CareIcon icon="l-print" className="size-4" />
-                {t("print")}
-                <ShortcutBadge actionId="print-invoice" />
-              </Button>
-              {canEdit && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="border-gray-400 px-2">
-                      <CareIcon icon="l-ellipsis-v" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {invoice.locked ? (
+              <div className="flex gap-2 w-full">
+                <Button
+                  variant="outline"
+                  className="border-gray-400 gap-1 flex-1 sm:flex-initial"
+                  onClick={() => {
+                    if (relatedInvoices) {
+                      // Navigate to multi-invoice print with all invoices
+                      const allInvoiceIds = [
+                        ...relatedInvoices.split(","),
+                        invoiceId,
+                      ].join(",");
+                      navigate(
+                        `/facility/${facilityId}/billing/invoices/${allInvoiceIds}/print`,
+                      );
+                    } else {
+                      // Navigate to single invoice print
+                      navigate(
+                        `/facility/${facilityId}/billing/invoice/${invoiceId}/print`,
+                      );
+                    }
+                  }}
+                >
+                  <CareIcon icon="l-print" className="size-4" />
+                  {t("print")}
+                  <ShortcutBadge actionId="print-invoice" />
+                </Button>
+                {canEdit && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="border-gray-400 px-2"
+                      >
+                        <CareIcon icon="l-ellipsis-v" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {invoice.locked ? (
+                        <DropdownMenuItem asChild className="text-primary-900">
+                          <Button
+                            variant="ghost"
+                            onClick={() => unlockInvoice({})}
+                            disabled={isUnlockPending}
+                            className="w-full flex flex-row justify-stretch items-center"
+                          >
+                            <CareIcon icon="l-unlock" className="mr-1" />
+                            <span>{t("unlock_invoice")}</span>
+                          </Button>
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem asChild className="text-primary-900">
+                          <Button
+                            variant="ghost"
+                            onClick={() => lockInvoice({})}
+                            disabled={isLockPending}
+                            className="w-full flex flex-row justify-stretch items-center"
+                          >
+                            <CareIcon icon="l-lock" className="mr-1" />
+                            <span>{t("lock_invoice")}</span>
+                          </Button>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem asChild className="text-primary-900">
                         <Button
                           variant="ghost"
-                          onClick={() => unlockInvoice({})}
-                          disabled={isUnlockPending}
+                          onClick={() =>
+                            handleStatusChange(InvoiceStatus.cancelled)
+                          }
+                          disabled={isCancelPending}
                           className="w-full flex flex-row justify-stretch items-center"
                         >
-                          <CareIcon icon="l-unlock" className="mr-1" />
-                          <span>{t("unlock_invoice")}</span>
+                          <CareIcon icon="l-times-circle" className="mr-1" />
+                          <span>{t("mark_as_cancelled")}</span>
                         </Button>
                       </DropdownMenuItem>
-                    ) : (
                       <DropdownMenuItem asChild className="text-primary-900">
                         <Button
                           variant="ghost"
-                          onClick={() => lockInvoice({})}
-                          disabled={isLockPending}
+                          onClick={() =>
+                            handleStatusChange(InvoiceStatus.entered_in_error)
+                          }
+                          disabled={isCancelPending}
                           className="w-full flex flex-row justify-stretch items-center"
                         >
-                          <CareIcon icon="l-lock" className="mr-1" />
-                          <span>{t("lock_invoice")}</span>
+                          <CareIcon
+                            icon="l-exclamation-circle"
+                            className="mr-1"
+                          />
+                          <span>{t("mark_as_entered_in_error")}</span>
                         </Button>
                       </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild className="text-primary-900">
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          handleStatusChange(InvoiceStatus.cancelled)
-                        }
-                        disabled={isCancelPending}
-                        className="w-full flex flex-row justify-stretch items-center"
-                      >
-                        <CareIcon icon="l-times-circle" className="mr-1" />
-                        <span>{t("mark_as_cancelled")}</span>
-                      </Button>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-primary-900">
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          handleStatusChange(InvoiceStatus.entered_in_error)
-                        }
-                        disabled={isCancelPending}
-                        className="w-full flex flex-row justify-stretch items-center"
-                      >
-                        <CareIcon
-                          icon="l-exclamation-circle"
-                          className="mr-1"
-                        />
-                        <span>{t("mark_as_entered_in_error")}</span>
-                      </Button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
           </div>
           <Card className="rounded-sm shadow-sm">
@@ -1818,7 +1823,7 @@ export function InvoiceShow({
           invoice={invoice}
         />
 
-        <div className="flex gap-10 max-w-4xl mx-auto">
+        <div className="flex flex-col sm:flex-row gap-10 max-w-4xl mx-auto">
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center size-14 bg-white rounded-full border border-gray-200">
               <FileCheck className="size-4" />
