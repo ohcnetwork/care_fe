@@ -54,6 +54,7 @@ import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
+import { EditInvoiceDetailsDialog } from "@/components/Billing/Invoice/EditInvoiceDetailsDialog";
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import BackButton from "@/components/Common/BackButton";
 import { DisablingCover } from "@/components/Common/DisablingCover";
@@ -102,6 +103,7 @@ export function InvoiceShow({
   const { t } = useTranslation();
   const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditDetailsDialogOpen, setIsEditDetailsDialogOpen] = useState(false);
   const [selectedChargeItems, setSelectedChargeItems] = useState<
     ChargeItemRead[]
   >([]);
@@ -301,7 +303,7 @@ export function InvoiceShow({
         charge_items: invoice?.charge_items.map((item) => item.id) || [],
         issue_date:
           status === InvoiceStatus.issued
-            ? dayjs().toISOString()
+            ? invoice?.issue_date || dayjs().toISOString()
             : invoice?.issue_date,
       };
 
@@ -630,18 +632,28 @@ export function InvoiceShow({
             </div>
             <div className="flex flex-row gap-2">
               {invoice.status === InvoiceStatus.draft && (
-                <Button
-                  variant="outline"
-                  className="border-gray-400 gap-1"
-                  onClick={() => {
-                    setIsEditDialogOpen(true);
-                    setSelectedChargeItems(invoice.charge_items);
-                  }}
-                >
-                  <CareIcon icon="l-edit" className="size-4" />
-                  {t("edit_items")}
-                  <ShortcutBadge actionId="edit-button" />
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    className="border-gray-400 gap-1"
+                    onClick={() => setIsEditDetailsDialogOpen(true)}
+                  >
+                    <CareIcon icon="l-edit" className="size-4" />
+                    {t("edit_details")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-gray-400 gap-1"
+                    onClick={() => {
+                      setIsEditDialogOpen(true);
+                      setSelectedChargeItems(invoice.charge_items);
+                    }}
+                  >
+                    <CareIcon icon="l-edit" className="size-4" />
+                    {t("edit_items")}
+                    <ShortcutBadge actionId="edit-button" />
+                  </Button>
+                </>
               )}
               <Button
                 variant="outline"
@@ -1797,6 +1809,13 @@ export function InvoiceShow({
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
           }}
+        />
+
+        <EditInvoiceDetailsDialog
+          open={isEditDetailsDialogOpen}
+          onOpenChange={setIsEditDetailsDialogOpen}
+          facilityId={facilityId}
+          invoice={invoice}
         />
 
         <div className="flex gap-10 max-w-4xl mx-auto">
