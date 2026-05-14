@@ -397,11 +397,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
             <Accordion
               type="multiple"
               className="flex flex-col gap-6"
-              defaultValue={[
-                "patient-basics",
-                "additional-details",
-                "extensions",
-              ]}
+              defaultValue={["patient-basics", "additional-details"]}
             >
               <PLUGIN_Component
                 __name="PatientRegistrationForm"
@@ -433,7 +429,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                 <AccordionTrigger className="flex justify-between">
                   <div className="flex gap-3 items-center w-full">
                     <h5 className="text-lg font-semibold">
-                      2: {t("address")}{" "}
+                      2: {t("additional_details")}{" "}
                       {quickRegistration && `(${t("optional")})`}
                     </h5>
                     {/* TODO: add progress bar */}
@@ -441,25 +437,9 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                 </AccordionTrigger>
                 <AccordionContent className="px-1 flex flex-col gap-6">
                   <AdditionalDetailsContent form={form} />
+                  {extensions.fields}
                 </AccordionContent>
               </AccordionItem>
-              {extensions.hasFields && (
-                <AccordionItem
-                  value="extensions"
-                  className="bg-white flex flex-col gap-4 p-6 shadow rounded-md"
-                >
-                  <AccordionTrigger className="flex justify-between">
-                    <div className="flex gap-3 items-center w-full">
-                      <h5 className="text-lg font-semibold">
-                        3: {t("additional_details")}
-                      </h5>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-1 flex flex-col gap-6">
-                    {extensions.fields}
-                  </AccordionContent>
-                </AccordionItem>
-              )}
             </Accordion>
             <div className="w-full border-t border-gray-200 py-6 mt-6">
               <div className="max-w-2xl mx-auto flex justify-end">
