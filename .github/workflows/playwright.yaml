@@ -42,7 +42,9 @@ jobs:
               - 'tests/**'
               - 'src/**'
               - 'package.json'
+              - 'package-lock.json'
               - 'playwright.config.ts'
+              - '.github/workflows/playwright.yaml'
 
   # Build application once and cache for all test shards
   build:
