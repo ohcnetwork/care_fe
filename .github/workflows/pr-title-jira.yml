@@ -3,12 +3,6 @@ name: PR Title JIRA Validation
 on:
   pull_request:
     types: [opened, reopened, edited]
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: "PR number to validate"
-        required: true
-        type: number
 
 permissions:
   pull-requests: write
@@ -16,11 +10,10 @@ permissions:
 jobs:
   validate-jira-ticket:
     runs-on: ubuntu-24.04-arm
-    # Skip workflow for PRs created by bots or from forks (only for pull_request events)
+    # Skip workflow for PRs created by bots or from forks
     if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.user.type != 'Bot' &&
-       github.event.pull_request.head.repo.full_name == github.repository)
+      github.event.pull_request.user.type != 'Bot' &&
+      github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
       - name: Validate JIRA Ticket in PR Title
@@ -31,23 +24,7 @@ jobs:
             // Configure JIRA project keys here
             const jiraProjectKeys = ['CARE', 'ENG'];
 
-            let pr;
-            if (context.eventName === 'workflow_dispatch') {
-              const prNumber = ${{ inputs.pr_number || 0 }};
-              if (!prNumber) {
-                core.setFailed('PR number is required for workflow_dispatch');
-                return;
-              }
-              const { data } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber
-              });
-              pr = data;
-            } else {
-              pr = context.payload.pull_request;
-            }
-
+            const pr = context.payload.pull_request;
             const { title: prTitle, number: prNumber, head: { ref: branchName } } = pr;
 
             // Build regex pattern: CARE-123, OHC-456, etc.
