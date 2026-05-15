@@ -1,0 +1,129 @@
+name: PR Title JIRA Validation
+
+on:
+  pull_request_target:
+    types: [opened, reopened, edited]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to validate"
+        required: true
+        type: number
+
+permissions:
+  pull-requests: write
+
+jobs:
+  validate-jira-ticket:
+    runs-on: ubuntu-24.04-arm
+    # Skip workflow for PRs created by bots or from forks (only for pull_request events)
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.user.type != 'Bot' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+
+    steps:
+      - name: Validate JIRA Ticket in PR Title
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Configure JIRA project keys here
+            const jiraProjectKeys = ['CARE', 'ENG'];
+
+            let pr;
+            if (context.eventName === 'workflow_dispatch') {
+              const prNumber = ${{ inputs.pr_number || 0 }};
+              if (!prNumber) {
+                core.setFailed('PR number is required for workflow_dispatch');
+                return;
+              }
+              const { data } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              pr = data;
+            } else {
+              pr = context.payload.pull_request;
+            }
+
+            const { title: prTitle, number: prNumber, head: { ref: branchName } } = pr;
+
+            // Build regex pattern: CARE-123, OHC-456, etc.
+            const jiraTicketRegex = new RegExp(`\\b(${jiraProjectKeys.join('|')})-\\d+\\b`, 'i');
+
+            // Helper to create or update bot comment
+            async function upsertComment(body) {
+              const marker = '<!-- jira-validation-bot -->';
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber
+              });
+
+              const existing = comments.find(c => c.body.includes(marker));
+              const markedBody = `${marker}\n${body}`;
+
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body: markedBody
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: markedBody
+                });
+              }
+            }
+
+            // Check title for JIRA ticket
+            const titleMatch = prTitle.match(jiraTicketRegex);
+            if (titleMatch) {
+              const ticket = titleMatch[0].toUpperCase();
+              await upsertComment(`✅ **JIRA Validation Passed**\n\nFound JIRA ticket: **${ticket}**`);
+              return;
+            }
+
+            // Check branch name for JIRA ticket
+            const branchMatch = branchName.match(jiraTicketRegex);
+            if (branchMatch) {
+              const ticket = branchMatch[0].toUpperCase();
+              const newTitle = `${ticket}: ${prTitle}`;
+
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                title: newTitle
+              });
+
+              await upsertComment(
+                `✅ **JIRA Validation Passed**\n\n` +
+                `Added JIRA ticket from branch to PR title.\n\n` +
+                `| Field | Value |\n|-------|-------|\n` +
+                `| Ticket | **${ticket}** |\n` +
+                `| New Title | ${newTitle} |`
+              );
+              return;
+            }
+
+            // Validation failed
+            const examples = jiraProjectKeys.map(k => `\`${k}-123\``).join(', ');
+            await upsertComment(
+              `❌ **JIRA Validation Failed**\n\n` +
+              `PR title must contain a JIRA ticket number.\n\n` +
+              `**Expected format:** \`[${jiraProjectKeys.join('/')}]-<number>\`\n` +
+              `**Examples:** ${examples}\n\n` +
+              `---\n` +
+              `**Fix by either:**\n` +
+              `1. Adding a JIRA ticket to your PR title, or\n` +
+              `2. Using a branch name like \`CARE-123-feature-name\``
+            );
+
+            core.setFailed(`PR title must contain a JIRA ticket (e.g., ${jiraProjectKeys[0]}-123)`);
