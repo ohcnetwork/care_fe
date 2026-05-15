@@ -155,7 +155,12 @@ const envSchema = z
     REACT_DEFAULT_ENCOUNTER_TYPE: z.string().optional(),
     REACT_DEFAULT_DISCHARGE_DISPOSITION: z.string().optional(),
     REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().uuid().optional(),
-    REACT_CUSTOM_REMOTE_I18N_URL: z.string().url().optional(),
+    REACT_CUSTOM_REMOTE_I18N_URL: z
+      .string()
+      .optional()
+      .transform((val) => val?.split(" "))
+      .pipe(z.array(z.string().url()).optional())
+      .describe("Optional: Space-separated list of i18n URLs"),
     REACT_CUSTOM_SHORTCUTS: customShortcutsSchemaString.optional(),
     REACT_AUTO_REFRESH_INTERVAL: numberAsString.optional(),
     REACT_AUTO_REFRESH_BY_DEFAULT: booleanAsStringSchema.optional(),

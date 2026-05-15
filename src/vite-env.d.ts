@@ -34,7 +34,7 @@ interface ImportMetaEnv {
   readonly REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED?: string;
   readonly REACT_DISABLE_PATIENT_LOGIN?: string;
   readonly REACT_ENABLE_QUESTIONNAIRE_DRAFT?: string;
-  readonly REACT_CUSTOM_REMOTE_I18N_URL?: string;
+  readonly REACT_CUSTOM_REMOTE_I18N_URLS?: string;
   readonly REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE?: string;
   readonly REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME?: string;
   readonly REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE?: string;

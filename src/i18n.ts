@@ -73,41 +73,43 @@ export async function initI18n() {
     .use(LanguageDetector)
     .use(
       resourcesToBackend((language, namespace, callback) => {
-        if (namespace === DEFAULT_NAMESPACE && careConfig.i18nUrl) {
-          const remoteUrl = `${careConfig.i18nUrl}/${language}.json`;
+        if (namespace === DEFAULT_NAMESPACE && careConfig.i18nUrls.length > 0) {
           const localUrl = `/locale/${language}.json`;
+
+          const loadJson = (url: string, warnLabel: string) =>
+            fetch(url, fetchOptions)
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+              })
+              .catch((error) => {
+                console.warn(`${warnLabel}: ${url}`, error);
+                return {};
+              });
+
           Promise.all([
-            fetch(remoteUrl, fetchOptions)
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-              })
-              .catch((error) => {
-                console.warn(
-                  `Failed to load remote translations: ${remoteUrl}`,
-                  error,
-                );
-                return {};
-              }),
-            fetch(localUrl, fetchOptions)
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-              })
-              .catch((error) => {
-                console.warn(
-                  `Failed to load local fallback translations: ${localUrl}`,
-                  error,
-                );
-                return {};
-              }),
+            ...careConfig.i18nUrls.map((base) => {
+              const trimmedBase = base.replace(/\/$/, "");
+              const remoteUrl = `${trimmedBase}/${language}.json`;
+              return loadJson(remoteUrl, "Failed to load remote translations");
+            }),
+            loadJson(localUrl, "Failed to load local fallback translations"),
           ])
-            .then(([remoteResources, localResources]) => {
-              const merged = { ...localResources, ...remoteResources };
+            .then((results) => {
+              const localResources = results[results.length - 1] as Record<
+                string,
+                unknown
+              >;
+              const remoteBundles = results.slice(0, -1) as Record<
+                string,
+                unknown
+              >[];
+              const merged = remoteBundles.reduce(
+                (acc, bundle) => ({ ...acc, ...bundle }),
+                { ...localResources },
+              );
               callback(null, merged);
             })
             .catch((error) => {

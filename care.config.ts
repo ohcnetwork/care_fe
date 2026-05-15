@@ -1,5 +1,3 @@
-import { booleanFromString } from "@/common/utils";
-import { PaymentReconciliationPaymentMethod } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import {
   ENCOUNTER_CLASS,
   EncounterClass,
@@ -7,6 +5,8 @@ import {
 } from "@/types/emr/encounter/encounter";
 
 import { NonEmptyArray } from "@/Utils/types";
+import { booleanFromString } from "@/common/utils";
+import { PaymentReconciliationPaymentMethod } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import Decimal from "decimal.js";
 import { CountryCode } from "libphonenumber-js/types.cjs";
 
@@ -256,7 +256,9 @@ const careConfig = {
     ),
   },
 
-  i18nUrl: env.REACT_CUSTOM_REMOTE_I18N_URL,
+  i18nUrls: (env.REACT_CUSTOM_REMOTE_I18N_URLS?.split(" ") || [])
+    .map((url) => url.trim())
+    .filter(Boolean),
 
   /**
    * Custom shortcuts configuration from environment variables

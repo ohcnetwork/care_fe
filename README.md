@@ -160,16 +160,18 @@ All strings must be encased in i18n translations. New translation strings must b
 
 CARE can load translation files from a remote URL and fall back to local files for any missing keys.
 
-- **Enable remote translations**: set `REACT_CUSTOM_REMOTE_I18N_URL` in your environment.
-- **Expected remote file path**: `${REACT_CUSTOM_REMOTE_I18N_URL}/{lang}.json` (for example: `https://cdn.example.com/i18n/en.json`).
+- **Enable remote translations**: set `REACT_CUSTOM_REMOTE_I18N_URLS` in your environment.
+- **Expected remote file path**: `${REACT_CUSTOM_REMOTE_I18N_URLS[0]}/{lang}.json` (for example: `https://cdn.example.com/i18n/en.json`).
 - **Local fallback path**: `/public/locale/{lang}.json` in this repository (served as `/locale/{lang}.json`).
-- **Merge behavior**: remote keys override local; any keys absent in remote are served from local.
+- **Multiple remote URLs**: set `REACT_CUSTOM_REMOTE_I18N_URLS` to a space-separated list of URLs.
+- **Merge behavior**: remote keys override local; any keys absent in remote are served from local. The remote URLs are loaded in order of appearance, so the last URL is the highest priority and will override all previous URLs.
+
 
 Example `.env.local`:
 
 ```env
 # Load i18n from a CDN (per-language JSON files)
-REACT_CUSTOM_REMOTE_I18N_URL=https://cdn.example.com/i18n
+REACT_CUSTOM_REMOTE_I18N_URLS=https://cdn.example.com/i18n https://cdn2.example.com/i18n
 ```
 
 Remote file example (`en.json`):
