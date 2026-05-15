@@ -6,7 +6,12 @@ import {
 import { LocationRead, OperationalStatus } from "@/types/location/location";
 
 export type LocationScreen = "view" | "assign" | "modify";
-export type LocationAction = "move" | "complete" | "cancel" | "new";
+export type LocationAction =
+  | "move"
+  | "complete"
+  | "cancel"
+  | "new"
+  | "add_reserved";
 
 export interface LocationSheetState {
   screen: LocationScreen;
@@ -203,6 +208,7 @@ export interface AssignmentHandlers {
   onConfirmEdit: (location: LocationAssociationRead) => void;
   onConfirmTime: (plannedLocation?: LocationAssociationRead) => void;
   onAssignLinkedBed?: (location: LocationAssociationRead) => void;
+  onAddReserved?: () => void;
 }
 
 export interface NavigationHandlers {

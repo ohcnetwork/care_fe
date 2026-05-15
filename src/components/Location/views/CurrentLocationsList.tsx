@@ -28,6 +28,7 @@ interface CurrentLocationsListProps {
   onCancelEdit: () => void;
   onConfirmEdit: (location: LocationAssociationRead) => void;
   linkedLocations?: LocationAssociationRead[];
+  onAddReserved?: () => void;
 }
 
 export function CurrentLocationsList({
@@ -47,6 +48,7 @@ export function CurrentLocationsList({
   onCancelEdit,
   onConfirmEdit,
   linkedLocations,
+  onAddReserved,
 }: CurrentLocationsListProps) {
   const { t } = useTranslation();
   const renderLocationCard = (
@@ -69,6 +71,7 @@ export function CurrentLocationsList({
       }
       areLinkedLocations={areLinkedLocations}
       onComplete={status === "active" ? onComplete : undefined}
+      onAddReserved={status === "active" ? onAddReserved : undefined}
     >
       {showMoveButton && (
         <div className="flex justify-end gap-2">

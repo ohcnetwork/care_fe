@@ -57,6 +57,7 @@ export function LocationAssignmentView({
     onCancelEdit,
     onConfirmEdit,
     onAssignLinkedBed,
+    onAddReserved,
   } = assignmentHandlers;
   const {
     onLocationClick,
@@ -79,8 +80,10 @@ export function LocationAssignmentView({
     hasMore,
   } = navigationHandlers;
 
+  const isAddingReserved = sheetState.action === "add_reserved";
   const shouldShowNavigation =
     sheetState.action === "move" ||
+    isAddingReserved ||
     (!currentLocation && !plannedLocations.length);
 
   const isLinkedBed = selectedLinkedBed !== null;
@@ -103,6 +106,7 @@ export function LocationAssignmentView({
           onCancelEdit={onCancelEdit}
           onConfirmEdit={onConfirmEdit}
           linkedLocations={activeLocations}
+          onAddReserved={onAddReserved}
         />
       </div>
     );
@@ -117,8 +121,10 @@ export function LocationAssignmentView({
         setEditingState={setEditingState}
         isPending={isPending}
         showMoveButton={false}
-        keepBedActive={keepBedActive}
-        onKeepBedActiveChange={onKeepBedActiveChange}
+        keepBedActive={!isAddingReserved ? keepBedActive : undefined}
+        onKeepBedActiveChange={
+          !isAddingReserved ? onKeepBedActiveChange : undefined
+        }
         onMove={onMove}
         onComplete={onComplete}
         onUpdateTime={onUpdateTime}
@@ -150,17 +156,19 @@ export function LocationAssignmentView({
         onLoadMore={onLoadMore}
         onClearSelection={onClearSelection}
         onGoBack={onGoBack}
-        linkedLocations={activeLocations}
+        linkedLocations={isAddingReserved ? [] : activeLocations}
       />
 
       <div className="mt-8 flex justify-end gap-2">
-        <Button
-          variant="outline"
-          disabled={!selectedBed}
-          onClick={onScheduleForLater}
-        >
-          {t("schedule_for_later")}
-        </Button>
+        {sheetState.action !== "add_reserved" && (
+          <Button
+            variant="outline"
+            disabled={!selectedBed}
+            onClick={onScheduleForLater}
+          >
+            {t("schedule_for_later")}
+          </Button>
+        )}
         <Button
           variant="primary"
           disabled={!selectedBed && !selectedLinkedBed}
@@ -170,7 +178,9 @@ export function LocationAssignmentView({
               : onAssignNow();
           }}
         >
-          {t("assign_bed_now")}
+          {sheetState.action === "add_reserved"
+            ? t("add_reserved_bed")
+            : t("assign_bed_now")}
         </Button>
       </div>
     </div>

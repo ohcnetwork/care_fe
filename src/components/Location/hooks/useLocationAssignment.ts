@@ -37,6 +37,7 @@ export function useLocationAssignment() {
   };
 
   const resetEditingState = () => {
+    setSheetState(initialState);
     setEditingState(initialEditingState);
   };
 
@@ -111,14 +112,26 @@ export function useLocationAssignment() {
     });
   };
 
+  const startAddReserved = () => {
+    setSheetState({
+      screen: "assign",
+      action: "add_reserved",
+      timeConfig: {
+        start: new Date(),
+        status: "reserved",
+      },
+    });
+  };
+
   const startAssigningPlanned = (
     plannedLocationId: string,
+    startTime: Date,
     status: LocationAssociationStatus = "active",
   ) => {
     const timeConfig = {
-      start: new Date(),
+      start: startTime,
       status,
-      end: undefined,
+      end: new Date(),
     };
 
     setSheetState({
@@ -153,6 +166,7 @@ export function useLocationAssignment() {
     startNewAssignment,
     startEditingTime,
     startCompletingStay,
+    startAddReserved,
     startAssigningPlanned,
   };
 }

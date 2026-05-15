@@ -1,4 +1,4 @@
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -34,12 +34,12 @@ interface LocationCardWrapperProps {
   handleCancelEdit: () => void;
   handleConfirmEdit: (location: LocationAssociationRead) => void;
   isPending: boolean;
-  showBackButton?: boolean;
   title?: string;
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
   areLinkedLocations?: boolean;
   onComplete?: (location: LocationAssociationRead) => void;
+  onAddReserved?: () => void;
 }
 
 export function LocationCardWrapper({
@@ -51,12 +51,12 @@ export function LocationCardWrapper({
   handleCancelEdit,
   handleConfirmEdit,
   isPending,
-  showBackButton,
   title,
   keepBedActive,
   onKeepBedActiveChange,
   areLinkedLocations = false,
   onComplete,
+  onAddReserved,
 }: LocationCardWrapperProps) {
   const { t } = useTranslation();
   const isEditing = editingState.locationId === locationHistory.id;
@@ -102,29 +102,26 @@ export function LocationCardWrapper({
 
   return (
     <div className="space-y-4">
-      {showBackButton && (
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={handleCancelEdit}>
-            <ChevronLeft className="size-4" />
-          </Button>
-          <h3 className="text-lg font-semibold">{title}</h3>
-        </div>
-      )}
-
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold">{getTitle()}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            {onAddReserved && (
+              <Button size="sm" variant="outline" onClick={onAddReserved}>
+                {t("add_reserved_bed")}
+              </Button>
+            )}
 
-          {onComplete && (
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => onComplete(locationHistory)}
-              className="self-end mb-1"
-            >
-              {t("complete_patient_stay")}
-            </Button>
-          )}
+            {onComplete && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => onComplete(locationHistory)}
+              >
+                {t("complete_patient_stay")}
+              </Button>
+            )}
+          </div>
         </div>
         <div
           className={cn(

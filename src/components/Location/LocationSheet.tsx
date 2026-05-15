@@ -135,7 +135,11 @@ export function LocationSheet({
   };
 
   const handleAssignNowPlanned = (plannedLocation: LocationAssociationRead) => {
-    assignment.startAssigningPlanned(plannedLocation.id, "active");
+    assignment.startAssigningPlanned(
+      plannedLocation.id,
+      new Date(plannedLocation.start_datetime),
+      "active",
+    );
   };
 
   const handleCancelPlan = (
@@ -471,12 +475,23 @@ export function LocationSheet({
     navigation.clearBedSelection();
   };
 
+  const handleAddReserved = () => {
+    assignment.startAddReserved();
+  };
+
   const handleScheduleForLater = () => {
     assignment.startNewAssignment("planned", !!currentLocation);
   };
 
   const handleAssignNow = () => {
-    assignment.startNewAssignment("active", !!currentLocation);
+    if (assignment.sheetState.action === "add_reserved") {
+      assignment.setSheetState((prev) => ({
+        ...prev,
+        screen: "modify",
+      }));
+    } else {
+      assignment.startNewAssignment("active", !!currentLocation);
+    }
   };
 
   const getDeleteDialogDescription = () => {
@@ -525,6 +540,7 @@ export function LocationSheet({
     onConfirmEdit: handleConfirmEdit,
     onConfirmTime: handleConfirmTime,
     onAssignLinkedBed: handleAssignLinkedBed,
+    onAddReserved: handleAddReserved,
   };
 
   const navigationHandlers = {

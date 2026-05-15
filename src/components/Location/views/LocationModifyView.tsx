@@ -43,8 +43,11 @@ export function LocationModifyView({
   const locationHistory = selectedBedLocation || selectedLinkedBed;
   const showNewBedCard =
     locationHistory &&
-    (sheetState.action === "new" || sheetState.action === "move") &&
+    (sheetState.action === "new" ||
+      sheetState.action === "move" ||
+      sheetState.action === "add_reserved") &&
     !editingState.locationId;
+  const isAddingReserved = sheetState.action === "add_reserved";
   const locationId = locationHistory?.id || "";
   const isEditingCurrentLocation = currentLocation?.id === locationId;
   return (
@@ -56,8 +59,10 @@ export function LocationModifyView({
         setEditingState={setEditingState}
         isPending={isPending}
         showMoveButton={false}
-        keepBedActive={keepBedActive}
-        onKeepBedActiveChange={onKeepBedActiveChange}
+        keepBedActive={!isAddingReserved ? keepBedActive : undefined}
+        onKeepBedActiveChange={
+          !isAddingReserved ? onKeepBedActiveChange : undefined
+        }
         onMove={onMove}
         onComplete={onComplete}
         onUpdateTime={onUpdateTime}
@@ -99,7 +104,9 @@ export function LocationModifyView({
           title={
             isEditingCurrentLocation
               ? t("patient_current_location")
-              : t("patient_next_location")
+              : sheetState.action === "add_reserved"
+                ? t("reserved_bed")
+                : t("patient_next_location")
           }
         />
       )}
