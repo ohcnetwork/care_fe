@@ -1,17 +1,18 @@
-import { NavigationLink } from "@/components/ui/sidebar/nav-main";
-import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
-import { InvoiceRead } from "@/types/billing/invoice/invoice";
-import { DeviceDetail } from "@/types/device/device";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
 import {
   PatientListRead,
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
+import { LazyExoticComponent, ReactNode } from "react";
+
+import { NavigationLink } from "@/components/ui/sidebar/nav-main";
+import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { InvoiceRead } from "@/types/billing/invoice/invoice";
+import { DeviceDetail } from "@/types/device/device";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { FacilityRead } from "@/types/facility/facility";
 import { PlugConfigMeta } from "@/types/plugConfig";
 import { UserReadMinimal } from "@/types/user/user";
-import { LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
@@ -67,6 +68,7 @@ export type PatientDetailsTabDemographyGeneralInfoComponentType = React.FC<{
 export type InvoiceRecordPaymentOptionsComponentType = React.FC<{
   facilityId: string;
   invoice: InvoiceRead;
+  form: UseFormReturn<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }>;
 
 export type PatientSearchActionsComponentType = React.FC<{

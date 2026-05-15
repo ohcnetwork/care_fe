@@ -1,27 +1,11 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { t } from "i18next";
-import { useAtom } from "jotai";
-import { useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import * as z from "zod";
 
 import {
-  Banknote,
-  BanknoteArrowUp,
-  CreditCard,
-  Landmark,
-  Signature,
-} from "lucide-react";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import careConfig from "@careConfig";
-
-import { Button } from "@/components/ui/button";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Form,
   FormControl,
@@ -31,11 +15,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   MonetaryAmountInput,
   MonetaryDisplay,
 } from "@/components/ui/monetary-display";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Sheet,
   SheetContent,
@@ -44,22 +28,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
-
-import { paymentReconcilationLocationAtom } from "@/atoms/paymentReconcilationLocationAtom";
-import { LocationPicker } from "@/components/Location/LocationPicker";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   ExtensionEntityType,
-  getCombinedExtensionProps,
   NamespacedExtensionData,
+  getCombinedExtensionProps,
   useEntityExtensions,
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
-import { AccountRead } from "@/types/billing/account/Account";
-import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
   PaymentReconciliationCreate,
   PaymentReconciliationIssuerType,
@@ -69,16 +44,48 @@ import {
   PaymentReconciliationStatus,
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
-import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import {
   isGreaterThanOrEqual,
   isPositive,
   round,
   zodDecimal,
 } from "@/Utils/decimal";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Banknote,
+  BanknoteArrowUp,
+  CreditCard,
+  Landmark,
+  Signature,
+} from "lucide-react";
+import { useEffect, useMemo } from "react";
+
+import { paymentReconcilationLocationAtom } from "@/atoms/paymentReconcilationLocationAtom";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { LocationPicker } from "@/components/Location/LocationPicker";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { useCareApps } from "@/hooks/useCareApps";
+import { PLUGIN_Component } from "@/PluginEngine";
+import { AccountRead } from "@/types/billing/account/Account";
+import { InvoiceRead } from "@/types/billing/invoice/invoice";
+import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import careConfig from "@careConfig";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
 import Decimal from "decimal.js";
+import { t } from "i18next";
+import { useAtom } from "jotai";
+import { ChevronUp } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 const PAYMENT_METHODS = [
   {
@@ -196,8 +203,7 @@ export function PaymentReconciliationSheet({
   );
   useShortcutSubContext();
 
-  const { getExtensions, isLoading: isExtensionsLoading } =
-    useExtensionSchemas();
+  const { getExtensions } = useExtensionSchemas();
 
   const ext = useMemo(
     () =>
@@ -254,6 +260,12 @@ export function PaymentReconciliationSheet({
       form.setValue("location", selectedLocationObject.id);
     }
   }, [selectedLocationObject, form]);
+
+  const careApps = useCareApps();
+  const isInvoiceRecordPaymentPluginsPresent = careApps.some(
+    (plugin) =>
+      !plugin.isLoading && plugin.components?.InvoiceRecordPaymentOptions,
+  );
 
   const { mutate: submitPayment, isPending } = useMutation({
     mutationFn: mutate(paymentReconciliationApi.createPaymentReconciliation, {
@@ -705,28 +717,51 @@ export function PaymentReconciliationSheet({
                   <ShortcutBadge actionId="cancel-action" />
                 </Button>
 
-                <Button
-                  type="submit"
-                  disabled={isPending || isExtensionsLoading}
-                  aria-label={
-                    isCreditNote ? t("record_credit_note") : t("record_payment")
-                  }
-                >
-                  {isPending ? (
-                    <>
-                      <CareIcon
-                        icon="l-spinner"
-                        className="mr-2 size-4 animate-spin"
-                      />
-                      {t("processing_with_dots")}
-                    </>
-                  ) : isCreditNote ? (
-                    t("record_credit_note")
-                  ) : (
-                    t("record_payment")
+                <ButtonGroup className="w-full">
+                  <Button
+                    type="submit"
+                    disabled={isPending}
+                    aria-label={t("record_payment")}
+                  >
+                    {isPending ? (
+                      <>
+                        <CareIcon
+                          icon="l-spinner"
+                          className="mr-2 size-4 animate-spin"
+                        />
+                        {t("processing_with_dots")}
+                      </>
+                    ) : isCreditNote ? (
+                      t("record_credit_note")
+                    ) : (
+                      t("record_payment")
+                    )}
+                    <ShortcutBadge actionId="submit-action" />
+                  </Button>
+                  {isInvoiceRecordPaymentPluginsPresent && invoice && (
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline_primary"
+                          size="icon"
+                          aria-label="More Options"
+                        >
+                          <ChevronUp />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-full">
+                        <DropdownMenuGroup>
+                          <PLUGIN_Component
+                            __name="InvoiceRecordPaymentOptions"
+                            facilityId={facilityId}
+                            invoice={invoice}
+                            form={form}
+                          />
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
-                  <ShortcutBadge actionId="submit-action" />
-                </Button>
+                </ButtonGroup>
               </div>
             </SheetFooter>
           </form>

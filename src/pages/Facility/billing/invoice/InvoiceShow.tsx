@@ -14,7 +14,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -30,18 +29,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
+import {
+  InvoiceChargeItemTitle,
+  useMedicationDispenseData,
+} from "@/pages/Facility/billing/invoice/components/InvoiceChargeItemTitle";
 import {
   INVOICE_STATUS_COLORS,
   InvoiceCreate,
   InvoiceRead,
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
-import { PaymentReconciliationStatus } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import {
+  PAYMENT_RECONCILIATION_METHOD_MAP,
+  PaymentReconciliationStatus,
+} from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import { add, multiply, round, subtract } from "@/Utils/decimal";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BadgeCheck,
-  ChevronDown,
   ChevronLeft,
   EyeIcon,
   FileCheck,
@@ -50,7 +56,6 @@ import {
   SquareArrowOutUpRight,
 } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
-import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
@@ -60,34 +65,26 @@ import { DisablingCover } from "@/components/Common/DisablingCover";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { Badge } from "@/components/ui/badge";
-import { ButtonGroup } from "@/components/ui/button-group";
 import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import { useCareApps } from "@/hooks/useCareApps";
 import { cn } from "@/lib/utils";
 import { isAccountActiveAndBillable } from "@/pages/Facility/billing/account/utils";
-import {
-  InvoiceChargeItemTitle,
-  useMedicationDispenseData,
-} from "@/pages/Facility/billing/invoice/components/InvoiceChargeItemTitle";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
-import { PLUGIN_Component } from "@/PluginEngine";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
+import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
-import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
-import { add, multiply, round, subtract } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName } from "@/Utils/utils";
 import { format } from "date-fns";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -356,12 +353,6 @@ export function InvoiceShow({
     return t("appointment_invoice_alert");
   })();
 
-  const careApps = useCareApps();
-  const isInvoiceRecordPaymentPluginsPresent = careApps.some(
-    (plugin) =>
-      !plugin.isLoading && plugin.components?.InvoiceRecordPaymentOptions,
-  );
-
   if (isLoading) {
     return <TableSkeleton count={5} />;
   }
@@ -480,40 +471,16 @@ export function InvoiceShow({
               </Button>
             )}
             {invoice.status === InvoiceStatus.issued && (
-              <ButtonGroup className="w-full">
-                <Button
-                  className="w-full"
-                  onClick={() => setIsPaymentSheetOpen(true)}
-                >
-                  <CareIcon icon="l-plus" className="mr-2 size-4" />
-                  {invoice.is_refund
-                    ? t("record_credit_note")
-                    : t("record_payment")}
-                  <ShortcutBadge actionId="record-payment" />
-                </Button>
-                {isInvoiceRecordPaymentPluginsPresent && !invoice.is_refund && (
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline_primary"
-                        size="icon"
-                        aria-label="More Options"
-                      >
-                        <ChevronDown />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-min">
-                      <DropdownMenuGroup>
-                        <PLUGIN_Component
-                          __name="InvoiceRecordPaymentOptions"
-                          facilityId={facilityId}
-                          invoice={invoice}
-                        />
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </ButtonGroup>
+              <Button
+                className="w-full"
+                onClick={() => setIsPaymentSheetOpen(true)}
+              >
+                <CareIcon icon="l-plus" className="mr-2 size-4" />
+                {invoice.is_refund
+                  ? t("record_credit_note")
+                  : t("record_payment")}
+                <ShortcutBadge actionId="record-payment" />
+              </Button>
             )}
           </div>
         </div>
