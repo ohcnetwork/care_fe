@@ -6,6 +6,12 @@ on:
       - opened
       - reopened
       - edited
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to validate"
+        required: true
+        type: number
 
 permissions:
   pull-requests: write
@@ -22,8 +28,28 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const prTitle = context.payload.pull_request.title;
-            const branchName = context.payload.pull_request.head.ref;
+            let pr;
+
+            // Handle workflow_dispatch - fetch PR by number
+            if (context.eventName === 'workflow_dispatch') {
+              const prNumber = ${{ inputs.pr_number || 0 }};
+              if (!prNumber) {
+                core.setFailed('PR number is required for workflow_dispatch');
+                return;
+              }
+              const { data } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              pr = data;
+            } else {
+              pr = context.payload.pull_request;
+            }
+
+            const prTitle = pr.title;
+            const branchName = pr.head.ref;
+            const prNumber = pr.number;
 
             // Configure JIRA project keys here
             const jiraProjectKeys = [
@@ -57,7 +83,7 @@ jobs:
               await github.rest.pulls.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: context.payload.pull_request.number,
+                pull_number: prNumber,
                 title: newTitle
               });
 
