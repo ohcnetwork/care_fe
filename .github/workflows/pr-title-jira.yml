@@ -28,7 +28,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             // Configure JIRA project keys here
-            const jiraProjectKeys = ['CARE', 'OHC'];
+            const jiraProjectKeys = ['CARE', 'ENG'];
 
             let pr;
             if (context.eventName === 'workflow_dispatch') {
