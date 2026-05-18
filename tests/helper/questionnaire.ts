@@ -173,13 +173,15 @@ export async function fillIntegerField(
 
 /**
  * Clears an integer input field identified by its label.
- * Uses clear() + Tab to ensure the React onChange fires with an empty value.
+ * Uses triple-click to select all + Backspace + Tab to reliably empty the
+ * number input and trigger React's onChange with an empty value.
  */
 export async function clearIntegerField(page: Page, labelText: string) {
   const label = page.getByText(labelText, { exact: true });
   await label.scrollIntoViewIfNeeded();
   const container = getQuestionContainer(page, labelText);
   const input = container.locator('input[type="number"]').first();
-  await input.clear();
+  await input.click({ clickCount: 3 });
+  await input.press("Backspace");
   await input.press("Tab");
 }
