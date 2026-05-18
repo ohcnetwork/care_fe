@@ -92,7 +92,7 @@ export const ACCOUNT_TABS = [
 ] as const;
 export type AccountTab = (typeof ACCOUNT_TABS)[number];
 
-export const ACCOUNT_PAYMENT_TYPES = ["advance", "credit_note"] as const;
+export const ACCOUNT_PAYMENT_TYPES = ["pay", "credit_note"] as const;
 export type AccountPaymentType = (typeof ACCOUNT_PAYMENT_TYPES)[number];
 
 const closedStatusText = {
@@ -390,10 +390,7 @@ export function AccountShow({
                 {t("create_invoice")}
                 <ShortcutBadge actionId="create-invoice" />
               </Button>
-              <Button
-                variant="primary"
-                onClick={() => openPaymentSheet("advance")}
-              >
+              <Button variant="primary" onClick={() => openPaymentSheet("pay")}>
                 <CareIcon icon="l-plus" className="size-4" />
                 {t("add_credit_payment")}
                 <ShortcutBadge actionId="credit-payment-account" />
@@ -415,10 +412,7 @@ export function AccountShow({
                 {t("invoice")}
                 <ShortcutBadge actionId="create-invoice" />
               </Button>
-              <Button
-                variant="primary"
-                onClick={() => openPaymentSheet("advance")}
-              >
+              <Button variant="primary" onClick={() => openPaymentSheet("pay")}>
                 <CareIcon icon="l-plus" className="size-4" />
                 {t("credit")}
                 <ShortcutBadge actionId="record-payment-account" />
