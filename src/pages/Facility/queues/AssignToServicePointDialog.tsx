@@ -75,37 +75,43 @@ export const AssignToServicePointDialog = ({
             })}
           </DialogDescription>
         </DialogHeader>
-
-        <RadioGroup
-          value={selectedSubQueueId}
-          onValueChange={setSelectedSubQueueId}
-        >
-          {subQueues.map((subQueue) => (
-            <div
-              key={subQueue.id}
-              className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
-              onClick={() => setSelectedSubQueueId(subQueue.id)}
-            >
-              <RadioGroupItem
-                value={subQueue.id}
-                id={subQueue.id}
+        {subQueues.length === 0 ? (
+          <span className="text-sm text-gray-500">
+            {t("no_active_service_points_present")}
+          </span>
+        ) : (
+          <RadioGroup
+            value={selectedSubQueueId}
+            onValueChange={setSelectedSubQueueId}
+          >
+            {subQueues.map((subQueue) => (
+              <div
                 key={subQueue.id}
-              />
-              <Label
-                htmlFor={subQueue.id}
-                className="flex-1 text-sm font-medium cursor-pointer"
+                className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+                onClick={() => setSelectedSubQueueId(subQueue.id)}
               >
-                {subQueue.name}
-              </Label>
-              {preferredServicePointCategories && (
-                <span className="text-sm text-gray-600">
-                  {preferredServicePointCategories?.[subQueue.id]?.name ??
-                    t("all")}
-                </span>
-              )}
-            </div>
-          ))}
-        </RadioGroup>
+                <RadioGroupItem
+                  value={subQueue.id}
+                  id={subQueue.id}
+                  key={subQueue.id}
+                />
+                <Label
+                  htmlFor={subQueue.id}
+                  className="flex-1 text-sm font-medium cursor-pointer"
+                >
+                  {subQueue.name}
+                </Label>
+                {preferredServicePointCategories && (
+                  <span className="text-sm text-gray-600">
+                    {preferredServicePointCategories?.[subQueue.id]?.name ??
+                      t("all")}
+                  </span>
+                )}
+              </div>
+            ))}
+          </RadioGroup>
+        )}
+
         <div className="flex">
           <Button
             onClick={handleConfirm}
