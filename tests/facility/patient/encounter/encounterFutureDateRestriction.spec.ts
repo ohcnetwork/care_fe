@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { format, subDays } from "date-fns";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -14,7 +14,7 @@ const encounterClasses = [
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-async function openEncounterForm(page: import("@playwright/test").Page) {
+async function openEncounterForm(page: Page) {
   const facilityId = getFacilityId();
   const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
   const createdDateBefore = format(new Date(), "yyyy-MM-dd");
@@ -30,16 +30,12 @@ async function openEncounterForm(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Create Encounter" }).click();
 }
 
-async function selectRandomEncounterClass(
-  page: import("@playwright/test").Page,
-) {
+async function selectRandomEncounterClass(page: Page) {
   const randomClass = faker.helpers.arrayElement(encounterClasses);
   await page.getByRole("button", { name: randomClass }).click();
 }
 
-async function selectFutureDateInCalendar(
-  page: import("@playwright/test").Page,
-) {
+async function selectFutureDateInCalendar(page: Page) {
   await page
     .locator('[data-slot="form-item"]')
     .filter({ hasText: "Date and Time" })
