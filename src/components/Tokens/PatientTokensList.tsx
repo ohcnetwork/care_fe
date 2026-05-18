@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import TokenCardWithButton from "@/components/Tokens/TokenCardWithButton";
@@ -37,20 +37,16 @@ export default function PatientTokensList({
   tokenId,
 }: PatientTokensListProps) {
   const { t } = useTranslation();
-  const [expandedTokens, setExpandedTokens] = useState<Set<string>>(new Set());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [expandedTokens, setExpandedTokens] = useState<Set<string>>(
+    () => new Set(tokenId ? [tokenId] : []),
+  );
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
       setSelectedDate(date);
     }
   };
-
-  useEffect(() => {
-    if (tokenId) {
-      setExpandedTokens(new Set([tokenId]));
-    }
-  }, [tokenId]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["tokens", patientId, facility.id, selectedDate],

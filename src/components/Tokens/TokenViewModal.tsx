@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import TokenCardWithButton from "@/components/Tokens/TokenCardWithButton";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { getTokenStatus, useToken } from "@/pages/Facility/queues/utils";
+import { useToken } from "@/hooks/useToken";
+import { getTokenStatus } from "@/pages/Facility/queues/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import {

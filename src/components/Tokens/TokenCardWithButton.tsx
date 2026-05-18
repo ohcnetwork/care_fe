@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { useToken } from "@/hooks/useToken";
 import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
-import { useToken } from "@/pages/Facility/queues/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import { TokenRetrieve, TokenStatus } from "@/types/tokens/token/token";
 import { ArrowRight } from "lucide-react";
