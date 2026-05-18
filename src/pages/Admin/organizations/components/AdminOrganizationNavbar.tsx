@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
-import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,7 +31,6 @@ function OrganizationTreeNode({
   const isExpanded = expandedOrganizations.has(organization.id);
   const isSelected = organization.id === selectedOrganizationId;
 
-  // Query for this node's children
   const { data: children, isLoading } = useQuery({
     queryKey: ["organization", "list", organizationType, organization.id],
     queryFn: query(organizationApi.list, {
@@ -49,10 +46,7 @@ function OrganizationTreeNode({
   return (
     <div className="space-y-1">
       <div
-        className={cn(
-          "flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100",
-          isSelected && "bg-blue-100 text-blue-800",
-        )}
+        className={`flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100 ${isSelected ? "bg-blue-100 text-blue-800" : ""}`}
         style={{ paddingLeft: `${level}rem` }}
       >
         {organization.has_children ? (
@@ -137,7 +131,9 @@ export default function AdminOrganizationNavbar({
       refetchOnMount: false,
     });
 
-  const topLevelOrganizations = allOrganizations?.results || [];
+  const topLevelOrganizations = (allOrganizations?.results || [])
+    .slice()
+    .sort((left, right) => left.name.localeCompare(right.name));
 
   return (
     <div className="h-full bg-white rounded-lg shadow-lg min-w-64 hidden md:block">

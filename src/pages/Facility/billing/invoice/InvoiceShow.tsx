@@ -54,6 +54,7 @@ import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
+import { EditInvoiceDetailsDialog } from "@/components/Billing/Invoice/EditInvoiceDetailsDialog";
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import BackButton from "@/components/Common/BackButton";
 import { DisablingCover } from "@/components/Common/DisablingCover";
@@ -65,6 +66,7 @@ import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import { cn } from "@/lib/utils";
+import { isAccountActiveAndBillable } from "@/pages/Facility/billing/account/utils";
 import {
   InvoiceChargeItemTitle,
   useMedicationDispenseData,
@@ -101,6 +103,7 @@ export function InvoiceShow({
   const { t } = useTranslation();
   const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditDetailsDialogOpen, setIsEditDetailsDialogOpen] = useState(false);
   const [selectedChargeItems, setSelectedChargeItems] = useState<
     ChargeItemRead[]
   >([]);
@@ -148,6 +151,7 @@ export function InvoiceShow({
         phone_number: patient?.phone_number ?? "",
         year_of_birth: patient?.year_of_birth?.toString() ?? "",
         partial_id: patient ? getPartialId(patient) : "",
+        facility: facilityId,
       },
     }),
     enabled: !!patient,
@@ -299,7 +303,7 @@ export function InvoiceShow({
         charge_items: invoice?.charge_items.map((item) => item.id) || [],
         issue_date:
           status === InvoiceStatus.issued
-            ? dayjs().toISOString()
+            ? invoice?.issue_date || dayjs().toISOString()
             : invoice?.issue_date,
       };
 
@@ -401,7 +405,7 @@ export function InvoiceShow({
                 {t("patient_name")}
               </label>
               <Link
-                href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                   {
                     phone_number: invoice.account.patient.phone_number,
                     year_of_birth:
@@ -626,111 +630,126 @@ export function InvoiceShow({
                 </Badge>
               )}
             </div>
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               {invoice.status === InvoiceStatus.draft && (
+                <>
+                  <Button
+                    variant="outline"
+                    className="border-gray-400 gap-1"
+                    onClick={() => setIsEditDetailsDialogOpen(true)}
+                  >
+                    <CareIcon icon="l-edit" className="size-4" />
+                    {t("edit_details")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-gray-400 gap-1"
+                    onClick={() => {
+                      setIsEditDialogOpen(true);
+                      setSelectedChargeItems(invoice.charge_items);
+                    }}
+                  >
+                    <CareIcon icon="l-edit" className="size-4" />
+                    {t("edit_items")}
+                    <ShortcutBadge actionId="edit-button" />
+                  </Button>
+                </>
+              )}
+              <div className="flex gap-2 w-full">
                 <Button
                   variant="outline"
-                  className="border-gray-400 gap-1"
+                  className="border-gray-400 gap-1 flex-1 sm:flex-initial"
                   onClick={() => {
-                    setIsEditDialogOpen(true);
-                    setSelectedChargeItems(invoice.charge_items);
+                    if (relatedInvoices) {
+                      // Navigate to multi-invoice print with all invoices
+                      const allInvoiceIds = [
+                        ...relatedInvoices.split(","),
+                        invoiceId,
+                      ].join(",");
+                      navigate(
+                        `/facility/${facilityId}/billing/invoices/${allInvoiceIds}/print`,
+                      );
+                    } else {
+                      // Navigate to single invoice print
+                      navigate(
+                        `/facility/${facilityId}/billing/invoice/${invoiceId}/print`,
+                      );
+                    }
                   }}
                 >
-                  <CareIcon icon="l-edit" className="size-4" />
-                  {t("edit_items")}
-                  <ShortcutBadge actionId="edit-button" />
+                  <CareIcon icon="l-print" className="size-4" />
+                  {t("print")}
+                  <ShortcutBadge actionId="print-invoice" />
                 </Button>
-              )}
-              <Button
-                variant="outline"
-                className="border-gray-400 gap-1"
-                onClick={() => {
-                  if (relatedInvoices) {
-                    // Navigate to multi-invoice print with all invoices
-                    const allInvoiceIds = [
-                      ...relatedInvoices.split(","),
-                      invoiceId,
-                    ].join(",");
-                    navigate(
-                      `/facility/${facilityId}/billing/invoices/${allInvoiceIds}/print`,
-                    );
-                  } else {
-                    // Navigate to single invoice print
-                    navigate(
-                      `/facility/${facilityId}/billing/invoice/${invoiceId}/print`,
-                    );
-                  }
-                }}
-              >
-                <CareIcon icon="l-print" className="size-4" />
-                {t("print")}
-                <ShortcutBadge actionId="print-invoice" />
-              </Button>
-              {canEdit && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="border-gray-400 px-2">
-                      <CareIcon icon="l-ellipsis-v" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {invoice.locked ? (
+                {canEdit && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="border-gray-400 px-2"
+                      >
+                        <CareIcon icon="l-ellipsis-v" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {invoice.locked ? (
+                        <DropdownMenuItem asChild className="text-primary-900">
+                          <Button
+                            variant="ghost"
+                            onClick={() => unlockInvoice({})}
+                            disabled={isUnlockPending}
+                            className="w-full flex flex-row justify-stretch items-center"
+                          >
+                            <CareIcon icon="l-unlock" className="mr-1" />
+                            <span>{t("unlock_invoice")}</span>
+                          </Button>
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem asChild className="text-primary-900">
+                          <Button
+                            variant="ghost"
+                            onClick={() => lockInvoice({})}
+                            disabled={isLockPending}
+                            className="w-full flex flex-row justify-stretch items-center"
+                          >
+                            <CareIcon icon="l-lock" className="mr-1" />
+                            <span>{t("lock_invoice")}</span>
+                          </Button>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem asChild className="text-primary-900">
                         <Button
                           variant="ghost"
-                          onClick={() => unlockInvoice({})}
-                          disabled={isUnlockPending}
+                          onClick={() =>
+                            handleStatusChange(InvoiceStatus.cancelled)
+                          }
+                          disabled={isCancelPending}
                           className="w-full flex flex-row justify-stretch items-center"
                         >
-                          <CareIcon icon="l-unlock" className="mr-1" />
-                          <span>{t("unlock_invoice")}</span>
+                          <CareIcon icon="l-times-circle" className="mr-1" />
+                          <span>{t("mark_as_cancelled")}</span>
                         </Button>
                       </DropdownMenuItem>
-                    ) : (
                       <DropdownMenuItem asChild className="text-primary-900">
                         <Button
                           variant="ghost"
-                          onClick={() => lockInvoice({})}
-                          disabled={isLockPending}
+                          onClick={() =>
+                            handleStatusChange(InvoiceStatus.entered_in_error)
+                          }
+                          disabled={isCancelPending}
                           className="w-full flex flex-row justify-stretch items-center"
                         >
-                          <CareIcon icon="l-lock" className="mr-1" />
-                          <span>{t("lock_invoice")}</span>
+                          <CareIcon
+                            icon="l-exclamation-circle"
+                            className="mr-1"
+                          />
+                          <span>{t("mark_as_entered_in_error")}</span>
                         </Button>
                       </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild className="text-primary-900">
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          handleStatusChange(InvoiceStatus.cancelled)
-                        }
-                        disabled={isCancelPending}
-                        className="w-full flex flex-row justify-stretch items-center"
-                      >
-                        <CareIcon icon="l-times-circle" className="mr-1" />
-                        <span>{t("mark_as_cancelled")}</span>
-                      </Button>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-primary-900">
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          handleStatusChange(InvoiceStatus.entered_in_error)
-                        }
-                        disabled={isCancelPending}
-                        className="w-full flex flex-row justify-stretch items-center"
-                      >
-                        <CareIcon
-                          icon="l-exclamation-circle"
-                          className="mr-1"
-                        />
-                        <span>{t("mark_as_entered_in_error")}</span>
-                      </Button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
           </div>
           <Card className="rounded-sm shadow-sm">
@@ -1057,26 +1076,27 @@ export function InvoiceShow({
                   ).length === 0 && "border-b rounded-b-md",
                 )}
               >
-                {invoice.status === InvoiceStatus.draft && (
-                  <AddChargeItemSheet
-                    facilityId={facilityId}
-                    invoiceId={invoiceId}
-                    accountId={invoice.account.id}
-                    open={isAddChargeItemSheetOpen}
-                    setOpen={setIsAddChargeItemSheetOpen}
-                    trigger={
-                      <Button
-                        variant="ghost"
-                        className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
-                        disabled={isAddChargeItemSheetOpen}
-                      >
-                        <CareIcon icon="l-plus" className="mr-2 size-4" />
-                        {t("add_charge_item")}
-                        <ShortcutBadge actionId="add-charge-item" />
-                      </Button>
-                    }
-                  />
-                )}
+                {invoice.status === InvoiceStatus.draft &&
+                  isAccountActiveAndBillable(invoice.account) && (
+                    <AddChargeItemSheet
+                      facilityId={facilityId}
+                      invoiceId={invoiceId}
+                      accountId={invoice.account.id}
+                      open={isAddChargeItemSheetOpen}
+                      setOpen={setIsAddChargeItemSheetOpen}
+                      trigger={
+                        <Button
+                          variant="ghost"
+                          className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
+                          disabled={isAddChargeItemSheetOpen}
+                        >
+                          <CareIcon icon="l-plus" className="mr-2 size-4" />
+                          {t("add_charge_item")}
+                          <ShortcutBadge actionId="add-charge-item" />
+                        </Button>
+                      }
+                    />
+                  )}
 
                 <div className="flex flex-col items-end space-y-2 text-gray-950 font-mormal text-sm mb-4">
                   {/* Base Amount */}
@@ -1242,13 +1262,22 @@ export function InvoiceShow({
                                 <TableCell
                                   className={cn(tableCellClass, "font-medium")}
                                 >
-                                  <span className="flex justify-between items-center flex-wrap gap-2">
-                                    {payment.payment_datetime
-                                      ? format(
-                                          new Date(payment.payment_datetime),
-                                          "d MMM yyyy, hh:mm a",
-                                        )
-                                      : "-"}
+                                  <div className="flex justify-between items-center flex-wrap gap-2">
+                                    <div className="flex flex-col">
+                                      <span>
+                                        {payment.payment_datetime
+                                          ? format(
+                                              new Date(
+                                                payment.payment_datetime,
+                                              ),
+                                              "d MMM yyyy, hh:mm a",
+                                            )
+                                          : "-"}
+                                      </span>
+                                      <span className="font-mono text-xs text-gray-500">
+                                        {payment.id}
+                                      </span>
+                                    </div>
 
                                     <div className="flex gap-2">
                                       <Button
@@ -1282,7 +1311,7 @@ export function InvoiceShow({
                                         </>
                                       </Button>
                                     </div>
-                                  </span>
+                                  </div>
                                 </TableCell>
                                 <TableCell
                                   className={cn(tableCellClass, "text-left")}
@@ -1381,13 +1410,22 @@ export function InvoiceShow({
                               <TableCell
                                 className={cn(tableCellClass, "font-medium")}
                               >
-                                <span className="flex justify-between items-center flex-wrap gap-2">
-                                  {creditNote.payment_datetime
-                                    ? format(
-                                        new Date(creditNote.payment_datetime),
-                                        "d MMM yyyy, hh:mm a",
-                                      )
-                                    : "-"}
+                                <div className="flex justify-between items-center flex-wrap gap-2">
+                                  <div className="flex flex-col">
+                                    <span>
+                                      {creditNote.payment_datetime
+                                        ? format(
+                                            new Date(
+                                              creditNote.payment_datetime,
+                                            ),
+                                            "d MMM yyyy, hh:mm a",
+                                          )
+                                        : "-"}
+                                    </span>
+                                    <span className="font-mono text-xs text-gray-500">
+                                      {creditNote.id}
+                                    </span>
+                                  </div>
 
                                   <div className="flex gap-2">
                                     <Button
@@ -1421,7 +1459,7 @@ export function InvoiceShow({
                                       </>
                                     </Button>
                                   </div>
-                                </span>
+                                </div>
                               </TableCell>
                               <TableCell
                                 className={cn(tableCellClass, "text-left")}
@@ -1668,6 +1706,10 @@ export function InvoiceShow({
                           >
                             <span className="text-gray-600">
                               {index + 1}.{" "}
+                              <span className="font-mono text-xs">
+                                {payment.id}
+                              </span>
+                              {" - "}
                               {
                                 PAYMENT_RECONCILIATION_METHOD_MAP[
                                   payment.method
@@ -1710,6 +1752,10 @@ export function InvoiceShow({
                           >
                             <span className="text-gray-600">
                               {index + 1}.{" "}
+                              <span className="font-mono text-xs">
+                                {creditNote.id}
+                              </span>
+                              {" - "}
                               {
                                 PAYMENT_RECONCILIATION_METHOD_MAP[
                                   creditNote.method
@@ -1770,7 +1816,14 @@ export function InvoiceShow({
           }}
         />
 
-        <div className="flex gap-10 max-w-4xl mx-auto">
+        <EditInvoiceDetailsDialog
+          open={isEditDetailsDialogOpen}
+          onOpenChange={setIsEditDetailsDialogOpen}
+          facilityId={facilityId}
+          invoice={invoice}
+        />
+
+        <div className="flex flex-col sm:flex-row gap-10 max-w-4xl mx-auto">
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center size-14 bg-white rounded-full border border-gray-200">
               <FileCheck className="size-4" />

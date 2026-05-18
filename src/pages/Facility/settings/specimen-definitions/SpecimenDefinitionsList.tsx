@@ -100,7 +100,7 @@ export function SpecimenDefinitionsList({
         title: qParams.search,
         status: qParams.status,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
   });

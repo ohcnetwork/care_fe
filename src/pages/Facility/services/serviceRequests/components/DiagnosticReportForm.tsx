@@ -210,7 +210,6 @@ export function DiagnosticReportForm({
     if (fullReport) {
       // When we get the full report details, ensure UI is in correct state
       setSelectedReportCode(fullReport.code || null);
-      setIsExpanded(true);
     }
   }, [fullReport]);
 
@@ -252,6 +251,7 @@ export function DiagnosticReportForm({
         queryClient.invalidateQueries({
           queryKey: ["diagnosticReport", latestReport?.id],
         });
+        setIsExpanded(false);
       },
       onError: () => {
         toast.success(t("failed_to_update_conclusion"));
@@ -898,6 +898,16 @@ export function DiagnosticReportForm({
             />
             {hasReport && fullReport ? (
               <div className="space-y-6">
+                {fullReport.status !== DiagnosticReportStatus.final && (
+                  <PLUGIN_Component
+                    __name="DiagnosticReportOverride"
+                    observationDefinitions={observationDefinitions}
+                    handleComponentValueChange={handleComponentValueChange}
+                    handleValueChange={handleValueChange}
+                    handleUnitChange={handleUnitChange}
+                    disabled={disableEdit}
+                  />
+                )}
                 {fullReport.status !== DiagnosticReportStatus.final &&
                   observationDefinitions.map((definition) => {
                     const observationsList = observations[definition.id] || [

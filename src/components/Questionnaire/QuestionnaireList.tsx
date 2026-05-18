@@ -234,7 +234,7 @@ export function QuestionnaireList() {
     queryFn: query.debounced(questionnaireApi.list, {
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         title: qParams.title || undefined,
         status: qParams.status || "active",
       },

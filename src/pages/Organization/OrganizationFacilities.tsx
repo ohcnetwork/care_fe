@@ -53,7 +53,7 @@ export default function OrganizationFacilities({
       queryParams: {
         page: qParams.page,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         organization: id,
         name: qParams.name,
         ...advancedFilter.filter,

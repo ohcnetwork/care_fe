@@ -137,7 +137,7 @@ export default function CreateTokenForm({
       });
       onSuccess?.();
       if (!disableRedirectOnSuccess) {
-        navigate(`/facility/${facilityId}/patients/verify`, {
+        navigate(`/facility/${facilityId}/patients/home`, {
           query: {
             phone_number: patient?.phone_number,
             year_of_birth: patient?.year_of_birth?.toString() ?? "",

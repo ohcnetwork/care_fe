@@ -180,7 +180,7 @@ export default function MedicationRequestList({
           ? dateTimeQueryString(new Date(qParams.created_date_before), true)
           : undefined,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
   });

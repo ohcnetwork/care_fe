@@ -44,6 +44,37 @@ export const TOKEN_STATUS_COLORS = {
   React.ComponentProps<typeof Badge>["variant"]
 >;
 
+export enum QueueTokenStatus {
+  WAITING = "waiting",
+  CALLED = "called",
+  RECALL = "recall",
+  SERVING = "serving",
+}
+
+export const QUEUE_TOKEN_STATUS_COLORS = {
+  [QueueTokenStatus.WAITING]: "pink",
+  [QueueTokenStatus.CALLED]: "indigo",
+  [QueueTokenStatus.RECALL]: "orange",
+  [QueueTokenStatus.SERVING]: "green",
+} as const satisfies Record<
+  QueueTokenStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
+
+export function getQueueTokenStatus(
+  token: Pick<TokenRead, "status" | "sub_queue">,
+): QueueTokenStatus {
+  if (token.status === TokenStatus.CREATED) {
+    return token.sub_queue ? QueueTokenStatus.CALLED : QueueTokenStatus.WAITING;
+  }
+
+  if (token.status === TokenStatus.UNFULFILLED) {
+    return QueueTokenStatus.RECALL;
+  }
+
+  return QueueTokenStatus.SERVING;
+}
+
 export interface Token {
   id: string;
 }

@@ -21,6 +21,7 @@ import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
+import useCurrentFacilitySilently from "@/pages/Facility/utils/useCurrentFacility";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
@@ -29,12 +30,9 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import query from "@/Utils/request/query";
-import {
-  formatName,
-  formatPatientAge,
-  getWeeklyIntervalsFromTodayTill,
-} from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 
 // Generate time slots based on count per day
 const generateTimeSlots = (count: number) => {
@@ -67,6 +65,7 @@ export const PrintMedicationAdministration = (props: {
 }) => {
   const { facilityId, encounterId, patientId } = props;
   const { t } = useTranslation();
+  const { facility } = useCurrentFacilitySilently();
 
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
@@ -79,12 +78,12 @@ export const PrintMedicationAdministration = (props: {
   // Fetch all medication requests for this encounter
   const { data: medicationRequests, isLoading: requestsLoading } = useQuery({
     queryKey: ["medication_requests_print", patientId, encounterId],
-    queryFn: query(medicationRequestApi.list, {
+    queryFn: query.paginated(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
-        limit: 1000,
       },
+      pageSize: 200,
     }),
     enabled: !!patientId,
   });
@@ -99,7 +98,7 @@ export const PrintMedicationAdministration = (props: {
           encounter: encounterId,
           status: "completed",
         },
-        pageSize: 1000,
+        pageSize: 200,
       }),
       enabled: !!patientId,
     });
@@ -129,7 +128,7 @@ export const PrintMedicationAdministration = (props: {
         med.requested_product?.name ||
         med.medication?.display ||
         "Unknown Medication";
-      const isPRN = med.dosage_instruction[0]?.as_needed_boolean || false;
+      const isPRN = med.dosage_instruction.some((di) => di.as_needed_boolean);
       const isActive = ACTIVE_MEDICATION_STATUSES.includes(
         med.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
       );
@@ -162,24 +161,34 @@ export const PrintMedicationAdministration = (props: {
     };
   }, [medicationRequests, showDiscontinued]);
 
-  // Get date range for the chart
-  const dateRange = useMemo(() => {
+  // Get date ranges for the chart - one week per range from encounter
+  // start through encounter end (or today if ongoing), in chronological order.
+  const dateRanges = useMemo(() => {
     if (!encounter?.period?.start) return [];
-    const intervals = getWeeklyIntervalsFromTodayTill(encounter.period.start);
-    if (intervals.length === 0) return [];
 
-    // Get the most recent week
-    const latestInterval = intervals[0];
-    const dates: Date[] = [];
-    const current = new Date(latestInterval.start);
-    const end = new Date(latestInterval.end);
+    const start = new Date(encounter.period.start);
+    start.setHours(0, 0, 0, 0);
 
-    while (current <= end) {
-      dates.push(new Date(current));
-      current.setDate(current.getDate() + 1);
+    const end = encounter.period.end
+      ? new Date(encounter.period.end)
+      : new Date();
+    end.setHours(23, 59, 59, 999);
+
+    if (end < start) return [];
+
+    const weeks: Date[][] = [];
+    let cursor = new Date(start);
+
+    while (cursor <= end) {
+      const week: Date[] = [];
+      for (let i = 0; i < 7 && cursor <= end; i++) {
+        week.push(new Date(cursor));
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      weeks.push(week);
     }
 
-    return dates.slice(0, 7); // Max 7 days
+    return weeks;
   }, [encounter]);
 
   // Index administrations by request ID, date, and time slot
@@ -237,7 +246,29 @@ export const PrintMedicationAdministration = (props: {
     <PrintPreview
       title={`${t("drug_chart")} - ${encounter?.patient.name}`}
       disabled={!hasData}
+      facility={facility}
+      templateSlug={PrintTemplateType.medication_administration}
     >
+      {/* Force landscape with tight margins so the wide drug chart fits on
+          a single A4 sheet per week. The parent print container also adds
+          a chunky p-10 that would otherwise eat into the printable width. */}
+      <style>{`
+        @media print {
+          @page { size: A4 landscape; margin: 6mm; }
+          html, body { background: white !important; }
+          /* Strip outer padding/shadow that the generic PrintPreview wrapper
+             applies, so the chart can use the full landscape width. */
+          div:has(> #section-to-print) {
+            padding: 0 !important;
+            box-shadow: none !important;
+            max-width: none !important;
+          }
+          /* Avoid splitting an individual medication row across pages. */
+          .mar-row { break-inside: avoid; page-break-inside: avoid; }
+          /* Repeat the table header on each printed page. */
+          .mar-thead { display: table-header-group; }
+        }
+      `}</style>
       {/* Print Options - hidden when printing */}
       <div className="print:hidden mb-4 p-3 bg-gray-50 rounded-lg border flex items-center gap-6 flex-wrap">
         <div className="flex items-center gap-2">
@@ -273,7 +304,7 @@ export const PrintMedicationAdministration = (props: {
         </div>
       </div>
 
-      <div className="p-4 max-w-[297mm] mx-auto text-[11px] print:text-[10px]">
+      <div className="p-4 max-w-[297mm] mx-auto text-[11px] print:p-0 print:max-w-none print:text-[9px]">
         {/* Header */}
         <div className="border-2 border-gray-400 mb-4">
           <div className="flex justify-between items-start p-3 border-b-2 border-gray-400 bg-gray-100">
@@ -329,28 +360,50 @@ export const PrintMedicationAdministration = (props: {
             <h2 className="font-bold text-sm uppercase tracking-wide mb-2 bg-gray-800 text-white px-2 py-1">
               {t("regular_medications")}
             </h2>
-            <DrugChartTable
-              groups={groupedMedications.regular}
-              dates={dateRange}
-              adminIndex={adminIndex}
-              timeSlots={timeSlots}
-            />
+            {dateRanges.map((dates, idx) => (
+              <div
+                key={`reg-${dates[0].toISOString()}`}
+                className={cn(idx > 0 && "mt-3 print:break-before-page")}
+              >
+                <div className="text-[10px] font-semibold text-gray-700 mb-1">
+                  {format(dates[0], "dd MMM yyyy")} –{" "}
+                  {format(dates[dates.length - 1], "dd MMM yyyy")}
+                </div>
+                <DrugChartTable
+                  groups={groupedMedications.regular}
+                  dates={dates}
+                  adminIndex={adminIndex}
+                  timeSlots={timeSlots}
+                />
+              </div>
+            ))}
           </div>
         )}
 
         {/* PRN Medications */}
         {groupedMedications.prn.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6 print:break-before-page">
             <h2 className="font-bold text-sm uppercase tracking-wide mb-2 bg-pink-700 text-white px-2 py-1">
               {t("prn_medications")} ({t("as_needed")})
             </h2>
-            <DrugChartTable
-              groups={groupedMedications.prn}
-              dates={dateRange}
-              adminIndex={adminIndex}
-              timeSlots={timeSlots}
-              isPRN
-            />
+            {dateRanges.map((dates, idx) => (
+              <div
+                key={`prn-${dates[0].toISOString()}`}
+                className={cn(idx > 0 && "mt-3 print:break-before-page")}
+              >
+                <div className="text-[10px] font-semibold text-gray-700 mb-1">
+                  {format(dates[0], "dd MMM yyyy")} –{" "}
+                  {format(dates[dates.length - 1], "dd MMM yyyy")}
+                </div>
+                <DrugChartTable
+                  groups={groupedMedications.prn}
+                  dates={dates}
+                  adminIndex={adminIndex}
+                  timeSlots={timeSlots}
+                  isPRN
+                />
+              </div>
+            ))}
           </div>
         )}
 
@@ -389,7 +442,7 @@ const DrugChartTable = ({
   return (
     <div className="border-1 border-gray-400 overflow-hidden">
       <table className="w-full border-collapse text-[10px] table-fixed">
-        <thead>
+        <thead className="mar-thead">
           <tr className="bg-gray-100">
             <th
               className="border-r-2 border-b-1 border-gray-400 p-1.5 text-left font-bold w-[160px]"
@@ -437,24 +490,40 @@ const DrugChartTable = ({
           {groups.map((group) => {
             // Get the latest active request for display
             const latestRequest = group.requests[0];
-            const dosage = latestRequest.dosage_instruction[0];
-            const doseText = formatDosage(dosage);
-            const routeText = dosage?.route?.display;
-            const frequencyText = isPRN
-              ? t("as_needed")
-              : formatFrequency(dosage);
+            const instructions = latestRequest.dosage_instruction;
 
             return (
-              <tr key={group.productId} className={cn(isPRN && "bg-pink-50")}>
+              <tr
+                key={group.productId}
+                className={cn("mar-row", isPRN && "bg-pink-50")}
+              >
                 <td className="border-r-2 border-b border-gray-400 p-1.5 align-top">
-                  <div className="font-bold text-[11px] leading-tight">
+                  <div className="font-bold text-[11px] leading-tight text-wrap break-all">
                     {group.productName}
                   </div>
-                  <div className="text-[9px] text-gray-600 mt-0.5 leading-snug">
-                    {[doseText, routeText, frequencyText]
+                  {instructions.map((di, idx) => {
+                    const doseText = formatDosage(di);
+                    const routeText = di.route?.display;
+                    const frequencyText = isPRN
+                      ? t("as_needed")
+                      : formatFrequency(di);
+                    const summary = [doseText, routeText, frequencyText]
                       .filter(Boolean)
-                      .join(" · ")}
-                  </div>
+                      .join(" · ");
+                    return summary ? (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "text-[9px] text-gray-600 leading-snug",
+                          idx === 0 && "mt-0.5",
+                          idx > 0 &&
+                            "mt-0.5 pt-0.5 border-t border-dashed border-gray-300",
+                        )}
+                      >
+                        {summary}
+                      </div>
+                    ) : null;
+                  })}
                   {group.requests.length > 1 && (
                     <div className="text-[8px] text-gray-400 mt-0.5">
                       ({group.requests.length} {t("orders")})

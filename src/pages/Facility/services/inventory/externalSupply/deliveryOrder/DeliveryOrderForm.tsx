@@ -126,7 +126,7 @@ export default function DeliveryOrderForm({
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        search: searchDeliveryFrom,
+        name: searchDeliveryFrom,
         limit: 100,
         mode: "kind",
         ordering: "sort_index",
@@ -226,6 +226,9 @@ export default function DeliveryOrderForm({
           false,
           `${deliveryOrder.id}${supplyOrderId ? `?supplyOrder=${supplyOrderId}` : ""}`,
         ),
+        {
+          replace: true,
+        },
       );
     },
   });

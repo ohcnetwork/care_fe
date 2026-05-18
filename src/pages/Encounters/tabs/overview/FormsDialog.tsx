@@ -62,6 +62,7 @@ export const FormDialog = ({
       queryParams: {
         favorite_list: "favorites_form",
         silent: true,
+        status: "active",
         limit: careConfig.maxFormDialogFavorites,
       },
     }),

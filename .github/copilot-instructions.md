@@ -3,11 +3,15 @@
 CARE is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States. This is a React + TypeScript + Vite frontend application for the healthcare management system.
 
 ## Important: Trust These Instructions
+
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here. This repository has custom setup requirements and workflows that must be followed exactly.
+
+Do not run lint or prettier. For missing i18n keys, simply add the key to the end of the `public/locale/en.json` file. Do not read the i18n files, directly append items to the end of the JSON when there is an error regarding a missing key.
 
 ## Architecture Overview
 
 ### Technology Stack
+
 - Frontend Framework: React 19.1.1 with TypeScript
 - Build Tool: Vite 6.3.5 for fast development and optimized builds
 - Styling: Tailwind CSS 4.1.3 with custom healthcare-specific design system
@@ -19,6 +23,7 @@ Always reference these instructions first and fallback to search or bash command
 - Testing: Playwright for E2E testing of critical healthcare workflows
 
 ### Project Structure
+
 - `src/components/` - React components organized by feature and domain
 - `src/CAREUI/` - Healthcare-specific component library
 - `src/pages/` - Page-level components and routing
@@ -28,24 +33,30 @@ Always reference these instructions first and fallback to search or bash command
 ## Cross-Cutting Concerns
 
 ### Accessibility
+
 Healthcare applications must meet enhanced accessibility standards:
+
 - WCAG 2.1 AA compliance: Required for medical applications
-- Screen reader compatibility: Medical data must be accessible via assistive technology  
+- Screen reader compatibility: Medical data must be accessible via assistive technology
 - Keyboard navigation: Full keyboard support for clinical environments
 - High contrast support: Visibility in various clinical lighting conditions
 - Focus management: Clear focus indicators for complex medical workflows
 
 ### Internationalization
+
 Multi-language support for global healthcare deployment:
+
 - i18n Strings: All literal strings must use i18next
 - Language files: English Locale files are in `public/locale/en.json`
 - Locale files for Non-English languages should not be edited directly, Managed via Crowdin,
 - Date/time formats: Localized formatting for medical timestamps
 
 ## Path-Specific Instructions
+
 Specialized guidance automatically applied based on file paths:
+
 - `careui.instructions.md` - Healthcare-specific component development
-- `react-components.instructions.md` - React component architecture and patterns  
+- `react-components.instructions.md` - React component architecture and patterns
 - `utils.instructions.md` - Utility function standards and medical data helpers
 - `typescript-types.instructions.md` - Type definitions for medical data structures
 - `pages.instructions.md` - Page component architecture and routing patterns
@@ -61,18 +72,21 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ## Coding Standards
 
 ### Code Quality
+
 - TypeScript: Use strict TypeScript configuration for medical data safety
 - ESLint: Follow configured rules for React hooks, accessibility, and code quality
 - Prettier: Consistent code formatting across the healthcare application
 - Component patterns: Follow established patterns in existing codebase
 
 ### Data Handling
+
 - Type safety: Strict typing for all medical data structures and API interfaces
 - Validation: Use zod schemas for runtime validation of medical data
 - Error handling: Comprehensive error boundaries and user-friendly error messages
 - Logging: Appropriate logging for medical workflow debugging without exposing PHI
 
 ### Documentation Requirements
+
 - Component documentation: Include medical use cases and accessibility notes
 - API documentation: Document medical data flows and validation requirements
 - Accessibility notes: Document WCAG compliance and medical device compatibility
@@ -81,11 +95,13 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ## Working Effectively
 
 ### Environment Setup
+
 - Node.js 22+ is required (check `.node-version` file)
 - Install Node.js 22: `curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs`
 - Or use nvm: `nvm install 22 && nvm use 22`
 
 ### Bootstrap, Build, and Test the Repository
+
 - `npm install --ignore-scripts` -- installs dependencies without platform-specific binaries (takes ~16 seconds)
 - `npm run postinstall` -- installs platform-specific dependencies and generates headers (takes ~3 seconds)
 - `npm run setup` -- generates plugin map and setup (takes ~1 second)
@@ -93,13 +109,8 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - `npm run dev` -- starts development server on http://localhost:4000 (takes ~5 seconds)
 - `npm run preview` -- starts production preview server (requires build first)
 
-### Linting and Formatting
-- `npm run lint` -- runs ESLint. Takes 85+ seconds. Set timeout to 120+ seconds.
-- `npm run lint-fix` -- runs ESLint with auto-fix
-- `npm run format` -- formats code with Prettier (takes ~19 seconds)
-- `npm run unimported` -- checks for unused imports (takes ~7 seconds)
-
 ### Testing
+
 - Playwright E2E Testing:
   - `npm run playwright:install` -- installs Playwright browsers
   - `npm run playwright:test` -- runs all tests headlessly
@@ -115,6 +126,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ## Validation
 
 ### Manual Validation Requirements
+
 - ALWAYS run through complete development workflow after making changes:
   1. `npm install --ignore-scripts && npm run postinstall && npm run setup`
   2. `npm run dev` -- verify development server starts and loads at http://localhost:4000
@@ -124,7 +136,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
   ### Build Time Expectations
   - npm install (with --ignore-scripts): up to 30 seconds
-  - npm run postinstall: up to 8 seconds  
+  - npm run postinstall: up to 8 seconds
   - npm run setup: up to 3 seconds
   - npm run build: up to 3 minutes (NEVER CANCEL, Set timeout to 180+ seconds; may take longer on slower machines)
   - npm run lint: up to 2 minutes (Set timeout to 120+ seconds; allow extra time on low-resource environments)
@@ -132,6 +144,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
   - npm run dev: up to 12 seconds to start server (depends on system performance)
 
 ### Required Validation Steps
+
 - Always run `npm run format` and `npm run lint` before committing changes
 - The CI pipeline (.github/workflows/linter.yml) runs `npm run lint -- --quiet` and `npm run unimported`
 - Application loads successfully showing CARE healthcare facility search and login interface
@@ -140,8 +153,9 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ## Key Dependencies & Tools
 
 ### Additional Dependencies
+
 - @tanstack/react-query for API state management
-- react-query is 
+- react-query is
 - raviger for routing
 - i18next for internationalization
 - date-fns for date handling
@@ -149,12 +163,14 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - framer-motion for animations
 
 ### Development Tools
+
 - ESLint 9.18.0 with TypeScript plugin
 - Prettier 3.3.3 with Tailwind plugin
 - Playwright for E2E testing
 - Vite PWA plugin for service worker
 
 ## Configuration Files & Environment
+
 - `.env` -- environment variables (not committed)
 - `.env.docker` -- Docker environment template
 - `REACT_CARE_API_URL` -- backend API URL (required for full functionality)
@@ -166,15 +182,18 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ## Common Issues and Solutions
 
 ### Known Limitations
+
 - Network errors when running without backend configuration -- application still loads UI correctly
 - Translation loading errors without proper backend setup -- expected behavior
 
 ### Environment Variables
+
 - `REACT_CARE_API_URL` -- backend API endpoint (default: staging API)
 - `REACT_ENABLE_HCX` -- enable HCX features
 - `NODE_OPTIONS="--max-old-space-size=4096"` -- required for Docker builds
 
 ### Build Process Details
+
 - Uses multi-stage Docker build process
 - Generates PWA manifest and service worker
 - Creates optimized production bundle with code splitting
@@ -183,12 +202,14 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ## Workflow Integration
 
 ### CI/CD Pipeline
+
 - Linting: Runs on every PR to `develop` branch
 - Playwright Tests: Runs E2E tests with Docker backend
 - Docker Build: Multi-platform builds for production
 - Deployment: Automatic staging deployment on `develop` branch
 
 ### Git Workflow
+
 - Create branches: `issues/{issue#}/{short-name}`
 - PR title format: "💊 Adds support for editing prescriptions" #6369
 - Link issues using closing keywords in PR body
@@ -197,12 +218,14 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ## Performance Considerations
 
 ### Build Optimization
+
 - Uses Rollup for bundle optimization
 - Platform-specific dependencies for different architectures
 - PWA caching with service worker
 - Code splitting with dynamic imports
 
 ### Development Performance
+
 - Vite HMR for fast development iteration
 - Memory management optimizations for large codebase
 - Plugin federation for modular architecture
@@ -210,6 +233,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ## Security and Compliance
 
 ### Security Measures
+
 - Regular dependency updates via Renovate
 - Snyk security scanning and vulnerability auditing
 - Security scanning with CodeQL and OSSAR
@@ -218,6 +242,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ## Resources
 
 ### Technical Documentation
+
 - [React 19 Documentation](https://react.dev/) - Latest React features and patterns
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/) - TypeScript best practices
 - [Vite Guide](https://vitejs.dev/guide/) - Build tool configuration and optimization
@@ -225,9 +250,11 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - [shadcn/ui](https://ui.shadcn.com/) - Primary component library documentation
 
 ### Testing and Quality
+
 - [Playwright Documentation](https://playwright.dev/) - E2E testing for healthcare workflows
 - [React Hook Form](https://react-hook-form.com/) - Form handling for medical data
 - [Zod](https://zod.dev/) - Schema validation for healthcare data integrity
 
 ## Trust and Validation
+
 Always ensure changes maintain the existing code quality standards and follow the established patterns in the codebase. Trust these instructions and only perform additional searches if the information here is incomplete or found to be in error.
