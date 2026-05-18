@@ -95,21 +95,27 @@ import { toast } from "sonner";
 export function InvoiceShow({
   facilityId,
   invoiceId,
+  paymentType,
 }: {
   facilityId: string;
   invoiceId: string;
+  paymentType?: "pay";
 }) {
   const { t } = useTranslation();
-  const [qParams, setQueryParams] = useQueryParams<{
-    is_payment?: string;
+  const [qParams] = useQueryParams<{
     sourceUrl?: string;
     relatedInvoices?: string;
   }>();
-  const isPaymentSheetOpen = qParams.is_payment === "true";
-  const setIsPaymentSheetOpen = (open: boolean) => {
-    const { is_payment: _isPayment, ...rest } = qParams;
-    setQueryParams(open ? { ...rest, is_payment: "true" } : rest, {
+  const openPaymentSheet = () => {
+    navigate(`/facility/${facilityId}/billing/invoices/${invoiceId}/pay`, {
       replace: true,
+      query: qParams,
+    });
+  };
+  const closePaymentSheet = () => {
+    navigate(`/facility/${facilityId}/billing/invoices/${invoiceId}`, {
+      replace: true,
+      query: qParams,
     });
   };
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -319,7 +325,7 @@ export function InvoiceShow({
       updateInvoice(data, {
         onSuccess: () => {
           if (status === InvoiceStatus.issued) {
-            setIsPaymentSheetOpen(true);
+            openPaymentSheet();
           }
         },
       });
@@ -492,10 +498,7 @@ export function InvoiceShow({
             )}
             {invoice.status === InvoiceStatus.issued && (
               <ButtonGroup className="w-full">
-                <Button
-                  className="w-full"
-                  onClick={() => setIsPaymentSheetOpen(true)}
-                >
+                <Button className="w-full" onClick={() => openPaymentSheet()}>
                   <CareIcon icon="l-plus" className="mr-2 size-4" />
                   {invoice.is_refund
                     ? t("record_credit_note")
@@ -1509,8 +1512,8 @@ export function InvoiceShow({
         </div>
 
         <PaymentReconciliationSheet
-          open={isPaymentSheetOpen}
-          onOpenChange={setIsPaymentSheetOpen}
+          open={paymentType === "pay"}
+          onOpenChange={(open) => !open && closePaymentSheet()}
           facilityId={facilityId}
           invoice={invoice}
           accountId={invoice.account.id}

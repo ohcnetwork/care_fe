@@ -2,7 +2,7 @@ import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Hash, MoreVertical } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -83,12 +83,17 @@ function formatDate(date?: string) {
   });
 }
 
-type tab =
-  | "charge_items"
-  | "invoices"
-  | "payments"
-  | "bed_charge_items"
-  | "reports";
+export const ACCOUNT_TABS = [
+  "invoices",
+  "charge_items",
+  "payments",
+  "reports",
+  "bed_charge_items",
+] as const;
+export type AccountTab = (typeof ACCOUNT_TABS)[number];
+
+export const ACCOUNT_PAYMENT_TYPES = ["advance", "credit_note"] as const;
+export type AccountPaymentType = (typeof ACCOUNT_PAYMENT_TYPES)[number];
 
 const closedStatusText = {
   [AccountBillingStatus.closed_baddebt]: "close_account_help_closed_baddebt",
@@ -102,36 +107,25 @@ export function AccountShow({
   facilityId,
   accountId,
   tab,
+  paymentType,
 }: {
   facilityId: string;
   accountId: string;
-  tab: tab;
+  tab: string;
+  paymentType?: string;
 }) {
   const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [qParams, setQueryParams] = useQueryParams<{
-    is_payment?: string;
-    is_credit_note?: string;
-  }>();
-  const isPaymentSheetOpen = qParams.is_payment === "true";
-  const isCreditNote = qParams.is_credit_note === "true";
-  const openPaymentSheet = (creditNote: boolean) => {
-    setQueryParams(
-      {
-        ...qParams,
-        is_payment: "true",
-        ...(creditNote && { is_credit_note: "true" }),
-      },
+  const openPaymentSheet = (type: AccountPaymentType) => {
+    navigate(
+      `/facility/${facilityId}/billing/account/${accountId}/${tab}/payment/${type}`,
       { replace: true },
     );
   };
   const closePaymentSheet = () => {
-    const {
-      is_payment: _isPayment,
-      is_credit_note: _isCreditNote,
-      ...rest
-    } = qParams;
-    setQueryParams(rest, { replace: true });
+    navigate(`/facility/${facilityId}/billing/account/${accountId}/${tab}`, {
+      replace: true,
+    });
   };
   const [transferPaymentOpen, setTransferPaymentOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -396,7 +390,10 @@ export function AccountShow({
                 {t("create_invoice")}
                 <ShortcutBadge actionId="create-invoice" />
               </Button>
-              <Button variant="primary" onClick={() => openPaymentSheet(false)}>
+              <Button
+                variant="primary"
+                onClick={() => openPaymentSheet("advance")}
+              >
                 <CareIcon icon="l-plus" className="size-4" />
                 {t("add_credit_payment")}
                 <ShortcutBadge actionId="credit-payment-account" />
@@ -418,7 +415,10 @@ export function AccountShow({
                 {t("invoice")}
                 <ShortcutBadge actionId="create-invoice" />
               </Button>
-              <Button variant="primary" onClick={() => openPaymentSheet(false)}>
+              <Button
+                variant="primary"
+                onClick={() => openPaymentSheet("advance")}
+              >
                 <CareIcon icon="l-plus" className="size-4" />
                 {t("credit")}
                 <ShortcutBadge actionId="record-payment-account" />
@@ -451,7 +451,9 @@ export function AccountShow({
                       {t("settle_close")}
                       <ShortcutBadge actionId="settle-close-account" />
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => openPaymentSheet(true)}>
+                    <DropdownMenuItem
+                      onClick={() => openPaymentSheet("credit_note")}
+                    >
                       <CareIcon icon="l-plus" className="mr-2 size-4" />
                       {t("record_credit_note")}
                     </DropdownMenuItem>
@@ -728,13 +730,11 @@ export function AccountShow({
       />
 
       <PaymentReconciliationSheet
-        open={isPaymentSheetOpen}
-        onOpenChange={(open) =>
-          open ? openPaymentSheet(isCreditNote) : closePaymentSheet()
-        }
+        open={paymentType !== undefined}
+        onOpenChange={(open) => !open && closePaymentSheet()}
         facilityId={facilityId}
         accountId={accountId}
-        isCreditNote={isCreditNote}
+        isCreditNote={paymentType === "credit_note"}
         account={account}
       />
 

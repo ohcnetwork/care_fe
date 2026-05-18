@@ -102,7 +102,7 @@ import {
   ReceiptIcon,
   SendIcon,
 } from "lucide-react";
-import { Link, useQueryParams } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -298,25 +298,7 @@ function InvoiceCard({
 }: InvoiceCardProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [qParams, setQueryParams] = useQueryParams<{
-    is_payment?: string;
-    payment_invoice_id?: string;
-  }>();
-  const paymentSheetOpen =
-    qParams.is_payment === "true" && qParams.payment_invoice_id === invoice.id;
-  const setPaymentSheetOpen = (open: boolean) => {
-    const {
-      is_payment: _isPayment,
-      payment_invoice_id: _paymentInvoiceId,
-      ...rest
-    } = qParams;
-    setQueryParams(
-      open
-        ? { ...rest, is_payment: "true", payment_invoice_id: invoice.id }
-        : rest,
-      { replace: true },
-    );
-  };
+  const [paymentSheetOpen, setPaymentSheetOpen] = useState(false);
   const [cancelInvoiceDialogOpen, setCancelInvoiceDialogOpen] = useState(false);
   const [cancelPaymentId, setCancelPaymentId] = useState<string | null>(null);
 
