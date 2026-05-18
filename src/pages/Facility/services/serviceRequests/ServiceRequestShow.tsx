@@ -78,7 +78,7 @@ interface ServiceRequestShowProps {
 const CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE = [
   Classification.surgical_procedure,
   Classification.counselling,
-];
+]; // TODO: Procedure won’t be in this list, so remove this variable and directly check for the AD slug instead
 
 export default function ServiceRequestShow({
   facilityId,
