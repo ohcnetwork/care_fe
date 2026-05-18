@@ -1,8 +1,8 @@
 {
   "title": "Enable When Test",
   "slug": "enable-when-test",
-  "description": "Tests enable_when with string and boolean operators: exists, equals, not_equals",
-  "version": "2.1",
+  "description": "Tests enable_when with string, boolean, and integer operators: exists, equals, not_equals, greater, less, greater_or_equals, less_or_equals",
+  "version": "3.0",
   "status": "active",
   "subject_type": "encounter",
   "questions": [
@@ -231,6 +231,272 @@
           "question": "B-007",
           "operator": "not_equals",
           "answer": "Yes"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000001",
+      "link_id": "I-001",
+      "text": "Patient Count",
+      "type": "integer",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000002",
+      "link_id": "I-002",
+      "text": "Count Interpretation",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-001",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000003",
+      "link_id": "I-003",
+      "text": "Count Comments",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-001",
+          "operator": "exists",
+          "answer": true
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000004",
+      "link_id": "I-004",
+      "text": "Exact Match Count",
+      "type": "integer",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000005",
+      "link_id": "I-005",
+      "text": "Match Count Diagnosis",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-004",
+          "operator": "equals",
+          "answer": "15"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000006",
+      "link_id": "I-006",
+      "text": "Match Count Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-004",
+          "operator": "equals",
+          "answer": "15"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000007",
+      "link_id": "I-007",
+      "text": "Non-Standard Count",
+      "type": "integer",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000008",
+      "link_id": "I-008",
+      "text": "Count Deviation Reason",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-007",
+          "operator": "not_equals",
+          "answer": "15"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000009",
+      "link_id": "I-009",
+      "text": "Count Deviation Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-007",
+          "operator": "not_equals",
+          "answer": "15"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000010",
+      "link_id": "I-010",
+      "text": "High Count",
+      "type": "integer",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000011",
+      "link_id": "I-011",
+      "text": "High Count Alert Action",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-010",
+          "operator": "greater",
+          "answer": "15"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000012",
+      "link_id": "I-012",
+      "text": "High Count Alert Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-010",
+          "operator": "greater",
+          "answer": "15"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000013",
+      "link_id": "I-013",
+      "text": "Low Count",
+      "type": "integer",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000014",
+      "link_id": "I-014",
+      "text": "Low Count Alert Action",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-013",
+          "operator": "less",
+          "answer": "15"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000015",
+      "link_id": "I-015",
+      "text": "Low Count Alert Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-013",
+          "operator": "less",
+          "answer": "15"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000016",
+      "link_id": "I-016",
+      "text": "Threshold Count GTE",
+      "type": "integer",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000017",
+      "link_id": "I-017",
+      "text": "GTE Count Alert Action",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-016",
+          "operator": "greater_or_equals",
+          "answer": "15"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000018",
+      "link_id": "I-018",
+      "text": "GTE Count Alert Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-016",
+          "operator": "greater_or_equals",
+          "answer": "15"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000019",
+      "link_id": "I-019",
+      "text": "Threshold Count LTE",
+      "type": "integer",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000020",
+      "link_id": "I-020",
+      "text": "LTE Count Alert Action",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-019",
+          "operator": "less_or_equals",
+          "answer": "15"
+        }
+      ]
+    },
+    {
+      "id": "e1000001-0001-4000-8000-000000000021",
+      "link_id": "I-021",
+      "text": "LTE Count Alert Notes",
+      "type": "string",
+      "required": false,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "I-019",
+          "operator": "less_or_equals",
+          "answer": "15"
         }
       ]
     }

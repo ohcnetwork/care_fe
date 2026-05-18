@@ -155,3 +155,31 @@ export async function clearBooleanField(
 ) {
   await selectBooleanOption(page, labelText, currentOption);
 }
+
+/**
+ * Fills an integer (type="number") input field identified by its label.
+ */
+export async function fillIntegerField(
+  page: Page,
+  labelText: string,
+  value: string,
+) {
+  const label = page.getByText(labelText, { exact: true });
+  await label.scrollIntoViewIfNeeded();
+  const container = getQuestionContainer(page, labelText);
+  const input = container.locator('input[type="number"]').first();
+  await input.fill(value);
+}
+
+/**
+ * Clears an integer input field identified by its label.
+ * Uses clear() + Tab to ensure the React onChange fires with an empty value.
+ */
+export async function clearIntegerField(page: Page, labelText: string) {
+  const label = page.getByText(labelText, { exact: true });
+  await label.scrollIntoViewIfNeeded();
+  const container = getQuestionContainer(page, labelText);
+  const input = container.locator('input[type="number"]').first();
+  await input.clear();
+  await input.press("Tab");
+}
