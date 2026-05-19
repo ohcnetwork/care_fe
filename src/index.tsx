@@ -7,6 +7,7 @@ import App from "@/App";
 import { AuthContextType, AuthUserContext } from "@/hooks/useAuthUser";
 import { initI18n } from "@/i18n";
 import { PlugConfigMeta } from "@/types/plugConfig";
+import { clearChunkReloadFlags } from "@/Utils/lazyWithRetry";
 import careConfig from "@careConfig";
 import React, { Context } from "react";
 import { createRoot } from "react-dom/client";
@@ -37,6 +38,9 @@ if (import.meta.env.PROD) {
     dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
   });
 }
+
+// Clear stale chunk reload flags on successful page load
+clearChunkReloadFlags();
 
 // Initialize i18n with namespaces from API before rendering the app
 initI18n()

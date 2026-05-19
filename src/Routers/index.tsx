@@ -1,12 +1,11 @@
-import { lazy } from "react";
-
 import PublicRouter from "@/Routers/PublicRouter";
+import { lazyWithRetry } from "@/Utils/lazyWithRetry";
 
 // Lazy load routers based on auth state to improve initial bundle size
 // PatientRouter only loads when user is OTP authorized
-const PatientRouter = lazy(() => import("@/Routers/PatientRouter"));
+const PatientRouter = lazyWithRetry(() => import("@/Routers/PatientRouter"));
 // AppRouter only loads when user is fully authorized
-const AppRouter = lazy(() => import("@/Routers/AppRouter"));
+const AppRouter = lazyWithRetry(() => import("@/Routers/AppRouter"));
 
 const routers = { PatientRouter, PublicRouter, AppRouter };
 
