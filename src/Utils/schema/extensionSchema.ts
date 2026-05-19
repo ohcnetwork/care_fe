@@ -198,7 +198,7 @@ function extractPropertyMetadata(
     uiControl: xui?.control,
     uiVariant: xui?.variant,
     uiMetadata: xui?.metadata,
-    blacklist: xui?.blacklist,
+    render_blacklist: xui?.render_blacklist,
   };
 
   // Add numeric constraints
@@ -463,7 +463,7 @@ export function evaluateConditionalRules(
 /**
  * Extracts defaults, field metadata, and conditional rules from a schema.
  * If `context` is provided, the result excludes fields that opted out of
- * that context via `x-ui.blacklist` (const/hidden fields always pass through).
+ * that context via `x-ui.render_blacklist` (const/hidden fields always pass through).
  */
 export function extractSchemaInfo(
   schema: JSONSchema2020 | undefined,
@@ -502,7 +502,7 @@ function filterFieldsByContext(
       (field) =>
         field.isConst ||
         field.type === "hidden" ||
-        !field.blacklist?.includes(context),
+        !field.render_blacklist?.includes(context),
     )
     .map((field) =>
       field.nestedFields

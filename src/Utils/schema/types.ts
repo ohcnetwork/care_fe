@@ -38,7 +38,7 @@ export type XUIControl = XUILayoutControl | XUIInputControl;
  * Known extension contexts where a field can render.
  * Hosts pass one of these values to filter extension fields, and
  * extension authors declare the same string values in their schema's
- * `x-ui.blacklist` array to opt out of specific contexts.
+ * `x-ui.render_blacklist` array to opt out of specific contexts.
  *
  * @example Read-only summary (e.g. patient demographics tab):
  * ```tsx
@@ -47,7 +47,7 @@ export type XUIControl = XUILayoutControl | XUIInputControl;
  *   allExtensions,
  *   ExtensionContexts.patient_summary,
  * );
- * // `fields` excludes any property whose x-ui.blacklist contains "patient_summary"
+ * // `fields` excludes any property whose x-ui.render_blacklist contains "patient_summary"
  * ```
  *
  * @example Form host (registration / edit):
@@ -84,9 +84,9 @@ export interface XUI {
   /** Generic metadata for dynamic/complex controls (e.g., autocomplete config, API endpoints) */
   metadata?: Record<string, unknown>;
   /**
-   * Contexts in which this field should NOT render (blacklist).
-   * A field with no `blacklist` renders in every context the host passes.
-   * `const` and `hidden` fields ignore the blacklist (always pass through for data integrity).
+   * Contexts in which this field should NOT render (render_blacklist).
+   * A field with no `render_blacklist` renders in every context the host passes.
+   * `const` and `hidden` fields ignore the render_blacklist (always pass through for data integrity).
    *
    * Known contexts: see {@link ExtensionContexts}.
    *
@@ -97,12 +97,12 @@ export interface XUI {
    *   "title": "Religion",
    *   "x-ui": {
    *     "control": "textbox",
-   *     "blacklist": ["registration", "patient_summary"],
+   *     "render_blacklist": ["registration", "patient_summary"],
    *   },
    * }
    * ```
    */
-  blacklist?: ExtensionContext[];
+  render_blacklist?: ExtensionContext[];
 }
 
 /**
@@ -246,11 +246,11 @@ export interface ExtensionFieldMetadata {
   /** Generic metadata from x-ui for dynamic controls (e.g., autocomplete, custom widgets) */
   uiMetadata?: Record<string, unknown>;
   /**
-   * Host contexts in which this field should NOT render (blacklist).
+   * Host contexts in which this field should NOT render (render_blacklist).
    * Missing/empty means the field renders in every context.
    * Const/hidden fields bypass context filtering for data integrity.
    */
-  blacklist?: ExtensionContext[];
+  render_blacklist?: ExtensionContext[];
 }
 
 /**
