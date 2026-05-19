@@ -242,19 +242,24 @@ export default function ValueSetSearchContent({
   });
 
   const seenCodes = new Set<string>();
-  const resultsWithRecents = [
-    ...(recentsQuery.data || []),
-    ...(searchQuery.data?.results || []),
-  ].filter((item) => {
-    if (seenCodes.has(item.code)) {
-      return false;
-    }
+  const searchResults = searchQuery.data?.results || [];
+  const searchLower = search.toLowerCase();
+  const recents =
+    search.length >= 3
+      ? (recentsQuery.data || []).filter(
+          (r) =>
+            r.display?.toLowerCase().includes(searchLower) ||
+            r.code?.toLowerCase().includes(searchLower),
+        )
+      : recentsQuery.data || [];
+  const resultsWithRecents = [...recents, ...searchResults].filter((item) => {
+    if (seenCodes.has(item.code)) return false;
     seenCodes.add(item.code);
     return true;
   });
   // Filter favourites based on search
   const favourites = favouritesQuery.data?.filter((favourite) =>
-    favourite.display?.toLowerCase().includes(search.toLowerCase()),
+    favourite.display?.toLowerCase().includes(searchLower),
   );
 
   return (
