@@ -38,7 +38,26 @@ export type XUIControl = XUILayoutControl | XUIInputControl;
  * Known extension contexts where a field can render.
  * Hosts pass one of these values to filter extension fields, and
  * extension authors declare the same string values in their schema's
- * `x-ui.contexts` array.
+ * `x-ui.blacklist` array to opt out of specific contexts.
+ *
+ * @example Read-only summary (e.g. patient demographics tab):
+ * ```tsx
+ * const allExtensions = getExtensions(ExtensionEntityType.patient, "retrieve");
+ * const fields = getExtensionFieldsWithName(
+ *   allExtensions,
+ *   ExtensionContexts.patient_summary,
+ * );
+ * // `fields` excludes any property whose x-ui.blacklist contains "patient_summary"
+ * ```
+ *
+ * @example Form host (registration / edit):
+ * ```tsx
+ * const extensions = useEntityExtensions({
+ *   form,
+ *   entityType: ExtensionEntityType.patient,
+ *   context: ExtensionContexts.registration,
+ * });
+ * ```
  */
 export const ExtensionContexts = {
   registration: "registration",
@@ -65,13 +84,25 @@ export interface XUI {
   /** Generic metadata for dynamic/complex controls (e.g., autocomplete config, API endpoints) */
   metadata?: Record<string, unknown>;
   /**
-   * Contexts in which this field should render
-   * A field with no `contexts` renders nowhere if context is passed during extension usage
+   * Contexts in which this field should NOT render (blacklist).
+   * A field with no `blacklist` renders in every context the host passes.
+   * `const` and `hidden` fields ignore the blacklist (always pass through for data integrity).
    *
-   * @example
-   *   "x-ui": { "contexts": ["registration", "patient_edit", "patient_summary"] }
+   * Known contexts: see {@link ExtensionContexts}.
+   *
+   * @example Hide `religion` from registration & summary but show on patient edit:
+   * ```python
+   * "religion": {
+   *   "type": "string",
+   *   "title": "Religion",
+   *   "x-ui": {
+   *     "control": "textbox",
+   *     "blacklist": ["registration", "patient_summary"],
+   *   },
+   * }
+   * ```
    */
-  contexts?: ExtensionContext[];
+  blacklist?: ExtensionContext[];
 }
 
 /**
@@ -215,11 +246,11 @@ export interface ExtensionFieldMetadata {
   /** Generic metadata from x-ui for dynamic controls (e.g., autocomplete, custom widgets) */
   uiMetadata?: Record<string, unknown>;
   /**
-   * Host contexts in which this field should render.
-   * Strict opt-in: missing/empty means the field renders in NO context.
+   * Host contexts in which this field should NOT render (blacklist).
+   * Missing/empty means the field renders in every context.
    * Const/hidden fields bypass context filtering for data integrity.
    */
-  contexts?: ExtensionContext[];
+  blacklist?: ExtensionContext[];
 }
 
 /**

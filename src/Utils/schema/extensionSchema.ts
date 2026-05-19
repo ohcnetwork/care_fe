@@ -198,7 +198,7 @@ function extractPropertyMetadata(
     uiControl: xui?.control,
     uiVariant: xui?.variant,
     uiMetadata: xui?.metadata,
-    contexts: xui?.contexts,
+    blacklist: xui?.blacklist,
   };
 
   // Add numeric constraints
@@ -462,8 +462,8 @@ export function evaluateConditionalRules(
 
 /**
  * Extracts defaults, field metadata, and conditional rules from a schema.
- * If `context` is provided, the result is filtered to fields that opted into
- * that context via `x-ui.contexts` (const/hidden fields always pass through).
+ * If `context` is provided, the result excludes fields that opted out of
+ * that context via `x-ui.blacklist` (const/hidden fields always pass through).
  */
 export function extractSchemaInfo(
   schema: JSONSchema2020 | undefined,
@@ -492,7 +492,7 @@ export function extractSchemaInfo(
   };
 }
 
-/** Recursively keep fields opted into `context`; const/hidden fields always pass. */
+/** Recursively drop fields that opted out of `context`; const/hidden fields always pass. */
 function filterFieldsByContext(
   fields: ExtensionFieldMetadata[],
   context: ExtensionContext,
@@ -502,7 +502,7 @@ function filterFieldsByContext(
       (field) =>
         field.isConst ||
         field.type === "hidden" ||
-        (field.contexts?.includes(context) ?? false),
+        !field.blacklist?.includes(context),
     )
     .map((field) =>
       field.nestedFields
