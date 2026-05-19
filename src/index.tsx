@@ -31,6 +31,12 @@ if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });
 }
 
+// Handle stale chunk errors from lazy imports after deployments
+window.addEventListener("vite:preloadError", (event) => {
+  event.preventDefault();
+  window.location.reload();
+});
+
 if (import.meta.env.PROD) {
   Sentry.init({
     environment: import.meta.env.MODE,
