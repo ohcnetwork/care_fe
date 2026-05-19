@@ -31,11 +31,17 @@ if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });
 }
 
-// Handle stale chunk errors from lazy imports after deployments
+// Handle stale chunk errors from lazy imports after deployments.
+// Only reload once per session to prevent infinite loops on network failures.
 window.addEventListener("vite:preloadError", (event) => {
-  event.preventDefault();
-  window.location.reload();
+  const reloaded = sessionStorage.getItem("vite-chunk-reload");
+  if (!reloaded) {
+    sessionStorage.setItem("vite-chunk-reload", "1");
+    event.preventDefault();
+    window.location.reload();
+  }
 });
+sessionStorage.removeItem("vite-chunk-reload");
 
 if (import.meta.env.PROD) {
   Sentry.init({
