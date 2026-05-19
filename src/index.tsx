@@ -41,7 +41,6 @@ window.addEventListener("vite:preloadError", (event) => {
     window.location.reload();
   }
 });
-sessionStorage.removeItem("vite-chunk-reload");
 
 if (import.meta.env.PROD) {
   Sentry.init({
@@ -53,6 +52,7 @@ if (import.meta.env.PROD) {
 // Initialize i18n with namespaces from API before rendering the app
 initI18n()
   .then(() => {
+    sessionStorage.removeItem("vite-chunk-reload");
     const root = createRoot(document.getElementById("root") as HTMLElement);
     root.render(
       <React.StrictMode>
