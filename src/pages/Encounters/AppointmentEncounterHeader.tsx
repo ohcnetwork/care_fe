@@ -7,11 +7,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   EncounterRead,
   EncounterStatus,
-  inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
@@ -21,17 +19,23 @@ import {
 } from "@/types/scheduling/schedule";
 
 import { PatientIDScanDialog } from "@/components/Scan/PatientIDScanDialog";
+import {
+  encounterRequiresDischarge,
+  useEncounterProgressController,
+} from "@/pages/Encounters/utils/useEncounterProgressController";
 import patientApi from "@/types/emr/patient/patientApi";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import {
   CalendarCheck,
   CalendarRange,
-  ChevronDown,
+  CheckCircle,
   ExternalLinkIcon,
   ListOrdered,
   ScanLine,
@@ -61,27 +65,6 @@ const getQueueLink = (appointment: AppointmentRead): string => {
     case SchedulableResourceType.HealthcareService:
       return `/facility/${facilityId}/services/${resourceId}/appointments?${dateParams}`;
   }
-};
-
-const getOptions = (encounter: EncounterRead) => {
-  const options: ("close_appointment" | "mark_as_complete")[] = [];
-
-  if (
-    encounter.status === EncounterStatus.PLANNED ||
-    encounter.status === EncounterStatus.ON_HOLD
-  ) {
-    return ["start_encounter"];
-  }
-
-  if (encounter.appointment?.status !== AppointmentStatus.FULFILLED) {
-    options.push("close_appointment");
-  }
-
-  if (!inactiveEncounterStatus.includes(encounter.status)) {
-    options.push("mark_as_complete");
-  }
-
-  return options;
 };
 
 const PatientScanButton = ({
@@ -214,8 +197,12 @@ const AppointmentEncounterHeaderActions = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const requiresDischarge = encounterRequiresDischarge(encounter);
 
-  const { actions, isEndEncounterPending } = useEncounter();
+  const { completeEverything, completeAppointment, isPending } =
+    useEncounterProgressController({
+      encounter,
+    });
 
   const { mutate: startEncounter } = useMutation({
     mutationFn: mutate(encounterApi.update, {
@@ -235,14 +222,10 @@ const AppointmentEncounterHeaderActions = ({
     });
   };
 
-  const options = getOptions(encounter);
-
-  if (options.length === 0) {
-    return null;
-  }
-
-  if (options.length === 1) {
-    const [option] = options;
+  if (
+    encounter.status === EncounterStatus.PLANNED ||
+    encounter.status === EncounterStatus.ON_HOLD
+  ) {
     return (
       <div
         className={cn(
@@ -251,22 +234,14 @@ const AppointmentEncounterHeaderActions = ({
         )}
       >
         <span className="text-sm text-black">
-          {option === "mark_as_complete"
-            ? t("do_you_want_to_complete_this_encounter")
-            : t("do_you_want_to_start_this_encounter")}
+          {t("do_you_want_to_start_this_encounter")}
         </span>
         <Button
           variant="outline"
           className="w-full sm:w-auto text-sm font-semibold text-black"
-          onClick={
-            option === "mark_as_complete"
-              ? actions.markAsCompleted
-              : handleStartEncounter
-          }
+          onClick={handleStartEncounter}
         >
-          {option === "mark_as_complete"
-            ? t("complete_encounter")
-            : t("start_encounter")}
+          {t("start_encounter")}
         </Button>
       </div>
     );
@@ -275,51 +250,71 @@ const AppointmentEncounterHeaderActions = ({
   return (
     <div
       className={cn(
-        "w-full sm:w-auto space-x-2 text-center",
+        "w-full sm:w-auto space-x-2 flex items-center",
         appointment.token && "sm:border-l-2 sm:pl-2",
       )}
     >
       <span className="text-sm text-black">
-        {t("how_do_you_to_finish_this_visit")}
+        {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
+          <span className="text-sm text-black">
+            {t("how_do_you_to_finish_this_visit")}
+          </span>
+        )}
       </span>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full sm:w-auto"
-            disabled={isEndEncounterPending}
-          >
-            <span className="text-sm font-semibold text-black">
-              {t("end_actions")}
-            </span>
-            <ChevronDown className="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-[59px]" align="start">
-          {options.map((option) => (
+      <Button
+        variant="outline"
+        className="w-full sm:w-auto"
+        disabled={isPending}
+        onClick={completeEverything}
+      >
+        <CheckCircle />
+        {requiresDischarge ? t("mark_for_discharge") : t("complete")}
+      </Button>
+      {encounter.status !== EncounterStatus.COMPLETED && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost">
+              <DotsVerticalIcon className="text-gray-700" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="min-w-[59px]" align="end">
+            {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
+              <DropdownMenuItem
+                className="p-2.5"
+                onClick={() => completeAppointment()}
+                disabled={isPending}
+              >
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium text-black">
+                    {t("close_appointment")}
+                  </span>
+                  <p className="text-xs text-gray-700">
+                    {t("close_appointment_description")}
+                  </p>
+                </div>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
-              key={option}
               className="p-2.5"
-              onClick={() => {
-                if (option === "mark_as_complete") {
-                  actions.markAsCompleted();
-                } else if (option === "close_appointment") {
-                  actions.endEncounter(encounter, false);
-                }
-              }}
+              onClick={() => completeEverything()}
+              disabled={isPending}
             >
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium text-black">
-                  {t(option)}
+                  {requiresDischarge
+                    ? t("mark_for_discharge")
+                    : t("mark_as_complete")}
                 </span>
                 <p className="text-xs text-gray-700">
-                  {t(`${option}_description`)}
+                  {requiresDischarge
+                    ? t("mark_for_discharge_description")
+                    : t("mark_as_complete_description")}
                 </p>
               </div>
             </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 };
