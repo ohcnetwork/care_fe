@@ -19,8 +19,7 @@ export const KNOWN_USERNAMES = [
   "care-admin",
   "care-volunteer",
   "care-fac-admin",
-  "volunteer_2_0",
-  "doctor_2_0",
-  "nurse_2_0",
-  "staff_2_0",
+  "care-role-admin",
+  "care-role-manager",
+  "care-role-member",
 ];
