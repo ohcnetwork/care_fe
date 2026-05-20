@@ -52,13 +52,13 @@ if (import.meta.env.PROD) {
 // Initialize i18n with namespaces from API before rendering the app
 initI18n()
   .then(() => {
-    sessionStorage.removeItem("vite-chunk-reload");
     const root = createRoot(document.getElementById("root") as HTMLElement);
     root.render(
       <React.StrictMode>
         <App />
       </React.StrictMode>,
     );
+    sessionStorage.removeItem("vite-chunk-reload");
   })
   .catch((error) => {
     console.error("Failed to initialize i18n:", error);
