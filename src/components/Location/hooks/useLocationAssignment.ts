@@ -125,13 +125,12 @@ export function useLocationAssignment() {
 
   const startAssigningPlanned = (
     plannedLocationId: string,
-    startTime: Date,
     status: LocationAssociationStatus = "active",
   ) => {
     const timeConfig = {
-      start: startTime,
+      start: new Date(),
       status,
-      end: new Date(),
+      end: undefined,
     };
 
     setSheetState({

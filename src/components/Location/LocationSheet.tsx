@@ -135,11 +135,7 @@ export function LocationSheet({
   };
 
   const handleAssignNowPlanned = (plannedLocation: LocationAssociationRead) => {
-    assignment.startAssigningPlanned(
-      plannedLocation.id,
-      new Date(plannedLocation.start_datetime),
-      "active",
-    );
+    assignment.startAssigningPlanned(plannedLocation.id, "active");
   };
 
   const handleCancelPlan = (
