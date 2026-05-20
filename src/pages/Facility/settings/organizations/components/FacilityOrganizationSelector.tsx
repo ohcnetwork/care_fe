@@ -285,6 +285,8 @@ export default function FacilityOrganizationSelector(
     preferredOrgIds.length,
     currentOrganizations,
     props.optional,
+    isLoadingPreferred,
+    preferredOrgIds.length,
   ]);
 
   useEffect(() => {
@@ -312,8 +314,11 @@ export default function FacilityOrganizationSelector(
       !hasAutoSelectedPreferred &&
       !value?.length
     ) {
-      setSelectedOrganizations(preferredOrganizations.results);
-      onChange(preferredOrganizations.results.map((org) => org.id));
+      const orgsToSelect = singleSelection
+        ? [preferredOrganizations.results[0]]
+        : preferredOrganizations.results;
+      setSelectedOrganizations(orgsToSelect);
+      onChange(orgsToSelect.map((org) => org.id));
       setHasAutoSelectedPreferred(true);
     }
   }, [
@@ -323,6 +328,7 @@ export default function FacilityOrganizationSelector(
     hasAutoSelectedPreferred,
     value,
     onChange,
+    singleSelection,
   ]);
 
   // Add favorite mutation

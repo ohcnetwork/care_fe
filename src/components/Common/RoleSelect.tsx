@@ -168,6 +168,13 @@ export function RoleSelect({
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);
 
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setSearchTerm("");
+    }
+  };
+
   const renderTriggerButton = () => (
     <Button
       variant="outline"
@@ -185,7 +192,7 @@ export function RoleSelect({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={setOpen}>
+      <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>{renderTriggerButton()}</DrawerTrigger>
         <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
@@ -196,7 +203,7 @@ export function RoleSelect({
               isFetchingNextPage={isFetchingNextPage}
               value={selectedRole}
               onChange={onChange}
-              setOpen={setOpen}
+              setOpen={handleOpenChange}
               ref={ref}
             />
           </div>
@@ -206,7 +213,7 @@ export function RoleSelect({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen} modal>
+    <Popover open={open} onOpenChange={handleOpenChange} modal>
       <PopoverTrigger asChild>{renderTriggerButton()}</PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
         <RoleCommandContent
@@ -216,7 +223,7 @@ export function RoleSelect({
           isFetchingNextPage={isFetchingNextPage}
           value={selectedRole}
           onChange={onChange}
-          setOpen={setOpen}
+          setOpen={handleOpenChange}
           ref={ref}
         />
       </PopoverContent>
