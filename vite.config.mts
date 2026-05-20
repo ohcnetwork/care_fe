@@ -91,9 +91,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
             logLevel: ["error"],
           },
         },
-        overlay: {
-          position: "br",
-        },
         enableBuild: false,
       }),
       treeShakeCareIcons({
