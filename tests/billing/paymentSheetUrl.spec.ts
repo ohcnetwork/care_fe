@@ -31,8 +31,8 @@ test.describe("Payment Sheet URL Persistence", () => {
         page.getByText("Record Payment", { exact: true }),
       ).toBeVisible();
 
-      // Verify the URL contains payment=advance
-      await expect(page).toHaveURL(/[?&]payment=advance/);
+      // Verify the URL contains /payment/pay route segment
+      await expect(page).toHaveURL(/\/payment\/pay/);
 
       // Refresh the page
       await page.reload();
@@ -42,16 +42,16 @@ test.describe("Payment Sheet URL Persistence", () => {
         page.getByText("Record Payment", { exact: true }),
       ).toBeVisible();
 
-      // Verify the URL still contains payment=advance
-      await expect(page).toHaveURL(/[?&]payment=advance/);
+      // Verify the URL still contains /payment/pay
+      await expect(page).toHaveURL(/\/payment\/pay/);
     });
 
     test("payment sheet closes and URL clears when dismissed", async ({
       page,
     }) => {
-      // Navigate directly with payment=advance in URL
+      // Navigate directly with /payment/pay route
       await page.goto(
-        `/facility/${facilityId}/billing/account/${accountId}?payment=advance`,
+        `/facility/${facilityId}/billing/account/${accountId}/invoices/payment/pay`,
       );
 
       // Verify the payment sheet is open
@@ -67,16 +67,16 @@ test.describe("Payment Sheet URL Persistence", () => {
         page.getByText("Record Payment", { exact: true }),
       ).not.toBeVisible();
 
-      // Verify the URL no longer contains payment param
-      await expect(page).not.toHaveURL(/[?&]payment=/);
+      // Verify the URL no longer contains /payment/
+      await expect(page).not.toHaveURL(/\/payment\//);
     });
 
     test("credit note slideover persists after page refresh", async ({
       page,
     }) => {
-      // Navigate with payment=credit in URL
+      // Navigate with /payment/credit_note route
       await page.goto(
-        `/facility/${facilityId}/billing/account/${accountId}?payment=credit`,
+        `/facility/${facilityId}/billing/account/${accountId}/invoices/payment/credit_note`,
       );
 
       // Verify the credit note sheet is open
@@ -92,8 +92,8 @@ test.describe("Payment Sheet URL Persistence", () => {
         page.getByText("Record Credit Note", { exact: true }),
       ).toBeVisible();
 
-      // Verify the URL still contains payment=credit
-      await expect(page).toHaveURL(/[?&]payment=credit/);
+      // Verify the URL still contains /payment/credit_note
+      await expect(page).toHaveURL(/\/payment\/credit_note/);
     });
   });
 });
