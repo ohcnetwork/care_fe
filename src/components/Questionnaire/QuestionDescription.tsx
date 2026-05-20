@@ -1,4 +1,4 @@
-import { Question } from "@/types/questionnaire/question";
+import type { Question } from "@/types/questionnaire/question";
 
 export function QuestionDescription({
   question: { description },
