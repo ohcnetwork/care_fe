@@ -25,9 +25,6 @@ test.describe("Encounter Keyboard Shortcuts", () => {
     test("should navigate to Plots tab using 'g p' shortcut", async ({
       page,
     }) => {
-      await page.goto(encounterUrl);
-      await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
-
       // Press 'g' then 'p' for plots tab
       await page.keyboard.press("g");
       await page.keyboard.press("p");
@@ -43,9 +40,6 @@ test.describe("Encounter Keyboard Shortcuts", () => {
     test("should navigate to Medicines tab using 'g m' shortcut", async ({
       page,
     }) => {
-      await page.goto(encounterUrl);
-      await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
-
       await page.keyboard.press("g");
       await page.keyboard.press("m");
 
@@ -59,9 +53,6 @@ test.describe("Encounter Keyboard Shortcuts", () => {
     test("should navigate to Notes tab using 'g n' shortcut", async ({
       page,
     }) => {
-      await page.goto(encounterUrl);
-      await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
-
       await page.keyboard.press("g");
       await page.keyboard.press("n");
 
@@ -78,9 +69,6 @@ test.describe("Encounter Keyboard Shortcuts", () => {
 
   test.describe("Quick Action Shortcuts", () => {
     test("should open allergy form using 'a' shortcut", async ({ page }) => {
-      await page.goto(encounterUrl);
-      await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
-
       await page.keyboard.press("a");
 
       // Should navigate to allergy questionnaire
@@ -88,11 +76,8 @@ test.describe("Encounter Keyboard Shortcuts", () => {
       await expect(page.getByText("Allergy Intolerance").first()).toBeVisible();
     });
 
-    test("should open medication form using 'm' shortcut", async ({ page }) => {
-      await page.goto(encounterUrl);
-      await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
-
-      await page.keyboard.press("m");
+    test("should open medication form using 'k' shortcut", async ({ page }) => {
+      await page.keyboard.press("k");
 
       // Should navigate to medication request questionnaire
       await expect(page).toHaveURL(/questionnaire\/medication_request/);
@@ -102,9 +87,6 @@ test.describe("Encounter Keyboard Shortcuts", () => {
     test("should open service request form using 'r' shortcut", async ({
       page,
     }) => {
-      await page.goto(encounterUrl);
-      await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
-
       await page.keyboard.press("r");
 
       // Should navigate to service request questionnaire
@@ -119,9 +101,6 @@ test.describe("Encounter Keyboard Shortcuts", () => {
     test("should open command dialog using 'Shift+E' shortcut", async ({
       page,
     }) => {
-      await page.goto(encounterUrl);
-      await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
-
       await page.keyboard.press("Shift+E");
 
       // Command dialog should be visible
@@ -131,9 +110,6 @@ test.describe("Encounter Keyboard Shortcuts", () => {
     test("should open keyboard shortcuts help using 'Shift+?' shortcut", async ({
       page,
     }) => {
-      await page.goto(encounterUrl);
-      await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
-
       await page.keyboard.press("Shift+?");
 
       // Keyboard shortcuts dialog/panel should be visible
@@ -143,9 +119,6 @@ test.describe("Encounter Keyboard Shortcuts", () => {
     test("should navigate back to Overview tab using 'g g' shortcut after switching tabs", async ({
       page,
     }) => {
-      await page.goto(encounterUrl);
-      await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
-
       // First navigate to Notes tab
       await page.keyboard.press("g");
       await page.keyboard.press("n");
