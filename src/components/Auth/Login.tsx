@@ -48,6 +48,7 @@ import otpApi from "@/types/otp/otpApi";
 
 import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 import { invalidateAllPaymentReconcilationLocationCaches } from "@/atoms/paymentReconcilationLocationAtom";
+import { clearQueuePractitionerCache } from "@/atoms/queuePractitionerAtom";
 import { register } from "@/lib/override";
 import { AuthHero } from "./AuthHero";
 
@@ -247,6 +248,7 @@ const Login = (props: LoginProps) => {
 
     FiltersCache.invalidateAll();
     invalidateAllPaymentReconcilationLocationCaches();
+    clearQueuePractitionerCache();
     clearQueryPersistenceCache();
     try {
       await signIn(validated);

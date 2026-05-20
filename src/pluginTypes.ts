@@ -84,6 +84,37 @@ export type ServiceRequestComponentType = React.FC<{
   serviceRequestId: string;
 }>;
 
+export type EncounterOverviewTopComponentType = React.FC<{
+  encounter: EncounterRead;
+  patientId: string;
+  encounterId: string;
+}>;
+
+export type DiagnosticReportOverrideComponentType = React.FC<{
+  observationDefinitions: {
+    id: string;
+    title?: string;
+    code?: { code: string; display?: string };
+    component?: { code: { code: string; display?: string } }[];
+    permitted_unit?: { code: string; display?: string; system?: string } | null;
+    permitted_data_type?: string;
+  }[];
+  handleComponentValueChange: (
+    definitionId: string,
+    index: number,
+    componentCode: string,
+    value: string,
+    unit: string,
+  ) => void;
+  handleValueChange: (
+    definitionId: string,
+    index: number,
+    value: string,
+  ) => void;
+  handleUnitChange: (definitionId: string, index: number, unit: string) => void;
+  disabled?: boolean;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -99,6 +130,8 @@ export type SupportedPluginComponents = {
   PatientSearchActions: PatientSearchActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
   ServiceRequestAction: ServiceRequestComponentType;
+  EncounterOverviewTop: EncounterOverviewTopComponentType;
+  DiagnosticReportOverride: DiagnosticReportOverrideComponentType;
 };
 
 // Create a type for lazy-loaded components

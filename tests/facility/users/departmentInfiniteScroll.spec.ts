@@ -1,8 +1,6 @@
-import * as fs from "fs";
-import * as path from "path";
-
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 const DEPT_COUNT = 25; // > PAGE_LIMIT (20) to trigger infinite scroll
@@ -10,26 +8,11 @@ const DEPT_PREFIX = "ScrollTest";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-function getAuthHeaders() {
-  const authFile = path.resolve("tests/.auth/user.json");
-  const storageState = JSON.parse(fs.readFileSync(authFile, "utf-8"));
-  const localStorage = storageState.origins?.[0]?.localStorage ?? [];
-  const tokenEntry = localStorage.find(
-    (item: { name: string; value: string }) =>
-      item.name === "care_access_token",
-  );
-  if (!tokenEntry) throw new Error("No access token in auth storage state");
-  return {
-    Authorization: `Bearer ${tokenEntry.value}`,
-    "Content-Type": "application/json",
-  };
-}
-
 test.describe("Department Selector Infinite Scroll", () => {
   test.beforeAll(async () => {
     const facilityId = getFacilityId();
-    const apiUrl = process.env.REACT_CARE_API_URL || "http://localhost:9000";
-    const headers = getAuthHeaders();
+    const apiUrl = getApiUrl();
+    const headers = getApiHeaders();
 
     // Check how many ScrollTest departments already exist
     const listRes = await fetch(
