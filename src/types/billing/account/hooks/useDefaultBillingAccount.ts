@@ -9,11 +9,11 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { useQuery } from "@tanstack/react-query";
 
 interface Options {
-  patientId: string;
+  patientId: string | undefined;
   facilityId: string;
 }
 
-export default function useDefaultBillingAccount({
+export default function usePatientDefaultBillingAccount({
   patientId,
   facilityId,
 }: Options) {
@@ -29,6 +29,7 @@ export default function useDefaultBillingAccount({
         billing_status: AccountBillingStatus.open,
       },
     }),
+    enabled: !!patientId,
     select: (data: PaginatedResponse<AccountBase>) => data.results[0],
   });
 }

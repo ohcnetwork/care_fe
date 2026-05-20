@@ -4,6 +4,7 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import {
   MedicationCategory,
   MedicationRequestDosageInstruction,
+  MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { LocationRead } from "@/types/location/location";
@@ -25,9 +26,9 @@ export const MEDICATION_DISPENSE_STATUS_COLORS = {
   cancelled: "destructive",
   on_hold: "orange",
   completed: "green",
-  entered_in_error: "secondary",
+  entered_in_error: "destructive",
   stopped: "destructive",
-  declined: "purple",
+  declined: "destructive",
 } as const satisfies Record<MedicationDispenseStatus, string>;
 
 export enum MedicationDispenseNotPerformedReason {
@@ -204,6 +205,7 @@ export interface MedicationDispenseRead extends MedicationDispenseBase {
   location: LocationRead;
   quantity: string;
   order: DispenseOrderRead;
+  authorizing_request: MedicationRequestRead | null;
 }
 
 export interface MedicationDispenseSummary {

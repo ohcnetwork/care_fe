@@ -24,7 +24,8 @@ import { ToDispatch } from "@/pages/Facility/services/inventory/ToDispatch";
 import { ToReceive } from "@/pages/Facility/services/inventory/ToReceive";
 import BillMedicationsByNewDispense from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByNewDispense";
 import BillMedicationsByPrescriptions from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByPrescriptions";
-import DispensesView from "@/pages/Facility/services/pharmacy/DispensesView";
+import DispenseOrderCompleted from "@/pages/Facility/services/pharmacy/DispenseOrderCompleted";
+import { DispenseOrderView } from "@/pages/Facility/services/pharmacy/DispenseOrderView";
 import MedicationDispenseHistory from "@/pages/Facility/services/pharmacy/MedicationDispenseHistory";
 import MedicationReturnList from "@/pages/Facility/services/pharmacy/MedicationReturnList";
 import MedicationReturnShow from "@/pages/Facility/services/pharmacy/MedicationReturnShow";
@@ -125,12 +126,27 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       locationId={locationId}
     />
   ),
+  "/medication_dispense/order/:dispenseOrderId/completed": ({
+    dispenseOrderId,
+  }: {
+    dispenseOrderId: string;
+  }) => (
+    <DispenseOrderCompleted
+      facilityId={facilityId}
+      locationId={locationId}
+      dispenseOrderId={dispenseOrderId}
+    />
+  ),
   "/medication_dispense/order/:dispenseOrderId": ({
     dispenseOrderId,
   }: {
     dispenseOrderId: string;
   }) => (
-    <DispensesView facilityId={facilityId} dispenseOrderId={dispenseOrderId} />
+    <DispenseOrderView
+      facilityId={facilityId}
+      locationId={locationId}
+      dispenseOrderId={dispenseOrderId}
+    />
   ),
   "/medication_return": () => (
     <MedicationReturnList facilityId={facilityId} locationId={locationId} />

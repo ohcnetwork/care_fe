@@ -27,7 +27,7 @@ export interface PrescritionList extends Prescription {
   prescribed_by: UserReadMinimal;
   encounter: EncounterRead;
   created_date: string;
-  tags?: TagConfig[];
+  tags: TagConfig[];
 }
 
 export interface PrescriptionRead extends Prescription {
@@ -35,6 +35,7 @@ export interface PrescriptionRead extends Prescription {
   encounter: EncounterRead;
   created_date: string;
   medications: MedicationRequestRead[];
+  tags?: TagConfig[];
 }
 
 export const PRESCRIPTION_STATUS_STYLES = {

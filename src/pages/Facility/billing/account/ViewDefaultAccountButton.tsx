@@ -11,6 +11,7 @@ import {
 import accountApi from "@/types/billing/account/accountApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
+import { Link } from "raviger";
 
 export default function ViewDefaultAccountButton({
   facilityId,
@@ -40,19 +41,16 @@ export default function ViewDefaultAccountButton({
 
   return (
     accountId && (
-      <Button
-        variant="outline_primary"
-        onClick={() =>
-          window.open(
-            `/facility/${facilityId}/billing/account/${accountId}`,
-            "_blank",
-          )
-        }
-        disabled={disabled}
-      >
-        {t("view_account")}
-        <ShortcutBadge actionId="view-account" />
-        <ExternalLinkIcon className="size-4" />
+      <Button variant="outline_primary" disabled={disabled} asChild>
+        <Link
+          href={`/facility/${facilityId}/billing/account/${accountId}`}
+          basePath="/"
+          target="_blank"
+        >
+          {t("view_account")}
+          <ShortcutBadge actionId="view-account" />
+          <ExternalLinkIcon className="size-4" />
+        </Link>
       </Button>
     )
   );

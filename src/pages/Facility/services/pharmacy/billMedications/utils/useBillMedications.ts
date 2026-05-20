@@ -1,6 +1,6 @@
 import { BillMedicationLineItemSchemaType } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import batchApi from "@/types/base/batch/batchApi";
-import useDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
+import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
 import {
   ChargeItemBatchResponse,
   extractChargeItemsFromBatchResponse,
@@ -38,10 +38,11 @@ export default function useBillMedications({
 }: Options) {
   const queryClient = useQueryClient();
 
-  const { data: account, refetch: refetchAccount } = useDefaultBillingAccount({
-    patientId,
-    facilityId,
-  });
+  const { data: account, refetch: refetchAccount } =
+    usePatientDefaultBillingAccount({
+      patientId,
+      facilityId,
+    });
 
   const dispenseMutation = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
@@ -170,7 +171,7 @@ const getDispenseCreateRequests = ({
         status: MedicationDispenseStatus.preparation,
         category: item.medication?.category ?? MedicationCategory.outpatient,
         when_prepared: whenPrepared,
-        dosage_instruction: [],
+        dosage_instruction: item.dosageInstructions ?? [],
         encounter: (item.medication?.encounter ?? fallbackEncounterId)!,
         authorizing_request: item.medication?.id ?? null,
         item: lot.item.id,
