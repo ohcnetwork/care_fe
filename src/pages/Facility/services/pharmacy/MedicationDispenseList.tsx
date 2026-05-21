@@ -263,9 +263,6 @@ export default function MedicationDispenseList({
         queryKey: ["prescription", patientId, prescriptionId],
       });
     },
-    onError: () => {
-      toast.error(t("something_went_wrong"));
-    },
   });
 
   const { mutate: updatePrescriptionStatus } = useMutation({
@@ -286,9 +283,6 @@ export default function MedicationDispenseList({
       queryClient.invalidateQueries({
         queryKey: ["prescription", patientId, prescriptionId],
       });
-    },
-    onError: () => {
-      toast.error(t("something_went_wrong"));
     },
   });
 

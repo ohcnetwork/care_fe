@@ -129,9 +129,6 @@ export default function useUpdateDispenseOrderStatus({
       toast.success(t("medication_dispense_updated"));
       onSuccess?.(variables.newStatus);
     },
-    onError: () => {
-      toast.error(t("error_updating_medication_dispenses"));
-    },
   });
 
   return mutation;

@@ -65,6 +65,12 @@ interface Props {
   unbilledItems: ChargeItemRead[];
   onCreateInvoice?: (items: ChargeItemRead[]) => void;
   onPaymentSuccess: () => void;
+  /**
+   * When true, disables invoice mutations (create invoice / issue invoice).
+   * Use when the parent dispense order is in a final status and should not
+   * allow new billing actions.
+   */
+  readOnly?: boolean;
 }
 
 export function PaymentStatusBanner({
@@ -74,6 +80,7 @@ export function PaymentStatusBanner({
   unbilledItems,
   onCreateInvoice,
   onPaymentSuccess,
+  readOnly = false,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -196,6 +203,7 @@ export function PaymentStatusBanner({
   // No invoice exists yet — show "Create Invoice" CTA if there are billable items
   if (!invoice) {
     if (unbilledItems.length === 0) return null;
+    if (readOnly) return null;
     return (
       <div className="border border-amber-200 bg-amber-50 rounded-md p-3">
         <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
@@ -254,14 +262,16 @@ export function PaymentStatusBanner({
               </div>
             </div>
           </div>
-          <Button
-            variant="primary"
-            onClick={handleIssueInvoice}
-            disabled={isIssuingInvoice}
-          >
-            <SendIcon className="size-4" />
-            {t("issue_invoice")}
-          </Button>
+          {!readOnly && (
+            <Button
+              variant="primary"
+              onClick={handleIssueInvoice}
+              disabled={isIssuingInvoice}
+            >
+              <SendIcon className="size-4" />
+              {t("issue_invoice")}
+            </Button>
+          )}
         </div>
       </div>
     );

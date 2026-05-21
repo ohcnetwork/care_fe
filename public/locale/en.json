@@ -4767,7 +4767,7 @@
   "recording_payment": "Recording a payment",
   "recording_payment_for_invoice": "Recording payment for invoice {{id}}",
   "recording_refund": "Recording refund",
-  "recording_refund_for_invoice": "Recording refund for invoice #{{id}}",
+  "recording_refund_for_invoice": "Recording refund for invoice {{id}}",
   "recurrence": "Recurrence",
   "redirected_to_create_consultation": "Note: You will be redirected to create consultation form. Please complete the form to finish the transfer process",
   "reference": "Reference",
@@ -6613,5 +6613,8 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞"
+  "℞": "℞",
+  "dispense_order_cannot_be_cancelled_due_to_invoice": "This dispense order cannot be cancelled because invoice {{invoiceNumber}} is in {{status}} state. Cancel or revert the invoice first to proceed.",
+  "invoice_status__issued": "Issued",
+  "invoice_status__balanced": "Balanced"
 }

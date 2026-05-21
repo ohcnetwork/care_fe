@@ -876,7 +876,7 @@ function PaymentReconciliationSuccessView({
               <p className="text-sm text-gray-700">
                 {invoice && (
                   <span>
-                    {t("invoice")} #{invoice.number}
+                    {t("invoice")} {invoice.number}
                   </span>
                 )}
                 {invoice && paymentDate && <span className="mx-1">·</span>}

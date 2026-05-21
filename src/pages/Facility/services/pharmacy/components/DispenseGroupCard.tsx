@@ -51,7 +51,11 @@ function getStatusOptions(
     !chargeItem.paid_invoice ||
     chargeItem.paid_invoice.status === InvoiceStatus.draft
   ) {
-    options.push(MedicationDispenseStatus.declined);
+    options.push(
+      MedicationDispenseStatus.declined,
+      MedicationDispenseStatus.entered_in_error,
+      MedicationDispenseStatus.cancelled,
+    );
   }
   return options;
 }
@@ -173,7 +177,7 @@ function DispenseItemsTable({
             </div>
 
             {/* Status */}
-            <div className="bg-white flex flex-col justify-center py-2 px-3 col-start-4">
+            <div className="bg-white flex flex-col justify-center py-2 px-3 col-start-4 xl:min-w-48">
               <Select
                 disabled={!EDITABLE_STATUSES.includes(dispense.status)}
                 value={dispense.status.toString()}

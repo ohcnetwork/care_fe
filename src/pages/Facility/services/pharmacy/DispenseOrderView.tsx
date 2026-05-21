@@ -224,6 +224,18 @@ export function DispenseOrderView({
     [relatedInvoices],
   );
 
+  // Cancelling the dispense order (abandoned / entered_in_error) is allowed
+  // only when there is no invoice, or invoices are in draft state.
+  const blockingInvoice = useMemo(
+    () =>
+      relatedInvoices.find(
+        (inv) =>
+          inv.status === InvoiceStatus.issued ||
+          inv.status === InvoiceStatus.balanced,
+      ),
+    [relatedInvoices],
+  );
+
   // True when one or more non-finalized dispenses are currently on hold.
   const hasOnHoldDispenses = useMemo(
     () => dispenses.some((d) => d.status === MedicationDispenseStatus.on_hold),
@@ -233,6 +245,10 @@ export function DispenseOrderView({
   const isOrderOpen =
     dispenseOrder?.status === DispenseOrderStatus.draft ||
     dispenseOrder?.status === DispenseOrderStatus.in_progress;
+
+  const isOrderCancelled =
+    dispenseOrder?.status === DispenseOrderStatus.abandoned ||
+    dispenseOrder?.status === DispenseOrderStatus.entered_in_error;
 
   // Block in-app navigation and browser back/refresh while order is open
   useNavigationPrompt(
@@ -376,34 +392,70 @@ export function DispenseOrderView({
           patient={dispenseOrder.patient}
           facilityId={facilityId}
         />
-        {/* TODO: show account's balance if account balance is negative */}
-        <Button variant="link" className="underline" asChild>
-          <Link
-            href={`/facility/${facilityId}/billing/account/${account?.id}`}
-            basePath="/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t("account")}
-            <ExternalLinkIcon />
-          </Link>
-        </Button>
+
+        {isOrderCancelled ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="primary" asChild>
+              <Link
+                href={`/facility/${facilityId}/locations/${locationId}/medication_requests`}
+                basePath="/"
+              >
+                {t("prescription_queue")}
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link
+                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense`}
+                basePath="/"
+              >
+                {t("go_to_dispenses")}
+              </Link>
+            </Button>
+            {account?.id && (
+              <Button variant="outline" asChild>
+                <Link
+                  href={`/facility/${facilityId}/billing/account/${account.id}`}
+                  basePath="/"
+                >
+                  {t("view_account")}
+                  <ExternalLinkIcon className="size-4" />
+                </Link>
+              </Button>
+            )}
+          </div>
+        ) : (
+          // TODO: show account's balance if account balance is negative
+          <Button variant="link" className="underline" asChild>
+            <Link
+              href={`/facility/${facilityId}/billing/account/${account?.id}`}
+              basePath="/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("account")}
+              <ExternalLinkIcon />
+            </Link>
+          </Button>
+        )}
       </Card>
 
-      {/* Payment Status Banner */}
-      <div className="mb-4">
-        <PaymentStatusBanner
-          facilityId={facilityId}
-          accountId={account?.id}
-          invoice={activeInvoice}
-          unbilledItems={billableItems}
-          onCreateInvoice={(items) => {
-            setBillableChargeItems(items);
-            setCreateInvoiceSheetOpen(true);
-          }}
-          onPaymentSuccess={handlePaymentSuccess}
-        />
-      </div>
+      {/* Payment Status Banner (hidden when order is cancelled) */}
+      {!isOrderCancelled && (
+        <div className="mb-4">
+          <PaymentStatusBanner
+            facilityId={facilityId}
+            accountId={account?.id}
+            invoice={activeInvoice}
+            unbilledItems={billableItems}
+            onCreateInvoice={(items) => {
+              setBillableChargeItems(items);
+              setCreateInvoiceSheetOpen(true);
+            }}
+            onPaymentSuccess={handlePaymentSuccess}
+            readOnly={!isOrderOpen}
+          />
+        </div>
+      )}
 
       {/* Filter row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
@@ -674,33 +726,40 @@ export function DispenseOrderView({
               {confirmStatusChange ? t(`mark_as_${confirmStatusChange}`) : ""}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmStatusChange === DispenseOrderStatus.entered_in_error
-                ? t("mark_order_as_entered_in_error_confirmation_description")
-                : t("mark_order_as_abandoned_confirmation_description")}
+              {blockingInvoice
+                ? t("dispense_order_cannot_be_cancelled_due_to_invoice", {
+                    invoiceNumber: blockingInvoice.number,
+                    status: t(`invoice_status__${blockingInvoice.status}`),
+                  })
+                : confirmStatusChange === DispenseOrderStatus.entered_in_error
+                  ? t("mark_order_as_entered_in_error_confirmation_description")
+                  : t("mark_order_as_abandoned_confirmation_description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isUpdatingStatus}>
-              {t("cancel")}
+              {blockingInvoice ? t("close") : t("cancel")}
             </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                if (!confirmStatusChange) return;
-                updateStatus(
-                  { newStatus: confirmStatusChange },
-                  {
-                    onSuccess: () => {
-                      setConfirmStatusChange(null);
+            {!blockingInvoice && (
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (!confirmStatusChange) return;
+                  updateStatus(
+                    { newStatus: confirmStatusChange },
+                    {
+                      onSuccess: () => {
+                        setConfirmStatusChange(null);
+                      },
                     },
-                  },
-                );
-              }}
-              disabled={isUpdatingStatus}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              {t("confirm")}
-            </AlertDialogAction>
+                  );
+                }}
+                disabled={isUpdatingStatus}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {t("confirm")}
+              </AlertDialogAction>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
