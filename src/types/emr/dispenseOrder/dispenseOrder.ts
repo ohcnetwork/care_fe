@@ -35,6 +35,7 @@ export interface DispenseOrderRead extends DispenseOrderBase {
   patient: PatientRead;
   location: LocationRead;
   created_by: UserReadMinimal | null;
+  updated_by: UserReadMinimal | null;
   created_date: string;
   modified_date: string;
 }

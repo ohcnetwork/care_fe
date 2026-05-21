@@ -84,6 +84,7 @@ import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDe
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { format } from "date-fns";
 
 export function DispenseOrderView({
   facilityId,
@@ -284,6 +285,12 @@ export function DispenseOrderView({
         queryKey: ["invoice", facilityId, id],
       });
     });
+
+    // Any billing activity (create / issue invoice, collect payment) implies
+    // the order is actively being worked on — bump it from draft to in_progress.
+    if (dispenseOrder?.status === DispenseOrderStatus.draft) {
+      updateStatus({ newStatus: DispenseOrderStatus.in_progress });
+    }
   };
 
   if (isLoadingOrder || isLoadingDispenses) {
@@ -362,27 +369,41 @@ export function DispenseOrderView({
             )}
           </div>
         </div>
-        <div className="flex items-start gap-8 text-sm">
-          {dispenseOrder.created_by && (
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-500">{t("created_by")}:</span>
-              <span className="font-semibold text-gray-900">
-                {formatName(dispenseOrder.created_by)}
-              </span>
-            </div>
-          )}
-          <div className="flex flex-col">
-            <span className="text-xs text-gray-500">{t("created_at")}:</span>
-            <span className="font-semibold text-gray-900">
-              {formatDateTime(dispenseOrder.created_date)}
-            </span>
-          </div>
+        <div className="flex items-start gap-x-8 gap-y-2 text-sm flex-wrap">
           <div className="flex flex-col">
             <span className="text-xs text-gray-500">{t("location")}:</span>
-            <span className="font-semibold text-gray-900">
+            <span className="font-semibold text-gray-900 text-xs">
               {dispenseOrder.location.name}
             </span>
           </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-gray-500">{t("created")}:</span>
+            <span className="font-semibold text-gray-900 text-xs">
+              {dispenseOrder.created_by
+                ? formatName(dispenseOrder.created_by)
+                : t("unknown")}
+              <span className="text-gray-400 mx-1.5">·</span>
+              <span className="text-gray-700 font-normal">
+                {format(dispenseOrder.created_date, "PPPpp")}
+              </span>
+            </span>
+          </div>
+          {dispenseOrder.modified_date !== dispenseOrder.created_date && (
+            <div className="flex flex-col">
+              <span className="text-xs text-gray-500">
+                {t("last_updated")}:
+              </span>
+              <span className="font-semibold text-gray-900 text-xs">
+                {dispenseOrder.updated_by
+                  ? formatName(dispenseOrder.updated_by)
+                  : t("unknown")}
+                <span className="text-gray-400 mx-1.5">·</span>
+                <span className="text-gray-700 font-normal">
+                  {formatDateTime(dispenseOrder.modified_date)}
+                </span>
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
