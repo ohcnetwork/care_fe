@@ -78,6 +78,14 @@ export default function useUpdateDispenseOrderStatus({
         newStatus === DispenseOrderStatus.entered_in_error;
 
       const inFlight = dispenses.filter((dispense) => {
+        // Skip for cancellations, backend will handle cancelling all associated
+        // dispenses
+        if (isFinalCorrection) {
+          return false;
+        }
+
+        // Don't move dispenses that are already cancelled or in error, even for
+        // final corrections.
         if (
           dispense.status === MedicationDispenseStatus.cancelled ||
           dispense.status === MedicationDispenseStatus.entered_in_error ||
@@ -85,6 +93,7 @@ export default function useUpdateDispenseOrderStatus({
         ) {
           return false;
         }
+
         // Don't move completed dispenses backward unless applying a final correction.
         if (
           dispense.status === MedicationDispenseStatus.completed &&
