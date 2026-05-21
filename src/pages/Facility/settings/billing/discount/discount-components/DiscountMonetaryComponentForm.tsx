@@ -62,14 +62,8 @@ export function DiscountMonetaryComponentForm({
         .object({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
-          factor: zodDecimal({ min: 0, max: 100 })
-            .optional()
-            .nullable()
-            .refine((val) => val !== null, { message: t("field_required") }),
-          amount: zodDecimal({ min: 0 })
-            .optional()
-            .nullable()
-            .refine((val) => val !== null, { message: t("field_required") }),
+          factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
+          amount: zodDecimal({ min: 0 }).optional().nullable(),
           title: z
             .string()
             .trim()
