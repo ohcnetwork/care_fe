@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import query from "@/Utils/request/query";
-import { LocationAssociationRead } from "@/types/location/association";
 import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -24,9 +23,6 @@ export function useLocationNavigation({
   );
   const [locationHistory, setLocationHistory] = useState<LocationRead[]>([]);
   const [selectedBed, setSelectedBed] = useState<LocationRead | null>(null);
-  const [selectedLinkedBed, setSelectedLinkedBed] = useState<
-    LocationAssociationRead | undefined
-  >();
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [locationsPage, setLocationsPage] = useState(1);
@@ -117,9 +113,6 @@ export function useLocationNavigation({
   }, [bedsData, bedsPage]);
 
   const handleLocationClick = (location: LocationRead) => {
-    if (selectedLinkedBed) {
-      setSelectedLinkedBed(undefined);
-    }
     const locationIndex = locationHistory.findIndex(
       (loc) => loc.id === location.id,
     );
@@ -139,19 +132,12 @@ export function useLocationNavigation({
     setSearchTerm("");
   };
 
-  const handleLinkedBedClick = (bed: LocationAssociationRead) => {
-    setSelectedLinkedBed(bed);
-    setSelectedBed(null);
-  };
-
   const handleBedSelect = (bed: LocationRead) => {
     setSelectedBed(bed);
-    setSelectedLinkedBed(undefined);
   };
 
   const clearBedSelection = () => {
     setSelectedBed(null);
-    setSelectedLinkedBed(undefined);
   };
 
   const handleLoadMore = () => {
@@ -205,7 +191,6 @@ export function useLocationNavigation({
     selectedLocation,
     locationHistory,
     selectedBed,
-    selectedLinkedBed,
     showAvailableOnly,
     searchTerm,
     allLocations,
@@ -224,7 +209,6 @@ export function useLocationNavigation({
 
     // Handlers
     handleLocationClick,
-    handleLinkedBedClick,
     handleLoadMore,
     handleSearch,
     clearBedSelection,

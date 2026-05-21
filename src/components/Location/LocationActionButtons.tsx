@@ -20,8 +20,9 @@ interface LocationActionButtonsProps {
   status: LocationAssociationStatus;
   location: LocationAssociationRead;
   onMove: () => void;
+  onAddBed?: () => void;
   onComplete?: (location: LocationAssociationRead) => void;
-  onCancel: () => void;
+  onCancelBed: () => void;
   onAssignNow?: () => void;
   onUpdateTime?: (location: LocationAssociationRead) => void;
 }
@@ -30,8 +31,9 @@ export function LocationActionButtons({
   status,
   location,
   onMove,
+  onAddBed,
   onComplete,
-  onCancel,
+  onCancelBed,
   onAssignNow,
   onUpdateTime,
 }: LocationActionButtonsProps) {
@@ -46,7 +48,7 @@ export function LocationActionButtons({
 
   const buttons: ActionButton[] = [];
 
-  if (status !== "reserved") {
+  if (status === "active") {
     buttons.push({
       label: t("move_to_another_bed"),
       onClick: onMove,
@@ -55,7 +57,16 @@ export function LocationActionButtons({
     });
   }
 
-  if (status === "planned" && onAssignNow) {
+  if ((status === "planned" || status === "reserved") && onAddBed) {
+    buttons.push({
+      label: t("add_another_bed"),
+      onClick: onAddBed,
+      variant: "outline",
+      className: "border-gray-400 shadow-sm",
+    });
+  }
+
+  if ((status === "planned" || status === "reserved") && onAssignNow) {
     buttons.push({
       label: t("assign_bed_now"),
       onClick: onAssignNow,
@@ -89,7 +100,7 @@ export function LocationActionButtons({
                 {t("complete_bed_stay")}
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem onClick={() => onCancel()}>
+            <DropdownMenuItem onClick={() => onCancelBed()}>
               {status === "planned" ? t("cancel_plan") : t("mark_as_error")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onUpdateTime(location)}>

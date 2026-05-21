@@ -5,13 +5,13 @@ import {
 } from "@/types/location/association";
 import { LocationRead, OperationalStatus } from "@/types/location/location";
 
-export type LocationScreen = "view" | "assign" | "modify";
+export type LocationScreen = "overview" | "assign" | "modify";
 export type LocationAction =
+  | "assign"
   | "move"
+  | "promote"
   | "complete"
-  | "cancel"
-  | "new"
-  | "add_reserved";
+  | "edit_time";
 
 export interface LocationSheetState {
   screen: LocationScreen;
@@ -53,8 +53,7 @@ export function getCurrentLocations(
   const activeLocations = encounter.location_history.filter(
     (loc) =>
       (loc.status === "active" || loc.status === "reserved") &&
-      currentEncounterLocation &&
-      loc.location.id !== currentEncounterLocation.id,
+      loc.location.id !== currentEncounterLocation?.id,
   );
 
   const plannedLocations = encounter.location_history.filter(
@@ -198,23 +197,22 @@ export interface AssignmentHandlers {
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
   onMove: () => void;
+  onAddBed: () => void;
   onComplete: (location: LocationAssociationRead) => void;
   onUpdateTime: (location: LocationAssociationRead) => void;
-  onCancel: (
+  onCancelBed: (
     status: "active" | "planned",
     location: LocationAssociationRead,
   ) => void;
   onCancelEdit: () => void;
   onConfirmEdit: (location: LocationAssociationRead) => void;
   onConfirmTime: (plannedLocation?: LocationAssociationRead) => void;
-  onAssignLinkedBed?: (location: LocationAssociationRead) => void;
-  onAddReserved?: () => void;
+  resetScreen: () => void;
 }
 
 export interface NavigationHandlers {
   onLocationClick: (location: LocationRead) => void;
   onBedSelect: (bed: LocationRead) => void;
-  onLinkedBedSelect: (bed: LocationAssociationRead) => void;
   onCheckBedStatus: (bed: LocationRead) => void;
   onSearchChange: (value: string) => void;
   onSearch: (e: React.FormEvent) => void;
@@ -223,7 +221,9 @@ export interface NavigationHandlers {
   onClearSelection: () => void;
   onGoBack: () => void;
   onAssignNowPlanned: (location: LocationAssociationRead) => void;
+  onAssignNowReserved: (location: LocationAssociationRead) => void;
   onScheduleForLater: () => void;
+  onAddReservedBed: () => void;
   onAssignNow: () => void;
   showAvailableOnly: boolean;
   searchTerm: string;

@@ -18,17 +18,18 @@ interface CurrentLocationsListProps {
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
   onMove: () => void;
+  onAddBed?: () => void;
   onComplete: (location: LocationAssociationRead) => void;
   onUpdateTime: (location: LocationAssociationRead) => void;
-  onCancel: (
+  onCancelBed: (
     status: "active" | "planned",
     location: LocationAssociationRead,
   ) => void;
-  onAssignNow: (location: LocationAssociationRead) => void;
+  onAssignNowPlanned: (location: LocationAssociationRead) => void;
+  onAssignNowReserved: (location: LocationAssociationRead) => void;
   onCancelEdit: () => void;
   onConfirmEdit: (location: LocationAssociationRead) => void;
   linkedLocations?: LocationAssociationRead[];
-  onAddReserved?: () => void;
 }
 
 export function CurrentLocationsList({
@@ -41,20 +42,20 @@ export function CurrentLocationsList({
   keepBedActive,
   onKeepBedActiveChange,
   onMove,
+  onAddBed,
   onComplete,
   onUpdateTime,
-  onCancel,
-  onAssignNow,
+  onCancelBed,
+  onAssignNowPlanned,
+  onAssignNowReserved,
   onCancelEdit,
   onConfirmEdit,
   linkedLocations,
-  onAddReserved,
 }: CurrentLocationsListProps) {
   const { t } = useTranslation();
   const renderLocationCard = (
     locationHistory: LocationAssociationRead,
     status: LocationAssociationStatus,
-    areLinkedLocations?: boolean,
   ) => (
     <LocationCardWrapper
       key={locationHistory.id}
@@ -69,9 +70,7 @@ export function CurrentLocationsList({
       onKeepBedActiveChange={
         status === "active" ? onKeepBedActiveChange : undefined
       }
-      areLinkedLocations={areLinkedLocations}
       onComplete={status === "active" ? onComplete : undefined}
-      onAddReserved={status === "active" ? onAddReserved : undefined}
     >
       {showMoveButton && (
         <div className="flex justify-end gap-2">
@@ -79,19 +78,22 @@ export function CurrentLocationsList({
             status={status}
             location={locationHistory}
             onMove={onMove}
+            onAddBed={onAddBed}
             onComplete={
               status === "active" || status === "reserved"
                 ? onComplete
                 : undefined
             }
             onUpdateTime={onUpdateTime}
-            onCancel={() =>
-              onCancel(status as "planned" | "active", locationHistory)
+            onCancelBed={() =>
+              onCancelBed(status as "planned" | "active", locationHistory)
             }
             onAssignNow={
-              status === "planned"
-                ? () => onAssignNow(locationHistory)
-                : undefined
+              status === "reserved"
+                ? () => onAssignNowReserved(locationHistory)
+                : status === "planned"
+                  ? () => onAssignNowPlanned(locationHistory)
+                  : undefined
             }
           />
         </div>
@@ -106,7 +108,7 @@ export function CurrentLocationsList({
         <>
           <h3 className="text-base font-semibold">{t("linked_locations")}</h3>
           {linkedLocations.map((location) =>
-            renderLocationCard(location, location.status, true),
+            renderLocationCard(location, location.status),
           )}
         </>
       )}
