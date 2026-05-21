@@ -38,6 +38,7 @@ export function LocationHistory({ history }: LocationHistoryProps) {
             endTime={item.end_datetime}
             isLatest={index === latestIndex}
             showTimeline
+            associationStatus={item.status}
           />
         </div>
       ))}

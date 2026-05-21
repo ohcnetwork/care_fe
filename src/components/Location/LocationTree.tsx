@@ -1,11 +1,10 @@
 import { format } from "date-fns";
-import { Circle } from "lucide-react";
+import { Check, Circle, Lock, MapPin } from "lucide-react";
 import React from "react";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 
+import { LocationAssociationStatus } from "@/types/location/association";
 import { LocationRead } from "@/types/location/location";
 
 interface LocationPathProps {
@@ -14,6 +13,7 @@ interface LocationPathProps {
   endTime?: string;
   isLatest?: boolean;
   showTimeline?: boolean;
+  associationStatus?: LocationAssociationStatus;
 }
 
 interface LocationNodeProps {
@@ -104,8 +104,31 @@ export function LocationTree({
   endTime,
   isLatest,
   showTimeline = false,
+  associationStatus,
 }: LocationPathProps) {
   const isCompleted = !!endTime;
+  const status = isCompleted
+    ? "completed"
+    : associationStatus === "reserved"
+      ? "reserved"
+      : associationStatus === "planned"
+        ? "planned"
+        : "default";
+
+  const getIcon = (status: string) => {
+    switch (status) {
+      case "reserved":
+        return <Lock className="size-4 text-yellow-600" />;
+      case "planned":
+        return <Circle className="size-4 text-blue-600" />;
+      case "active":
+        return <MapPin className="size-4 text-green-600" />;
+      case "completed":
+        return <Check className="size-4 text-gray-600" />;
+      default:
+        return <MapPin className="size-4 text-gray-600" />;
+    }
+  };
 
   return (
     <div
@@ -119,10 +142,7 @@ export function LocationTree({
           <div
             className={`size-6 rounded-full ${isCompleted ? "bg-gray-100" : isLatest ? "bg-green-100" : "bg-gray-100"} flex items-center justify-center z-10`}
           >
-            <CareIcon
-              icon={isCompleted ? "l-check" : "l-location-point"}
-              className={`size-4 ${isCompleted ? "text-gray-600" : isLatest ? "text-green-600" : "text-gray-600"}`}
-            />
+            {getIcon(status)}
           </div>
           {!isLatest && <div className="flex-1 w-px bg-gray-200" />}
         </div>
