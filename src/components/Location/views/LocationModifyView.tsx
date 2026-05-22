@@ -11,8 +11,6 @@ interface LocationModifyViewProps {
   activeLocations: LocationAssociationRead[];
   selectedBedLocation?: LocationAssociationRead;
   assignmentHandlers: AssignmentHandlers;
-  onAssignNowPlanned: (location: LocationAssociationRead) => void;
-  onAssignNowReserved: (location: LocationAssociationRead) => void;
 }
 
 export function LocationModifyView({
@@ -21,8 +19,6 @@ export function LocationModifyView({
   activeLocations,
   selectedBedLocation,
   assignmentHandlers,
-  onAssignNowPlanned,
-  onAssignNowReserved,
 }: LocationModifyViewProps) {
   const { t } = useTranslation();
   const {
@@ -40,6 +36,8 @@ export function LocationModifyView({
     onCancelEdit,
     onConfirmEdit,
     onConfirmTime,
+    onAssignNowPlanned,
+    onAssignNowReserved,
   } = assignmentHandlers;
 
   const locationHistory = selectedBedLocation;
@@ -63,27 +61,32 @@ export function LocationModifyView({
 
   const locationId = locationHistory?.id || "";
   const isEditingCurrentLocation = currentLocation?.id === locationId;
+
+  const handlers = {
+    editingState,
+    setEditingState,
+    isPending,
+    onMove,
+    onComplete,
+    onUpdateTime,
+    onCancelBed,
+    onCancelEdit,
+    onConfirmEdit,
+    onAssignNowPlanned,
+    onAssignNowReserved,
+  };
+
   return (
     <div className="space-y-4">
       <CurrentLocationsList
         currentLocation={currentLocation}
-        plannedLocations={plannedLocations}
-        editingState={editingState}
-        setEditingState={setEditingState}
-        isPending={isPending}
+        plannedLocations={!isPromotingReserved ? plannedLocations : undefined}
+        handlers={handlers}
         showMoveButton={false}
         keepBedActive={showKeepBedActive ? keepBedActive : undefined}
         onKeepBedActiveChange={
           showKeepBedActive ? onKeepBedActiveChange : undefined
         }
-        onMove={onMove}
-        onComplete={onComplete}
-        onUpdateTime={onUpdateTime}
-        onCancelBed={onCancelBed}
-        onAssignNowPlanned={onAssignNowPlanned}
-        onAssignNowReserved={onAssignNowReserved}
-        onCancelEdit={onCancelEdit}
-        onConfirmEdit={onConfirmEdit}
       />
       {showNewBedCard && (
         <LocationCardWrapper

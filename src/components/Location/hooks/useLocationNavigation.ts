@@ -161,29 +161,10 @@ export function useLocationNavigation({
     setSelectedLocation(null);
     setSelectedBed(null);
     setLocationsPage(1);
-    setAllLocations([]);
-    setHasMoreLocations(true);
     setBedsPage(1);
     setAllBeds([]);
     setHasMoreBeds(true);
     setSearchTerm("");
-  };
-
-  const resetNavigation = () => {
-    setSelectedLocation(null);
-    setLocationHistory([]);
-    setSelectedBed(null);
-    setShowAvailableOnly(false);
-    setSearchTerm("");
-    setLocationsPage(1);
-    setBedsPage(1);
-    setAllLocations([]);
-    setAllBeds([]);
-    setHasMoreLocations(true);
-    setHasMoreBeds(true);
-    if (locationsData?.results) {
-      setAllLocations(locationsData.results);
-    }
   };
 
   return {
@@ -213,6 +194,5 @@ export function useLocationNavigation({
     handleSearch,
     clearBedSelection,
     goBack,
-    resetNavigation,
   };
 }

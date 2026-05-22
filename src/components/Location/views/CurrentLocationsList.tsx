@@ -5,54 +5,57 @@ import {
 
 import { LocationActionButtons } from "@/components/Location/LocationActionButtons";
 import { LocationCardWrapper } from "@/components/Location/LocationCardWrapper";
-import { EditingState } from "@/components/Location/utils/locationHelpers";
+import { AssignmentHandlers } from "@/components/Location/utils/locationHelpers";
 import { useTranslation } from "react-i18next";
 
 interface CurrentLocationsListProps {
   currentLocation?: LocationAssociationRead;
-  plannedLocations: LocationAssociationRead[];
-  editingState: EditingState;
-  setEditingState: React.Dispatch<React.SetStateAction<EditingState>>;
-  isPending: boolean;
+  plannedLocations?: LocationAssociationRead[];
+  handlers: Pick<
+    AssignmentHandlers,
+    | "editingState"
+    | "setEditingState"
+    | "isPending"
+    | "onMove"
+    | "onComplete"
+    | "onUpdateTime"
+    | "onCancelBed"
+    | "onCancelEdit"
+    | "onConfirmEdit"
+    | "onAssignNowPlanned"
+    | "onAssignNowReserved"
+    | "onAddBed"
+  >;
   showMoveButton: boolean;
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
-  onMove: () => void;
-  onAddBed?: () => void;
-  onComplete: (location: LocationAssociationRead) => void;
-  onUpdateTime: (location: LocationAssociationRead) => void;
-  onCancelBed: (
-    status: "active" | "planned",
-    location: LocationAssociationRead,
-  ) => void;
-  onAssignNowPlanned: (location: LocationAssociationRead) => void;
-  onAssignNowReserved: (location: LocationAssociationRead) => void;
-  onCancelEdit: () => void;
-  onConfirmEdit: (location: LocationAssociationRead) => void;
   linkedLocations?: LocationAssociationRead[];
 }
 
 export function CurrentLocationsList({
   currentLocation,
   plannedLocations,
-  editingState,
-  setEditingState,
-  isPending,
+  handlers,
   showMoveButton,
   keepBedActive,
   onKeepBedActiveChange,
-  onMove,
-  onAddBed,
-  onComplete,
-  onUpdateTime,
-  onCancelBed,
-  onAssignNowPlanned,
-  onAssignNowReserved,
-  onCancelEdit,
-  onConfirmEdit,
   linkedLocations,
 }: CurrentLocationsListProps) {
   const { t } = useTranslation();
+  const {
+    editingState,
+    setEditingState,
+    isPending,
+    onMove,
+    onComplete,
+    onUpdateTime,
+    onCancelBed,
+    onCancelEdit,
+    onConfirmEdit,
+    onAssignNowPlanned,
+    onAssignNowReserved,
+    onAddBed,
+  } = handlers;
   const renderLocationCard = (
     locationHistory: LocationAssociationRead,
     status: LocationAssociationStatus,
@@ -112,9 +115,10 @@ export function CurrentLocationsList({
           )}
         </>
       )}
-      {plannedLocations.map((location) =>
-        renderLocationCard(location, "planned"),
-      )}
+      {plannedLocations &&
+        plannedLocations.map((location) =>
+          renderLocationCard(location, "planned"),
+        )}
     </>
   );
 }

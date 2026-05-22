@@ -197,7 +197,7 @@ export interface AssignmentHandlers {
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
   onMove: () => void;
-  onAddBed: () => void;
+  onAddBed?: () => void;
   onComplete: (location: LocationAssociationRead) => void;
   onUpdateTime: (location: LocationAssociationRead) => void;
   onCancelBed: (
@@ -207,6 +207,8 @@ export interface AssignmentHandlers {
   onCancelEdit: () => void;
   onConfirmEdit: (location: LocationAssociationRead) => void;
   onConfirmTime: (plannedLocation?: LocationAssociationRead) => void;
+  onAssignNowPlanned: (location: LocationAssociationRead) => void;
+  onAssignNowReserved: (location: LocationAssociationRead) => void;
   resetScreen: () => void;
 }
 
@@ -220,8 +222,6 @@ export interface NavigationHandlers {
   onLoadMore: () => void;
   onClearSelection: () => void;
   onGoBack: () => void;
-  onAssignNowPlanned: (location: LocationAssociationRead) => void;
-  onAssignNowReserved: (location: LocationAssociationRead) => void;
   onScheduleForLater: () => void;
   onAddReservedBed: () => void;
   onAssignNow: () => void;

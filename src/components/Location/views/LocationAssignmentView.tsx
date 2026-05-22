@@ -53,6 +53,8 @@ export function LocationAssignmentView({
     onCancelBed,
     onCancelEdit,
     onConfirmEdit,
+    onAssignNowPlanned,
+    onAssignNowReserved,
     resetScreen,
   } = assignmentHandlers;
   const {
@@ -65,8 +67,6 @@ export function LocationAssignmentView({
     onLoadMore,
     onClearSelection,
     onGoBack,
-    onAssignNowPlanned,
-    onAssignNowReserved,
     onScheduleForLater,
     onAddReservedBed,
     onAssignNow,
@@ -83,7 +83,23 @@ export function LocationAssignmentView({
     activeLocations.length > 0;
   const isOverview = sheetState.screen === "overview";
 
-  const showAddAnotherBedForReservedPlanned = !currentLocation;
+  const showAddAnotherBedForReservedPlanned =
+    isOverview && hasLocations && !currentLocation;
+
+  const handlers = {
+    editingState,
+    setEditingState,
+    isPending,
+    onMove,
+    onComplete,
+    onUpdateTime,
+    onCancelBed,
+    onCancelEdit,
+    onConfirmEdit,
+    onAssignNowPlanned,
+    onAssignNowReserved,
+    onAddBed: showAddAnotherBedForReservedPlanned ? onAddBed : undefined,
+  };
 
   if (isOverview && hasLocations) {
     return (
@@ -91,19 +107,8 @@ export function LocationAssignmentView({
         <CurrentLocationsList
           currentLocation={currentLocation}
           plannedLocations={plannedLocations}
-          editingState={editingState}
-          setEditingState={setEditingState}
-          isPending={isPending}
+          handlers={handlers}
           showMoveButton={true}
-          onMove={onMove}
-          onAddBed={showAddAnotherBedForReservedPlanned ? onAddBed : undefined}
-          onComplete={onComplete}
-          onUpdateTime={onUpdateTime}
-          onCancelBed={onCancelBed}
-          onAssignNowPlanned={onAssignNowPlanned}
-          onAssignNowReserved={onAssignNowReserved}
-          onCancelEdit={onCancelEdit}
-          onConfirmEdit={onConfirmEdit}
           linkedLocations={activeLocations}
         />
       </div>
@@ -114,20 +119,8 @@ export function LocationAssignmentView({
     <div className="space-y-2">
       <CurrentLocationsList
         currentLocation={currentLocation}
-        plannedLocations={plannedLocations}
-        editingState={editingState}
-        setEditingState={setEditingState}
-        isPending={isPending}
+        handlers={handlers}
         showMoveButton={false}
-        onMove={onMove}
-        onAddBed={onAddBed}
-        onComplete={onComplete}
-        onUpdateTime={onUpdateTime}
-        onCancelBed={onCancelBed}
-        onAssignNowPlanned={onAssignNowPlanned}
-        onAssignNowReserved={onAssignNowReserved}
-        onCancelEdit={onCancelEdit}
-        onConfirmEdit={onConfirmEdit}
       />
 
       <LocationNavigation

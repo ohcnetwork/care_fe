@@ -74,7 +74,7 @@ export function LocationSheet({
 
   // Reset handlers
   const resetAll = () => {
-    navigation.resetNavigation();
+    navigation.goBack();
     assignment.resetToInitial();
   };
 
@@ -385,15 +385,9 @@ export function LocationSheet({
   };
 
   // Navigation handlers
-  const handleGoBack = () => {
-    if (assignment.sheetState.screen === "assign") {
-      assignment.setScreenToOverview();
-    } else if (assignment.sheetState.screen === "modify") {
-      assignment.setScreenToAssign();
-    } else {
-      navigation.goBack();
-    }
-    navigation.clearBedSelection();
+  const handleReset = () => {
+    navigation.goBack();
+    assignment.resetToInitial();
   };
 
   const handleAddReserved = () => {
@@ -439,7 +433,9 @@ export function LocationSheet({
     onCancelEdit: assignment.resetEditingState,
     onConfirmEdit: handleConfirmEdit,
     onConfirmTime: handleConfirmTime,
-    resetScreen: assignment.resetToInitial,
+    onAssignNowPlanned: handleAssignNowPlanned,
+    onAssignNowReserved: handleAssignNowReserved,
+    resetScreen: handleReset,
   };
 
   const navigationHandlers = {
@@ -455,9 +451,7 @@ export function LocationSheet({
     },
     onLoadMore: navigation.handleLoadMore,
     onClearSelection: navigation.clearBedSelection,
-    onGoBack: handleGoBack,
-    onAssignNowPlanned: handleAssignNowPlanned,
-    onAssignNowReserved: handleAssignNowReserved,
+    onGoBack: navigation.goBack,
     onScheduleForLater: handleScheduleForLater,
     onAddReservedBed: handleAddReserved,
     onAssignNow: handleAssignNow,
@@ -481,8 +475,6 @@ export function LocationSheet({
             activeLocations={activeLocations}
             selectedBedLocation={selectedBedLocation}
             assignmentHandlers={assignmentHandlers}
-            onAssignNowPlanned={handleAssignNowPlanned}
-            onAssignNowReserved={handleAssignNowReserved}
           />
         );
 
