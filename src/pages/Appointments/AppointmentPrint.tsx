@@ -22,12 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { usePermissions } from "@/context/PermissionContext";
-import useExtensionSchemas from "@/hooks/useExtensionSchemas";
-import {
-  ExtensionEntityType,
-  getExtensionFieldsWithName,
-  getExtensionValue,
-} from "@/hooks/useExtensions";
+import usePatientExtensionData from "@/hooks/usePatientExtensionData";
 import { cn } from "@/lib/utils";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -48,8 +43,6 @@ import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/pa
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { renderTokenNumber } from "@/types/tokens/token/token";
-import { useMemo } from "react";
-
 interface Props {
   appointmentId: string;
 }
@@ -117,14 +110,7 @@ export default function AppointmentPrint(props: Props) {
   const patient = appointment?.patient;
   const token = appointment?.token;
 
-  const { getExtensions } = useExtensionSchemas();
-
-  const allExtensions = getExtensions(ExtensionEntityType.patient, "retrieve");
-
-  const extensionFields = useMemo(
-    () => getExtensionFieldsWithName(allExtensions),
-    [allExtensions],
-  );
+  const patientExtensionData = usePatientExtensionData(patient?.extensions);
 
   if (isLoading || !appointment || !facility) {
     return (
@@ -144,16 +130,6 @@ export default function AppointmentPrint(props: Props) {
       </PrintPreview>
     );
   }
-
-  const patientExtensionData = extensionFields
-    .map((field) => {
-      const value = getExtensionValue(patient?.extensions, field);
-      return {
-        name: field.label,
-        value: value ? String(value) : "",
-      };
-    })
-    .filter((field) => field.value !== undefined && field.value !== "");
 
   // Filter out excluded charge items and show all from the query
   const displayChargeItems = chargeItems?.results?.filter(
