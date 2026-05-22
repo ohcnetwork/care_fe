@@ -969,6 +969,8 @@
   "bill_id": "Bill ID",
   "bill_medication": "Bill Medication",
   "bill_medications": "Bill Medications",
+  "bill_medications_dispense_limit_exceeded_description": "A single bill can contain at most {{max}} dispense lots. Please reduce the selection or bill them in multiple batches.",
+  "bill_medications_dispense_limit_exceeded_title": "Too many items selected ({{count}} of max {{max}})",
   "bill_now": "Bill Now",
   "bill_prescription": "Bill Prescription",
   "bill_selected": "Bill Selected",
@@ -1925,6 +1927,7 @@
   "dispense_not_completed": "Dispense not completed",
   "dispense_now": "Dispense Now",
   "dispense_order": "Dispense Order",
+  "dispense_order_cannot_be_cancelled_due_to_invoice": "This dispense order cannot be cancelled because invoice {{invoiceNumber}} is in {{status}} state. Cancel or revert the invoice first to proceed.",
   "dispense_order_items_placeholder": "Dispense Order Items",
   "dispense_order_items_placeholder_description": "Items for this dispense order will appear here",
   "dispense_order_leave_warning": "You have an in-progress dispense order. Please use the actions on this page to put it on hold or complete it before leaving.",
@@ -2951,6 +2954,8 @@
   "invoice_number_expression_supported_variables": "Supported variables:",
   "invoice_optional_details": "Issue Date, Payment Terms & Note",
   "invoice_status": "Invoice Status",
+  "invoice_status__balanced": "Balanced",
+  "invoice_status__issued": "Issued",
   "invoice_summary": "Invoice Summary",
   "invoice_timeline": "Invoice Timeline",
   "invoice_title": "Invoice Title",
@@ -6613,8 +6618,5 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞",
-  "dispense_order_cannot_be_cancelled_due_to_invoice": "This dispense order cannot be cancelled because invoice {{invoiceNumber}} is in {{status}} state. Cancel or revert the invoice first to proceed.",
-  "invoice_status__issued": "Issued",
-  "invoice_status__balanced": "Balanced"
+  "℞": "℞"
 }
