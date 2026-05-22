@@ -155,7 +155,7 @@ const envSchema = z
     REACT_DEFAULT_ENCOUNTER_TYPE: z.string().optional(),
     REACT_DEFAULT_DISCHARGE_DISPOSITION: z.string().optional(),
     REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().uuid().optional(),
-    REACT_CUSTOM_REMOTE_I18N_URL: z
+    REACT_CUSTOM_REMOTE_I18N_URLS: z
       .string()
       .optional()
       .transform((val) => val?.split(" "))
