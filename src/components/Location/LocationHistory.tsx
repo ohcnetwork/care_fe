@@ -31,7 +31,7 @@ export function LocationHistory({ history }: LocationHistoryProps) {
   return (
     <div className="space-y-4">
       {sortedHistory.map((item, index) => (
-        <div key={index}>
+        <div key={item.id}>
           <LocationTree
             location={item.location}
             startTime={item.start_datetime}

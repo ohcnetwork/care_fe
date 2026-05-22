@@ -201,7 +201,7 @@ export interface AssignmentHandlers {
   onComplete: (location: LocationAssociationRead) => void;
   onUpdateTime: (location: LocationAssociationRead) => void;
   onCancelBed: (
-    status: "active" | "planned",
+    status: LocationAssociationStatus,
     location: LocationAssociationRead,
   ) => void;
   onCancelEdit: () => void;

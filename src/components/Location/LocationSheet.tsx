@@ -13,7 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { LocationAssociationRead } from "@/types/location/association";
+import {
+  LocationAssociationRead,
+  LocationAssociationStatus,
+} from "@/types/location/association";
 import { LocationRead } from "@/types/location/location";
 
 import { useLocationAssignment } from "@/components/Location/hooks/useLocationAssignment";
@@ -147,7 +150,7 @@ export function LocationSheet({
   };
 
   const handleCancelBed = (
-    status: "active" | "planned",
+    status: LocationAssociationStatus,
     locationToCancel: LocationAssociationRead,
   ) => {
     dialogs.openDeleteDialog(
@@ -385,11 +388,6 @@ export function LocationSheet({
   };
 
   // Navigation handlers
-  const handleReset = () => {
-    navigation.goBack();
-    assignment.resetToInitial();
-  };
-
   const handleAddReserved = () => {
     assignment.confirmBedSelection("reserved", !!currentLocation);
   };
@@ -403,14 +401,9 @@ export function LocationSheet({
   };
 
   const getDeleteDialogDescription = () => {
-    const isReservedBed = activeLocations.some(
-      (loc) =>
-        loc.id === dialogs.locationToDelete?.associationId &&
-        loc.status === "reserved",
-    );
     if (dialogs.locationToDelete?.status === "active") {
       return t("are_you_sure_mark_as_error_active_bed");
-    } else if (isReservedBed) {
+    } else if (dialogs.locationToDelete?.status === "reserved") {
       return t("are_you_sure_cancel_reserved_bed");
     }
     return t("are_you_sure_cancel_planned_bed");
@@ -435,7 +428,7 @@ export function LocationSheet({
     onConfirmTime: handleConfirmTime,
     onAssignNowPlanned: handleAssignNowPlanned,
     onAssignNowReserved: handleAssignNowReserved,
-    resetScreen: handleReset,
+    resetScreen: resetAll,
   };
 
   const navigationHandlers = {
