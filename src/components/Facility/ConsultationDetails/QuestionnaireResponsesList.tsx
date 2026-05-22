@@ -231,7 +231,7 @@ function QuestionGroup({
       </h3>
       <div
         className={cn("w-full", {
-          "grid md:grid-cols-2 grid-cols-1 gap-4": shouldUseTwoColumns,
+          "grid sm:grid-cols-2 grid-cols-1 gap-4": shouldUseTwoColumns,
         })}
       >
         {leftQuestions.length > 0 && (
@@ -504,7 +504,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
       <div
         className={cn(
           "grid gap-3",
-          shouldUseTwoColumns ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1",
+          shouldUseTwoColumns ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1",
         )}
       >
         {/* Left Column */}
