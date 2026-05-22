@@ -83,7 +83,6 @@ export const PrintMedicationAdministration = (props: {
       queryParams: {
         encounter: encounterId,
       },
-      pageSize: 200,
     }),
     enabled: !!patientId,
   });
@@ -98,7 +97,6 @@ export const PrintMedicationAdministration = (props: {
           encounter: encounterId,
           status: "completed",
         },
-        pageSize: 200,
       }),
       enabled: !!patientId,
     });

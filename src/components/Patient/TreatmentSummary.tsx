@@ -112,7 +112,6 @@ export default function TreatmentSummary({
           ? encounterId
           : undefined,
       },
-      pageSize: 100,
     }),
   });
 
@@ -121,7 +120,6 @@ export default function TreatmentSummary({
     queryFn: query.paginated(symptomApi.listSymptoms, {
       pathParams: { patientId },
       queryParams: { encounter: encounterId },
-      pageSize: 100,
     }),
     enabled: !!patientId && !!encounterId,
   });
@@ -134,7 +132,6 @@ export default function TreatmentSummary({
         encounter: encounterId,
         category: "encounter_diagnosis,chronic_condition",
       },
-      pageSize: 100,
     }),
     enabled: !!patientId && !!encounterId,
   });
@@ -148,7 +145,6 @@ export default function TreatmentSummary({
         facility: facilityId,
         medications_only: true,
       },
-      pageSize: 100,
     }),
     enabled: !!encounterId,
   });
@@ -157,7 +153,6 @@ export default function TreatmentSummary({
       queryKey: ["medication_statements", patientId],
       queryFn: query.paginated(medicationStatementApi.list, {
         pathParams: { patientId },
-        pageSize: 100,
       }),
       enabled: !!patientId,
     });
@@ -170,7 +165,6 @@ export default function TreatmentSummary({
         queryParams: {
           encounter: encounterId,
         },
-        pageSize: 100,
       }),
       enabled: !!encounterId && !!facilityId,
     },

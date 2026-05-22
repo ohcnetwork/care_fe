@@ -1,7 +1,5 @@
 import careConfig from "@careConfig";
 
-import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
-
 import {
   ApiCallOptions,
   ApiRoute,
@@ -165,7 +163,8 @@ const paginatedQuery = <
     let page = 0;
     let count = 0;
 
-    const pageSize = options?.pageSize ?? RESULTS_PER_PAGE_LIMIT;
+    const pageSize =
+      options?.pageSize ?? careConfig.pagination.limitOffset.maxLimit;
 
     while (hasNextPage) {
       const res = await query(route, {

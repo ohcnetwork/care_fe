@@ -114,6 +114,7 @@ const envSchema = z
     REACT_ENABLED_APPS: z.string().optional(),
     REACT_RECAPTCHA_SITE_KEY: z.string(),
     REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: numberAsString.optional(),
+    REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT: numberAsString.optional(),
     REACT_JWT_TOKEN_REFRESH_INTERVAL: numberAsString.optional(),
     REACT_DISABLE_PATIENT_LOGIN: booleanAsStringSchema.optional(),
     REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: booleanAsStringSchema.optional(),
