@@ -32,6 +32,14 @@ const numberAsString = z.string().refine((val) => !isNaN(parseInt(val)), {
   message: "Must be a valid number",
 });
 
+const positiveNumberAsString = z.string().refine(
+  (val) => {
+    const n = parseInt(val, 10);
+    return !isNaN(n) && n > 0;
+  },
+  { message: "Must be a positive number greater than 0" },
+);
+
 const jsonAsStringSchema = z.string().refine(
   (val) => {
     try {
@@ -113,9 +121,9 @@ const envSchema = z
     REACT_MAPS_FALLBACK_URL_TEMPLATE: z.string().url().optional(),
     REACT_ENABLED_APPS: z.string().optional(),
     REACT_RECAPTCHA_SITE_KEY: z.string(),
-    REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: numberAsString.optional(),
-    REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT: numberAsString.optional(),
-    REACT_JWT_TOKEN_REFRESH_INTERVAL: numberAsString.optional(),
+    REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: positiveNumberAsString.optional(),
+    REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT: positiveNumberAsString.optional(),
+    REACT_JWT_TOKEN_REFRESH_INTERVAL: positiveNumberAsString.optional(),
     REACT_DISABLE_PATIENT_LOGIN: booleanAsStringSchema.optional(),
     REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: booleanAsStringSchema.optional(),
     REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED: booleanAsStringSchema.optional(),
@@ -158,18 +166,19 @@ const envSchema = z
     REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().uuid().optional(),
     REACT_CUSTOM_REMOTE_I18N_URL: z.string().url().optional(),
     REACT_CUSTOM_SHORTCUTS: customShortcutsSchemaString.optional(),
-    REACT_AUTO_REFRESH_INTERVAL: numberAsString.optional(),
+    REACT_AUTO_REFRESH_INTERVAL: positiveNumberAsString.optional(),
     REACT_AUTO_REFRESH_BY_DEFAULT: booleanAsStringSchema.optional(),
-    REACT_APP_UPDATE_CHECK_INTERVAL: numberAsString.optional(),
-    REACT_DECIMAL_PRECISION: numberAsString.optional(),
-    REACT_ACCOUNTING_PRECISION: numberAsString.optional(),
+    REACT_APP_UPDATE_CHECK_INTERVAL: positiveNumberAsString.optional(),
+    REACT_DECIMAL_PRECISION: positiveNumberAsString.optional(),
+    REACT_ACCOUNTING_PRECISION: positiveNumberAsString.optional(),
     REACT_DECIMAL_ROUNDING_METHOD: z
       .string()
       .refine((val) => VALID_ROUNDING_METHODS.includes(val), {
         message: `Must be one of: ${VALID_ROUNDING_METHODS.join(", ")}`,
       })
       .optional(),
-    REACT_MAX_FORM_DIALOG_FAVORITES: numberAsString.optional(),
+    REACT_MAX_FORM_DIALOG_FAVORITES: positiveNumberAsString.optional(),
+    REACT_MAX_DISPENSES_PER_DISPENSE_ORDER: positiveNumberAsString.optional(),
   })
   .superRefine(async (data, ctx) => {
     // Ensure at least one API URL configuration is provided
@@ -218,6 +227,24 @@ const envSchema = z
         message: "Sentry environment and DSN are both required",
         path: ["REACT_SENTRY_ENVIRONMENT", "REACT_SENTRY_DSN"],
       });
+    }
+
+    if (data.REACT_MAX_DISPENSES_PER_DISPENSE_ORDER) {
+      const maxDispenses = parseInt(
+        data.REACT_MAX_DISPENSES_PER_DISPENSE_ORDER,
+        10,
+      );
+      const maxLimit = parseInt(
+        data.REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT || "200",
+        10,
+      );
+      if (maxDispenses > maxLimit) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `REACT_MAX_DISPENSES_PER_DISPENSE_ORDER (${maxDispenses}) must not exceed REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT (${maxLimit})`,
+          path: ["REACT_MAX_DISPENSES_PER_DISPENSE_ORDER"],
+        });
+      }
     }
   });
 

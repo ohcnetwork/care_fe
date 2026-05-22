@@ -304,6 +304,20 @@ const careConfig = {
   ),
 
   /**
+   * Maximum number of medication dispenses allowed for billing per dispense
+   * order.
+   *
+   * Defaults to `REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT` if set, otherwise 200.
+   * Must not exceed `REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT`.
+   */
+  maxDispensesPerDispenseOrder: parseInt(
+    env.REACT_MAX_DISPENSES_PER_DISPENSE_ORDER ||
+      env.REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT ||
+      "200",
+    10,
+  ),
+
+  /**
    * Default state for tax inclusive pricing in inventory
    * When true, base price is calculated from MRP by removing tax
    */
