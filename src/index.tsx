@@ -69,4 +69,5 @@ initI18n()
         <App />
       </React.StrictMode>,
     );
+    sessionStorage.removeItem("vite-chunk-reload");
   });
