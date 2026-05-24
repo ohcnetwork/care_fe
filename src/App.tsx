@@ -40,14 +40,14 @@ const App = () => {
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
             <ShortcutProvider>
-              <AuthUserProvider
-                unauthorized={<Routers.PublicRouter />}
-                otpAuthorized={<Routers.PatientRouter />}
-              >
-                <PluginEngine>
+              <PluginEngine>
+                <AuthUserProvider
+                  unauthorized={<Routers.PublicRouter />}
+                  otpAuthorized={<Routers.PatientRouter />}
+                >
                   <Routers.AppRouter />
-                </PluginEngine>
-              </AuthUserProvider>
+                </AuthUserProvider>
+              </PluginEngine>
               <Toaster
                 position="top-center"
                 theme="light"

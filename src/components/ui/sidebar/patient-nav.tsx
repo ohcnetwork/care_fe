@@ -42,6 +42,11 @@ function generatePatientLinks(
       url: `/nearby_facilities/?${queryParams.toString()}`,
       icon: <CareIcon icon="d-hospital" />,
     },
+    {
+      name: "Create Complaint",
+      url: `/patient/${selectedUser?.id}/complaints`,
+      icon: <CareIcon icon="l-plus" />,
+    },
   ];
 }
 

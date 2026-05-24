@@ -133,6 +133,9 @@ export type SupportedPluginComponents = {
   ServiceRequestAction: ServiceRequestComponentType;
   EncounterOverviewTop: EncounterOverviewTopComponentType;
   DiagnosticReportOverride: DiagnosticReportOverrideComponentType;
+  KioskFeedbackPage: React.FC;
+  KioskComplaintPage: React.FC;
+  CareIssueManagementWidget: React.FC;
 };
 
 // Create a type for lazy-loaded components

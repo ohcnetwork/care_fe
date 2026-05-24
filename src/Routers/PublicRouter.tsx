@@ -13,6 +13,7 @@ import { FacilityDetailsPage } from "@/pages/Facility/FacilityDetailsPage";
 import { LandingPage } from "@/pages/Landing/LandingPage";
 import { LicensesPage } from "@/pages/Licenses/Licenses";
 import PatientLogin from "@/pages/PublicAppointments/auth/PatientLogin";
+import { PLUGIN_Component } from "@/PluginEngine";
 
 export const routes = {
   "/": () =>
@@ -52,6 +53,8 @@ export const routes = {
   "/session-expired": () => <SessionExpired />,
   "/licenses": () => <LicensesPage />,
   "/invalid-reset": () => <InvalidReset />,
+  "/kiosk/feedback": () => <PLUGIN_Component __name="KioskFeedbackPage" />,
+  "/kiosk/complaint": () => <PLUGIN_Component __name="KioskComplaintPage" />,
 };
 
 export default function PublicRouter() {

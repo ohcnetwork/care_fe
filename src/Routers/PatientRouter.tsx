@@ -10,8 +10,10 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientProfile } from "@/components/Patient/PatientProfile";
 
+import { usePluginRoutes } from "@/hooks/useCareApps";
 import useSidebarState from "@/hooks/useSidebarState";
 
+import PluginEngine from "@/PluginEngine";
 import PatientUserProvider from "@/Providers/PatientUserProvider";
 import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
 import PatientIndex from "@/pages/Patient/index";
@@ -81,11 +83,16 @@ const AppointmentRoutes = {
   }) => <PatientRegistration facilityId={facilityId} staffId={staffId} />,
 };
 
-export default function PatientRouter() {
-  const pages = useRoutes(DashboardRoutes);
+// This inner component runs INSIDE PluginEngine, so usePluginRoutes() works
+function PatientRouterContent() {
+  const pluginRoutes = usePluginRoutes();
+
+  const pages = useRoutes({
+    ...pluginRoutes,
+    ...DashboardRoutes,
+  });
 
   const appointmentPages = useRoutes(AppointmentRoutes);
-
   const sidebarOpen = useSidebarState();
 
   if (!pages) {
@@ -130,5 +137,14 @@ export default function PatientRouter() {
         </main>
       </SidebarProvider>
     </PatientUserProvider>
+  );
+}
+
+// Outer component just provides PluginEngine context
+export default function PatientRouter() {
+  return (
+    <PluginEngine>
+      <PatientRouterContent />
+    </PluginEngine>
   );
 }
