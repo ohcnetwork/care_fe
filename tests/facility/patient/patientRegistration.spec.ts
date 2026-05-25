@@ -1,4 +1,5 @@
 import { expect, Page, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
@@ -274,19 +275,14 @@ test.describe("DOB timezone validation", () => {
   const TOMORROW_IST = { day: "17", month: "06", year: "2024" };
 
   test.beforeEach(async ({ page }) => {
+    const facilityId = getFacilityId();
+
     // Must be installed before any navigation so the app's Date.now() is
     // overridden from first render.
     await page.clock.install({ time: FROZEN_INSTANT });
     await page.clock.setFixedTime(FROZEN_INSTANT);
 
-    await page.goto("/");
-    await page
-      .getByRole("link", { name: /facility with patients/i })
-      .first()
-      .click();
-    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-    await page.getByRole("button", { name: "Patients", exact: true }).click();
-    await page.getByRole("link", { name: /search patients/i }).click();
+    await page.goto(`/facility/${facilityId}/patient/create`);
   });
 
   test("allows registering a newborn with today's DOB in the IST early-morning window", async ({
