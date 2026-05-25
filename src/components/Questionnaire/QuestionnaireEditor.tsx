@@ -104,6 +104,7 @@ import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
 
+import { slugValueSchema } from "@/types/base/slug/schema";
 import { generateSlugValue } from "@/types/base/slug/utils";
 import { CodingEditor } from "./CodingEditor";
 import { QuestionActions } from "./QuestionActions";
@@ -428,14 +429,7 @@ export default function QuestionnaireEditor({
 
   const QuestionnaireFormPartialSchema = z.object({
     title: z.string().trim().min(1, t("field_required")),
-    slug: z
-      .string()
-      .trim()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 }))
-      .regex(/^[-\w]+$/, {
-        message: t("slug_format_message"),
-      }),
+    slug: slugValueSchema(),
     description: z.string().optional(),
     questions: z.array(
       z.object({
