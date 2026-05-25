@@ -109,11 +109,13 @@ export function LocationTree({
   const isCompleted = !!endTime;
   const status = isCompleted
     ? "completed"
-    : associationStatus === "reserved"
-      ? "reserved"
-      : associationStatus === "planned"
-        ? "planned"
-        : "default";
+    : associationStatus === "active"
+      ? "active"
+      : associationStatus === "reserved"
+        ? "reserved"
+        : associationStatus === "planned"
+          ? "planned"
+          : "default";
 
   const getIcon = (status: string) => {
     switch (status) {
