@@ -57,6 +57,7 @@ import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
 
 import queryClient from "@/Utils/request/queryClient";
+import { isValid } from "date-fns";
 
 export interface QuestionnaireFormState {
   questionnaire: QuestionnaireRead;
@@ -383,7 +384,7 @@ const rehydrateDateValue: DraftValueRehydrator = (value) => {
     return value;
   }
   const parsed = new Date(rawValue);
-  if (isNaN(parsed.getTime())) {
+  if (isValid(parsed)) {
     return value;
   }
   return { ...value, value: parsed } as ResponseValue;
@@ -932,7 +933,7 @@ export function QuestionnaireForm({
                 values: response.values.map((value) => {
                   if (value.type === "date" && value.value) {
                     const date = new Date(value.value);
-                    if (isNaN(date.getTime())) {
+                    if (isValid(date)) {
                       return { ...value, value: "" };
                     }
                     const formattedDate = dateQueryString(date);
