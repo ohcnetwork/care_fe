@@ -26,7 +26,7 @@ interface EditingState {
 }
 
 interface LocationCardWrapperProps {
-  locationHistory: LocationAssociationRead;
+  location: LocationAssociationRead;
   status: LocationAssociationStatus;
   children?: React.ReactNode;
   editingState: EditingState;
@@ -42,7 +42,7 @@ interface LocationCardWrapperProps {
 }
 
 export function LocationCardWrapper({
-  locationHistory,
+  location,
   status,
   children,
   editingState,
@@ -57,7 +57,7 @@ export function LocationCardWrapper({
   readOnly = false,
 }: LocationCardWrapperProps) {
   const { t } = useTranslation();
-  const isEditing = editingState.locationId === locationHistory.id;
+  const isEditing = editingState.locationId === location.id;
   const isCompletingStay =
     isEditing && editingState.timeConfig.status === "completed";
   const showEndTimeField =
@@ -88,7 +88,7 @@ export function LocationCardWrapper({
 
   const handleConfirm = () => {
     if (!validateDates()) return;
-    handleConfirmEdit(locationHistory);
+    handleConfirmEdit(location);
   };
 
   const getTitle = () => {
@@ -108,7 +108,7 @@ export function LocationCardWrapper({
               <Button
                 size="sm"
                 variant="destructive"
-                onClick={() => onComplete(locationHistory)}
+                onClick={() => onComplete(location)}
               >
                 {t("complete_patient_stay")}
               </Button>
@@ -122,7 +122,7 @@ export function LocationCardWrapper({
           )}
         >
           <LocationCard
-            locationHistory={locationHistory}
+            locationHistory={location}
             status={status}
             keepBedActive={keepBedActive}
             onKeepBedActiveChange={onKeepBedActiveChange}

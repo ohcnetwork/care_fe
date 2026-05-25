@@ -63,7 +63,7 @@ export function LocationSheet({
   const mutations = useLocationMutations(encounter.id);
 
   // Derived state
-  const { currentLocation, activeLocations, plannedLocations } = useMemo(
+  const { currentLocation, reservedLocations, plannedLocations } = useMemo(
     () => getCurrentLocations(encounter),
     [encounter],
   );
@@ -351,11 +351,11 @@ export function LocationSheet({
           ),
         );
 
-        activeLocations.forEach((activeLocation) => {
-          if (activeLocation.status === "reserved") {
+        reservedLocations.forEach((reservedLocation) => {
+          if (reservedLocation.status === "reserved") {
             requests.push(
               completeCurrentLocationAssociation(
-                activeLocation,
+                reservedLocation,
                 facilityId,
                 encounter.id,
                 new Date(),
@@ -363,7 +363,7 @@ export function LocationSheet({
             );
             requests.push(
               createLocationUpdateOperationalStatusRequest(
-                activeLocation.location,
+                reservedLocation.location,
                 facilityId,
                 "U",
               ),
@@ -465,7 +465,7 @@ export function LocationSheet({
           <LocationModifyView
             currentLocation={currentLocation}
             plannedLocations={plannedLocations}
-            activeLocations={activeLocations}
+            reservedLocations={reservedLocations}
             selectedBedLocation={selectedBedLocation}
             assignmentHandlers={assignmentHandlers}
           />
@@ -483,7 +483,7 @@ export function LocationSheet({
             selectedBed={navigation.selectedBed}
             currentLocation={currentLocation}
             plannedLocations={plannedLocations}
-            activeLocations={activeLocations}
+            reservedLocations={reservedLocations}
             isPending={mutations.isPending}
             assignmentHandlers={assignmentHandlers}
             navigationHandlers={navigationHandlers}

@@ -32,12 +32,12 @@ export interface LocationTimeConfig {
 
 export interface CurrentLocations {
   currentLocation: LocationAssociationRead | undefined;
-  activeLocations: LocationAssociationRead[];
+  reservedLocations: LocationAssociationRead[];
   plannedLocations: LocationAssociationRead[];
 }
 
 /**
- * Gets the current, active (non-current), and planned locations from encounter history
+ * Gets the current, active (non-current), reserved, and planned locations from encounter history
  */
 export function getCurrentLocations(
   encounter: EncounterRead,
@@ -50,17 +50,19 @@ export function getCurrentLocations(
       loc.location.id === currentEncounterLocation.id,
   );
 
-  const activeLocations = encounter.location_history.filter(
-    (loc) =>
-      (loc.status === "active" || loc.status === "reserved") &&
-      loc.location.id !== currentEncounterLocation?.id,
+  const reservedLocations = encounter.location_history.filter(
+    (loc) => loc.status === "reserved",
   );
 
   const plannedLocations = encounter.location_history.filter(
     (loc) => loc.status === "planned",
   );
 
-  return { currentLocation, activeLocations, plannedLocations };
+  return {
+    currentLocation,
+    reservedLocations,
+    plannedLocations,
+  };
 }
 
 /**

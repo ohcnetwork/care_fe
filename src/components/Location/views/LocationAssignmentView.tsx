@@ -21,7 +21,7 @@ interface LocationAssignmentViewProps {
   selectedBed: LocationRead | null;
   currentLocation?: LocationAssociationRead;
   plannedLocations: LocationAssociationRead[];
-  activeLocations: LocationAssociationRead[];
+  reservedLocations: LocationAssociationRead[];
   // Flags
   isPending: boolean;
   assignmentHandlers: AssignmentHandlers;
@@ -36,7 +36,7 @@ export function LocationAssignmentView({
   selectedBed,
   currentLocation,
   plannedLocations,
-  activeLocations,
+  reservedLocations,
   assignmentHandlers,
   navigationHandlers,
 }: LocationAssignmentViewProps) {
@@ -80,7 +80,7 @@ export function LocationAssignmentView({
   const hasLocations =
     !!currentLocation ||
     plannedLocations.length > 0 ||
-    activeLocations.length > 0;
+    reservedLocations.length > 0;
   const isOverview = sheetState.screen === "overview";
 
   const showAddAnotherBedForReservedPlanned =
@@ -109,7 +109,7 @@ export function LocationAssignmentView({
           plannedLocations={plannedLocations}
           handlers={handlers}
           showMoveButton={true}
-          linkedLocations={activeLocations}
+          reservedLocations={reservedLocations}
         />
       </div>
     );
