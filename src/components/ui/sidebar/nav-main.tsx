@@ -75,7 +75,10 @@ function NavLink({
 
   if (isSelected) {
     return (
-      <div className={cn(className, resolvedExact, "cursor-default")}>
+      <div
+        className={cn(className, resolvedExact, "cursor-pointer")}
+        onClick={onClick}
+      >
         {children}
       </div>
     );
