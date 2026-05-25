@@ -289,7 +289,6 @@ test.describe("DOB timezone validation", () => {
     page,
   }) => {
     const patientData = generatePatientData();
-    await startRegistration(page);
     await fillBasicInfo(page, patientData);
     await fillDateOfBirth(page, TODAY_IST);
     await selectBloodGroup(page, patientData.bloodGroup);
@@ -301,7 +300,6 @@ test.describe("DOB timezone validation", () => {
     page,
   }) => {
     const patientData = generatePatientData();
-    await startRegistration(page);
     await fillBasicInfo(page, patientData);
     await fillDateOfBirth(page, TOMORROW_IST);
     await selectBloodGroup(page, patientData.bloodGroup);
