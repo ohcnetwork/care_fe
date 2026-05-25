@@ -158,7 +158,7 @@
     { "key": "q 7", "action": "questionnaire-7", "description": "Questionnaire 7", "when": "canEdit && questionnairesEnabled" },
     { "key": "q 8", "action": "questionnaire-8", "description": "Questionnaire 8", "when": "canEdit && questionnairesEnabled" },
     { "key": "q 9", "action": "questionnaire-9", "description": "Questionnaire 9", "when": "canEdit && questionnairesEnabled" },
-    { "key": "m c", "action": "mark-as-completed", "description": "Mark as Completed", "when": "canEdit" },
+    { "key": "m c", "action": "mark-as-complete", "description": "Mark as Completed", "when": "canEdit" },
     { "key": "l", "action": "assign-location", "description": "Assign Location", "when": "canEdit" },
     { "key": "shift+d", "action": "dispense", "description": "Dispense Medication", "when": "canEdit" }
   ]

@@ -1,0 +1,29 @@
+name: PR Review Trigger
+
+on:
+  pull_request_review:
+    types:
+      - submitted
+
+permissions: {}
+
+jobs:
+  save-review-info:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.review.state == 'changes_requested' }}
+    steps:
+      - name: Save review info
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REVIEW_STATE: ${{ github.event.review.state }}
+        run: |
+          echo "$PR_NUMBER" > pr_number.txt
+          echo "$REVIEW_STATE" > review_state.txt
+
+      - name: Upload review info
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-info
+          path: |
+            pr_number.txt
+            review_state.txt
