@@ -81,9 +81,10 @@ export function ServiceSwitcher() {
           <Button
             variant="ghost"
             className={cn(
-              "w-full flex items-center justify-between gap-3 rounded-md bg-white border border-gray-200 px-2",
+              "w-full flex items-center justify-between gap-3 rounded-md bg-white border border-gray-200 px-2 overflow-hidden",
               state === "expanded" && "py-6",
             )}
+            title={selectedService?.name ?? t("select_healthcare_service")}
             onClick={() => setOpenDialog(true)}
           >
             <div className="flex min-w-0 items-center gap-2">
@@ -94,11 +95,11 @@ export function ServiceSwitcher() {
                 )}
               >
                 <TooltipComponent content={selectedService?.name}>
-                  <div className="flex min-w-0 flex-col items-start">
+                  <div className="flex min-w-0 w-full flex-col items-start overflow-hidden">
                     <span className="text-xs text-gray-500">
                       {t("current_service")}
                     </span>
-                    <span className="truncate text-sm font-medium text-gray-900">
+                    <span className="max-w-full truncate text-sm font-medium text-gray-900">
                       {selectedService?.name}
                     </span>
                   </div>
