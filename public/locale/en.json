@@ -796,6 +796,7 @@
   "assign_bed": "Assign Bed",
   "assign_bed_now": "Assign Bed Now",
   "assign_location": "Assign Location",
+  "assign_planned_bed_now": "Assign Planned Bed Now",
   "assign_reserved_bed_now": "Assign Reserved Bed Now",
   "assign_service_points": "Assign Service points",
   "assign_this_encounter": "Assign This Encounter",
