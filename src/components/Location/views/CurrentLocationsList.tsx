@@ -88,9 +88,7 @@ export function CurrentLocationsList({
                 : undefined
             }
             onUpdateTime={onUpdateTime}
-            onCancelBed={() =>
-              onCancelBed(status as "planned" | "active", location)
-            }
+            onCancelBed={() => onCancelBed(status, location)}
             onAssignNow={
               status === "reserved"
                 ? () => onAssignNowReserved(location)
