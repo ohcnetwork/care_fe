@@ -74,6 +74,14 @@ test.describe("Facility Creation", () => {
       .getByRole("textbox", { name: "Phone Number *" })
       .fill(phoneNumber);
     await page.getByRole("spinbutton", { name: "PIN Code *" }).fill(pinCode);
+
+    // Select the State in the government organization selector
+    const stateCombobox = page
+      .getByRole("combobox")
+      .filter({ hasText: "Select..." });
+    await stateCombobox.click();
+    await page.getByRole("option").first().click();
+
     await page.getByRole("textbox", { name: "Address *" }).fill(address);
     await page.getByRole("button", { name: "Create Facility" }).click();
 
@@ -130,6 +138,14 @@ test.describe("Facility Creation", () => {
       .getByRole("textbox", { name: "Phone Number *" })
       .fill(phoneNumber);
     await page.getByRole("spinbutton", { name: "PIN Code *" }).fill(pinCode);
+
+    // Select the State in the government organization selector
+    const stateCombobox = page
+      .getByRole("combobox")
+      .filter({ hasText: "Select..." });
+    await stateCombobox.click();
+    await page.getByRole("option").first().click();
+
     await page.getByRole("textbox", { name: "Address *" }).fill(address);
     await page
       .getByRole("combobox")
