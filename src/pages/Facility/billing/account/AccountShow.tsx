@@ -83,12 +83,17 @@ function formatDate(date?: string) {
   });
 }
 
-type tab =
-  | "charge_items"
-  | "invoices"
-  | "payments"
-  | "bed_charge_items"
-  | "reports";
+export const ACCOUNT_TABS = [
+  "invoices",
+  "charge_items",
+  "payments",
+  "reports",
+  "bed_charge_items",
+] as const;
+export type AccountTab = (typeof ACCOUNT_TABS)[number];
+
+export const ACCOUNT_PAYMENT_TYPES = ["pay", "credit_note"] as const;
+export type AccountPaymentType = (typeof ACCOUNT_PAYMENT_TYPES)[number];
 
 const closedStatusText = {
   [AccountBillingStatus.closed_baddebt]: "close_account_help_closed_baddebt",
@@ -102,17 +107,26 @@ export function AccountShow({
   facilityId,
   accountId,
   tab,
+  paymentType,
 }: {
   facilityId: string;
   accountId: string;
-  tab: tab;
+  tab: string;
+  paymentType?: string;
 }) {
   const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [paymentSheet, setPaymentSheet] = useState<{
-    isOpen: boolean;
-    isCreditNote: boolean;
-  }>({ isOpen: false, isCreditNote: false });
+  const openPaymentSheet = (type: AccountPaymentType) => {
+    navigate(
+      `/facility/${facilityId}/billing/account/${accountId}/${tab}/payment/${type}`,
+      { replace: true },
+    );
+  };
+  const closePaymentSheet = () => {
+    navigate(`/facility/${facilityId}/billing/account/${accountId}/${tab}`, {
+      replace: true,
+    });
+  };
   const [transferPaymentOpen, setTransferPaymentOpen] = useState(false);
   const queryClient = useQueryClient();
   const [closeAccountStatus, setCloseAccountStatus] = useState<{
@@ -376,15 +390,7 @@ export function AccountShow({
                 {t("create_invoice")}
                 <ShortcutBadge actionId="create-invoice" />
               </Button>
-              <Button
-                variant="primary"
-                onClick={() =>
-                  setPaymentSheet({
-                    isOpen: true,
-                    isCreditNote: false,
-                  })
-                }
-              >
+              <Button variant="primary" onClick={() => openPaymentSheet("pay")}>
                 <CareIcon icon="l-plus" className="size-4" />
                 {t("add_credit_payment")}
                 <ShortcutBadge actionId="credit-payment-account" />
@@ -406,15 +412,7 @@ export function AccountShow({
                 {t("invoice")}
                 <ShortcutBadge actionId="create-invoice" />
               </Button>
-              <Button
-                variant="primary"
-                onClick={() =>
-                  setPaymentSheet({
-                    isOpen: true,
-                    isCreditNote: false,
-                  })
-                }
-              >
+              <Button variant="primary" onClick={() => openPaymentSheet("pay")}>
                 <CareIcon icon="l-plus" className="size-4" />
                 {t("credit")}
                 <ShortcutBadge actionId="record-payment-account" />
@@ -448,12 +446,7 @@ export function AccountShow({
                       <ShortcutBadge actionId="settle-close-account" />
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() =>
-                        setPaymentSheet({
-                          isOpen: true,
-                          isCreditNote: true,
-                        })
-                      }
+                      onClick={() => openPaymentSheet("credit_note")}
                     >
                       <CareIcon icon="l-plus" className="mr-2 size-4" />
                       {t("record_credit_note")}
@@ -731,11 +724,11 @@ export function AccountShow({
       />
 
       <PaymentReconciliationSheet
-        open={paymentSheet.isOpen}
-        onOpenChange={(isOpen) => setPaymentSheet({ ...paymentSheet, isOpen })}
+        open={paymentType !== undefined}
+        onOpenChange={(open) => !open && closePaymentSheet()}
         facilityId={facilityId}
         accountId={accountId}
-        isCreditNote={paymentSheet.isCreditNote}
+        isCreditNote={paymentType === "credit_note"}
         account={account}
       />
 

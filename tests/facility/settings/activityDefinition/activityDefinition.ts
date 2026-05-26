@@ -13,7 +13,7 @@ import {
 } from "tests/helper/ui";
 import { expectedSlug } from "tests/helper/utils";
 
-export const RESOURCE_CATEGORY_SLUG = "lab-tests-activity_definition";
+export const RESOURCE_CATEGORY_SLUG = "lab-tests-activity-definition";
 
 export const RESOURCE_CATEGORY_NAME = "Lab Tests";
 
