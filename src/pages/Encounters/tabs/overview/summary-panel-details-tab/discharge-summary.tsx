@@ -50,7 +50,7 @@ export const DischargeDetails = () => {
         )}
       </div>
       <div className="bg-white rounded-md p-2 shadow flex flex-col gap-3">
-        {dischargeStatus ? (
+        {dischargeStatus && encounter.period.end ? (
           <>
             <div className="flex justify-between items-center">
               <div className="flex flex-col text-xs gap-1">
@@ -60,10 +60,10 @@ export const DischargeDetails = () => {
                 <div className="flex flex-row gap-1 font-semibold">
                   <div className="flex flex-row gap-1 font-semibold">
                     <span className="text-gray-950">
-                      {format(dischargeStatus.moved_at, "dd MMM yyyy")},
+                      {format(encounter.period.end, "dd MMM yyyy")},
                     </span>
                     <span className="text-gray-700">
-                      {format(dischargeStatus.moved_at, "hh:mma")}
+                      {format(encounter.period.end, "hh:mma")}
                     </span>
                   </div>
                 </div>
