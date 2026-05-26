@@ -287,9 +287,9 @@ function QuestionGroup({
 
   return (
     <div className={cn("space-y-2", group.styling_metadata?.classes)}>
-      {!!level && group.text && (
+      {group.text && (
         <div className="flex flex-col space-y-1">
-          <h4 className="text-sm font-medium text-secondary-700">
+          <h4 className="text-lg font-semibold text-black">
             {group.text}
             {group.code && (
               <span className="ml-1 text-xs text-gray-500">
@@ -297,7 +297,7 @@ function QuestionGroup({
               </span>
             )}
           </h4>
-          {level === 0 && <Separator className="my-2" />}
+          {level === 0 && <Separator />}
         </div>
       )}
       <div
