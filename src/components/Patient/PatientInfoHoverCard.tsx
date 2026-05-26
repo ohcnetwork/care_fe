@@ -10,16 +10,18 @@ import {
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
 import { formatPatientAge } from "@/Utils/utils";
-import { Phone } from "lucide-react";
+import { Eye, Phone } from "lucide-react";
 import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 export const PatientInfoHoverCard = ({
   patient,
   facilityId,
+  canWritePatient = false,
 }: {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   facilityId: string;
+  canWritePatient?: boolean;
 }) => {
   const { t } = useTranslation();
 
@@ -56,9 +58,9 @@ export const PatientInfoHoverCard = ({
           </Badge>
         )}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center w-full gap-2 border-b border-gray-200 pb-4">
         {!isPatientHomePage && facilityId && (
-          <Button variant="outline" className="text-gray-950" asChild>
+          <Button variant="outline" className="text-gray-950 flex-1" asChild>
             <Link
               basePath="/"
               href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
@@ -74,7 +76,11 @@ export const PatientInfoHoverCard = ({
           </Button>
         )}
 
-        <Button variant="outline" className="text-gray-950" asChild>
+        <Button
+          variant="outline"
+          className="text-gray-950 gap-full flex-1"
+          asChild
+        >
           <Link
             basePath="/"
             href={
@@ -83,10 +89,22 @@ export const PatientInfoHoverCard = ({
                 : `/patient/${patient.id}`
             }
           >
-            {t("view_profile")}
+            <Eye size={16} />
+            {t("see_profile")}
           </Link>
         </Button>
+        {canWritePatient && (
+          <Button variant="outline" className="text-gray-950 flex-1" asChild>
+            <Link
+              basePath="/"
+              href={`/facility/${facilityId}/patient/${patient.id}/update`}
+            >
+              {t("edit_profile")}
+            </Link>
+          </Button>
+        )}
       </div>
+
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3 border-t border-gray-200 pt-4">
           {"instance_identifiers" in patient &&

@@ -13,8 +13,7 @@ import {
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
 import { formatPatientAge } from "@/Utils/utils";
-import { ChevronDown, Pencil } from "lucide-react";
-import { navigate } from "raviger";
+import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface PatientHoverCardProps {
@@ -28,7 +27,7 @@ export function PatientHoverCard({
   patient,
   facilityId,
   disabled = false,
-  canWritePatient,
+  canWritePatient = false,
 }: PatientHoverCardProps) {
   return (
     <>
@@ -38,15 +37,11 @@ export function PatientHoverCard({
           disabled={disabled}
           className="lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <PatientHoverCardTrigger
-            patient={patient}
-            facilityId={facilityId}
-            disabled={disabled}
-            canWritePatient={canWritePatient}
-          />
+          <PatientHoverCardTrigger patient={patient} disabled={disabled} />
         </DrawerTrigger>
         <DrawerContent className="flex flex-col p-4 gap-4">
           <PatientInfoHoverCard
+            canWritePatient={canWritePatient}
             patient={patient}
             facilityId={facilityId || ""}
           />
@@ -59,12 +54,7 @@ export function PatientHoverCard({
           disabled={disabled}
           className="hidden lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background"
         >
-          <PatientHoverCardTrigger
-            patient={patient}
-            facilityId={facilityId}
-            disabled={disabled}
-            canWritePatient={canWritePatient}
-          />
+          <PatientHoverCardTrigger patient={patient} disabled={disabled} />
         </PopoverTrigger>
         <PopoverContent
           className="flex flex-col border border-gray-200 shadow-lg p-4 rounded-md gap-4 w-100"
@@ -83,16 +73,12 @@ export function PatientHoverCard({
 
 interface PatientHoverCardTriggerProps {
   patient: PublicPatientRead | PatientListRead | PatientRead;
-  facilityId?: string;
   disabled?: boolean;
-  canWritePatient?: boolean;
 }
 
 function PatientHoverCardTrigger({
   patient,
-  facilityId,
   disabled = false,
-  canWritePatient,
 }: PatientHoverCardTriggerProps) {
   const { t } = useTranslation();
 
@@ -118,22 +104,6 @@ function PatientHoverCardTrigger({
           >
             {patient.name}
           </h5>
-          {!disabled && canWritePatient && facilityId && (
-            <button
-              type="button"
-              aria-label={t("edit_patient")}
-              title={t("edit_patient")}
-              className="inline-flex items-center justify-center size-6 rounded-full hover:bg-gray-200 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(
-                  `/facility/${facilityId}/patient/${patient.id}/update`,
-                );
-              }}
-            >
-              <Pencil size={14} className="text-gray-600" />
-            </button>
-          )}
           {!disabled && <ChevronDown size={16} />}
         </div>
         <span className="flex flex-start text-gray-700">

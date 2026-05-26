@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   ArrowRight,
+  Edit,
   SquareActivity,
   Stethoscope,
   Ticket,
@@ -74,6 +75,7 @@ export default function PatientHome() {
     canListEncounters,
     canWriteToken,
     canListTokens,
+    canWritePatient,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
 
   const {
@@ -135,12 +137,28 @@ export default function PatientHome() {
                     });
                   }}
                 >
-                  <PLUGIN_Component
-                    __name="PatientInfoCardActions"
-                    patient={patientData}
-                    facilityId={facilityId}
-                    className="flex justify-end"
-                  />
+                  <div className="flex gap-2">
+                    {canWritePatient && (
+                      <Button variant="ghost" className="hidden lg:flex">
+                        <Link
+                          basePath="/"
+                          href={`/facility/${facilityId}/patient/${patientData.id}/update`}
+                          className="flex gap-2 items-center"
+                        >
+                          <Edit size={16} />
+                          <span className="text-sm text-black underline">
+                            {t("edit_profile")}
+                          </span>
+                        </Link>
+                      </Button>
+                    )}
+                    <PLUGIN_Component
+                      __name="PatientInfoCardActions"
+                      patient={patientData}
+                      facilityId={facilityId}
+                      className="flex justify-end"
+                    />
+                  </div>
                 </PatientInfoCard>
               </div>
 
