@@ -58,7 +58,7 @@ export const PatientInfoHoverCard = ({
           </Badge>
         )}
       </div>
-      <div className="flex items-center w-full gap-2 border-b border-gray-200 pb-4">
+      <div className="flex items-center w-full gap-2">
         {!isPatientHomePage && facilityId && (
           <Button variant="outline" className="text-gray-950 flex-1" asChild>
             <Link
