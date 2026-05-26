@@ -50,14 +50,15 @@ export const DischargeDetails = () => {
         )}
       </div>
       <div className="bg-white rounded-md p-2 shadow flex flex-col gap-3">
-        {dischargeStatus && encounter.period.end ? (
+        {dischargeStatus ? (
           <>
             <div className="flex justify-between items-center">
-              <div className="flex flex-col text-xs gap-1">
-                <span className=" text-gray-700">
-                  {t("discharge_date_and_time")}:
-                </span>
-                <div className="flex flex-row gap-1 font-semibold">
+              {encounter.period.end && (
+                <div className="flex flex-col text-xs gap-1">
+                  <span className="text-gray-700">
+                    {t("discharge_date_and_time")}:
+                  </span>
+
                   <div className="flex flex-row gap-1 font-semibold">
                     <span className="text-gray-950">
                       {format(encounter.period.end, "dd MMM yyyy")},
@@ -67,7 +68,7 @@ export const DischargeDetails = () => {
                     </span>
                   </div>
                 </div>
-              </div>
+              )}
               <Badge variant="green">{t("discharged")}</Badge>
             </div>
             <Dialog>
