@@ -13,9 +13,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
 
-import { PLUGIN_Component } from "@/PluginEngine";
 import { useEncounterProgressController } from "@/pages/Encounters/utils/useEncounterProgressController";
+import { PLUGIN_Component } from "@/PluginEngine";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { AlertTriangleIcon } from "lucide-react";
 
 export function MarkEncounterAsCompletedDialog({
@@ -70,6 +71,7 @@ export function MarkEncounterAsCompletedDialog({
             }}
           >
             {t("mark_as_complete")}
+            <ShortcutBadge actionId="enter-action" />
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
