@@ -6,6 +6,9 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import { add } from "@/Utils/decimal";
+import query from "@/Utils/request/query";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 import { getPermissions } from "@/common/Permissions";
 import PrintFooter from "@/components/Common/PrintFooter";
 import TagBadge from "@/components/Tags/TagBadge";
@@ -19,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { usePermissions } from "@/context/PermissionContext";
+import usePatientExtensionData from "@/hooks/usePatientExtensionData";
 import { cn } from "@/lib/utils";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -39,10 +43,6 @@ import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/pa
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { renderTokenNumber } from "@/types/tokens/token/token";
-import { add } from "@/Utils/decimal";
-import query from "@/Utils/request/query";
-import { formatName, formatPatientAge } from "@/Utils/utils";
-
 interface Props {
   appointmentId: string;
 }
@@ -107,6 +107,11 @@ export default function AppointmentPrint(props: Props) {
     .map((q) => q.data)
     .filter((inv): inv is InvoiceRead => !!inv);
 
+  const patient = appointment?.patient;
+  const token = appointment?.token;
+
+  const patientExtensionData = usePatientExtensionData(patient?.extensions);
+
   if (isLoading || !appointment || !facility) {
     return (
       <PrintPreview
@@ -125,9 +130,6 @@ export default function AppointmentPrint(props: Props) {
       </PrintPreview>
     );
   }
-
-  const patient = appointment.patient;
-  const token = appointment.token;
 
   // Filter out excluded charge items and show all from the query
   const displayChargeItems = chargeItems?.results?.filter(
@@ -199,10 +201,21 @@ export default function AppointmentPrint(props: Props) {
         <div className="flex justify-between gap-3 mb-1.5">
           <div className="flex-1">
             <div className="text-xs leading-snug space-y-px">
-              <DetailRow
-                label={t("patient")}
-                value={`${patient?.name} | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
-              />
+              {patient && (
+                <>
+                  <DetailRow
+                    label={t("patient")}
+                    value={`${patient?.name} | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
+                  />
+                  {patientExtensionData.map((field) => (
+                    <DetailRow
+                      key={field.name}
+                      label={t(field.name)}
+                      value={field.value}
+                    />
+                  ))}
+                </>
+              )}
               <DetailRow
                 label={t("contact_system_phone")}
                 value={
