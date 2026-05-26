@@ -15,6 +15,7 @@ import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { usePermissions } from "@/context/PermissionContext";
+import usePatientExtensionData from "@/hooks/usePatientExtensionData";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
@@ -96,6 +97,8 @@ export default function TreatmentSummary({
     hasPermission,
     encounter?.permissions ?? [],
   );
+
+  const patientExtensionData = usePatientExtensionData(patient?.extensions);
 
   const canAccess = canReadEncounter || canViewClinicalData;
 
@@ -278,6 +281,18 @@ export default function TreatmentSummary({
                     </span>
                   </div>
                 )}
+                {patientExtensionData.map((field) => (
+                  <div
+                    key={field.name}
+                    className="grid grid-cols-[10rem_auto_1fr] md:grid-cols-[8rem_auto_1fr] items-center"
+                  >
+                    <span className="text-gray-600">{field.name}</span>
+                    <span className="text-gray-600">:</span>
+                    <span className="font-semibold break-words">
+                      {field.value}
+                    </span>
+                  </div>
+                ))}
               </div>
 
               {/* Right Column */}

@@ -29,7 +29,12 @@ export const Locations = () => {
             <HistoryIcon className="cursor-pointer" strokeWidth={1.5} />
           </Button>
           {canWriteSelectedEncounter && (
-            <Button variant="ghost" size="sm" onClick={assignLocation}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={assignLocation}
+              data-shortcut-id="assign-location"
+            >
               <SquarePen className="cursor-pointer" strokeWidth={1.5} />
             </Button>
           )}
