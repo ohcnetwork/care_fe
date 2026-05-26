@@ -344,7 +344,7 @@ export function DiagnosticReportForm({
     definitionId: string,
     index: number,
     value: string,
-    unit: string,
+    unit?: string,
   ) {
     setObservations((prev) => {
       const observationsList = [...(prev[definitionId] || [])];
@@ -352,7 +352,7 @@ export function DiagnosticReportForm({
         observationsList[index] = {
           id: "",
           value: "",
-          unit,
+          unit: unit || "",
           status: ObservationStatus.AMENDED,
           components: {},
         };

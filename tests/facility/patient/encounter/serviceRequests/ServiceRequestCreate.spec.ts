@@ -117,7 +117,7 @@ test.describe("Patient Service Request Tab", () => {
   test("ensure unit is autofilled for observations in service request", async ({
     page,
   }) => {
-    await page.goto(`facility/${facilityId}/settings/observation_definitions`);
+    await page.goto(`/facility/${facilityId}/settings/observation_definitions`);
     const observationDefinitionTitle = faker.helpers.arrayElement(
       OBSERVATION_DEFINITIONS,
     );
