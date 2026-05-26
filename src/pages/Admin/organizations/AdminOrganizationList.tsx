@@ -70,8 +70,12 @@ export default function AdminOrganizationList({
   });
 
   const handleOrganizationSelect = useCallback(
-    (organization: Organization) => {
-      navigate(`/admin/organizations/${organizationType}/${organization.id}`);
+    (organization?: Organization) => {
+      navigate(
+        organization
+          ? `/admin/organizations/${organizationType}/${organization.id}`
+          : `/admin/organizations/${organizationType}`,
+      );
     },
     [organizationType],
   );
@@ -134,9 +138,7 @@ export default function AdminOrganizationList({
           <div className="md:hidden">
             <OrgSelect
               value={organizationId}
-              onChange={(selectedOrg) => {
-                if (selectedOrg) handleOrganizationSelect(selectedOrg);
-              }}
+              onChange={handleOrganizationSelect}
               orgType={organizationType as OrgType}
               placeholder={
                 isRoleOrg
