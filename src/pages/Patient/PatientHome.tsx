@@ -146,7 +146,7 @@ export default function PatientHome() {
                           className="flex gap-2 items-center"
                         >
                           <Edit size={16} />
-                          <span className="text-sm text-black underline">
+                          <span className="text-black underline font-semibold">
                             {t("edit_profile")}
                           </span>
                         </Link>

@@ -93,7 +93,7 @@ export const PatientInfoHoverCard = ({
             {t("see_profile")}
           </Link>
         </Button>
-        {canWritePatient && (
+        {canWritePatient && isPatientHomePage && (
           <Button variant="outline" className="text-gray-950 flex-1" asChild>
             <Link
               basePath="/"
