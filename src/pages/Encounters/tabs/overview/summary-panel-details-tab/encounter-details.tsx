@@ -15,6 +15,7 @@ import {
 } from "@/pages/Encounters/EncounterProperties";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ENCOUNTER_PRIORITY_COLORS } from "@/types/emr/encounter/encounter";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 export const EncounterDetails = () => {
   const { t } = useTranslation();
@@ -24,6 +25,7 @@ export const EncounterDetails = () => {
     patientId,
     facilityId,
     canWriteSelectedEncounter,
+    actions: { markAsCompleted, dispense },
   } = useEncounter();
   if (!encounter) return <CardListSkeleton count={1} />;
 
@@ -109,14 +111,23 @@ export const EncounterDetails = () => {
         </div>
       </div>
       {canWriteSelectedEncounter && (
-        <Button variant="outline" className="w-full" asChild>
-          <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
-          >
-            <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
-            <span className="text-gray-950">{t("update_encounter")}</span>
-          </Link>
-        </Button>
+        <>
+          <Button variant="outline" className="w-full" asChild>
+            <Link
+              href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
+            >
+              <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
+              <span className="text-gray-950">{t("update_encounter")}</span>
+              <ShortcutBadge actionId="update-encounter" />
+            </Link>
+          </Button>
+          <Button className="hidden" onClick={() => markAsCompleted(true)}>
+            <ShortcutBadge actionId="mark-as-completed" />
+          </Button>
+          <Button className="hidden" onClick={dispense}>
+            <ShortcutBadge actionId="dispense" />
+          </Button>
+        </>
       )}
     </div>
   );
