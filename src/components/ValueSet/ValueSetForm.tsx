@@ -28,6 +28,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import {
+  SNOMED_VERSIONS,
   TERMINOLOGY_SYSTEMS,
   ValueSetBase,
   ValueSetRead,
@@ -44,6 +45,56 @@ interface ValueSetFormProps {
   onSubmit: (data: ValueSetBase) => void;
   isSubmitting?: boolean;
   isSystemDefined?: boolean;
+}
+
+function SystemVersionField({
+  system,
+  index,
+  type,
+  form,
+  disabled,
+}: {
+  system: string;
+  index: number;
+  type: "include" | "exclude";
+  form: ReturnType<typeof useForm<ValueSetBase>>;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  if (system === TERMINOLOGY_SYSTEMS.SNOMED) {
+    return (
+      <FormField
+        control={form.control}
+        name={`compose.${type}.${index}.version`}
+        render={({ field }) => (
+          <FormItem className="flex-1">
+            <FormLabel>{t("version")}</FormLabel>
+            <FormControl>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={disabled}
+              >
+                <SelectTrigger ref={field.ref}>
+                  <SelectValue placeholder={t("select_version")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={SNOMED_VERSIONS.INDIAN}>
+                    {t("indian_version")}
+                  </SelectItem>
+                  <SelectItem value={SNOMED_VERSIONS.INTERNATIONAL}>
+                    {t("international_version")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    );
+  }
+  return null;
 }
 
 function ConceptFields({
@@ -245,7 +296,15 @@ function RuleFields({
                   <FormItem className="flex-1">
                     <FormLabel>{t("system")}</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        form.setValue(
+                          `compose.${type}.${index}.version`,
+                          value === TERMINOLOGY_SYSTEMS.SNOMED
+                            ? SNOMED_VERSIONS.INDIAN
+                            : undefined,
+                        );
+                      }}
                       defaultValue={field.value}
                       disabled={disabled}
                     >
@@ -277,6 +336,15 @@ function RuleFields({
                 <TrashIcon className="size-4" />
               </Button>
             </div>
+
+            <SystemVersionField
+              system={form.watch(`compose.${type}.${index}.system`)}
+              index={index}
+              type={type}
+              form={form}
+              disabled={disabled}
+            />
+
             <ConceptFields
               nestIndex={index}
               type={type}
@@ -323,6 +391,7 @@ export function ValueSetForm({
       include: z.array(
         z.object({
           system: z.string(),
+          version: z.string().optional(),
           concept: z
             .array(
               z.object({
@@ -345,6 +414,7 @@ export function ValueSetForm({
       exclude: z.array(
         z.object({
           system: z.string(),
+          version: z.string().optional(),
           concept: z
             .array(
               z.object({
