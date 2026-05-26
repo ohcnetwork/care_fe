@@ -279,12 +279,6 @@ function QuestionGroup({
   }[];
   level?: number;
 }) {
-  const hasResponses = responses.some((r) =>
-    group.questions?.some((q) => q.id === r.question_id),
-  );
-
-  if (!hasResponses) return null;
-
   return (
     <div className={cn("space-y-2", group.styling_metadata?.classes)}>
       {!!level && group.text && (
@@ -375,7 +369,9 @@ export function ResponseCard({ item }: ResponseCardProps) {
               const response = item.responses.find(
                 (r) => r.question_id === question.id,
               );
-              if (!response) return null;
+              if (!response) {
+                return null;
+              }
 
               return (
                 <QuestionResponseValue
