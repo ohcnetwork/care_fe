@@ -75,8 +75,8 @@ export function useAppVersion(): UseAppVersionReturn {
     }
 
     // Version differs
-    if (isInitial) {
-      // Initial check: auto-update
+    if (isInitial && window.location.pathname === "/") {
+      // Initial check on root route: auto-update
       performAppUpdate(data.version);
     } else {
       // Polling check: notify user, wait for confirmation
