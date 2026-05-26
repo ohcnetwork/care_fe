@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import {
   ConditionalRule,
+  ExtensionContext,
   ExtensionFieldMetadata,
   ExtensionSchemaResult,
   FieldCondition,
@@ -99,7 +100,7 @@ function extractPropertyDefaults(
  * @param schema - JSON Schema Draft 2020-12 object
  * @returns Record of field names to default values
  */
-export function extractDefaults(
+function extractDefaults(
   schema: JSONSchema2020 | undefined,
 ): Record<string, unknown> {
   if (!schema?.properties) {
@@ -197,6 +198,7 @@ function extractPropertyMetadata(
     uiControl: xui?.control,
     uiVariant: xui?.variant,
     uiMetadata: xui?.metadata,
+    render_blacklist: xui?.render_blacklist,
   };
 
   // Add numeric constraints
@@ -266,7 +268,7 @@ function extractPropertyMetadata(
  * @param schema - JSON Schema Draft 2020-12 object
  * @returns Array of field metadata objects
  */
-export function extractFieldMetadata(
+function extractFieldMetadata(
   schema: JSONSchema2020 | undefined,
 ): ExtensionFieldMetadata[] {
   if (!schema?.properties) {
@@ -320,224 +322,80 @@ function extractConditionsFromIf(
 }
 
 /**
- * Extracts conditional rules from allOf/if-then-else within a property
- * @param property - The property schema to extract rules from
- * @param pathPrefix - Path prefix for nested rules (e.g., "cold_chain_requirements")
+ * Builds a ConditionalRule from a schema fragment with if/then/else.
+ * Returns null if there's no `if` or no usable conditions.
  */
-function extractPropertyConditionalRules(
-  property: JSONSchemaProperty,
-  pathPrefix: string = "",
+function buildRule(
+  node: {
+    if?: JSONSchemaProperty;
+    then?: JSONSchemaProperty;
+    else?: JSONSchemaProperty;
+  },
+  pathPrefix = "",
+): ConditionalRule | null {
+  if (!node.if) return null;
+
+  const conditions = extractConditionsFromIf(node.if, pathPrefix);
+  if (conditions.length === 0) return null;
+
+  const withPrefix = (fields: string[]) =>
+    pathPrefix ? fields.map((f) => `${pathPrefix}.${f}`) : fields;
+
+  const effects = (branch: JSONSchemaProperty | undefined) => {
+    const required = branch?.required ?? [];
+    const props = branch?.properties ? Object.keys(branch.properties) : [];
+    return {
+      requiredFields: withPrefix(required),
+      visibleFields: withPrefix(props.length > 0 ? props : required),
+    };
+  };
+
+  return {
+    conditions,
+    then: effects(node.then),
+    else: node.else ? effects(node.else) : undefined,
+  };
+}
+
+/**
+ * Recursively collects conditional rules from a schema:
+ * its own allOf/if-then-else, plus those of every nested property.
+ */
+function collectRules(
+  schema: JSONSchemaProperty,
+  pathPrefix = "",
 ): ConditionalRule[] {
   const rules: ConditionalRule[] = [];
 
-  // Helper to add path prefix to field names
-  const withPrefix = (fields: string[]): string[] =>
-    fields.map((f) => (pathPrefix ? `${pathPrefix}.${f}` : f));
-
-  // Process allOf within property
-  if (property.allOf) {
-    for (const item of property.allOf) {
-      if (isConditional(item) && item.if) {
-        // Extract conditions - these are relative to this property
-        const conditions = extractConditionsFromIf(item.if, pathPrefix);
-
-        if (conditions.length > 0) {
-          // For visibility: if then.properties is defined, use those
-          // Otherwise, treat required fields as also controlling visibility
-          const thenRequired = item.then?.required || [];
-          const thenHasProperties =
-            item.then?.properties &&
-            Object.keys(item.then.properties).length > 0;
-          const thenVisible = thenHasProperties
-            ? Object.keys(item.then!.properties!)
-            : thenRequired;
-
-          const rule: ConditionalRule = {
-            conditions,
-            then: {
-              requiredFields: withPrefix(thenRequired),
-              visibleFields: withPrefix(thenVisible),
-            },
-          };
-
-          if (item.else) {
-            const elseRequired = item.else.required || [];
-            const elseHasProperties =
-              item.else.properties &&
-              Object.keys(item.else.properties).length > 0;
-            const elseVisible = elseHasProperties
-              ? Object.keys(item.else.properties!)
-              : elseRequired;
-
-            rule.else = {
-              requiredFields: withPrefix(elseRequired),
-              visibleFields: withPrefix(elseVisible),
-            };
-          }
-
-          rules.push(rule);
-        }
-      }
+  // allOf entries that are if/then/else fragments
+  for (const item of schema.allOf ?? []) {
+    if (isConditional(item)) {
+      const rule = buildRule(item, pathPrefix);
+      if (rule) rules.push(rule);
     }
   }
 
-  // Process if/then/else within property
-  if (property.if) {
-    const conditions = extractConditionsFromIf(property.if, pathPrefix);
+  // Direct if/then/else on this node
+  const direct = buildRule(schema, pathPrefix);
+  if (direct) rules.push(direct);
 
-    if (conditions.length > 0) {
-      const thenRequired = property.then?.required || [];
-      const thenHasProperties =
-        property.then?.properties &&
-        Object.keys(property.then.properties).length > 0;
-      const thenVisible = thenHasProperties
-        ? Object.keys(property.then!.properties!)
-        : thenRequired;
-
-      const rule: ConditionalRule = {
-        conditions,
-        then: {
-          requiredFields: withPrefix(thenRequired),
-          visibleFields: withPrefix(thenVisible),
-        },
-      };
-
-      if (property.else) {
-        const elseRequired = property.else.required || [];
-        const elseHasProperties =
-          property.else.properties &&
-          Object.keys(property.else.properties).length > 0;
-        const elseVisible = elseHasProperties
-          ? Object.keys(property.else.properties!)
-          : elseRequired;
-
-        rule.else = {
-          requiredFields: withPrefix(elseRequired),
-          visibleFields: withPrefix(elseVisible),
-        };
-      }
-
-      rules.push(rule);
-    }
-  }
-
-  // Recursively check nested properties for their own conditionals
-  if (property.properties) {
-    for (const [name, nestedProp] of Object.entries(property.properties)) {
-      const nestedPath = pathPrefix ? `${pathPrefix}.${name}` : name;
-      rules.push(...extractPropertyConditionalRules(nestedProp, nestedPath));
-    }
+  // Recurse into nested properties
+  for (const [name, prop] of Object.entries(schema.properties ?? {})) {
+    const nestedPath = pathPrefix ? `${pathPrefix}.${name}` : name;
+    rules.push(...collectRules(prop, nestedPath));
   }
 
   return rules;
 }
 
 /**
- * Extracts conditional rules from a JSON Schema
- * Looks in allOf for if/then/else patterns at root and nested levels
- * Conditionally required fields are also treated as conditionally visible
+ * Extracts conditional rules from a JSON Schema.
+ * Conditionally required fields are also treated as conditionally visible.
  */
-export function extractConditionalRules(
+function extractConditionalRules(
   schema: JSONSchema2020 | undefined,
 ): ConditionalRule[] {
-  if (!schema) {
-    return [];
-  }
-
-  const rules: ConditionalRule[] = [];
-
-  // Process root-level allOf array for conditionals
-  if (schema.allOf) {
-    for (const item of schema.allOf) {
-      if (isConditional(item) && item.if) {
-        const conditions = extractConditionsFromIf(item.if);
-
-        if (conditions.length > 0) {
-          const thenRequired = item.then?.required || [];
-          const thenHasProperties =
-            item.then?.properties &&
-            Object.keys(item.then.properties).length > 0;
-          const thenVisible = thenHasProperties
-            ? Object.keys(item.then!.properties!)
-            : thenRequired;
-
-          const rule: ConditionalRule = {
-            conditions,
-            then: {
-              requiredFields: thenRequired,
-              visibleFields: thenVisible,
-            },
-          };
-
-          if (item.else) {
-            const elseRequired = item.else.required || [];
-            const elseHasProperties =
-              item.else.properties &&
-              Object.keys(item.else.properties).length > 0;
-            const elseVisible = elseHasProperties
-              ? Object.keys(item.else.properties!)
-              : elseRequired;
-
-            rule.else = {
-              requiredFields: elseRequired,
-              visibleFields: elseVisible,
-            };
-          }
-
-          rules.push(rule);
-        }
-      }
-    }
-  }
-
-  // Also check top-level if/then/else
-  if (schema.if) {
-    const conditions = extractConditionsFromIf(schema.if);
-
-    if (conditions.length > 0) {
-      const thenRequired = schema.then?.required || [];
-      const thenHasProperties =
-        schema.then?.properties &&
-        Object.keys(schema.then.properties).length > 0;
-      const thenVisible = thenHasProperties
-        ? Object.keys(schema.then!.properties!)
-        : thenRequired;
-
-      const rule: ConditionalRule = {
-        conditions,
-        then: {
-          requiredFields: thenRequired,
-          visibleFields: thenVisible,
-        },
-      };
-
-      if (schema.else) {
-        const elseRequired = schema.else.required || [];
-        const elseHasProperties =
-          schema.else.properties &&
-          Object.keys(schema.else.properties).length > 0;
-        const elseVisible = elseHasProperties
-          ? Object.keys(schema.else.properties!)
-          : elseRequired;
-
-        rule.else = {
-          requiredFields: elseRequired,
-          visibleFields: elseVisible,
-        };
-      }
-
-      rules.push(rule);
-    }
-  }
-
-  // Extract conditionals from nested properties
-  if (schema.properties) {
-    for (const [name, property] of Object.entries(schema.properties)) {
-      rules.push(...extractPropertyConditionalRules(property, name));
-    }
-  }
-
-  return rules;
+  return schema ? collectRules(schema) : [];
 }
 
 /**
@@ -574,8 +432,8 @@ function getValueAtPath(obj: Record<string, unknown>, path: string): unknown {
 }
 
 /**
- * Evaluates conditional rules against current form values
- * Returns which fields should be required and visible
+ * Evaluates conditional rules against current form values.
+ * Returns which fields should be required and visible.
  */
 export function evaluateConditionalRules(
   rules: ConditionalRule[],
@@ -586,56 +444,102 @@ export function evaluateConditionalRules(
   const conditionalFields = new Set<string>();
 
   for (const rule of rules) {
-    // Track all fields that are controlled by conditions
-    for (const field of rule.then.visibleFields) {
-      conditionalFields.add(field);
-    }
-    if (rule.else) {
-      for (const field of rule.else.visibleFields) {
-        conditionalFields.add(field);
-      }
-    }
+    // Every field touched by then/else is "controlled" by this rule.
+    rule.then.visibleFields.forEach((f) => conditionalFields.add(f));
+    rule.else?.visibleFields.forEach((f) => conditionalFields.add(f));
 
-    // Check if all conditions are met (supports nested paths)
     const conditionsMet = rule.conditions.every(
       (cond) => getValueAtPath(values, cond.field) === cond.value,
     );
 
-    if (conditionsMet) {
-      // Apply "then" effects
-      for (const field of rule.then.requiredFields) {
-        requiredFields.add(field);
-      }
-      for (const field of rule.then.visibleFields) {
-        visibleFields.add(field);
-      }
-    } else if (rule.else) {
-      // Apply "else" effects
-      for (const field of rule.else.requiredFields) {
-        requiredFields.add(field);
-      }
-      for (const field of rule.else.visibleFields) {
-        visibleFields.add(field);
-      }
-    }
+    const branch = conditionsMet ? rule.then : rule.else;
+    branch?.requiredFields.forEach((f) => requiredFields.add(f));
+    branch?.visibleFields.forEach((f) => visibleFields.add(f));
   }
 
   return { requiredFields, visibleFields, conditionalFields };
 }
 
 /**
- * Extracts both defaults and field metadata from a schema
- * @param schema - JSON Schema Draft 2020-12 object
- * @returns Object with defaults and fieldMetadata
+ * Extracts defaults, field metadata, and conditional rules from a schema.
+ * If `context` is provided, the result excludes fields that opted out of
+ * that context via `x-ui.render_blacklist` (const/hidden fields always pass through).
  */
 export function extractSchemaInfo(
   schema: JSONSchema2020 | undefined,
+  context?: ExtensionContext,
 ): ExtensionSchemaResult {
-  return {
+  const result: ExtensionSchemaResult = {
     defaults: extractDefaults(schema),
     fieldMetadata: extractFieldMetadata(schema),
     conditionalRules: extractConditionalRules(schema),
   };
+
+  if (!context) return result;
+
+  const fieldMetadata = filterFieldsByContext(result.fieldMetadata, context);
+  const surviving = new Set(fieldMetadata.map((f) => f.name));
+
+  return {
+    fieldMetadata,
+    defaults: Object.fromEntries(
+      Object.entries(result.defaults).filter(([key]) => surviving.has(key)),
+    ),
+    conditionalRules: filterConditionalRulesByContext(
+      result.conditionalRules,
+      surviving,
+    ),
+  };
+}
+
+/** Recursively drop fields that opted out of `context`; const/hidden fields always pass. */
+function filterFieldsByContext(
+  fields: ExtensionFieldMetadata[],
+  context: ExtensionContext,
+): ExtensionFieldMetadata[] {
+  return fields
+    .filter(
+      (field) =>
+        field.isConst ||
+        field.type === "hidden" ||
+        !field.render_blacklist?.includes(context),
+    )
+    .map((field) =>
+      field.nestedFields
+        ? {
+            ...field,
+            nestedFields: filterFieldsByContext(field.nestedFields, context),
+          }
+        : field,
+    );
+}
+
+/** Drop rules whose trigger field was filtered out; prune then/else targets to surviving fields. */
+function filterConditionalRulesByContext(
+  rules: ConditionalRule[],
+  surviving: Set<string>,
+): ConditionalRule[] {
+  const isAlive = (path: string) => surviving.has(path.split(".")[0]);
+
+  const pruneEffects = (
+    effects: ConditionalRule["then"],
+  ): ConditionalRule["then"] => ({
+    requiredFields: effects.requiredFields.filter(isAlive),
+    visibleFields: effects.visibleFields.filter(isAlive),
+  });
+
+  const hasEffects = (effects: ConditionalRule["then"]) =>
+    effects.requiredFields.length > 0 || effects.visibleFields.length > 0;
+
+  return rules.flatMap((rule) => {
+    if (!rule.conditions.every((c) => isAlive(c.field))) return [];
+    const then = pruneEffects(rule.then);
+    const elseEffects = rule.else ? pruneEffects(rule.else) : undefined;
+    if (!hasEffects(then) && !(elseEffects && hasEffects(elseEffects))) {
+      return [];
+    }
+    return [{ conditions: rule.conditions, then, else: elseEffects }];
+  });
 }
 
 /**
