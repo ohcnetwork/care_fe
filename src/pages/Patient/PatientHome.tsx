@@ -116,7 +116,7 @@ export default function PatientHome() {
         <div className="space-y-6 md:max-w-5xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
-              <div className="">
+              <div>
                 <PatientInfoCard
                   tags={[
                     ...patientData.instance_tags,
@@ -137,7 +137,7 @@ export default function PatientHome() {
                     });
                   }}
                 >
-                  <div className="flex gap-2">
+                  <div className="flex flex-row flex-wrap gap-2 items-end justify-end">
                     {canWritePatient && (
                       <Button variant="ghost" className="hidden lg:flex">
                         <Link
