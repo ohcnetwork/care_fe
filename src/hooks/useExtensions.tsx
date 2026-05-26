@@ -253,7 +253,7 @@ export function getCombinedExtensionProps(
 interface UseExtensionsOptions<TForm extends FieldValues> {
   schema: JSONSchema2020 | undefined;
   form: UseFormReturn<TForm>;
-  /** Optional host slot. If set, fields without it in `x-ui.contexts` are filtered out. */
+  /** Optional host slot. If set, fields blacklisted for it via `x-ui.render_blacklist` are filtered out. */
   context?: ExtensionContext;
   existingData?: Record<string, unknown>;
   basePath?: string;
