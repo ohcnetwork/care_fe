@@ -68,16 +68,24 @@ function NavLink({
   activeClass?: string;
   exactActiveClass?: string;
   className?: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
   children: ReactNode;
 }) {
   const resolvedExact = exactActiveClass ?? activeClass;
+  const { toggleSidebar, isMobile } = useSidebar();
+
+  const handleSelectedOnClick = (e: React.MouseEvent) => {
+    if (isSelected && isMobile) {
+      toggleSidebar();
+    }
+    onClick?.(e);
+  };
 
   if (isSelected) {
     return (
       <div
         className={cn(className, resolvedExact, "cursor-pointer")}
-        onClick={onClick}
+        onClick={handleSelectedOnClick}
       >
         {children}
       </div>
