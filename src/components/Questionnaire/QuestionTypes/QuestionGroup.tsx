@@ -11,6 +11,7 @@ import type {
 } from "@/types/questionnaire/form";
 import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
+import { QuestionDescription } from "@/components/Questionnaire/QuestionDescription";
 import { QuestionInput } from "./QuestionInput";
 
 interface QuestionGroupProps {
@@ -176,9 +177,7 @@ export const QuestionGroup = memo(function QuestionGroup({
             groupLabel
             isSubQuestion={isSubQuestion}
           />
-          {question.description && (
-            <p className="text-sm text-gray-500">{question.description}</p>
-          )}
+          <QuestionDescription question={question} />
         </div>
       )}
       <div

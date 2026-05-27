@@ -56,7 +56,7 @@ export function KeyboardShortcutBadge({
   VariantProps<typeof keyboardShortcutBadgeVariants>) {
   const { isOptionPressed } = useKeyboardShortcuts([], {}, {});
 
-  if (!shortcut || (!alwaysShow && !isOptionPressed)) return null;
+  const shouldShowVisually = shortcut && (alwaysShow || isOptionPressed);
 
   return (
     <div
@@ -64,6 +64,7 @@ export function KeyboardShortcutBadge({
       className={cn(
         keyboardShortcutBadgeVariants({ variant, position }),
         className,
+        !shouldShowVisually && "hidden",
       )}
     >
       {shortcut}

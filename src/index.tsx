@@ -31,6 +31,17 @@ if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });
 }
 
+// Handle stale chunk errors from lazy imports after deployments.
+// Only reload once per session to prevent infinite loops on network failures.
+window.addEventListener("vite:preloadError", (event) => {
+  const reloaded = sessionStorage.getItem("vite-chunk-reload");
+  if (!reloaded) {
+    sessionStorage.setItem("vite-chunk-reload", "1");
+    event.preventDefault();
+    window.location.reload();
+  }
+});
+
 if (import.meta.env.PROD) {
   Sentry.init({
     environment: import.meta.env.MODE,
@@ -47,6 +58,7 @@ initI18n()
         <App />
       </React.StrictMode>,
     );
+    sessionStorage.removeItem("vite-chunk-reload");
   })
   .catch((error) => {
     console.error("Failed to initialize i18n:", error);
@@ -57,4 +69,5 @@ initI18n()
         <App />
       </React.StrictMode>,
     );
+    sessionStorage.removeItem("vite-chunk-reload");
   });

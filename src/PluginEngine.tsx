@@ -160,8 +160,7 @@ export default function PluginEngine({
         }
       >
         <CareAppsContext.Provider value={pluginsQuery}>
-          <Suspense fallback={<Loading />}></Suspense>
-          {children}
+          <Suspense fallback={<Loading />}>{children}</Suspense>
         </CareAppsContext.Provider>
       </ErrorBoundary>
     </Suspense>
