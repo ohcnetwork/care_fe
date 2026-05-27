@@ -68,6 +68,8 @@ export function LocationSwitcher() {
             size="icon"
             onClick={() => navigate(fallbackUrl)}
             className="w-8 h-8"
+            aria-label={t("home")}
+            title={t("home")}
           >
             <CareIcon icon="l-home-alt" />
           </Button>
@@ -86,6 +88,7 @@ export function LocationSwitcher() {
               state === "collapsed" ? "justify-center" : "py-6",
             )}
             title={location?.name ?? t("select_location")}
+            aria-label={location?.name ?? t("select_location")}
             onClick={() => setOpenDialog(true)}
           >
             <div className="flex min-w-0 items-center gap-2">
@@ -111,7 +114,7 @@ export function LocationSwitcher() {
                 </TooltipComponent>
               </div>
             </div>
-            {state == "expanded" && <CareIcon icon="l-sort" />}
+            {state === "expanded" && <CareIcon icon="l-sort" />}
           </Button>
           <Separator className="mt-4" />
         </div>
