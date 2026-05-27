@@ -106,16 +106,7 @@ export function LocationTree({
   showTimeline = false,
   associationStatus,
 }: LocationPathProps) {
-  const isCompleted = !!endTime;
-  const status = isCompleted
-    ? "completed"
-    : associationStatus === "active"
-      ? "active"
-      : associationStatus === "reserved"
-        ? "reserved"
-        : associationStatus === "planned"
-          ? "planned"
-          : "default";
+  const isCompleted = associationStatus === "completed";
 
   const getIcon = (status: string) => {
     switch (status) {
@@ -127,8 +118,6 @@ export function LocationTree({
         return <MapPin className="size-4 text-green-600" />;
       case "completed":
         return <Check className="size-4 text-gray-600" />;
-      default:
-        return <MapPin className="size-4 text-gray-600" />;
     }
   };
 
@@ -144,7 +133,7 @@ export function LocationTree({
           <div
             className={`size-6 rounded-full ${isCompleted ? "bg-gray-100" : isLatest ? "bg-green-100" : "bg-gray-100"} flex items-center justify-center z-10`}
           >
-            {getIcon(status)}
+            {getIcon(associationStatus || "active")}
           </div>
           {!isLatest && <div className="flex-1 w-px bg-gray-200" />}
         </div>

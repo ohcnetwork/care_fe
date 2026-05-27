@@ -57,22 +57,24 @@ export function LocationActionButtons({
     });
   }
 
-  if ((status === "planned" || status === "reserved") && onAddBed) {
-    buttons.push({
-      label: t("add_another_bed"),
-      onClick: onAddBed,
-      variant: "outline",
-      className: "border-gray-400 shadow-sm",
-    });
-  }
+  if (status === "planned" || status === "reserved") {
+    if (onAddBed) {
+      buttons.push({
+        label: t("add_another_bed"),
+        onClick: onAddBed,
+        variant: "outline",
+        className: "border-gray-400 shadow-sm",
+      });
+    }
 
-  if ((status === "planned" || status === "reserved") && onAssignNow) {
-    buttons.push({
-      label: t("assign_bed_now"),
-      onClick: onAssignNow,
-      variant: "primary",
-      className: "shadow-sm",
-    });
+    if (onAssignNow) {
+      buttons.push({
+        label: t("assign_bed_now"),
+        onClick: onAssignNow,
+        variant: "primary",
+        className: "shadow-sm",
+      });
+    }
   }
 
   return (
