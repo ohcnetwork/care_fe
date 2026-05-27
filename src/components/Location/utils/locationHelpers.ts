@@ -37,7 +37,7 @@ export interface CurrentLocations {
 }
 
 /**
- * Gets the current, active (non-current), reserved, and planned locations from encounter history
+ * Gets the current, reserved, and planned locations from encounter history
  */
 export function getCurrentLocations(
   encounter: EncounterRead,
