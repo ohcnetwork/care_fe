@@ -81,27 +81,23 @@ export function LocationSwitcher() {
         )}
 
         <div className={cn("w-full", state === "expanded" ? "px-2" : "px-0")}>
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full flex items-center justify-between gap-3 rounded-md bg-white border border-gray-200 px-2 overflow-hidden",
-              state === "collapsed" ? "justify-center" : "py-6",
-            )}
-            title={location?.name ?? t("select_location")}
-            aria-label={location?.name ?? t("select_location")}
-            onClick={() => setOpenDialog(true)}
-          >
-            <div className="flex min-w-0 items-center gap-2">
-              <MapPinIcon className="size-5 text-green-600" />
-              <div
-                className={cn(
-                  "min-w-0 flex-1",
-                  state === "collapsed" && "hidden",
-                )}
-              >
-                <TooltipComponent
-                  content={location?.name}
-                  className="hidden lg:block max-w-xs"
+          <TooltipComponent content={location?.name ?? t("select_location")}>
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full flex items-center justify-between gap-3 rounded-md bg-white border border-gray-200 px-2 overflow-hidden",
+                state === "collapsed" ? "justify-center" : "py-6",
+              )}
+              aria-label={location?.name ?? t("select_location")}
+              onClick={() => setOpenDialog(true)}
+            >
+              <div className="flex min-w-0 items-center gap-2">
+                <MapPinIcon className="size-5 text-green-600" />
+                <div
+                  className={cn(
+                    "min-w-0 flex-1",
+                    state === "collapsed" && "hidden",
+                  )}
                 >
                   <div className="flex min-w-0 w-full flex-col items-start overflow-hidden">
                     <span className="text-xs text-gray-500">
@@ -111,11 +107,11 @@ export function LocationSwitcher() {
                       {location?.name}
                     </span>
                   </div>
-                </TooltipComponent>
+                </div>
               </div>
-            </div>
-            {state === "expanded" && <CareIcon icon="l-sort" />}
-          </Button>
+              {state === "expanded" && <CareIcon icon="l-sort" />}
+            </Button>
+          </TooltipComponent>
           <Separator className="mt-4" />
         </div>
       </div>

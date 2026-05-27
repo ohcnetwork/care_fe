@@ -80,24 +80,27 @@ export function ServiceSwitcher() {
         )}
 
         <div className={cn("w-full", state === "expanded" ? "px-2" : "px-0")}>
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full flex items-center justify-between gap-3 rounded-md bg-white border border-gray-200 px-2 overflow-hidden",
-              state === "expanded" && "py-6",
-            )}
-            title={selectedService?.name ?? t("select_healthcare_service")}
-            aria-label={selectedService?.name ?? t("select_healthcare_service")}
-            onClick={() => setOpenDialog(true)}
+          <TooltipComponent
+            content={selectedService?.name ?? t("select_healthcare_service")}
           >
-            <div className="flex min-w-0 items-center gap-2">
-              <HeartPulse className="size-5 text-green-600" />
-              <div
-                className={cn(
-                  state === "collapsed" ? "hidden" : "min-w-0 flex-1",
-                )}
-              >
-                <TooltipComponent content={selectedService?.name}>
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full flex items-center justify-between gap-3 rounded-md bg-white border border-gray-200 px-2 overflow-hidden",
+                state === "expanded" && "py-6",
+              )}
+              aria-label={
+                selectedService?.name ?? t("select_healthcare_service")
+              }
+              onClick={() => setOpenDialog(true)}
+            >
+              <div className="flex min-w-0 items-center gap-2">
+                <HeartPulse className="size-5 text-green-600" />
+                <div
+                  className={cn(
+                    state === "collapsed" ? "hidden" : "min-w-0 flex-1",
+                  )}
+                >
                   <div className="flex min-w-0 w-full flex-col items-start overflow-hidden">
                     <span className="text-xs text-gray-500">
                       {t("current_service")}
@@ -106,11 +109,11 @@ export function ServiceSwitcher() {
                       {selectedService?.name}
                     </span>
                   </div>
-                </TooltipComponent>
+                </div>
               </div>
-            </div>
-            {state === "expanded" && <CareIcon icon="l-sort" />}
-          </Button>
+              {state === "expanded" && <CareIcon icon="l-sort" />}
+            </Button>
+          </TooltipComponent>
           <Separator className="mt-4" />
         </div>
       </div>
