@@ -110,7 +110,10 @@ export default function AppointmentPrint(props: Props) {
   const patient = appointment?.patient;
   const token = appointment?.token;
 
-  const patientExtensionData = usePatientExtensionData(patient?.extensions);
+  const patientExtensionData = usePatientExtensionData(
+    patient?.extensions,
+    "appointment_print",
+  );
 
   if (isLoading || !appointment || !facility) {
     return (

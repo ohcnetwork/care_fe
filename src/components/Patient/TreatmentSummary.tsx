@@ -98,7 +98,10 @@ export default function TreatmentSummary({
     encounter?.permissions ?? [],
   );
 
-  const patientExtensionData = usePatientExtensionData(patient?.extensions);
+  const patientExtensionData = usePatientExtensionData(
+    patient?.extensions,
+    "treatment_summary",
+  );
 
   const canAccess = canReadEncounter || canViewClinicalData;
 

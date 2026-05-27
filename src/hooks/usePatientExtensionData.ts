@@ -1,12 +1,15 @@
 import { useMemo } from "react";
 
-import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import {
   ExtensionEntityType,
   NamespacedExtensionData,
   getExtensionFieldsWithName,
   getExtensionValue,
 } from "@/hooks/useExtensions";
+import useExtensionSchemas, {
+  ExtensionSchemaType,
+} from "@/hooks/useExtensionSchemas";
+import { ExtensionContext } from "@/Utils/schema/types";
 
 interface PatientExtensionField {
   name: string;
@@ -15,14 +18,16 @@ interface PatientExtensionField {
 
 export default function usePatientExtensionData(
   extensions: NamespacedExtensionData | undefined,
+  context: ExtensionContext,
+  schemaType: ExtensionSchemaType = "retrieve",
 ): PatientExtensionField[] {
   const { getExtensions } = useExtensionSchemas();
 
-  const allExtensions = getExtensions(ExtensionEntityType.patient, "retrieve");
+  const allExtensions = getExtensions(ExtensionEntityType.patient, schemaType);
 
   const extensionFields = useMemo(
-    () => getExtensionFieldsWithName(allExtensions),
-    [allExtensions],
+    () => getExtensionFieldsWithName(allExtensions, context),
+    [allExtensions, context],
   );
 
   return useMemo(

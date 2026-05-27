@@ -61,6 +61,7 @@ const TokenCard = ({
 
   const patientExtensionData = usePatientExtensionData(
     appointment?.patient?.extensions,
+    "appointment_print",
   );
 
   return (
