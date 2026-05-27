@@ -595,7 +595,7 @@ export function NoteManager({
 
       {/* Main Content */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <div className="flex flex-col h-full relative">
+        <div className="flex flex-col h-full relative max-lg:pb-14">
           {/* Header */}
           <div className="p-3 sm:p-4 border-b border-gray-200 bg-white z-1">
             {selectedThread ? (
@@ -649,7 +649,7 @@ export function NoteManager({
                                 ? recentMessageRef
                                 : undefined
                             }
-                            className={cn(i === 0 && "mb-14")}
+                            className={cn(i === 0 && "mb-2")}
                           />
                         ))}
                         {isFetchingNextPage && (
@@ -691,7 +691,7 @@ export function NoteManager({
 
                   {/* Message Input */}
                   {canWrite && (
-                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky bottom-0 max-lg:bottom-14">
+                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white relative z-10 shrink-0">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
