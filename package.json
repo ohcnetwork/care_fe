@@ -113,7 +113,7 @@
     "input-otp": "^1.4.2",
     "jotai": "^2.12.3",
     "jotai-family": "^1.0.1",
-    "jspdf": "^3.0.2",
+    "jspdf": "^4.0.0",
     "libphonenumber-js": "^1.11.18",
     "lucide-react": "^0.548.0",
     "markdown-it": "^14.1.0",
