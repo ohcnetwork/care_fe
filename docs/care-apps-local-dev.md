@@ -1,7 +1,6 @@
 ## Plugin Discovery & Setup
 
-- Build-time plugins configured via REACT_ENABLED_APPS env var, parsed by scripts/setup-care-apps.ts
-- setup-care-apps.ts generates src/pluginMap.ts with static imports of app manifests
+- Build-time plugins configured via REACT_ENABLED_APPS env var
 - format: org/repo or org/repo@host/path/to/remoteEntry.js
 
 ## Build-time vs. Runtime
@@ -39,7 +38,7 @@
 - Tailwind content: Already includes ./apps/\*_/_ so CSS should work
 - Risk: Re-export cycles if apps/ import from src/ (already happens - care_hello_fe imports Page component)
 - Federation globals: **federation** methods already in globals.d.ts and usable in dev mode
-- Implementation points: scripts/setup-care-apps.ts, vite.config.mts, care.config.ts (optional), src/PluginEngine.tsx (routing logic)
+- Implementation points: vite.config.mts, care.config.ts (optional), src/PluginEngine.tsx (routing logic)
 
 ## Cloning Components Into a Plugin (`scripts/clone-component.ts`)
 
