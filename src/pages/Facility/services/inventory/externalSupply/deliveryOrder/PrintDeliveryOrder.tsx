@@ -96,7 +96,7 @@ const DeliveryOrderContent = ({
 
               return {
                 product: productName || "-",
-                quantity: round(delivery.supplied_item_quantity) || "-",
+                quantity: round(delivery.supplied_item_quantity),
                 status: t(delivery.status),
                 condition: t(delivery.supplied_item_condition || "normal"),
                 lot_batch_number: batchNumber || "-",
