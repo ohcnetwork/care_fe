@@ -71,21 +71,25 @@ export default function useUpdateDispenseOrderStatus({
         },
       ];
 
-      // Final corrections (abandoned / entered_in_error) can apply to completed
-      // dispenses as well
+      // Final corrections (abandoned / entered_in_error) cascade to each
+      // associated dispense only when the order isn't already completed.
+      // If the order is completed, backend handles the cancellation of
+      // already-completed dispenses.
       const isFinalCorrection =
         newStatus === DispenseOrderStatus.abandoned ||
         newStatus === DispenseOrderStatus.entered_in_error;
 
+      const orderAlreadyCompleted =
+        dispenseOrder.status === DispenseOrderStatus.completed;
+
       const inFlight = dispenses.filter((dispense) => {
-        // Skip for cancellations, backend will handle cancelling all associated
-        // dispenses
-        if (isFinalCorrection) {
+        // For final corrections on already-completed orders, backend will
+        // handle cancelling the associated dispenses — skip client-side.
+        if (isFinalCorrection && orderAlreadyCompleted) {
           return false;
         }
 
-        // Don't move dispenses that are already cancelled or in error, even for
-        // final corrections.
+        // Don't move dispenses that are already cancelled / in error / declined.
         if (
           dispense.status === MedicationDispenseStatus.cancelled ||
           dispense.status === MedicationDispenseStatus.entered_in_error ||

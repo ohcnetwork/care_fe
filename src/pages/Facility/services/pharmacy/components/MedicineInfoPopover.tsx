@@ -67,6 +67,7 @@ export const MedicineInfoPopover = ({
               <Button
                 variant="ghost"
                 size="icon"
+                type="button"
                 className="size-8 border border-gray-300 p-4"
                 onClick={() => setOpenPopover(false)}
               >
@@ -126,6 +127,7 @@ export const MedicineInfoPopover = ({
                 MedicationRequestDispenseStatus.partial && (
                 <Button
                   variant="outline"
+                  type="button"
                   size="sm"
                   className="mr-auto font-semibold"
                   onClick={() => {

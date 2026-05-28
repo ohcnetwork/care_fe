@@ -56,6 +56,8 @@ export default function useBillMedications({
       queryClient.invalidateQueries({
         queryKey: ["accounts", patientId],
       });
+      queryClient.invalidateQueries({ queryKey: ["dispenseOrder"] });
+      queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
     },
   });
 
@@ -92,11 +94,25 @@ export default function useBillMedications({
     mutationFn: async ({
       items,
       prescriptionsToComplete,
+      priorRequests,
     }: {
       items: BillMedicationLineItemSchemaType[];
       prescriptionsToComplete?: string[];
+      /**
+       * Extra batch requests to prepend before the dispense create requests.
+       * Used by the edit-dispense-order flow to abandon the old order in the
+       * same batch as creating the replacement.
+       */
+      priorRequests?: Array<{
+        url: string;
+        method: HttpMethod;
+        reference_id: string;
+        body: unknown;
+      }>;
     }) => {
       const requests = [
+        ...(priorRequests ?? []),
+
         ...getDispenseCreateRequests({
           items,
           locationId,
