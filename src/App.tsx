@@ -17,6 +17,7 @@ import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
 
 import { ShortcutProvider } from "@/context/ShortcutContext";
+import { OverrideProvider } from "@/lib/override";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 const ScrollToTop = () => {
@@ -40,25 +41,27 @@ const App = () => {
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
             <ShortcutProvider>
-              <AuthUserProvider
-                unauthorized={<Routers.PublicRouter />}
-                otpAuthorized={<Routers.PatientRouter />}
-              >
-                <PluginEngine>
-                  <Routers.AppRouter />
-                </PluginEngine>
-              </AuthUserProvider>
-              <Toaster
-                position="top-center"
-                theme="light"
-                richColors
-                expand
-                // For `richColors` to work, pass at-least an empty object.
-                // Refer: https://github.com/shadcn-ui/ui/issues/2234.
-                toastOptions={{}}
-                closeButton
-              />
-              <AppUpdateNotifier />
+              <PluginEngine>
+                <OverrideProvider>
+                  <AuthUserProvider
+                    unauthorized={<Routers.PublicRouter />}
+                    otpAuthorized={<Routers.PatientRouter />}
+                  >
+                    <Routers.AppRouter />
+                  </AuthUserProvider>
+                </OverrideProvider>
+                <Toaster
+                  position="top-center"
+                  theme="light"
+                  richColors
+                  expand
+                  // For `richColors` to work, pass at-least an empty object.
+                  // Refer: https://github.com/shadcn-ui/ui/issues/2234.
+                  toastOptions={{}}
+                  closeButton
+                />
+                <AppUpdateNotifier />
+              </PluginEngine>
             </ShortcutProvider>
           </PubSubProvider>
         </Suspense>

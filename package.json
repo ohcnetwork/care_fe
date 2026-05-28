@@ -27,15 +27,14 @@
   "author": "Open Healthcare Network Contributors",
   "license": "MIT",
   "scripts": {
-    "dev": "test -f src/pluginMap.ts || npm run setup && npm run build:meta && npm run supported-browsers && vite",
+    "dev": "npm run build:meta && npm run supported-browsers && vite",
     "local": "npm run supported-browsers && vite --mode docker",
     "preview": "cross-env NODE_ENV=production vite preview",
     "preview:scan": "npm run preview & npx react-scan localhost:4000",
     "build:meta": "node ./scripts/generate-build-version.js",
     "build:react": "cross-env NODE_ENV=production vite build",
     "supported-browsers": "node ./scripts/generate-supported-browsers.mjs",
-    "build": "npm run setup && npm run build:meta && npm run supported-browsers && npm run build:react",
-    "setup": "tsx scripts/setup-care-apps.ts",
+    "build": "npm run build:meta && npm run supported-browsers && npm run build:react",
     "postinstall": "tsx scripts/install-platform-deps.ts && tsx scripts/generate-headers.ts",
     "test": "snyk test",
     "playwright:test": "playwright test",
@@ -52,7 +51,8 @@
     "unimported": "unimported",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./tests --write",
-    "sort-locales": "node ./scripts/sort-locales.js"
+    "sort-locales": "node ./scripts/sort-locales.js",
+    "clone-component": "tsx scripts/clone-component.ts"
   },
   "dependencies": {
     "@dmitryrechkin/json-schema-to-zod": "^1.0.1",
