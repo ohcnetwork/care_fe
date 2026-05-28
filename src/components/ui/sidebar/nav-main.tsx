@@ -75,7 +75,7 @@ function NavLink({
   const { toggleSidebar, isMobile } = useSidebar();
 
   const handleSelectedOnClick = (e: React.MouseEvent) => {
-    if (isSelected && isMobile) {
+    if (isMobile) {
       toggleSidebar();
     }
     onClick?.(e);
