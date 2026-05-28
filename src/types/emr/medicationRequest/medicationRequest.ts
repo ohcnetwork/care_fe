@@ -1,7 +1,7 @@
 import { Code } from "@/types/base/code/code";
 import {
   PrescriptionCreate,
-  PrescriptionRead,
+  PrescriptionList,
 } from "@/types/emr/prescription/prescription";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
@@ -289,7 +289,7 @@ export interface MedicationRequestRead {
   inventory_items_internal?: InventoryRead[];
   dispense_status?: MedicationRequestDispenseStatus;
   requester?: UserReadMinimal;
-  prescription?: PrescriptionRead;
+  prescription?: PrescriptionList;
 }
 
 export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<

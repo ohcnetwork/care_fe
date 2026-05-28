@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  PrescriptionList,
   PrescriptionStatus,
-  PrescritionList,
 } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
@@ -39,7 +39,7 @@ export default function UnbilledPrescriptionsCard({
         limit: 100,
       },
     }),
-    select: ({ results }: PaginatedResponse<PrescritionList>) =>
+    select: ({ results }: PaginatedResponse<PrescriptionList>) =>
       results
         .filter((prescription) => !included.includes(prescription.id))
         .map((prescription) => prescription.id),

@@ -23,7 +23,7 @@ export interface PrescriptionCreate extends Omit<Prescription, "id"> {
   alternate_identifier: string;
 }
 
-export interface PrescritionList extends Prescription {
+export interface PrescriptionList extends Prescription {
   prescribed_by: UserReadMinimal;
   encounter: EncounterRead;
   created_date: string;
@@ -71,6 +71,6 @@ export function groupMedicationsByPrescription(
   );
 }
 
-export interface PrescriptionSummary extends PrescritionList {
+export interface PrescriptionSummary extends PrescriptionList {
   tags: TagConfig[];
 }

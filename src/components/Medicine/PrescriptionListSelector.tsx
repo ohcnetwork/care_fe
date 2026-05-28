@@ -13,7 +13,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { PrescritionList } from "@/types/emr/prescription/prescription";
+import { PrescriptionList } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import query from "@/Utils/request/query";
@@ -44,7 +44,7 @@ interface PrescriptionListSelectorProps {
   encounterId: string;
   facilityId?: string;
   selectedPrescriptionId?: string;
-  onSelectPrescription: (prescription: PrescritionList | undefined) => void;
+  onSelectPrescription: (prescription: PrescriptionList | undefined) => void;
 }
 
 export default function PrescriptionListSelector({
@@ -66,7 +66,7 @@ export default function PrescriptionListSelector({
   });
 
   const handleSelectPrescription = React.useCallback(
-    (prescription: PrescritionList | undefined) => {
+    (prescription: PrescriptionList | undefined) => {
       onSelectPrescription(prescription);
       setOpenDrawer(false);
     },
@@ -177,9 +177,9 @@ function PrescriptionList({
   selectedPrescriptionId,
   onSelectPrescription,
 }: {
-  prescriptions: PrescritionList[];
+  prescriptions: PrescriptionList[];
   selectedPrescriptionId: string | undefined;
-  onSelectPrescription: (prescription: PrescritionList | undefined) => void;
+  onSelectPrescription: (prescription: PrescriptionList | undefined) => void;
 }) {
   const { t } = useTranslation();
 

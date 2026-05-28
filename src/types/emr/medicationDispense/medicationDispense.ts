@@ -1,6 +1,9 @@
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import {
+  EncounterListRead,
+  EncounterRead,
+} from "@/types/emr/encounter/encounter";
 import {
   MedicationCategory,
   MedicationRequestDosageInstruction,
@@ -207,6 +210,10 @@ export interface MedicationDispenseRead extends MedicationDispenseBase {
   quantity: string;
   order: DispenseOrderRead;
   authorizing_request: MedicationRequestRead | null;
+}
+
+export interface MedicationDispenseRetrieve extends MedicationDispenseRead {
+  encounter: EncounterListRead;
 }
 
 export interface MedicationDispenseSummary {
