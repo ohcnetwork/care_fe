@@ -61,6 +61,7 @@ function NavLink({
   exactActiveClass,
   className,
   onClick,
+  selectedOnClick,
   children,
 }: {
   href: string;
@@ -68,25 +69,26 @@ function NavLink({
   activeClass?: string;
   exactActiveClass?: string;
   className?: string;
-  onClick?: (e: React.MouseEvent) => void;
+  onClick?: () => void;
+  selectedOnClick?: () => void;
   children: ReactNode;
 }) {
   const resolvedExact = exactActiveClass ?? activeClass;
-  const { toggleSidebar, isMobile } = useSidebar();
-
-  const handleSelectedOnClick = (e: React.MouseEvent) => {
-    if (isMobile) {
-      toggleSidebar();
-    }
-    onClick?.(e);
-  };
 
   if (isSelected) {
+    if (selectedOnClick) {
+      return (
+        <div
+          className={cn(className, resolvedExact, "cursor-pointer")}
+          onClick={selectedOnClick}
+        >
+          {children}
+        </div>
+      );
+    }
+
     return (
-      <div
-        className={cn(className, resolvedExact, "cursor-pointer")}
-        onClick={handleSelectedOnClick}
-      >
+      <div className={cn(className, resolvedExact, "cursor-default")}>
         {children}
       </div>
     );
@@ -106,7 +108,7 @@ function NavLink({
 }
 
 export function NavMain({ links }: { links: NavigationLink[] }) {
-  const { state } = useSidebar();
+  const { state, toggleSidebar, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
   const path = usePath();
 
@@ -157,6 +159,11 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       href={link.url}
                       isSelected={isSelected(link.url)}
                       activeClass="bg-white text-green-700 shadow-sm"
+                      selectedOnClick={() => {
+                        if (isMobile) {
+                          toggleSidebar();
+                        }
+                      }}
                     >
                       {link.icon ? (
                         link.icon
