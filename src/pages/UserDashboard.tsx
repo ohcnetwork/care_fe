@@ -184,7 +184,7 @@ export default function UserDashboard() {
       {availableTabs.length > 0 && (
         <div className="w-full">
           <div
-            className="flex border-b border-gray-200"
+            className="flex border-b border-gray-200 overflow-auto"
             role="tablist"
             aria-label="Dashboard Sections"
           >
