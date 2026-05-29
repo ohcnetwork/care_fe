@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { useToken } from "@/hooks/useToken";
-import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
+import { AssignToServicePointDialogOrDrawer } from "@/pages/Facility/queues/AssignToServicePointDialogOrDrawer";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import { FacilityRead } from "@/types/facility/facility";
@@ -93,7 +93,7 @@ export default function TokenCardWithButton({
       )}
 
       {!isOnlyOneSubQueue && showMarkInServiceButton && (
-        <AssignToServicePointDialog
+        <AssignToServicePointDialogOrDrawer
           open={showServicepointDialog}
           onOpenChange={setShowServicepointDialog}
           token={currentToken}
