@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { formatName } from "@/Utils/utils";
 import { LocationNode } from "@/components/Location/LocationTree";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import {
@@ -42,11 +43,15 @@ function formatSpecimenRequirements(
 interface ServiceRequestDetailsProps {
   request: ServiceRequestReadSpec;
   activityDefinition: ActivityDefinitionReadSpec;
+  facilityId: string;
+  onTagsUpdate: () => void;
 }
 
 export function ServiceRequestDetails({
   request,
   activityDefinition,
+  facilityId,
+  onTagsUpdate,
 }: ServiceRequestDetailsProps) {
   const specimenRequirements = activityDefinition?.specimen_requirements ?? [];
   const observationRequirements =
@@ -64,6 +69,16 @@ export function ServiceRequestDetails({
           </div>
           <div className="font-medium px-3">
             {t("request id")}: {request.id}
+          </div>
+          <div className="px-3 mt-2 flex flex-wrap gap-1">
+            <TagAssignmentSheet
+              entityType="service_request"
+              entityId={request.id}
+              facilityId={facilityId}
+              currentTags={request.tags}
+              onUpdate={onTagsUpdate}
+              patientId={request.encounter.patient.id}
+            />
           </div>
         </div>
         <div className="flex gap-2 items-center mr-4">

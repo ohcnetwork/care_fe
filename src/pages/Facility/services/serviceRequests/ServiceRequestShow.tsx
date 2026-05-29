@@ -431,6 +431,12 @@ export default function ServiceRequestShow({
           <ServiceRequestDetails
             request={request}
             activityDefinition={activityDefinition}
+            facilityId={facilityId}
+            onTagsUpdate={() => {
+              queryClient.invalidateQueries({
+                queryKey: ["serviceRequest", facilityId, serviceRequestId],
+              });
+            }}
           />
           <div className="space-y-3 pt-5">
             <ChargeItemsSection
