@@ -1,4 +1,10 @@
-import { ChevronRight, LogOut, SquarePen, User2Icon } from "lucide-react";
+import {
+  ChevronRight,
+  LogOut,
+  Search,
+  SquarePen,
+  User2Icon,
+} from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,6 +19,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -37,6 +45,7 @@ type TabContentProps = {
   description: string;
   renderChild: (item: FacilityBareMinimum | Organization) => React.ReactNode;
   isLoading?: boolean;
+  searchComponent?: React.ReactNode;
 };
 
 export default function UserDashboard() {
@@ -77,6 +86,11 @@ export default function UserDashboard() {
 
   const [activeTab, setActiveTab] = useState<DashboardTabs | null>(
     availableTabs.length > 0 ? availableTabs[0] : null,
+  );
+  const [facilitySearch, setFacilitySearch] = useState("");
+
+  const filteredFacilities = facilities.filter((facility) =>
+    facility.name.toLowerCase().includes(facilitySearch.toLowerCase()),
   );
 
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -212,8 +226,22 @@ export default function UserDashboard() {
             {activeTab === DashboardTabs.TAB_FACILITIES && (
               <TabContent
                 tabId="facilities-panel"
-                tabItems={facilities}
+                tabItems={filteredFacilities}
                 description={t("dashboard_tab_facilities")}
+                searchComponent={
+                  facilities.length > 1 ? (
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                      <Input
+                        placeholder={t("search_button")}
+                        aria-label={t("search_button")}
+                        value={facilitySearch}
+                        onChange={(e) => setFacilitySearch(e.target.value)}
+                        className="pl-9"
+                      />
+                    </div>
+                  ) : undefined
+                }
                 renderChild={(facility) => {
                   return (
                     <Link
@@ -332,7 +360,9 @@ const TabContent = ({
   description,
   renderChild,
   isLoading,
+  searchComponent,
 }: TabContentProps) => {
+  const { t } = useTranslation();
   return (
     <section
       className="space-y-3 md:space-y-4"
@@ -341,6 +371,7 @@ const TabContent = ({
       aria-labelledby={tabId}
     >
       <p className="text-sm text-gray-800 font-normal px-1">{description}</p>
+      {searchComponent}
 
       {isLoading ? (
         <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -356,6 +387,12 @@ const TabContent = ({
             </Card>
           ))}
         </div>
+      ) : tabItems.length === 0 ? (
+        <EmptyState
+          icon={<Search className="size-5 text-primary" />}
+          title={t("no_facilities_found")}
+          className="border-solid"
+        />
       ) : (
         <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {tabItems.map((item: FacilityBareMinimum | Organization) => {
