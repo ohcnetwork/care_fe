@@ -229,11 +229,12 @@ export default function UserDashboard() {
                 tabItems={filteredFacilities}
                 description={t("dashboard_tab_facilities")}
                 searchComponent={
-                  facilities.length > 4 ? (
+                  facilities.length > 1 ? (
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                       <Input
                         placeholder={t("search_button")}
+                        aria-label={t("search_button")}
                         value={facilitySearch}
                         onChange={(e) => setFacilitySearch(e.target.value)}
                         className="pl-9"

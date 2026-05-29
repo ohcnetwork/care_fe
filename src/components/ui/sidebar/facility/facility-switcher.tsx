@@ -48,6 +48,7 @@ export function FacilitySwitcher({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white"
               tooltip={selectedFacility?.name}
+              aria-label={t("select_facility")}
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
                 <Hospital className="size-4" />
@@ -75,11 +76,12 @@ export function FacilitySwitcher({
             <DropdownMenuSeparator />
             <DropdownMenuLabel>{t("facilities")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {facilities.length > 4 && (
+            {facilities.length > 1 && (
               <div className="relative p-1.5">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-3.5 text-gray-400" />
                 <Input
                   placeholder={t("search_button")}
+                  aria-label={t("search_button")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8 h-8 sm:text-sm"
