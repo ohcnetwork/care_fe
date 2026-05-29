@@ -33,7 +33,7 @@ test.describe("Dashboard - Facility Search", () => {
       }
 
       await searchInput.fill("zzz_nonexistent_facility_xyz");
-      await expect(page.getByText(/no facilities found/i)).toBeVisible();
+      await expect(page.getByText(/no results found/i)).toBeVisible();
 
       // Ensure more than one facility link is shown after clearing search
       await searchInput.clear();

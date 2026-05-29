@@ -390,7 +390,7 @@ const TabContent = ({
       ) : tabItems.length === 0 ? (
         <EmptyState
           icon={<Search className="size-5 text-primary" />}
-          title={t("no_facilities_found")}
+          title={t("no_results_found")}
           className="border-solid"
         />
       ) : (
