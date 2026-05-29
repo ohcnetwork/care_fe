@@ -105,7 +105,7 @@ The following command should install the required dependencies on Ubuntu. If you
 sudo apt-get install nginx
 ```
 
-#### Common Setup (both macOS and Ubuntu)
+#### Configure Nginx (both macOS and Ubuntu)
 
 1. Create a new Nginx server configuration file...
    - `/opt/homebrew/etc/nginx/servers/care` (macOS)
@@ -113,7 +113,7 @@ sudo apt-get install nginx
 
    ...and save the following configuration inside it:
 
-   ```
+   ```nginx
    server {
      listen 80;
      server_name care.localhost develop.localhost dev.localhost plugs.localhost;
