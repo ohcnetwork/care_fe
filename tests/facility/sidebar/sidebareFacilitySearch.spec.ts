@@ -14,8 +14,9 @@ test.describe("Sidebar Facility Switcher - Search", () => {
     await expect(page.getByText(/view dashboard/i)).toBeVisible();
     await expect(page.getByText(/Facilities/i)).toBeVisible();
 
+    const searchInput = page.getByPlaceholder(/search/i);
+
     await test.step("Search for a facility FACILITY WITH PATIENTS", async () => {
-      const searchInput = page.getByPlaceholder(/search/i);
       const facilityName = "FACILITY WITH PATIENTS";
       const isSearchVisible = await searchInput.isVisible().catch(() => false);
       if (!isSearchVisible) {
@@ -32,7 +33,6 @@ test.describe("Sidebar Facility Switcher - Search", () => {
     });
 
     await test.step("Show empty state for non-matching search", async () => {
-      const searchInput = page.getByPlaceholder(/search/i);
       const isSearchVisible = await searchInput.isVisible().catch(() => false);
       if (!isSearchVisible) {
         test.skip();
