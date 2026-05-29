@@ -104,7 +104,6 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 - `npm install --ignore-scripts` -- installs dependencies without platform-specific binaries (takes ~16 seconds)
 - `npm run postinstall` -- installs platform-specific dependencies and generates headers (takes ~3 seconds)
-- `npm run setup` -- generates plugin map and setup (takes ~1 second)
 - `npm run build` -- production build. NEVER CANCEL: Takes 2+ minutes. Set timeout to 180+ seconds.
 - `npm run dev` -- starts development server on http://localhost:4000 (takes ~5 seconds)
 - `npm run preview` -- starts production preview server (requires build first)
@@ -128,7 +127,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Manual Validation Requirements
 
 - ALWAYS run through complete development workflow after making changes:
-  1. `npm install --ignore-scripts && npm run postinstall && npm run setup`
+  1. `npm install --ignore-scripts && npm run postinstall`
   2. `npm run dev` -- verify development server starts and loads at http://localhost:4000
   3. `npm run build` -- NEVER CANCEL: Takes 2+ minutes
   4. `npm run preview` -- verify production build works
@@ -137,7 +136,6 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
   ### Build Time Expectations
   - npm install (with --ignore-scripts): up to 30 seconds
   - npm run postinstall: up to 8 seconds
-  - npm run setup: up to 3 seconds
   - npm run build: up to 3 minutes (NEVER CANCEL, Set timeout to 180+ seconds; may take longer on slower machines)
   - npm run lint: up to 2 minutes (Set timeout to 120+ seconds; allow extra time on low-resource environments)
   - npm run format: up to 40 seconds
