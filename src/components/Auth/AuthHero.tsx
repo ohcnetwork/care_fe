@@ -2,7 +2,9 @@ import careConfig from "@careConfig";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-export const AuthHero = () => {
+import { register } from "@/lib/override";
+
+const AuthHeroBase = () => {
   const { urls, stateLogo, customLogo, customLogoAlt } = careConfig;
   const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
   const { t } = useTranslation();
@@ -117,3 +119,5 @@ export const AuthHero = () => {
     </div>
   );
 };
+
+export const AuthHero = register("AuthHero", AuthHeroBase);
