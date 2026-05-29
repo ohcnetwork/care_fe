@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { useAtom } from "jotai";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -48,6 +48,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { paymentReconcilationLocationAtom } from "@/atoms/paymentReconcilationLocationAtom";
 import { LocationPicker } from "@/components/Location/LocationPicker";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
@@ -59,7 +60,12 @@ import {
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
 import { AccountRead } from "@/types/billing/account/Account";
-import { InvoiceRead } from "@/types/billing/invoice/invoice";
+import {
+  InvoiceCreate,
+  InvoiceRead,
+  InvoiceStatus,
+} from "@/types/billing/invoice/invoice";
+import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import {
   PaymentReconciliationCreate,
   PaymentReconciliationIssuerType,
@@ -77,7 +83,8 @@ import {
   zodDecimal,
 } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import mutate from "@/Utils/request/mutate";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
+import { ExtensionContexts } from "@/Utils/schema/types";
 import Decimal from "decimal.js";
 
 const PAYMENT_METHODS = [
@@ -203,6 +210,7 @@ export function PaymentReconciliationSheet({
     () =>
       getCombinedExtensionProps(
         getExtensions(ExtensionEntityType.payment_reconciliation, "write"),
+        ExtensionContexts.payment_reconciliation_form,
       ),
     [getExtensions],
   );
@@ -221,6 +229,7 @@ export function PaymentReconciliationSheet({
     entityType: ExtensionEntityType.payment_reconciliation,
     schemaType: "write",
     form,
+    context: ExtensionContexts.payment_reconciliation_form,
   });
 
   // Watch for payment method changes
@@ -255,16 +264,42 @@ export function PaymentReconciliationSheet({
     }
   }, [selectedLocationObject, form]);
 
-  const { mutate: submitPayment, isPending } = useMutation({
-    mutationFn: mutate(paymentReconciliationApi.createPaymentReconciliation, {
-      pathParams: { facilityId },
-    }),
+  // Amount remaining on the invoice (total_gross - total_payments)
+  const amountDueDecimal = useMemo(() => {
+    if (!invoice) return null;
+    return new Decimal(invoice.total_gross).minus(invoice.total_payments);
+  }, [invoice]);
+
+  // Whether the "Mark as Balanced" option should be shown
+  const canMarkInvoiceAsBalanced = useMemo(() => {
+    if (!invoice || isCreditNote) return false;
+    if (invoice.status === InvoiceStatus.balanced) return false;
+    if (!amount || !amountDueDecimal) return false;
+    try {
+      return new Decimal(amount).gte(amountDueDecimal);
+    } catch {
+      return false;
+    }
+  }, [invoice, isCreditNote, amount, amountDueDecimal]);
+
+  const [markInvoiceAsBalanced, setMarkInvoiceAsBalanced] = useState(true);
+
+  // Default the option to checked whenever the sheet (re)opens
+  useEffect(() => {
+    if (open) setMarkInvoiceAsBalanced(true);
+  }, [open]);
+
+  const { mutate: submitBatch, isPending } = useBatchRequest({
     onSuccess: () => {
       toast.success(
         isCreditNote
           ? t("refund_recorded_successfully")
           : t("payment_recorded_successfully"),
       );
+
+      if (canMarkInvoiceAsBalanced && markInvoiceAsBalanced && invoice) {
+        toast.success(t("invoice_marked_as_balanced"));
+      }
 
       // Invalidate relevant queries
       if (invoice) {
@@ -306,7 +341,34 @@ export function PaymentReconciliationSheet({
       location: restData.location,
       extensions: cleanedExtensions,
     };
-    submitPayment(submissionData);
+
+    const requests: BatchRequestObject[] = [
+      {
+        api: paymentReconciliationApi.createPaymentReconciliation,
+        pathParams: { facilityId },
+        body: submissionData,
+        referenceId: "create_payment_reconciliation",
+      },
+    ];
+
+    if (canMarkInvoiceAsBalanced && markInvoiceAsBalanced && invoice) {
+      const invoiceBody: InvoiceCreate = {
+        status: InvoiceStatus.balanced,
+        payment_terms: invoice.payment_terms,
+        note: invoice.note,
+        account: invoice.account.id,
+        charge_items: invoice.charge_items.map((item) => item.id),
+        issue_date: invoice.issue_date,
+      };
+      requests.push({
+        api: invoiceApi.updateInvoice,
+        pathParams: { facilityId, invoiceId: invoice.id },
+        body: invoiceBody,
+        referenceId: "mark_invoice_balanced",
+      });
+    }
+
+    submitBatch(requests);
   });
 
   useEffect(() => {
@@ -689,6 +751,31 @@ export function PaymentReconciliationSheet({
                   </FormItem>
                 )}
               />
+
+              {canMarkInvoiceAsBalanced && (
+                <div className="flex items-start gap-3 rounded-md border border-gray-300 bg-gray-50 p-3">
+                  <Checkbox
+                    id="mark-invoice-as-balanced"
+                    checked={markInvoiceAsBalanced}
+                    onCheckedChange={(checked) =>
+                      setMarkInvoiceAsBalanced(checked === true)
+                    }
+                    className="mt-0.5"
+                    aria-label={t("mark_as_balanced")}
+                  />
+                  <Label
+                    htmlFor="mark-invoice-as-balanced"
+                    className="flex flex-col items-start gap-1 cursor-pointer"
+                  >
+                    <span className="text-sm font-medium text-gray-950">
+                      {t("mark_as_balanced")}
+                    </span>
+                    <span className="text-xs text-gray-700 font-normal">
+                      {t("mark_as_balanced_warning")}
+                    </span>
+                  </Label>
+                </div>
+              )}
 
               {extensions.fields}
             </div>
