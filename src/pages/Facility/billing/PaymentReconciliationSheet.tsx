@@ -373,8 +373,13 @@ export function PaymentReconciliationSheet({
 
   useEffect(() => {
     if (open) {
-      const initialAmount = invoice?.total_gross
-        ? round(new Decimal(invoice.total_gross).abs())
+      const initialAmount = invoice
+        ? round(
+            Decimal.max(
+              new Decimal(invoice.total_gross),
+              new Decimal(invoice.total_gross).minus(invoice.total_payments),
+            ).abs(),
+          )
         : "";
 
       // Determine the default payment method
