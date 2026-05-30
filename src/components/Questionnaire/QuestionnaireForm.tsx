@@ -384,7 +384,7 @@ const rehydrateDateValue: DraftValueRehydrator = (value) => {
     return value;
   }
   const parsed = new Date(rawValue);
-  if (isValid(parsed)) {
+  if (!isValid(parsed)) {
     return value;
   }
   return { ...value, value: parsed } as ResponseValue;
