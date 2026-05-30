@@ -123,7 +123,7 @@
     "qrcode.react": "^4.1.0",
     "raviger": "^5.3.0",
     "react": "19.1.1",
-    "react-day-picker": "^9.6.3",
+    "react-day-picker": "^10.0.1",
     "react-dom": "19.1.1",
     "react-easy-crop": "^5.4.2",
     "react-google-recaptcha": "^3.1.0",
