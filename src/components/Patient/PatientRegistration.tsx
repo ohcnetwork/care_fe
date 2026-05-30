@@ -62,12 +62,13 @@ import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { ExtensionContexts } from "@/Utils/schema/types";
 import { dateQueryString, goBack } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { format, isBefore, isFuture, subYears } from "date-fns";
+import { format, isBefore, subYears } from "date-fns";
 import { TFunction } from "i18next";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { ArrowLeft, CheckIcon } from "lucide-react";
@@ -103,6 +104,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     () =>
       getCombinedExtensionProps(
         getExtensions(ExtensionEntityType.patient, "write"),
+        ExtensionContexts.registration,
       ),
     [getExtensions],
   );
@@ -145,6 +147,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     schemaType: "write",
     form,
     existingData: patientQuery.data?.extensions,
+    context: ExtensionContexts.registration,
   });
 
   const defaultGeoOrgId = careConfig.patientRegistration.defaultGeoOrganization;
@@ -1061,7 +1064,10 @@ const getFormSchema = (
       date_of_birth: z
         .string()
         .date()
-        .refine((date) => !isFuture(date), t("date_cannot_be_future"))
+        .refine(
+          (date) => date <= format(new Date(), "yyyy-MM-dd"),
+          t("date_cannot_be_future"),
+        )
         .optional()
         .nullable(),
       age: validators().age.optional().nullable(),

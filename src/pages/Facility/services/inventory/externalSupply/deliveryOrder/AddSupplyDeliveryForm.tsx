@@ -83,6 +83,7 @@ import { round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { ExtensionContexts } from "@/Utils/schema/types";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
@@ -161,13 +162,18 @@ export function AddSupplyDeliveryForm({
 
   // Process extensions for form rendering (includes owner, defaults, fieldMetadata)
   const processedExtensions = useMemo(
-    () => processExtensions(allExtensions),
+    () =>
+      processExtensions(allExtensions, ExtensionContexts.supply_delivery_form),
     [allExtensions],
   );
 
   // Get extension field metadata with extension name for table headers
   const extensionFields = useMemo(
-    () => getExtensionFieldsWithName(allExtensions),
+    () =>
+      getExtensionFieldsWithName(
+        allExtensions,
+        ExtensionContexts.supply_delivery_form,
+      ),
     [allExtensions],
   );
 
@@ -750,10 +756,10 @@ export function AddSupplyDeliveryForm({
                                     {code.display}
                                   </TableHead>
                                 ))}
-                                <TableHead className="min-w-[100px] text-xs font-semibold border-r">
+                                <TableHead className="min-w-[100px] text-xs font-semibold">
                                   {t("pr")}
                                 </TableHead>
-                                <TableHead className="min-w-[120px] text-xs font-semibold">
+                                <TableHead className="min-w-[120px] text-xs font-semibold border-r">
                                   {t("tpr")}
                                 </TableHead>
                               </TableRow>
