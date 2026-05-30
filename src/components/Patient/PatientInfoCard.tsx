@@ -39,9 +39,13 @@ export const PatientInfoCard = ({
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
-        <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-center justify-between px-2">
-          <div className="space-y-4">
-            <PatientHoverCard patient={patient} facilityId={facilityId} />
+        <CardHeader className="pb-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center px-2">
+          <div className="space-y-4 min-w-0">
+            <PatientHoverCard
+              patient={patient}
+              facilityId={facilityId}
+              truncateName
+            />
           </div>
           {children}
         </CardHeader>

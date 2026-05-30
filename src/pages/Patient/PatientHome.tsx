@@ -93,6 +93,11 @@ export default function PatientHome() {
     enabled: !!(partial_id && (year_of_birth || phone_number)),
   });
 
+  const { canWritePatient } = getPermissions(
+    hasPermission,
+    patientData?.permissions ?? [],
+  );
+
   if (isVerifyingPatient || !facility) {
     return (
       <div className="space-y-4 md:max-w-5xl mx-auto">
@@ -114,7 +119,7 @@ export default function PatientHome() {
         <div className="space-y-6 md:max-w-5xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
-              <div className="">
+              <div>
                 <PatientInfoCard
                   tags={[
                     ...patientData.instance_tags,
@@ -135,12 +140,15 @@ export default function PatientHome() {
                     });
                   }}
                 >
-                  <PLUGIN_Component
-                    __name="PatientInfoCardActions"
-                    patient={patientData}
-                    facilityId={facilityId}
-                    className="flex justify-end"
-                  />
+                  <div className="flex flex-wrap gap-2 mx-2">
+                    <PLUGIN_Component
+                      __name="PatientInfoCardActions"
+                      patient={patientData}
+                      facilityId={facilityId}
+                      canWritePatient={canWritePatient}
+                      className="flex justify-end"
+                    />
+                  </div>
                 </PatientInfoCard>
               </div>
 
