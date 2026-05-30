@@ -1,4 +1,5 @@
 import { expect, Page, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
@@ -100,11 +101,11 @@ async function fillAdditionalDetails(
     const stateCombobox = page
       .getByRole("region", { name: "Additional Details" })
       .getByRole("combobox");
-    await stateCombobox.waitFor({ state: "visible", timeout: 5000 });
+    await stateCombobox.waitFor({ state: "visible" });
     await stateCombobox.click();
 
     const stateOption = page.getByRole("option").first();
-    await stateOption.waitFor({ state: "visible", timeout: 5000 });
+    await stateOption.waitFor({ state: "visible" });
     await stateOption.click();
   });
 }
@@ -113,8 +114,10 @@ async function submitRegistration(page: Page) {
   await test.step("Submit patient registration", async () => {
     await page.getByRole("button", { name: /register patient/i }).click();
     await expect(
-      page.getByText(/patient registered successfully/i),
-    ).toBeVisible({ timeout: 10000 });
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText(/patient registered successfully/i),
+    ).toBeVisible();
   });
 }
 
@@ -192,7 +195,7 @@ test.describe("Patient Registration", () => {
 
       await expect(
         page.getByText(/entered phone number is not valid/i).first(),
-      ).toBeVisible({ timeout: 5000 });
+      ).toBeVisible();
     });
   });
 
@@ -242,7 +245,7 @@ test.describe("Patient Registration", () => {
 
     await expect(
       page.locator(`text=Year of Birth: ${expectedYearOfBirth}`),
-    ).toBeVisible({ timeout: 3000 });
+    ).toBeVisible();
 
     await selectBloodGroup(page, "A+");
     await fillAdditionalDetails(page, {
@@ -252,13 +255,65 @@ test.describe("Patient Registration", () => {
 
     await submitRegistration(page);
 
-    await page.waitForURL("**/patients/**", { timeout: 10000 });
+    await page.waitForURL("**/patients/**");
     await expect(
       page.getByRole("button", {
         name: new RegExp(`.*${patientAge} Y, Male`),
       }),
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible();
 
     expect(expectedYearOfBirth).toEqual(currentYear - patientAge);
+  });
+});
+
+test.describe("DOB timezone validation", () => {
+  test.use({ timezoneId: "Asia/Kolkata" });
+
+  // 2024-06-15T19:10:00Z == 2024-06-16 00:40:00 IST
+  const FROZEN_INSTANT = new Date("2024-06-15T19:10:00Z");
+  const TODAY_IST = { day: "16", month: "06", year: "2024" };
+  const TOMORROW_IST = { day: "17", month: "06", year: "2024" };
+
+  test.beforeEach(async ({ page }) => {
+    const facilityId = getFacilityId();
+
+    // Must be installed before any navigation so the app's Date.now() is
+    // overridden from first render.
+    await page.clock.install({ time: FROZEN_INSTANT });
+    await page.clock.setFixedTime(FROZEN_INSTANT);
+
+    await page.goto(`/facility/${facilityId}/patient/create`);
+  });
+
+  test("allows registering a newborn with today's DOB in the IST early-morning window", async ({
+    page,
+  }) => {
+    const patientData = generatePatientData();
+    await fillBasicInfo(page, patientData);
+    await fillDateOfBirth(page, TODAY_IST);
+    await selectBloodGroup(page, patientData.bloodGroup);
+    await fillAdditionalDetails(page, patientData);
+    await submitRegistration(page);
+  });
+
+  test("rejects a DOB that is in the future in local time", async ({
+    page,
+  }) => {
+    const patientData = generatePatientData();
+    await fillBasicInfo(page, patientData);
+    await fillDateOfBirth(page, TOMORROW_IST);
+    await selectBloodGroup(page, patientData.bloodGroup);
+    await fillAdditionalDetails(page, patientData);
+
+    await page.getByRole("button", { name: /register patient/i }).click();
+
+    await expect(
+      page.getByText(/date cannot be in the future/i).first(),
+    ).toBeVisible();
+    await expect(
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText(/patient registered successfully/i),
+    ).not.toBeVisible();
   });
 });

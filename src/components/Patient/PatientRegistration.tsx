@@ -36,7 +36,6 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import {
   ExtensionEntityType,
   getCombinedExtensionProps,
@@ -63,12 +62,12 @@ import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, goBack } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { format, isBefore, isFuture, subYears } from "date-fns";
+import { format, isBefore, subYears } from "date-fns";
 import { TFunction } from "i18next";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { ArrowLeft, CheckIcon } from "lucide-react";
@@ -88,7 +87,6 @@ interface QParams {
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   useShortcutSubContext();
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
   const [{ phone_number, flow }] = useQueryParams<QParams>();
 
@@ -279,6 +277,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
             open_schedule: "true",
           }),
         },
+        replace: true,
       });
     },
   });
@@ -1062,7 +1061,10 @@ const getFormSchema = (
       date_of_birth: z
         .string()
         .date()
-        .refine((date) => !isFuture(date), t("date_cannot_be_future"))
+        .refine(
+          (date) => date <= format(new Date(), "yyyy-MM-dd"),
+          t("date_cannot_be_future"),
+        )
         .optional()
         .nullable(),
       age: validators().age.optional().nullable(),

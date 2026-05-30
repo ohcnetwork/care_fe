@@ -18,14 +18,21 @@ import { Organization, getOrgLabel } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 import EntityBadge from "./components/EntityBadge";
-import OrganizationLayout from "./components/OrganizationLayout";
+import OrganizationLayout, {
+  type RouteContext,
+} from "./components/OrganizationLayout";
 
 interface Props {
   id: string;
   navOrganizationId?: string;
+  routeContext?: RouteContext;
 }
 
-export default function OrganizationView({ id, navOrganizationId }: Props) {
+export default function OrganizationView({
+  id,
+  navOrganizationId,
+  routeContext,
+}: Props) {
   const { t } = useTranslation();
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
@@ -51,7 +58,11 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
     : `/organization/${id}`;
 
   return (
-    <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
+    <OrganizationLayout
+      id={id}
+      navOrganizationId={navOrganizationId}
+      routeContext={routeContext}
+    >
       {() => {
         return (
           <div className="space-y-6">

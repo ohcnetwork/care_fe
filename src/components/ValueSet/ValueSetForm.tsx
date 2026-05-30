@@ -27,15 +27,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import {
   TERMINOLOGY_SYSTEMS,
   ValueSetBase,
   ValueSetRead,
   ValueSetStatus,
 } from "@/types/valueSet/valueSet";
-import { valuesOf } from "@/Utils/utils";
+import { goBack, valuesOf } from "@/Utils/utils";
 
 import { generateSlug } from "@/Utils/utils";
 import { CodingField } from "./CodingField";
@@ -45,7 +43,7 @@ interface ValueSetFormProps {
   initialData?: ValueSetRead;
   onSubmit: (data: ValueSetBase) => void;
   isSubmitting?: boolean;
-  isSystemDefined?: boolean;
+  isReadOnly?: boolean;
 }
 
 function ConceptFields({
@@ -302,7 +300,7 @@ export function ValueSetForm({
   initialData,
   onSubmit,
   isSubmitting,
-  isSystemDefined,
+  isReadOnly,
 }: ValueSetFormProps) {
   const { t } = useTranslation();
   const valuesetFormSchema = z.object({
@@ -369,8 +367,6 @@ export function ValueSetForm({
     }),
   });
 
-  const { goBack } = useAppHistory();
-
   const form = useForm({
     resolver: zodResolver(valuesetFormSchema),
     defaultValues: {
@@ -405,7 +401,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="name"
-          disabled={isSystemDefined}
+          disabled={isReadOnly}
           render={({ field }) => (
             <FormItem>
               <FormLabel aria-required>{t("name")}</FormLabel>
@@ -429,7 +425,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="slug"
-          disabled={isSystemDefined}
+          disabled={isReadOnly}
           render={({ field }) => (
             <FormItem>
               <FormLabel aria-required>{t("slug")}</FormLabel>
@@ -456,7 +452,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="description"
-          disabled={isSystemDefined}
+          disabled={isReadOnly}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("description")}</FormLabel>
@@ -477,7 +473,7 @@ export function ValueSetForm({
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
-                disabled={isSystemDefined}
+                disabled={isReadOnly}
               >
                 <FormControl>
                   <SelectTrigger ref={field.ref}>
@@ -498,10 +494,10 @@ export function ValueSetForm({
         />
 
         <div className="space-y-6">
-          <RuleFields type="include" form={form} disabled={isSystemDefined} />
-          <RuleFields type="exclude" form={form} disabled={isSystemDefined} />
+          <RuleFields type="include" form={form} disabled={isReadOnly} />
+          <RuleFields type="exclude" form={form} disabled={isReadOnly} />
         </div>
-        {isSystemDefined && (
+        {isReadOnly && (
           <div className="text-red-600 text-sm flex justify-end">
             {t("saving_is_disabled_for_system_valuesets")}
           </div>
@@ -519,9 +515,7 @@ export function ValueSetForm({
           <Button
             variant="primary"
             type="submit"
-            disabled={
-              isSystemDefined || isSubmitting || !form.formState.isDirty
-            }
+            disabled={isReadOnly || isSubmitting || !form.formState.isDirty}
           >
             {isSubmitting ? t("saving") : t("save_valueset")}
           </Button>

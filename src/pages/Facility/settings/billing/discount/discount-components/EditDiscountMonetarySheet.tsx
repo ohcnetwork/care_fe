@@ -64,7 +64,9 @@ export function EditDiscountMonetarySheet({
 
               const updatedComponents =
                 facility.discount_monetary_components.map((existing, index) =>
-                  index === component.facilityIndex ? data : existing,
+                  index === component.facilityIndex
+                    ? { ...existing, ...data }
+                    : existing,
                 );
 
               updateComponent({

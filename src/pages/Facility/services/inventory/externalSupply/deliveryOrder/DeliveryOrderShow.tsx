@@ -3,18 +3,18 @@ import {
   ChevronLeft,
   Edit,
   EllipsisVertical,
+  Eye,
   Hash,
   MoreVertical,
   Printer,
   Truck,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -167,6 +167,48 @@ function AllSupplyDeliveriesComponent({
   );
 }
 
+function getDeliveryOrderStatusActions(
+  status: DeliveryOrderStatus,
+  internal: boolean,
+  anyCompletedSupplyDeliveries: boolean,
+) {
+  const isPendingOrCompleted = [
+    DeliveryOrderStatus.draft,
+    DeliveryOrderStatus.pending,
+    DeliveryOrderStatus.completed,
+  ].includes(status);
+  if (
+    (internal && status !== DeliveryOrderStatus.draft) ||
+    (!internal && !isPendingOrCompleted)
+  ) {
+    return [];
+  }
+
+  const actions = [
+    {
+      status: DeliveryOrderStatus.draft,
+      icon: <Edit className="size-4" />,
+      label: "mark_as_draft",
+      visibility: true,
+    },
+    {
+      status: DeliveryOrderStatus.entered_in_error,
+      icon: <CareIcon icon="l-exclamation-circle" />,
+      label: "mark_as_entered_in_error",
+      visibility: internal ? true : !anyCompletedSupplyDeliveries,
+    },
+    {
+      status: DeliveryOrderStatus.abandoned,
+      icon: <CareIcon icon="l-ban" />,
+      label: "mark_as_abandoned",
+      visibility: internal ? true : !anyCompletedSupplyDeliveries,
+    },
+  ];
+  return actions.filter(
+    (action) => action.status !== status && action.visibility,
+  );
+}
+
 export function DeliveryOrderShow({
   facilityId,
   deliveryOrderId,
@@ -229,6 +271,10 @@ export function DeliveryOrderShow({
       }),
       enabled: !!deliveryOrderId,
     });
+
+  const supplyOrderId = supplyDeliveries?.results?.find(
+    (delivery) => delivery.supply_request && delivery.supply_request.id,
+  )?.supply_request?.order?.id;
 
   const { mutate: upsertSupplyDeliveries, isPending: isUpsertingDeliveries } =
     useMutation({
@@ -409,6 +455,17 @@ export function DeliveryOrderShow({
   const canAddSupplyDeliveries =
     deliveryOrder.status === DeliveryOrderStatus.draft;
 
+  const anyCompletedSupplyDeliveries =
+    supplyDeliveries?.results?.some(
+      (delivery) => delivery.status === SupplyDeliveryStatus.completed,
+    ) ?? false;
+
+  const deliveryOrderStatusActions = getDeliveryOrderStatusActions(
+    deliveryOrder.status,
+    internal,
+    anyCompletedSupplyDeliveries,
+  );
+
   return (
     <Page
       title={t("delivery_order_details")}
@@ -426,20 +483,25 @@ export function DeliveryOrderShow({
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <BackButton
+            <Button
               size="icon"
+              variant="outline"
               className="shrink-0"
-              to={getInventoryBasePath(
-                facilityId,
-                locationId,
-                internal,
-                false,
-                isRequester,
-                "",
-              )}
+              onClick={() =>
+                navigate(
+                  getInventoryBasePath(
+                    facilityId,
+                    locationId,
+                    internal,
+                    false,
+                    isRequester,
+                    "",
+                  ),
+                )
+              }
             >
               <ChevronLeft />
-            </BackButton>
+            </Button>
             <div>
               <h4>{deliveryOrder.name}</h4>
               <p className="text-sm text-gray-700">
@@ -460,6 +522,18 @@ export function DeliveryOrderShow({
             </div>
           </div>
           <div className="flex items-center justify-end gap-2">
+            {supplyOrderId && (
+              <Button variant="outline" asChild>
+                <Link
+                  href={`/inventory/internal/${isRequester ? "receive" : "dispatch"}/orders/${supplyOrderId}`}
+                >
+                  <Eye className="size-4" />{" "}
+                  {isRequester
+                    ? t("view_stock_request")
+                    : t("view_dispatch_request")}
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" asChild>
               <Link href={`${deliveryOrderId}/print`}>
                 <Printer className="size-4" /> {t("print")}
@@ -507,7 +581,7 @@ export function DeliveryOrderShow({
                 </Button>
               )}
 
-            {deliveryOrder.status === DeliveryOrderStatus.draft && (
+            {deliveryOrderStatusActions.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon">
@@ -515,38 +589,26 @@ export function DeliveryOrderShow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                    <Button
-                      variant="ghost"
-                      onClick={() =>
-                        setDeliveryOrderStatusDialog({
-                          open: true,
-                          status: DeliveryOrderStatus.entered_in_error,
-                        })
-                      }
-                      disabled={isUpdating}
-                      className="w-full flex justify-stretch"
-                    >
-                      <CareIcon icon="l-exclamation-circle" />
-                      <span>{t("mark_as_entered_in_error")}</span>
-                    </Button>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Button
-                      variant="ghost"
-                      onClick={() =>
-                        setDeliveryOrderStatusDialog({
-                          open: true,
-                          status: DeliveryOrderStatus.abandoned,
-                        })
-                      }
-                      disabled={isUpdating}
-                      className="w-full flex justify-stretch"
-                    >
-                      <CareIcon icon="l-ban" />
-                      <span>{t("mark_as_abandoned")}</span>
-                    </Button>
-                  </DropdownMenuItem>
+                  {deliveryOrderStatusActions.map((action) => {
+                    return (
+                      <DropdownMenuItem asChild key={action.status}>
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            setDeliveryOrderStatusDialog({
+                              open: true,
+                              status: action.status,
+                            })
+                          }
+                          disabled={isUpdating}
+                          className="w-full flex justify-stretch"
+                        >
+                          {action.icon}
+                          <span>{t(action.label)}</span>
+                        </Button>
+                      </DropdownMenuItem>
+                    );
+                  })}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -657,15 +719,20 @@ export function DeliveryOrderShow({
               {extensionFields.map((field) => {
                 const value = getExtensionValue(
                   deliveryOrder.extensions as NamespacedExtensionData,
-                  field.extensionName,
-                  field.name,
+                  field,
+                  {
+                    delivery_order: deliveryOrder,
+                    supply_deliveries: supplyDeliveries,
+                  },
                 );
                 if (value === undefined || value === null) return null;
 
                 const displayValue =
-                  field.format === "date" || field.format === "date-time"
-                    ? formatDateTime(value as string)
-                    : String(value);
+                  typeof value === "number"
+                    ? value.toFixed(2)
+                    : field.format === "date" || field.format === "date-time"
+                      ? formatDateTime(value as string)
+                      : String(value);
 
                 return (
                   <div key={`${field.extensionName}-${field.name}`}>
@@ -1021,19 +1088,27 @@ export function DeliveryOrderShow({
             setDeliveryOrderStatusDialog((prev) => ({ ...prev, open }))
           }
           title={
-            deliveryOrderStatusDialog.status ===
-            DeliveryOrderStatus.entered_in_error
-              ? t("mark_as_entered_in_error")
-              : t("mark_as_abandoned")
+            deliveryOrderStatusDialog.status === DeliveryOrderStatus.draft
+              ? t("mark_as_draft")
+              : deliveryOrderStatusDialog.status ===
+                  DeliveryOrderStatus.entered_in_error
+                ? t("mark_as_entered_in_error")
+                : t("mark_as_abandoned")
           }
           description={
-            deliveryOrderStatusDialog.status ===
-            DeliveryOrderStatus.entered_in_error
-              ? t("mark_order_as_entered_in_error_confirmation_description")
-              : t("mark_order_as_abandoned_confirmation_description")
+            deliveryOrderStatusDialog.status === DeliveryOrderStatus.draft
+              ? t("mark_order_as_draft_confirmation_description")
+              : deliveryOrderStatusDialog.status ===
+                  DeliveryOrderStatus.entered_in_error
+                ? t("mark_order_as_entered_in_error_confirmation_description")
+                : t("mark_order_as_abandoned_confirmation_description")
           }
           confirmText={t("confirm")}
-          variant="destructive"
+          variant={
+            deliveryOrderStatusDialog.status === DeliveryOrderStatus.draft
+              ? "primary"
+              : "destructive"
+          }
           onConfirm={() => {
             if (deliveryOrderStatusDialog.status) {
               handleUpdateDeliveryOrderStatus(deliveryOrderStatusDialog.status);

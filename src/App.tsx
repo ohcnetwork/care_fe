@@ -12,12 +12,12 @@ import ProductionWarningBanner from "@/components/Common/ProductionWarningBanner
 import Integrations from "@/Integrations";
 import PluginEngine from "@/PluginEngine";
 import AuthUserProvider from "@/Providers/AuthUserProvider";
-import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
 
 import { ShortcutProvider } from "@/context/ShortcutContext";
+import { OverrideProvider } from "@/lib/override";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 const ScrollToTop = () => {
@@ -42,14 +42,14 @@ const App = () => {
           <PubSubProvider>
             <ShortcutProvider>
               <PluginEngine>
-                <HistoryAPIProvider>
+                <OverrideProvider>
                   <AuthUserProvider
                     unauthorized={<Routers.PublicRouter />}
                     otpAuthorized={<Routers.PatientRouter />}
                   >
                     <Routers.AppRouter />
                   </AuthUserProvider>
-                </HistoryAPIProvider>
+                </OverrideProvider>
                 <Toaster
                   position="top-center"
                   theme="light"

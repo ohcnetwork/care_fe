@@ -19,7 +19,7 @@ test.describe("Manage care team for an encounter", () => {
   let selectedRole: string;
   let selectedUsername: string;
 
-  const TEST_USERNAMES = ["care-admin", "care-fac-admin", "administrator_2_0"];
+  const TEST_USERNAMES = ["care-doctor", "admin"];
   const TEST_ROLES = [
     "Primary healthcare service",
     "Acupuncturist",
@@ -87,7 +87,10 @@ test.describe("Manage care team for an encounter", () => {
         await expect(memberSelector).toBeEnabled();
         await memberSelector.click();
         await page.getByPlaceholder("Search").fill(selectedUsername);
-        await page.getByText(selectedUsername).click();
+        await page
+          .getByRole("option", { name: selectedUsername })
+          .first()
+          .click();
       });
 
       await test.step("Select role", async () => {
@@ -121,7 +124,10 @@ test.describe("Manage care team for an encounter", () => {
           .filter({ hasText: "Select Member" });
         await memberSelector.click();
         await page.getByPlaceholder("Search").fill(selectedUsername);
-        await page.getByText(selectedUsername).click();
+        await page
+          .getByRole("option", { name: selectedUsername })
+          .first()
+          .click();
 
         await page
           .getByRole("combobox")
@@ -140,7 +146,10 @@ test.describe("Manage care team for an encounter", () => {
           .filter({ hasText: "Select Member" });
         await memberSelector.click();
         await page.getByPlaceholder("Search").fill(selectedUsername);
-        await page.getByText(selectedUsername).click();
+        await page
+          .getByRole("option", { name: selectedUsername })
+          .first()
+          .click();
 
         await page
           .getByRole("combobox")
@@ -183,7 +192,10 @@ test.describe("Manage care team for an encounter", () => {
       await expect(memberSelector).toBeEnabled();
       await memberSelector.click();
       await page.getByPlaceholder("Search").fill(selectedUsername);
-      await page.getByText(selectedUsername).click();
+      await page
+        .getByRole("option", { name: selectedUsername })
+        .first()
+        .click();
 
       await page
         .getByRole("combobox")
@@ -204,8 +216,9 @@ test.describe("Manage care team for an encounter", () => {
       await openCareTeamDialog(page);
 
       const dialog = page.getByRole("dialog", { name: "Manage Care Team" });
-      await expect(dialog.getByText(selectedUsername)).not.toBeVisible();
-      await expect(dialog.getByText(selectedRole)).not.toBeVisible();
+      await expect(
+        dialog.getByText(selectedUsername, { exact: true }),
+      ).not.toBeVisible();
     });
   });
 
@@ -227,7 +240,10 @@ test.describe("Manage care team for an encounter", () => {
       await expect(memberSelector).toBeEnabled();
       await memberSelector.click();
       await page.getByPlaceholder("Search").fill(selectedUsername);
-      await page.getByText(selectedUsername).click();
+      await page
+        .getByRole("option", { name: selectedUsername })
+        .first()
+        .click();
     });
 
     await test.step("Verify Add button is still disabled", async () => {

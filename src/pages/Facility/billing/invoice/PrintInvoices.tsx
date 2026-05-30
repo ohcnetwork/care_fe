@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
@@ -39,6 +38,7 @@ import {
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
@@ -167,42 +167,14 @@ export function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
       title={`${t("invoices")} (${invoices.length})`}
       watermark={invoices.length === 1 ? getWatermark(invoices[0]) : undefined}
       disabled={isLoadingDispenses}
+      facility={facility}
+      templateSlug={PrintTemplateType.invoices}
     >
       <DisablingCover
         disabled={isLoadingDispenses}
         message={t("loading_medication_details")}
       >
         <div className="max-w-5xl mx-auto">
-          {/* Header with Facility Name and Logo - shown once */}
-          <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
-            <div className="flex items-start gap-4">
-              <div className="text-left">
-                <h1 className="text-2xl font-medium">{facility.name}</h1>
-                {facility.address && (
-                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                    {facility.address}
-                    {facility.phone_number && (
-                      <p className="text-gray-500 text-sm">
-                        {t("phone")}: {facility.phone_number}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-              <QRCodeSVG
-                value={invoices[0].account.patient.id}
-                size={50}
-                level="Q"
-                marginSize={0}
-              />
-            </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Logo"
-              className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
-            />
-          </div>
-
           {/* Bill To section - shown once */}
           {(() => {
             const firstInvoice = invoices[0];
@@ -211,20 +183,18 @@ export function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
             );
 
             return (
-              <div className="mb-4 flex justify-between items-center">
+              <div className="flex justify-between items-start pb-4">
                 <div>
                   <div className="font-medium text-gray-700 text-sm">
                     {t("bill_to")}:
                   </div>
-                  <div>
-                    <p className="font-semibold text-base">
-                      {firstInvoice.account.patient.name}
-                      <span className="text-gray-600 ml-2 font-normal">
-                        ({t(`GENDER__${firstInvoice.account.patient.gender}`)},{" "}
-                        {formatPatientAge(firstInvoice.account.patient, true)})
-                      </span>
-                    </p>
-                  </div>
+                  <p className="font-semibold text-base">
+                    {firstInvoice.account.patient.name}
+                    <span className="text-gray-600 ml-2 font-normal">
+                      ({t(`GENDER__${firstInvoice.account.patient.gender}`)},{" "}
+                      {formatPatientAge(firstInvoice.account.patient, true)})
+                    </span>
+                  </p>
                   {verifiedPatient &&
                     "instance_identifiers" in verifiedPatient &&
                     verifiedPatient.instance_identifiers
@@ -244,11 +214,9 @@ export function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
                           </span>
                         </div>
                       ))}
-                </div>
-                <div>
-                  <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
-                    {t("address")}:{" "}
-                    <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
+                  <div className="flex gap-1 font-medium text-gray-700 text-sm mt-1">
+                    <span>{t("address")}:</span>
+                    <span className="whitespace-pre-wrap">
                       {formatPatientAddress(
                         firstInvoice.account.patient.address,
                       ) || (
@@ -256,9 +224,16 @@ export function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
                           {t("no_address_provided")}
                         </span>
                       )}
-                    </p>
+                    </span>
                   </div>
                 </div>
+                <QRCodeSVG
+                  value={firstInvoice.account.patient.id}
+                  size={100}
+                  level="M"
+                  marginSize={0}
+                  className="mr-2"
+                />
               </div>
             );
           })()}
@@ -634,12 +609,21 @@ export function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
                                       "font-medium",
                                     )}
                                   >
-                                    {payment.payment_datetime
-                                      ? format(
-                                          new Date(payment.payment_datetime),
-                                          "d MMM yyyy, hh:mm a",
-                                        )
-                                      : "-"}
+                                    <div className="flex flex-col">
+                                      <span>
+                                        {payment.payment_datetime
+                                          ? format(
+                                              new Date(
+                                                payment.payment_datetime,
+                                              ),
+                                              "d MMM yyyy, hh:mm a",
+                                            )
+                                          : "-"}
+                                      </span>
+                                      <span className="font-mono text-xs text-gray-500">
+                                        {payment.id}
+                                      </span>
+                                    </div>
                                   </TableCell>
                                   <TableCell
                                     className={cn(tableCellClass, "text-left")}
@@ -741,12 +725,21 @@ export function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
                                       "font-medium",
                                     )}
                                   >
-                                    {creditNote.payment_datetime
-                                      ? format(
-                                          new Date(creditNote.payment_datetime),
-                                          "d MMM yyyy, hh:mm a",
-                                        )
-                                      : "-"}
+                                    <div className="flex flex-col">
+                                      <span>
+                                        {creditNote.payment_datetime
+                                          ? format(
+                                              new Date(
+                                                creditNote.payment_datetime,
+                                              ),
+                                              "d MMM yyyy, hh:mm a",
+                                            )
+                                          : "-"}
+                                      </span>
+                                      <span className="font-mono text-xs text-gray-500">
+                                        {creditNote.id}
+                                      </span>
+                                    </div>
                                   </TableCell>
                                   <TableCell
                                     className={cn(tableCellClass, "text-left")}

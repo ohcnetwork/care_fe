@@ -1,5 +1,5 @@
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -23,15 +23,17 @@ import {
 } from "@/components/ui/popover";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { RoleBase } from "@/types/emr/role/role";
+import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 import query from "@/Utils/request/query";
 
 interface RoleSelectProps {
   value?: RoleBase;
   onChange: (value: RoleBase) => void;
+  context?: RoleContext;
   disabled?: boolean;
   className?: string;
+  placeholder?: string;
 }
 
 const PAGE_LIMIT = 10;
@@ -111,19 +113,23 @@ function RoleCommandContent({
 export function RoleSelect({
   value,
   onChange,
+  context,
   disabled,
   className,
+  placeholder,
 }: RoleSelectProps) {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
   const { ref, inView } = useInView();
   const isMobile = useBreakpoints({ default: true, sm: false });
+  const selectedRoleId = value?.id;
 
   const getQueryParams = (pageParam: number) => ({
     limit: String(PAGE_LIMIT),
     offset: String(pageParam),
     name: searchTerm,
+    context,
   });
 
   const {
@@ -133,7 +139,7 @@ export function RoleSelect({
     isFetchingNextPage,
     isFetching,
   } = useInfiniteQuery({
-    queryKey: ["roles", searchTerm],
+    queryKey: ["roles", searchTerm, context],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query.debounced(roleApi.listRoles, {
         queryParams: getQueryParams(pageParam),
@@ -148,9 +154,26 @@ export function RoleSelect({
     select: (data) => data?.pages.flatMap((p) => p.results) || [],
   });
 
+  const { data: selectedRoleData } = useQuery({
+    queryKey: ["role", selectedRoleId],
+    queryFn: query(roleApi.getRole, {
+      pathParams: { external_id: selectedRoleId || "" },
+    }),
+    enabled: !!selectedRoleId && !value?.name,
+  });
+
+  const selectedRole = value?.name ? value : selectedRoleData;
+
   useEffect(() => {
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setSearchTerm("");
+    }
+  };
 
   const renderTriggerButton = () => (
     <Button
@@ -160,8 +183,8 @@ export function RoleSelect({
       className={cn("w-full justify-between", className)}
       disabled={disabled}
     >
-      <span className={cn(!value && "text-gray-500")}>
-        {value ? value.name : t("select_role")}
+      <span className={cn(!selectedRole && "text-gray-500")}>
+        {selectedRole ? selectedRole.name : placeholder || t("select_role")}
       </span>
       <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
     </Button>
@@ -169,7 +192,7 @@ export function RoleSelect({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={setOpen}>
+      <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>{renderTriggerButton()}</DrawerTrigger>
         <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
@@ -178,9 +201,9 @@ export function RoleSelect({
               rolesList={rolesList}
               isFetching={isFetching}
               isFetchingNextPage={isFetchingNextPage}
-              value={value}
+              value={selectedRole}
               onChange={onChange}
-              setOpen={setOpen}
+              setOpen={handleOpenChange}
               ref={ref}
             />
           </div>
@@ -190,7 +213,7 @@ export function RoleSelect({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen} modal>
+    <Popover open={open} onOpenChange={handleOpenChange} modal>
       <PopoverTrigger asChild>{renderTriggerButton()}</PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
         <RoleCommandContent
@@ -198,9 +221,9 @@ export function RoleSelect({
           rolesList={rolesList}
           isFetching={isFetching}
           isFetchingNextPage={isFetchingNextPage}
-          value={value}
+          value={selectedRole}
           onChange={onChange}
-          setOpen={setOpen}
+          setOpen={handleOpenChange}
           ref={ref}
         />
       </PopoverContent>
