@@ -6,6 +6,7 @@
 .pnp.js
 
 .claude/
+.cursor/
 
 # testing
 /coverage
