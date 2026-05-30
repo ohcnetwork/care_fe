@@ -59,7 +59,7 @@
     "@excalidraw/excalidraw": "^0.18.0-a18b139",
     "@fontsource/figtree": "^5.1.1",
     "@fontsource/libre-barcode-128-text": "^5.2.5",
-    "@hookform/resolvers": "^5.0.1",
+    "@hookform/resolvers": "^5.4.0",
     "@originjs/vite-plugin-federation": "^1.3.7",
     "@radix-ui/react-accordion": "^1.2.8",
     "@radix-ui/react-alert-dialog": "^1.1.7",
@@ -91,7 +91,7 @@
     "@tanstack/react-query-devtools": "^5.64.2",
     "@tanstack/react-query-persist-client": "^5.83.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "@yudiel/react-qr-scanner": "^2.4.1",
+    "@yudiel/react-qr-scanner": "^2.6.0",
     "bowser": "^2.11.0",
     "browser-image-compression": "^2.0.2",
     "browserslist": "^4.24.4",
@@ -150,7 +150,7 @@
     "@playwright/test": "^1.55.1",
     "@react-scan/vite-plugin-react-scan": "^0.1.3",
     "@tailwindcss/container-queries": "^0.1.1",
-    "@tailwindcss/forms": "^0.5.9",
+    "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.15",
     "@types/events": "^3.0.3",
     "@types/google.maps": "^3.58.1",
@@ -201,8 +201,8 @@
   "optionalDependencies": {
     "@esbuild/linux-arm64": "latest",
     "@esbuild/linux-x64": "latest",
-    "@rollup/rollup-linux-arm64-gnu": "4.53.3",
-    "@rollup/rollup-linux-x64-gnu": "4.53.2"
+    "@rollup/rollup-linux-arm64-gnu": "4.60",
+    "@rollup/rollup-linux-x64-gnu": "4.60"
   },
   "browserslist": {
     "production": [
