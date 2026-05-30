@@ -55,7 +55,10 @@ export function PatientHoverCard({
       <Popover>
         <PopoverTrigger
           disabled={disabled}
-          className="hidden w-full min-w-0 lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background"
+          className={cn(
+            "hidden min-w-0 lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background",
+            truncateName && "w-full",
+          )}
         >
           <PatientHoverCardTrigger
             patient={patient}
