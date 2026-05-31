@@ -249,6 +249,11 @@ export default function PatientHome() {
                   actionId="view-the-accounts"
                   href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${patientData.id}&patient_name=${patientData.name}`}
                 />
+                <PLUGIN_Component
+                  __name="PatientHomeQuickActions"
+                  patient={patientData}
+                  facilityId={facilityId}
+                />
               </div>
 
               <PatientHomeTabs

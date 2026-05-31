@@ -67,7 +67,7 @@ import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { format, isBefore, isFuture, subYears } from "date-fns";
+import { format, isBefore, subYears } from "date-fns";
 import { TFunction } from "i18next";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { ArrowLeft, CheckIcon } from "lucide-react";
@@ -1061,7 +1061,10 @@ const getFormSchema = (
       date_of_birth: z
         .string()
         .date()
-        .refine((date) => !isFuture(date), t("date_cannot_be_future"))
+        .refine(
+          (date) => date <= format(new Date(), "yyyy-MM-dd"),
+          t("date_cannot_be_future"),
+        )
         .optional()
         .nullable(),
       age: validators().age.optional().nullable(),

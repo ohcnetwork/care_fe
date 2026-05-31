@@ -16,7 +16,11 @@ import {
   createExtensionValidationSchema,
   extractSchemaInfo,
 } from "@/Utils/schema/extensionSchema";
-import { ExtensionFieldMetadata, JSONSchema2020 } from "@/Utils/schema/types";
+import {
+  ExtensionContext,
+  ExtensionFieldMetadata,
+  JSONSchema2020,
+} from "@/Utils/schema/types";
 
 import { ExtensionFields } from "@/components/Extensions/ExtensionFields";
 
@@ -89,21 +93,15 @@ export function getExtensionValue(
   return extensions?.[field.extensionName]?.[field.name];
 }
 
-/**
- * Get all field metadata with extension name from extensions.
- * Use for table headers or iterating over all extension fields.
- *
- * @example
- * const fields = getExtensionFieldsWithName(allExtensions);
- * fields.forEach(f => console.log(`${f.extensionName}.${f.name}: ${f.label}`));
- */
+/** Field metadata flattened across extensions; optionally filtered to a host `context`. */
 export function getExtensionFieldsWithName(
   extensions: ExtensionWithSchema[],
+  context?: ExtensionContext,
 ): ExtensionFieldWithName[] {
   return extensions
     .filter(({ schema }) => schema !== undefined)
     .flatMap(({ config, schema }) => {
-      const { fieldMetadata } = extractSchemaInfo(schema);
+      const { fieldMetadata } = extractSchemaInfo(schema, context);
       return fieldMetadata.map((field) => ({
         ...field,
         extensionName: config.name,
@@ -115,18 +113,17 @@ export function getExtensionFieldsWithName(
 // Processing Extensions for Forms
 // ============================================================================
 
-/**
- * Process an array of extensions, extracting schema info for each.
- */
+/** Process extensions, optionally filtering by host `context`. */
 export function processExtensions(
   extensions: ExtensionWithSchema[],
+  context?: ExtensionContext,
 ): ProcessedExtension[] {
   return extensions
     .filter(({ schema }) => schema !== undefined)
     .map(({ config, schema }) => ({
       config,
       schema,
-      ...extractSchemaInfo(schema),
+      ...extractSchemaInfo(schema, context),
     }));
 }
 
@@ -144,13 +141,15 @@ export function buildNamespacedDefaults(
   }, {} as NamespacedExtensionData);
 }
 
-/**
- * Get extension props from a single schema.
- * Use for forms with a single known schema.
- */
-export function getExtensionProps(schema: JSONSchema2020 | undefined) {
-  const { defaults, fieldMetadata, conditionalRules } =
-    extractSchemaInfo(schema);
+/** Get extension props from a single schema, optionally filtered by host `context`. */
+export function getExtensionProps(
+  schema: JSONSchema2020 | undefined,
+  context?: ExtensionContext,
+) {
+  const { defaults, fieldMetadata, conditionalRules } = extractSchemaInfo(
+    schema,
+    context,
+  );
   const validation = createExtensionValidationSchema(
     fieldMetadata,
     conditionalRules,
@@ -218,13 +217,12 @@ function createNamespacedValidationSchema(
   });
 }
 
-/**
- * Get combined extension props from multiple extensions.
- * Defaults are namespaced by extension name.
- * Use BEFORE creating your form to get defaults and validation.
- */
-export function getCombinedExtensionProps(extensions: ExtensionWithSchema[]) {
-  const processedExtensions = processExtensions(extensions);
+/** Combined extension props (defaults namespaced by extension name); optionally filtered by host `context`. */
+export function getCombinedExtensionProps(
+  extensions: ExtensionWithSchema[],
+  context?: ExtensionContext,
+) {
+  const processedExtensions = processExtensions(extensions, context);
   const namespacedDefaults = buildNamespacedDefaults(processedExtensions);
 
   // Combine all field metadata and conditional rules
@@ -255,6 +253,8 @@ export function getCombinedExtensionProps(extensions: ExtensionWithSchema[]) {
 interface UseExtensionsOptions<TForm extends FieldValues> {
   schema: JSONSchema2020 | undefined;
   form: UseFormReturn<TForm>;
+  /** Optional host slot. If set, fields blacklisted for it via `x-ui.render_blacklist` are filtered out. */
+  context?: ExtensionContext;
   existingData?: Record<string, unknown>;
   basePath?: string;
 }
@@ -271,12 +271,13 @@ interface UseExtensionsReturn {
 export function useExtensions<TForm extends FieldValues>({
   schema,
   form,
+  context,
   existingData,
   basePath = "extensions",
 }: UseExtensionsOptions<TForm>): UseExtensionsReturn {
   const { defaults, fieldMetadata, conditionalRules } = useMemo(
-    () => extractSchemaInfo(schema),
-    [schema],
+    () => extractSchemaInfo(schema, context),
+    [schema, context],
   );
 
   useEffect(() => {
@@ -334,10 +335,11 @@ export function useExtensions<TForm extends FieldValues>({
 export function withExtensions<T extends z.ZodObject<z.ZodRawShape>>(
   baseSchema: T,
   extensionSchema: JSONSchema2020 | undefined,
+  context?: ExtensionContext,
 ): z.ZodObject<
   T["shape"] & { extensions: z.ZodOptional<z.ZodType<Record<string, unknown>>> }
 > {
-  const { validation } = getExtensionProps(extensionSchema);
+  const { validation } = getExtensionProps(extensionSchema, context);
   return baseSchema.extend({
     extensions: validation.optional(),
   }) as z.ZodObject<
@@ -354,6 +356,8 @@ export function withExtensions<T extends z.ZodObject<z.ZodRawShape>>(
 interface UseEntityExtensionsOptions<TForm extends FieldValues> {
   entityType: ExtensionEntityType;
   schemaType?: ExtensionSchemaType;
+  /** If context(optional) is passed, fields without it in `x-ui.contexts` are filtered out. */
+  context?: ExtensionContext;
   form: UseFormReturn<TForm>;
   existingData?: NamespacedExtensionData;
   basePath?: string;
@@ -379,6 +383,7 @@ interface UseEntityExtensionsReturn {
 export function useEntityExtensions<TForm extends FieldValues>({
   entityType,
   schemaType = "write",
+  context,
   form,
   existingData,
   basePath = "extensions",
@@ -398,19 +403,20 @@ export function useEntityExtensions<TForm extends FieldValues>({
   // Update stable extensions only when underlying data changes
   useEffect(() => {
     const allExtensions = getExtensions(entityType, schemaType);
-    const extensionsKey = JSON.stringify(
-      allExtensions.map(({ config }) => ({
+    const extensionsKey = JSON.stringify({
+      context,
+      configs: allExtensions.map(({ config }) => ({
         owner: config.owner,
         name: config.name,
         version: config.version,
       })),
-    );
+    });
 
     if (extensionsKey !== prevExtensionsKeyRef.current) {
       prevExtensionsKeyRef.current = extensionsKey;
-      setStableExtensions(processExtensions(allExtensions));
+      setStableExtensions(processExtensions(allExtensions, context));
     }
-  }, [getExtensions, entityType, schemaType]);
+  }, [getExtensions, entityType, schemaType, context]);
 
   // Build namespaced defaults from stable extensions
   const namespacedDefaults = useMemo(

@@ -10,24 +10,27 @@ import { scheduleServiceTypeAtom } from "@/atoms/scheduleServiceTypeAtom";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
-import mutate from "@/Utils/request/mutate";
+import { register } from "@/lib/override";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import scheduleApi from "@/types/scheduling/scheduleApi";
+import mutate from "@/Utils/request/mutate";
 
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
 import { Appointment } from "@/types/scheduling/schedule";
 import { AppointmentDateSelection } from "./AppointmentDateSelection";
 import { AppointmentFormSection } from "./AppointmentFormSection";
 
-export const BookAppointmentDetails = ({
-  patientId,
-  onSuccess,
-}: {
+export interface BookAppointmentDetailsProps {
   patientId: string;
   onSuccess?: () => void;
-}) => {
+}
+
+const BookAppointmentDetailsBase = ({
+  patientId,
+  onSuccess,
+}: BookAppointmentDetailsProps) => {
   const { t } = useTranslation();
 
   const { facilityId } = useCurrentFacility();
@@ -239,3 +242,8 @@ export const BookAppointmentDetails = ({
     </div>
   );
 };
+
+export const BookAppointmentDetails = register(
+  "BookAppointmentDetails",
+  BookAppointmentDetailsBase,
+);

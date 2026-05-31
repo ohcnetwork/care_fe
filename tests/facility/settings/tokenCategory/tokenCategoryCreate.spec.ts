@@ -112,7 +112,7 @@ test.describe("Token Category Create - Permission Tests", () => {
         .fill(nonExistentName);
 
       // Verify no results found message is displayed
-      const noResultsText = page.getByText("No products found");
+      const noResultsText = page.getByText("No token categories found");
       await expect(noResultsText).toBeVisible();
     });
 
@@ -161,8 +161,8 @@ test.describe("Token Category Create - Permission Tests", () => {
     test.beforeEach(async ({ page }) => {
       // Login as nurse
       await page.goto("/login");
-      await page.getByRole("textbox", { name: /username/i }).fill("nurse_2_0");
-      await page.getByLabel(/password/i).fill("Coronasafe@123");
+      await page.getByRole("textbox", { name: /username/i }).fill("care-nurse");
+      await page.getByLabel(/password/i).fill("Ohcn@123");
       await page.getByRole("button", { name: /login/i }).click();
       await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
 
