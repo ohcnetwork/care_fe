@@ -132,6 +132,7 @@ export type SupportedPluginComponents = {
   ServiceRequestAction: ServiceRequestComponentType;
   EncounterOverviewTop: EncounterOverviewTopComponentType;
   DiagnosticReportOverride: DiagnosticReportOverrideComponentType;
+  PatientHomeQuickActions: PatientHomeActionsComponentType;
 };
 
 // Create a type for lazy-loaded components
