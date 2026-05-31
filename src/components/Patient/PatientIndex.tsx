@@ -84,7 +84,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     ],
   );
 
-  const { canCreatePatient } = getPermissions(
+  const { canCreatePatient, canReadAccount } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
   );
@@ -174,6 +174,19 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     } else {
       navigateToVerify(patient, undefined, "create_encounter");
     }
+  };
+
+  const handleViewAccounts = (index: number) => {
+    const patient = patientList?.results[index];
+    if (!patient) {
+      return;
+    }
+    navigate(`/facility/${facilityId}/billing/account`, {
+      query: {
+        patient_filter: patient.id,
+        patient_name: patient.name,
+      },
+    });
   };
 
   const handleVerify = () => {
@@ -375,6 +388,17 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                         >
                                           {t("patient_home")}
                                         </DropdownMenuItem>
+                                        {canReadAccount && (
+                                          <DropdownMenuItem
+                                            onSelect={(event) => {
+                                              event.preventDefault();
+                                              event.stopPropagation();
+                                              handleViewAccounts(index);
+                                            }}
+                                          >
+                                            {t("view_accounts")}
+                                          </DropdownMenuItem>
+                                        )}
                                       </DropdownMenuContent>
                                     </DropdownMenu>
                                   </div>
