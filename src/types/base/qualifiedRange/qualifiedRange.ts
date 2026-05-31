@@ -110,7 +110,7 @@ export const qualifiedRangeSchema = z.array(
         data.valueset_interpretation.length > 0
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("ranges_valueset_conflict_error"),
           path: ["_interpretation_type"],
         });
@@ -120,7 +120,7 @@ export const qualifiedRangeSchema = z.array(
         (!data.ranges || data.ranges.length === 0)
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("required"),
           path: ["ranges"],
         });
@@ -131,13 +131,13 @@ export const qualifiedRangeSchema = z.array(
           data.valueset_interpretation.length === 0)
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("required"),
           path: ["valueset_interpretation"],
         });
       }
     }),
-) as z.ZodType<QualifiedRange[]>;
+) as z.ZodType<QualifiedRange[], QualifiedRange[]>;
 
 export const getRangeSummary = (range: NumericRange) => {
   if (!range.min && !range.max) {

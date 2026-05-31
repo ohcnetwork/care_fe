@@ -1,5 +1,5 @@
-import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
-import { BinaryFiles } from "@excalidraw/excalidraw/dist/types/excalidraw/types";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
+import { BinaryFiles } from "@excalidraw/excalidraw/types";
 
 import { UserReadMinimal } from "@/types/user/user";
 

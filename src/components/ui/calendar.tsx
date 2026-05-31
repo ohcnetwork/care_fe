@@ -96,10 +96,6 @@ function Calendar({
     props.weekdayClassName,
   );
   const _monthClassName = cn("w-full", props.monthClassName);
-  const _captionClassName = cn(
-    "relative flex items-center justify-center pt-1",
-    props.captionClassName,
-  );
   const _captionLabelClassName = cn(
     "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8 [&>svg]:size-3.5 border border-gray-400",
     props.captionLabelClassName,
@@ -179,7 +175,6 @@ function Calendar({
         weekdays: _weekdaysClassName,
         weekday: _weekdayClassName,
         month: _monthClassName,
-        caption: _captionClassName,
         caption_label: _captionLabelClassName,
         button_next: _buttonNextClassName,
         button_previous: _buttonPreviousClassName,

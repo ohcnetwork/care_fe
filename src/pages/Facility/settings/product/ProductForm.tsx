@@ -64,7 +64,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { goBack } from "@/Utils/utils";
 const formSchema = z.object({
-  status: z.nativeEnum(ProductStatusOptions),
+  status: z.enum(ProductStatusOptions),
   product_knowledge: z.string().min(1, "Product Knowledge is required"),
   charge_item_definition: z.string().optional(),
   batch: z
@@ -73,8 +73,8 @@ const formSchema = z.object({
     })
     .required(),
   expiration_date: z.date(),
-  standard_pack_size: z.coerce.number().min(0).optional(),
-  purchase_price: z.coerce.number().min(0).optional(),
+  standard_pack_size: z.number().min(0).optional(),
+  purchase_price: z.number().min(0).optional(),
 });
 export default function ProductForm({
   facilityId,

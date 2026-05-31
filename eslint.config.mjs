@@ -154,6 +154,14 @@ const config = [
       "react/prop-types": "off",
       "react/no-children-prop": "off",
       "react/no-unescaped-entities": "off",
+      // React Compiler rules added to react-hooks v7 `recommended`. Surfaced as
+      // warnings so the existing code is not blocked; address incrementally.
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/refs": "warn",
+      "react-hooks/static-components": "warn",
+      "react-hooks/preserve-manual-memoization": "warn",
+      "react-hooks/immutability": "warn",
+      "react-hooks/purity": "warn",
     },
   },
   // No Relative import paths rule

@@ -8,7 +8,7 @@ import {
 
 import { NonEmptyArray } from "@/Utils/types";
 import Decimal from "decimal.js";
-import { CountryCode } from "libphonenumber-js/types.cjs";
+import { CountryCode } from "libphonenumber-js";
 
 const env = import.meta.env;
 
