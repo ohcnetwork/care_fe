@@ -933,7 +933,7 @@ export function QuestionnaireForm({
                 values: response.values.map((value) => {
                   if (value.type === "date" && value.value) {
                     const date = new Date(value.value);
-                    if (isValid(date)) {
+                    if (!isValid(date)) {
                       return { ...value, value: "" };
                     }
                     const formattedDate = dateQueryString(date);
