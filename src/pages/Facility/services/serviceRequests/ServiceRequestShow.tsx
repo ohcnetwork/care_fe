@@ -130,6 +130,7 @@ export default function ServiceRequestShow({
   });
 
   const { mutate: executeBatch } = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({
