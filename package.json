@@ -30,7 +30,6 @@
     "dev": "npm run build:meta && npm run supported-browsers && vite",
     "local": "npm run supported-browsers && vite --mode docker",
     "preview": "cross-env NODE_ENV=production vite preview",
-    "preview:scan": "npm run preview & npx react-scan localhost:4000",
     "build:meta": "node ./scripts/generate-build-version.js",
     "build:react": "cross-env NODE_ENV=production vite build",
     "supported-browsers": "node ./scripts/generate-supported-browsers.mjs",
@@ -147,7 +146,6 @@
     "@eslint/js": "^9.18.0",
     "@faker-js/faker": "^10.4.0",
     "@playwright/test": "^1.60.0",
-    "@react-scan/vite-plugin-react-scan": "^0.1.8",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.19",
@@ -223,10 +221,5 @@
     "public/locale/*.json": [
       "npm run sort-locales"
     ]
-  },
-  "overrides": {
-    "@react-scan/vite-plugin-react-scan": {
-      "vite": "$vite"
-    }
   }
 }

@@ -9,7 +9,6 @@ import {
 } from "vite";
 
 import federation from "@originjs/vite-plugin-federation";
-import reactScan from "@react-scan/vite-plugin-react-scan";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
@@ -440,10 +439,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         ],
       }),
       react(),
-      reactScan({
-        enable:
-          env.NODE_ENV === "development" && env.ENABLE_REACT_SCAN === "true",
-      }),
       checker({
         typescript: true,
         eslint: {
