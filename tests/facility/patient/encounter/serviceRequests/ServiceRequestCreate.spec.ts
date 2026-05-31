@@ -139,13 +139,18 @@ test.describe("Patient Service Request Tab", () => {
     await page
       .getByPlaceholder("Search activity definitions")
       .fill(activityDefinitionTitle);
+    await page.waitForLoadState("networkidle");
     await page.getByRole("option", { name: activityDefinitionTitle }).click();
     await page.getByRole("button", { name: "Submit" }).click();
     await page.waitForLoadState("networkidle");
+    await expect(page.getByText("See Details").first()).toBeVisible();
     await page.getByRole("button", { name: "See Details" }).first().click();
     await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Collect Specimen" }).click();
     await expect(page.getByText("Sample Identification")).toBeVisible();
+    await expect(page.getByText(/qr code generated/i)).toBeVisible({
+      timeout: 10000,
+    });
     await page.getByPlaceholder("Value", { exact: true }).fill("2");
     await expect(page.getByPlaceholder("Value", { exact: true })).toHaveValue(
       "2",
@@ -164,6 +169,10 @@ test.describe("Patient Service Request Tab", () => {
       .click();
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: "Create Report" }).click();
-    await expect(page.getByRole("combobox")).toContainText("mg");
+    const unitField = page
+      .locator("div")
+      .filter({ has: page.getByText("Unit", { exact: true }) })
+      .first();
+    await expect(unitField.getByRole("combobox")).toContainText("mg");
   });
 });
