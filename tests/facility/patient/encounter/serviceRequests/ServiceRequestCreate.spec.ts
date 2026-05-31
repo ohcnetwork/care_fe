@@ -141,6 +141,7 @@ test.describe("Patient Service Request Tab", () => {
       .fill(activityDefinitionTitle);
     await page.getByRole("option", { name: activityDefinitionTitle }).click();
     await page.getByRole("button", { name: "Submit" }).click();
+    await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "See Details" }).first().click();
     await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Collect Specimen" }).click();
