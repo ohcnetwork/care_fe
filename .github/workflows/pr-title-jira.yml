@@ -10,8 +10,9 @@ permissions:
 jobs:
   validate-jira-ticket:
     runs-on: ubuntu-24.04-arm
-    # Skip workflow for PRs created by bots or from forks
+    # Skip workflow for PRs created by bots, from forks, or self-triggered edits
     if: >
+      github.actor != 'github-actions[bot]' &&
       github.event.pull_request.user.type != 'Bot' &&
       github.event.pull_request.head.repo.full_name == github.repository
 
@@ -27,7 +28,7 @@ jobs:
             const pr = context.payload.pull_request;
             const { title: prTitle, number: prNumber, head: { ref: branchName } } = pr;
 
-            // Build regex pattern: CARE-123, OHC-456, etc.
+            // Build regex pattern: CARE-123, ENG-456, etc.
             const jiraTicketRegex = new RegExp(`\\b(${jiraProjectKeys.join('|')})-\\d+\\b`, 'i');
 
             // Helper to append/update JIRA info in PR body
@@ -43,6 +44,8 @@ jobs:
               } else {
                 newBody = currentBody ? `${currentBody}\n\n---\n\n${markedContent}` : markedContent;
               }
+
+              if (newBody === currentBody) return;
 
               await github.rest.pulls.update({
                 owner: context.repo.owner,
