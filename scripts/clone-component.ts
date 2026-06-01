@@ -22,6 +22,7 @@
  *   tsx scripts/clone-component.ts @/components/ui/button care_ask_fe --force
  */
 import fs from "node:fs";
+import { builtinModules } from "node:module";
 import path from "node:path";
 import process from "node:process";
 
@@ -29,6 +30,7 @@ const ROOT = path.resolve(__dirname, "..");
 const SRC_ROOT = path.join(ROOT, "src");
 const APPS_ROOT = path.join(ROOT, "apps");
 const CARE_CONFIG = path.join(ROOT, "care.config.ts");
+const ROOT_PACKAGE_JSON = path.join(ROOT, "package.json");
 
 const CODE_EXTS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"];
 const RESOLVE_EXTS = [
@@ -49,6 +51,27 @@ const RESOLVE_EXTS = [
   ".gif",
   ".lottie",
 ];
+
+const DEPENDENCY_FIELDS = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies",
+] as const;
+
+type DependencyField = (typeof DEPENDENCY_FIELDS)[number];
+
+const BUILTIN_PACKAGES = new Set(
+  builtinModules.flatMap((name) => [name, `node:${name}`]),
+);
+
+interface PackageJson {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
+  [key: string]: unknown;
+}
 
 interface Args {
   source: string;
@@ -156,8 +179,172 @@ interface ImportRef {
   quoteEnd: number;
 }
 
+function stripCommentsPreserveLength(code: string): string {
+  const chars = code.split("");
+  let index = 0;
+  let state:
+    | "code"
+    | "line-comment"
+    | "block-comment"
+    | "single-quote"
+    | "double-quote"
+    | "template"
+    | "template-expression" = "code";
+  let templateExpressionDepth = 0;
+
+  while (index < chars.length) {
+    const current = chars[index];
+    const next = chars[index + 1];
+
+    if (state === "line-comment") {
+      if (current === "\n") {
+        state = "code";
+      } else {
+        chars[index] = " ";
+      }
+      index += 1;
+      continue;
+    }
+
+    if (state === "block-comment") {
+      if (current === "*" && next === "/") {
+        chars[index] = " ";
+        chars[index + 1] = " ";
+        state = "code";
+        index += 2;
+      } else {
+        if (current !== "\n") {
+          chars[index] = " ";
+        }
+        index += 1;
+      }
+      continue;
+    }
+
+    if (state === "single-quote") {
+      if (current === "\\") {
+        index += 2;
+        continue;
+      }
+      if (current === "'") {
+        state = "code";
+      }
+      index += 1;
+      continue;
+    }
+
+    if (state === "double-quote") {
+      if (current === "\\") {
+        index += 2;
+        continue;
+      }
+      if (current === '"') {
+        state = "code";
+      }
+      index += 1;
+      continue;
+    }
+
+    if (state === "template") {
+      if (current === "\\") {
+        index += 2;
+        continue;
+      }
+      if (current === "`") {
+        state = "code";
+        index += 1;
+        continue;
+      }
+      if (current === "$" && next === "{") {
+        state = "template-expression";
+        templateExpressionDepth = 1;
+        index += 2;
+        continue;
+      }
+      index += 1;
+      continue;
+    }
+
+    if (state === "template-expression") {
+      if (current === "'" || current === '"' || current === "`") {
+        state =
+          current === "'"
+            ? "single-quote"
+            : current === '"'
+              ? "double-quote"
+              : "template";
+        index += 1;
+        continue;
+      }
+      if (current === "/" && next === "/") {
+        chars[index] = " ";
+        chars[index + 1] = " ";
+        state = "line-comment";
+        index += 2;
+        continue;
+      }
+      if (current === "/" && next === "*") {
+        chars[index] = " ";
+        chars[index + 1] = " ";
+        state = "block-comment";
+        index += 2;
+        continue;
+      }
+      if (current === "{") {
+        templateExpressionDepth += 1;
+      } else if (current === "}") {
+        templateExpressionDepth -= 1;
+        if (templateExpressionDepth === 0) {
+          state = "template";
+        }
+      }
+      index += 1;
+      continue;
+    }
+
+    if (current === "/" && next === "/") {
+      chars[index] = " ";
+      chars[index + 1] = " ";
+      state = "line-comment";
+      index += 2;
+      continue;
+    }
+
+    if (current === "/" && next === "*") {
+      chars[index] = " ";
+      chars[index + 1] = " ";
+      state = "block-comment";
+      index += 2;
+      continue;
+    }
+
+    if (current === "'") {
+      state = "single-quote";
+      index += 1;
+      continue;
+    }
+
+    if (current === '"') {
+      state = "double-quote";
+      index += 1;
+      continue;
+    }
+
+    if (current === "`") {
+      state = "template";
+      index += 1;
+      continue;
+    }
+
+    index += 1;
+  }
+
+  return chars.join("");
+}
+
 function findImports(code: string): ImportRef[] {
   const refs: ImportRef[] = [];
+  const searchableCode = stripCommentsPreserveLength(code);
   // Matches: import ... from "x"; import "x"; export ... from "x";
   // dynamic import("x"); require("x").
   const patterns: RegExp[] = [
@@ -168,7 +355,7 @@ function findImports(code: string): ImportRef[] {
   ];
   for (const re of patterns) {
     let m: RegExpExecArray | null;
-    while ((m = re.exec(code)) !== null) {
+    while ((m = re.exec(searchableCode)) !== null) {
       const quote = m[1];
       const spec = m[2];
       const quoteStart = m.index + m[0].lastIndexOf(quote + spec + quote);
@@ -227,6 +414,101 @@ interface Report {
   skippedExisting: string[];
   unresolved: { from: string; spec: string }[];
   external: Set<string>;
+  syncedPackages: string[];
+  existingPackages: string[];
+  missingPackages: string[];
+  skippedBuiltins: string[];
+}
+
+function readJsonFile<T>(filePath: string): T {
+  return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
+}
+
+function writeJsonFile(filePath: string, data: PackageJson) {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + "\n");
+}
+
+function sortDependencyMap(record?: Record<string, string>) {
+  if (!record) return record;
+  return Object.fromEntries(
+    Object.entries(record).sort(([left], [right]) => left.localeCompare(right)),
+  );
+}
+
+function normalizePackageJson(pkg: PackageJson): PackageJson {
+  for (const field of DEPENDENCY_FIELDS) {
+    if (pkg[field]) {
+      pkg[field] = sortDependencyMap(pkg[field]);
+    }
+  }
+  return pkg;
+}
+
+function getPackageName(spec: string): string {
+  return spec.startsWith("@")
+    ? spec.split("/").slice(0, 2).join("/")
+    : spec.split("/")[0];
+}
+
+function findDependency(
+  pkg: PackageJson,
+  dependencyName: string,
+): { field: DependencyField; version: string } | null {
+  for (const field of DEPENDENCY_FIELDS) {
+    const version = pkg[field]?.[dependencyName];
+    if (version) {
+      return { field, version };
+    }
+  }
+  return null;
+}
+
+function syncExternalPackages(
+  appDir: string,
+  args: Args,
+  report: Report,
+): void {
+  const targetPackageJsonPath = path.join(appDir, "package.json");
+  const rootPackageJson = readJsonFile<PackageJson>(ROOT_PACKAGE_JSON);
+  const targetPackageJson = readJsonFile<PackageJson>(targetPackageJsonPath);
+  let changed = false;
+
+  for (const dependencyName of [...report.external].sort()) {
+    if (BUILTIN_PACKAGES.has(dependencyName)) {
+      report.skippedBuiltins.push(dependencyName);
+      continue;
+    }
+
+    const existing = findDependency(targetPackageJson, dependencyName);
+    if (existing) {
+      report.existingPackages.push(
+        `${dependencyName}@${existing.version} (${existing.field})`,
+      );
+      continue;
+    }
+
+    const source = findDependency(rootPackageJson, dependencyName);
+    if (!source) {
+      report.missingPackages.push(dependencyName);
+      continue;
+    }
+
+    const section =
+      (targetPackageJson[source.field] as Record<string, string> | undefined) ??
+      {};
+    section[dependencyName] = source.version;
+    targetPackageJson[source.field] = section;
+    report.syncedPackages.push(
+      `${dependencyName}@${source.version} (${source.field})${args.dryRun ? " (dry-run)" : ""}`,
+    );
+    changed = true;
+  }
+
+  if (!changed || args.dryRun) {
+    return;
+  }
+
+  writeJsonFile(targetPackageJsonPath, normalizePackageJson(targetPackageJson));
 }
 
 function isCodeFile(file: string): boolean {
@@ -251,6 +533,10 @@ function clone(args: Args): Report {
     skippedExisting: [],
     unresolved: [],
     external: new Set(),
+    syncedPackages: [],
+    existingPackages: [],
+    missingPackages: [],
+    skippedBuiltins: [],
   };
 
   while (queue.length) {
@@ -274,11 +560,7 @@ function clone(args: Args): Report {
       for (const ref of refs) {
         const aliased = resolveAlias(ref.spec, abs);
         if (!aliased) {
-          // External package – capture root package name.
-          const pkg = ref.spec.startsWith("@")
-            ? ref.spec.split("/").slice(0, 2).join("/")
-            : ref.spec.split("/")[0];
-          report.external.add(pkg);
+          report.external.add(getPackageName(ref.spec));
           continue;
         }
         const resolved = resolveToFile(aliased);
@@ -309,6 +591,8 @@ function clone(args: Args): Report {
       writeFile(dest, fs.readFileSync(abs), args, report);
     }
   }
+
+  syncExternalPackages(appDir, args, report);
 
   return report;
 }
@@ -343,10 +627,28 @@ function printReport(report: Report) {
     for (const f of report.skippedExisting) console.log(`  = ${f}`);
   }
   if (report.external.size) {
-    console.log(
-      `\n• External packages referenced (ensure they exist in the plugin's package.json):`,
-    );
+    console.log(`\n• External packages referenced:`);
     for (const p of [...report.external].sort()) console.log(`  - ${p}`);
+  }
+  if (report.syncedPackages.length) {
+    console.log(
+      `\n✓ Synced ${report.syncedPackages.length} package(s) into the target app's package.json:`,
+    );
+    for (const p of report.syncedPackages) console.log(`  + ${p}`);
+  }
+  if (report.existingPackages.length) {
+    console.log(
+      `\n• Packages already present in the target app's package.json:`,
+    );
+    for (const p of report.existingPackages) console.log(`  = ${p}`);
+  }
+  if (report.skippedBuiltins.length) {
+    console.log(`\n• Skipped Node builtins:`);
+    for (const p of report.skippedBuiltins) console.log(`  = ${p}`);
+  }
+  if (report.missingPackages.length) {
+    console.log(`\n! External packages missing from the root package.json:`);
+    for (const p of report.missingPackages) console.log(`  ? ${p}`);
   }
   if (report.unresolved.length) {
     console.log(`\n! Unresolved imports:`);
