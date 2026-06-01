@@ -8,7 +8,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 test.describe("Encounter Plots Tab", () => {
   let plotsUrl: string;
 
-  test.beforeEach(async () => {
+  test.beforeEach(() => {
     const facilityId = getFacilityId();
     const patientId = getPatientId();
     const encounterId = getEncounterId();
@@ -25,7 +25,7 @@ test.describe("Encounter Plots Tab", () => {
     });
 
     await test.step("Stub the plots config endpoint with an empty array", async () => {
-      await page.route("**/config/plots.json", (route) =>
+      await page.route("**/config/plots.json*", (route) =>
         route.fulfill({
           status: 200,
           contentType: "application/json",
