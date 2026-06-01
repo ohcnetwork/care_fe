@@ -343,6 +343,28 @@ function isResponseFilled(r: QuestionnaireResponse): boolean {
   return false;
 }
 
+function serializeValue(value: ResponseValue): Record<string, unknown> {
+  if (value.type === "date" && value.value) {
+    const date = new Date(value.value);
+    if (isNaN(date.getTime())) {
+      return { ...value, value: "" };
+    }
+    return { ...value, value: dateQueryString(date) };
+  }
+  if (value.type === "dateTime" && value.value) {
+    return { ...value, value: value.value.toISOString() };
+  }
+  if (value.unit) {
+    return {
+      value: value.value?.toString(),
+      unit: value.unit,
+      coding: value.coding,
+    };
+  }
+  if (value.coding) return { coding: value.coding };
+  return { value: String(value.value) };
+}
+
 function serializeRepeatableGroupResponse(
   response: QuestionnaireResponse,
 ): Record<string, unknown> {
@@ -356,10 +378,7 @@ function serializeRepeatableGroupResponse(
           }
           return {
             question_id: r.question_id,
-            values: r.values.filter(isValueFilled).map((value) => {
-              if (value.coding) return { coding: value.coding };
-              return { value: String(value.value) };
-            }),
+            values: r.values.filter(isValueFilled).map(serializeValue),
             ...(r.note ? { note: r.note } : {}),
           };
         }),
@@ -931,35 +950,7 @@ export function QuestionnaireForm({
                 }
                 return {
                   question_id: response.question_id,
-                  values: response.values.map((value) => {
-                    if (value.type === "date" && value.value) {
-                      const date = new Date(value.value);
-                      if (isNaN(date.getTime())) {
-                        return { ...value, value: "" };
-                      }
-                      const formattedDate = dateQueryString(date);
-                      return {
-                        ...value,
-                        value: formattedDate,
-                      };
-                    } else if (value.type === "dateTime" && value.value) {
-                      return {
-                        ...value,
-                        value: value.value.toISOString(),
-                      };
-                    }
-                    if (value.unit) {
-                      return {
-                        value: value.value?.toString(),
-                        unit: value.unit,
-                        coding: value.coding,
-                      };
-                    }
-                    if (value.coding) {
-                      return { coding: value.coding };
-                    }
-                    return { value: String(value.value) };
-                  }),
+                  values: response.values.map(serializeValue),
                   note: response.note,
                   body_site: response.body_site,
                   method: response.method,
