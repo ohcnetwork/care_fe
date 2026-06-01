@@ -221,10 +221,12 @@ export function SupplyDeliveryTable({
         <TableRow>
           <TableHead>{t("item_price")}</TableHead>
           {informationalCodes.map((code) => (
-            <TableHead key={code.code}>{code.display}</TableHead>
+            <TableHead key={code.code} className="border border-r">
+              {code.display}
+            </TableHead>
           ))}
-          {!internal && <TableHead className="border-r">{t("pr")}</TableHead>}
-          {!internal && <TableHead>{t("tpr")}</TableHead>}
+          {!internal && <TableHead>{t("pr")}</TableHead>}
+          {!internal && <TableHead className="border-r">{t("tpr")}</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody className="text-sm">

@@ -112,7 +112,7 @@ test.describe("Token Category Create - Permission Tests", () => {
         .fill(nonExistentName);
 
       // Verify no results found message is displayed
-      const noResultsText = page.getByText("No products found");
+      const noResultsText = page.getByText("No token categories found");
       await expect(noResultsText).toBeVisible();
     });
 
