@@ -277,15 +277,16 @@ export function DiagnosticReportForm({
   // Handle file upload dialog
   useEffect(() => {
     if (
-      fileUpload.files.length > 0 &&
-      fileUpload.files[0] !== undefined &&
-      !fileUpload.previewing
+      disableEdit ||
+      fileUpload.files.length === 0 ||
+      fileUpload.files[0] === undefined ||
+      fileUpload.previewing
     ) {
-      setOpenUploadDialog(true);
-    } else {
       setOpenUploadDialog(false);
+    } else {
+      setOpenUploadDialog(true);
     }
-  }, [fileUpload.files, fileUpload.previewing]);
+  }, [fileUpload.files, fileUpload.previewing, disableEdit]);
 
   useEffect(() => {
     if (!openUploadDialog) {
@@ -1172,6 +1173,7 @@ export function DiagnosticReportForm({
                               type="button"
                               variant="outline"
                               className=" border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white"
+                              disabled={disableEdit}
                               onClick={() => fileUpload.handleCameraCapture()}
                             >
                               <Camera className="size-4" />
@@ -1180,14 +1182,24 @@ export function DiagnosticReportForm({
                             <Button
                               asChild
                               variant="outline"
+                              disabled={disableEdit}
                               className=" border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white cursor-pointer"
                             >
-                              <Label htmlFor="file_upload_diagnostic_report">
+                              <Label
+                                htmlFor={
+                                  disableEdit
+                                    ? undefined
+                                    : "file_upload_diagnostic_report"
+                                }
+                              >
                                 <Upload className="size-4" />
                                 {t("upload_files")}
                               </Label>
                             </Button>
-                            {fileUpload.Input({ className: "hidden" })}
+                            {fileUpload.Input({
+                              className: "hidden",
+                              disabled: disableEdit,
+                            })}
                           </div>
 
                           {fileUpload.files.length > 0 && (
@@ -1206,6 +1218,7 @@ export function DiagnosticReportForm({
                                 type="button"
                                 variant="outline"
                                 className="w-full border-gray-300 bg-white"
+                                disabled={disableEdit}
                                 onClick={() => fileUpload.clearFiles()}
                               >
                                 {t("clear")}
