@@ -1158,7 +1158,11 @@ export function DiagnosticReportForm({
                             {t("attach_result_files")}
                           </h3>
                           <p className="mt-1.5 text-sm text-gray-600">
-                            {t("add_supporting_photos_or_documents")}
+                            {t("add_supporting_photos_or_documents", {
+                              formats: BACKEND_ALLOWED_EXTENSIONS.slice(0, 5)
+                                .join(", ")
+                                .toUpperCase(),
+                            })}
                           </p>
                           <div className="mt-4 flex gap-3">
                             <Button

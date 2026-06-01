@@ -534,7 +534,7 @@
   "add_spoke": "Add Spoke Facility",
   "add_sub_question": "Add Sub-Question",
   "add_supply_request": "Add Supply Request",
-  "add_supporting_photos_or_documents": "Add supporting photos or documents",
+  "add_supporting_photos_or_documents": "Add supporting photos, reports or documents ({{formats}})",
   "add_symptom": "Add Symptom",
   "add_symptom_one": "Add Symptom",
   "add_symptom_other": "Add another Symptom",
