@@ -180,7 +180,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
         )}
       </CardContent>
 
-      <CardFooter className="flex flex-wrap justify-end items-center px-4 py-2 gap-x-4 gap-y-2 mt-auto">
+      <CardFooter className="flex flex-wrap justify-end items-center px-2 py-2 gap-x-1 gap-y-2 mt-auto">
         <Button variant="link" aria-label={t("patient_home")} asChild>
           <Link
             basePath="/"
