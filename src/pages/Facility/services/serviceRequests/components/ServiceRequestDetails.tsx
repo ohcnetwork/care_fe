@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import React from "react";
 
@@ -44,15 +45,14 @@ interface ServiceRequestDetailsProps {
   request: ServiceRequestReadSpec;
   activityDefinition: ActivityDefinitionReadSpec;
   facilityId: string;
-  onTagsUpdate: () => void;
 }
 
 export function ServiceRequestDetails({
   request,
   activityDefinition,
   facilityId,
-  onTagsUpdate,
 }: ServiceRequestDetailsProps) {
+  const queryClient = useQueryClient();
   const specimenRequirements = activityDefinition?.specimen_requirements ?? [];
   const observationRequirements =
     activityDefinition?.observation_result_requirements ?? [];
@@ -76,7 +76,11 @@ export function ServiceRequestDetails({
               entityId={request.id}
               facilityId={facilityId}
               currentTags={request.tags}
-              onUpdate={onTagsUpdate}
+              onUpdate={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["serviceRequest", facilityId, request.id],
+                });
+              }}
               patientId={request.encounter.patient.id}
             />
           </div>
