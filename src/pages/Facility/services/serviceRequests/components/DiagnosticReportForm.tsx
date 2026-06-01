@@ -1171,19 +1171,14 @@ export function DiagnosticReportForm({
                               {t("take_photo")}
                             </Button>
                             <Button
-                              type="button"
+                              asChild
                               variant="outline"
-                              className=" border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white"
-                              onClick={() =>
-                                document
-                                  .getElementById(
-                                    "file_upload_diagnostic_report",
-                                  )
-                                  ?.click()
-                              }
+                              className=" border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white cursor-pointer"
                             >
-                              <Upload className="size-4" />
-                              {t("upload_files")}
+                              <Label htmlFor="file_upload_diagnostic_report">
+                                <Upload className="size-4" />
+                                {t("upload_files")}
+                              </Label>
                             </Button>
                             {fileUpload.Input({ className: "hidden" })}
                           </div>
