@@ -23,7 +23,12 @@ const FULL_WIDTH_QUESTION_TYPES: StructuredQuestionType[] = [
 interface QuestionRendererProps {
   questions: Question[];
   responses: QuestionnaireResponse[];
-  onResponseChange: (values: ResponseValue[], questionId: string) => void;
+  onResponseChange: (
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+    subResults?: QuestionnaireResponse[][],
+  ) => void;
   errors: QuestionValidationError[];
   clearError: (questionId: string) => void;
   disabled?: boolean;

@@ -6649,5 +6649,6 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
+  "repeatable_group_cannot_contain_structured": "A repeatable group cannot contain structured questions. Please disable repeatable or remove the structured question.",
   "℞": "℞"
 }

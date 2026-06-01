@@ -266,19 +266,96 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
   );
 }
 
+type ResponseItem = {
+  values: ResponseValue[];
+  note?: string;
+  question_id: string;
+  sub_results?: ResponseItem[][];
+};
+
+function hasRenderableContent(
+  questions: Question[] | undefined,
+  responses: ResponseItem[],
+): boolean {
+  if (!questions) return false;
+  return questions.some((question) => {
+    if (question.type === "group") {
+      if (question.repeats) {
+        const groupResp = responses.find((r) => r.question_id === question.id);
+        return (groupResp?.sub_results?.length ?? 0) > 0;
+      }
+      return hasRenderableContent(question.questions, responses);
+    }
+    if (question.type === "structured") return false;
+    const resp = responses.find((r) => r.question_id === question.id);
+    if (!resp) return false;
+    return resp.values.some((v) => v.value || v.coding);
+  });
+}
+
 function QuestionGroup({
   group,
   responses,
   level = 0,
 }: {
   group: Question;
-  responses: {
-    values: ResponseValue[];
-    note?: string;
-    question_id: string;
-  }[];
+  responses: ResponseItem[];
   level?: number;
 }) {
+  // Handle repeatable groups with sub_results
+  if (group.repeats) {
+    const groupResponse = responses.find((r) => r.question_id === group.id);
+    if (!groupResponse?.sub_results?.length) return null;
+
+    return (
+      <div className={cn("space-y-2", group.styling_metadata?.classes)}>
+        {group.text && (
+          <div className="flex flex-col space-y-1">
+            <h4 className="text-lg font-semibold text-black">{group.text}</h4>
+            {level === 0 && <Separator />}
+          </div>
+        )}
+        <div className="space-y-2">
+          {groupResponse.sub_results.map((instance, idx) => (
+            <div key={idx} className="ml-2 border-l-2 border-gray-200 pl-3">
+              {groupResponse.sub_results!.length > 1 && (
+                <span className="text-xs font-medium text-gray-400">
+                  #{idx + 1}
+                </span>
+              )}
+              {group.questions?.map((subQuestion) => {
+                if (subQuestion.type === "structured") return null;
+                if (subQuestion.type === "group") {
+                  return (
+                    <QuestionGroup
+                      key={subQuestion.id}
+                      group={subQuestion}
+                      responses={instance}
+                      level={level + 1}
+                    />
+                  );
+                }
+                const subResp = instance.find(
+                  (r) => r.question_id === subQuestion.id,
+                );
+                if (!subResp) return null;
+                return (
+                  <QuestionResponseValue
+                    key={subQuestion.id}
+                    question={subQuestion}
+                    response={subResp}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasRenderableContent(group.questions, responses)) return null;
+
   return (
     <div className={cn("space-y-2", group.styling_metadata?.classes)}>
       {group.text && (

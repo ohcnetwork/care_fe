@@ -329,6 +329,45 @@ const STRUCTURED_TYPE_VALIDATORS = {
   },
 } as const;
 
+function isValueFilled(v: ResponseValue): boolean {
+  if (v.coding) return true;
+  if (v.value == null || v.value === "") return false;
+  if (Array.isArray(v.value) && v.value.length === 0) return false;
+  return true;
+}
+
+function isResponseFilled(r: QuestionnaireResponse): boolean {
+  if (r.structured_type) return false;
+  if (r.values.length > 0 && r.values.some(isValueFilled)) return true;
+  if (r.sub_results?.some((inst) => inst.some(isResponseFilled))) return true;
+  return false;
+}
+
+function serializeRepeatableGroupResponse(
+  response: QuestionnaireResponse,
+): Record<string, unknown> {
+  return {
+    question_id: response.question_id,
+    sub_results: (response.sub_results ?? [])
+      .map((instance) =>
+        instance.filter(isResponseFilled).map((r) => {
+          if (r.sub_results && r.sub_results.length > 0) {
+            return serializeRepeatableGroupResponse(r);
+          }
+          return {
+            question_id: r.question_id,
+            values: r.values.filter(isValueFilled).map((value) => {
+              if (value.coding) return { coding: value.coding };
+              return { value: String(value.value) };
+            }),
+            ...(r.note ? { note: r.note } : {}),
+          };
+        }),
+      )
+      .filter((instance) => instance.length > 0),
+  };
+}
+
 const initializeResponses = (
   questions: Question[],
 ): QuestionnaireResponse[] => {
@@ -336,7 +375,17 @@ const initializeResponses = (
 
   const processQuestion = (q: Question) => {
     if (q.type === "group" && q.questions) {
-      q.questions.forEach(processQuestion);
+      if (q.repeats) {
+        responses.push({
+          question_id: q.id,
+          link_id: q.link_id,
+          values: [],
+          structured_type: null,
+          sub_results: [initializeResponses(q.questions)],
+        });
+      } else {
+        q.questions.forEach(processQuestion);
+      }
     } else {
       let defaultValues: ResponseValue[] = [];
       if (q.answer_option && q.answer_option.length > 0) {
@@ -854,10 +903,7 @@ export function QuestionnaireForm({
     // Then, add questionnaire submission requests
     formsWithValidation.forEach((form) => {
       const validResponses = form.responses.filter(
-        (response) =>
-          !response.structured_type &&
-          response.values.length > 0 &&
-          response.values?.[0]?.value !== "",
+        (response) => !response.structured_type && isResponseFilled(response),
       );
       if (validResponses.length > 0) {
         requests.push({
@@ -878,41 +924,47 @@ export function QuestionnaireForm({
                   form.responses,
                 ),
               )
-              .map((response) => ({
-                question_id: response.question_id,
-                values: response.values.map((value) => {
-                  if (value.type === "date" && value.value) {
-                    const date = new Date(value.value);
-                    if (isNaN(date.getTime())) {
-                      return { ...value, value: "" };
+              .map((response) => {
+                // Handle repeatable group responses
+                if (response.sub_results && response.sub_results.length > 0) {
+                  return serializeRepeatableGroupResponse(response);
+                }
+                return {
+                  question_id: response.question_id,
+                  values: response.values.map((value) => {
+                    if (value.type === "date" && value.value) {
+                      const date = new Date(value.value);
+                      if (isNaN(date.getTime())) {
+                        return { ...value, value: "" };
+                      }
+                      const formattedDate = dateQueryString(date);
+                      return {
+                        ...value,
+                        value: formattedDate,
+                      };
+                    } else if (value.type === "dateTime" && value.value) {
+                      return {
+                        ...value,
+                        value: value.value.toISOString(),
+                      };
                     }
-                    const formattedDate = dateQueryString(date);
-                    return {
-                      ...value,
-                      value: formattedDate,
-                    };
-                  } else if (value.type === "dateTime" && value.value) {
-                    return {
-                      ...value,
-                      value: value.value.toISOString(),
-                    };
-                  }
-                  if (value.unit) {
-                    return {
-                      value: value.value?.toString(),
-                      unit: value.unit,
-                      coding: value.coding,
-                    };
-                  }
-                  if (value.coding) {
-                    return { coding: value.coding };
-                  }
-                  return { value: String(value.value) };
-                }),
-                note: response.note,
-                body_site: response.body_site,
-                method: response.method,
-              })),
+                    if (value.unit) {
+                      return {
+                        value: value.value?.toString(),
+                        unit: value.unit,
+                        coding: value.coding,
+                      };
+                    }
+                    if (value.coding) {
+                      return { coding: value.coding };
+                    }
+                    return { value: String(value.value) };
+                  }),
+                  note: response.note,
+                  body_site: response.body_site,
+                  method: response.method,
+                };
+              }),
           },
         });
       }
@@ -1054,6 +1106,7 @@ export function QuestionnaireForm({
                 values: ResponseValue[],
                 questionId: string,
                 note?: string,
+                subResults?: QuestionnaireResponse[][],
               ) => {
                 setQuestionnaireForms((existingForms) =>
                   existingForms.map((formItem) =>
@@ -1062,7 +1115,14 @@ export function QuestionnaireForm({
                           ...formItem,
                           responses: formItem.responses.map((r) =>
                             r.question_id === questionId
-                              ? { ...r, values, note: note }
+                              ? {
+                                  ...r,
+                                  values,
+                                  note: note,
+                                  ...(subResults !== undefined
+                                    ? { sub_results: subResults }
+                                    : {}),
+                                }
                               : r,
                           ),
                           errors: [],

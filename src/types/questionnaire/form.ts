@@ -49,4 +49,5 @@ export interface QuestionnaireResponse {
   taken_at?: string;
   body_site?: Code;
   method?: Code;
+  sub_results?: QuestionnaireResponse[][];
 }

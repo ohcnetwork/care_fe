@@ -210,12 +210,16 @@ function LayoutOptionCard({
   );
 }
 
-const HIDE_REPEATABLE_QUESTION_TYPES = [
-  "boolean",
-  "group",
-  "display",
-  "structured",
-];
+const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "display", "structured"];
+
+function hasStructuredQuestion(questions?: Question[]): boolean {
+  if (!questions) return false;
+  return questions.some(
+    (q) =>
+      q.type === "structured" ||
+      (q.type === "group" && hasStructuredQuestion(q.questions)),
+  );
+}
 
 function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
   for (let i = 0; i < errors.length; i++) {
@@ -702,6 +706,16 @@ export default function QuestionnaireEditor({
               type: "manual",
               message: t("group_must_have_sub_questions"),
             });
+            isValid = false;
+          }
+          if (question.repeats && hasStructuredQuestion(question.questions)) {
+            form.setError(`${currentPath}.repeats`, {
+              type: "manual",
+              message: t("repeatable_group_cannot_contain_structured"),
+            });
+            toast.error(
+              `${question.text}: ${t("repeatable_group_cannot_contain_structured")}`,
+            );
             isValid = false;
           }
         }

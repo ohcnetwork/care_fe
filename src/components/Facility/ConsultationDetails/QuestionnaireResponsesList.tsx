@@ -103,8 +103,104 @@ function QuestionGroup({
   isSingleGroup?: boolean;
 }) {
   const { t } = useTranslation();
+
+  // Handle repeatable groups with sub_results
+  if (group.repeats) {
+    const groupResponse = responses.find((r) => r.question_id === group.id);
+    if (!groupResponse?.sub_results?.length) return null;
+
+    return (
+      <div className="border border-gray-200 rounded-md px-3 py-1.5">
+        <h3 className="text-sm font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
+          {group.text}
+        </h3>
+        <div className="space-y-2">
+          {groupResponse.sub_results.map((instance, idx) => (
+            <div key={idx} className="border border-gray-100 rounded px-2 py-1">
+              {groupResponse.sub_results!.length > 1 && (
+                <span className="text-xs font-medium text-gray-400">
+                  #{idx + 1}
+                </span>
+              )}
+              <Table className="table-fixed w-full">
+                <TableBody>
+                  {group.questions?.map((subQuestion) => {
+                    if (subQuestion.type === "structured") return null;
+                    if (subQuestion.type === "group") return null;
+                    const subResp = instance.find(
+                      (r) => r.question_id === subQuestion.id,
+                    );
+                    if (!subResp?.values?.length) return null;
+                    const hasAnyValue = subResp.values.some(
+                      (v) => v.value || v.coding,
+                    );
+                    if (!hasAnyValue) return null;
+
+                    return (
+                      <TableRow
+                        key={subQuestion.id}
+                        className="flex flex-col md:table-row"
+                      >
+                        <TableCell className="py-1 pl-0 align-top">
+                          <div className="text-sm text-gray-600 wrap-break-words whitespace-normal">
+                            {subQuestion.text}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-1 pr-0 align-top">
+                          <div className="text-sm font-medium wrap-break-words whitespace-pre-wrap">
+                            {subResp.values.map((val, vidx) => (
+                              <React.Fragment key={vidx}>
+                                {vidx > 0 && ", "}
+                                {val.value &&
+                                  formatValue(val.value, subQuestion.type)}
+                                {val.unit && (
+                                  <span className="ml-1 text-gray-600">
+                                    {val.unit.code}
+                                  </span>
+                                )}
+                                {val.coding && (
+                                  <span className="ml-1 text-gray-600">
+                                    {val.coding.display} ({val.coding.code})
+                                  </span>
+                                )}
+                              </React.Fragment>
+                            ))}
+                            {subResp.note && (
+                              <p className="text-xs text-gray-500 mt-0.5 italic">
+                                {subResp.note}
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+              {/* Render nested groups (including nested repeatable groups) */}
+              {group.questions?.map((subQuestion) => {
+                if (subQuestion.type !== "group") return null;
+                return (
+                  <QuestionGroup
+                    key={subQuestion.id}
+                    group={subQuestion}
+                    responses={instance}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const hasResponses = group.questions?.some((q) => {
     if (q.type === "group") {
+      if (q.repeats) {
+        const groupResp = responses.find((r) => r.question_id === q.id);
+        return groupResp?.sub_results && groupResp.sub_results.length > 0;
+      }
       return q.questions?.some((subQ) =>
         responses.some((r) => r.question_id === subQ.id),
       );
