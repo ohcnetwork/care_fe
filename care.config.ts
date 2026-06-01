@@ -196,6 +196,10 @@ const careConfig = {
       })
     : [],
 
+  appStore: {
+    indexUrl: env.REACT_APP_STORE_INDEX_URL,
+  },
+
   plotsConfigUrl:
     env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
 
