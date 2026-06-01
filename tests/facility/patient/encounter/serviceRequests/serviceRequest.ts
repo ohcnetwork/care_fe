@@ -21,8 +21,13 @@ export const STATUS_OPTIONS = [
 
 export const ACTIVITY_DEFINITIONS = [
   "Urinalysis",
-  "Complete Blood Count (CBC) Panel",
   "Lipid Panel",
+  "Fasting Blood Glucose",
+];
+
+export const OBSERVATION_DEFINITIONS = [
+  "Urinalysis Observation",
+  "Lipid Panel Observation",
   "Fasting Blood Glucose",
 ];
 

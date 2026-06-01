@@ -9,6 +9,7 @@
     "src/components/ui/definition-list.tsx",
     "src/pages/Admin/organizations/components/AdminOrganizationSelector.tsx",
     "src/pages/Encounters/ReportBuilder/ReportBuilderSheet.tsx",
+    "src/pluginMap.ts",
     "src/pluginTypes.ts",
     "src/service-worker.ts"
   ],
@@ -26,12 +27,6 @@
       "__federation__",
       [
         "src/PluginEngine.tsx"
-      ]
-    ],
-    [
-      "./pluginMap",
-      [
-        "src/pluginTypes.ts"
       ]
     ],
     [
@@ -66,6 +61,13 @@
         "node_modules/@tailwindcss/forms/src/index.js",
         "node_modules/@tailwindcss/typography/src/index.js",
         "node_modules/@tailwindcss/container-queries/dist/index.js"
+      ]
+    ],
+    [
+      "virtual:care-local-plugins",
+      [
+        "src/Utils/plugConfig.ts",
+        "src/PluginEngine.tsx"
       ]
     ],
     [
