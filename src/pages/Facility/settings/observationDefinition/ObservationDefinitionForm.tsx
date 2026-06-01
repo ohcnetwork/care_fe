@@ -774,7 +774,6 @@ function ObservationDefinitionFormContent({
                         appendComponent({
                           code: { code: "", display: "", system: "" },
                           permitted_data_type: QuestionType.quantity,
-                          permitted_unit: null,
                           qualified_ranges: [],
                         });
                       }}
@@ -945,7 +944,6 @@ function ObservationDefinitionFormContent({
                         appendComponent({
                           code: { code: "", display: "", system: "" },
                           permitted_data_type: QuestionType.quantity,
-                          permitted_unit: null,
                           qualified_ranges: [],
                         });
                       }}
