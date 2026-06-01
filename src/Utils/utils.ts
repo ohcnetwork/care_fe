@@ -429,7 +429,7 @@ export function formatTruncatedList<T>(
   const displayedItems = items.slice(0, maxItems);
   const remainingCount = items.length - maxItems;
 
-  return `${displayedItems.map(getDisplayValue).join(", ")} ... +${remainingCount} ${t("more") || moreText}`;
+  return `${displayedItems.map(getDisplayValue).join(", ")} ... +${remainingCount} ${moreText || t("more")}`;
 }
 
 export function deepFreeze<T>(obj: T): T {
