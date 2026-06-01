@@ -30,40 +30,33 @@ jobs:
             // Build regex pattern: CARE-123, OHC-456, etc.
             const jiraTicketRegex = new RegExp(`\\b(${jiraProjectKeys.join('|')})-\\d+\\b`, 'i');
 
-            // Helper to create or update bot comment
-            async function upsertComment(body) {
-              const marker = '<!-- jira-validation-bot -->';
-              const { data: comments } = await github.rest.issues.listComments({
+            // Helper to append/update JIRA info in PR body
+            const marker = '<!-- jira-validation-bot -->';
+            async function upsertInBody(content) {
+              const currentBody = pr.body || '';
+              const markedContent = `${marker}\n${content}\n<!-- /jira-validation-bot -->`;
+              const regex = /<!-- jira-validation-bot -->[\s\S]*?<!-- \/jira-validation-bot -->/;
+
+              let newBody;
+              if (regex.test(currentBody)) {
+                newBody = currentBody.replace(regex, markedContent);
+              } else {
+                newBody = currentBody ? `${currentBody}\n\n---\n\n${markedContent}` : markedContent;
+              }
+
+              await github.rest.pulls.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: prNumber
+                pull_number: prNumber,
+                body: newBody
               });
-
-              const existing = comments.find(c => c.body.includes(marker));
-              const markedBody = `${marker}\n${body}`;
-
-              if (existing) {
-                await github.rest.issues.updateComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: existing.id,
-                  body: markedBody
-                });
-              } else {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: prNumber,
-                  body: markedBody
-                });
-              }
             }
 
             // Check title for JIRA ticket
             const titleMatch = prTitle.match(jiraTicketRegex);
             if (titleMatch) {
               const ticket = titleMatch[0].toUpperCase();
-              await upsertComment(`✅ **JIRA Validation Passed**\n\nFound JIRA ticket: **${ticket}**`);
+              await upsertInBody(`✅ **JIRA Validation Passed**\n\nFound JIRA ticket: **${ticket}**`);
               return;
             }
 
@@ -80,7 +73,7 @@ jobs:
                 title: newTitle
               });
 
-              await upsertComment(
+              await upsertInBody(
                 `✅ **JIRA Validation Passed**\n\n` +
                 `Added JIRA ticket from branch to PR title.\n\n` +
                 `| Field | Value |\n|-------|-------|\n` +
@@ -92,7 +85,7 @@ jobs:
 
             // Validation failed
             const examples = jiraProjectKeys.map(k => `\`${k}-123\``).join(', ');
-            await upsertComment(
+            await upsertInBody(
               `❌ **JIRA Validation Failed**\n\n` +
               `PR title must contain a JIRA ticket number.\n\n` +
               `**Expected format:** \`[${jiraProjectKeys.join('/')}]-<number>\`\n` +
