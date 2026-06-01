@@ -26,6 +26,11 @@ interface Options {
   locationId: string;
   patientId: string;
   fallbackEncounterId: string;
+  /**
+   * When set, newly-created dispenses attach to this dispense order via the
+   * `order` field instead of creating a new one. Used by the edit flow.
+   */
+  dispenseOrderId?: string;
   onSuccess?: (dispenseOrder: DispenseOrderRead) => void;
 }
 
@@ -34,6 +39,7 @@ export default function useBillMedications({
   locationId,
   patientId,
   fallbackEncounterId,
+  dispenseOrderId,
   onSuccess,
 }: Options) {
   const queryClient = useQueryClient();
@@ -117,6 +123,7 @@ export default function useBillMedications({
           items,
           locationId,
           fallbackEncounterId,
+          dispenseOrderId,
           alternateIdentifier: getDispenseCreateAlternateIdentifier(patientId),
         }),
 
@@ -140,7 +147,7 @@ export default function useBillMedications({
 
       if (chargeItems.length > 0 && accountId) {
         const invoice = await createInvoiceMutation.mutateAsync({
-          status: InvoiceStatus.issued,
+          status: InvoiceStatus.draft,
           account: accountId,
           charge_items: chargeItems.map((item) => item.id),
         });
@@ -167,11 +174,13 @@ const getDispenseCreateRequests = ({
   alternateIdentifier,
   locationId,
   fallbackEncounterId,
+  dispenseOrderId,
 }: {
   items: BillMedicationLineItemSchemaType[];
   alternateIdentifier: string;
   locationId: string;
   fallbackEncounterId: string;
+  dispenseOrderId?: string;
 }) => {
   const whenPrepared = new Date();
 
@@ -188,14 +197,13 @@ const getDispenseCreateRequests = ({
         category: item.medication?.category ?? MedicationCategory.outpatient,
         when_prepared: whenPrepared,
         dosage_instruction: item.dosageInstructions ?? [],
-        encounter: (item.medication?.encounter ?? fallbackEncounterId)!,
+        encounter: (item.medication?.encounter ??
+          item.encounterOverride ??
+          fallbackEncounterId)!,
         authorizing_request: item.medication?.id ?? null,
         item: lot.item.id,
         quantity: lot.quantity,
         fully_dispensed: item.allGiven,
-        create_dispense_order: {
-          alternate_identifier: alternateIdentifier,
-        },
         location: locationId,
         substitution: item.substitution
           ? {
@@ -205,6 +213,16 @@ const getDispenseCreateRequests = ({
             }
           : undefined,
       };
+
+      if (dispenseOrderId) {
+        // Attach to existing dispense order by setting the `order` field. This will be used by the edit flow.
+        body.order = dispenseOrderId;
+      } else {
+        // Create a new dispense order by including the `create_dispense_order` field. This will be used by the new bill medications flow.
+        body.create_dispense_order = {
+          alternate_identifier: alternateIdentifier,
+        };
+      }
 
       requests.push({
         url: "/api/v1/medication/dispense/",

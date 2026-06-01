@@ -6719,5 +6719,8 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
+  "edit_dispense_order": "Edit",
+  "dispense_order_cannot_be_edited_due_to_invoice": "Cancel the related invoice before editing this dispense order.",
+  "dispense_order_updated_successfully": "Dispense order updated successfully.",
   "℞": "℞"
 }

@@ -4,6 +4,7 @@ import {
   DispenseOrderStatus,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import {
+  MEDICATION_DISPENSE_CANCELLED_STATUSES,
   MedicationDispenseRead,
   MedicationDispenseStatus,
   MedicationDispenseUpsert,
@@ -90,11 +91,7 @@ export default function useUpdateDispenseOrderStatus({
         }
 
         // Don't move dispenses that are already cancelled / in error / declined.
-        if (
-          dispense.status === MedicationDispenseStatus.cancelled ||
-          dispense.status === MedicationDispenseStatus.entered_in_error ||
-          dispense.status === MedicationDispenseStatus.declined
-        ) {
+        if (MEDICATION_DISPENSE_CANCELLED_STATUSES.includes(dispense.status)) {
           return false;
         }
 

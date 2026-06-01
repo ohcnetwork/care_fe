@@ -138,7 +138,7 @@ const getPrescriptionFormValues = (
         medication,
         productKnowledge: medication.requested_product ?? null,
         substitution: null,
-        dosageInstructions: null,
+        dosageInstructions: medication.dosage_instruction,
         lots: [],
         allGiven: true,
       })),

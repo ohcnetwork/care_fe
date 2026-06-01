@@ -16,15 +16,11 @@ import {
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { LotSelection } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
-import {
-  isLessThanOrEqual,
-  isPositive,
-  roundWhole,
-  zodDecimal,
-} from "@/Utils/decimal";
+import { isPositive, roundWhole } from "@/Utils/decimal";
 import {
   formatLotExpiry,
   getExpiryBadgeVariant,
@@ -33,24 +29,6 @@ import {
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useQuery } from "@tanstack/react-query";
-import { z } from "zod";
-
-export const lotSelectionSchema = z
-  .object({
-    item: z.custom<InventoryRead>(),
-    quantity: zodDecimal({ min: 0 }),
-    autoSelected: z.boolean().optional(),
-  })
-  .refine(
-    (data) =>
-      data.quantity && isLessThanOrEqual(data.quantity, data.item.net_content),
-    {
-      path: ["quantity"],
-      message: "Insufficient stock",
-    },
-  );
-
-export type LotSelection = z.infer<typeof lotSelectionSchema>;
 
 interface Props {
   facilityId: string;

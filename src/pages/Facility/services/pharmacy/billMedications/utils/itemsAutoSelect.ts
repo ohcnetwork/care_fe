@@ -1,4 +1,4 @@
-import { LotSelection } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
+import { LotSelection } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { decimal, roundWhole } from "@/Utils/decimal";
 import Decimal from "decimal.js";

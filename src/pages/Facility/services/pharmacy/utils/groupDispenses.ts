@@ -1,8 +1,8 @@
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
-import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import { PrescriptionList } from "@/types/emr/prescription/prescription";
 
 export interface DispensePrescriptionGroup {
-  prescription: PrescriptionRead;
+  prescription: PrescriptionList;
   dispenses: MedicationDispenseRead[];
 }
 

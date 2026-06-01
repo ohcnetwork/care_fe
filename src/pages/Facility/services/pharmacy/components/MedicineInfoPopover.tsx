@@ -21,7 +21,7 @@ interface MedicineInfoCardProps {
   effectiveProductKnowledge: ProductKnowledgeBase | null;
   substitution: MedicationBillSubstitution | null;
   productKnowledge: ProductKnowledgeBase | null;
-  dosageInstructions?: MedicationRequestDosageInstruction[] | null;
+  dosageInstructions: MedicationRequestDosageInstruction[];
 }
 
 export const MedicineInfoPopover = ({
@@ -59,9 +59,8 @@ export const MedicineInfoPopover = ({
                     t("unknown_medication")}
                 </h4>
                 <span className="text-xs text-gray-600">
-                  {formatMedicationLine(
-                    (dosageInstructions ?? medication?.dosage_instruction)?.[0],
-                  )}
+                  {/* TODO: handle multiple dosage instructions */}
+                  {formatMedicationLine(dosageInstructions[0])}
                 </span>
               </div>
               <Button

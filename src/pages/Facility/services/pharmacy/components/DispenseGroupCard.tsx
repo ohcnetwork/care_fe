@@ -11,13 +11,14 @@ import { cn } from "@/lib/utils";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
+  MEDICATION_DISPENSE_CANCELLED_STATUSES,
   MEDICATION_DISPENSE_STATUS_COLORS,
   MedicationDispenseRead,
   MedicationDispenseStatus,
   MedicationDispenseUpdate,
 } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
-import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import { PrescriptionList } from "@/types/emr/prescription/prescription";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { LocationRead } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
@@ -51,11 +52,7 @@ function getStatusOptions(
     !chargeItem.paid_invoice ||
     chargeItem.paid_invoice.status === InvoiceStatus.draft
   ) {
-    options.push(
-      MedicationDispenseStatus.declined,
-      MedicationDispenseStatus.entered_in_error,
-      MedicationDispenseStatus.cancelled,
-    );
+    options.push(...MEDICATION_DISPENSE_CANCELLED_STATUSES);
   }
   return options;
 }
@@ -105,10 +102,9 @@ function DispenseItemsTable({
         const batchNumber = dispense.item.product.batch?.lot_number;
         const expiryDate = dispense.item.product.expiration_date;
 
-        const isCancelled =
-          dispense.status === MedicationDispenseStatus.cancelled ||
-          dispense.status === MedicationDispenseStatus.declined ||
-          dispense.status === MedicationDispenseStatus.entered_in_error;
+        const isCancelled = MEDICATION_DISPENSE_CANCELLED_STATUSES.includes(
+          dispense.status,
+        );
 
         return (
           <Fragment key={dispense.id}>
@@ -212,7 +208,7 @@ function DispenseItemsTable({
 }
 
 interface PrescriptionGroupCardProps {
-  prescription: PrescriptionRead;
+  prescription: PrescriptionList;
   dispenses: MedicationDispenseRead[];
 }
 

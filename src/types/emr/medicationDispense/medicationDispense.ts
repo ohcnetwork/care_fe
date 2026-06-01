@@ -23,6 +23,14 @@ export enum MedicationDispenseStatus {
   declined = "declined",
 }
 
+export const MEDICATION_DISPENSE_CANCELLED_STATUSES: MedicationDispenseStatus[] =
+  [
+    MedicationDispenseStatus.cancelled,
+    MedicationDispenseStatus.entered_in_error,
+    MedicationDispenseStatus.stopped,
+    MedicationDispenseStatus.declined,
+  ];
+
 export const MEDICATION_DISPENSE_STATUS_COLORS = {
   preparation: "blue",
   in_progress: "yellow",

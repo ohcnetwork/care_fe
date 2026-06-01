@@ -22,11 +22,11 @@ import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
+import { InventoryItemsSelector } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import {
-  InventoryItemsSelector,
+  billMedicationsFormSchema,
   LotSelection,
-} from "@/pages/Facility/services/inventory/InventoryItemsSelector";
-import { billMedicationsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
+} from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
 import { isMedicationDispenseable } from "@/pages/Facility/services/pharmacy/billMedications/utils/utils";
 import { MedicineInfoPopover } from "@/pages/Facility/services/pharmacy/components/MedicineInfoPopover";
@@ -520,11 +520,8 @@ const MedicineLineItem = ({
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;
 
-  const effectiveDosageInstructions =
-    dosageInstructions ?? medication?.dosage_instruction;
-
   const canAutoSelectInventoryItems = !!(
-    effectiveDosageInstructions && effectiveProductKnowledge
+    dosageInstructions && effectiveProductKnowledge
   );
 
   const {
@@ -541,13 +538,11 @@ const MedicineLineItem = ({
       },
     }),
     onSuccess: (data: PaginatedResponse<InventoryRead>) => {
-      if (!effectiveDosageInstructions) {
+      if (!canAutoSelectInventoryItems) {
         return;
       }
 
-      const quantity = computeMedicationDispenseQuantity(
-        effectiveDosageInstructions,
-      );
+      const quantity = computeMedicationDispenseQuantity(dosageInstructions);
       const autoSelectedLots = selectEligibleInventoryItems(data.results, {
         quantity: decimal(quantity),
         canSelect: isLotAllowedForDispensing,
@@ -562,9 +557,20 @@ const MedicineLineItem = ({
   });
 
   useEffect(() => {
+    const hasExistingDispenseInAnyLot = lots.some(
+      (lot) => !!lot.existingDispenseId,
+    );
+
+    // Skip auto-selection on mount, when any of the already selected lots are
+    // from an existing dispense (edit dispense workflow).
+    if (hasExistingDispenseInAnyLot) {
+      return;
+    }
+
     if (canAutoSelectInventoryItems) {
       autoSelectInventoryItems(undefined);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canAutoSelectInventoryItems, autoSelectInventoryItems]);
 
   return (
@@ -906,20 +912,18 @@ const MedicineLineItemMedication = ({
             </span>
           )}
           <div className="flex flex-col gap-0.5">
-            {(dosageInstructions ?? medication?.dosage_instruction)?.map(
-              (instruction, index) => {
-                const line = formatMedicationLine(instruction);
-                if (!line) return null;
-                return (
-                  <span
-                    key={index}
-                    className="text-sm text-gray-700 font-medium flex items-center gap-1 whitespace-nowrap capitalize"
-                  >
-                    {line}
-                  </span>
-                );
-              },
-            )}
+            {dosageInstructions?.map((instruction, index) => {
+              const line = formatMedicationLine(instruction);
+              if (!line) return null;
+              return (
+                <span
+                  key={index}
+                  className="text-sm text-gray-700 font-medium flex items-center gap-1 whitespace-nowrap capitalize"
+                >
+                  {line}
+                </span>
+              );
+            })}
           </div>
         </div>
         <div className="flex gap-1">

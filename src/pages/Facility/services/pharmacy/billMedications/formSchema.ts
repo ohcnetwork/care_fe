@@ -1,4 +1,3 @@
-import { lotSelectionSchema } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import {
   SubstitutionReason,
   SubstitutionType,
@@ -8,9 +7,56 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import { add, decimal, isPositive } from "@/Utils/decimal";
+import {
+  add,
+  decimal,
+  isLessThanOrEqual,
+  isPositive,
+  zodDecimal,
+} from "@/Utils/decimal";
 import { z } from "zod";
+
+const lotSelectionSchema = z
+  .object({
+    /*
+     * The inventory item (lot) selected for dispensing.
+     */
+    item: z.custom<InventoryRead>(),
+    /*
+     * The quantity to dispense from the selected lot.
+     * Should be less than or equal to the available stock (`item.net_content`).
+     */
+    quantity: zodDecimal({ min: 0 }),
+    /*
+     * Whether the lot was auto-selected by the system based on the dispense
+     * quantity and available stock.
+     */
+    autoSelected: z.boolean().optional(),
+    /**
+     * The id of an existing MedicationDispense that this lot was hydrated
+     * from in the edit-dispense-order flow. Used by the submit handler to
+     * diff against the original snapshot.
+     */
+    existingDispenseId: z.string().optional(),
+    /**
+     * The original quantity of the existing dispense at the time it was
+     * hydrated. Used together with `existingDispenseId` to determine whether
+     * the lot was modified.
+     */
+    existingDispenseQuantity: z.string().optional(),
+  })
+  .refine(
+    (data) =>
+      data.quantity && isLessThanOrEqual(data.quantity, data.item.net_content),
+    {
+      path: ["quantity"],
+      message: "Insufficient stock",
+    },
+  );
+
+export type LotSelection = z.infer<typeof lotSelectionSchema>;
 
 const billMedicationLineItemSchema = z
   .object({
@@ -23,10 +69,15 @@ const billMedicationLineItemSchema = z
     /** The medication request */
     medication: z.custom<MedicationRequestRead>().nullable(),
 
-    /** The dosage instructions, when medicines are added without medication request / prescription. */
-    dosageInstructions: z
-      .custom<MedicationRequestDosageInstruction[]>()
-      .nullable(),
+    /**
+     * Encounter override. Used by the edit-dispense-order flow where a
+     * single page can carry items from multiple encounters. When set, takes
+     * precedence over `medication?.encounter` and the page-level fallback.
+     */
+    encounterOverride: z.string().optional(),
+
+    /** The dosage instructions for the product */
+    dosageInstructions: z.custom<MedicationRequestDosageInstruction[]>(),
 
     /** The product knowledge (either from medication request or product knowledge select from add medication flow) */
     productKnowledge: z.custom<ProductKnowledgeBase>().nullable(),

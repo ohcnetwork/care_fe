@@ -37,7 +37,7 @@ export interface MedicationBillFormItem {
   productKnowledge?: ProductKnowledgeBase;
   isSelected: boolean;
   fully_dispensed: boolean;
-  dosageInstructions?: MedicationRequestDosageInstruction[];
+  dosageInstructions: MedicationRequestDosageInstruction[];
   lots: MedicationBillLotItem[];
   substitution?: MedicationBillSubstitution;
   prescriptionId?: string;
