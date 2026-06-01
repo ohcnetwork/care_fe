@@ -42,11 +42,7 @@ export function FacilitySwitcher({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu
-          onOpenChange={(open) => {
-            if (!open) setSearchQuery("");
-          }}
-        >
+        <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
@@ -109,7 +105,10 @@ export function FacilitySwitcher({
                       "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
                   )}
                 >
-                  <Link href={`/facility/${facility.id}/overview`}>
+                  <Link
+                    href={`/facility/${facility.id}/overview`}
+                    onClick={() => setSearchQuery("")}
+                  >
                     <div className="flex size-6 items-center justify-center rounded-sm border border-gray-200 shrink-0">
                       <Hospital className="size-4 shrink-0 text-current" />
                     </div>
