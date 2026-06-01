@@ -198,6 +198,15 @@ jobs:
         run: |
           echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
 
+      - name: Upload results to Trunk Flaky Tests
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        uses: trunk-io/analytics-uploader@v1
+        with:
+          junit-paths: test-results/junit.xml
+          org-slug: ${{ vars.TRUNK_ORG_URL_SLUG }}
+          token: ${{ secrets.TRUNK_API_TOKEN }}
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
