@@ -46,6 +46,7 @@ type TabContentProps = {
   renderChild: (item: FacilityBareMinimum | Organization) => React.ReactNode;
   isLoading?: boolean;
   searchComponent?: React.ReactNode;
+  emptyStateTitle?: string;
 };
 
 export default function UserDashboard() {
@@ -242,6 +243,7 @@ export default function UserDashboard() {
                     </div>
                   ) : undefined
                 }
+                emptyStateTitle={t("no_facilities_found")}
                 renderChild={(facility) => {
                   return (
                     <Link
@@ -361,6 +363,7 @@ const TabContent = ({
   renderChild,
   isLoading,
   searchComponent,
+  emptyStateTitle,
 }: TabContentProps) => {
   const { t } = useTranslation();
   return (
@@ -390,7 +393,7 @@ const TabContent = ({
       ) : tabItems.length === 0 ? (
         <EmptyState
           icon={<Search className="size-5 text-primary" />}
-          title={t("no_results_found")}
+          title={emptyStateTitle || t("no_results_found")}
           className="border-solid"
         />
       ) : (

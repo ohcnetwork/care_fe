@@ -8,13 +8,21 @@ test.describe("Dashboard - Facility Search", () => {
     await expect(page.getByRole("tab", { name: "Facilities" })).toBeVisible();
     const searchInput = page.getByPlaceholder(/Search Facilities/i);
 
+    // If more than 1 facility exists, search should be visible; otherwise skip
+    const initialFacilities = await page.getByRole("link").all();
+    if (initialFacilities.length <= 1) {
+      test.skip();
+      return;
+    }
+
+    const isSearchVisible = await searchInput.isVisible().catch(() => false);
+    if (!isSearchVisible) {
+      test.skip();
+      return;
+    }
+
     await test.step("Search for a facility FACILITY WITH PATIENTS", async () => {
       const facilityName = "FACILITY WITH PATIENTS";
-      const isSearchVisible = await searchInput.isVisible().catch(() => false);
-      if (!isSearchVisible) {
-        test.skip();
-        return;
-      }
 
       await searchInput.fill(facilityName);
 
@@ -25,14 +33,8 @@ test.describe("Dashboard - Facility Search", () => {
     });
 
     await test.step("Show empty state for non-matching search", async () => {
-      const isSearchVisible = await searchInput.isVisible().catch(() => false);
-      if (!isSearchVisible) {
-        test.skip();
-        return;
-      }
-
       await searchInput.fill("zzz_nonexistent_facility_xyz");
-      await expect(page.getByText(/no results found/i)).toBeVisible();
+      await expect(page.getByText(/no facilities found/i)).toBeVisible();
 
       // Ensure more than one facility link is shown after clearing search
       await searchInput.clear();

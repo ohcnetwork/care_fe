@@ -92,7 +92,7 @@ export function FacilitySwitcher({
             )}
             {filteredFacilities.length === 0 ? (
               <div className="px-2 py-4 text-center text-sm text-gray-500">
-                {t("no_results_found")}
+                {t("no_facilities_found")}
               </div>
             ) : (
               filteredFacilities.map((facility, index) => (
