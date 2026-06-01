@@ -139,8 +139,9 @@ export default function PatientHome() {
                       ],
                     });
                   }}
+                  className="flex-col sm:items-start"
                 >
-                  <div className="flex flex-wrap gap-2 mx-2">
+                  <div className="flex flex-wrap gap-2 mx-2 self-end">
                     <PLUGIN_Component
                       __name="PatientInfoCardActions"
                       patient={patientData}

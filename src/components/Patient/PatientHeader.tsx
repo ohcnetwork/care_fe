@@ -31,7 +31,7 @@ export function PatientHeader({
         className,
       )}
     >
-      <div className="flex flex-col md:flex-row gap-4 xl:gap-8 xl:items-center">
+      <div className="flex flex-col md:flex-row flex-wrap lg:flex-nowrap gap-4 xl:gap-8 xl:items-center">
         <PatientHoverCard
           patient={patient}
           facilityId={facilityId}

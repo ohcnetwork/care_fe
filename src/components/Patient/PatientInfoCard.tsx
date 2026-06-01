@@ -4,6 +4,7 @@ import TagAssignmentSheet, {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
 import {
   PatientListRead,
@@ -25,6 +26,7 @@ export const PatientInfoCard = ({
   children,
   tagEntityType,
   tagEntityId,
+  className,
 }: {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   tags: TagConfig[];
@@ -33,18 +35,19 @@ export const PatientInfoCard = ({
   children?: React.ReactNode;
   tagEntityType: TagEntityType;
   tagEntityId: string;
+  className?: string;
 }) => {
   const { t } = useTranslation();
 
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
-        <CardHeader className="pb-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center px-2">
-          <div className="space-y-4 min-w-0">
+        <CardHeader className={cn("pb-4 flex px-2", className)}>
+          <div className="space-y-4 w-full">
             <PatientHoverCard
               patient={patient}
               facilityId={facilityId}
-              truncateName
+              truncateEnabled={false}
             />
           </div>
           {children}

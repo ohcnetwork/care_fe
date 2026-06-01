@@ -20,14 +20,14 @@ interface PatientHoverCardProps {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   facilityId?: string;
   disabled?: boolean;
-  truncateName?: boolean;
+  truncateEnabled?: boolean;
 }
 
 export function PatientHoverCard({
   patient,
   facilityId,
   disabled = false,
-  truncateName = false,
+  truncateEnabled = true,
 }: PatientHoverCardProps) {
   return (
     <>
@@ -35,13 +35,9 @@ export function PatientHoverCard({
       <Drawer>
         <DrawerTrigger
           disabled={disabled}
-          className="w-full lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="w-full min-w-0 lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <PatientHoverCardTrigger
-            patient={patient}
-            disabled={disabled}
-            truncateName={truncateName}
-          />
+          <PatientHoverCardTrigger patient={patient} disabled={disabled} />
         </DrawerTrigger>
         <DrawerContent className="flex flex-col p-4 gap-4">
           <PatientInfoHoverCard
@@ -55,15 +51,12 @@ export function PatientHoverCard({
       <Popover>
         <PopoverTrigger
           disabled={disabled}
-          className={cn(
-            "hidden min-w-0 lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background",
-            truncateName && "w-full",
-          )}
+          className="hidden max-w-full min-w-0 lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background"
         >
           <PatientHoverCardTrigger
             patient={patient}
             disabled={disabled}
-            truncateName={truncateName}
+            truncateEnabled={truncateEnabled}
           />
         </PopoverTrigger>
         <PopoverContent
@@ -84,13 +77,13 @@ export function PatientHoverCard({
 interface PatientHoverCardTriggerProps {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   disabled?: boolean;
-  truncateName?: boolean;
+  truncateEnabled?: boolean;
 }
 
 function PatientHoverCardTrigger({
   patient,
   disabled = false,
-  truncateName = false,
+  truncateEnabled = false,
 }: PatientHoverCardTriggerProps) {
   const { t } = useTranslation();
 
@@ -98,37 +91,33 @@ function PatientHoverCardTrigger({
     <div
       data-slot="patient-info-hover-card-trigger"
       className={cn(
-        "flex gap-3 items-center rounded-md",
-        truncateName ? "w-full min-w-0 max-w-full" : "w-fit",
+        "flex gap-3 items-center rounded-md min-w-46",
         !disabled && "hover:bg-gray-50 active:bg-gray-50 cursor-pointer",
       )}
     >
-      <div className="size-12">
+      <div className="size-12 shrink-0">
         <Avatar name={patient.name} />
       </div>
 
-      <div className={cn("flex flex-col", truncateName && "flex-1 min-w-0")}>
-        <div
+      <div
+        className={cn(
+          "flex flex-col min-w-0",
+          truncateEnabled ? "max-w-md" : "max-w-full",
+        )}
+      >
+        <h5
           className={cn(
-            "flex flex-row gap-2 items-center",
-            truncateName && "min-w-0",
+            "text-lg font-semibold truncate text-start",
+            !disabled && "underline",
           )}
         >
-          <h5
-            className={cn(
-              "text-lg font-semibold whitespace-nowrap",
-              truncateName && "truncate max-w-full",
-              !disabled && "underline",
-            )}
-          >
-            {patient.name}
-          </h5>
-          {!disabled && <ChevronDown size={16} className="shrink-0" />}
-        </div>
+          {patient.name}
+        </h5>
         <span className="flex flex-start text-gray-700">
           {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
         </span>
       </div>
+      {!disabled && <ChevronDown size={16} className="self-start mt-1" />}
     </div>
   );
 }

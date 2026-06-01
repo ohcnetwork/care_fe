@@ -354,7 +354,7 @@ export function AccountShow({
         <CareIcon icon="l-arrow-left" className="size-4" />
         {t("back")}
       </BackButton>
-      <Card className="rounded-none shadow-none border-none flex flex-col md:flex-row md:justify-between bg-transparent gap-4">
+      <Card className="rounded-none shadow-none border-none flex flex-col lg:flex-row lg:justify-between bg-transparent gap-4">
         <PatientHeader
           patient={account.patient}
           facilityId={facilityId}
@@ -398,10 +398,10 @@ export function AccountShow({
             </div>
           )}
           {isAccountBillableAndActive && (
-            <div className="lg:hidden flex justify-end gap-2">
+            <div className="lg:hidden flex gap-2 w-full justify-between">
               <Button
                 variant="outline"
-                className="border-gray-400 text-gray-950"
+                className="border-gray-400 text-gray-950 w-full"
                 onClick={() =>
                   navigate(
                     `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
@@ -412,7 +412,11 @@ export function AccountShow({
                 {t("invoice")}
                 <ShortcutBadge actionId="create-invoice" />
               </Button>
-              <Button variant="primary" onClick={() => openPaymentSheet("pay")}>
+              <Button
+                variant="primary"
+                className="w-full"
+                onClick={() => openPaymentSheet("pay")}
+              >
                 <CareIcon icon="l-plus" className="size-4" />
                 {t("credit")}
                 <ShortcutBadge actionId="record-payment-account" />
