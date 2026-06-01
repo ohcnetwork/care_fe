@@ -343,7 +343,7 @@ function RepeatableGroupRenderer({
       className={cn(
         "sm:rounded-lg bg-gray-100 md:bg-transparent",
         isActive && "ring-2 ring-primary",
-        question.styling_metadata?.classes && question.styling_metadata.classes,
+        question.styling_metadata?.classes,
       )}
     >
       {question.text && (
@@ -371,9 +371,10 @@ function RepeatableGroupRenderer({
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
+                    size="icon"
                     onClick={() => handleRemoveInstance(instanceIndex)}
-                    className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+                    className="size-6 text-gray-400 hover:text-red-500"
+                    aria-label={`Remove instance ${instanceIndex + 1}`}
                   >
                     <XIcon className="size-4" />
                   </Button>
@@ -383,8 +384,7 @@ function RepeatableGroupRenderer({
             <div
               className={cn(
                 "gap-1",
-                question.styling_metadata?.containerClasses &&
-                  question.styling_metadata.containerClasses,
+                question.styling_metadata?.containerClasses,
               )}
             >
               {question.questions?.map((subQuestion) => (
