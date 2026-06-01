@@ -43,6 +43,11 @@ function LocationCard({
     service_type: InternalType | undefined,
   ) => {
     switch (service_type) {
+      case InternalType.store:
+        return {
+          text: t("view_inventory"),
+          link: `/facility/${facilityId}/locations/${locationId}/inventory/summary`,
+        };
       case InternalType.pharmacy:
         return {
           text: t("view_prescriptions"),
