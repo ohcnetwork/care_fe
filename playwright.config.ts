@@ -30,7 +30,9 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
 
-  retries: process.env.CI ? 2 : 0,
+  /* Retries are disabled so Trunk Flaky Tests can accurately detect flakes.
+   * Flaky tests are managed via Trunk's Quarantining feature instead. */
+  retries: 0,
   /* CI workers are controlled per-phase in the workflow (setup=1, chromium=4).
    * Locally, use all available cores. */
   workers: undefined,

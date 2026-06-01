@@ -204,7 +204,7 @@ jobs:
         uses: trunk-io/analytics-uploader@v1
         with:
           junit-paths: test-results/junit.xml
-          org-slug: ${{ vars.TRUNK_ORG_URL_SLUG }}
+          org-slug: open-healthcare-network-foundation
           token: ${{ secrets.TRUNK_API_TOKEN }}
 
       - name: Upload test results
