@@ -207,7 +207,7 @@ jobs:
             playwright-report/
             test-results/
             test-results.json
-          retention-days: 7
+          retention-days: 30
 
       - name: Stop backend services
         if: always()

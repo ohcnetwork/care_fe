@@ -1,25 +1,26 @@
-version: 2
 updates:
-  - package-ecosystem: npm
-    directory: "/"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 0
-    allow:
-      - dependency-name: "*"
-        dependency-type: "production"
-    assignees:
-      - "tomahawk_pilot"
-    labels:
-      - "dependencies"
-
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 0
-    assignees:
-      - "tomahawk_pilot"
-    labels:
-      - "ci"
-      - "dependencies"
+- allow:
+  - dependency-name: "*"
+    dependency-type: production
+  assignees:
+  - tomahawk_pilot
+  directory: /
+  labels:
+  - dependencies
+  open-pull-requests-limit: 0
+  package-ecosystem: npm
+  schedule:
+    interval: daily
+- assignees:
+  - tomahawk_pilot
+  directory: /
+  ignore:
+  - dependency-name: "github/gh-aw-actions/**" # Managed by gh aw compile. Version-locked to the gh-aw compiler; do not bump.
+  labels:
+  - ci
+  - dependencies
+  open-pull-requests-limit: 0
+  package-ecosystem: github-actions
+  schedule:
+    interval: daily
+version: 2
