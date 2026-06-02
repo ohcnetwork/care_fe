@@ -6,6 +6,8 @@ on:
       - develop
       - main
       - production
+      - dev
+      - new-deployment
     tags:
       - 'v*'
 
