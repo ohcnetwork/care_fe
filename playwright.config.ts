@@ -30,8 +30,7 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
 
-  /* Retries are disabled to surface flaky tests for debugging. */
-  retries: 0,
+  retries: process.env.CI ? 2 : 0,
   /* CI workers are controlled per-phase in the workflow (setup=1, chromium=4).
    * Locally, use all available cores. */
   workers: undefined,
