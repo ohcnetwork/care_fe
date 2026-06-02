@@ -1,7 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useLocationChange } from "raviger";
-import { Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 
@@ -12,9 +12,12 @@ import ProductionWarningBanner from "@/components/Common/ProductionWarningBanner
 import Integrations from "@/Integrations";
 import PluginEngine from "@/PluginEngine";
 import AuthUserProvider from "@/Providers/AuthUserProvider";
-import Routers from "@/Routers";
+import PublicRouter from "@/Routers/PublicRouter";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
+
+const PatientRouter = lazy(() => import("@/Routers/PatientRouter"));
+const AppRouter = lazy(() => import("@/Routers/AppRouter"));
 
 import { ShortcutProvider } from "@/context/ShortcutContext";
 import { OverrideProvider } from "@/lib/override";
@@ -44,10 +47,16 @@ const App = () => {
               <PluginEngine>
                 <OverrideProvider>
                   <AuthUserProvider
-                    unauthorized={<Routers.PublicRouter />}
-                    otpAuthorized={<Routers.PatientRouter />}
+                    unauthorized={<PublicRouter />}
+                    otpAuthorized={
+                      <Suspense fallback={<Loading />}>
+                        <PatientRouter />
+                      </Suspense>
+                    }
                   >
-                    <Routers.AppRouter />
+                    <Suspense fallback={<Loading />}>
+                      <AppRouter />
+                    </Suspense>
                   </AuthUserProvider>
                 </OverrideProvider>
                 <Toaster

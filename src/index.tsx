@@ -31,18 +31,6 @@ if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });
 }
 
-// Handle stale chunk errors from lazy imports after deployments.
-// Reload once per session, but only if the failed chunk is from our own origin
-// (skip cross-origin plugin/federation chunks — those are handled by their callers).
-window.addEventListener("vite:preloadError", (event) => {
-  event.preventDefault();
-  const isOwnChunk = event.payload.message.includes(location.origin);
-  if (isOwnChunk && !sessionStorage.getItem("vite-chunk-reload")) {
-    sessionStorage.setItem("vite-chunk-reload", "1");
-    window.location.reload();
-  }
-});
-
 if (import.meta.env.PROD) {
   Sentry.init({
     environment: import.meta.env.MODE,
@@ -59,7 +47,6 @@ initI18n()
         <App />
       </React.StrictMode>,
     );
-    sessionStorage.removeItem("vite-chunk-reload");
   })
   .catch((error) => {
     console.error("Failed to initialize i18n:", error);
@@ -70,5 +57,4 @@ initI18n()
         <App />
       </React.StrictMode>,
     );
-    sessionStorage.removeItem("vite-chunk-reload");
   });
