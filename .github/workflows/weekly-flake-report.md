@@ -165,7 +165,7 @@ Use the `gh` CLI to fetch the last 7 days of CI data. Always paginate with
    - **Distinct PRs:** N (#1234, #1235, #1240, ...)
    - **First seen:** YYYY-MM-DD HH:MM UTC · **Last seen:** YYYY-MM-DD HH:MM UTC
    - **Auto-fix eligible:** yes / no
-   - **Suggested fix pattern:** waitForResponse / waitForURL / data-testid / per-worker fixture / setup retry / other
+   - **Suggested fix pattern:** waitForResponse / waitForURL / role-based selector / per-worker fixture / setup retry / other
 
    Daily occurrences:
 
@@ -200,7 +200,7 @@ Use the `gh` CLI to fetch the last 7 days of CI data. Always paginate with
     - `waitForResponse(url predicate)` for network-driven UI updates
     - `waitForURL(...)` after navigation, before next interaction
     - `expect(locator).toBeVisible() / toHaveText()` with default polling
-    - `data-testid` selectors for dynamic rows, forms, action buttons
+    - Role-based selectors: `getByRole`, `getByLabel`, `getByText`
     - `faker` + `Date.now()` for unique test data
     - Per-worker fixtures for shared resources
     - Small `retryAsync` wrapper for transient backend errors in `beforeAll`
@@ -211,6 +211,10 @@ Use the `gh` CLI to fetch the last 7 days of CI data. Always paginate with
     - Increase timeouts unless directly justified by the failure data
     - Weaken or remove assertions
     - Modify application source (`src/`), `playwright.config.ts`, or CI workflows
+    - Add or rely on `data-testid` / `testid` / `test-id` attributes — this
+      project does **not** use test ids in application code. Use role-based
+      selectors instead. If a test is unfixable without a test id, classify
+      the cluster as Product Bug or Unknown and leave it for human triage.
     - Modify healthcare workflows, clinical logic, authorization, or patient
       data handling
 
