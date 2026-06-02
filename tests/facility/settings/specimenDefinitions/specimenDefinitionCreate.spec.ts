@@ -54,6 +54,8 @@ test.describe("Specimen Definitions Create", () => {
     // title and description are both trimmed before the required check.
     await expectWhitespaceRejected(
       [
+        // "Title *" / "Description *" target the required fields specifically;
+        // the form also has a nested optional "Description" (container) field.
         page.getByRole("textbox", { name: "Title *" }),
         page.getByRole("textbox", { name: "Description *" }),
       ],

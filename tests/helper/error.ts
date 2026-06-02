@@ -19,27 +19,30 @@ export function getFieldErrorMessage(fieldLocator: Locator): Locator {
 
 /**
  * Fills the given required text fields with whitespace-only input, submits the
- * form, and asserts each field shows its required-field error — i.e. that the
- * schema trims the value before the `.min(1)` check.
+ * form, and asserts each field shows its required-field error message — i.e.
+ * that the schema trims the value before the `.min(1)` check.
  *
  * @param fields - Required free-text field locators (textboxes/textareas)
  * @param submit - Action that submits the form (e.g. clicking Create/Save)
+ * @param expectedError - Text/regex the field error must contain
+ *   (default: `/required/i`, matching "This field is required")
  *
  * @example
  * await expectWhitespaceRejected(
- *   [page.getByRole("textbox", { name: "Title *" })],
+ *   [page.getByRole("textbox", { name: /^Title\b/ })],
  *   () => page.getByRole("button", { name: "Create" }).click(),
  * );
  */
 export async function expectWhitespaceRejected(
   fields: Locator[],
   submit: () => Promise<void>,
+  expectedError: string | RegExp = /required/i,
 ): Promise<void> {
   for (const field of fields) {
     await field.fill("   ");
   }
   await submit();
   for (const field of fields) {
-    await expect(getFieldErrorMessage(field)).toBeVisible();
+    await expect(getFieldErrorMessage(field)).toContainText(expectedError);
   }
 }
