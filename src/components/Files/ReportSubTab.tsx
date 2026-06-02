@@ -50,6 +50,7 @@ interface ReportTabProps {
   facilityId?: string;
   patientId?: string;
   encounterId?: string;
+  getViewUrl?: (reportId: string) => string;
 }
 
 export function ReportSubTab({
@@ -58,6 +59,7 @@ export function ReportSubTab({
   facilityId,
   patientId,
   encounterId,
+  getViewUrl,
 }: ReportTabProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
@@ -98,10 +100,10 @@ export function ReportSubTab({
     return iconMap[reportType] || "l-file-alt";
   };
 
-  const canNavigateToPreview = !!(facilityId && patientId && encounterId);
-
   const handleView = (report: ReportReadList) => {
-    if (canNavigateToPreview) {
+    if (getViewUrl) {
+      navigate(getViewUrl(report.id));
+    } else if (facilityId && patientId && encounterId) {
       navigate(
         `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/report/${report.id}`,
       );

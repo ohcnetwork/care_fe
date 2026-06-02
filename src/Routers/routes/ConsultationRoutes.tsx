@@ -104,11 +104,11 @@ const consultationRoutes: AppRoutes = {
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/template/:templateSlug":
     ({ encounterId, templateSlug }) => (
-      <ReportViewer encounterId={encounterId} templateSlug={templateSlug} />
+      <ReportViewer associatingId={encounterId} templateSlug={templateSlug} />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/:reportId":
     ({ encounterId, reportId }) => (
-      <ReportViewer encounterId={encounterId} reportId={reportId} />
+      <ReportViewer associatingId={encounterId} reportId={reportId} />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (

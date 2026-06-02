@@ -7,6 +7,7 @@ import MedicationDispenseRedirect from "@/pages/Facility/billing/account/compone
 import BedAvailabilityDashboard from "@/pages/Facility/BedAvailabilityDashboard";
 
 import { AppRoutes } from "@/Routers/AppRouter";
+import ReportViewer from "@/pages/Encounters/ReportViewer";
 import TemplateBuilder from "@/pages/Encounters/TemplateBuilder/TemplateBuilder";
 import TemplatePage from "@/pages/Encounters/TemplateBuilder/TemplatePage";
 import AccountList from "@/pages/Facility/billing/account/AccountList";
@@ -104,6 +105,16 @@ const FacilityRoutes: AppRoutes = {
     facilityId,
     accountId,
   }) => <PrintChargeItems facilityId={facilityId} accountId={accountId} />,
+  "/facility/:facilityId/billing/account/:accountId/reports/:reportId": ({
+    accountId,
+    reportId,
+  }) => (
+    <ReportViewer
+      associatingId={accountId}
+      reportId={reportId}
+      reportType="account_report"
+    />
+  ),
   "/facility/:facilityId/billing/account/:accountId/:tab": ({
     facilityId,
     accountId,

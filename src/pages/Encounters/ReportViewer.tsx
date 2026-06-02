@@ -52,15 +52,17 @@ const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 30000;
 
 interface ReportViewerProps {
-  encounterId: string;
+  associatingId: string;
   templateSlug?: string;
   reportId?: string;
+  reportType?: string;
 }
 
 export default function ReportViewer({
-  encounterId,
+  associatingId,
   templateSlug,
   reportId,
+  reportType = "discharge_summary",
 }: ReportViewerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -75,6 +77,7 @@ export default function ReportViewer({
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
   const [autoGenTriggered, setAutoGenTriggered] = useState(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -114,18 +117,18 @@ export default function ReportViewer({
     isLoading: isLoadingReports,
     refetch: refetchReports,
   } = useQuery({
-    queryKey: ["reports", encounterId, "template", effectiveTSlug],
+    queryKey: ["reports", associatingId, "template", effectiveTSlug],
     queryFn: query(reportApi.listReports, {
       queryParams: {
-        associating_id: encounterId,
+        associating_id: associatingId,
         upload_completed: "true",
-        report_type: "discharge_summary",
+        report_type: reportType,
         is_archived: "false",
         template: effectiveTSlug,
         limit: 50,
       },
     }),
-    enabled: !!encounterId && !!effectiveTSlug,
+    enabled: !!associatingId && !!effectiveTSlug,
   });
 
   const reports = useMemo(
@@ -184,7 +187,7 @@ export default function ReportViewer({
         const response = await callApi(reportApi.createReport, {
           body: {
             template_id: tmpl.id,
-            associating_id: encounterId,
+            associating_id: associatingId,
             output_format: tmpl.default_format,
             options: JSON.stringify({}),
             force: false,
@@ -200,16 +203,16 @@ export default function ReportViewer({
         const freshData = await queryClient.fetchQuery({
           queryKey: [
             "reports",
-            encounterId,
+            associatingId,
             "template",
             effectiveTSlug,
             "fresh",
           ],
           queryFn: query(reportApi.listReports, {
             queryParams: {
-              associating_id: encounterId,
+              associating_id: associatingId,
               upload_completed: "true",
-              report_type: "discharge_summary",
+              report_type: reportType,
               is_archived: "false",
               template: effectiveTSlug,
               limit: 1,
@@ -236,7 +239,15 @@ export default function ReportViewer({
         // Continue polling on transient errors
       }
     },
-    [encounterId, effectiveTSlug, stopPolling, queryClient, refetchReports, t],
+    [
+      associatingId,
+      effectiveTSlug,
+      reportType,
+      stopPolling,
+      queryClient,
+      refetchReports,
+      t,
+    ],
   );
 
   const startPolling = useCallback(
@@ -279,7 +290,7 @@ export default function ReportViewer({
       triggerGeneration(
         {
           template_id: tmpl.id,
-          associating_id: encounterId,
+          associating_id: associatingId,
           output_format: tmpl.default_format,
           options: JSON.stringify({}),
           force: false,
@@ -292,7 +303,7 @@ export default function ReportViewer({
         },
       );
     },
-    [isGenerating, encounterId, triggerGeneration, startPolling, t],
+    [isGenerating, associatingId, triggerGeneration, startPolling, t],
   );
 
   // Auto-generate report on first load if none exist
@@ -327,6 +338,9 @@ export default function ReportViewer({
         }
 
         const response = await fetch(pdfUrl);
+        if (!response.ok) {
+          throw new Error("Download failed");
+        }
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const anchor = document.createElement("a");
@@ -345,8 +359,12 @@ export default function ReportViewer({
   const handlePrint = useCallback(async () => {
     if (!pdfUrl) return;
 
+    setIsPrinting(true);
     try {
       const response = await fetch(pdfUrl);
+      if (!response.ok) {
+        throw new Error("Print failed");
+      }
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const iframe = document.createElement("iframe");
@@ -358,6 +376,7 @@ export default function ReportViewer({
         } catch {
           window.open(blobUrl, "_blank");
         }
+        setIsPrinting(false);
         setTimeout(() => {
           document.body.removeChild(iframe);
           window.URL.revokeObjectURL(blobUrl);
@@ -366,6 +385,7 @@ export default function ReportViewer({
 
       document.body.appendChild(iframe);
     } catch {
+      setIsPrinting(false);
       toast.error(t("PRINTABLE_QR_CODE__print_error"));
     }
   }, [pdfUrl, t]);
@@ -423,9 +443,13 @@ export default function ReportViewer({
               variant="outline"
               onClick={handlePrint}
               aria-label={t("print")}
-              disabled={!pdfUrl}
+              disabled={!pdfUrl || isPrinting}
             >
-              <Printer className="size-4" />
+              {isPrinting ? (
+                <Loader className="size-4 animate-spin" />
+              ) : (
+                <Printer className="size-4" />
+              )}
               <span className="hidden md:inline">{t("print")}</span>
               <ShortcutBadge actionId="print-button" />
             </Button>
