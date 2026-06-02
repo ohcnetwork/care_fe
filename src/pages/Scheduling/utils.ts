@@ -76,8 +76,7 @@ export function computeAppointmentSlots(
   while (time < endTime) {
     const slotEndTime = addMinutes(time, slotSizeInMinutes);
 
-    let conflicting = false;
-    for (const exception of exceptions) {
+    const slotExceptions = exceptions.filter((exception) => {
       const exceptionStartTime = parse(
         exception.start_time,
         "HH:mm:ss",
@@ -89,20 +88,15 @@ export function computeAppointmentSlots(
         referenceDate,
       );
 
-      if (exceptionStartTime < slotEndTime && exceptionEndTime > time) {
-        conflicting = true;
-        break;
-      }
-    }
+      return exceptionStartTime < slotEndTime && exceptionEndTime > time;
+    });
 
-    if (!conflicting) {
-      slots.push({
-        start_time: format(time, "HH:mm") as Time,
-        end_time: format(slotEndTime, "HH:mm") as Time,
-        isAvailable: true,
-        exceptions: [],
-      });
-    }
+    slots.push({
+      start_time: format(time, "HH:mm") as Time,
+      end_time: format(slotEndTime, "HH:mm") as Time,
+      isAvailable: slotExceptions.length === 0,
+      exceptions: slotExceptions,
+    });
 
     time = slotEndTime;
   }
