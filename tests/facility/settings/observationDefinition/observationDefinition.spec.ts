@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 
 import { expect, test } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
 import { getFacilityId } from "tests/support/facilityId";
 
 const UNITS = [
@@ -199,6 +200,15 @@ test.describe("Observation Definition Form with Interpretation", () => {
     facilityId = getFacilityId();
     const targetUrl = `/facility/${facilityId}/settings/observation_definitions/new`;
     await page.goto(targetUrl);
+  });
+
+  test("should reject a whitespace-only title", async ({ page }) => {
+    const titleInput = page.getByRole("textbox", { name: "Title" });
+    await titleInput.fill("   ");
+    await page.getByRole("button", { name: "Create" }).click();
+
+    // Whitespace-only title must be treated as empty.
+    await expect(getFieldErrorMessage(titleInput)).toBeVisible();
   });
 
   test("should create observation definition with root-level interpretation", async ({

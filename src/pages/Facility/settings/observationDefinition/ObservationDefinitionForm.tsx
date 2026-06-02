@@ -140,12 +140,12 @@ function ObservationDefinitionFormContent({
 
   const formSchema = z
     .object({
-      title: z.string().min(1, t("field_required")),
+      title: z.string().trim().min(1, t("field_required")),
       slug_value: z
         .string()
         .min(5, t("character_count_validation", { min: 5, max: 25 }))
         .max(25, t("character_count_validation", { min: 5, max: 25 })),
-      description: z.string().min(1, t("field_required")),
+      description: z.string().trim().min(1, t("field_required")),
       status: z.nativeEnum(ObservationDefinitionStatus),
       category: z.enum(
         OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]],

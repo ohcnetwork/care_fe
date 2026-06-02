@@ -60,6 +60,19 @@ test.describe("activity definition form", () => {
     );
   });
 
+  test("should reject a whitespace-only title", async ({ page }) => {
+    await page.goto(
+      `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}/new`,
+    );
+
+    const titleInput = page.getByRole("textbox", { name: "Title *" });
+    await titleInput.fill("   ");
+    await page.getByRole("button", { name: "Create" }).click();
+
+    // Whitespace-only title must be treated as empty.
+    await expect(getFieldErrorMessage(titleInput)).toBeVisible();
+  });
+
   test("should create activity definition with required fields", async ({
     page,
   }) => {
