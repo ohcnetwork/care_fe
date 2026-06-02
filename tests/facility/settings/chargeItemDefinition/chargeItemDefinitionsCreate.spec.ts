@@ -64,10 +64,15 @@ test.describe("Charge Item Definition Creation", () => {
 
     // Verify in search results (retry to handle search indexing delay)
     await expect(async () => {
-      await page.getByRole("textbox", { name: /search/i }).clear();
+      await page.goto(
+        `/facility/${facilityId}/settings/charge_item_definitions/`,
+      );
+      await page.getByRole("textbox", { name: "Search" }).fill(categoryName);
+      await page.getByRole("heading", { name: categoryName }).click();
       await page.getByRole("textbox", { name: /search/i }).fill(title);
+      await page.waitForLoadState("networkidle");
       await expect(page.getByRole("table").getByText(title)).toBeVisible();
-    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 60_000 });
+    }).toPass({ intervals: [3_000, 5_000, 8_000], timeout: 60_000 });
 
     await page.getByRole("link", { name: "View" }).click();
     await page.waitForURL("**/charge_item_definitions/**");
@@ -166,10 +171,15 @@ test.describe("Charge Item Definition Creation", () => {
 
     // Verify in search results (retry to handle search indexing delay)
     await expect(async () => {
-      await page.getByRole("textbox", { name: /search/i }).clear();
+      await page.goto(
+        `/facility/${facilityId}/settings/charge_item_definitions/`,
+      );
+      await page.getByRole("textbox", { name: "Search" }).fill(categoryName);
+      await page.getByRole("heading", { name: categoryName }).click();
       await page.getByRole("textbox", { name: /search/i }).fill(title);
+      await page.waitForLoadState("networkidle");
       await expect(page.getByRole("table").getByText(title)).toBeVisible();
-    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 60_000 });
+    }).toPass({ intervals: [3_000, 5_000, 8_000], timeout: 60_000 });
 
     await page.getByRole("link", { name: "View" }).click();
     await page.waitForURL("**/charge_item_definitions/**");

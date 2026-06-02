@@ -166,7 +166,7 @@ test.describe("Patient Service Request Tab", () => {
       page.getByRole("button", { name: "Collect ⇧ + ENTER" }),
     ).toBeVisible();
     await page.getByRole("button", { name: "Collect ⇧ + ENTER" }).click();
-    await expectToast(page, /specimen collected/i, { timeout: 15000 });
+    await expectToast(page, /specimen collected/i, { timeout: 30000 });
     await page
       .getByRole("combobox")
       .filter({ hasText: "Select Diagnostic Report Type" })

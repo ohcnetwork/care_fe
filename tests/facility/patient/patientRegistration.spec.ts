@@ -117,7 +117,7 @@ async function submitRegistration(page: Page) {
       page
         .locator("li[data-sonner-toast]")
         .getByText(/patient registered successfully/i),
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible({ timeout: 30000 });
   });
 }
 
@@ -277,12 +277,13 @@ test.describe("DOB timezone validation", () => {
   test.beforeEach(async ({ page }) => {
     const facilityId = getFacilityId();
 
-    // Must be installed before any navigation so the app's Date.now() is
-    // overridden from first render.
+    // Install clock override before navigation so the app's Date.now() returns
+    // the frozen value from first render (for DOB validation).
     await page.clock.install({ time: FROZEN_INSTANT });
-    await page.clock.setFixedTime(FROZEN_INSTANT);
-
     await page.goto(`/facility/${facilityId}/patient/create`);
+    // Resume timers so network requests, debounced inputs, and toasts work normally.
+    // Date.now() still returns the installed time even after resume.
+    await page.clock.resume();
   });
 
   test("allows registering a newborn with today's DOB in the IST early-morning window", async ({

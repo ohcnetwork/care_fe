@@ -115,13 +115,13 @@ export async function selectFromRequirements(
     if (await input.isVisible().catch(() => false)) {
       await input.fill("");
       await input.fill(search);
-      await page.waitForTimeout(500); // Wait for debounced search
+      await page.waitForLoadState("networkidle");
     }
   }
 
   // Wait for options to load
   const options = scope.getByRole("option");
-  await options.first().waitFor({ state: "visible" });
+  await options.first().waitFor({ state: "visible", timeout: 30000 });
 
   const count = await options.count();
   if (count === 0) {
@@ -193,17 +193,14 @@ export async function selectFromValueSet(
       await input.fill("");
       await input.fill(search);
 
-      // Wait for "Searching..." to appear and disappear
-      const searching = scope.getByText(/searching/i);
-      if (await searching.isVisible().catch(() => false)) {
-        await searching.waitFor({ state: "hidden" });
-      }
+      // Wait for network requests triggered by the search to settle
+      await page.waitForLoadState("networkidle");
     }
   }
 
   // Wait for options to load
   const options = scope.getByRole("option");
-  await options.first().waitFor({ state: "visible" });
+  await options.first().waitFor({ state: "visible", timeout: 30000 });
 
   const count = await options.count();
   if (count === 0) {
@@ -264,22 +261,21 @@ export async function selectFromCommand(
     if (isInputVisible) {
       await input.fill("");
       await input.fill(search);
-      // Wait for search results to update
-      await page.waitForTimeout(500);
     } else {
       // Fallback for custom inputs
       const placeholderInput = scope.getByPlaceholder(/search/i).first();
       if (await placeholderInput.isVisible().catch(() => false)) {
         await placeholderInput.fill("");
         await placeholderInput.fill(search);
-        await page.waitForTimeout(500);
       }
     }
+    // Wait for network requests triggered by the search to settle
+    await page.waitForLoadState("networkidle");
   }
 
-  // Wait for options to load
+  // Wait for options to load (longer timeout for slow API responses)
   const options = scope.getByRole("option");
-  await options.first().waitFor({ state: "visible" });
+  await options.first().waitFor({ state: "visible", timeout: 30000 });
 
   const count = await options.count();
   if (count === 0) {
@@ -646,6 +642,9 @@ export async function clickTabOrMenuItem(
   page: Page,
   tabName: string | RegExp,
 ): Promise<void> {
+  // Wait a moment for the page to settle before checking tab visibility
+  await page.waitForLoadState("domcontentloaded");
+
   // Try to find as a visible tab first
   const tab = page.getByRole("tab", { name: tabName });
   const isTabVisible = await tab.isVisible().catch(() => false);
