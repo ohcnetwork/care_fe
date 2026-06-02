@@ -115,11 +115,15 @@ export type DiagnosticReportOverrideComponentType = React.FC<{
   disabled?: boolean;
 }>;
 
+export type DeliveryOrderActionsComponentType = React.FC<{
+  facilityId: string;
+  locationId: string;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
-  CareIssueManagementWidget: React.FC;
   PatientHomeActions: PatientHomeActionsComponentType;
   PatientInfoCardQuickActions: PatientInfoCardQuickActionsComponentType;
   EncounterActions: EncounterActionsComponentType;
@@ -136,6 +140,7 @@ export type SupportedPluginComponents = {
   KioskFeedbackPage: React.FC;
   KioskComplaintPage: React.FC;
   CareIssueManagementWidget: React.FC;
+  DeliveryOrderActions: DeliveryOrderActionsComponentType;
 };
 
 // Create a type for lazy-loaded components
