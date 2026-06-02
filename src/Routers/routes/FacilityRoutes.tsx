@@ -29,6 +29,7 @@ import DiagnosticReportPrint from "@/pages/Facility/services/diagnosticReports/D
 import DiagnosticReportView from "@/pages/Facility/services/diagnosticReports/DiagnosticReportView";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
 import { SettingsLayout } from "@/pages/Facility/settings/layout";
+import { ReportType } from "@/types/emr/report/report";
 
 const FacilityRoutes: AppRoutes = {
   "/facility": () => <Redirect to="/" />,
@@ -112,7 +113,7 @@ const FacilityRoutes: AppRoutes = {
     <ReportViewer
       associatingId={accountId}
       reportId={reportId}
-      reportType="account_report"
+      reportType={ReportType.ACCOUNT_REPORT}
     />
   ),
   "/facility/:facilityId/billing/account/:accountId/:tab": ({

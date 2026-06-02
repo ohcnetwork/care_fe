@@ -39,7 +39,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
-import { ReportReadList } from "@/types/emr/report/report";
+import { ReportReadList, ReportType } from "@/types/emr/report/report";
 import reportApi from "@/types/emr/report/reportApi";
 import { TemplateBaseRead } from "@/types/emr/template/template";
 import templateApi from "@/types/emr/template/templateApi";
@@ -55,14 +55,14 @@ interface ReportViewerProps {
   associatingId: string;
   templateSlug?: string;
   reportId?: string;
-  reportType?: string;
+  reportType?: ReportType;
 }
 
 export default function ReportViewer({
   associatingId,
   templateSlug,
   reportId,
-  reportType = "discharge_summary",
+  reportType = ReportType.DISCHARGE_SUMMARY,
 }: ReportViewerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
