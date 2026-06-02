@@ -28,6 +28,8 @@ import {
   FileReadMinimal,
   getVideoMimeType,
 } from "@/types/files/file";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { Printer } from "lucide-react";
 
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 export interface StateInterface {
@@ -275,8 +277,9 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                       }
                     }}
                   >
-                    <CareIcon icon="l-print" className="size-4" />
-                    <span>{t("print")}</span>
+                    <Printer className="size-4" />
+                    <span className="hidden sm:block">{t("print")}</span>
+                    <ShortcutBadge actionId="print-button" />
                   </Button>
                 )}
                 {file_state.extension === "pdf" && fileUrl && (
