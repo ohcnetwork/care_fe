@@ -1,5 +1,19 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
+/**
+ * Waits for either a dialog or popover to become visible after a trigger click.
+ * Races both locators to avoid the racy `isVisible()` check.
+ */
+async function waitForDialogOrPopper(page: Page): Promise<Locator> {
+  const dialog = page.getByRole("dialog").last();
+  const popper = page.locator("[data-radix-popper-content-wrapper]").last();
+  const scope = await Promise.race([
+    dialog.waitFor({ state: "visible", timeout: 10000 }).then(() => dialog),
+    popper.waitFor({ state: "visible", timeout: 10000 }).then(() => popper),
+  ]);
+  return scope;
+}
+
 export async function selectFromLocationMultiSelect(
   page: Page,
   trigger: Locator,
@@ -93,12 +107,7 @@ export async function selectFromRequirements(
   await trigger.click();
 
   // Wait for the picker to open (could be dialog or popover)
-  const dialog = page.getByRole("dialog").last();
-  const hasDialog = await dialog.isVisible().catch(() => false);
-  const popper = page.locator("[data-radix-popper-content-wrapper]").last();
-  const scope = hasDialog ? dialog : popper;
-
-  await scope.waitFor({ state: "visible" });
+  const scope = await waitForDialogOrPopper(page);
 
   // If search is provided, use the search input
   if (search) {
@@ -166,12 +175,7 @@ export async function selectFromValueSet(
   await trigger.click();
 
   // Wait for the picker to open (could be dialog or popover)
-  const dialog = page.getByRole("dialog").last();
-  const hasDialog = await dialog.isVisible().catch(() => false);
-  const popper = page.locator("[data-radix-popper-content-wrapper]").last();
-  const scope = hasDialog ? dialog : popper;
-
-  await scope.waitFor({ state: "visible" });
+  const scope = await waitForDialogOrPopper(page);
 
   // Switch tabs if needed (mainly for mobile, but won't hurt on desktop)
   if (tab === "starred") {
@@ -249,12 +253,7 @@ export async function selectFromCommand(
   await trigger.click();
 
   // Wait for the picker to open (could be dialog or popover)
-  const dialog = page.getByRole("dialog").last();
-  const hasDialog = await dialog.isVisible().catch(() => false);
-  const popper = page.locator("[data-radix-popper-content-wrapper]").last();
-  const scope = hasDialog ? dialog : popper;
-
-  await scope.waitFor({ state: "visible" });
+  const scope = await waitForDialogOrPopper(page);
 
   // If search is provided, use the search input
   if (search) {
@@ -345,12 +344,7 @@ export async function selectFromCategoryPicker(
   await trigger.click();
 
   // Wait for the picker to open (could be dialog or popover)
-  const dialog = page.getByRole("dialog").last();
-  const hasDialog = await dialog.isVisible().catch(() => false);
-  const popper = page.locator("[data-radix-popper-content-wrapper]").last();
-  const scope = hasDialog ? dialog : popper;
-
-  await scope.waitFor({ state: "visible" });
+  const scope = await waitForDialogOrPopper(page);
 
   // Navigate through categories if specified
   for (const categoryTitle of navigateCategories) {
@@ -453,12 +447,7 @@ export async function selectFromDefinitionCategoryPicker(
   await trigger.click();
 
   // Wait for the picker to open (could be dialog or popover)
-  const dialog = page.getByRole("dialog").last();
-  const hasDialog = await dialog.isVisible().catch(() => false);
-  const popper = page.locator("[data-radix-popper-content-wrapper]").last();
-  const scope = hasDialog ? dialog : popper;
-
-  await scope.waitFor({ state: "visible" });
+  const scope = await waitForDialogOrPopper(page);
 
   // Navigate through categories if specified
   for (const categoryTitle of navigateCategories) {

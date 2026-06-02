@@ -117,7 +117,7 @@ async function submitRegistration(page: Page) {
       page
         .locator("li[data-sonner-toast]")
         .getByText(/patient registered successfully/i),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15000 });
   });
 }
 

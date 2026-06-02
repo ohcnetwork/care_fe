@@ -247,7 +247,7 @@ test.describe("Enable When — Boolean Operators", () => {
     test("T4: source = Yes → dependent visible [required] + filled → submits", async ({
       page,
     }) => {
-      const cigarettesPerDay = faker.number.int({ min: 1, max: 40 }).toString();
+      const cigarettesPerDay = faker.number.int({ min: 100, max: 999 }).toString();
 
       await test.step("Select Yes and fill required dependent", async () => {
         await selectBooleanOption(page, "Is Smoker", "Yes");
@@ -267,7 +267,7 @@ test.describe("Enable When — Boolean Operators", () => {
     test("T5: source = Yes → dependent visible [optional] + empty → submits", async ({
       page,
     }) => {
-      const cigarettesPerDay = faker.number.int({ min: 1, max: 40 }).toString();
+      const cigarettesPerDay = faker.number.int({ min: 100, max: 999 }).toString();
 
       await test.step("Select Yes — optional dependent appears", async () => {
         await selectBooleanOption(page, "Is Smoker", "Yes");
@@ -294,7 +294,9 @@ test.describe("Enable When — Boolean Operators", () => {
     test("T6: source = Yes → changed to No → dependent hides → hidden data not on overview", async ({
       page,
     }) => {
-      const cigarettesPerDay = faker.number.int({ min: 1, max: 40 }).toString();
+      const cigarettesPerDay = faker.number
+        .int({ min: 100, max: 999 })
+        .toString();
       const smokingDuration = faker.lorem.words(2);
 
       await test.step("Select Yes — dependents appear", async () => {
