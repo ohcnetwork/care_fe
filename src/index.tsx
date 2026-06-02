@@ -32,12 +32,13 @@ if ("serviceWorker" in navigator) {
 }
 
 // Handle stale chunk errors from lazy imports after deployments.
-// Only reload once per session to prevent infinite loops on network failures.
+// Reload once per session, but only if the failed chunk is from our own origin
+// (skip cross-origin plugin/federation chunks — those are handled by their callers).
 window.addEventListener("vite:preloadError", (event) => {
-  const reloaded = sessionStorage.getItem("vite-chunk-reload");
-  if (!reloaded) {
+  event.preventDefault();
+  const isOwnChunk = event.payload.message.includes(location.origin);
+  if (isOwnChunk && !sessionStorage.getItem("vite-chunk-reload")) {
     sessionStorage.setItem("vite-chunk-reload", "1");
-    event.preventDefault();
     window.location.reload();
   }
 });
