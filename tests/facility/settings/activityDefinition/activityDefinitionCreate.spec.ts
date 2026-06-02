@@ -4,7 +4,10 @@ import {
   createActivityDefinition,
   RESOURCE_CATEGORY_SLUG,
 } from "tests/facility/settings/activityDefinition/activityDefinition";
-import { getFieldErrorMessage } from "tests/helper/error";
+import {
+  expectWhitespaceRejected,
+  getFieldErrorMessage,
+} from "tests/helper/error";
 import { getCardByTitle } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -60,17 +63,22 @@ test.describe("activity definition form", () => {
     );
   });
 
-  test("should reject a whitespace-only title", async ({ page }) => {
+  test("should reject whitespace-only required text fields", async ({
+    page,
+  }) => {
     await page.goto(
       `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}/new`,
     );
 
-    const titleInput = page.getByRole("textbox", { name: "Title *" });
-    await titleInput.fill("   ");
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Whitespace-only title must be treated as empty.
-    await expect(getFieldErrorMessage(titleInput)).toBeVisible();
+    // title, description and usage are all trimmed before the required check.
+    await expectWhitespaceRejected(
+      [
+        page.getByRole("textbox", { name: "Title *" }),
+        page.getByRole("textbox", { name: "Description *" }),
+        page.getByRole("textbox", { name: "Usage *" }),
+      ],
+      () => page.getByRole("button", { name: "Create" }).click(),
+    );
   });
 
   test("should create activity definition with required fields", async ({

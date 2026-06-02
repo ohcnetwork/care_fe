@@ -11,7 +11,10 @@ import {
   STATUS_OPTIONS,
   typeCollectedOptions,
 } from "tests/facility/settings/specimenDefinitions/specimenDefinitionConstants";
-import { getFieldErrorMessage } from "tests/helper/error";
+import {
+  expectWhitespaceRejected,
+  getFieldErrorMessage,
+} from "tests/helper/error";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -43,15 +46,19 @@ test.describe("Specimen Definitions Create", () => {
     await page.goto(targetUrl);
   });
 
-  test("should reject a whitespace-only title", async ({ page }) => {
+  test("should reject whitespace-only required text fields", async ({
+    page,
+  }) => {
     await page.getByRole("button", { name: "Add Definition" }).click();
 
-    const titleInput = page.getByRole("textbox", { name: "Title *" });
-    await titleInput.fill("   ");
-    await page.getByRole("button", { name: /save/i }).click();
-
-    // Whitespace-only title must be treated as empty.
-    await expect(getFieldErrorMessage(titleInput)).toBeVisible();
+    // title and description are both trimmed before the required check.
+    await expectWhitespaceRejected(
+      [
+        page.getByRole("textbox", { name: "Title *" }),
+        page.getByRole("textbox", { name: "Description *" }),
+      ],
+      () => page.getByRole("button", { name: /save/i }).click(),
+    );
   });
 
   test("should create specimen definition with all fields", async ({
