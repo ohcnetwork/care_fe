@@ -115,6 +115,7 @@ export type DiagnosticReportOverrideComponentType = React.FC<{
   disabled?: boolean;
 }>;
 
+// To Support additional options to create delivery orders
 export type DeliveryOrderActionsComponentType = React.FC<{
   facilityId: string;
   locationId: string;
