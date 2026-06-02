@@ -18,6 +18,7 @@ export interface AppVersionInfo {
 
 export interface BuildMeta {
   version: string;
+  built_at: string;
 }
 
 /**
