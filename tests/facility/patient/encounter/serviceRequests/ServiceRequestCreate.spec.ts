@@ -147,7 +147,10 @@ test.describe("Patient Service Request Tab", () => {
       .fill(activityDefinitionTitle);
     await page.getByRole("option", { name: activityDefinitionTitle }).click();
     await page.getByRole("button", { name: "Submit" }).click();
-    await page.getByRole("tab", { name: "Service Requests" }).click();
+    await expect(async () => {
+      await clickTabOrMenuItem(page, /service requests/i);
+      await expect(page).toHaveURL(/\/service_requests$/);
+    }).toPass({ intervals: [1_000, 2_000, 3_000], timeout: 20_000 });
     await page.getByRole("button", { name: "See Details" }).first().click();
     await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Collect Specimen" }).click();

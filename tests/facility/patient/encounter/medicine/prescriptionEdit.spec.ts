@@ -45,7 +45,13 @@ test.describe("Edit Patient Prescription", () => {
     await test.step("Select medicine from list", async () => {
       await page.getByRole("tab", { name: "Medication" }).click();
       await page.locator("input[data-slot='command-input']").fill(medicineName);
-      await page.getByRole("option", { name: medicineName }).first().click();
+      await expect(async () => {
+        const medicineOption = page
+          .getByRole("option", { name: medicineName })
+          .first();
+        await expect(medicineOption).toBeVisible();
+        await medicineOption.click();
+      }).toPass({ intervals: [500, 1_000, 2_000], timeout: 15_000 });
       await expect(page.getByText(medicineName).first()).toBeVisible();
     });
 

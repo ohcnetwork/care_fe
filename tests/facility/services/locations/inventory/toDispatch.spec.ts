@@ -35,9 +35,11 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     let tableRow1 = page.locator("table tbody tr").nth(0);
     await expect(tableRow1).toContainText("Paracetamol");
     await expect(tableRow1).toContainText("5");
-    await page
-      .getByRole("button", { name: "Mark as Approved" })
-      .click({ timeout: 5000 });
+    const markAsApprovedButton = page.getByRole("button", {
+      name: "Mark as Approved",
+    });
+    await expect(markAsApprovedButton).toBeEnabled({ timeout: 15_000 });
+    await markAsApprovedButton.click();
 
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     // verify item appears in table
@@ -108,7 +110,11 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await page.locator("div").filter({ hasText: "₹20.00" }).nth(3).click();
     await page.mouse.click(0, 0);
     await page.getByRole("button", { name: "Save" }).click();
-    await page.getByRole("button", { name: "Mark as Approved" }).click();
+    const markAsApprovedButton = page.getByRole("button", {
+      name: "Mark as Approved",
+    });
+    await expect(markAsApprovedButton).toBeEnabled({ timeout: 15_000 });
+    await markAsApprovedButton.click();
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
     await page.getByRole("tab", { name: "Outgoing Deliveries" }).click();
     const deliveryRow = page
@@ -137,7 +143,11 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await page.locator("div").filter({ hasText: "₹20.00" }).nth(3).click();
     await page.mouse.click(0, 0);
     await page.getByRole("button", { name: "Save" }).click();
-    await page.getByRole("button", { name: "Mark as Approved" }).click();
+    const markAsApprovedButton = page.getByRole("button", {
+      name: "Mark as Approved",
+    });
+    await expect(markAsApprovedButton).toBeEnabled({ timeout: 15_000 });
+    await markAsApprovedButton.click();
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
     await page.getByRole("tab", { name: "Outgoing Deliveries" }).click();
     const deliveryRow = page

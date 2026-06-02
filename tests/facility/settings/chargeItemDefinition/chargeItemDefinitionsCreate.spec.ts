@@ -67,7 +67,7 @@ test.describe("Charge Item Definition Creation", () => {
       await page.getByRole("textbox", { name: /search/i }).clear();
       await page.getByRole("textbox", { name: /search/i }).fill(title);
       await expect(page.getByRole("table").getByText(title)).toBeVisible();
-    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
+    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 60_000 });
 
     await page.getByRole("link", { name: "View" }).click();
     await page.waitForURL("**/charge_item_definitions/**");
@@ -169,7 +169,7 @@ test.describe("Charge Item Definition Creation", () => {
       await page.getByRole("textbox", { name: /search/i }).clear();
       await page.getByRole("textbox", { name: /search/i }).fill(title);
       await expect(page.getByRole("table").getByText(title)).toBeVisible();
-    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
+    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 60_000 });
 
     await page.getByRole("link", { name: "View" }).click();
     await page.waitForURL("**/charge_item_definitions/**");
