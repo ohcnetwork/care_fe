@@ -51,7 +51,7 @@ test.describe("Edit Patient Prescription", () => {
           .first();
         await expect(medicineOption).toBeVisible();
         await medicineOption.click();
-      }).toPass({ intervals: [500, 1_000, 2_000], timeout: 15_000 });
+      }).toPass({ intervals: [1_000, 2_000, 3_000], timeout: 15_000 });
       await expect(page.getByText(medicineName).first()).toBeVisible();
     });
 
