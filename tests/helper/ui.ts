@@ -642,8 +642,8 @@ export async function clickTabOrMenuItem(
   page: Page,
   tabName: string | RegExp,
 ): Promise<void> {
-  // Wait a moment for the page to settle before checking tab visibility
-  await page.waitForLoadState("domcontentloaded");
+  // Wait for the page to settle and tabs to render
+  await page.waitForLoadState("networkidle");
 
   // Try to find as a visible tab first
   const tab = page.getByRole("tab", { name: tabName });

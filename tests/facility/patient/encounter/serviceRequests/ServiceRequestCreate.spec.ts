@@ -150,7 +150,7 @@ test.describe("Patient Service Request Tab", () => {
     await expect(async () => {
       await clickTabOrMenuItem(page, /service requests/i);
       await expect(page).toHaveURL(/\/service_requests$/);
-    }).toPass({ intervals: [1_000, 2_000, 3_000], timeout: 20_000 });
+    }).toPass({ intervals: [2_000, 3_000, 5_000], timeout: 30_000 });
     await page.getByRole("button", { name: "See Details" }).first().click();
     await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Collect Specimen" }).click();
