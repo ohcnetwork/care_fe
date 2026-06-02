@@ -101,7 +101,10 @@ function useTokenActions({
 
   const items: TokenActionItem[] = [];
 
-  if (token.status === TokenStatus.CREATED && !token.sub_queue) {
+  if (
+    (token.status === TokenStatus.CREATED && !token.sub_queue) ||
+    token.status === TokenStatus.UNFULFILLED
+  ) {
     items.push({
       key: "open_encounter",
       label: t("open_encounter"),
@@ -293,7 +296,7 @@ function OngoingQueueTokenCardInner({
       <DrawerTrigger>
         <div
           className={cn(
-            "flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-3 bg-white rounded-lg shadow",
+            "flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow",
             token.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
           )}
@@ -316,9 +319,9 @@ function OngoingQueueTokenCardInner({
           <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
             {getQueueTokenStatus(token) === QueueTokenStatus.SERVING && (
               <Button
-                variant="outline"
+                variant="outline_primary"
                 asChild
-                size="sm"
+                size="md"
                 className="hidden sm:flex"
               >
                 <Link
@@ -329,7 +332,13 @@ function OngoingQueueTokenCardInner({
                 </Link>
               </Button>
             )}
-            <div className="flex w-full sm:w-auto gap-2 items-center justify-center py-1 px-3 bg-gray-100 border border-gray-200 rounded-lg whitespace-nowrap">
+            <div
+              className={cn(
+                "flex w-full sm:w-auto gap-2 items-center justify-center py-1 px-3 bg-gray-100 border border-gray-200 rounded-md whitespace-nowrap text-black",
+                getQueueTokenStatus(token) === QueueTokenStatus.SERVING &&
+                  "bg-primary-100 border border-primary-400 text-primary-900",
+              )}
+            >
               <span
                 className={cn(
                   "items-center gap-2",
@@ -344,11 +353,11 @@ function OngoingQueueTokenCardInner({
                   }
                   className="h-2 w-2 rounded-full p-0 border"
                 />
-                <span className="text-sm sm:text-base font-medium text-black">
-                  {t(`token_status__${getQueueTokenStatus(token)}`)}:
+                <span className="text-sm font-medium">
+                  {t(`token_status__${getQueueTokenStatus(token)}`)}
                 </span>
               </span>
-              <span className="text-lg font-bold text-black">
+              <span className="text-lg font-bold ">
                 {renderTokenNumber(token)}
               </span>
             </div>
@@ -360,7 +369,8 @@ function OngoingQueueTokenCardInner({
       <DrawerContent className="flex flex-col items-center px-3 pb-2">
         <div className="w-full max-w-md mx-auto">
           <DrawerHeader className="flex flex-row items-start justify-between -ml-4">
-            {getQueueTokenStatus(token) === QueueTokenStatus.WAITING ? (
+            {getQueueTokenStatus(token) === QueueTokenStatus.WAITING ||
+            QueueTokenStatus.RECALL ? (
               <div className="flex flex-col items-start">
                 <span className="text-gray-950 font-semibold">
                   {token.patient
@@ -600,7 +610,8 @@ function TokenDrawerContent({
 
   return (
     <div className="flex flex-col gap-3">
-      {queueStatus === QueueTokenStatus.WAITING ? (
+      {queueStatus === QueueTokenStatus.WAITING ||
+      queueStatus === QueueTokenStatus.RECALL ? (
         <div className="flex w-full sm:w-auto gap-2 items-center justify-center py-1 px-3 bg-gray-100 border border-gray-200 rounded-lg whitespace-nowrap">
           <span className="flex gap-2 items-center">
             <Badge
@@ -645,7 +656,8 @@ function TokenDrawerContent({
           showLabel={false}
         />
       )}
-      {queueStatus === QueueTokenStatus.WAITING ? (
+      {queueStatus === QueueTokenStatus.WAITING ||
+      queueStatus === QueueTokenStatus.RECALL ? (
         <div className="flex gap-2 w-full">
           <Button
             variant="outline_primary"
