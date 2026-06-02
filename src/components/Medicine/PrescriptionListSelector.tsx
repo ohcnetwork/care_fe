@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
@@ -18,8 +17,11 @@ import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown, ReceiptTextIcon } from "lucide-react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
 
 function PrescriptionTags({ tags }: { tags?: TagConfig[] }) {
   if (!tags || tags.length === 0) return null;
@@ -56,14 +58,35 @@ export default function PrescriptionListSelector({
 }: PrescriptionListSelectorProps) {
   const { t } = useTranslation();
   const [openDrawer, setOpenDrawer] = React.useState(false);
-  const { data: prescriptions, isLoading } = useQuery({
-    queryKey: ["prescriptions", patientId, encounterId],
-    queryFn: query(prescriptionApi.list, {
-      pathParams: { patientId },
-      queryParams: { encounter: encounterId, facility: facilityId },
-    }),
-    enabled: !!patientId && !!encounterId,
-  });
+  const { ref, inView } = useInView();
+  const PAGE_LIMIT = 14;
+
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["infinite-prescriptions", patientId, encounterId],
+      queryFn: async ({ pageParam = 0, signal }) => {
+        const response = await query(prescriptionApi.list, {
+          pathParams: { patientId },
+          queryParams: {
+            encounter: encounterId,
+            facility: facilityId,
+            limit: String(PAGE_LIMIT),
+            offset: String(pageParam),
+          },
+        })({
+          signal,
+        });
+        return response;
+      },
+      enabled: !!patientId && !!encounterId,
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * PAGE_LIMIT;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+    });
+
+  const prescriptions = data?.pages.flatMap((page) => page.results) ?? [];
 
   const handleSelectPrescription = React.useCallback(
     (prescription: PrescritionList | undefined) => {
@@ -72,6 +95,12 @@ export default function PrescriptionListSelector({
     },
     [onSelectPrescription],
   );
+
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
 
   if (isLoading) {
     return (
@@ -82,7 +111,7 @@ export default function PrescriptionListSelector({
   }
 
   const selectedPrescription = selectedPrescriptionId
-    ? prescriptions?.results.find((pres) => pres.id === selectedPrescriptionId)
+    ? prescriptions.find((pres) => pres.id === selectedPrescriptionId)
     : undefined;
 
   const isAllSelected = selectedPrescriptionId === undefined;
@@ -91,9 +120,11 @@ export default function PrescriptionListSelector({
     <>
       <div className="hidden lg:block h-full overflow-y-auto pr-1">
         <PrescriptionList
-          prescriptions={prescriptions?.results ?? []}
+          prescriptions={prescriptions}
           selectedPrescriptionId={selectedPrescriptionId}
           onSelectPrescription={onSelectPrescription}
+          ref={ref}
+          isFetchingNextPage={isFetchingNextPage}
         />
       </div>
       <div className="lg:hidden">
@@ -154,7 +185,9 @@ export default function PrescriptionListSelector({
             </DrawerHeader>
             <div className="overflow-y-auto pr-2">
               <PrescriptionList
-                prescriptions={prescriptions?.results ?? []}
+                ref={ref}
+                isFetchingNextPage={isFetchingNextPage}
+                prescriptions={prescriptions}
                 selectedPrescriptionId={selectedPrescriptionId}
                 onSelectPrescription={handleSelectPrescription}
               />
@@ -176,10 +209,14 @@ function PrescriptionList({
   prescriptions,
   selectedPrescriptionId,
   onSelectPrescription,
+  isFetchingNextPage,
+  ref,
 }: {
   prescriptions: PrescritionList[];
   selectedPrescriptionId: string | undefined;
   onSelectPrescription: (prescription: PrescritionList | undefined) => void;
+  isFetchingNextPage: boolean;
+  ref: (node?: Element | null) => void;
 }) {
   const { t } = useTranslation();
 
@@ -199,7 +236,7 @@ function PrescriptionList({
 
   return (
     <div className="space-y-2 p-2">
-      {items.map((item) => {
+      {items.map((item, i) => {
         const isSelected = selectedPrescriptionId === item.id;
 
         return (
@@ -214,6 +251,7 @@ function PrescriptionList({
             onClick={() =>
               onSelectPrescription(prescriptions.find((p) => p.id === item.id))
             }
+            ref={i === items.length - 1 ? ref : undefined}
           >
             {isSelected && (
               <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
@@ -240,6 +278,7 @@ function PrescriptionList({
           </Card>
         );
       })}
+      {isFetchingNextPage && <CardListSkeleton count={5} />}
     </div>
   );
 }
