@@ -49,6 +49,8 @@ interface PrescriptionListSelectorProps {
   onSelectPrescription: (prescription: PrescritionList | undefined) => void;
 }
 
+const PAGE_LIMIT = 14;
+
 export default function PrescriptionListSelector({
   patientId,
   encounterId,
@@ -59,11 +61,10 @@ export default function PrescriptionListSelector({
   const { t } = useTranslation();
   const [openDrawer, setOpenDrawer] = React.useState(false);
   const { ref, inView } = useInView();
-  const PAGE_LIMIT = 14;
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["infinite-prescriptions", patientId, encounterId],
+      queryKey: ["infinite-prescriptions", patientId, encounterId, facilityId],
       queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(prescriptionApi.list, {
           pathParams: { patientId },
