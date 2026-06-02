@@ -33,6 +33,12 @@ export default {
     TRes: Type<InvoiceRead>(),
     TBody: Type<InvoiceCreate>(),
   },
+  partialUpdateInvoice: {
+    path: "/api/v1/facility/{facilityId}/invoice/{invoiceId}/",
+    method: HttpMethod.PATCH,
+    TRes: Type<InvoiceRead>(),
+    TBody: Type<Partial<InvoiceCreate>>(),
+  },
   cancelInvoice: {
     path: "/api/v1/facility/{facilityId}/invoice/{invoiceId}/cancel_invoice/",
     method: HttpMethod.POST,
