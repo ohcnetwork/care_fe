@@ -245,6 +245,40 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                   )}
               </div>
               <div className="flex gap-2">
+                {file_state.extension === "pdf" && (
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(fileUrl);
+                        const blob = await response.blob();
+                        const blobUrl = window.URL.createObjectURL(blob);
+                        const iframe = document.createElement("iframe");
+                        iframe.style.display = "none";
+                        iframe.src = blobUrl;
+
+                        iframe.onload = () => {
+                          try {
+                            iframe.contentWindow?.print();
+                          } catch {
+                            window.open(blobUrl, "_blank");
+                          }
+                          setTimeout(() => {
+                            document.body.removeChild(iframe);
+                            window.URL.revokeObjectURL(blobUrl);
+                          }, 10000);
+                        };
+
+                        document.body.appendChild(iframe);
+                      } catch {
+                        toast.error(t("print_failed"));
+                      }
+                    }}
+                  >
+                    <CareIcon icon="l-print" className="size-4" />
+                    <span>{t("print")}</span>
+                  </Button>
+                )}
                 {file_state.extension === "pdf" && fileUrl && (
                   <Button
                     variant="outline"
