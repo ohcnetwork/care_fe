@@ -1,4 +1,4 @@
-# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"2959469cf4fa56faaa02e335034c1c83ea2a8bd611c18fabc24286ed80c37e1b","body_hash":"65a338f779aa4cd425d3386785104315ab794065d627f445c846348caaccd017","compiler_version":"v0.77.5","strict":true,"agent_id":"copilot","agent_model":"claude-opus-4"}
+# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"71adaa550da9d808fc436d87ea8228c4ec5e1adeb921329dcd9a4072aa1b9c81","body_hash":"57d5543fe82fd37e95f6916e56e25c36482052e425c54caa03647859747b6e71","compiler_version":"v0.77.5","strict":true,"agent_id":"copilot","agent_model":"claude-opus-4"}
 # gh-aw-manifest: {"version":1,"secrets":["COPILOT_GITHUB_TOKEN","GH_AW_CI_TRIGGER_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN"],"actions":[{"repo":"actions/cache/restore","sha":"27d5ce7f107fe9357f9df03efb73ab90386fccae","version":"v5.0.5"},{"repo":"actions/cache/save","sha":"27d5ce7f107fe9357f9df03efb73ab90386fccae","version":"v5.0.5"},{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"3ea13c02d765410340d533515cb31a7eef2baaf0","version":"v0.77.5"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.25.58"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.58"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.25.58"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.22"},{"image":"ghcr.io/github/github-mcp-server:v1.1.0"},{"image":"node:lts-alpine","digest":"sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14","pinned_image":"node:lts-alpine@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14"}]}
 #    ___                   _   _      
 #   / _ \                 | | (_)     
@@ -22,7 +22,7 @@
 #
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
-# Weekly reliability agent for ohcnetwork/care_fe. Each Monday, analyses the previous 7 days of Playwright CI runs, clusters recurring failures, and opens a single Draft PR fixing all flakes that meet the escalation threshold (≥3 distinct PRs OR ≥5 occurrences).
+# Daily reliability agent for ohcnetwork/care_fe. Each day, analyses the previous 7 days of Playwright CI runs, clusters recurring failures, and opens a single Draft PR fixing all flakes that meet the escalation threshold (≥3 distinct PRs OR ≥5 occurrences).
 #
 # Secrets used:
 #   - COPILOT_GITHUB_TOKEN
@@ -50,11 +50,11 @@
 #   - ghcr.io/github/github-mcp-server:v1.1.0
 #   - node:lts-alpine@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14
 
-name: "Weekly Flake Report — Reliability Engineer"
+name: "Daily Flake Report — Reliability Engineer"
 on:
   schedule:
-  - cron: "11 22 * * 1"
-    # Friendly format: weekly on monday (scattered)
+  - cron: "23 18 * * *"
+    # Friendly format: daily (scattered)
   workflow_dispatch:
     inputs:
       aw_context:
@@ -68,7 +68,7 @@ permissions: {}
 concurrency:
   group: "gh-aw-${{ github.workflow }}"
 
-run-name: "Weekly Flake Report — Reliability Engineer"
+run-name: "Daily Flake Report — Reliability Engineer"
 
 jobs:
   activation:
@@ -95,8 +95,8 @@ jobs:
           destination: ${{ runner.temp }}/gh-aw/actions
           job-name: ${{ github.job }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/weekly-flake-report.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flake-report.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "1.0.55"
           GH_AW_INFO_AWF_VERSION: "v0.25.58"
           GH_AW_INFO_ENGINE_ID: "copilot"
@@ -109,7 +109,7 @@ jobs:
           GH_AW_INFO_VERSION: "1.0.55"
           GH_AW_INFO_AGENT_VERSION: "1.0.55"
           GH_AW_INFO_CLI_VERSION: "v0.77.5"
-          GH_AW_INFO_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
+          GH_AW_INFO_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
           GH_AW_INFO_EXPERIMENTAL: "false"
           GH_AW_INFO_SUPPORTS_TOOLS_ALLOWLIST: "true"
           GH_AW_INFO_STAGED: "false"
@@ -157,7 +157,7 @@ jobs:
         id: check-lock-file
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          GH_AW_WORKFLOW_FILE: "weekly-flake-report.lock.yml"
+          GH_AW_WORKFLOW_FILE: "flake-report.lock.yml"
           GH_AW_CONTEXT_WORKFLOW_REF: "${{ github.workflow_ref }}"
         with:
           script: |
@@ -191,24 +191,24 @@ jobs:
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/create_prompt_first.sh"
           {
-          cat << 'GH_AW_PROMPT_80d009a79856a421_EOF'
+          cat << 'GH_AW_PROMPT_7bc2135789cc2e1c_EOF'
           <system>
-          GH_AW_PROMPT_80d009a79856a421_EOF
+          GH_AW_PROMPT_7bc2135789cc2e1c_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/xpia.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/temp_folder_prompt.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/markdown.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/cache_memory_prompt.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_prompt.md"
-          cat << 'GH_AW_PROMPT_80d009a79856a421_EOF'
+          cat << 'GH_AW_PROMPT_7bc2135789cc2e1c_EOF'
           <safe-output-tools>
           Tools: add_comment(max:5), create_issue, create_pull_request, missing_tool, missing_data, noop
-          GH_AW_PROMPT_80d009a79856a421_EOF
+          GH_AW_PROMPT_7bc2135789cc2e1c_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_create_pull_request.md"
-          cat << 'GH_AW_PROMPT_80d009a79856a421_EOF'
+          cat << 'GH_AW_PROMPT_7bc2135789cc2e1c_EOF'
           </safe-output-tools>
-          GH_AW_PROMPT_80d009a79856a421_EOF
+          GH_AW_PROMPT_7bc2135789cc2e1c_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/mcp_cli_tools_prompt.md"
-          cat << 'GH_AW_PROMPT_80d009a79856a421_EOF'
+          cat << 'GH_AW_PROMPT_7bc2135789cc2e1c_EOF'
           <github-context>
           The following GitHub context information is available for this workflow:
           {{#if github.actor}}
@@ -237,12 +237,12 @@ jobs:
           {{/if}}
           </github-context>
           
-          GH_AW_PROMPT_80d009a79856a421_EOF
+          GH_AW_PROMPT_7bc2135789cc2e1c_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/github_mcp_tools_with_safeoutputs_prompt.md"
-          cat << 'GH_AW_PROMPT_80d009a79856a421_EOF'
+          cat << 'GH_AW_PROMPT_7bc2135789cc2e1c_EOF'
           </system>
-          {{#runtime-import .github/workflows/weekly-flake-report.md}}
-          GH_AW_PROMPT_80d009a79856a421_EOF
+          {{#runtime-import .github/workflows/flake-report.md}}
+          GH_AW_PROMPT_7bc2135789cc2e1c_EOF
           } > "$GH_AW_PROMPT"
       - name: Interpolate variables and render templates
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -338,7 +338,7 @@ jobs:
       GH_AW_ASSETS_BRANCH: ""
       GH_AW_ASSETS_MAX_SIZE_KB: 0
       GH_AW_MCP_LOG_DIR: /tmp/gh-aw/mcp-logs/safeoutputs
-      GH_AW_WORKFLOW_ID_SANITIZED: weeklyflakereport
+      GH_AW_WORKFLOW_ID_SANITIZED: flakereport
     outputs:
       agentic_engine_timeout: ${{ steps.detect-agent-errors.outputs.agentic_engine_timeout || 'false' }}
       checkout_pr_success: ${{ steps.checkout-pr.outputs.checkout_pr_success || 'true' }}
@@ -364,8 +364,8 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/weekly-flake-report.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flake-report.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "1.0.55"
           GH_AW_INFO_AWF_VERSION: "v0.25.58"
           GH_AW_INFO_ENGINE_ID: "copilot"
@@ -475,17 +475,17 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/gh-aw/safeoutputs"
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
-          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_b0eb38479867a7ab_EOF'
-          {"add_comment":{"max":5,"target":"*"},"create_issue":{"max":1,"title_prefix":"[weekly-flake-report] "},"create_pull_request":{"draft":true,"max":1,"max_patch_files":100,"max_patch_size":1024,"protect_top_level_dot_folders":true,"protected_files":["package.json","bun.lockb","bunfig.toml","deno.json","deno.jsonc","deno.lock","global.json","NuGet.Config","Directory.Packages.props","mix.exs","mix.lock","go.mod","go.sum","stack.yaml","stack.yaml.lock","pom.xml","build.gradle","build.gradle.kts","settings.gradle","settings.gradle.kts","gradle.properties","package-lock.json","yarn.lock","pnpm-lock.yaml","npm-shrinkwrap.json","requirements.txt","Pipfile","Pipfile.lock","pyproject.toml","setup.py","setup.cfg","Gemfile","Gemfile.lock","uv.lock","CODEOWNERS","DESIGN.md","README.md","CONTRIBUTING.md","CHANGELOG.md","SECURITY.md","CODE_OF_CONDUCT.md","AGENTS.md","CLAUDE.md","GEMINI.md"],"protected_files_policy":"request_review","title_prefix":"[weekly-flake-report] "},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"report_incomplete":{}}
-          GH_AW_SAFE_OUTPUTS_CONFIG_b0eb38479867a7ab_EOF
+          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_9c0327defdbcd644_EOF'
+          {"add_comment":{"max":5,"target":"*"},"create_issue":{"max":1,"title_prefix":"[flake-report] "},"create_pull_request":{"draft":true,"max":1,"max_patch_files":100,"max_patch_size":1024,"protect_top_level_dot_folders":true,"protected_files":["package.json","bun.lockb","bunfig.toml","deno.json","deno.jsonc","deno.lock","global.json","NuGet.Config","Directory.Packages.props","mix.exs","mix.lock","go.mod","go.sum","stack.yaml","stack.yaml.lock","pom.xml","build.gradle","build.gradle.kts","settings.gradle","settings.gradle.kts","gradle.properties","package-lock.json","yarn.lock","pnpm-lock.yaml","npm-shrinkwrap.json","requirements.txt","Pipfile","Pipfile.lock","pyproject.toml","setup.py","setup.cfg","Gemfile","Gemfile.lock","uv.lock","CODEOWNERS","DESIGN.md","README.md","CONTRIBUTING.md","CHANGELOG.md","SECURITY.md","CODE_OF_CONDUCT.md","AGENTS.md","CLAUDE.md","GEMINI.md"],"protected_files_policy":"request_review","title_prefix":"[flake-report] "},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"report_incomplete":{}}
+          GH_AW_SAFE_OUTPUTS_CONFIG_9c0327defdbcd644_EOF
       - name: Generate Safe Outputs Tools
         env:
           GH_AW_TOOLS_META_JSON: |
             {
               "description_suffixes": {
                 "add_comment": " CONSTRAINTS: Maximum 5 comment(s) can be added. Target: *. Supports reply_to_id for discussion threading.",
-                "create_issue": " CONSTRAINTS: Maximum 1 issue(s) can be created. Title will be prefixed with \"[weekly-flake-report] \".",
-                "create_pull_request": " CONSTRAINTS: Maximum 1 pull request(s) can be created. Title will be prefixed with \"[weekly-flake-report] \". PRs will be created as drafts."
+                "create_issue": " CONSTRAINTS: Maximum 1 issue(s) can be created. Title will be prefixed with \"[flake-report] \".",
+                "create_pull_request": " CONSTRAINTS: Maximum 1 pull request(s) can be created. Title will be prefixed with \"[flake-report] \". PRs will be created as drafts."
               },
               "repo_params": {},
               "dynamic_tools": []
@@ -750,7 +750,7 @@ jobs:
           
           mkdir -p /home/runner/.copilot
           GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
-          cat << GH_AW_MCP_CONFIG_af7c345a880562bb_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
+          cat << GH_AW_MCP_CONFIG_40b5f7b0863e81a1_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
           {
             "mcpServers": {
               "github": {
@@ -791,7 +791,7 @@ jobs:
               "payloadDir": "${MCP_GATEWAY_PAYLOAD_DIR}"
             }
           }
-          GH_AW_MCP_CONFIG_af7c345a880562bb_EOF
+          GH_AW_MCP_CONFIG_40b5f7b0863e81a1_EOF
       - name: Mount MCP servers as CLIs
         id: mount-mcp-clis
         continue-on-error: true
@@ -1096,7 +1096,7 @@ jobs:
       issues: write
       pull-requests: write
     concurrency:
-      group: "gh-aw-conclusion-weekly-flake-report"
+      group: "gh-aw-conclusion-flake-report"
       cancel-in-progress: false
       queue: max
     outputs:
@@ -1114,8 +1114,8 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/weekly-flake-report.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flake-report.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "1.0.55"
           GH_AW_INFO_AWF_VERSION: "v0.25.58"
           GH_AW_INFO_ENGINE_ID: "copilot"
@@ -1139,8 +1139,8 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_NOOP_MAX: "1"
-          GH_AW_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/weekly-flake-report.md"
+          GH_AW_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flake-report.md"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
           GH_AW_NOOP_REPORT_AS_ISSUE: "true"
@@ -1156,8 +1156,8 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/weekly-flake-report.md"
+          GH_AW_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flake-report.md"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
           GH_AW_DETECTION_REASON: ${{ needs.detection.outputs.detection_reason }}
@@ -1175,8 +1175,8 @@ jobs:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_MISSING_TOOL_CREATE_ISSUE: "true"
           GH_AW_MISSING_TOOL_TITLE_PREFIX: "[missing tool]"
-          GH_AW_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/weekly-flake-report.md"
+          GH_AW_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flake-report.md"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -1190,8 +1190,8 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_REPORT_INCOMPLETE_CREATE_ISSUE: "true"
-          GH_AW_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/weekly-flake-report.md"
+          GH_AW_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flake-report.md"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -1205,11 +1205,11 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/weekly-flake-report.md"
+          GH_AW_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flake-report.md"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
-          GH_AW_WORKFLOW_ID: "weekly-flake-report"
+          GH_AW_WORKFLOW_ID: "flake-report"
           GH_AW_ACTION_FAILURE_ISSUE_EXPIRES_HOURS: "168"
           GH_AW_ENGINE_ID: "copilot"
           GH_AW_SECRET_VERIFICATION_RESULT: ${{ needs.activation.outputs.secret_verification_result }}
@@ -1263,8 +1263,8 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/weekly-flake-report.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flake-report.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "1.0.55"
           GH_AW_INFO_AWF_VERSION: "v0.25.58"
           GH_AW_INFO_ENGINE_ID: "copilot"
@@ -1335,8 +1335,8 @@ jobs:
         if: always() && steps.detection_guard.outputs.run_detection == 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          WORKFLOW_DESCRIPTION: "Weekly reliability agent for ohcnetwork/care_fe. Each Monday, analyses the previous 7 days of Playwright CI runs, clusters recurring failures, and opens a single Draft PR fixing all flakes that meet the escalation threshold (≥3 distinct PRs OR ≥5 occurrences)."
+          WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          WORKFLOW_DESCRIPTION: "Daily reliability agent for ohcnetwork/care_fe. Each day, analyses the previous 7 days of Playwright CI runs, clusters recurring failures, and opens a single Draft PR fixing all flakes that meet the escalation threshold (≥3 distinct PRs OR ≥5 occurrences)."
           HAS_PATCH: ${{ needs.agent.outputs.has_patch }}
         with:
           script: |
@@ -1470,16 +1470,16 @@ jobs:
       pull-requests: write
     timeout-minutes: 15
     env:
-      GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/weekly-flake-report"
+      GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/flake-report"
       GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
       GH_AW_DETECTION_REASON: ${{ needs.detection.outputs.detection_reason }}
       GH_AW_EFFECTIVE_TOKENS: ${{ needs.agent.outputs.effective_tokens }}
       GH_AW_ENGINE_ID: "copilot"
       GH_AW_ENGINE_MODEL: "claude-opus-4"
       GH_AW_ENGINE_VERSION: "1.0.55"
-      GH_AW_WORKFLOW_ID: "weekly-flake-report"
-      GH_AW_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-      GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/weekly-flake-report.md"
+      GH_AW_WORKFLOW_ID: "flake-report"
+      GH_AW_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+      GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flake-report.md"
     outputs:
       code_push_failure_count: ${{ steps.process_safe_outputs.outputs.code_push_failure_count }}
       code_push_failure_errors: ${{ steps.process_safe_outputs.outputs.code_push_failure_errors }}
@@ -1503,8 +1503,8 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/weekly-flake-report.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flake-report.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "1.0.55"
           GH_AW_INFO_AWF_VERSION: "v0.25.58"
           GH_AW_INFO_ENGINE_ID: "copilot"
@@ -1586,7 +1586,7 @@ jobs:
           GH_AW_ALLOWED_DOMAINS: "api.business.githubcopilot.com,api.enterprise.githubcopilot.com,api.github.com,api.githubcopilot.com,api.individual.githubcopilot.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,github.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,ppa.launchpad.net,raw.githubusercontent.com,registry.npmjs.org,s.symcb.com,s.symcd.com,security.ubuntu.com,telemetry.enterprise.githubcopilot.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com"
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
-          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"max\":5,\"target\":\"*\"},\"create_issue\":{\"max\":1,\"title_prefix\":\"[weekly-flake-report] \"},\"create_pull_request\":{\"draft\":true,\"max\":1,\"max_patch_files\":100,\"max_patch_size\":1024,\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"AGENTS.md\",\"CLAUDE.md\",\"GEMINI.md\"],\"protected_files_policy\":\"request_review\",\"title_prefix\":\"[weekly-flake-report] \"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"true\"},\"report_incomplete\":{}}"
+          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"max\":5,\"target\":\"*\"},\"create_issue\":{\"max\":1,\"title_prefix\":\"[flake-report] \"},\"create_pull_request\":{\"draft\":true,\"max\":1,\"max_patch_files\":100,\"max_patch_size\":1024,\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"AGENTS.md\",\"CLAUDE.md\",\"GEMINI.md\"],\"protected_files_policy\":\"request_review\",\"title_prefix\":\"[flake-report] \"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"true\"},\"report_incomplete\":{}}"
           GH_AW_CI_TRIGGER_TOKEN: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
@@ -1614,7 +1614,7 @@ jobs:
     runs-on: ubuntu-slim
     permissions: {}
     env:
-      GH_AW_WORKFLOW_ID_SANITIZED: weeklyflakereport
+      GH_AW_WORKFLOW_ID_SANITIZED: flakereport
     steps:
       - name: Setup Scripts
         id: setup
@@ -1625,8 +1625,8 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Weekly Flake Report — Reliability Engineer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/weekly-flake-report.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Daily Flake Report — Reliability Engineer"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flake-report.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "1.0.55"
           GH_AW_INFO_AWF_VERSION: "v0.25.58"
           GH_AW_INFO_ENGINE_ID: "copilot"
