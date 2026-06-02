@@ -144,24 +144,35 @@ async function createPatient(): Promise<string> {
   if (!geoOrg)
     throw new Error("No govt organization found for geo_organization");
 
-  const res = await fetch(`${getApiUrl()}/api/v1/patient/`, {
-    method: "POST",
-    headers: getApiHeaders(),
-    body: JSON.stringify({
-      name: `Transfer Test ${faker.string.alphanumeric(6)}`,
-      gender: "male",
-      phone_number: phone,
-      date_of_birth: "1990-01-15",
-      geo_organization: geoOrg,
-      identifiers: [],
-    }),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Failed to create patient: ${res.status} — ${text}`);
+  // beforeAll setup: backend occasionally returns 400
+  // "Patient creation failed, try again after a while" — retry with a fresh
+  // phone number to make setup resilient. This is setup-only and does not
+  // mask flakiness in the tests themselves.
+  let lastError = "";
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const attemptPhone =
+      attempt === 0 ? phone : `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`;
+    const res = await fetch(`${getApiUrl()}/api/v1/patient/`, {
+      method: "POST",
+      headers: getApiHeaders(),
+      body: JSON.stringify({
+        name: `Transfer Test ${faker.string.alphanumeric(6)}`,
+        gender: "male",
+        phone_number: attemptPhone,
+        date_of_birth: "1990-01-15",
+        geo_organization: geoOrg,
+        identifiers: [],
+      }),
+    });
+    if (res.ok) {
+      const data = (await res.json()) as { id: string };
+      return data.id;
+    }
+    lastError = `${res.status} — ${await res.text()}`;
+    if (!lastError.includes("try again")) break;
+    await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
   }
-  const data = (await res.json()) as { id: string };
-  return data.id;
+  throw new Error(`Failed to create patient: ${lastError}`);
 }
 
 test.describe("Account Transfer Payment", () => {
