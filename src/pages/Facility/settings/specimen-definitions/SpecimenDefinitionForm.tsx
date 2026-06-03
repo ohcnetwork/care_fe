@@ -189,7 +189,6 @@ function SpecimenDefinitionFormContent({
     description: z.string().trim().min(1, t("field_required")),
     derived_from_uri: z
       .string()
-      .trim()
       .url({ message: t("field_required") })
       .optional(),
     type_collected: CodeSchema,
