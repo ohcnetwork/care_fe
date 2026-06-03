@@ -52,15 +52,22 @@ type VirtualSlot = {
   exceptions: ScheduleException[];
 };
 
+interface ComputeAppointmentSlotsOptions {
+  /**
+   * When true, slots blocked by an exception are returned with
+   * `isAvailable: false` and their overlapping exceptions, instead of being
+   * omitted. Defaults to false (available slots only).
+   */
+  includeUnavailableSlots?: boolean;
+}
+
 export function computeAppointmentSlots(
   availability: ScheduleAvailability & {
     slot_type: AvailabilitySlotType.Appointment;
   },
   exceptions: ScheduleException[],
   referenceDate: Date = new Date(),
-  {
-    includeUnavailableSlots = false,
-  }: { includeUnavailableSlots?: boolean } = {},
+  { includeUnavailableSlots = false }: ComputeAppointmentSlotsOptions = {},
 ) {
   const startTime = parse(
     availability.availability[0].start_time,
@@ -85,25 +92,19 @@ export function computeAppointmentSlots(
   let time = startTime;
   while (time < endTime) {
     const slotEndTime = addMinutes(time, slotSizeInMinutes);
-    const start_time = format(time, "HH:mm") as Time;
-    const end_time = format(slotEndTime, "HH:mm") as Time;
 
-    // some() short-circuits on the first overlapping exception.
-    const isAvailable = !parsedExceptions.some(
-      ({ start, end }) => start < slotEndTime && end > time,
-    );
+    // Single pass: collect overlapping exceptions, then derive availability.
+    const slotExceptions = parsedExceptions
+      .filter(({ start, end }) => start < slotEndTime && end > time)
+      .map(({ exception }) => exception);
+    const isAvailable = slotExceptions.length === 0;
 
-    if (isAvailable) {
-      slots.push({ start_time, end_time, isAvailable: true, exceptions: [] });
-    } else if (includeUnavailableSlots) {
-      // Only build the overlapping list for slots we actually return.
+    if (isAvailable || includeUnavailableSlots) {
       slots.push({
-        start_time,
-        end_time,
-        isAvailable: false,
-        exceptions: parsedExceptions
-          .filter(({ start, end }) => start < slotEndTime && end > time)
-          .map(({ exception }) => exception),
+        start_time: format(time, "HH:mm") as Time,
+        end_time: format(slotEndTime, "HH:mm") as Time,
+        isAvailable,
+        exceptions: slotExceptions,
       });
     }
 
