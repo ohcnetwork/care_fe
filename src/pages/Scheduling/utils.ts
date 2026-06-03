@@ -52,6 +52,12 @@ type VirtualSlot = {
   exceptions: ScheduleException[];
 };
 
+// Schedule times may arrive as HH:mm (e.g. the exception form's time input,
+// which sets values like "00:00"/"23:59") or HH:mm:ss; parse with the matching
+// format so neither variant produces an Invalid Date.
+const parseScheduleTime = (value: Time, referenceDate: Date) =>
+  parse(value, value.length > 5 ? "HH:mm:ss" : "HH:mm", referenceDate);
+
 interface ComputeAppointmentSlotsOptions {
   /**
    * When true, slots blocked by an exception are returned with
@@ -69,14 +75,12 @@ export function computeAppointmentSlots(
   referenceDate: Date = new Date(),
   { includeUnavailableSlots = false }: ComputeAppointmentSlotsOptions = {},
 ) {
-  const startTime = parse(
+  const startTime = parseScheduleTime(
     availability.availability[0].start_time,
-    "HH:mm:ss",
     referenceDate,
   );
-  const endTime = parse(
+  const endTime = parseScheduleTime(
     availability.availability[0].end_time,
-    "HH:mm:ss",
     referenceDate,
   );
   const slotSizeInMinutes = availability.slot_size_in_minutes;
@@ -85,8 +89,8 @@ export function computeAppointmentSlots(
   // Parse each exception's time window once instead of for every slot.
   const parsedExceptions = exceptions.map((exception) => ({
     exception,
-    start: parse(exception.start_time, "HH:mm:ss", referenceDate),
-    end: parse(exception.end_time, "HH:mm:ss", referenceDate),
+    start: parseScheduleTime(exception.start_time, referenceDate),
+    end: parseScheduleTime(exception.end_time, referenceDate),
   }));
 
   let time = startTime;
