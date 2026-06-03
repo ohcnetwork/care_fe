@@ -437,6 +437,7 @@ function ScheduleTemplateAvailabilityItem({
     availability,
     unavailableExceptions,
     date,
+    { includeUnavailableSlots: true },
   );
 
   const availableSlots = computedSlots.filter(

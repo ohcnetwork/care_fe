@@ -58,6 +58,9 @@ export function computeAppointmentSlots(
   },
   exceptions: ScheduleException[],
   referenceDate: Date = new Date(),
+  {
+    includeUnavailableSlots = false,
+  }: { includeUnavailableSlots?: boolean } = {},
 ) {
   const startTime = parse(
     availability.availability[0].start_time,
@@ -72,31 +75,37 @@ export function computeAppointmentSlots(
   const slotSizeInMinutes = availability.slot_size_in_minutes;
   const slots: VirtualSlot[] = [];
 
+  // Parse each exception's time window once instead of for every slot.
+  const parsedExceptions = exceptions.map((exception) => ({
+    exception,
+    start: parse(exception.start_time, "HH:mm:ss", referenceDate),
+    end: parse(exception.end_time, "HH:mm:ss", referenceDate),
+  }));
+
   let time = startTime;
   while (time < endTime) {
     const slotEndTime = addMinutes(time, slotSizeInMinutes);
+    const start_time = format(time, "HH:mm") as Time;
+    const end_time = format(slotEndTime, "HH:mm") as Time;
 
-    const slotExceptions = exceptions.filter((exception) => {
-      const exceptionStartTime = parse(
-        exception.start_time,
-        "HH:mm:ss",
-        referenceDate,
-      );
-      const exceptionEndTime = parse(
-        exception.end_time,
-        "HH:mm:ss",
-        referenceDate,
-      );
+    // some() short-circuits on the first overlapping exception.
+    const isAvailable = !parsedExceptions.some(
+      ({ start, end }) => start < slotEndTime && end > time,
+    );
 
-      return exceptionStartTime < slotEndTime && exceptionEndTime > time;
-    });
-
-    slots.push({
-      start_time: format(time, "HH:mm") as Time,
-      end_time: format(slotEndTime, "HH:mm") as Time,
-      isAvailable: slotExceptions.length === 0,
-      exceptions: slotExceptions,
-    });
+    if (isAvailable) {
+      slots.push({ start_time, end_time, isAvailable: true, exceptions: [] });
+    } else if (includeUnavailableSlots) {
+      // Only build the overlapping list for slots we actually return.
+      slots.push({
+        start_time,
+        end_time,
+        isAvailable: false,
+        exceptions: parsedExceptions
+          .filter(({ start, end }) => start < slotEndTime && end > time)
+          .map(({ exception }) => exception),
+      });
+    }
 
     time = slotEndTime;
   }
