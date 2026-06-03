@@ -251,14 +251,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         <PrintTemplateSheet
                           facility={facilityData}
                           trigger={
-                            <Button
-                              className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
-                              variant="outline"
-                              size="sm"
+                            <button
+                              type="button"
+                              className="hover:bg-gray-100 hover:text-gray-900 flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
                             >
-                              <Printer className="size-4" />
+                              <Printer className="size-4 text-gray-500" />
                               {t("print_templates")}
-                            </Button>
+                            </button>
                           }
                         />
                         <PLUGIN_Component
@@ -293,7 +292,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="col-span-1 sm:col-span-2 flex flex-col">
                         <span className="font-semibold">{t("address")}</span>
-                        <span className="text-gray-700 whitespace-pre-wrap break-words text-sm">
+                        <span className="text-gray-700 whitespace-pre-wrap wrap-break-word text-sm">
                           {facilityData.address}
                         </span>
                       </div>
@@ -368,7 +367,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
               {facilityData?.description && (
                 <Card>
-                  <CardContent className="mt-4 break-words">
+                  <CardContent className="mt-4 wrap-break-word">
                     <Markdown
                       content={facilityData.description}
                       className="text-sm"
