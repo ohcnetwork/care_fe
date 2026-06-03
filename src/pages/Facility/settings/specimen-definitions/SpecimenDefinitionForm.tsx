@@ -182,12 +182,14 @@ function SpecimenDefinitionFormContent({
     title: z.string().trim().min(1, t("field_required")),
     slug_value: z
       .string()
+      .trim()
       .min(5, t("character_count_validation", { min: 5, max: 25 }))
       .max(25, t("character_count_validation", { min: 5, max: 25 })),
     status: z.nativeEnum(SpecimenDefinitionStatus),
     description: z.string().trim().min(1, t("field_required")),
     derived_from_uri: z
       .string()
+      .trim()
       .url({ message: t("field_required") })
       .optional(),
     type_collected: CodeSchema,

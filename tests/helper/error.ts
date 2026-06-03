@@ -43,6 +43,8 @@ export async function expectWhitespaceRejected(
   }
   await submit();
   for (const field of fields) {
-    await expect(getFieldErrorMessage(field)).toContainText(expectedError);
+    const error = getFieldErrorMessage(field);
+    await expect(error).toBeVisible();
+    await expect(error).toContainText(expectedError);
   }
 }

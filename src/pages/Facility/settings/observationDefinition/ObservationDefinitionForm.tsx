@@ -143,6 +143,7 @@ function ObservationDefinitionFormContent({
       title: z.string().trim().min(1, t("field_required")),
       slug_value: z
         .string()
+        .trim()
         .min(5, t("character_count_validation", { min: 5, max: 25 }))
         .max(25, t("character_count_validation", { min: 5, max: 25 })),
       description: z.string().trim().min(1, t("field_required")),
