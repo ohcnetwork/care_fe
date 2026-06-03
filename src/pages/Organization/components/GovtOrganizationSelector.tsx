@@ -183,7 +183,9 @@ export default function GovtOrganizationSelector({
           currentLevel={selectedLevels[index]}
           previousLevel={selectedLevels[index - 1]}
           onChange={handleFilterChange}
-          required={required}
+          required={
+            required || (requiredDepth != null && index < requiredDepth)
+          }
           authToken={authToken}
         />
       ))}
