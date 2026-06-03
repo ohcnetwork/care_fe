@@ -13,6 +13,7 @@ import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 import ReportViewer from "@/pages/Encounters/ReportViewer";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
+import { ReportType } from "@/types/emr/report/report";
 
 const ExcalidrawEditor = lazy(
   () => import("@/components/Common/Drawings/ExcalidrawEditor"),
@@ -110,6 +111,26 @@ const consultationRoutes: AppRoutes = {
     ({ encounterId, reportId }) => (
       <ReportViewer associatingId={encounterId} reportId={reportId} />
     ),
+  "/facility/:facilityId/patient/:patientId/report/template/:templateSlug": ({
+    patientId,
+    templateSlug,
+  }) => (
+    <ReportViewer
+      associatingId={patientId}
+      templateSlug={templateSlug}
+      reportType={ReportType.PATIENT_SUMMARY}
+    />
+  ),
+  "/facility/:facilityId/patient/:patientId/report/:reportId": ({
+    patientId,
+    reportId,
+  }) => (
+    <ReportViewer
+      associatingId={patientId}
+      reportId={reportId}
+      reportType={ReportType.PATIENT_SUMMARY}
+    />
+  ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (
       <EncounterQuestionnaire

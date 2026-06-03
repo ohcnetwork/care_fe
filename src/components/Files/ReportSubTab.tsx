@@ -34,7 +34,7 @@ import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
 
 import queryClient from "@/Utils/request/queryClient";
-import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
+import { GenerateReportDropdown } from "@/components/Files/GenerateReportDropdown";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ReportRead,
@@ -53,6 +53,24 @@ interface ReportTabProps {
   getViewUrl?: (reportId: string) => string;
 }
 
+function buildReportPath(
+  facilityId: string,
+  reportIdOrSlug: string,
+  options?: { patientId?: string; encounterId?: string; isTemplate?: boolean },
+) {
+  const segment = options?.isTemplate
+    ? `template/${reportIdOrSlug}`
+    : reportIdOrSlug;
+
+  if (options?.patientId && options?.encounterId) {
+    return `/facility/${facilityId}/patient/${options.patientId}/encounter/${options.encounterId}/report/${segment}`;
+  }
+  if (options?.patientId) {
+    return `/facility/${facilityId}/patient/${options.patientId}/report/${segment}`;
+  }
+  return `/facility/${facilityId}/reports/${segment}`;
+}
+
 export function ReportSubTab({
   associatingId,
   reportType,
@@ -63,6 +81,7 @@ export function ReportSubTab({
 }: ReportTabProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
+  const resolvedFacilityId = facilityId ?? facility?.id;
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
     disableCache: true,
@@ -74,7 +93,6 @@ export function ReportSubTab({
     viewFile,
     downloadFile,
     archiveReport,
-    refetch,
     Dialogs,
   } = useReportManager({
     associatingId,
@@ -103,9 +121,12 @@ export function ReportSubTab({
   const handleView = (report: ReportReadList) => {
     if (getViewUrl) {
       navigate(getViewUrl(report.id));
-    } else if (facilityId && patientId && encounterId) {
+    } else if (resolvedFacilityId) {
       navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/report/${report.id}`,
+        buildReportPath(resolvedFacilityId, report.id, {
+          patientId,
+          encounterId,
+        }),
       );
     } else {
       viewFile(report);
@@ -375,21 +396,20 @@ export function ReportSubTab({
             {t("refresh")}
           </Button>
         </div>
-        {facility && (
-          <TemplateReportSheet
-            facilityId={facility.id}
+        {resolvedFacilityId && (
+          <GenerateReportDropdown
+            facilityId={resolvedFacilityId}
             associatingId={associatingId}
-            permissions={facility.permissions ?? []}
             reportType={reportType}
-            trigger={
-              <Button variant="outline_primary">
-                <CareIcon icon="l-plus" className="mr-1" />
-                <span>{t("generate_report")}</span>
-              </Button>
+            getReportUrl={(slug) =>
+              getViewUrl
+                ? getViewUrl(`template/${slug}`)
+                : buildReportPath(resolvedFacilityId, slug, {
+                    patientId,
+                    encounterId,
+                    isTemplate: true,
+                  })
             }
-            onSuccess={() => {
-              refetch();
-            }}
           />
         )}
       </div>
