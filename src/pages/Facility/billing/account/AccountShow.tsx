@@ -175,7 +175,7 @@ export function AccountShow({
     queryFn: query(templateApi.listTemplates, {
       queryParams: {
         facility: facilityId,
-        template_type: "account_report",
+        template_type: ReportType.ACCOUNT_REPORT,
         status: "active",
       },
     }),

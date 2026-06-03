@@ -386,7 +386,7 @@ export default function ReportViewer({
       document.body.appendChild(iframe);
     } catch {
       setIsPrinting(false);
-      toast.error(t("PRINTABLE_QR_CODE__print_error"));
+      toast.error(t("print_failed"));
     }
   }, [pdfUrl, t]);
 
