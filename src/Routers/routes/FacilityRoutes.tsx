@@ -106,6 +106,14 @@ const FacilityRoutes: AppRoutes = {
     facilityId,
     accountId,
   }) => <PrintChargeItems facilityId={facilityId} accountId={accountId} />,
+  "/facility/:facilityId/billing/account/:accountId/reports/template/:templateSlug":
+    ({ accountId, templateSlug }) => (
+      <ReportViewer
+        associatingId={accountId}
+        templateSlug={templateSlug}
+        reportType={ReportType.ACCOUNT_REPORT}
+      />
+    ),
   "/facility/:facilityId/billing/account/:accountId/reports/:reportId": ({
     accountId,
     reportId,
