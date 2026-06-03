@@ -886,7 +886,8 @@ const AdditionalDetailsContent = ({
               <FormControl>
                 <GovtOrganizationSelector
                   {...field}
-                  requiredDepth={minGeoOrganizationLevelsRequired ?? 1}
+                  required={minGeoOrganizationLevelsRequired == null}
+                  requiredDepth={minGeoOrganizationLevelsRequired}
                   selected={form.watch("_selected_levels")}
                   value={form.watch("geo_organization")}
                   onChange={field.onChange}
