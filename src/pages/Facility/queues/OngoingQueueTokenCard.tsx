@@ -293,7 +293,7 @@ function OngoingQueueTokenCardInner({
 
   return (
     <Drawer>
-      <DrawerTrigger>
+      <DrawerTrigger asChild>
         <div
           className={cn(
             "flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow",
@@ -370,7 +370,7 @@ function OngoingQueueTokenCardInner({
         <div className="w-full max-w-md mx-auto">
           <DrawerHeader className="flex flex-row items-start justify-between -ml-4">
             {getQueueTokenStatus(token) === QueueTokenStatus.WAITING ||
-            QueueTokenStatus.RECALL ? (
+            getQueueTokenStatus(token) === QueueTokenStatus.RECALL ? (
               <div className="flex flex-col items-start">
                 <span className="text-gray-950 font-semibold">
                   {token.patient
@@ -418,7 +418,6 @@ function OngoingQueueTokenCardInner({
             openServicePointSelector={openServicePointSelector}
             servicePointAction={servicePointAction}
             setServicePointAction={setServicePointAction}
-            t={t}
           />
         </div>
       </DrawerContent>
@@ -558,7 +557,6 @@ function TokenDrawerContent({
   setOpenServicePointSelector,
   servicePointAction,
   setServicePointAction,
-  t,
 }: {
   facilityId: string;
   token: TokenRead;
@@ -567,10 +565,10 @@ function TokenDrawerContent({
   setOpenServicePointSelector: (open: boolean) => void;
   servicePointAction: ServicepointSelectorAction;
   setServicePointAction: (action: ServicepointSelectorAction) => void;
-  t: (key: string, options?: Record<string, unknown>) => string;
 }) {
   const queueStatus = getQueueTokenStatus(token);
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const { assignedServicePoints } = useQueueServicePoints();
 
@@ -693,10 +691,9 @@ function TokenDrawerContent({
           </Button>
         </div>
       ) : queueStatus === QueueTokenStatus.SERVING ? (
-        <Button variant="primary">
+        <Button asChild variant="primary">
           <Link
-            href={`
-          /facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+            href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
             className="flex items-center gap-1"
           >
             <Stethoscope className="size-4 mr-2" />
@@ -707,10 +704,9 @@ function TokenDrawerContent({
         </Button>
       ) : (
         <div className="flex gap-2 w-full">
-          <Button variant="outline_primary" className="flex-1 group">
+          <Button asChild variant="outline_primary" className="flex-1 group">
             <Link
-              href={`
-          /facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+              href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
               className="flex items-center gap-1"
             >
               <Stethoscope className="size-4 mr-2 group-hover:text-white" />
@@ -745,7 +741,7 @@ function TokenDrawerContent({
                 onClick={action.onSelect}
               >
                 <span>{action.icon}</span>
-                {t(action.label)}
+                {action.label}
               </Button>
             </div>
           ))}

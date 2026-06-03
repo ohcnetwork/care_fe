@@ -12,9 +12,8 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import RadioInput from "@/components/ui/RadioInput";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { cn } from "@/lib/utils";
 import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
@@ -68,8 +67,10 @@ export const ServicepointSelector = ({
   useEffect(() => {
     if (!open) {
       setSelectedSubQueueId("");
+      return;
     }
-  }, [open]);
+    setSelectedSubQueueId(token.sub_queue?.id ?? "");
+  }, [open, token.sub_queue?.id]);
 
   const { mutate: updateToken, isPending } = useMutation({
     mutationFn: mutate(tokenApi.update, {
@@ -116,11 +117,15 @@ export const ServicepointSelector = ({
             </DrawerDescription>
           </DrawerHeader>
           <div className="p-3 pb-6">
-            <ServicePointList
-              subQueues={subQueues}
-              selectedSubQueueId={selectedSubQueueId}
-              handleSelect={handleSelect}
-              isPending={isPending}
+            <RadioInput
+              options={subQueues.map((sub) => ({
+                label: sub.name,
+                value: sub.id,
+              }))}
+              onValueChange={handleSelect}
+              value={selectedSubQueueId}
+              className="flex flex-col gap-3"
+              classNameInput="p-2"
             />
           </div>
         </DrawerContent>
@@ -137,64 +142,17 @@ export const ServicepointSelector = ({
             {description}
           </DialogDescription>
         </DialogHeader>
-        <ServicePointList
-          subQueues={subQueues}
-          selectedSubQueueId={selectedSubQueueId}
-          handleSelect={handleSelect}
-          isPending={isPending}
+        <RadioInput
+          options={subQueues.map((sub) => ({
+            label: sub.name,
+            value: sub.id,
+          }))}
+          onValueChange={handleSelect}
+          value={selectedSubQueueId}
+          className="flex flex-col gap-3"
+          classNameInput="p-2"
         />
       </DialogContent>
     </Dialog>
-  );
-};
-
-const ServicePointList = ({
-  subQueues,
-  selectedSubQueueId,
-  handleSelect,
-}: {
-  subQueues: TokenSubQueueRead[];
-  selectedSubQueueId: string;
-  handleSelect: (id: string) => void;
-  isPending: boolean;
-}) => {
-  return (
-    <RadioGroup
-      value={selectedSubQueueId}
-      onValueChange={handleSelect}
-      className="gap-2"
-    >
-      {subQueues.map((subQueue) => {
-        const isSelected = selectedSubQueueId === subQueue.id;
-        return (
-          <div
-            key={subQueue.id}
-            onClick={() => handleSelect(subQueue.id)}
-            className={cn(
-              "flex items-center gap-3 p-3 rounded-lg border text-left transition-colors w-full",
-              "hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70",
-              isSelected
-                ? "border-primary bg-primary/5 ring-1 ring-primary"
-                : "border-gray-200",
-            )}
-          >
-            <RadioGroupItem
-              value={subQueue.id}
-              id={subQueue.id}
-              tabIndex={-1}
-              className="pointer-events-none"
-            />
-            <span
-              className={cn(
-                "flex-1 text-sm font-medium",
-                isSelected ? "text-primary-900" : "text-gray-900",
-              )}
-            >
-              {subQueue.name}
-            </span>
-          </div>
-        );
-      })}
-    </RadioGroup>
   );
 };
