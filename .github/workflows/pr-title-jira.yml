@@ -10,9 +10,7 @@ permissions:
 jobs:
   validate-jira-ticket:
     runs-on: ubuntu-24.04-arm
-    # Skip workflow for PRs created by bots, from forks, or self-triggered edits
     if: >
-      github.actor != 'github-actions[bot]' &&
       github.event.pull_request.user.type != 'Bot' &&
       github.event.pull_request.head.repo.full_name == github.repository
 
@@ -23,80 +21,18 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             // Configure JIRA project keys here
-            const jiraProjectKeys = ['CARE', 'ENG'];
+            const jiraProjectKeys = ['ENG'];
 
-            const pr = context.payload.pull_request;
-            const { title: prTitle, number: prNumber, head: { ref: branchName } } = pr;
+            const prTitle = context.payload.pull_request.title;
 
-            // Build regex pattern: CARE-123, ENG-456, etc.
-            const jiraTicketRegex = new RegExp(`\\b(${jiraProjectKeys.join('|')})-\\d+\\b`, 'i');
+            // Check that title starts with [ENG-456] format
+            const pattern = new RegExp(`^\\[(${jiraProjectKeys.join('|')})-\\d+\\]`, 'i');
 
-            // Helper to append/update JIRA info in PR body
-            const marker = '<!-- jira-validation-bot -->';
-            async function upsertInBody(content) {
-              const currentBody = pr.body || '';
-              const markedContent = `${marker}\n${content}\n<!-- /jira-validation-bot -->`;
-              const regex = /<!-- jira-validation-bot -->[\s\S]*?<!-- \/jira-validation-bot -->/;
-
-              let newBody;
-              if (regex.test(currentBody)) {
-                newBody = currentBody.replace(regex, markedContent);
-              } else {
-                newBody = currentBody ? `${currentBody}\n\n---\n\n${markedContent}` : markedContent;
-              }
-
-              if (newBody === currentBody) return;
-
-              await github.rest.pulls.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber,
-                body: newBody
-              });
-            }
-
-            // Check title for JIRA ticket
-            const titleMatch = prTitle.match(jiraTicketRegex);
-            if (titleMatch) {
-              const ticket = titleMatch[0].toUpperCase();
-              await upsertInBody(`✅ **JIRA Validation Passed**\n\nFound JIRA ticket: **${ticket}**`);
-              return;
-            }
-
-            // Check branch name for JIRA ticket
-            const branchMatch = branchName.match(jiraTicketRegex);
-            if (branchMatch) {
-              const ticket = branchMatch[0].toUpperCase();
-              const newTitle = `${ticket}: ${prTitle}`;
-
-              await github.rest.pulls.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber,
-                title: newTitle
-              });
-
-              await upsertInBody(
-                `✅ **JIRA Validation Passed**\n\n` +
-                `Added JIRA ticket from branch to PR title.\n\n` +
-                `| Field | Value |\n|-------|-------|\n` +
-                `| Ticket | **${ticket}** |\n` +
-                `| New Title | ${newTitle} |`
+            if (!pattern.test(prTitle)) {
+              const examples = jiraProjectKeys.map(k => `[${k}-123]`).join(', ');
+              core.setFailed(
+                `PR title must start with a JIRA ticket in brackets.\n` +
+                `Expected format: [PROJECT-NUMBER] title\n` +
+                `Examples: ${examples}`
               );
-              return;
             }
-
-            // Validation failed
-            const examples = jiraProjectKeys.map(k => `\`${k}-123\``).join(', ');
-            await upsertInBody(
-              `❌ **JIRA Validation Failed**\n\n` +
-              `PR title must contain a JIRA ticket number.\n\n` +
-              `**Expected format:** \`[${jiraProjectKeys.join('/')}]-<number>\`\n` +
-              `**Examples:** ${examples}\n\n` +
-              `---\n` +
-              `**Fix by either:**\n` +
-              `1. Adding a JIRA ticket to your PR title, or\n` +
-              `2. Using a branch name like \`CARE-123-feature-name\``
-            );
-
-            core.setFailed(`PR title must contain a JIRA ticket (e.g., ${jiraProjectKeys[0]}-123)`);
