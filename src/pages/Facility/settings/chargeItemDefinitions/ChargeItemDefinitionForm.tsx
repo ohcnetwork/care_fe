@@ -124,7 +124,10 @@ export function ChargeItemDefinitionForm({
     t: (key: string, options?: Record<string, unknown>) => string,
   ) =>
     z.object({
-      title: z.string().min(1, { message: t("title_is_required") }),
+      title: z
+        .string()
+        .trim()
+        .min(1, { message: t("title_is_required") }),
       slug_value: slugValueSchema(),
       category: z.string().min(1, { message: t("field_required") }),
       _categoryName: z.string().optional(),

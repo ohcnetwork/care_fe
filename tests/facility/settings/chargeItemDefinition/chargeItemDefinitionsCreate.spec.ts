@@ -48,6 +48,22 @@ test.describe("Charge Item Definition Creation", () => {
     await expect(page.getByText(/base price.*required/i)).toBeVisible();
   });
 
+  test("rejects a whitespace-only title", async ({ page }) => {
+    await page.getByRole("button", { name: /add definition/i }).click();
+    // Title is only spaces; slug and base price are valid, so the title
+    // validation is the only thing that can block creation.
+    await page.getByRole("textbox", { name: /title/i }).fill("   ");
+    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
+    await page.getByRole("textbox", { name: /base price/i }).fill(basePrice);
+    await page.getByRole("button", { name: /create/i }).click();
+
+    // A whitespace-only title must be treated as empty: required error, no creation.
+    await expect(page.getByText(/title.*required/i)).toBeVisible();
+    await expect(
+      page.getByText(/charge item definition.*created successfully/i),
+    ).toHaveCount(0);
+  });
+
   test("create charge item definition with required fields only", async ({
     page,
   }) => {
