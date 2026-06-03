@@ -53,10 +53,14 @@ type VirtualSlot = {
 };
 
 // Schedule times may arrive as HH:mm (e.g. the exception form's time input,
-// which sets values like "00:00"/"23:59") or HH:mm:ss; parse with the matching
-// format so neither variant produces an Invalid Date.
-const parseScheduleTime = (value: Time, referenceDate: Date) =>
-  parse(value, value.length > 5 ? "HH:mm:ss" : "HH:mm", referenceDate);
+// which sets values like "00:00"/"23:59") or HH:mm:ss; pick the format from the
+// number of colon-separated segments (after trimming) so neither variant
+// produces an Invalid Date.
+const parseScheduleTime = (value: Time, referenceDate: Date) => {
+  const trimmed = value.trim();
+  const pattern = trimmed.split(":").length > 2 ? "HH:mm:ss" : "HH:mm";
+  return parse(trimmed, pattern, referenceDate);
+};
 
 interface ComputeAppointmentSlotsOptions {
   /**
