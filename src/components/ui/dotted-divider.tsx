@@ -9,7 +9,7 @@ function DottedDivider({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dotted-divider"
-      className={cn("h-2 w-full text-border-strong", className)}
+      className={cn("h-2 w-full text-gray-300 dark:text-gray-700", className)}
       {...props}
     >
       <svg

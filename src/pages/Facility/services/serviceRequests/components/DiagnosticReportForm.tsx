@@ -1170,7 +1170,6 @@ export function DiagnosticReportForm({
                           </p>
                           <div className="mt-4 flex gap-3">
                             <Button
-                              type="button"
                               variant="outline"
                               className=" border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white"
                               disabled={disableEdit}
@@ -1183,7 +1182,12 @@ export function DiagnosticReportForm({
                               asChild
                               variant="outline"
                               disabled={disableEdit}
-                              className=" border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white cursor-pointer"
+                              className={cn(
+                                "border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white",
+                                disableEdit
+                                  ? "pointer-events-none opacity-50"
+                                  : "cursor-pointer",
+                              )}
                             >
                               <Label
                                 htmlFor={
@@ -1203,7 +1207,7 @@ export function DiagnosticReportForm({
                           </div>
 
                           {fileUpload.files.length > 0 && (
-                            <div className="mt-5 w-full max-w-md space-y-2">
+                            <div className="mt-5 w-full max-w-md space-y-2 bg-red-500">
                               <div
                                 className="truncate text-sm text-gray-600"
                                 title={fileUpload.files
