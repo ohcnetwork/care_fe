@@ -624,7 +624,7 @@ export function EncounterList({
           <div className="flex flex-col overflow-visible">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <div className="relative w-full sm:w-auto sm:min-w-96">
+                <div className="relative w-full sm:w-auto sm:min-w-60">
                   <Popover
                     open={searchOptionsOpen && showSearchOptions}
                     onOpenChange={setSearchOptionsOpen}
@@ -647,7 +647,7 @@ export function EncounterList({
                           }}
                           onKeyDown={handleSearchInputKeyDown}
                           placeholder={selectedSearchType.placeholder}
-                          className="h-9 w-full rounded-md border bg-white px-3 text-sm shadow-sm focus-visible:outline-none"
+                          className="h-9 w-full rounded-md border bg-white px-2 text-sm shadow-sm focus-visible:outline-none"
                         />
                       </div>
                     </PopoverTrigger>
