@@ -165,7 +165,7 @@ function useTokenActions({
       key: `assign_${service.id}`,
       label: token.sub_queue
         ? t("reassign_service_point", { name: service.name })
-        : t("mark_as_in_service", { name: service.name }),
+        : t("mark_as_in_service_with_name", { name: service.name }),
       icon: token.sub_queue ? (
         <RedoDot className="size-4 mr-2" />
       ) : (

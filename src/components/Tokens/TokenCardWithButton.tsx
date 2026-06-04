@@ -64,29 +64,30 @@ export default function TokenCardWithButton({
         className={cardClassName}
         tokenActions={tokenActions}
       />
-      {showMarkInServiceButton && token.status === TokenStatus.CREATED && (
-        <Button
-          className="w-full flex items-center justify-center gap-2 font-semibold"
-          onClick={() => {
-            if (isOnlyOneSubQueue) {
-              updateToken({
-                status: TokenStatus.IN_PROGRESS,
-                sub_queue: assignedServicePoints[0]?.id,
-                note: currentToken.note,
-              });
-              return;
-            }
+      {showMarkInServiceButton &&
+        currentToken.status === TokenStatus.CREATED && (
+          <Button
+            className="w-full flex items-center justify-center gap-2 font-semibold"
+            onClick={() => {
+              if (isOnlyOneSubQueue) {
+                updateToken({
+                  status: TokenStatus.IN_PROGRESS,
+                  sub_queue: assignedServicePoints[0]?.id,
+                  note: currentToken.note,
+                });
+                return;
+              }
 
-            onOpenDialogForServicePoint?.();
-            setShowServicepointDialog(true);
-          }}
-        >
-          {t("mark_as_in_service")}
-          {showButtonArrow && (
-            <ArrowRight className="size-4 animate-arrow-slide" />
-          )}
-        </Button>
-      )}
+              onOpenDialogForServicePoint?.();
+              setShowServicepointDialog(true);
+            }}
+          >
+            {t("mark_as_in_service")}
+            {showButtonArrow && (
+              <ArrowRight className="size-4 animate-arrow-slide" />
+            )}
+          </Button>
+        )}
 
       {!isOnlyOneSubQueue && showMarkInServiceButton && (
         <ServicepointSelector

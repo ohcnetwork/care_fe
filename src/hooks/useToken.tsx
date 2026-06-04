@@ -34,19 +34,22 @@ export function useToken({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
         facility_id: facilityId,
-        queue_id: token?.queue.id ?? "",
-        id: token?.id ?? "",
+        queue_id: queueId,
+        id: tokenId,
       },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["infinite-tokens", facilityId, token?.queue.id ?? ""],
+        queryKey: ["token", facilityId, queueId, tokenId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["infinite-tokens", facilityId, queueId],
       });
       queryClient.invalidateQueries({
         queryKey: ["tokens", token?.patient?.id, facilityId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facilityId, token?.queue.id ?? ""],
+        queryKey: ["token-queue-summary", facilityId, queueId],
       });
       toast.success(t("token_assigned_to_service_point"));
       onSuccess?.();
