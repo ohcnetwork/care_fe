@@ -19,7 +19,6 @@ import templateApi from "@/types/emr/template/templateApi";
 
 interface GenerateReportDropdownProps {
   facilityId: string;
-  associatingId: string;
   reportType?: TemplateType;
   getReportUrl: (templateSlug: string) => string;
 }
@@ -56,7 +55,7 @@ export function GenerateReportDropdown({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-[calc(100vw)] max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
+        className="w-full max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
       >
         <div className="px-2 pt-2">
           <div className="max-h-[30vh] overflow-y-auto">

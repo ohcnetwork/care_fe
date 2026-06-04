@@ -399,7 +399,6 @@ export function ReportSubTab({
         {resolvedFacilityId && (
           <GenerateReportDropdown
             facilityId={resolvedFacilityId}
-            associatingId={associatingId}
             reportType={reportType}
             getReportUrl={(slug) =>
               getViewUrl
