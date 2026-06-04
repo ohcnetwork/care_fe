@@ -99,7 +99,7 @@ function OrganizationLevelSelect({
 
 /**
  * @deprecated This component is deprecated and should not be used.
- * Use `GovtOrganizationPicker` instead. This componet is known for weird bugs.
+ * Use `GovtOrganizationPicker` instead. This component is known for weird bugs.
  */
 export default function GovtOrganizationSelector({
   onChange,
