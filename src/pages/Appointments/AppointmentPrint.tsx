@@ -107,11 +107,8 @@ export default function AppointmentPrint(props: Props) {
     .map((q) => q.data)
     .filter((inv): inv is InvoiceRead => !!inv);
 
-  const patient = appointment?.patient;
-  const token = appointment?.token;
-
   const patientExtensionData = usePatientExtensionData(
-    patient?.extensions,
+    appointment?.patient?.extensions,
     "appointment_print",
   );
 
@@ -135,6 +132,9 @@ export default function AppointmentPrint(props: Props) {
   }
 
   // Filter out excluded charge items and show all from the query
+  const patient = appointment.patient;
+  const token = appointment.token;
+
   const displayChargeItems = chargeItems?.results?.filter(
     (item) => !EXCLUDED_CHARGE_ITEM_STATUSES.includes(item.status),
   );
@@ -163,8 +163,8 @@ export default function AppointmentPrint(props: Props) {
     ? add(...allPayments.map((p) => p.amount)).toString()
     : undefined;
 
-  const patientTags = patient?.instance_tags ?? [];
-  const appointmentTags = appointment?.tags ?? [];
+  const patientTags = patient.instance_tags ?? [];
+  const appointmentTags = appointment.tags ?? [];
 
   return (
     <PrintPreview
@@ -204,31 +204,22 @@ export default function AppointmentPrint(props: Props) {
         <div className="flex justify-between gap-3 mb-1.5">
           <div className="flex-1">
             <div className="text-xs leading-snug space-y-px">
-              {patient && (
-                <>
-                  <DetailRow
-                    label={t("patient")}
-                    value={`${patient?.name} | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
-                  />
-                  {patientExtensionData.map((field) => (
-                    <DetailRow
-                      key={field.name}
-                      label={t(field.name)}
-                      value={field.value}
-                    />
-                  ))}
-                </>
-              )}
+              <DetailRow
+                label={t("patient")}
+                value={`${patient.name} | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
+              />
+              {patientExtensionData.map((field) => (
+                <DetailRow
+                  key={field.name}
+                  label={t(field.name)}
+                  value={field.value}
+                />
+              ))}
               <DetailRow
                 label={t("contact_system_phone")}
-                value={
-                  patient?.phone_number
-                    ? formatPhoneNumberIntl(patient.phone_number) ||
-                      patient.phone_number
-                    : undefined
-                }
+                value={formatPhoneNumberIntl(patient.phone_number)}
               />
-              {patient?.instance_identifiers
+              {patient.instance_identifiers
                 ?.filter(
                   (identifier) =>
                     identifier.config.config.use ===
@@ -241,9 +232,7 @@ export default function AppointmentPrint(props: Props) {
                     value={identifier.value}
                   />
                 ))}
-              {patient?.address?.trim() && (
-                <DetailRow label={t("address")} value={patient.address} />
-              )}
+              <DetailRow label={t("address")} value={patient.address} />
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -255,7 +244,7 @@ export default function AppointmentPrint(props: Props) {
                 </p>
               </div>
             )}
-            {patient?.id && <QRCodeSVG size={80} value={patient.id} />}
+            <QRCodeSVG size={80} value={patient.id} />
           </div>
         </div>
 
