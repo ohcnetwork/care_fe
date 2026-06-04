@@ -255,7 +255,7 @@ export default function AppointmentPrint(props: Props) {
                 </p>
               </div>
             )}
-            <QRCodeSVG size={80} value={patient?.id || ""} />
+            {patient?.id && <QRCodeSVG size={80} value={patient.id} />}
           </div>
         </div>
 
