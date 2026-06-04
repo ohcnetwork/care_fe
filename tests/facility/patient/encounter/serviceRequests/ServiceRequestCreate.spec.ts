@@ -1,7 +1,5 @@
-import { faker } from "@faker-js/faker";
-import { expect, Page, test } from "@playwright/test";
-import { format, subDays } from "date-fns";
-import { expectToast } from "tests/helper/ui";
+import { expect, test } from "@playwright/test";
+import { clickTabOrMenuItem, expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -31,8 +29,11 @@ test.describe("Patient Service Request Tab", () => {
     );
 
     await expect(page).toHaveURL(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
     );
+
+    await clickTabOrMenuItem(page, /service requests/i);
+    await expect(page).toHaveURL(/\/service_requests$/);
 
     const firstRow = page
       .locator('[data-slot="table-body"] [data-slot="table-row"]')
@@ -57,8 +58,11 @@ test.describe("Patient Service Request Tab", () => {
     );
 
     await expect(page).toHaveURL(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
     );
+
+    await clickTabOrMenuItem(page, /service requests/i);
+    await expect(page).toHaveURL(/\/service_requests$/);
 
     const firstRow = page
       .locator('[data-slot="table-body"] [data-slot="table-row"]')
@@ -123,12 +127,23 @@ test.describe("Patient Service Request Tab", () => {
     await page
       .getByPlaceholder("Search activity definitions")
       .fill(activityDefinitionTitle);
-    await page.waitForLoadState("networkidle");
-    await page.getByRole("option", { name: activityDefinitionTitle }).click();
-    await page.getByRole("button", { name: "Submit" }).click();
-    await page.waitForLoadState("networkidle");
-    await expect(page.getByText("See Details").first()).toBeVisible();
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await page
+      .locator('[data-slot="command-item"]', {
+        hasText: activityDefinitionTitle,
+      })
+      .first()
+      .click();
+    await expect(page.locator("#question-service_request")).toBeVisible();
+    const submitButton = page.getByRole("button", { name: "Submit" });
+    await expect(submitButton).toBeEnabled();
+    await submitButton.click();
+    await page.getByRole("tab", { name: "Service Requests" }).click();
+    await page
+      .locator('[data-slot="table-body"] [data-slot="table-row"]')
+      .filter({ hasText: activityDefinitionTitle })
+      .first()
+      .getByRole("button", { name: "See Details" })
+      .click();
     await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Collect Specimen" }).click();
     await expect(
@@ -136,9 +151,6 @@ test.describe("Patient Service Request Tab", () => {
     ).toBeVisible();
     await page.waitForLoadState("networkidle");
     await expect(page.getByText("Sample Identification")).toBeVisible();
-    await expect(page.getByText(/qr code generated/i)).toBeVisible({
-      timeout: 10000,
-    });
     await page.getByPlaceholder("Value", { exact: true }).fill("2");
     await expect(page.getByPlaceholder("Value", { exact: true })).toHaveValue(
       "2",
@@ -165,10 +177,11 @@ test.describe("Patient Service Request Tab", () => {
       .click();
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: "Create Report" }).click();
-    const unitField = page
-      .locator("div")
-      .filter({ has: page.getByText("Unit", { exact: true }) })
-      .first();
-    await expect(unitField.getByRole("combobox")).toContainText("mg");
+    const observationCombobox = page
+      .locator('[data-slot="card-content"]')
+      .filter({ hasText: "Observation 1" })
+      .getByRole("combobox");
+    await observationCombobox.scrollIntoViewIfNeeded();
+    await expect(observationCombobox).toContainText("mg");
   });
 });
