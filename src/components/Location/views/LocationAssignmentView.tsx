@@ -82,9 +82,10 @@ export function LocationAssignmentView({
     plannedLocations.length > 0 ||
     reservedLocations.length > 0;
   const isOverview = sheetState.screen === "overview";
+  const isMove = sheetState.action === "move";
+  const isAddingAnotherBed = !isMove && !!currentLocation && !isOverview;
 
-  const showAddAnotherBedForReservedPlanned =
-    isOverview && hasLocations && !currentLocation;
+  const showAddAnotherBedForReservedPlanned = isOverview && hasLocations;
 
   const handlers = {
     editingState,
@@ -151,23 +152,33 @@ export function LocationAssignmentView({
             {t("cancel")}
           </Button>
         )}
-        <Button
-          variant="outline"
-          disabled={!selectedBed}
-          onClick={onScheduleForLater}
-        >
-          {t("schedule_for_later")}
-        </Button>
-        <Button
-          variant="outline"
-          disabled={!selectedBed}
-          onClick={onAddReservedBed}
-        >
-          {t("add_reserved_bed")}
-        </Button>
-        <Button variant="primary" disabled={!selectedBed} onClick={onAssignNow}>
-          {t("assign_bed_now")}
-        </Button>
+        {!isMove && (
+          <>
+            <Button
+              variant="outline"
+              disabled={!selectedBed}
+              onClick={onScheduleForLater}
+            >
+              {t("schedule_for_later")}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!selectedBed}
+              onClick={onAddReservedBed}
+            >
+              {t("add_reserved_bed")}
+            </Button>
+          </>
+        )}
+        {!isAddingAnotherBed && (
+          <Button
+            variant="primary"
+            disabled={!selectedBed}
+            onClick={onAssignNow}
+          >
+            {t("assign_bed_now")}
+          </Button>
+        )}
       </div>
     </div>
   );

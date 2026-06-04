@@ -57,7 +57,7 @@ export function LocationActionButtons({
     });
   }
 
-  if (status === "planned" || status === "reserved") {
+  if (status === "planned" || status === "reserved" || status === "active") {
     if (onAddBed) {
       buttons.push({
         label: t("add_another_bed"),
@@ -66,7 +66,9 @@ export function LocationActionButtons({
         className: "border-gray-400 shadow-sm",
       });
     }
+  }
 
+  if (status === "planned" || status === "reserved") {
     if (onAssignNow) {
       buttons.push({
         label: t("assign_bed_now"),
