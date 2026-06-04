@@ -168,6 +168,35 @@ const careConfig = {
     return undefined;
   })(),
 
+  /**
+   * Screen position for toast notifications (Sonner)
+   * Valid values: top-left, top-center, top-right, bottom-left, bottom-center, bottom-right
+   * Defaults to top-center if unset or invalid.
+   */
+  toastPosition: (() => {
+    const validPositions = [
+      "top-left",
+      "top-center",
+      "top-right",
+      "bottom-left",
+      "bottom-center",
+      "bottom-right",
+    ] as const;
+
+    const defaultPosition: (typeof validPositions)[number] = "top-center";
+    const position = env.REACT_TOAST_POSITION;
+    if (!position) return defaultPosition;
+
+    if (validPositions.includes(position as (typeof validPositions)[number])) {
+      return position as (typeof validPositions)[number];
+    }
+
+    console.warn(
+      `Invalid REACT_TOAST_POSITION: "${position}". Valid values are: ${validPositions.join(", ")}. Falling back to ${defaultPosition}.`,
+    );
+    return defaultPosition;
+  })(),
+
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
         const [module, cdn] = app.split("@");
