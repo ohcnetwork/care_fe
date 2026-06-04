@@ -33,7 +33,7 @@ function generatePatientData() {
       "AB+",
       "AB-",
     ]),
-    pincode: faker.string.numeric(6),
+    pincode: `${faker.number.int({ min: 1, max: 9 })}${faker.string.numeric(5)}`,
     address: faker.location.streetAddress({ useFullAddress: true }),
     emergencyContact: {
       name: faker.person.fullName(),

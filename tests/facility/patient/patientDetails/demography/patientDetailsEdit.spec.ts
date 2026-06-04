@@ -31,7 +31,7 @@ function generateEditData() {
       "AB-",
     ]),
     address: faker.location.streetAddress({ useFullAddress: true }),
-    pincode: faker.string.numeric(6),
+    pincode: `${faker.number.int({ min: 1, max: 9 })}${faker.string.numeric(5)}`,
   };
 }
 
