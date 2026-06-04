@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -135,6 +136,7 @@ export function LocationCardWrapper({
                   <div className="space-y-2">
                     <Label>{t("end_time")}</Label>
                     <DateTimeInput
+                      max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                       value={
                         editingState.timeConfig.end?.toISOString() ??
                         new Date().toISOString()
