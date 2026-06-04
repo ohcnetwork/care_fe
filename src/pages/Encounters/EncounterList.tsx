@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
+import { Check } from "lucide-react";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -9,6 +10,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   careTeamFilter,
   dateFilter,
@@ -23,6 +30,11 @@ import {
   FilterDateRange,
   longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 
 import Page from "@/components/Common/Page";
@@ -53,6 +65,13 @@ interface EncounterListProps {
   facilityId: string;
   encounterClass?: EncounterClass;
 }
+
+const SEARCH_WITH_NAME = "name" as const;
+const SEARCH_WITH_EXTERNAL_IDENTIFIER = "external_identifier" as const;
+
+type SearchWith =
+  | typeof SEARCH_WITH_NAME
+  | typeof SEARCH_WITH_EXTERNAL_IDENTIFIER;
 
 const buildQueryParams = (
   facilityId: string,
@@ -132,19 +151,22 @@ export function EncounterList({
   const [, setSavedFilters] = useAtom(encounterListFiltersAtom);
   const hasRestoredFilters = useRef(false);
   const hasAppliedDefaultStatus = useRef(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchType, setSearchType] = useState<"name" | "external_identifier">(
-    "name",
+  const [searchWith, setSearchWith] = useState<SearchWith>(
+    qParams.external_identifier
+      ? SEARCH_WITH_EXTERNAL_IDENTIFIER
+      : SEARCH_WITH_NAME,
   );
-  const [activeSearchTypeIndex, setActiveSearchTypeIndex] = useState(0);
-  const [showSearchTypeDropdown, setShowSearchTypeDropdown] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchText, setSearchText] = useState(
+    qParams.external_identifier || qParams.name || "",
+  );
+  const [searchOptionsOpen, setSearchOptionsOpen] = useState(false);
+  const [activeSearchOptionIndex, setActiveSearchOptionIndex] = useState(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const {
     status,
     priority,
     encounter_id,
-    external_identifier,
     patient_filter,
     created_date_after,
     created_date_before,
@@ -163,106 +185,101 @@ export function EncounterList({
     };
   };
 
-  const searchTypeOptions = [
+  const searchWithOptions = [
     {
-      key: "name" as const,
+      key: SEARCH_WITH_NAME,
       label: t("patient_name"),
       placeholder: t("search_by_patient_name"),
     },
     {
-      key: "external_identifier" as const,
+      key: SEARCH_WITH_EXTERNAL_IDENTIFIER,
       label: t("external_identifier"),
       placeholder: t("search_by_external_id"),
     },
   ];
 
-  const searchByNameLabel = t("name");
-  const searchByIdLabel = t("id");
-  const buttonType = "button" as const;
-
   useEffect(() => {
-    if (searchType === "name") {
-      setSearchTerm(qParams.name || "");
+    if (qParams.external_identifier) {
+      setSearchWith(SEARCH_WITH_EXTERNAL_IDENTIFIER);
+      setSearchText(qParams.external_identifier);
+    } else if (qParams.name) {
+      setSearchWith(SEARCH_WITH_NAME);
+      setSearchText(qParams.name);
     } else {
-      setSearchTerm(qParams.external_identifier || "");
+      setSearchText("");
     }
-  }, [searchType, qParams.name, qParams.external_identifier]);
+  }, [qParams.name, qParams.external_identifier]);
 
   const selectedSearchType =
-    searchTypeOptions.find((option) => option.key === searchType) ||
-    searchTypeOptions[0];
+    searchWithOptions.find((option) => option.key === searchWith) ||
+    searchWithOptions[0];
+  const showSearchOptions = searchText.trim() !== "";
 
-  const shouldShowSearchTypeBadge =
-    !!searchTerm.trim() && !isSearchFocused && showSearchTypeDropdown === false;
+  const searchQueryParams =
+    searchWith === SEARCH_WITH_NAME
+      ? { name: searchText || undefined, external_identifier: undefined }
+      : { name: undefined, external_identifier: searchText || undefined };
 
-  const handleSearchTypeSelect = (
-    selectedKey: "name" | "external_identifier",
+  const updateSearchQuery = (
+    nextSearchWith: SearchWith,
+    nextSearchText: string,
   ) => {
-    setSearchType(selectedKey);
-    setShowSearchTypeDropdown(false);
-
-    setActiveSearchTypeIndex(
-      selectedKey === "name" ? 0 : searchTypeOptions.length - 1,
-    );
-
-    if (selectedKey === "name") {
+    if (nextSearchWith === SEARCH_WITH_NAME) {
       updateQuery({
-        name: searchTerm,
+        name: nextSearchText,
         external_identifier: "",
       });
     } else {
       updateQuery({
         name: "",
-        external_identifier: searchTerm,
+        external_identifier: nextSearchText,
       });
     }
   };
 
+  const handleSearchWithChange = (nextSearchWith: SearchWith) => {
+    setSearchWith(nextSearchWith);
+    updateSearchQuery(nextSearchWith, searchText);
+    setSearchOptionsOpen(false);
+    searchInputRef.current?.focus();
+  };
+
   const handleSearchInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && !searchOptionsOpen) {
+      event.preventDefault();
+      updateSearchQuery(searchWith, searchText);
+      return;
+    }
+
+    if (!showSearchOptions) {
+      return;
+    }
+
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setShowSearchTypeDropdown(true);
-      setActiveSearchTypeIndex((prev) =>
-        prev === searchTypeOptions.length - 1 ? 0 : prev + 1,
+      setSearchOptionsOpen(true);
+      setActiveSearchOptionIndex((prev) =>
+        prev < searchWithOptions.length - 1 ? prev + 1 : prev,
       );
       return;
     }
 
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      setShowSearchTypeDropdown(true);
-      setActiveSearchTypeIndex((prev) =>
-        prev === 0 ? searchTypeOptions.length - 1 : prev - 1,
-      );
+      setActiveSearchOptionIndex((prev) => (prev > 0 ? prev - 1 : prev));
       return;
     }
 
-    if (event.key === "Enter" && showSearchTypeDropdown) {
+    if (event.key === "Enter" && searchOptionsOpen) {
       event.preventDefault();
-
-      handleSearchTypeSelect(
-        searchTypeOptions[activeSearchTypeIndex]?.key || "name",
+      handleSearchWithChange(
+        searchWithOptions[activeSearchOptionIndex]?.key || SEARCH_WITH_NAME,
       );
       return;
-    }
-
-    if (event.key === "Enter") {
-      event.preventDefault();
-      if (searchType === "name") {
-        updateQuery({
-          name: searchTerm,
-          external_identifier: "",
-        });
-      } else {
-        updateQuery({
-          name: "",
-          external_identifier: searchTerm,
-        });
-      }
     }
 
     if (event.key === "Escape") {
-      setShowSearchTypeDropdown(false);
+      setSearchOptionsOpen(false);
     }
   };
 
@@ -346,13 +363,13 @@ export function EncounterList({
           care_team_user,
         ),
         encounter_class: encounterClass,
-        external_identifier,
+        external_identifier: searchQueryParams.external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
         patient_filter: patient_filter,
-        name: qParams.name,
+        name: searchQueryParams.name,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -607,83 +624,80 @@ export function EncounterList({
           <div className="flex flex-col overflow-visible">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <div className="w-full sm:w-auto sm:min-w-64 relative">
-                  <div className="w-full border rounded-md bg-white">
-                    <div className="relative flex items-center h-9 border-b border-b-transparent rounded-md">
-                      <input
-                        value={searchTerm}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          setSearchTerm(value);
-                          if (searchType === "name") {
-                            updateQuery({
-                              name: value,
-                              external_identifier: "",
-                            });
-                          } else {
-                            updateQuery({
-                              name: "",
-                              external_identifier: value,
-                            });
-                          }
-                        }}
-                        onKeyDown={handleSearchInputKeyDown}
-                        onFocus={() => {
-                          setIsSearchFocused(true);
-                          setShowSearchTypeDropdown(true);
-                          setActiveSearchTypeIndex(
-                            searchType === "name"
-                              ? 0
-                              : searchTypeOptions.length - 1,
-                          );
-                        }}
-                        onBlur={() => {
-                          setIsSearchFocused(false);
-                          window.setTimeout(() => {
-                            setShowSearchTypeDropdown(false);
-                          }, 100);
-                        }}
-                        placeholder={selectedSearchType.placeholder}
-                        className="w-full h-full border-none pl-3 pr-9 text-sm focus-visible:outline-none"
-                      />
-                      {shouldShowSearchTypeBadge ? (
-                        <span
-                          className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-                            searchType === "external_identifier"
-                              ? "border-amber-300 text-amber-700 bg-amber-50"
-                              : "border-blue-300 text-blue-700 bg-blue-50"
-                          }`}
-                        >
-                          {searchType === "external_identifier"
-                            ? searchByIdLabel
-                            : searchByNameLabel}
-                        </span>
-                      ) : null}
-                    </div>
-
-                    {showSearchTypeDropdown ? (
-                      <div className="absolute z-20 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-md">
-                        {searchTypeOptions.map((option, index) => (
-                          <button
-                            key={option.key}
-                            type={buttonType}
-                            className={`w-full text-left px-3 py-2 text-sm ${
-                              index === activeSearchTypeIndex
-                                ? "bg-gray-100"
-                                : "bg-white"
-                            }`}
-                            onMouseDown={(event) => {
-                              event.preventDefault();
-                              handleSearchTypeSelect(option.key);
-                            }}
-                            onMouseEnter={() => setActiveSearchTypeIndex(index)}
-                          >
-                            {option.label}
-                          </button>
-                        ))}
+                <div className="relative w-full sm:w-auto sm:min-w-96">
+                  <Popover
+                    open={searchOptionsOpen && showSearchOptions}
+                    onOpenChange={setSearchOptionsOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <div className="relative">
+                        <input
+                          ref={searchInputRef}
+                          value={searchText}
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            setSearchText(value);
+                            setSearchOptionsOpen(value.trim() !== "");
+                            setActiveSearchOptionIndex(0);
+                          }}
+                          onFocus={() => {
+                            if (showSearchOptions) {
+                              setSearchOptionsOpen(true);
+                            }
+                          }}
+                          onKeyDown={handleSearchInputKeyDown}
+                          placeholder={selectedSearchType.placeholder}
+                          className="h-9 w-full rounded-md border bg-white px-3 text-sm shadow-sm focus-visible:outline-none"
+                        />
                       </div>
-                    ) : null}
-                  </div>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-(--radix-popover-trigger-width) p-0"
+                      align="start"
+                      onOpenAutoFocus={(event) => {
+                        event.preventDefault();
+                        searchInputRef.current?.focus();
+                      }}
+                    >
+                      <Command>
+                        <CommandList>
+                          <CommandGroup>
+                            {searchWithOptions.map((option, index) => (
+                              <CommandItem
+                                key={option.key}
+                                value={option.key}
+                                onSelect={() =>
+                                  handleSearchWithChange(option.key)
+                                }
+                                className={`flex items-center gap-2 ${
+                                  activeSearchOptionIndex === index
+                                    ? "bg-gray-100"
+                                    : ""
+                                }`}
+                                onMouseEnter={() =>
+                                  setActiveSearchOptionIndex(index)
+                                }
+                              >
+                                <div>
+                                  {searchText}{" "}
+                                  <span className="text-gray-500">
+                                    {option.label}
+                                  </span>
+                                </div>
+                                <Check
+                                  className={`ml-auto size-4 ${
+                                    option.key === searchWith
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  }`}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <PatientIdentifierFilter
                   onSelect={(patientId, patientName) =>
