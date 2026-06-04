@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { useAtom } from "jotai";
@@ -13,6 +13,7 @@ import {
   Banknote,
   BanknoteArrowUp,
   CreditCard,
+  InfoIcon,
   Landmark,
   Signature,
 } from "lucide-react";
@@ -45,9 +46,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { paymentReconcilationLocationAtom } from "@/atoms/paymentReconcilationLocationAtom";
 import { LocationPicker } from "@/components/Location/LocationPicker";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
@@ -59,7 +62,8 @@ import {
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
 import { AccountRead } from "@/types/billing/account/Account";
-import { InvoiceRead } from "@/types/billing/invoice/invoice";
+import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
+import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import {
   PaymentReconciliationCreate,
   PaymentReconciliationIssuerType,
@@ -73,12 +77,15 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import {
   isGreaterThanOrEqual,
   isPositive,
+  max,
+  multiply,
   round,
+  subtract,
   zodDecimal,
 } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import mutate from "@/Utils/request/mutate";
-import Decimal from "decimal.js";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
+import { ExtensionContexts } from "@/Utils/schema/types";
 
 const PAYMENT_METHODS = [
   {
@@ -156,6 +163,7 @@ const createBaseSchema = () =>
     note: z.string().optional(),
     account: z.string(),
     is_credit_note: z.boolean().optional(),
+    mark_invoice_as_balanced: z.boolean().optional(),
     location: careConfig.paymentLocationRequired
       ? z.string().min(1, t("field_required"))
       : z.string().optional(),
@@ -203,6 +211,7 @@ export function PaymentReconciliationSheet({
     () =>
       getCombinedExtensionProps(
         getExtensions(ExtensionEntityType.payment_reconciliation, "write"),
+        ExtensionContexts.payment_reconciliation_form,
       ),
     [getExtensions],
   );
@@ -221,6 +230,7 @@ export function PaymentReconciliationSheet({
     entityType: ExtensionEntityType.payment_reconciliation,
     schemaType: "write",
     form,
+    context: ExtensionContexts.payment_reconciliation_form,
   });
 
   // Watch for payment method changes
@@ -238,7 +248,7 @@ export function PaymentReconciliationSheet({
       // For cash payments, calculate change to return
       form.setValue(
         "returned_amount",
-        round(Decimal.max(0, tenderedAmount || "0").minus(amount || "0")),
+        round(subtract(max(0, tenderedAmount || "0"), amount || "0")),
       );
       form.setValue("reference_number", "");
     } else {
@@ -255,15 +265,51 @@ export function PaymentReconciliationSheet({
     }
   }, [selectedLocationObject, form]);
 
-  const { mutate: submitPayment, isPending } = useMutation({
-    mutationFn: mutate(paymentReconciliationApi.createPaymentReconciliation, {
-      pathParams: { facilityId },
-    }),
-    onSuccess: () => {
+  // Amount remaining on the invoice after payments and credit notes.
+  const amountDueDecimal = useMemo(() => {
+    if (!invoice) return null;
+    return subtract(
+      subtract(invoice.total_gross, invoice.total_payments),
+      multiply(invoice.total_credit_notes || "0", invoice.is_refund ? -1 : 1),
+    );
+  }, [invoice]);
+
+  // Whether the "Mark as Balanced" option applies to this invoice.
+  const canOfferMarkInvoiceAsBalanced = useMemo(() => {
+    if (!invoice || isCreditNote) return false;
+    if (invoice.status !== InvoiceStatus.issued) return false;
+    if (!amountDueDecimal) return false;
+    if (!isPositive(amountDueDecimal)) return false;
+    return true;
+  }, [invoice, isCreditNote, amountDueDecimal]);
+
+  const canMarkInvoiceAsBalanced = useMemo(() => {
+    if (!canOfferMarkInvoiceAsBalanced || !amount || !amountDueDecimal) {
+      return false;
+    }
+    try {
+      return isGreaterThanOrEqual(amount, amountDueDecimal);
+    } catch {
+      return false;
+    }
+  }, [canOfferMarkInvoiceAsBalanced, amount, amountDueDecimal]);
+
+  const { mutate: submitBatch, isPending } = useBatchRequest({
+    onSuccess: (data) => {
+      const balancedResult = data.results.find(
+        (result) => result.reference_id === "mark_invoice_balanced",
+      );
+      const invoiceBalanced =
+        !!balancedResult &&
+        balancedResult.status_code >= 200 &&
+        balancedResult.status_code < 300;
+
       toast.success(
         isCreditNote
           ? t("refund_recorded_successfully")
-          : t("payment_recorded_successfully"),
+          : invoiceBalanced
+            ? t("payment_recorded_and_invoice_balanced")
+            : t("payment_recorded_successfully"),
       );
 
       // Invalidate relevant queries
@@ -294,7 +340,11 @@ export function PaymentReconciliationSheet({
   });
 
   const handleSubmit = form.handleSubmit((data) => {
-    const { extensions: formExtensions, ...restData } = data;
+    const {
+      extensions: formExtensions,
+      mark_invoice_as_balanced,
+      ...restData
+    } = data;
     const cleanedExtensions = extensions.prepareForSubmit(
       formExtensions as NamespacedExtensionData,
     );
@@ -306,14 +356,35 @@ export function PaymentReconciliationSheet({
       location: restData.location,
       extensions: cleanedExtensions,
     };
-    submitPayment(submissionData);
+
+    const requests: BatchRequestObject[] = [
+      {
+        api: paymentReconciliationApi.createPaymentReconciliation,
+        pathParams: { facilityId },
+        body: submissionData,
+        referenceId: "create_payment_reconciliation",
+      },
+    ];
+
+    if (
+      canMarkInvoiceAsBalanced &&
+      mark_invoice_as_balanced !== false &&
+      invoice
+    ) {
+      requests.push({
+        api: invoiceApi.partialUpdateInvoice,
+        pathParams: { facilityId, invoiceId: invoice.id },
+        body: { status: InvoiceStatus.balanced },
+        referenceId: "mark_invoice_balanced",
+      });
+    }
+
+    submitBatch(requests);
   });
 
   useEffect(() => {
     if (open) {
-      const initialAmount = invoice?.total_gross
-        ? round(new Decimal(invoice.total_gross).abs())
-        : "";
+      const initialAmount = invoice ? round(amountDueDecimal || "0") : "";
 
       // Determine the default payment method
       const defaultMethod = careConfig.defaultPaymentMethod
@@ -342,6 +413,7 @@ export function PaymentReconciliationSheet({
         note: "",
         account: accountId,
         is_credit_note: isCreditNote,
+        mark_invoice_as_balanced: true,
         location: selectedLocationObject?.id,
         extensions: ext.defaults,
       });
@@ -391,11 +463,7 @@ export function PaymentReconciliationSheet({
                         {isCreditNote ? t("refund_given") : t("amount_due")}
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
-                        <MonetaryDisplay
-                          amount={new Decimal(invoice.total_gross)
-                            .minus(invoice.total_payments)
-                            .toString()}
-                        />
+                        <MonetaryDisplay amount={amountDueDecimal} />
                       </p>
                     </>
                   ) : (
@@ -693,8 +761,56 @@ export function PaymentReconciliationSheet({
               {extensions.fields}
             </div>
 
-            <SheetFooter className="sticky bottom-0 bg-white p-4 border-t border-gray-200 -mx-6">
-              <div className="flex justify-between gap-3">
+            <SheetFooter className="sticky bottom-0 bg-white p-4 border-t border-gray-200 -mx-6 flex flex-col gap-3 shadow-[0_-4px_12px_rgba(15,23,42,0.04)] sm:flex-col sm:space-x-0">
+              {canOfferMarkInvoiceAsBalanced && (
+                <FormField
+                  control={form.control}
+                  name="mark_invoice_as_balanced"
+                  render={({ field }) => (
+                    <FormItem className="flex w-full grid-cols-none items-start gap-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-left">
+                      <FormControl>
+                        <Checkbox
+                          id="mark-invoice-as-balanced"
+                          checked={
+                            canMarkInvoiceAsBalanced && field.value !== false
+                          }
+                          onCheckedChange={(checked) =>
+                            field.onChange(checked === true)
+                          }
+                          disabled={!canMarkInvoiceAsBalanced}
+                          aria-label={t("mark_invoice_as_balanced")}
+                        />
+                      </FormControl>
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <Label
+                          htmlFor="mark-invoice-as-balanced"
+                          className="cursor-pointer text-sm font-medium text-gray-950"
+                        >
+                          {t("mark_invoice_as_balanced")}
+                        </Label>
+                        <TooltipComponent
+                          content={
+                            canMarkInvoiceAsBalanced
+                              ? t("mark_as_balanced_payment_covers_due")
+                              : t("mark_as_balanced_requires_full_payment")
+                          }
+                          side="top"
+                          className="max-w-xs"
+                        >
+                          <button
+                            type="button"
+                            className="text-gray-500 hover:text-gray-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-500"
+                            aria-label={t("mark_invoice_as_balanced")}
+                          >
+                            <InfoIcon className="size-4" />
+                          </button>
+                        </TooltipComponent>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              )}
+              <div className="flex w-full justify-end gap-3">
                 <Button
                   type="button"
                   variant="outline"
