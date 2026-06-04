@@ -4550,6 +4550,7 @@
   "print_all_responses": "Print all {{title}} responses",
   "print_appointment": "Print Appointment",
   "print_charge_items": "Print Charge Items",
+  "print_failed": "Print failed",
   "print_header": "Print Header",
   "print_header_placeholder": "Enter the text to display as the header when printing documents for this facility",
   "print_invoice": "Print Invoice",
