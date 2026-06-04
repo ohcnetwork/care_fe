@@ -111,22 +111,40 @@ test.describe("Payment Reconciliation", () => {
     await expect(dialog).toBeVisible();
   });
 
-  test("should show validation error when submitting empty payment", async ({
+  test("should disable submit button when required fields are empty", async ({
     page,
   }) => {
     // Open Record Payment
     await page.getByRole("button", { name: /advance/i }).click();
 
-    // Click Record Payment without filling anything
-    await page.getByRole("button", { name: /record payment/i }).click();
+    // Verify submit button is disabled when form is incomplete
+    const submitButton = page.getByRole("button", {
+      name: /record payment/i,
+    });
+    await expect(submitButton).toBeDisabled();
 
-    // Verify validation error is shown
-    const paymentAmountSection = page
-      .locator("div")
-      .filter({ hasText: /^Amount Paid/ })
-      .filter({ hasText: /Must be a valid number$/ });
+    // Fill required fields and verify button becomes enabled
+    await page.locator("label").filter({ hasText: "Cash" }).click();
+    await page
+      .locator("label")
+      .filter({ hasText: /^Payment$/ })
+      .click();
 
-    await expect(paymentAmountSection).toBeVisible();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select Location" })
+      .click();
+    await page
+      .locator('[data-slot="command-item"]')
+      .filter({ hasText: "Bio-Chemistry Lab" })
+      .click();
+
+    const paymentAmount = faker.number.int({ min: 100, max: 5000 }).toString();
+    await page
+      .getByRole("textbox", { name: "Amount Paid" })
+      .fill(paymentAmount);
+
+    await expect(submitButton).toBeEnabled();
   });
 
   test("should record payment twice without refreshing page with location cache", async ({
