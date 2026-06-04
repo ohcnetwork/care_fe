@@ -120,6 +120,7 @@ export default function GovtOrganizationPicker({
   required,
   requiredDepth,
   authToken,
+  ref,
   ...props
 }: GovtOrganizationPickerProps) {
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
@@ -160,7 +161,7 @@ export default function GovtOrganizationPicker({
       {Array.from({ length: totalLevels }).map((_, index) => (
         <GovtOrganizationLevel
           key={index}
-          ref={props.ref}
+          ref={index === 0 ? ref : undefined}
           index={index}
           parentId={index === 0 ? "" : selectedLevels[index - 1]?.id || ""}
           selectedOrg={selectedLevels[index]}

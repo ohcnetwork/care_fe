@@ -891,7 +891,6 @@ const AdditionalDetailsContent = ({
                   requiredDepth={minGeoOrganizationLevelsRequired}
                   value={form.watch("_selected_levels")[0] ?? null}
                   onChange={(organization) => {
-                    console.log("onChange", organization);
                     form.setValue(
                       "_selected_levels",
                       organization ? [organization] : [],
