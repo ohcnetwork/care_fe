@@ -240,7 +240,8 @@ export function PaymentReconciliationSheet({
     !!amount &&
     isPositive(amount) &&
     !!paymentDatetime &&
-    (isCreditNote || !!reconciliationType);
+    (isCreditNote || !!reconciliationType) &&
+    (!careConfig.paymentLocationRequired || !!form.watch("location"));
 
   // Calculate returned amount when tender amount, amount or payment method changes
   useEffect(() => {
