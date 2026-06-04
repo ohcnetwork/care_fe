@@ -33,7 +33,6 @@ function generatePatientData() {
       "AB+",
       "AB-",
     ]),
-    state: "Rajasthan", //not used currently
     pincode: faker.string.numeric(6),
     address: faker.location.streetAddress({ useFullAddress: true }),
     emergencyContact: {
