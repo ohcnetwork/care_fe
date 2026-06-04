@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { useEffect, useRef } from "react";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { encounterListFiltersAtom } from "@/atoms/encounterFilterAtom";
@@ -26,7 +26,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import Page from "@/components/Common/Page";
-import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
@@ -133,6 +132,13 @@ export function EncounterList({
   const [, setSavedFilters] = useAtom(encounterListFiltersAtom);
   const hasRestoredFilters = useRef(false);
   const hasAppliedDefaultStatus = useRef(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchType, setSearchType] = useState<"name" | "external_identifier">(
+    "name",
+  );
+  const [activeSearchTypeIndex, setActiveSearchTypeIndex] = useState(0);
+  const [showSearchTypeDropdown, setShowSearchTypeDropdown] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const {
     status,
@@ -155,6 +161,109 @@ export function EncounterList({
       ),
       created_date_before: dateQueryString(today),
     };
+  };
+
+  const searchTypeOptions = [
+    {
+      key: "name" as const,
+      label: t("patient_name"),
+      placeholder: t("search_by_patient_name"),
+    },
+    {
+      key: "external_identifier" as const,
+      label: t("external_identifier"),
+      placeholder: t("search_by_external_id"),
+    },
+  ];
+
+  const searchByNameLabel = t("name");
+  const searchByIdLabel = t("id");
+  const buttonType = "button" as const;
+
+  useEffect(() => {
+    if (searchType === "name") {
+      setSearchTerm(qParams.name || "");
+    } else {
+      setSearchTerm(qParams.external_identifier || "");
+    }
+  }, [searchType, qParams.name, qParams.external_identifier]);
+
+  const selectedSearchType =
+    searchTypeOptions.find((option) => option.key === searchType) ||
+    searchTypeOptions[0];
+
+  const shouldShowSearchTypeBadge =
+    !!searchTerm.trim() && !isSearchFocused && showSearchTypeDropdown === false;
+
+  const handleSearchTypeSelect = (
+    selectedKey: "name" | "external_identifier",
+  ) => {
+    setSearchType(selectedKey);
+    setShowSearchTypeDropdown(false);
+
+    setActiveSearchTypeIndex(
+      selectedKey === "name" ? 0 : searchTypeOptions.length - 1,
+    );
+
+    if (selectedKey === "name") {
+      updateQuery({
+        name: searchTerm,
+        external_identifier: "",
+      });
+    } else {
+      updateQuery({
+        name: "",
+        external_identifier: searchTerm,
+      });
+    }
+  };
+
+  const handleSearchInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setShowSearchTypeDropdown(true);
+      setActiveSearchTypeIndex((prev) =>
+        prev === searchTypeOptions.length - 1 ? 0 : prev + 1,
+      );
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setShowSearchTypeDropdown(true);
+      setActiveSearchTypeIndex((prev) =>
+        prev === 0 ? searchTypeOptions.length - 1 : prev - 1,
+      );
+      return;
+    }
+
+    if (event.key === "Enter" && showSearchTypeDropdown) {
+      event.preventDefault();
+
+      handleSearchTypeSelect(
+        searchTypeOptions[activeSearchTypeIndex]?.key || "name",
+      );
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (searchType === "name") {
+        updateQuery({
+          name: searchTerm,
+          external_identifier: "",
+        });
+      } else {
+        updateQuery({
+          name: "",
+          external_identifier: searchTerm,
+        });
+      }
+    }
+
+    if (event.key === "Escape") {
+      setShowSearchTypeDropdown(false);
+    }
   };
 
   // Restore filters from sessionStorage on mount AND set default dates if needed
@@ -494,24 +603,88 @@ export function EncounterList({
       }
     >
       <div className="space-y-4 mt-4 flex flex-col">
-        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col overflow-auto">
-          <div className="flex flex-col">
+        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col overflow-visible">
+          <div className="flex flex-col overflow-visible">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <SearchInput
-                  id="patient-name-search"
-                  options={[
-                    {
-                      key: "name",
-                      type: "text",
-                      placeholder: t("search_by_patient_name"),
-                      value: qParams.name || "",
-                      display: t("patient_name"),
-                    },
-                  ]}
-                  className="w-full sm:w-auto sm:min-w-64"
-                  onSearch={(key, value) => updateQuery({ [key]: value })}
-                />
+                <div className="w-full sm:w-auto sm:min-w-64 relative">
+                  <div className="w-full border rounded-md bg-white">
+                    <div className="relative flex items-center h-9 border-b border-b-transparent rounded-md">
+                      <input
+                        value={searchTerm}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setSearchTerm(value);
+                          if (searchType === "name") {
+                            updateQuery({
+                              name: value,
+                              external_identifier: "",
+                            });
+                          } else {
+                            updateQuery({
+                              name: "",
+                              external_identifier: value,
+                            });
+                          }
+                        }}
+                        onKeyDown={handleSearchInputKeyDown}
+                        onFocus={() => {
+                          setIsSearchFocused(true);
+                          setShowSearchTypeDropdown(true);
+                          setActiveSearchTypeIndex(
+                            searchType === "name"
+                              ? 0
+                              : searchTypeOptions.length - 1,
+                          );
+                        }}
+                        onBlur={() => {
+                          setIsSearchFocused(false);
+                          window.setTimeout(() => {
+                            setShowSearchTypeDropdown(false);
+                          }, 100);
+                        }}
+                        placeholder={selectedSearchType.placeholder}
+                        className="w-full h-full border-none pl-3 pr-9 text-sm focus-visible:outline-none"
+                      />
+                      {shouldShowSearchTypeBadge ? (
+                        <span
+                          className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                            searchType === "external_identifier"
+                              ? "border-amber-300 text-amber-700 bg-amber-50"
+                              : "border-blue-300 text-blue-700 bg-blue-50"
+                          }`}
+                        >
+                          {searchType === "external_identifier"
+                            ? searchByIdLabel
+                            : searchByNameLabel}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {showSearchTypeDropdown ? (
+                      <div className="absolute z-20 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-md">
+                        {searchTypeOptions.map((option, index) => (
+                          <button
+                            key={option.key}
+                            type={buttonType}
+                            className={`w-full text-left px-3 py-2 text-sm ${
+                              index === activeSearchTypeIndex
+                                ? "bg-gray-100"
+                                : "bg-white"
+                            }`}
+                            onMouseDown={(event) => {
+                              event.preventDefault();
+                              handleSearchTypeSelect(option.key);
+                            }}
+                            onMouseEnter={() => setActiveSearchTypeIndex(index)}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
                 <PatientIdentifierFilter
                   onSelect={(patientId, patientName) =>
                     updateQuery({
