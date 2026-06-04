@@ -44,9 +44,11 @@ async function navigateToPatientEdit(page: Page) {
   // Navigate to patient details first to establish browser history,
   // since the edit form calls goBack() after successful update.
   await page.goto(patientDetailsUrl);
-  await page.waitForLoadState("networkidle");
+  await expect(
+    page.getByRole("heading", { name: "General Info" }),
+  ).toBeVisible();
   await page.goto(`${patientDetailsUrl}/update`);
-  await page.waitForLoadState("networkidle");
+  await expect(page.getByRole("button", { name: /update/i })).toBeVisible();
 }
 
 async function submitAndExpectSuccess(page: Page) {
@@ -83,7 +85,9 @@ test.describe("Patient Details Edit", () => {
     const patientId = getPatientId();
 
     await page.goto(`/facility/${facilityId}/patient/${patientId}`);
-    await page.waitForLoadState("networkidle");
+    await expect(
+      page.getByRole("heading", { name: "General Info" }),
+    ).toBeVisible();
 
     await test.step("Click Edit button in General Info section", async () => {
       await page.getByRole("button", { name: /edit/i }).first().click();
