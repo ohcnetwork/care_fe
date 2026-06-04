@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { clickTabOrMenuItem, expectToast } from "tests/helper/ui";
+import { expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -29,11 +29,8 @@ test.describe("Patient Service Request Tab", () => {
     );
 
     await expect(page).toHaveURL(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
     );
-
-    await clickTabOrMenuItem(page, /service requests/i);
-    await expect(page).toHaveURL(/\/service_requests$/);
 
     const firstRow = page
       .locator('[data-slot="table-body"] [data-slot="table-row"]')
@@ -58,11 +55,8 @@ test.describe("Patient Service Request Tab", () => {
     );
 
     await expect(page).toHaveURL(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
     );
-
-    await clickTabOrMenuItem(page, /service requests/i);
-    await expect(page).toHaveURL(/\/service_requests$/);
 
     const firstRow = page
       .locator('[data-slot="table-body"] [data-slot="table-row"]')
