@@ -215,6 +215,7 @@ export function PaymentReconciliationSheet({
   type FormValues = z.infer<typeof formSchema>;
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    shouldFocusError: true,
   });
 
   const extensions = useEntityExtensions({
@@ -293,21 +294,29 @@ export function PaymentReconciliationSheet({
     },
   });
 
-  const handleSubmit = form.handleSubmit((data) => {
-    const { extensions: formExtensions, ...restData } = data;
-    const cleanedExtensions = extensions.prepareForSubmit(
-      formExtensions as NamespacedExtensionData,
-    );
+  const handleSubmit = form.handleSubmit(
+    (data) => {
+      const { extensions: formExtensions, ...restData } = data;
+      const cleanedExtensions = extensions.prepareForSubmit(
+        formExtensions as NamespacedExtensionData,
+      );
 
-    // Convert form data to PaymentReconciliationCreate type
-    const submissionData: PaymentReconciliationCreate = {
-      ...restData,
-      is_credit_note: isCreditNote,
-      location: restData.location,
-      extensions: cleanedExtensions,
-    };
-    submitPayment(submissionData);
-  });
+      // Convert form data to PaymentReconciliationCreate type
+      const submissionData: PaymentReconciliationCreate = {
+        ...restData,
+        is_credit_note: isCreditNote,
+        location: restData.location,
+        extensions: cleanedExtensions,
+      };
+      submitPayment(submissionData);
+    },
+    () => {
+      setTimeout(() => {
+        const firstError = document.querySelector("[data-slot='form-message']");
+        firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+    },
+  );
 
   useEffect(() => {
     if (open) {
