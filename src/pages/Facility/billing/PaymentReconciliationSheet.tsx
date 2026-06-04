@@ -241,7 +241,7 @@ export function PaymentReconciliationSheet({
     !!amount &&
     isPositive(amount) &&
     !!paymentDatetime &&
-    (isCreditNote || !!reconciliationType) &&
+    !!reconciliationType &&
     (!careConfig.paymentLocationRequired || !!location);
 
   // Calculate returned amount when tender amount, amount or payment method changes
