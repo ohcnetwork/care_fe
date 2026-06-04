@@ -132,8 +132,7 @@ export default function AppointmentPrint(props: Props) {
   }
 
   // Filter out excluded charge items and show all from the query
-  const patient = appointment.patient;
-  const token = appointment.token;
+  const { patient, token } = appointment;
 
   const displayChargeItems = chargeItems?.results?.filter(
     (item) => !EXCLUDED_CHARGE_ITEM_STATUSES.includes(item.status),
@@ -163,8 +162,8 @@ export default function AppointmentPrint(props: Props) {
     ? add(...allPayments.map((p) => p.amount)).toString()
     : undefined;
 
-  const patientTags = patient.instance_tags ?? [];
-  const appointmentTags = appointment.tags ?? [];
+  const patientTags = patient.instance_tags;
+  const appointmentTags = appointment.tags;
 
   return (
     <PrintPreview
@@ -220,7 +219,7 @@ export default function AppointmentPrint(props: Props) {
                 value={formatPhoneNumberIntl(patient.phone_number)}
               />
               {patient.instance_identifiers
-                ?.filter(
+                .filter(
                   (identifier) =>
                     identifier.config.config.use ===
                     PatientIdentifierUse.official,
@@ -232,7 +231,9 @@ export default function AppointmentPrint(props: Props) {
                     value={identifier.value}
                   />
                 ))}
-              <DetailRow label={t("address")} value={patient.address} />
+              {patient.address?.trim() && (
+                <DetailRow label={t("address")} value={patient.address} />
+              )}
             </div>
           </div>
           <div className="flex items-start gap-3">
