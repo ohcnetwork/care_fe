@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { useToken } from "@/hooks/useToken";
-import { AssignToServicePointDialogOrDrawer } from "@/pages/Facility/queues/AssignToServicePointDialogOrDrawer";
+import { ServicepointSelector } from "@/pages/Facility/queues/ServicepointSelector";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import { FacilityRead } from "@/types/facility/facility";
@@ -34,11 +34,7 @@ export default function TokenCardWithButton({
   const { t } = useTranslation();
   const [showServicepointDialog, setShowServicepointDialog] = useState(false);
 
-  const {
-    token: latestToken,
-    updateToken,
-    isPending,
-  } = useToken({
+  const { token: latestToken, updateToken } = useToken({
     facilityId: facility.id,
     queueId: token.queue.id,
     tokenId: token.id,
@@ -93,13 +89,13 @@ export default function TokenCardWithButton({
       )}
 
       {!isOnlyOneSubQueue && showMarkInServiceButton && (
-        <AssignToServicePointDialogOrDrawer
+        <ServicepointSelector
           open={showServicepointDialog}
           onOpenChange={setShowServicepointDialog}
           token={currentToken}
+          facilityId={facility.id}
           subQueues={assignedServicePoints}
-          onUpdate={updateToken}
-          isPending={isPending}
+          action="serve"
         />
       )}
     </>

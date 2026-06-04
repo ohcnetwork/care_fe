@@ -13,7 +13,7 @@ import {
   Ticket,
   Wallet,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
 import { getPermissions } from "@/common/Permissions";
@@ -22,7 +22,6 @@ import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
 import PatientTokensList from "@/components/Tokens/PatientTokensList";
-import TokenViewModal from "@/components/Tokens/TokenViewModal";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
@@ -68,7 +67,6 @@ export default function PatientHome() {
   const queryClient = useQueryClient();
 
   const { facility, facilityId } = useCurrentFacility();
-  const [showTokenModal, setShowTokenModal] = useState(false);
 
   const pharmacyDispenseService = useAtomValue(
     pharmacyDispenseServiceAtom(facilityId),
@@ -107,12 +105,6 @@ export default function PatientHome() {
     }),
     enabled: !!(partial_id && (year_of_birth || phone_number)),
   });
-
-  useEffect(() => {
-    if (isQueueFlow && token_id && patientData) {
-      setShowTokenModal(true);
-    }
-  }, [isQueueFlow, token_id, patientData]);
 
   if (isVerifyingPatient || !facility) {
     return (
@@ -293,15 +285,6 @@ export default function PatientHome() {
               )}
             </div>
           </div>
-          {isQueueFlow && token_id && queue_id && (
-            <TokenViewModal
-              open={showTokenModal}
-              onOpenChange={setShowTokenModal}
-              facility={facility}
-              queueId={queue_id}
-              tokenId={token_id}
-            />
-          )}
         </div>
       ) : (
         isError && (
