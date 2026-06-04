@@ -72,15 +72,20 @@ async function ensureGeoOrgFilled(page: Page) {
     await region.waitFor({ state: "visible", timeout: 3000 });
   }
 
+  // Wait for the geo org picker to finish loading its data.
+  // While loading, it shows a spinner (animate-spin). We must wait for all
+  // spinners to disappear so combobox text accurately reflects their state.
+  await expect(region.locator(".animate-spin")).toHaveCount(0, {
+    timeout: 10000,
+  });
+
   // The geo org picker renders cascading comboboxes. We need to select
   // through all levels until a leaf is reached (no more comboboxes appear).
-  // Start from the last combobox that has a "Select" placeholder or from
-  // the first empty one.
   const comboboxes = region.getByRole("combobox");
   let count = await comboboxes.count();
   if (count === 0) return;
 
-  // Find the first combobox that needs filling (has placeholder text)
+  // Find the first combobox that needs filling (has placeholder text "Select...")
   let startLevel = 0;
   for (let i = 0; i < count; i++) {
     const text = await comboboxes
@@ -94,14 +99,12 @@ async function ensureGeoOrgFilled(page: Page) {
     startLevel = i + 1; // All filled so far, start after last filled
   }
 
-  // If startLevel equals count and the last combobox has a selection,
-  // check if there might be more levels needed by clicking the last selected one
-  // to see if it triggers a new empty level. If not, we're done.
+  // All visible comboboxes are already filled — geo org is valid
   if (startLevel >= count) {
-    return; // All visible comboboxes are filled and no new level appeared
+    return;
   }
 
-  // Select through remaining levels
+  // Select through remaining levels until we reach a leaf node
   let level = startLevel;
   while (true) {
     const currentCount = await comboboxes.count();
@@ -111,7 +114,7 @@ async function ensureGeoOrgFilled(page: Page) {
     await combobox.click();
     const option = page.getByRole("option").first();
     try {
-      await option.waitFor({ state: "visible", timeout: 5000 });
+      await option.waitFor({ state: "visible", timeout: 10000 });
     } catch {
       await page.keyboard.press("Escape");
       break;
@@ -119,9 +122,13 @@ async function ensureGeoOrgFilled(page: Page) {
     await option.click();
     level++;
 
-    // Wait for next level to appear
+    // Wait for next level to appear (if the selected org has children)
     try {
-      await comboboxes.nth(level).waitFor({ state: "visible", timeout: 3000 });
+      await comboboxes.nth(level).waitFor({ state: "visible", timeout: 5000 });
+      // Also wait for the new level's options to load
+      await expect(region.locator(".animate-spin")).toHaveCount(0, {
+        timeout: 10000,
+      });
     } catch {
       break;
     }
@@ -185,7 +192,7 @@ test.describe("Patient Details Edit", () => {
     await ensureGeoOrgFilled(page);
 
     // Make a trivial change to enable the submit button (it's disabled when !isDirty)
-    const addressField = page.getByRole("textbox", { name: /address/i });
+    const addressField = page.getByRole("textbox", { name: /^Address/i });
     const currentAddress = await addressField.inputValue();
     await addressField.clear();
     await addressField.fill(currentAddress + " ");
@@ -263,7 +270,8 @@ test.describe("Patient Details Edit", () => {
 
     await test.step("Update phone number", async () => {
       const phoneField = page.getByRole("textbox", {
-        name: /phone number.*\*/i,
+        name: "Phone Number *",
+        exact: true,
       });
       await phoneField.clear();
       await phoneField.fill(editData.phoneNumber);
@@ -354,7 +362,9 @@ test.describe("Patient Details Edit", () => {
     });
 
     await test.step("Update address", async () => {
-      const addressField = page.getByRole("textbox", { name: "Address" });
+      const addressField = page.getByRole("textbox", {
+        name: /^Address/i,
+      });
       await addressField.clear();
       await addressField.fill(editData.address);
     });
@@ -430,7 +440,9 @@ test.describe("Patient Details Edit", () => {
     });
 
     await test.step("Also update address to ensure dirty state", async () => {
-      const addressField = page.getByRole("textbox", { name: "Address" });
+      const addressField = page.getByRole("textbox", {
+        name: /^Address/i,
+      });
       await addressField.clear();
       await addressField.fill(editData.address);
     });
@@ -479,7 +491,9 @@ test.describe("Patient Details Edit", () => {
         await additionalDetailsSection.click();
       }
 
-      const addressField = page.getByRole("textbox", { name: "Address" });
+      const addressField = page.getByRole("textbox", {
+        name: /^Address/i,
+      });
       await addressField.clear();
       await addressField.fill(editData.address);
     });
@@ -504,7 +518,8 @@ test.describe("Patient Details Edit", () => {
 
     await test.step("Enter invalid phone number", async () => {
       const phoneField = page.getByRole("textbox", {
-        name: /phone number.*\*/i,
+        name: "Phone Number *",
+        exact: true,
       });
       await phoneField.clear();
       await phoneField.fill("123");
