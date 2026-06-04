@@ -185,6 +185,14 @@ test.describe("Patient Details Edit", () => {
     await test.step("Submit the form", async () => {
       await submitAndExpectSuccess(page);
     });
+
+    await test.step("Verify updated DOB on patient details", async () => {
+      const generalInfo = page.locator("#general-info");
+      // DOB is displayed as "DD MMM YYYY" (e.g. "15 Mar 1990")
+      await expect(
+        generalInfo.getByText(editData.dateOfBirth.year),
+      ).toBeVisible();
+    });
   });
 
   test("should edit patient additional details", async ({ page }) => {
@@ -239,6 +247,8 @@ test.describe("Patient Details Edit", () => {
       }
     });
 
+    let lastSelectedOption = "";
+
     await test.step("Select through cascading geo org comboboxes", async () => {
       await page
         .getByRole("button", { name: /update/i })
@@ -259,6 +269,7 @@ test.describe("Patient Details Edit", () => {
         await combobox.click();
         const option = page.getByRole("option").first();
         await option.waitFor({ state: "visible" });
+        lastSelectedOption = (await option.textContent()) ?? "";
         await option.click();
 
         level++;
@@ -282,6 +293,13 @@ test.describe("Patient Details Edit", () => {
 
     await test.step("Submit the form", async () => {
       await submitAndExpectSuccess(page);
+    });
+
+    await test.step("Verify geo organization on patient details", async () => {
+      const generalInfo = page.locator("#general-info");
+      await expect(
+        generalInfo.getByText(lastSelectedOption.trim()),
+      ).toBeVisible();
     });
   });
 
