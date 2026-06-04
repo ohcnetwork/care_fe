@@ -49,9 +49,89 @@ async function navigateToPatientEdit(page: Page) {
   ).toBeVisible();
   await page.goto(`${patientDetailsUrl}/update`);
   await expect(page.getByRole("button", { name: /update/i })).toBeVisible();
+  // Wait for form to be populated with patient data (form.reset fires after API fetch)
+  const nameField = page.getByRole("textbox", { name: /name.*\*/i });
+  await expect(nameField).not.toHaveValue("");
+}
+
+/**
+ * Ensures the geo_organization field is filled to a leaf level (required for form submission).
+ * Opens Additional Details and selects through cascading comboboxes until no more levels appear.
+ */
+async function ensureGeoOrgFilled(page: Page) {
+  // Open Additional Details if collapsed
+  const additionalDetailsSection = page.getByRole("button", {
+    name: "Additional Details",
+  });
+  // Check if section content is visible; if not, click to expand
+  const region = page.getByRole("region", {
+    name: "Additional Details",
+  });
+  if (!(await region.isVisible().catch(() => false))) {
+    await additionalDetailsSection.click();
+    await region.waitFor({ state: "visible", timeout: 3000 });
+  }
+
+  // The geo org picker renders cascading comboboxes. We need to select
+  // through all levels until a leaf is reached (no more comboboxes appear).
+  // Start from the last combobox that has a "Select" placeholder or from
+  // the first empty one.
+  const comboboxes = region.getByRole("combobox");
+  let count = await comboboxes.count();
+  if (count === 0) return;
+
+  // Find the first combobox that needs filling (has placeholder text)
+  let startLevel = 0;
+  for (let i = 0; i < count; i++) {
+    const text = await comboboxes
+      .nth(i)
+      .textContent()
+      .catch(() => "");
+    if (!text || text.includes("Select")) {
+      startLevel = i;
+      break;
+    }
+    startLevel = i + 1; // All filled so far, start after last filled
+  }
+
+  // If startLevel equals count and the last combobox has a selection,
+  // check if there might be more levels needed by clicking the last selected one
+  // to see if it triggers a new empty level. If not, we're done.
+  if (startLevel >= count) {
+    return; // All visible comboboxes are filled and no new level appeared
+  }
+
+  // Select through remaining levels
+  let level = startLevel;
+  while (true) {
+    const currentCount = await comboboxes.count();
+    if (currentCount <= level) break;
+
+    const combobox = comboboxes.nth(level);
+    await combobox.click();
+    const option = page.getByRole("option").first();
+    try {
+      await option.waitFor({ state: "visible", timeout: 5000 });
+    } catch {
+      await page.keyboard.press("Escape");
+      break;
+    }
+    await option.click();
+    level++;
+
+    // Wait for next level to appear
+    try {
+      await comboboxes.nth(level).waitFor({ state: "visible", timeout: 3000 });
+    } catch {
+      break;
+    }
+  }
 }
 
 async function submitAndExpectSuccess(page: Page) {
+  // Ensure geo_organization is filled (required field that may be empty for legacy patients)
+  await ensureGeoOrgFilled(page);
+
   const patientId = getPatientId();
   const [response] = await Promise.all([
     page.waitForResponse(
@@ -94,6 +174,66 @@ test.describe("Patient Details Edit", () => {
       await expect(page).toHaveURL(
         new RegExp(`/facility/${facilityId}/patient/${patientId}/update`),
       );
+    });
+  });
+
+  test("should submit edit form with minimal change (verifies geo org prefill)", async ({
+    page,
+  }) => {
+    // First, ensure the patient has geo_organization set (legacy patients may not)
+    await navigateToPatientEdit(page);
+    await ensureGeoOrgFilled(page);
+
+    // Make a trivial change to enable the submit button (it's disabled when !isDirty)
+    const addressField = page.getByRole("textbox", { name: /address/i });
+    const currentAddress = await addressField.inputValue();
+    await addressField.clear();
+    await addressField.fill(currentAddress + " ");
+
+    const patientId = getPatientId();
+    const [setupResponse] = await Promise.all([
+      page.waitForResponse(
+        (r) =>
+          r.url().includes("/api/v1/patient/") &&
+          r.request().method() === "PUT",
+      ),
+      page.getByRole("button", { name: /update/i }).click(),
+    ]);
+    expect(setupResponse.status()).toBe(200);
+    await expect(page).toHaveURL(new RegExp(`/patient/${patientId}`), {
+      timeout: 10000,
+    });
+    await expect(
+      page.getByRole("heading", { name: "General Info" }),
+    ).toBeVisible();
+
+    await test.step("Re-open edit form, make trivial change, and submit without touching geo org", async () => {
+      // Now that the patient has a geo_org saved, re-open the form.
+      // The geo org should be prefilled from the API — no need to select it again.
+      await navigateToPatientEdit(page);
+
+      // Make a trivial change to enable the Update button (form requires isDirty)
+      const nameField = page.getByRole("textbox", { name: /name.*\*/i });
+      const currentName = await nameField.inputValue();
+      await nameField.clear();
+      await nameField.fill(currentName + ".");
+
+      // Submit WITHOUT calling ensureGeoOrgFilled — geo org must be prefilled correctly
+      const [response] = await Promise.all([
+        page.waitForResponse(
+          (r) =>
+            r.url().includes("/api/v1/patient/") &&
+            r.request().method() === "PUT",
+        ),
+        page.getByRole("button", { name: /update/i }).click(),
+      ]);
+      expect(response.status()).toBe(200);
+      await expect(page).toHaveURL(new RegExp(`/patient/${patientId}`), {
+        timeout: 10000,
+      });
+      await expect(
+        page.getByRole("heading", { name: "General Info" }),
+      ).toBeVisible();
     });
   });
 
