@@ -311,10 +311,12 @@ export function PaymentReconciliationSheet({
       submitPayment(submissionData);
     },
     () => {
-      const firstError = formRef.current?.querySelector(
-        "[data-slot='form-message']",
-      );
-      firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
+      requestAnimationFrame(() => {
+        const firstError = formRef.current?.querySelector(
+          "[data-slot='form-message']",
+        );
+        firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
     },
   );
 
