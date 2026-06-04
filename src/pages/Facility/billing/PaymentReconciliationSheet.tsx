@@ -231,6 +231,16 @@ export function PaymentReconciliationSheet({
   // Watch for amount changes
   const amount = form.watch("amount");
   const tenderedAmount = form.watch("tendered_amount");
+  const reconciliationType = form.watch("reconciliation_type");
+  const paymentDatetime = form.watch("payment_datetime");
+
+  // Determine if all required fields are filled
+  const isFormComplete =
+    !!paymentMethod &&
+    !!amount &&
+    isPositive(amount) &&
+    !!paymentDatetime &&
+    (isCreditNote || !!reconciliationType);
 
   // Calculate returned amount when tender amount, amount or payment method changes
   useEffect(() => {
@@ -707,7 +717,7 @@ export function PaymentReconciliationSheet({
 
                 <Button
                   type="submit"
-                  disabled={isPending || isExtensionsLoading}
+                  disabled={isPending || isExtensionsLoading || !isFormComplete}
                   aria-label={
                     isCreditNote ? t("record_credit_note") : t("record_payment")
                   }
