@@ -144,6 +144,14 @@ test.describe("Payment Reconciliation", () => {
       .getByRole("textbox", { name: "Amount Paid" })
       .fill(paymentAmount);
 
+    // For Cash, Amount Received is required and must be >= Amount Paid
+    const tenderAmount = faker.number
+      .int({ min: parseInt(paymentAmount), max: 10000 })
+      .toString();
+    await page
+      .getByRole("textbox", { name: "Amount Received" })
+      .fill(tenderAmount);
+
     await expect(submitButton).toBeEnabled();
   });
 
