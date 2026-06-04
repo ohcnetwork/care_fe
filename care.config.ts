@@ -208,6 +208,11 @@ const careConfig = {
     name: env.REACT_DEFAULT_COUNTRY_NAME || "India",
   },
 
+  medicationValueSetSelectDefaultTab:
+    env.REACT_MEDICATION_VALUE_SET_SELECT_DEFAULT_TAB === "valueset"
+      ? "valueset"
+      : "product",
+
   resendOtpTimeout: env.REACT_APP_RESEND_OTP_TIMEOUT
     ? parseInt(env.REACT_APP_RESEND_OTP_TIMEOUT, 10)
     : 30,
