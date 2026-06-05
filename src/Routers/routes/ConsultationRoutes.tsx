@@ -6,7 +6,6 @@ import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDe
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import { PrintMedicationAdministration } from "@/components/Medicine/MedicationAdministration/PrintMedicationAdministration";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
-import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
@@ -90,18 +89,6 @@ const consultationRoutes: AppRoutes = {
         encounterId={encounterId}
         patientId={patientId}
       />
-    ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/treatment_summary":
-    ({ facilityId, encounterId, patientId }) => (
-      <TreatmentSummary
-        facilityId={facilityId}
-        encounterId={encounterId}
-        patientId={patientId}
-      />
-    ),
-  "/organization/:organizationId/patient/:patientId/encounter/:encounterId/treatment_summary":
-    ({ encounterId, patientId }) => (
-      <TreatmentSummary encounterId={encounterId} patientId={patientId} />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/template/:templateSlug":
     ({ encounterId, templateSlug }) => (
