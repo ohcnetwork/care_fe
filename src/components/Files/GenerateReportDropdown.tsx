@@ -14,12 +14,12 @@ import {
 import NavigationHelper from "@/components/ui/multi-filter/utils/navigation-helper";
 
 import query from "@/Utils/request/query";
-import { TemplateType } from "@/types/emr/template/template";
+import { ReportType } from "@/types/emr/report/report";
 import templateApi from "@/types/emr/template/templateApi";
 
 interface GenerateReportDropdownProps {
   facilityId: string;
-  reportType?: TemplateType;
+  reportType?: ReportType;
   getReportUrl: (templateSlug: string) => string;
 }
 
@@ -83,7 +83,7 @@ export function GenerateReportDropdown({
             ))}
           </div>
           {!isLoading && templatesData && templates.length > 0 && (
-            <NavigationHelper />
+            <NavigationHelper hideRight />
           )}
         </div>
       </DropdownMenuContent>
