@@ -494,7 +494,7 @@ export function AccountShow({
                       {accountTemplates.map((template) => (
                         <DropdownMenuItem key={template.id} asChild>
                           <Link
-                            href={`/facility/${facilityId}/billing/account/${accountId}/reports/template/${template.slug}`}
+                            href={`/facility/${facilityId}/billing/account/${accountId}/report/template/${template.slug}`}
                           >
                             <FileText className="mr-2 size-4 shrink-0" />
                             {template.name}
