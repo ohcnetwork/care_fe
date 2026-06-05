@@ -475,10 +475,8 @@ function GenerateReportDropdown({
         status: "active",
       },
     }),
-    enabled: canListTemplate,
+    enabled: canListTemplate && !!reportType,
   });
-
-  const templates = templatesData?.results ?? [];
 
   const getTemplateUrl = (slug: string) => {
     if (encounterId && patientId) {
@@ -493,13 +491,19 @@ function GenerateReportDropdown({
     return null;
   };
 
+  const templates = (templatesData?.results ?? []).flatMap((template) => {
+    const url = getTemplateUrl(template.slug);
+    return url ? [{ template, url }] : [];
+  });
+
   if (templates.length === 0) return null;
 
   if (templates.length === 1) {
-    const url = getTemplateUrl(templates[0].slug);
-    if (!url) return null;
     return (
-      <Button variant="outline_primary" onClick={() => navigate(url)}>
+      <Button
+        variant="outline_primary"
+        onClick={() => navigate(templates[0].url)}
+      >
         <Plus className="size-4" />
         <span>{t("generate_report")}</span>
       </Button>
@@ -519,9 +523,7 @@ function GenerateReportDropdown({
         className="w-full max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
       >
         <div className="px-2 pt-2">
-          {templates.map((template) => {
-            const url = getTemplateUrl(template.slug);
-            if (!url) return null;
+          {templates.map(({ template, url }) => {
             return (
               <DropdownMenuItem key={template.id} onClick={() => navigate(url)}>
                 <FileText className="size-4 shrink-0" />

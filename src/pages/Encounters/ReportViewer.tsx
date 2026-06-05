@@ -116,7 +116,13 @@ export default function ReportViewer({
     isLoading: isLoadingReports,
     refetch: refetchReports,
   } = useQuery({
-    queryKey: ["reports", associatingId, "template", effectiveTSlug],
+    queryKey: [
+      "reports",
+      associatingId,
+      "template",
+      effectiveTSlug,
+      reportType,
+    ],
     queryFn: query(reportApi.listReports, {
       queryParams: {
         associating_id: associatingId,
@@ -205,6 +211,7 @@ export default function ReportViewer({
             associatingId,
             "template",
             effectiveTSlug,
+            reportType,
             "fresh",
           ],
           queryFn: query(reportApi.listReports, {
