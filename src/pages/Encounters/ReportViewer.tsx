@@ -92,7 +92,7 @@ export default function ReportViewer({
     facility?.permissions,
   );
 
-  const { data: initialReport } = useQuery({
+  const { data: initialReport, isLoading: isLoadingInitialReport } = useQuery({
     queryKey: ["report", reportId],
     queryFn: query(reportApi.retrieveReport, {
       pathParams: { id: reportId! },
@@ -397,7 +397,7 @@ export default function ReportViewer({
     }
   }, [pdfUrl, t]);
 
-  if (isLoadingTemplate || isLoadingReports) {
+  if (isLoadingInitialReport || isLoadingTemplate || isLoadingReports) {
     return <Loading />;
   }
 

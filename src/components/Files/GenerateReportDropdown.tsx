@@ -59,7 +59,7 @@ export function GenerateReportDropdown({
       >
         <div className="px-2 pt-2">
           <div className="max-h-[30vh] overflow-y-auto">
-            {(isLoading || !templatesData) && (
+            {isLoading && (
               <div className="px-3 py-4 text-sm text-gray-500 text-center flex items-center justify-center gap-2">
                 <Loader2 className="size-4 animate-spin" />
                 {t("loading")}

@@ -121,7 +121,7 @@ export function ReportSubTab({
   const handleView = (report: ReportReadList) => {
     if (getViewUrl) {
       navigate(getViewUrl(report.id));
-    } else if (resolvedFacilityId) {
+    } else if (resolvedFacilityId && patientId) {
       navigate(
         buildReportPath(resolvedFacilityId, report.id, {
           patientId,
