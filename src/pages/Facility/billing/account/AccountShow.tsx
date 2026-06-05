@@ -1,7 +1,7 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { Hash, MoreVertical } from "lucide-react";
+import { FileText, Hash, Loader, MoreVertical } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,6 +23,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
@@ -69,6 +71,7 @@ import {
 } from "@/pages/Facility/billing/account/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ReportType } from "@/types/emr/report/report";
+import templateApi from "@/types/emr/template/templateApi";
 import AccountSheet from "./AccountSheet";
 import TransferPaymentSheet from "./TransferPaymentSheet";
 import BedChargeItemsTable from "./components/BedChargeItemsTable";
@@ -128,6 +131,7 @@ export function AccountShow({
     });
   };
   const [transferPaymentOpen, setTransferPaymentOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const queryClient = useQueryClient();
   const [closeAccountStatus, setCloseAccountStatus] = useState<{
     sheetOpen: boolean;
@@ -165,6 +169,20 @@ export function AccountShow({
   });
 
   const hasBillableItems = (billableChargeItems?.count ?? 0) > 0;
+
+  const { data: templatesData, isLoading: isLoadingTemplates } = useQuery({
+    queryKey: ["templates", facilityId, "account_report"],
+    queryFn: query(templateApi.listTemplates, {
+      queryParams: {
+        facility: facilityId,
+        template_type: ReportType.ACCOUNT_REPORT,
+        status: "active",
+      },
+    }),
+    enabled: dropdownOpen,
+  });
+
+  const accountTemplates = templatesData?.results ?? [];
 
   const showMoreAfterIndex = useBreakpoints({
     default: 1,
@@ -422,7 +440,7 @@ export function AccountShow({
             </div>
           )}
           {account.status == AccountStatus.active && (
-            <DropdownMenu>
+            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
@@ -459,6 +477,28 @@ export function AccountShow({
                   <CareIcon icon="l-exchange" className="mr-2 size-4" />
                   {t("transfer_payment")}
                 </DropdownMenuItem>
+                {isLoadingTemplates && (
+                  <DropdownMenuItem disabled>
+                    <Loader className="size-3 animate-spin" />
+                    {t("loading")}
+                  </DropdownMenuItem>
+                )}
+                {accountTemplates.length > 0 && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>{t("reports")}</DropdownMenuLabel>
+                  </>
+                )}
+                {accountTemplates.map((template) => (
+                  <DropdownMenuItem key={template.id} asChild>
+                    <Link
+                      href={`/facility/${facilityId}/billing/account/${accountId}/reports/template/${template.slug}`}
+                    >
+                      <FileText className="size-4 shrink-0" />
+                      {template.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           )}

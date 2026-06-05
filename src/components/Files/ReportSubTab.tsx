@@ -523,14 +523,19 @@ function GenerateReportDropdown({
         className="w-full max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
       >
         <div className="px-2 pt-2">
-          {templates.map(({ template, url }) => {
-            return (
-              <DropdownMenuItem key={template.id} onClick={() => navigate(url)}>
-                <FileText className="size-4 shrink-0" />
-                <span className="truncate">{template.name}</span>
-              </DropdownMenuItem>
-            );
-          })}
+          <div className="max-h-[30vh] overflow-y-auto pb-2">
+            {templates.map(({ template, url }) => {
+              return (
+                <DropdownMenuItem
+                  key={template.id}
+                  onClick={() => navigate(url)}
+                >
+                  <FileText className="size-4 shrink-0" />
+                  <span className="truncate">{template.name}</span>
+                </DropdownMenuItem>
+              );
+            })}
+          </div>
           <NavigationHelper hideRightArrow />
         </div>
       </DropdownMenuContent>
