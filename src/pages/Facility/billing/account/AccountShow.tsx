@@ -42,7 +42,7 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { getPermissions } from "@/common/Permissions";
+import { PERMISSION_LIST_TEMPLATE, getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
@@ -146,6 +146,11 @@ export function AccountShow({
     facility?.permissions || [],
   );
 
+  const canListTemplates = hasPermission(
+    PERMISSION_LIST_TEMPLATE,
+    facility?.permissions || [],
+  );
+
   useShortcutSubContext("facility:account:show");
 
   const { data: account, isLoading } = useQuery({
@@ -179,7 +184,7 @@ export function AccountShow({
         status: "active",
       },
     }),
-    enabled: dropdownOpen,
+    enabled: dropdownOpen && canListTemplates,
   });
 
   const accountTemplates = templatesData?.results ?? [];
@@ -480,13 +485,13 @@ export function AccountShow({
                   <CareIcon icon="l-exchange" className="mr-2 size-4" />
                   {t("transfer_payment")}
                 </DropdownMenuItem>
-                {isLoadingTemplates && (
+                {canListTemplates && isLoadingTemplates && (
                   <DropdownMenuItem disabled>
                     <Loader className="size-3 animate-spin" />
                     {t("loading")}
                   </DropdownMenuItem>
                 )}
-                {accountTemplates.length > 0 && (
+                {canListTemplates && accountTemplates.length > 0 && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel>{t("reports")}</DropdownMenuLabel>

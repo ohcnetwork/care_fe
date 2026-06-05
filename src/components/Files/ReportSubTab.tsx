@@ -466,7 +466,7 @@ function GenerateReportDropdown({
     facility?.permissions,
   );
 
-  const { data: templatesData } = useQuery({
+  const { data: templatesData, isLoading } = useQuery({
     queryKey: ["templates", facilityId, reportType],
     queryFn: query(templateApi.listTemplates, {
       queryParams: {
@@ -496,15 +496,20 @@ function GenerateReportDropdown({
     return url ? [{ template, url }] : [];
   });
 
-  if (templates.length === 0) return null;
+  if (!isLoading && templates.length === 0) return null;
 
-  if (templates.length === 1) {
+  if (isLoading || templates.length === 1) {
     return (
       <Button
         variant="outline_primary"
-        onClick={() => navigate(templates[0].url)}
+        disabled={isLoading}
+        onClick={() => templates[0] && navigate(templates[0].url)}
       >
-        <Plus className="size-4" />
+        {isLoading ? (
+          <CareIcon icon="l-spinner" className="size-4 animate-spin" />
+        ) : (
+          <Plus className="size-4" />
+        )}
         <span>{t("generate_report")}</span>
       </Button>
     );
