@@ -450,7 +450,10 @@ export function AccountShow({
                   <MoreVertical className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent
+                align="end"
+                className="w-full max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
+              >
                 {!isAccountBillingClosed(account) && (
                   <>
                     <DropdownMenuItem
@@ -487,18 +490,20 @@ export function AccountShow({
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel>{t("reports")}</DropdownMenuLabel>
+                    <div className="max-h-[30vh] overflow-y-auto">
+                      {accountTemplates.map((template) => (
+                        <DropdownMenuItem key={template.id} asChild>
+                          <Link
+                            href={`/facility/${facilityId}/billing/account/${accountId}/reports/template/${template.slug}`}
+                          >
+                            <FileText className="mr-2 size-4 shrink-0" />
+                            {template.name}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
                   </>
                 )}
-                {accountTemplates.map((template) => (
-                  <DropdownMenuItem key={template.id} asChild>
-                    <Link
-                      href={`/facility/${facilityId}/billing/account/${accountId}/reports/template/${template.slug}`}
-                    >
-                      <FileText className="size-4 shrink-0" />
-                      {template.name}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
