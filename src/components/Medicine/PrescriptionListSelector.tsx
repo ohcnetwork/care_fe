@@ -19,9 +19,8 @@ import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown, ReceiptTextIcon } from "lucide-react";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
+import { useOnInView } from "react-intersection-observer";
 
 function PrescriptionTags({ tags }: { tags?: TagConfig[] }) {
   if (!tags || tags.length === 0) return null;
@@ -60,7 +59,6 @@ export default function PrescriptionListSelector({
 }: PrescriptionListSelectorProps) {
   const { t } = useTranslation();
   const [openDrawer, setOpenDrawer] = React.useState(false);
-  const { ref, inView } = useInView();
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -89,6 +87,12 @@ export default function PrescriptionListSelector({
 
   const prescriptions = data?.pages.flatMap((page) => page.results) ?? [];
 
+  const loadMoreRef = useOnInView<HTMLDivElement>((inView) => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  });
+
   const handleSelectPrescription = React.useCallback(
     (prescription: PrescritionList | undefined) => {
       onSelectPrescription(prescription);
@@ -96,12 +100,6 @@ export default function PrescriptionListSelector({
     },
     [onSelectPrescription],
   );
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
 
   if (isLoading) {
     return (
@@ -124,7 +122,7 @@ export default function PrescriptionListSelector({
           prescriptions={prescriptions}
           selectedPrescriptionId={selectedPrescriptionId}
           onSelectPrescription={onSelectPrescription}
-          ref={ref}
+          ref={loadMoreRef}
           isFetchingNextPage={isFetchingNextPage}
         />
       </div>
@@ -186,7 +184,7 @@ export default function PrescriptionListSelector({
             </DrawerHeader>
             <div className="overflow-y-auto pr-2">
               <PrescriptionList
-                ref={ref}
+                ref={loadMoreRef}
                 isFetchingNextPage={isFetchingNextPage}
                 prescriptions={prescriptions}
                 selectedPrescriptionId={selectedPrescriptionId}
@@ -217,7 +215,7 @@ function PrescriptionList({
   selectedPrescriptionId: string | undefined;
   onSelectPrescription: (prescription: PrescritionList | undefined) => void;
   isFetchingNextPage: boolean;
-  ref: (node?: Element | null) => void;
+  ref: React.Ref<HTMLDivElement>;
 }) {
   const { t } = useTranslation();
 
