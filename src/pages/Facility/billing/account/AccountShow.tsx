@@ -331,6 +331,8 @@ export function AccountShow({
         <ReportSubTab
           associatingId={accountId}
           reportType={ReportType.ACCOUNT_REPORT}
+          facilityId={facilityId}
+          billingAccountId={accountId}
         />
       ),
       shortcutId: "switch-to-reports-tab",

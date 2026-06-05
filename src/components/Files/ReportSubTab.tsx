@@ -1,7 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { SearchIcon } from "lucide-react";
+import { FileText, Plus, SearchIcon } from "lucide-react";
+import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -26,23 +29,25 @@ import {
 } from "@/components/ui/table";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import { PERMISSION_LIST_TEMPLATE } from "@/common/Permissions";
 import Loading from "@/components/Common/Loading";
 import { FilterBadges, FilterButton } from "@/components/Files/FileFilters";
 import { EmptyState } from "@/components/ui/empty-state";
+import { usePermissions } from "@/context/PermissionContext";
 
 import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
 
+import query from "@/Utils/request/query";
 import queryClient from "@/Utils/request/queryClient";
-import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
+import NavigationHelper from "@/components/ui/multi-filter/utils/navigation-helper";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ReportRead,
   ReportReadList,
   ReportType,
 } from "@/types/emr/report/report";
-import { navigate } from "raviger";
-import { toast } from "sonner";
+import templateApi from "@/types/emr/template/templateApi";
 
 interface ReportTabProps {
   associatingId: string;
@@ -50,6 +55,7 @@ interface ReportTabProps {
   facilityId?: string;
   patientId?: string;
   encounterId?: string;
+  billingAccountId?: string;
 }
 
 export function ReportSubTab({
@@ -58,6 +64,7 @@ export function ReportSubTab({
   facilityId,
   patientId,
   encounterId,
+  billingAccountId,
 }: ReportTabProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
@@ -72,7 +79,6 @@ export function ReportSubTab({
     viewFile,
     downloadFile,
     archiveReport,
-    refetch,
     Dialogs,
   } = useReportManager({
     associatingId,
@@ -98,13 +104,32 @@ export function ReportSubTab({
     return iconMap[reportType] || "l-file-alt";
   };
 
-  const canNavigateToPreview = !!(facilityId && patientId && encounterId);
+  const canNavigateToEncounterPreview = !!(
+    facilityId &&
+    patientId &&
+    encounterId
+  );
+  const canNavigateToBillingPreview = !!(facilityId && billingAccountId);
+  const canNavigateToPatientPreview = !!(patientId && !encounterId);
 
   const handleView = (report: ReportReadList) => {
-    if (canNavigateToPreview) {
+    if (canNavigateToEncounterPreview) {
       navigate(
         `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/report/${report.id}`,
       );
+    } else if (canNavigateToBillingPreview) {
+      navigate(
+        `/facility/${facilityId}/billing/account/${billingAccountId}/report/${report.id}`,
+      );
+    } else if (canNavigateToPatientPreview) {
+      const effectiveFacilityId = facilityId ?? facility?.id;
+      if (effectiveFacilityId) {
+        navigate(
+          `/facility/${effectiveFacilityId}/patient/${patientId}/report/${report.id}`,
+        );
+      } else {
+        viewFile(report);
+      }
     } else {
       viewFile(report);
     }
@@ -374,20 +399,12 @@ export function ReportSubTab({
           </Button>
         </div>
         {facility && (
-          <TemplateReportSheet
-            facilityId={facility.id}
-            associatingId={associatingId}
-            permissions={facility.permissions ?? []}
+          <GenerateReportDropdown
+            facilityId={facilityId ?? facility.id}
+            patientId={patientId}
+            encounterId={encounterId}
+            billingAccountId={billingAccountId}
             reportType={reportType}
-            trigger={
-              <Button variant="outline_primary">
-                <CareIcon icon="l-plus" className="mr-1" />
-                <span>{t("generate_report")}</span>
-              </Button>
-            }
-            onSuccess={() => {
-              refetch();
-            }}
           />
         )}
       </div>
@@ -424,5 +441,97 @@ export function ReportSubTab({
       {/* Dialogs */}
       {Dialogs}
     </div>
+  );
+}
+
+function GenerateReportDropdown({
+  facilityId,
+  patientId,
+  encounterId,
+  billingAccountId,
+  reportType,
+}: {
+  facilityId: string;
+  patientId?: string;
+  encounterId?: string;
+  billingAccountId?: string;
+  reportType?: ReportType;
+}) {
+  const { t } = useTranslation();
+  const { facility } = useCurrentFacilitySilently();
+  const { hasPermission } = usePermissions();
+
+  const canListTemplate = hasPermission(
+    PERMISSION_LIST_TEMPLATE,
+    facility?.permissions,
+  );
+
+  const { data: templatesData } = useQuery({
+    queryKey: ["templates", facilityId, reportType],
+    queryFn: query(templateApi.listTemplates, {
+      queryParams: {
+        facility: facilityId,
+        template_type: reportType,
+        status: "active",
+      },
+    }),
+    enabled: canListTemplate,
+  });
+
+  const templates = templatesData?.results ?? [];
+
+  const getTemplateUrl = (slug: string) => {
+    if (encounterId && patientId) {
+      return `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/report/template/${slug}`;
+    }
+    if (billingAccountId) {
+      return `/facility/${facilityId}/billing/account/${billingAccountId}/report/template/${slug}`;
+    }
+    if (patientId) {
+      return `/facility/${facilityId}/patient/${patientId}/report/template/${slug}`;
+    }
+    return null;
+  };
+
+  if (templates.length === 0) return null;
+
+  if (templates.length === 1) {
+    const url = getTemplateUrl(templates[0].slug);
+    if (!url) return null;
+    return (
+      <Button variant="outline_primary" onClick={() => navigate(url)}>
+        <Plus className="size-4" />
+        <span>{t("generate_report")}</span>
+      </Button>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline_primary">
+          <Plus className="size-4" />
+          <span>{t("generate_report")}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="w-full max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
+      >
+        <div className="px-2 pt-2">
+          {templates.map((template) => {
+            const url = getTemplateUrl(template.slug);
+            if (!url) return null;
+            return (
+              <DropdownMenuItem key={template.id} onClick={() => navigate(url)}>
+                <FileText className="size-4 shrink-0" />
+                <span className="truncate">{template.name}</span>
+              </DropdownMenuItem>
+            );
+          })}
+          <NavigationHelper hideRightArrow />
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

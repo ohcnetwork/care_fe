@@ -10,9 +10,11 @@ import { AppRoutes } from "@/Routers/AppRouter";
 import { PatientRegistration } from "@/components/Patient/PatientRegistration";
 import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
+import ReportViewer from "@/pages/Encounters/ReportViewer";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 import ClinicalHistoryPage from "@/pages/Patient/History";
 import PatientHome from "@/pages/Patient/PatientHome";
+import { ReportType } from "@/types/emr/report/report";
 import careConfig from "@careConfig";
 
 const ExcalidrawEditor = lazy(
@@ -162,6 +164,26 @@ const PatientRoutes: AppRoutes = {
       patientId={patientId}
       tab={tab}
       fallBackUrl={`/patient/${patientId}`}
+    />
+  ),
+  "/facility/:facilityId/patient/:patientId/report/template/:templateSlug": ({
+    patientId,
+    templateSlug,
+  }) => (
+    <ReportViewer
+      associatingId={patientId}
+      templateSlug={templateSlug}
+      reportType={ReportType.PATIENT_SUMMARY}
+    />
+  ),
+  "/facility/:facilityId/patient/:patientId/report/:reportId": ({
+    patientId,
+    reportId,
+  }) => (
+    <ReportViewer
+      associatingId={patientId}
+      reportId={reportId}
+      reportType={ReportType.PATIENT_SUMMARY}
     />
   ),
 };

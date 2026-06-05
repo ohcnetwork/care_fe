@@ -7,8 +7,10 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 export default function NavigationHelper({
   isActiveFilter,
+  hideRightArrow,
 }: {
   isActiveFilter?: boolean;
+  hideRightArrow?: boolean;
 }) {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ sm: false, default: true });
@@ -33,7 +35,7 @@ export default function NavigationHelper({
               <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
                 <CareIcon icon="l-arrow-up" className="h-4 w-4" />
               </div>
-              {!isActiveFilter && (
+              {!isActiveFilter && !hideRightArrow && (
                 <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
                   <CareIcon icon="l-arrow-right" className="h-4 w-4" />
                 </div>
