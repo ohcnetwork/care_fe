@@ -22,6 +22,22 @@ interface ValueSetEditorProps {
   onSuccess?: (data: ValueSetRead) => void;
 }
 
+function normalizeValueSetPayload(data: ValueSetBase): ValueSetBase {
+  return {
+    ...data,
+    compose: {
+      include: data.compose.include.map((rule) => ({
+        ...rule,
+        version: rule.version?.trim() || null,
+      })),
+      exclude: data.compose.exclude.map((rule) => ({
+        ...rule,
+        version: rule.version?.trim() || null,
+      })),
+    },
+  };
+}
+
 export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -58,14 +74,16 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
   });
 
   const handleSubmit = (data: ValueSetBase) => {
+    const payload = normalizeValueSetPayload(data);
+
     if (slug && existingValueset) {
       const updateData: ValueSetUpdate = {
-        ...data,
+        ...payload,
         id: existingValueset.id,
       };
       updateMutation.mutate(updateData);
     } else {
-      const createData: ValueSetCreate = data;
+      const createData: ValueSetCreate = payload;
       createMutation.mutate(createData);
     }
   };
