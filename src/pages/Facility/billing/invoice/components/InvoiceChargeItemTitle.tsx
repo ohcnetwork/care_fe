@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { register } from "@/lib/override/register";
 import { BatchRequest } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
 import {
@@ -21,7 +22,7 @@ interface InvoiceChargeItemTitleProps {
   isLoading: boolean;
 }
 
-export function InvoiceChargeItemTitle({
+function InvoiceChargeItemTitleBase({
   item,
   dispenseMap,
   isLoading,
@@ -71,6 +72,11 @@ export function InvoiceChargeItemTitle({
     </div>
   );
 }
+
+export const InvoiceChargeItemTitle = register(
+  "InvoiceChargeItemTitle",
+  InvoiceChargeItemTitleBase,
+);
 
 interface UseMedicationDispenseDataResult {
   dispenseMap: Record<string, MedicationDispenseRead | undefined>;
