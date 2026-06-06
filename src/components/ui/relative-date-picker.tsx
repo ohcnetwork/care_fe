@@ -1,15 +1,15 @@
 import {
+  addDays,
+  addMonths,
+  addWeeks,
+  addYears,
   differenceInDays,
   differenceInMonths,
   differenceInWeeks,
   differenceInYears,
   format,
-  subDays,
-  subMonths,
-  subWeeks,
-  subYears,
 } from "date-fns";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -35,50 +35,71 @@ interface RelativeDatePickerProps {
   disabled?: (date: Date) => boolean;
 }
 
-const computeDate = (unit: TimeUnit, value: number) => {
-  const now = new Date();
+const getMaxValue = (unit: TimeUnit) => {
   switch (unit) {
     case "days":
-      return subDays(now, value);
+      return 31;
     case "weeks":
-      return subWeeks(now, value);
+      return 12;
     case "months":
-      return subMonths(now, value);
+      return 36;
     case "years":
-      return subYears(now, value);
+      return 60;
+  }
+};
+
+const computeDate = (unit: TimeUnit, value: number) => {
+  const now = new Date();
+
+  switch (unit) {
+    case "days":
+      return addDays(now, value);
+    case "weeks":
+      return addWeeks(now, value);
+    case "months":
+      return addMonths(now, value);
+    case "years":
+      return addYears(now, value);
   }
 };
 
 const computeTimeUnits = (date?: Date): TimeUnitState => {
   const now = new Date();
+
   if (!date) {
     return { unit: "days", value: 1 };
   }
-  const daysDiff = differenceInDays(now, date);
-  const weeksDiff = differenceInWeeks(now, date);
-  const monthsDiff = differenceInMonths(now, date);
-  const yearsDiff = differenceInYears(now, date);
+
+  const yearsDiff = differenceInYears(date, now);
+  const monthsDiff = differenceInMonths(date, now);
+  const weeksDiff = differenceInWeeks(date, now);
+  const daysDiff = differenceInDays(date, now);
+
   if (yearsDiff > 0) {
     return {
       unit: "years",
       value: yearsDiff,
     };
-  } else if (monthsDiff > 0) {
+  }
+
+  if (monthsDiff > 0) {
     return {
       unit: "months",
       value: monthsDiff,
     };
-  } else if (weeksDiff > 0) {
+  }
+
+  if (weeksDiff > 0) {
     return {
       unit: "weeks",
       value: weeksDiff,
     };
-  } else {
-    return {
-      unit: "days",
-      value: daysDiff,
-    };
   }
+
+  return {
+    unit: "days",
+    value: Math.max(daysDiff, 1),
+  };
 };
 
 export function RelativeDatePicker({
@@ -87,25 +108,16 @@ export function RelativeDatePicker({
   disabled,
 }: RelativeDatePickerProps) {
   const { t } = useTranslation();
+
   const [selected, setSelected] = useState(() => computeTimeUnits(value));
-  const [resultDate, setResultDate] = useState<Date>(value || new Date());
+
+  const [resultDate, setResultDate] = useState<Date>(
+    value || computeDate("days", 1),
+  );
 
   const timeUnits: TimeUnit[] = ["days", "weeks", "months", "years"];
 
-  const maxValue = useMemo(() => {
-    switch (selected.unit) {
-      case "days":
-        return 31;
-      case "weeks":
-        return 12;
-      case "months":
-        return 36;
-      case "years":
-        return 60;
-      default:
-        return 31;
-    }
-  }, [selected.unit]);
+  const maxValue = getMaxValue(selected.unit);
 
   const validateDate = (unit: TimeUnit, value: number) => {
     const selectedDate = computeDate(unit, value);
@@ -113,17 +125,29 @@ export function RelativeDatePicker({
     return !isDisabled;
   };
 
-  // Update result date
   useEffect(() => {
-    setResultDate(computeDate(selected.unit, selected.value));
-    onDateChange(computeDate(selected.unit, selected.value));
+    const newDate = computeDate(selected.unit, selected.value);
+
+    setResultDate(newDate);
+    onDateChange(newDate);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
   const handleUnitChange = (newUnit: TimeUnit) => {
-    if (validateDate(newUnit, 1)) {
-      setSelected((prev) => ({ ...prev, unit: newUnit, value: 1 }));
-    } else toast.error(t("select_valid_date"));
+    setSelected((prev) => {
+      const newValue = Math.min(prev.value, getMaxValue(newUnit));
+
+      if (!validateDate(newUnit, newValue)) {
+        toast.error(t("select_valid_date"));
+        return prev;
+      }
+
+      return {
+        unit: newUnit,
+        value: newValue,
+      };
+    });
   };
 
   return (
@@ -133,7 +157,8 @@ export function RelativeDatePicker({
           <Select
             value={selected.value.toString()}
             onValueChange={(value) => {
-              const numValue = Number.parseInt(value) || 0;
+              const numValue = Number.parseInt(value, 10) || 1;
+
               if (validateDate(selected.unit, numValue)) {
                 setSelected((prev) => ({
                   ...prev,
@@ -146,10 +171,12 @@ export function RelativeDatePicker({
             <SelectTrigger className="col-span-2">
               <SelectValue placeholder={t("select_a_number")} />
             </SelectTrigger>
+
             <SelectContent>
               {Array.from({ length: maxValue }, (_, i) => i + 1).map((num) => {
                 const isDisabled =
                   disabled?.(computeDate(selected.unit, num)) ?? false;
+
                 return (
                   <SelectItem
                     key={num}
@@ -163,6 +190,7 @@ export function RelativeDatePicker({
               })}
             </SelectContent>
           </Select>
+
           {timeUnits.map((unit) => (
             <Button
               key={unit}
@@ -181,6 +209,7 @@ export function RelativeDatePicker({
         <div className="text-xl font-bold mb-1 truncate">
           {format(resultDate, "MMM d, yyyy")}
         </div>
+
         <div className="text-sm truncate">{format(resultDate, "EEEE")}</div>
       </div>
     </div>
