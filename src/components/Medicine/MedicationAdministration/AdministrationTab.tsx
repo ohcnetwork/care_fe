@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
+import { MedicationRequestEmptyState as EmptyState } from "@/components/Medicine/MedicationRequestTable";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";

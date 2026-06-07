@@ -39,7 +39,7 @@ interface FacilityOrganizationSelectorProps {
   singleSelection?: boolean;
 }
 
-export default function FacilityOrganizationSelector(
+export default function AdminFacilityOrganizationSelector(
   props: FacilityOrganizationSelectorProps,
 ) {
   const { t } = useTranslation();

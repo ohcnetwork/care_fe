@@ -19,6 +19,7 @@ import path from "path";
 import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
@@ -415,6 +416,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       careConsoleArt(),
       fixSonnerPackageJson(),
       localPluginDevSupport(),
+      autoRegisterComponents(),
       tailwindcss(),
       federation({
         name: "core",
