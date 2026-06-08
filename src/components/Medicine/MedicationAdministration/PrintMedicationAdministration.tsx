@@ -1,16 +1,15 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Bed } from "lucide-react";
+import { Fragment, useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -19,7 +18,11 @@ import {
 
 import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
-import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
+import {
+  formatDosage,
+  formatDuration,
+  formatFrequency,
+} from "@/components/Medicine/utils";
 
 import useCurrentFacilitySilently from "@/pages/Facility/utils/useCurrentFacility";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -31,23 +34,27 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
+import { LocationRead } from "@/types/location/location";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
-// Generate time slots based on count per day
-const generateTimeSlots = (count: number) => {
-  const hoursPerSlot = 24 / count;
-  const slots = [];
-  for (let i = 0; i < count; i++) {
-    const start = i * hoursPerSlot;
-    const end = (i + 1) * hoursPerSlot;
-    slots.push({
-      label: `${String(start).padStart(2, "0")}:00`,
-      start,
-      end: end === 24 ? 24 : end,
-    });
-  }
-  return slots;
+// The four administration time slots (Bedtime / Morning / Afternoon / Night).
+// Each carries its own abbreviation so the chart label stays correct even when
+// some slots are filtered out.
+const ADMIN_TIME_SLOTS = [
+  { key: "B", i18nKey: "bed_time", start: 0, end: 6 },
+  { key: "M", i18nKey: "morning_time", start: 6, end: 12 },
+  { key: "A", i18nKey: "afternoon_time", start: 12, end: 18 },
+  { key: "N", i18nKey: "night_time", start: 18, end: 24 },
+] as const;
+
+// Format a 0-24 hour into a readable 12-hour label e.g. 0 -> "12 AM", 18 -> "06 PM".
+const formatSlotHour = (hour: number) => {
+  const normalized = hour % 24;
+  const period = normalized < 12 ? "AM" : "PM";
+  const display = normalized % 12 === 0 ? 12 : normalized % 12;
+  return `${String(display).padStart(2, "0")} ${period}`;
 };
 
 interface GroupedMedication {
@@ -104,13 +111,24 @@ export const PrintMedicationAdministration = (props: {
     });
 
   // Filter state
-  const [showDiscontinued, setShowDiscontinued] = useState(false);
-  const [slotsPerDay, setSlotsPerDay] = useState(4);
+  const [showDiscontinued] = useState(false);
+  const [selectedSlotKeys, setSelectedSlotKeys] = useState<string[]>(
+    ADMIN_TIME_SLOTS.map((slot) => slot.key),
+  );
 
-  // Generate time slots based on selection
+  // Build the active time slots from the user's selection, preserving each
+  // slot's fixed abbreviation and chronological order.
   const timeSlots = useMemo(
-    () => generateTimeSlots(slotsPerDay),
-    [slotsPerDay],
+    () =>
+      ADMIN_TIME_SLOTS.filter((slot) =>
+        selectedSlotKeys.includes(slot.key),
+      ).map((slot) => ({
+        label: `${String(slot.start).padStart(2, "0")}:00`,
+        abbreviation: slot.key,
+        start: slot.start,
+        end: slot.end,
+      })),
+    [selectedSlotKeys],
   );
 
   // Group medications by product - include all medications (active + stopped)
@@ -227,6 +245,25 @@ export const PrintMedicationAdministration = (props: {
     return index;
   }, [medicationAdministrations, timeSlots]);
 
+  // Build the location breadcrumb (root → ... → bed) from the encounter's
+  // current location by walking up the parent chain.
+  const locationPath = useMemo(() => {
+    const chain: LocationRead[] = [];
+    let loc: LocationRead | undefined =
+      encounter?.current_location ?? undefined;
+    while (loc) {
+      chain.unshift(loc);
+      loc = loc.parent;
+    }
+    return chain;
+  }, [encounter]);
+
+  const hospitalId =
+    encounter?.patient.instance_identifiers?.find(
+      (identifier) =>
+        identifier.config.config.use === PatientIdentifierUse.official,
+    )?.value ?? encounter?.external_identifier;
+
   const isLoading = requestsLoading || adminsLoading;
 
   if (isLoading) return <Loading />;
@@ -248,6 +285,7 @@ export const PrintMedicationAdministration = (props: {
       disabled={!hasData}
       facility={facility}
       templateSlug={PrintTemplateType.medication_administration}
+      hideFacilityHeader
     >
       {/* Force landscape with tight margins so the wide drug chart fits on
           a single A4 sheet per week. The parent print container also adds
@@ -269,106 +307,179 @@ export const PrintMedicationAdministration = (props: {
           .mar-thead { display: table-header-group; }
         }
       `}</style>
-      {/* Print Options - hidden when printing */}
-      <div className="print:hidden mb-4 p-3 bg-gray-50 rounded-lg border flex items-center gap-6 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="show-discontinued"
-            checked={showDiscontinued}
-            onCheckedChange={(checked) => setShowDiscontinued(checked === true)}
-          />
-          <Label htmlFor="show-discontinued" className="text-sm cursor-pointer">
-            {t("show_discontinued_medications")}
-          </Label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Label className="text-sm">{t("time_slots_per_day")}:</Label>
-          <div className="flex rounded-md border border-gray-300 overflow-hidden">
-            {[1, 2, 3, 4].map((num) => (
-              <Button
-                key={num}
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  "h-8 w-10 rounded-none border-r last:border-r-0 border-gray-300",
-                  slotsPerDay === num
-                    ? "bg-primary-100 text-primary-700 font-semibold"
-                    : "hover:bg-gray-100",
-                )}
-                onClick={() => setSlotsPerDay(num)}
+
+      {/* Administration time slot filter (screen only) */}
+      <div className="print:hidden rounded-lg bg-gray-50 p-4 mb-4">
+        <p className="mb-3 text-sm font-medium text-gray-700">
+          {t("administration_times")}:
+        </p>
+        <div className="flex flex-wrap gap-x-8 gap-y-3">
+          {ADMIN_TIME_SLOTS.map((slot) => {
+            const checked = selectedSlotKeys.includes(slot.key);
+            return (
+              <label
+                key={slot.key}
+                className="flex cursor-pointer items-start gap-2"
               >
-                {num}
-              </Button>
-            ))}
-          </div>
+                <Checkbox
+                  className="mt-0.5"
+                  checked={checked}
+                  onCheckedChange={(value) =>
+                    setSelectedSlotKeys((prev) =>
+                      value
+                        ? [...prev, slot.key]
+                        : prev.filter((key) => key !== slot.key),
+                    )
+                  }
+                />
+                <span className="leading-tight">
+                  <span className="block text-sm font-medium text-gray-950">
+                    <Trans
+                      i18nKey={slot.i18nKey}
+                      components={{ strong: <span /> }}
+                    />
+                  </span>
+                  <span className="block text-xs text-gray-500">
+                    {formatSlotHour(slot.start)} - {formatSlotHour(slot.end)}
+                  </span>
+                </span>
+              </label>
+            );
+          })}
         </div>
       </div>
 
       <div className="p-4 max-w-[297mm] mx-auto text-[11px] print:p-0 print:max-w-none print:text-[9px]">
         {/* Header */}
-        <div className="border-2 border-gray-400 mb-4">
-          <div className="flex justify-between items-start p-3 border-b-2 border-gray-400 bg-gray-100">
-            <div>
-              <h1 className="text-xl font-bold uppercase tracking-wide">
+        <div className="mb-4 print:mb-3">
+          <div className="flex items-start justify-between gap-4 border-b border-gray-300 pb-3">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold text-gray-950 leading-tight print:text-xl">
                 {t("medication_administration_record")}
               </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                {encounter?.facility?.name}
-              </p>
+              {facility?.name && (
+                <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-gray-800">
+                  {facility.name}
+                </p>
+              )}
+              {facility?.address && (
+                <p className="whitespace-pre-line text-xs text-gray-500">
+                  {facility.address}
+                </p>
+              )}
             </div>
             <img
               src={careConfig.mainLogo?.dark}
-              alt="Logo"
-              className="h-12 w-auto object-contain"
+              alt={t("logo")}
+              className="h-10 w-auto shrink-0 object-contain"
             />
           </div>
 
-          {/* Patient Info - Simplified */}
-          <div className="grid grid-cols-4 divide-x-2 divide-gray-400">
-            <div className="p-2 col-span-2">
-              <div className="font-bold text-xs text-gray-500 uppercase">
-                {t("patient_name")}
+          {encounter && (
+            <div className="flex flex-col gap-2 mt-2">
+              <div className="grid grid-cols-2 gap-x-10">
+                <div className="text-sm flex items-center gap-3">
+                  <span>{t("patient")}</span>
+                  <span className="font-semibold">
+                    {":"}
+                    {encounter.patient.name}
+                  </span>
+                </div>
+                {encounter.period?.start && (
+                  <div className="text-sm flex items-center gap-3">
+                    <span>{t("encounter_date")}</span>
+                    <span className="font-semibold">
+                      {":"}
+                      {format(
+                        new Date(encounter.period.start),
+                        "dd MMM yyyy, EEEE",
+                      )}
+                    </span>
+                  </div>
+                )}
               </div>
-              <div className="font-bold text-base">
-                {encounter?.patient.name}
+              <div className="grid grid-cols-2 gap-x-10 items-start">
+                <div className="text-sm flex items-center gap-3">
+                  <span>{`${t("age")}/${t("sex")}`}</span>
+                  <span className="font-semibold">
+                    {":"}
+                    {`${formatPatientAge(encounter.patient, true)}, ${t(
+                      `GENDER__${encounter.patient.gender}`,
+                    )}`}
+                  </span>
+                </div>
+                {hospitalId && (
+                  <div className="text-sm flex items-center gap-3">
+                    <span>{t("hospital_id")}</span>
+                    <span className="font-semibold">
+                      {":"}
+                      {hospitalId}
+                    </span>
+                  </div>
+                )}
               </div>
+              {locationPath.length > 0 && (
+                <div className="text-sm flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="text-gray-700">
+                    {t("patient_ip_location")}:
+                  </span>
+                  {locationPath.map((loc, idx) => (
+                    <span key={loc.id} className="flex items-center gap-1.5">
+                      {idx > 0 && <span className="text-gray-400">&rarr;</span>}
+                      {loc.form === "bd" && (
+                        <Bed className="size-3.5 text-gray-600" />
+                      )}
+                      <span className="font-semibold">{loc.name}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="p-2">
-              <div className="font-bold text-xs text-gray-500 uppercase">
-                {t("age")} / {t("sex")}
-              </div>
-              <div className="font-semibold">
-                {encounter?.patient &&
-                  `${formatPatientAge(encounter.patient, true)}, ${t(`GENDER__${encounter.patient.gender}`)}`}
-              </div>
-            </div>
-            <div className="p-2">
-              <div className="font-bold text-xs text-gray-500 uppercase">
-                {t("encounter_date")}
-              </div>
-              <div className="font-semibold">
-                {encounter?.period?.start &&
-                  format(new Date(encounter.period.start), "dd MMM yyyy")}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Regular Medications Drug Chart */}
         {groupedMedications.regular.length > 0 && (
           <div className="mb-6">
-            <h2 className="font-bold text-sm uppercase tracking-wide mb-2 bg-gray-800 text-white px-2 py-1">
-              {t("regular_medications")}
-            </h2>
+            <div className="mb-2 border border-gray-400 p-2 flex items-center justify-between">
+              <span className="text-gray-950 text-xl font-semibold ">
+                {t("regular_medications")}
+              </span>
+              <div className="text-gray-600 text-base">
+                <Trans
+                  i18nKey="bed_time"
+                  components={{
+                    strong: <span className="text-gray-950" />,
+                  }}
+                />
+                ,{" "}
+                <Trans
+                  i18nKey="morning_time"
+                  components={{
+                    strong: <span className="text-gray-950" />,
+                  }}
+                />
+                ,{" "}
+                <Trans
+                  i18nKey="afternoon_time"
+                  components={{
+                    strong: <span className="text-gray-950" />,
+                  }}
+                />
+                ,{" "}
+                <Trans
+                  i18nKey="night_time"
+                  components={{
+                    strong: <span className="text-gray-950" />,
+                  }}
+                />
+              </div>
+            </div>
             {dateRanges.map((dates, idx) => (
               <div
                 key={`reg-${dates[0].toISOString()}`}
                 className={cn(idx > 0 && "mt-3 print:break-before-page")}
               >
-                <div className="text-[10px] font-semibold text-gray-700 mb-1">
-                  {format(dates[0], "dd MMM yyyy")} –{" "}
-                  {format(dates[dates.length - 1], "dd MMM yyyy")}
-                </div>
                 <DrugChartTable
                   groups={groupedMedications.regular}
                   dates={dates}
@@ -383,18 +494,16 @@ export const PrintMedicationAdministration = (props: {
         {/* PRN Medications */}
         {groupedMedications.prn.length > 0 && (
           <div className="mb-6 print:break-before-page">
-            <h2 className="font-bold text-sm uppercase tracking-wide mb-2 bg-pink-700 text-white px-2 py-1">
-              {t("prn_medications")} ({t("as_needed")})
-            </h2>
+            <div className="mb-2 border border-gray-400 p-2">
+              <span className="text-gray-950 text-xl font-semibold ">
+                {t("prn_medications")} ({t("as_needed")})
+              </span>
+            </div>
             {dateRanges.map((dates, idx) => (
               <div
                 key={`prn-${dates[0].toISOString()}`}
                 className={cn(idx > 0 && "mt-3 print:break-before-page")}
               >
-                <div className="text-[10px] font-semibold text-gray-700 mb-1">
-                  {format(dates[0], "dd MMM yyyy")} –{" "}
-                  {format(dates[dates.length - 1], "dd MMM yyyy")}
-                </div>
                 <DrugChartTable
                   groups={groupedMedications.prn}
                   dates={dates}
@@ -416,6 +525,28 @@ export const PrintMedicationAdministration = (props: {
   );
 };
 
+// Collect patient-facing instructions and clinical notes across every request
+// in a medication group, de-duplicated for a compact footer strip.
+const collectInstructionsAndNotes = (group: GroupedMedication) => {
+  const instructions = new Set<string>();
+  const notes = new Set<string>();
+
+  group.requests.forEach((request) => {
+    request.dosage_instruction.forEach((di) => {
+      const patientInstruction = di.patient_instruction?.trim();
+      if (patientInstruction) instructions.add(patientInstruction);
+      di.additional_instruction?.forEach((ai) => {
+        const text = ai.display?.trim();
+        if (text) instructions.add(text);
+      });
+    });
+    const note = request.note?.trim();
+    if (note) notes.add(note);
+  });
+
+  return { instructions: [...instructions], notes: [...notes] };
+};
+
 // Drug Chart Table Component
 const DrugChartTable = ({
   groups,
@@ -430,41 +561,53 @@ const DrugChartTable = ({
     string,
     Record<string, Record<string, MedicationAdministrationRead[]>>
   >;
-  timeSlots: { label: string; start: number; end: number }[];
+  timeSlots: {
+    label: string;
+    abbreviation: string;
+    start: number;
+    end: number;
+  }[];
   isPRN?: boolean;
 }) => {
   const { t } = useTranslation();
 
-  // Check if this is the last slot of the day (needs thicker border)
+  const slotLabels = timeSlots.map((slot) => slot.abbreviation);
+
+  // Thicker divider after the final slot of a day; zebra shade alternate slots.
   const isLastSlotOfDay = (slotIndex: number) =>
     slotIndex === timeSlots.length - 1;
+  const isShadedSlot = (slotIndex: number) => slotIndex % 2 === 1;
+
+  const totalColumns = 2 + dates.length * timeSlots.length;
 
   return (
-    <div className="border-1 border-gray-400 overflow-hidden">
-      <table className="w-full border-collapse text-[10px] table-fixed">
-        <thead className="mar-thead">
-          <tr className="bg-gray-100">
+    <div className="overflow-hidden rounded-lg border border-gray-300">
+      <table className="w-full border-collapse table-fixed">
+        <thead className="mar-thead text-sm text-gray-600 ">
+          <tr className="bg-gray-50">
             <th
-              className="border-r-2 border-b-1 border-gray-400 p-1.5 text-left font-bold w-[160px]"
               rowSpan={2}
+              className="w-7 border-b border-r border-gray-300 p-1 text-center align-middle font-normal"
+            >
+              #
+            </th>
+            <th
+              rowSpan={2}
+              className="w-[200px] border-b border-r-2 border-gray-300 p-2 text-left align-middle font-normal"
             >
               {t("medication")}
             </th>
             {dates.map((date, dateIdx) => (
               <th
                 key={date.toISOString()}
-                className={cn(
-                  "border-b border-gray-400 p-1 text-center font-bold",
-                  dateIdx < dates.length - 1
-                    ? "border-r-2 border-r-gray-400"
-                    : "border-r border-gray-400",
-                )}
                 colSpan={timeSlots.length}
+                className={cn(
+                  "border-b border-gray-200 px-1 pb-1 pt-1.5 text-center align-top font-normal",
+                  dateIdx < dates.length - 1 && "border-r-2 border-r-gray-300",
+                )}
               >
-                <div className="font-bold">{format(date, "EEE")}</div>
-                <div className="text-[9px] font-normal">
-                  {format(date, "dd/MM")}
-                </div>
+                <div>{format(date, "EEE")}</div>
+                <div>{format(date, "dd/MM")}</div>
               </th>
             ))}
           </tr>
@@ -473,187 +616,223 @@ const DrugChartTable = ({
               timeSlots.map((slot, slotIdx) => (
                 <th
                   key={`${date.toISOString()}-${slot.label}`}
+                  title={slot.label}
                   className={cn(
-                    "border-b border-gray-400 p-0.5 text-center font-normal text-[9px] w-[32px]",
+                    "w-[26px] border-b border-gray-200 px-0.5 py-0.5 text-center font-normal",
+                    isShadedSlot(slotIdx) && "bg-green-50",
                     isLastSlotOfDay(slotIdx) && dateIdx < dates.length - 1
-                      ? "border-r-2 border-r-gray-400"
-                      : "border-r border-gray-400",
+                      ? "border-r-2 border-r-gray-300"
+                      : "border-r border-gray-200",
                   )}
                 >
-                  {slot.label.slice(0, 2)}
+                  {slotLabels[slotIdx]}
                 </th>
               )),
             )}
           </tr>
         </thead>
         <tbody>
-          {groups.map((group) => {
+          {groups.map((group, groupIdx) => {
             // Get the latest active request for display
             const latestRequest = group.requests[0];
             const instructions = latestRequest.dosage_instruction;
+            const form =
+              latestRequest.requested_product?.definitional?.dosage_form
+                ?.display;
+            const { instructions: patientInstructions, notes } =
+              collectInstructionsAndNotes(group);
+            const hasFooter =
+              patientInstructions.length > 0 || notes.length > 0;
 
             return (
-              <tr
-                key={group.productId}
-                className={cn("mar-row", isPRN && "bg-pink-50")}
-              >
-                <td className="border-r-2 border-b border-gray-400 p-1.5 align-top">
-                  <div className="font-bold text-[11px] leading-tight text-wrap break-all">
-                    {group.productName}
-                  </div>
-                  {instructions.map((di, idx) => {
-                    const doseText = formatDosage(di);
-                    const routeText = di.route?.display;
-                    const frequencyText = isPRN
-                      ? t("as_needed")
-                      : formatFrequency(di);
-                    const summary = [doseText, routeText, frequencyText]
-                      .filter(Boolean)
-                      .join(" · ");
-                    return summary ? (
-                      <div
-                        key={idx}
-                        className={cn(
-                          "text-[9px] text-gray-600 leading-snug",
-                          idx === 0 && "mt-0.5",
-                          idx > 0 &&
-                            "mt-0.5 pt-0.5 border-t border-dashed border-gray-300",
-                        )}
-                      >
-                        {summary}
-                      </div>
-                    ) : null;
-                  })}
-                  {group.requests.length > 1 && (
-                    <div className="text-[8px] text-gray-400 mt-0.5">
-                      ({group.requests.length} {t("orders")})
+              <Fragment key={group.productId}>
+                <tr className={cn("mar-row", isPRN && "bg-pink-50/40")}>
+                  <td className="border-b border-r border-gray-300 p-1 text-center align-top font-semibold text-gray-950">
+                    {groupIdx + 1}
+                  </td>
+                  <td className="border-b border-r-2 border-gray-300 p-2 align-top">
+                    <div className="text-sm leading-tight text-gray-950 font-semibold">
+                      {group.productName}
                     </div>
-                  )}
-                </td>
-                {dates.map((date, dateIdx) =>
-                  timeSlots.map((slot, slotIdx) => {
-                    const dateKey = format(date, "yyyy-MM-dd");
-                    // Check all requests in this group for administrations
-                    const admins = group.requests.flatMap(
-                      (req) =>
-                        adminIndex[req.id]?.[dateKey]?.[slot.label] || [],
-                    );
+                    {form && <div className="mt-0.5 text-gray-600">{form}</div>}
+                    <div className="mt-1 space-y-0.5">
+                      {instructions.map((di, idx) => {
+                        const summary = [
+                          formatDosage(di),
+                          isPRN ? t("as_needed") : formatFrequency(di),
+                          formatDuration(di),
+                          di.method?.display,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ");
+                        return summary ? (
+                          <div key={idx} className="text-gray-600">
+                            {summary}
+                          </div>
+                        ) : null;
+                      })}
+                    </div>
+                    {group.requests.length > 1 && (
+                      <div className="mt-1 text-[8px] text-gray-400">
+                        ({group.requests.length} {t("orders")})
+                      </div>
+                    )}
+                  </td>
+                  {dates.map((date, dateIdx) =>
+                    timeSlots.map((slot, slotIdx) => {
+                      const dateKey = format(date, "yyyy-MM-dd");
+                      // Check all requests in this group for administrations
+                      const admins = group.requests.flatMap(
+                        (req) =>
+                          adminIndex[req.id]?.[dateKey]?.[slot.label] || [],
+                      );
 
-                    const hasAdmins = admins.length > 0;
+                      const hasAdmins = admins.length > 0;
+                      const shaded = isShadedSlot(slotIdx);
 
-                    // Show checkmarks for each administration (up to 3, then show count)
-                    const cellContent = hasAdmins ? (
-                      <div className="flex flex-col items-center justify-center h-full gap-0.5">
-                        {admins.length <= 3 ? (
-                          // Show individual checkmarks
+                      // Checkmark per administration (up to 3, then show count)
+                      const cellContent = hasAdmins ? (
+                        admins.length <= 3 ? (
                           <div className="flex items-center justify-center gap-0.5">
                             {admins.map((admin) => (
                               <span
                                 key={admin.id}
-                                className="text-green-700 text-[10px] font-bold"
+                                className="text-[11px] font-bold leading-none text-green-600"
                               >
                                 ✓
                               </span>
                             ))}
                           </div>
                         ) : (
-                          // Show count with checkmark
-                          <div className="flex items-center gap-0.5">
-                            <span className="text-green-700 text-[10px] font-bold">
+                          <div className="flex items-center justify-center gap-0.5">
+                            <span className="text-[11px] font-bold leading-none text-green-600">
                               ✓
                             </span>
-                            <span className="text-[9px] font-semibold text-gray-700">
+                            <span className="text-[9px] font-semibold text-gray-600">
                               ×{admins.length}
                             </span>
                           </div>
-                        )}
-                      </div>
-                    ) : null;
+                        )
+                      ) : null;
 
-                    return (
-                      <td
-                        key={`${date.toISOString()}-${slot.label}`}
-                        className={cn(
-                          "border-b border-gray-400 p-0 text-center align-middle h-8",
-                          isLastSlotOfDay(slotIdx) && dateIdx < dates.length - 1
-                            ? "border-r-2 border-r-gray-400"
-                            : "border-r border-gray-400",
-                          hasAdmins && "bg-green-100",
-                        )}
-                      >
-                        {hasAdmins ? (
-                          <>
-                            {/* Print version - simple content without popover */}
-                            <div className="hidden print:flex items-center justify-center w-full h-full">
-                              {cellContent}
-                            </div>
-                            {/* Screen version - with popover for details */}
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <button
-                                  type="button"
-                                  className="w-full h-full min-h-[28px] cursor-pointer hover:bg-green-200 transition-colors flex items-center justify-center print:hidden"
+                      return (
+                        <td
+                          key={`${date.toISOString()}-${slot.label}`}
+                          className={cn(
+                            "h-9 border-b border-gray-200 p-0 text-center align-middle",
+                            shaded && "bg-green-50",
+                            isLastSlotOfDay(slotIdx) &&
+                              dateIdx < dates.length - 1
+                              ? "border-r-2 border-r-gray-300"
+                              : "border-r border-gray-200",
+                          )}
+                        >
+                          {hasAdmins ? (
+                            <>
+                              {/* Print version - simple content without popover */}
+                              <div className="hidden h-full w-full items-center justify-center print:flex">
+                                {cellContent}
+                              </div>
+                              {/* Screen version - with popover for details */}
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="flex h-full min-h-[28px] w-full cursor-pointer items-center justify-center transition-colors hover:bg-green-100 print:hidden"
+                                  >
+                                    {cellContent}
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="w-64 p-0 print:hidden"
+                                  side="top"
                                 >
-                                  {cellContent}
-                                </button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-64 p-0 print:hidden"
-                                side="top"
-                              >
-                                <div className="bg-gray-50 px-3 py-2 border-b">
-                                  <div className="font-semibold text-sm">
-                                    {group.productName}
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    {format(date, "EEE, dd MMM")} · {slot.label}
-                                  </div>
-                                </div>
-                                <div className="max-h-48 overflow-y-auto">
-                                  {admins.map((admin, idx) => (
-                                    <div
-                                      key={admin.id}
-                                      className={cn(
-                                        "px-3 py-2 text-sm",
-                                        idx !== admins.length - 1 && "border-b",
-                                      )}
-                                    >
-                                      <div className="flex justify-between items-start">
-                                        <span className="font-medium">
-                                          {format(
-                                            new Date(
-                                              admin.occurrence_period_start,
-                                            ),
-                                            "HH:mm",
-                                          )}
-                                        </span>
-                                        <span className="text-xs text-gray-600">
-                                          {admin.dosage?.dose?.value}{" "}
-                                          {admin.dosage?.dose?.unit?.display}
-                                        </span>
-                                      </div>
-                                      <div className="text-xs text-gray-600 mt-0.5">
-                                        {t("by")} {formatName(admin.created_by)}
-                                      </div>
-                                      {admin.note && (
-                                        <div className="text-xs text-gray-500 mt-1 italic">
-                                          {admin.note}
-                                        </div>
-                                      )}
+                                  <div className="border-b bg-gray-50 px-3 py-2">
+                                    <div className="text-sm font-semibold">
+                                      {group.productName}
                                     </div>
-                                  ))}
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                          </>
-                        ) : (
-                          <span className="text-gray-200">·</span>
-                        )}
-                      </td>
-                    );
-                  }),
+                                    <div className="text-xs text-gray-500">
+                                      {format(date, "EEE, dd MMM")} ·{" "}
+                                      {slot.label}
+                                    </div>
+                                  </div>
+                                  <div className="max-h-48 overflow-y-auto">
+                                    {admins.map((admin, idx) => (
+                                      <div
+                                        key={admin.id}
+                                        className={cn(
+                                          "px-3 py-2 text-sm",
+                                          idx !== admins.length - 1 &&
+                                            "border-b",
+                                        )}
+                                      >
+                                        <div className="flex items-start justify-between">
+                                          <span className="font-medium">
+                                            {format(
+                                              new Date(
+                                                admin.occurrence_period_start,
+                                              ),
+                                              "HH:mm",
+                                            )}
+                                          </span>
+                                          <span className="text-xs text-gray-600">
+                                            {admin.dosage?.dose?.value}{" "}
+                                            {admin.dosage?.dose?.unit?.display}
+                                          </span>
+                                        </div>
+                                        <div className="mt-0.5 text-xs text-gray-600">
+                                          {t("by")}{" "}
+                                          {formatName(admin.created_by)}
+                                        </div>
+                                        {admin.note && (
+                                          <div className="mt-1 text-xs italic text-gray-500">
+                                            {admin.note}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            </>
+                          ) : (
+                            <span className="text-gray-200">·</span>
+                          )}
+                        </td>
+                      );
+                    }),
+                  )}
+                </tr>
+                {hasFooter && (
+                  <tr className="mar-row">
+                    <td className="border-b border-r border-gray-300" />
+                    <td
+                      colSpan={totalColumns - 1}
+                      className="border-b border-gray-300 bg-gray-50/70 px-2 py-1 text-xs leading-snug text-gray-600"
+                    >
+                      {patientInstructions.length > 0 && (
+                        <span>
+                          <span>{t("instructions")}:</span>
+                          <span className="font-semibold text-gray-700">
+                            {patientInstructions.join("; ")}
+                          </span>{" "}
+                        </span>
+                      )}
+                      {patientInstructions.length > 0 && notes.length > 0 && (
+                        <span className="mx-2 text-gray-300">|</span>
+                      )}
+                      {notes.length > 0 && (
+                        <span>
+                          <span>{t("note")}:</span>{" "}
+                          <span className="font-semibold text-gray-600">
+                            {notes.join("; ")}
+                          </span>
+                        </span>
+                      )}
+                    </td>
+                  </tr>
                 )}
-              </tr>
+              </Fragment>
             );
           })}
         </tbody>
