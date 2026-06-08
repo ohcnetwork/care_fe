@@ -653,7 +653,7 @@ const PatientBasicsContent = ({
                     render={({ field }) => (
                       <FormItem className="w-full md:col-span-2 relative">
                         <FormControl>
-                          <>
+                          <div>
                             <Input
                               {...field}
                               type="number"
@@ -677,7 +677,7 @@ const PatientBasicsContent = ({
                                 {new Date().getFullYear() - Number(field.value)}
                               </span>
                             )}
-                          </>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>

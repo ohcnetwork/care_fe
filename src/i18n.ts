@@ -154,6 +154,7 @@ export async function initI18n() {
     .init({
       fallbackLng: "en",
       ns: namespaces,
+      fallbackNS: pluginNamespaces,
       load: "currentOnly",
       supportedLngs: Object.keys(LANGUAGES),
       interpolation: {
