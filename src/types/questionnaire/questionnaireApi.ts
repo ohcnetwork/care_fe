@@ -106,12 +106,6 @@ export default {
       method: HttpMethod.GET,
       TRes: Type<PaginatedResponse<QuestionnaireTagRead>>(),
     },
-    create: {
-      path: "/api/v1/questionnaire_tag/",
-      method: HttpMethod.POST,
-      TBody: Type<QuestionnaireTagBase>(),
-      TRes: Type<QuestionnaireTagRead>(),
-    },
     update: {
       path: "/api/v1/questionnaire_tag/{slug}/",
       method: HttpMethod.PUT,

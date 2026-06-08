@@ -21,7 +21,6 @@ import {
 import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
 
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
-import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
 import ManageQuestionnaireOrganizationsSheet, {
   OrgSelector,
 } from "./ManageQuestionnaireOrganizationsSheet";
@@ -65,7 +64,6 @@ interface QuestionnairePropertiesProps {
     setSearchQuery: (query: string) => void;
     available?: QuestionnaireTagRead[];
     isLoading?: boolean;
-    onTagCreated?: (tag: QuestionnaireTagRead) => void;
   };
 }
 
@@ -321,20 +319,6 @@ function TagSelector({
         isLoading={selection.isLoading}
         tagOptions={selection.available}
       />
-
-      {!slug && (
-        <CreateQuestionnaireTagSheet
-          onTagCreated={(tag) => {
-            selection.onTagCreated?.(tag);
-          }}
-          trigger={
-            <Button variant="outline" className="w-full justify-start">
-              <Tags className="mr-2 size-4" />
-              {t("create_tag")}
-            </Button>
-          }
-        />
-      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Hash, Loader2, Plus, X } from "lucide-react";
+import { Check, Hash, Loader2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -7,15 +7,8 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Command,
   CommandEmpty,
@@ -25,8 +18,6 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -179,9 +170,6 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagSlug, setNewTagSlug] = useState("");
   const [selectedTags, setSelectedTags] = useState<QuestionnaireTagRead[]>([]);
   const isMobile = useBreakpoints({ default: true, sm: false });
 
@@ -205,20 +193,6 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
       });
       toast.success(t("tag_updated_successfully"));
       setOpen(false);
-    },
-  });
-
-  const { mutate: createTag, isPending: isCreating } = useMutation({
-    mutationFn: mutate(questionnaireApi.tags.create),
-    onSuccess: (data: QuestionnaireTagRead) => {
-      queryClient.invalidateQueries({
-        queryKey: ["questionnaireTags"],
-      });
-      setSelectedTags((current) => [...current, data]);
-      setNewTagName("");
-      setNewTagSlug("");
-      setIsCreateOpen(false);
-      toast.success(t("tag_created_successfully"));
     },
   });
 
@@ -257,18 +231,6 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
 
   const handleSave = () => {
     setTags({ tags: selectedTags.map((tag) => tag.slug) });
-  };
-
-  const handleCreateTag = () => {
-    if (!newTagName.trim() || !newTagSlug.trim()) {
-      toast.error(t("name_and_slug_are_required"));
-      return;
-    }
-
-    createTag({
-      name: newTagName.trim(),
-      slug: newTagSlug.trim(),
-    });
   };
 
   const hasChanges =
@@ -318,64 +280,6 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
           className="w-full justify-start text-left font-normal"
         />
       </div>
-
-      {/* Create New Tag */}
-      <Collapsible
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        className="rounded-lg border border-gray-200 p-4"
-      >
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex w-full items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <Plus className="size-4" />
-              <span>{t("create_new_tag")}</span>
-            </div>
-            <CareIcon
-              icon={isCreateOpen ? "l-angle-up" : "l-angle-down"}
-              className="size-4"
-            />
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="mt-4 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="tag-name">{t("tag_name")}</Label>
-            <Input
-              id="tag-name"
-              value={newTagName}
-              onChange={(e) => setNewTagName(e.target.value)}
-              placeholder={t("enter_tag_name")}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="tag-slug">{t("tag_slug")}</Label>
-            <Input
-              id="tag-slug"
-              value={newTagSlug}
-              onChange={(e) => setNewTagSlug(e.target.value)}
-              placeholder={t("enter_tag_slug")}
-            />
-          </div>
-          <Button
-            onClick={handleCreateTag}
-            disabled={isCreating || !newTagName || !newTagSlug}
-            className="w-full"
-          >
-            {isCreating ? (
-              <>
-                <Loader2 className="mr-2 size-4 animate-spin" />
-                {t("creating")}
-              </>
-            ) : (
-              t("create_tag")
-            )}
-          </Button>
-        </CollapsibleContent>
-      </Collapsible>
     </div>
   );
 
@@ -386,9 +290,6 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
         variant="outline"
         onClick={() => {
           setSelectedTags(tags);
-          setNewTagName("");
-          setNewTagSlug("");
-          setIsCreateOpen(false);
           setOpen(false);
         }}
       >

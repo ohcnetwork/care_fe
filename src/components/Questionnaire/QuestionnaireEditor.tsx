@@ -891,10 +891,6 @@ export default function QuestionnaireEditor({
     );
   };
 
-  const handleTagCreated = (tag: QuestionnaireTagRead) => {
-    setSelectedTags((current) => [...current, tag]);
-  };
-
   const handleAddQuestionAtIndex = (index: number) => {
     const newQuestion: Question = {
       id: crypto.randomUUID(),
@@ -1085,7 +1081,6 @@ export default function QuestionnaireEditor({
                     setSearchQuery: setTagSearchQuery,
                     available: tagOptions,
                     isLoading: isLoadingAvailableTags,
-                    onTagCreated: !slug ? handleTagCreated : undefined,
                   }}
                 />
                 <QuestionActions
@@ -1340,7 +1335,6 @@ export default function QuestionnaireEditor({
                   setSearchQuery: setTagSearchQuery,
                   available: tagOptions,
                   isLoading: isLoadingAvailableTags,
-                  onTagCreated: handleTagCreated,
                 }}
               />
               <QuestionActions
