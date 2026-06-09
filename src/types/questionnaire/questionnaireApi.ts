@@ -7,11 +7,7 @@ import {
   QuestionnaireSetOrganizations,
   QuestionnaireUpdate,
 } from "./questionnaire";
-import {
-  QuestionnaireTagBase,
-  QuestionnaireTagRead,
-  QuestionnaireTagSet,
-} from "./tags";
+import { QuestionnaireTagRead, QuestionnaireTagSet } from "./tags";
 
 export default {
   list: {
@@ -105,12 +101,6 @@ export default {
       path: "/api/v1/questionnaire_tag/",
       method: HttpMethod.GET,
       TRes: Type<PaginatedResponse<QuestionnaireTagRead>>(),
-    },
-    update: {
-      path: "/api/v1/questionnaire_tag/{slug}/",
-      method: HttpMethod.PUT,
-      TBody: Type<QuestionnaireTagBase>(),
-      TRes: Type<QuestionnaireTagRead>(),
     },
   },
 } as const;
