@@ -41,8 +41,8 @@ export interface ValueSetConcept {
 export interface ValueSetInclude {
   filter?: ValueSetFilter[];
   system: string;
-  concept?: ValueSetConcept[];
   version?: string;
+  concept?: ValueSetConcept[];
 }
 
 interface ValueSetCompose {
@@ -99,6 +99,7 @@ export interface ValueSetLookupResponse {
 export interface ValueSetLookupRequest {
   system: string;
   code: string;
+  version?: string;
 }
 
 export const TERMINOLOGY_SYSTEMS = {

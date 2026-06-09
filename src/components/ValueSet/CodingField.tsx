@@ -20,6 +20,7 @@ import mutate from "@/Utils/request/mutate";
 
 type CodingFieldProps = {
   system: string;
+  version?: string;
   name: string;
   form: any;
   className?: string;
@@ -29,6 +30,7 @@ type CodingFieldProps = {
 
 export const CodingField = ({
   system,
+  version,
   name,
   form,
   className,
@@ -66,7 +68,7 @@ export const CodingField = ({
       return;
     }
 
-    lookup({ system, code });
+    lookup({ system, code, ...(version && { version }) });
   };
 
   const handleCodeChange = () => {

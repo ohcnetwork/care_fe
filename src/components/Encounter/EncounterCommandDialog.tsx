@@ -159,8 +159,6 @@ export function EncounterCommandDialog({
               buildEncounterUrl("/updates"),
             )}`,
           ),
-        "treatment-summary": () =>
-          navigate(buildEncounterUrl("/treatment_summary")),
         "encounter-overview": () => navigate(buildEncounterUrl("/updates")),
         plots: () => navigate(buildEncounterUrl("/plots")),
         observations: () => navigate(buildEncounterUrl("/observations")),

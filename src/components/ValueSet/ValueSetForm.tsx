@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, type UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
 
@@ -96,7 +96,6 @@ function SystemVersionField({
   }
   return null;
 }
-
 function ConceptFields({
   nestIndex,
   type,
@@ -105,7 +104,7 @@ function ConceptFields({
 }: {
   nestIndex: number;
   type: "include" | "exclude";
-  parentForm: ReturnType<typeof useForm<ValueSetBase>>;
+  parentForm: UseFormReturn<ValueSetBase>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation(); // Add translation hook
@@ -134,6 +133,7 @@ function ConceptFields({
         <div key={field.id} className="flex gap-4 items-start">
           <CodingField
             system={parentForm.watch(`compose.${type}.${nestIndex}.system`)}
+            version={parentForm.watch(`compose.${type}.${nestIndex}.version`)}
             name={`compose.${type}.${nestIndex}.concept.${index}`}
             form={parentForm}
             className="flex-1"
@@ -155,7 +155,7 @@ function FilterFields({
   nestIndex: number;
   type: "include" | "exclude";
   disabled?: boolean;
-  parentForm: ReturnType<typeof useForm<ValueSetBase>>;
+  parentForm: UseFormReturn<ValueSetBase>;
 }) {
   const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({
@@ -252,7 +252,7 @@ function RuleFields({
   disabled,
 }: {
   type: "include" | "exclude";
-  form: ReturnType<typeof useForm<ValueSetBase>>;
+  form: UseFormReturn<ValueSetBase>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -274,6 +274,7 @@ function RuleFields({
           onClick={() =>
             append({
               system: Object.values(TERMINOLOGY_SYSTEMS)[0],
+              version: "",
               concept: [],
               filter: [],
             })
@@ -326,6 +327,14 @@ function RuleFields({
                   </FormItem>
                 )}
               />
+
+              <SystemVersionField
+                system={form.watch(`compose.${type}.${index}.system`)}
+                index={index}
+                type={type}
+                form={form}
+                disabled={disabled}
+              />
               <Button
                 type="button"
                 variant="ghost"
@@ -336,14 +345,6 @@ function RuleFields({
                 <TrashIcon className="size-4" />
               </Button>
             </div>
-
-            <SystemVersionField
-              system={form.watch(`compose.${type}.${index}.system`)}
-              index={index}
-              type={type}
-              form={form}
-              disabled={disabled}
-            />
 
             <ConceptFields
               nestIndex={index}
@@ -437,7 +438,7 @@ export function ValueSetForm({
     }),
   });
 
-  const form = useForm({
+  const form = useForm<ValueSetBase>({
     resolver: zodResolver(valuesetFormSchema),
     defaultValues: {
       name: initialData?.name || "",
@@ -446,8 +447,16 @@ export function ValueSetForm({
       status: initialData?.status || ValueSetStatus.ACTIVE,
       is_system_defined: initialData?.is_system_defined || false,
       compose: {
-        include: initialData?.compose?.include || [],
-        exclude: initialData?.compose?.exclude || [],
+        include:
+          initialData?.compose?.include.map((rule) => ({
+            ...rule,
+            version: rule.version ?? "",
+          })) || [],
+        exclude:
+          initialData?.compose?.exclude.map((rule) => ({
+            ...rule,
+            version: rule.version ?? "",
+          })) || [],
       },
     },
   });
