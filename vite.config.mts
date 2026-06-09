@@ -104,6 +104,19 @@ function getMimeType(filePath: string) {
   }
 }
 
+function parseRegisteredComponentNames(value: string | undefined) {
+  if (!value || value.trim() === "" || value.trim() === "*") {
+    return null;
+  }
+
+  return new Set(
+    value
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean),
+  );
+}
+
 function isPluginManifestPath(rootDir: string, filePath: string) {
   const normalizedFilePath = normalizePath(filePath);
   const appsPrefix = `${normalizePath(path.join(rootDir, "apps"))}/`;
@@ -416,7 +429,11 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       careConsoleArt(),
       fixSonnerPackageJson(),
       localPluginDevSupport(),
-      autoRegisterComponents(),
+      autoRegisterComponents({
+        include: parseRegisteredComponentNames(
+          env.REACT_MFE_REGISTERED_COMPONENTS,
+        ),
+      }),
       tailwindcss(),
       federation({
         name: "core",

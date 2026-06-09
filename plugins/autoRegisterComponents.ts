@@ -1,4 +1,5 @@
 import fs from "fs";
+import MagicString from "magic-string";
 import path from "path";
 import ts from "typescript";
 import type { Plugin } from "vite";
@@ -11,6 +12,7 @@ interface Edit {
   start: number;
   end: number;
   text: string;
+  storeName?: boolean;
 }
 
 interface TransformTarget {
@@ -22,6 +24,17 @@ interface TransformTarget {
 interface ComponentTarget {
   name: string;
   file: string;
+}
+
+interface AutoRegisterComponentsOptions {
+  include?: ReadonlySet<string> | null;
+}
+
+function shouldRegisterComponent(
+  name: string,
+  include: ReadonlySet<string> | null | undefined,
+) {
+  return !include || include.has(name);
 }
 
 function isPascalCase(name: string) {
@@ -132,14 +145,33 @@ function appendRegistration(statement: ts.Statement, target: TransformTarget) {
   return `\nexport const ${target.exportName} = ${registration};`;
 }
 
-function applyEdits(source: string, edits: Edit[]) {
-  return edits
-    .sort((left, right) => right.start - left.start)
-    .reduce(
-      (code, edit) =>
-        `${code.slice(0, edit.start)}${edit.text}${code.slice(edit.end)}`,
-      source,
-    );
+function applyEdits(source: string, id: string, edits: Edit[]) {
+  const code = new MagicString(source, { filename: id });
+
+  for (const edit of edits.sort((left, right) => right.start - left.start)) {
+    if (edit.start === edit.end) {
+      code.appendLeft(edit.start, edit.text);
+      continue;
+    }
+
+    if (edit.text === "") {
+      code.remove(edit.start, edit.end);
+      continue;
+    }
+
+    code.update(edit.start, edit.end, edit.text, {
+      storeName: edit.storeName,
+    });
+  }
+
+  return {
+    code: code.toString(),
+    map: code.generateMap({
+      hires: true,
+      includeContent: true,
+      source: id,
+    }),
+  };
 }
 
 function getImportInsertPosition(sourceFile: ts.SourceFile) {
@@ -299,8 +331,11 @@ function findTsxFiles(root: string): string[] {
   });
 }
 
-function assertUniqueComponentNames(srcRoot: string, overrideRoot: string) {
-  const targets = findTsxFiles(srcRoot).flatMap((filePath) => {
+function collectRegisteredComponentTargets(
+  srcRoot: string,
+  overrideRoot: string,
+) {
+  return findTsxFiles(srcRoot).flatMap((filePath) => {
     const normalizedPath = normalizePath(filePath);
 
     if (normalizedPath.startsWith(overrideRoot)) {
@@ -312,6 +347,9 @@ function assertUniqueComponentNames(srcRoot: string, overrideRoot: string) {
       normalizedPath,
     );
   });
+}
+
+function assertUniqueComponentNames(targets: ComponentTarget[]) {
   const componentFiles = new Map<string, Set<string>>();
 
   for (const target of targets) {
@@ -344,7 +382,36 @@ function assertUniqueComponentNames(srcRoot: string, overrideRoot: string) {
   );
 }
 
-function transformSource(source: string, id: string) {
+function assertKnownComponentNames(
+  targets: ComponentTarget[],
+  include: ReadonlySet<string> | null | undefined,
+) {
+  if (!include) {
+    return;
+  }
+
+  const knownNames = new Set(targets.map((target) => target.name));
+  const unknownNames = Array.from(include)
+    .filter((name) => !knownNames.has(name))
+    .sort((left, right) => left.localeCompare(right));
+
+  if (unknownNames.length === 0) {
+    return;
+  }
+
+  throw new Error(
+    [
+      "Unknown component names in REACT_MFE_REGISTERED_COMPONENTS:",
+      ...unknownNames.map((name) => `- ${name}`),
+    ].join("\n"),
+  );
+}
+
+function transformSource(
+  source: string,
+  id: string,
+  include: ReadonlySet<string> | null | undefined,
+) {
   if (!source.includes("export")) {
     return null;
   }
@@ -372,6 +439,10 @@ function transformSource(source: string, id: string) {
       isComponentFunction(statement)
     ) {
       const exportName = statement.name.text;
+      if (!shouldRegisterComponent(exportName, include)) {
+        continue;
+      }
+
       const baseName = uniqueName(source, `${exportName}Base`);
 
       removeExportAndDefaultModifiers(sourceFile, statement, edits);
@@ -379,6 +450,7 @@ function transformSource(source: string, id: string) {
         start: statement.name.getStart(sourceFile),
         end: statement.name.end,
         text: baseName,
+        storeName: true,
       });
       edits.push({
         start: statement.end,
@@ -409,6 +481,10 @@ function transformSource(source: string, id: string) {
       }
 
       const exportName = declaration.name.text;
+      if (!shouldRegisterComponent(exportName, include)) {
+        continue;
+      }
+
       const baseName = uniqueName(source, `${exportName}Base`);
 
       removeExportAndDefaultModifiers(sourceFile, statement, edits);
@@ -416,6 +492,7 @@ function transformSource(source: string, id: string) {
         start: declaration.name.getStart(sourceFile),
         end: declaration.name.end,
         text: baseName,
+        storeName: true,
       });
       edits.push({
         start: statement.end,
@@ -437,6 +514,10 @@ function transformSource(source: string, id: string) {
       !transformedNames.has(statement.expression.text)
     ) {
       const exportName = statement.expression.text;
+      if (!shouldRegisterComponent(exportName, include)) {
+        continue;
+      }
+
       const declaration = findLocalComponentDeclaration(sourceFile, exportName);
 
       if (!declaration) {
@@ -460,10 +541,12 @@ function transformSource(source: string, id: string) {
   }
 
   edits.push(createRegisterImport(sourceFile));
-  return applyEdits(source, edits);
+  return applyEdits(source, id, edits);
 }
 
-export function autoRegisterComponents(): Plugin {
+export function autoRegisterComponents({
+  include = null,
+}: AutoRegisterComponentsOptions = {}): Plugin {
   let srcRoot = "";
   let overrideRoot = "";
 
@@ -477,7 +560,9 @@ export function autoRegisterComponents(): Plugin {
       )}/`;
     },
     buildStart() {
-      assertUniqueComponentNames(srcRoot, overrideRoot);
+      const targets = collectRegisteredComponentTargets(srcRoot, overrideRoot);
+      assertUniqueComponentNames(targets);
+      assertKnownComponentNames(targets, include);
     },
     transform(source, id) {
       const normalizedId = normalizePath(id.split("?")[0]);
@@ -490,14 +575,14 @@ export function autoRegisterComponents(): Plugin {
         return null;
       }
 
-      const transformed = transformSource(source, normalizedId);
+      const transformed = transformSource(source, normalizedId, include);
       if (!transformed) {
         return null;
       }
 
       return {
-        code: transformed,
-        map: null,
+        code: transformed.code,
+        map: transformed.map,
       };
     },
   };

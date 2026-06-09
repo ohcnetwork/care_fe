@@ -180,6 +180,7 @@
     "husky": "^9.1.7",
     "jsdom": "^26.0.0",
     "lint-staged": "^15.2.10",
+    "magic-string": "^0.27.0",
     "marked": "^15.0.0",
     "prettier": "^3.3.3",
     "prettier-plugin-organize-imports": "^4.2.0",
