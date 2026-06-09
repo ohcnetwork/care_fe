@@ -167,6 +167,48 @@ function AllSupplyDeliveriesComponent({
   );
 }
 
+function getDeliveryOrderStatusActions(
+  status: DeliveryOrderStatus,
+  internal: boolean,
+  anyCompletedSupplyDeliveries: boolean,
+) {
+  const isPendingOrCompleted = [
+    DeliveryOrderStatus.draft,
+    DeliveryOrderStatus.pending,
+    DeliveryOrderStatus.completed,
+  ].includes(status);
+  if (
+    (internal && status !== DeliveryOrderStatus.draft) ||
+    (!internal && !isPendingOrCompleted)
+  ) {
+    return [];
+  }
+
+  const actions = [
+    {
+      status: DeliveryOrderStatus.draft,
+      icon: <Edit className="size-4" />,
+      label: "mark_as_draft",
+      visibility: true,
+    },
+    {
+      status: DeliveryOrderStatus.entered_in_error,
+      icon: <CareIcon icon="l-exclamation-circle" />,
+      label: "mark_as_entered_in_error",
+      visibility: internal ? true : !anyCompletedSupplyDeliveries,
+    },
+    {
+      status: DeliveryOrderStatus.abandoned,
+      icon: <CareIcon icon="l-ban" />,
+      label: "mark_as_abandoned",
+      visibility: internal ? true : !anyCompletedSupplyDeliveries,
+    },
+  ];
+  return actions.filter(
+    (action) => action.status !== status && action.visibility,
+  );
+}
+
 export function DeliveryOrderShow({
   facilityId,
   deliveryOrderId,
@@ -413,6 +455,17 @@ export function DeliveryOrderShow({
   const canAddSupplyDeliveries =
     deliveryOrder.status === DeliveryOrderStatus.draft;
 
+  const anyCompletedSupplyDeliveries =
+    supplyDeliveries?.results?.some(
+      (delivery) => delivery.status === SupplyDeliveryStatus.completed,
+    ) ?? false;
+
+  const deliveryOrderStatusActions = getDeliveryOrderStatusActions(
+    deliveryOrder.status,
+    internal,
+    anyCompletedSupplyDeliveries,
+  );
+
   return (
     <Page
       title={t("delivery_order_details")}
@@ -528,7 +581,7 @@ export function DeliveryOrderShow({
                 </Button>
               )}
 
-            {deliveryOrder.status === DeliveryOrderStatus.draft && (
+            {deliveryOrderStatusActions.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon">
@@ -536,38 +589,26 @@ export function DeliveryOrderShow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                    <Button
-                      variant="ghost"
-                      onClick={() =>
-                        setDeliveryOrderStatusDialog({
-                          open: true,
-                          status: DeliveryOrderStatus.entered_in_error,
-                        })
-                      }
-                      disabled={isUpdating}
-                      className="w-full flex justify-stretch"
-                    >
-                      <CareIcon icon="l-exclamation-circle" />
-                      <span>{t("mark_as_entered_in_error")}</span>
-                    </Button>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Button
-                      variant="ghost"
-                      onClick={() =>
-                        setDeliveryOrderStatusDialog({
-                          open: true,
-                          status: DeliveryOrderStatus.abandoned,
-                        })
-                      }
-                      disabled={isUpdating}
-                      className="w-full flex justify-stretch"
-                    >
-                      <CareIcon icon="l-ban" />
-                      <span>{t("mark_as_abandoned")}</span>
-                    </Button>
-                  </DropdownMenuItem>
+                  {deliveryOrderStatusActions.map((action) => {
+                    return (
+                      <DropdownMenuItem asChild key={action.status}>
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            setDeliveryOrderStatusDialog({
+                              open: true,
+                              status: action.status,
+                            })
+                          }
+                          disabled={isUpdating}
+                          className="w-full flex justify-stretch"
+                        >
+                          {action.icon}
+                          <span>{t(action.label)}</span>
+                        </Button>
+                      </DropdownMenuItem>
+                    );
+                  })}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -1047,19 +1088,27 @@ export function DeliveryOrderShow({
             setDeliveryOrderStatusDialog((prev) => ({ ...prev, open }))
           }
           title={
-            deliveryOrderStatusDialog.status ===
-            DeliveryOrderStatus.entered_in_error
-              ? t("mark_as_entered_in_error")
-              : t("mark_as_abandoned")
+            deliveryOrderStatusDialog.status === DeliveryOrderStatus.draft
+              ? t("mark_as_draft")
+              : deliveryOrderStatusDialog.status ===
+                  DeliveryOrderStatus.entered_in_error
+                ? t("mark_as_entered_in_error")
+                : t("mark_as_abandoned")
           }
           description={
-            deliveryOrderStatusDialog.status ===
-            DeliveryOrderStatus.entered_in_error
-              ? t("mark_order_as_entered_in_error_confirmation_description")
-              : t("mark_order_as_abandoned_confirmation_description")
+            deliveryOrderStatusDialog.status === DeliveryOrderStatus.draft
+              ? t("mark_order_as_draft_confirmation_description")
+              : deliveryOrderStatusDialog.status ===
+                  DeliveryOrderStatus.entered_in_error
+                ? t("mark_order_as_entered_in_error_confirmation_description")
+                : t("mark_order_as_abandoned_confirmation_description")
           }
           confirmText={t("confirm")}
-          variant="destructive"
+          variant={
+            deliveryOrderStatusDialog.status === DeliveryOrderStatus.draft
+              ? "primary"
+              : "destructive"
+          }
           onConfirm={() => {
             if (deliveryOrderStatusDialog.status) {
               handleUpdateDeliveryOrderStatus(deliveryOrderStatusDialog.status);
