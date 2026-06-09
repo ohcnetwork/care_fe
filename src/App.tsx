@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useLocationChange } from "raviger";
@@ -51,7 +52,7 @@ const App = () => {
                   </AuthUserProvider>
                 </OverrideProvider>
                 <Toaster
-                  position="top-center"
+                  position={careConfig.toastPosition}
                   theme="light"
                   richColors
                   expand
