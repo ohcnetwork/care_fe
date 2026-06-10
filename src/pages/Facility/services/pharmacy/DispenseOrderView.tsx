@@ -1,6 +1,7 @@
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftRight,
+  BanIcon,
   ChevronDown,
   ExternalLinkIcon,
   EyeIcon,
@@ -35,6 +36,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -52,35 +58,35 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { cn } from "@/lib/utils";
+
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
-import {
-  OtherItemsGroupCard,
-  PrescriptionGroupCard,
-} from "@/pages/Facility/services/pharmacy/components/DispenseGroupCard";
+import { DispenseItemsTableCard } from "@/pages/Facility/services/pharmacy/components/DispenseGroupCard";
 import { PaymentStatusBanner } from "@/pages/Facility/services/pharmacy/components/PaymentStatusBanner";
 import useUpdateDispenseOrderStatus from "@/pages/Facility/services/pharmacy/hooks/useUpdateDispenseOrderStatus";
 import { MedicationReturnSheet } from "@/pages/Facility/services/pharmacy/MedicationReturnSheet";
-import { groupDispensesByPrescription } from "@/pages/Facility/services/pharmacy/utils/groupDispenses";
 
 import {
   ChargeItemRead,
   ChargeItemStatus,
+  EXCLUDED_CHARGE_ITEM_STATUSES,
 } from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
-import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import { InvoiceList, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
   DISPENSE_ORDER_STATUS_STYLES,
   DispenseOrderStatus,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import {
+  MEDICATION_DISPENSE_CANCELLED_STATUSES,
   MedicationDispenseRead,
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 
+import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
 import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -129,6 +135,7 @@ export function DispenseOrderView({
   const [billableChargeItems, setBillableChargeItems] = useState<
     ChargeItemRead[]
   >([]);
+  const [showCancelled, setShowCancelled] = useState(false);
 
   const {
     data: dispenseOrder,
@@ -159,83 +166,80 @@ export function DispenseOrderView({
     patientId: dispenseOrder?.patient.id,
   });
 
-  const billableItems = useMemo(() => {
-    return dispenses
-      .filter((dispense) => {
-        const ci = dispense.charge_item;
-        if (!ci) return false;
-        if (
-          ci.status === ChargeItemStatus.aborted ||
-          ci.status === ChargeItemStatus.entered_in_error ||
-          ci.status === ChargeItemStatus.not_billable
-        ) {
-          return false;
-        }
-        if (ci.status === ChargeItemStatus.billable) return true;
-        if (
-          ci.paid_invoice?.status === InvoiceStatus.cancelled ||
-          ci.paid_invoice?.status === InvoiceStatus.entered_in_error
-        ) {
-          return true;
-        }
-        return false;
-      })
-      .map((dispense) => dispense.charge_item);
-  }, [dispenses]);
-
-  const invoiceIds = useMemo(() => {
-    const ids = new Set<string>();
-    dispenses.forEach((dispense) => {
-      const id = dispense.charge_item?.paid_invoice?.id;
-      if (id) ids.add(id);
-    });
-    return Array.from(ids);
-  }, [dispenses]);
-
-  const invoiceQueries = useQueries({
-    queries: invoiceIds.map((invoiceId) => ({
-      queryKey: ["invoice", facilityId, invoiceId],
-      queryFn: query(invoiceApi.retrieveInvoice, {
-        pathParams: { facilityId, invoiceId },
-      }),
-      enabled: !!invoiceId,
-    })),
-  });
-
-  const relatedInvoices = useMemo(() => {
-    return invoiceQueries
-      .map((q) => q.data)
-      .filter((data): data is InvoiceRead => !!data);
-  }, [invoiceQueries]);
-
-  // Pick the active (non-cancelled) invoice; prefer the most recent.
-  const activeInvoice = useMemo(() => {
-    const active = relatedInvoices.filter(
-      (inv) =>
-        inv.status !== InvoiceStatus.cancelled &&
-        inv.status !== InvoiceStatus.entered_in_error,
-    );
-    return active.sort(
-      (a, b) =>
-        new Date(b.created_date).getTime() - new Date(a.created_date).getTime(),
-    )[0];
-  }, [relatedInvoices]);
-
-  const hasBalancedInvoice = useMemo(
-    () => relatedInvoices.some((inv) => inv.status === InvoiceStatus.balanced),
-    [relatedInvoices],
+  const billableItems = dispenses.filter(
+    (d) =>
+      d.charge_item.status === ChargeItemStatus.billable &&
+      !MEDICATION_DISPENSE_CANCELLED_STATUSES.includes(d.status),
   );
 
-  // Cancelling the dispense order (abandoned / entered_in_error) is allowed
-  // only when there is no invoice, or invoices are in draft state.
-  const blockingInvoice = useMemo(
+  const invoices = extractInvoicesFromDispenses(dispenses);
+  const hasActiveInvoice = invoices.length > 0;
+  const hasBalancedInvoice = invoices.some(
+    (inv) => inv.status === InvoiceStatus.balanced,
+  );
+
+  // Cancelling the dispense order (abandoned / entered_in_error) is blocked
+  // while an issued/balanced invoice exists.
+  const blockingInvoice = invoices.find(
+    (inv) =>
+      inv.status === InvoiceStatus.issued ||
+      inv.status === InvoiceStatus.balanced,
+  );
+
+  // Group dispenses: one group per active invoice, plus an "unbilled" bucket
+  // for dispenses whose charge item has no active invoice. Cancelled dispenses
+  // are pulled out into their own collapsible section. Unbilled first, then
+  // invoice groups ordered oldest → newest.
+  const { unbilledDispenses, invoiceGroups, cancelledDispenses } =
+    useMemo(() => {
+      const unbilled: MedicationDispenseRead[] = [];
+      const cancelled: MedicationDispenseRead[] = [];
+      const byInvoice = new Map<
+        string,
+        { meta: InvoiceList; dispenses: MedicationDispenseRead[] }
+      >();
+      dispenses.forEach((dispense) => {
+        // Cancelled dispenses are surfaced separately, not in unbilled/invoice.
+        if (MEDICATION_DISPENSE_CANCELLED_STATUSES.includes(dispense.status)) {
+          cancelled.push(dispense);
+          return;
+        }
+        const inv = dispense.charge_item?.paid_invoice;
+        if (inv) {
+          const group = byInvoice.get(inv.id) ?? { meta: inv, dispenses: [] };
+          group.dispenses.push(dispense);
+          byInvoice.set(inv.id, group);
+        } else {
+          unbilled.push(dispense);
+        }
+      });
+      const groups = Array.from(byInvoice.values()).sort(
+        (a, b) =>
+          new Date(a.meta.created_date).getTime() -
+          new Date(b.meta.created_date).getTime(),
+      );
+      return {
+        unbilledDispenses: unbilled,
+        invoiceGroups: groups,
+        cancelledDispenses: cancelled,
+      };
+    }, [dispenses]);
+
+  // Completion is allowed only when every billable item is either excluded
+  // (not_billable / aborted / entered_in_error) or settled in a balanced
+  // invoice. Cancelled dispenses don't require settlement.
+  const canCompleteDispense = useMemo(
     () =>
-      relatedInvoices.find(
-        (inv) =>
-          inv.status === InvoiceStatus.issued ||
-          inv.status === InvoiceStatus.balanced,
-      ),
-    [relatedInvoices],
+      dispenses.every((dispense) => {
+        if (MEDICATION_DISPENSE_CANCELLED_STATUSES.includes(dispense.status)) {
+          return true;
+        }
+        const ci = dispense.charge_item;
+        if (!ci) return true;
+        if (EXCLUDED_CHARGE_ITEM_STATUSES.includes(ci.status)) return true;
+        return ci.paid_invoice?.status === InvoiceStatus.balanced;
+      }),
+    [dispenses],
   );
 
   // True when one or more non-finalized dispenses are currently on hold.
@@ -281,11 +285,7 @@ export function DispenseOrderView({
     queryClient.invalidateQueries({
       queryKey: ["accounts", dispenseOrder?.patient.id],
     });
-    invoiceIds.forEach((id) => {
-      queryClient.invalidateQueries({
-        queryKey: ["invoice", facilityId, id],
-      });
-    });
+    queryClient.invalidateQueries({ queryKey: ["invoice"] });
 
     // Any billing activity (create / issue invoice, collect payment) implies
     // the order is actively being worked on — bump it from draft to in_progress.
@@ -302,18 +302,21 @@ export function DispenseOrderView({
     return <ErrorPage />;
   }
 
-  // Filter and group
-  const filteredDispenses = dispenses.filter((m) => {
+  // Filter dispenses by status + search; applied per-group for display.
+  const matchesFilter = (m: MedicationDispenseRead) => {
     if (statusFilter && m.status !== statusFilter) return false;
     if (searchQuery) {
       const name = m.item.product.product_knowledge.name?.toLowerCase() || "";
       if (!name.includes(searchQuery)) return false;
     }
     return true;
-  });
+  };
 
-  const { prescriptionGroups, otherDispenses } =
-    groupDispensesByPrescription(filteredDispenses);
+  const filteredDispenses = dispenses.filter(matchesFilter);
+
+  // Payment banners are suppressed for cancelled orders — the patient header
+  // surfaces the next-action buttons instead.
+  const showBanners = !isOrderCancelled;
 
   const handlePutOnHold = () => {
     updateStatus(
@@ -461,24 +464,6 @@ export function DispenseOrderView({
         )}
       </Card>
 
-      {/* Payment Status Banner (hidden when order is cancelled) */}
-      {!isOrderCancelled && (
-        <div className="mb-4">
-          <PaymentStatusBanner
-            facilityId={facilityId}
-            accountId={account?.id}
-            invoice={activeInvoice}
-            unbilledItems={billableItems}
-            onCreateInvoice={(items) => {
-              setBillableChargeItems(items);
-              setCreateInvoiceSheetOpen(true);
-            }}
-            onPaymentSuccess={handlePaymentSuccess}
-            readOnly={!isOrderOpen}
-          />
-        </div>
-      )}
-
       {/* Filter row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 flex-wrap">
@@ -513,33 +498,100 @@ export function DispenseOrderView({
         </Button>
       </div>
 
-      {/* Dispense cards */}
-      {prescriptionGroups.length === 0 && otherDispenses.length === 0 ? (
+      {/* Dispense groups (by invoice) */}
+      {filteredDispenses.length === 0 ? (
         <EmptyState
           title={t("no_medications_found")}
           description={t("no_medications_found_description")}
           icon={<CareIcon icon="l-tablets" className="text-primary size-6" />}
         />
       ) : (
-        <div className="flex flex-col gap-4 pb-24">
-          {prescriptionGroups.map((group) => (
-            <PrescriptionGroupCard
-              key={group.prescription.id}
-              prescription={group.prescription}
-              dispenses={group.dispenses}
-            />
-          ))}
-          {otherDispenses.length > 0 && (
-            <OtherItemsGroupCard dispenses={otherDispenses} />
-          )}
+        <div className="flex flex-col gap-6 pb-24">
+          {/* Unbilled group — dispenses not yet settled in an active invoice */}
+          {(() => {
+            const groupDispenses = unbilledDispenses.filter(matchesFilter);
+            if (groupDispenses.length === 0) return null;
+            return (
+              <div className="flex flex-col gap-3">
+                {showBanners && (
+                  <PaymentStatusBanner
+                    facilityId={facilityId}
+                    accountId={account?.id}
+                    invoiceId={undefined}
+                    unbilledItems={billableItems.map(
+                      (dispense) => dispense.charge_item,
+                    )}
+                    onCreateInvoice={(items) => {
+                      setBillableChargeItems(items);
+                      setCreateInvoiceSheetOpen(true);
+                    }}
+                    onPaymentSuccess={handlePaymentSuccess}
+                    readOnly={!isOrderOpen}
+                  />
+                )}
+                <DispenseItemsTableCard dispenses={groupDispenses} />
+              </div>
+            );
+          })()}
+
+          {/* One group per invoice */}
+          {invoiceGroups.map((group) => {
+            const groupDispenses = group.dispenses.filter(matchesFilter);
+            if (groupDispenses.length === 0) return null;
+            return (
+              <div key={group.meta.id} className="flex flex-col gap-3">
+                {showBanners && (
+                  <PaymentStatusBanner
+                    facilityId={facilityId}
+                    accountId={account?.id}
+                    invoiceId={group.meta.id}
+                    unbilledItems={[]}
+                    onPaymentSuccess={handlePaymentSuccess}
+                    readOnly={!isOrderOpen}
+                  />
+                )}
+                <DispenseItemsTableCard dispenses={groupDispenses} />
+              </div>
+            );
+          })}
+
+          {/* Cancelled dispenses — collapsible, always shown last */}
+          {(() => {
+            const groupDispenses = cancelledDispenses.filter(matchesFilter);
+            if (groupDispenses.length === 0) return null;
+            return (
+              <Collapsible
+                open={showCancelled}
+                onOpenChange={setShowCancelled}
+                className="flex flex-col gap-3"
+              >
+                <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 hover:bg-gray-100">
+                  <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <BanIcon className="size-4 text-gray-500" />
+                    {t("cancelled_dispenses")}
+                    <Badge variant="secondary">{groupDispenses.length}</Badge>
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      "size-4 text-gray-500 transition-transform",
+                      showCancelled && "rotate-180",
+                    )}
+                  />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <DispenseItemsTableCard dispenses={groupDispenses} />
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })()}
         </div>
       )}
 
       {/* Sticky footer action bar */}
       {isOrderOpen && (
         <div className="fixed bottom-0 left-0 right-0 z-10 px-4 md:px-6 py-4 bg-white border-t border-gray-200 shadow-md flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div className="flex flex-col gap-0.5 text-sm text-gray-700">
-            {hasBalancedInvoice ? (
+          <div className="flex flex-col gap-3.5 text-sm text-gray-700">
+            {canCompleteDispense ? (
               <>
                 <span className="font-medium">
                   {t("payment_has_been_collected")}
@@ -549,14 +601,9 @@ export function DispenseOrderView({
                 </span>
               </>
             ) : (
-              <>
-                <span className="text-gray-700">
-                  {t("payment_collected_now_or_later")}
-                </span>{" "}
-                <span className="text-red-600 font-medium italic">
-                  {t("payment_due_to_account_warning")}
-                </span>
-              </>
+              <span className="text-red-600 font-medium italic">
+                {t("settle_pending_invoices_before_completion")}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -611,34 +658,51 @@ export function DispenseOrderView({
                         `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${dispenseOrder.patient.id}/bill/dispense_order/${dispenseOrderId}`,
                       )
                     }
-                    disabled={isUpdatingStatus || !!activeInvoice}
+                    disabled={isUpdatingStatus || hasActiveInvoice}
                   >
                     <PencilIcon className="size-4" />
                     {t("edit_dispense_order")}
                   </Button>
                 </span>
               </TooltipTrigger>
-              {activeInvoice && (
+              {hasActiveInvoice && (
                 <TooltipContent>
                   {t("dispense_order_cannot_be_edited_due_to_invoice")}
                 </TooltipContent>
               )}
             </Tooltip>
             <div className="flex">
-              <Button
-                variant={hasBalancedInvoice ? "primary" : "outline_primary"}
-                className="rounded-r-none"
-                onClick={() =>
-                  updateStatus({ newStatus: DispenseOrderStatus.completed })
-                }
-                disabled={isUpdatingStatus}
-              >
-                {t("complete_dispense")}
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Button
+                      variant={
+                        canCompleteDispense ? "primary" : "outline_primary"
+                      }
+                      className="rounded-r-none"
+                      onClick={() =>
+                        updateStatus({
+                          newStatus: DispenseOrderStatus.completed,
+                        })
+                      }
+                      disabled={isUpdatingStatus || !canCompleteDispense}
+                    >
+                      {t("complete_dispense")}
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {!canCompleteDispense && (
+                  <TooltipContent>
+                    {t("settle_pending_invoices_before_completion")}
+                  </TooltipContent>
+                )}
+              </Tooltip>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant={hasBalancedInvoice ? "primary" : "outline_primary"}
+                    variant={
+                      canCompleteDispense ? "primary" : "outline_primary"
+                    }
                     size="icon"
                     className="rounded-l-none border-l border-l-white/20"
                     disabled={isUpdatingStatus}

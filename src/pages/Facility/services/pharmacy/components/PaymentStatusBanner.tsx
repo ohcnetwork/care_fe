@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Decimal from "decimal.js";
 import {
   BadgeCheckIcon,
@@ -16,7 +16,7 @@ import {
   SendIcon,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -42,26 +42,63 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
 
-import {
-  ChargeItemRead,
-  ChargeItemStatus,
-} from "@/types/billing/chargeItem/chargeItem";
+import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { PaymentReconciliationStatus } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { DottedDivider } from "@/components/careui/dotted-divider";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
+const computePaidAndDueAmount = (invoice?: InvoiceRead) => {
+  if (!invoice) {
+    return {
+      actualPaidAmount: "0",
+      amountDue: "0",
+    };
+  }
+
+  if (!invoice.payments.length) {
+    return {
+      actualPaidAmount: "0",
+      amountDue: invoice.total_gross?.toString() || "0",
+    };
+  }
+  const payments = invoice.payments.filter(
+    (p) => p.status === PaymentReconciliationStatus.active,
+  );
+
+  const actualPaidAmount = payments
+    .reduce((sum, p) => sum.plus(p.amount || 0), new Decimal(0))
+    .toString();
+
+  const amountDue = new Decimal(invoice.total_gross || 0)
+    .minus(actualPaidAmount)
+    .toString();
+
+  return {
+    actualPaidAmount,
+    amountDue,
+  };
+};
+
+const sumTotalPrices = (items: ChargeItemRead[]) => {
+  return items
+    .reduce((sum, item) => sum.plus(item.total_price || 0), new Decimal(0))
+    .toString();
+};
+
 interface Props {
   facilityId: string;
   accountId?: string;
-  invoice?: InvoiceRead;
+  invoiceId?: string;
   unbilledItems: ChargeItemRead[];
   onCreateInvoice?: (items: ChargeItemRead[]) => void;
   onPaymentSuccess: () => void;
@@ -73,10 +110,56 @@ interface Props {
   readOnly?: boolean;
 }
 
+/**
+ * Skeleton placeholder shown while the invoice details are being fetched.
+ * Mirrors the layout of the issued/balanced banner so the swap-in is smooth.
+ */
+function PaymentStatusBannerSkeleton() {
+  const { t } = useTranslation();
+  return (
+    <div
+      role="status"
+      aria-label={t("loading")}
+      className="border border-gray-200 rounded-md p-1 pt-2 bg-gray-50"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3 pl-3">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-5 w-20 rounded-full" />
+      </div>
+      {/* Body row */}
+      <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6 bg-white rounded-md p-3 shadow-xs">
+        {/* Status block */}
+        <div className="flex items-center gap-2">
+          <Skeleton className="size-8 rounded" />
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        </div>
+        {/* Amounts */}
+        <div className="flex items-center gap-6 flex-wrap">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex flex-col gap-1.5">
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-6 w-24" />
+            </div>
+          ))}
+        </div>
+        {/* Actions */}
+        <div className="flex items-center gap-2 lg:ml-auto flex-wrap">
+          <Skeleton className="h-9 w-28 rounded-md" />
+          <Skeleton className="h-9 w-32 rounded-md" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function PaymentStatusBanner({
   facilityId,
   accountId,
-  invoice,
+  invoiceId,
   unbilledItems,
   onCreateInvoice,
   onPaymentSuccess,
@@ -89,6 +172,14 @@ export function PaymentStatusBanner({
   const [cancelInvoiceDialogOpen, setCancelInvoiceDialogOpen] = useState(false);
   const [markBalancedDialogOpen, setMarkBalancedDialogOpen] = useState(false);
 
+  const { data: invoice, isLoading: isLoadingInvoice } = useQuery({
+    queryKey: ["invoice", facilityId, invoiceId],
+    queryFn: query(invoiceApi.retrieveInvoice, {
+      pathParams: { facilityId, invoiceId: invoiceId ?? "" },
+    }),
+    enabled: !!invoiceId,
+  });
+
   const invalidateQueries = () => {
     queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
     queryClient.invalidateQueries({ queryKey: ["accounts"] });
@@ -96,9 +187,9 @@ export function PaymentStatusBanner({
   };
 
   const { mutate: issueInvoice, isPending: isIssuingInvoice } = useMutation({
-    mutationFn: invoice
+    mutationFn: invoiceId
       ? mutate(invoiceApi.updateInvoice, {
-          pathParams: { facilityId, invoiceId: invoice.id },
+          pathParams: { facilityId, invoiceId },
         })
       : async () => undefined,
     onSuccess: () => {
@@ -106,13 +197,12 @@ export function PaymentStatusBanner({
       invalidateQueries();
       onPaymentSuccess();
     },
-    onError: () => toast.error(t("failed_to_issue_invoice")),
   });
 
   const { mutate: markAsBalanced, isPending: isMarkingBalanced } = useMutation({
-    mutationFn: invoice
+    mutationFn: invoiceId
       ? mutate(invoiceApi.updateInvoice, {
-          pathParams: { facilityId, invoiceId: invoice.id },
+          pathParams: { facilityId, invoiceId },
         })
       : async () => undefined,
     onSuccess: () => {
@@ -120,14 +210,13 @@ export function PaymentStatusBanner({
       invalidateQueries();
       onPaymentSuccess();
     },
-    onError: () => toast.error(t("failed_to_mark_invoice_as_balanced")),
   });
 
   const { mutate: cancelInvoice, isPending: isCancellingInvoice } = useMutation(
     {
-      mutationFn: invoice
+      mutationFn: invoiceId
         ? mutate(invoiceApi.cancelInvoice, {
-            pathParams: { facilityId, invoiceId: invoice.id },
+            pathParams: { facilityId, invoiceId },
           })
         : async () => undefined,
       onSuccess: () => {
@@ -135,43 +224,14 @@ export function PaymentStatusBanner({
         invalidateQueries();
         onPaymentSuccess();
       },
-      onError: () => toast.error(t("failed_to_cancel_invoice")),
     },
   );
 
-  const actualPaidAmount = useMemo(() => {
-    if (!invoice?.payments) return "0";
-    return invoice.payments
-      .filter((p) => p.status === PaymentReconciliationStatus.active)
-      .reduce((sum, p) => sum.plus(p.amount || 0), new Decimal(0))
-      .toString();
-  }, [invoice]);
-
-  const amountDue = useMemo(() => {
-    return new Decimal(invoice?.total_gross || 0)
-      .minus(actualPaidAmount)
-      .toString();
-  }, [invoice, actualPaidAmount]);
+  const unbilledTotal = sumTotalPrices(unbilledItems);
+  const { actualPaidAmount, amountDue } = computePaidAndDueAmount(invoice);
 
   const isFullyPaid = !!invoice && new Decimal(amountDue).lessThanOrEqualTo(0);
   const hasPayments = invoice?.payments && invoice.payments.length > 0;
-
-  const unbilledTotal = useMemo(() => {
-    let total = new Decimal(0);
-    unbilledItems.forEach((item) => {
-      if (
-        item.status === ChargeItemStatus.aborted ||
-        item.status === ChargeItemStatus.entered_in_error ||
-        item.status === ChargeItemStatus.not_billable
-      ) {
-        return;
-      }
-      if (item.total_price) {
-        total = total.plus(item.total_price);
-      }
-    });
-    return total.toString();
-  }, [unbilledItems]);
 
   const handleIssueInvoice = () => {
     if (!invoice) return;
@@ -199,6 +259,11 @@ export function PaymentStatusBanner({
   const cashPayment = invoice?.payments?.find(
     (p) => p.status === PaymentReconciliationStatus.active,
   );
+
+  // Invoice is still being fetched — show a skeleton placeholder.
+  if (invoiceId && isLoadingInvoice) {
+    return <PaymentStatusBannerSkeleton />;
+  }
 
   // No invoice exists yet — show "Create Invoice" CTA if there are billable items
   if (!invoice) {
