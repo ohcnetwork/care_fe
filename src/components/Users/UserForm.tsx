@@ -805,9 +805,13 @@ export default function UserForm({
                   value={selectedGeoOrg}
                   onChange={(organization) => {
                     setSelectedGeoOrg(organization);
-                    form.setValue("geo_organization", organization?.id ?? "", {
-                      shouldDirty: true,
-                    });
+                    const isValid =
+                      !!organization && !organization.has_children;
+                    form.setValue(
+                      "geo_organization",
+                      isValid ? organization.id : "",
+                      { shouldDirty: true },
+                    );
                   }}
                 />
               </FormControl>

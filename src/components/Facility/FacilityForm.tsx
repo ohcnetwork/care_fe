@@ -103,8 +103,16 @@ export default function FacilityForm({
   });
 
   useEffect(() => {
-    setSelectedGeoOrg(org && org.org_type === "govt" ? org : null);
-  }, [org, organizationId]);
+    if (!organizationId) {
+      return;
+    }
+
+    const govtOrg = org && org.org_type === "govt" ? org : null;
+    const isValid = !!govtOrg && !govtOrg.has_children;
+
+    setSelectedGeoOrg(govtOrg);
+    form.setValue("geo_organization", isValid ? govtOrg.id : "");
+  }, [org, organizationId, form]);
 
   const { mutate: createFacility, isPending } = useMutation({
     mutationFn: mutate(facilityApi.create),
