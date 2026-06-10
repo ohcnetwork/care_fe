@@ -15,6 +15,8 @@ export type CareAppsContextType = Array<
 
 export const CareAppsContext = createContext<CareAppsContextType | null>(null);
 
+export const CareAppsLoadingContext = createContext<boolean>(false);
+
 export const useCareApps = () => {
   const ctx = useContext(CareAppsContext);
   if (!ctx) {
@@ -24,6 +26,8 @@ export const useCareApps = () => {
   }
   return ctx;
 };
+
+export const useCareAppsLoading = () => useContext(CareAppsLoadingContext);
 
 // export const useCareAppNavItems = () => {
 //   const careApps = useCareApps();

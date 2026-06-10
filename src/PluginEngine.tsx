@@ -1,4 +1,8 @@
-import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
+import {
+  CareAppsContext,
+  CareAppsLoadingContext,
+  useCareApps,
+} from "@/hooks/useCareApps";
 import {
   PluginManifest,
   PluginManifestWithMeta,
@@ -73,13 +77,16 @@ export default function PluginEngine({
   children: React.ReactNode;
 }) {
   // Fetch enabled plugins from the backend API
-  const { data: enabledPlugins } = useQuery({
-    queryKey: ["enabled-plugins"],
-    queryFn: query(plugConfigApi.list, {
-      silent: (response) => response.status === 401 || response.status === 403,
-    }),
-    retry: false,
-  });
+  const { data: enabledPlugins, isLoading: isEnabledPluginsLoading } = useQuery(
+    {
+      queryKey: ["enabled-plugins"],
+      queryFn: query(plugConfigApi.list, {
+        silent: (response) =>
+          response.status === 401 || response.status === 403,
+      }),
+      retry: false,
+    },
+  );
 
   const resolvedPlugins = useMemo(
     () => mergePlugConfigs(enabledPlugins?.configs ?? []),
@@ -118,6 +125,10 @@ export default function PluginEngine({
   useEffect(() => {
     window.__CARE_PLUGIN_RUNTIME__ = deepFreeze({ meta: pluginMeta });
   }, [pluginMeta]);
+
+  // Expose plugin loading state to show loaders while a plugin page is being accessed
+  const arePluginsLoading =
+    isEnabledPluginsLoading || pluginsQuery.some((plugin) => plugin.isLoading);
 
   // Register plugin overrides
   const overrideCleanupRef = useRef<(() => void)[]>([]);
@@ -160,7 +171,9 @@ export default function PluginEngine({
         }
       >
         <CareAppsContext.Provider value={pluginsQuery}>
-          <Suspense fallback={<Loading />}>{children}</Suspense>
+          <CareAppsLoadingContext.Provider value={arePluginsLoading}>
+            <Suspense fallback={<Loading />}>{children}</Suspense>
+          </CareAppsLoadingContext.Provider>
         </CareAppsContext.Provider>
       </ErrorBoundary>
     </Suspense>
