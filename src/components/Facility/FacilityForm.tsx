@@ -25,11 +25,11 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 
 import LocationPicker from "@/components/Common/GeoLocationPicker";
+import GovtOrganizationPicker from "@/components/Organization/GovtOrganizationPicker";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
-import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import {
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
@@ -53,7 +53,9 @@ export default function FacilityForm({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [selectedGeoOrg, setSelectedGeoOrg] = useState<Organization | null>(
+    null,
+  );
 
   const facilityFormSchema = z.object({
     facility_type: z.string().min(1, t("facility_type_required")),
@@ -101,9 +103,7 @@ export default function FacilityForm({
   });
 
   useEffect(() => {
-    const levels: Organization[] = [];
-    if (org && org.org_type === "govt") levels.push(org);
-    setSelectedLevels(levels);
+    setSelectedGeoOrg(org && org.org_type === "govt" ? org : null);
   }, [org, organizationId]);
 
   const { mutate: createFacility, isPending } = useMutation({
@@ -194,7 +194,7 @@ export default function FacilityForm({
   // Update form when facility data is loaded
   useEffect(() => {
     if (facilityData) {
-      setSelectedLevels([facilityData.geo_organization]);
+      setSelectedGeoOrg(facilityData.geo_organization);
       form.reset({
         facility_type: facilityData.facility_type,
         name: facilityData.name,
@@ -354,20 +354,25 @@ export default function FacilityForm({
             <FormField
               name="geo_organization"
               control={form.control}
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem className="md:col-span-2">
                   <FormControl>
                     <div className="grid-cols-1 grid md:grid-cols-2 gap-5">
-                      <GovtOrganizationSelector
-                        {...field}
-                        value={form.watch("geo_organization")}
-                        selected={selectedLevels}
-                        onChange={(value) =>
-                          form.setValue("geo_organization", value, {
-                            shouldDirty: true,
-                          })
-                        }
+                      <GovtOrganizationPicker
+                        ref={field.ref}
+                        aria-invalid={!!fieldState.error}
                         required
+                        value={selectedGeoOrg}
+                        onChange={(organization) => {
+                          setSelectedGeoOrg(organization);
+                          const isValid =
+                            !!organization && !organization.has_children;
+                          form.setValue(
+                            "geo_organization",
+                            isValid ? organization.id : "",
+                            { shouldDirty: true },
+                          );
+                        }}
                       />
                     </div>
                   </FormControl>
