@@ -110,7 +110,10 @@ import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import { FacilityRead } from "@/types/facility/facility";
+import { TokenFinalStatuses, TokenStatus } from "@/types/tokens/token/token";
+import tokenApi from "@/types/tokens/token/tokenApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
@@ -783,43 +786,151 @@ const AppointmentActions = ({
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
   const [newNote, setNewVisitReason] = useState(appointment.note);
   const [oldNote, setRescheduleReason] = useState(appointment.note);
-
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [note, setNote] = useState(appointment.note);
 
-  const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
-    mutationFn: mutate(scheduleApis.appointments.cancel, {
-      pathParams: { facilityId, id: appointment.id },
-    }),
-    onSuccess: () => {
-      toast.success(t("appointment_cancelled"));
-      queryClient.invalidateQueries({
-        queryKey: ["appointment", appointment.id],
-      });
-    },
-  });
-
-  const { mutate: rescheduleAppointment, isPending: isRescheduling } =
-    useMutation({
-      mutationFn: mutate(scheduleApis.appointments.reschedule, {
-        pathParams: { facilityId, id: appointment.id },
-      }),
-      onSuccess: (newAppointment: Appointment) => {
-        toast.success(t("appointment_rescheduled"));
+  const { mutate: executeBatch, isPending: isPending } = useBatchRequest({
+    onSuccess: ({ results }) => {
+      if (
+        results.find((result) => result.reference_id === "cancel-appointment")
+      ) {
+        queryClient.invalidateQueries({
+          queryKey: ["appointment", appointment.id],
+        });
+        toast.success(t("appointment_cancelled"));
+      }
+      if (results.find((result) => result.reference_id === "token-cancelled")) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            "infinite-tokens",
+            facilityId,
+            appointment.token?.queue.id || "",
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            "token-queue-summary",
+            facilityId,
+            appointment.token?.queue.id || "",
+          ],
+        });
+      }
+      if (
+        results.find(
+          (result) => result.reference_id === "reschedule-appointment",
+        )
+      ) {
         queryClient.invalidateQueries({
           queryKey: ["appointment", appointment.id],
         });
         setIsRescheduleOpen(false);
         setSelectedSlotId(undefined);
         setRescheduleReason("");
-        navigate(
-          `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
+        const result = results.find(
+          (result) => result.reference_id === "reschedule-appointment",
         );
+        const newAppointment = result?.data as Appointment;
+        if (newAppointment) {
+          navigate(
+            `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
+          );
+        }
+      }
+      if (results.find((result) => result.reference_id === "token-cancelled")) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            "infinite-tokens",
+            facilityId,
+            appointment.token?.queue.id || "",
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            "token-queue-summary",
+            facilityId,
+            appointment.token?.queue.id || "",
+          ],
+        });
+      }
+    },
+  });
+
+  const addCancelAppointment = (reason: string, note?: string) => {
+    let requests: BatchRequestObject[] = [];
+    requests.push({
+      api: scheduleApis.appointments.cancel,
+      pathParams: {
+        facilityId,
+        id: appointment.id,
+      },
+      referenceId: "cancel-appointment",
+      body: {
+        reason: reason,
+        note: note,
       },
     });
+    if (
+      appointment.token &&
+      !TokenFinalStatuses.includes(appointment.token.status)
+    ) {
+      requests.push({
+        api: tokenApi.update,
+        pathParams: {
+          facility_id: facilityId,
+          queue_id: appointment.token.queue.id,
+          id: appointment.token.id,
+        },
+        referenceId: "token-cancelled",
+        body: {
+          note: appointment.token.note,
+          sub_queue: appointment.token.sub_queue?.id || null,
+          status: TokenStatus.CANCELLED,
+        },
+      });
+    }
+    executeBatch(requests);
+  };
+
+  const addRescheduleAppointment = () => {
+    let requests: BatchRequestObject[] = [];
+    requests.push({
+      api: scheduleApis.appointments.reschedule,
+      pathParams: {
+        facilityId,
+        id: appointment.id,
+      },
+      referenceId: "reschedule-appointment",
+      body: {
+        new_slot: selectedSlotId || "",
+        previous_booking_note: oldNote,
+        new_booking_note: newNote,
+        tags: appointment.tags.map((tag) => tag.id),
+      },
+    });
+    if (
+      appointment.token &&
+      !TokenFinalStatuses.includes(appointment.token.status)
+    ) {
+      requests.push({
+        api: tokenApi.update,
+        referenceId: "token-cancelled",
+        pathParams: {
+          facility_id: facilityId,
+          queue_id: appointment.token.queue.id,
+          id: appointment.token.id,
+        },
+        body: {
+          note: appointment.token.note,
+          sub_queue: appointment.token.sub_queue?.id || null,
+          status: TokenStatus.CANCELLED,
+        },
+      });
+    }
+    executeBatch(requests);
+  };
 
   if (AppointmentFinalStatuses.includes(currentStatus)) {
     return null;
@@ -1025,21 +1136,10 @@ const AppointmentActions = ({
                           </Button>
                           <Button
                             variant="default"
-                            disabled={!selectedSlotId || isRescheduling}
-                            onClick={() => {
-                              if (selectedSlotId) {
-                                rescheduleAppointment({
-                                  new_slot: selectedSlotId,
-                                  previous_booking_note: oldNote,
-                                  new_booking_note: newNote,
-                                  tags: appointment.tags.map((tag) => tag.id),
-                                });
-                              }
-                            }}
+                            disabled={!selectedSlotId || isPending}
+                            onClick={addRescheduleAppointment}
                           >
-                            {isRescheduling
-                              ? t("rescheduling")
-                              : t("reschedule")}
+                            {isPending ? t("rescheduling") : t("reschedule")}
                           </Button>
                         </div>
                       </div>
@@ -1085,7 +1185,7 @@ const AppointmentActions = ({
                       onClick={() =>
                         updateAppointment({
                           status: AppointmentStatus.NO_SHOW,
-                          note: note,
+                          note,
                         })
                       }
                       className={cn(buttonVariants({ variant: "destructive" }))}
@@ -1133,16 +1233,11 @@ const AppointmentActions = ({
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() =>
-                        cancelAppointment({
-                          reason: "cancelled",
-                          note: note,
-                        })
-                      }
+                      onClick={() => addCancelAppointment("cancelled", note)}
                       className={cn(buttonVariants({ variant: "destructive" }))}
                       disabled={!note.trim()}
                     >
-                      {isCancelling ? (
+                      {isPending ? (
                         <Loader2 className="size-4 animate-spin mr-2" />
                       ) : (
                         t("confirm")
@@ -1179,11 +1274,11 @@ const AppointmentActions = ({
                   <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() =>
-                      cancelAppointment({ reason: "entered_in_error" })
+                      addCancelAppointment("entered_in_error", note)
                     }
                     className={cn(buttonVariants({ variant: "destructive" }))}
                   >
-                    {isCancelling ? (
+                    {isPending ? (
                       <Loader2 className="size-4 animate-spin mr-2" />
                     ) : (
                       t("confirm")
