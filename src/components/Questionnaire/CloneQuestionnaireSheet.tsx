@@ -49,7 +49,6 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const slug = useWatch({ control: form.control, name: "slug" });
-  const tags = useWatch({ control: form.control, name: "tags" });
   const [newSlug, setNewSlug] = useState(slug + "-copy");
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -96,7 +95,6 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
       status: "draft" as const,
       title: `${form.getValues("title")} (Clone)`,
       organizations: selectedIds,
-      tags: tags.map((tag) => tag.id),
       version: "1.0", // TODO: remove once backend handles versioning
     };
 
