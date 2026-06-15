@@ -17,7 +17,7 @@ import { ApiCallOptions, ApiRoute } from "@/Utils/request/types";
  * ```
  */
 export default function mutate<
-  Route extends ApiRoute<unknown, unknown, unknown>,
+  Route extends ApiRoute<unknown, unknown, QueryParams>,
 >(route: Route, options?: ApiCallOptions<Route>) {
   return (variables: Route["TBody"]) => {
     return callApi(route, { ...options, body: variables });
