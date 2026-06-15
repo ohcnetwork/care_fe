@@ -13,14 +13,6 @@ import { getResponseBody, makeHeaders, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
 /**
- * Represents query parameters for a paginated request.
- */
-interface PaginationQueryParams extends QueryParams {
-  limit?: number;
-  offset?: number;
-}
-
-/**
  * Low-level function to make an API call.
  * This function handles URL construction, header generation, and response parsing.
  *
@@ -31,7 +23,7 @@ interface PaginationQueryParams extends QueryParams {
  * @throws {Error} If a network error occurs.
  */
 export async function callApi<
-  Route extends ApiRoute<unknown, unknown, unknown>,
+  Route extends ApiRoute<unknown, unknown, QueryParams>,
 >(
   { baseUrl, path, method, noAuth, defaultQueryParams }: Route,
   options?: ApiCallOptions<Route>,
@@ -106,7 +98,7 @@ export async function callApi<
  * ```
  */
 export default function query<
-  Route extends ApiRoute<unknown, unknown, unknown>,
+  Route extends ApiRoute<unknown, unknown, QueryParams>,
 >(route: Route, options?: ApiCallOptions<Route>) {
   return ({ signal }: { signal: AbortSignal }) => {
     return callApi(route, { ...options, signal });
@@ -146,7 +138,7 @@ export default function query<
  * @param options - Additional options for the API call (path params, query params, debounceInterval, etc.).
  * @returns A query function that can be used with TanStack Query.
  */
-const debouncedQuery = <Route extends ApiRoute<unknown, unknown, unknown>>(
+const debouncedQuery = <Route extends ApiRoute<unknown, unknown, QueryParams>>(
   route: Route,
   options?: ApiCallOptions<Route> & { debounceInterval?: number },
 ) => {
@@ -182,11 +174,7 @@ query.debounced = debouncedQuery;
  * @returns A query function that can be used with TanStack Query.
  */
 const paginatedQuery = <
-  Route extends ApiRoute<
-    PaginatedResponse<unknown>,
-    unknown,
-    PaginationQueryParams
-  >,
+  Route extends ApiRoute<PaginatedResponse<unknown>, unknown, QueryParams>,
 >(
   route: Route,
   options?: ApiCallOptions<Route> & {

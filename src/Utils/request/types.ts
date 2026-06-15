@@ -63,7 +63,7 @@ type PathParams<T extends string> = {
  * Derives the query parameter type from an ApiRoute.
  */
 export type RouteQueryParams<
-  Route extends ApiRoute<unknown, unknown, unknown>,
+  Route extends ApiRoute<unknown, unknown, QueryParams>,
 > = NonNullable<Route["TQuery"]>;
 
 /**
@@ -72,7 +72,7 @@ export type RouteQueryParams<
  * @template Route - The API route definition.
  */
 export interface ApiCallOptions<
-  Route extends ApiRoute<unknown, unknown, unknown>,
+  Route extends ApiRoute<unknown, unknown, QueryParams>,
 > {
   /** Parameters to replace placeholders in the route path. */
   pathParams?: PathParams<Route["path"]>;
