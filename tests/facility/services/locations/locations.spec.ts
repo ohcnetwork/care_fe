@@ -15,21 +15,21 @@ test.describe("Locations", () => {
     await createHealthcareService(page, facilityId, serviceName, servicesUrl);
   }
 
-  test.beforeAll(async ({ page }) => {
+  test.beforeAll(async ({ browser }) => {
     facilityId = getFacilityId();
     serviceName =
       faker.string.uuid().slice(0, 5) + faker.commerce.productName();
     servicesUrl = `/facility/${facilityId}/services/`;
+    const page = await browser.newPage();
     await createService(page, serviceName);
+    await page.close();
   });
 
   test.beforeEach(async ({ page }) => {
     await page.goto(servicesUrl);
   });
 
-  test("should switch healthcare service (expanded sidebar)", async ({
-    page,
-  }) => {
+  test("should switch location (collapsed sidebar)", async ({ page }) => {
     await page.getByRole("link", { name: serviceName }).click();
     await expect(
       page.getByRole("heading").getByText(serviceName),
@@ -39,20 +39,16 @@ test.describe("Locations", () => {
       page.getByRole("heading").getByText("Prescription Queue"),
     ).toBeVisible();
     await toggleSidebar(page, true);
-    await page
-      .getByRole("button", { name: "Current Location Pharmacy" })
-      .click();
+    await page.getByRole("button", { name: "Pharmacy" }).click();
     await expect(page.getByText("Current Location:Pharmacy")).toBeVisible();
     await page.getByPlaceholder("Search").fill("Bio-Chemistry Lab");
     await page.getByRole("option", { name: "Bio-Chemistry Lab" }).click();
     await expect(
-      page.getByRole("button", { name: "Current Location Bio-Chemistry Lab" }),
+      page.getByRole("button", { name: "Bio-Chemistry Lab" }),
     ).toBeVisible();
   });
 
-  test("should switch healthcare service (collapsed sidebar)", async ({
-    page,
-  }) => {
+  test("should switch location (expanded sidebar)", async ({ page }) => {
     await page.getByRole("link", { name: serviceName }).click();
     await expect(
       page.getByRole("heading").getByText(serviceName),
@@ -66,7 +62,7 @@ test.describe("Locations", () => {
       .getByRole("button")
       .filter({ hasText: /Current Location/ })
       .click();
-    await expect(page.getByText("Current Location:Pharmacy")).toBeVisible();
+    await expect(page.getByText("Current LocationPharmacy")).toBeVisible();
     await page.getByPlaceholder("Search").fill("Bio-Chemistry Lab");
     await page.getByRole("option", { name: "Bio-Chemistry Lab" }).click();
     await expect(

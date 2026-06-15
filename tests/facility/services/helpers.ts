@@ -29,11 +29,11 @@ export async function createHealthcareService(
   await page.goto(servicesUrl);
 }
 
-export async function toggleSidebar(page: Page, expanded: boolean) {
-  const homeButton = page.getByRole("button", { name: "Home" });
-  if (expanded && !(await homeButton.isVisible())) {
-    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-  } else if (!expanded && (await homeButton.isVisible())) {
+export async function toggleSidebar(page: Page, expand: boolean) {
+  const homeButtonVisible = await page
+    .getByRole("button", { name: "Home" })
+    .isVisible();
+  if ((expand && !homeButtonVisible) || (!expand && homeButtonVisible)) {
     await page.getByRole("button", { name: "Toggle Sidebar" }).click();
   }
 }
