@@ -72,6 +72,7 @@ import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowl
 import {
   ActivityDefinitionTemplateSpec,
   QuestionnaireResponseTemplateCreateSpec,
+  QuestionnaireResponseTemplateKeyFilter,
   QuestionnaireResponseTemplateReadSpec,
   QuestionnaireResponseTemplateRetrieveSpec,
   QuestionnaireResponseTemplateUpdateSpec,
@@ -566,11 +567,7 @@ interface ManageResponseTemplatesSheetProps {
   disabled?: boolean;
   currentMedications?: MedicationRequestCreate[];
   currentActivityDefinitions?: ActivityDefinitionTemplateSpec[];
-  key_filter:
-    | "activity_definition"
-    | "medication_request"
-    | "questionnaire"
-    | "service_request";
+  key_filter: QuestionnaireResponseTemplateKeyFilter;
   facilityOrganizations?: string[];
 }
 
