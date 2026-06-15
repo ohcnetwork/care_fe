@@ -1,8 +1,4 @@
-import {
-  CareAppsContext,
-  CareAppsLoadingContext,
-  useCareApps,
-} from "@/hooks/useCareApps";
+import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
 import {
   PluginManifest,
   PluginManifestWithMeta,
@@ -170,10 +166,10 @@ export default function PluginEngine({
           </div>
         }
       >
-        <CareAppsContext.Provider value={pluginsQuery}>
-          <CareAppsLoadingContext.Provider value={arePluginsLoading}>
-            <Suspense fallback={<Loading />}>{children}</Suspense>
-          </CareAppsLoadingContext.Provider>
+        <CareAppsContext.Provider
+          value={{ apps: pluginsQuery, isLoading: arePluginsLoading }}
+        >
+          <Suspense fallback={<Loading />}>{children}</Suspense>
         </CareAppsContext.Provider>
       </ErrorBoundary>
     </Suspense>
