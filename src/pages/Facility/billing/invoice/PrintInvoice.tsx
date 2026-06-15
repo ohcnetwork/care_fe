@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { register } from "@/lib/override/";
 import { cn } from "@/lib/utils";
 import {
   InvoiceChargeItemTitle,
@@ -49,7 +50,7 @@ type PrintInvoiceProps = {
   invoiceId: string;
 };
 
-export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
+export function PrintInvoiceBase({ facilityId, invoiceId }: PrintInvoiceProps) {
   const { t } = useTranslation();
 
   const { data: invoice, isLoading: isInvoiceLoading } = useQuery({
@@ -710,4 +711,4 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
   );
 }
 
-export default PrintInvoice;
+export default register("PrintInvoice", PrintInvoiceBase);
