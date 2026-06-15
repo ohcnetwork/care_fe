@@ -29,7 +29,7 @@ test.describe("Services", () => {
     await page.goto(servicesUrl);
   });
 
-  test("should switch healthcare service (collapsed sidebar)", async ({
+  test("should switch healthcare service (expanded sidebar)", async ({
     page,
   }) => {
     await page.getByRole("link", { name: serviceName }).click();
@@ -48,7 +48,7 @@ test.describe("Services", () => {
     ).toBeVisible();
   });
 
-  test("should switch healthcare service (expanded sidebar)", async ({
+  test("should switch healthcare service (collapsed sidebar)", async ({
     page,
   }) => {
     await page.getByRole("link", { name: serviceName }).click();

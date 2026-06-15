@@ -29,7 +29,7 @@ test.describe("Locations", () => {
     await page.goto(servicesUrl);
   });
 
-  test("should switch location (collapsed sidebar)", async ({ page }) => {
+  test("should switch location (expanded sidebar)", async ({ page }) => {
     await page.getByRole("link", { name: serviceName }).click();
     await expect(
       page.getByRole("heading").getByText(serviceName),
@@ -48,7 +48,7 @@ test.describe("Locations", () => {
     ).toBeVisible();
   });
 
-  test("should switch location (expanded sidebar)", async ({ page }) => {
+  test("should switch location (collapsed sidebar)", async ({ page }) => {
     await page.getByRole("link", { name: serviceName }).click();
     await expect(
       page.getByRole("heading").getByText(serviceName),
