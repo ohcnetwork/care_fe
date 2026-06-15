@@ -12,9 +12,9 @@ function generateSlugValue(title: string | undefined): string {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^\w\s-]/g, "")
     .replace(/[\s-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
+    .replace(/^[-_]+|[-_]+$/g, "")
     .slice(0, 36)
-    .replace(/-+$/, "");
+    .replace(/[-_]+$/, "");
 }
 
 /**
