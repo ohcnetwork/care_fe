@@ -189,10 +189,15 @@ const paginatedQuery = <
     let count = 0;
 
     const pageSize =
-      Number(options?.pageSize) ||
-      Number(options?.queryParams?.limit) ||
-      RESULTS_PER_PAGE_LIMIT;
-    const startOffset = Number(options?.queryParams?.offset) || 0;
+      typeof options?.pageSize === "number"
+        ? options.pageSize
+        : typeof options?.queryParams?.limit === "number"
+          ? options.queryParams.limit
+          : RESULTS_PER_PAGE_LIMIT;
+    const startOffset =
+      typeof options?.queryParams?.offset === "number"
+        ? options.queryParams.offset
+        : 0;
 
     if (!Number.isInteger(pageSize) || pageSize <= 0) {
       throw new RangeError("query.paginated requires a positive pageSize.");
