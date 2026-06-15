@@ -28,11 +28,11 @@ export function generateSlugValue(title: string | undefined): string {
       .replace(/[^\w\s-]/g, "")
       // Replace multiple spaces or hyphens with single hyphen
       .replace(/[\s-]+/g, "-")
-      // Remove leading and trailing hyphens
-      .replace(/^-+|-+$/g, "")
+      // Remove leading and trailing hyphens or underscores
+      .replace(/^[-_]+|[-_]+$/g, "")
       // Limit length
       .slice(0, SLUG_VALUE_MAX_LENGTH)
-      // Remove trailing hyphens after truncation
-      .replace(/-+$/, "")
+      // Remove trailing hyphens or underscores after truncation
+      .replace(/[-_]+$/, "")
   );
 }
