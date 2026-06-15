@@ -130,10 +130,10 @@ function formatDoseRange(range?: DoseRange): string {
 export function buildMedicationForTemplate(
   medication: MedicationRequestCreate,
 ): MedicationRequestTemplateSpec {
-  const medicationForTemplate = {
+  const medicationForTemplate: MedicationRequestCreate = {
     ...medication,
     requested_product: medication.requested_product_internal?.slug || undefined,
-  } as Partial<MedicationRequestTemplateSpec> & Record<string, unknown>;
+  };
 
   // Handle medication field based on whether we have a product slug
   if (medication.requested_product) {
@@ -148,7 +148,7 @@ export function buildMedicationForTemplate(
   delete medicationForTemplate.requested_product_internal;
   delete medicationForTemplate.id;
 
-  return medicationForTemplate as MedicationRequestTemplateSpec;
+  return medicationForTemplate;
 }
 
 /**
