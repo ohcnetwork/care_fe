@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, type UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
 
@@ -30,6 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   TERMINOLOGY_SYSTEMS,
   ValueSetBase,
+  ValueSetInclude,
   ValueSetRead,
   ValueSetStatus,
 } from "@/types/valueSet/valueSet";
@@ -47,6 +48,17 @@ interface ValueSetFormProps {
   isReadOnly?: boolean;
 }
 
+interface ValueSetFormInclude extends Omit<ValueSetInclude, "version"> {
+  version: string;
+}
+
+interface ValueSetFormData extends Omit<ValueSetBase, "compose"> {
+  compose: {
+    exclude: ValueSetFormInclude[];
+    include: ValueSetFormInclude[];
+  };
+}
+
 function ConceptFields({
   nestIndex,
   type,
@@ -55,7 +67,7 @@ function ConceptFields({
 }: {
   nestIndex: number;
   type: "include" | "exclude";
-  parentForm: ReturnType<typeof useForm<ValueSetBase>>;
+  parentForm: UseFormReturn<ValueSetFormData>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation(); // Add translation hook
@@ -105,7 +117,7 @@ function FilterFields({
   nestIndex: number;
   type: "include" | "exclude";
   disabled?: boolean;
-  parentForm: ReturnType<typeof useForm<ValueSetBase>>;
+  parentForm: UseFormReturn<ValueSetFormData>;
 }) {
   const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({
@@ -202,7 +214,7 @@ function RuleFields({
   disabled,
 }: {
   type: "include" | "exclude";
-  form: ReturnType<typeof useForm<ValueSetBase>>;
+  form: UseFormReturn<ValueSetFormData>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -224,6 +236,7 @@ function RuleFields({
           onClick={() =>
             append({
               system: Object.values(TERMINOLOGY_SYSTEMS)[0],
+              version: "",
               concept: [],
               filter: [],
             })
@@ -265,6 +278,23 @@ function RuleFields({
                         )}
                       </SelectContent>
                     </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`compose.${type}.${index}.version`}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>{t("version")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder={t("version")}
+                        disabled={disabled}
+                      />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -319,6 +349,7 @@ export function ValueSetForm({
       include: z.array(
         z.object({
           system: z.string(),
+          version: z.string(),
           concept: z
             .array(
               z.object({
@@ -341,6 +372,7 @@ export function ValueSetForm({
       exclude: z.array(
         z.object({
           system: z.string(),
+          version: z.string(),
           concept: z
             .array(
               z.object({
@@ -363,7 +395,7 @@ export function ValueSetForm({
     }),
   });
 
-  const form = useForm({
+  const form = useForm<ValueSetFormData>({
     resolver: zodResolver(valuesetFormSchema),
     defaultValues: {
       name: initialData?.name || "",
@@ -372,8 +404,16 @@ export function ValueSetForm({
       status: initialData?.status || ValueSetStatus.ACTIVE,
       is_system_defined: initialData?.is_system_defined || false,
       compose: {
-        include: initialData?.compose?.include || [],
-        exclude: initialData?.compose?.exclude || [],
+        include:
+          initialData?.compose?.include.map((rule) => ({
+            ...rule,
+            version: rule.version ?? "",
+          })) || [],
+        exclude:
+          initialData?.compose?.exclude.map((rule) => ({
+            ...rule,
+            version: rule.version ?? "",
+          })) || [],
       },
     },
   });
