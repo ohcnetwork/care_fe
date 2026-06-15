@@ -29,7 +29,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
 import { useCareApps } from "@/hooks/useCareApps";
-import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
@@ -75,8 +74,6 @@ export function EncounterCommandDialog({
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
-  const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
-
   const { data: questionnaires, isLoading } = useQuery({
     queryKey: ["questionnaires", search, "encounter"],
     queryFn: query.debounced(questionnaireApi.list, {
@@ -86,7 +83,6 @@ export function EncounterCommandDialog({
         subject_type: "encounter",
       },
     }),
-    enabled: !!search,
   });
 
   useEffect(() => {
@@ -410,11 +406,7 @@ export function EncounterCommandDialog({
       groups.push({
         group: t("questionnaire"),
         items: [
-          ...(
-            (search.length > 0
-              ? questionnaires?.results
-              : questionnaireOptions?.results) || []
-          ).map((option) => ({
+          ...(questionnaires?.results || []).map((option) => ({
             id: `questionnaire-${option.slug}`,
             label: option.title,
             icon: <NotebookPen />,
@@ -427,7 +419,6 @@ export function EncounterCommandDialog({
     return groups;
   }, [
     t,
-    questionnaireOptions,
     questionnaires,
     search,
     getShortcutDisplay,
