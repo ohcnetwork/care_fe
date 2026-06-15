@@ -20,6 +20,16 @@ export interface ActivityDefinitionTemplateSpec {
   };
 }
 
+export const QUESTIONNAIRE_RESPONSE_TEMPLATE_KEY_FILTERS = [
+  "activity_definition",
+  "medication_request",
+  "questionnaire",
+  "service_request",
+] as const;
+
+export type QuestionnaireResponseTemplateKeyFilter =
+  (typeof QUESTIONNAIRE_RESPONSE_TEMPLATE_KEY_FILTERS)[number];
+
 interface TemplateData {
   medication_request?: MedicationRequestTemplateSpec[];
   questionnaire?: QuestionnaireAnswer[];

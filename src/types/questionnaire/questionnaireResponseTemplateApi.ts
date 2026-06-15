@@ -1,5 +1,6 @@
 import {
   QuestionnaireResponseTemplateCreateSpec,
+  QuestionnaireResponseTemplateKeyFilter,
   QuestionnaireResponseTemplateReadSpec,
   QuestionnaireResponseTemplateRetrieveSpec,
   QuestionnaireResponseTemplateUpdateSpec,
@@ -15,11 +16,7 @@ export const questionnaireResponseTemplateApi = {
       questionnaire?: string;
       facility?: string;
       name?: string;
-      key_filter?:
-        | "activity_definition"
-        | "medication_request"
-        | "questionnaire"
-        | "service_request";
+      key_filter?: QuestionnaireResponseTemplateKeyFilter;
       limit?: number;
       offset?: number;
     }>(),
