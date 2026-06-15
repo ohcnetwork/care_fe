@@ -24,6 +24,7 @@ interface TemplateData {
   medication_request?: MedicationRequestTemplateSpec[];
   questionnaire?: QuestionnaireAnswer[];
   activity_definition?: ActivityDefinitionTemplateSpec[];
+  service_request?: never[];
   meta?: Record<string, unknown>;
 }
 

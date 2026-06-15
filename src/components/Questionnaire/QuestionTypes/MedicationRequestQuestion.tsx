@@ -531,7 +531,7 @@ export function MedicationRequestQuestion({
         facility: facilityId,
         template_data: {
           medication_request: [medicationForTemplate],
-          activity_definition: [],
+          service_request: [],
         },
         users: [authUser.username],
         facility_organizations: selectedOrganizations || [],
