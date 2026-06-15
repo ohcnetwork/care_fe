@@ -103,7 +103,7 @@ export default function FacilityForm({
   });
 
   useEffect(() => {
-    if (!organizationId) {
+    if (!organizationId || facilityId) {
       return;
     }
 
@@ -112,7 +112,7 @@ export default function FacilityForm({
 
     setSelectedGeoOrg(govtOrg);
     form.setValue("geo_organization", isValid ? govtOrg.id : "");
-  }, [org, organizationId, form]);
+  }, [org, organizationId, facilityId, form]);
 
   const { mutate: createFacility, isPending } = useMutation({
     mutationFn: mutate(facilityApi.create),
