@@ -677,7 +677,7 @@ export default function QuestionnaireEditor({
               message: t("repeatable_group_cannot_contain_structured"),
             });
             toast.error(
-              `${question.text}: ${t("repeatable_group_cannot_contain_structured")}`,
+              `${t("question")} ${idx + 1}: ${question.text} - ${t("repeatable_group_cannot_contain_structured")}`,
             );
             isValid = false;
           }
