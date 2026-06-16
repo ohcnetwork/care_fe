@@ -144,12 +144,12 @@ function QuestionGroup({
                               className="flex flex-col md:table-row"
                             >
                               <TableCell className="py-1 pl-0 align-top">
-                                <div className="text-sm text-gray-600 wrap-break-words whitespace-normal">
+                                <div className="text-sm text-gray-600 wrap-break-word whitespace-normal">
                                   {subQuestion.text}
                                 </div>
                               </TableCell>
                               <TableCell className="py-1 pr-0 align-top">
-                                <div className="text-sm font-medium wrap-break-words whitespace-pre-wrap">
+                                <div className="text-sm font-medium wrap-break-word whitespace-pre-wrap">
                                   {subResp.values.map((val, vidx) => (
                                     <React.Fragment key={vidx}>
                                       {vidx > 0 && ", "}
@@ -302,7 +302,7 @@ function QuestionGroup({
     return (
       <TableRow key={question.id} className="flex flex-col md:table-row">
         <TableCell className="py-1 pl-0 align-top">
-          <div className="text-sm text-gray-600 break-words whitespace-normal">
+          <div className="text-sm text-gray-600 wrap-break-word whitespace-normal">
             {question.text}
           </div>
         </TableCell>
@@ -310,7 +310,7 @@ function QuestionGroup({
           className="py-1 pr-0 align-top"
           colSpan={response.note ? 1 : 2}
         >
-          <div className="text-sm font-medium break-words whitespace-pre-wrap">
+          <div className="text-sm font-medium wrap-break-word whitespace-pre-wrap">
             {values.map((val, idx) => (
               <React.Fragment key={idx}>
                 {idx > 0 && ", "}
@@ -543,7 +543,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                         className="flex flex-col md:table-row"
                       >
                         <TableCell className="py-1 pl-0 align-top">
-                          <div className="text-sm text-gray-600 break-words whitespace-normal">
+                          <div className="text-sm text-gray-600 wrap-break-word whitespace-normal">
                             {question.text}
                           </div>
                         </TableCell>
@@ -551,7 +551,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                           className="py-1 pr-0 align-top"
                           colSpan={response.note ? 1 : 2}
                         >
-                          <div className="text-sm font-medium break-words whitespace-pre-wrap">
+                          <div className="text-sm font-medium wrap-break-word whitespace-pre-wrap">
                             {values.map((val, idx) => (
                               <React.Fragment key={idx}>
                                 {idx > 0 && ", "}

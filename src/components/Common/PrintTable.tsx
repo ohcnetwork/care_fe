@@ -98,7 +98,7 @@ export default function PrintTable({
                 {headers.map(({ key }) => (
                   <TableCell
                     className={cn(
-                      "wrap-break-words whitespace-normal text-center",
+                      "wrap-break-word whitespace-normal text-center",
                       classNameCell,
                       cellConfig?.[key]?.className,
                     )}

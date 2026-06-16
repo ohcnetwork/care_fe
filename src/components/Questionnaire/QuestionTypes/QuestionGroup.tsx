@@ -419,7 +419,10 @@ function RepeatableGroupRenderer({
                   facilityId={facilityId}
                   key={`${subQuestion.id}-${instanceIndex}`}
                   question={subQuestion}
-                  questionnaireResponses={instance}
+                  questionnaireResponses={[
+                    ...instance,
+                    ...questionnaireResponses,
+                  ]}
                   updateQuestionnaireResponseCB={(
                     values,
                     questionId,
