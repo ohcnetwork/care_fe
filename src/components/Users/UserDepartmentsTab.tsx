@@ -155,7 +155,8 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
         />
       </div>
       <Input
-        placeholder={t("search")}
+        placeholder={t("search_departments_placeholder")}
+        aria-label={t("search_departments_placeholder")}
         value={qParams.name || ""}
         onChange={(e) => updateQuery({ name: e.target.value || undefined })}
         className="w-full max-w-sm"
