@@ -139,6 +139,9 @@ const SERVICE_REQUEST_FIELDS = {
   },
 } as const;
 
+/**
+ * @public
+ */
 export function validateServiceRequestQuestion(
   values: ServiceRequestReadSpec[],
   questionId: string,

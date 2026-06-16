@@ -73,7 +73,7 @@ interface AccountSheetProps {
   isEdit?: boolean;
 }
 
-export function AccountSheet({
+function AccountSheet({
   open,
   onOpenChange,
   facilityId,

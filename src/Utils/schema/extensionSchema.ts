@@ -17,6 +17,7 @@ import {
  * Converts a JSON Schema to a Zod schema at runtime
  * @param schema - JSON Schema Draft 2020-12 object
  * @returns Zod schema for validation
+ * @public
  */
 export function convertJsonSchemaToZod(
   schema: JSONSchema2020 | undefined,

@@ -20,13 +20,6 @@ export const MEDICATION_REQUEST_STATUS_COLORS = {
   entered_in_error: "destructive",
 } as const satisfies Record<MedicationRequestStatus, string>;
 
-export const MEDICATION_REQUEST_PRIORITY_COLORS = {
-  stat: "secondary",
-  urgent: "yellow",
-  asap: "destructive",
-  routine: "indigo",
-} as const satisfies Record<MedicationPriority, string>;
-
 export const DOSAGE_UNITS_CODES = [
   {
     code: "{tbl}",
@@ -253,13 +246,6 @@ export enum MedicationPriority {
   ASAP = "asap",
   ROUTINE = "routine",
 }
-
-export const MEDICATION_PRIORITY_COLORS = {
-  stat: "secondary",
-  urgent: "yellow",
-  asap: "destructive",
-  routine: "indigo",
-} as const satisfies Record<MedicationPriority, string>;
 
 export interface MedicationRequestRead {
   id: string;
@@ -891,16 +877,6 @@ export function evalSlot(slot: string): number {
     return den ? num / den : 0;
   }
   return Number(slot) || 0;
-}
-
-/**
- * Check whether all non-zero slots in a M-A-N string have the same dose.
- */
-export function isUniformMan(manString: string): boolean {
-  const slots = manString.split("-");
-  const nonZero = slots.filter((s) => evalSlot(s) !== 0);
-  if (nonZero.length === 0) return true;
-  return nonZero.every((s) => evalSlot(s) === evalSlot(nonZero[0]));
 }
 
 /**
