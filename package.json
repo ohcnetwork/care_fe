@@ -48,7 +48,7 @@
     "playwright:db-status": "bash scripts/playwright-db.sh status",
     "prepare": "husky",
     "lint": "eslint ./src",
-    "unimported": "npx unimported",
+    "unimported": "npx --yes unimported@1.31.1",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./tests --write",
     "sort-locales": "node ./scripts/sort-locales.js",
