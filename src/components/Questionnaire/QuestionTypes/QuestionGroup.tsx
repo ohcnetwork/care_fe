@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { memo, useCallback, useEffect } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ import type {
 import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
 import { QuestionDescription } from "@/components/Questionnaire/QuestionDescription";
+import { initializeGroupResponses } from "@/components/Questionnaire/utils";
 import { Plus, XIcon } from "lucide-react";
 import { QuestionInput } from "./QuestionInput";
 
@@ -123,9 +124,12 @@ export const QuestionGroup = memo(function QuestionGroup({
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
+  const questionnaireResponsesRef = useRef(questionnaireResponses);
+  questionnaireResponsesRef.current = questionnaireResponses;
+
   const clearDependentQuestionResponse = useCallback(
     (dependentQuestion: Question) => {
-      const dependentQuestionResponse = questionnaireResponses.find(
+      const dependentQuestionResponse = questionnaireResponsesRef.current.find(
         (v) => v.question_id === dependentQuestion.id,
       );
       if (dependentQuestionResponse) {
@@ -145,13 +149,15 @@ export const QuestionGroup = memo(function QuestionGroup({
         clearDependentQuestionResponse(q);
       });
     },
-    [questionnaireResponses, updateQuestionnaireResponseCB],
+    [updateQuestionnaireResponseCB],
   );
 
+  const prevIsEnabledRef = useRef(isEnabled);
   useEffect(() => {
-    if (!isEnabled) {
+    if (prevIsEnabledRef.current && !isEnabled) {
       clearDependentQuestionResponse(question);
     }
+    prevIsEnabledRef.current = isEnabled;
   }, [isEnabled, clearDependentQuestionResponse, question]);
 
   if (!isEnabled) {
@@ -247,47 +253,7 @@ export const QuestionGroup = memo(function QuestionGroup({
   );
 });
 
-function initializeGroupResponses(
-  questions: Question[],
-): QuestionnaireResponse[] {
-  const responses: QuestionnaireResponse[] = [];
-  for (const q of questions) {
-    if (q.type === "group" && q.questions) {
-      if (q.repeats) {
-        responses.push({
-          question_id: q.id,
-          link_id: q.link_id,
-          values: [],
-          structured_type: null,
-          sub_results: [initializeGroupResponses(q.questions)],
-        });
-      } else {
-        responses.push(...initializeGroupResponses(q.questions));
-      }
-    } else {
-      let defaultValues: ResponseValue[] = [];
-      if (q.answer_option && q.answer_option.length > 0) {
-        const defaultOptions = q.answer_option.filter(
-          (o) => o.initial_selected === true,
-        );
-        if (defaultOptions.length > 0) {
-          defaultValues = defaultOptions.map((opt) => ({
-            type: "string",
-            value: opt.value,
-            coding: opt.code ?? undefined,
-          }));
-        }
-      }
-      responses.push({
-        question_id: q.id,
-        link_id: q.link_id,
-        values: defaultValues,
-        structured_type: q.structured_type ?? null,
-      });
-    }
-  }
-  return responses;
-}
+let instanceIdCounter = 0;
 
 function RepeatableGroupRenderer({
   question,
@@ -311,56 +277,87 @@ function RepeatableGroupRenderer({
   );
   const subResults = groupResponse?.sub_results ?? [];
 
-  const handleAddInstance = () => {
+  // Stable instance keys: maintain a ref that maps each instance to a unique ID
+  const instanceKeysRef = useRef<number[]>([]);
+  if (instanceKeysRef.current.length < subResults.length) {
+    // New instances were added — assign new keys for the new ones
+    while (instanceKeysRef.current.length < subResults.length) {
+      instanceKeysRef.current.push(++instanceIdCounter);
+    }
+  } else if (instanceKeysRef.current.length > subResults.length) {
+    // Instances were removed — trim to match (handled by handleRemoveInstance)
+    instanceKeysRef.current = instanceKeysRef.current.slice(
+      0,
+      subResults.length,
+    );
+  }
+
+  // Use a ref to hold subResults for stable callback references
+  const subResultsRef = useRef(subResults);
+  subResultsRef.current = subResults;
+
+  const handleAddInstance = useCallback(() => {
     const newInstance = initializeGroupResponses(question.questions ?? []);
-    const updatedSubResults = [...subResults, newInstance];
+    const updatedSubResults = [...subResultsRef.current, newInstance];
     updateQuestionnaireResponseCB(
       [],
       question.id,
       undefined,
       updatedSubResults,
     );
-  };
+  }, [question.questions, question.id, updateQuestionnaireResponseCB]);
 
-  const handleRemoveInstance = (index: number) => {
-    const updatedSubResults = subResults.filter((_, i) => i !== index);
-    updateQuestionnaireResponseCB(
-      [],
-      question.id,
-      undefined,
-      updatedSubResults,
-    );
-  };
-
-  const handleUpdateSubResponse = (
-    instanceIndex: number,
-    values: ResponseValue[],
-    questionId: string,
-    note?: string,
-    nestedSubResults?: QuestionnaireResponse[][],
-  ) => {
-    const updatedSubResults = subResults.map((instance, i) => {
-      if (i !== instanceIndex) return instance;
-      return instance.map((r) =>
-        r.question_id === questionId
-          ? {
-              ...r,
-              values,
-              ...(note !== undefined ? { note } : {}),
-              ...(nestedSubResults !== undefined
-                ? { sub_results: nestedSubResults }
-                : {}),
-            }
-          : r,
+  const handleRemoveInstance = useCallback(
+    (index: number) => {
+      const updatedSubResults = subResultsRef.current.filter(
+        (_, i) => i !== index,
       );
-    });
-    updateQuestionnaireResponseCB(
-      [],
-      question.id,
-      undefined,
-      updatedSubResults,
-    );
-  };
+      // Also remove the corresponding stable key
+      instanceKeysRef.current = instanceKeysRef.current.filter(
+        (_, i) => i !== index,
+      );
+      updateQuestionnaireResponseCB(
+        [],
+        question.id,
+        undefined,
+        updatedSubResults,
+      );
+    },
+    [question.id, updateQuestionnaireResponseCB],
+  );
+
+  const handleUpdateSubResponse = useCallback(
+    (
+      instanceIndex: number,
+      values: ResponseValue[],
+      questionId: string,
+      note?: string,
+      nestedSubResults?: QuestionnaireResponse[][],
+    ) => {
+      const updatedSubResults = subResultsRef.current.map((instance, i) => {
+        if (i !== instanceIndex) return instance;
+        return instance.map((r) =>
+          r.question_id === questionId
+            ? {
+                ...r,
+                values,
+                ...(note !== undefined ? { note } : {}),
+                ...(nestedSubResults !== undefined
+                  ? { sub_results: nestedSubResults }
+                  : {}),
+              }
+            : r,
+        );
+      });
+      updateQuestionnaireResponseCB(
+        [],
+        question.id,
+        undefined,
+        updatedSubResults,
+      );
+    },
+    [question.id, updateQuestionnaireResponseCB],
+  );
 
   const isActive = activeGroupId === question.id;
 
@@ -384,71 +381,25 @@ function RepeatableGroupRenderer({
       )}
       <div className="space-y-4 p-2">
         {subResults.map((instance, instanceIndex) => (
-          <div
-            key={instanceIndex}
-            className="relative rounded-md border border-gray-200 bg-white p-3"
-          >
-            {subResults.length > 1 && (
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-500">
-                  #{instanceIndex + 1}
-                </span>
-                {!disabled && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveInstance(instanceIndex)}
-                    className="size-6 text-gray-400 hover:text-red-500"
-                    aria-label={t("remove")}
-                  >
-                    <XIcon className="size-4" />
-                  </Button>
-                )}
-              </div>
-            )}
-            <div
-              className={cn(
-                "gap-1",
-                question.styling_metadata?.containerClasses,
-              )}
-            >
-              {question.questions?.map((subQuestion) => (
-                <QuestionGroup
-                  encounterId={encounterId}
-                  facilityId={facilityId}
-                  key={`${subQuestion.id}-${instanceIndex}`}
-                  question={subQuestion}
-                  questionnaireResponses={[
-                    ...instance,
-                    ...questionnaireResponses,
-                  ]}
-                  updateQuestionnaireResponseCB={(
-                    values,
-                    questionId,
-                    note,
-                    subResults,
-                  ) =>
-                    handleUpdateSubResponse(
-                      instanceIndex,
-                      values,
-                      questionId,
-                      note,
-                      subResults,
-                    )
-                  }
-                  errors={errors}
-                  clearError={clearError}
-                  disabled={disabled}
-                  activeGroupId={activeGroupId}
-                  patientId={patientId}
-                  isSubQuestion={true}
-                  questionnaireId={questionnaireId}
-                  questionnaireSlug={questionnaireSlug}
-                />
-              ))}
-            </div>
-          </div>
+          <RepeatableGroupInstance
+            key={instanceKeysRef.current[instanceIndex]}
+            instance={instance}
+            instanceIndex={instanceIndex}
+            instanceCount={subResults.length}
+            question={question}
+            encounterId={encounterId}
+            questionnaireResponses={questionnaireResponses}
+            errors={errors}
+            clearError={clearError}
+            disabled={disabled}
+            activeGroupId={activeGroupId}
+            facilityId={facilityId}
+            patientId={patientId}
+            questionnaireId={questionnaireId}
+            questionnaireSlug={questionnaireSlug}
+            onRemove={handleRemoveInstance}
+            onUpdateSubResponse={handleUpdateSubResponse}
+          />
         ))}
         {!disabled && (
           <Button
@@ -470,3 +421,118 @@ function RepeatableGroupRenderer({
     </div>
   );
 }
+
+interface RepeatableGroupInstanceProps {
+  instance: QuestionnaireResponse[];
+  instanceIndex: number;
+  instanceCount: number;
+  question: Question;
+  encounterId?: string;
+  questionnaireResponses: QuestionnaireResponse[];
+  errors: QuestionValidationError[];
+  clearError: (questionId: string) => void;
+  disabled?: boolean;
+  activeGroupId?: string;
+  facilityId?: string;
+  patientId: string;
+  questionnaireId?: string;
+  questionnaireSlug?: string;
+  onRemove: (index: number) => void;
+  onUpdateSubResponse: (
+    instanceIndex: number,
+    values: ResponseValue[],
+    questionId: string,
+    note?: string,
+    nestedSubResults?: QuestionnaireResponse[][],
+  ) => void;
+}
+
+const RepeatableGroupInstance = memo(function RepeatableGroupInstance({
+  instance,
+  instanceIndex,
+  instanceCount,
+  question,
+  encounterId,
+  questionnaireResponses,
+  errors,
+  clearError,
+  disabled,
+  activeGroupId,
+  facilityId,
+  patientId,
+  questionnaireId,
+  questionnaireSlug,
+  onRemove,
+  onUpdateSubResponse,
+}: RepeatableGroupInstanceProps) {
+  const { t } = useTranslation();
+
+  // Scope errors to this instance: only pass errors matching this index or with no index
+  const instanceErrors = useMemo(
+    () =>
+      errors.filter((e) => e.index === undefined || e.index === instanceIndex),
+    [errors, instanceIndex],
+  );
+
+  const mergedResponses = useMemo(
+    () => [...instance, ...questionnaireResponses],
+    [instance, questionnaireResponses],
+  );
+
+  return (
+    <div className="relative rounded-md border border-gray-200 bg-white p-3">
+      {instanceCount > 1 && (
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-500">
+            #{instanceIndex + 1}
+          </span>
+          {!disabled && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onRemove(instanceIndex)}
+              className="size-6 text-gray-400 hover:text-red-500"
+              aria-label={t("remove")}
+            >
+              <XIcon className="size-4" />
+            </Button>
+          )}
+        </div>
+      )}
+      <div className={cn("gap-1", question.styling_metadata?.containerClasses)}>
+        {question.questions?.map((subQuestion) => (
+          <QuestionGroup
+            encounterId={encounterId}
+            facilityId={facilityId}
+            key={`${subQuestion.id}-${instanceIndex}`}
+            question={subQuestion}
+            questionnaireResponses={mergedResponses}
+            updateQuestionnaireResponseCB={(
+              values,
+              questionId,
+              note,
+              subResults,
+            ) =>
+              onUpdateSubResponse(
+                instanceIndex,
+                values,
+                questionId,
+                note,
+                subResults,
+              )
+            }
+            errors={instanceErrors}
+            clearError={clearError}
+            disabled={disabled}
+            activeGroupId={activeGroupId}
+            patientId={patientId}
+            isSubQuestion={true}
+            questionnaireId={questionnaireId}
+            questionnaireSlug={questionnaireSlug}
+          />
+        ))}
+      </div>
+    </div>
+  );
+});

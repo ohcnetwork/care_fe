@@ -220,6 +220,22 @@ function hasStructuredQuestion(questions?: Question[]): boolean {
   );
 }
 
+function findStructuredQuestionNumbers(
+  questions: Question[],
+  prefix: string,
+): { number: string; text: string }[] {
+  const results: { number: string; text: string }[] = [];
+  questions.forEach((q, idx) => {
+    const num = `${prefix}.${idx + 1}`;
+    if (q.type === "structured") {
+      results.push({ number: num, text: q.text });
+    } else if (q.type === "group" && q.questions) {
+      results.push(...findStructuredQuestionNumbers(q.questions, num));
+    }
+  });
+  return results;
+}
+
 function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
   for (let i = 0; i < errors.length; i++) {
     const current = errors[i];
@@ -650,9 +666,16 @@ export default function QuestionnaireEditor({
     const hasOrganizations = validateOrganizations();
     const hasValidStructuredType = validateStructuredType();
 
-    const validateQuestions = (questions: Question[], path = "questions") => {
+    const validateQuestions = (
+      questions: Question[],
+      path = "questions",
+      numberPrefix = "",
+    ) => {
       questions.forEach((question, idx) => {
         const currentPath = `${path}.${idx}`;
+        const questionNumber = numberPrefix
+          ? `${numberPrefix}.${idx + 1}`
+          : `${idx + 1}`;
 
         if (question.code && !question.code?.display) {
           form.setError(`${currentPath}.code.display`, {
@@ -663,7 +686,11 @@ export default function QuestionnaireEditor({
         }
 
         if (question.type === "group" && Array.isArray(question.questions)) {
-          validateQuestions(question.questions, `${currentPath}.questions`);
+          validateQuestions(
+            question.questions,
+            `${currentPath}.questions`,
+            questionNumber,
+          );
           if (question.questions.length === 0) {
             form.setError(`${currentPath}.questions`, {
               type: "manual",
@@ -676,9 +703,15 @@ export default function QuestionnaireEditor({
               type: "manual",
               message: t("repeatable_group_cannot_contain_structured"),
             });
-            toast.error(
-              `${t("question")} ${idx + 1}: ${question.text} - ${t("repeatable_group_cannot_contain_structured")}`,
+            const structuredQuestions = findStructuredQuestionNumbers(
+              question.questions,
+              questionNumber,
             );
+            structuredQuestions.forEach((sq) => {
+              toast.error(
+                `${t("question")} ${sq.number}: ${sq.text} - ${t("repeatable_group_cannot_contain_structured")}`,
+              );
+            });
             isValid = false;
           }
         }

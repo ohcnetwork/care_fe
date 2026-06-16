@@ -4884,7 +4884,7 @@
   "rename_file": "Rename File",
   "reopen_order": "Reopen Order",
   "repeatable": "Repeatable",
-  "repeatable_group_cannot_contain_structured": "A repeatable group cannot contain structured questions, please disable repeatable or remove the structured question.",
+  "repeatable_group_cannot_contain_structured": "Repeatable group cannot contain structured questions.",
   "replace_home_facility": "Replace Home Facility",
   "replace_home_facility_confirm": "Are you sure you want to replace",
   "replace_home_facility_confirm_as": "as home facility for user",

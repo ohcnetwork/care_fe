@@ -1,4 +1,55 @@
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
+
+/**
+ * Initializes default responses for a group of questions.
+ * Used by both QuestionnaireForm (for top-level init) and
+ * RepeatableGroupRenderer (for adding new instances).
+ */
+export function initializeGroupResponses(
+  questions: Question[],
+): QuestionnaireResponse[] {
+  const responses: QuestionnaireResponse[] = [];
+  for (const q of questions) {
+    if (q.type === "group" && q.questions) {
+      if (q.repeats) {
+        responses.push({
+          question_id: q.id,
+          link_id: q.link_id,
+          values: [],
+          structured_type: null,
+          sub_results: [initializeGroupResponses(q.questions)],
+        });
+      } else {
+        responses.push(...initializeGroupResponses(q.questions));
+      }
+    } else {
+      let defaultValues: ResponseValue[] = [];
+      if (q.answer_option && q.answer_option.length > 0) {
+        const defaultOptions = q.answer_option.filter(
+          (o) => o.initial_selected === true,
+        );
+        if (defaultOptions.length > 0) {
+          defaultValues = defaultOptions.map((opt) => ({
+            type: "string",
+            value: opt.value,
+            coding: opt.code ?? undefined,
+          }));
+        }
+      }
+      responses.push({
+        question_id: q.id,
+        link_id: q.link_id,
+        values: defaultValues,
+        structured_type: q.structured_type ?? null,
+      });
+    }
+  }
+  return responses;
+}
 
 export const removeQuestionsFromSource = (
   questions: Question[],

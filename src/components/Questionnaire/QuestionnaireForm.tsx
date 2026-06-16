@@ -35,7 +35,6 @@ import type {
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 import {
   type Question,
-  AnswerOption,
   findQuestionById,
 } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
@@ -55,6 +54,7 @@ import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
+import { initializeGroupResponses } from "./utils";
 
 import queryClient from "@/Utils/request/queryClient";
 
@@ -380,6 +380,8 @@ function serializeRepeatableGroupResponse(
             question_id: r.question_id,
             values: r.values.filter(isValueFilled).map(serializeValue),
             ...(r.note ? { note: r.note } : {}),
+            ...(r.body_site ? { body_site: r.body_site } : {}),
+            ...(r.method ? { method: r.method } : {}),
           };
         }),
       )
@@ -387,50 +389,7 @@ function serializeRepeatableGroupResponse(
   };
 }
 
-const initializeResponses = (
-  questions: Question[],
-): QuestionnaireResponse[] => {
-  const responses: QuestionnaireResponse[] = [];
-
-  const processQuestion = (q: Question) => {
-    if (q.type === "group" && q.questions) {
-      if (q.repeats) {
-        responses.push({
-          question_id: q.id,
-          link_id: q.link_id,
-          values: [],
-          structured_type: null,
-          sub_results: [initializeResponses(q.questions)],
-        });
-      } else {
-        q.questions.forEach(processQuestion);
-      }
-    } else {
-      let defaultValues: ResponseValue[] = [];
-      if (q.answer_option && q.answer_option.length > 0) {
-        const defaultOptions: AnswerOption[] = q.answer_option.filter(
-          (o) => o.initial_selected === true,
-        );
-        if (defaultOptions.length > 0) {
-          defaultValues = defaultOptions.map((opt) => ({
-            type: "string",
-            value: opt.value,
-            coding: opt.code ?? undefined,
-          }));
-        }
-      }
-      responses.push({
-        question_id: q.id,
-        link_id: q.link_id,
-        values: defaultValues,
-        structured_type: q.structured_type ?? null,
-      });
-    }
-  };
-
-  questions.forEach(processQuestion);
-  return responses;
-};
+const initializeResponses = initializeGroupResponses;
 
 export function QuestionnaireForm({
   questionnaireSlug,
