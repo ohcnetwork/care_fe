@@ -18,7 +18,6 @@
     "src/Utils/decimal.ts": ["exports"]
   },
   "ignoreUnresolved": ["__federation__", "@/supportedBrowsers"],
-  "ignoreBinaries": ["react-scan"],
   "ignoreDependencies": [
     "normalize-wheel",
     "workbox-core",
