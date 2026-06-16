@@ -43,7 +43,7 @@ import query from "@/Utils/request/query";
 import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
+import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import InvoicesData from "@/pages/Facility/billing/invoice/InvoicesData";
 import PaymentsData from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
 import {

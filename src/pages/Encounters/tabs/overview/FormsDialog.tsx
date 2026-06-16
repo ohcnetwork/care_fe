@@ -8,7 +8,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -25,11 +24,9 @@ import careConfig from "@careConfig";
 
 export const FormDialog = ({
   subjectType,
-  questionnaireTag,
   trigger,
 }: {
   subjectType: string;
-  questionnaireTag: string;
   trigger?: React.ReactNode;
 }) => {
   const { t } = useTranslation();
@@ -116,11 +113,7 @@ export const FormDialog = ({
     }
   };
 
-  const taggedQuestionnaires = useQuestionnaireOptions(questionnaireTag);
-  const allQuestionnaires = [
-    ...taggedQuestionnaires.results,
-    ...(questionnaires?.results ?? []),
-  ];
+  const allQuestionnaires = questionnaires?.results ?? [];
 
   const questionnaireIds = new Set([...allQuestionnaires.map((q) => q.id)]);
 

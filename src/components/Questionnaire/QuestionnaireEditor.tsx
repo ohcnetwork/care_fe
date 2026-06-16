@@ -102,7 +102,6 @@ import {
 } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
 
 import { generateSlug } from "@/Utils/utils";
 import { CodingEditor } from "./CodingEditor";
@@ -259,9 +258,7 @@ export default function QuestionnaireEditor({
     new Set(),
   );
   const [selectedOrgs, setSelectedOrgs] = useState<Organization[]>([]);
-  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagRead[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
-  const [tagSearchQuery, setTagSearchQuery] = useState("");
   const [orgError, setOrgError] = useState<string | undefined>();
   const [importUrl, setImportUrl] = useState("");
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -355,32 +352,6 @@ export default function QuestionnaireEditor({
       },
     }),
   });
-
-  const { data: availableTags, isLoading: isLoadingAvailableTags } = useQuery({
-    queryKey: ["questionnaireTags", tagSearchQuery],
-    queryFn: query.debounced(questionnaireApi.tags.list, {
-      queryParams: {
-        name: tagSearchQuery || undefined,
-      },
-    }),
-  });
-
-  // This useMemo will automatically include the new tag in options
-  const tagOptions = useMemo(() => {
-    if (!availableTags?.results) return selectedTags;
-    if (tagSearchQuery) return availableTags.results;
-
-    const availableSlugs = new Set(
-      availableTags.results.map((tag) => tag.slug),
-    );
-
-    // Add selected tags that aren't in availableTags
-    const selectedNotInAvailable = selectedTags.filter(
-      (selectedTag) => !availableSlugs.has(selectedTag.slug),
-    );
-
-    return [...availableTags.results, ...selectedNotInAvailable];
-  }, [availableTags, selectedTags, tagSearchQuery]);
 
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.create, {
@@ -477,7 +448,6 @@ export default function QuestionnaireEditor({
           subject_type: "encounter",
           questions: [],
           slug: "",
-          tags: [],
         };
       }
       return null;
@@ -494,7 +464,6 @@ export default function QuestionnaireEditor({
       status: questionnaire?.status,
       subject_type: questionnaire?.subject_type,
       version: questionnaire?.version,
-      tags: questionnaire?.tags,
     },
     mode: "onChange",
   });
@@ -511,7 +480,6 @@ export default function QuestionnaireEditor({
         status: initialQuestionnaire.status,
         subject_type: initialQuestionnaire.subject_type,
         version: initialQuestionnaire.version,
-        tags: initialQuestionnaire.tags,
       };
 
       setQuestionnaire(initialQuestionnaire);
@@ -534,11 +502,6 @@ export default function QuestionnaireEditor({
   const rootQuestions: Question[] = useWatch({
     control: form.control,
     name: "questions",
-  });
-
-  const tags = useWatch({
-    control: form.control,
-    name: "tags",
   });
 
   useEffect(() => {
@@ -781,7 +744,6 @@ export default function QuestionnaireEditor({
         ...form.getValues(),
         questions: rootQuestions,
         organizations: selectedOrgs.map((o) => o.id),
-        tags: selectedTags.map((t) => t.id),
       });
     }
   };
@@ -893,20 +855,6 @@ export default function QuestionnaireEditor({
 
       return newSelection;
     });
-  };
-
-  const handleToggleTag = (tagId: string) => {
-    const newTag = tagOptions.find((t) => t.id === tagId);
-    const newAdded = newTag ? [...selectedTags, newTag] : selectedTags;
-    setSelectedTags((current) =>
-      current.some((t) => t.id === tagId)
-        ? current.filter((t) => t.id !== tagId)
-        : newAdded,
-    );
-  };
-
-  const handleTagCreated = (tag: QuestionnaireTagRead) => {
-    setSelectedTags((current) => [...current, tag]);
   };
 
   const handleAddQuestionAtIndex = (index: number) => {
@@ -1090,16 +1038,6 @@ export default function QuestionnaireEditor({
                     isLoading: isLoadingAvailableOrganizations,
                     error: orgError,
                     setError: setOrgError,
-                  }}
-                  tags={tags}
-                  tagSelection={{
-                    selectedTags: selectedTags,
-                    onToggle: handleToggleTag,
-                    searchQuery: tagSearchQuery,
-                    setSearchQuery: setTagSearchQuery,
-                    available: tagOptions,
-                    isLoading: isLoadingAvailableTags,
-                    onTagCreated: !slug ? handleTagCreated : undefined,
                   }}
                 />
                 <QuestionActions
@@ -1345,16 +1283,6 @@ export default function QuestionnaireEditor({
                   isLoading: isLoadingAvailableOrganizations,
                   error: orgError,
                   setError: setOrgError,
-                }}
-                tags={tags}
-                tagSelection={{
-                  selectedTags: selectedTags,
-                  onToggle: handleToggleTag,
-                  searchQuery: tagSearchQuery,
-                  setSearchQuery: setTagSearchQuery,
-                  available: tagOptions,
-                  isLoading: isLoadingAvailableTags,
-                  onTagCreated: handleTagCreated,
                 }}
               />
               <QuestionActions
