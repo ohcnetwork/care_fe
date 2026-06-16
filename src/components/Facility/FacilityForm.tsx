@@ -108,10 +108,9 @@ export default function FacilityForm({
     }
 
     const govtOrg = org && org.org_type === "govt" ? org : null;
-    const isValid = !!govtOrg && !govtOrg.has_children;
 
     setSelectedGeoOrg(govtOrg);
-    form.setValue("geo_organization", isValid ? govtOrg.id : "");
+    form.setValue("geo_organization", govtOrg?.id ?? "");
   }, [org, organizationId, facilityId, form]);
 
   const { mutate: createFacility, isPending } = useMutation({
@@ -369,15 +368,13 @@ export default function FacilityForm({
                       <GovtOrganizationPicker
                         ref={field.ref}
                         aria-invalid={!!fieldState.error}
-                        required
+                        requiredDepth={1}
                         value={selectedGeoOrg}
                         onChange={(organization) => {
                           setSelectedGeoOrg(organization);
-                          const isValid =
-                            !!organization && !organization.has_children;
                           form.setValue(
                             "geo_organization",
-                            isValid ? organization.id : "",
+                            organization?.id ?? "",
                             { shouldDirty: true },
                           );
                         }}

@@ -801,17 +801,13 @@ export default function UserForm({
                 <GovtOrganizationPicker
                   ref={field.ref}
                   aria-invalid={!!fieldState.error}
-                  required={false}
+                  requiredDepth={1}
                   value={selectedGeoOrg}
                   onChange={(organization) => {
                     setSelectedGeoOrg(organization);
-                    const isValid =
-                      !!organization && !organization.has_children;
-                    form.setValue(
-                      "geo_organization",
-                      isValid ? organization.id : "",
-                      { shouldDirty: true },
-                    );
+                    form.setValue("geo_organization", organization?.id ?? "", {
+                      shouldDirty: true,
+                    });
                   }}
                 />
               </FormControl>
