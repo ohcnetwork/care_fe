@@ -144,7 +144,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Required Validation Steps
 
 - Always run `npm run format` and `npm run lint` before committing changes
-- The CI pipeline (.github/workflows/linter.yml) runs `npm run lint -- --quiet` and `npm run unimported`
+- The CI pipeline (.github/workflows/linter.yml) runs `npm run lint -- --quiet` and `npm run knip`
 - Application loads successfully showing CARE healthcare facility search and login interface
 - Build produces a functional PWA with service worker
 

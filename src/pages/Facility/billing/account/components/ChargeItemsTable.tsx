@@ -111,7 +111,7 @@ export interface ChargeItemsTableProps {
   patientId: string;
   canAddChargeItems?: boolean;
 }
-export function ChargeItemsTable({
+function ChargeItemsTable({
   facilityId,
   accountId,
   patientId,

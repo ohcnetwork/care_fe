@@ -268,6 +268,9 @@ interface UseExtensionsReturn {
   ) => Record<string, unknown>;
 }
 
+/**
+ * @public
+ */
 export function useExtensions<TForm extends FieldValues>({
   schema,
   form,
@@ -331,7 +334,9 @@ export function useExtensions<TForm extends FieldValues>({
 // ============================================================================
 // Zod Schema Helper
 // ============================================================================
-
+/**
+ * @public
+ */
 export function withExtensions<T extends z.ZodObject<z.ZodRawShape>>(
   baseSchema: T,
   extensionSchema: JSONSchema2020 | undefined,
@@ -544,5 +549,4 @@ export function useEntityExtensions<TForm extends FieldValues>({
 // Exports
 // ============================================================================
 
-export default useExtensions;
 export { ExtensionEntityType, useExtensionSchemas };

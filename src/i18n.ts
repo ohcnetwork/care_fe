@@ -165,4 +165,7 @@ export async function initI18n() {
     });
 }
 
+/**
+ * @public
+ */
 export default i18n;

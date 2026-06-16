@@ -141,5 +141,3 @@ export function SpecimenIDScanSuccessDialog({
     </Dialog>
   );
 }
-
-export default SpecimenIDScanSuccessDialog;

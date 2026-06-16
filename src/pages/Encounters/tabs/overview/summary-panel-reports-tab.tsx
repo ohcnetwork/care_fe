@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 import { PERMISSION_LIST_TEMPLATE } from "@/common/Permissions";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { usePermissions } from "@/context/PermissionContext";
+import { useHasPermission } from "@/context/PermissionContext";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import templateApi from "@/types/emr/template/templateApi";
@@ -21,9 +21,7 @@ export const SummaryPanelReportsTab = ({
   const { selectedEncounterId, facilityId } = useEncounter();
   const { facility } = useCurrentFacilitySilently();
   const { t } = useTranslation();
-  const { hasPermission } = usePermissions();
-
-  const canListTemplate = hasPermission(
+  const canListTemplate = useHasPermission(
     PERMISSION_LIST_TEMPLATE,
     facility?.permissions,
   );

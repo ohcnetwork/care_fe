@@ -71,7 +71,7 @@ import {
   InvoiceChargeItemTitle,
   useMedicationDispenseData,
 } from "@/pages/Facility/billing/invoice/components/InvoiceChargeItemTitle";
-import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
+import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
@@ -93,7 +93,7 @@ import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
-export function InvoiceShow({
+function InvoiceShow({
   facilityId,
   invoiceId,
   paymentType,

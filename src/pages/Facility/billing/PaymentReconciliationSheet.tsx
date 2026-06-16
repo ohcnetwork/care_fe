@@ -58,6 +58,7 @@ import {
   useEntityExtensions,
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
+import { register } from "@/lib/override/register";
 import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -182,7 +183,7 @@ const createFormSchema = (
       },
     );
 
-export function PaymentReconciliationSheet({
+const PaymentReconciliationSheetBase = ({
   open,
   onOpenChange,
   facilityId,
@@ -191,7 +192,7 @@ export function PaymentReconciliationSheet({
   accountId,
   onSuccess,
   isCreditNote = false,
-}: PaymentReconciliationSheetProps) {
+}: PaymentReconciliationSheetProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
@@ -227,6 +228,7 @@ export function PaymentReconciliationSheet({
     schemaType: "write",
     context: ExtensionContexts.payment_reconciliation_form,
     form,
+    context: ExtensionContexts.payment_reconciliation_form,
   });
 
   // Watch for payment method changes
@@ -754,6 +756,9 @@ export function PaymentReconciliationSheet({
       </SheetContent>
     </Sheet>
   );
-}
+};
 
-export default PaymentReconciliationSheet;
+export const PaymentReconciliationSheet = register(
+  "PaymentReconciliationSheet",
+  PaymentReconciliationSheetBase,
+);
