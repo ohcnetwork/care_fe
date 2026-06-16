@@ -188,32 +188,15 @@ const paginatedQuery = <
     let page = 0;
     let count = 0;
 
-    const pageSize =
-      typeof options?.pageSize === "number"
-        ? options.pageSize
-        : typeof options?.queryParams?.limit === "number"
-          ? options.queryParams.limit
-          : RESULTS_PER_PAGE_LIMIT;
-    const startOffset =
-      typeof options?.queryParams?.offset === "number"
-        ? options.queryParams.offset
-        : 0;
-
-    if (!Number.isInteger(pageSize) || pageSize <= 0) {
-      throw new RangeError("query.paginated requires a positive pageSize.");
-    }
-
-    if (!Number.isInteger(startOffset) || startOffset < 0) {
-      throw new RangeError("query.paginated requires a non-negative offset.");
-    }
+    const pageSize = options?.pageSize ?? RESULTS_PER_PAGE_LIMIT;
 
     while (hasNextPage) {
       const res = await query(route, {
         ...options,
         queryParams: {
-          ...options?.queryParams,
           limit: pageSize,
-          offset: startOffset + page * pageSize,
+          offset: page * pageSize,
+          ...options?.queryParams,
         },
       })({ signal });
 
@@ -224,7 +207,7 @@ const paginatedQuery = <
         hasNextPage = false;
       }
 
-      if (items.length + startOffset >= res.count) {
+      if (items.length >= res.count) {
         hasNextPage = false;
       }
 
