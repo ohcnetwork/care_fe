@@ -67,20 +67,6 @@
   }
 }
 
-@keyframes arrow-slide {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(4px);
-  }
-}
-
-.animate-arrow-slide {
-  animation: arrow-slide 3s ease-in-out infinite;
-}
-
 .animate-ping-slow {
   animation: ping-slow 8s ease-in-out infinite;
 }

@@ -20,6 +20,7 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import {
   renderTokenNumber,
   TOKEN_STATUS_COLORS,
+  TokenStatus,
 } from "@/types/tokens/token/token";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
@@ -188,8 +189,10 @@ export default function PatientTokensList({
                     <TokenCardWithButton
                       token={token}
                       facility={facility}
-                      showMarkInServiceButton={tokenId === token.id}
-                      showButtonArrow
+                      showMarkInServiceButton={
+                        tokenId === token.id &&
+                        token.status === TokenStatus.CREATED
+                      }
                       cardClassName="rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"
                     />
                   </div>

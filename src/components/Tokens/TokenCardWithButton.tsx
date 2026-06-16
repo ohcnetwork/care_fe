@@ -8,13 +8,11 @@ import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import { FacilityRead } from "@/types/facility/facility";
 import { TokenRetrieve, TokenStatus } from "@/types/tokens/token/token";
-import { ArrowRight } from "lucide-react";
 
 interface TokenCardWithButtonProps {
   token: TokenRetrieve;
   facility: FacilityRead;
   showMarkInServiceButton?: boolean;
-  showButtonArrow?: boolean;
   cardClassName?: string;
   tokenActions?: boolean;
   onSuccess?: () => void;
@@ -25,7 +23,6 @@ export default function TokenCardWithButton({
   token,
   facility,
   showMarkInServiceButton = true,
-  showButtonArrow = false,
   cardClassName,
   tokenActions = false,
   onSuccess,
@@ -66,27 +63,27 @@ export default function TokenCardWithButton({
       />
       {showMarkInServiceButton &&
         currentToken.status === TokenStatus.CREATED && (
-          <Button
-            className="w-full flex items-center justify-center gap-2 font-semibold"
-            onClick={() => {
-              if (isOnlyOneSubQueue) {
-                updateToken({
-                  status: TokenStatus.IN_PROGRESS,
-                  sub_queue: assignedServicePoints[0]?.id,
-                  note: currentToken.note,
-                });
-                return;
-              }
+          <div className="flex w-full items-center justify-center bg-white p-3 rounded-md -mt-1">
+            <Button
+              className="w-full flex items-center justify-center gap-2 font-semibold"
+              onClick={() => {
+                if (isOnlyOneSubQueue) {
+                  updateToken({
+                    status: TokenStatus.IN_PROGRESS,
+                    sub_queue: assignedServicePoints[0]?.id,
+                    note: currentToken.note,
+                  });
+                  return;
+                }
 
-              onOpenDialogForServicePoint?.();
-              setShowServicepointDialog(true);
-            }}
-          >
-            {t("mark_as_in_service")}
-            {showButtonArrow && (
-              <ArrowRight className="size-4 animate-arrow-slide" />
-            )}
-          </Button>
+                onOpenDialogForServicePoint?.();
+                setShowServicepointDialog(true);
+              }}
+              variant="outline_primary"
+            >
+              {t("mark_as_in_service")}
+            </Button>
+          </div>
         )}
 
       {!isOnlyOneSubQueue && showMarkInServiceButton && (
