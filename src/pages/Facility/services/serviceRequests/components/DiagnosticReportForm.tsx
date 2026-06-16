@@ -3,7 +3,9 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   CloudUpload,
+  FileUp,
   NotepadText,
+  Plus,
   PlusCircle,
   Save,
   Trash2,
@@ -15,7 +17,6 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -33,18 +34,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-
-import { Avatar } from "@/components/Common/Avatar";
-import { FileListTable } from "@/components/Files/FileListTable";
-import FileUploadDialog from "@/components/Files/FileUploadDialog";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
@@ -68,11 +60,20 @@ import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenD
 import {
   BACKEND_ALLOWED_EXTENSIONS,
   FileReadMinimal,
+  FileType,
 } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 
+import { Avatar } from "@/components/Common/Avatar";
+import { FileListTable } from "@/components/Files/FileListTable";
+import FileUploadDialog from "@/components/Files/FileUploadDialog";
+import { Badge } from "@/components/ui/badge";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
+import { formatName } from "@/Utils/utils";
 
 interface DiagnosticReportFormProps {
   patientId: string;
@@ -121,54 +122,21 @@ export function DiagnosticReportForm({
   disableEdit,
 }: DiagnosticReportFormProps) {
   const { t } = useTranslation();
-  const [observations, setObservations] = useState<ObservationsByDefinition>(
-    {},
-  );
-  const [isExpanded, setIsExpanded] = useState(true);
+  const queryClient = useQueryClient();
+
+  const [showReportTypeSelect, setShowReportTypeSelect] = useState(false);
   const [selectedReportCode, setSelectedReportCode] = useState<Code | null>(
     null,
   );
-  const [openUploadDialog, setOpenUploadDialog] = useState(false);
-  const [conclusion, setConclusion] = useState<string>("");
-  const queryClient = useQueryClient();
-
-  // Get the latest report if any exists
-  const latestReport =
-    diagnosticReports.length > 0 ? diagnosticReports[0] : null;
-  const hasReport = !!latestReport;
 
   // Check if all required specimens are collected
   const hasCollectedSpecimens =
     activityDefinition?.specimen_requirements?.length === 0 ||
     specimens.some((specimen) => specimen.status === SpecimenStatus.available);
 
-  // Fetch the full diagnostic report to get observations
-  const { data: fullReport, isLoading: isLoadingReport } = useQuery({
-    queryKey: ["diagnosticReport", latestReport?.id],
-    queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
-      pathParams: {
-        patient_external_id: patientId,
-        external_id: latestReport?.id || "",
-      },
-    }),
-    enabled: !!latestReport?.id,
-  });
-
-  // Query to fetch files for the diagnostic report
-  const { data: files = { results: [], count: 0 } } = useQuery<
-    PaginatedResponse<FileReadMinimal>
-  >({
-    queryKey: ["files", "diagnostic_report", fullReport?.id],
-    queryFn: query(fileApi.list, {
-      queryParams: {
-        file_type: "diagnostic_report",
-        associating_id: fullReport?.id,
-        limit: 100,
-        offset: 0,
-      },
-    }),
-    enabled: !!fullReport?.id,
-  });
+  const isMultipleDiagnosticReport =
+    !!activityDefinition?.diagnostic_report_codes &&
+    activityDefinition.diagnostic_report_codes.length > 0;
 
   // Creating a new diagnostic report
   const { mutate: createDiagnosticReport, isPending: isCreatingReport } =
@@ -183,35 +151,180 @@ export function DiagnosticReportForm({
         queryClient.invalidateQueries({
           queryKey: ["serviceRequest"],
         });
-        // Fetch the newly created report
         queryClient.invalidateQueries({
           queryKey: ["diagnosticReport"],
         });
       },
-      onError: (err: any) => {
+      onError: (err: Error) => {
         toast.error(
           `Failed to create diagnostic report: ${err.message || "Unknown error"}`,
         );
       },
     });
 
-  // Effect to handle diagnostic reports changes
-  useEffect(() => {
-    const latestReport = diagnosticReports[0];
-    if (latestReport) {
-      // If we have a new report, update the UI accordingly
-      setSelectedReportCode(latestReport.code || null);
-      setIsExpanded(true);
+  function handleCreateReport(code?: Code) {
+    if (!hasCollectedSpecimens) {
+      toast.error(t("specimen_collection_required"));
+      return;
     }
-  }, [diagnosticReports]);
 
-  // Effect to handle fullReport changes
-  useEffect(() => {
-    if (fullReport) {
-      // When we get the full report details, ensure UI is in correct state
-      setSelectedReportCode(fullReport.code || null);
-    }
-  }, [fullReport]);
+    const category: Code = {
+      code: "LAB",
+      display: "Laboratory",
+      system: "http://terminology.hl7.org/CodeSystem/v2-0074",
+    };
+
+    createDiagnosticReport({
+      status: DiagnosticReportStatus.preliminary,
+      category,
+      service_request: serviceRequestId,
+      code: code || undefined,
+    });
+  }
+
+  return (
+    <>
+      {diagnosticReports.length > 0 && (
+        <div className="relative">
+          <div className="relative z-10 space-y-3">
+            {diagnosticReports.map((report) => (
+              <DiagnosticReportItem
+                key={report.id}
+                report={report}
+                patientId={patientId}
+                serviceRequestId={serviceRequestId}
+                observationDefinitions={observationDefinitions}
+                disableEdit={disableEdit}
+                isMultipleDiagnosticReport={isMultipleDiagnosticReport}
+              />
+            ))}
+          </div>
+          {isMultipleDiagnosticReport && (
+            <div className="-mt-3 rounded-b-lg bg-gray-100 px-2 pb-2 pt-5">
+              {showReportTypeSelect ? (
+                <Select
+                  value={selectedReportCode?.code ?? ""}
+                  onValueChange={(value) => {
+                    const code =
+                      activityDefinition?.diagnostic_report_codes?.find(
+                        (c) => c.code === value,
+                      );
+                    setSelectedReportCode(code || null);
+                    if (code) {
+                      handleCreateReport(code);
+                      setShowReportTypeSelect(false);
+                      setSelectedReportCode(null);
+                    }
+                  }}
+                  disabled={!hasCollectedSpecimens || disableEdit}
+                >
+                  <SelectTrigger className="w-full bg-white">
+                    <SelectValue
+                      placeholder={t("select_diagnostic_report_type")}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {isMultipleDiagnosticReport &&
+                      activityDefinition?.diagnostic_report_codes?.map(
+                        (code) => (
+                          <SelectItem key={code.code} value={code.code}>
+                            <div className="flex flex-col">
+                              <span className="truncate">
+                                {code.display} ({code.code})
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ),
+                      )}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Button
+                  variant="ghost"
+                  className="gap-1.5 px-2 font-medium text-gray-950 underline hover:bg-transparent hover:text-gray-950"
+                  onClick={() => {
+                    if (isMultipleDiagnosticReport) {
+                      setShowReportTypeSelect(true);
+                    } else {
+                      handleCreateReport();
+                    }
+                  }}
+                  disabled={
+                    disableEdit || isCreatingReport || !hasCollectedSpecimens
+                  }
+                >
+                  <Plus className="size-4" />
+                  {t("another_diagnostic_report")}
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      {diagnosticReports.length === 0 && (
+        <CreateDiagnosticReportForm
+          activityDefinition={activityDefinition}
+          specimens={specimens}
+          isCreatingReport={isCreatingReport}
+          disableEdit={disableEdit}
+          serviceRequestId={serviceRequestId}
+          handleCreateReport={handleCreateReport}
+        />
+      )}
+    </>
+  );
+}
+
+function DiagnosticReportItem({
+  report,
+  patientId,
+  serviceRequestId,
+  observationDefinitions,
+  disableEdit,
+  isMultipleDiagnosticReport,
+}: {
+  report: DiagnosticReportRead;
+  patientId: string;
+  serviceRequestId: string;
+  observationDefinitions: ObservationDefinitionReadSpec[];
+  disableEdit: boolean;
+  isMultipleDiagnosticReport: boolean;
+}) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [observations, setObservations] = useState<ObservationsByDefinition>(
+    {},
+  );
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [openUploadDialog, setOpenUploadDialog] = useState(false);
+  const [conclusion, setConclusion] = useState<string>("");
+
+  const { data: fullReport } = useQuery({
+    queryKey: ["diagnosticReport", report.id],
+    queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
+      pathParams: {
+        patient_external_id: patientId,
+        external_id: report.id,
+      },
+    }),
+    enabled: !!report.id,
+  });
+
+  // Query to fetch files for the diagnostic report
+  const { data: files = { results: [], count: 0 } } = useQuery<
+    PaginatedResponse<FileReadMinimal>
+  >({
+    queryKey: ["files", "diagnostic_report", report.id],
+    queryFn: query(fileApi.list, {
+      queryParams: {
+        file_type: "diagnostic_report",
+        associating_id: report.id,
+        limit: 100,
+        offset: 0,
+      },
+    }),
+    enabled: !!report.id,
+  });
 
   // Upserting observations for a diagnostic report
   const { mutate: upsertObservations, isPending: isUpsertingObservations } =
@@ -219,7 +332,7 @@ export function DiagnosticReportForm({
       mutationFn: mutate(observationApi.upsertObservations, {
         pathParams: {
           patient_external_id: patientId,
-          external_id: latestReport?.id || "",
+          external_id: report.id,
         },
       }),
       onSuccess: () => {
@@ -228,10 +341,10 @@ export function DiagnosticReportForm({
           queryKey: ["serviceRequest", serviceRequestId],
         });
         queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport", latestReport?.id],
+          queryKey: ["diagnosticReport", report.id],
         });
       },
-      onError: (err: any) => {
+      onError: (err: Error) => {
         toast.error(
           `Failed to save test results: ${err.message || "Unknown error"}`,
         );
@@ -243,13 +356,13 @@ export function DiagnosticReportForm({
       mutationFn: mutate(diagnosticReportApi.updateDiagnosticReport, {
         pathParams: {
           patient_external_id: patientId,
-          external_id: latestReport?.id || "",
+          external_id: report.id,
         },
       }),
       onSuccess: () => {
         toast.success(t("conclusion_updated_successfully"));
         queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport", latestReport?.id],
+          queryKey: ["diagnosticReport", report.id],
         });
         setIsExpanded(false);
       },
@@ -260,13 +373,13 @@ export function DiagnosticReportForm({
 
   // Initialize file upload hook
   const fileUpload = useFileUpload({
-    type: "diagnostic_report" as any,
+    type: "diagnostic_report" as FileType,
     multiple: true,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
     onUpload: () => {
       queryClient.invalidateQueries({
-        queryKey: ["diagnosticReport", latestReport?.id],
+        queryKey: ["diagnosticReport", report.id],
       });
     },
     compress: false,
@@ -289,9 +402,10 @@ export function DiagnosticReportForm({
     if (!openUploadDialog) {
       fileUpload.clearFiles();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openUploadDialog]);
 
-  // Initialize form with existing observations from the full report
+  // Initialize form with existing observations from the report
   useEffect(() => {
     if (fullReport?.observations && fullReport.observations.length > 0) {
       const initialObservations: ObservationsByDefinition = {};
@@ -333,10 +447,10 @@ export function DiagnosticReportForm({
         });
 
       setObservations(initialObservations);
+    }
 
-      if (fullReport.conclusion) {
-        setConclusion(fullReport.conclusion);
-      }
+    if (fullReport?.conclusion) {
+      setConclusion(fullReport.conclusion);
     }
   }, [fullReport]);
 
@@ -467,36 +581,7 @@ export function DiagnosticReportForm({
     });
   }
 
-  function handleCreateReport() {
-    // Only create a new report if no reports exist
-    if (!hasReport) {
-      if (!hasCollectedSpecimens) {
-        toast.error(t("specimen_collection_required"));
-        return;
-      }
-
-      const category: Code = {
-        code: "LAB",
-        display: "Laboratory",
-        system: "http://terminology.hl7.org/CodeSystem/v2-0074",
-      };
-
-      createDiagnosticReport({
-        status: DiagnosticReportStatus.preliminary,
-        category,
-        service_request: serviceRequestId,
-        code: selectedReportCode || undefined,
-      });
-    }
-  }
-
   function handleSubmit() {
-    if (!hasReport) {
-      // First create a report if none exists
-      handleCreateReport();
-      return;
-    }
-
     try {
       // Check if all observations have values
       const hasObservationValue = Object.values(observations).some((obsList) =>
@@ -645,23 +730,21 @@ export function DiagnosticReportForm({
         )
         .filter((obs): obs is ObservationUpsertRequest => obs !== null);
 
-      if (fullReport) {
-        // Upsert observations
-        if (formattedObservations.length > 0) {
-          upsertObservations({
-            observations: formattedObservations,
-          });
-        }
-
-        updateDiagnosticReport({
-          id: fullReport.id,
-          status: fullReport.status,
-          category: fullReport.category,
-          code: fullReport.code,
-          note: fullReport.note,
-          conclusion,
+      // Upsert observations
+      if (formattedObservations.length > 0) {
+        upsertObservations({
+          observations: formattedObservations,
         });
       }
+
+      updateDiagnosticReport({
+        id: report.id,
+        status: report.status,
+        category: report.category,
+        code: report.code,
+        note: report.note,
+        conclusion,
+      });
     } catch (_error) {
       toast.error(t("error_validating_form"));
     }
@@ -808,23 +891,7 @@ export function DiagnosticReportForm({
     );
   }
 
-  const isSubmitting =
-    isCreatingReport || isUpsertingObservations || isUpdatingReport;
-
-  // Show loading state while fetching the report
-  if (hasReport && isLoadingReport) {
-    return (
-      <Card className="shadow-lg border-t-4 border-t-primary">
-        <CardContent className="p-4">
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-1/3" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const isSubmitting = isUpsertingObservations || isUpdatingReport;
 
   return (
     <Card
@@ -842,34 +909,32 @@ export function DiagnosticReportForm({
                   <p className="flex items-center gap-1.5">
                     <NotepadText className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
                     <span className="text-base/9 text-gray-950 font-medium">
-                      {t("test_results_entry")}
+                      {isMultipleDiagnosticReport
+                        ? report.code?.display
+                        : t("test_results_entry")}
                     </span>
                   </p>
                 </CardTitle>
               </div>
               <div className="flex items-center gap-5">
-                {hasReport && fullReport?.created_by && (
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-5 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-5 w-full sm:w-auto">
+                  {report.created_by && (
                     <Avatar
-                      name={formatName(fullReport.created_by, true)}
+                      name={formatName(report.created_by, true)}
                       className="size-5"
-                      imageUrl={fullReport.created_by.profile_picture_url}
+                      imageUrl={report.created_by.profile_picture_url}
                     />
-                    <span className="text-sm/9 text-gray-700 font-medium">
-                      {formatName(fullReport.created_by)}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  {hasReport && fullReport && (
-                    <Badge
-                      variant={
-                        DIAGNOSTIC_REPORT_STATUS_COLORS[fullReport.status]
-                      }
-                    >
-                      {t(fullReport.status)}
-                    </Badge>
                   )}
+                  <span className="text-sm/9 text-gray-700 font-medium">
+                    {formatName(report.created_by)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
+                  >
+                    {t(report.status)}
+                  </Badge>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -897,207 +962,275 @@ export function DiagnosticReportForm({
               __name="ServiceRequestAction"
               serviceRequestId={serviceRequestId}
             />
-            {hasReport && fullReport ? (
-              <div className="space-y-6">
-                {fullReport.status !== DiagnosticReportStatus.final && (
-                  <PLUGIN_Component
-                    __name="DiagnosticReportOverride"
-                    observationDefinitions={observationDefinitions}
-                    handleComponentValueChange={handleComponentValueChange}
-                    handleValueChange={handleValueChange}
-                    handleUnitChange={handleUnitChange}
-                    disabled={disableEdit}
-                  />
-                )}
-                {fullReport.status !== DiagnosticReportStatus.final &&
-                  observationDefinitions.map((definition) => {
-                    const observationsList = observations[definition.id] || [
-                      {
-                        id: "",
-                        value: "",
-                        unit: definition.permitted_unit?.code || "",
-                        interpretation: "",
-                        status: ObservationStatus.AMENDED,
-                        components: {},
-                      },
-                    ];
+            <div className="space-y-6">
+              {report.status !== DiagnosticReportStatus.final && (
+                <PLUGIN_Component
+                  __name="DiagnosticReportOverride"
+                  observationDefinitions={observationDefinitions}
+                  handleComponentValueChange={handleComponentValueChange}
+                  handleValueChange={handleValueChange}
+                  handleUnitChange={handleUnitChange}
+                  disabled={disableEdit}
+                />
+              )}
+              {report.status !== DiagnosticReportStatus.final &&
+                observationDefinitions.map((definition) => {
+                  const observationsList = observations[definition.id] || [
+                    {
+                      id: "",
+                      value: "",
+                      unit: definition.permitted_unit?.code || "",
+                      interpretation: "",
+                      status: ObservationStatus.AMENDED,
+                      components: {},
+                    },
+                  ];
 
-                    return (
-                      <Card
-                        key={definition.id}
-                        className="mb-4 shadow-none rounded-lg border-gray-200 bg-gray-50"
-                      >
-                        <CardContent className="p-4">
-                          <div className="grid gap-4">
-                            <div className="flex justify-between items-start">
-                              <Label className="text-base font-semibold text-gray-950">
-                                {definition.title || definition.code?.display}
-                              </Label>
-                            </div>
+                  return (
+                    <Card
+                      key={definition.id}
+                      className="mb-4 shadow-none rounded-lg border-gray-200 bg-gray-50"
+                    >
+                      <CardContent className="p-4">
+                        <div className="grid gap-4">
+                          <div className="flex justify-between items-start">
+                            <Label className="text-base font-semibold text-gray-950">
+                              {definition.title || definition.code?.display}
+                            </Label>
+                          </div>
 
-                            {observationsList.map((observationData, index) => {
-                              const hasComponents =
-                                definition.component &&
-                                definition.component.length > 0;
-                              const isErrored =
-                                observationData.status ===
-                                ObservationStatus.ENTERED_IN_ERROR;
-                              return (
-                                <div
-                                  key={index}
-                                  className={cn(
-                                    "space-y-1 bg-gray-200/50 p-4 rounded-lg",
-                                    isErrored && "bg-gray-100",
+                          {observationsList.map((observationData, index) => {
+                            const hasComponents =
+                              definition.component &&
+                              definition.component.length > 0;
+                            const isErrored =
+                              observationData.status ===
+                              ObservationStatus.ENTERED_IN_ERROR;
+                            return (
+                              <div
+                                key={index}
+                                className={cn(
+                                  "space-y-1 bg-gray-200/50 p-4 rounded-lg",
+                                  isErrored && "bg-gray-100",
+                                )}
+                              >
+                                <div className="flex justify-between items-center">
+                                  <Label className="text-sm font-semibold text-gray-950">
+                                    {t("observation") + " " + (index + 1)}
+                                  </Label>
+                                  {isErrored ? (
+                                    <span className="text-sm text-red-500">
+                                      {t("marked_for_deletion")}
+                                    </span>
+                                  ) : (
+                                    !disableEdit && (
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2"
+                                        onClick={() =>
+                                          handleDeleteObservation(
+                                            definition.id,
+                                            index,
+                                          )
+                                        }
+                                        disabled={
+                                          isErrored ||
+                                          (index === 0 && !observationData.id)
+                                        }
+                                      >
+                                        <Trash2 className="size-4" />
+                                      </Button>
+                                    )
                                   )}
-                                >
-                                  <div className="flex justify-between items-center">
-                                    <Label className="text-sm font-semibold text-gray-950">
-                                      {t("observation") + " " + (index + 1)}
-                                    </Label>
-                                    {isErrored ? (
-                                      <span className="text-sm text-red-500">
-                                        {t("marked_for_deletion")}
-                                      </span>
-                                    ) : (
-                                      !disableEdit && (
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="sm"
-                                          className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2"
-                                          onClick={() =>
-                                            handleDeleteObservation(
-                                              definition.id,
-                                              index,
-                                            )
-                                          }
-                                          disabled={
-                                            isErrored ||
-                                            (index === 0 && !observationData.id)
-                                          }
-                                        >
-                                          <Trash2 className="size-4" />
-                                        </Button>
-                                      )
-                                    )}
-                                  </div>
+                                </div>
 
-                                  {/* For blood pressure and similar observations with components, we may or may not need to show the main value field */}
-                                  {!hasComponents && (
-                                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-stretch sm:items-center">
-                                      {definition.permitted_unit && (
-                                        <div className="w-full sm:w-32">
-                                          <Label className="text-sm font-medium mb-1 block text-gray-700">
-                                            {t("unit")}
-                                          </Label>
-                                          <Select
-                                            value={observationData.unit}
-                                            onValueChange={(unit) =>
-                                              handleUnitChange(
-                                                definition.id,
-                                                index,
-                                                unit,
-                                              )
-                                            }
-                                            disabled={isErrored || disableEdit}
-                                          >
-                                            <SelectTrigger className="w-full">
-                                              <SelectValue
-                                                placeholder={t("unit")}
-                                              />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem
-                                                value={
-                                                  definition.permitted_unit.code
-                                                }
-                                              >
-                                                {definition.permitted_unit
-                                                  .code ||
-                                                  definition.permitted_unit
-                                                    .display}
-                                              </SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                      )}
-
-                                      <div className="flex-1">
+                                {/* For blood pressure and similar observations with components, we may or may not need to show the main value field */}
+                                {!hasComponents && (
+                                  <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-stretch sm:items-center">
+                                    {definition.permitted_unit && (
+                                      <div className="w-full sm:w-32">
                                         <Label className="text-sm font-medium mb-1 block text-gray-700">
-                                          {t("result")}
+                                          {t("unit")}
                                         </Label>
-                                        <Input
-                                          value={observationData.value}
-                                          onChange={(e) =>
-                                            handleValueChange(
+                                        <Select
+                                          value={observationData.unit}
+                                          onValueChange={(unit) =>
+                                            handleUnitChange(
                                               definition.id,
                                               index,
-                                              e.target.value,
-                                              observationData.unit,
+                                              unit,
                                             )
-                                          }
-                                          placeholder={t("result_value")}
-                                          type={
-                                            definition.permitted_data_type ===
-                                              "decimal" ||
-                                            definition.permitted_data_type ===
-                                              "integer"
-                                              ? "number"
-                                              : "text"
                                           }
                                           disabled={isErrored || disableEdit}
-                                        />
+                                        >
+                                          <SelectTrigger className="w-full">
+                                            <SelectValue
+                                              placeholder={t("unit")}
+                                            />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem
+                                              value={
+                                                definition.permitted_unit.code
+                                              }
+                                            >
+                                              {definition.permitted_unit.code ||
+                                                definition.permitted_unit
+                                                  .display}
+                                            </SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                       </div>
-                                    </div>
-                                  )}
-
-                                  {/* Render component inputs for multi-component observations */}
-                                  {hasComponents &&
-                                    renderComponentInputs(
-                                      definition,
-                                      observationData,
-                                      index,
                                     )}
-                                </div>
-                              );
+
+                                    <div className="flex-1">
+                                      <Label className="text-sm font-medium mb-1 block text-gray-700">
+                                        {t("result")}
+                                      </Label>
+                                      <Input
+                                        value={observationData.value}
+                                        onChange={(e) =>
+                                          handleValueChange(
+                                            definition.id,
+                                            index,
+                                            e.target.value,
+                                            observationData.unit,
+                                          )
+                                        }
+                                        placeholder={t("result_value")}
+                                        type={
+                                          definition.permitted_data_type ===
+                                            "decimal" ||
+                                          definition.permitted_data_type ===
+                                            "integer"
+                                            ? "number"
+                                            : "text"
+                                        }
+                                        disabled={isErrored || disableEdit}
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Render component inputs for multi-component observations */}
+                                {hasComponents &&
+                                  renderComponentInputs(
+                                    definition,
+                                    observationData,
+                                    index,
+                                  )}
+                              </div>
+                            );
+                          })}
+
+                          {/* Add button for multiple observations */}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setObservations((prev) => {
+                                const currentList = prev[definition.id] || [];
+                                return {
+                                  ...prev,
+                                  [definition.id]: [
+                                    ...currentList,
+                                    {
+                                      id: "",
+                                      value: "",
+                                      unit:
+                                        definition.permitted_unit?.code || "",
+                                      status: ObservationStatus.AMENDED,
+                                      components: {},
+                                    },
+                                  ],
+                                };
+                              });
+                            }}
+                            disabled={disableEdit}
+                          >
+                            <PlusCircle className="size-4 mr-2" />
+                            {t("add_another_result")}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+
+              <div className="space-y-4">
+                {files?.results && files.results.length > 0 && (
+                  <div className="mt-6">
+                    <div className="text-lg font-medium">
+                      {t("uploaded_files")}
+                    </div>
+                    <FileListTable
+                      files={files.results}
+                      type="diagnostic_report"
+                      associatingId={report.id}
+                      canEdit={!disableEdit}
+                      showHeader={false}
+                    />
+                  </div>
+                )}
+
+                {report?.status === DiagnosticReportStatus.preliminary && (
+                  <Card className="mt-4 bg-gray-50 border-gray-200 shadow-none cursor-auto">
+                    <CardContent className="p-4">
+                      <div className="space-y-4">
+                        <div className="flex flex-col items-center justify-between gap-1">
+                          <CloudUpload className="size-10 border border-gray-100 rounded-md p-2 bg-white" />
+                          <Label className="text-base font-medium">
+                            {t("choose_file")}
+                          </Label>
+                          <div className="text-sm text-gray-500 mb-2">
+                            {t("allowed_formats_are", {
+                              formats:
+                                BACKEND_ALLOWED_EXTENSIONS.slice(0, 5).join(
+                                  ", ",
+                                ) +
+                                ", " +
+                                t("etc"),
                             })}
-
-                            {/* Add button for multiple observations */}
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setObservations((prev) => {
-                                  const currentList = prev[definition.id] || [];
-                                  return {
-                                    ...prev,
-                                    [definition.id]: [
-                                      ...currentList,
-                                      {
-                                        id: "",
-                                        value: "",
-                                        unit:
-                                          definition.permitted_unit?.code || "",
-                                        status: ObservationStatus.AMENDED,
-                                        components: {},
-                                      },
-                                    ],
-                                  };
-                                });
-                              }}
-                              disabled={disableEdit}
-                            >
-                              <PlusCircle className="size-4 mr-2" />
-                              {t("add_another_result")}
-                            </Button>
                           </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                          <Label
+                            htmlFor="file_upload_diagnostic_report"
+                            className="inline-flex items-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground border-gray-300 shadow-sm"
+                          >
+                            <Upload className="mr-2 size-4" />
+                            <span
+                              className="truncate font-semibold"
+                              title={fileUpload.files
+                                .map((file) => file.name)
+                                .join(", ")}
+                            >
+                              {fileUpload.files.length > 0
+                                ? fileUpload.files
+                                    .map((file) => file.name)
+                                    .join(", ")
+                                : t("select_files")}
+                            </span>
+                            {fileUpload.Input({ className: "hidden" })}
+                          </Label>
+                        </div>
 
-                {fullReport.status !== DiagnosticReportStatus.final && (
+                        {fileUpload.files.length > 0 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => fileUpload.clearFiles()}
+                          >
+                            {t("clear")}
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                {report.status !== DiagnosticReportStatus.final && (
                   <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-gray-50">
                     <CardContent className="p-4 space-y-2">
                       <Label
@@ -1118,156 +1251,20 @@ export function DiagnosticReportForm({
                     </CardContent>
                   </Card>
                 )}
-
-                <div className="space-y-4">
-                  {fullReport?.status ===
-                    DiagnosticReportStatus.preliminary && (
-                    <div className="flex justify-end space-x-4">
-                      <Button
-                        variant="primary"
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || disableEdit}
-                      >
-                        <Save className="size-4 mr-2" />
-                        {t("save_results")}
-                      </Button>
-                    </div>
-                  )}
-
-                  {files?.results && files.results.length > 0 && (
-                    <div className="mt-6">
-                      <div className="text-lg font-medium">
-                        {t("uploaded_files")}
-                      </div>
-                      <FileListTable
-                        files={files.results}
-                        type="diagnostic_report"
-                        associatingId={fullReport.id}
-                        canEdit={!disableEdit}
-                        showHeader={false}
-                      />
-                    </div>
-                  )}
-
-                  {fullReport?.status ===
-                    DiagnosticReportStatus.preliminary && (
-                    <Card className="mt-4 bg-gray-50 border-gray-200 shadow-none cursor-auto">
-                      <CardContent className="p-4">
-                        <div className="space-y-4">
-                          <div className="flex flex-col items-center justify-between gap-1">
-                            <CloudUpload className="size-10 border border-gray-100 rounded-md p-2 bg-white" />
-                            <Label className="text-base font-medium">
-                              {t("choose_file")}
-                            </Label>
-                            <div className="text-sm text-gray-500 mb-2">
-                              {t("allowed_formats_are", {
-                                formats:
-                                  BACKEND_ALLOWED_EXTENSIONS.slice(0, 5).join(
-                                    ", ",
-                                  ) +
-                                  ", " +
-                                  t("etc"),
-                              })}
-                            </div>
-                            <Label
-                              htmlFor="file_upload_diagnostic_report"
-                              className="inline-flex items-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground border-gray-300 shadow-sm"
-                            >
-                              <Upload className="mr-2 size-4" />
-                              <span
-                                className="truncate font-semibold"
-                                title={fileUpload.files
-                                  .map((file) => file.name)
-                                  .join(", ")}
-                              >
-                                {fileUpload.files.length > 0
-                                  ? fileUpload.files
-                                      .map((file) => file.name)
-                                      .join(", ")
-                                  : t("select_files")}
-                              </span>
-                              {fileUpload.Input({ className: "hidden" })}
-                            </Label>
-                          </div>
-
-                          {fileUpload.files.length > 0 && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="w-full"
-                              onClick={() => fileUpload.clearFiles()}
-                            >
-                              {t("clear")}
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
+                {report?.status === DiagnosticReportStatus.preliminary && (
+                  <div className="flex justify-end space-x-4">
+                    <Button
+                      variant="primary"
+                      onClick={handleSubmit}
+                      disabled={isSubmitting || disableEdit}
+                    >
+                      <Save className="size-4 mr-2" />
+                      {t("save_results")}
+                    </Button>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="space-y-4 bg-gray-50 rounded-lg p-4">
-                <div className="text-gray-500 flex justify-center items-center">
-                  <p className="mt-2 text-sm text-gray-500 text-center">
-                    {!hasCollectedSpecimens
-                      ? t("collect_specimen_before_report")
-                      : t("no_test_results_recorded")}
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-center">
-                  {activityDefinition?.diagnostic_report_codes &&
-                    activityDefinition.diagnostic_report_codes.length > 0 && (
-                      <div className="flex-1 min-w-0">
-                        <Select
-                          value={selectedReportCode?.code}
-                          onValueChange={(value) => {
-                            const code =
-                              activityDefinition.diagnostic_report_codes?.find(
-                                (c) => c.code === value,
-                              );
-                            setSelectedReportCode(code || null);
-                          }}
-                          disabled={!hasCollectedSpecimens || disableEdit}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue
-                              placeholder={t("select_diagnostic_report_type")}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {activityDefinition.diagnostic_report_codes.map(
-                              (code) => (
-                                <SelectItem key={code.code} value={code.code}>
-                                  <div className="flex flex-col">
-                                    <span className="truncate">
-                                      {code.display} ({code.code})
-                                    </span>
-                                  </div>
-                                </SelectItem>
-                              ),
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  <Button
-                    onClick={handleCreateReport}
-                    disabled={
-                      disableEdit ||
-                      isCreatingReport ||
-                      !hasCollectedSpecimens ||
-                      (!!activityDefinition?.diagnostic_report_codes?.length &&
-                        !selectedReportCode)
-                    }
-                    className="w-full sm:w-auto sm:shrink-0"
-                  >
-                    <PlusCircle className="size-4 mr-2" />
-                    {t("create_report")}
-                  </Button>
-                </div>
-              </div>
-            )}
+            </div>
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
@@ -1277,9 +1274,189 @@ export function DiagnosticReportForm({
         open={openUploadDialog}
         onOpenChange={setOpenUploadDialog}
         fileUpload={fileUpload}
-        associatingId={fullReport?.id || ""}
+        associatingId={report?.id || ""}
         type="diagnostic_report"
       />
     </Card>
   );
 }
+
+const CreateDiagnosticReportForm = ({
+  activityDefinition,
+  specimens,
+  isCreatingReport,
+  disableEdit,
+  serviceRequestId,
+  handleCreateReport,
+}: {
+  activityDefinition?: {
+    diagnostic_report_codes?: Code[];
+    classification?: string;
+    specimen_requirements?: SpecimenDefinitionRead[];
+  };
+  specimens: SpecimenRead[];
+  isCreatingReport: boolean;
+  disableEdit: boolean;
+  serviceRequestId: string;
+  handleCreateReport: (code?: Code) => void;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { t } = useTranslation();
+  // Check if all required specimens are collected
+  const hasCollectedSpecimens =
+    activityDefinition?.specimen_requirements?.length === 0 ||
+    specimens.some((specimen) => specimen.status === SpecimenStatus.available);
+
+  const isMultipleDiagnosticReport =
+    !!activityDefinition?.diagnostic_report_codes &&
+    activityDefinition.diagnostic_report_codes.length > 0;
+
+  const [selectedReportCode, setSelectedReportCode] = useState<Code | null>(
+    null,
+  );
+
+  return (
+    <Card
+      className={cn(
+        "shadow-none border-gray-300 rounded-lg cursor-pointer bg-white",
+        isExpanded && "bg-gray-100",
+      )}
+    >
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        <CollapsibleTrigger asChild className="px-2 py-4">
+          <CardHeader>
+            <div className="flex flex-row justify-between items-start sm:items-center gap-4 sm:gap-2 rounded-md">
+              <div className="flex items-center gap-2">
+                <CardTitle>
+                  <p className="flex items-center gap-1.5">
+                    <NotepadText className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
+                    <span className="text-base/9 text-gray-950 font-medium">
+                      {t("test_results_entry")}
+                    </span>
+                  </p>
+                </CardTitle>
+              </div>
+              <div className="flex items-center gap-5">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-10 border border-gray-400 bg-white shadow p-4"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsExpanded(!isExpanded);
+                    }}
+                  >
+                    {isExpanded ? (
+                      <ChevronsDownUp className="size-5" />
+                    ) : (
+                      <ChevronsUpDown className="size-5" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="px-2 bg-gray-100">
+            <PLUGIN_Component
+              __name="ServiceRequestAction"
+              serviceRequestId={serviceRequestId}
+            />
+
+            <div className="flex flex-col gap-1 bg-gray-100 rounded-lg p-1">
+              <div className="flex flex-col justify-center items-center rounded-lg bg-gray-500/3 p-3 border border-gray-200">
+                <FileUp size={24} className="text-gray-600" />
+                <p className="mt-2 text-sm text-gray-700 text-center">
+                  {!hasCollectedSpecimens
+                    ? t("collect_specimen_before_report")
+                    : t("no_test_results_recorded")}
+                </p>
+                {isMultipleDiagnosticReport && (
+                  <p className="mt-2 text-sm text-gray-700 text-center">
+                    {t("select_report_type_to_create")}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-col items-stretch sm:items-center gap-4 justify-center bg-gray-500/3 border border-gray-200 rounded-lg p-4">
+                {isMultipleDiagnosticReport && (
+                  <div className="flex-1 w-full   space-y-2">
+                    <Label className="text-sm font-medium text-gray-950">
+                      {t("select_diagnostic_report_type")}
+                    </Label>
+                    <Select
+                      value={selectedReportCode?.code ?? ""}
+                      onValueChange={(value) => {
+                        const code =
+                          activityDefinition?.diagnostic_report_codes?.find(
+                            (c) => c.code === value,
+                          );
+                        setSelectedReportCode(code || null);
+                      }}
+                      disabled={!hasCollectedSpecimens || disableEdit}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue
+                          placeholder={t("select_diagnostic_report_type")}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {isMultipleDiagnosticReport &&
+                          activityDefinition?.diagnostic_report_codes?.map(
+                            (code) => (
+                              <SelectItem key={code.code} value={code.code}>
+                                <div className="flex flex-col">
+                                  <span className="truncate">
+                                    {code.display} ({code.code})
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ),
+                          )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                <div className="flex ml-auto gap-2 items-center">
+                  <Button
+                    variant="ghost"
+                    className="underline"
+                    onClick={() => {
+                      setSelectedReportCode(null);
+                    }}
+                    disabled={
+                      disableEdit ||
+                      isCreatingReport ||
+                      !hasCollectedSpecimens ||
+                      (!!activityDefinition?.diagnostic_report_codes?.length &&
+                        !selectedReportCode)
+                    }
+                  >
+                    {t("clear")}
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      handleCreateReport(selectedReportCode || undefined)
+                    }
+                    disabled={
+                      disableEdit ||
+                      isCreatingReport ||
+                      !hasCollectedSpecimens ||
+                      (!!activityDefinition?.diagnostic_report_codes?.length &&
+                        !selectedReportCode)
+                    }
+                    className="w-full sm:w-auto"
+                  >
+                    <Plus className="size-4 mr-2" />
+                    {t("create_report")}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
+  );
+};

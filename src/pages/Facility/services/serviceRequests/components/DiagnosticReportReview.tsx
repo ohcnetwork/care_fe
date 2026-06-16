@@ -22,7 +22,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 
 import { Avatar } from "@/components/Common/Avatar";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
@@ -57,44 +56,68 @@ export function DiagnosticReportReview({
   diagnosticReports,
   disableEdit,
 }: DiagnosticReportReviewProps) {
+  return (
+    <>
+      {diagnosticReports.map((report) => (
+        <DiagnosticReportReviewItem
+          key={report.id}
+          report={report}
+          facilityId={facilityId}
+          patientId={patientId}
+          disableEdit={disableEdit}
+        />
+      ))}
+    </>
+  );
+}
+
+function DiagnosticReportReviewItem({
+  report,
+  facilityId,
+  patientId,
+  disableEdit,
+}: {
+  report: DiagnosticReportRead;
+  facilityId: string;
+  patientId: string;
+  disableEdit: boolean;
+}) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(true);
   const [conclusion, setConclusion] = useState<string>("");
   const [showApproveDialog, setShowApproveDialog] = useState(false);
-  const queryClient = useQueryClient();
-  const latestReport = diagnosticReports[0];
 
-  // Fetch the full diagnostic report to get observations
-  const { data: fullReport, isLoading: isLoadingReport } = useQuery({
-    queryKey: ["diagnosticReport", latestReport?.id],
+  const { data: fullReport } = useQuery({
+    queryKey: ["diagnosticReport", report.id],
     queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
       pathParams: {
         patient_external_id: patientId,
-        external_id: latestReport?.id || "",
+        external_id: report.id,
       },
     }),
-    enabled: !!latestReport?.id,
+    enabled: !!report.id,
   });
 
   useEffect(() => {
     if (fullReport?.conclusion) {
       setConclusion(fullReport.conclusion);
     }
-  }, [fullReport]);
+  }, [fullReport?.conclusion]);
 
   const { data: files = { results: [], count: 0 } } = useQuery<
     PaginatedResponse<FileReadMinimal>
   >({
-    queryKey: ["files", "diagnostic_report", fullReport?.id],
+    queryKey: ["files", "diagnostic_report", report.id],
     queryFn: query(fileApi.list, {
       queryParams: {
         file_type: "diagnostic_report",
-        associating_id: fullReport?.id,
+        associating_id: report.id,
         limit: 100,
         offset: 0,
       },
     }),
-    enabled: !!fullReport?.id,
+    enabled: !!report.id,
   });
 
   const { mutate: updateDiagnosticReport, isPending: isUpdatingReport } =
@@ -102,7 +125,7 @@ export function DiagnosticReportReview({
       mutationFn: mutate(diagnosticReportApi.updateDiagnosticReport, {
         pathParams: {
           patient_external_id: patientId,
-          external_id: latestReport?.id || "",
+          external_id: report.id,
         },
       }),
       onSuccess: () => {
@@ -118,47 +141,30 @@ export function DiagnosticReportReview({
           queryKey: ["files"],
         });
       },
-      onError: (err: any) => {
+      onError: (err: Error) => {
         toast.error(
           `Failed to approve diagnostic report: ${err.message || "Unknown error"}`,
         );
       },
     });
 
+  // Prefer the full detail (with observations); fall back to the list report
+  // while the detail request is still loading.
+  const reportDetail = fullReport ?? report;
+
   const handleApprove = () => {
-    if (latestReport) {
-      updateDiagnosticReport({
-        ...latestReport,
-        status: DiagnosticReportStatus.final,
-        conclusion,
-      });
-    }
+    updateDiagnosticReport({
+      ...reportDetail,
+      status: DiagnosticReportStatus.final,
+      conclusion,
+    });
   };
 
-  if (!latestReport) {
-    return null;
-  }
-
-  // Show loading state while fetching the report
-  if (isLoadingReport) {
-    return (
-      <Card className="shadow-lg border">
-        <CardContent className="p-4">
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-1/3" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Don't show the report review if there are no observations and no files and no conclusion
+  // Don't show the report review if there are no observations, files or conclusion
   if (
-    (!fullReport?.observations || fullReport.observations.length === 0) &&
+    (!reportDetail.observations || reportDetail.observations.length === 0) &&
     (!files?.results || files.results.length === 0) &&
-    !fullReport?.conclusion
+    !reportDetail.conclusion
   ) {
     return null;
   }
@@ -179,31 +185,27 @@ export function DiagnosticReportReview({
                   <p className="flex items-center gap-1.5">
                     <FileCheck2 className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
                     <span className="text-base/9 text-gray-950 font-medium">
-                      {t("result_review")}
+                      {t("result_review", { name: report.code?.display })}
                     </span>
                   </p>
                 </CardTitle>
               </div>
               <div className="flex items-center gap-5">
-                {fullReport?.created_by && (
+                {report.created_by && (
                   <div className="flex items-center gap-2">
                     <Avatar
-                      name={formatName(fullReport.created_by, true)}
+                      name={formatName(report.created_by, true)}
                       className="size-5"
-                      imageUrl={fullReport.created_by.profile_picture_url}
+                      imageUrl={report.created_by.profile_picture_url}
                     />
                     <span className="text-sm/9 text-gray-700 font-medium">
-                      {formatName(fullReport.created_by)}
+                      {formatName(report.created_by)}
                     </span>
                   </div>
                 )}
-                {fullReport && (
-                  <Badge
-                    variant={DIAGNOSTIC_REPORT_STATUS_COLORS[fullReport.status]}
-                  >
-                    {t(fullReport.status)}
-                  </Badge>
-                )}
+                <Badge variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}>
+                  {t(report.status)}
+                </Badge>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -226,110 +228,108 @@ export function DiagnosticReportReview({
 
         <CollapsibleContent>
           <CardContent className="px-2 bg-gray-100">
-            {fullReport && (
-              <div className="space-y-6">
+            <div className="space-y-6">
+              <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
+                <CardHeader className="p-4 pb-0">
+                  <CardTitle className="text-base font-semibold">
+                    {reportDetail.code?.display}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  {(reportDetail.observations?.length ?? 0) === 0 && (
+                    <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border cursor-default text-center">
+                      {t("no_observations_entered")}
+                    </p>
+                  )}
+                  <DiagnosticReportResultsTable
+                    observations={(reportDetail.observations ?? []).filter(
+                      (obs) =>
+                        obs.status !== ObservationStatus.ENTERED_IN_ERROR,
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
+                <CardContent className="p-4 space-y-2">
+                  <Label htmlFor="conclusion" className="font-medium">
+                    {t("conclusion")}
+                  </Label>
+                  {reportDetail.status === DiagnosticReportStatus.final ? (
+                    <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border border-gray-200 cursor-default">
+                      {reportDetail.conclusion || t("no_conclusion_entered")}
+                    </p>
+                  ) : (
+                    <textarea
+                      id="conclusion"
+                      className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg disabled:cursor-not-allowed"
+                      placeholder={t("enter_conclusion")}
+                      value={conclusion || reportDetail.conclusion || ""}
+                      onChange={(e) => setConclusion(e.target.value)}
+                      disabled={disableEdit}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              {files?.results && files.results.length > 0 && (
                 <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
                   <CardHeader className="p-4 pb-0">
-                    <CardTitle className="text-base font-semibold">
-                      {fullReport?.code?.display}
+                    <CardTitle className="text-base font-medium">
+                      {t("uploaded_files")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4">
-                    {fullReport.observations.length == 0 && (
-                      <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border cursor-default text-center">
-                        {t("no_observations_entered")}
-                      </p>
-                    )}
-                    <DiagnosticReportResultsTable
-                      observations={fullReport.observations.filter(
-                        (obs) =>
-                          obs.status !== ObservationStatus.ENTERED_IN_ERROR,
-                      )}
+                    <FileListTable
+                      files={files.results}
+                      type="diagnostic_report"
+                      associatingId={report.id}
+                      canEdit={true}
+                      showHeader={false}
                     />
                   </CardContent>
                 </Card>
+              )}
 
-                <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
-                  <CardContent className="p-4 space-y-2">
-                    <Label htmlFor="conclusion" className="font-medium">
-                      {t("conclusion")}
-                    </Label>
-                    {fullReport?.status === DiagnosticReportStatus.final ? (
-                      <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border border-gray-200 cursor-default">
-                        {fullReport?.conclusion || t("no_conclusion_entered")}
-                      </p>
-                    ) : (
-                      <textarea
-                        id="conclusion"
-                        className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg disabled:cursor-not-allowed"
-                        placeholder={t("enter_conclusion")}
-                        value={conclusion || fullReport?.conclusion || ""}
-                        onChange={(e) => setConclusion(e.target.value)}
-                        disabled={disableEdit}
-                      />
-                    )}
-                  </CardContent>
-                </Card>
-
-                {files?.results && files.results.length > 0 && (
-                  <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
-                    <CardHeader className="p-4 pb-0">
-                      <CardTitle className="text-base font-medium">
-                        {t("uploaded_files")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                      <FileListTable
-                        files={files.results}
-                        type="diagnostic_report"
-                        associatingId={fullReport.id}
-                        canEdit={true}
-                        showHeader={false}
-                      />
-                    </CardContent>
-                  </Card>
-                )}
-
-                {fullReport?.status === DiagnosticReportStatus.final && (
-                  <div className="flex justify-end">
-                    <Link
-                      basePath="/"
-                      href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${fullReport?.id}`}
-                    >
-                      <Button variant="primary" className="gap-2">
-                        <ExternalLink className="h-4 w-4" />
-                        {t("view_report")}
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-
-                {fullReport?.status === DiagnosticReportStatus.preliminary && (
-                  <div className="flex justify-end">
-                    <Button
-                      variant="primary"
-                      disabled={isUpdatingReport}
-                      className="gap-2"
-                      onClick={() => setShowApproveDialog(true)}
-                    >
-                      <CheckCircle2 className="size-4" />
-                      {t("approve_results")}
+              {report.status === DiagnosticReportStatus.final && (
+                <div className="flex justify-end">
+                  <Link
+                    basePath="/"
+                    href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}`}
+                  >
+                    <Button variant="primary" className="gap-2">
+                      <ExternalLink className="h-4 w-4" />
+                      {t("view_report")}
                     </Button>
-                    <ConfirmActionDialog
-                      open={showApproveDialog}
-                      onOpenChange={setShowApproveDialog}
-                      title={t("confirm")}
-                      description={t(
-                        "are_you_sure_want_to_approve_diagnostic_report",
-                      )}
-                      confirmText={t("approve")}
-                      onConfirm={handleApprove}
-                      disabled={isUpdatingReport || disableEdit}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
+                  </Link>
+                </div>
+              )}
+
+              {report.status === DiagnosticReportStatus.preliminary && (
+                <div className="flex justify-end">
+                  <Button
+                    variant="primary"
+                    disabled={isUpdatingReport}
+                    className="gap-2"
+                    onClick={() => setShowApproveDialog(true)}
+                  >
+                    <CheckCircle2 className="size-4" />
+                    {t("approve_results")}
+                  </Button>
+                  <ConfirmActionDialog
+                    open={showApproveDialog}
+                    onOpenChange={setShowApproveDialog}
+                    title={t("confirm")}
+                    description={t(
+                      "are_you_sure_want_to_approve_diagnostic_report",
+                    )}
+                    confirmText={t("approve")}
+                    onConfirm={handleApprove}
+                    disabled={isUpdatingReport || disableEdit}
+                  />
+                </div>
+              )}
+            </div>
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
