@@ -1168,7 +1168,7 @@ export function DiagnosticReportForm({
                                 .toUpperCase(),
                             })}
                           </p>
-                          <div className="mt-4 flex gap-3">
+                          <div className="mt-4 flex flex-col sm:flex-row gap-3 w-full sm:items-center sm:justify-center">
                             <Button
                               variant="outline"
                               className=" border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white"
@@ -1207,7 +1207,7 @@ export function DiagnosticReportForm({
                           </div>
 
                           {fileUpload.files.length > 0 && (
-                            <div className="mt-5 w-full max-w-md space-y-2 bg-red-500">
+                            <div className="mt-5 w-full max-w-md space-y-2">
                               <div
                                 className="truncate text-sm text-gray-600"
                                 title={fileUpload.files
