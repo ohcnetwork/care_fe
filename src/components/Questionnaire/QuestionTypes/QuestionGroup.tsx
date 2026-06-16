@@ -207,6 +207,7 @@ export const QuestionGroup = memo(function QuestionGroup({
 
   return (
     <div
+      id={"question-" + question.id}
       className={cn(
         "sm:rounded-lg bg-gray-100 md:bg-transparent",
         isActive && "ring-2 ring-primary",
@@ -363,6 +364,7 @@ function RepeatableGroupRenderer({
 
   return (
     <div
+      id={"question-" + question.id}
       className={cn(
         "sm:rounded-lg bg-gray-100 md:bg-transparent",
         isActive && "ring-2 ring-primary",

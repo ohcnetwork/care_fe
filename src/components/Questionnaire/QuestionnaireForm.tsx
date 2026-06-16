@@ -776,7 +776,86 @@ export function QuestionnaireForm({
       const validateQuestion = (q: Question) => {
         // Handle nested questions in groups
         if (q.type === "group" && q.questions) {
-          q.questions.forEach(validateQuestion);
+          if (q.repeats) {
+            const groupResponse = form.responses.find(
+              (r) => r.question_id === q.id,
+            );
+
+            if (q.required && isQuestionEnabled(q, form.responses)) {
+              const hasFilledInstance = groupResponse?.sub_results?.some(
+                (instance) => instance.some(isResponseFilled),
+              );
+              if (!hasFilledInstance) {
+                errors.push({
+                  question_id: q.id,
+                  error: t("field_required"),
+                  type: "validation_error",
+                  msg: t("field_required"),
+                });
+                firstErrorId = firstErrorId ? firstErrorId : q.id;
+              }
+            }
+
+            if (groupResponse?.sub_results) {
+              groupResponse.sub_results.forEach((instance, instanceIndex) => {
+                q.questions!.forEach((subQ) => {
+                  if (subQ.type === "group" && subQ.questions) {
+                    return;
+                  }
+                  if (subQ.required && isQuestionEnabled(subQ, instance)) {
+                    const subResponse = instance.find(
+                      (r) => r.question_id === subQ.id,
+                    );
+                    const hasValue = subResponse?.values?.some(isValueFilled);
+                    const hasProperty = (
+                      arr: ResponseValue[] | undefined,
+                      prop: string,
+                    ) =>
+                      Array.isArray(arr) &&
+                      arr.some(
+                        (item) =>
+                          (item as Record<string, unknown>)?.[prop] != null,
+                      );
+                    const hasCoding = hasProperty(
+                      subResponse?.values,
+                      "coding",
+                    );
+                    const hasUnit = hasProperty(subResponse?.values, "unit");
+
+                    if (!hasValue && !hasCoding && !hasUnit) {
+                      errors.push({
+                        question_id: subQ.id,
+                        error: t("field_required"),
+                        type: "validation_error",
+                        msg: t("field_required"),
+                        index: instanceIndex,
+                      });
+                      firstErrorId = firstErrorId ? firstErrorId : subQ.id;
+                    }
+                  }
+                });
+              });
+            }
+          } else {
+            if (q.required && isQuestionEnabled(q, form.responses)) {
+              const hasFilledSubQuestion = q.questions.some((subQ) => {
+                const response = form.responses.find(
+                  (r) => r.question_id === subQ.id,
+                );
+                return response?.values?.some(isValueFilled);
+              });
+              if (!hasFilledSubQuestion) {
+                errors.push({
+                  question_id: q.id,
+                  error: t("field_required"),
+                  type: "validation_error",
+                  msg: t("field_required"),
+                });
+                firstErrorId = firstErrorId ? firstErrorId : q.id;
+              }
+            }
+            q.questions.forEach(validateQuestion);
+          }
           return;
         }
 
