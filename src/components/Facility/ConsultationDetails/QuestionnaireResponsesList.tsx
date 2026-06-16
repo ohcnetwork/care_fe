@@ -115,81 +115,114 @@ function QuestionGroup({
           {group.text}
         </h3>
         <div className="space-y-2">
-          {groupResponse.sub_results.map((instance, idx) => (
-            <div key={idx} className="border border-gray-100 rounded px-2 py-1">
-              {groupResponse.sub_results!.length > 1 && (
-                <span className="text-xs font-medium text-gray-400">
-                  #{idx + 1}
-                </span>
-              )}
-              <Table className="table-fixed w-full">
-                <TableBody>
-                  {group.questions?.map((subQuestion) => {
-                    if (subQuestion.type === "structured") return null;
-                    if (subQuestion.type === "group") return null;
-                    const subResp = instance.find(
-                      (r) => r.question_id === subQuestion.id,
-                    );
-                    if (!subResp?.values?.length) return null;
-                    const hasAnyValue = subResp.values.some(
-                      (v) => v.value || v.coding,
-                    );
-                    if (!hasAnyValue) return null;
+          {groupResponse.sub_results.map((instance, idx) => {
+            const renderQuestionsInOrder = () => {
+              const result: React.ReactElement[] = [];
+              let currentNonGroupQuestions: Question[] = [];
 
-                    return (
-                      <TableRow
-                        key={subQuestion.id}
-                        className="flex flex-col md:table-row"
-                      >
-                        <TableCell className="py-1 pl-0 align-top">
-                          <div className="text-sm text-gray-600 wrap-break-words whitespace-normal">
-                            {subQuestion.text}
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-1 pr-0 align-top">
-                          <div className="text-sm font-medium wrap-break-words whitespace-pre-wrap">
-                            {subResp.values.map((val, vidx) => (
-                              <React.Fragment key={vidx}>
-                                {vidx > 0 && ", "}
-                                {val.value &&
-                                  formatValue(val.value, subQuestion.type)}
-                                {val.unit && (
-                                  <span className="ml-1 text-gray-600">
-                                    {val.unit.code}
-                                  </span>
-                                )}
-                                {val.coding && (
-                                  <span className="ml-1 text-gray-600">
-                                    {val.coding.display} ({val.coding.code})
-                                  </span>
-                                )}
-                              </React.Fragment>
-                            ))}
-                            {subResp.note && (
-                              <p className="text-xs text-gray-500 mt-0.5 italic">
-                                {subResp.note}
-                              </p>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-              {/* Render nested groups (including nested repeatable groups) */}
-              {group.questions?.map((subQuestion) => {
-                if (subQuestion.type !== "group") return null;
-                return (
-                  <QuestionGroup
-                    key={subQuestion.id}
-                    group={subQuestion}
-                    responses={instance}
-                  />
-                );
-              })}
-            </div>
-          ))}
+              const flushNonGroupQuestions = () => {
+                if (currentNonGroupQuestions.length > 0) {
+                  result.push(
+                    <Table
+                      key={`table-${result.length}`}
+                      className="table-fixed w-full"
+                    >
+                      <TableBody>
+                        {currentNonGroupQuestions.map((subQuestion) => {
+                          const subResp = instance.find(
+                            (r) => r.question_id === subQuestion.id,
+                          );
+                          if (!subResp?.values?.length) return null;
+                          const hasAnyValue = subResp.values.some(
+                            (v) => v.value || v.coding,
+                          );
+                          if (!hasAnyValue) return null;
+
+                          return (
+                            <TableRow
+                              key={subQuestion.id}
+                              className="flex flex-col md:table-row"
+                            >
+                              <TableCell className="py-1 pl-0 align-top">
+                                <div className="text-sm text-gray-600 wrap-break-words whitespace-normal">
+                                  {subQuestion.text}
+                                </div>
+                              </TableCell>
+                              <TableCell className="py-1 pr-0 align-top">
+                                <div className="text-sm font-medium wrap-break-words whitespace-pre-wrap">
+                                  {subResp.values.map((val, vidx) => (
+                                    <React.Fragment key={vidx}>
+                                      {vidx > 0 && ", "}
+                                      {val.value &&
+                                        formatValue(
+                                          val.value,
+                                          subQuestion.type,
+                                        )}
+                                      {val.unit && (
+                                        <span className="ml-1 text-gray-600">
+                                          {val.unit.code}
+                                        </span>
+                                      )}
+                                      {val.coding && (
+                                        <span className="ml-1 text-gray-600">
+                                          {val.coding.display} (
+                                          {val.coding.code})
+                                        </span>
+                                      )}
+                                    </React.Fragment>
+                                  ))}
+                                  {subResp.note && (
+                                    <p className="text-xs text-gray-500 mt-0.5 italic">
+                                      {subResp.note}
+                                    </p>
+                                  )}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>,
+                  );
+                  currentNonGroupQuestions = [];
+                }
+              };
+
+              group.questions?.forEach((subQuestion) => {
+                if (subQuestion.type === "structured") return;
+
+                if (subQuestion.type === "group") {
+                  flushNonGroupQuestions();
+                  result.push(
+                    <QuestionGroup
+                      key={subQuestion.id}
+                      group={subQuestion}
+                      responses={instance}
+                    />,
+                  );
+                } else {
+                  currentNonGroupQuestions.push(subQuestion);
+                }
+              });
+              flushNonGroupQuestions();
+
+              return result;
+            };
+
+            return (
+              <div
+                key={idx}
+                className="border border-gray-100 rounded px-2 py-1 space-y-1"
+              >
+                {groupResponse.sub_results!.length > 1 && (
+                  <span className="text-xs font-medium text-gray-400">
+                    #{idx + 1}
+                  </span>
+                )}
+                {renderQuestionsInOrder()}
+              </div>
+            );
+          })}
         </div>
       </div>
     );

@@ -18,7 +18,10 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import { ResponseValue } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse as QuestionnaireResponseItem,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
@@ -266,16 +269,9 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
   );
 }
 
-type ResponseItem = {
-  values: ResponseValue[];
-  note?: string;
-  question_id: string;
-  sub_results?: ResponseItem[][];
-};
-
 function hasRenderableContent(
   questions: Question[] | undefined,
-  responses: ResponseItem[],
+  responses: QuestionnaireResponseItem[],
 ): boolean {
   if (!questions) return false;
   return questions.some((question) => {
@@ -299,7 +295,7 @@ function QuestionGroup({
   level = 0,
 }: {
   group: Question;
-  responses: ResponseItem[];
+  responses: QuestionnaireResponseItem[];
   level?: number;
 }) {
   // Handle repeatable groups with sub_results

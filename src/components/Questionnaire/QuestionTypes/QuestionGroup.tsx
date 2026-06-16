@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { memo, useEffect } from "react";
+import { memo, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -123,23 +123,36 @@ export const QuestionGroup = memo(function QuestionGroup({
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
-  const clearDependentQuestionResponse = (dependentQuestion: Question) => {
-    const dependentQuestionResponse = questionnaireResponses.find(
-      (v) => v.question_id === dependentQuestion.id,
-    );
-    if (dependentQuestionResponse) {
-      updateQuestionnaireResponseCB([], dependentQuestion.id);
-    }
-    dependentQuestion.questions?.forEach((q) => {
-      clearDependentQuestionResponse(q);
-    });
-  };
+  const clearDependentQuestionResponse = useCallback(
+    (dependentQuestion: Question) => {
+      const dependentQuestionResponse = questionnaireResponses.find(
+        (v) => v.question_id === dependentQuestion.id,
+      );
+      if (dependentQuestionResponse) {
+        // For repeatable groups, explicitly clear sub_results to reset instances
+        if (dependentQuestion.repeats) {
+          updateQuestionnaireResponseCB(
+            [],
+            dependentQuestion.id,
+            undefined,
+            [],
+          );
+        } else {
+          updateQuestionnaireResponseCB([], dependentQuestion.id);
+        }
+      }
+      dependentQuestion.questions?.forEach((q) => {
+        clearDependentQuestionResponse(q);
+      });
+    },
+    [questionnaireResponses, updateQuestionnaireResponseCB],
+  );
 
   useEffect(() => {
     if (!isEnabled) {
       clearDependentQuestionResponse(question);
     }
-  }, [isEnabled]);
+  }, [isEnabled, clearDependentQuestionResponse, question]);
 
   if (!isEnabled) {
     return null;
@@ -252,10 +265,23 @@ function initializeGroupResponses(
         responses.push(...initializeGroupResponses(q.questions));
       }
     } else {
+      let defaultValues: ResponseValue[] = [];
+      if (q.answer_option && q.answer_option.length > 0) {
+        const defaultOptions = q.answer_option.filter(
+          (o) => o.initial_selected === true,
+        );
+        if (defaultOptions.length > 0) {
+          defaultValues = defaultOptions.map((opt) => ({
+            type: "string",
+            value: opt.value,
+            coding: opt.code ?? undefined,
+          }));
+        }
+      }
       responses.push({
         question_id: q.id,
         link_id: q.link_id,
-        values: [],
+        values: defaultValues,
         structured_type: q.structured_type ?? null,
       });
     }
@@ -374,7 +400,7 @@ function RepeatableGroupRenderer({
                     size="icon"
                     onClick={() => handleRemoveInstance(instanceIndex)}
                     className="size-6 text-gray-400 hover:text-red-500"
-                    aria-label={`Remove instance ${instanceIndex + 1}`}
+                    aria-label={t("remove")}
                   >
                     <XIcon className="size-4" />
                   </Button>
