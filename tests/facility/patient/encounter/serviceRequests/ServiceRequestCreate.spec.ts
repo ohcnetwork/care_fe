@@ -174,9 +174,11 @@ test.describe("Patient Service Request Tab", () => {
         resp.status() === 200,
     );
     const specimenCollectedToast = expectToast(page, /specimen collected/i);
-    await collectButton.click();
-    await specimenResponse;
-    await specimenCollectedToast;
+    await Promise.all([
+      collectButton.click(),
+      specimenResponse,
+      specimenCollectedToast,
+    ]);
     await page
       .getByRole("combobox")
       .filter({ hasText: "Select Diagnostic Report Type" })
