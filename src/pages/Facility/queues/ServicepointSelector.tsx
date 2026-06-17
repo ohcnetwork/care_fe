@@ -72,7 +72,7 @@ export const ServicepointSelector = ({
     setSelectedSubQueueId(
       token.status === targetStatus ? (token.sub_queue?.id ?? "") : "",
     );
-  }, [open, token.sub_queue?.id]);
+  }, [open, token.sub_queue?.id, token.status, targetStatus]);
 
   const { mutate: updateToken, isPending } = useMutation({
     mutationFn: mutate(tokenApi.update, {
