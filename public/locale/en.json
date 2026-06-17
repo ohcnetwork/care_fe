@@ -3888,6 +3888,7 @@
   "no_sections_added": "No sections added yet. Select a section from the dropdown above to get started.",
   "no_sections_selected": "No sections selected. Add a section to see available fields.",
   "no_service_accounts_found": "No service accounts found",
+  "no_service_points": "No active service points are present",
   "no_service_points_available": "No Service Points Available",
   "no_service_points_found": "No service points found",
   "no_service_points_found_description": "No service points have been created yet. Create your first service point to get started.",

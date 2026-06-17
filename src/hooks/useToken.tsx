@@ -19,7 +19,7 @@ export function useToken({
 }) {
   const { t } = useTranslation();
   const { data: token } = useQuery({
-    queryKey: ["token", facilityId, queueId, tokenId],
+    queryKey: ["token", tokenId],
     queryFn: query(tokenApi.get, {
       pathParams: {
         facility_id: facilityId,
@@ -40,7 +40,7 @@ export function useToken({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["token", facilityId, queueId, tokenId],
+        queryKey: ["token", tokenId],
       });
       queryClient.invalidateQueries({
         queryKey: ["infinite-tokens", facilityId, queueId],

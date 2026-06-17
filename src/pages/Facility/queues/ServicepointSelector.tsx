@@ -121,18 +121,25 @@ export const ServicepointSelector = ({
               {description}
             </DrawerDescription>
           </DrawerHeader>
-          <div className="p-3 pb-6">
-            <RadioInput
-              options={subQueues.map((sub) => ({
-                label: sub.name,
-                value: sub.id,
-              }))}
-              onValueChange={handleSelect}
-              value={selectedSubQueueId}
-              className="flex flex-col gap-3"
-              classNameInput="p-2"
-            />
-          </div>
+          {subQueues.length === 0 ? (
+            <div className="text-sm text-gray-500 italic pb-3 pl-4">
+              {t("no_service_points")}
+            </div>
+          ) : (
+            <div className="p-3 pb-6">
+              <RadioInput
+                options={subQueues.map((sub) => ({
+                  label: sub.name,
+                  value: sub.id,
+                }))}
+                onValueChange={handleSelect}
+                value={selectedSubQueueId}
+                required
+                className="flex flex-col gap-3"
+                classNameInput="p-2"
+              />
+            </div>
+          )}
         </DrawerContent>
       </Drawer>
     );
@@ -147,16 +154,23 @@ export const ServicepointSelector = ({
             {description}
           </DialogDescription>
         </DialogHeader>
-        <RadioInput
-          options={subQueues.map((sub) => ({
-            label: sub.name,
-            value: sub.id,
-          }))}
-          onValueChange={handleSelect}
-          value={selectedSubQueueId}
-          className="flex flex-col gap-3"
-          classNameInput="p-2"
-        />
+        {subQueues.length === 0 ? (
+          <div className="text-sm text-gray-500 italic">
+            {t("no_service_points")}
+          </div>
+        ) : (
+          <RadioInput
+            options={subQueues.map((sub) => ({
+              label: sub.name,
+              value: sub.id,
+            }))}
+            required
+            onValueChange={handleSelect}
+            value={selectedSubQueueId}
+            className="flex flex-col gap-3"
+            classNameInput="p-2"
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
