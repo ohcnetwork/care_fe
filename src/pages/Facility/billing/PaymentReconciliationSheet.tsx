@@ -58,6 +58,7 @@ import {
   useEntityExtensions,
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
+import { register } from "@/lib/override/register";
 import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -78,6 +79,7 @@ import {
 } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { ExtensionContexts } from "@/Utils/schema/types";
 import Decimal from "decimal.js";
 
 const PAYMENT_METHODS = [
@@ -179,7 +181,7 @@ const createFormSchema = (extValidation: z.ZodType<Record<string, unknown>>) =>
       },
     );
 
-export function PaymentReconciliationSheet({
+const PaymentReconciliationSheetBase = ({
   open,
   onOpenChange,
   facilityId,
@@ -188,7 +190,7 @@ export function PaymentReconciliationSheet({
   accountId,
   onSuccess,
   isCreditNote = false,
-}: PaymentReconciliationSheetProps) {
+}: PaymentReconciliationSheetProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
@@ -204,6 +206,7 @@ export function PaymentReconciliationSheet({
     () =>
       getCombinedExtensionProps(
         getExtensions(ExtensionEntityType.payment_reconciliation, "write"),
+        ExtensionContexts.payment_reconciliation_form,
       ),
     [getExtensions],
   );
@@ -222,6 +225,7 @@ export function PaymentReconciliationSheet({
     entityType: ExtensionEntityType.payment_reconciliation,
     schemaType: "write",
     form,
+    context: ExtensionContexts.payment_reconciliation_form,
   });
 
   // Watch for payment method changes
@@ -749,6 +753,9 @@ export function PaymentReconciliationSheet({
       </SheetContent>
     </Sheet>
   );
-}
+};
 
-export default PaymentReconciliationSheet;
+export const PaymentReconciliationSheet = register(
+  "PaymentReconciliationSheet",
+  PaymentReconciliationSheetBase,
+);
