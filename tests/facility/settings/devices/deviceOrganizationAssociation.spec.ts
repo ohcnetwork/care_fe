@@ -11,7 +11,6 @@ function getManageOrganizationSheet(page: Page) {
 }
 
 async function submitAddOrganization(
-  page: Page,
   manageOrgSheet: ReturnType<typeof getManageOrganizationSheet>,
 ) {
   const addOrganizationButton = manageOrgSheet.getByRole("button", {
@@ -91,7 +90,7 @@ test.describe("Device Organization Association", () => {
 
     // Administration is pre-selected by default, click Add Organization
     const manageOrgSheet = getManageOrganizationSheet(page);
-    await submitAddOrganization(page, manageOrgSheet);
+    await submitAddOrganization(manageOrgSheet);
 
     // Organization should now be associated on the details section.
     const managingOrgSection = page
@@ -125,7 +124,7 @@ test.describe("Device Organization Association", () => {
       "Administration",
     );
 
-    await submitAddOrganization(page, manageOrgSheet);
+    await submitAddOrganization(manageOrgSheet);
 
     // After first add, slideover should auto-close.
     await expect(manageOrgSheet).not.toBeVisible();
@@ -186,7 +185,7 @@ test.describe("Device Organization Association", () => {
       await expect(departmentItems.first()).toBeHidden();
     }
 
-    await submitAddOrganization(page, manageOrgSheet);
+    await submitAddOrganization(manageOrgSheet);
     await expect(manageOrgSheet).not.toBeVisible();
 
     // Final state should show the newly selected organization beside Change.
