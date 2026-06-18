@@ -22,18 +22,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export type ServicepointSelectorAction =
+export type ServicePointSelectorAction =
   | "serve"
   | "move_to_up_next"
   | "change_service_point";
 
-const ACTION_TO_STATUS: Record<ServicepointSelectorAction, TokenStatus> = {
+const ACTION_TO_STATUS: Record<ServicePointSelectorAction, TokenStatus> = {
   serve: TokenStatus.IN_PROGRESS,
   move_to_up_next: TokenStatus.CREATED,
   change_service_point: TokenStatus.IN_PROGRESS,
 };
 
-export const ServicepointSelector = ({
+export const ServicePointSelector = ({
   open,
   onOpenChange,
   token,
@@ -46,7 +46,7 @@ export const ServicepointSelector = ({
   token: TokenRead;
   subQueues: TokenSubQueueRead[];
   facilityId: string;
-  action: ServicepointSelectorAction;
+  action: ServicePointSelectorAction;
 }) => {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -118,9 +118,9 @@ export const ServicepointSelector = ({
           </DrawerHeader>
           <div className="p-3 pb-6">
             <RadioInput
-              options={subQueues.map((sub) => ({
-                label: sub.name,
-                value: sub.id,
+              options={subQueues.map((subQueue) => ({
+                label: subQueue.name,
+                value: subQueue.id,
               }))}
               onValueChange={handleSelect}
               value={selectedSubQueueId}
@@ -143,9 +143,9 @@ export const ServicepointSelector = ({
           </DialogDescription>
         </DialogHeader>
         <RadioInput
-          options={subQueues.map((sub) => ({
-            label: sub.name,
-            value: sub.id,
+          options={subQueues.map((subQueue) => ({
+            label: subQueue.name,
+            value: subQueue.id,
           }))}
           onValueChange={handleSelect}
           value={selectedSubQueueId}

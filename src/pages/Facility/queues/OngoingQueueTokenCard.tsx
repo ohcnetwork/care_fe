@@ -14,8 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
 import {
-  ServicepointSelector,
-  ServicepointSelectorAction,
+  ServicePointSelector,
+  ServicePointSelectorAction,
 } from "@/pages/Facility/queues/ServicepointSelector";
 import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
@@ -286,7 +286,7 @@ function OngoingQueueTokenCardInner({
   });
 
   const [servicePointAction, setServicePointAction] =
-    useState<ServicepointSelectorAction>("serve");
+    useState<ServicePointSelectorAction>("serve");
 
   const [openServicePointSelector, setOpenServicePointSelector] =
     useState(false);
@@ -296,11 +296,17 @@ function OngoingQueueTokenCardInner({
       <DrawerTrigger asChild>
         <div
           className={cn(
-            "flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow",
+            "relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow",
             token.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
           )}
         >
+          {token.status === TokenStatus.IN_PROGRESS && (
+            <span
+              aria-hidden="true"
+              className="absolute top-4 left-0 inset-y-6 w-1 rounded-r-lg bg-primary-500 h-5"
+            />
+          )}
           <div className="flex sm:contents items-start justify-between w-full">
             <div className="flex flex-col items-start gap-1 min-w-0">
               <span className="text-gray-950 font-semibold">
@@ -563,8 +569,8 @@ function TokenDrawerContent({
   actions: TokenActionItem[];
   openServicePointSelector: boolean;
   setOpenServicePointSelector: (open: boolean) => void;
-  servicePointAction: ServicepointSelectorAction;
-  setServicePointAction: (action: ServicepointSelectorAction) => void;
+  servicePointAction: ServicePointSelectorAction;
+  setServicePointAction: (action: ServicePointSelectorAction) => void;
 }) {
   const queueStatus = getQueueTokenStatus(token);
   const queryClient = useQueryClient();
@@ -678,7 +684,7 @@ function TokenDrawerContent({
             disabled={isPending}
           >
             <ArrowUpRight className="size-4 mr-2" />
-            {t("up_next")}
+            {t("move_to_up_next")}
           </Button>
           <Button
             variant="primary"
@@ -735,7 +741,7 @@ function TokenDrawerContent({
               <Button
                 variant="ghost"
                 className={cn(
-                  "flex gap-3 text-gray-950 text-sm font-semibold",
+                  "flex gap-3 text-gray-950 text-sm font-semibold w-full justify-start underline",
                   action.danger && "text-danger-600",
                 )}
                 onClick={action.onSelect}
@@ -747,7 +753,7 @@ function TokenDrawerContent({
           ))}
         </div>
       </div>
-      <ServicepointSelector
+      <ServicePointSelector
         open={openServicePointSelector}
         onOpenChange={setOpenServicePointSelector}
         facilityId={facilityId}
