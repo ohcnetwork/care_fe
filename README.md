@@ -88,7 +88,7 @@ REACT_CARE_API_URL=https://careapi.ohc.network
 
 **Set up Nginx reverse proxy:**
 
-### On macOS
+#### On macOS
 
 We'll use [Homebrew](https://brew.sh/) to fetch most of the packages on macOS:
 
@@ -97,11 +97,15 @@ We'll use [Homebrew](https://brew.sh/) to fetch most of the packages on macOS:
 **Important**: Make sure that you start Nginx after you install them. Instructions on how to do that will
 be printed to the command-line after it's successfully installed.
 
-### On Ubuntu
+#### On Ubuntu
 
 The following command should install the required dependencies on Ubuntu. If you're using another _flavour_ of Linux, adapt the command to work with the package manager available with your distribution.
 
-    sudo apt-get install nginx
+```sh
+sudo apt-get install nginx
+```
+
+#### Configure Nginx (both macOS and Ubuntu)
 
 1. Create a new Nginx server configuration file...
    - `/opt/homebrew/etc/nginx/servers/care` (macOS)
@@ -109,7 +113,7 @@ The following command should install the required dependencies on Ubuntu. If you
 
    ...and save the following configuration inside it:
 
-   ```
+   ```nginx
    server {
      listen 80;
      server_name care.localhost develop.localhost dev.localhost plugs.localhost;
