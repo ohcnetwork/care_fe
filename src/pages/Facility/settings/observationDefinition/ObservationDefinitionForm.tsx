@@ -65,7 +65,7 @@ import observationDefinitionApi from "@/types/emr/observationDefinition/observat
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-import { ObservationInterpretation } from "./ObservationInterpretation";
+import { ObservationInterpretation } from "./components/ObservationInterpretation";
 
 export default function ObservationDefinitionForm({
   facilityId,

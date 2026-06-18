@@ -35,6 +35,7 @@ interface Props<TabKey extends string> {
   showMoreAfterIndex?: number;
   tabContentClassName?: string;
   enableIndexShortcut?: boolean;
+  alwaysShowShortcut?: boolean;
 }
 
 const getTabsToShowAndShowMore = <TabKey extends string>(
@@ -73,6 +74,7 @@ export const NavTabs = <TabKey extends string>({
   tabTriggerClassName,
   showMoreAfterIndex,
   enableIndexShortcut = false,
+  alwaysShowShortcut = false,
   ...props
 }: Props<TabKey> & React.ComponentProps<typeof Tabs>) => {
   const { t } = useTranslation();
@@ -110,12 +112,16 @@ export const NavTabs = <TabKey extends string>({
           >
             {tabs[option].label}
             {tabs[option].labelSuffix}
-            {tabs[option].shortcutId && (
-              <ShortcutBadge actionId={tabs[option].shortcutId}></ShortcutBadge>
+            {tabs[option].shortcutId && !enableIndexShortcut && (
+              <ShortcutBadge
+                actionId={tabs[option].shortcutId}
+                alwaysShow={alwaysShowShortcut}
+              ></ShortcutBadge>
             )}
             {enableIndexShortcut && (
               <ShortcutBadge
                 actionId={`tab-index-${index + 1}`}
+                alwaysShow={alwaysShowShortcut}
               ></ShortcutBadge>
             )}
           </TabsTrigger>

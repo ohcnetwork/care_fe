@@ -51,6 +51,7 @@ interface MultiFilterStyleTagSelectorProps {
   disabled?: boolean;
   isTagMutationInProgress?: boolean;
   trigger?: React.ReactNode;
+  align?: "start" | "end";
 }
 
 // Clean, minimal tag selector matching multi-filter design
@@ -63,6 +64,7 @@ export function MultiFilterStyleTagSelector({
   disabled = false,
   isTagMutationInProgress = false,
   trigger,
+  align = "start",
 }: MultiFilterStyleTagSelectorProps) {
   const [open, setOpen] = useState(false);
   const [groupPopoverOpen, setGroupPopoverOpen] = useState<string | null>(null);
@@ -405,7 +407,7 @@ export function MultiFilterStyleTagSelector({
           <DropdownMenuTrigger asChild>{triggerButton}</DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[calc(100vw)] max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
-            align="start"
+            align={align}
           >
             <div className="p-0">
               {/* Header */}

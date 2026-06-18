@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { FileText, NotebookPen } from "lucide-react";
+import { FileText } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -54,13 +54,6 @@ export const SummaryPanelReportsTab = ({
         <h6 className="text-gray-950 font-semibold">{t("reports")}</h6>
       </div>
       <div className="flex flex-col @md:grid @md:grid-cols-2 gap-3">
-        <Button variant="outline" className="justify-start w-full" asChild>
-          <Link href={`../${selectedEncounterId}/treatment_summary`}>
-            <NotebookPen />
-            {t("treatment_summary")}
-          </Link>
-        </Button>
-
         {templates.map((template) => (
           <Button
             key={template.id}
