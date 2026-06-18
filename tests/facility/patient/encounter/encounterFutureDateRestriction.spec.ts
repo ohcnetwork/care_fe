@@ -118,7 +118,7 @@ test.describe("Encounter Future Date Restriction", () => {
     // Wait for encounter to be created and dialog to close
     await expect(encounterDialog).not.toBeVisible();
 
-    // Verify Encounter Actions button is visible, then mark encounter as complete
+    // Verify Encounter Actions button is visible after encounter creation
     await expect(
       page.getByRole("button", { name: "Encounter Actions" }),
     ).toBeVisible();
