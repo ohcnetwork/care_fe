@@ -7,6 +7,7 @@ const appVersion = uuidv4();
 
 const jsonData = {
   version: appVersion,
+  built_at: new Date().toISOString(),
 };
 
 const jsonContent = JSON.stringify(jsonData);

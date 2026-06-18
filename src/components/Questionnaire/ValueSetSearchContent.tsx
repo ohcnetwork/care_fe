@@ -19,11 +19,69 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
-import { Code, CodeConceptMinimal } from "@/types/base/code/code";
+import { Code, CodeConceptMinimal, Designation } from "@/types/base/code/code";
 import valueSetApi from "@/types/valueSet/valueSetApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { Loader2 } from "lucide-react";
+
+// Use codes for "fully specified name" variants that are too verbose to show as synonyms
+const EXCLUDED_USE_CODES = new Set([
+  "900000000000003001", // SNOMED Fully specified name
+  "FullySpecifiedName", // LOINC Fully specified name
+]);
+
+function getSynonyms(option: CodeConceptMinimal): string[] {
+  if (!option.designation?.length) return [];
+  return option.designation
+    .filter(
+      (d: Designation) =>
+        d.value &&
+        d.value !== option.display &&
+        // TO DO: If local language supported is added to loinc/snomed value set api,
+        // we should switch this to use i18n.language
+        (!d.language || d.language.startsWith("en")) &&
+        (!d.use?.code || !EXCLUDED_USE_CODES.has(d.use.code)),
+    )
+    .map((d: Designation) => d.value!)
+    .filter((v, i, arr) => arr.indexOf(v) === i);
+}
+
+// Score: 3 = startsWith, 2 = word boundary match, 1 = includes, 0 = no match
+const score = (text: string, searchTerm: string) => {
+  const t = text.toLowerCase();
+  if (t.startsWith(searchTerm)) return 3;
+  if (t.split(/\s+/).some((word) => word.startsWith(searchTerm))) return 2;
+  if (t.includes(searchTerm)) return 1;
+  return 0;
+};
+
+function getBestMatchDisplay(
+  option: CodeConceptMinimal,
+  search: string,
+): { primary: string; secondary: string | null } {
+  if (!search) return { primary: option.display, secondary: null };
+
+  const s = search.toLowerCase();
+  const canonical = option.display;
+  const synonyms = getSynonyms(option);
+
+  let bestTerm = canonical;
+  let bestScore = score(canonical, s);
+
+  for (const syn of synonyms) {
+    const synScore = score(syn, s);
+    if (synScore > bestScore) {
+      bestScore = synScore;
+      bestTerm = syn;
+    }
+  }
+
+  return {
+    primary: bestTerm,
+    secondary: bestTerm !== canonical ? canonical : null,
+  };
+}
 
 interface Props {
   system: string;
@@ -43,6 +101,7 @@ interface ItemProps {
   onFavourite: () => void;
   onSelect: () => void;
   showCode: boolean;
+  search: string;
 }
 
 const Item = ({
@@ -51,32 +110,42 @@ const Item = ({
   onSelect,
   isFavourite,
   showCode,
-}: ItemProps) => (
-  <CommandItem
-    key={option.code}
-    value={option.code}
-    onSelect={onSelect}
-    className="cursor-pointer"
-  >
-    <div className="flex items-center justify-between w-full gap-4">
-      <span>
-        {option.display} {showCode && `(${option.code})`}
-      </span>
+  search,
+}: ItemProps) => {
+  const { primary, secondary } = getBestMatchDisplay(option, search);
 
-      <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onFavourite();
-        }}
-        className="hover:text-primary-500 transition-all text-secondary-900 cursor-pointer"
-      >
-        {isFavourite ? <StarFilledIcon /> : <StarIcon />}
-      </button>
-    </div>
-  </CommandItem>
-);
+  return (
+    <CommandItem
+      key={option.code}
+      value={`${option.display} ${option.code}`}
+      onSelect={onSelect}
+      className="cursor-pointer"
+    >
+      <div className="flex items-center justify-between w-full gap-4">
+        <div className="flex flex-col">
+          <span>
+            {primary} {showCode && `(${option.code})`}
+          </span>
+          {secondary && (
+            <span className="text-xs text-gray-500">{secondary}</span>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onFavourite();
+          }}
+          className="hover:text-primary-500 transition-all text-secondary-900 cursor-pointer"
+        >
+          {isFavourite ? <StarFilledIcon /> : <StarIcon />}
+        </button>
+      </div>
+    </CommandItem>
+  );
+};
 
 export default function ValueSetSearchContent({
   system,
@@ -172,25 +241,25 @@ export default function ValueSetSearchContent({
     },
   });
 
-  // Combine recents and search results, but only show each result once
-  const filteredRecents =
-    search.length < 3
-      ? recentsQuery.data || []
-      : recentsQuery.data?.filter(
-          (recent) =>
-            recent.display?.toLowerCase().includes(search.toLowerCase()) ||
-            recent.code?.toLowerCase().includes(search.toLowerCase()),
-        ) || [];
-
-  const resultsWithRecents = [
-    ...filteredRecents,
-    ...(searchQuery.data?.results?.filter(
-      (r) => !filteredRecents.find((recent) => recent.code === r.code),
-    ) || []),
-  ];
+  const seenCodes = new Set<string>();
+  const searchResults = searchQuery.data?.results || [];
+  const searchLower = search.toLowerCase();
+  const recents =
+    search.length >= 3
+      ? (recentsQuery.data || []).filter(
+          (r) =>
+            r.display?.toLowerCase().includes(searchLower) ||
+            r.code?.toLowerCase().includes(searchLower),
+        )
+      : recentsQuery.data || [];
+  const resultsWithRecents = [...recents, ...searchResults].filter((item) => {
+    if (seenCodes.has(item.code)) return false;
+    seenCodes.add(item.code);
+    return true;
+  });
   // Filter favourites based on search
   const favourites = favouritesQuery.data?.filter((favourite) =>
-    favourite.display?.toLowerCase().includes(search.toLowerCase()),
+    favourite.display?.toLowerCase().includes(searchLower),
   );
 
   return (
@@ -254,10 +323,12 @@ export default function ValueSetSearchContent({
                     key={option.code}
                     option={option}
                     showCode={showCode}
+                    search={search}
                     onSelect={() => {
+                      const { primary } = getBestMatchDisplay(option, search);
                       onSelect({
                         code: option.code,
-                        display: option.display || "",
+                        display: primary || option.display || "",
                         system: option.system || "",
                       });
                       addRecentMutation.mutate(option);
@@ -322,6 +393,7 @@ export default function ValueSetSearchContent({
                     key={option.code}
                     option={option}
                     showCode={showCode}
+                    search={search}
                     onSelect={() => {
                       onSelect({
                         code: option.code,

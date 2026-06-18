@@ -18,6 +18,7 @@ import {
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { SupplyDeliveryRead } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
+import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 
 interface DetailRowProps {
@@ -95,7 +96,7 @@ const DeliveryOrderContent = ({
 
               return {
                 product: productName || "-",
-                quantity: String(delivery.supplied_item_quantity || "-"),
+                quantity: round(delivery.supplied_item_quantity),
                 status: t(delivery.status),
                 condition: t(delivery.supplied_item_condition || "normal"),
                 lot_batch_number: batchNumber || "-",
