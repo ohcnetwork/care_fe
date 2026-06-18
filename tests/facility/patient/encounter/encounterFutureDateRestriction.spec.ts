@@ -114,6 +114,23 @@ test.describe("Encounter Future Date Restriction", () => {
     await encounterDialog
       .getByRole("button", { name: /^Create Encounter/ })
       .click();
+
+    // Wait for encounter to be created and dialog to close
+    await expect(encounterDialog).not.toBeVisible();
+
+    // Verify Encounter Actions button is visible, then mark encounter as complete
+    await expect(
+      page.getByRole("button", { name: "Encounter Actions" }),
+    ).toBeVisible();
+
+    // Use keyboard shortcut M+C to open Mark as Complete dialog
+    await page.keyboard.type("M");
+    await page.keyboard.type("C");
+
+    // Click the "Mark as Complete" button in the confirmation dialog
+    await page.getByRole("button", { name: "Mark as Complete" }).click();
+
+    // Verify the future-date validation error is not shown for Planned status
     await expect(
       page.getByText("Future date is only allowed for planned encounters"),
     ).not.toBeVisible();
