@@ -44,7 +44,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
 
   const [selectedOrganizations, setSelectedOrganizations] = useState<
     Organization[]
-  >([]);
+  >(currentOrganizations || []);
   const [currentSelection, setCurrentSelection] = useState<Organization | null>(
     null,
   );

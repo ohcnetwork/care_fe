@@ -74,8 +74,8 @@ export default function TagConfigForm({
     resource: z.nativeEnum(TagResource, {
       required_error: t("field_required"),
     }),
-    facility_organization: z.string().optional(),
-    organization: z.string().optional(),
+    facility_organization: z.string().nullable(),
+    organization: z.string().nullable(),
   });
 
   type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
@@ -99,8 +99,8 @@ export default function TagConfigForm({
       priority: parentTag?.priority || 100,
       status: TagStatus.ACTIVE,
       resource: parentTag?.resource || TagResource.PATIENT,
-      facility_organization: undefined,
-      organization: undefined,
+      facility_organization: null,
+      organization: null,
     },
   });
 
@@ -124,8 +124,8 @@ export default function TagConfigForm({
         priority: existingConfig.priority,
         status: existingConfig.status,
         resource: existingConfig.resource,
-        facility_organization: existingConfig.facility_organization?.id,
-        organization: existingConfig.organization?.id,
+        facility_organization: existingConfig.facility_organization?.id ?? null,
+        organization: existingConfig.organization?.id ?? null,
       });
     }
   }, [existingConfig, isEditing, form]);
@@ -140,8 +140,8 @@ export default function TagConfigForm({
         priority: parentTag.priority,
         status: TagStatus.ACTIVE,
         resource: parentTag.resource,
-        facility_organization: undefined,
-        organization: undefined,
+        facility_organization: null,
+        organization: null,
       });
     }
   }, [parentTag, isCreatingChild, form]);
@@ -184,12 +184,8 @@ export default function TagConfigForm({
       resource: data.resource,
       ...(parentId && { parent: parentId }),
       ...(facilityId && { facility: facilityId }),
-      ...(data.facility_organization && {
-        facility_organization: data.facility_organization,
-      }),
-      ...(data.organization && {
-        organization: data.organization,
-      }),
+      facility_organization: data.facility_organization,
+      organization: data.organization,
     };
 
     if (isEditing) {

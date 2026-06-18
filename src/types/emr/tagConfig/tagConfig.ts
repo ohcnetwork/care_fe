@@ -75,9 +75,9 @@ export interface TagConfigRequest {
   status: TagStatus;
   parent?: string | null;
   resource: TagResource;
-  organization?: string;
+  organization: string | null;
   facility?: string;
-  facility_organization?: string;
+  facility_organization: string | null;
 }
 
 export function getTagHierarchyDisplay(
