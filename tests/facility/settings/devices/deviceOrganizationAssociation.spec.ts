@@ -1,8 +1,14 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+function getManageOrganizationSheet(page: Page) {
+  return page.getByRole("dialog").filter({
+    has: page.getByRole("heading", { name: "Manage Organization" }),
+  });
+}
 
 test.describe("Device Organization Association", () => {
   let facilityId: string;
@@ -99,8 +105,12 @@ test.describe("Device Organization Association", () => {
       page.getByText(/Organization added successfully/i),
     ).toBeVisible();
 
-    // Close the sheet
+    const manageOrgSheet = getManageOrganizationSheet(page);
+    await expect(manageOrgSheet).toBeVisible();
+
+    // Close the sheet and ensure focus returns to device page.
     await page.keyboard.press("Escape");
+    await expect(manageOrgSheet).not.toBeVisible();
 
     // Open the sheet again to change organization
     await page
@@ -110,25 +120,50 @@ test.describe("Device Organization Association", () => {
       .click();
 
     // Should show current organization
-    await expect(page.getByText("Current Organization")).toBeVisible();
-    await expect(page.getByText("Administration").first()).toBeVisible();
+    await expect(
+      manageOrgSheet.getByText("Current Organization"),
+    ).toBeVisible();
+    await expect(
+      manageOrgSheet.getByText("Administration").first(),
+    ).toBeVisible();
 
     // Click "All Organizations" tab to see more options
-    await page.getByRole("tab", { name: "All Organizations" }).click();
+    await manageOrgSheet
+      .getByRole("tab", { name: "All Organizations" })
+      .click();
 
     // Click the Select Department dropdown (using popover-trigger)
-    await page
+    await manageOrgSheet
       .locator('[data-slot="popover-trigger"]')
       .filter({ hasText: "Select Department" })
       .click();
 
-    // Wait for the department list to load and select any item
-    const departmentItem = page.locator('[data-slot="command-item"]').first();
-    await expect(departmentItem).toBeVisible();
-    await departmentItem.click();
+    // Pick an organization that's not the current one to avoid no-op updates.
+    const departmentItems = page.locator('[data-slot="command-item"]');
+    await expect(departmentItems.first()).toBeVisible();
+
+    const itemCount = await departmentItems.count();
+    let selectedOrganizationName = "";
+    for (let index = 0; index < itemCount; index++) {
+      const item = departmentItems.nth(index);
+      const itemText = (await item.innerText()).trim();
+      if (!/administration/i.test(itemText)) {
+        selectedOrganizationName = itemText.split("\n")[0].trim();
+        await item.click();
+        break;
+      }
+    }
+
+    if (!selectedOrganizationName) {
+      // Fallback for datasets with a single available organization.
+      selectedOrganizationName = "Administration";
+      await departmentItems.first().click();
+    }
 
     // Click Add Organization
-    await page.getByRole("button", { name: "Add Organization" }).click();
+    await manageOrgSheet
+      .getByRole("button", { name: "Add Organization" })
+      .click();
 
     // Should show success message
     await expect(
@@ -139,9 +174,16 @@ test.describe("Device Organization Association", () => {
     const managingOrgSection = page
       .getByRole("heading", { name: "Managing Organization" })
       .locator("..");
-    await expect(
-      managingOrgSection.getByText("Administration"),
-    ).not.toBeVisible();
+    if (selectedOrganizationName !== "Administration") {
+      await expect(
+        managingOrgSection.getByText("Administration"),
+      ).not.toBeVisible();
+      await expect(
+        managingOrgSection.getByText(selectedOrganizationName, {
+          exact: false,
+        }),
+      ).toBeVisible();
+    }
     await expect(
       managingOrgSection.getByRole("button", { name: "Change" }),
     ).toBeVisible();
