@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { format, subDays } from "date-fns";
 import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 const encounterClasses = [
   "Inpatient",
@@ -16,14 +16,9 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 async function openEncounterForm(page: Page) {
   const facilityId = getFacilityId();
-  const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-  const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+  const patientId = getPatientId();
 
-  await page.goto(
-    `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
-  );
-
-  await page.getByRole("link", { name: "Patient Home" }).first().click();
+  await page.goto(`/facility/${facilityId}/patient/${patientId}`);
   await expect(
     page.getByRole("button", { name: "Create Encounter" }),
   ).toBeVisible();
