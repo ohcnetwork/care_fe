@@ -62,6 +62,7 @@ export type XUIControl = XUILayoutControl | XUIInputControl;
 export const ExtensionContexts = {
   registration: "registration",
   patient_edit: "patient_edit",
+  appointment_print: "appointment_print",
   patient_summary: "patient_summary",
   account_form: "account_form",
   payment_reconciliation_form: "payment_reconciliation_form",

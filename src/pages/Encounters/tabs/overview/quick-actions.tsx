@@ -14,6 +14,7 @@ import {
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
+import { register } from "@/lib/override";
 import { FormDialog } from "./FormsDialog";
 
 export const QuickActions = (props: React.ComponentProps<"div">) => {
@@ -58,7 +59,6 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
       />
       <FormDialog
         subjectType="encounter"
-        questionnaireTag="encounter_actions"
         trigger={
           <QuickAction
             icon={<HealthWorkerIcon className="text-teal-700" />}
@@ -71,7 +71,9 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
   );
 };
 
-export function QuickAction({
+export const QuickAction = register("QuickAction", QuickActionBase);
+
+function QuickActionBase({
   icon,
   title,
   actionId,
