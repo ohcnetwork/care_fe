@@ -460,15 +460,12 @@ export default function AppointmentDetail(props: Props) {
                 </CardContent>
               </Card>
             )}
-            {/* Lets only show encounter details if the appointment is not in a final status or if there is an encounter linked to the appointment */}
             <div>
               <h3 className="text-base font-semibold mt-4">
                 {t("quick_actions")}
               </h3>
               <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
-                {![...AppointmentFinalStatuses].includes(
-                  appointment.status,
-                ) && (
+                {!AppointmentFinalStatuses.includes(appointment.status) && (
                   <>
                     {/* Start Consultation - For booked and checked in appointments */}
                     {["booked", "checked_in"].includes(currentStatus) &&
@@ -552,7 +549,7 @@ export default function AppointmentDetail(props: Props) {
                   title={t("accounts")}
                   actionId="goto-account"
                   basePath="/"
-                  href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${appointment.patient.id}&patient_name=${appointment.patient.name}`}
+                  href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${appointment.patient.id}&patient_name=${encodeURIComponent(appointment.patient.name || "")}`}
                 />
               </div>
             </div>
