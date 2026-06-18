@@ -295,6 +295,8 @@ function OngoingQueueTokenCardInner({
     <Drawer>
       <DrawerTrigger asChild>
         <div
+          role="button"
+          tabIndex={0}
           className={cn(
             "relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow",
             token.status === TokenStatus.IN_PROGRESS &&

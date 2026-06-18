@@ -69,7 +69,9 @@ export const ServicePointSelector = ({
       setSelectedSubQueueId("");
       return;
     }
-    setSelectedSubQueueId(token.sub_queue?.id ?? "");
+    setSelectedSubQueueId(
+      token.status === targetStatus ? (token.sub_queue?.id ?? "") : "",
+    );
   }, [open, token.sub_queue?.id]);
 
   const { mutate: updateToken, isPending } = useMutation({
@@ -122,6 +124,7 @@ export const ServicePointSelector = ({
                 label: subQueue.name,
                 value: subQueue.id,
               }))}
+              required
               onValueChange={handleSelect}
               value={selectedSubQueueId}
               className="flex flex-col gap-3"
@@ -147,6 +150,7 @@ export const ServicePointSelector = ({
             label: subQueue.name,
             value: subQueue.id,
           }))}
+          required
           onValueChange={handleSelect}
           value={selectedSubQueueId}
           className="flex flex-col gap-3"
