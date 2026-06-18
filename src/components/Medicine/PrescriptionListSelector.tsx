@@ -48,7 +48,7 @@ interface PrescriptionListSelectorProps {
   onSelectPrescription: (prescription: PrescritionList | undefined) => void;
 }
 
-const PAGE_LIMIT = 14;
+const RESULTS_PER_PAGE_LIMIT = 14;
 
 export default function PrescriptionListSelector({
   patientId,
@@ -69,7 +69,7 @@ export default function PrescriptionListSelector({
           queryParams: {
             encounter: encounterId,
             facility: facilityId,
-            limit: String(PAGE_LIMIT),
+            limit: String(RESULTS_PER_PAGE_LIMIT),
             offset: String(pageParam),
           },
         })({
@@ -80,7 +80,7 @@ export default function PrescriptionListSelector({
       enabled: !!patientId && !!encounterId,
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * PAGE_LIMIT;
+        const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
     });
@@ -88,6 +88,7 @@ export default function PrescriptionListSelector({
   const prescriptions = data?.pages.flatMap((page) => page.results) ?? [];
 
   const loadMoreRef = useOnInView<HTMLDivElement>((inView) => {
+    console.log("In view:", inView);
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
