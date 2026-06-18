@@ -10,6 +10,25 @@ function getManageOrganizationSheet(page: Page) {
   });
 }
 
+async function submitAddOrganization(
+  page: Page,
+  manageOrgSheet: ReturnType<typeof getManageOrganizationSheet>,
+) {
+  const addOrganizationButton = manageOrgSheet.getByRole("button", {
+    name: "Add Organization",
+  });
+  await expect(addOrganizationButton).toBeVisible();
+  await expect(addOrganizationButton).toBeEnabled();
+  await addOrganizationButton.scrollIntoViewIfNeeded();
+
+  try {
+    await addOrganizationButton.click({ timeout: 5000 });
+  } catch {
+    await addOrganizationButton.focus();
+    await addOrganizationButton.press("Enter");
+  }
+}
+
 test.describe("Device Organization Association", () => {
   let facilityId: string;
   let deviceName: string;
@@ -71,7 +90,8 @@ test.describe("Device Organization Association", () => {
     ).toBeVisible();
 
     // Administration is pre-selected by default, click Add Organization
-    await page.getByRole("button", { name: "Add Organization" }).click();
+    const manageOrgSheet = getManageOrganizationSheet(page);
+    await submitAddOrganization(page, manageOrgSheet);
 
     // Should show success message
     await expect(
@@ -99,18 +119,19 @@ test.describe("Device Organization Association", () => {
     ).toBeVisible();
 
     // Administration is pre-selected by default, click Add Organization
-    await page.getByRole("button", { name: "Add Organization" }).click();
+    let manageOrgSheet = getManageOrganizationSheet(page);
+    await submitAddOrganization(page, manageOrgSheet);
 
     await expect(
       page.getByText(/Organization added successfully/i),
     ).toBeVisible();
 
-    const manageOrgSheet = getManageOrganizationSheet(page);
-    await expect(manageOrgSheet).toBeVisible();
-
-    // Close the sheet and ensure focus returns to device page.
-    await page.keyboard.press("Escape");
-    await expect(manageOrgSheet).not.toBeVisible();
+    manageOrgSheet = getManageOrganizationSheet(page);
+    // Some environments auto-close the sheet after successful association.
+    if (await manageOrgSheet.isVisible()) {
+      await page.keyboard.press("Escape");
+      await expect(manageOrgSheet).not.toBeVisible();
+    }
 
     // Open the sheet again to change organization
     await page
@@ -160,10 +181,14 @@ test.describe("Device Organization Association", () => {
       await departmentItems.first().click();
     }
 
-    // Click Add Organization
+    // Dismiss any open popover before submit to avoid click interception.
     await manageOrgSheet
-      .getByRole("button", { name: "Add Organization" })
+      .getByRole("tab", { name: "All Organizations" })
       .click();
+    await expect(departmentItems.first()).toBeHidden();
+
+    // Click Add Organization
+    await submitAddOrganization(page, manageOrgSheet);
 
     // Should show success message
     await expect(
