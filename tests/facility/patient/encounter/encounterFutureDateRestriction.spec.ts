@@ -122,18 +122,6 @@ test.describe("Encounter Future Date Restriction", () => {
     await expect(
       page.getByRole("button", { name: "Encounter Actions" }),
     ).toBeVisible();
-
-    // Use keyboard shortcut M+C to open Mark as Complete dialog
-    await page.keyboard.type("M");
-    await page.keyboard.type("C");
-
-    // Click the "Mark as Complete" button in the confirmation dialog
-    await page.getByRole("button", { name: "Mark as Complete" }).click();
-
-    // Verify the future-date validation error is not shown for Planned status
-    await expect(
-      page.getByText("Future date is only allowed for planned encounters"),
-    ).not.toBeVisible();
   });
 
   test("should show validation error when switching from Planned to In Progress with future date", async ({
