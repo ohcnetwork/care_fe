@@ -52,14 +52,26 @@ export const ServicePointSelector = ({
   const isMobile = useBreakpoints({ default: true, sm: false });
   const queryClient = useQueryClient();
 
-  const title = t(
-    action === "serve"
-      ? "serve_token"
-      : action === "move_to_up_next"
-        ? "move_to_up_next"
-        : "change_service_point",
-  );
-  const description = t(`${action}_confirmation`);
+  const getTitleOrDescription = (action: ServicePointSelectorAction) => {
+    switch (action) {
+      case "serve":
+        return {
+          title: t("serve_token"),
+          description: t("serve_confirmation"),
+        };
+      case "move_to_up_next":
+        return {
+          title: t("move_to_up_next"),
+          description: t("move_to_up_next_description"),
+        };
+      case "change_service_point":
+        return {
+          title: t("change_service_point"),
+          description: t("change_service_point_description"),
+        };
+    }
+  };
+  const { title, description } = getTitleOrDescription(action);
   const targetStatus = ACTION_TO_STATUS[action];
 
   const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
