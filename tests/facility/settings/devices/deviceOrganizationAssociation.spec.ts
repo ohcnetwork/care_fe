@@ -116,20 +116,36 @@ test.describe("Device Organization Association", () => {
     await managingOrgSection.getByRole("button", { name: "Associate" }).click();
     let manageOrgSheet = getManageOrganizationSheet(page);
     await expect(manageOrgSheet).toBeVisible();
+
+    // On first open, Administration should be pre-selected in the blue card.
+    const initiallySelectedOrganizationChip = manageOrgSheet
+      .getByRole("button", { name: "Add Organization" })
+      .locator("xpath=preceding-sibling::*[1]");
+    await expect(initiallySelectedOrganizationChip).toContainText(
+      "Administration",
+    );
+
     await submitAddOrganization(page, manageOrgSheet);
+
+    // After first add, slideover should auto-close.
+    await expect(manageOrgSheet).not.toBeVisible();
+
+    // Verify default organization is visible beside the Change button.
     await expect(
       managingOrgSection.getByRole("button", { name: "Change" }),
     ).toBeVisible();
+    await expect(managingOrgSection.getByText("Administration")).toBeVisible();
 
-    // Step 2: Reopen sheet and choose a different organization if available.
-    if (await manageOrgSheet.isVisible()) {
-      await page.keyboard.press("Escape");
-      await expect(manageOrgSheet).not.toBeVisible();
-    }
-
+    // Step 2: Reopen sheet and choose a different organization.
     await managingOrgSection.getByRole("button", { name: "Change" }).click();
     manageOrgSheet = getManageOrganizationSheet(page);
     await expect(manageOrgSheet).toBeVisible();
+
+    // Administration appears in both selected (blue card) and current organization sections.
+    const administrationInstances = await manageOrgSheet
+      .getByText("Administration")
+      .count();
+    expect(administrationInstances).toBeGreaterThanOrEqual(2);
 
     await manageOrgSheet
       .getByRole("tab", { name: "All Organizations" })
@@ -139,22 +155,30 @@ test.describe("Device Organization Association", () => {
       .first()
       .click();
 
+    const selectedDepartment = faker.helpers.arrayElement([
+      "Urology",
+      "Endocrinology",
+      "ENT",
+    ]);
+    const searchInput = page.locator('[data-slot="command-input"]');
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill(selectedDepartment);
+
     const departmentItems = page.locator('[data-slot="command-item"]');
-    await expect(departmentItems.first()).toBeVisible();
+    const firstFilteredItem = departmentItems.first();
+    await expect(firstFilteredItem).toBeVisible();
+    await firstFilteredItem.click();
 
-    const nonAdminDepartmentItems = departmentItems.filter({
-      hasNotText: /Administration/i,
-    });
-    await expect(
-      nonAdminDepartmentItems.first(),
-      "Expected at least one department option other than Administration",
-    ).toBeVisible();
-
-    const optionCount = await nonAdminDepartmentItems.count();
-    const randomOption = nonAdminDepartmentItems.nth(
-      faker.number.int({ min: 0, max: optionCount - 1 }),
+    // Verify the blue selected card is replaced with the newly selected department.
+    const updatedSelectedOrganizationChip = manageOrgSheet
+      .getByRole("button", { name: "Add Organization" })
+      .locator("xpath=preceding-sibling::*[1]");
+    await expect(updatedSelectedOrganizationChip).toContainText(
+      selectedDepartment,
     );
-    await randomOption.click();
+    await expect(updatedSelectedOrganizationChip).not.toContainText(
+      "Administration",
+    );
 
     // Ensure popover is closed before submission to prevent click interception.
     if (await departmentItems.first().isVisible()) {
@@ -163,16 +187,17 @@ test.describe("Device Organization Association", () => {
     }
 
     await submitAddOrganization(page, manageOrgSheet);
+    await expect(manageOrgSheet).not.toBeVisible();
 
-    // Final state should remain associated and expose Change action.
+    // Final state should show the newly selected organization beside Change.
     await expect(
       managingOrgSection.getByRole("button", { name: "Change" }),
     ).toBeVisible();
     await expect(
-      page.getByText("No organization associated"),
-    ).not.toBeVisible();
+      managingOrgSection.getByText(selectedDepartment, { exact: false }),
+    ).toBeVisible({ timeout: 15_000 });
     await expect(
       managingOrgSection.getByText("Administration"),
-    ).not.toBeVisible({ timeout: 15_000 });
+    ).not.toBeVisible();
   });
 });
