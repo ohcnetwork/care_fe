@@ -784,11 +784,15 @@ export function QuestionnaireForm({
 
             if (groupResponse?.sub_results) {
               groupResponse.sub_results.forEach((instance, instanceIndex) => {
+                const mergedResponses = [...instance, ...form.responses];
                 q.questions!.forEach((subQ) => {
                   if (subQ.type === "group" && subQ.questions) {
                     return;
                   }
-                  if (subQ.required && isQuestionEnabled(subQ, instance)) {
+                  if (
+                    subQ.required &&
+                    isQuestionEnabled(subQ, mergedResponses)
+                  ) {
                     const subResponse = instance.find(
                       (r) => r.question_id === subQ.id,
                     );
