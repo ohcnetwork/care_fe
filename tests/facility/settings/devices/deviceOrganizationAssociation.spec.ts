@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import { selectFromCommand } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -150,24 +151,21 @@ test.describe("Device Organization Association", () => {
     await manageOrgSheet
       .getByRole("tab", { name: "All Organizations" })
       .click();
-    await manageOrgSheet
-      .locator('[data-slot="popover-trigger"]')
-      .first()
-      .click();
 
     const selectedDepartment = faker.helpers.arrayElement([
       "Urology",
       "Endocrinology",
       "ENT",
     ]);
-    const searchInput = page.locator('[data-slot="command-input"]');
-    await expect(searchInput).toBeVisible();
-    await searchInput.fill(selectedDepartment);
+    const organizationPickerTrigger = manageOrgSheet
+      .locator('[data-slot="popover-trigger"]')
+      .first();
+    await selectFromCommand(page, organizationPickerTrigger, {
+      search: selectedDepartment,
+      itemIndex: 0,
+    });
 
     const departmentItems = page.locator('[data-slot="command-item"]');
-    const firstFilteredItem = departmentItems.first();
-    await expect(firstFilteredItem).toBeVisible();
-    await firstFilteredItem.click();
 
     // Verify the blue selected card is replaced with the newly selected department.
     const updatedSelectedOrganizationChip = manageOrgSheet
