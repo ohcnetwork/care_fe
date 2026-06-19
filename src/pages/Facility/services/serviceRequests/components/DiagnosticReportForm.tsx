@@ -344,6 +344,7 @@ export function DiagnosticReportForm({
     definitionId: string,
     index: number,
     value: string,
+    unit?: string,
   ) {
     setObservations((prev) => {
       const observationsList = [...(prev[definitionId] || [])];
@@ -351,7 +352,7 @@ export function DiagnosticReportForm({
         observationsList[index] = {
           id: "",
           value: "",
-          unit: "",
+          unit: unit || "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -724,7 +725,7 @@ export function DiagnosticReportForm({
             component.code.code
           ] || {
             value: "",
-            unit: "",
+            unit: component.permitted_unit?.code || "",
             interpretation: "",
           };
 
@@ -914,7 +915,7 @@ export function DiagnosticReportForm({
                       {
                         id: "",
                         value: "",
-                        unit: "",
+                        unit: definition.permitted_unit?.code || "",
                         interpretation: "",
                         status: ObservationStatus.AMENDED,
                         components: {},
@@ -1032,6 +1033,7 @@ export function DiagnosticReportForm({
                                               definition.id,
                                               index,
                                               e.target.value,
+                                              observationData.unit,
                                             )
                                           }
                                           placeholder={t("result_value")}
@@ -1075,7 +1077,8 @@ export function DiagnosticReportForm({
                                       {
                                         id: "",
                                         value: "",
-                                        unit: "",
+                                        unit:
+                                          definition.permitted_unit?.code || "",
                                         status: ObservationStatus.AMENDED,
                                         components: {},
                                       },
