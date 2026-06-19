@@ -4,14 +4,17 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-function getManageOrganizationSheet(page: Page) {
-  return page.getByRole("dialog").filter({
+async function getManageOrganizationSheet(page: Page) {
+  const manageOrgSheet = page.getByRole("dialog").filter({
     has: page.getByRole("heading", { name: "Manage Organization" }),
   });
+
+  await expect(manageOrgSheet).toBeVisible();
+  return manageOrgSheet;
 }
 
 async function submitAddOrganization(
-  manageOrgSheet: ReturnType<typeof getManageOrganizationSheet>,
+  manageOrgSheet: Awaited<ReturnType<typeof getManageOrganizationSheet>>,
 ) {
   const addOrganizationButton = manageOrgSheet.getByRole("button", {
     name: "Add Organization",
@@ -89,7 +92,7 @@ test.describe("Device Organization Association", () => {
     ).toBeVisible();
 
     // Administration is pre-selected by default, click Add Organization
-    const manageOrgSheet = getManageOrganizationSheet(page);
+    const manageOrgSheet = await getManageOrganizationSheet(page);
     await submitAddOrganization(manageOrgSheet);
 
     // Organization should now be associated on the details section.
@@ -113,8 +116,7 @@ test.describe("Device Organization Association", () => {
 
     // Step 1: Associate default organization so Change action is available.
     await managingOrgSection.getByRole("button", { name: "Associate" }).click();
-    let manageOrgSheet = getManageOrganizationSheet(page);
-    await expect(manageOrgSheet).toBeVisible();
+    let manageOrgSheet = await getManageOrganizationSheet(page);
 
     // On first open, Administration should be pre-selected in the blue card.
     const initiallySelectedOrganizationChip = manageOrgSheet
@@ -137,8 +139,7 @@ test.describe("Device Organization Association", () => {
 
     // Step 2: Reopen sheet and choose a different organization.
     await managingOrgSection.getByRole("button", { name: "Change" }).click();
-    manageOrgSheet = getManageOrganizationSheet(page);
-    await expect(manageOrgSheet).toBeVisible();
+    manageOrgSheet = await getManageOrganizationSheet(page);
 
     // Administration appears in both selected (blue card) and current organization sections.
     const administrationInstances = await manageOrgSheet

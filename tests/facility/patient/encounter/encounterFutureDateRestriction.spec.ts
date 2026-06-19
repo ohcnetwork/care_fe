@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { ENCOUNTER_CLASSES } from "tests/support/encounterClasses";
+import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterClasses";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 

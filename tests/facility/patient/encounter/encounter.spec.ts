@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { format, subDays } from "date-fns";
-import { ENCOUNTER_CLASSES } from "tests/support/encounterClasses";
+import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterClasses";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
