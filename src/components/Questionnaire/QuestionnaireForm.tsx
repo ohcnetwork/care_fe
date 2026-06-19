@@ -54,7 +54,7 @@ import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
-import { initializeGroupResponses } from "./utils";
+import { hasStructuredQuestion, initializeGroupResponses } from "./utils";
 
 import queryClient from "@/Utils/request/queryClient";
 
@@ -584,22 +584,8 @@ export function QuestionnaireForm({
       return false;
     }
 
-    const findStructuredQuestions = (questions: Question[]): boolean => {
-      for (const q of questions) {
-        if (q.type === "structured") {
-          return true;
-        }
-        if (q.type === "group" && q.questions) {
-          if (findStructuredQuestions(q.questions)) {
-            return true;
-          }
-        }
-      }
-      return false;
-    };
-
     return !questionnaireForms.some((form) =>
-      findStructuredQuestions(form.questionnaire.questions),
+      hasStructuredQuestion(form.questionnaire.questions),
     );
   }, [questionnaireSlug, questionnaireForms]);
 

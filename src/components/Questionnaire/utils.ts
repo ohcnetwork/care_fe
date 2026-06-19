@@ -134,3 +134,16 @@ export const copyQuestionWithNewIds = (question: Question): Question => {
   };
   return newQuestion;
 };
+
+/**
+ * Recursively checks if any question in the tree has type "structured".
+ * Traverses into "group" type questions to check nested questions.
+ */
+export function hasStructuredQuestion(questions?: Question[]): boolean {
+  if (!questions) return false;
+  return questions.some(
+    (q) =>
+      q.type === "structured" ||
+      (q.type === "group" && hasStructuredQuestion(q.questions)),
+  );
+}

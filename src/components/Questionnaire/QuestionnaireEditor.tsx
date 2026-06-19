@@ -110,7 +110,7 @@ import { QuestionnaireForm } from "./QuestionnaireForm";
 import { QuestionnaireProperties } from "./QuestionnaireProperties";
 import { SelectOrCreateValueset } from "./SelectOrCreateValueset";
 import ValueSetSelect from "./ValueSetSelect";
-import { scrollToQuestion } from "./utils";
+import { hasStructuredQuestion, scrollToQuestion } from "./utils";
 
 interface QuestionnaireEditorProps {
   slug?: string;
@@ -210,15 +210,6 @@ function LayoutOptionCard({
 }
 
 const HIDE_REPEATABLE_QUESTION_TYPES = ["boolean", "display", "structured"];
-
-function hasStructuredQuestion(questions?: Question[]): boolean {
-  if (!questions) return false;
-  return questions.some(
-    (q) =>
-      q.type === "structured" ||
-      (q.type === "group" && hasStructuredQuestion(q.questions)),
-  );
-}
 
 function findStructuredQuestionNumbers(
   questions: Question[],

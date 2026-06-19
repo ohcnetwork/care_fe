@@ -381,7 +381,7 @@ function RepeatableGroupRenderer({
           <QuestionDescription question={question} />
         </div>
       )}
-      <div className="space-y-4 p-2">
+      <div className="space-y-2 p-2">
         {subResults.map((instance, instanceIndex) => (
           <RepeatableGroupInstance
             key={instanceKeysRef.current[instanceIndex]}
@@ -410,13 +410,17 @@ function RepeatableGroupRenderer({
             size="sm"
             onClick={handleAddInstance}
             className={cn(
-              isSubQuestion ? "text-gray-500 hover:text-gray-700" : "w-full",
+              isSubQuestion
+                ? "text-gray-500 hover:text-gray-700 max-w-full"
+                : "w-full",
             )}
           >
-            <Plus className="size-4" />
-            {isSubQuestion
-              ? `${t("add_another")} ${question.text || ""}`
-              : t("add_another")}
+            <Plus className="size-4 shrink-0" />
+            <span className="truncate">
+              {isSubQuestion
+                ? `${t("add_another")} ${question.text || ""}`
+                : t("add_another")}
+            </span>
           </Button>
         )}
       </div>
@@ -482,58 +486,63 @@ const RepeatableGroupInstance = memo(function RepeatableGroupInstance({
   );
 
   return (
-    <div className="relative rounded-md border border-gray-200 bg-white p-3">
-      {instanceCount > 1 && (
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-500">
+    <div className="relative rounded-md border border-gray-200 bg-white px-3 py-1.5">
+      <div className="flex flex-col md:flex-row md:items-start gap-1 md:gap-2">
+        {instanceCount > 1 && (
+          <span className="text-sm font-medium text-gray-500 md:pt-2 shrink-0">
             #{instanceIndex + 1}
           </span>
-          {!disabled && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => onRemove(instanceIndex)}
-              className="size-6 text-gray-400 hover:text-red-500"
-              aria-label={t("remove")}
-            >
-              <XIcon className="size-4" />
-            </Button>
+        )}
+        <div
+          className={cn(
+            "flex-1 min-w-0 gap-1",
+            question.styling_metadata?.containerClasses,
           )}
-        </div>
-      )}
-      <div className={cn("gap-1", question.styling_metadata?.containerClasses)}>
-        {question.questions?.map((subQuestion) => (
-          <QuestionGroup
-            encounterId={encounterId}
-            facilityId={facilityId}
-            key={`${subQuestion.id}-${instanceIndex}`}
-            question={subQuestion}
-            questionnaireResponses={mergedResponses}
-            updateQuestionnaireResponseCB={(
-              values,
-              questionId,
-              note,
-              subResults,
-            ) =>
-              onUpdateSubResponse(
-                instanceIndex,
+        >
+          {question.questions?.map((subQuestion) => (
+            <QuestionGroup
+              encounterId={encounterId}
+              facilityId={facilityId}
+              key={`${subQuestion.id}-${instanceIndex}`}
+              question={subQuestion}
+              questionnaireResponses={mergedResponses}
+              updateQuestionnaireResponseCB={(
                 values,
                 questionId,
                 note,
                 subResults,
-              )
-            }
-            errors={instanceErrors}
-            clearError={clearError}
-            disabled={disabled}
-            activeGroupId={activeGroupId}
-            patientId={patientId}
-            isSubQuestion={true}
-            questionnaireId={questionnaireId}
-            questionnaireSlug={questionnaireSlug}
-          />
-        ))}
+              ) =>
+                onUpdateSubResponse(
+                  instanceIndex,
+                  values,
+                  questionId,
+                  note,
+                  subResults,
+                )
+              }
+              errors={instanceErrors}
+              clearError={clearError}
+              disabled={disabled}
+              activeGroupId={activeGroupId}
+              patientId={patientId}
+              isSubQuestion={true}
+              questionnaireId={questionnaireId}
+              questionnaireSlug={questionnaireSlug}
+            />
+          ))}
+        </div>
+        {instanceCount > 1 && !disabled && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => onRemove(instanceIndex)}
+            className="size-6 text-gray-400 hover:text-red-500 shrink-0 absolute top-2 right-2 md:static md:mt-2"
+            aria-label={t("remove")}
+          >
+            <XIcon className="size-4" />
+          </Button>
+        )}
       </div>
     </div>
   );
