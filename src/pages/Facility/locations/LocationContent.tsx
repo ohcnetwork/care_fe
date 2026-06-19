@@ -54,7 +54,7 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <div className="flex flex-col items-center justify-center py-8 h-auto">
+      <div className="flex flex-col items-center justify-center py-8 h-auto px-2">
         <div className="rounded-full bg-yellow-100 p-3 mb-3">
           <Lock className="size-6 text-yellow-700" />
         </div>

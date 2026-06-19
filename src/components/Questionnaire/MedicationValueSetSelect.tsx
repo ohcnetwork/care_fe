@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
+import careConfig from "@careConfig";
 
 import {
   Breadcrumb,
@@ -79,7 +80,9 @@ export default function MedicationValueSetSelect({
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>("product");
+  const [activeTab, setActiveTab] = useState<TabType>(
+    careConfig.medicationValueSetSelectDefaultTab,
+  );
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
 
