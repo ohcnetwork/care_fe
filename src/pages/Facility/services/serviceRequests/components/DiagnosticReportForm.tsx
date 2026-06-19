@@ -157,7 +157,9 @@ export function DiagnosticReportForm({
       },
       onError: (err: Error) => {
         toast.error(
-          `Failed to create diagnostic report: ${err.message || "Unknown error"}`,
+          t("failed_to_create_diagnostic_report", {
+            error: err.message || "Unknown error",
+          }),
         );
       },
     });
@@ -263,6 +265,8 @@ export function DiagnosticReportForm({
       )}
       {diagnosticReports.length === 0 && (
         <CreateDiagnosticReportForm
+          hasCollectedSpecimens
+          isMultipleDiagnosticReport
           activityDefinition={activityDefinition}
           specimens={specimens}
           isCreatingReport={isCreatingReport}
@@ -1283,11 +1287,12 @@ function DiagnosticReportItem({
 
 const CreateDiagnosticReportForm = ({
   activityDefinition,
-  specimens,
   isCreatingReport,
   disableEdit,
   serviceRequestId,
   handleCreateReport,
+  hasCollectedSpecimens,
+  isMultipleDiagnosticReport,
 }: {
   activityDefinition?: {
     diagnostic_report_codes?: Code[];
@@ -1299,17 +1304,11 @@ const CreateDiagnosticReportForm = ({
   disableEdit: boolean;
   serviceRequestId: string;
   handleCreateReport: (code?: Code) => void;
+  hasCollectedSpecimens: boolean;
+  isMultipleDiagnosticReport: boolean;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { t } = useTranslation();
-  // Check if all required specimens are collected
-  const hasCollectedSpecimens =
-    activityDefinition?.specimen_requirements?.length === 0 ||
-    specimens.some((specimen) => specimen.status === SpecimenStatus.available);
-
-  const isMultipleDiagnosticReport =
-    !!activityDefinition?.diagnostic_report_codes &&
-    activityDefinition.diagnostic_report_codes.length > 0;
 
   const [selectedReportCode, setSelectedReportCode] = useState<Code | null>(
     null,

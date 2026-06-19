@@ -7,7 +7,7 @@ import {
   FileCheck2,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -56,8 +56,10 @@ export function DiagnosticReportReview({
   diagnosticReports,
   disableEdit,
 }: DiagnosticReportReviewProps) {
+  const { t } = useTranslation();
   return (
-    <>
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold">{t("review_test_results")}</h2>
       {diagnosticReports.map((report) => (
         <DiagnosticReportReviewItem
           key={report.id}
@@ -67,7 +69,7 @@ export function DiagnosticReportReview({
           disableEdit={disableEdit}
         />
       ))}
-    </>
+    </div>
   );
 }
 
@@ -85,7 +87,7 @@ function DiagnosticReportReviewItem({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(true);
-  const [conclusion, setConclusion] = useState<string>("");
+  const [conclusion, setConclusion] = useState<string>(report.conclusion || "");
   const [showApproveDialog, setShowApproveDialog] = useState(false);
 
   const { data: fullReport } = useQuery({
@@ -98,12 +100,6 @@ function DiagnosticReportReviewItem({
     }),
     enabled: !!report.id,
   });
-
-  useEffect(() => {
-    if (fullReport?.conclusion) {
-      setConclusion(fullReport.conclusion);
-    }
-  }, [fullReport?.conclusion]);
 
   const { data: files = { results: [], count: 0 } } = useQuery<
     PaginatedResponse<FileReadMinimal>
@@ -160,20 +156,17 @@ function DiagnosticReportReviewItem({
     });
   };
 
-  // Don't show the report review if there are no observations, files or conclusion
-  if (
+  const isReportNotReviewable =
     (!reportDetail.observations || reportDetail.observations.length === 0) &&
     (!files?.results || files.results.length === 0) &&
-    !reportDetail.conclusion
-  ) {
-    return null;
-  }
+    !reportDetail.conclusion;
 
   return (
     <Card
       className={cn(
         "shadow-none border-gray-300 rounded-lg cursor-pointer bg-white",
         isExpanded && "bg-gray-100",
+        isReportNotReviewable && !isExpanded && "bg-gray-50 cursor-default",
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
@@ -181,16 +174,26 @@ function DiagnosticReportReviewItem({
           <CardHeader>
             <div className="flex justify-between items-center rounded-md">
               <div className="flex items-center gap-2">
-                <CardTitle>
-                  <p className="flex items-center gap-1.5">
-                    <FileCheck2 className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
-                    <span className="text-base/9 text-gray-950 font-medium">
-                      {t("result_review", { name: report.code?.display })}
+                <CardTitle
+                  className={cn(
+                    "text-gray-950 ml-2",
+                    isReportNotReviewable && "text-gray-400",
+                  )}
+                >
+                  <p className="flex items-center gap-3">
+                    <FileCheck2 className="size-6  font-normal text-base stroke-[1.5px]" />{" "}
+                    <span className="text-base/9  font-medium">
+                      {report.code?.display}
                     </span>
                   </p>
                 </CardTitle>
               </div>
               <div className="flex items-center gap-5">
+                {isReportNotReviewable && (
+                  <span className="text-sm/9 text-gray-400 font-medium">
+                    {t("no_observations_entered")}
+                  </span>
+                )}
                 {report.created_by && (
                   <div className="flex items-center gap-2">
                     <Avatar
