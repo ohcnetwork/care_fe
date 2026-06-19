@@ -7,8 +7,8 @@ import {
 import { LocationAssociationStatus } from "@/types/location/association";
 
 const initialState: LocationSheetState = {
-  screen: "assign",
-  action: "new",
+  screen: "overview",
+  action: "assign",
   timeConfig: {
     start: new Date(),
     status: "active",
@@ -37,7 +37,15 @@ export function useLocationAssignment() {
   };
 
   const resetEditingState = () => {
+    setSheetState(initialState);
     setEditingState(initialEditingState);
+  };
+
+  const setScreenToOverview = () => {
+    setSheetState((prev) => ({
+      ...prev,
+      screen: "overview",
+    }));
   };
 
   const setScreenToAssign = () => {
@@ -54,10 +62,10 @@ export function useLocationAssignment() {
     }));
   };
 
-  const startMove = () => {
+  const browseBeds = (action: "move" | "assign" = "assign") => {
     setSheetState({
       screen: "assign",
-      action: "move",
+      action,
       timeConfig: {
         start: new Date(),
         status: "active",
@@ -65,13 +73,15 @@ export function useLocationAssignment() {
     });
   };
 
-  const startNewAssignment = (
+  const confirmBedSelection = (
     status: LocationAssociationStatus,
     hasCurrentLocation: boolean,
   ) => {
+    const action =
+      status === "active" && hasCurrentLocation ? "move" : "assign";
     setSheetState({
       screen: "modify",
-      action: hasCurrentLocation ? "move" : "new",
+      action,
       timeConfig: {
         start: new Date(),
         ...(status === "planned" ? { end: new Date() } : {}),
@@ -86,6 +96,7 @@ export function useLocationAssignment() {
     endTime?: Date,
     status: LocationAssociationStatus = "active",
   ) => {
+    setSheetState((prev) => ({ ...prev, action: "edit_time" }));
     setEditingState({
       locationId,
       timeConfig: {
@@ -101,6 +112,7 @@ export function useLocationAssignment() {
     startTime: Date,
     endTime: Date = new Date(),
   ) => {
+    setSheetState((prev) => ({ ...prev, action: "complete" }));
     setEditingState({
       locationId,
       timeConfig: {
@@ -111,7 +123,7 @@ export function useLocationAssignment() {
     });
   };
 
-  const startAssigningPlanned = (
+  const promotePlanned = (
     plannedLocationId: string,
     status: LocationAssociationStatus = "active",
   ) => {
@@ -123,12 +135,34 @@ export function useLocationAssignment() {
 
     setSheetState({
       screen: "modify",
-      action: "new",
+      action: "promote",
       timeConfig,
     });
 
     setEditingState({
       locationId: plannedLocationId,
+      timeConfig,
+    });
+  };
+
+  const promoteReserved = (
+    reservedLocationId: string,
+    originalStartTime: Date,
+  ) => {
+    const timeConfig = {
+      start: originalStartTime,
+      status: "active" as LocationAssociationStatus,
+      end: undefined,
+    };
+
+    setSheetState({
+      screen: "modify",
+      action: "promote",
+      timeConfig,
+    });
+
+    setEditingState({
+      locationId: reservedLocationId,
       timeConfig,
     });
   };
@@ -147,12 +181,14 @@ export function useLocationAssignment() {
     // Actions
     resetToInitial,
     resetEditingState,
+    setScreenToOverview,
     setScreenToAssign,
     setScreenToModify,
-    startMove,
-    startNewAssignment,
+    browseBeds,
+    confirmBedSelection,
     startEditingTime,
     startCompletingStay,
-    startAssigningPlanned,
+    promotePlanned,
+    promoteReserved,
   };
 }
