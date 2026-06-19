@@ -43,6 +43,7 @@ import {
   AppointmentRead,
   AppointmentStatus,
   AppointmentUpdateRequest,
+  CancelledAppointmentStatuses,
   SchedulableResourceType,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
@@ -318,7 +319,7 @@ export default function AppointmentDetail(props: Props) {
                 </div>
               </>
             ) : (
-              !["fulfilled"].includes(appointment.status) &&
+              !AppointmentFinalStatuses.includes(appointment.status) &&
               canWriteToken && (
                 <>
                   <h3 className="text-base font-semibold">{t("token")}</h3>
@@ -536,14 +537,15 @@ export default function AppointmentDetail(props: Props) {
                     )}
                   </>
                 )}
-                {/* Print Appointment */}
-                <QuickAction
-                  icon={<PrinterIcon className="size-4" />}
-                  title={t("print_appointment")}
-                  actionId="print-appointment"
-                  basePath="/"
-                  href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
-                />
+                {!CancelledAppointmentStatuses.includes(appointment.status) && (
+                  <QuickAction
+                    icon={<PrinterIcon className="size-4" />}
+                    title={t("print_appointment")}
+                    actionId="print-appointment"
+                    basePath="/"
+                    href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
+                  />
+                )}
                 <QuickAction
                   icon={<Wallet className="size-4" />}
                   title={t("accounts")}
