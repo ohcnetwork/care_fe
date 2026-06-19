@@ -49,13 +49,35 @@ import {
 } from "@/types/emr/report/report";
 import templateApi from "@/types/emr/template/templateApi";
 
+function getReportBasePath(
+  reportType: ReportType | undefined,
+  associatingId: string,
+  facilityId?: string,
+  patientId?: string,
+): string | null {
+  switch (reportType) {
+    case ReportType.DISCHARGE_SUMMARY:
+      return facilityId && patientId
+        ? `/facility/${facilityId}/patient/${patientId}/encounter/${associatingId}`
+        : null;
+    case ReportType.ACCOUNT_REPORT:
+      return facilityId
+        ? `/facility/${facilityId}/billing/account/${associatingId}`
+        : null;
+    case ReportType.PATIENT_SUMMARY:
+      return facilityId && patientId
+        ? `/facility/${facilityId}/patient/${patientId}`
+        : null;
+    default:
+      return null;
+  }
+}
+
 interface ReportTabProps {
   associatingId: string;
   reportType?: ReportType;
   facilityId?: string;
   patientId?: string;
-  encounterId?: string;
-  billingAccountId?: string;
 }
 
 export function ReportSubTab({
@@ -63,11 +85,10 @@ export function ReportSubTab({
   reportType,
   facilityId,
   patientId,
-  encounterId,
-  billingAccountId,
 }: ReportTabProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
+
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
     disableCache: true,
@@ -104,32 +125,15 @@ export function ReportSubTab({
     return iconMap[reportType] || "l-file-alt";
   };
 
-  const canNavigateToEncounterPreview = !!(
-    facilityId &&
-    patientId &&
-    encounterId
-  );
-  const canNavigateToBillingPreview = !!(facilityId && billingAccountId);
-  const canNavigateToPatientPreview = !!(patientId && !encounterId);
-
   const handleView = (report: ReportReadList) => {
-    if (canNavigateToEncounterPreview) {
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/report/${report.id}`,
-      );
-    } else if (canNavigateToBillingPreview) {
-      navigate(
-        `/facility/${facilityId}/billing/account/${billingAccountId}/report/${report.id}`,
-      );
-    } else if (canNavigateToPatientPreview) {
-      const effectiveFacilityId = facilityId ?? facility?.id;
-      if (effectiveFacilityId) {
-        navigate(
-          `/facility/${effectiveFacilityId}/patient/${patientId}/report/${report.id}`,
-        );
-      } else {
-        viewFile(report);
-      }
+    const basePath = getReportBasePath(
+      reportType,
+      associatingId,
+      facilityId ?? facility?.id,
+      patientId,
+    );
+    if (basePath) {
+      navigate(`${basePath}/report/${report.id}`);
     } else {
       viewFile(report);
     }
@@ -402,8 +406,7 @@ export function ReportSubTab({
           <GenerateReportDropdown
             facilityId={facilityId ?? facility.id}
             patientId={patientId}
-            encounterId={encounterId}
-            billingAccountId={billingAccountId}
+            associatingId={associatingId}
             reportType={reportType}
           />
         )}
@@ -447,14 +450,12 @@ export function ReportSubTab({
 function GenerateReportDropdown({
   facilityId,
   patientId,
-  encounterId,
-  billingAccountId,
+  associatingId,
   reportType,
 }: {
   facilityId: string;
   patientId?: string;
-  encounterId?: string;
-  billingAccountId?: string;
+  associatingId: string;
   reportType?: ReportType;
 }) {
   const { t } = useTranslation();
@@ -479,16 +480,13 @@ function GenerateReportDropdown({
   });
 
   const getTemplateUrl = (slug: string) => {
-    if (encounterId && patientId) {
-      return `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/report/template/${slug}`;
-    }
-    if (billingAccountId) {
-      return `/facility/${facilityId}/billing/account/${billingAccountId}/report/template/${slug}`;
-    }
-    if (patientId) {
-      return `/facility/${facilityId}/patient/${patientId}/report/template/${slug}`;
-    }
-    return null;
+    const basePath = getReportBasePath(
+      reportType,
+      associatingId,
+      facilityId,
+      patientId,
+    );
+    return basePath ? `${basePath}/report/template/${slug}` : null;
   };
 
   const templates = (templatesData?.results ?? []).flatMap((template) => {
