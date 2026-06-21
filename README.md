@@ -62,14 +62,14 @@ Once you have the local backend running and loaded dummy data, you can use the f
 
 ```yaml
 # Default Local Backend Credentials
-ROLE            USERNAME                PASSWORD
+ROLE            USERNAME            PASSWORD
 ----------------------------------------------------------------
-Volunteer       volunteer_2_0           Coronasafe@123
-Doctor          doctor_2_0              Coronasafe@123
-Staff           staff_2_0               Coronasafe@123
-Nurse           nurse_2_0               Coronasafe@123
-Administrator   administrator_2_0       Coronasafe@123
-Facility Admin  facility_admin_2_0      Coronasafe@123
+Doctor          care-doctor         Ohcn@123
+Admin           care-admin          Ohcn@123
+Nurse           care-nurse          Ohcn@123
+Staff           care-staff          Ohcn@123
+Volunteer       care-volunteer      Ohcn@123
+Facility Admin  care-fac-admin      Ohcn@123
 ```
 
 ## Multitenancy for Development
@@ -140,6 +140,20 @@ sudo apt-get install nginx
 If your Nginx reverse-proxy has been set up correctly, then visit the school using your browser at
 `http://care.localhost`.
 
+## 🧩 Plugin System
+
+CARE supports a micro-frontend plugin architecture, letting you extend the app with additional features without forking it. Plugins are self-contained federated React remotes loaded at runtime via [Module Federation](https://github.com/originjs/vite-plugin-federation) (`@originjs/vite-plugin-federation`).
+
+- **Manifest contract**: each plugin exposes a `PluginManifest` defining the routes, components, tabs, and devices it provides. The source of truth for the manifest types is [`src/pluginTypes.ts`](src/pluginTypes.ts). Key host files are `src/PluginEngine.tsx` and `src/pluginTypes.ts`.
+- **Enabling plugins**: set the `REACT_ENABLED_APPS` environment variable to a comma-separated list of plugins in `org/repo` or `org/repo@host/path` form. With just `org/repo`, the remote is loaded from `https://{org}.github.io/{repo}`; otherwise the `@host` portion is used as the remote origin.
+
+  ```env
+  # Load one plugin from GitHub Pages and another from a local dev server
+  REACT_ENABLED_APPS=ohcnetwork/care_livekit_fe,ohcnetwork/care_hello_fe@localhost:4173/assets/remoteEntry.js
+  ```
+
+Plugin routes are injected into the app router via `usePluginRoutes()`. For a minimal working example, see the [`care_hello_fe`](https://github.com/ohcnetwork/care_hello_fe) plugin template.
+
 ## 📱 Patient Login in Staging
 
 For patient login via phone number:
@@ -158,7 +172,7 @@ For patient login via phone number:
 
 ## Translations
 
-All strings must be encased in i18n translations. New translation strings must be specified in `src`->`Locale`->`en`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
+All strings must be encased in i18n translations. New translation strings must be specified in `public/locale/en.json`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
 
 #### Remote i18n configuration (optional)
 
@@ -212,7 +226,7 @@ To run Playwright tests locally, you'll need to setup the backend to run locally
 Once backend is running locally, ensure your local front-end is connected to local backend by setting the `REACT_CARE_API_URL` environment variable:
 
 ```env
-#.env
+# .env
 REACT_CARE_API_URL=http://127.0.0.1:9000
 ```
 
