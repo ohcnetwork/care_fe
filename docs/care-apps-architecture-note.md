@@ -69,3 +69,8 @@ Host-to-plugin data sharing via `window` globals (set in `src/index.tsx`):
 - `window.AuthUserContext` — The React context object for auth state (`AuthUserContext`). Since `react` is a shared dependency, plugins can call `React.useContext(window.AuthUserContext)` to access `signIn`, `signOut`, `user`, etc., because the plugin component tree renders inside the host's `AuthUserProvider`.
 - `window.__CORE_ENV__` — The full `careConfig` object (API URLs, feature flags, locale settings, plugin config).
 - `window.__CARE_PLUGIN_RUNTIME__` — Plugin-specific runtime metadata (`{ meta: PlugConfigMeta }`) set by `PluginEngine` after the plugin manifest loads.
+
+See also:
+
+- `src/pluginTypes.ts` — the manifest contract a plugin must satisfy (the source of truth for the `routes`, `components`, tabs, devices, and overrides a manifest can provide).
+- `docs/care-apps-local-dev.md` — local plugin development, including the shipped `apps/` auto-discovery dev flow and the `clone-component` CLI (`scripts/clone-component.ts`) for copying host components into a plugin.

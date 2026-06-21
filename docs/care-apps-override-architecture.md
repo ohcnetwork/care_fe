@@ -1,5 +1,11 @@
 # Override Framework – Minimal Integration Plan
 
+> **Note: this is a design-intent document.** It captures the original design and
+> mental model for the override system, not its current API. The shipped
+> implementation lives in `src/lib/override/` — see `register.ts`, `registry.ts`,
+> `bridge.ts`, and `types.ts` for the actual, authoritative code. Where this
+> document and the source disagree, the source wins.
+
 ## 🎯 Goal
 
 Introduce a **non-intrusive override system** into the React app such that:
