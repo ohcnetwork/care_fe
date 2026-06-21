@@ -71,9 +71,11 @@ graph — no separate build, preview, or `REACT_ENABLED_APPS` entry needed.
 - **`/local-plugins/<slug>` asset serving:** a dev middleware serves files from
   `apps/<slug>/public/` at `/local-plugins/<slug>/...` (path-traversal guarded, `no-store`),
   so plugin static assets resolve without a build step.
-- **Tailwind:** the host scans `./apps/**` via `@source`, and the plugin's own
-  `@import "tailwindcss"` lines are stripped in dev (the host already provides
-  theme/preflight/utilities), so plugin classes work without re-running preflight.
+- **Tailwind:** the host scans `./apps/**` via the `content:` array in
+  `tailwind.config.js` (wired into the v4 pipeline by `@config "../../tailwind.config.js"`
+  in `src/style/index.css`), and the plugin's own `@import "tailwindcss"` lines are stripped
+  in dev (the host already provides theme/preflight/utilities), so plugin classes work
+  without re-running preflight.
 - **Shared deps / no duplicate React:** federation shares react, react-dom, react-i18next,
   @tanstack/react-query, raviger, sonner, decimal.js, and `resolve.dedupe` forces plugin
   source to use the host's single copy — avoiding "Should have a queue" / hook-order errors.
