@@ -62,8 +62,10 @@ graph — no separate build, preview, or `REACT_ENABLED_APPS` entry needed.
 
 - **Auto-discovery:** every immediate `apps/<slug>/` directory whose `src/manifest.tsx`
   exists becomes a local plugin (sorted by slug). Each is exposed through the virtual module
-  `virtual:care-local-plugins` as `localDevPluginConfigs` / `localDevPluginManifests`, with
-  metadata `{ name: slug, localPath: "/local-plugins/<slug>", package: "local/<slug>" }`.
+  `virtual:care-local-plugins` as `localDevPluginConfigs` / `localDevPluginManifests`. Each
+  config entry has the shape `{ slug: "<slug>", meta: { name: "<slug>", localPath:
+  "/local-plugins/<slug>", package: "local/<slug>" } }` (the `meta` object satisfies
+  `PlugConfigMeta` from `src/types/plugConfig.ts`).
 - **`@/` → `/@fs/` rewrite:** imports inside plugin source that use the `@/` alias are
   rewritten to absolute `/@fs/<resolved>` paths, resolved against the plugin's own
   `apps/<slug>/src` (falling back to the host `src/`). This lets a plugin use the same
