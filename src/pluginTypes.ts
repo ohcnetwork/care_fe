@@ -1,3 +1,5 @@
+import { DrawingEditorApplicationProps } from "@/components/Files/Drawings/DrawingEditor";
+import { DrawingPreviewProps } from "@/components/Files/Drawings/DrawingPreview";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import type { OverrideCondition } from "@/lib/override";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
@@ -172,6 +174,13 @@ export type PluginDeviceManifest = {
   encounterOverview?: React.FC<{ encounter: EncounterRead }>;
 };
 
+export type DrawingApplicationManifest = {
+  application: string;
+  icon?: React.FC<React.HTMLAttributes<HTMLElement>>;
+  previewer: LazyComponent<React.FC<DrawingPreviewProps>>;
+  editor: LazyComponent<React.FC<DrawingEditorApplicationProps>>;
+};
+
 /**
  * Plugin override definition for replacing registered components
  */
@@ -208,6 +217,7 @@ export type PluginManifest = {
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
   devices?: readonly PluginDeviceManifest[];
+  drawingApplications?: readonly DrawingApplicationManifest[];
   /** Component overrides provided by this plugin */
   overrides?: readonly PluginOverride[];
 };

@@ -3,11 +3,11 @@ import { useQueryParams } from "raviger";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { DrawingPage } from "@/components/Files/DrawingSubTab";
 import { FilesPage } from "@/components/Files/FileSubTab";
 
 import { getPermissions } from "@/common/Permissions";
 
+import { DrawingsSubTab } from "@/components/Files/Drawings/DrawingsSubTab";
 import { usePermissions } from "@/context/PermissionContext";
 import {
   EncounterRead,
@@ -16,6 +16,7 @@ import {
 import { PatientRead } from "@/types/emr/patient/patient";
 import { ReportType } from "@/types/emr/report/report";
 import { FileType } from "@/types/files/file";
+import { MetaArtifactAssociatingType } from "@/types/metaArtifact/metaArtifact";
 import { ReportSubTab } from "./ReportSubTab";
 
 interface FilesTabsProps {
@@ -124,8 +125,13 @@ export const FilesTab = ({
 
         <TabsContent value="drawings">
           <div>
-            <DrawingPage
-              type={type}
+            <DrawingsSubTab
+              type={
+                {
+                  [FileType.PATIENT]: MetaArtifactAssociatingType.PATIENT,
+                  [FileType.ENCOUNTER]: MetaArtifactAssociatingType.ENCOUNTER,
+                }[type]
+              }
               {...(type === FileType.PATIENT
                 ? { patientId: patient?.id }
                 : { encounter: encounter })}

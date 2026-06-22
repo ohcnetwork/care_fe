@@ -33,12 +33,12 @@ export const useCareApps = () => {
 //   return navItems;
 // };
 
-const withSuspense = (
-  Component: React.ComponentType<PluginEncounterTabProps>,
+const withSuspense = <T extends object>(
+  Component: React.ComponentType<T>,
   pluginName: string,
 ) => {
   // eslint-disable-next-line react/display-name
-  return (props: PluginEncounterTabProps) => {
+  return (props: T) => {
     return (
       <PluginErrorBoundary
         pluginName={pluginName}

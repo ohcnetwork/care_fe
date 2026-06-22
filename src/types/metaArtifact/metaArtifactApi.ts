@@ -1,45 +1,42 @@
 import {
+  MetaArtifactCreateRequest,
+  MetaArtifactRead,
+  MetaArtifactUpdateRequest,
+} from "@/types/metaArtifact/metaArtifact";
+import {
   HttpMethod,
   PaginatedResponse,
   Type,
   UpsertRequest,
 } from "@/Utils/request/types";
-import {
-  MetaArtifactCreateRequest,
-  MetaArtifactResponse,
-  MetaArtifactUpdateRequest,
-} from "@/types/metaArtifact/metaArtifact";
 
 export default {
-  /**
-   * Schedule Template related APIs
-   */
   create: {
     path: "/api/v1/meta_artifacts/",
     method: HttpMethod.POST,
-    TRes: Type<MetaArtifactResponse>(),
+    TRes: Type<MetaArtifactRead>(),
     TBody: Type<MetaArtifactCreateRequest>(),
   },
   retrieve: {
     path: "/api/v1/meta_artifacts/{external_id}/",
     method: HttpMethod.GET,
-    TRes: Type<MetaArtifactResponse>(),
+    TRes: Type<MetaArtifactRead>(),
   },
   list: {
     path: "/api/v1/meta_artifacts/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<MetaArtifactResponse>>(),
+    TRes: Type<PaginatedResponse<MetaArtifactRead>>(),
   },
   update: {
     path: "/api/v1/meta_artifacts/{external_id}/",
     method: HttpMethod.PUT,
     TBody: Type<MetaArtifactUpdateRequest>(),
-    TRes: Type<MetaArtifactResponse>(),
+    TRes: Type<MetaArtifactRead>(),
   },
   upsert: {
     path: "/api/v1/meta_artifacts/upsert/",
     method: HttpMethod.POST,
-    TRes: Type<MetaArtifactResponse[]>(),
+    TRes: Type<MetaArtifactRead[]>(),
     TBody:
       Type<
         UpsertRequest<MetaArtifactCreateRequest, MetaArtifactUpdateRequest>

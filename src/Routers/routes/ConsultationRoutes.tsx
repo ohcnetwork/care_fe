@@ -1,6 +1,3 @@
-import { Suspense, lazy } from "react";
-
-import Loading from "@/components/Common/Loading";
 import { PrintAllQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses";
 import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
@@ -8,14 +5,11 @@ import { PrintMedicationAdministration } from "@/components/Medicine/MedicationA
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 
 import { AppRoutes } from "@/Routers/AppRouter";
+import { DrawingEditor } from "@/components/Files/Drawings/DrawingEditor";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 import ReportViewer from "@/pages/Encounters/ReportViewer";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
-
-const ExcalidrawEditor = lazy(
-  () => import("@/components/Common/Drawings/ExcalidrawEditor"),
-);
 
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/prescription/:prescriptionId/print":
@@ -106,26 +100,8 @@ const consultationRoutes: AppRoutes = {
         subjectType="encounter"
       />
     ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/new":
-    ({ encounterId }) => (
-      <Suspense fallback={<Loading />}>
-        <ExcalidrawEditor
-          associatingId={encounterId}
-          associating_type="encounter"
-        />
-      </Suspense>
-    ),
-
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/:drawingId":
-    ({ encounterId, drawingId }) => (
-      <Suspense fallback={<Loading />}>
-        <ExcalidrawEditor
-          associatingId={encounterId}
-          associating_type="encounter"
-          drawingId={drawingId}
-        />
-      </Suspense>
-    ),
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/:id":
+    ({ id }) => <DrawingEditor id={id} />,
 
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
     ({ facilityId, encounterId, slug, patientId }) => (
