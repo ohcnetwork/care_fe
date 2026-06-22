@@ -18,10 +18,6 @@ declare global {
     CARE_API_URL: string;
     __CORE_ENV__: typeof careConfig;
     __CARE_PLUGIN_RUNTIME__: { meta: PlugConfigMeta };
-    __CARE_CONTROL_STORES__?: Map<
-      string,
-      { value: unknown; listeners: Set<() => void> }
-    >;
     AuthUserContext: Context<AuthContextType | null>;
   }
 }
