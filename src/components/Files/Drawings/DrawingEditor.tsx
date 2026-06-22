@@ -1,3 +1,4 @@
+import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import { usePluginDrawingApplication } from "@/components/Files/Drawings/usePluginDrawingApplications";
 import {
@@ -8,7 +9,6 @@ import {
 import metaArtifactApi from "@/types/metaArtifact/metaArtifactApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { goBack } from "@/Utils/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -84,14 +84,25 @@ export const DrawingEditor: React.FC<Props> = ({ id }) => {
 
   return (
     <div className="h-[calc(100vh-1.4rem)] w-[calc(100%+1.25rem)] -mt-6.5 -ml-2.5 -mb-2.5 rounded-md overflow-clip">
-      <DrawingEditorApplication
-        obj={data}
-        value={value}
-        onChange={handleChange}
-        handleSave={handleSave}
-        handleExit={() => goBack()}
-        disabled={isSaving}
-      />
+      <ErrorBoundary
+        fallback={
+          <div className="flex items-center justify-center size-full">
+            <p className="text-sm text-gray-500">
+              {t("unsupported_drawing_application", {
+                application: data.object_value.application,
+              })}
+            </p>
+          </div>
+        }
+      >
+        <DrawingEditorApplication
+          obj={data}
+          value={value}
+          onChange={handleChange}
+          handleSave={handleSave}
+          disabled={isSaving}
+        />
+      </ErrorBoundary>
     </div>
   );
 };
