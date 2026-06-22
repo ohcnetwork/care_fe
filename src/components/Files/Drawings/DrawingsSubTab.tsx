@@ -333,8 +333,13 @@ export const DrawingsSubTab = (props: DrawingsTabProps) => {
                 <Card
                   key={drawing.id}
                   className="group flex cursor-pointer flex-col gap-0 overflow-hidden rounded-xl border-gray-200 p-0 shadow-xs transition-all duration-200 hover:shadow-md"
-                  onClick={() => {
-                    navigate(`./drawings/${drawing.id}`);
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`./drawings/${drawing.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      navigate(`./drawings/${drawing.id}`);
+                    }
                   }}
                 >
                   <div className="relative border-b">
