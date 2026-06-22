@@ -16,7 +16,7 @@ import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
 import {
   ServicePointSelector,
   ServicePointSelectorAction,
-} from "@/pages/Facility/queues/ServicepointSelector";
+} from "@/pages/Facility/queues/ServicePointSelector";
 import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
   getQueueTokenStatus,
@@ -295,8 +295,6 @@ function OngoingQueueTokenCardInner({
     <Drawer>
       <DrawerTrigger asChild>
         <div
-          role="button"
-          tabIndex={0}
           className={cn(
             "relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow",
             token.status === TokenStatus.IN_PROGRESS &&
@@ -394,7 +392,9 @@ function OngoingQueueTokenCardInner({
               </div>
             ) : (
               <div className="flex gap-2 items-center">
-                <h5 className="text-gray-950">{token.sub_queue?.name}</h5>
+                <h5 className="text-gray-950 font-semibold">
+                  {token.sub_queue?.name}
+                </h5>
                 <Badge
                   variant={
                     QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]
