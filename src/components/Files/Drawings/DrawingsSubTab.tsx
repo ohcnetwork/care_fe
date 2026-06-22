@@ -269,9 +269,10 @@ const hasWritePermission = ({
 export const DrawingsSubTab = (props: DrawingsTabProps) => {
   const { t } = useTranslation();
   const associatingId =
-    (props.type === MetaArtifactAssociatingType.ENCOUNTER
-      ? props.encounter?.id
-      : props.patient?.id) ?? "";
+    {
+      [MetaArtifactAssociatingType.PATIENT]: props.patient?.id,
+      [MetaArtifactAssociatingType.ENCOUNTER]: props.encounter?.id,
+    }[props.type] ?? "";
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
