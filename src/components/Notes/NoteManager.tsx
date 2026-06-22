@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 
 import { AutoExpandingTextarea } from "@/components/ui/auto-expanding-textarea";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -713,10 +713,6 @@ export function NoteManager({
                           {/* Make sure to mark any buttons inside plugins utilizing this slot with `type="button"` to prevent unintentionally submitting the form*/}
                           <PLUGIN_Component
                             __name="NoteMessageInput"
-                            className={cn(
-                              buttonVariants({ variant: "primary" }),
-                              "size-10 shrink-0",
-                            )}
                             message={newMessage}
                             setMessage={setNewMessage}
                           />

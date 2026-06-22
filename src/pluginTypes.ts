@@ -85,7 +85,6 @@ export type ServiceRequestComponentType = React.FC<{
 }>;
 
 export type NoteMessageInputComponentType = React.FC<{
-  className?: string;
   message: string;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
 }>;
