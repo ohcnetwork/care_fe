@@ -1,5 +1,5 @@
-import { DrawingEditorApplicationProps } from "@/components/Files/Drawings/DrawingEditor";
-import { DrawingPreviewProps } from "@/components/Files/Drawings/DrawingPreview";
+import type { DrawingEditorApplicationProps } from "@/components/Files/Drawings/DrawingEditor";
+import type { DrawingPreviewProps } from "@/components/Files/Drawings/DrawingPreview";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import type { OverrideCondition } from "@/lib/override";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
