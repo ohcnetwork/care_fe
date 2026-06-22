@@ -232,7 +232,7 @@ const hasReadPermission = ({ type, patient, encounter }: DrawingsTabProps) => {
   }
 
   if (type === MetaArtifactAssociatingType.ENCOUNTER) {
-    return permissions.has("can_view_encounter_clinical_data");
+    return permissions.has("can_read_encounter_clinical_data");
   }
 
   return false;
