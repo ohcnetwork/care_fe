@@ -29,6 +29,8 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { isSafeExternalUrl } from "@/Utils/utils";
+
 const isChildActive = (link: NavigationLink) => {
   if (!link.children) return false;
   const currentPath = window.location.pathname;
@@ -51,7 +53,56 @@ export interface NavigationLink {
   url: string;
   icon?: ReactNode;
   visibility?: boolean;
+  external?: boolean; // Marks the url as external, rendered as a sanitized anchor. Also defaults openInNewTab to true.
+  openInNewTab?: boolean;
   children?: NavigationLink[];
+}
+
+/** Drops external links whose url is not a safe http(s) URL. */
+const isRenderableNavLink = (link: NavigationLink) =>
+  !link.external || isSafeExternalUrl(link.url);
+
+/**
+ * Renders a nav destination as a raviger `ActiveLink` (internal, same-tab) or a
+ * plain anchor (external links, or links opening in a new tab). Returns a DOM
+ * element directly so it can be used as the child of an `asChild` button.
+ */
+function renderNavLink(
+  link: NavigationLink,
+  children: ReactNode,
+  opts: {
+    className?: string;
+    activeClass?: string;
+    exactActiveClass?: string;
+    onClick?: () => void;
+  } = {},
+) {
+  if (link.external || link.openInNewTab) {
+    const openInNewTab = link.openInNewTab ?? !!link.external;
+    return (
+      <a
+        href={link.url}
+        onClick={opts.onClick}
+        className={opts.className}
+        target={openInNewTab ? "_blank" : undefined}
+        rel={openInNewTab ? "noopener noreferrer" : undefined}
+      >
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <ActiveLink
+      href={link.url}
+      onClick={opts.onClick}
+      className={opts.className}
+      activeClass={opts.activeClass}
+      exactActiveClass={opts.exactActiveClass}
+    >
+      {children}
+    </ActiveLink>
+  );
 }
 
 export function NavMain({ links }: { links: NavigationLink[] }) {
@@ -76,6 +127,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
       <SidebarMenu>
         {links
           .filter((link) => link.visibility !== false)
+          .filter(isRenderableNavLink)
           .map((link) => (
             <Fragment key={link.name}>
               {link.children ? (
@@ -93,24 +145,27 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                     }
                   >
-                    <ActiveLink
-                      href={link.url}
-                      activeClass="bg-white text-green-700 shadow-sm"
-                      exactActiveClass="bg-white text-green-700 shadow-sm"
-                    >
-                      {link.icon ? (
-                        link.icon
-                      ) : (
-                        <Avatar
-                          name={link.name}
-                          className="size-6 -m-1 rounded-sm"
-                        />
-                      )}
+                    {renderNavLink(
+                      link,
+                      <>
+                        {link.icon ? (
+                          link.icon
+                        ) : (
+                          <Avatar
+                            name={link.name}
+                            className="size-6 -m-1 rounded-sm"
+                          />
+                        )}
 
-                      <span className="group-data-[collapsible=icon]:hidden ml-1">
-                        {link.name}
-                      </span>
-                    </ActiveLink>
+                        <span className="group-data-[collapsible=icon]:hidden ml-1">
+                          {link.name}
+                        </span>
+                      </>,
+                      {
+                        activeClass: "bg-white text-green-700 shadow-sm",
+                        exactActiveClass: "bg-white text-green-700 shadow-sm",
+                      },
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
@@ -158,6 +213,7 @@ function CollapsibleNavItem({
           <SidebarMenuSub className="border-l border-gray-300">
             {link.children
               ?.filter((link) => link.visibility !== false)
+              .filter(isRenderableNavLink)
               .map((subItem) => (
                 <Fragment key={subItem.name}>
                   {subItem.header && (
@@ -175,19 +231,16 @@ function CollapsibleNavItem({
                         "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                       }
                     >
-                      <ActiveLink
-                        href={subItem.url}
-                        className="w-full"
-                        activeClass={cn(
+                      {renderNavLink(subItem, subItem.name, {
+                        className: "w-full",
+                        activeClass: cn(
                           subItem.url
                             .split("/")
                             .every((part) => fullPathMap[part]) &&
                             "bg-white text-green-700 shadow",
-                        )}
-                        exactActiveClass="bg-white text-green-700 shadow"
-                      >
-                        {subItem.name}
-                      </ActiveLink>
+                        ),
+                        exactActiveClass: "bg-white text-green-700 shadow",
+                      })}
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                 </Fragment>
@@ -228,17 +281,16 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex flex-col gap-1">
-          {link.children?.map((subItem) => (
-            <ActiveLink
-              key={subItem.name}
-              href={subItem.url}
-              onClick={() => setOpen(false)}
-              className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
-              activeClass="bg-gray-100 text-green-700"
-              exactActiveClass="bg-gray-100 text-green-700"
-            >
-              {subItem.name}
-            </ActiveLink>
+          {link.children?.filter(isRenderableNavLink).map((subItem) => (
+            <Fragment key={subItem.name}>
+              {renderNavLink(subItem, subItem.name, {
+                className:
+                  "w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100",
+                activeClass: "bg-gray-100 text-green-700",
+                exactActiveClass: "bg-gray-100 text-green-700",
+                onClick: () => setOpen(false),
+              })}
+            </Fragment>
           ))}
         </div>
       </PopoverContent>

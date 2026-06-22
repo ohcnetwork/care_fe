@@ -137,6 +137,20 @@ export const isValidLongitude = (longitude: number) => {
   return Number.isFinite(longitude) && longitude >= -180 && longitude <= 180;
 };
 
+/**
+ * Checks whether a URL is a safe external link.
+ * Only absolute http(s) URLs are allowed; anything else (e.g. javascript:,
+ * data:) is rejected to avoid script injection via configuration.
+ */
+export const isSafeExternalUrl = (url: string): boolean => {
+  try {
+    const protocol = new URL(url).protocol;
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
 const getRelativeDateSuffix = (abbreviated: boolean) => {
   return {
     day: abbreviated ? "d" : "days",
