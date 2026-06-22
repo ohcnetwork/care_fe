@@ -303,7 +303,10 @@ export const DrawingsSubTab = (props: DrawingsTabProps) => {
           <Input
             placeholder={t("search")}
             value={search || ""}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setPage(1);
+              setSearch(e.target.value);
+            }}
             className="pl-8"
           />
         </div>
