@@ -1,10 +1,17 @@
 import { usePluginDrawingApplication } from "@/components/Files/Drawings/usePluginDrawingApplications";
-import { Skeleton } from "@/components/ui/skeleton";
 import { MetaArtifactRead } from "@/types/metaArtifact/metaArtifact";
+import { LoaderCircleIcon } from "lucide-react";
+import { Suspense } from "react";
 
 export interface DrawingPreviewProps {
   obj: MetaArtifactRead;
 }
+
+const FallbackSkeleton = () => (
+  <div className="flex bg-gray-50 size-full items-center justify-center">
+    <LoaderCircleIcon className="animate-spin" size={24} />
+  </div>
+);
 
 export const DrawingPreview: React.FC<DrawingPreviewProps> = ({ obj }) => {
   const { drawingApplication, isLoading } = usePluginDrawingApplication(
@@ -12,8 +19,12 @@ export const DrawingPreview: React.FC<DrawingPreviewProps> = ({ obj }) => {
   );
 
   if (isLoading) {
-    return <Skeleton className="h-[300px] w-full" />;
+    return <FallbackSkeleton />;
   }
 
-  return <drawingApplication.previewer obj={obj} />;
+  return (
+    <Suspense fallback={<FallbackSkeleton />}>
+      <drawingApplication.previewer obj={obj} />
+    </Suspense>
+  );
 };

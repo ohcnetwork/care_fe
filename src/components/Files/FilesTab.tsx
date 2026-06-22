@@ -132,9 +132,8 @@ export const FilesTab = ({
                   [FileType.ENCOUNTER]: MetaArtifactAssociatingType.ENCOUNTER,
                 }[type]
               }
-              {...(type === FileType.PATIENT
-                ? { patientId: patient?.id }
-                : { encounter: encounter })}
+              patient={patient}
+              encounter={encounter}
               readOnly={readOnly}
             />
           </div>

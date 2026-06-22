@@ -10,7 +10,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { goBack } from "@/Utils/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -107,5 +107,9 @@ const DrawingEditorApplication = (props: DrawingEditorApplicationProps) => {
 
   const Editor = drawingApplication.editor;
 
-  return <Editor {...props} />;
+  return (
+    <Suspense fallback={<Loading />}>
+      <Editor {...props} />
+    </Suspense>
+  );
 };

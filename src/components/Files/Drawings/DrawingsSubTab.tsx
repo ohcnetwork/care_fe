@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -75,6 +76,7 @@ const NewDrawingButton = (props: NewDrawingButtonProps) => {
 
   const [showCreateModal, setShowCreateModal] = useState<string>();
   const [name, setName] = useState("");
+  const [note, setNote] = useState("");
 
   const { mutate: createDrawing, isPending: isCreating } = useMutation({
     mutationFn: mutate(metaArtifactApi.create),
@@ -87,6 +89,7 @@ const NewDrawingButton = (props: NewDrawingButtonProps) => {
       });
       setShowCreateModal(undefined);
       setName("");
+      setNote("");
       navigate(`./drawings/${data.id}`);
     },
   });
@@ -106,6 +109,7 @@ const NewDrawingButton = (props: NewDrawingButtonProps) => {
     }
     createDrawing({
       name: name.trim(),
+      note: note.trim() || undefined,
       object_type: MetaArtifactObjectType.DRAWING,
       object_value: { application: showCreateModal },
       associating_type: props.associatingType,
@@ -160,6 +164,7 @@ const NewDrawingButton = (props: NewDrawingButtonProps) => {
           if (!open) {
             setShowCreateModal(undefined);
             setName("");
+            setNote("");
           }
         }}
       >
@@ -168,15 +173,28 @@ const NewDrawingButton = (props: NewDrawingButtonProps) => {
             <DialogHeader>
               <DialogTitle>{t("new_drawing")}</DialogTitle>
             </DialogHeader>
-            <div className="my-4 space-y-2">
-              <Label htmlFor="drawing-name">{t("name")}</Label>
-              <Input
-                id="drawing-name"
-                autoFocus
-                placeholder={t("enter_drawing_name")}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+            <div className="my-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="drawing-name">{t("name")}</Label>
+                <Input
+                  id="drawing-name"
+                  autoFocus
+                  autoComplete="off"
+                  placeholder={t("enter_drawing_name")}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="drawing-note">{t("note")}</Label>
+                <Textarea
+                  id="drawing-note"
+                  placeholder={t("enter_note_optional")}
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={3}
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button
@@ -235,7 +253,7 @@ const hasWritePermission = ({
   ]);
 
   if (type === MetaArtifactAssociatingType.PATIENT) {
-    return permissions.has("can_write_patient_obj");
+    return permissions.has("can_write_patient");
   }
 
   if (type === MetaArtifactAssociatingType.ENCOUNTER) {
