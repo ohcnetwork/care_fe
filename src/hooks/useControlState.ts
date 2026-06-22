@@ -2,9 +2,7 @@ import {
   Dispatch,
   SetStateAction,
   useCallback,
-  useEffect,
-  useRef,
-  useState,
+  useSyncExternalStore,
 } from "react";
 
 /**
@@ -27,19 +25,17 @@ function getRegistry(): StoreRegistry {
 
 function getOrCreateStore<T>(key: string, initialValue: T): ControlStore<T> {
   const registry = getRegistry();
-  if (!registry.has(key)) {
-    registry.set(key, { value: initialValue, listeners: new Set() });
+  let store = registry.get(key) as ControlStore<T> | undefined;
+  if (!store) {
+    store = { value: initialValue, listeners: new Set() };
+    registry.set(key, store);
   }
-  return registry.get(key) as ControlStore<T>;
+  return store;
 }
 
 /**
  * A shared state hook that works like `useState` but stores state in a global
  * registry accessible by both the host app and MFE plugins.
- *
- * Uses local `useState` for fast rendering (batchable by React) while keeping
- * the global store in sync. External changes (e.g. from MFE plugins) are
- * detected via the store's listener mechanism and synced to local state.
  *
  * @param key - A unique key identifying this piece of shared state.
  * @param initialValue - The initial value (used only on first access).
@@ -49,23 +45,20 @@ export function useControlState<T>(
   initialValue: T,
 ): [T, Dispatch<SetStateAction<T>>] {
   const store = getOrCreateStore(key, initialValue);
-  const [localValue, setLocalValue] = useState<T>(store.value);
-  const isLocalUpdate = useRef(false);
 
-  // Subscribe to external store changes (from plugins or other consumers)
-  useEffect(() => {
-    const listener = () => {
-      if (isLocalUpdate.current) {
-        isLocalUpdate.current = false;
-        return;
-      }
-      setLocalValue(store.value);
-    };
-    store.listeners.add(listener);
-    return () => {
-      store.listeners.delete(listener);
-    };
-  }, [store]);
+  const subscribe = useCallback(
+    (listener: () => void) => {
+      store.listeners.add(listener);
+      return () => {
+        store.listeners.delete(listener);
+      };
+    },
+    [store],
+  );
+
+  const getSnapshot = useCallback(() => store.value, [store]);
+
+  const value = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   const setValue: Dispatch<SetStateAction<T>> = useCallback(
     (action) => {
@@ -74,14 +67,14 @@ export function useControlState<T>(
           ? (action as (prev: T) => T)(store.value)
           : action;
       if (!Object.is(nextValue, store.value)) {
-        isLocalUpdate.current = true;
         store.value = nextValue;
-        setLocalValue(nextValue);
-        store.listeners.forEach((l) => l());
+        // Snapshot to avoid mutation-during-iteration if a listener
+        // synchronously (un)mounts another consumer of the same key.
+        Array.from(store.listeners).forEach((l) => l());
       }
     },
     [store],
   );
 
-  return [localValue, setValue];
+  return [value, setValue];
 }

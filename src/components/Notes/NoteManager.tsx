@@ -334,7 +334,10 @@ export function NoteManager({
   const [selectedThread, setSelectedThread] = useState<string | null>(null);
   const [isThreadsExpanded, setIsThreadsExpanded] = useState(false);
   const [showNewThreadDialog, setShowNewThreadDialog] = useState(false);
-  const [newMessage, setNewMessage] = useControlState("noteMessage", "");
+  const [newMessage, setNewMessage] = useControlState(
+    `noteMessage-${encounterId ?? patientId}`,
+    "",
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   // points to the first message fetched in the last page or the newly created message
   const recentMessageRef = useRef<HTMLDivElement | null>(null);
@@ -711,6 +714,7 @@ export function NoteManager({
                             }}
                             className="flex-1 min-h-10 max-h-[50vh]"
                           />
+                          {/* Make sure to mark any buttons inside plugins utilizing this slot with `type="button"` to prevent unintentionally submitting the form*/}
                           <PLUGIN_Component
                             __name="NoteMessageInput"
                             className={cn(
