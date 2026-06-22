@@ -61,7 +61,7 @@ export function getTokenStatus({
   token: TokenRetrieve;
   t: (key: string) => string;
 }) {
-  if (token.status === TokenStatus.CREATED && token?.sub_queue?.id) {
+  if (token.status === TokenStatus.CREATED && token.sub_queue?.id) {
     return t("called");
   }
   if (token.status === TokenStatus.CREATED) {

@@ -22,18 +22,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export type ServicepointSelectorAction =
+export type ServicePointSelectorAction =
   | "serve"
   | "move_to_up_next"
   | "change_service_point";
 
-const ACTION_TO_STATUS: Record<ServicepointSelectorAction, TokenStatus> = {
+const ACTION_TO_STATUS: Record<ServicePointSelectorAction, TokenStatus> = {
   serve: TokenStatus.IN_PROGRESS,
   move_to_up_next: TokenStatus.CREATED,
   change_service_point: TokenStatus.IN_PROGRESS,
 };
 
-export const ServicepointSelector = ({
+export const ServicePointSelector = ({
   open,
   onOpenChange,
   token,
@@ -46,20 +46,32 @@ export const ServicepointSelector = ({
   token: TokenRead;
   subQueues: TokenSubQueueRead[];
   facilityId: string;
-  action: ServicepointSelectorAction;
+  action: ServicePointSelectorAction;
 }) => {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ default: true, sm: false });
   const queryClient = useQueryClient();
 
-  const title = t(
-    action === "serve"
-      ? "serve_token"
-      : action === "move_to_up_next"
-        ? "move_to_up_next"
-        : "change_service_point",
-  );
-  const description = t(`${action}_confirmation`);
+  const getTitleOrDescription = (action: ServicePointSelectorAction) => {
+    switch (action) {
+      case "serve":
+        return {
+          title: t("serve_token"),
+          description: t("serve_confirmation"),
+        };
+      case "move_to_up_next":
+        return {
+          title: t("move_to_up_next"),
+          description: t("move_to_up_next_description"),
+        };
+      case "change_service_point":
+        return {
+          title: t("change_service_point"),
+          description: t("change_service_point_description"),
+        };
+    }
+  };
+  const { title, description } = getTitleOrDescription(action);
   const targetStatus = ACTION_TO_STATUS[action];
 
   const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
@@ -85,9 +97,6 @@ export const ServicepointSelector = ({
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["infinite-tokens", facilityId, token.queue.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["tokens", token?.patient?.id, facilityId],
       });
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, token.queue.id],
@@ -121,25 +130,19 @@ export const ServicepointSelector = ({
               {description}
             </DrawerDescription>
           </DrawerHeader>
-          {subQueues.length === 0 ? (
-            <div className="text-sm text-gray-500 italic pb-3 pl-4">
-              {t("no_service_points")}
-            </div>
-          ) : (
-            <div className="p-3 pb-6">
-              <RadioInput
-                options={subQueues.map((sub) => ({
-                  label: sub.name,
-                  value: sub.id,
-                }))}
-                onValueChange={handleSelect}
-                value={selectedSubQueueId}
-                required
-                className="flex flex-col gap-3"
-                classNameInput="p-2"
-              />
-            </div>
-          )}
+          <div className="p-3 pb-6">
+            <RadioInput
+              options={subQueues.map((subQueue) => ({
+                label: subQueue.name,
+                value: subQueue.id,
+              }))}
+              required
+              onValueChange={handleSelect}
+              value={selectedSubQueueId}
+              className="flex flex-col gap-3"
+              classNameInput="p-2"
+            />
+          </div>
         </DrawerContent>
       </Drawer>
     );
@@ -154,23 +157,17 @@ export const ServicepointSelector = ({
             {description}
           </DialogDescription>
         </DialogHeader>
-        {subQueues.length === 0 ? (
-          <div className="text-sm text-gray-500 italic">
-            {t("no_service_points")}
-          </div>
-        ) : (
-          <RadioInput
-            options={subQueues.map((sub) => ({
-              label: sub.name,
-              value: sub.id,
-            }))}
-            required
-            onValueChange={handleSelect}
-            value={selectedSubQueueId}
-            className="flex flex-col gap-3"
-            classNameInput="p-2"
-          />
-        )}
+        <RadioInput
+          options={subQueues.map((subQueue) => ({
+            label: subQueue.name,
+            value: subQueue.id,
+          }))}
+          required
+          onValueChange={handleSelect}
+          value={selectedSubQueueId}
+          className="flex flex-col gap-3"
+          classNameInput="p-2"
+        />
       </DialogContent>
     </Dialog>
   );

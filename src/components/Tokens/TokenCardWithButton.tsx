@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { useToken } from "@/hooks/useToken";
-import { ServicepointSelector } from "@/pages/Facility/queues/ServicepointSelector";
+import { ServicePointSelector } from "@/pages/Facility/queues/ServicePointSelector";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import { FacilityRead } from "@/types/facility/facility";
 import { TokenRetrieve, TokenStatus } from "@/types/tokens/token/token";
+import { toast } from "sonner";
 
 interface TokenCardWithButtonProps {
   token: TokenRetrieve;
@@ -37,6 +38,7 @@ export default function TokenCardWithButton({
     tokenId: token.id,
     onSuccess: () => {
       setShowServicepointDialog(false);
+      toast(t("token_assigned_to_service_point"));
       onSuccess?.();
     },
   });
@@ -87,7 +89,7 @@ export default function TokenCardWithButton({
         )}
 
       {!isOnlyOneSubQueue && showMarkInServiceButton && (
-        <ServicepointSelector
+        <ServicePointSelector
           open={showServicepointDialog}
           onOpenChange={setShowServicepointDialog}
           token={currentToken}

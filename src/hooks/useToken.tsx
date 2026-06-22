@@ -3,8 +3,6 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import queryClient from "@/Utils/request/queryClient";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 export function useToken({
   facilityId,
@@ -17,9 +15,8 @@ export function useToken({
   tokenId: string;
   onSuccess?: () => void;
 }) {
-  const { t } = useTranslation();
   const { data: token } = useQuery({
-    queryKey: ["token", tokenId],
+    queryKey: ["token", facilityId, queueId, tokenId],
     queryFn: query(tokenApi.get, {
       pathParams: {
         facility_id: facilityId,
@@ -40,7 +37,7 @@ export function useToken({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["token", tokenId],
+        queryKey: ["token", facilityId, queueId, tokenId],
       });
       queryClient.invalidateQueries({
         queryKey: ["infinite-tokens", facilityId, queueId],
@@ -51,7 +48,6 @@ export function useToken({
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, queueId],
       });
-      toast.success(t("token_assigned_to_service_point"));
       onSuccess?.();
     },
   });
