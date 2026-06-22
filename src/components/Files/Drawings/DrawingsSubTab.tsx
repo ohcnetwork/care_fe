@@ -203,6 +203,7 @@ const NewDrawingButton = (props: NewDrawingButtonProps) => {
                 onClick={() => {
                   setShowCreateModal(undefined);
                   setName("");
+                  setNote("");
                 }}
               >
                 {t("cancel")}
@@ -368,11 +369,11 @@ export const DrawingsSubTab = (props: DrawingsTabProps) => {
                     </div>
                     <div className="absolute inset-0 flex items-end justify-end px-2 py-1">
                       <span className="flex ml-auto text-gray-200 uppercase text-xs font-semibold">
-                        <div className="mr-1 size-3.5">
+                        <span className="mr-1 size-3.5">
                           <DrawingIcon
                             application={drawing.object_value.application}
                           />
-                        </div>
+                        </span>
                         {drawing.object_value.application}
                       </span>
                     </div>

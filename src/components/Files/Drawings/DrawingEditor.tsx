@@ -73,6 +73,7 @@ export const DrawingEditor: React.FC<Props> = ({ id }) => {
         name: data.name,
         object_type: MetaArtifactObjectType.DRAWING,
         object_value: value,
+        note: data.note,
       },
       {
         onSuccess: () => {
