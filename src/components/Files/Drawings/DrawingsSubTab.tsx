@@ -295,7 +295,7 @@ export const DrawingsSubTab = (props: DrawingsTabProps) => {
   });
 
   return (
-    <div className="care-excalidraw-container">
+    <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div className="relative max-w-96 min-w-72 flex-1 ml-1">
           <SearchIcon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-500" />
