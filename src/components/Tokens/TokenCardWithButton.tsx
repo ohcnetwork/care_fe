@@ -32,7 +32,11 @@ export default function TokenCardWithButton({
   const { t } = useTranslation();
   const [showServicepointDialog, setShowServicepointDialog] = useState(false);
 
-  const { token: latestToken, updateToken } = useToken({
+  const {
+    token: latestToken,
+    updateToken,
+    isPending,
+  } = useToken({
     facilityId: facility.id,
     queueId: token.queue.id,
     tokenId: token.id,
@@ -82,6 +86,7 @@ export default function TokenCardWithButton({
                 setShowServicepointDialog(true);
               }}
               variant="outline_primary"
+              disabled={isPending}
             >
               {t("mark_as_in_service")}
             </Button>

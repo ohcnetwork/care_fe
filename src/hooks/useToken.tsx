@@ -42,9 +42,13 @@ export function useToken({
       queryClient.invalidateQueries({
         queryKey: ["infinite-tokens", facilityId, queueId],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["tokens", token?.patient?.id, facilityId],
-      });
+      if (token?.patient?.id) {
+        queryClient.invalidateQueries({
+          queryKey: ["tokens", token.patient.id, facilityId],
+        });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["tokens"] });
+      }
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, queueId],
       });
