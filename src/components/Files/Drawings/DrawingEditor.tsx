@@ -9,6 +9,7 @@ import {
 import metaArtifactApi from "@/types/metaArtifact/metaArtifactApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -101,6 +102,7 @@ export const DrawingEditor: React.FC<Props> = ({ id }) => {
           value={value}
           onChange={handleChange}
           handleSave={handleSave}
+          handleExit={() => goBack()}
           disabled={isSaving}
         />
       </ErrorBoundary>
