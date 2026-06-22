@@ -54,10 +54,10 @@ export const DrawingEditor: React.FC<Props> = ({ id }) => {
   const isLoading = isLoadingDrawing || !data || !value;
 
   useEffect(() => {
-    if (data) {
+    if (data && value == null) {
       setValue(data.object_value);
     }
-  }, [data]);
+  }, [data, value]);
 
   if (isLoading) {
     return <Loading />;
