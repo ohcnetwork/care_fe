@@ -1163,9 +1163,10 @@ export function DiagnosticReportForm({
                           </h3>
                           <p className="mt-1.5 text-sm text-gray-600">
                             {t("add_supporting_photos_or_documents", {
-                              formats: BACKEND_ALLOWED_EXTENSIONS.slice(0, 5)
-                                .join(", ")
-                                .toUpperCase(),
+                              formats:
+                                BACKEND_ALLOWED_EXTENSIONS.slice(0, 5)
+                                  .join(", ")
+                                  .toUpperCase() + `, ${t("etc")}`,
                             })}
                           </p>
                           <div className="mt-4 flex flex-col sm:flex-row gap-3 w-full sm:items-center sm:justify-center">
@@ -1181,7 +1182,6 @@ export function DiagnosticReportForm({
                             <Button
                               asChild
                               variant="outline"
-                              disabled={disableEdit}
                               className={cn(
                                 "border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white",
                                 disableEdit
