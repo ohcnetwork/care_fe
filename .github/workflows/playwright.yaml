@@ -75,6 +75,7 @@ jobs:
         with:
           name: build-output
           path: build/
+          if-no-files-found: error
           retention-days: 1
           compression-level: 6
 
@@ -150,14 +151,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
-      - name: Install dependencies
-        run: npm ci --prefer-offline
-
       - name: Download build artifact
         uses: actions/download-artifact@v8
         with:
           name: build-output
           path: build/
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
