@@ -29,6 +29,12 @@ import { Textarea } from "@/components/ui/textarea";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import {
+  PERMISSION_READ_ENCOUNTER_CLINICAL_DATA,
+  PERMISSION_VIEW_CLINICAL_DATA,
+  PERMISSION_WRITE_ENCOUNTER_CLINICAL_DATA,
+  PERMISSION_WRITE_PATIENT,
+} from "@/common/Permissions";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import Pagination from "@/components/Common/Pagination";
@@ -227,12 +233,12 @@ const hasReadPermission = ({ type, patient, encounter }: DrawingsTabProps) => {
     ...(encounter?.permissions ?? []),
   ]);
 
-  if (permissions.has("can_view_clinical_data")) {
+  if (permissions.has(PERMISSION_VIEW_CLINICAL_DATA)) {
     return true;
   }
 
   if (type === MetaArtifactAssociatingType.ENCOUNTER) {
-    return permissions.has("can_read_encounter_clinical_data");
+    return permissions.has(PERMISSION_READ_ENCOUNTER_CLINICAL_DATA);
   }
 
   return false;
@@ -254,14 +260,14 @@ const hasWritePermission = ({
   ]);
 
   if (type === MetaArtifactAssociatingType.PATIENT) {
-    return permissions.has("can_write_patient");
+    return permissions.has(PERMISSION_WRITE_PATIENT);
   }
 
   if (type === MetaArtifactAssociatingType.ENCOUNTER) {
     if (encounter && inactiveEncounterStatus.includes(encounter.status)) {
       return false;
     }
-    return permissions.has("can_write_encounter_clinical_data");
+    return permissions.has(PERMISSION_WRITE_ENCOUNTER_CLINICAL_DATA);
   }
 
   return false;
