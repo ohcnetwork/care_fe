@@ -85,6 +85,11 @@ export type ServiceRequestComponentType = React.FC<{
   serviceRequestId: string;
 }>;
 
+export type NoteMessageInputComponentType = React.FC<{
+  message: string;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
+}>;
+
 export type EncounterOverviewTopComponentType = React.FC<{
   encounter: EncounterRead;
   patientId: string;
@@ -137,6 +142,7 @@ export type SupportedPluginComponents = {
   PatientSearchActions: PatientSearchActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
   ServiceRequestAction: ServiceRequestComponentType;
+  NoteMessageInput: NoteMessageInputComponentType;
   EncounterOverviewTop: EncounterOverviewTopComponentType;
   DiagnosticReportOverride: DiagnosticReportOverrideComponentType;
   PatientHomeQuickActions: PatientHomeActionsComponentType;
