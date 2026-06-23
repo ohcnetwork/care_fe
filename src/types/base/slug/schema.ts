@@ -2,7 +2,7 @@ import { t } from "i18next";
 import { z } from "zod";
 
 export const SLUG_VALUE_MIN_LENGTH = 5;
-export const SLUG_VALUE_MAX_LENGTH = 36;
+export const SLUG_VALUE_MAX_LENGTH = 50;
 
 export const SLUG_VALUE_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]$/;
 
