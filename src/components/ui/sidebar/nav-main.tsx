@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { useAtom } from "jotai";
 import { ChevronRight } from "lucide-react";
 import { ActiveLink, useFullPath } from "raviger";
@@ -86,6 +87,9 @@ function renderNavLink(
         rel={openInNewTab ? "noopener noreferrer" : undefined}
       >
         {children}
+        {openInNewTab && (
+          <span className="sr-only">{t("opens_in_new_tab")}</span>
+        )}
       </a>
     );
   }
