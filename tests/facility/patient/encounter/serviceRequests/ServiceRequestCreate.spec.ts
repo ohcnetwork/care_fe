@@ -134,6 +134,21 @@ test.describe("Patient Service Request Tab", () => {
       .first()
       .click();
     await expect(page.locator("#question-service_request")).toBeVisible();
+
+    // Expand service request card and select required priority
+    const serviceRequestCard = page
+      .locator('[data-slot="collapsible"]')
+      .filter({ hasText: activityDefinitionTitle })
+      .first();
+    await serviceRequestCard.waitFor({ state: "visible" });
+    await serviceRequestCard
+      .locator('[data-slot="collapsible-trigger"]')
+      .click();
+    await serviceRequestCard
+      .getByRole("radio", { name: /routine/i })
+      .waitFor({ state: "visible" });
+    await serviceRequestCard.getByRole("radio", { name: "Routine" }).check();
+
     const submitButton = page.getByRole("button", { name: "Submit" });
     await expect(submitButton).toBeEnabled();
     await submitButton.click();
