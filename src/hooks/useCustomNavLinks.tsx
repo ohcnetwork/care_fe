@@ -24,7 +24,7 @@ import { useCareApps } from "@/hooks/useCareApps";
 import {
   type CustomNavLink,
   type NavScope,
-  customNavLinksSchema,
+  customNavLinkSchema,
 } from "@/types/nav/customNavLink";
 
 import { isInternalNavPath, isSafeNavUrl } from "@/Utils/url";
@@ -54,8 +54,17 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 function parseLinks(value: unknown): CustomNavLink[] {
-  const result = customNavLinksSchema.safeParse(value ?? []);
-  return result.success ? result.data : [];
+  if (!Array.isArray(value)) return [];
+  // Validate each entry independently so one malformed link (e.g. from a
+  // runtime-loaded plugin manifest) doesn't drop the entire list.
+  return value.flatMap((item) => {
+    const parsed = customNavLinkSchema.safeParse(item);
+    if (parsed.success) return [parsed.data];
+    if (import.meta.env.DEV) {
+      console.warn("Skipping invalid custom nav link:", parsed.error.issues);
+    }
+    return [];
+  });
 }
 
 /**
