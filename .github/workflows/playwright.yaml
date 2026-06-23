@@ -190,7 +190,7 @@ jobs:
           echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-results-shard-${{ matrix.shard }}
@@ -242,7 +242,7 @@ jobs:
 
       - name: Download all test results
         if: steps.skipped.outputs.skipped == 'false'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: playwright-results-shard-*
           path: all-results
@@ -292,7 +292,7 @@ jobs:
 
       - name: Upload final report
         if: steps.skipped.outputs.skipped == 'false'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-final-report
           path: all-results/
@@ -321,7 +321,7 @@ jobs:
 
       - name: Upload PR comment
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pr-comment
           path: pr-comment.md
@@ -335,7 +335,7 @@ jobs:
 
       - name: Upload PR number
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pr-number
           path: pr-number/
