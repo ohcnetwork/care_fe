@@ -71,11 +71,12 @@ jobs:
           NODE_ENV: production
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-output
           path: build/
           retention-days: 1
+          compression-level: 6
 
   # Run E2E tests with backend integration
   test:
@@ -153,7 +154,7 @@ jobs:
         run: npm ci --prefer-offline
 
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build-output
           path: build/
