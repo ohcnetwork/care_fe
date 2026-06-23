@@ -17,17 +17,17 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { NavigationLink } from "@/components/ui/sidebar/nav-main";
+import type { NavigationLink } from "@/components/ui/sidebar/nav-main";
 
 import { useCareApps } from "@/hooks/useCareApps";
 
 import {
-  CustomNavLink,
-  NavScope,
+  type CustomNavLink,
+  type NavScope,
   customNavLinksSchema,
 } from "@/types/nav/customNavLink";
 
-import { isSafeNavUrl } from "@/Utils/url";
+import { isInternalNavPath, isSafeNavUrl } from "@/Utils/url";
 
 import careConfig from "@careConfig";
 
@@ -82,9 +82,12 @@ export function useCustomNavLinks(scope: NavScope): NavigationLink[] {
       (link) =>
         link.placement.includes(scope) || link.placement.includes("all"),
     )
-    .filter(
-      (link) => !(link.external || link.openInNewTab) || isSafeNavUrl(link.url),
-    )
+    .filter((link) => {
+      if (link.external || link.openInNewTab) {
+        return isSafeNavUrl(link.url);
+      }
+      return isInternalNavPath(link.url);
+    })
     .map((link) => {
       const Icon = link.icon ? iconMap[link.icon] : undefined;
       return {

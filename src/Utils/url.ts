@@ -21,13 +21,16 @@ export const isSafeExternalUrl = (url: string): boolean => {
 };
 
 /**
+ * Checks whether a URL is an internal app path ("/..." but not a
+ * protocol-relative "//..." URL, which resolves to an external origin).
+ */
+export const isInternalNavPath = (url: string): boolean =>
+  url.startsWith("/") && !url.startsWith("//");
+
+/**
  * Checks whether a URL is safe to render as an anchor-based nav link.
  * Allows internal app paths ("/..." but not protocol-relative "//...") and
  * absolute http(s) URLs; rejects javascript:, data:, and other schemes.
  */
-export const isSafeNavUrl = (url: string): boolean => {
-  if (url.startsWith("/") && !url.startsWith("//")) {
-    return true;
-  }
-  return isSafeExternalUrl(url);
-};
+export const isSafeNavUrl = (url: string): boolean =>
+  isInternalNavPath(url) || isSafeExternalUrl(url);
