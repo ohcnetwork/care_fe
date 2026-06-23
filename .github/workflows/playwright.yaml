@@ -159,15 +159,29 @@ jobs:
             node_modules/
           key: build-${{ github.sha }}
 
+      - name: Retry cache restore after delay
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        id: cache-retry
+        run: |
+          echo "Cache miss on first attempt, waiting 30s for propagation..."
+          sleep 30
+      
+      - name: Restore build cache (retry)
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        id: cache-restore-retry
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/
+            node_modules/
+          key: build-${{ github.sha }}
+
       - name: Verify build exists
         run: |
           if [ ! -f build/index.html ]; then
-            echo "::error::Build directory not found. Cache restoration failed."
-            echo "Cache key: build-${{ github.sha }}"
-            echo "Cache hit: ${{ steps.cache-restore.outputs.cache-hit }}"
+            echo "::error::Build not found after cache restore attempts (key: build-${{ github.sha }})"
             exit 1
           fi
-          echo "Build directory verified (cache-hit=${{ steps.cache-restore.outputs.cache-hit }})"
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -200,7 +214,7 @@ jobs:
           echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
 
       - name: Upload test results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-results-shard-${{ matrix.shard }}
@@ -252,7 +266,7 @@ jobs:
 
       - name: Download all test results
         if: steps.skipped.outputs.skipped == 'false'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           pattern: playwright-results-shard-*
           path: all-results
@@ -302,7 +316,7 @@ jobs:
 
       - name: Upload final report
         if: steps.skipped.outputs.skipped == 'false'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-final-report
           path: all-results/
@@ -331,7 +345,7 @@ jobs:
 
       - name: Upload PR comment
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: pr-comment
           path: pr-comment.md
@@ -345,7 +359,7 @@ jobs:
 
       - name: Upload PR number
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: pr-number
           path: pr-number/
