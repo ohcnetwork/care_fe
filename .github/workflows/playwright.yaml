@@ -46,7 +46,7 @@ jobs:
               - 'playwright.config.ts'
               - '.github/workflows/playwright.yaml'
 
-  # Build application once and cache for all test shards
+  # Build application once and share via artifact to all test shards
   build:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
     needs: changes
