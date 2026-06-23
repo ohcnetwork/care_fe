@@ -2568,6 +2568,7 @@
   "failed_to_remove_tags": "Failed to remove the tag",
   "failed_to_restart_encounter": "Failed to restart encounter",
   "failed_to_revoke_token": "Failed to revoke token",
+  "failed_to_save_test_results": "Failed to save test results: {{error}}",
   "failed_to_send_message": "Failed to send message",
   "failed_to_stop_camera": "Failed to stop camera",
   "failed_to_unlock_invoice": "Failed to unlock invoice",

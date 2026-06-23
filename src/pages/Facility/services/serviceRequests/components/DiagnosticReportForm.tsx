@@ -301,7 +301,7 @@ function DiagnosticReportItem({
   );
   const [isExpanded, setIsExpanded] = useState(true);
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
-  const [conclusion, setConclusion] = useState<string>("");
+  const [conclusion, setConclusion] = useState<string>(report.conclusion || "");
 
   const { data: fullReport } = useQuery({
     queryKey: ["diagnosticReport", report.id],
@@ -350,7 +350,9 @@ function DiagnosticReportItem({
       },
       onError: (err: Error) => {
         toast.error(
-          `Failed to save test results: ${err.message || "Unknown error"}`,
+          t("failed_to_save_test_results", {
+            error: err.message || "Unknown error",
+          }),
         );
       },
     });
@@ -456,7 +458,7 @@ function DiagnosticReportItem({
     if (fullReport?.conclusion) {
       setConclusion(fullReport.conclusion);
     }
-  }, [fullReport]);
+  }, [fullReport, conclusion]);
 
   function handleValueChange(
     definitionId: string,
@@ -915,7 +917,7 @@ function DiagnosticReportItem({
                     <span className="text-base/9 text-gray-950 font-medium">
                       {isMultipleDiagnosticReport
                         ? report.code?.display
-                        : t("test_results_entry")}
+                        : report.service_request?.title}
                     </span>
                   </p>
                 </CardTitle>
@@ -1365,7 +1367,7 @@ const CreateDiagnosticReportForm = ({
             />
 
             <div className="flex flex-col gap-1 bg-gray-100 rounded-lg p-1">
-              <div className="flex flex-col justify-center items-center rounded-lg bg-gray-500/3 p-3 border border-gray-200">
+              <div className="flex flex-col justify-center items-center rounded-lg bg-gray-500/3 p-3 border border-gray-200 gap-2">
                 <FileUp size={24} className="text-gray-600" />
                 <p className="mt-2 text-sm text-gray-700 text-center">
                   {!hasCollectedSpecimens
@@ -1377,9 +1379,27 @@ const CreateDiagnosticReportForm = ({
                     {t("select_report_type_to_create")}
                   </p>
                 )}
+                {!isMultipleDiagnosticReport && (
+                  <Button
+                    onClick={() =>
+                      handleCreateReport(selectedReportCode || undefined)
+                    }
+                    disabled={
+                      disableEdit ||
+                      isCreatingReport ||
+                      !hasCollectedSpecimens ||
+                      (!!activityDefinition?.diagnostic_report_codes?.length &&
+                        !selectedReportCode)
+                    }
+                    className="w-full sm:w-auto"
+                  >
+                    <Plus className="size-4 mr-2" />
+                    {t("create_report")}
+                  </Button>
+                )}
               </div>
-              <div className="flex flex-col items-stretch sm:items-center gap-4 justify-center bg-gray-500/3 border border-gray-200 rounded-lg p-4">
-                {isMultipleDiagnosticReport && (
+              {isMultipleDiagnosticReport && (
+                <div className="flex flex-col items-stretch sm:items-center gap-4 justify-center bg-gray-500/3 border border-gray-200 rounded-lg p-4">
                   <div className="flex-1 w-full   space-y-2">
                     <Label className="text-sm font-medium text-gray-950">
                       {t("select_diagnostic_report_type")}
@@ -1401,57 +1421,59 @@ const CreateDiagnosticReportForm = ({
                         />
                       </SelectTrigger>
                       <SelectContent>
-                        {isMultipleDiagnosticReport &&
-                          activityDefinition?.diagnostic_report_codes?.map(
-                            (code) => (
-                              <SelectItem key={code.code} value={code.code}>
-                                <div className="flex flex-col">
-                                  <span className="truncate">
-                                    {code.display} ({code.code})
-                                  </span>
-                                </div>
-                              </SelectItem>
-                            ),
-                          )}
+                        {activityDefinition?.diagnostic_report_codes?.map(
+                          (code) => (
+                            <SelectItem key={code.code} value={code.code}>
+                              <div className="flex flex-col">
+                                <span className="truncate">
+                                  {code.display} ({code.code})
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ),
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
-                )}
-                <div className="flex ml-auto gap-2 items-center">
-                  <Button
-                    variant="ghost"
-                    className="underline"
-                    onClick={() => {
-                      setSelectedReportCode(null);
-                    }}
-                    disabled={
-                      disableEdit ||
-                      isCreatingReport ||
-                      !hasCollectedSpecimens ||
-                      (!!activityDefinition?.diagnostic_report_codes?.length &&
-                        !selectedReportCode)
-                    }
-                  >
-                    {t("clear")}
-                  </Button>
-                  <Button
-                    onClick={() =>
-                      handleCreateReport(selectedReportCode || undefined)
-                    }
-                    disabled={
-                      disableEdit ||
-                      isCreatingReport ||
-                      !hasCollectedSpecimens ||
-                      (!!activityDefinition?.diagnostic_report_codes?.length &&
-                        !selectedReportCode)
-                    }
-                    className="w-full sm:w-auto"
-                  >
-                    <Plus className="size-4 mr-2" />
-                    {t("create_report")}
-                  </Button>
+
+                  <div className="flex ml-auto gap-2 items-center">
+                    <Button
+                      variant="ghost"
+                      className="underline"
+                      onClick={() => {
+                        setSelectedReportCode(null);
+                      }}
+                      disabled={
+                        disableEdit ||
+                        isCreatingReport ||
+                        !hasCollectedSpecimens ||
+                        (!!activityDefinition?.diagnostic_report_codes
+                          ?.length &&
+                          !selectedReportCode)
+                      }
+                    >
+                      {t("clear")}
+                    </Button>
+                    <Button
+                      onClick={() =>
+                        handleCreateReport(selectedReportCode || undefined)
+                      }
+                      disabled={
+                        disableEdit ||
+                        isCreatingReport ||
+                        !hasCollectedSpecimens ||
+                        (!!activityDefinition?.diagnostic_report_codes
+                          ?.length &&
+                          !selectedReportCode)
+                      }
+                      className="w-full sm:w-auto"
+                    >
+                      <Plus className="size-4 mr-2" />
+                      {t("create_report")}
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </CardContent>
         </CollapsibleContent>

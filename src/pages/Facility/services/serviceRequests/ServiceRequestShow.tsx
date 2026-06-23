@@ -267,6 +267,10 @@ export default function ServiceRequestShow({
     activityDefinition.observation_result_requirements ?? [];
   const diagnosticReports = request.diagnostic_reports || [];
 
+  const activeDiagnosticReports = diagnosticReports.filter(
+    (report) => report.status !== DiagnosticReportStatus.final,
+  );
+
   const assignedSpecimenIds = new Set<string>();
 
   const preparePrintAllQRCodes = async () => {
@@ -596,31 +600,26 @@ export default function ServiceRequestShow({
                 </DropdownMenu>
               </div>
             )}
-            {(!diagnosticReports.length ||
-              diagnosticReports[0]?.status !==
-                DiagnosticReportStatus.final) && (
-              <DiagnosticReportForm
-                patientId={request.encounter.patient.id}
-                facilityId={facilityId}
-                serviceRequestId={serviceRequestId}
-                observationDefinitions={observationRequirements}
-                diagnosticReports={diagnosticReports}
-                activityDefinition={activityDefinition}
-                specimens={request.specimens || []}
-                disableEdit={disableEdit}
-              />
-            )}
-          </div>
 
-          {diagnosticReports.length > 0 && (
-            <DiagnosticReportReview
-              facilityId={facilityId}
+            <DiagnosticReportForm
               patientId={request.encounter.patient.id}
+              facilityId={facilityId}
               serviceRequestId={serviceRequestId}
-              diagnosticReports={diagnosticReports}
+              observationDefinitions={observationRequirements}
+              diagnosticReports={activeDiagnosticReports}
+              activityDefinition={activityDefinition}
+              specimens={request.specimens || []}
               disableEdit={disableEdit}
             />
-          )}
+          </div>
+
+          <DiagnosticReportReview
+            facilityId={facilityId}
+            patientId={request.encounter.patient.id}
+            serviceRequestId={serviceRequestId}
+            diagnosticReports={diagnosticReports}
+            disableEdit={disableEdit}
+          />
         </div>
       </div>
       {!isMobile && (

@@ -59,7 +59,13 @@ export function DiagnosticReportReview({
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">{t("review_test_results")}</h2>
+      {(!diagnosticReports.length ||
+        diagnosticReports.some(
+          (report) => report.status !== DiagnosticReportStatus.final,
+        )) && (
+        <h3 className="text-xl font-semibold">{t("review_test_results")}</h3>
+      )}
+
       {diagnosticReports.map((report) => (
         <DiagnosticReportReviewItem
           key={report.id}
@@ -150,9 +156,12 @@ function DiagnosticReportReviewItem({
 
   const handleApprove = () => {
     updateDiagnosticReport({
-      ...reportDetail,
+      id: reportDetail.id,
       status: DiagnosticReportStatus.final,
-      conclusion,
+      category: reportDetail.category,
+      code: reportDetail.code,
+      note: reportDetail.note,
+      conclusion: conclusion || reportDetail.conclusion,
     });
   };
 
@@ -183,7 +192,7 @@ function DiagnosticReportReviewItem({
                   <p className="flex items-center gap-3">
                     <FileCheck2 className="size-6  font-normal text-base stroke-[1.5px]" />{" "}
                     <span className="text-base/9  font-medium">
-                      {report.code?.display}
+                      {report.code?.display ?? report.service_request?.title}
                     </span>
                   </p>
                 </CardTitle>
@@ -287,7 +296,7 @@ function DiagnosticReportReviewItem({
                       files={files.results}
                       type="diagnostic_report"
                       associatingId={report.id}
-                      canEdit={true}
+                      canEdit={!disableEdit}
                       showHeader={false}
                     />
                   </CardContent>
@@ -312,7 +321,7 @@ function DiagnosticReportReviewItem({
                 <div className="flex justify-end">
                   <Button
                     variant="primary"
-                    disabled={isUpdatingReport}
+                    disabled={disableEdit || isUpdatingReport}
                     className="gap-2"
                     onClick={() => setShowApproveDialog(true)}
                   >
