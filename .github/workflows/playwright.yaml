@@ -46,7 +46,7 @@ jobs:
               - 'playwright.config.ts'
               - '.github/workflows/playwright.yaml'
 
-  # Build application once and share via artifact to all test shards
+  # Build application once and cache for all test shards
   build:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
     needs: changes
@@ -70,14 +70,13 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v7
+      - name: Save build and node_modules to cache
+        uses: actions/cache/save@v4
         with:
-          name: build-output
-          path: build/
-          if-no-files-found: error
-          retention-days: 1
-          compression-level: 6
+          path: |
+            build/
+            node_modules/
+          key: build-${{ github.sha }}
 
   # Run E2E tests with backend integration
   test:
@@ -151,14 +150,24 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
-      - name: Download build artifact
-        uses: actions/download-artifact@v8
+      - name: Restore build cache
+        id: cache-restore
+        uses: actions/cache/restore@v4
         with:
-          name: build-output
-          path: build/
+          path: |
+            build/
+            node_modules/
+          key: build-${{ github.sha }}
 
-      - name: Install dependencies
-        run: npm ci --prefer-offline
+      - name: Verify build exists
+        run: |
+          if [ ! -f build/index.html ]; then
+            echo "::error::Build directory not found. Cache restoration failed."
+            echo "Cache key: build-${{ github.sha }}"
+            echo "Cache hit: ${{ steps.cache-restore.outputs.cache-hit }}"
+            exit 1
+          fi
+          echo "Build directory verified (cache-hit=${{ steps.cache-restore.outputs.cache-hit }})"
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
