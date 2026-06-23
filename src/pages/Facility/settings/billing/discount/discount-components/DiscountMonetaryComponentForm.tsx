@@ -62,9 +62,18 @@ export function DiscountMonetaryComponentForm({
         .object({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
-          factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
-          amount: zodDecimal({ min: 0 }).optional().nullable(),
-          title: z.string().min(1, { message: t("field_required") }),
+          factor: z
+            .preprocess((val) => val ?? "", zodDecimal({ min: 0, max: 100 }))
+            .optional()
+            .nullable(),
+          amount: z
+            .preprocess((val) => val ?? "", zodDecimal({ min: 0 }))
+            .optional()
+            .nullable(),
+          title: z
+            .string()
+            .trim()
+            .min(1, { message: t("field_required") }),
           conditions: z.array(conditionSchema).default([]),
         })
         .refine((data) => data.factor != null || data.amount != null, {
@@ -171,7 +180,7 @@ export function DiscountMonetaryComponentForm({
                             max="100"
                             step="0.01"
                             {...field}
-                            value={field.value || ""}
+                            value={(field.value as string | null) || ""}
                             onChange={(e) =>
                               field.onChange(e.target.value || null)
                             }
@@ -205,7 +214,11 @@ export function DiscountMonetaryComponentForm({
                             onChange={(e) =>
                               field.onChange(e.target.value || null)
                             }
-                            value={field.value === null ? "" : field.value}
+                            value={
+                              (field.value as string | null) === null
+                                ? ""
+                                : (field.value as string)
+                            }
                             className="pl-8"
                           />
                         </div>
@@ -316,7 +329,7 @@ export function DiscountMonetaryComponentForm({
           <Button
             type="submit"
             className="w-full"
-            disabled={!form.formState.isDirty}
+            disabled={!form.formState.isDirty || !form.formState.isValid}
           >
             {t("save")}
           </Button>
