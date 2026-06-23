@@ -135,7 +135,7 @@ test.describe("Patient Service Request Tab", () => {
       .click();
     await expect(page.locator("#question-service_request")).toBeVisible();
 
-    // Expand service request card and select required priority
+    // Expand service request card and verify default priority
     const serviceRequestCard = page
       .locator('[data-slot="collapsible"]')
       .filter({ hasText: activityDefinitionTitle })
@@ -144,10 +144,9 @@ test.describe("Patient Service Request Tab", () => {
     await serviceRequestCard
       .locator('[data-slot="collapsible-trigger"]')
       .click();
-    await serviceRequestCard
-      .getByRole("radio", { name: /routine/i })
-      .waitFor({ state: "visible" });
-    await serviceRequestCard.getByRole("radio", { name: "Routine" }).check();
+    await expect(
+      serviceRequestCard.getByRole("radio", { name: "Routine" }),
+    ).toBeChecked();
 
     const submitButton = page.getByRole("button", { name: "Submit" });
     await expect(submitButton).toBeEnabled();
