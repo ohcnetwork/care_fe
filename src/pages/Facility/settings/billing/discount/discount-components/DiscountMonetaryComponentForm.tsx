@@ -62,6 +62,9 @@ export function DiscountMonetaryComponentForm({
         .object({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
+          // Fix #14040: preprocess coerces null (emitted when input is cleared)
+          // to "" so zodDecimal's refinement fires the friendly "field_required"
+          // message instead of the raw Zod type error "Expected string, received null".
           factor: z
             .preprocess((val) => val ?? "", zodDecimal({ min: 0, max: 100 }))
             .optional()
@@ -70,6 +73,8 @@ export function DiscountMonetaryComponentForm({
             .preprocess((val) => val ?? "", zodDecimal({ min: 0 }))
             .optional()
             .nullable(),
+          // Fix #14040: trim() strips leading/trailing whitespace before the
+          // min(1) check so a whitespace-only entry correctly fails validation.
           title: z
             .string()
             .trim()
@@ -326,6 +331,8 @@ export function DiscountMonetaryComponentForm({
         </Card>
 
         <div className="pt-2">
+          {/* Fix #14040: isValid prevents submitting an invalid form;
+              isDirty prevents re-saving unchanged values. */}
           <Button
             type="submit"
             className="w-full"
