@@ -10,7 +10,7 @@ import {
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
-import { CustomNavLink } from "@/types/nav/customNavLink";
+import type { CustomNavLink } from "@/types/nav/customNavLink";
 import { PlugConfigMeta } from "@/types/plugConfig";
 import { UserReadMinimal } from "@/types/user/user";
 import { ComponentType, LazyExoticComponent, ReactNode } from "react";

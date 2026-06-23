@@ -6,6 +6,8 @@ import {
 } from "../src/types/emr/encounter/encounter";
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import { customNavLinksSchema } from "../src/types/nav/customNavLink";
+// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
+import { isSafeExternalUrl, isSafeNavUrl } from "../src/Utils/url";
 
 import { z } from "zod";
 
@@ -58,7 +60,26 @@ const customShortcutsSchemaString = jsonAsStringSchema
 
 const customNavLinksSchemaString = jsonAsStringSchema
   .transform((val) => JSON.parse(val))
-  .pipe(customNavLinksSchema);
+  .pipe(customNavLinksSchema)
+  .superRefine((links, ctx) => {
+    links.forEach((link, index) => {
+      if (link.external && !isSafeExternalUrl(link.url)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "external links must use an absolute http(s) URL",
+          path: [index, "url"],
+        });
+      }
+      if (link.openInNewTab && !isSafeNavUrl(link.url)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "openInNewTab links must use a safe internal path or an absolute http(s) URL",
+          path: [index, "url"],
+        });
+      }
+    });
+  });
 
 const VALID_ROUNDING_METHODS = [
   "ROUND_UP",

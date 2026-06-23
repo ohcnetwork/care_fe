@@ -27,7 +27,7 @@ import {
   customNavLinksSchema,
 } from "@/types/nav/customNavLink";
 
-import { isSafeExternalUrl } from "@/Utils/utils";
+import { isSafeNavUrl } from "@/Utils/url";
 
 import careConfig from "@careConfig";
 
@@ -62,9 +62,9 @@ function parseLinks(value: unknown): CustomNavLink[] {
  * Resolves the custom navigation links configured for a given sidebar scope.
  *
  * Links are sourced from the deployment env (`careConfig.customNavLinks`) and
- * from loaded plugin manifests (`customNavLinks`), then filtered by placement,
- * visibility, and external-URL safety before being mapped to `NavigationLink`s
- * that `NavMain` can render.
+ * from loaded plugin manifests (`customNavLinks`), then filtered by placement
+ * and nav-URL safety before being mapped to `NavigationLink`s that `NavMain`
+ * can render.
  */
 export function useCustomNavLinks(scope: NavScope): NavigationLink[] {
   const { t } = useTranslation();
@@ -82,7 +82,9 @@ export function useCustomNavLinks(scope: NavScope): NavigationLink[] {
       (link) =>
         link.placement.includes(scope) || link.placement.includes("all"),
     )
-    .filter((link) => !link.external || isSafeExternalUrl(link.url))
+    .filter(
+      (link) => !(link.external || link.openInNewTab) || isSafeNavUrl(link.url),
+    )
     .map((link) => {
       const Icon = link.icon ? iconMap[link.icon] : undefined;
       return {

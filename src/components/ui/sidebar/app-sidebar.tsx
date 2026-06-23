@@ -38,7 +38,7 @@ import { ServiceSwitcher } from "./facility/service/service-switcher";
 
 import PinPageDialog from "@/components/Common/PinPageDialog";
 import { FacilityBareMinimum } from "@/types/facility/facility";
-import { NavScope } from "@/types/nav/customNavLink";
+import type { NavScope } from "@/types/nav/customNavLink";
 import { CurrentUserRead } from "@/types/user/user";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {

@@ -2,7 +2,7 @@ import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { useCustomNavLinks } from "@/hooks/useCustomNavLinks";
 
-import { NavScope } from "@/types/nav/customNavLink";
+import type { NavScope } from "@/types/nav/customNavLink";
 
 /**
  * Renders configuration- and plugin-provided custom links for the given sidebar

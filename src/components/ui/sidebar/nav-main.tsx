@@ -29,7 +29,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { isSafeExternalUrl } from "@/Utils/utils";
+import { isSafeNavUrl } from "@/Utils/url";
 
 const isChildActive = (link: NavigationLink) => {
   if (!link.children) return false;
@@ -58,9 +58,8 @@ export interface NavigationLink {
   children?: NavigationLink[];
 }
 
-/** Drops external links whose url is not a safe http(s) URL. */
 const isRenderableNavLink = (link: NavigationLink) =>
-  !link.external || isSafeExternalUrl(link.url);
+  !(link.external || link.openInNewTab) || isSafeNavUrl(link.url);
 
 /**
  * Renders a nav destination as a raviger `ActiveLink` (internal, same-tab) or a
