@@ -7,11 +7,7 @@ import {
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import { customNavLinksSchema } from "../src/types/nav/customNavLink";
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import {
-  isInternalNavPath,
-  isSafeExternalUrl,
-  isSafeNavUrl,
-} from "../src/Utils/url";
+import { isSafeNavUrl } from "../src/Utils/url";
 
 import { z } from "zod";
 
@@ -67,30 +63,11 @@ const customNavLinksSchemaString = jsonAsStringSchema
   .pipe(customNavLinksSchema)
   .superRefine((links, ctx) => {
     links.forEach((link, index) => {
-      if (link.external && !isSafeExternalUrl(link.url)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "external links must use an absolute http(s) URL",
-          path: [index, "url"],
-        });
-      }
-      if (link.openInNewTab && !isSafeNavUrl(link.url)) {
+      if (!isSafeNavUrl(link.url)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message:
-            "openInNewTab links must use a safe internal path or an absolute http(s) URL",
-          path: [index, "url"],
-        });
-      }
-      if (
-        !link.external &&
-        !link.openInNewTab &&
-        !isInternalNavPath(link.url)
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "internal links must use an absolute app path starting with / (and not //)",
+            "url must be an internal app path starting with / (and not //) or an absolute http(s) URL",
           path: [index, "url"],
         });
       }

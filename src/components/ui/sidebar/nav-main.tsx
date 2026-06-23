@@ -29,7 +29,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import { isInternalNavPath, isSafeNavUrl } from "@/Utils/url";
+import { isSafeExternalUrl, isSafeNavUrl } from "@/Utils/url";
 
 const isChildActive = (link: NavigationLink) => {
   if (!link.children) return false;
@@ -53,20 +53,16 @@ export interface NavigationLink {
   url: string;
   icon?: ReactNode;
   visibility?: boolean;
-  external?: boolean; // Marks the url as external, rendered as a sanitized anchor. Also defaults openInNewTab to true.
-  openInNewTab?: boolean;
+  openInNewTab?: boolean; // Open in a new tab; defaults to true for absolute http(s) URLs.
   children?: NavigationLink[];
 }
 
-const isRenderableNavLink = (link: NavigationLink) =>
-  link.external || link.openInNewTab
-    ? isSafeNavUrl(link.url)
-    : isInternalNavPath(link.url);
+const isRenderableNavLink = (link: NavigationLink) => isSafeNavUrl(link.url);
 
 /**
  * Renders a nav destination as a raviger `ActiveLink` (internal, same-tab) or a
- * plain anchor (external links, or links opening in a new tab). Returns a DOM
- * element directly so it can be used as the child of an `asChild` button.
+ * plain anchor (absolute http(s) URLs, or links opening in a new tab). Returns a
+ * DOM element directly so it can be used as the child of an `asChild` button.
  */
 function renderNavLink(
   link: NavigationLink,
@@ -78,8 +74,9 @@ function renderNavLink(
     onClick?: () => void;
   } = {},
 ) {
-  if (link.external || link.openInNewTab) {
-    const openInNewTab = link.openInNewTab ?? !!link.external;
+  const isExternal = isSafeExternalUrl(link.url);
+  if (isExternal || link.openInNewTab) {
+    const openInNewTab = link.openInNewTab ?? isExternal;
     return (
       <a
         href={link.url}

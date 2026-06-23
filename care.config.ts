@@ -308,8 +308,8 @@ const careConfig = {
   /**
    * Custom navigation links injected into the left sidebar from environment.
    * Format: JSON string with an array of CustomNavLink objects.
-   * Each link may declare placement (which nav contexts it appears in),
-   * external (renders as a sanitized anchor), and openInNewTab.
+   * Each link may declare placement (which nav contexts it appears in) and
+   * openInNewTab. Absolute http(s) URLs are treated as external automatically.
    */
   customNavLinks: env.REACT_CUSTOM_NAV_LINKS
     ? JSON.parse(env.REACT_CUSTOM_NAV_LINKS)

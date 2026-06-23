@@ -27,11 +27,7 @@ import {
   customNavLinkSchema,
 } from "@/types/nav/customNavLink";
 
-import {
-  isInternalNavPath,
-  isSafeExternalUrl,
-  isSafeNavUrl,
-} from "@/Utils/url";
+import { isSafeExternalUrl, isSafeNavUrl } from "@/Utils/url";
 
 import careConfig from "@careConfig";
 
@@ -95,22 +91,13 @@ export function useCustomNavLinks(scope: NavScope): NavigationLink[] {
       (link) =>
         link.placement.includes(scope) || link.placement.includes("all"),
     )
-    .filter((link) => {
-      if (link.external) {
-        return isSafeExternalUrl(link.url);
-      }
-      if (link.openInNewTab) {
-        return isSafeNavUrl(link.url);
-      }
-      return isInternalNavPath(link.url);
-    })
+    .filter((link) => isSafeNavUrl(link.url))
     .map((link) => {
       const Icon = link.icon ? iconMap[link.icon] : undefined;
       return {
         name: t(link.title),
         url: link.url,
-        external: link.external,
-        openInNewTab: link.openInNewTab ?? link.external,
+        openInNewTab: link.openInNewTab ?? isSafeExternalUrl(link.url),
         icon: Icon ? <Icon /> : undefined,
       } satisfies NavigationLink;
     });

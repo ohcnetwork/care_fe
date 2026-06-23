@@ -21,17 +21,17 @@ export type NavScope = (typeof NAV_SCOPES)[number];
  * env config or a plugin manifest.
  *
  * - `title`: display label, passed through i18n (falls back to literal text).
- * - `url`: internal route path, or an absolute http(s) URL when `external`.
+ * - `url`: internal route path ("/...") or an absolute http(s) URL. Absolute
+ *   http(s) URLs are treated as external automatically (rendered as a sanitized
+ *   anchor); anything else must be an internal path.
  * - `icon`: optional name from the allow-listed lucide-react icons.
- * - `external`: marks the url as outside the app (rendered as a sanitized anchor).
- * - `openInNewTab`: open in a new tab; defaults to the value of `external`.
+ * - `openInNewTab`: open in a new tab; defaults to true for absolute http(s) URLs.
  * - `placement`: sidebar contexts the link appears in; defaults to every context.
  */
 export const customNavLinkSchema = z.object({
   title: z.string(),
   url: z.string(),
   icon: z.string().optional(),
-  external: z.boolean().optional(),
   openInNewTab: z.boolean().optional(),
   placement: z.array(z.enum(NAV_SCOPES)).default(["all"]),
 });
