@@ -137,12 +137,31 @@ export function EncounterQuestion({
   useEffect(() => {
     if (
       encounter.status === EncounterStatus.DISCHARGED ||
-      encounter.status === EncounterStatus.COMPLETED ||
+      encounter.status === EncounterStatus.COMPLETED
+    ) {
+      if (!encounter.period.end) {
+        handleUpdateEncounter({
+          period: {
+            ...encounter.period,
+            end: new Date().toISOString(),
+          },
+        });
+      }
+    } else if (
       encounter.status === EncounterStatus.CANCELLED ||
       encounter.status === EncounterStatus.DISCONTINUED ||
       encounter.status === EncounterStatus.ENTERED_IN_ERROR
     ) {
-      if (!encounter.period.end) {
+      if (encounterData?.status === EncounterStatus.PLANNED) {
+        if (encounter.period.end) {
+          handleUpdateEncounter({
+            period: {
+              ...encounter.period,
+              end: undefined,
+            },
+          });
+        }
+      } else if (!encounter.period.end) {
         handleUpdateEncounter({
           period: {
             ...encounter.period,
