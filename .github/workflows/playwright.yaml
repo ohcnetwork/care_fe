@@ -70,13 +70,13 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Cache build
-        uses: actions/cache@v4
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
         with:
-          path: |
-            build/
-            node_modules/
-          key: build-${{ github.sha }}
+          name: build-output
+          path: build/
+          retention-days: 1
+          compression-level: 6
 
   # Run E2E tests with backend integration
   test:
@@ -150,23 +150,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
-      - name: Restore build cache
-        id: cache-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            build/
-            node_modules/
-          key: build-${{ github.sha }}
-          fail-on-cache-miss: true
+      - name: Install dependencies
+        run: npm ci --prefer-offline
 
-      - name: Verify build exists
-        run: |
-          if [ ! -d "build" ]; then
-            echo "::error::Build directory not found. Cache restoration may have failed."
-            exit 1
-          fi
-          echo "Build directory verified"
+      - name: Download build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: build-output
+          path: build/
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
