@@ -27,7 +27,11 @@ import {
   customNavLinkSchema,
 } from "@/types/nav/customNavLink";
 
-import { isInternalNavPath, isSafeNavUrl } from "@/Utils/url";
+import {
+  isInternalNavPath,
+  isSafeExternalUrl,
+  isSafeNavUrl,
+} from "@/Utils/url";
 
 import careConfig from "@careConfig";
 
@@ -92,7 +96,10 @@ export function useCustomNavLinks(scope: NavScope): NavigationLink[] {
         link.placement.includes(scope) || link.placement.includes("all"),
     )
     .filter((link) => {
-      if (link.external || link.openInNewTab) {
+      if (link.external) {
+        return isSafeExternalUrl(link.url);
+      }
+      if (link.openInNewTab) {
         return isSafeNavUrl(link.url);
       }
       return isInternalNavPath(link.url);
