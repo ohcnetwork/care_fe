@@ -121,7 +121,7 @@ export default function PrescriptionListSelector({
           prescriptions={prescriptions}
           selectedPrescriptionId={selectedPrescriptionId}
           onSelectPrescription={onSelectPrescription}
-          ref={loadMoreRef}
+          loadMoreRef={loadMoreRef}
           isFetchingNextPage={isFetchingNextPage}
         />
       </div>
@@ -183,7 +183,7 @@ export default function PrescriptionListSelector({
             </DrawerHeader>
             <div className="overflow-y-auto pr-2">
               <PrescriptionList
-                ref={loadMoreRef}
+                loadMoreRef={loadMoreRef}
                 isFetchingNextPage={isFetchingNextPage}
                 prescriptions={prescriptions}
                 selectedPrescriptionId={selectedPrescriptionId}
@@ -208,13 +208,13 @@ function PrescriptionList({
   selectedPrescriptionId,
   onSelectPrescription,
   isFetchingNextPage,
-  ref,
+  loadMoreRef,
 }: {
   prescriptions: PrescritionList[];
   selectedPrescriptionId: string | undefined;
   onSelectPrescription: (prescription: PrescritionList | undefined) => void;
   isFetchingNextPage: boolean;
-  ref: React.Ref<HTMLDivElement>;
+  loadMoreRef: React.Ref<HTMLDivElement>;
 }) {
   const { t } = useTranslation();
 
@@ -249,7 +249,7 @@ function PrescriptionList({
             onClick={() =>
               onSelectPrescription(prescriptions.find((p) => p.id === item.id))
             }
-            ref={i === items.length - 1 ? ref : undefined}
+            ref={i === items.length - 1 ? loadMoreRef : undefined}
           >
             {isSelected && (
               <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
