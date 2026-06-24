@@ -399,7 +399,7 @@ const DrawingCard = ({ drawing }: { drawing: MetaArtifactRead }) => {
         <div className="h-60 w-full bg-white md:h-40">
           <ErrorBoundary
             fallback={
-              <div className="flex flex-col gap-2 h-full items-center justify-center text-red-700">
+              <div className="flex flex-col gap-2 h-full items-center justify-center text-center text-red-700">
                 <TriangleAlertIcon />
                 {t("unsupported_drawing_application", {
                   application: drawing.object_value.application,
