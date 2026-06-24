@@ -85,13 +85,13 @@ export function LocationSwitcher() {
             <Button
               variant="ghost"
               className={cn(
-                "w-full flex items-center justify-between gap-3 rounded-md bg-white border border-gray-200 px-2 overflow-hidden",
+                "w-full flex items-center justify-between gap-3 overflow-hidden rounded-md border border-gray-200 bg-white px-2",
                 state === "collapsed" ? "justify-center" : "py-6",
               )}
               aria-label={location?.name ?? t("select_location")}
               onClick={() => setOpenDialog(true)}
             >
-              <div className="flex min-w-0 items-center gap-2">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
                 <MapPinIcon className="size-5 text-green-600" />
                 <div
                   className={cn(
@@ -109,7 +109,9 @@ export function LocationSwitcher() {
                   </div>
                 </div>
               </div>
-              {state === "expanded" && <CareIcon icon="l-sort" />}
+              {state === "expanded" && (
+                <CareIcon icon="l-sort" className="shrink-0" />
+              )}
             </Button>
           </TooltipComponent>
           <Separator className="mt-4" />

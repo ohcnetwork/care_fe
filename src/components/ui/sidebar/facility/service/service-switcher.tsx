@@ -86,7 +86,7 @@ export function ServiceSwitcher() {
             <Button
               variant="ghost"
               className={cn(
-                "w-full flex items-center justify-between gap-3 rounded-md bg-white border border-gray-200 px-2 overflow-hidden",
+                "w-full flex items-center justify-between gap-3 overflow-hidden rounded-md border border-gray-200 bg-white px-2",
                 state === "expanded" && "py-6",
               )}
               aria-label={
@@ -94,7 +94,7 @@ export function ServiceSwitcher() {
               }
               onClick={() => setOpenDialog(true)}
             >
-              <div className="flex min-w-0 items-center gap-2">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
                 <HeartPulse className="size-5 text-green-600" />
                 <div
                   className={cn(
@@ -111,7 +111,9 @@ export function ServiceSwitcher() {
                   </div>
                 </div>
               </div>
-              {state === "expanded" && <CareIcon icon="l-sort" />}
+              {state === "expanded" && (
+                <CareIcon icon="l-sort" className="shrink-0" />
+              )}
             </Button>
           </TooltipComponent>
           <Separator className="mt-4" />
