@@ -34,7 +34,7 @@ export const DrawingEditor: React.FC<Props> = ({ id }) => {
 
   const [value, setValue] = useState<DrawingObjectValue>();
 
-  const { data, isLoading: isLoadingDrawing } = useQuery({
+  const { data, isFetching: isFetchingDrawing } = useQuery({
     queryKey: ["drawing", id],
     queryFn: query(metaArtifactApi.retrieve, {
       pathParams: { external_id: id },
@@ -49,11 +49,10 @@ export const DrawingEditor: React.FC<Props> = ({ id }) => {
       queryClient.invalidateQueries({
         queryKey: ["drawing", id],
       });
-      goBack();
     },
   });
 
-  const isLoading = isLoadingDrawing || !data || !value;
+  const isLoading = isFetchingDrawing || !data || !value;
 
   useEffect(() => {
     if (data && value == null) {
@@ -80,6 +79,7 @@ export const DrawingEditor: React.FC<Props> = ({ id }) => {
       {
         onSuccess: () => {
           toast.success(t("saved"), { duration: 700 });
+          goBack();
         },
       },
     );
