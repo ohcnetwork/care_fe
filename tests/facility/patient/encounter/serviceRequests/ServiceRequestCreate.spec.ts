@@ -134,10 +134,29 @@ test.describe("Patient Service Request Tab", () => {
       .first()
       .click();
     await expect(page.locator("#question-service_request")).toBeVisible();
+
+    // Expand service request card and verify default priority
+    const serviceRequestCard = page
+      .locator('[data-slot="collapsible"]')
+      .filter({ hasText: activityDefinitionTitle })
+      .first();
+    await serviceRequestCard.waitFor({ state: "visible" });
+    await serviceRequestCard
+      .locator('[data-slot="collapsible-trigger"]')
+      .click();
+    await expect(
+      serviceRequestCard.getByRole("radio", { name: "Routine" }),
+    ).toBeChecked();
+
     const submitButton = page.getByRole("button", { name: "Submit" });
     await expect(submitButton).toBeEnabled();
     await submitButton.click();
-    await page.getByRole("tab", { name: "Service Requests" }).click();
+    await expectToast(page, /questionnaire submitted successfully/i);
+    await expect(page).toHaveURL(
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+    );
+    await clickTabOrMenuItem(page, /service requests/i);
+    await expect(page).toHaveURL(/\/service_requests$/);
     await page
       .locator('[data-slot="table-body"] [data-slot="table-row"]')
       .filter({ hasText: activityDefinitionTitle })
@@ -168,9 +187,12 @@ test.describe("Patient Service Request Tab", () => {
         resp.request().method() === "PUT" &&
         resp.status() === 200,
     );
-    await collectButton.click();
-    await specimenResponse;
-    await expectToast(page, /specimen collected/i);
+    const specimenCollectedToast = expectToast(page, /specimen collected/i);
+    await Promise.all([
+      collectButton.click(),
+      specimenResponse,
+      specimenCollectedToast,
+    ]);
     await page
       .getByRole("combobox")
       .filter({ hasText: "Select Diagnostic Report Type" })
