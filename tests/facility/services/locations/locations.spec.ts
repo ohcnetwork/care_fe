@@ -20,7 +20,10 @@ test.describe("Locations", () => {
     serviceName =
       faker.string.uuid().slice(0, 5) + faker.commerce.productName();
     servicesUrl = `/facility/${facilityId}/services/`;
-    const page = await browser.newPage();
+    const context = await browser.newContext({
+      storageState: "tests/.auth/user.json",
+    });
+    const page = await context.newPage();
     await createService(page, serviceName);
     await page.close();
   });
