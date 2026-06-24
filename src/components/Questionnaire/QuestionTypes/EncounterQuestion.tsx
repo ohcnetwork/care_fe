@@ -145,16 +145,7 @@ export function EncounterQuestion({
       encounter.status === EncounterStatus.DISCONTINUED ||
       encounter.status === EncounterStatus.ENTERED_IN_ERROR
     ) {
-      if (isStartDateInFuture) {
-        if (encounter.period.end) {
-          handleUpdateEncounter({
-            period: {
-              ...encounter.period,
-              end: undefined,
-            },
-          });
-        }
-      } else if (!encounter.period.end) {
+      if (!encounter.period.end && !isStartDateInFuture) {
         handleUpdateEncounter({
           period: {
             ...encounter.period,
