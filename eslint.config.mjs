@@ -120,6 +120,24 @@ const config = [
         warn: DEFAULT,
       }),
       "no-undef": "off",
+
+      // Require rendering components to pass an ExtensionContexts.* value when rendering
+      // extensions. Warns by default, errors on pre-commit.
+      "no-restricted-syntax": [
+        dynamicRules({ error: isPreCommit, warn: DEFAULT }),
+        {
+          selector:
+            "CallExpression[callee.name=/^(getExtensionFieldsWithName|processExtensions|getExtensionProps|getCombinedExtensionProps)$/][arguments.length<2]",
+          message:
+            "Pass an ExtensionContexts.* value as the second argument. Create a new context if needed.",
+        },
+        {
+          selector:
+            "CallExpression[callee.name=/^use(Extensions|EntityExtensions)$/] > ObjectExpression:first-child:not(:has(Property[key.name='context']))",
+          message:
+            "Pass `context: ExtensionContexts.<slot>` in the options. Create a new context if needed.",
+        },
+      ],
     },
   },
 
