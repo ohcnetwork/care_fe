@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -20,13 +20,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import useExtensionSchemas from "@/hooks/useExtensionSchemas";
-import {
-  getExtensionFieldsWithName,
-  getExtensionValue,
-  NamespacedExtensionData,
-} from "@/hooks/useExtensions";
-import { ExtensionEntityType } from "@/types/extensions/extensions";
+import usePatientExtensionData from "@/hooks/usePatientExtensionData";
 import {
   getOrgLabel,
   Organization,
@@ -45,13 +39,9 @@ export const Demography = (props: PatientProps) => {
     patientData.permissions,
   );
 
-  const { getExtensions } = useExtensionSchemas();
-
-  const allExtensions = getExtensions(ExtensionEntityType.patient, "retrieve");
-
-  const extensionFields = useMemo(
-    () => getExtensionFieldsWithName(allExtensions),
-    [allExtensions],
+  const patientExtensionData = usePatientExtensionData(
+    patientData.extensions,
+    "patient_summary",
   );
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);
@@ -164,15 +154,10 @@ export const Demography = (props: PatientProps) => {
       (canWritePatient ||
         careConfig.patientRegistration.globalPatientEditAccessEnabled) &&
       !!facilityId,
-    details: extensionFields
-      .map((field) => {
-        const value = getExtensionValue(
-          patientData.extensions as NamespacedExtensionData,
-          field,
-        );
-        return { label: field.label, value: value ? String(value) : "" };
-      })
-      .filter((field) => field.value !== undefined && field.value !== ""),
+    details: patientExtensionData.map((field) => ({
+      label: field.name,
+      value: field.value,
+    })),
   };
 
   const data: Data[] = [
