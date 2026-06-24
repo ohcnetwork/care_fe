@@ -49,6 +49,7 @@ export const DrawingEditor: React.FC<Props> = ({ id }) => {
       queryClient.invalidateQueries({
         queryKey: ["drawing", id],
       });
+      goBack();
     },
   });
 
