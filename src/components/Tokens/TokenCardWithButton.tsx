@@ -49,13 +49,15 @@ export default function TokenCardWithButton({
 
   const currentToken = latestToken ?? token;
 
-  const { assignedServicePoints } = useQueueServicePoints({
-    facilityId: facility.id,
-    resourceType: currentToken.resource_type,
-    resourceId: currentToken.resource.id,
-  });
+  const { assignedServicePoints, isServicePointsLoading } =
+    useQueueServicePoints({
+      facilityId: facility.id,
+      resourceType: currentToken.resource_type,
+      resourceId: currentToken.resource.id,
+    });
 
-  const isOnlyOneSubQueue = assignedServicePoints.length === 1;
+  const isOnlyOneSubQueue =
+    !isServicePointsLoading && assignedServicePoints.length === 1;
 
   return (
     <>
@@ -86,7 +88,7 @@ export default function TokenCardWithButton({
                 setShowServicepointDialog(true);
               }}
               variant="outline_primary"
-              disabled={isPending}
+              disabled={isPending || isServicePointsLoading}
             >
               {t("mark_as_in_service")}
             </Button>

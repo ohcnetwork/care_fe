@@ -25,7 +25,7 @@ export function useQueueServicePoints({
   const [assignedServicePoints, setAssignedServicePoints] = useAtom(atom);
   const servicPointKey = `${resourceType}:${resourceId}`;
 
-  const { data: subQueues } = useQuery({
+  const { data: subQueues, isPending: isServicePointsLoading } = useQuery({
     queryKey: ["servicePoints", facilityId, resourceType, resourceId],
     queryFn: query(tokenSubQueueApi.list, {
       pathParams: { facility_id: facilityId },
@@ -49,6 +49,7 @@ export function useQueueServicePoints({
   return {
     allServicePoints,
     assignedServicePointIds,
+    isServicePointsLoading,
     assignedServicePoints:
       allServicePoints?.filter(({ id }) =>
         assignedServicePointIds.includes(id),
