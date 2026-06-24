@@ -135,24 +135,17 @@ export function EncounterQuestion({
   });
 
   useEffect(() => {
+    const isStartDateInFuture =
+      encounter.period.start && new Date(encounter.period.start) > new Date();
+
     if (
       encounter.status === EncounterStatus.DISCHARGED ||
-      encounter.status === EncounterStatus.COMPLETED
-    ) {
-      if (!encounter.period.end) {
-        handleUpdateEncounter({
-          period: {
-            ...encounter.period,
-            end: new Date().toISOString(),
-          },
-        });
-      }
-    } else if (
+      encounter.status === EncounterStatus.COMPLETED ||
       encounter.status === EncounterStatus.CANCELLED ||
       encounter.status === EncounterStatus.DISCONTINUED ||
       encounter.status === EncounterStatus.ENTERED_IN_ERROR
     ) {
-      if (encounterData?.status === EncounterStatus.PLANNED) {
+      if (isStartDateInFuture) {
         if (encounter.period.end) {
           handleUpdateEncounter({
             period: {
