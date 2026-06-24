@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [opened, reopened, edited]
 
+permissions:
+  contents: read
+
 jobs:
   validate-jira-ticket:
     runs-on: ubuntu-24.04-arm
@@ -13,7 +16,7 @@ jobs:
 
     steps:
       - name: Validate JIRA Ticket in PR Title
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -22,7 +25,7 @@ jobs:
 
             const prTitle = context.payload.pull_request.title;
 
-            // Check that title starts with [ENG-456] format
+            // Check that title starts with [PROJECT-NUMBER] format
             const pattern = new RegExp(`^\\[(${jiraProjectKeys.join('|')})-\\d+\\]`, 'i');
 
             if (!pattern.test(prTitle)) {
