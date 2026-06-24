@@ -73,7 +73,7 @@ import fileApi from "@/types/files/fileApi";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 
-import { DottedDivider } from "@/components/ui/dotted-divider";
+import { DottedDivider } from "@/components/careui/dotted-divider";
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 
 interface DiagnosticReportFormProps {
@@ -276,12 +276,7 @@ export function DiagnosticReportForm({
 
   // Handle file upload dialog
   useEffect(() => {
-    if (
-      disableEdit ||
-      fileUpload.files.length === 0 ||
-      fileUpload.files[0] === undefined ||
-      fileUpload.previewing
-    ) {
+    if (disableEdit || fileUpload.files.length === 0 || fileUpload.previewing) {
       setOpenUploadDialog(false);
     } else {
       setOpenUploadDialog(true);
@@ -1123,20 +1118,6 @@ export function DiagnosticReportForm({
                 )}
 
                 <div className="space-y-4">
-                  {fullReport?.status ===
-                    DiagnosticReportStatus.preliminary && (
-                    <div className="flex justify-end space-x-4">
-                      <Button
-                        variant="primary"
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || disableEdit}
-                      >
-                        <Save className="size-4 mr-2" />
-                        {t("save_results")}
-                      </Button>
-                    </div>
-                  )}
-
                   {files?.results && files.results.length > 0 && (
                     <div className="mt-3">
                       <div className="text-lg font-medium">
@@ -1231,6 +1212,20 @@ export function DiagnosticReportForm({
                           )}
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {fullReport?.status ===
+                    DiagnosticReportStatus.preliminary && (
+                    <div className="flex justify-end space-x-4">
+                      <Button
+                        variant="primary"
+                        onClick={handleSubmit}
+                        disabled={isSubmitting || disableEdit}
+                      >
+                        <Save className="size-4 mr-2" />
+                        {t("save_results")}
+                      </Button>
                     </div>
                   )}
                 </div>
