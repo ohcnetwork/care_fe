@@ -81,7 +81,7 @@ export default function TransferPaymentSheet({
   );
 
   const { mutate: submitTransfer, isPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       toast.success(t("payment_transferred_successfully"));
       queryClient.invalidateQueries({ queryKey: ["account", account.id] });
@@ -97,12 +97,65 @@ export default function TransferPaymentSheet({
       setAmount("");
     },
     onError: (error) => {
-      toast.error(error.message || t("payment_transfer_failed"));
+      const errorData = error.cause as {
+        results?: Array<{
+          reference_id: string;
+          status_code: number;
+          data: {
+            detail?: string;
+            errors?: Array<{
+              msg?: string;
+              error?: string;
+              type?: string;
+              loc?: string[];
+            }>;
+            non_field_errors?: string[];
+          };
+        }>;
+      };
+
+      if (errorData?.results) {
+        const failedResults = errorData.results.filter(
+          (result) => result.status_code >= 400,
+        );
+
+        if (failedResults.length > 0) {
+          for (const result of failedResults) {
+            if (result.data?.detail) {
+              toast.error(result.data.detail);
+              return;
+            }
+
+            const errors = result.data?.errors || [];
+            if (errors.length > 0) {
+              const message =
+                errors[0].msg ||
+                errors[0].error ||
+                t("payment_transfer_failed");
+              toast.error(message);
+              return;
+            }
+
+            const nonFieldErrors = result.data?.non_field_errors || [];
+            if (nonFieldErrors.length > 0) {
+              toast.error(nonFieldErrors[0]);
+              return;
+            }
+          }
+        }
+      }
+
+      toast.error(t("payment_transfer_failed"));
     },
   });
 
   const handleSubmit = () => {
     if (!selectedAccountId || !amount || parseFloat(amount) <= 0) return;
+
+    if (parseFloat(amount) > parseFloat(account.total_paid || "0")) {
+      toast.error(t("transfer_amount_exceeds_total_paid"));
+      return;
+    }
 
     const now = format(new Date(), "yyyy-MM-dd'T'HH:mm");
     const basePayment = {
@@ -128,7 +181,7 @@ export default function TransferPaymentSheet({
             ...basePayment,
             account: account.id,
             is_credit_note: true,
-            note: t("outgoing_transfer_note"),
+            note: t("outgoing_transfer_note", { account: selectedAccountId }),
           },
         },
         {
@@ -139,7 +192,7 @@ export default function TransferPaymentSheet({
             ...basePayment,
             account: selectedAccountId,
             is_credit_note: false,
-            note: t("incoming_transfer_note"),
+            note: t("incoming_transfer_note", { account: account.id }),
           },
         },
       ],

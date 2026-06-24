@@ -15,12 +15,13 @@ import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
 
+import BackButton from "@/components/Common/BackButton";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import useAutoPrint from "@/hooks/useAutoPrint";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { FacilityRead } from "@/types/facility/facility";
 import type {
+  LogoConfig,
   PrintTemplate,
   WatermarkConfig,
 } from "@/types/facility/printTemplate";
@@ -46,7 +47,6 @@ type Props = {
 
 export default function PrintPreview(props: Props) {
   const isMobile = useBreakpoints({ default: true, md: false });
-  const { goBack } = useAppHistory();
   const { t } = useTranslation();
   useShortcutSubContext();
 
@@ -120,14 +120,10 @@ export default function PrintPreview(props: Props) {
         options={
           <div className="flex items-center gap-2">
             {props.showBackButton !== false && (
-              <Button
-                variant="outline"
-                onClick={() => goBack()}
-                data-shortcut-id="go-back"
-              >
+              <BackButton variant="outline" data-shortcut-id="go-back">
                 <CareIcon icon="l-arrow-left" className="text-lg" />
                 {t("back")}
-              </Button>
+              </BackButton>
             )}
             <Button
               variant="primary"
@@ -278,6 +274,47 @@ function buildPageStyle(template?: PrintTemplate): string | null {
   return `@media print { @page { ${parts.join("; ")}; } }`;
 }
 
+function FacilityInfo({ facility }: { facility: FacilityRead }) {
+  return (
+    <div className="text-left">
+      <h1 className="text-2xl font-semibold">{facility.name}</h1>
+      <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
+        {facility.address}
+        <p className="text-gray-500 text-xs">{facility.phone_number}</p>
+      </div>
+    </div>
+  );
+}
+
+function FacilityLogo({
+  logoUrl,
+  logo,
+}: {
+  logoUrl?: string;
+  logo?: LogoConfig;
+}) {
+  const hasCustomDims = !!(logoUrl && (logo?.width || logo?.height));
+
+  return (
+    <img
+      src={logoUrl ?? careConfig.mainLogo?.dark}
+      alt={logoUrl ? "Facility brand mark" : "Care Logo"}
+      className={cn(
+        "object-contain mb-2 sm:mb-0",
+        !hasCustomDims && "h-10 w-auto",
+      )}
+      style={
+        logoUrl
+          ? {
+              ...(logo?.width ? { width: `${logo.width}px` } : {}),
+              ...(logo?.height ? { height: `${logo.height}px` } : {}),
+            }
+          : undefined
+      }
+    />
+  );
+}
+
 function FacilityPrintLayout({
   templateSlug,
   facility,
@@ -296,13 +333,16 @@ function FacilityPrintLayout({
   const printTemplate = resolvePrintTemplate(facility, templateSlug);
   const headerImage = printTemplate?.branding?.header_image;
   const footerImage = printTemplate?.branding?.footer_image;
+  const logo = printTemplate?.branding?.logo;
   const pageStyle = buildPageStyle(printTemplate);
+  const logoUrl = logo?.url || undefined;
+  const alignment = logoUrl ? (logo?.alignment ?? "right") : "right";
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-80px)] print:min-h-screen">
       {pageStyle && <style>{pageStyle}</style>}
       {hideFacilityHeader ? null : headerImage?.url ? (
-        <div className="flex justify-between items-start mb-4 pb-2">
+        <div className="flex justify-between items-start mb-2 pb-2">
           <img
             src={headerImage.url}
             alt="Custom Header"
@@ -314,26 +354,26 @@ function FacilityPrintLayout({
             }
           />
         </div>
+      ) : alignment === "center" ? (
+        <div className="flex flex-col items-center mb-3 pb-2 border-b border-gray-200 gap-2">
+          <FacilityLogo logoUrl={logoUrl} logo={logo} />
+          <div className="w-full">
+            <FacilityInfo facility={facility} />
+          </div>
+        </div>
       ) : (
         <div className="flex justify-between items-start mb-3 pb-2 border-b border-gray-200">
-          <div className="text-left">
-            <h1 className="text-2xl font-semibold">{facility.name}</h1>
-            {facility.address && (
-              <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
-                {facility.address}
-                {facility.phone_number && (
-                  <p className="text-gray-500 text-xs">
-                    {facility.phone_number}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-          <img
-            src={careConfig.mainLogo?.dark}
-            alt="Care Logo"
-            className="h-10 w-auto object-contain mb-2 sm:mb-0"
-          />
+          {alignment === "left" ? (
+            <>
+              <FacilityLogo logoUrl={logoUrl} logo={logo} />
+              <FacilityInfo facility={facility} />
+            </>
+          ) : (
+            <>
+              <FacilityInfo facility={facility} />
+              <FacilityLogo logoUrl={logoUrl} logo={logo} />
+            </>
+          )}
         </div>
       )}
       <div className="flex-1">{children}</div>

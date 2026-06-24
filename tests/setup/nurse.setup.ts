@@ -8,8 +8,8 @@ setup("authenticate as nurse", async ({ page }) => {
 
   // Fill in credentials for nurse user
   // These should match the credentials from your local backend setup
-  await page.getByRole("textbox", { name: /username/i }).fill("nurse_2_0");
-  await page.getByLabel(/password/i).fill("Coronasafe@123");
+  await page.getByRole("textbox", { name: /username/i }).fill("care-nurse");
+  await page.getByLabel(/password/i).fill("Ohcn@123");
 
   // Click login button
   await page.getByRole("button", { name: /login/i }).click();
