@@ -78,7 +78,7 @@ export default function TokenCardWithButton({
                 if (isOnlyOneSubQueue) {
                   updateToken({
                     status: TokenStatus.IN_PROGRESS,
-                    sub_queue: assignedServicePoints[0]?.id,
+                    sub_queue: assignedServicePoints[0].id,
                     note: currentToken.note,
                   });
                   return;
