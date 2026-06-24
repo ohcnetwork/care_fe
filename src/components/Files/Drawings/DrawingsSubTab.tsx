@@ -47,6 +47,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -275,6 +276,7 @@ const hasWritePermission = ({
 
 export const DrawingsSubTab = (props: DrawingsTabProps) => {
   const { t } = useTranslation();
+  const hasApplications = usePluginDrawingApplications().length;
   const associatingId =
     {
       [MetaArtifactAssociatingType.PATIENT]: props.patient?.id,
@@ -334,84 +336,17 @@ export const DrawingsSubTab = (props: DrawingsTabProps) => {
               <ImageOffIcon className="mb-2 text-4xl" />
               <p className="text-lg font-medium">{t("no_drawings_so_far")}</p>
               {canEdit && (
-                <p className="text-sm">{t("create_new_drawing_message")}</p>
+                <p className="text-sm">
+                  {hasApplications
+                    ? t("create_new_drawing_message")
+                    : t("no_drawing_applications_available")}
+                </p>
               )}
             </div>
           ) : (
             <div className="ml-1 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {data?.results.map((drawing) => (
-                <Card
-                  key={drawing.id}
-                  className="group flex cursor-pointer flex-col gap-0 overflow-hidden rounded-xl border-gray-200 p-0 shadow-xs transition-all duration-200 hover:shadow-md"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => navigate(`./drawings/${drawing.id}`)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      navigate(`./drawings/${drawing.id}`);
-                    }
-                  }}
-                >
-                  <div className="relative border-b">
-                    <div className="h-60 w-full bg-white md:h-40">
-                      <ErrorBoundary
-                        fallback={
-                          <div className="flex flex-col gap-2 h-full items-center justify-center text-red-700">
-                            <TriangleAlertIcon />
-                            {t("unsupported_drawing_application", {
-                              application: drawing.object_value.application,
-                            })}
-                          </div>
-                        }
-                      >
-                        <DrawingPreview obj={drawing} />
-                        <div className="absolute inset-0 flex items-end justify-center bg-linear-to-t from-black/50 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                          <span className="flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-sm font-medium text-gray-900 shadow-sm">
-                            <EyeIcon className="size-4" />
-                            {t("view")}
-                          </span>
-                        </div>
-                        <div className="absolute inset-0 flex items-end justify-end px-2 py-1">
-                          <span className="flex ml-auto text-gray-200 uppercase text-xs font-semibold">
-                            <span className="mr-1 size-3.5">
-                              <DrawingIcon
-                                application={drawing.object_value.application}
-                              />
-                            </span>
-                            {drawing.object_value.application}
-                          </span>
-                        </div>
-                      </ErrorBoundary>
-                    </div>
-                  </div>
-                  <CardContent className="flex flex-1 flex-col gap-3 p-4">
-                    <div className="flex items-center gap-2">
-                      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-600">
-                        <FilePenLineIcon className="size-4" />
-                      </span>
-                      <span className="truncate font-semibold text-gray-900">
-                        {drawing.name}
-                      </span>
-                    </div>
-
-                    {drawing.note && (
-                      <p className="line-clamp-2 text-sm text-gray-600">
-                        {drawing.note}
-                      </p>
-                    )}
-
-                    <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-gray-100 pt-3 text-xs text-gray-500">
-                      <span className="flex items-center gap-1.5">
-                        <HistoryIcon className="size-3.5 text-gray-400" />
-                        <RelativeDateTooltip date={drawing.modified_date} />
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <UserIcon className="size-3.5 text-gray-400" />
-                        {formatName(drawing.created_by)}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                <DrawingCard key={drawing.id} drawing={drawing} />
               ))}
             </div>
           )}
@@ -427,5 +362,94 @@ export const DrawingsSubTab = (props: DrawingsTabProps) => {
         />
       )}
     </div>
+  );
+};
+
+const DrawingCard = ({ drawing }: { drawing: MetaArtifactRead }) => {
+  const { t } = useTranslation();
+
+  const applications = usePluginDrawingApplications();
+
+  const hasApplication = applications.some(
+    ({ application }) => application === drawing.object_value.application,
+  );
+
+  const handleSelect = () => {
+    if (hasApplication) {
+      navigate(`./drawings/${drawing.id}`);
+    }
+  };
+
+  return (
+    <Card
+      className={cn(
+        "group flex cursor-pointer flex-col gap-0 overflow-hidden rounded-xl border-gray-200 p-0 shadow-xs transition-all duration-200 hover:shadow-md",
+        hasApplication ? "cursor-pointer" : "cursor-not-allowed opacity-50",
+      )}
+      role="button"
+      tabIndex={0}
+      onClick={() => handleSelect()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          handleSelect();
+        }
+      }}
+    >
+      <div className="relative border-b">
+        <div className="h-60 w-full bg-white md:h-40">
+          <ErrorBoundary
+            fallback={
+              <div className="flex flex-col gap-2 h-full items-center justify-center text-red-700">
+                <TriangleAlertIcon />
+                {t("unsupported_drawing_application", {
+                  application: drawing.object_value.application,
+                })}
+              </div>
+            }
+          >
+            <DrawingPreview obj={drawing} />
+            <div className="absolute inset-0 flex items-end justify-center bg-linear-to-t from-black/50 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <span className="flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-sm font-medium text-gray-900 shadow-sm">
+                <EyeIcon className="size-4" />
+                {t("view")}
+              </span>
+            </div>
+            <div className="absolute inset-0 flex items-end justify-end px-2 py-1">
+              <span className="flex ml-auto text-gray-200 uppercase text-xs font-semibold">
+                <span className="mr-1 size-3.5">
+                  <DrawingIcon application={drawing.object_value.application} />
+                </span>
+                {drawing.object_value.application}
+              </span>
+            </div>
+          </ErrorBoundary>
+        </div>
+      </div>
+      <CardContent className="flex flex-1 flex-col gap-3 p-4">
+        <div className="flex items-center gap-2">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-600">
+            <FilePenLineIcon className="size-4" />
+          </span>
+          <span className="truncate font-semibold text-gray-900">
+            {drawing.name}
+          </span>
+        </div>
+
+        {drawing.note && (
+          <p className="line-clamp-2 text-sm text-gray-600">{drawing.note}</p>
+        )}
+
+        <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-gray-100 pt-3 text-xs text-gray-500">
+          <span className="flex items-center gap-1.5">
+            <HistoryIcon className="size-3.5 text-gray-400" />
+            <RelativeDateTooltip date={drawing.modified_date} />
+          </span>
+          <span className="flex items-center gap-1.5">
+            <UserIcon className="size-3.5 text-gray-400" />
+            {formatName(drawing.created_by)}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
