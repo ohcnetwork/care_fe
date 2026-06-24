@@ -459,6 +459,9 @@ export default function AppointmentPrint(props: Props) {
             rightContent={format(new Date(), "PP 'at' p")}
             leftContent={
               <>
+                <span className="font-semibold">{t("created_by")}:</span>{" "}
+                {formatName(appointment.created_by)}
+                <span className="mx-1.5 text-gray-400">|</span>
                 <span className="font-semibold">{t("last_updated_by")}:</span>{" "}
                 {formatName(appointment.updated_by)}
               </>
