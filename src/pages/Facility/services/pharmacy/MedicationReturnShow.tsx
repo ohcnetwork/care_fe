@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-query";
 import {
   ChevronLeft,
-  Edit,
   EllipsisVertical,
   ExternalLink,
   MoreVertical,
@@ -355,18 +354,6 @@ export default function MedicationReturnShow({
                   basePath="/"
                 >
                   <Printer className="size-4" /> {t("print")}
-                </Link>
-              </Button>
-            )}
-
-            {deliveryOrder.status === DeliveryOrderStatus.draft && (
-              <Button variant="outline" asChild>
-                <Link
-                  basePath="/"
-                  href={`${basePath}/order/${deliveryOrderId}/edit`}
-                >
-                  <Edit /> {t("edit")}
-                  <ShortcutBadge actionId="edit-order" />
                 </Link>
               </Button>
             )}
