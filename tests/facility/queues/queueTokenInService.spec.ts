@@ -67,9 +67,18 @@ test.describe("Queue token in-service flow", () => {
     await test.step("Mark the token In-service via the service point selector", async () => {
       await page.getByRole("button", { name: /mark as in-service/i }).click();
 
+      // When the resource has more than one assigned service point, a selector
+      // dialog is shown to pick where to serve. With a single service point the
+      // app serves immediately without a dialog. Handle both so the test does
+      // not depend on how many service points the fixture has.
       const serveDialog = page.getByRole("dialog", { name: /serve token/i });
-      await expect(serveDialog).toBeVisible();
-      await serveDialog.getByRole("radio").first().click();
+      const dialogAppeared = await serveDialog
+        .waitFor({ state: "visible", timeout: 3000 })
+        .then(() => true)
+        .catch(() => false);
+      if (dialogAppeared) {
+        await serveDialog.getByRole("radio").first().click();
+      }
 
       await expectToast(page, /token has been assigned to service point/i);
     });
