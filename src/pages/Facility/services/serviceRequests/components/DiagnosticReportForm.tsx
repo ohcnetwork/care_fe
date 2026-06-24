@@ -1181,10 +1181,10 @@ export function DiagnosticReportForm({
                                 {t("upload_files")}
                               </Label>
                             </Button>
-                            {fileUpload.Input({
-                              className: "hidden",
-                              disabled: disableEdit,
-                            })}
+                            <fileUpload.Input
+                              className="hidden"
+                              disabled={disableEdit}
+                            />
                           </div>
 
                           {fileUpload.files.length > 0 && (
