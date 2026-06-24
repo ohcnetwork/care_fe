@@ -140,12 +140,33 @@ export function EncounterQuestion({
 
     if (
       encounter.status === EncounterStatus.DISCHARGED ||
-      encounter.status === EncounterStatus.COMPLETED ||
+      encounter.status === EncounterStatus.COMPLETED
+    ) {
+      // Always set end date — if start is in the future, BE will reject it
+      if (!encounter.period.end) {
+        handleUpdateEncounter({
+          period: {
+            ...encounter.period,
+            end: new Date().toISOString(),
+          },
+        });
+      }
+    } else if (
       encounter.status === EncounterStatus.CANCELLED ||
       encounter.status === EncounterStatus.DISCONTINUED ||
       encounter.status === EncounterStatus.ENTERED_IN_ERROR
     ) {
-      if (!encounter.period.end && !isStartDateInFuture) {
+      if (isStartDateInFuture) {
+        // Valid transition from future encounters — don't set end date
+        if (encounter.period.end) {
+          handleUpdateEncounter({
+            period: {
+              ...encounter.period,
+              end: undefined,
+            },
+          });
+        }
+      } else if (!encounter.period.end) {
         handleUpdateEncounter({
           period: {
             ...encounter.period,
