@@ -26,6 +26,7 @@ test.describe("Locations", () => {
     const page = await context.newPage();
     await createService(page, serviceName);
     await page.close();
+    await context.close();
   });
 
   test.beforeEach(async ({ page }) => {
