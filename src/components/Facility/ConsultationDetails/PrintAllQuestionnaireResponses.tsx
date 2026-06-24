@@ -248,7 +248,7 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
             >
               {formatValue(value, question.type)}
               {precedentUnit && (
-                <span className="ml-1 text-xs">{precedentUnit.code}</span>
+                <span className="ml-1 text-xs">{precedentUnit.display}</span>
               )}
               {coding && (
                 <span className="ml-1 text-xs">

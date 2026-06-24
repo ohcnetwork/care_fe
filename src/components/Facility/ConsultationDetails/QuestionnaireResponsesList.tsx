@@ -187,7 +187,7 @@ function QuestionGroup({
                 {idx > 0 && ", "}
                 {val.value && formatValue(val.value, question.type)}
                 {val.unit && (
-                  <span className="ml-1 text-gray-600">{val.unit.code}</span>
+                  <span className="ml-1 text-gray-600">{val.unit.display}</span>
                 )}
                 {val.coding && (
                   <span className="ml-1 text-gray-600">
@@ -430,7 +430,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                                   formatValue(val.value, question.type)}
                                 {val.unit && (
                                   <span className="ml-1 text-gray-600">
-                                    {val.unit.code}
+                                    {val.unit.display}
                                   </span>
                                 )}
                                 {val.coding && (
