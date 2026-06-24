@@ -101,6 +101,11 @@ export default function TokenCardWithButton({
           facilityId={facility.id}
           subQueues={assignedServicePoints}
           action="serve"
+          onSuccess={() => {
+            setShowServicepointDialog(false);
+            toast.success(t("token_assigned_to_service_point"));
+            onSuccess?.();
+          }}
         />
       )}
     </>
