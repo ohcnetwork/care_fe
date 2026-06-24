@@ -88,7 +88,6 @@ export default function PrescriptionListSelector({
   const prescriptions = data?.pages.flatMap((page) => page.results) ?? [];
 
   const loadMoreRef = useOnInView<HTMLDivElement>((inView) => {
-    console.log("In view:", inView);
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
