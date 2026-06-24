@@ -365,23 +365,23 @@ export const DrawingsSubTab = (props: DrawingsTabProps) => {
                         }
                       >
                         <DrawingPreview obj={drawing} />
+                        <div className="absolute inset-0 flex items-end justify-center bg-linear-to-t from-black/50 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                          <span className="flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-sm font-medium text-gray-900 shadow-sm">
+                            <EyeIcon className="size-4" />
+                            {t("view")}
+                          </span>
+                        </div>
+                        <div className="absolute inset-0 flex items-end justify-end px-2 py-1">
+                          <span className="flex ml-auto text-gray-200 uppercase text-xs font-semibold">
+                            <span className="mr-1 size-3.5">
+                              <DrawingIcon
+                                application={drawing.object_value.application}
+                              />
+                            </span>
+                            {drawing.object_value.application}
+                          </span>
+                        </div>
                       </ErrorBoundary>
-                    </div>
-                    <div className="absolute inset-0 flex items-end justify-center bg-linear-to-t from-black/50 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <span className="flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-sm font-medium text-gray-900 shadow-sm">
-                        <EyeIcon className="size-4" />
-                        {t("view")}
-                      </span>
-                    </div>
-                    <div className="absolute inset-0 flex items-end justify-end px-2 py-1">
-                      <span className="flex ml-auto text-gray-200 uppercase text-xs font-semibold">
-                        <span className="mr-1 size-3.5">
-                          <DrawingIcon
-                            application={drawing.object_value.application}
-                          />
-                        </span>
-                        {drawing.object_value.application}
-                      </span>
                     </div>
                   </div>
                   <CardContent className="flex flex-1 flex-col gap-3 p-4">
