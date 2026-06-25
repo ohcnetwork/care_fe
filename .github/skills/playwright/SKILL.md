@@ -170,7 +170,7 @@ test.describe("Feature Name", () => {
 
 ### Critical Rules
 
-1. **Use `faker` for new entity data** and shared constants for fixture-backed selections — avoid scattered hardcoded literals
+1. **Use `faker` for data you create in tests** (entity names, notes, and random array selection for generated values). For selecting existing fixture-backed options (usernames, body sites, etc.), use shared constants in `tests/helper/commonConstants.ts` — avoid scattered hardcoded literals
 2. **Always use deterministic fixture IDs** — use `getFacilityId()`, `getPatientId()`, `getEncounterId()` from `tests/support/` for navigation. NEVER select a random encounter/patient/facility from a list in the UI — random selection causes flakiness when data changes between runs
 3. Always include `test.use({ storageState })` for authentication
 4. Use `exact: true` on selectors when partial matches are possible
