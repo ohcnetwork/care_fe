@@ -340,6 +340,9 @@ async function createAccountViaApi() {
     headers: getApiHeaders(),
     body: JSON.stringify({ name: "Test Account", type: "income" }),
   });
+  if (!res.ok) {
+    throw new Error(`Failed to create account: ${res.status}`);
+  }
   const data = await res.json();
   return data;
 }
