@@ -179,10 +179,15 @@ test.describe("Patient Service Request Tab", () => {
       specimenResponse,
       specimenCollectedToast,
     ]);
-    await page
+    const reportTypeSelect = page
       .getByRole("combobox")
-      .filter({ hasText: "Select Diagnostic Report Type" })
-      .click();
+      .filter({ hasText: "Select Diagnostic Report Type" });
+    // The "Test Results Entry" card is collapsed by default; expand it to
+    // reveal the report-type dropdown before interacting with it.
+    if ((await reportTypeSelect.count()) === 0) {
+      await page.getByText("Test Results Entry").click();
+    }
+    await reportTypeSelect.click();
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: "Create Report" }).click();
     const observationCombobox = page
