@@ -2,7 +2,10 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-function DottedDivider({ className, ...props }: React.ComponentProps<"div">) {
+function DottedDivider({
+  className,
+  ...props
+}: Omit<React.ComponentProps<"div">, "children">) {
   const id = React.useId();
   const patternId = `dotted-divider-${id.replace(/:/g, "")}`;
 
