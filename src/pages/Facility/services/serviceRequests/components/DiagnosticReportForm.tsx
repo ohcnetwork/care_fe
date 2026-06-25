@@ -249,11 +249,7 @@ export function DiagnosticReportForm({
                   variant="ghost"
                   className="gap-1.5 px-2 font-medium text-gray-950 underline hover:bg-transparent hover:text-gray-950"
                   onClick={() => {
-                    if (isMultipleDiagnosticReport) {
-                      setShowReportTypeSelect(true);
-                    } else {
-                      handleCreateReport();
-                    }
+                    setShowReportTypeSelect(true);
                   }}
                   disabled={
                     disableEdit || isCreatingReport || !hasCollectedSpecimens
