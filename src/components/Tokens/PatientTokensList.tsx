@@ -127,7 +127,7 @@ export default function PatientTokensList({
       )}
 
       {[
-        // ordered by selected token first, then by created date
+        // ordered by selected token first, then remaining token
         ...tokens.filter((token) => token.id === tokenId),
         ...tokens.filter((token) => token.id !== tokenId),
       ].map((token) => {

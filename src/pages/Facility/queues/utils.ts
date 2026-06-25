@@ -61,11 +61,14 @@ export function getTokenStatus({
   token: TokenRetrieve;
   t: (key: string) => string;
 }) {
+  if (token.status === TokenStatus.UNFULFILLED) {
+    return t("token_status__recall");
+  }
   if (token.status === TokenStatus.CREATED && token.sub_queue?.id) {
     return t("called");
   }
   if (token.status === TokenStatus.CREATED) {
     return t("waiting");
   }
-  return t(`${token.status.toLowerCase()}`);
+  return t(token.status.toLowerCase());
 }
