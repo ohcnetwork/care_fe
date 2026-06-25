@@ -279,23 +279,21 @@ export function SupplyDeliveryTable({
               })()}
             </TableCell>
             <TableCell>
-              {delivery.supplied_inventory_item?.product?.batch?.lot_number ??
-                delivery.supplied_item?.batch?.lot_number ??
+              {delivery.supplied_inventory_item?.product?.batch?.lot_number ||
+                delivery.supplied_item?.batch?.lot_number ||
                 "-"}
             </TableCell>
             {!internal && (
               <TableCell>
-                {(delivery.supplied_inventory_item?.product?.expiration_date ??
-                  delivery.supplied_item?.expiration_date)
-                  ? formatDate(
-                      new Date(
-                        delivery.supplied_inventory_item?.product
-                          ?.expiration_date ??
-                          delivery.supplied_item?.expiration_date!,
-                      ),
-                      "dd/MM/yyyy",
-                    )
-                  : "-"}
+                {(() => {
+                  const expiryDate =
+                    delivery.supplied_inventory_item?.product?.expiration_date ??
+                    delivery.supplied_item?.expiration_date;
+
+                  return expiryDate
+                    ? formatDate(new Date(expiryDate), "dd/MM/yyyy")
+                    : "-";
+                })()}
               </TableCell>
             )}
             <TableCell>
