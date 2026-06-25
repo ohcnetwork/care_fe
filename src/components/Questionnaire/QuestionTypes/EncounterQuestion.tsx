@@ -136,7 +136,7 @@ export function EncounterQuestion({
 
   useEffect(() => {
     const isStartDateInFuture =
-      encounter.period.start && new Date(encounter.period.start) > new Date();
+      !!encounter.period.start && new Date(encounter.period.start) > new Date();
 
     if (
       encounter.status === EncounterStatus.DISCHARGED ||
