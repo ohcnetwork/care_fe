@@ -111,7 +111,7 @@ tests/
 
 **Naming conventions:**
 - Directories: camelCase matching the feature (e.g., `activityDefinition/`, `patientDetails/`)
-- Files: `featureAction.spec.ts` (e.g., `locationCreation.spec.ts`, `deviceEdit.spec.ts`, `departmentUserManage.spec.ts`)
+- Files: prefer `featureAction.spec.ts` (e.g., `locationCreation.spec.ts`, `deviceEdit.spec.ts`, `departmentUserManage.spec.ts`) and keep naming consistent within the directory
 - Group CRUD operations in the same directory with separate files per action
 
 ## Quick Reference
@@ -159,6 +159,8 @@ test.describe("Feature Name", () => {
 | `tests/.auth/user.json` | Admin | `admin` |
 | `tests/.auth/facilityAdmin.json` | Facility Admin | `care-fac-admin` |
 | `tests/.auth/nurse.json` | Nurse | `care-nurse` |
+
+These files are generated (gitignored) by setup specs in `tests/setup/*.setup.ts`. If you hit a missing storage-state file error, run the auth setup first (for example: `npx playwright test tests/setup/auth.setup.ts`).
 
 ### Key Helpers (from `tests/helper/ui`)
 
@@ -237,8 +239,11 @@ npx playwright test tests/path/to/test.spec.ts --debug
 # Run headed to visually see what's happening
 npx playwright test tests/path/to/test.spec.ts --headed
 
-# View trace from last run
+# View HTML report from last run
 npx playwright show-report
+
+# Open a trace zip directly (if available)
+npx playwright show-trace test-results/**/trace.zip
 ```
 
 When a test fails:
@@ -378,6 +383,8 @@ await input.fill(search);   // Then fill
 Extract reusable form logic into local helpers that return generated data:
 
 ```typescript
+import type { Page } from "@playwright/test";
+
 async function createEntity(page: Page, options: { name: string; type: string }) {
   await page.getByRole("button", { name: "Create" }).click();
   await page.getByRole("textbox", { name: "Name" }).fill(options.name);
@@ -393,6 +400,7 @@ async function createEntity(page: Page, options: { name: string; type: string })
 Handle comboboxes that appear based on previous selection:
 
 ```typescript
+const region = page;
 let previousCount = 0;
 const MAX_CASCADES = 10;
 
@@ -460,6 +468,8 @@ Camera inputs are tested by uploading a fixture image file — no actual camera 
 Destructive actions typically require two confirmations. Always verify BOTH:
 
 ```typescript
+const entityName = "<entity name>";
+
 await test.step("Delete with double confirmation", async () => {
   // First: click delete button
   await page.getByRole("button", { name: "Delete" }).click();
