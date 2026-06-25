@@ -165,6 +165,10 @@ export function SupplyDeliveryTable({
     return map;
   }, [deliveries]);
 
+  const formatExpiryDate = (expiryDate?: string) => {
+    return expiryDate ? formatDate(new Date(expiryDate), "dd/MM/yyyy") : "-";
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -285,15 +289,10 @@ export function SupplyDeliveryTable({
             </TableCell>
             {!internal && (
               <TableCell>
-                {(() => {
-                  const expiryDate =
-                    delivery.supplied_inventory_item?.product?.expiration_date ??
-                    delivery.supplied_item?.expiration_date;
-
-                  return expiryDate
-                    ? formatDate(new Date(expiryDate), "dd/MM/yyyy")
-                    : "-";
-                })()}
+                {formatExpiryDate(
+                  delivery.supplied_inventory_item?.product?.expiration_date ??
+                    delivery.supplied_item?.expiration_date,
+                )}
               </TableCell>
             )}
             <TableCell>
