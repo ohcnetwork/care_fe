@@ -189,7 +189,7 @@ export function SupplyDeliveryTable({
           <TableHead rowSpan={2}>{t("#")}</TableHead>
           <TableHead rowSpan={2}>{t("item")}</TableHead>
           <TableHead rowSpan={2}>{t("batch")}</TableHead>
-          {!internal && <TableHead rowSpan={2}>{t("expiry")}</TableHead>}
+          <TableHead rowSpan={2}>{t("expiry")}</TableHead>
           <TableHead rowSpan={2}>{t("requested_qty")}</TableHead>
           {!internal && <TableHead rowSpan={2}>{t("pack_size")}</TableHead>}
           {!internal && <TableHead rowSpan={2}>{t("pack_qty")}</TableHead>}
@@ -285,13 +285,11 @@ export function SupplyDeliveryTable({
             <TableCell>
               {delivery.supplied_inventory_item?.product?.batch?.lot_number || "-"}
             </TableCell>
-            {!internal && (
-              <TableCell>
-                {formatExpiryDate(
-                  delivery.supplied_inventory_item?.product?.expiration_date,
-                )}
-              </TableCell>
-            )}
+            <TableCell>
+              {formatExpiryDate(
+                delivery.supplied_inventory_item?.product?.expiration_date,
+              )}
+            </TableCell>
             <TableCell>
               {delivery.supply_request
                 ? round(delivery.supply_request.quantity)
