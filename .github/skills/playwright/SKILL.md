@@ -352,14 +352,16 @@ const account = await createAccountViaApi();
 
 ### Promise.all() for Parallel Navigation + API Wait
 
+The wait promise MUST be listed first so the response listener is registered before the action that triggers the request — otherwise the request can fire before Playwright is listening, causing a flaky timeout.
+
 ```typescript
 await Promise.all([
-  page.getByRole("tab", { name: "Medicines" }).click(),
   page.waitForResponse(
     (resp) =>
       resp.url().includes("/medication/prescription/") &&
       resp.status() === 200,
   ),
+  page.getByRole("tab", { name: "Medicines" }).click(),
 ]);
 ```
 
@@ -523,6 +525,8 @@ Use sparingly — prefer real backend responses. Only mock when testing specific
 When a workflow requires actions from different users (e.g., admin creates, nurse verifies), use `browser.newContext()` with different storage states:
 
 ```typescript
+import { expect, test } from "@playwright/test";
+
 import { getFacilityId } from "tests/support/facilityId";
 
 test("Admin assigns task, nurse sees it", async ({ browser }) => {
