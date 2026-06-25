@@ -28,7 +28,7 @@ test.describe("Form Submission and Display in Encounter Overview", () => {
     } else if (action === "input") {
       // For number inputs, find the parent container
       const questionContainer = labelLocator.locator(
-        "xpath=ancestor::div[contains(@id, 'question')]",
+        "xpath=ancestor::div[starts-with(@id, 'question-')][1]",
       );
       const input = questionContainer.locator('input[type="number"]').first();
       await input.scrollIntoViewIfNeeded();
