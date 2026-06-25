@@ -343,11 +343,14 @@ async function createAccountViaApi() {
   if (!res.ok) {
     throw new Error(`Failed to create account: ${res.status}`);
   }
-  const data = await res.json();
-  return data;
+  return res.json();
 }
 
-const account = await createAccountViaApi();
+// Call inside a test or hook — never at module top level
+test.beforeEach(async () => {
+  const account = await createAccountViaApi();
+  // ... use account in the test
+});
 ```
 
 ### Promise.all() for Parallel Navigation + API Wait
