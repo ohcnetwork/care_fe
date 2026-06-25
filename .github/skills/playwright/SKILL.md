@@ -174,7 +174,7 @@ These files are generated (gitignored) by setup specs in `tests/setup/*.setup.ts
 
 1. **Use `faker` for data you create in tests** (entity names, notes, and random array selection for generated values). For selecting existing fixture-backed options (usernames, body sites, etc.), use shared constants in `tests/helper/commonConstants.ts` — avoid scattered hardcoded literals
 2. **Always use deterministic fixture IDs** — use `getFacilityId()`, `getPatientId()`, `getEncounterId()` from `tests/support/` for navigation. NEVER select a random encounter/patient/facility from a list in the UI — random selection causes flakiness when data changes between runs
-3. Always include `test.use({ storageState })` for authentication
+3. Always include `test.use({ storageState })` for authenticated flows (omit only for explicit public/auth-page tests)
 4. Use `exact: true` on selectors when partial matches are possible
 5. **`.first()` only after searching/filtering** — use `.first()` only when you've searched a list and are selecting from filtered results. Never use it to randomly pick from an unfiltered list
 6. Use `test.step()` to organize test actions
@@ -333,13 +333,18 @@ Use `fetch()` for creating precondition data without going through UI:
 import { getFacilityId } from "tests/support/facilityId";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 
-const facilityId = getFacilityId();
-const res = await fetch(`${getApiUrl()}/api/v1/facility/${facilityId}/account/`, {
-  method: "POST",
-  headers: getApiHeaders(),
-  body: JSON.stringify({ name: "Test Account", type: "income" }),
-});
-const data = await res.json();
+async function createAccountViaApi() {
+  const facilityId = getFacilityId();
+  const res = await fetch(`${getApiUrl()}/api/v1/facility/${facilityId}/account/`, {
+    method: "POST",
+    headers: getApiHeaders(),
+    body: JSON.stringify({ name: "Test Account", type: "income" }),
+  });
+  const data = await res.json();
+  return data;
+}
+
+const account = await createAccountViaApi();
 ```
 
 ### Promise.all() for Parallel Navigation + API Wait
