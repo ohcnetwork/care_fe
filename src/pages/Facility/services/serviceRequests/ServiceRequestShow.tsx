@@ -612,14 +612,15 @@ export default function ServiceRequestShow({
               disableEdit={disableEdit}
             />
           </div>
-
-          <DiagnosticReportReview
-            facilityId={facilityId}
-            patientId={request.encounter.patient.id}
-            serviceRequestId={serviceRequestId}
-            diagnosticReports={diagnosticReports}
-            disableEdit={disableEdit}
-          />
+          {diagnosticReports.length > 0 && (
+            <DiagnosticReportReview
+              facilityId={facilityId}
+              patientId={request.encounter.patient.id}
+              serviceRequestId={serviceRequestId}
+              diagnosticReports={diagnosticReports}
+              disableEdit={disableEdit}
+            />
+          )}
         </div>
       </div>
       {!isMobile && (

@@ -31,6 +31,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
+import { Textarea } from "@/components/ui/textarea";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
@@ -59,10 +60,9 @@ export function DiagnosticReportReview({
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      {(!diagnosticReports.length ||
-        diagnosticReports.some(
-          (report) => report.status !== DiagnosticReportStatus.final,
-        )) && (
+      {diagnosticReports.some(
+        (report) => report.status !== DiagnosticReportStatus.final,
+      ) && (
         <h3 className="text-xl font-semibold">{t("review_test_results")}</h3>
       )}
 
@@ -145,7 +145,7 @@ function DiagnosticReportReviewItem({
       },
       onError: (err: Error) => {
         toast.error(
-          `Failed to approve diagnostic report: ${err.message || "Unknown error"}`,
+          t("failed_to_approve_diagnostic_report", { error: err.message }),
         );
       },
     });
@@ -264,7 +264,10 @@ function DiagnosticReportReviewItem({
 
               <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
                 <CardContent className="p-4 space-y-2">
-                  <Label htmlFor="conclusion" className="font-medium">
+                  <Label
+                    htmlFor={`conclusion-${report.id}`}
+                    className="font-medium"
+                  >
                     {t("conclusion")}
                   </Label>
                   {reportDetail.status === DiagnosticReportStatus.final ? (
@@ -272,8 +275,8 @@ function DiagnosticReportReviewItem({
                       {reportDetail.conclusion || t("no_conclusion_entered")}
                     </p>
                   ) : (
-                    <textarea
-                      id="conclusion"
+                    <Textarea
+                      id={`conclusion-${report.id}`}
                       className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg disabled:cursor-not-allowed"
                       placeholder={t("enter_conclusion")}
                       value={conclusion || reportDetail.conclusion || ""}

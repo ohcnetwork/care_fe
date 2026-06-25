@@ -105,6 +105,8 @@ interface ObservationValue {
   interpretation?: Interpretation;
   status: ObservationStatus;
   components: Record<string, ComponentValue>;
+
+  facilityId?: string;
 }
 
 // New interface to handle multiple observations per definition
@@ -120,6 +122,7 @@ export function DiagnosticReportForm({
   activityDefinition,
   specimens,
   disableEdit,
+  facilityId,
 }: DiagnosticReportFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -198,6 +201,7 @@ export function DiagnosticReportForm({
                 observationDefinitions={observationDefinitions}
                 disableEdit={disableEdit}
                 isMultipleDiagnosticReport={isMultipleDiagnosticReport}
+                facilityId={facilityId}
               />
             ))}
           </div>
@@ -265,8 +269,8 @@ export function DiagnosticReportForm({
       )}
       {diagnosticReports.length === 0 && (
         <CreateDiagnosticReportForm
-          hasCollectedSpecimens
-          isMultipleDiagnosticReport
+          hasCollectedSpecimens={hasCollectedSpecimens}
+          isMultipleDiagnosticReport={isMultipleDiagnosticReport}
           activityDefinition={activityDefinition}
           specimens={specimens}
           isCreatingReport={isCreatingReport}
@@ -285,6 +289,7 @@ function DiagnosticReportItem({
   serviceRequestId,
   observationDefinitions,
   disableEdit,
+  facilityId,
   isMultipleDiagnosticReport,
 }: {
   report: DiagnosticReportRead;
@@ -292,6 +297,7 @@ function DiagnosticReportItem({
   serviceRequestId: string;
   observationDefinitions: ObservationDefinitionReadSpec[];
   disableEdit: boolean;
+  facilityId?: string;
   isMultipleDiagnosticReport: boolean;
 }) {
   const { t } = useTranslation();
@@ -340,9 +346,9 @@ function DiagnosticReportItem({
         },
       }),
       onSuccess: () => {
-        toast.success("Test results saved successfully");
+        toast.success(t("test_results_saved_successfully"));
         queryClient.invalidateQueries({
-          queryKey: ["serviceRequest", serviceRequestId],
+          queryKey: ["serviceRequest", facilityId, serviceRequestId],
         });
         queryClient.invalidateQueries({
           queryKey: ["diagnosticReport", report.id],
@@ -378,8 +384,10 @@ function DiagnosticReportItem({
     });
 
   // Initialize file upload hook
+  const inputId = `file_upload_diagnostic_report_${report.id}`;
   const fileUpload = useFileUpload({
     type: "diagnostic_report" as FileType,
+    inputId,
     multiple: true,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
@@ -458,7 +466,7 @@ function DiagnosticReportItem({
     if (fullReport?.conclusion) {
       setConclusion(fullReport.conclusion);
     }
-  }, [fullReport, conclusion]);
+  }, [fullReport]);
 
   function handleValueChange(
     definitionId: string,
@@ -1202,7 +1210,7 @@ function DiagnosticReportItem({
                             })}
                           </div>
                           <Label
-                            htmlFor="file_upload_diagnostic_report"
+                            htmlFor={inputId}
                             className="inline-flex items-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground border-gray-300 shadow-sm"
                           >
                             <Upload className="mr-2 size-4" />
