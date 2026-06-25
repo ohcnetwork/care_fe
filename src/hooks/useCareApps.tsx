@@ -1,10 +1,8 @@
-import { PluginManifestWithMeta } from "@/pluginTypes";
+import { PluginManifest, PluginManifestWithMeta } from "@/pluginTypes";
 import { CableIcon, Loader2Icon } from "lucide-react";
 import { Suspense, createContext, useContext } from "react";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
-import { FilesTabsProps } from "@/components/Files/FilesTab";
-import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import OrganizationLayout from "@/pages/Organization/components/OrganizationLayout";
 import { PlugConfig } from "@/types/plugConfig";
 import { t } from "i18next";
@@ -75,48 +73,25 @@ const withSuspense = <T extends object>(
   };
 };
 
-export const useCareAppEncounterTabs = () => {
+export const useCareAppTabs = <T extends object>(key: keyof PluginManifest) => {
   const careApps = useCareApps();
 
-  return careApps.reduce<Record<string, React.FC<PluginEncounterTabProps>>>(
-    (acc, app) => {
-      if (app.isLoading) {
-        return acc;
-      }
+  return careApps.reduce<Record<string, React.FC<T>>>((acc, app) => {
+    if (app.isLoading) {
+      return acc;
+    }
 
-      const appTabs = Object.entries(app.encounterTabs ?? {}).reduce(
-        (acc, [key, Component]) => {
-          return { ...acc, [key]: withSuspense(Component, app.plugin) };
-        },
-        {},
-      );
+    const tabs = app[key] as Record<string, React.ComponentType<T>> | undefined;
+    if (!tabs) {
+      return acc;
+    }
 
-      return { ...acc, ...appTabs };
-    },
-    {},
-  );
-};
+    const appTabs = Object.entries(tabs).reduce((acc, [key, Component]) => {
+      return { ...acc, [key]: withSuspense(Component, app.plugin) };
+    }, {});
 
-export const useCareAppsEncounterFileTabs = () => {
-  const careApps = useCareApps();
-
-  return careApps.reduce<Record<string, React.FC<FilesTabsProps>>>(
-    (acc, app) => {
-      if (app.isLoading) {
-        return acc;
-      }
-
-      const appTabs = Object.entries(app.encounterFileTabs ?? {}).reduce(
-        (acc, [key, Component]) => {
-          return { ...acc, [key]: withSuspense(Component, app.plugin) };
-        },
-        {},
-      );
-
-      return { ...acc, ...appTabs };
-    },
-    {},
-  );
+    return { ...acc, ...appTabs };
+  }, {});
 };
 
 // If required; Reduce plugin.routes to a single pluginRoutes object of type Record<string, () => React.ReactNode>

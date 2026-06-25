@@ -8,7 +8,7 @@ import { FilesPage } from "@/components/Files/FileSubTab";
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
-import { useCareAppsEncounterFileTabs } from "@/hooks/useCareApps";
+import { useCareAppTabs } from "@/hooks/useCareApps";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -16,7 +16,6 @@ import {
 import { PatientRead } from "@/types/emr/patient/patient";
 import { ReportType } from "@/types/emr/report/report";
 import { FileType } from "@/types/files/file";
-import { Suspense } from "react";
 import { ReportSubTab } from "./ReportSubTab";
 
 export interface FilesTabsProps {
@@ -44,8 +43,7 @@ export const FilesTab = ({
     encounter?.permissions ?? [],
   );
 
-  const pluginTabs = useCareAppsEncounterFileTabs();
-
+  const pluginTabs = useCareAppTabs<FilesTabsProps>("encounterFileTabs");
   const allowedTabs = ["all", "reports", ...Object.keys(pluginTabs)];
   const tabValue = allowedTabs.includes(qParams.file) ? qParams.file : "all";
 
@@ -68,9 +66,9 @@ export const FilesTab = ({
     <div className="space-y-4">
       <Tabs
         value={tabValue}
-        onValueChange={(value) => {
-          setQParams({ file: value }, { overwrite: false });
-        }}
+        onValueChange={(value) =>
+          setQParams({ file: value }, { overwrite: false })
+        }
       >
         <TabsList className={type != "encounter" ? "mt-2" : ""}>
           <TabsTrigger
@@ -123,14 +121,12 @@ export const FilesTab = ({
         {Object.entries(pluginTabs).map(([pluginName, Component]) => {
           return (
             <TabsContent key={pluginName} value={pluginName}>
-              <Suspense>
-                <Component
-                  type={type}
-                  patient={patient}
-                  encounter={encounter}
-                  readOnly={readOnly}
-                />
-              </Suspense>
+              <Component
+                type={type}
+                patient={patient}
+                encounter={encounter}
+                readOnly={readOnly}
+              />
             </TabsContent>
           );
         })}
