@@ -111,7 +111,7 @@ tests/
 
 **Naming conventions:**
 - Directories: camelCase matching the feature (e.g., `activityDefinition/`, `patientDetails/`)
-- Files: prefer `featureAction.spec.ts` (e.g., `locationCreation.spec.ts`, `deviceEdit.spec.ts`, `departmentUserManage.spec.ts`) and keep naming consistent within the directory
+- Files: `featureAction.spec.ts` (e.g., `locationCreation.spec.ts`, `deviceEdit.spec.ts`, `departmentUserManage.spec.ts`) — camelCase, not PascalCase
 - Group CRUD operations in the same directory with separate files per action
 
 ## Quick Reference
