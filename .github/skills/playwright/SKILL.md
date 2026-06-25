@@ -243,7 +243,7 @@ npx playwright test tests/path/to/test.spec.ts --headed
 npx playwright show-report
 
 # Open a trace zip directly (if available)
-npx playwright show-trace test-results/**/trace.zip
+npx playwright show-trace test-results/<run-id>/trace.zip
 ```
 
 When a test fails:
