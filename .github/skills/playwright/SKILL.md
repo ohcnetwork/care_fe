@@ -170,7 +170,7 @@ test.describe("Feature Name", () => {
 
 ### Critical Rules
 
-1. **Always use `faker`** for random data generation and random array selection — never hardcode names or pick arbitrary values
+1. **Use `faker` for new entity data** and shared constants for fixture-backed selections — avoid scattered hardcoded literals
 2. **Always use deterministic fixture IDs** — use `getFacilityId()`, `getPatientId()`, `getEncounterId()` from `tests/support/` for navigation. NEVER select a random encounter/patient/facility from a list in the UI — random selection causes flakiness when data changes between runs
 3. Always include `test.use({ storageState })` for authentication
 4. Use `exact: true` on selectors when partial matches are possible
@@ -295,7 +295,8 @@ test.describe("Location validations", () => {
 // AVOID: serial creates hidden dependencies and increases flakiness.
 // Only use when a single logical flow MUST share state (rare).
 // If you need serial, consider making it ONE test with multiple steps instead.
-test.describe.serial("Location CRUD", () => {
+test.describe("Location CRUD", () => {
+  test.describe.configure({ mode: "serial" });
   test("create location", async ({ page }) => { /* ... */ });
   test("edit location", async ({ page }) => { /* ... */ });
   test("delete location", async ({ page }) => { /* ... */ });
@@ -324,8 +325,10 @@ await page.getByRole("textbox", { name: "Name" }).pressSequentially("appended te
 Use `fetch()` for creating precondition data without going through UI:
 
 ```typescript
+import { getFacilityId } from "tests/support/facilityId";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 
+const facilityId = getFacilityId();
 const res = await fetch(`${getApiUrl()}/api/v1/facility/${facilityId}/account/`, {
   method: "POST",
   headers: getApiHeaders(),
@@ -364,6 +367,7 @@ const card = page.locator('[data-slot="collapsible"]').filter({ hasText: "Lab Te
 await card.locator('[data-slot="collapsible-trigger"]').click();
 
 // Command input (search fields)
+const scope = page;
 const input = scope.locator('[data-slot="command-input"]').first();
 await input.fill("");       // Clear first
 await input.fill(search);   // Then fill
@@ -390,7 +394,9 @@ Handle comboboxes that appear based on previous selection:
 
 ```typescript
 let previousCount = 0;
-while (true) {
+const MAX_CASCADES = 10;
+
+for (let iteration = 0; iteration < MAX_CASCADES; iteration++) {
   const comboboxes = region.getByRole("combobox");
   const count = await comboboxes.count();
   if (count === previousCount) break;
@@ -398,6 +404,12 @@ while (true) {
   await combobox.click();
   await combobox.getByRole("option").first().click();
   previousCount = count;
+
+  if (iteration === MAX_CASCADES - 1) {
+    throw new Error(
+      `Cascading comboboxes exceeded ${MAX_CASCADES} iterations - possible loop`,
+    );
+  }
 }
 ```
 
@@ -420,7 +432,7 @@ For UI that updates asynchronously (e.g., list refreshes after creation):
 
 ```typescript
 await expect(async () => {
-  await page.getByRole("table").getByText(createdName).isVisible();
+  await expect(page.getByRole("table").getByText(createdName)).toBeVisible();
 }).toPass({ timeout: 10000 });
 ```
 
@@ -433,10 +445,10 @@ For file upload inputs, use `setInputFiles()`:
 ```typescript
 // Standard file upload
 const fileInput = page.locator('input[type="file"]');
-await fileInput.setInputFiles("tests/fixtures/sample-file.pdf");
+await fileInput.setInputFiles("tests/fixtures/sample_file.xlsx");
 
 // Camera/image capture (mimic by uploading an image file)
-await fileInput.setInputFiles("tests/fixtures/sample-image.jpg");
+await fileInput.setInputFiles("tests/fixtures/images/test-image.jpg");
 ```
 
 Camera inputs are tested by uploading a fixture image file — no actual camera simulation needed. Always verify:
@@ -493,7 +505,11 @@ Use sparingly — prefer real backend responses. Only mock when testing specific
 When a workflow requires actions from different users (e.g., admin creates, nurse verifies), use `browser.newContext()` with different storage states:
 
 ```typescript
+import { getFacilityId } from "tests/support/facilityId";
+
 test("Admin assigns task, nurse sees it", async ({ browser }) => {
+  const facilityId = getFacilityId();
+
   // Admin context
   const adminContext = await browser.newContext({
     storageState: "tests/.auth/user.json",
@@ -525,7 +541,7 @@ Always close each context after use. Use `{ browser }` fixture instead of `{ pag
 ### Keep Tests Independent
 
 - Each test MUST be runnable in isolation — never depend on another test's side effects
-- Use `test.describe.serial()` only when tests share a logical CRUD flow (create → edit → delete) within the SAME describe block
+- Use `test.describe.configure({ mode: "serial" })` only when tests share a logical CRUD flow (create → edit → delete) within the SAME describe block
 - If a test needs precondition data, create it in `beforeEach`/`beforeAll` or via direct API calls — never assume a previous test created it
 - Tests in DIFFERENT files must NEVER depend on each other
 - **Encounter limit awareness** — a patient can have only 5 live encounters at a time. If your test creates encounters or selects existing ones, ensure you mark them as completed (via API or UI) after use. Failing to do so causes flaky failures when the limit is reached across test runs.
