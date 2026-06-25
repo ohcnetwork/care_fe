@@ -91,6 +91,26 @@ export function formatValue(
   }
 }
 
+function hasGroupResponses(
+  questions: Question[] | undefined,
+  responses: QuestionnaireResponse["responses"],
+): boolean {
+  if (!questions) return false;
+  return questions.some((question) => {
+    if (question.type === "group") {
+      if (question.repeats) {
+        const groupResp = responses.find((r) => r.question_id === question.id);
+        return (groupResp?.sub_results?.length ?? 0) > 0;
+      }
+      return hasGroupResponses(question.questions, responses);
+    }
+    if (question.type === "structured") return false;
+    const resp = responses.find((r) => r.question_id === question.id);
+    if (!resp) return false;
+    return resp.values.some((v) => v.value || v.coding);
+  });
+}
+
 function QuestionGroup({
   group,
   responses,
@@ -228,18 +248,7 @@ function QuestionGroup({
     );
   }
 
-  const hasResponses = group.questions?.some((q) => {
-    if (q.type === "group") {
-      if (q.repeats) {
-        const groupResp = responses.find((r) => r.question_id === q.id);
-        return groupResp?.sub_results && groupResp.sub_results.length > 0;
-      }
-      return q.questions?.some((subQ) =>
-        responses.some((r) => r.question_id === subQ.id),
-      );
-    }
-    return responses.some((r) => r.question_id === q.id);
-  });
+  const hasResponses = hasGroupResponses(group.questions, responses);
 
   if (!hasResponses) return null;
 

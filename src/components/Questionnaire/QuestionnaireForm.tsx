@@ -832,7 +832,7 @@ export function QuestionnaireForm({
                 const response = form.responses.find(
                   (r) => r.question_id === subQ.id,
                 );
-                return response?.values?.some(isValueFilled);
+                return response != null && isResponseFilled(response);
               });
               if (!hasFilledSubQuestion) {
                 errors.push({
