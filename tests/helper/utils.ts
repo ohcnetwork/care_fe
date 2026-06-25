@@ -13,7 +13,7 @@ function generateSlugValue(title: string | undefined): string {
     .replace(/[^\w\s-]/g, "")
     .replace(/[\s-]+/g, "-")
     .replace(/^[-_]+|[-_]+$/g, "")
-    .slice(0, 36)
+    .slice(0, 50)
     .replace(/[-_]+$/, "");
 }
 

@@ -8,7 +8,7 @@ export const SLUG_VALUE_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]$/;
 
 /**
  * Validation schema for slug values used in various resources.
- * Slug values must be between 5 and 36 characters, and can include letters, numbers, hyphens, and underscores.
+ * Slug values must be between 5 and 50 characters, and can include letters, numbers, hyphens, and underscores.
  */
 export const slugValueSchema = () => {
   const characterCountMessage = t("character_count_validation", {

@@ -54,7 +54,6 @@ import {
   qualifiedRangeSchema,
 } from "@/types/base/qualifiedRange/qualifiedRange";
 import { slugValueSchema } from "@/types/base/slug/schema";
-import { generateSlugValue } from "@/types/base/slug/utils";
 import {
   OBSERVATION_DEFINITION_CATEGORY,
   type ObservationDefinitionCreateSpec,
@@ -66,6 +65,7 @@ import {
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { generateSlugValue } from "@/Utils/validators";
 import { ObservationInterpretation } from "./components/ObservationInterpretation";
 
 export default function ObservationDefinitionForm({

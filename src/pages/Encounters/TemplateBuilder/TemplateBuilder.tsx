@@ -46,9 +46,9 @@ import {
 import templateApi from "@/types/emr/template/templateApi";
 
 import queryClient from "@/Utils/request/queryClient";
+import { generateSlugValue } from "@/Utils/validators";
 import { cn } from "@/lib/utils";
 import { slugValueSchema } from "@/types/base/slug/schema";
-import { generateSlugValue } from "@/types/base/slug/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DOMPurify from "dompurify";
 import { navigate } from "raviger";

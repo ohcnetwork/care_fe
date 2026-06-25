@@ -52,7 +52,6 @@ import {
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { slugValueSchema } from "@/types/base/slug/schema";
-import { generateSlugValue } from "@/types/base/slug/utils";
 import {
   MRP_CODE,
   PURCHASE_PRICE_CODE,
@@ -68,6 +67,7 @@ import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { goBack } from "@/Utils/utils";
+import { generateSlugValue } from "@/Utils/validators";
 
 interface ChargeItemDefinitionFormProps {
   facilityId: string;

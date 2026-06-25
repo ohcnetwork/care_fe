@@ -103,8 +103,8 @@ import {
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
+import { generateSlugValue } from "@/Utils/validators";
 import { slugValueSchema } from "@/types/base/slug/schema";
-import { generateSlugValue } from "@/types/base/slug/utils";
 import { CodingEditor } from "./CodingEditor";
 import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
