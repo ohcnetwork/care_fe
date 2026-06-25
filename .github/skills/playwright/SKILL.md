@@ -532,29 +532,33 @@ import { getFacilityId } from "tests/support/facilityId";
 test("Admin assigns task, nurse sees it", async ({ browser }) => {
   const facilityId = getFacilityId();
 
-  // Admin context
+  // Admin context — close in `finally` so a failing step still releases the context
   const adminContext = await browser.newContext({
     storageState: "tests/.auth/user.json",
   });
-  const adminPage = await adminContext.newPage();
-
-  await test.step("Admin creates assignment", async () => {
-    await adminPage.goto(`/facility/${facilityId}/...`);
-    // ... admin actions
-  });
-  await adminContext.close();
+  try {
+    const adminPage = await adminContext.newPage();
+    await test.step("Admin creates assignment", async () => {
+      await adminPage.goto(`/facility/${facilityId}/...`);
+      // ... admin actions
+    });
+  } finally {
+    await adminContext.close();
+  }
 
   // Nurse context
   const nurseContext = await browser.newContext({
     storageState: "tests/.auth/nurse.json",
   });
-  const nursePage = await nurseContext.newPage();
-
-  await test.step("Nurse verifies assignment", async () => {
-    await nursePage.goto(`/facility/${facilityId}/...`);
-    await expect(nursePage.getByText("Assigned Task")).toBeVisible();
-  });
-  await nurseContext.close();
+  try {
+    const nursePage = await nurseContext.newPage();
+    await test.step("Nurse verifies assignment", async () => {
+      await nursePage.goto(`/facility/${facilityId}/...`);
+      await expect(nursePage.getByText("Assigned Task")).toBeVisible();
+    });
+  } finally {
+    await nurseContext.close();
+  }
 });
 ```
 
