@@ -1,8 +1,12 @@
-import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterClasses";
-import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
+import {
+  getEncounterCreateDialog,
+  getFutureDateButtonFromCalendar,
+  openCalendarAndGetNextMonthButton,
+  openCreateEncounterDialog,
+  selectRandomEncounterClass,
+  selectStatusInCreateDialog,
+} from "tests/facility/patient/encounter/encounterFormHelpers";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -10,49 +14,22 @@ const VALIDATION_ERROR_TEXT =
   "period: Value error, Start Date cannot be greater than End Date";
 
 async function selectFutureDateInCalendar(page: Page) {
-  await page
-    .locator('[data-slot="form-item"]')
-    .filter({ hasText: "Date and Time" })
-    .locator('[data-slot="popover-trigger"]')
-    .click();
-
-  const nextMonthButton = page.getByRole("button", {
-    name: "Go to the Next Month",
-  });
+  const nextMonthButton = await openCalendarAndGetNextMonthButton(page);
   await expect(nextMonthButton).toBeEnabled();
   await nextMonthButton.click();
 
-  const futureDayButton = page
-    .getByRole("gridcell")
-    .filter({ hasText: /^15$/ })
-    .getByRole("button");
+  const futureDayButton = getFutureDateButtonFromCalendar(page);
   await expect(futureDayButton).toBeEnabled();
   await futureDayButton.click();
 }
 
 async function createPlannedEncounterWithFutureDate(page: Page) {
-  const facilityId = getFacilityId();
-  const patientId = getPatientId();
-
-  await page.goto(`/facility/${facilityId}/patient/${patientId}`);
-  await page.getByRole("link", { name: "Patient Home" }).click();
-
-  await expect(
-    page.getByRole("button", { name: "Create Encounter" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Create Encounter" }).click();
-
-  const encounterClass = faker.helpers.arrayElement(ENCOUNTER_CLASSES);
-  await page.getByRole("button", { name: encounterClass }).click();
-
-  await page.getByRole("combobox", { name: "Status" }).click();
-  await page.getByRole("option", { name: "Planned", exact: true }).click();
-
+  await openCreateEncounterDialog(page);
+  await selectRandomEncounterClass(page);
+  await selectStatusInCreateDialog(page, "Planned");
   await selectFutureDateInCalendar(page);
 
-  const dialog = page.getByRole("dialog", {
-    name: "Initiate Patient Encounter",
-  });
+  const dialog = getEncounterCreateDialog(page);
   await dialog.getByRole("button", { name: /^Create Encounter/ }).click();
 
   // Submit navigates to the encounter detail page.
