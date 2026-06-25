@@ -187,7 +187,7 @@ test.describe("Feature Name", () => {
 15. **3-strike rule: ask for human help** — if a test keeps failing after 3 AI fix attempts, stop and ask the user to manually inspect the UI. The AI may be missing a visual detail, animation, or dynamic behavior that only a human can verify
 16. **Do not touch CI/CD YAML** — never modify GitHub Actions workflow files or CI configuration unless explicitly asked to do so. If a test requires a new `.env` variable that works locally, ALERT the human that CI/CD YAML may need updating for it to work in pipelines.
 17. **Never use `test.skip()` or conditional skips to hide failures** — if a test is failing, fix it. Never add `.skip()`, `test.fixme()`, or `if` conditions to bypass a failure. These create false positives where the suite appears green but functionality is broken. Only use `.skip()` for genuinely unsupported environments (e.g., OS-specific) with a clear comment explaining why.
-18. **Continuously improve this skill** — when you discover a better approach, a new pattern, or gain domain knowledge while writing tests, update this SKILL.md file. Keep it current with lessons learned, new helpers, and corrected assumptions.
+18. **Continuously improve this skill** — capture improvements as follow-up changes through a separate human-reviewed PR; do not self-modify the skill during normal test generation.
 
 ## Mindset: Senior QA Engineer
 
@@ -402,7 +402,7 @@ for (let iteration = 0; iteration < MAX_CASCADES; iteration++) {
   if (count === previousCount) break;
   const combobox = comboboxes.nth(count - 1);
   await combobox.click();
-  await combobox.getByRole("option").first().click();
+  await page.getByRole("option").first().click();
   previousCount = count;
 
   if (iteration === MAX_CASCADES - 1) {
