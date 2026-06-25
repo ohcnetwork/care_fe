@@ -283,15 +283,12 @@ export function SupplyDeliveryTable({
               })()}
             </TableCell>
             <TableCell>
-              {delivery.supplied_inventory_item?.product?.batch?.lot_number ||
-                delivery.supplied_item?.batch?.lot_number ||
-                "-"}
+              {delivery.supplied_inventory_item?.product?.batch?.lot_number || "-"}
             </TableCell>
             {!internal && (
               <TableCell>
                 {formatExpiryDate(
-                  delivery.supplied_inventory_item?.product?.expiration_date ??
-                    delivery.supplied_item?.expiration_date,
+                  delivery.supplied_inventory_item?.product?.expiration_date,
                 )}
               </TableCell>
             )}
