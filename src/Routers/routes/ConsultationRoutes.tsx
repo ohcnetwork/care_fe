@@ -5,7 +5,6 @@ import { PrintMedicationAdministration } from "@/components/Medicine/MedicationA
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
 
 import { AppRoutes } from "@/Routers/AppRouter";
-import { DrawingEditor } from "@/components/Files/Drawings/DrawingEditor";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
 import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 import ReportViewer from "@/pages/Encounters/ReportViewer";
@@ -100,8 +99,6 @@ const consultationRoutes: AppRoutes = {
         subjectType="encounter"
       />
     ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/:id":
-    ({ id }) => <DrawingEditor id={id} />,
 
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
     ({ facilityId, encounterId, slug, patientId }) => (

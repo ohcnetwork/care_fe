@@ -7,8 +7,8 @@ import { FilesPage } from "@/components/Files/FileSubTab";
 
 import { getPermissions } from "@/common/Permissions";
 
-import { DrawingsSubTab } from "@/components/Files/Drawings/DrawingsSubTab";
 import { usePermissions } from "@/context/PermissionContext";
+import { useCareAppsEncounterFileTabs } from "@/hooks/useCareApps";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -16,22 +16,15 @@ import {
 import { PatientRead } from "@/types/emr/patient/patient";
 import { ReportType } from "@/types/emr/report/report";
 import { FileType } from "@/types/files/file";
-import { MetaArtifactAssociatingType } from "@/types/metaArtifact/metaArtifact";
+import { Suspense } from "react";
 import { ReportSubTab } from "./ReportSubTab";
 
-interface FilesTabsProps {
+export interface FilesTabsProps {
   type: FileType.ENCOUNTER | FileType.PATIENT;
   encounter?: EncounterRead;
   patient?: PatientRead;
   readOnly?: boolean;
 }
-
-type QueryParams = {
-  file: "all" | "reports" | "drawings";
-};
-
-const allowedTabs = ["all", "reports", "drawings"] as const;
-type TabType = (typeof allowedTabs)[number];
 
 export const FilesTab = ({
   patient,
@@ -39,7 +32,7 @@ export const FilesTab = ({
   encounter,
   readOnly,
 }: FilesTabsProps) => {
-  const [qParams, setQParams] = useQueryParams<QueryParams>();
+  const [qParams, setQParams] = useQueryParams();
 
   const { hasPermission } = usePermissions();
   const { canWritePatient } = getPermissions(
@@ -51,9 +44,10 @@ export const FilesTab = ({
     encounter?.permissions ?? [],
   );
 
-  const tabValue: TabType = allowedTabs.includes(qParams.file)
-    ? qParams.file
-    : "all";
+  const pluginTabs = useCareAppsEncounterFileTabs();
+
+  const allowedTabs = ["all", "reports", ...Object.keys(pluginTabs)];
+  const tabValue = allowedTabs.includes(qParams.file) ? qParams.file : "all";
 
   const canWriteCurrentEncounter =
     canWriteEncounter &&
@@ -75,7 +69,7 @@ export const FilesTab = ({
       <Tabs
         value={tabValue}
         onValueChange={(value) => {
-          setQParams({ file: value as TabType }, { overwrite: false });
+          setQParams({ file: value }, { overwrite: false });
         }}
       >
         <TabsList className={type != "encounter" ? "mt-2" : ""}>
@@ -91,12 +85,15 @@ export const FilesTab = ({
           >
             {t("reports")}
           </TabsTrigger>
-          <TabsTrigger
-            value="drawings"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-          >
-            {t("drawings")}
-          </TabsTrigger>
+          {Object.keys(pluginTabs).map((tab) => (
+            <TabsTrigger
+              key={tab}
+              value={tab}
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold capitalize"
+            >
+              {t(tab)}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="all">
@@ -123,21 +120,20 @@ export const FilesTab = ({
           />
         </TabsContent>
 
-        <TabsContent value="drawings">
-          <div>
-            <DrawingsSubTab
-              type={
-                {
-                  [FileType.PATIENT]: MetaArtifactAssociatingType.PATIENT,
-                  [FileType.ENCOUNTER]: MetaArtifactAssociatingType.ENCOUNTER,
-                }[type]
-              }
-              patient={patient}
-              encounter={encounter}
-              readOnly={readOnly}
-            />
-          </div>
-        </TabsContent>
+        {Object.entries(pluginTabs).map(([pluginName, Component]) => {
+          return (
+            <TabsContent key={pluginName} value={pluginName}>
+              <Suspense>
+                <Component
+                  type={type}
+                  patient={patient}
+                  encounter={encounter}
+                  readOnly={readOnly}
+                />
+              </Suspense>
+            </TabsContent>
+          );
+        })}
       </Tabs>
     </div>
   );

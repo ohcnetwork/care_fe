@@ -3,6 +3,7 @@ import { CableIcon, Loader2Icon } from "lucide-react";
 import { Suspense, createContext, useContext } from "react";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
+import { FilesTabsProps } from "@/components/Files/FilesTab";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import OrganizationLayout from "@/pages/Organization/components/OrganizationLayout";
 import { PlugConfig } from "@/types/plugConfig";
@@ -84,6 +85,28 @@ export const useCareAppEncounterTabs = () => {
       }
 
       const appTabs = Object.entries(app.encounterTabs ?? {}).reduce(
+        (acc, [key, Component]) => {
+          return { ...acc, [key]: withSuspense(Component, app.plugin) };
+        },
+        {},
+      );
+
+      return { ...acc, ...appTabs };
+    },
+    {},
+  );
+};
+
+export const useCareAppsEncounterFileTabs = () => {
+  const careApps = useCareApps();
+
+  return careApps.reduce<Record<string, React.FC<FilesTabsProps>>>(
+    (acc, app) => {
+      if (app.isLoading) {
+        return acc;
+      }
+
+      const appTabs = Object.entries(app.encounterFileTabs ?? {}).reduce(
         (acc, [key, Component]) => {
           return { ...acc, [key]: withSuspense(Component, app.plugin) };
         },

@@ -5,7 +5,6 @@ import PatientIndex from "@/components/Patient/PatientIndex";
 import { PatientProfile } from "@/components/Patient/PatientProfile";
 
 import { AppRoutes } from "@/Routers/AppRouter";
-import { DrawingEditor } from "@/components/Files/Drawings/DrawingEditor";
 import { PatientRegistration } from "@/components/Patient/PatientRegistration";
 import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
 import EncountersOverview from "@/pages/Encounters/EncountersOverview";
@@ -98,10 +97,6 @@ const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:id/update": ({ id }) => (
     <PatientRegistration patientId={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/drawings/:id": ({ id }) => (
-    <DrawingEditor id={id} />
-  ),
-  "/patient/:patientId/drawings/:id": ({ id }) => <DrawingEditor id={id} />,
   "/facility/:facilityId/patient/:patientId/history/:tab": ({
     facilityId,
     patientId,
