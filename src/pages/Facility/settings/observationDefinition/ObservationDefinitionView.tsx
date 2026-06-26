@@ -415,7 +415,7 @@ export default function ObservationDefinitionView({
           </CardContent>
         </Card>
 
-        {(definition.component?.length ?? 0) > 0 && (
+        {definition.component && definition.component.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>{t("components")}</CardTitle>
