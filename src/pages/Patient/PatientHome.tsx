@@ -46,15 +46,23 @@ interface QParams {
   partial_id: string;
   flow?: "queue" | "dispense";
   action?: "schedule" | "create_encounter";
-  tokenId?: string;
-  queueId?: string;
+  token_id?: string;
+  queue_id?: string;
 }
 
 export default function PatientHome() {
   useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
   const [
-    { phone_number, year_of_birth, partial_id, flow, action, tokenId, queueId },
+    {
+      phone_number,
+      year_of_birth,
+      partial_id,
+      flow,
+      action,
+      token_id,
+      queue_id,
+    },
   ] = useQueryParams<QParams>();
   const queryClient = useQueryClient();
 
@@ -117,7 +125,7 @@ export default function PatientHome() {
         </Alert>
       ) : patientData ? (
         <div className="space-y-6 md:max-w-5xl mx-auto">
-          {isQueueFlow && queueId && (
+          {isQueueFlow && queue_id && (
             <BackButton>
               <ArrowLeft />
               {t("queue")}
@@ -272,7 +280,7 @@ export default function PatientHome() {
                 <PatientTokensList
                   patientId={patientData.id}
                   facility={facility}
-                  highlightedTokenId={tokenId}
+                  highlightedTokenId={token_id}
                 />
               )}
             </div>
