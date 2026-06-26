@@ -148,7 +148,7 @@ export function useLocationNavigation({
     }
   };
 
-  const handleSearch = (e: React.InputEvent) => {
+  const handleSearch = (e: React.SubmitEvent) => {
     e.preventDefault();
     setLocationsPage(1);
     setBedsPage(1);

@@ -3,7 +3,7 @@ publish = "build"
 command = "CI='' npm run build"
 
 [build.environment]
-NODE_VERSION = "22.11.0"
+NODE_VERSION = "24.x"
 NODE_OPTIONS = "--max_old_space_size=4096"
 
 [[redirects]]

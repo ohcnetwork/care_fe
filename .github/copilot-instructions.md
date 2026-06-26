@@ -96,7 +96,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ### Environment Setup
 
-- Node.js 22+ is required (check `.node-version` file)
+- Node.js 24+ is required (check `.node-version` file)
 - Install Node.js 22: `curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs`
 - Or use nvm: `nvm install 22 && nvm use 22`
 

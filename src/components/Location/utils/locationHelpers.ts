@@ -219,7 +219,7 @@ export interface NavigationHandlers {
   onBedSelect: (bed: LocationRead) => void;
   onCheckBedStatus: (bed: LocationRead) => void;
   onSearchChange: (value: string) => void;
-  onSearch: (e: React.InputEvent) => void;
+  onSearch: (e: React.SubmitEvent) => void;
   onShowAvailableChange: (value: boolean) => void;
   onLoadMore: () => void;
   onClearSelection: () => void;
