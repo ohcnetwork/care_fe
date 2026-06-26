@@ -32,11 +32,7 @@ export default function TokenCardWithButton({
   const { t } = useTranslation();
   const [showServicepointDialog, setShowServicepointDialog] = useState(false);
 
-  const {
-    token: latestToken,
-    updateToken,
-    isPending,
-  } = useToken({
+  const { updateToken, isUpdating } = useToken({
     facilityId: facility.id,
     queueId: token.queue.id,
     tokenId: token.id,
@@ -47,13 +43,11 @@ export default function TokenCardWithButton({
     },
   });
 
-  const currentToken = latestToken ?? token;
-
   const { assignedServicePoints, isServicePointsLoading } =
     useQueueServicePoints({
       facilityId: facility.id,
-      resourceType: currentToken.resource_type,
-      resourceId: currentToken.resource.id,
+      resourceType: token.resource_type,
+      resourceId: token.resource.id,
     });
 
   const isOnlyOneSubQueue =
@@ -63,43 +57,42 @@ export default function TokenCardWithButton({
     <>
       <TokenCard
         showlogo={false}
-        token={currentToken}
+        token={token}
         facility={facility}
         id={`token-card-${token.id}`}
         className={cardClassName}
         tokenActions={tokenActions}
       />
-      {showMarkInServiceButton &&
-        currentToken.status === TokenStatus.CREATED && (
-          <div className="flex w-full items-center justify-center bg-white p-3 rounded-md -mt-1">
-            <Button
-              className="w-full flex items-center justify-center gap-2 font-semibold"
-              onClick={() => {
-                if (isOnlyOneSubQueue) {
-                  updateToken({
-                    status: TokenStatus.IN_PROGRESS,
-                    sub_queue: assignedServicePoints[0].id,
-                    note: currentToken.note,
-                  });
-                  return;
-                }
+      {showMarkInServiceButton && token.status === TokenStatus.CREATED && (
+        <div className="flex w-full items-center justify-center bg-white p-3 rounded-md -mt-1">
+          <Button
+            className="w-full flex items-center justify-center gap-2 font-semibold"
+            onClick={() => {
+              if (isOnlyOneSubQueue) {
+                updateToken({
+                  status: TokenStatus.IN_PROGRESS,
+                  sub_queue: assignedServicePoints[0].id,
+                  note: token.note,
+                });
+                return;
+              }
 
-                onOpenDialogForServicePoint?.();
-                setShowServicepointDialog(true);
-              }}
-              variant="outline_primary"
-              disabled={isPending || isServicePointsLoading}
-            >
-              {t("mark_as_in_service")}
-            </Button>
-          </div>
-        )}
+              onOpenDialogForServicePoint?.();
+              setShowServicepointDialog(true);
+            }}
+            variant="outline_primary"
+            disabled={isUpdating || isServicePointsLoading}
+          >
+            {t("mark_as_in_service")}
+          </Button>
+        </div>
+      )}
 
       {!isOnlyOneSubQueue && showMarkInServiceButton && (
         <ServicePointSelector
           open={showServicepointDialog}
           onOpenChange={setShowServicepointDialog}
-          token={currentToken}
+          token={token}
           facilityId={facility.id}
           subQueues={assignedServicePoints}
           action="serve"

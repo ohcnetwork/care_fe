@@ -30,18 +30,18 @@ import { ChevronsDownUp, ChevronsUpDown, TicketIcon } from "lucide-react";
 interface PatientTokensListProps {
   patientId: string;
   facility: FacilityRead;
-  tokenId?: string;
+  highlightedTokenId?: string;
 }
 
 export default function PatientTokensList({
   patientId,
   facility,
-  tokenId,
+  highlightedTokenId,
 }: PatientTokensListProps) {
   const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [expandedTokens, setExpandedTokens] = useState<Set<string>>(
-    () => new Set(tokenId ? [tokenId] : []),
+  const [expandedTokens, setExpandedTokens] = useState(
+    () => new Set(highlightedTokenId ? [highlightedTokenId] : []),
   );
 
   const handleDateChange = (date: Date | undefined) => {
@@ -127,8 +127,8 @@ export default function PatientTokensList({
 
       {[
         // ordered by selected token first, then remaining token
-        ...tokens.filter((token) => token.id === tokenId),
-        ...tokens.filter((token) => token.id !== tokenId),
+        ...tokens.filter((token) => token.id === highlightedTokenId),
+        ...tokens.filter((token) => token.id !== highlightedTokenId),
       ].map((token) => {
         const isExpanded = expandedTokens.has(token.id);
 
@@ -198,7 +198,7 @@ export default function PatientTokensList({
                       token={token}
                       facility={facility}
                       showMarkInServiceButton={
-                        tokenId === token.id &&
+                        highlightedTokenId === token.id &&
                         token.status === TokenStatus.CREATED
                       }
                       cardClassName="rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"

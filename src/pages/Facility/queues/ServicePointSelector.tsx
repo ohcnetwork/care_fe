@@ -31,6 +31,24 @@ const ACTION_TO_STATUS: Record<ServicePointSelectorAction, TokenStatus> = {
   change_service_point: TokenStatus.IN_PROGRESS,
 };
 
+const ACTION_TO_CONTENT: Record<
+  ServicePointSelectorAction,
+  { titleKey: string; descriptionKey: string }
+> = {
+  serve: {
+    titleKey: "serve_token",
+    descriptionKey: "serve_confirmation",
+  },
+  move_to_up_next: {
+    titleKey: "move_to_up_next",
+    descriptionKey: "move_to_up_next_description",
+  },
+  change_service_point: {
+    titleKey: "change_service_point",
+    descriptionKey: "change_service_point_description",
+  },
+};
+
 export const ServicePointSelector = ({
   open,
   onOpenChange,
@@ -50,36 +68,19 @@ export const ServicePointSelector = ({
 }) => {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const { updateToken, isPending } = useToken({
+  const { updateToken, isUpdating } = useToken({
     facilityId,
     queueId: token.queue.id,
     tokenId: token.id,
     onSuccess,
   });
 
-  const getTitleOrDescription = (action: ServicePointSelectorAction) => {
-    switch (action) {
-      case "serve":
-        return {
-          title: t("serve_token"),
-          description: t("serve_confirmation"),
-        };
-      case "move_to_up_next":
-        return {
-          title: t("move_to_up_next"),
-          description: t("move_to_up_next_description"),
-        };
-      case "change_service_point":
-        return {
-          title: t("change_service_point"),
-          description: t("change_service_point_description"),
-        };
-    }
-  };
-  const { title, description } = getTitleOrDescription(action);
+  const { titleKey, descriptionKey } = ACTION_TO_CONTENT[action];
+  const title = t(titleKey);
+  const description = t(descriptionKey);
   const targetStatus = ACTION_TO_STATUS[action];
 
-  const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
+  const [selectedSubQueueId, setSelectedSubQueueId] = useState("");
 
   useEffect(() => {
     if (!open) {
@@ -93,7 +94,7 @@ export const ServicePointSelector = ({
 
   const handleSelect = (subQueueId: string) => {
     if (
-      isPending ||
+      isUpdating ||
       (subQueueId === token.sub_queue?.id && token.status === targetStatus)
     ) {
       return;
@@ -116,25 +117,13 @@ export const ServicePointSelector = ({
               {description}
             </DrawerDescription>
           </DrawerHeader>
-          {subQueues.length === 0 ? (
-            <div className="text-sm text-gray-500 italic pb-3 pl-4">
-              {t("no_service_points")}
-            </div>
-          ) : (
-            <div className="p-3 pb-6">
-              <RadioInput
-                options={subQueues.map((subQueue) => ({
-                  label: subQueue.name,
-                  value: subQueue.id,
-                }))}
-                onValueChange={handleSelect}
-                value={selectedSubQueueId}
-                required
-                className="flex flex-col gap-3"
-                classNameInput="p-2"
-              />
-            </div>
-          )}
+          <div className="p-3 pb-6">
+            <ServicePointsContent
+              subQueues={subQueues}
+              selectedSubQueueId={selectedSubQueueId}
+              onSelect={handleSelect}
+            />
+          </div>
         </DrawerContent>
       </Drawer>
     );
@@ -149,24 +138,46 @@ export const ServicePointSelector = ({
             {description}
           </DialogDescription>
         </DialogHeader>
-        {subQueues.length === 0 ? (
-          <div className="text-sm text-gray-500 italic">
-            {t("no_service_points")}
-          </div>
-        ) : (
-          <RadioInput
-            options={subQueues.map((sub) => ({
-              label: sub.name,
-              value: sub.id,
-            }))}
-            required
-            onValueChange={handleSelect}
-            value={selectedSubQueueId}
-            className="flex flex-col gap-3"
-            classNameInput="p-2"
-          />
-        )}
+        <ServicePointsContent
+          subQueues={subQueues}
+          selectedSubQueueId={selectedSubQueueId}
+          onSelect={handleSelect}
+        />
       </DialogContent>
     </Dialog>
+  );
+};
+
+const ServicePointsContent = ({
+  subQueues,
+  selectedSubQueueId,
+  onSelect,
+}: {
+  subQueues: TokenSubQueueRead[];
+  selectedSubQueueId: string;
+  onSelect: (subQueueId: string) => void;
+}) => {
+  const { t } = useTranslation();
+
+  if (subQueues.length === 0) {
+    return (
+      <div className="text-sm text-gray-500 italic">
+        {t("no_service_points")}
+      </div>
+    );
+  }
+
+  return (
+    <RadioInput
+      options={subQueues.map((subQueue) => ({
+        label: subQueue.name,
+        value: subQueue.id,
+      }))}
+      onValueChange={onSelect}
+      value={selectedSubQueueId}
+      required
+      className="flex flex-col gap-3"
+      optionClassName="p-2"
+    />
   );
 };

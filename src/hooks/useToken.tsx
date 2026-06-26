@@ -15,7 +15,7 @@ export function useToken({
   tokenId: string;
   onSuccess?: () => void;
 }) {
-  const { data: token } = useQuery({
+  const { data: token, isPending: isFetching } = useQuery({
     queryKey: ["token", facilityId, queueId, tokenId],
     queryFn: query(tokenApi.get, {
       pathParams: {
@@ -24,10 +24,9 @@ export function useToken({
         id: tokenId ?? "",
       },
     }),
-    enabled: !!queueId && !!tokenId,
   });
 
-  const { mutate: updateToken, isPending } = useMutation({
+  const { mutate: updateToken, isPending: isUpdating } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
         facility_id: facilityId,
@@ -56,5 +55,5 @@ export function useToken({
     },
   });
 
-  return { token, updateToken, isPending };
+  return { token, updateToken, isFetching, isUpdating };
 }

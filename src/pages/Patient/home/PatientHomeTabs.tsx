@@ -101,7 +101,7 @@ export default function PatientHomeTabs({
           <PatientTokensList
             patientId={patientId}
             facility={facility}
-            tokenId={token_id}
+            highlightedTokenId={token_id}
           />
         )}
       </div>
