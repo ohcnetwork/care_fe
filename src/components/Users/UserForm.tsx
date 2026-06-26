@@ -801,7 +801,7 @@ export default function UserForm({
                 <GovtOrganizationPicker
                   ref={field.ref}
                   aria-invalid={!!fieldState.error}
-                  requiredDepth={1}
+                  required={false}
                   value={selectedGeoOrg}
                   onChange={(organization) => {
                     setSelectedGeoOrg(organization);
