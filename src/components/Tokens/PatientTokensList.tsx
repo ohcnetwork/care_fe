@@ -13,7 +13,6 @@ import {
 import { DatePicker } from "@/components/ui/date-picker";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
-import { getTokenStatus } from "@/pages/Facility/queues/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -178,7 +177,7 @@ export default function PatientTokensList({
                       }
                       className="px-1.5 rounded-sm ml-2 whitespace-nowrap shrink-0"
                     >
-                      {getTokenStatus({ token, t })}
+                      {t(`token_status__${getQueueTokenStatus(token)}`)}
                     </Badge>
                     {isExpanded ? (
                       <ChevronsDownUp className="size-4 shrink-0" />

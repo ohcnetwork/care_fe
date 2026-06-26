@@ -1,4 +1,4 @@
-import { TokenRetrieve, TokenStatus } from "@/types/tokens/token/token";
+import { TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenQueueSummary } from "@/types/tokens/tokenQueue/tokenQueue";
 import query from "@/Utils/request/query";
@@ -52,23 +52,4 @@ export function useTokenListInfiniteQuery({
         ? careConfig.appointmentAndQueueRefreshInterval
         : false,
   });
-}
-
-export function getTokenStatus({
-  token,
-  t,
-}: {
-  token: TokenRetrieve;
-  t: (key: string) => string;
-}) {
-  if (token.status === TokenStatus.UNFULFILLED) {
-    return t("token_status__recall");
-  }
-  if (token.status === TokenStatus.CREATED && token.sub_queue?.id) {
-    return t("called");
-  }
-  if (token.status === TokenStatus.CREATED) {
-    return t("waiting");
-  }
-  return t(token.status.toLowerCase());
 }
