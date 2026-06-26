@@ -145,38 +145,26 @@ function useTokenActions({
   }
 
   if (token.sub_queue) {
-    items.push(
-      {
-        key: "return_to_waiting",
-        label: t("return_to_waiting"),
-        icon: <BringToFront className="size-4 mr-2" />,
-        onSelect: () =>
-          updateToken({
-            status: TokenStatus.CREATED,
-            note: token.note,
-            sub_queue: null,
-          }),
-      },
-      {
+    items.push({
+      key: "return_to_waiting",
+      label: t("return_to_waiting"),
+      icon: <BringToFront className="size-4 mr-2" />,
+      onSelect: () =>
+        updateToken({
+          status: TokenStatus.CREATED,
+          note: token.note,
+          sub_queue: null,
+        }),
+    });
+
+    if (assignedServicePointIds.length > 1) {
+      items.push({
         key: "change_service_point",
         label: t("change_service_point"),
         icon: <ArrowLeftRight className="size-4 mr-2" />,
-        onSelect: () => {
-          if (assignedServicePointIds.length === 0) {
-            toast.error(t("no_assigned_service_points"));
-            return;
-          } else if (assignedServicePointIds.length === 1) {
-            updateToken({
-              status: TokenStatus.IN_PROGRESS,
-              note: token.note,
-              sub_queue: assignedServicePointIds[0],
-            });
-            return;
-          }
-          onChangeServicePointClick();
-        },
-      },
-    );
+        onSelect: onChangeServicePointClick,
+      });
+    }
   }
 
   items.push({
@@ -329,6 +317,7 @@ function OngoingQueueTokenCardInner({
                 asChild
                 size="md"
                 className="hidden sm:flex"
+                onClick={(e) => e.stopPropagation()}
               >
                 <Link
                   basePath="/"

@@ -72,7 +72,9 @@ export const ServicePointSelector = ({
     }
   };
   const { title, description } = getTitleOrDescription(action);
-  const targetStatus = ACTION_TO_STATUS[action];
+
+  const targetStatus =
+    action === "change_service_point" ? token.status : ACTION_TO_STATUS[action];
 
   const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
 
