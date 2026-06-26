@@ -26,6 +26,9 @@ export function useToken({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
+        queryKey: ["token", tokenId],
+      });
+      queryClient.invalidateQueries({
         queryKey: ["token", facilityId, queueId, tokenId],
       });
       queryClient.invalidateQueries({
