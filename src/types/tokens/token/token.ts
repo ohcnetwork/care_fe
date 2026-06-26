@@ -49,6 +49,10 @@ export enum QueueTokenStatus {
   CALLED = "called",
   RECALL = "recall",
   SERVING = "serving",
+
+  FULFILLED = "fulfilled",
+  CANCELLED = "cancelled",
+  ENTERED_IN_ERROR = "entered_in_error",
 }
 
 export const QUEUE_TOKEN_STATUS_COLORS = {
@@ -56,6 +60,9 @@ export const QUEUE_TOKEN_STATUS_COLORS = {
   [QueueTokenStatus.CALLED]: "indigo",
   [QueueTokenStatus.RECALL]: "orange",
   [QueueTokenStatus.SERVING]: "green",
+  [QueueTokenStatus.FULFILLED]: "green",
+  [QueueTokenStatus.CANCELLED]: "destructive",
+  [QueueTokenStatus.ENTERED_IN_ERROR]: "destructive",
 } as const satisfies Record<
   QueueTokenStatus,
   React.ComponentProps<typeof Badge>["variant"]
@@ -70,6 +77,18 @@ export function getQueueTokenStatus(
 
   if (token.status === TokenStatus.UNFULFILLED) {
     return QueueTokenStatus.RECALL;
+  }
+
+  if (token.status === TokenStatus.FULFILLED) {
+    return QueueTokenStatus.FULFILLED;
+  }
+
+  if (token.status === TokenStatus.CANCELLED) {
+    return QueueTokenStatus.CANCELLED;
+  }
+
+  if (token.status === TokenStatus.ENTERED_IN_ERROR) {
+    return QueueTokenStatus.ENTERED_IN_ERROR;
   }
 
   return QueueTokenStatus.SERVING;
