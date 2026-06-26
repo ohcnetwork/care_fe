@@ -23,7 +23,7 @@ export function useQueueServicePoints({
   resourceId: string;
 }) {
   const [assignedServicePoints, setAssignedServicePoints] = useAtom(atom);
-  const servicPointKey = `${resourceType}:${resourceId}`;
+  const servicPointKey = `${facilityId}:${resourceType}:${resourceId}`;
 
   const { data: subQueues, isPending: isServicePointsLoading } = useQuery({
     queryKey: ["servicePoints", facilityId, resourceType, resourceId],
