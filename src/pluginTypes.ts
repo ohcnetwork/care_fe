@@ -84,6 +84,11 @@ export type ServiceRequestComponentType = React.FC<{
   serviceRequestId: string;
 }>;
 
+export type NoteMessageInputComponentType = React.FC<{
+  message: string;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
+}>;
+
 export type EncounterOverviewTopComponentType = React.FC<{
   encounter: EncounterRead;
   patientId: string;
@@ -115,6 +120,12 @@ export type DiagnosticReportOverrideComponentType = React.FC<{
   disabled?: boolean;
 }>;
 
+// To Support additional options to create delivery orders
+export type DeliveryOrderActionsComponentType = React.FC<{
+  facilityId: string;
+  locationId: string;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -130,9 +141,11 @@ export type SupportedPluginComponents = {
   PatientSearchActions: PatientSearchActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
   ServiceRequestAction: ServiceRequestComponentType;
+  NoteMessageInput: NoteMessageInputComponentType;
   EncounterOverviewTop: EncounterOverviewTopComponentType;
   DiagnosticReportOverride: DiagnosticReportOverrideComponentType;
   PatientHomeQuickActions: PatientHomeActionsComponentType;
+  DeliveryOrderActions: DeliveryOrderActionsComponentType;
 };
 
 // Create a type for lazy-loaded components

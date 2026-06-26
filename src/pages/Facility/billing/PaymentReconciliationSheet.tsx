@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { useAtom } from "jotai";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -58,6 +58,7 @@ import {
   useEntityExtensions,
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
+import { register } from "@/lib/override/register";
 import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -78,6 +79,7 @@ import {
 } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { ExtensionContexts } from "@/Utils/schema/types";
 import Decimal from "decimal.js";
 
 const PAYMENT_METHODS = [
@@ -179,7 +181,7 @@ const createFormSchema = (extValidation: z.ZodType<Record<string, unknown>>) =>
       },
     );
 
-export function PaymentReconciliationSheet({
+const PaymentReconciliationSheetBase = ({
   open,
   onOpenChange,
   facilityId,
@@ -188,9 +190,10 @@ export function PaymentReconciliationSheet({
   accountId,
   onSuccess,
   isCreditNote = false,
-}: PaymentReconciliationSheetProps) {
+}: PaymentReconciliationSheetProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const formRef = useRef<HTMLFormElement>(null);
   const [selectedLocationObject, setSelectedLocationObject] = useAtom(
     paymentReconcilationLocationAtom(facilityId),
   );
@@ -203,6 +206,7 @@ export function PaymentReconciliationSheet({
     () =>
       getCombinedExtensionProps(
         getExtensions(ExtensionEntityType.payment_reconciliation, "write"),
+        ExtensionContexts.payment_reconciliation_form,
       ),
     [getExtensions],
   );
@@ -221,6 +225,7 @@ export function PaymentReconciliationSheet({
     entityType: ExtensionEntityType.payment_reconciliation,
     schemaType: "write",
     form,
+    context: ExtensionContexts.payment_reconciliation_form,
   });
 
   // Watch for payment method changes
@@ -293,21 +298,31 @@ export function PaymentReconciliationSheet({
     },
   });
 
-  const handleSubmit = form.handleSubmit((data) => {
-    const { extensions: formExtensions, ...restData } = data;
-    const cleanedExtensions = extensions.prepareForSubmit(
-      formExtensions as NamespacedExtensionData,
-    );
+  const handleSubmit = form.handleSubmit(
+    (data) => {
+      const { extensions: formExtensions, ...restData } = data;
+      const cleanedExtensions = extensions.prepareForSubmit(
+        formExtensions as NamespacedExtensionData,
+      );
 
-    // Convert form data to PaymentReconciliationCreate type
-    const submissionData: PaymentReconciliationCreate = {
-      ...restData,
-      is_credit_note: isCreditNote,
-      location: restData.location,
-      extensions: cleanedExtensions,
-    };
-    submitPayment(submissionData);
-  });
+      // Convert form data to PaymentReconciliationCreate type
+      const submissionData: PaymentReconciliationCreate = {
+        ...restData,
+        is_credit_note: isCreditNote,
+        location: restData.location,
+        extensions: cleanedExtensions,
+      };
+      submitPayment(submissionData);
+    },
+    () => {
+      requestAnimationFrame(() => {
+        const firstError = formRef.current?.querySelector(
+          "[data-slot='form-message']",
+        );
+        firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    },
+  );
 
   useEffect(() => {
     if (open) {
@@ -372,7 +387,11 @@ export function PaymentReconciliationSheet({
         </SheetHeader>
 
         <Form {...form}>
-          <form onSubmit={handleSubmit} className="space-y-6 py-4">
+          <form
+            ref={formRef}
+            onSubmit={handleSubmit}
+            className="space-y-6 py-4"
+          >
             <div className="space-y-6">
               <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 space-y-3">
                 {invoice && (
@@ -734,6 +753,9 @@ export function PaymentReconciliationSheet({
       </SheetContent>
     </Sheet>
   );
-}
+};
 
-export default PaymentReconciliationSheet;
+export const PaymentReconciliationSheet = register(
+  "PaymentReconciliationSheet",
+  PaymentReconciliationSheetBase,
+);

@@ -147,7 +147,7 @@ export default function LocationForm({
       numberOfBeds &&
       locationName
     ) {
-      if (!customizeNames || bedFields.length === 0 || locationName) {
+      if (!customizeNames || bedFields.length === 0) {
         resetToDefaultNames();
       } else {
         const newCount = Number.parseInt(numberOfBeds ?? "0", 10);
