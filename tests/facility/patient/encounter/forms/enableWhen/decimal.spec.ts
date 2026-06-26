@@ -213,7 +213,11 @@ test.describe("Enable When — Decimal Operators", () => {
       });
 
       await test.step("Verify hidden values not on overview", async () => {
-        await verifySubmittedValues(page, [], [interpretation, comments]);
+        await verifySubmittedValues(
+          page,
+          [],
+          [interpretation, comments, "Score Interpretation", "Score Comments"],
+        );
       });
     });
   });
@@ -350,7 +354,11 @@ test.describe("Enable When — Decimal Operators", () => {
       });
 
       await test.step("Verify hidden values not on overview", async () => {
-        await verifySubmittedValues(page, [], [diagnosis, notes]);
+        await verifySubmittedValues(
+          page,
+          [],
+          [diagnosis, notes, "Match Diagnosis", "Match Notes"],
+        );
       });
     });
   });
@@ -499,7 +507,11 @@ test.describe("Enable When — Decimal Operators", () => {
       });
 
       await test.step("Verify hidden values not on overview", async () => {
-        await verifySubmittedValues(page, [], [reason, devNotes]);
+        await verifySubmittedValues(
+          page,
+          [],
+          [reason, devNotes, "Deviation Reason", "Deviation Notes"],
+        );
       });
     });
   });
@@ -636,7 +648,11 @@ test.describe("Enable When — Decimal Operators", () => {
       });
 
       await test.step("Verify hidden values not on overview", async () => {
-        await verifySubmittedValues(page, [], [action, alertNotes]);
+        await verifySubmittedValues(
+          page,
+          [],
+          [action, alertNotes, "High Alert Action", "High Alert Notes"],
+        );
       });
     });
   });
@@ -773,7 +789,11 @@ test.describe("Enable When — Decimal Operators", () => {
       });
 
       await test.step("Verify hidden values not on overview", async () => {
-        await verifySubmittedValues(page, [], [action, alertNotes]);
+        await verifySubmittedValues(
+          page,
+          [],
+          [action, alertNotes, "Low Alert Action", "Low Alert Notes"],
+        );
       });
     });
   });
@@ -910,7 +930,11 @@ test.describe("Enable When — Decimal Operators", () => {
       });
 
       await test.step("Verify hidden values not on overview", async () => {
-        await verifySubmittedValues(page, [], [action, alertNotes]);
+        await verifySubmittedValues(
+          page,
+          [],
+          [action, alertNotes, "GTE Alert Action", "GTE Alert Notes"],
+        );
       });
     });
   });
@@ -1047,7 +1071,11 @@ test.describe("Enable When — Decimal Operators", () => {
       });
 
       await test.step("Verify hidden values not on overview", async () => {
-        await verifySubmittedValues(page, [], [action, alertNotes]);
+        await verifySubmittedValues(
+          page,
+          [],
+          [action, alertNotes, "LTE Alert Action", "LTE Alert Notes"],
+        );
       });
     });
   });

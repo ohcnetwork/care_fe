@@ -16,6 +16,7 @@ interface NumberQuestionProps {
   ) => void;
   disabled?: boolean;
   index: number;
+  clearError: () => void;
 }
 
 export function NumberQuestion({
@@ -24,8 +25,10 @@ export function NumberQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   index,
+  clearError,
 }: NumberQuestionProps) {
   const handleChange = (value: string) => {
+    clearError();
     const emptyValue = value === "";
 
     if (emptyValue) {
