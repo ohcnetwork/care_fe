@@ -375,7 +375,7 @@ function DiagnosticReportItem({
         setIsExpanded(false);
       },
       onError: () => {
-        toast.success(t("failed_to_update_conclusion"));
+        toast.error(t("failed_to_update_conclusion"));
       },
     });
 
