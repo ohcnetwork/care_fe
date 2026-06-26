@@ -1,31 +1,21 @@
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import queryClient from "@/Utils/request/queryClient";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 export function useToken({
   facilityId,
   queueId,
   tokenId,
   onSuccess,
+  patientId,
 }: {
   facilityId: string;
   queueId: string;
   tokenId: string;
+  patientId?: string;
   onSuccess?: () => void;
 }) {
-  const { data: token, isPending: isFetching } = useQuery({
-    queryKey: ["token", facilityId, queueId, tokenId],
-    queryFn: query(tokenApi.get, {
-      pathParams: {
-        facility_id: facilityId,
-        queue_id: queueId ?? "",
-        id: tokenId ?? "",
-      },
-    }),
-  });
-
   const { mutate: updateToken, isPending: isUpdating } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
@@ -41,9 +31,9 @@ export function useToken({
       queryClient.invalidateQueries({
         queryKey: ["infinite-tokens", facilityId, queueId],
       });
-      if (token?.patient?.id) {
+      if (patientId) {
         queryClient.invalidateQueries({
-          queryKey: ["tokens", token.patient.id, facilityId],
+          queryKey: ["tokens", patientId, facilityId],
         });
       } else {
         queryClient.invalidateQueries({ queryKey: ["tokens"] });
@@ -55,5 +45,5 @@ export function useToken({
     },
   });
 
-  return { token, updateToken, isFetching, isUpdating };
+  return { updateToken, isUpdating };
 }

@@ -36,6 +36,7 @@ export default function TokenCardWithButton({
     facilityId: facility.id,
     queueId: token.queue.id,
     tokenId: token.id,
+    patientId: token.patient?.id,
     onSuccess: () => {
       setShowServicepointDialog(false);
       toast(t("token_assigned_to_service_point"));

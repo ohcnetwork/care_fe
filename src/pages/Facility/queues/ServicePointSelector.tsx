@@ -72,6 +72,7 @@ export const ServicePointSelector = ({
     facilityId,
     queueId: token.queue.id,
     tokenId: token.id,
+    patientId: token.patient?.id,
     onSuccess,
   });
 
