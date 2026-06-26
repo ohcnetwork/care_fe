@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
-import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
@@ -56,6 +55,7 @@ import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
 import { hasStructuredQuestion, initializeGroupResponses } from "./utils";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import queryClient from "@/Utils/request/queryClient";
 
 export interface QuestionnaireFormState {
@@ -341,6 +341,23 @@ function isResponseFilled(r: QuestionnaireResponse): boolean {
   if (r.values.length > 0 && r.values.some(isValueFilled)) return true;
   if (r.sub_results?.some((inst) => inst.some(isResponseFilled))) return true;
   return false;
+}
+
+function hasFilledQuestionInResponses(
+  question: Question,
+  responses: QuestionnaireResponse[],
+): boolean {
+  if (question.type === "group" && question.questions) {
+    if (question.repeats) {
+      const response = responses.find((r) => r.question_id === question.id);
+      return response != null && isResponseFilled(response);
+    }
+    return question.questions.some((subQ) =>
+      hasFilledQuestionInResponses(subQ, responses),
+    );
+  }
+  const response = responses.find((r) => r.question_id === question.id);
+  return response != null && isResponseFilled(response);
 }
 
 function serializeValue(value: ResponseValue): Record<string, unknown> {
@@ -828,12 +845,9 @@ export function QuestionnaireForm({
             }
           } else {
             if (q.required && isQuestionEnabled(q, form.responses)) {
-              const hasFilledSubQuestion = q.questions.some((subQ) => {
-                const response = form.responses.find(
-                  (r) => r.question_id === subQ.id,
-                );
-                return response != null && isResponseFilled(response);
-              });
+              const hasFilledSubQuestion = q.questions.some((subQ) =>
+                hasFilledQuestionInResponses(subQ, form.responses),
+              );
               if (!hasFilledSubQuestion) {
                 errors.push({
                   question_id: q.id,
@@ -1032,6 +1046,11 @@ export function QuestionnaireForm({
 
   return (
     <div className="flex gap-4">
+      <PLUGIN_Component
+        __name="Scribe"
+        formState={questionnaireForms}
+        setFormState={setQuestionnaireForms}
+      />
       {/* Left Navigation */}
       <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
         <BackButton className="w-full">
@@ -1259,12 +1278,6 @@ export function QuestionnaireForm({
             />
           </>
         )}
-
-        <PLUGIN_Component
-          __name="Scribe"
-          formState={questionnaireForms}
-          setFormState={setQuestionnaireForms}
-        />
 
         <DebugPreview
           data={questionnaireForms}
