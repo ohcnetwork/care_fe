@@ -228,7 +228,6 @@ const PaymentReconciliationSheetBase = ({
     schemaType: "write",
     context: ExtensionContexts.payment_reconciliation_form,
     form,
-    context: ExtensionContexts.payment_reconciliation_form,
   });
 
   // Watch for payment method changes

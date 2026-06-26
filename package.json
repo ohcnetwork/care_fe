@@ -54,7 +54,6 @@
     "clone-component": "tsx scripts/clone-component.ts"
   },
   "dependencies": {
-    "@excalidraw/excalidraw": "^0.18.1",
     "@fontsource/figtree": "^5.2.10",
     "@fontsource/libre-barcode-128-text": "^5.2.8",
     "@hookform/resolvers": "^5.4.0",

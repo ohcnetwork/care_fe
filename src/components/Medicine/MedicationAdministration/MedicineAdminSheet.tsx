@@ -191,7 +191,7 @@ export function MedicineAdminSheet({
     [medications, encounterId],
   );
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const administrations = Array.from(selectedMedicines).map(
       (id) => administrationRequests[id],
