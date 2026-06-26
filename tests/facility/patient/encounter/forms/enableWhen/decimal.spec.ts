@@ -69,6 +69,7 @@ async function fillOtherDecimalSources(page: Page, excludeLabel: string) {
 }
 
 test.describe("Enable When — Decimal Operators", () => {
+  test.describe.configure({ mode: "serial" });
   test.use({ storageState: "tests/.auth/user.json" });
 
   test.beforeEach(async ({ page }) => {
