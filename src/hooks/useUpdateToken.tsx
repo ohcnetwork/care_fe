@@ -1,48 +1,45 @@
+import { TokenRead } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import queryClient from "@/Utils/request/queryClient";
 import { useMutation } from "@tanstack/react-query";
 
-export function useToken({
+export function useUpdateToken({
   facilityId,
-  queueId,
-  tokenId,
+  token,
   onSuccess,
-  patientId,
 }: {
   facilityId: string;
-  queueId: string;
-  tokenId: string;
-  patientId?: string;
+  token: TokenRead;
   onSuccess?: () => void;
 }) {
   const { mutate: updateToken, isPending: isUpdating } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
         facility_id: facilityId,
-        queue_id: queueId,
-        id: tokenId,
+        queue_id: token.queue.id,
+        id: token.id,
       },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["token", tokenId],
+        queryKey: ["token", token.id],
       });
       queryClient.invalidateQueries({
-        queryKey: ["token", facilityId, queueId, tokenId],
+        queryKey: ["token", facilityId, token.queue.id, token.id],
       });
       queryClient.invalidateQueries({
-        queryKey: ["infinite-tokens", facilityId, queueId],
+        queryKey: ["infinite-tokens", facilityId, token.queue.id],
       });
-      if (patientId) {
+      if (token.patient?.id) {
         queryClient.invalidateQueries({
-          queryKey: ["tokens", patientId, facilityId],
+          queryKey: ["tokens", token.patient.id, facilityId],
         });
       } else {
         queryClient.invalidateQueries({ queryKey: ["tokens"] });
       }
       queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facilityId, queueId],
+        queryKey: ["token-queue-summary", facilityId, token.queue.id],
       });
       onSuccess?.();
     },

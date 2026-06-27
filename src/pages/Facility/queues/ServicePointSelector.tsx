@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/drawer";
 import RadioInput from "@/components/ui/RadioInput";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { useToken } from "@/hooks/useToken";
+import { useUpdateToken } from "@/hooks/useUpdateToken";
 import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
 import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import { useEffect, useState } from "react";
@@ -68,11 +68,9 @@ export const ServicePointSelector = ({
 }) => {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const { updateToken, isUpdating } = useToken({
+  const { updateToken, isUpdating } = useUpdateToken({
     facilityId,
-    queueId: token.queue.id,
-    tokenId: token.id,
-    patientId: token.patient?.id,
+    token,
     onSuccess,
   });
 
@@ -178,7 +176,7 @@ const ServicePointsContent = ({
       value={selectedSubQueueId}
       required
       className="flex flex-col gap-3"
-      optionClassName="p-2"
+      labelClassName="p-2"
     />
   );
 };

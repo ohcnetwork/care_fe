@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { useToken } from "@/hooks/useToken";
+import { useUpdateToken } from "@/hooks/useUpdateToken";
 import { ServicePointSelector } from "@/pages/Facility/queues/ServicePointSelector";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
@@ -32,11 +32,9 @@ export default function TokenCardWithButton({
   const { t } = useTranslation();
   const [showServicepointDialog, setShowServicepointDialog] = useState(false);
 
-  const { updateToken, isUpdating } = useToken({
+  const { updateToken, isUpdating } = useUpdateToken({
     facilityId: facility.id,
-    queueId: token.queue.id,
-    tokenId: token.id,
-    patientId: token.patient?.id,
+    token,
     onSuccess: () => {
       setShowServicepointDialog(false);
       toast(t("token_assigned_to_service_point"));

@@ -68,6 +68,15 @@ export const QUEUE_TOKEN_STATUS_COLORS = {
   React.ComponentProps<typeof Badge>["variant"]
 >;
 
+const TOKEN_TO_QUEUE_STATUS: Record<TokenStatus, QueueTokenStatus> = {
+  [TokenStatus.UNFULFILLED]: QueueTokenStatus.RECALL,
+  [TokenStatus.IN_PROGRESS]: QueueTokenStatus.SERVING,
+  [TokenStatus.FULFILLED]: QueueTokenStatus.FULFILLED,
+  [TokenStatus.CANCELLED]: QueueTokenStatus.CANCELLED,
+  [TokenStatus.ENTERED_IN_ERROR]: QueueTokenStatus.ENTERED_IN_ERROR,
+  [TokenStatus.CREATED]: QueueTokenStatus.WAITING,
+};
+
 export function getQueueTokenStatus(
   token: Pick<TokenRead, "status" | "sub_queue">,
 ): QueueTokenStatus {
@@ -75,23 +84,7 @@ export function getQueueTokenStatus(
     return token.sub_queue ? QueueTokenStatus.CALLED : QueueTokenStatus.WAITING;
   }
 
-  if (token.status === TokenStatus.UNFULFILLED) {
-    return QueueTokenStatus.RECALL;
-  }
-
-  if (token.status === TokenStatus.FULFILLED) {
-    return QueueTokenStatus.FULFILLED;
-  }
-
-  if (token.status === TokenStatus.CANCELLED) {
-    return QueueTokenStatus.CANCELLED;
-  }
-
-  if (token.status === TokenStatus.ENTERED_IN_ERROR) {
-    return QueueTokenStatus.ENTERED_IN_ERROR;
-  }
-
-  return QueueTokenStatus.SERVING;
+  return TOKEN_TO_QUEUE_STATUS[token.status];
 }
 
 export interface Token {
