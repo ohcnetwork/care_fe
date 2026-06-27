@@ -57,15 +57,10 @@ import {
 } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenRead, SpecimenStatus } from "@/types/emr/specimen/specimen";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
-import {
-  BACKEND_ALLOWED_EXTENSIONS,
-  FileReadMinimal,
-  FileType,
-} from "@/types/files/file";
+import { BACKEND_ALLOWED_EXTENSIONS, FileType } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { FileListTable } from "@/components/Files/FileListTable";
@@ -158,13 +153,6 @@ export function DiagnosticReportForm({
           queryKey: ["diagnosticReport"],
         });
       },
-      onError: (err: Error) => {
-        toast.error(
-          t("failed_to_create_diagnostic_report", {
-            error: err.message || "Unknown error",
-          }),
-        );
-      },
     });
 
   function handleCreateReport(code?: Code) {
@@ -230,18 +218,17 @@ export function DiagnosticReportForm({
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {isMultipleDiagnosticReport &&
-                      activityDefinition?.diagnostic_report_codes?.map(
-                        (code) => (
-                          <SelectItem key={code.code} value={code.code}>
-                            <div className="flex flex-col">
-                              <span className="truncate">
-                                {code.display} ({code.code})
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ),
-                      )}
+                    {activityDefinition?.diagnostic_report_codes?.map(
+                      (code) => (
+                        <SelectItem key={code.code} value={code.code}>
+                          <div className="flex flex-col">
+                            <span className="truncate">
+                              {code.display} ({code.code})
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ),
+                    )}
                   </SelectContent>
                 </Select>
               ) : (
@@ -317,9 +304,7 @@ function DiagnosticReportItem({
   });
 
   // Query to fetch files for the diagnostic report
-  const { data: files = { results: [], count: 0 } } = useQuery<
-    PaginatedResponse<FileReadMinimal>
-  >({
+  const { data: files } = useQuery({
     queryKey: ["files", "diagnostic_report", report.id],
     queryFn: query(fileApi.list, {
       queryParams: {
@@ -350,13 +335,6 @@ function DiagnosticReportItem({
           queryKey: ["diagnosticReport", report.id],
         });
       },
-      onError: (err: Error) => {
-        toast.error(
-          t("failed_to_save_test_results", {
-            error: err.message || "Unknown error",
-          }),
-        );
-      },
     });
 
   const { mutate: updateDiagnosticReport, isPending: isUpdatingReport } =
@@ -382,7 +360,7 @@ function DiagnosticReportItem({
   // Initialize file upload hook
   const inputId = `file_upload_diagnostic_report_${report.id}`;
   const fileUpload = useFileUpload({
-    type: "diagnostic_report" as FileType,
+    type: FileType.DIAGNOSTIC_REPORT,
     inputId,
     multiple: true,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
