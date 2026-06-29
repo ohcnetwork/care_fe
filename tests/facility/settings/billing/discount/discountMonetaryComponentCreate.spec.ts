@@ -23,6 +23,14 @@ test.describe("Discount Monetary Component Settings", () => {
     await page.waitForLoadState("networkidle");
   }
 
+  // Switch the factor/amount Select dropdown to the given option.
+  // Uses data-slot="select-trigger" to distinguish the Radix Select from the
+  // discount-code Autocomplete (which renders as data-slot="popover-trigger").
+  async function selectValueType(page: Page, option: "Factor" | "Amount") {
+    await page.locator('[data-slot="select-trigger"]').click();
+    await page.getByRole("option", { name: option }).click();
+  }
+
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     await navigateToDiscountComponents(page);
@@ -43,7 +51,8 @@ test.describe("Discount Monetary Component Settings", () => {
     const titleInput = page.getByRole("textbox", { name: /name/i });
     await titleInput.fill("   "); // Only whitespace
 
-    const amountInput = page.getByLabel(/discount|amount/i).first();
+    // Amount is the default — fill it so the title field gets blurred (touched).
+    const amountInput = page.getByRole("spinbutton");
     await amountInput.fill("100");
 
     const saveButton = page.getByRole("button", { name: /save/i });
@@ -69,12 +78,8 @@ test.describe("Discount Monetary Component Settings", () => {
     const titleInput = page.getByRole("textbox", { name: /name/i });
     await titleInput.fill("Test Discount");
 
-    const amountRadio = page.getByLabel(/amount/i).first();
-    await amountRadio.click();
-
-    const amountInput = page.getByRole("spinbutton", {
-      name: /discount|amount/i,
-    });
+    // Amount is already selected by default — find the spinbutton directly.
+    const amountInput = page.getByRole("spinbutton");
     // Leave empty and trigger validation
     await amountInput.focus();
     await amountInput.blur();
@@ -98,19 +103,16 @@ test.describe("Discount Monetary Component Settings", () => {
     const titleInput = page.getByRole("textbox", { name: /name/i });
     await titleInput.fill("Test Discount Factor");
 
-    // Select factor option
-    const factorRadio = page.getByLabel(/factor/i).first();
-    await factorRadio.click();
+    // Switch to factor via the Select dropdown.
+    await selectValueType(page, "Factor");
 
-    const factorInput = page.getByRole("spinbutton", {
-      name: /discount|factor|%/i,
-    });
+    const factorInput = page.getByRole("spinbutton");
     // Leave empty and trigger validation
     await factorInput.focus();
     await factorInput.blur();
 
     const saveButton = page.getByRole("button", { name: /save/i });
-    await saveButton.click();
+    await expect(saveButton).toBeDisabled();
 
     // Should show "This field is required"
     const factorContainer = page.locator("div").filter({ has: factorInput });
@@ -137,13 +139,8 @@ test.describe("Discount Monetary Component Settings", () => {
     // Still disabled - no amount/factor
     await expect(saveButton).toBeDisabled();
 
-    // Add amount
-    const amountRadio = page.getByLabel(/amount/i).first();
-    await amountRadio.click();
-
-    const amountInput = page.getByRole("spinbutton", {
-      name: /discount|amount/i,
-    });
+    // Amount is already selected by default — just fill it.
+    const amountInput = page.getByRole("spinbutton");
     await amountInput.fill("50");
 
     // Now should be enabled
@@ -159,27 +156,22 @@ test.describe("Discount Monetary Component Settings", () => {
     const discountTitle = `Discount ${faker.string.alphanumeric(8)}`;
     await titleInput.fill(discountTitle);
 
-    // Select and fill amount
-    const amountRadio = page.getByLabel(/amount/i).first();
-    await amountRadio.click();
-
-    const amountInput = page.getByRole("spinbutton", {
-      name: /discount|amount/i,
-    });
+    // Amount is already selected by default — fill the spinbutton directly.
+    const amountInput = page.getByRole("spinbutton");
     await amountInput.fill("100");
 
     const saveButton = page.getByRole("button", { name: /save/i });
     await expect(saveButton).toBeEnabled();
-    await saveButton.click();
+
+    const [apiResponse] = await Promise.all([
+      page.waitForResponse((r) => r.url().includes("set_monetary_config")),
+      saveButton.click(),
+    ]);
+    expect(apiResponse.status()).toBe(200);
 
     await page.waitForLoadState("networkidle");
 
-    // Verify success
-    await expect(
-      page.getByText(/discount.*component.*created|saved/i),
-    ).toBeVisible();
-
-    // Verify component appears in table
+    // Verify component appears in table (confirms mutation succeeded)
     await expect(page.getByText(discountTitle)).toBeVisible();
   });
 
@@ -191,13 +183,10 @@ test.describe("Discount Monetary Component Settings", () => {
     const titleInput = page.getByRole("textbox", { name: /name/i });
     await titleInput.fill("Invalid Factor Discount");
 
-    // Select factor option
-    const factorRadio = page.getByLabel(/factor/i).first();
-    await factorRadio.click();
+    // Switch to factor via the Select dropdown.
+    await selectValueType(page, "Factor");
 
-    const factorInput = page.getByRole("spinbutton", {
-      name: /discount|factor|%/i,
-    });
+    const factorInput = page.getByRole("spinbutton");
 
     // Enter value > 100 (invalid)
     await factorInput.fill("150");
@@ -206,10 +195,19 @@ test.describe("Discount Monetary Component Settings", () => {
     const saveButton = page.getByRole("button", { name: /save/i });
     await expect(saveButton).toBeDisabled();
 
-    // Should show validation error
+    // react-hook-form (onSubmit mode) only populates errors after a submit event.
+    // The save button is disabled, so we dispatch a synthetic submit to trigger
+    // the zodResolver error population without native HTML constraint validation.
+    await page
+      .locator("form")
+      .evaluate((form) =>
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        ),
+      );
+
+    // Should show validation error ("Must be at most 100")
     const factorContainer = page.locator("div").filter({ has: factorInput });
-    await expect(
-      factorContainer.getByText(/invalid|max|greater/i),
-    ).toBeVisible();
+    await expect(factorContainer.getByText(/at most/i).first()).toBeVisible();
   });
 });

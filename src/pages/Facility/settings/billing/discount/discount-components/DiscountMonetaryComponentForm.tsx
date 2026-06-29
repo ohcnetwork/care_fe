@@ -66,11 +66,17 @@ export function DiscountMonetaryComponentForm({
           // to "" so zodDecimal's refinement fires the friendly "field_required"
           // message instead of the raw Zod type error "Expected string, received null".
           factor: z
-            .preprocess((val) => val ?? "", zodDecimal({ min: 0, max: 100 }))
+            .preprocess(
+              (val) => val ?? "",
+              zodDecimal({ min: 0, max: 100, message: t("field_required") }),
+            )
             .optional()
             .nullable(),
           amount: z
-            .preprocess((val) => val ?? "", zodDecimal({ min: 0 }))
+            .preprocess(
+              (val) => val ?? "",
+              zodDecimal({ min: 0, message: t("field_required") }),
+            )
             .optional()
             .nullable(),
           // Fix #14040: trim() strips leading/trailing whitespace before the

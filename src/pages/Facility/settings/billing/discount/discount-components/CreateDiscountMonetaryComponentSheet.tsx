@@ -60,7 +60,10 @@ export function CreateDiscountMonetaryComponentSheet() {
                   data,
                 ],
                 discount_codes: facility.discount_codes,
-                discount_configuration: facility.discount_configuration ?? null,
+                discount_configuration:
+                  facility.discount_configuration?.max_applicable != null
+                    ? facility.discount_configuration
+                    : null,
               });
             }}
           />
