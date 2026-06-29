@@ -352,9 +352,6 @@ function DiagnosticReportItem({
         });
         setIsExpanded(false);
       },
-      onError: () => {
-        toast.error(t("failed_to_update_conclusion"));
-      },
     });
 
   // Initialize file upload hook

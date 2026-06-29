@@ -143,11 +143,6 @@ function DiagnosticReportReviewItem({
           queryKey: ["files"],
         });
       },
-      onError: (err: Error) => {
-        toast.error(
-          t("failed_to_approve_diagnostic_report", { error: err.message }),
-        );
-      },
     });
 
   // Prefer the full detail (with observations); fall back to the list report
