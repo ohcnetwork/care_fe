@@ -53,6 +53,8 @@ const TokenEncounterRedirect = ({
           year_of_birth: token.patient.year_of_birth?.toString() || "",
           partial_id: token.patient.id.slice(0, 5),
           queue_id: token.queue.id,
+          resource_type: token.resource_type,
+          resource_id: token.resource.id,
           token_id: token.id,
         }).toString()}`}
       />

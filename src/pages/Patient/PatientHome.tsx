@@ -17,9 +17,9 @@ import { useState } from "react";
 
 import { pharmacyDispenseServiceAtom } from "@/atoms/pharmacy";
 import { getPermissions } from "@/common/Permissions";
-import BackButton from "@/components/Common/BackButton";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
+import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import CreateTokenForm from "@/components/Tokens/CreateTokenForm";
 import PatientTokensList from "@/components/Tokens/PatientTokensList";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import PatientHomeTabs from "@/pages/Patient/home/PatientHomeTabs";
 import { PLUGIN_Component } from "@/PluginEngine";
 import patientApi from "@/types/emr/patient/patientApi";
+import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import query from "@/Utils/request/query";
 import { goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
@@ -47,7 +48,9 @@ interface QParams {
   flow?: "queue" | "dispense";
   action?: "schedule" | "create_encounter";
   token_id?: string;
-  queue_id?: string;
+  queue_id: string;
+  resource_type: SchedulableResourceType;
+  resource_id: string;
 }
 
 export default function PatientHome() {
@@ -62,6 +65,8 @@ export default function PatientHome() {
       action,
       token_id,
       queue_id,
+      resource_type,
+      resource_id,
     },
   ] = useQueryParams<QParams>();
   const queryClient = useQueryClient();
@@ -125,11 +130,16 @@ export default function PatientHome() {
         </Alert>
       ) : patientData ? (
         <div className="space-y-6 md:max-w-5xl mx-auto">
-          {isQueueFlow && queue_id && (
-            <BackButton>
-              <ArrowLeft />
-              {t("queue")}
-            </BackButton>
+          {isQueueFlow && (
+            <Button asChild type="button" variant="outline">
+              <Link
+                href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resource_type]}/${resource_id}/queues/${queue_id}/ongoing`}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft />
+                {t("queue")}
+              </Link>
+            </Button>
           )}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">

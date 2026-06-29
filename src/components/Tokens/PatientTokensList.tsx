@@ -18,7 +18,6 @@ import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import {
   getQueueTokenStatus,
-  QUEUE_TOKEN_STATUS_COLORS,
   renderTokenNumber,
   TOKEN_STATUS_COLORS,
   TokenStatus,
@@ -167,14 +166,7 @@ export default function PatientTokensList({
                       </div>
                     </div>
                     <Badge
-                      variant={
-                        token.status === TokenStatus.CREATED ||
-                        token.status === TokenStatus.UNFULFILLED
-                          ? QUEUE_TOKEN_STATUS_COLORS[
-                              getQueueTokenStatus(token)
-                            ]
-                          : TOKEN_STATUS_COLORS[token.status]
-                      }
+                      variant={TOKEN_STATUS_COLORS[token.status]}
                       className="px-1.5 rounded-sm ml-2 whitespace-nowrap shrink-0"
                     >
                       {t(`token_status__${getQueueTokenStatus(token)}`)}
