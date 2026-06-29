@@ -26,19 +26,36 @@ import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
 import {
   ACTIVE_MEDICATION_STATUSES,
+  getMedicationActiveWindow,
   INACTIVE_MEDICATION_STATUSES,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 
 import {
+  getGroupActiveWindow,
+  getGroupAdministrationsForTimeSlot,
+  getSlotWindowState,
   GroupedMedication,
+  isTimeInSlot,
   STATUS_COLORS,
   TIME_SLOTS,
-  getGroupAdministrationsForTimeSlot,
-  isTimeInSlot,
 } from "./utils";
 
 type TimeSlot = (typeof TIME_SLOTS)[number] & { date: Date };
+
+/** Inline marker shown in the slot that contains a window's start or end. */
+const WindowCap: React.FC<{ label: string; date: Date }> = ({
+  label,
+  date,
+}) => (
+  <div className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-gray-400">
+    <span className="h-px flex-1 bg-gray-200" />
+    <span className="whitespace-nowrap">
+      {label} {format(date, "MMM dd")}
+    </span>
+    <span className="h-px flex-1 bg-gray-200" />
+  </div>
+);
 
 interface GroupedMedicationRowProps {
   group: GroupedMedication;
@@ -90,6 +107,7 @@ const IndividualMedicationRow: React.FC<{
   const isActive = ACTIVE_MEDICATION_STATUSES.includes(
     medication.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
   );
+  const activeWindow = getMedicationActiveWindow(medication);
 
   return (
     <React.Fragment>
@@ -168,6 +186,7 @@ const IndividualMedicationRow: React.FC<{
 
         const hasAdmins = slotAdmins && slotAdmins.length > 0;
         const isCurrentSlot = isTimeInSlot(currentDate, slot);
+        const windowState = getSlotWindowState(slot, activeWindow);
 
         // Check if this is the last slot of a day
         const nextSlot = visibleSlots[slotIndex + 1];
@@ -183,9 +202,18 @@ const IndividualMedicationRow: React.FC<{
               "p-2 border-t border-r border-gray-100 bg-gray-50",
               isInactive && "opacity-50",
               hasAdmins && "bg-green-50/50",
+              !windowState.inWindow &&
+                !hasAdmins &&
+                "bg-gray-100/60 opacity-40",
               isLastSlotOfDay && "border-r-4 border-r-gray-200",
             )}
           >
+            {windowState.isStartSlot && (
+              <WindowCap label={t("starts")} date={activeWindow.start} />
+            )}
+            {windowState.isEndSlot && activeWindow.end && (
+              <WindowCap label={t("ends")} date={activeWindow.end} />
+            )}
             <div className="flex flex-wrap gap-1">
               {slotAdmins?.map((admin) => {
                 const colorClass =
@@ -211,17 +239,20 @@ const IndividualMedicationRow: React.FC<{
               })}
             </div>
             {/* Show Administer button if group has active requests */}
-            {isCurrentSlot && groupHasActiveRequests && canWrite && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full h-7 mt-1 text-primary-700 border-primary-500 hover:bg-primary-50 font-medium text-xs"
-                onClick={() => onAdminister(medication)}
-              >
-                <CareIcon icon="l-syringe" className="size-3 mr-1" />
-                {t("administer")}
-              </Button>
-            )}
+            {isCurrentSlot &&
+              groupHasActiveRequests &&
+              canWrite &&
+              windowState.inWindow && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full h-7 mt-1 text-primary-700 border-primary-500 hover:bg-primary-50 font-medium text-xs"
+                  onClick={() => onAdminister(medication)}
+                >
+                  <CareIcon icon="l-syringe" className="size-3 mr-1" />
+                  {t("administer")}
+                </Button>
+              )}
           </div>
         );
       })}
@@ -286,6 +317,8 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
           return currentDate > latestDate ? current : latest;
         })
       : group.requests[0]; // Fallback to first request if no active ones
+
+  const groupWindow = getGroupActiveWindow(group);
 
   return (
     <Collapsible
@@ -413,6 +446,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
           );
           const isCurrentSlot = isTimeInSlot(currentDate, slot);
           const hasAdmins = slotAdmins.length > 0;
+          const windowState = getSlotWindowState(slot, groupWindow);
 
           // Check if this is the last slot of a day (next slot is different day)
           const nextSlot = visibleSlots[slotIndex + 1];
@@ -427,9 +461,18 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
               className={cn(
                 "p-3 border-t border-r border-gray-200",
                 hasAdmins && "bg-green-50",
+                !windowState.inWindow &&
+                  !hasAdmins &&
+                  "bg-gray-100/60 opacity-40",
                 isLastSlotOfDay && "border-r-4 border-r-gray-200",
               )}
             >
+              {windowState.isStartSlot && (
+                <WindowCap label={t("starts")} date={groupWindow.start} />
+              )}
+              {windowState.isEndSlot && groupWindow.end && (
+                <WindowCap label={t("ends")} date={groupWindow.end} />
+              )}
               {/* Administration badges */}
               {hasAdmins && (
                 <div className="flex flex-wrap gap-1 mb-2">
@@ -472,17 +515,20 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
               )}
 
               {/* Administer button */}
-              {isCurrentSlot && group.hasActiveRequests && canWrite && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full h-8 text-primary-700 border-primary-500 hover:bg-primary-50 font-medium"
-                  onClick={() => onAdministerGroup(group)}
-                >
-                  <CareIcon icon="l-syringe" className="size-4 mr-1" />
-                  {t("administer")}
-                </Button>
-              )}
+              {isCurrentSlot &&
+                group.hasActiveRequests &&
+                canWrite &&
+                windowState.inWindow && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full h-8 text-primary-700 border-primary-500 hover:bg-primary-50 font-medium"
+                    onClick={() => onAdministerGroup(group)}
+                  >
+                    <CareIcon icon="l-syringe" className="size-4 mr-1" />
+                    {t("administer")}
+                  </Button>
+                )}
             </div>
           );
         })}

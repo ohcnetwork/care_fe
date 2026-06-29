@@ -154,10 +154,29 @@ export function DosageFrequencyInput({
           text: "SOS",
         });
       } else {
-        // Standard FHIR timing (from M-A-N preset or direct FHIR code)
+        // Standard FHIR timing (from M-A-N preset or direct FHIR code).
+        // Preserve any scheduling bounds already chosen in the Duration field
+        // (duration / range / period) — only fall back to the preset's default
+        // bounds_duration when no bounds were set yet.
         const preset = MAN_FREQUENCY_PRESETS.find((p) => p.man === value);
+        const existing = dosageInstruction.timing?.repeat;
+        const hasExistingBounds =
+          !!existing?.bounds_duration ||
+          !!existing?.bounds_range ||
+          !!existing?.bounds_period;
+        const timing = hasExistingBounds
+          ? {
+              ...fhirMapping.timing,
+              repeat: {
+                ...fhirMapping.timing.repeat,
+                bounds_duration: existing?.bounds_duration,
+                bounds_range: existing?.bounds_range,
+                bounds_period: existing?.bounds_period,
+              },
+            }
+          : fhirMapping.timing;
         onDosageInstructionChange({
-          timing: fhirMapping.timing,
+          timing,
           as_needed_boolean: false,
           as_needed_for: undefined,
           text: preset ? preset.man : undefined,

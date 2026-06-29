@@ -6,6 +6,8 @@ import {
 } from "@/types/emr/medicationAdministration/medicationAdministration";
 import {
   ACTIVE_MEDICATION_STATUSES,
+  getMedicationActiveWindow,
+  MedicationActiveWindow,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 
@@ -267,4 +269,62 @@ export function getGroupAdministrationsForTimeSlot(
     const adminDate = new Date(admin.occurrence_period_start);
     return isTimeInSlot(adminDate, { date: slotDate, start, end });
   });
+}
+
+/**
+ * Combined active window for a group — the union across its active requests
+ * (earliest start, latest end). Any open-ended request makes the group
+ * open-ended. Falls back to all requests if none are active.
+ */
+export function getGroupActiveWindow(
+  group: GroupedMedication,
+): MedicationActiveWindow {
+  const active = group.requests.filter((r) =>
+    ACTIVE_MEDICATION_STATUSES.includes(
+      r.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
+    ),
+  );
+  const requests = active.length ? active : group.requests;
+
+  let start: Date | undefined;
+  let end: Date | undefined;
+  let openEnded = false;
+
+  for (const request of requests) {
+    const window = getMedicationActiveWindow(request);
+    if (!start || window.start < start) start = window.start;
+    if (window.end === undefined) openEnded = true;
+    else if (!end || window.end > end) end = window.end;
+  }
+
+  return { start: start ?? new Date(), end: openEnded ? undefined : end };
+}
+
+/**
+ * How a time slot relates to an active window — used to shade out-of-window
+ * slots, mark the start/end caps, and gate the Administer button.
+ */
+export interface SlotWindowState {
+  inWindow: boolean;
+  isStartSlot: boolean;
+  isEndSlot: boolean;
+}
+
+export function getSlotWindowState(
+  slot: { date: Date; start: string; end: string },
+  window: MedicationActiveWindow,
+): SlotWindowState {
+  const slotStart = new Date(slot.date);
+  slotStart.setHours(Number(slot.start.split(":")[0]), 0, 0, 0);
+  const slotEnd = new Date(slotStart);
+  slotEnd.setHours(Number(slot.end.split(":")[0]), 0, 0, 0);
+
+  const beforeStart = slotEnd <= window.start;
+  const afterEnd = window.end ? slotStart >= window.end : false;
+
+  return {
+    inWindow: !beforeStart && !afterEnd,
+    isStartSlot: window.start >= slotStart && window.start < slotEnd,
+    isEndSlot: !!window.end && window.end > slotStart && window.end <= slotEnd,
+  };
 }

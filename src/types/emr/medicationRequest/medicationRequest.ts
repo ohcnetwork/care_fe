@@ -151,12 +151,182 @@ export interface DoseRange {
   high: DosageQuantity;
 }
 
+/** A range of timing quantities, e.g. dose duration between low and high. */
+export interface TimingRange {
+  low: BoundsDuration;
+  high: BoundsDuration;
+}
+
+/** An explicit period with timezone-aware ISO-8601 start/end timestamps. */
+export interface PeriodSpec {
+  start?: string;
+  end?: string;
+}
+
+/**
+ * The scheduling bound on `timing.repeat`, as a discriminated union — exactly
+ * one of duration / range / period. On the wire these live as three mutually
+ * exclusive optional fields; use {@link getTimingBounds} /
+ * {@link timingBoundsToRepeat} to convert at the boundary.
+ */
+export type TimingBounds =
+  | { type: "duration"; value: BoundsDuration }
+  | { type: "range"; value: TimingRange }
+  | { type: "period"; value: PeriodSpec };
+
+type RepeatBoundFields = Pick<
+  Timing["repeat"],
+  "bounds_duration" | "bounds_range" | "bounds_period"
+>;
+
+/** Read the active bound off a `timing.repeat`, or undefined if none is set. */
+export function getTimingBounds(
+  repeat?: RepeatBoundFields,
+): TimingBounds | undefined {
+  if (repeat?.bounds_range)
+    return { type: "range", value: repeat.bounds_range };
+  if (repeat?.bounds_period)
+    return { type: "period", value: repeat.bounds_period };
+  if (repeat?.bounds_duration && repeat.bounds_duration.value !== "0") {
+    return { type: "duration", value: repeat.bounds_duration };
+  }
+  return undefined;
+}
+
+/**
+ * Expand a {@link TimingBounds} (or undefined) into the three repeat fields,
+ * with the inactive ones set to undefined. Spread into an existing
+ * `timing.repeat` to switch the active bound.
+ */
+export function timingBoundsToRepeat(bounds?: TimingBounds): RepeatBoundFields {
+  return {
+    bounds_duration: bounds?.type === "duration" ? bounds.value : undefined,
+    bounds_range: bounds?.type === "range" ? bounds.value : undefined,
+    bounds_period: bounds?.type === "period" ? bounds.value : undefined,
+  };
+}
+
+function formatBoundDate(iso?: string): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export interface MedicationActiveWindow {
+  /** When the request becomes active. */
+  start: Date;
+  /** When it stops being active, or undefined for open-ended requests. */
+  end?: Date;
+}
+
+/**
+ * Derive the active window of a medication request from its scheduling bounds,
+ * clamped by lifecycle events.
+ *
+ * Start:
+ * - `bounds_period.start` when present — the prescriber-set start is
+ *   authoritative, whether it's in the past (documenting an ongoing course) or
+ *   the future (scheduled to begin later).
+ * - otherwise `created_date` — duration/range bounds are relative durations with
+ *   no explicit start, so the course is anchored to when the record was created.
+ *
+ * End:
+ * - `bounds_period` → its explicit end; `bounds_duration` → `start + duration`;
+ *   `bounds_range` → `start + high` (longest end, so administration isn't cut
+ *   off early — treat `low → high` as a taper-off zone in the UI); no bound →
+ *   open-ended.
+ * - clamped to the discontinuation time for inactive requests: a med stopped
+ *   early ends when it was stopped, not when its prescribed course would have.
+ *   `modified_date` is exact here — bounds are set once at creation and edits
+ *   create a new record, so an inactive record's only mutation is its stop.
+ *
+ * `status` stays authoritative for active/inactive; this only bounds where the
+ * schedule applies. ponytail: uses the first dosage instruction — tapered
+ * multi-instruction sequencing isn't modeled.
+ */
+export function getMedicationActiveWindow(
+  request: Pick<
+    MedicationRequestRead,
+    "created_date" | "modified_date" | "status" | "dosage_instruction"
+  >,
+): MedicationActiveWindow {
+  const bounds = getTimingBounds(
+    request.dosage_instruction?.[0]?.timing?.repeat,
+  );
+
+  // bounds_period carries an explicit, prescriber-authoritative start; relative
+  // bounds (duration/range) have none, so they anchor to record creation.
+  const start =
+    bounds?.type === "period" && bounds.value.start
+      ? new Date(bounds.value.start)
+      : new Date(request.created_date);
+
+  const addDuration = (d: BoundsDuration) =>
+    new Date(
+      start.getTime() + convertToHours(d.value, d.unit).toNumber() * 3_600_000,
+    );
+
+  let end: Date | undefined;
+  switch (bounds?.type) {
+    case "period":
+      end = bounds.value.end ? new Date(bounds.value.end) : undefined;
+      break;
+    case "duration":
+      end = addDuration(bounds.value);
+      break;
+    case "range":
+      end = addDuration(bounds.value.high);
+      break;
+  }
+
+  // Discontinued early → the window ends when it was stopped.
+  const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
+    request.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
+  );
+  if (isInactive && request.modified_date) {
+    const stoppedAt = new Date(request.modified_date);
+    if (!end || stoppedAt < end) end = stoppedAt;
+  }
+
+  return { start, end };
+}
+
+/** Human-readable label for a scheduling bound, for read-only render sites. */
+export function formatTimingBounds(bounds: TimingBounds): string {
+  switch (bounds.type) {
+    case "duration":
+      return formatDurationLabel(bounds.value);
+    case "range": {
+      const { low, high } = bounds.value;
+      const info = DURATION_UNIT_LABELS[high.unit];
+      const unit = info
+        ? Number(high.value) === 1
+          ? info.singular
+          : info.plural
+        : high.unit;
+      return `${low.value}–${high.value} ${unit}`;
+    }
+    case "period":
+      return `${formatBoundDate(bounds.value.start)} → ${formatBoundDate(
+        bounds.value.end,
+      )}`;
+  }
+}
+
 export interface Timing {
   repeat: {
     frequency: number;
     period: string;
     period_unit: (typeof UCUM_TIME_UNITS)[number];
-    bounds_duration: BoundsDuration;
+    // Exactly one of bounds_duration / bounds_range / bounds_period is set.
+    // ponytail: not encoded as a discriminated union — backend enforces the
+    // one-of constraint; switch to a union if the form needs to enforce it too.
+    bounds_duration?: BoundsDuration;
+    bounds_range?: TimingRange;
+    bounds_period?: PeriodSpec;
   };
   /** Optional in FHIR (0..1). Omitted for text-only dosage patterns. */
   code?: Code;
@@ -1394,14 +1564,6 @@ export function decodeDurationValue(
     return undefined;
   }
   return { value, unit: unit as (typeof UCUM_TIME_UNITS)[number] };
-}
-
-/**
- * Encode a BoundsDuration to the autocomplete value format.
- */
-export function encodeDurationValue(duration?: BoundsDuration): string {
-  if (!duration?.value || duration.value === "0") return "";
-  return `${duration.value}-${duration.unit}`;
 }
 
 /**

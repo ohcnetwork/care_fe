@@ -77,7 +77,7 @@ import {
   buildTimingForTextDosage,
   displayMedicationName,
   DoseRange,
-  formatDurationLabel,
+  getTimingBounds,
   INACTIVE_MEDICATION_STATUSES,
   MEDICATION_REQUEST_INTENT,
   MedicationRequestCreate,
@@ -87,6 +87,7 @@ import {
   MedicationRequestTemplateSpec,
   parseMedicationStringToRequest,
   sumManSlots,
+  timingBoundsToRepeat,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
@@ -261,8 +262,10 @@ const MEDICATION_REQUEST_FIELDS = {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
       if (dosageInstruction?.timing) {
-        const duration = dosageInstruction.timing.repeat.bounds_duration;
-        return !!(duration?.value && duration?.unit);
+        const { bounds_duration, bounds_range, bounds_period } =
+          dosageInstruction.timing.repeat;
+        if (bounds_range || bounds_period) return true;
+        return !!(bounds_duration?.value && bounds_duration?.unit);
       }
       return true;
     },
@@ -1144,8 +1147,8 @@ export function MedicationRequestQuestion({
                 className={cn(
                   "hidden lg:grid bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500",
                   showAdvancedFields
-                    ? "grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
-                    : "grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
+                    ? "grid-cols-[280px_220px_180px_200px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
+                    : "grid-cols-[280px_220px_180px_200px_40px_180px_48px]",
                 )}
               >
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
@@ -1330,9 +1333,8 @@ export function MedicationRequestQuestion({
 
                                               {freq && ` · ${freq}`}
 
-                                              {di?.timing?.repeat
-                                                ?.bounds_duration?.value &&
-                                                ` · ${formatDurationLabel(di.timing.repeat.bounds_duration)}`}
+                                              {formatDuration(di) &&
+                                                ` · ${formatDuration(di)}`}
                                             </div>
                                           );
                                         },
@@ -1669,8 +1671,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       className={cn(
         "grid grid-cols-1 border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
         showAdvancedFields
-          ? "lg:grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
-          : "lg:grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
+          ? "lg:grid-cols-[280px_220px_180px_200px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
+          : "lg:grid-cols-[280px_220px_180px_200px_40px_180px_48px]",
         {
           "opacity-40 pointer-events-none": disabled,
         },
@@ -1869,50 +1871,37 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 <div className="border-t border-dashed border-gray-300 my-1" />
               )}
               <DurationInput
-                value={di?.timing?.repeat?.bounds_duration}
-                onChange={(duration) => {
-                  if (!duration) {
-                    if (di?.timing) {
-                      handleUpdateDosageInstruction(dIdx, {
-                        timing: {
-                          ...di.timing,
-                          repeat: {
-                            ...di.timing.repeat,
-                            bounds_duration: { value: "0", unit: "d" },
-                          },
-                        },
-                      });
-                    }
-                    return;
-                  }
-
+                value={getTimingBounds(di?.timing?.repeat)}
+                onChange={(bounds) => {
                   if (di?.timing) {
                     handleUpdateDosageInstruction(dIdx, {
                       timing: {
                         ...di.timing,
                         repeat: {
                           ...di.timing.repeat,
-                          bounds_duration: duration,
+                          ...timingBoundsToRepeat(bounds),
                         },
                       },
                     });
+                  } else if (
+                    di?.text &&
+                    sumManSlots(di.text) !== null &&
+                    bounds.type === "duration"
+                  ) {
+                    handleUpdateDosageInstruction(dIdx, {
+                      timing: buildTimingForTextDosage(di.text, bounds.value),
+                    });
                   } else {
-                    if (di?.text && sumManSlots(di.text) !== null) {
-                      handleUpdateDosageInstruction(dIdx, {
-                        timing: buildTimingForTextDosage(di.text, duration),
-                      });
-                    } else {
-                      handleUpdateDosageInstruction(dIdx, {
-                        timing: {
-                          repeat: {
-                            frequency: 1,
-                            period: "1",
-                            period_unit: "d",
-                            bounds_duration: duration,
-                          },
+                    handleUpdateDosageInstruction(dIdx, {
+                      timing: {
+                        repeat: {
+                          frequency: 1,
+                          period: "1",
+                          period_unit: "d",
+                          ...timingBoundsToRepeat(bounds),
                         },
-                      });
-                    }
+                      },
+                    });
                   }
                 }}
                 disabled={disabled || di?.as_needed_boolean || isReadOnly}
