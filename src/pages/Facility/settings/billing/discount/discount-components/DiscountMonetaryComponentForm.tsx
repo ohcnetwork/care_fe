@@ -185,7 +185,7 @@ export function DiscountMonetaryComponentForm({
                             max="100"
                             step="0.01"
                             {...field}
-                            value={(field.value as string | null) || ""}
+                            value={(field.value as string | null) ?? ""}
                             onChange={(e) =>
                               field.onChange(e.target.value || null)
                             }

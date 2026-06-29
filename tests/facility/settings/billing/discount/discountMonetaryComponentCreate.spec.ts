@@ -47,7 +47,7 @@ test.describe("Discount Monetary Component Settings", () => {
     await amountInput.fill("100");
 
     const saveButton = page.getByRole("button", { name: /save/i });
-    await saveButton.click();
+    await expect(saveButton).toBeDisabled();
 
     // Should show "This field is required" error for title
     await expect(
@@ -80,7 +80,7 @@ test.describe("Discount Monetary Component Settings", () => {
     await amountInput.blur();
 
     const saveButton = page.getByRole("button", { name: /save/i });
-    await saveButton.click();
+    await expect(saveButton).toBeDisabled();
 
     // Should show "This field is required"
     const amountContainer = page.locator("div").filter({ has: amountInput });
@@ -201,9 +201,10 @@ test.describe("Discount Monetary Component Settings", () => {
 
     // Enter value > 100 (invalid)
     await factorInput.fill("150");
+    await factorInput.blur();
 
     const saveButton = page.getByRole("button", { name: /save/i });
-    await saveButton.click();
+    await expect(saveButton).toBeDisabled();
 
     // Should show validation error
     const factorContainer = page.locator("div").filter({ has: factorInput });
