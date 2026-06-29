@@ -6,7 +6,6 @@ import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDe
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import { PrintMedicationAdministration } from "@/components/Medicine/MedicationAdministration/PrintMedicationAdministration";
 import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
-import TreatmentSummary from "@/components/Patient/TreatmentSummary";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
@@ -90,35 +89,13 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/treatment_summary":
-    ({ facilityId, encounterId, patientId }) => (
-      <TreatmentSummary
-        facilityId={facilityId}
-        encounterId={encounterId}
-        patientId={patientId}
-      />
-    ),
-  "/organization/:organizationId/patient/:patientId/encounter/:encounterId/treatment_summary":
-    ({ encounterId, patientId }) => (
-      <TreatmentSummary encounterId={encounterId} patientId={patientId} />
-    ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/template/:templateSlug":
-    ({ facilityId, encounterId, patientId, templateSlug }) => (
-      <ReportViewer
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-        templateSlug={templateSlug}
-      />
+    ({ encounterId, templateSlug }) => (
+      <ReportViewer encounterId={encounterId} templateSlug={templateSlug} />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/:reportId":
-    ({ facilityId, encounterId, patientId, reportId }) => (
-      <ReportViewer
-        facilityId={facilityId}
-        encounterId={encounterId}
-        patientId={patientId}
-        reportId={reportId}
-      />
+    ({ encounterId, reportId }) => (
+      <ReportViewer encounterId={encounterId} reportId={reportId} />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (

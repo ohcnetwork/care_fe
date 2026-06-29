@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import usePatientExtensionData from "@/hooks/usePatientExtensionData";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
@@ -58,6 +59,11 @@ const TokenCard = ({
 
   const appointmentTags = appointment?.tags ?? [];
 
+  const patientExtensionData = usePatientExtensionData(
+    appointment?.patient?.extensions,
+    "appointment_print",
+  );
+
   return (
     <Card
       id={id}
@@ -91,6 +97,16 @@ const TokenCard = ({
                   {formatPatientAge(patient, true)},{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </p>
+                {patientExtensionData.map((data) => {
+                  return (
+                    <div key={data.name} className="hidden print:block">
+                      <Label className="text-gray-600 text-sm">
+                        {data.name}:
+                      </Label>
+                      <p className="font-semibold text-sm">{data.value}</p>
+                    </div>
+                  );
+                })}
                 {patientWithIdentifiers?.instance_identifiers
                   ?.filter(
                     (identifier) =>
@@ -142,6 +158,9 @@ const TokenCard = ({
                       </div>
                       <Separator />
                       <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {appointment.token_slot.availability.name}
+                        </p>
                         <p className="text-sm font-semibold text-gray-600 flex gap-2">
                           <span className="text-sm font-semibold text-gray-600">
                             {formatDate(

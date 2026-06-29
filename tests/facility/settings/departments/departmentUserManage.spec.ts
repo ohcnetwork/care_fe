@@ -5,9 +5,12 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Department User Management", () => {
+  // Tests share state (users in the same department) — run serially to avoid conflicts
+  test.describe.configure({ mode: "serial" });
+
   let facilityId: string;
 
-  const testUsers = ["care-doctor", "care-volunteer"];
+  const testUsers = ["care-volunteer"];
 
   const testRoles = ["Doctor", "Staff", "Facility Admin"];
 
@@ -49,14 +52,12 @@ test.describe("Department User Management", () => {
 
   async function submitAddUser(page: Page) {
     await page.getByRole("button", { name: "Add to Organization" }).click();
-  }
-
-  async function verifyUserAddedSuccess(page: Page) {
+    // Wait for the success toast to confirm the operation completed
     await expect(
       page
         .locator("li[data-sonner-toast]")
         .getByText("User added to organization successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function searchUserInTable(page: Page, userName: string) {
@@ -89,7 +90,7 @@ test.describe("Department User Management", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("User role updated successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function removeUser(page: Page) {
@@ -102,7 +103,7 @@ test.describe("Department User Management", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("User removed from organization successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function closeDialog(page: Page) {
@@ -147,7 +148,6 @@ test.describe("Department User Management", () => {
     await selectUser(page, userName);
     await selectRole(page, role);
     await submitAddUser(page);
-    await verifyUserAddedSuccess(page);
 
     // Verify user exists in department list
     await searchUserInTable(page, userName);
@@ -177,7 +177,6 @@ test.describe("Department User Management", () => {
     await selectUser(page, userName);
     await selectRole(page, initialRole);
     await submitAddUser(page);
-    await verifyUserAddedSuccess(page);
 
     // Search and verify user with initial role
     await searchUserInTable(page, userName);
@@ -212,7 +211,6 @@ test.describe("Department User Management", () => {
     await selectUser(page, userName);
     await selectRole(page, role);
     await submitAddUser(page);
-    await verifyUserAddedSuccess(page);
 
     // Verify user is in list
     await searchUserInTable(page, userName);

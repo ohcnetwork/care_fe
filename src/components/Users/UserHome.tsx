@@ -13,13 +13,12 @@ import UserBanner from "@/components/Users/UserBanner";
 import UserDepartmentsTab from "@/components/Users/UserDepartmentsTab";
 import UserSummaryTab from "@/components/Users/UserSummary";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
-import { formatName, keysOf } from "@/Utils/utils";
+import { formatName, goBack, keysOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import facilityApi from "@/types/facility/facilityApi";
 import userApi from "@/types/user/userApi";
@@ -43,7 +42,6 @@ export default function UserHome(props: UserHomeProps) {
     username = authUser.username;
   }
   const { hasPermission } = usePermissions();
-  const { goBack } = useAppHistory();
 
   const {
     data: userData,
