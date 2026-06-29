@@ -48,7 +48,7 @@ jobs:
 
   # Build application once and cache for all test shards
   build:
-    if: always() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
+    if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
     needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -70,8 +70,8 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Cache build
-        uses: actions/cache@v4
+      - name: Save build and node_modules to cache
+        uses: actions/cache/save@v4
         with:
           path: |
             build/
@@ -80,7 +80,7 @@ jobs:
 
   # Run E2E tests with backend integration
   test:
-    if: always() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
+    if: "!cancelled() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'"
     needs: [changes, build]
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -158,15 +158,30 @@ jobs:
             build/
             node_modules/
           key: build-${{ github.sha }}
-          fail-on-cache-miss: true
+
+      - name: Retry cache restore after delay
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        id: cache-retry
+        run: |
+          echo "Cache miss on first attempt, waiting 30s for propagation..."
+          sleep 30
+      
+      - name: Restore build cache (retry)
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        id: cache-restore-retry
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/
+            node_modules/
+          key: build-${{ github.sha }}
 
       - name: Verify build exists
         run: |
-          if [ ! -d "build" ]; then
-            echo "::error::Build directory not found. Cache restoration may have failed."
+          if [ ! -f build/index.html ]; then
+            echo "::error::Build not found after cache restore attempts (key: build-${{ github.sha }})"
             exit 1
           fi
-          echo "Build directory verified"
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -217,7 +232,7 @@ jobs:
 
   # Aggregate results and create final report
   report:
-    if: always() && github.repository == 'ohcnetwork/care_fe'
+    if: "!cancelled() && github.repository == 'ohcnetwork/care_fe'"
     needs: [changes, test]
     runs-on: ubuntu-latest
     steps:
