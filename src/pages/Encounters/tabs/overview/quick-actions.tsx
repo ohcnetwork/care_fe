@@ -85,11 +85,10 @@ export function QuickAction({
   title: string;
   actionId?: string;
   href?: string;
-  props?: React.ComponentProps<"div">;
   basePath?: string;
   onClick?: () => void;
   hidden?: boolean;
-}) {
+} & React.ComponentProps<"button">) {
   const className = cn(
     "flex-1 flex flex-row md:flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white",
     hidden && "hidden",
