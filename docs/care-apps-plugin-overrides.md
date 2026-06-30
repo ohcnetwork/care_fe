@@ -45,6 +45,24 @@ The plugin uses `MagicString` to produce high-resolution source maps for these
 edits. This improves browser stack traces and debugger locations for transformed
 code. It does not remove the registered wrapper from the React component tree.
 
+### Supported Export Forms
+
+The plugin can only auto-register components exported in these three forms:
+
+- `export function Foo(…) { … }` — named function declaration
+- `export const Foo = …` — single-declarator variable with a component initializer (arrow function or function expression)
+- `export default Foo` — default export assignment of a locally declared component
+
+The following forms are **not** transformable and are silently skipped during registration:
+
+- `export { Foo }` — named export specifier blocks
+- `export { X as Y }` — aliased named export specifiers
+- `export const A = …, B = …` — multi-declarator variable statements
+- `export { Foo } from "./other"` — re-exports from another module
+- `export const Foo = forwardRef(…)` / `export const Foo = memo(…)` — `forwardRef`/`memo` initializers (deliberately skipped because the registration wrapper does not forward refs)
+
+Allowlisting a name (via `REACT_MFE_REGISTERED_COMPONENTS`) that uses one of the first four skipped forms is a build error that names the unsupported form. A `forwardRef`/`memo` component is reported instead as an unknown component name (it is excluded from registration by design); convert it to a plain `export function`/`export const` component if it must be overridable.
+
 ## Registration Allowlist
 
 Use `REACT_MFE_REGISTERED_COMPONENTS` to limit which exported components are

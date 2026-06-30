@@ -327,6 +327,55 @@ function collectComponentTargets(
   return targets;
 }
 
+function collectUnsupportedComponentTargets(
+  source: string,
+  id: string,
+): ComponentTarget[] {
+  const sourceFile = ts.createSourceFile(
+    id,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  const unsupported: ComponentTarget[] = [];
+
+  for (const statement of sourceFile.statements) {
+    // export { Foo } / export { X as Y } / export { Foo } from "./x" (re-exports)
+    if (
+      ts.isExportDeclaration(statement) &&
+      statement.exportClause &&
+      ts.isNamedExports(statement.exportClause)
+    ) {
+      for (const specifier of statement.exportClause.elements) {
+        const exportedName = specifier.name.text; // Y in "X as Y", Foo in "{ Foo }"
+        if (isPascalCase(exportedName)) {
+          unsupported.push({ name: exportedName, file: id });
+        }
+      }
+      continue;
+    }
+
+    // multi-declarator: export const A = ..., B = ...
+    if (
+      hasModifier(statement, ts.SyntaxKind.ExportKeyword) &&
+      ts.isVariableStatement(statement) &&
+      statement.declarationList.declarations.length > 1
+    ) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (
+          ts.isIdentifier(declaration.name) &&
+          isPascalCase(declaration.name.text)
+        ) {
+          unsupported.push({ name: declaration.name.text, file: id });
+        }
+      }
+    }
+  }
+
+  return unsupported;
+}
+
 function findTsxFiles(root: string): string[] {
   if (!fs.existsSync(root)) {
     return [];
@@ -346,19 +395,25 @@ function findTsxFiles(root: string): string[] {
 function collectRegisteredComponentTargets(
   srcRoot: string,
   overrideRoot: string,
-) {
-  return findTsxFiles(srcRoot).flatMap((filePath) => {
+): { targets: ComponentTarget[]; unsupported: ComponentTarget[] } {
+  const targets: ComponentTarget[] = [];
+  const unsupported: ComponentTarget[] = [];
+
+  for (const filePath of findTsxFiles(srcRoot)) {
     const normalizedPath = normalizePath(filePath);
 
     if (normalizedPath.startsWith(overrideRoot)) {
-      return [];
+      continue;
     }
 
-    return collectComponentTargets(
-      fs.readFileSync(filePath, "utf8"),
-      normalizedPath,
+    const source = fs.readFileSync(filePath, "utf8");
+    targets.push(...collectComponentTargets(source, normalizedPath));
+    unsupported.push(
+      ...collectUnsupportedComponentTargets(source, normalizedPath),
     );
-  });
+  }
+
+  return { targets, unsupported };
 }
 
 function assertUniqueComponentNames(targets: ComponentTarget[]) {
@@ -394,17 +449,52 @@ function assertUniqueComponentNames(targets: ComponentTarget[]) {
   );
 }
 
-function assertKnownComponentNames(
-  targets: ComponentTarget[],
+function assertAllowlistFormsSupported(
+  unsupported: ComponentTarget[],
   include: ReadonlySet<string> | null | undefined,
 ) {
   if (!include) {
     return;
   }
 
+  const hits = unsupported
+    .filter((target) => include.has(target.name))
+    .sort(
+      (left, right) =>
+        left.name.localeCompare(right.name) ||
+        left.file.localeCompare(right.file),
+    );
+
+  if (hits.length === 0) {
+    return;
+  }
+
+  const list = hits
+    .map((target) => `- ${target.name}\n  ${target.file}`)
+    .join("\n");
+
+  throw new Error(
+    [
+      "Components requested in REACT_MFE_REGISTERED_COMPONENTS use an unsupported export form and cannot be auto-registered:",
+      list,
+      "Use 'export function', 'export const X = …' (single declarator), or 'export default'.",
+    ].join("\n"),
+  );
+}
+
+function assertKnownComponentNames(
+  targets: ComponentTarget[],
+  include: ReadonlySet<string> | null | undefined,
+  unsupported: ComponentTarget[],
+) {
+  if (!include) {
+    return;
+  }
+
   const knownNames = new Set(targets.map((target) => target.name));
+  const unsupportedNames = new Set(unsupported.map((t) => t.name));
   const unknownNames = Array.from(include)
-    .filter((name) => !knownNames.has(name))
+    .filter((name) => !knownNames.has(name) && !unsupportedNames.has(name))
     .sort((left, right) => left.localeCompare(right));
 
   if (unknownNames.length === 0) {
@@ -560,9 +650,13 @@ export function autoRegisterComponents({
       )}/`;
     },
     buildStart() {
-      const targets = collectRegisteredComponentTargets(srcRoot, overrideRoot);
+      const { targets, unsupported } = collectRegisteredComponentTargets(
+        srcRoot,
+        overrideRoot,
+      );
       assertUniqueComponentNames(targets);
-      assertKnownComponentNames(targets, include);
+      assertAllowlistFormsSupported(unsupported, include);
+      assertKnownComponentNames(targets, include, unsupported);
     },
     transform(source, id) {
       const normalizedId = normalizePath(id.split("?")[0]);
