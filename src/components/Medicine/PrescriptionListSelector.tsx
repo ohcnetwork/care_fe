@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import * as React from "react";
 
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Button } from "@/components/ui/button";
@@ -47,8 +48,6 @@ interface PrescriptionListSelectorProps {
   selectedPrescriptionId?: string;
   onSelectPrescription: (prescription: PrescritionList | undefined) => void;
 }
-
-const RESULTS_PER_PAGE_LIMIT = 14;
 
 export default function PrescriptionListSelector({
   patientId,
