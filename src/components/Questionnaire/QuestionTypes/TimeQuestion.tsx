@@ -17,6 +17,7 @@ interface TimeQuestionProps {
   disabled?: boolean;
   clearError: () => void;
   classes?: string;
+  disableRightBorder?: boolean;
   index: number;
 }
 
@@ -26,15 +27,16 @@ export function TimeQuestion({
   disabled,
   clearError,
   classes,
+  disableRightBorder,
   index,
 }: TimeQuestionProps) {
   const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const [hours, minutes] = event.target.value.split(":");
+    const time = event.target.value;
 
     const newValues = [...questionnaireResponse.values];
     newValues[index] = {
       type: "time",
-      value: `${hours}:${minutes}:00`,
+      value: time === "" ? undefined : `${time}:00`,
     };
 
     clearError();
@@ -53,7 +55,11 @@ export function TimeQuestion({
           ? (questionnaireResponse.values[index].value as string).slice(0, 5)
           : ""
       }
-      className={cn(classes, "h-9 text-sm sm:text-base")}
+      className={cn(
+        classes,
+        "h-9 text-sm sm:text-base",
+        disableRightBorder && "rounded-r-none border-r-0 shadow-none",
+      )}
       onChange={handleTimeChange}
       disabled={disabled}
     />

@@ -60,13 +60,13 @@ export function CombinedDatePicker({
   };
 
   return (
-    <div className="flex sm:gap-2 flex-wrap">
+    <div className="flex sm:gap-2 flex-wrap flex-1">
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             className={cn(
-              "flex-1 justify-start text-left font-normal",
+              "flex-1 justify-start text-left font-normal border-1 border-gray-300 shadow-none",
               !value && "text-gray-500",
               classes,
               buttonClassName,

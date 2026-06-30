@@ -2,13 +2,8 @@ import { t } from "i18next";
 import { memo } from "react";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import RadioInput from "@/components/ui/RadioInput";
 import Autocomplete from "@/components/ui/autocomplete";
-import { Button } from "@/components/ui/button";
 import { MultiSelect } from "@/components/ui/multi-select";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -31,6 +26,7 @@ interface ChoiceQuestionProps {
   disabled?: boolean;
   withLabel?: boolean;
   clearError: () => void;
+  disableRightBorder?: boolean;
   index?: number;
 }
 
@@ -40,6 +36,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
   updateQuestionnaireResponseCB,
   disabled = false,
   clearError,
+  disableRightBorder,
   index = 0,
 }: ChoiceQuestionProps) {
   const options = question.answer_option || [];
@@ -111,6 +108,19 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     );
   };
 
+  const handleClearSelection = (idx?: number) => {
+    clearError();
+    const newValues =
+      idx === undefined
+        ? []
+        : questionnaireResponse.values.filter((_, i) => i !== idx);
+    updateQuestionnaireResponseCB(
+      newValues,
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
+  };
+
   if (question.answer_value_set) {
     if (!question.repeats) {
       return (
@@ -118,49 +128,34 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
           system={question.answer_value_set}
           value={currentCoding}
           onSelect={(newValue) => handleCodingChange(newValue, 0)}
-        ></ValueSetSelect>
+          onClear={handleClearSelection}
+          disabled={disabled}
+          disableRightBorder={disableRightBorder}
+        />
       );
     }
     return (
       <>
-        {questionnaireResponse.values.map((value, idx) => {
-          return (
-            <div key={idx} className="flex items-center mb-2">
-              <div className="flex-1">
-                <ValueSetSelect
-                  system={question.answer_value_set!}
-                  value={value.coding}
-                  onSelect={(newValue) => handleCodingChange(newValue, idx)}
-                />
-              </div>
+        {questionnaireResponse.values.map((value, idx) => (
+          <div key={idx} className="mb-2">
+            <ValueSetSelect
+              system={question.answer_value_set!}
+              value={value.coding}
+              onSelect={(newValue) => handleCodingChange(newValue, idx)}
+              onClear={() => handleClearSelection(idx)}
+              disabled={disabled}
+              disableRightBorder={disableRightBorder}
+            />
+          </div>
+        ))}
 
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  const newValues = questionnaireResponse.values.filter(
-                    (_, i) => i !== idx,
-                  );
-                  updateQuestionnaireResponseCB(
-                    newValues,
-                    questionnaireResponse.question_id,
-                  );
-                }}
-              >
-                <CareIcon icon="l-trash" className="size-4" />
-              </Button>
-            </div>
-          );
-        })}
-
-        <div className={cn(questionnaireResponse.values.length && "mr-9")}>
-          <ValueSetSelect
-            closeOnSelect={false}
-            system={question.answer_value_set}
-            value={null}
-            onSelect={handleCodingChange}
-          />
-        </div>
+        <ValueSetSelect
+          closeOnSelect={false}
+          system={question.answer_value_set}
+          value={null}
+          onSelect={handleCodingChange}
+          disableRightBorder={disableRightBorder}
+        />
       </>
     );
   }

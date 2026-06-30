@@ -62,9 +62,7 @@ function InputWithNotes({
 
   return (
     <div className="flex items-stretch">
-      <div className="flex-1 min-w-0 [&_input]:border-r-0 [&_input]:rounded-r-none [&_input]:shadow-none [&_input]:focus-visible:ring-0 [&_textarea]:border-r-0 [&_textarea]:rounded-r-none [&_textarea]:shadow-none [&_textarea]:focus-visible:ring-0 [&_button[role=combobox]]:border-r-0 [&_button[role=combobox]]:rounded-r-none [&_button[role=combobox]]:shadow-none">
-        {children}
-      </div>
+      <div className="flex-1 min-w-0">{children}</div>
       <Popover open={notesOpen} onOpenChange={setNotesOpen}>
         <PopoverTrigger asChild>
           <button
@@ -123,7 +121,7 @@ function RepeatingNotesButton({
           type="button"
           disabled={disabled}
           className={cn(
-            "flex items-center justify-center w-10 h-10 border border-gray-300 rounded-md bg-gray-100/20",
+            "flex items-center justify-center size-10 border border-gray-300 rounded-md bg-gray-100/20",
             hasNotes && "bg-orange-50 border-orange-300",
           )}
         >
@@ -216,10 +214,10 @@ export function QuestionInput({
     );
   };
 
-  const renderSingleInput = (index: number = 0) => {
+  const renderSingleInput = (index: number = 0, disableRightBorder: boolean = false) => {
     const commonProps = {
       classes: question.styling_metadata?.classes,
-      disableRightBorder: true,
+      disableRightBorder,
       question,
       questionnaireResponse,
       updateQuestionnaireResponseCB,
@@ -381,6 +379,15 @@ export function QuestionInput({
       ? [{ value: "", type: "string" } as ResponseValue]
       : questionnaireResponse.values;
 
+    const isIntegratedNotes =
+      !question.structured_type &&
+      !question.repeats &&
+      question.type !== "text" &&
+      question.type !== "string";
+    // Wide / multi-field inputs (e.g. quantity) look cramped with the notes
+    // button attached on the right, so render it on the next line instead.
+    const notesBelow = question.type === "quantity";
+
     if (question.type === "choice") {
       return (
         <div
@@ -406,14 +413,14 @@ export function QuestionInput({
             }}
             disabled={disabled}
           >
-            {renderSingleInput(0)}
+            {renderSingleInput(0, true)}
           </InputWithNotes>
         </div>
       );
     }
 
     return (
-      <div className="bg-gray-100 md:bg-transparent px-2 py-1.5">
+      <div className="bg-gray-100 md:bg-transparent px-2 py-1.5 space-y-2 sm:space-y-1">
         {values.map((value, index) => {
           const removeButton = question.repeats &&
             questionnaireResponse.values.length > 1 &&
@@ -455,10 +462,7 @@ export function QuestionInput({
                   })}
                 >
                   {/* For basic types (not structured, not text/string, not repeating), use integrated notes */}
-                  {!question.structured_type &&
-                  !question.repeats &&
-                  question.type !== "text" &&
-                  question.type !== "string" ? (
+                  {isIntegratedNotes && !notesBelow ? (
                     <InputWithNotes
                       questionnaireResponse={questionnaireResponse}
                       onUpdateNote={(note) => {
@@ -470,8 +474,23 @@ export function QuestionInput({
                       }}
                       disabled={disabled}
                     >
-                      {renderSingleInput(index)}
+                      {renderSingleInput(index, true)}
                     </InputWithNotes>
+                  ) : isIntegratedNotes && notesBelow ? (
+                    <div className="space-y-2">
+                      {renderSingleInput(index)}
+                      <RepeatingNotesButton
+                        questionnaireResponse={questionnaireResponse}
+                        onUpdateNote={(note) => {
+                          updateQuestionnaireResponseCB(
+                            [...questionnaireResponse.values],
+                            questionnaireResponse.question_id,
+                            note,
+                          );
+                        }}
+                        disabled={disabled}
+                      />
+                    </div>
                   ) : (
                     <div className="flex-1 min-w-0">
                       {renderSingleInput(index)}
@@ -487,9 +506,10 @@ export function QuestionInput({
           <div className="mt-2 flex items-center gap-2">
             <Button
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={handleAddValue}
               disabled={disabled}
+              className="border-gray-300"
             >
               <CareIcon icon="l-plus" className="mr-2 size-4" />
               {t("add_another")}

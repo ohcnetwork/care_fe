@@ -1,11 +1,16 @@
+import { t } from "i18next";
 import "react-day-picker/style.css";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 
 import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
+import { cn } from "@/lib/utils";
 
 interface DateQuestionProps {
   questionnaireResponse: QuestionnaireResponse;
@@ -17,6 +22,7 @@ interface DateQuestionProps {
   disabled?: boolean;
   clearError: () => void;
   classes?: string;
+  disableRightBorder?: boolean;
   index: number;
 }
 
@@ -26,6 +32,7 @@ export function DateQuestion({
   disabled,
   clearError,
   classes,
+  disableRightBorder,
   index,
 }: DateQuestionProps) {
   const currentValue = questionnaireResponse.values[index]?.value
@@ -33,8 +40,6 @@ export function DateQuestion({
     : undefined;
 
   const handleSelect = (date: Date | undefined) => {
-    if (!date) return;
-
     clearError();
     const newValues = [...questionnaireResponse.values];
     newValues[index] = {
@@ -49,12 +54,36 @@ export function DateQuestion({
     );
   };
 
+  const showClear = currentValue && !disabled;
+
   return (
-    <CombinedDatePicker
-      value={currentValue}
-      onChange={handleSelect}
-      disabled={disabled}
-      classes={classes}
-    />
+    <div className="flex flex-1">
+      <CombinedDatePicker
+        value={currentValue}
+        onChange={handleSelect}
+        disabled={disabled}
+        classes={cn("flex-1", classes)}
+        buttonClassName={cn(
+          "border-gray-300",
+          (showClear || disableRightBorder) && "rounded-r-none border-r-0",
+        )}
+      />
+      {showClear && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => handleSelect(undefined)}
+          aria-label={t("clear")}
+          title={t("clear")}
+          className={cn(
+            "rounded-l-none border-1 border-gray-300",
+            disableRightBorder ? "rounded-r-none border-r-0" : "rounded-r-md",
+          )}
+        >
+          <CareIcon icon="l-times" className="size-4" />
+        </Button>
+      )}
+    </div>
   );
 }

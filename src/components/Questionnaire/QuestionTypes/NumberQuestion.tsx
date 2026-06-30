@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 import { Input } from "@/components/ui/input";
 
 import type {
@@ -15,6 +17,7 @@ interface NumberQuestionProps {
     note?: string,
   ) => void;
   disabled?: boolean;
+  disableRightBorder?: boolean;
   index: number;
 }
 
@@ -23,6 +26,7 @@ export function NumberQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  disableRightBorder,
   index,
 }: NumberQuestionProps) {
   const handleChange = (value: string) => {
@@ -51,6 +55,7 @@ export function NumberQuestion({
       onChange={(e) => handleChange(e.target.value)}
       step={question.type === "decimal" ? "0.01" : "1"}
       disabled={disabled}
+      className={cn(disableRightBorder && "rounded-r-none border-r-0 shadow-none")}
     />
   );
 }

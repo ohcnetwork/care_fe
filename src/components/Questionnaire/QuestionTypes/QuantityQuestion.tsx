@@ -22,6 +22,7 @@ interface QuantityQuestionProps {
   ) => void;
   disabled?: boolean;
   clearError: () => void;
+  disableRightBorder?: boolean;
   index?: number;
 }
 
@@ -31,6 +32,7 @@ export const QuantityQuestion = memo(function QuantityQuestion({
   updateQuestionnaireResponseCB,
   disabled = false,
   clearError,
+  disableRightBorder,
   index = 0,
 }: QuantityQuestionProps) {
   const currentValue = questionnaireResponse.values[index]?.value as
@@ -91,21 +93,57 @@ export const QuantityQuestion = memo(function QuantityQuestion({
     );
   };
 
+  const handleClearUnit = () => {
+    clearError();
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "quantity",
+      value: currentValue,
+      unit: undefined,
+      coding: currentCoding,
+    };
+
+    updateQuestionnaireResponseCB(
+      newValues,
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
+  };
+
+  const handleClearCoding = () => {
+    clearError();
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "quantity",
+      value: currentValue,
+      unit: currentUnit,
+      coding: undefined,
+    };
+
+    updateQuestionnaireResponseCB(
+      newValues,
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
+  };
+
   return (
-    <div className="flex flex-col sm:flex-row gap-4 sm:flex-wrap">
+    <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
       {question.answer_value_set && (
-        <div className="space-y-2">
+        <div className="space-y-2 sm:flex-1">
           <Label htmlFor={`${question.id}-coding`}>Type</Label>
-          <div className="w-full sm:w-[200px]">
+          <div className="w-full">
             <ValueSetSelect
               system={question.answer_value_set}
               value={currentCoding}
               onSelect={handleCodingChange}
+              onClear={handleClearCoding}
+              disabled={disabled}
             />
           </div>
         </div>
       )}
-      <div className="space-y-2">
+      <div className="space-y-2 sm:flex-1">
         <Label htmlFor={`${question.id}-value`}>Value</Label>
         <Input
           id={`${question.id}-value`}
@@ -116,16 +154,19 @@ export const QuantityQuestion = memo(function QuantityQuestion({
           onChange={(e) => handleValueChange(e.target.value)}
           step="0.01"
           disabled={disabled}
-          className="w-[200px]"
+          className="w-full h-9"
         />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-2 sm:flex-1">
         <Label htmlFor={`${question.id}-unit`}>Unit</Label>
-        <div className="w-[200px]">
+        <div className="w-full">
           <ValueSetSelect
             system="system-ucum-units"
             value={currentUnit}
             onSelect={handleUnitChange}
+            onClear={handleClearUnit}
+            disabled={disabled}
+            disableRightBorder={disableRightBorder}
           />
         </div>
       </div>

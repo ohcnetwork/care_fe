@@ -1,3 +1,10 @@
+import { t } from "i18next";
+
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 
@@ -16,6 +23,7 @@ interface DateTimeQuestionProps {
   disabled?: boolean;
   clearError: () => void;
   classes?: string;
+  disableRightBorder?: boolean;
   index: number;
 }
 
@@ -24,6 +32,7 @@ export function DateTimeQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   clearError,
+  disableRightBorder,
   index,
 }: DateTimeQuestionProps) {
   const currentValue = questionnaireResponse.values[index]?.value
@@ -31,10 +40,8 @@ export function DateTimeQuestion({
     : undefined;
 
   const handleSelect = (date: Date | undefined) => {
-    if (!date) return;
-
     clearError();
-    if (currentValue) {
+    if (date && currentValue) {
       date.setHours(currentValue.getHours());
       date.setMinutes(currentValue.getMinutes());
     }
@@ -81,21 +88,46 @@ export function DateTimeQuestion({
       .padStart(2, "0")}`;
   };
 
+  const showClear = currentValue && !disabled;
+
   return (
     <div className="flex flex-col sm:flex-row gap-2">
       <DatePicker
         date={currentValue}
         onChange={handleSelect}
         disablePicker={disabled}
-        className="flex-1"
+        className="flex-1 border-gray-300 shadow-none"
       />
-      <Input
-        type="time"
-        className="sm:w-[150px] border-gray-200 sm:border-r-0 sm:ring-r-0 sm:focus-visible:ring-0 h-9 text-sm sm:text-base"
-        value={formatTime(currentValue)}
-        onChange={handleTimeChange}
-        disabled={disabled || !currentValue}
-      />
+      <div className="flex sm:w-[186px]">
+        <Input
+          type="time"
+          className={cn(
+            "flex-1 min-w-0 border-gray-300 h-9 text-sm sm:text-base",
+            (showClear || disableRightBorder) && "rounded-r-none border-r-0",
+          )}
+          value={formatTime(currentValue)}
+          onChange={handleTimeChange}
+          disabled={disabled || !currentValue}
+        />
+        {showClear && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => handleSelect(undefined)}
+            aria-label={t("clear")}
+            title={t("clear")}
+            className={cn(
+              "rounded-l-none border-1 border-gray-300",
+              disableRightBorder
+                ? "rounded-r-none border-r-0"
+                : "rounded-r-md",
+            )}
+          >
+            <CareIcon icon="l-times" className="size-4" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

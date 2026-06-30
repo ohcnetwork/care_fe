@@ -329,6 +329,11 @@ const STRUCTURED_TYPE_VALIDATORS = {
   },
 } as const;
 
+const hasMeaningfulValue = (value: ResponseValue): boolean =>
+  (value.value !== "" && value.value != null) ||
+  value.coding != null ||
+  value.unit != null;
+
 const initializeResponses = (
   questions: Question[],
 ): QuestionnaireResponse[] => {
@@ -855,9 +860,7 @@ export function QuestionnaireForm({
     formsWithValidation.forEach((form) => {
       const validResponses = form.responses.filter(
         (response) =>
-          !response.structured_type &&
-          response.values.length > 0 &&
-          response.values?.[0]?.value !== "",
+          !response.structured_type && response.values.some(hasMeaningfulValue),
       );
       if (validResponses.length > 0) {
         requests.push({
@@ -880,35 +883,39 @@ export function QuestionnaireForm({
               )
               .map((response) => ({
                 question_id: response.question_id,
-                values: response.values.map((value) => {
-                  if (value.type === "date" && value.value) {
-                    const date = new Date(value.value);
-                    if (isNaN(date.getTime())) {
-                      return { ...value, value: "" };
+                // Drop individual cleared values (e.g. a removed entry in a
+                // repeatable question) so empty values are never sent.
+                values: response.values
+                  .filter(hasMeaningfulValue)
+                  .map((value) => {
+                    if (value.type === "date" && value.value) {
+                      const date = new Date(value.value);
+                      if (isNaN(date.getTime())) {
+                        return { ...value, value: "" };
+                      }
+                      const formattedDate = dateQueryString(date);
+                      return {
+                        ...value,
+                        value: formattedDate,
+                      };
+                    } else if (value.type === "dateTime" && value.value) {
+                      return {
+                        ...value,
+                        value: value.value.toISOString(),
+                      };
                     }
-                    const formattedDate = dateQueryString(date);
-                    return {
-                      ...value,
-                      value: formattedDate,
-                    };
-                  } else if (value.type === "dateTime" && value.value) {
-                    return {
-                      ...value,
-                      value: value.value.toISOString(),
-                    };
-                  }
-                  if (value.unit) {
-                    return {
-                      value: value.value?.toString(),
-                      unit: value.unit,
-                      coding: value.coding,
-                    };
-                  }
-                  if (value.coding) {
-                    return { coding: value.coding };
-                  }
-                  return { value: String(value.value) };
-                }),
+                    if (value.unit) {
+                      return {
+                        value: value.value?.toString(),
+                        unit: value.unit,
+                        coding: value.coding,
+                      };
+                    }
+                    if (value.coding) {
+                      return { coding: value.coding };
+                    }
+                    return { value: String(value.value) };
+                  }),
                 note: response.note,
                 body_site: response.body_site,
                 method: response.method,

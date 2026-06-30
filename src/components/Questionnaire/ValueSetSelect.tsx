@@ -42,6 +42,7 @@ interface Props {
   closeOnSelect?: boolean;
   mobileTrigger?: React.ReactNode;
   clearButtonClassName?: string;
+  disableRightBorder?: boolean;
 }
 
 export default function ValueSetSelect({
@@ -59,6 +60,7 @@ export default function ValueSetSelect({
   title,
   mobileTrigger,
   clearButtonClassName,
+  disableRightBorder,
   ...props
 }: Props & ButtonProps) {
   const { t } = useTranslation();
@@ -90,6 +92,7 @@ export default function ValueSetSelect({
       size="icon"
       className={cn(
         "rounded-l-none border-l-0 text-gray-500 hover:text-gray-900 shrink-0 bg-gray-50",
+        disableRightBorder && "rounded-r-none border-r-0",
         clearButtonClassName,
       )}
       onClick={(e) => {
@@ -122,6 +125,9 @@ export default function ValueSetSelect({
                   "w-full flex justify-between h-auto whitespace-normal text-left font-normal border-gray-300 shadow-xs",
                   !value?.display && "text-gray-500 hover:bg-white",
                   showMobileClear && "rounded-r-none",
+                  disableRightBorder &&
+                    !showMobileClear &&
+                    "rounded-r-none border-r-0 shadow-none",
                 )}
                 {...props}
               >
@@ -203,6 +209,9 @@ export default function ValueSetSelect({
               "flex justify-between truncate font-normal border-gray-300 shadow-xs",
               !value?.display && "text-gray-500 hover:bg-white",
               showClear && "w-full rounded-r-none",
+              disableRightBorder &&
+                !showClear &&
+                "rounded-r-none border-r-0 shadow-none",
             )}
             {...props}
           >
