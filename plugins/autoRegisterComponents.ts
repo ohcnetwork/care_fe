@@ -12,12 +12,11 @@ interface Edit {
   start: number;
   end: number;
   text: string;
-  storeName?: boolean;
 }
 
 interface TransformTarget {
   exportName: string;
-  baseName: string;
+  registeredName: string;
   isDefault: boolean;
 }
 
@@ -133,16 +132,17 @@ function removeExportAndDefaultModifiers(
   }
 }
 
-function appendRegistration(statement: ts.Statement, target: TransformTarget) {
+function appendRegistration(target: TransformTarget) {
   const registration = `${REGISTER_ALIAS}(${JSON.stringify(
     target.exportName,
-  )}, ${target.baseName})`;
+  )}, ${target.exportName})`;
+  const declaration = `\nconst ${target.registeredName} = ${registration};`;
 
   if (target.isDefault) {
-    return `\nconst ${target.exportName} = ${registration};\nexport default ${target.exportName};`;
+    return `${declaration}\nexport default ${target.registeredName};`;
   }
 
-  return `\nexport const ${target.exportName} = ${registration};`;
+  return `${declaration}\nexport { ${target.registeredName} as ${target.exportName} };`;
 }
 
 function applyEdits(source: string, id: string, edits: Edit[]) {
@@ -159,9 +159,7 @@ function applyEdits(source: string, id: string, edits: Edit[]) {
       continue;
     }
 
-    code.update(edit.start, edit.end, edit.text, {
-      storeName: edit.storeName,
-    });
+    code.update(edit.start, edit.end, edit.text);
   }
 
   return {
@@ -443,21 +441,15 @@ function transformSource(
         continue;
       }
 
-      const baseName = uniqueName(source, `${exportName}Base`);
+      const registeredName = uniqueName(source, `${exportName}Registered`);
 
       removeExportAndDefaultModifiers(sourceFile, statement, edits);
       edits.push({
-        start: statement.name.getStart(sourceFile),
-        end: statement.name.end,
-        text: baseName,
-        storeName: true,
-      });
-      edits.push({
         start: statement.end,
         end: statement.end,
-        text: appendRegistration(statement, {
+        text: appendRegistration({
           exportName,
-          baseName,
+          registeredName,
           isDefault,
         }),
       });
@@ -485,21 +477,15 @@ function transformSource(
         continue;
       }
 
-      const baseName = uniqueName(source, `${exportName}Base`);
+      const registeredName = uniqueName(source, `${exportName}Registered`);
 
       removeExportAndDefaultModifiers(sourceFile, statement, edits);
       edits.push({
-        start: declaration.name.getStart(sourceFile),
-        end: declaration.name.end,
-        text: baseName,
-        storeName: true,
-      });
-      edits.push({
         start: statement.end,
         end: statement.end,
-        text: appendRegistration(statement, {
+        text: appendRegistration({
           exportName,
-          baseName,
+          registeredName,
           isDefault: false,
         }),
       });
