@@ -62,25 +62,24 @@ export function DiscountMonetaryComponentForm({
         .object({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
-          // Fix #14040: preprocess coerces null (emitted when input is cleared)
-          // to "" so zodDecimal's refinement fires the friendly "field_required"
-          // message instead of the raw Zod type error "Expected string, received null".
-          factor: z
-            .preprocess(
-              (val) => val ?? "",
-              zodDecimal({ min: 0, max: 100, message: t("field_required") }),
-            )
-            .optional()
-            .nullable(),
-          amount: z
-            .preprocess(
-              (val) => val ?? "",
-              zodDecimal({ min: 0, message: t("field_required") }),
-            )
-            .optional()
-            .nullable(),
-          // Fix #14040: trim() strips leading/trailing whitespace before the
-          // min(1) check so a whitespace-only entry correctly fails validation.
+          // null means the OTHER value type is active (set by handleValueTypeChange).
+          // An empty string means the user cleared the active field — z.string().min(1)
+          // then fires the friendly "field_required" message at the field level.
+          // Using z.union avoids the z.preprocess + .nullable() pitfall where
+          // ZodNullable short-circuits before the preprocess function runs.
+          factor: z.union([
+            z.null(),
+            z.string()
+              .min(1, { message: t("field_required") })
+              .pipe(zodDecimal({ min: 0, max: 100 })),
+          ]),
+          amount: z.union([
+            z.null(),
+            z.string()
+              .min(1, { message: t("field_required") })
+              .pipe(zodDecimal({ min: 0 })),
+          ]),
+          // trim() strips whitespace before the min(1) check.
           title: z
             .string()
             .trim()
@@ -121,8 +120,8 @@ export function DiscountMonetaryComponentForm({
     defaultValues: {
       monetary_component_type: MonetaryComponentType.discount,
       code: defaultValues?.code,
-      factor: defaultValues?.factor ? round(defaultValues.factor) : null,
-      amount: defaultValues?.amount ? round(defaultValues.amount) : null,
+      factor: defaultValues?.factor != null ? round(defaultValues.factor) : null,
+      amount: defaultValues?.amount != null ? round(defaultValues.amount) : null,
       title: defaultValues?.title || "",
       conditions:
         defaultValues?.conditions?.map((condition) => ({
@@ -192,9 +191,7 @@ export function DiscountMonetaryComponentForm({
                             step="0.01"
                             {...field}
                             value={(field.value as string | null) ?? ""}
-                            onChange={(e) =>
-                              field.onChange(e.target.value || null)
-                            }
+                            onChange={(e) => field.onChange(e.target.value)}
                             className="pr-8"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
@@ -222,9 +219,7 @@ export function DiscountMonetaryComponentForm({
                             min="0"
                             step="0.01"
                             {...field}
-                            onChange={(e) =>
-                              field.onChange(e.target.value || null)
-                            }
+                            onChange={(e) => field.onChange(e.target.value)}
                             value={
                               (field.value as string | null) === null
                                 ? ""

@@ -58,13 +58,25 @@ test.describe("Discount Monetary Component Settings", () => {
     const saveButton = page.getByRole("button", { name: /save/i });
     await expect(saveButton).toBeDisabled();
 
-    // Should show "This field is required" error for title
+    // react-hook-form (onSubmit mode) only populates errors after a submit event.
+    // Dispatch a synthetic submit to trigger error population without native
+    // HTML constraint validation and without calling the real onSubmit handler.
+    await page
+      .locator("form")
+      .evaluate((form) =>
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        ),
+      );
+
+    // Should show "This field is required" error for title (use data-slot to
+    // avoid matching description text like "Leave empty if no code is required").
+    const titleFormItem = page
+      .locator('[data-slot="form-item"]')
+      .filter({ has: titleInput });
     await expect(
-      page
-        .locator("div")
-        .filter({ has: titleInput })
-        .getByText(/required/i),
-    ).toBeVisible();
+      titleFormItem.locator('[data-slot="form-message"]'),
+    ).toContainText(/required/i);
 
     // Error should NOT be the raw Zod type error
     await expect(page.getByText(/expected string/i)).not.toBeVisible();
@@ -80,16 +92,31 @@ test.describe("Discount Monetary Component Settings", () => {
 
     // Amount is already selected by default — find the spinbutton directly.
     const amountInput = page.getByRole("spinbutton");
-    // Leave empty and trigger validation
-    await amountInput.focus();
+    // Fill then clear to send "" through onChange (focus/blur alone won't
+    // dispatch a change event when the value was already empty).
+    await amountInput.fill("5");
+    await amountInput.fill("");
     await amountInput.blur();
 
     const saveButton = page.getByRole("button", { name: /save/i });
     await expect(saveButton).toBeDisabled();
 
-    // Should show "This field is required"
-    const amountContainer = page.locator("div").filter({ has: amountInput });
-    await expect(amountContainer.getByText(/required/i)).toBeVisible();
+    // Dispatch a synthetic submit to trigger error population (onSubmit mode).
+    await page
+      .locator("form")
+      .evaluate((form) =>
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        ),
+      );
+
+    // Should show "This field is required" in the amount FormMessage.
+    const amountFormItem = page
+      .locator('[data-slot="form-item"]')
+      .filter({ has: amountInput });
+    await expect(
+      amountFormItem.locator('[data-slot="form-message"]').first(),
+    ).toContainText(/required/i);
 
     // Error should NOT be the raw Zod error
     await expect(page.getByText(/expected.*received null/i)).not.toBeVisible();
@@ -107,16 +134,31 @@ test.describe("Discount Monetary Component Settings", () => {
     await selectValueType(page, "Factor");
 
     const factorInput = page.getByRole("spinbutton");
-    // Leave empty and trigger validation
-    await factorInput.focus();
+    // Fill then clear to send "" through onChange (focus/blur alone won't
+    // dispatch a change event when the value was already empty).
+    await factorInput.fill("5");
+    await factorInput.fill("");
     await factorInput.blur();
 
     const saveButton = page.getByRole("button", { name: /save/i });
     await expect(saveButton).toBeDisabled();
 
-    // Should show "This field is required"
-    const factorContainer = page.locator("div").filter({ has: factorInput });
-    await expect(factorContainer.getByText(/required/i)).toBeVisible();
+    // Dispatch a synthetic submit to trigger error population (onSubmit mode).
+    await page
+      .locator("form")
+      .evaluate((form) =>
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        ),
+      );
+
+    // Should show "This field is required" in the factor FormMessage.
+    const factorFormItem = page
+      .locator('[data-slot="form-item"]')
+      .filter({ has: factorInput });
+    await expect(
+      factorFormItem.locator('[data-slot="form-message"]').first(),
+    ).toContainText(/required/i);
 
     // Error should NOT be the raw Zod error
     await expect(page.getByText(/expected.*received null/i)).not.toBeVisible();
