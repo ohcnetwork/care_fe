@@ -59,7 +59,6 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
       />
       <FormDialog
         subjectType="encounter"
-        questionnaireTag="encounter_actions"
         trigger={
           <QuickAction
             icon={<HealthWorkerIcon className="text-teal-700" />}
