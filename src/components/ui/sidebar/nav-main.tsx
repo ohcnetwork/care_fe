@@ -62,8 +62,8 @@ const isRenderableNavLink = (link: NavigationLink) => isSafeNavUrl(link.url);
 
 /**
  * Renders a nav destination as a raviger `ActiveLink` (internal, same-tab) or a
- * plain anchor (absolute http(s) URLs, or links opening in a new tab). Returns a
- * DOM element directly so it can be used as the child of an `asChild` button.
+ * plain `<a>` (external or open-in-new-tab). Returns a single React element
+ * suitable as the child of a Radix `asChild` button.
  */
 function renderNavLink(
   link: NavigationLink,

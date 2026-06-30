@@ -55,7 +55,7 @@ function toNavigationLink(
  * Resolves custom sidebar links for a given scope from env config and plugins.
  *
  * - Env (`REACT_CUSTOM_NAV_LINKS`): JSON config; icons are auto-assigned from URL.
- * - Plugins (`customNavItems`): manifest entries with the same icon rules.
+ * - Plugins (`customNavItems`): validated with the same schema as env links.
  */
 export function useCustomNavLinks(scope: NavScope): NavigationLink[] {
   const { t } = useTranslation();
@@ -63,8 +63,10 @@ export function useCustomNavLinks(scope: NavScope): NavigationLink[] {
 
   const links = [
     ...envCustomNavLinks,
-    ...careApps.flatMap((app) =>
-      !app.isLoading && app.customNavItems ? app.customNavItems : [],
+    ...parseLinks(
+      careApps.flatMap((app) =>
+        !app.isLoading && app.customNavItems ? app.customNavItems : [],
+      ),
     ),
   ];
 
