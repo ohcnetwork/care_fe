@@ -78,6 +78,17 @@ function isComponentFunction(node: ts.FunctionDeclaration) {
   return !!node.body && containsJsx(node.body);
 }
 
+function isRefOrMemoCall(node: ts.CallExpression): boolean {
+  const callee = node.expression;
+  if (ts.isIdentifier(callee)) {
+    return callee.text === "forwardRef" || callee.text === "memo";
+  }
+  if (ts.isPropertyAccessExpression(callee)) {
+    return callee.name.text === "forwardRef" || callee.name.text === "memo";
+  }
+  return false;
+}
+
 function isComponentInitializer(node: ts.Expression | undefined): boolean {
   if (!node) {
     return false;
@@ -88,6 +99,9 @@ function isComponentInitializer(node: ts.Expression | undefined): boolean {
   }
 
   if (ts.isCallExpression(node)) {
+    if (isRefOrMemoCall(node)) {
+      return false;
+    }
     return containsJsx(node);
   }
 
