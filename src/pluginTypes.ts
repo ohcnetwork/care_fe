@@ -208,7 +208,7 @@ export type PluginManifest = {
   billingNavItems?: NavigationLink[];
   userNavItems?: NavigationLink[];
   adminNavItems?: NavigationLink[];
-  customNavLinks?: CustomNavLink[];
+  customNavItems?: CustomNavLink[];
   organizationTabs?: PluginOrganizationTab[];
   components?: PluginComponentMap;
   encounterTabs?: Record<

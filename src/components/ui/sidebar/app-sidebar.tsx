@@ -195,7 +195,6 @@ export function AppSidebar({
         )}
         {patientSidebar && <PatientNav />}
         {adminSidebar && <AdminNav />}
-        <CustomNavLinks scope={navScope} />
         {(facilitySidebar ||
           facilityLocationSidebar ||
           facilityServiceSidebar ||
@@ -203,6 +202,7 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
+        <CustomNavLinks scope={navScope} />
         {patientSidebar ? (
           <PatientNavUser />
         ) : (

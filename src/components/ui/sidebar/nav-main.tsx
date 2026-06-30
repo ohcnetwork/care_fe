@@ -107,7 +107,13 @@ function renderNavLink(
   );
 }
 
-export function NavMain({ links }: { links: NavigationLink[] }) {
+export function NavMain({
+  links,
+  groupClassName,
+}: {
+  links: NavigationLink[];
+  groupClassName?: string;
+}) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
@@ -125,7 +131,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
   );
 
   return (
-    <SidebarGroup>
+    <SidebarGroup className={groupClassName}>
       <SidebarMenu>
         {links
           .filter((link) => link.visibility !== false)

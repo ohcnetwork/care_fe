@@ -17,25 +17,27 @@ export const NAV_SCOPES = [
 export type NavScope = (typeof NAV_SCOPES)[number];
 
 /**
- * A single custom navigation link, sourced from the `REACT_CUSTOM_NAV_LINKS`
- * env config or a plugin manifest.
+ * A supplementary sidebar link from env (`REACT_CUSTOM_NAV_LINKS`) or a plugin
+ * manifest (`customNavItems`). Same shape for both sources.
  *
- * - `title`: display label, passed through i18n (falls back to literal text).
+ * - `name`: display label, passed through i18n (falls back to literal text).
  * - `url`: internal route path ("/...") or an absolute http(s) URL. Absolute
  *   http(s) URLs are treated as external automatically (rendered as a sanitized
  *   anchor); anything else must be an internal path.
- * - `icon`: optional name from the allow-listed lucide-react icons.
  * - `openInNewTab`: open in a new tab; defaults to true for absolute http(s) URLs.
  * - `placement`: sidebar contexts the link appears in; defaults to every context.
+ *
+ * Icons are assigned automatically: Lucide `ExternalLink` for http(s) URLs,
+ * Lucide `Link` for internal paths.
  */
 export const customNavLinkSchema = z.object({
-  title: z.string(),
+  name: z.string(),
   url: z.string(),
-  icon: z.string().optional(),
   openInNewTab: z.boolean().optional(),
   placement: z.array(z.enum(NAV_SCOPES)).default(["all"]),
 });
 
-export type CustomNavLink = z.infer<typeof customNavLinkSchema>;
+/** Config shape for env JSON and plugin `customNavItems` entries. */
+export type CustomNavLink = z.input<typeof customNavLinkSchema>;
 
 export const customNavLinksSchema = z.array(customNavLinkSchema);

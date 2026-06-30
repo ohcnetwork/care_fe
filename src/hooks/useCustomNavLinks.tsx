@@ -1,20 +1,4 @@
-import {
-  Book,
-  BookOpen,
-  Box,
-  Building2,
-  Calendar,
-  Database,
-  ExternalLink,
-  FileText,
-  Globe,
-  HelpCircle,
-  Link as LinkIcon,
-  LucideIcon,
-  Settings,
-  Stethoscope,
-  Users,
-} from "lucide-react";
+import { ExternalLink, Link as LinkIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import type { NavigationLink } from "@/components/ui/sidebar/nav-main";
@@ -31,32 +15,8 @@ import { isSafeExternalUrl, isSafeNavUrl } from "@/Utils/url";
 
 import careConfig from "@careConfig";
 
-/**
- * Allow-list of icon names that can be referenced from configuration.
- * Restricting the set avoids importing the entire lucide library and keeps
- * untrusted config from rendering arbitrary components.
- */
-const iconMap: Record<string, LucideIcon> = {
-  Book,
-  BookOpen,
-  Box,
-  Building2,
-  Calendar,
-  Database,
-  ExternalLink,
-  FileText,
-  Globe,
-  HelpCircle,
-  Link: LinkIcon,
-  Settings,
-  Stethoscope,
-  Users,
-};
-
 function parseLinks(value: unknown): CustomNavLink[] {
   if (!Array.isArray(value)) return [];
-  // Validate each entry independently so one malformed link (e.g. from a
-  // runtime-loaded plugin manifest) doesn't drop the entire list.
   return value.flatMap((item) => {
     const parsed = customNavLinkSchema.safeParse(item);
     if (parsed.success) return [parsed.data];
@@ -67,38 +27,49 @@ function parseLinks(value: unknown): CustomNavLink[] {
   });
 }
 
+/** Static at build time; validated once when the module loads. */
+const envCustomNavLinks = parseLinks(careConfig.customNavLinks);
+
+function matchesScope(placement: NavScope[], scope: NavScope): boolean {
+  return placement.includes(scope) || placement.includes("all");
+}
+
+function resolveCustomNavIcon(url: string) {
+  const Icon = isSafeExternalUrl(url) ? ExternalLink : LinkIcon;
+  return <Icon className="!h-3.5 !w-4 shrink-0" />;
+}
+
+function toNavigationLink(
+  link: CustomNavLink,
+  t: (key: string) => string,
+): NavigationLink {
+  return {
+    name: t(link.name),
+    url: link.url,
+    openInNewTab: link.openInNewTab ?? isSafeExternalUrl(link.url),
+    icon: resolveCustomNavIcon(link.url),
+  };
+}
+
 /**
- * Resolves the custom navigation links configured for a given sidebar scope.
+ * Resolves custom sidebar links for a given scope from env config and plugins.
  *
- * Links are sourced from the deployment env (`careConfig.customNavLinks`) and
- * from loaded plugin manifests (`customNavLinks`), then filtered by placement
- * and nav-URL safety before being mapped to `NavigationLink`s that `NavMain`
- * can render.
+ * - Env (`REACT_CUSTOM_NAV_LINKS`): JSON config; icons are auto-assigned from URL.
+ * - Plugins (`customNavItems`): manifest entries with the same icon rules.
  */
 export function useCustomNavLinks(scope: NavScope): NavigationLink[] {
   const { t } = useTranslation();
   const careApps = useCareApps();
 
-  const envLinks = parseLinks(careConfig.customNavLinks);
-  const pluginLinks = parseLinks(
-    careApps.flatMap((app) =>
-      !app.isLoading && app.customNavLinks ? app.customNavLinks : [],
+  const links = [
+    ...envCustomNavLinks,
+    ...careApps.flatMap((app) =>
+      !app.isLoading && app.customNavItems ? app.customNavItems : [],
     ),
-  );
+  ];
 
-  return [...envLinks, ...pluginLinks]
-    .filter(
-      (link) =>
-        link.placement.includes(scope) || link.placement.includes("all"),
-    )
+  return links
+    .filter((link) => matchesScope(link.placement ?? ["all"], scope))
     .filter((link) => isSafeNavUrl(link.url))
-    .map((link) => {
-      const Icon = link.icon ? iconMap[link.icon] : undefined;
-      return {
-        name: t(link.title),
-        url: link.url,
-        openInNewTab: link.openInNewTab ?? isSafeExternalUrl(link.url),
-        icon: Icon ? <Icon /> : undefined,
-      } satisfies NavigationLink;
-    });
+    .map((link) => toNavigationLink(link, t));
 }
