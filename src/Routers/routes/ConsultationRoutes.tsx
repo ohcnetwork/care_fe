@@ -81,12 +81,13 @@ const consultationRoutes: AppRoutes = {
     };
     return acc;
   }, {}),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/medicines/administrations/print":
-    ({ facilityId, encounterId, patientId }) => (
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/type/:productType/administrations/print":
+    ({ facilityId, encounterId, patientId, productType }) => (
       <PrintMedicationAdministration
         facilityId={facilityId}
         encounterId={encounterId}
         patientId={patientId}
+        productType={productType}
       />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/template/:templateSlug":

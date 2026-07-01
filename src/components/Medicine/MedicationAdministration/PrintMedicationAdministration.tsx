@@ -31,6 +31,7 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
+import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
@@ -62,8 +63,9 @@ export const PrintMedicationAdministration = (props: {
   facilityId: string;
   encounterId: string;
   patientId: string;
+  productType: ProductKnowledgeType;
 }) => {
-  const { facilityId, encounterId, patientId } = props;
+  const { facilityId, encounterId, patientId, productType } = props;
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
 
@@ -77,11 +79,17 @@ export const PrintMedicationAdministration = (props: {
 
   // Fetch all medication requests for this encounter
   const { data: medicationRequests, isLoading: requestsLoading } = useQuery({
-    queryKey: ["medication_requests_print", patientId, encounterId],
+    queryKey: [
+      "medication_requests_print",
+      patientId,
+      encounterId,
+      productType,
+    ],
     queryFn: query.paginated(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
+        product_type: productType,
       },
       pageSize: 200,
     }),
@@ -237,14 +245,18 @@ export const PrintMedicationAdministration = (props: {
   if (!hasData) {
     return (
       <div className="flex h-52 items-center justify-center rounded-lg border-2 border-gray-200 border-dashed p-4 text-gray-500">
-        {t("no_medications_found_for_this_encounter")}
+        {t(`no_${productType}s_found_for_this_encounter`)}
       </div>
     );
   }
 
   return (
     <PrintPreview
-      title={`${t("drug_chart")} - ${encounter?.patient.name}`}
+      title={`${t(
+        productType === ProductKnowledgeType.medication
+          ? "drug_chart"
+          : "intake_chart",
+      )} - ${encounter?.patient.name}`}
       disabled={!hasData}
       facility={facility}
       templateSlug={PrintTemplateType.medication_administration}
@@ -278,7 +290,7 @@ export const PrintMedicationAdministration = (props: {
             onCheckedChange={(checked) => setShowDiscontinued(checked === true)}
           />
           <Label htmlFor="show-discontinued" className="text-sm cursor-pointer">
-            {t("show_discontinued_medications")}
+            {t(`show_discontinued_${productType}s`)}
           </Label>
         </div>
         <div className="flex items-center gap-2">
@@ -310,7 +322,7 @@ export const PrintMedicationAdministration = (props: {
           <div className="flex justify-between items-start p-3 border-b-2 border-gray-400 bg-gray-100">
             <div>
               <h1 className="text-xl font-bold uppercase tracking-wide">
-                {t("medication_administration_record")}
+                {t(`${productType}_administration_record`)}
               </h1>
               <p className="text-sm text-gray-600 mt-1">
                 {encounter?.facility?.name}
@@ -358,7 +370,7 @@ export const PrintMedicationAdministration = (props: {
         {groupedMedications.regular.length > 0 && (
           <div className="mb-6">
             <h2 className="font-bold text-sm uppercase tracking-wide mb-2 bg-gray-800 text-white px-2 py-1">
-              {t("regular_medications")}
+              {t(`regular_${productType}s`)}
             </h2>
             {dateRanges.map((dates, idx) => (
               <div
@@ -374,6 +386,7 @@ export const PrintMedicationAdministration = (props: {
                   dates={dates}
                   adminIndex={adminIndex}
                   timeSlots={timeSlots}
+                  productType={productType}
                 />
               </div>
             ))}
@@ -384,7 +397,7 @@ export const PrintMedicationAdministration = (props: {
         {groupedMedications.prn.length > 0 && (
           <div className="mb-6 print:break-before-page">
             <h2 className="font-bold text-sm uppercase tracking-wide mb-2 bg-pink-700 text-white px-2 py-1">
-              {t("prn_medications")} ({t("as_needed")})
+              {t(`prn_${productType}s`)} ({t("as_needed")})
             </h2>
             {dateRanges.map((dates, idx) => (
               <div
@@ -400,6 +413,7 @@ export const PrintMedicationAdministration = (props: {
                   dates={dates}
                   adminIndex={adminIndex}
                   timeSlots={timeSlots}
+                  productType={productType}
                   isPRN
                 />
               </div>
@@ -409,7 +423,7 @@ export const PrintMedicationAdministration = (props: {
 
         <PrintFooter
           className="mt-4"
-          leftContent={t("computer_generated_medication_administration")}
+          leftContent={t(`computer_generated_${productType}_administration`)}
         />
       </div>
     </PrintPreview>
@@ -422,6 +436,7 @@ const DrugChartTable = ({
   dates,
   adminIndex,
   timeSlots,
+  productType,
   isPRN = false,
 }: {
   groups: GroupedMedication[];
@@ -431,6 +446,7 @@ const DrugChartTable = ({
     Record<string, Record<string, MedicationAdministrationRead[]>>
   >;
   timeSlots: { label: string; start: number; end: number }[];
+  productType: ProductKnowledgeType;
   isPRN?: boolean;
 }) => {
   const { t } = useTranslation();
@@ -448,7 +464,7 @@ const DrugChartTable = ({
               className="border-r-2 border-b-1 border-gray-400 p-1.5 text-left font-bold w-[160px]"
               rowSpan={2}
             >
-              {t("medication")}
+              {t(productType)}
             </th>
             {dates.map((date, dateIdx) => (
               <th
