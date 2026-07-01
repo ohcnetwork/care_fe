@@ -20,6 +20,7 @@ import {
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
+import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
 
 import { GroupedMedication } from "./utils";
 
@@ -30,11 +31,20 @@ interface DiscontinueConfirmDialogProps {
   group?: GroupedMedication | null;
   onConfirm: () => void;
   isPending?: boolean;
+  productType: ProductKnowledgeType;
 }
 
 export const DiscontinueConfirmDialog: React.FC<
   DiscontinueConfirmDialogProps
-> = ({ open, onOpenChange, medication, group, onConfirm, isPending }) => {
+> = ({
+  open,
+  onOpenChange,
+  medication,
+  group,
+  onConfirm,
+  isPending,
+  productType,
+}) => {
   const { t } = useTranslation();
 
   // Count active requests in group
@@ -47,17 +57,17 @@ export const DiscontinueConfirmDialog: React.FC<
     : 0;
 
   const title = group
-    ? t("discontinue_medication_group_title", {
+    ? t(`discontinue_${productType}_group_title`, {
         product: group.productName,
       })
-    : t("discontinue_medication");
+    : t(`discontinue_${productType}`);
 
   const description = group
-    ? t("discontinue_medication_group_description", {
+    ? t(`discontinue_${productType}_group_description`, {
         count: activeCount,
         product: group.productName,
       })
-    : t("discontinue_medication_description", {
+    : t(`discontinue_${productType}_description`, {
         medication: medication ? displayMedicationName(medication) : "",
       });
 

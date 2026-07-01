@@ -812,6 +812,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
             selectedGroupForAdmin ? selectedGroupForAdmin.requests : undefined
           }
           onMedicationChange={handleMedicationChangeInDialog}
+          productType={selectedProductType}
         />
       )}
 
@@ -832,6 +833,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           patientId={patientId}
           encounterId={encounterId}
           selectedGroup={selectedGroupForAdmin || undefined}
+          productType={selectedProductType}
         />
       )}
 
@@ -841,6 +843,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         medication={itemToDiscontinue?.medication}
         group={itemToDiscontinue?.group}
         onConfirm={handleConfirmDiscontinue}
+        productType={selectedProductType}
       />
     </div>
   );

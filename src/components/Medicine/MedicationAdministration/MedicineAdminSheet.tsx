@@ -26,6 +26,7 @@ import {
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
+import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
 
 import { MedicineAdminForm } from "./MedicineAdminForm";
 import {
@@ -41,6 +42,7 @@ interface Props {
   lastAdministeredDates?: Record<string, string>;
   patientId: string;
   encounterId: string;
+  productType: ProductKnowledgeType;
   selectedGroup?: GroupedMedication;
 }
 
@@ -122,6 +124,7 @@ export function MedicineAdminSheet({
   patientId,
   encounterId,
   selectedGroup,
+  productType,
 }: Props) {
   const { t } = useTranslation();
 
@@ -246,7 +249,9 @@ export function MedicineAdminSheet({
         >
           <SheetHeader className="space-y-4 shrink-0 mr-2">
             <SheetTitle className="text-xl">
-              {t("administer_medicines")}
+              {productType === ProductKnowledgeType.medication
+                ? t("administer_medicines")
+                : t("administer_nutritional_products")}
             </SheetTitle>
           </SheetHeader>
 
@@ -287,7 +292,11 @@ export function MedicineAdminSheet({
               >
                 {isPending
                   ? t("saving")
-                  : `${t("administer_medicines")} (${selectedMedicines.size})`}
+                  : `${
+                      productType === ProductKnowledgeType.medication
+                        ? t("administer_medicines")
+                        : t("administer_nutritional_products")
+                    } (${selectedMedicines.size})`}
               </Button>
             </div>
           </SheetFooter>
