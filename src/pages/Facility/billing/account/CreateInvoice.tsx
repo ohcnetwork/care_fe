@@ -5,9 +5,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { t as i18nT } from "i18next";
 import {
   CheckIcon,
-  ChevronLeft,
   ChevronRight,
   Package,
   PlusIcon,
@@ -77,10 +77,10 @@ import { UserReadMinimal } from "@/types/user/user";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { formatDateTime, formatName, goBack } from "@/Utils/utils";
 
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
-import BackButton from "@/components/Common/BackButton";
+import { DateTimePicker } from "@/components/Common/DateTimePicker";
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import {
@@ -101,6 +101,12 @@ const formSchema = z.object({
   status: z.nativeEnum(InvoiceStatus),
   payment_terms: z.string().optional(),
   note: z.string().optional(),
+  issue_date: z
+    .string()
+    .optional()
+    .refine((val) => !val || new Date(val) <= new Date(), {
+      message: i18nT("issue_date_cannot_be_in_future"),
+    }),
   charge_items: z.array(z.string()),
 });
 
@@ -190,6 +196,7 @@ export function CreateInvoicePage({
       status: InvoiceStatus.draft,
       payment_terms: import.meta.env.REACT_DEFAULT_PAYMENT_TERMS || "",
       note: "",
+      issue_date: "",
       charge_items: preSelectedChargeItems?.map((item) => item.id) || [],
     },
   });
@@ -264,7 +271,7 @@ export function CreateInvoicePage({
         onSuccess?.();
       } else {
         onSuccess?.();
-        navigate(invoiceUrl);
+        navigate(invoiceUrl, { replace: true });
       }
     },
   });
@@ -273,6 +280,7 @@ export function CreateInvoicePage({
     const payload: InvoiceCreate = {
       ...values,
       account: accountId,
+      issue_date: values.issue_date || undefined,
     };
     createMutation.mutate(payload);
   };
@@ -417,14 +425,6 @@ export function CreateInvoicePage({
       {showHeader && (
         <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center border-b-3 border-double pb-4">
           <div className="flex gap-3 sm:gap-6 flex-col md:flex-row">
-            <BackButton
-              variant="link"
-              className="px-0 justify-start"
-              fallbackUrl={`/facility/${facilityId}/billing/account/${accountId}`}
-            >
-              <ChevronLeft />
-              <span>{t("back")}</span>
-            </BackButton>
             <div className="h-auto w-px bg-gray-300" aria-hidden="true" />
             {account?.patient && (
               <>
@@ -874,7 +874,7 @@ export function CreateInvoicePage({
                     )}
                   />
                   <span className="font-medium">
-                    {t("payment_terms_and_note")}
+                    {t("invoice_optional_details")}
                   </span>
                   <span className="text-xs text-gray-400 group-hover:text-gray-500">
                     ({t("optional")})
@@ -882,58 +882,85 @@ export function CreateInvoicePage({
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 pt-2 pb-4">
+                <div className="space-y-4 pt-2 pb-4">
                   <FormField
                     control={form.control}
-                    name="payment_terms"
+                    name="issue_date"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("payment_terms")}</FormLabel>
+                      <FormItem className="lg:max-w-md">
+                        <FormLabel>{t("issue_date")}</FormLabel>
                         <FormControl>
-                          <Textarea
-                            {...field}
+                          <DateTimePicker
+                            id="invoice-issue-date"
+                            value={field.value}
+                            onDateChange={(val) => field.onChange(val ?? "")}
                             disabled={createMutation.isPending}
-                            placeholder={t("payment_terms_placeholder")}
-                            rows={2}
+                            blockDate={(date) => date > new Date()}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="note"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("note")}</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            disabled={createMutation.isPending}
-                            placeholder={t("invoice_note_placeholder")}
-                            rows={2}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="payment_terms"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("payment_terms")}</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              disabled={createMutation.isPending}
+                              placeholder={t("payment_terms_placeholder")}
+                              rows={2}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="note"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("note")}</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              disabled={createMutation.isPending}
+                              placeholder={t("invoice_note_placeholder")}
+                              rows={2}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
               </CollapsibleContent>
             </Collapsible>
 
             <div className="flex justify-end space-x-4">
-              <BackButton
+              <Button
                 type="button"
                 variant="ghost"
                 className="text-base font-semibold"
-                {...(onCancel && { onClick: onCancel })}
+                onClick={() => {
+                  if (onCancel) {
+                    onCancel();
+                  } else {
+                    goBack();
+                  }
+                }}
                 disabled={createMutation.isPending}
                 data-shortcut-id="go-back"
               >
                 <span className="underline">{t("cancel")}</span>
-              </BackButton>
+              </Button>
               {dispenseOrderId && (
                 <Button
                   type="button"

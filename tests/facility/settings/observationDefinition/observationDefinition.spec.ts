@@ -3,6 +3,15 @@ import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
 
+const UNITS = [
+  "meq/g",
+  "gram percent",
+  "beats / minute",
+  "per liter",
+  "liter per minute",
+];
+let unit = faker.helpers.arrayElement(UNITS);
+
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -51,10 +60,10 @@ test.describe("Observation Definition Form with Interpretation", () => {
 
       // Select LOINC code (search and select first available)
       await page.getByRole("combobox", { name: "LOINC Code *" }).click();
-      // Wait for search results and select first option
-      await page.waitForTimeout(1000); // Wait for search to load
-      const firstCodeOption = page.getByRole("option").first();
-      await firstCodeOption.click();
+      await page
+        .getByPlaceholder("Search for observation codes")
+        .fill("procedure");
+      await page.getByRole("option", { name: "Procedure" }).first().click();
     });
   }
 
@@ -65,12 +74,14 @@ test.describe("Observation Definition Form with Interpretation", () => {
     gender: string = "Male",
   ) {
     await test.step("Add gender condition", async () => {
-      const conditionSelector = page.getByText(
-        `Condition ${conditionNumber}Type`,
-      );
+      await page.getByTitle(`Condition ${conditionNumber}`);
+      const conditionSelector = page.getByTitle(`Condition ${conditionNumber}`);
       const conditionSelectorExists = await conditionSelector.isVisible();
       if (!conditionSelectorExists) {
-        await page.getByRole("button", { name: "Add Condition" }).click();
+        await page
+          .getByText("ConditionsAdd")
+          .getByRole("button", { name: "Add" })
+          .click();
       }
       // Select metric type
       await conditionSelector
@@ -101,8 +112,8 @@ test.describe("Observation Definition Form with Interpretation", () => {
     ageType: string = "years",
   ) {
     await test.step("Add age condition", async () => {
-      const conditionSelector = await page.getByText(
-        `Condition ${conditionNumber}Type`,
+      const conditionSelector = await page.getByTitle(
+        `Condition ${conditionNumber}`,
       );
 
       // Select metric type
@@ -132,10 +143,6 @@ test.describe("Observation Definition Form with Interpretation", () => {
         if (max !== undefined) {
           await conditionSelector.getByPlaceholder("Max").fill(max.toString());
         }
-        // Select age type
-        //await page.getByRole("combobox").filter({ hasText: "Years" }).click();
-        //await conditionSelector.getByRole("combobox").nth(2).click();
-        //await page.getByRole("option", { name: ageType }).click();
       }
     });
   }
@@ -148,12 +155,16 @@ test.describe("Observation Definition Form with Interpretation", () => {
     display: string,
     min?: number,
     max?: number,
-    color?: string,
   ) {
     await test.step("Add numeric range", async () => {
-      const rangeSelector = page.getByText(
-        `Range ${rangeNumber}DisplayIconColorSelect`,
-      );
+      const rangeSelector = page.getByTitle(`Range ${rangeNumber}`);
+      const rangeSelectorExists = await rangeSelector.isVisible();
+      if (!rangeSelectorExists) {
+        await page
+          .getByText("RangesAdd")
+          .getByRole("button", { name: "Add" })
+          .click();
+      }
       const qualifiedRangesInput = isComponent
         ? `component.0.qualified_ranges.0.ranges.${rangeNumber - 1}`
         : `qualified_ranges.0.ranges.${rangeNumber - 1}`;
@@ -177,26 +188,11 @@ test.describe("Observation Definition Form with Interpretation", () => {
           .locator(`input[name="${qualifiedRangesInput}.max"]`)
           .fill(max.toString());
       }
-
-      // Select color if provided
-      if (color) {
-        await rangeSelector
-          .getByRole("combobox")
-          .filter({ hasText: "Select a value" })
-          .first()
-          .click();
-        await page.getByRole("option", { name: color }).click();
-      }
     });
   }
 
   async function cancelAndDeleteInterpretation(page: any) {
     await page.getByRole("button", { name: "Cancel" }).click();
-    await page
-      .locator(".flex.flex-col.sm\\:flex-row")
-      .nth(0)
-      .locator("button:has(svg.lucide-trash-2)")
-      .click();
   }
 
   test.beforeEach(async ({ page }) => {
@@ -217,19 +213,23 @@ test.describe("Observation Definition Form with Interpretation", () => {
     await page.getByRole("button", { name: "Add Interpretation" }).click();
 
     /*     // Wait for sheet to open
-    await expect(
-      page.getByRole("heading", { name: /Add\/Edit Interpretation/i }),
-    ).toBeVisible(); */
+        await expect(
+          page.getByRole("heading", { name: /Add\/Edit Interpretation/i }),
+        ).toBeVisible(); */
 
     // Add condition
     await addGenderCondition(page, 1, "Male");
 
     // Add condition - Patient Age
-    await page.getByRole("button", { name: "Add Condition" }).click();
+    await page
+      .getByText("ConditionsAdd")
+      .getByRole("button", { name: "Add" })
+      .click();
+
     await addAgeCondition(page, 2, "in_range", undefined, 18, 65, "Years");
 
     // Add numeric range
-    await addNumericRange(page, 1, false, "Normal Range", 10, 100, "primary");
+    await addNumericRange(page, 1, false, "Normal Range", 10, 100);
 
     // Save interpretation
     await page.getByRole("button", { name: "Save" }).click();
@@ -270,17 +270,24 @@ test.describe("Observation Definition Form with Interpretation", () => {
 
     // Fill component code
     await page.getByRole("combobox", { name: "Code *", exact: true }).click();
-    await page.waitForTimeout(1000);
-    await page.getByRole("option").first().click();
+    await page.waitForLoadState("networkidle");
+    await page
+      .getByPlaceholder("Search for observation codes")
+      .fill("Hemoglobin");
+    await page.getByRole("option", { name: "Hemoglobin" }).first().click();
 
     // Select component data type
     await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
     await page.getByRole("option", { name: "Quantity" }).first().click();
 
     // Select component unit
-    page.getByRole("combobox", { name: "Unit" }).nth(1).click();
-    await page.waitForTimeout(1000);
-    await page.getByRole("option").first().click();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "search for units" })
+      .click();
+    await page.waitForLoadState("networkidle");
+    await page.getByPlaceholder("Search for units").fill(unit);
+    await page.getByRole("option", { name: unit }).first().click();
 
     // Add component-level interpretation
     await page
@@ -297,7 +304,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     await addGenderCondition(page, 1, "Female");
 
     // Add numeric range
-    await addNumericRange(page, 1, true, "Low", undefined, 50, "Danger");
+    await addNumericRange(page, 1, true, "Low", undefined, 50);
 
     // Save interpretation
     await page.getByRole("button", { name: "Save" }).click();
@@ -341,7 +348,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       await page.getByRole("combobox", { name: "Code *", exact: true }).click();
-      await page.waitForTimeout(1000);
+      await page.waitForLoadState("networkidle");
       await page.getByRole("option").first().click();
 
       await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
@@ -351,7 +358,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       await page.getByRole("combobox", { name: "Unit" }).nth(1).click();
-      await page.waitForTimeout(1000);
+      await page.waitForLoadState("networkidle");
       await page.getByRole("option").first().click();
     });
 
@@ -431,7 +438,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       await page.getByRole("combobox", { name: "Code *", exact: true }).click();
-      await page.waitForTimeout(1000);
+      await page.waitForLoadState("networkidle");
       await page.getByRole("option").first().click();
 
       await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
@@ -441,7 +448,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       page.getByRole("combobox", { name: "Unit" }).nth(1).click();
-      await page.waitForTimeout(1000);
+      await page.waitForLoadState("networkidle");
       await page.getByRole("option").first().click();
 
       // Add component-level interpretation
@@ -520,17 +527,28 @@ test.describe("Observation Definition Form with Interpretation", () => {
       await addGenderCondition(page, 1, "Male");
 
       // Add second condition - Age
-      await page.getByRole("button", { name: "Add Condition" }).click();
+      await page
+        .getByText("ConditionsAdd")
+        .getByRole("button", { name: "Add" })
+        .click();
       await addAgeCondition(page, 2, "in_range", undefined, 18, 65, "Years");
 
       // Add first range
-      await addNumericRange(page, 1, false, "Low", undefined, 50, "Danger");
-      await page.getByRole("button", { name: "Add Range" }).click();
+      await addNumericRange(page, 1, false, "Low", undefined, 50);
+
+      await page
+        .getByText("RangesAdd")
+        .getByRole("button", { name: "Add" })
+        .click();
       // Add second range
-      await addNumericRange(page, 2, false, "Normal", 51, 100, "Blue");
-      await page.getByRole("button", { name: "Add Range" }).click();
+      await addNumericRange(page, 2, false, "Normal", 51, 100);
+
+      await page
+        .getByText("RangesAdd")
+        .getByRole("button", { name: "Add" })
+        .click();
       // Add third range
-      await addNumericRange(page, 3, false, "High", 101, undefined, "Pink");
+      await addNumericRange(page, 3, false, "High", 101, undefined);
 
       // Save interpretation
       await page.getByRole("button", { name: "Save" }).click();
@@ -664,10 +682,13 @@ test.describe("Observation Definition Form with Interpretation", () => {
       await page.getByRole("button", { name: "Add Interpretation" }).click();
       await addNumericRange(page, 1, false, "Normal", 0, 100);
 
-      const conditionSelector = page.getByText(`Condition 1Type`);
+      const conditionSelector = page.getByTitle(`Condition 1`);
       const conditionSelectorExists = await conditionSelector.isVisible();
       if (!conditionSelectorExists) {
-        await page.getByRole("button", { name: "Add Condition" }).click();
+        await page
+          .getByText("ConditionsAdd")
+          .getByRole("button", { name: "Add" })
+          .click();
       }
 
       // Select metric type
@@ -705,13 +726,10 @@ test.describe("Observation Definition Form with Interpretation", () => {
       await page.getByRole("button", { name: "Add Interpretation" }).click();
       await addGenderCondition(page, 1, "Male");
 
-      const rangeSelector = page.getByText(`Range ${1}DisplayIconColorSelect`);
+      const rangeSelector = page.getByTitle("Range 1");
 
       // Remove the range
-      await rangeSelector
-        .locator("button:has(svg.lucide-trash-2)")
-        .first()
-        .click();
+      await rangeSelector.getByRole("button").click();
 
       // Save button should be disabled (because no ranges)
       const saveButton = page.getByRole("button", { name: "Save" });

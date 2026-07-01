@@ -24,9 +24,11 @@ import {
   Metrics,
 } from "@/types/base/condition/condition";
 import {
+  DiscountMonetaryComponent,
   formatComponentValue,
   getComponentNumericValue,
   isComponentSelected,
+  isDiscountComponent,
   isPercentageBased,
   isSameComponentCode,
   MonetaryComponent,
@@ -60,6 +62,8 @@ export interface MonetaryComponentSelectorProps {
   displayMode?: "inline" | "full" | "short";
   /** Additional CSS classes */
   className?: string;
+  /** Facility ID for facility-scoped tag filtering */
+  facilityId?: string;
 }
 
 /**
@@ -69,13 +73,22 @@ function toMonetaryComponent(
   component: MonetaryComponentRead,
   type: MonetaryComponentType,
 ): MonetaryComponent {
-  return {
-    monetary_component_type: type,
+  const shared = {
     code: component.code,
     factor: isPercentageBased(component) ? component.factor : null,
     amount: !isPercentageBased(component) ? component.amount : null,
     conditions: [],
-    global_component: true,
+  };
+  if (type === MonetaryComponentType.discount) {
+    return {
+      monetary_component_type: MonetaryComponentType.discount,
+      ...shared,
+      global_component: true,
+    };
+  }
+  return {
+    monetary_component_type: type,
+    ...shared,
   };
 }
 
@@ -95,6 +108,7 @@ export function MonetaryComponentSelector({
   disabled = false,
   displayMode = "full",
   className = "",
+  facilityId,
 }: MonetaryComponentSelectorProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -217,11 +231,11 @@ export function MonetaryComponentSelector({
     );
   };
 
-  const handleToggleGlobal = (component: MonetaryComponent) => {
+  const handleToggleGlobal = (component: DiscountMonetaryComponent) => {
     const isCurrentlyGlobal = component.global_component === true;
     onSelectionChange(
       selectedComponents.map((c) =>
-        isSameComponentCode(c, component)
+        isSameComponentCode(c, component) && isDiscountComponent(c)
           ? {
               ...c,
               global_component: !isCurrentlyGlobal,
@@ -428,7 +442,9 @@ export function MonetaryComponentSelector({
               const componentRead = components.find((c) =>
                 isSameComponentCode(c, component),
               );
-              const isGlobal = component.global_component === true;
+              const isGlobal =
+                isDiscountComponent(component) &&
+                component.global_component === true;
 
               return (
                 <div
@@ -457,7 +473,11 @@ export function MonetaryComponentSelector({
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={isGlobal}
-                        onCheckedChange={() => handleToggleGlobal(component)}
+                        onCheckedChange={() => {
+                          if (isDiscountComponent(component)) {
+                            handleToggleGlobal(component);
+                          }
+                        }}
                         aria-label={t("use_facility_global_value")}
                       />
                       <span className="text-sm text-gray-600">
@@ -492,6 +512,7 @@ export function MonetaryComponentSelector({
                         )
                       }
                       className="mt-3"
+                      facilityId={facilityId}
                     />
                   )}
                 </div>

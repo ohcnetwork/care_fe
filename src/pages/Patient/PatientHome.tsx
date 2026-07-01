@@ -23,7 +23,6 @@ import PatientTokensList from "@/components/Tokens/PatientTokensList";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { UpcomingAppointmentCard } from "@/pages/Appointments/components/UpcomingAppointmentCard";
@@ -33,6 +32,7 @@ import PatientHomeTabs from "@/pages/Patient/home/PatientHomeTabs";
 import { PLUGIN_Component } from "@/PluginEngine";
 import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
 import { useAtomValue } from "jotai";
 import { Link, navigate, useQueryParams } from "raviger";
@@ -53,7 +53,6 @@ export default function PatientHome() {
     useQueryParams<QParams>();
   const queryClient = useQueryClient();
 
-  const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
 
   const pharmacyDispenseService = useAtomValue(
@@ -84,7 +83,12 @@ export default function PatientHome() {
   } = useQuery({
     queryKey: ["patient-verify", phone_number, year_of_birth, partial_id],
     queryFn: query(patientApi.searchRetrieve, {
-      body: { phone_number: phone_number ?? "", year_of_birth, partial_id },
+      body: {
+        phone_number: phone_number ?? "",
+        year_of_birth,
+        partial_id,
+        facility: facilityId,
+      },
     }),
     enabled: !!(partial_id && (year_of_birth || phone_number)),
   });
@@ -112,7 +116,10 @@ export default function PatientHome() {
             <div className="space-y-6 lg:col-span-2">
               <div className="">
                 <PatientInfoCard
-                  tags={patientData.instance_tags}
+                  tags={[
+                    ...patientData.instance_tags,
+                    ...patientData.facility_tags,
+                  ]}
                   tagEntityType="patient"
                   tagEntityId={patientData.id}
                   patient={patientData}
@@ -214,6 +221,11 @@ export default function PatientHome() {
                   title={t("view_accounts")}
                   actionId="view-the-accounts"
                   href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${patientData.id}&patient_name=${patientData.name}`}
+                />
+                <PLUGIN_Component
+                  __name="PatientHomeQuickActions"
+                  patient={patientData}
+                  facilityId={facilityId}
                 />
               </div>
 

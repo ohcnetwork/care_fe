@@ -168,6 +168,35 @@ const careConfig = {
     return undefined;
   })(),
 
+  /**
+   * Screen position for toast notifications (Sonner)
+   * Valid values: top-left, top-center, top-right, bottom-left, bottom-center, bottom-right
+   * Defaults to top-center if unset or invalid.
+   */
+  toastPosition: (() => {
+    const validPositions = [
+      "top-left",
+      "top-center",
+      "top-right",
+      "bottom-left",
+      "bottom-center",
+      "bottom-right",
+    ] as const;
+
+    const defaultPosition: (typeof validPositions)[number] = "top-center";
+    const position = env.REACT_TOAST_POSITION;
+    if (!position) return defaultPosition;
+
+    if (validPositions.includes(position as (typeof validPositions)[number])) {
+      return position as (typeof validPositions)[number];
+    }
+
+    console.warn(
+      `Invalid REACT_TOAST_POSITION: "${position}". Valid values are: ${validPositions.join(", ")}. Falling back to ${defaultPosition}.`,
+    );
+    return defaultPosition;
+  })(),
+
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
         const [module, cdn] = app.split("@");
@@ -196,6 +225,10 @@ const careConfig = {
       })
     : [],
 
+  appStore: {
+    indexUrl: env.REACT_APP_STORE_INDEX_URL,
+  },
+
   plotsConfigUrl:
     env.REACT_OBSERVATION_PLOTS_CONFIG_URL || "/config/plots.json",
 
@@ -203,6 +236,11 @@ const careConfig = {
     code: (env.REACT_DEFAULT_COUNTRY || "IN") as CountryCode,
     name: env.REACT_DEFAULT_COUNTRY_NAME || "India",
   },
+
+  medicationValueSetSelectDefaultTab:
+    env.REACT_MEDICATION_VALUE_SET_SELECT_DEFAULT_TAB === "valueset"
+      ? "valueset"
+      : "product",
 
   resendOtpTimeout: env.REACT_APP_RESEND_OTP_TIMEOUT
     ? parseInt(env.REACT_APP_RESEND_OTP_TIMEOUT, 10)
@@ -247,6 +285,11 @@ const careConfig = {
 
     minimalPatientRegistration: booleanFromString(
       env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION,
+      false,
+    ),
+
+    globalPatientEditAccessEnabled: booleanFromString(
+      env.REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED,
       false,
     ),
   },
