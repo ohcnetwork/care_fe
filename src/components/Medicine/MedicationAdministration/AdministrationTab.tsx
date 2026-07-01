@@ -723,8 +723,15 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   onClick={() => setIsSheetOpen(true)}
                   disabled={!activeMedications?.results?.length}
                 >
-                  <CareIcon icon="l-syringe" className="mr-2 size-4" />
-                  {t("administer_medicine")}
+                  <CareIcon
+                    icon={
+                      selectedTab === "medication" ? "l-syringe" : "l-utensils"
+                    }
+                    className="mr-2 size-4"
+                  />
+                  {selectedTab === "medication"
+                    ? t("administer_medicine")
+                    : t("record_intake")}
                 </Button>
               )}
               {facilityIdExists && (
@@ -741,7 +748,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     className="h-9"
                   >
                     <CareIcon icon="l-file-medical-alt" className="mr-2" />
-                    {t("view_drug_chart")}
+                    {selectedTab === "medication"
+                      ? t("view_drug_chart")
+                      : t("view_intake_chart")}
                   </Button>
                 </Link>
               )}
