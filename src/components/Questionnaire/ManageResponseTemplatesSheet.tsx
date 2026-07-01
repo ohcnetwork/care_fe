@@ -820,12 +820,7 @@ export default function ManageResponseTemplatesSheet({
             setSavingCurrent(true);
             setViewMode("create");
             setEditableMedications(
-              currentMedications.map(
-                (med) =>
-                  buildMedicationForTemplate(
-                    med,
-                  ) as MedicationRequestTemplateSpec,
-              ),
+              currentMedications.map((med) => buildMedicationForTemplate(med)),
             );
             setEditableActivityDefinitions([...currentActivityDefinitions]);
           }}

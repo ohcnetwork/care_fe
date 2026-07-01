@@ -130,25 +130,23 @@ function formatDoseRange(range?: DoseRange): string {
 export function buildMedicationForTemplate(
   medication: MedicationRequestCreate,
 ): MedicationRequestTemplateSpec {
-  const medicationForTemplate: MedicationRequestCreate = {
-    ...medication,
+  const templateMedication: MedicationRequestTemplateSpec = {
+    status: medication.status,
+    status_reason: medication.status_reason,
+    intent: medication.intent,
+    category: medication.category,
+    priority: medication.priority,
+    do_not_perform: medication.do_not_perform,
+    dosage_instruction: medication.dosage_instruction,
+    note: medication.note,
     requested_product: medication.requested_product_internal?.slug || undefined,
   };
 
-  // Handle medication field based on whether we have a product slug
-  if (medication.requested_product) {
-    delete medicationForTemplate.medication;
-  } else if (medication.medication?.code) {
-    medicationForTemplate.medication = medication.medication;
-  } else {
-    delete medicationForTemplate.medication;
+  if (!medication.requested_product && medication.medication?.code) {
+    templateMedication.medication = medication.medication;
   }
 
-  // Remove internal objects that shouldn't be stored in templates
-  delete medicationForTemplate.requested_product_internal;
-  delete medicationForTemplate.id;
-
-  return medicationForTemplate;
+  return templateMedication;
 }
 
 /**

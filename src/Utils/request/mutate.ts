@@ -1,5 +1,5 @@
 import { callApi } from "@/Utils/request/query";
-import { ApiCallOptions, ApiRoute } from "@/Utils/request/types";
+import { ApiCallOptions, ApiRoute, QueryParams } from "@/Utils/request/types";
 
 /**
  * Creates a TanStack Query compatible mutation function.
