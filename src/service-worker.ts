@@ -32,34 +32,69 @@ self.addEventListener("push", async function (event) {
         clients[0].postMessage(data);
       });
     } else {
+      const title = data.title || "Care - Open Health Care Network";
+      const body = data.body || data.message || "";
       event.waitUntil(
-        self.registration.showNotification("Care - Open Health Care Network", {
-          body: data.message,
-          tag: data.external_id,
+        self.registration.showNotification(title, {
+          body,
+          tag: data.external_id || data.resource_id,
+          data,
         }),
       );
     }
   }
 });
 
+function resolveNotificationPath(data: Record<string, unknown>): string {
+  const resourceType = data.resource_type as string | undefined;
+  const resourceId = data.resource_id as string | undefined;
+  const facilityId = data.facility_id as string | undefined;
+  const payload = (data.payload as Record<string, unknown>) || data;
+
+  if (facilityId && resourceType) {
+    switch (resourceType) {
+      case "encounter":
+        if (payload.patient_id)
+          return `/facility/${facilityId}/patient/${payload.patient_id}/encounter/${resourceId}/updates`;
+        break;
+      case "service_request":
+        return `/facility/${facilityId}/service_requests/${resourceId}`;
+      case "diagnostic_report":
+        if (payload.patient_id)
+          return `/facility/${facilityId}/patient/${payload.patient_id}/diagnostic_reports/${resourceId}`;
+        break;
+      case "medication_stock":
+        if (payload.location_id)
+          return `/facility/${facilityId}/locations/${payload.location_id}/inventory/summary`;
+        break;
+    }
+  }
+
+  if (facilityId) {
+    return `/facility/${facilityId}/notifications`;
+  }
+
+  return "/";
+}
+
 // Notification click event listener
 self.addEventListener("notificationclick", (e) => {
-  // Close the notification popout
   e.notification.close();
-  // Get all the Window clients
+  const data = (e.notification.data as Record<string, unknown>) || {};
+  const targetUrl = resolveNotificationPath(data);
+
   e.waitUntil(
     self.clients.matchAll({ type: "window" }).then((clientsArr) => {
-      // If a Window tab matching the targeted URL already exists, focus that;
-      const hadWindowToFocus = clientsArr.some((windowClient) =>
-        windowClient.url === "/notifications/".concat(e.notification.tag)
-          ? (windowClient.focus(), true)
-          : false,
+      const existingClient = clientsArr.find((client) =>
+        client.url.includes(self.location.origin),
       );
-      // Otherwise, open a new tab to the applicable URL and focus it.
-      if (!hadWindowToFocus)
-        self.clients
-          .openWindow("/notifications/".concat(e.notification.tag))
-          .then((windowClient) => (windowClient ? windowClient.focus() : null));
+      if (existingClient) {
+        existingClient.navigate(targetUrl);
+        return existingClient.focus();
+      }
+      return self.clients
+        .openWindow(targetUrl)
+        .then((windowClient) => (windowClient ? windowClient.focus() : null));
     }),
   );
 });
