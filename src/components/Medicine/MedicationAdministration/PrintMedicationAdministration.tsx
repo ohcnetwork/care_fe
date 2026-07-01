@@ -63,7 +63,7 @@ export const PrintMedicationAdministration = (props: {
   facilityId: string;
   encounterId: string;
   patientId: string;
-  productType: ProductKnowledgeType;
+  productType: string;
 }) => {
   const { facilityId, encounterId, patientId, productType } = props;
   const { t } = useTranslation();
@@ -89,7 +89,9 @@ export const PrintMedicationAdministration = (props: {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
-        product_type: productType,
+        ...(productType === ProductKnowledgeType.medication
+          ? { medications_only: true }
+          : { product_type: productType }),
       },
       pageSize: 200,
     }),
@@ -446,7 +448,7 @@ const DrugChartTable = ({
     Record<string, Record<string, MedicationAdministrationRead[]>>
   >;
   timeSlots: { label: string; start: number; end: number }[];
-  productType: ProductKnowledgeType;
+  productType: string;
   isPRN?: boolean;
 }) => {
   const { t } = useTranslation();

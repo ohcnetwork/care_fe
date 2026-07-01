@@ -740,7 +740,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               )}
               {facilityIdExists && (
                 <Link
-                  href={`../${encounterId}/type/${selectedProductType}/administrations/print`}
+                  href={`type/${selectedProductType}/administrations/print`}
                 >
                   <Button
                     variant="outline"
