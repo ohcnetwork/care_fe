@@ -84,19 +84,21 @@ self.addEventListener("notificationclick", (e) => {
   const targetUrl = resolveNotificationPath(data);
 
   e.waitUntil(
-    self.clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then(async (clientsArr) => {
-        const existingClient = clientsArr.find((client) =>
-          client.url.includes(self.location.origin),
-        );
-        if (existingClient) {
+    self.clients.matchAll({ type: "window" }).then(async (clientsArr) => {
+      const existingClient = clientsArr.find((client) =>
+        client.url.includes(self.location.origin),
+      );
+      if (existingClient) {
+        try {
           await existingClient.navigate(targetUrl);
-          return existingClient.focus();
+          return await existingClient.focus();
+        } catch {
+          // navigate/focus may fail according to the browser's behavior
         }
-        return self.clients
-          .openWindow(targetUrl)
-          .then((windowClient) => (windowClient ? windowClient.focus() : null));
-      }),
+      }
+      return self.clients
+        .openWindow(targetUrl)
+        .then((windowClient) => (windowClient ? windowClient.focus() : null));
+    }),
   );
 });
