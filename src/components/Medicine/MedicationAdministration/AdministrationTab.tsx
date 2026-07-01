@@ -34,6 +34,8 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Pill, Utensils } from "lucide-react";
 import { DiscontinueConfirmDialog } from "./DiscontinueConfirmDialog";
 import { GroupedMedicationRow } from "./GroupedMedicationRow";
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
@@ -123,6 +125,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { facilityId } = useCurrentFacilitySilently();
+  const [selectedTab, setSelectedTab] = useState("medication");
 
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
@@ -157,22 +160,35 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   // Queries
   const { data: activeMedications } = useQuery({
-    queryKey: ["medication_requests_active", patientId, encounterId],
+    queryKey: [
+      "medication_requests_active",
+      patientId,
+      encounterId,
+      selectedTab,
+    ],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
         limit: 1000,
         status: ACTIVE_MEDICATION_STATUSES.join(","),
-        medications_only: true,
         facility: facilityId,
+        ...(selectedTab === "medication"
+          ? { medications_only: true }
+          : { product_type: selectedTab }),
       },
     }),
     enabled: !!patientId && canAccess,
+    staleTime: 10 * 1000,
   });
 
   const { data: stoppedMedications } = useQuery({
-    queryKey: ["medication_requests_stopped", patientId, encounterId],
+    queryKey: [
+      "medication_requests_stopped",
+      patientId,
+      encounterId,
+      selectedTab,
+    ],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
       queryParams: {
@@ -180,10 +196,13 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         limit: 1000,
         status: INACTIVE_MEDICATION_STATUSES.join(","),
         facility: facilityId,
-        medications_only: true,
+        ...(selectedTab === "medication"
+          ? { medications_only: true }
+          : { product_type: selectedTab }),
       },
     }),
     enabled: !!patientId && canAccess,
+    staleTime: 10 * 1000,
   });
 
   const { data: administrations } = useQuery({
@@ -648,24 +667,48 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         <div className="flex flex-col gap-3">
           {/* Search and Actions Row */}
           <div className="flex justify-between items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md bg-white border rounded-lg px-3 py-1.5">
-              <CareIcon icon="l-search" className="text-lg text-gray-400" />
-              <Input
-                placeholder={t("search_medications")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 border-0 bg-transparent text-sm outline-none focus-visible:ring-0 placeholder:text-gray-400 h-8 px-0"
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                  onClick={() => setSearchQuery("")}
-                >
-                  <CareIcon icon="l-times" className="text-base" />
-                </Button>
-              )}
+            <div className="flex flex-wrap flex-1 gap-2">
+              <Tabs
+                defaultValue="medication"
+                value={selectedTab}
+                onValueChange={(value) => setSelectedTab(value)}
+              >
+                <TabsList className="h-[38px] border border-gray-200">
+                  <TabsTrigger
+                    value="medication"
+                    className="flex-1 data-[state=active]:bg-primary-700 data-[state=active]:text-white"
+                  >
+                    <Pill className="size-4" />
+                    {t("medications")}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="nutritional_product"
+                    className="flex-1 data-[state=active]:bg-primary-700 data-[state=active]:text-white"
+                  >
+                    <Utensils className="size-4" />
+                    {t("nutrition")}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-sm bg-white border rounded-lg px-3 py-1.5">
+                <CareIcon icon="l-search" className="text-lg text-gray-400" />
+                <Input
+                  placeholder={t("search_medications")}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 shadow-none border-0 bg-transparent text-sm outline-none focus-visible:ring-0 py-0! placeholder:text-gray-400 h-6 px-0"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    <CareIcon icon="l-times" className="text-base" />
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               {canWrite && (
