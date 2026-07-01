@@ -176,7 +176,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         limit: 1000,
         status: ACTIVE_MEDICATION_STATUSES.join(","),
         facility: facilityId,
-        ...(selectedProductType === "medication"
+        ...(selectedProductType === ProductKnowledgeType.medication
           ? { medications_only: true }
           : { product_type: selectedProductType }),
       },
@@ -200,7 +200,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         limit: 1000,
         status: INACTIVE_MEDICATION_STATUSES.join(","),
         facility: facilityId,
-        ...(selectedProductType === "medication"
+        ...(selectedProductType === ProductKnowledgeType.medication
           ? { medications_only: true }
           : { product_type: selectedProductType }),
       },
@@ -727,20 +727,20 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 >
                   <CareIcon
                     icon={
-                      selectedProductType === "medication"
+                      selectedProductType === ProductKnowledgeType.medication
                         ? "l-syringe"
                         : "l-utensils"
                     }
                     className="mr-2 size-4"
                   />
-                  {selectedProductType === "medication"
+                  {selectedProductType === ProductKnowledgeType.medication
                     ? t("administer_medicine")
                     : t("record_intake")}
                 </Button>
               )}
               {facilityIdExists && (
                 <Link
-                  href={`type/${selectedProductType}/administrations/print`}
+                  href={`../${encounterId}/type/${selectedProductType}/administrations/print`}
                 >
                   <Button
                     variant="outline"
@@ -752,7 +752,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     className="h-9"
                   >
                     <CareIcon icon="l-file-medical-alt" className="mr-2" />
-                    {selectedProductType === "medication"
+                    {selectedProductType === ProductKnowledgeType.medication
                       ? t("view_drug_chart")
                       : t("view_intake_chart")}
                   </Button>

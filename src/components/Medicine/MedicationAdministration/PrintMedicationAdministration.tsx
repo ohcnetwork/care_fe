@@ -63,7 +63,9 @@ export const PrintMedicationAdministration = (props: {
   facilityId: string;
   encounterId: string;
   patientId: string;
-  productType: string;
+  productType:
+    | ProductKnowledgeType.medication
+    | ProductKnowledgeType.nutritional_product;
 }) => {
   const { facilityId, encounterId, patientId, productType } = props;
   const { t } = useTranslation();
