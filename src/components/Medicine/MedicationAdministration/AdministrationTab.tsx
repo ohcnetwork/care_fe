@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
+import { Pill, Utensils } from "lucide-react";
 import { Link, usePathParams } from "raviger";
 import React, { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,7 +36,6 @@ import {
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Pill, Utensils } from "lucide-react";
 import { DiscontinueConfirmDialog } from "./DiscontinueConfirmDialog";
 import { GroupedMedicationRow } from "./GroupedMedicationRow";
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
@@ -165,6 +165,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       patientId,
       encounterId,
       selectedTab,
+      facilityId,
     ],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
@@ -188,6 +189,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       patientId,
       encounterId,
       selectedTab,
+      facilityId,
     ],
     queryFn: query(medicationRequestApi.list, {
       pathParams: { patientId },
@@ -511,8 +513,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   ) {
     content = (
       <EmptyState
-        message={t("no_medications")}
-        description={t("no_medications_to_administer")}
+        message={t(`no_${selectedTab}s`)}
+        description={t(`no_${selectedTab}s_to_administer`)}
       />
     );
   } else if (
@@ -647,8 +649,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
                   <span className="text-xs text-gray-500">
                     {showStopped
-                      ? t("showing_all_medications")
-                      : t("n_discontinued_medications_hidden", {
+                      ? t(`showing_all_${selectedTab}s`)
+                      : t(`n_discontinued_${selectedTab}s_hidden`, {
                           count: stoppedMedications.results.length,
                         })}
                   </span>
@@ -669,9 +671,11 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           <div className="flex justify-between items-center gap-3 flex-wrap">
             <div className="flex flex-wrap flex-1 gap-2">
               <Tabs
-                defaultValue="medication"
                 value={selectedTab}
-                onValueChange={(value) => setSelectedTab(value)}
+                onValueChange={(value) => {
+                  setSelectedTab(value);
+                  setSearchQuery("");
+                }}
               >
                 <TabsList className="h-[38px] border border-gray-200">
                   <TabsTrigger
@@ -693,7 +697,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-sm bg-white border rounded-lg px-3 py-1.5">
                 <CareIcon icon="l-search" className="text-lg text-gray-400" />
                 <Input
-                  placeholder={t("search_medications")}
+                  placeholder={t(`search_${selectedTab}`)}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 shadow-none border-0 bg-transparent text-sm outline-none focus-visible:ring-0 py-0! placeholder:text-gray-400 h-6 px-0"
@@ -702,6 +706,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   <Button
                     variant="ghost"
                     size="sm"
+                    aria-label={t("clear_search")}
                     className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
                     onClick={() => setSearchQuery("")}
                   >
