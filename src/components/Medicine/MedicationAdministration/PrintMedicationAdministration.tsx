@@ -31,7 +31,10 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
-import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
@@ -63,9 +66,7 @@ export const PrintMedicationAdministration = (props: {
   facilityId: string;
   encounterId: string;
   patientId: string;
-  productType:
-    | ProductKnowledgeType.medication
-    | ProductKnowledgeType.nutritional_product;
+  productType: AdministrableProductType;
 }) => {
   const { facilityId, encounterId, patientId, productType } = props;
   const { t } = useTranslation();
@@ -450,7 +451,7 @@ const DrugChartTable = ({
     Record<string, Record<string, MedicationAdministrationRead[]>>
   >;
   timeSlots: { label: string; start: number; end: number }[];
-  productType: string;
+  productType: AdministrableProductType;
   isPRN?: boolean;
 }) => {
   const { t } = useTranslation();

@@ -34,7 +34,10 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
+import {
+  AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiscontinueConfirmDialog } from "./DiscontinueConfirmDialog";
@@ -127,7 +130,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { facilityId } = useCurrentFacilitySilently();
   const [selectedProductType, setSelectedProductType] =
-    useState<ProductKnowledgeType>(ProductKnowledgeType.medication);
+    useState<AdministrableProductType>(ProductKnowledgeType.medication);
 
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
@@ -675,20 +678,20 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               <Tabs
                 value={selectedProductType}
                 onValueChange={(value) => {
-                  setSelectedProductType(value as ProductKnowledgeType);
+                  setSelectedProductType(value as AdministrableProductType);
                   setSearchQuery("");
                 }}
               >
                 <TabsList className="h-[38px] border border-gray-200">
                   <TabsTrigger
-                    value="medication"
+                    value={ProductKnowledgeType.medication}
                     className="flex-1 data-[state=active]:bg-primary-700 data-[state=active]:text-white"
                   >
                     <Pill className="size-4" />
                     {t("medications")}
                   </TabsTrigger>
                   <TabsTrigger
-                    value="nutritional_product"
+                    value={ProductKnowledgeType.nutritional_product}
                     className="flex-1 data-[state=active]:bg-primary-700 data-[state=active]:text-white"
                   >
                     <Utensils className="size-4" />

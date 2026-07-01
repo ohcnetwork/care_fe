@@ -16,7 +16,10 @@ import mutate from "@/Utils/request/mutate";
 import { MedicationAdministrationRequest } from "@/types/emr/medicationAdministration/medicationAdministration";
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
 import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
-import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 import { MedicineAdminForm } from "./MedicineAdminForm";
 
@@ -29,7 +32,7 @@ interface Props {
   administrationRequest: MedicationAdministrationRequest;
   patientId: string;
   otherGroupRequests?: MedicationRequestRead[];
-  productType: ProductKnowledgeType;
+  productType: AdministrableProductType;
   onMedicationChange?: (medication: MedicationRequestRead) => void;
 }
 

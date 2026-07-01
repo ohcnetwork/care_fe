@@ -26,7 +26,10 @@ import {
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 import { MedicineAdminForm } from "./MedicineAdminForm";
 import {
@@ -42,7 +45,7 @@ interface Props {
   lastAdministeredDates?: Record<string, string>;
   patientId: string;
   encounterId: string;
-  productType: ProductKnowledgeType;
+  productType: AdministrableProductType;
   selectedGroup?: GroupedMedication;
 }
 

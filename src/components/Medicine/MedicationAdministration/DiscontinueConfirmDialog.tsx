@@ -20,7 +20,7 @@ import {
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
+import { type AdministrableProductType } from "@/types/inventory/productKnowledge/productKnowledge";
 
 import { GroupedMedication } from "./utils";
 
@@ -31,7 +31,7 @@ interface DiscontinueConfirmDialogProps {
   group?: GroupedMedication | null;
   onConfirm: () => void;
   isPending?: boolean;
-  productType: ProductKnowledgeType;
+  productType: AdministrableProductType;
 }
 
 export const DiscontinueConfirmDialog: React.FC<
