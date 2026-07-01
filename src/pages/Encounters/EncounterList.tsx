@@ -33,8 +33,8 @@ import {
 } from "@/components/ui/multi-filter/utils/Utils";
 import {
   Popover,
-  PopoverAnchor,
   PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 
@@ -206,10 +206,10 @@ export function EncounterList({
     searchWithOptions[0];
   const showSearchOptions = searchText.trim() !== "";
 
-  const searchQueryParams =
-    searchWith === SEARCH_WITH_NAME
-      ? { name: searchText || undefined, external_identifier: undefined }
-      : { name: undefined, external_identifier: searchText || undefined };
+  const searchQueryParams = {
+    name: qParams.name || undefined,
+    external_identifier: qParams.external_identifier || undefined,
+  };
 
   const updateSearchQuery = (
     nextSearchWith: SearchWith,
@@ -583,14 +583,15 @@ export function EncounterList({
                       open={searchOptionsOpen && showSearchOptions}
                       onOpenChange={setSearchOptionsOpen}
                     >
-                      <PopoverAnchor asChild>
+                      <PopoverTrigger asChild>
                         <CommandInput
+                          aria-label={selectedSearchType.placeholder}
                           value={searchText}
                           onValueChange={(value) => {
                             setSearchText(value);
                             setSearchOptionsOpen(value.trim() !== "");
                           }}
-                          onClick={() => {
+                          onFocus={() => {
                             if (showSearchOptions) setSearchOptionsOpen(true);
                           }}
                           onKeyDown={(event) => {
@@ -605,7 +606,7 @@ export function EncounterList({
                           }}
                           placeholder={selectedSearchType.placeholder}
                         />
-                      </PopoverAnchor>
+                      </PopoverTrigger>
                       <PopoverContent
                         className="w-(--radix-popover-trigger-width) p-0"
                         align="start"
