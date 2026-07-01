@@ -1,10 +1,21 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+// Duration is a native input with plain <button> suggestions in the popover;
+// exact-match avoids catching the range / period action buttons.
+async function selectDuration(page: Page, duration: number, unit: string) {
+  const field = page.getByRole("textbox", { name: "Duration" });
+  await field.click();
+  await field.fill(`${duration} ${unit}`);
+  await page
+    .getByRole("button", { name: `${duration} ${unit}`, exact: true })
+    .click();
+}
 
 const INT_MAX = 70; // Arbitrary upper limit for integer fields
 const DOSAGE_UNITS = [
@@ -156,12 +167,7 @@ test.describe("Medication Request Questionnaire", () => {
     await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
     await page.getByRole("option", { name: frequencyData.display }).click();
 
-    const durationField = page.getByRole("textbox", { name: "Duration" });
-    await durationField.click();
-    await durationField.fill(`${duration} ${durationUnit}`);
-    await page
-      .getByRole("button", { name: `${duration} ${durationUnit}`, exact: true })
-      .click();
+    await selectDuration(page, duration, durationUnit);
 
     // Select random additional instruction - target only enabled button
     const instruction = faker.helpers.arrayElement(instructionOptions);
@@ -271,12 +277,7 @@ test.describe("Medication Request Questionnaire", () => {
     await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
     await page.getByRole("option", { name: frequencyData.display }).click();
 
-    const durationField = page.getByRole("textbox", { name: "Duration" });
-    await durationField.click();
-    await durationField.fill(`${duration} ${durationUnit}`);
-    await page
-      .getByRole("button", { name: `${duration} ${durationUnit}`, exact: true })
-      .click();
+    await selectDuration(page, duration, durationUnit);
 
     await page.getByRole("button", { name: "Submit" }).click();
 
