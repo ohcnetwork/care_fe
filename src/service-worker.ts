@@ -45,43 +45,18 @@ self.addEventListener("push", async function (event) {
   }
 });
 
-function resolveNotificationPath(data: Record<string, unknown>): string {
-  const resourceType = data.resource_type as string | undefined;
-  const resourceId = data.resource_id as string | undefined;
-  const facilityId = data.facility_id as string | undefined;
-  const payload = (data.payload as Record<string, unknown>) || data;
-
-  if (facilityId && resourceType && resourceId) {
-    switch (resourceType) {
-      case "encounter":
-        if (payload.patient_id)
-          return `/facility/${facilityId}/patient/${payload.patient_id}/encounter/${resourceId}/updates`;
-        break;
-      case "service_request":
-        return `/facility/${facilityId}/service_requests/${resourceId}`;
-      case "diagnostic_report":
-        if (payload.patient_id)
-          return `/facility/${facilityId}/patient/${payload.patient_id}/diagnostic_reports/${resourceId}`;
-        break;
-      case "medication_stock":
-        if (payload.location_id)
-          return `/facility/${facilityId}/locations/${payload.location_id}/inventory/summary`;
-        break;
-    }
-  }
-
-  if (facilityId) {
-    return `/facility/${facilityId}/notifications`;
-  }
-
-  return "/";
-}
-
 // Notification click event listener
 self.addEventListener("notificationclick", (e) => {
   e.notification.close();
   const data = (e.notification.data as Record<string, unknown>) || {};
-  const targetUrl = resolveNotificationPath(data);
+  const facilityId = data.facility_id as string | undefined;
+  const fallbackUrl = facilityId
+    ? `/facility/${facilityId}/notifications`
+    : "/";
+
+  // Encode notification data in URL hash for the FE plugin to resolve on load
+  const clickParam = encodeURIComponent(JSON.stringify(data));
+  const targetUrl = `${fallbackUrl}#notification_click=${clickParam}`;
 
   e.waitUntil(
     self.clients.matchAll({ type: "window" }).then(async (clientsArr) => {
@@ -93,7 +68,7 @@ self.addEventListener("notificationclick", (e) => {
           await existingClient.navigate(targetUrl);
           return await existingClient.focus();
         } catch {
-          // navigate/focus may fail according to the browser's behavior
+          // navigate may fail
         }
       }
       return self.clients
