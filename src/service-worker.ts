@@ -51,7 +51,7 @@ function resolveNotificationPath(data: Record<string, unknown>): string {
   const facilityId = data.facility_id as string | undefined;
   const payload = (data.payload as Record<string, unknown>) || data;
 
-  if (facilityId && resourceType) {
+  if (facilityId && resourceType && resourceId) {
     switch (resourceType) {
       case "encounter":
         if (payload.patient_id)
@@ -84,17 +84,19 @@ self.addEventListener("notificationclick", (e) => {
   const targetUrl = resolveNotificationPath(data);
 
   e.waitUntil(
-    self.clients.matchAll({ type: "window" }).then((clientsArr) => {
-      const existingClient = clientsArr.find((client) =>
-        client.url.includes(self.location.origin),
-      );
-      if (existingClient) {
-        existingClient.navigate(targetUrl);
-        return existingClient.focus();
-      }
-      return self.clients
-        .openWindow(targetUrl)
-        .then((windowClient) => (windowClient ? windowClient.focus() : null));
-    }),
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then(async (clientsArr) => {
+        const existingClient = clientsArr.find((client) =>
+          client.url.includes(self.location.origin),
+        );
+        if (existingClient) {
+          await existingClient.navigate(targetUrl);
+          return existingClient.focus();
+        }
+        return self.clients
+          .openWindow(targetUrl)
+          .then((windowClient) => (windowClient ? windowClient.focus() : null));
+      }),
   );
 });
