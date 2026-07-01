@@ -69,7 +69,7 @@ function InputWithNotes({
             type="button"
             disabled={disabled}
             className={cn(
-              "flex items-center justify-center w-10 border border-gray-300 rounded-r-md bg-gray-100/20",
+              "flex items-center justify-center w-10 border border-gray-300 rounded-r-md bg-gray-100/20 shadow",
               hasNotes && "bg-orange-50",
             )}
           >
@@ -214,7 +214,10 @@ export function QuestionInput({
     );
   };
 
-  const renderSingleInput = (index: number = 0, disableRightBorder: boolean = false) => {
+  const renderSingleInput = (
+    index: number = 0,
+    disableRightBorder: boolean = false,
+  ) => {
     const commonProps = {
       classes: question.styling_metadata?.classes,
       disableRightBorder,

@@ -57,8 +57,8 @@ export function TimeQuestion({
       }
       className={cn(
         classes,
-        "h-9 text-sm sm:text-base",
-        disableRightBorder && "rounded-r-none border-r-0 shadow-none",
+        "h-9 text-sm sm:text-base shadow",
+        disableRightBorder && "rounded-r-none border-r-0",
       )}
       onChange={handleTimeChange}
       disabled={disabled}

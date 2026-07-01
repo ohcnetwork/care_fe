@@ -52,6 +52,7 @@ interface AutocompleteProps {
   freeInput?: boolean;
   closeOnSelect?: boolean;
   showClearButton?: boolean;
+  clearButtonClassName?: string;
 
   ref?: React.RefCallback<HTMLButtonElement | null>;
 
@@ -76,6 +77,7 @@ export default function Autocomplete({
   freeInput = false,
   closeOnSelect = true,
   showClearButton = true,
+  clearButtonClassName,
   ref,
   shortcutId,
   ...props
@@ -245,7 +247,10 @@ export default function Autocomplete({
           <Button
             variant="outline"
             size="icon"
-            className="rounded-l-none border-l-0 text-gray-400 h-auto"
+            className={cn(
+              "rounded-l-none border-l-0 text-gray-400 h-auto",
+              clearButtonClassName,
+            )}
             onClick={handleClear}
             title={t("clear")}
             hidden={disabled}
@@ -304,7 +309,10 @@ export default function Autocomplete({
         <Button
           variant="outline"
           size="icon"
-          className="rounded-l-none border-l-0 text-gray-400 h-auto"
+          className={cn(
+            "rounded-l-none border-l-0 text-gray-400 h-auto",
+            clearButtonClassName,
+          )}
           onClick={handleClear}
           title={t("clear")}
           hidden={disabled}

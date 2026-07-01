@@ -91,7 +91,7 @@ export default function ValueSetSelect({
       variant="white"
       size="icon"
       className={cn(
-        "rounded-l-none border-l-0 text-gray-500 hover:text-gray-900 shrink-0 bg-gray-50",
+        "rounded-l-none border-l-0 text-gray-500 hover:text-gray-900 shrink-0 bg-gray-50 shadow",
         disableRightBorder && "rounded-r-none border-r-0",
         clearButtonClassName,
       )}
@@ -206,12 +206,10 @@ export default function ValueSetSelect({
             variant="white"
             role="combobox"
             className={cn(
-              "flex justify-between truncate font-normal border-gray-300 shadow-xs",
+              "flex justify-between truncate font-normal border-gray-300 shadow",
               !value?.display && "text-gray-500 hover:bg-white",
               showClear && "w-full rounded-r-none",
-              disableRightBorder &&
-                !showClear &&
-                "rounded-r-none border-r-0 shadow-none",
+              disableRightBorder && !showClear && "rounded-r-none border-r-0",
             )}
             {...props}
           >

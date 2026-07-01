@@ -175,7 +175,7 @@ export function TextQuestion({
                   : undefined
               }
               className={cn(
-                "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                "border-0 shadow focus-visible:ring-0 focus-visible:ring-offset-0",
                 hasTemplates ? "rounded-tl-md" : "rounded-l-md",
               )}
               disabled={disabled}
@@ -207,7 +207,7 @@ export function TextQuestion({
               type="button"
               disabled={disabled}
               className={cn(
-                "flex items-center justify-center w-10 border border-gray-300 bg-gray-100/20",
+                "flex items-center justify-center w-10 border border-gray-300 bg-gray-100/20 shadow",
                 hasTemplates ? "rounded-tr-md" : "rounded-r-md",
                 hasNotes && "bg-orange-50",
               )}

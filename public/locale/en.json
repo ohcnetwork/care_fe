@@ -1300,6 +1300,7 @@
   "code_verification_required": "Code Verification is required",
   "code_verified_successfully": "Code verified successfully",
   "coding_details": "Coding Details",
+  "typing_value_unit_required": "Type, Value and Unit are all required",
   "collapse": "Collapse",
   "collapse_all": "Collapse All",
   "collapse_sidebar": "Collapse Sidebar",

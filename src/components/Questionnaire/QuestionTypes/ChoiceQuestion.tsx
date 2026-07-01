@@ -8,6 +8,7 @@ import { MultiSelect } from "@/components/ui/multi-select";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
 import type {
   QuestionnaireResponse,
@@ -137,7 +138,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     return (
       <>
         {questionnaireResponse.values.map((value, idx) => (
-          <div key={idx} className="mb-2">
+          <div key={value.coding?.code} className="mb-2">
             <ValueSetSelect
               system={question.answer_value_set!}
               value={value.coding}
@@ -189,6 +190,15 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         }))}
         placeholder={t("select_an_option")}
         disabled={disabled}
+        className={cn(
+          "border-gray-300",
+          disableRightBorder && !currentValue
+            ? "rounded-r-none border-r-0"
+            : "",
+        )}
+        clearButtonClassName={cn(
+          disableRightBorder ? "border-gray-300 rounded-r-none border-r-0" : "",
+        )}
       />
     );
   }

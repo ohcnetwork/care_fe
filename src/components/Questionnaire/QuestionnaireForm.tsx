@@ -758,23 +758,37 @@ export function QuestionnaireForm({
           return;
         }
 
-        if (q.required && isQuestionEnabled(q, form.responses)) {
-          // Handle appointment validation
-          const response = form.responses.find((r) => r.question_id === q.id);
-          const hasValue = response?.values?.some(
-            (v) =>
-              v.value !== undefined &&
-              v.value !== null &&
-              v.value !== "" &&
-              (Array.isArray(v.value) ? v.value.length > 0 : true),
-          );
+        // Handle appointment validation
+        const response = form.responses.find((r) => r.question_id === q.id);
+        const hasValue = response?.values?.some(
+          (v) =>
+            v.value !== undefined &&
+            v.value !== null &&
+            v.value !== "" &&
+            (Array.isArray(v.value) ? v.value.length > 0 : true),
+        );
 
-          const hasProperty = (arr: any[] | undefined, prop: string) =>
-            Array.isArray(arr) && arr.some((item) => item?.[prop] != null);
+        const hasProperty = (arr: any[] | undefined, prop: string) =>
+          Array.isArray(arr) && arr.some((item) => item?.[prop] != null);
 
-          const hasCoding = hasProperty(response?.values, "coding");
-          const hasUnit = hasProperty(response?.values, "unit");
-
+        const hasCoding = hasProperty(response?.values, "coding");
+        const hasUnit = hasProperty(response?.values, "unit");
+        if (q.type === "quantity" && isQuestionEnabled(q, form.responses)) {
+          // Required quantity needs every part; an optional quantity is
+          // all-or-nothing (a partially filled one is invalid, empty is fine).
+          const needsCoding = !!q.answer_value_set;
+          const anyFilled = hasValue || hasUnit || (needsCoding && hasCoding);
+          const allFilled = hasValue && hasUnit && (!needsCoding || hasCoding);
+          if (!allFilled && (q.required || anyFilled)) {
+            errors.push({
+              question_id: q.id,
+              error: t("typing_value_unit_required"),
+              type: "validation_error",
+              msg: t("typing_value_unit_required"),
+            });
+            firstErrorId = firstErrorId ? firstErrorId : q.id;
+          }
+        } else if (q.required && isQuestionEnabled(q, form.responses)) {
           if (!hasValue && !hasCoding && !hasUnit) {
             errors.push({
               question_id: q.id,

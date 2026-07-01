@@ -6,11 +6,11 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 
+import { cn } from "@/lib/utils";
 import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import { cn } from "@/lib/utils";
 
 interface DateQuestionProps {
   questionnaireResponse: QuestionnaireResponse;
@@ -64,7 +64,7 @@ export function DateQuestion({
         disabled={disabled}
         classes={cn("flex-1", classes)}
         buttonClassName={cn(
-          "border-gray-300",
+          "border-gray-300 shadow",
           (showClear || disableRightBorder) && "rounded-r-none border-r-0",
         )}
       />

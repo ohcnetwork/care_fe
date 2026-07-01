@@ -96,13 +96,13 @@ export function DateTimeQuestion({
         date={currentValue}
         onChange={handleSelect}
         disablePicker={disabled}
-        className="flex-1 border-gray-300 shadow-none"
+        className="flex-1 border-gray-300"
       />
       <div className="flex sm:w-[186px]">
         <Input
           type="time"
           className={cn(
-            "flex-1 min-w-0 border-gray-300 h-9 text-sm sm:text-base",
+            "flex-1 min-w-0 border-gray-300 h-9 text-sm sm:text-base shadow",
             (showClear || disableRightBorder) && "rounded-r-none border-r-0",
           )}
           value={formatTime(currentValue)}
@@ -112,16 +112,14 @@ export function DateTimeQuestion({
         {showClear && (
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="icon"
             onClick={() => handleSelect(undefined)}
             aria-label={t("clear")}
             title={t("clear")}
             className={cn(
-              "rounded-l-none border-1 border-gray-300",
-              disableRightBorder
-                ? "rounded-r-none border-r-0"
-                : "rounded-r-md",
+              "rounded-l-none border-gray-300",
+              disableRightBorder ? "rounded-r-none border-r-0" : "rounded-r-md",
             )}
           >
             <CareIcon icon="l-times" className="size-4" />
