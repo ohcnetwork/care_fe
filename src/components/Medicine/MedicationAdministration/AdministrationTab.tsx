@@ -34,6 +34,7 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiscontinueConfirmDialog } from "./DiscontinueConfirmDialog";
@@ -125,7 +126,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { facilityId } = useCurrentFacilitySilently();
-  const [selectedTab, setSelectedTab] = useState("medication");
+  const [selectedProductType, setSelectedProductType] =
+    useState<ProductKnowledgeType>(ProductKnowledgeType.medication);
 
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
@@ -164,7 +166,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       "medication_requests_active",
       patientId,
       encounterId,
-      selectedTab,
+      selectedProductType,
       facilityId,
     ],
     queryFn: query(medicationRequestApi.list, {
@@ -174,9 +176,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         limit: 1000,
         status: ACTIVE_MEDICATION_STATUSES.join(","),
         facility: facilityId,
-        ...(selectedTab === "medication"
+        ...(selectedProductType === "medication"
           ? { medications_only: true }
-          : { product_type: selectedTab }),
+          : { product_type: selectedProductType }),
       },
     }),
     enabled: !!patientId && canAccess,
@@ -188,7 +190,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       "medication_requests_stopped",
       patientId,
       encounterId,
-      selectedTab,
+      selectedProductType,
       facilityId,
     ],
     queryFn: query(medicationRequestApi.list, {
@@ -198,9 +200,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
         limit: 1000,
         status: INACTIVE_MEDICATION_STATUSES.join(","),
         facility: facilityId,
-        ...(selectedTab === "medication"
+        ...(selectedProductType === "medication"
           ? { medications_only: true }
-          : { product_type: selectedTab }),
+          : { product_type: selectedProductType }),
       },
     }),
     enabled: !!patientId && canAccess,
@@ -513,8 +515,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   ) {
     content = (
       <EmptyState
-        message={t(`no_${selectedTab}s`)}
-        description={t(`no_${selectedTab}s_to_administer`)}
+        message={t(`no_${selectedProductType}s`)}
+        description={t(`no_${selectedProductType}s_to_administer`)}
       />
     );
   } else if (
@@ -649,8 +651,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
                   <span className="text-xs text-gray-500">
                     {showStopped
-                      ? t(`showing_all_${selectedTab}s`)
-                      : t(`n_discontinued_${selectedTab}s_hidden`, {
+                      ? t(`showing_all_${selectedProductType}s`)
+                      : t(`n_discontinued_${selectedProductType}s_hidden`, {
                           count: stoppedMedications.results.length,
                         })}
                   </span>
@@ -671,9 +673,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           <div className="flex justify-between items-center gap-3 flex-wrap">
             <div className="flex flex-wrap flex-1 gap-2">
               <Tabs
-                value={selectedTab}
+                value={selectedProductType}
                 onValueChange={(value) => {
-                  setSelectedTab(value);
+                  setSelectedProductType(value as ProductKnowledgeType);
                   setSearchQuery("");
                 }}
               >
@@ -697,7 +699,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-sm bg-white border rounded-lg px-3 py-1.5">
                 <CareIcon icon="l-search" className="text-lg text-gray-400" />
                 <Input
-                  placeholder={t(`search_${selectedTab}`)}
+                  placeholder={t(`search_${selectedProductType}`)}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 shadow-none border-0 bg-transparent text-sm outline-none focus-visible:ring-0 py-0! placeholder:text-gray-400 h-6 px-0"
@@ -725,11 +727,13 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 >
                   <CareIcon
                     icon={
-                      selectedTab === "medication" ? "l-syringe" : "l-utensils"
+                      selectedProductType === "medication"
+                        ? "l-syringe"
+                        : "l-utensils"
                     }
                     className="mr-2 size-4"
                   />
-                  {selectedTab === "medication"
+                  {selectedProductType === "medication"
                     ? t("administer_medicine")
                     : t("record_intake")}
                 </Button>
@@ -748,7 +752,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     className="h-9"
                   >
                     <CareIcon icon="l-file-medical-alt" className="mr-2" />
-                    {selectedTab === "medication"
+                    {selectedProductType === "medication"
                       ? t("view_drug_chart")
                       : t("view_intake_chart")}
                   </Button>
