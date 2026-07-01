@@ -113,7 +113,9 @@ test.describe("Medication Request Questionnaire", () => {
     dosageUnit = faker.helpers.arrayElement(DOSAGE_UNITS);
     frequencyData = faker.helpers.arrayElement(frequencies);
     durationUnit = faker.helpers.arrayElement(DURATION_UNITS);
-    duration = faker.number.int({ min: 1, max: INT_MAX });
+    // min: 2 keeps us in the plural range — the new DurationInput renders
+    // proper singulars ("1 day") which would break exact-match option lookups.
+    duration = faker.number.int({ min: 2, max: INT_MAX });
 
     questionnaireUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`;
 
@@ -154,13 +156,11 @@ test.describe("Medication Request Questionnaire", () => {
     await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
     await page.getByRole("option", { name: frequencyData.display }).click();
 
-    await page.getByRole("combobox", { name: "1 day" }).click();
+    const durationField = page.getByRole("textbox", { name: "Duration" });
+    await durationField.click();
+    await durationField.fill(`${duration} ${durationUnit}`);
     await page
-      .getByPlaceholder("Type eg. 5 days, 2 weeks")
-      .fill(`${duration} ${durationUnit}`);
-
-    await page
-      .getByRole("option", { name: `${duration} ${durationUnit}` })
+      .getByRole("button", { name: `${duration} ${durationUnit}`, exact: true })
       .click();
 
     // Select random additional instruction - target only enabled button
@@ -271,13 +271,11 @@ test.describe("Medication Request Questionnaire", () => {
     await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
     await page.getByRole("option", { name: frequencyData.display }).click();
 
-    await page.getByRole("combobox", { name: "1 day" }).click();
+    const durationField = page.getByRole("textbox", { name: "Duration" });
+    await durationField.click();
+    await durationField.fill(`${duration} ${durationUnit}`);
     await page
-      .getByPlaceholder("Type eg. 5 days, 2 weeks")
-      .fill(`${duration} ${durationUnit}`);
-
-    await page
-      .getByRole("option", { name: `${duration} ${durationUnit}` })
+      .getByRole("button", { name: `${duration} ${durationUnit}`, exact: true })
       .click();
 
     await page.getByRole("button", { name: "Submit" }).click();
