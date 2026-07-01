@@ -280,7 +280,7 @@ function DiagnosticReportItem({
   serviceRequestId: string;
   observationDefinitions: ObservationDefinitionReadSpec[];
   disableEdit: boolean;
-  facilityId?: string;
+  facilityId: string;
   isMultipleDiagnosticReport: boolean;
 }) {
   const { t } = useTranslation();
@@ -300,7 +300,7 @@ function DiagnosticReportItem({
         external_id: report.id,
       },
     }),
-    enabled: !!report.id,
+    enabled: !!report.id && isExpanded,
   });
 
   // Query to fetch files for the diagnostic report
@@ -314,7 +314,7 @@ function DiagnosticReportItem({
         offset: 0,
       },
     }),
-    enabled: !!report.id,
+    enabled: !!report.id && isExpanded,
   });
 
   // Upserting observations for a diagnostic report
@@ -434,10 +434,10 @@ function DiagnosticReportItem({
       setObservations(initialObservations);
     }
 
-    if (fullReport?.conclusion) {
+    if (fullReport?.conclusion && conclusion === (report.conclusion || "")) {
       setConclusion(fullReport.conclusion);
     }
-  }, [fullReport]);
+  }, [fullReport, report.conclusion, conclusion]);
 
   function handleValueChange(
     definitionId: string,
@@ -1261,6 +1261,7 @@ function DiagnosticReportItem({
         fileUpload={fileUpload}
         associatingId={report?.id || ""}
         type="diagnostic_report"
+        instanceId={report?.id || ""}
       />
     </Card>
   );

@@ -7,7 +7,7 @@ import {
   FileCheck2,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -104,7 +104,7 @@ function DiagnosticReportReviewItem({
         external_id: report.id,
       },
     }),
-    enabled: !!report.id,
+    enabled: !!report.id && isExpanded,
   });
 
   const { data: files = { results: [], count: 0 } } = useQuery<
@@ -119,7 +119,7 @@ function DiagnosticReportReviewItem({
         offset: 0,
       },
     }),
-    enabled: !!report.id,
+    enabled: !!report.id && isExpanded,
   });
 
   const { mutate: updateDiagnosticReport, isPending: isUpdatingReport } =
@@ -149,6 +149,10 @@ function DiagnosticReportReviewItem({
   // while the detail request is still loading.
   const reportDetail = fullReport ?? report;
 
+  useEffect(() => {
+    setConclusion(reportDetail?.conclusion || "");
+  }, [reportDetail?.conclusion]);
+
   const handleApprove = () => {
     updateDiagnosticReport({
       id: reportDetail.id,
@@ -156,7 +160,7 @@ function DiagnosticReportReviewItem({
       category: reportDetail.category,
       code: reportDetail.code,
       note: reportDetail.note,
-      conclusion: conclusion || reportDetail.conclusion,
+      conclusion: conclusion,
     });
   };
 
@@ -274,7 +278,7 @@ function DiagnosticReportReviewItem({
                       id={`conclusion-${report.id}`}
                       className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg disabled:cursor-not-allowed"
                       placeholder={t("enter_conclusion")}
-                      value={conclusion || reportDetail.conclusion || ""}
+                      value={conclusion}
                       onChange={(e) => setConclusion(e.target.value)}
                       disabled={disableEdit}
                     />

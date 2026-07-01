@@ -43,7 +43,7 @@ test("navigate to an patient - create and save account id", async ({
         .pressSequentially(accountName);
       await page.getByRole("button", { name: "Create" }).click();
 
-      await page.getByRole("button", { name: "Go to account" }).first().click();
+      await page.getByRole("button", { name: "Go to account" }).click();
     }
 
     // Wait for navigation and extract account ID from URL
