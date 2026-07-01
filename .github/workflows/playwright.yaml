@@ -127,6 +127,7 @@ jobs:
           echo DISABLE_RATELIMIT=True >> docker/.local.env
           echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
           echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
+          echo SNOWSTORM_DEPLOYMENT_URL=https://www.nrces.in/bhts/api/v1/ts >> docker/.local.env
           make docker_config_file=docker-compose.local.yaml up load-fixtures
           cd ..
         env:
