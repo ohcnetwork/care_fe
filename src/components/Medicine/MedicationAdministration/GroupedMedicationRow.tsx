@@ -34,6 +34,7 @@ import {
 import {
   getGroupActiveWindow,
   getGroupAdministrationsForTimeSlot,
+  getGroupSlotWindowState,
   getSlotWindowState,
   GroupedMedication,
   isTimeInSlot,
@@ -88,7 +89,6 @@ const IndividualMedicationRow: React.FC<{
   onAdminister: (medication: MedicationRequestRead) => void;
   onDiscontinue: (medication: MedicationRequestRead) => void;
   canWrite: boolean;
-  groupHasActiveRequests: boolean;
 }> = ({
   medication,
   visibleSlots,
@@ -98,7 +98,6 @@ const IndividualMedicationRow: React.FC<{
   onAdminister,
   onDiscontinue,
   canWrite,
-  groupHasActiveRequests,
 }) => {
   const { t } = useTranslation();
   const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
@@ -238,21 +237,19 @@ const IndividualMedicationRow: React.FC<{
                 );
               })}
             </div>
-            {/* Show Administer button if group has active requests */}
-            {isCurrentSlot &&
-              groupHasActiveRequests &&
-              canWrite &&
-              windowState.inWindow && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full h-7 mt-1 text-primary-700 border-primary-500 hover:bg-primary-50 font-medium text-xs"
-                  onClick={() => onAdminister(medication)}
-                >
-                  <CareIcon icon="l-syringe" className="size-3 mr-1" />
-                  {t("administer")}
-                </Button>
-              )}
+            {/* Administer targets this row's medication, so gate on this row's
+                own active status — not the group's. */}
+            {isCurrentSlot && isActive && canWrite && windowState.inWindow && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full h-7 mt-1 text-primary-700 border-primary-500 hover:bg-primary-50 font-medium text-xs"
+                onClick={() => onAdminister(medication)}
+              >
+                <CareIcon icon="l-syringe" className="size-3 mr-1" />
+                {t("administer")}
+              </Button>
+            )}
           </div>
         );
       })}
@@ -446,7 +443,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
           );
           const isCurrentSlot = isTimeInSlot(currentDate, slot);
           const hasAdmins = slotAdmins.length > 0;
-          const windowState = getSlotWindowState(slot, groupWindow);
+          const windowState = getGroupSlotWindowState(slot, group, groupWindow);
 
           // Check if this is the last slot of a day (next slot is different day)
           const nextSlot = visibleSlots[slotIndex + 1];
@@ -564,7 +561,6 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
             onAdminister={onAdminister}
             onDiscontinue={onDiscontinue}
             canWrite={canWrite}
-            groupHasActiveRequests={group.hasActiveRequests}
           />
         ))}
       </CollapsibleContent>

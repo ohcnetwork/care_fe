@@ -328,3 +328,33 @@ export function getSlotWindowState(
     isEndSlot: !!window.end && window.end > slotStart && window.end <= slotEnd,
   };
 }
+
+/**
+ * A slot's state for a whole group. `inWindow` is the union across the group's
+ * active requests — true when the slot falls in ANY request's own window — so
+ * gaps between non-overlapping courses for the same product are correctly
+ * out-of-window (a single merged envelope would wrongly fill the gap). The
+ * start/end caps still come from the group's combined envelope.
+ */
+export function getGroupSlotWindowState(
+  slot: { date: Date; start: string; end: string },
+  group: GroupedMedication,
+  groupWindow: MedicationActiveWindow,
+): SlotWindowState {
+  const active = group.requests.filter((r) =>
+    ACTIVE_MEDICATION_STATUSES.includes(
+      r.status as (typeof ACTIVE_MEDICATION_STATUSES)[number],
+    ),
+  );
+  const requests = active.length ? active : group.requests;
+
+  const inWindow = requests.some(
+    (r) => getSlotWindowState(slot, getMedicationActiveWindow(r)).inWindow,
+  );
+  const envelope = getSlotWindowState(slot, groupWindow);
+  return {
+    inWindow,
+    isStartSlot: envelope.isStartSlot,
+    isEndSlot: envelope.isEndSlot,
+  };
+}

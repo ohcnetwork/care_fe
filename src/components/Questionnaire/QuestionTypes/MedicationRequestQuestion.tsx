@@ -88,6 +88,7 @@ import {
   parseMedicationStringToRequest,
   sumManSlots,
   timingBoundsToRepeat,
+  validateTimingBounds,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
@@ -248,10 +249,14 @@ const MEDICATION_REQUEST_FIELDS = {
     validate: (value: unknown) => {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
+      // A real frequency carries an explicit FHIR timing code, an as-needed
+      // flag, or a free-text M-A-N pattern. A bare `timing` is not enough:
+      // setting a duration alone auto-creates a `frequency:1` repeat with no
+      // code/text, which must not satisfy the frequency requirement.
       return !!(
-        dosageInstruction?.timing ||
         dosageInstruction?.as_needed_boolean ||
-        dosageInstruction?.text
+        dosageInstruction?.text ||
+        dosageInstruction?.timing?.code
       );
     },
   },
@@ -261,13 +266,12 @@ const MEDICATION_REQUEST_FIELDS = {
     validate: (value: unknown) => {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
-      if (dosageInstruction?.timing) {
-        const { bounds_duration, bounds_range, bounds_period } =
-          dosageInstruction.timing.repeat;
-        if (bounds_range || bounds_period) return true;
-        return !!(bounds_duration?.value && bounds_duration?.unit);
-      }
-      return true;
+      const bounds = getTimingBounds(dosageInstruction?.timing?.repeat);
+      // Duration is optional — only validate the contents of a bound that was
+      // actually set (range low <= high, period start <= end, etc.).
+      if (!bounds) return true;
+      const error = validateTimingBounds(bounds);
+      return error ? t(error) : true;
     },
   },
 } as const;
@@ -322,10 +326,13 @@ export function validateMedicationRequestQuestion(
           index,
         );
 
-        return fieldErrors.map((error) => ({
-          ...error,
-          error: t("field_required"),
-        }));
+        return fieldErrors.map((error) =>
+          // Duration carries a specific "why it's invalid" message; the
+          // required dose/frequency fields read as a plain required error.
+          error.field_key?.endsWith(".duration")
+            ? error
+            : { ...error, error: t("field_required") },
+        );
       },
     );
 
@@ -1883,13 +1890,22 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                         },
                       },
                     });
-                  } else if (
-                    di?.text &&
-                    sumManSlots(di.text) !== null &&
-                    bounds.type === "duration"
-                  ) {
+                  } else if (di?.text && sumManSlots(di.text) !== null) {
+                    // Text M-A-N dosage: keep the frequency derived from the
+                    // pattern (e.g. 1-0-1) for every bound type, then apply the
+                    // chosen duration / range / period.
+                    const base = buildTimingForTextDosage(di.text, {
+                      value: "0",
+                      unit: "d",
+                    });
                     handleUpdateDosageInstruction(dIdx, {
-                      timing: buildTimingForTextDosage(di.text, bounds.value),
+                      timing: {
+                        ...base,
+                        repeat: {
+                          ...base.repeat,
+                          ...timingBoundsToRepeat(bounds),
+                        },
+                      },
                     });
                   } else {
                     handleUpdateDosageInstruction(dIdx, {

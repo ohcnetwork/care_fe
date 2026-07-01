@@ -354,6 +354,21 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
     setShowAdvanced(false);
   };
 
+  // Non-blocking warning: an administration dated before the order was placed
+  // is allowed (e.g. back-dating an early dose) but worth flagging.
+  const authoredOn = medication.authored_on
+    ? new Date(medication.authored_on)
+    : undefined;
+  const startsBeforeAuthored =
+    !!authoredOn &&
+    !!administrationRequest.occurrence_period_start &&
+    new Date(administrationRequest.occurrence_period_start) < authoredOn;
+  const beforeAuthoredWarning = startsBeforeAuthored ? (
+    <p className="text-xs text-amber-600">
+      {t("administration_before_order_warning")}
+    </p>
+  ) : null;
+
   // Compact mode for sheet - simplified form
   if (compact) {
     return (
@@ -483,6 +498,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 {startTimeError && (
                   <p className="text-xs text-red-500">{startTimeError}</p>
                 )}
+                {beforeAuthoredWarning}
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">{t("end_time")}</Label>
@@ -768,6 +784,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         {startTimeError && (
           <p className="text-sm text-red-500">{startTimeError}</p>
         )}
+        {beforeAuthoredWarning}
       </div>
 
       <div className="space-y-2">

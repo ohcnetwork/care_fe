@@ -35,6 +35,7 @@ import { Code } from "@/types/base/code/code";
 import {
   DoseRange,
   MedicationRequestDosageInstruction,
+  timingBoundsToRepeat,
   UCUM_TIME_UNITS,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
@@ -432,13 +433,19 @@ export const AddMedicationSheet = ({
                                       ...localDosageInstruction.timing,
                                       repeat: {
                                         ...localDosageInstruction.timing.repeat,
-                                        bounds_duration: {
-                                          value,
-                                          unit:
-                                            localDosageInstruction.timing.repeat
-                                              .bounds_duration?.unit ??
-                                            UCUM_TIME_UNITS[0],
-                                        },
+                                        // Pharmacy orders only edit duration —
+                                        // emit a single bound, clearing any
+                                        // range/period the original order had.
+                                        ...timingBoundsToRepeat({
+                                          type: "duration",
+                                          value: {
+                                            value,
+                                            unit:
+                                              localDosageInstruction.timing
+                                                .repeat.bounds_duration?.unit ??
+                                              UCUM_TIME_UNITS[0],
+                                          },
+                                        }),
                                       },
                                     },
                                   });
@@ -463,7 +470,10 @@ export const AddMedicationSheet = ({
                                       ...localDosageInstruction.timing,
                                       repeat: {
                                         ...localDosageInstruction.timing.repeat,
-                                        bounds_duration: { value, unit },
+                                        ...timingBoundsToRepeat({
+                                          type: "duration",
+                                          value: { value, unit },
+                                        }),
                                       },
                                     },
                                   });

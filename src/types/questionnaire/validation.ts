@@ -5,7 +5,11 @@ import { QuestionValidationError } from "@/types/questionnaire/batch";
 export interface FieldMetadata<T = unknown> {
   key: string;
   required: boolean;
-  validate?: (value: T) => boolean;
+  /**
+   * Returns `true` when valid. Returns `false` for a generic invalid value, or
+   * an already-translated message string to surface a specific reason.
+   */
+  validate?: (value: T) => boolean | string;
 }
 
 export type FieldDefinitions = {

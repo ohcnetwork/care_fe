@@ -1,26 +1,22 @@
+import { format } from "date-fns";
 import {
   ArrowLeftRight,
-  Calendar,
+  Calendar as CalendarIcon,
   Check,
   ChevronLeft,
   ChevronRight,
-  ChevronsUpDown,
   Clock,
-  Plus,
-  Search,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import type { DateRange } from "react-day-picker";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { ComboboxInput } from "@/components/ui/combobox-input";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -31,6 +27,8 @@ import {
 
 import {
   BoundsDuration,
+  dateOnly,
+  dateOnlyToIso,
   decodeDurationValue,
   DURATION_UNIT_LABELS,
   formatDurationLabel,
@@ -38,52 +36,44 @@ import {
   generateDurationSuggestions,
   parseDurationString,
   TimingBounds,
+  validateTimingBounds,
 } from "@/types/emr/medicationRequest/medicationRequest";
 
 interface DurationInputProps {
   value?: TimingBounds;
-  onChange: (bounds: TimingBounds) => void;
+  onChange: (bounds?: TimingBounds) => void;
   disabled?: boolean;
   hasError?: boolean;
   className?: string;
 }
 
+// The dropdown shows duration suggestions, or hosts the range / period editors.
 type View = "list" | "range" | "period";
 
-// ponytail: range UI offers day-granularity units only (matches the design).
+// Range UI offers day-granularity units only (matches the design).
 const RANGE_UNITS = ["d", "wk", "mo"] as const;
 type RangeUnit = (typeof RANGE_UNITS)[number];
 
 const BOUND_ICONS = {
   duration: Clock,
   range: ArrowLeftRight,
-  period: Calendar,
+  period: CalendarIcon,
 } as const;
 
-/** "YYYY-MM-DD" from a stored ISO timestamp, for <input type="date">. */
-function toDateInput(iso?: string): string {
-  return iso ? iso.slice(0, 10) : "";
-}
-
-/** A <input type="date"> value to a tz-aware ISO timestamp. */
-function fromDateInput(date: string, endOfDay = false): string | undefined {
-  if (!date) return undefined;
-  return new Date(
-    `${date}T${endOfDay ? "23:59:59" : "00:00:00"}`,
-  ).toISOString();
-}
-
-function summarize(value?: TimingBounds) {
-  if (!value) return null;
-  return { icon: BOUND_ICONS[value.type], text: formatTimingBounds(value) };
+/** Local Date (midnight) from a "YYYY-MM-DD" string, for the calendar. */
+function parseLocalDate(ymd: string): Date | undefined {
+  return ymd ? new Date(`${ymd}T00:00:00`) : undefined;
 }
 
 /**
  * Duration field with scheduling bounds — Duration · Range · Period.
  *
- * Default flow types/picks a single duration (`bounds_duration`). The foot of
- * the dropdown switches to a range of days (`bounds_range`) or fixed start/end
- * dates (`bounds_period`). The three are mutually exclusive.
+ * Built on {@link ComboboxInput}: the field is a native input where the user
+ * types a duration ("5 days") and picks from suggestions, exactly like the
+ * dosage field. Two dedicated, visually distinct rows switch to a day-range
+ * (`bounds_range`) or fixed start/end dates (`bounds_period`). Reopening a field
+ * that already holds a range or period drops straight into that editor, seeded
+ * with the current value. The three bounds are mutually exclusive.
  */
 export function DurationInput({
   value,
@@ -93,285 +83,332 @@ export function DurationInput({
   className,
 }: DurationInputProps) {
   const { t } = useTranslation();
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>("list");
+  // While the user is actively typing, the field shows their query; otherwise
+  // it shows the committed bound's summary.
+  const [typing, setTyping] = useState(false);
   const [search, setSearch] = useState("");
 
-  // Drafts for the range / period sub-views, seeded from the current value.
+  // Range editor drafts.
   const [rLow, setRLow] = useState("5");
   const [rHigh, setRHigh] = useState("7");
   const [rUnit, setRUnit] = useState<RangeUnit>("d");
-  const [pStart, setPStart] = useState("");
-  const [pEnd, setPEnd] = useState("");
 
-  const summary = summarize(value);
+  // Period calendar draft.
+  const [draftRange, setDraftRange] = useState<DateRange | undefined>();
 
-  const presets = useMemo(() => {
-    const suggestions = generateDurationSuggestions(search);
-    const current = value?.type === "duration" ? value.value : undefined;
-    return suggestions.map((s) => {
-      const decoded = decodeDurationValue(s.value);
-      const selected =
-        !!current &&
-        !!decoded &&
-        current.value === decoded.value &&
-        current.unit === decoded.unit;
-      return { ...s, selected };
-    });
-  }, [search, value]);
+  const inputValue = typing ? search : value ? formatTimingBounds(value) : "";
 
-  const customPreset = useMemo(() => {
+  const suggestions = useMemo(() => {
+    return generateDurationSuggestions(search)
+      .map((s) => ({ label: s.label, decoded: decodeDurationValue(s.value) }))
+      .filter(
+        (s): s is { label: string; decoded: BoundsDuration } => !!s.decoded,
+      );
+  }, [search]);
+
+  const customDuration = useMemo(() => {
     const parsed = parseDurationString(search);
     if (!parsed) return null;
-    if (presets.some((p) => p.value === `${parsed.value}-${parsed.unit}`)) {
-      return null;
-    }
+    const n = Number(parsed.value);
+    // Reject "0.", decimals and non-positive values at the source.
+    if (!Number.isInteger(n) || n <= 0) return null;
+    if (suggestions.some((s) => s.decoded.value === parsed.value)) return null;
     return parsed;
-  }, [search, presets]);
+  }, [search, suggestions]);
 
-  const openPopover = () => {
-    setSearch("");
-    if (value?.type === "range") {
-      setRLow(value.value.low.value);
-      setRHigh(value.value.high.value);
-      setRUnit(value.value.high.unit as RangeUnit);
-      setView("range");
-    } else if (value?.type === "period") {
-      setPStart(toDateInput(value.value.start));
-      setPEnd(toDateInput(value.value.end));
-      setView("period");
-    } else {
-      setView("list");
-    }
-    setOpen(true);
-  };
+  const currentDuration = value?.type === "duration" ? value.value : undefined;
+  const isSelected = (d: BoundsDuration) =>
+    !!currentDuration &&
+    currentDuration.value === d.value &&
+    currentDuration.unit === d.unit;
 
-  const pickDuration = (duration: BoundsDuration) => {
-    onChange({ type: "duration", value: duration });
-    setOpen(false);
-  };
-
-  const commitRange = () => {
-    onChange({
+  // Same rule the submit gate enforces, so the editor and validation agree.
+  const rangeValid =
+    validateTimingBounds({
       type: "range",
       value: {
         low: { value: rLow, unit: rUnit },
         high: { value: rHigh, unit: rUnit },
       },
-    });
-    setOpen(false);
+    }) === null;
+
+  const seedRange = () => {
+    if (value?.type === "range") {
+      setRLow(value.value.low.value);
+      setRHigh(value.value.high.value);
+      setRUnit(value.value.high.unit as RangeUnit);
+    }
   };
 
-  const commitPeriod = () => {
+  const seedPeriod = () => {
+    setDraftRange(
+      value?.type === "period"
+        ? {
+            from: parseLocalDate(dateOnly(value.value.start)),
+            to: parseLocalDate(dateOnly(value.value.end)),
+          }
+        : undefined,
+    );
+  };
+
+  // Preload the editor matching the current bound when the dropdown opens.
+  const preloadView = () => {
+    if (typing) return;
+    if (value?.type === "range") {
+      seedRange();
+      setView("range");
+    } else if (value?.type === "period") {
+      seedPeriod();
+      setView("period");
+    } else {
+      setView("list");
+    }
+  };
+
+  const reset = () => {
+    setTyping(false);
+    setSearch("");
+    setView("list");
+  };
+
+  const handleValueChange = (next: string) => {
+    // Hard-block decimal points (and therefore "0.") in the duration field.
+    if (next.includes(".")) return;
+    setTyping(true);
+    setSearch(next);
+    setView("list");
+    setOpen(true);
+    if (next.trim() === "") onChange(undefined);
+  };
+
+  const commitDuration = (d: BoundsDuration) => {
+    onChange({ type: "duration", value: d });
+    setOpen(false);
+    reset();
+  };
+
+  const commitRange = () => {
+    if (!rangeValid) return;
     onChange({
-      type: "period",
+      type: "range",
       value: {
-        start: fromDateInput(pStart),
-        end: fromDateInput(pEnd, true),
+        low: { value: String(Number(rLow)), unit: rUnit },
+        high: { value: String(Number(rHigh)), unit: rUnit },
       },
     });
     setOpen(false);
+    reset();
   };
 
-  const SummaryIcon = summary?.icon;
+  const commitPeriod = () => {
+    if (!draftRange?.from || !draftRange?.to) return;
+    onChange({
+      type: "period",
+      value: {
+        start: dateOnlyToIso(format(draftRange.from, "yyyy-MM-dd")),
+        end: dateOnlyToIso(format(draftRange.to, "yyyy-MM-dd"), true),
+      },
+    });
+    setOpen(false);
+    reset();
+  };
+
+  const BoundIcon = value && !typing ? BOUND_ICONS[value.type] : null;
 
   return (
-    <Popover
+    <ComboboxInput
+      value={inputValue}
+      onValueChange={handleValueChange}
       open={open}
-      onOpenChange={(o) => (o ? openPopover() : setOpen(false))}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o) preloadView();
+        else reset();
+      }}
+      inputRef={inputRef}
+      type="text"
+      inputMode="numeric"
+      placeholder={t("duration_placeholder")}
+      disabled={disabled}
+      aria-invalid={hasError}
+      aria-label={t("duration")}
+      onFocus={() => inputRef.current?.select()}
+      contentClassName="w-72"
+      className={cn(
+        "h-9 text-sm",
+        BoundIcon && "pl-9",
+        hasError && "border-red-500",
+        className,
+      )}
+      startAdornment={
+        BoundIcon ? (
+          <BoundIcon className="pointer-events-none absolute ml-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        ) : null
+      }
     >
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          disabled={disabled}
-          className={cn(
-            "flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-white px-3 text-sm text-foreground disabled:cursor-not-allowed disabled:opacity-50",
-            hasError && "border-red-500",
-            className,
-          )}
-        >
-          <span className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
-            {SummaryIcon && (
-              <SummaryIcon className="size-4 shrink-0 text-muted-foreground" />
-            )}
-            <span
-              className={cn("truncate", !summary && "text-muted-foreground")}
-            >
-              {summary?.text ?? t("duration_placeholder")}
-            </span>
-          </span>
-          <ChevronsUpDown className="size-3.5 shrink-0 text-primary" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-66 p-0">
-        {view === "list" && (
-          <>
-            <div className="flex items-center gap-2 border-b px-3 py-2.5">
-              <Search className="size-4 shrink-0 text-muted-foreground" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("duration_input_placeholder")}
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              />
-            </div>
-            <div className="max-h-56 overflow-y-auto py-1">
-              {customPreset && (
-                <button
-                  type="button"
-                  onClick={() => pickDuration(customPreset)}
-                  className="flex w-full items-center gap-2 px-3.5 py-2 text-left text-sm hover:bg-accent"
-                >
-                  <Plus className="size-3.5 shrink-0 text-primary" />
-                  {t("use_duration", {
-                    duration: formatDurationLabel(customPreset),
-                  })}
-                </button>
-              )}
-              {presets.map((p) => (
-                <button
-                  type="button"
-                  key={p.value}
-                  onClick={() => {
-                    const decoded = decodeDurationValue(p.value);
-                    if (decoded) pickDuration(decoded);
-                  }}
-                  className={cn(
-                    "flex w-full items-center justify-between px-3.5 py-2 text-left text-sm hover:bg-accent",
-                    p.selected && "bg-accent",
-                  )}
-                >
-                  {p.label}
-                  {p.selected && (
-                    <Check className="size-3.5 shrink-0 text-primary" />
-                  )}
-                </button>
-              ))}
-            </div>
-            <div className="border-t py-1">
+      {view === "list" && (
+        <>
+          <div className="max-h-56 overflow-y-auto py-1">
+            {customDuration && (
               <button
                 type="button"
-                onClick={() => setView("range")}
-                className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
+                onClick={() => commitDuration(customDuration)}
+                className="flex w-full items-center gap-2 px-3.5 py-2 text-left text-sm hover:bg-accent"
               >
-                <ArrowLeftRight className="size-4 shrink-0" />
-                <span className="flex-1">{t("duration_set_range")}</span>
-                <ChevronRight className="size-3.5 shrink-0" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setView("period")}
-                className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
-              >
-                <Calendar className="size-4 shrink-0" />
-                <span className="flex-1">{t("duration_set_period")}</span>
-                <ChevronRight className="size-3.5 shrink-0" />
-              </button>
-            </div>
-          </>
-        )}
-
-        {view === "range" && (
-          <>
-            <button
-              type="button"
-              onClick={() => setView("list")}
-              className="flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
-            >
-              <ChevronLeft className="size-4 text-muted-foreground" />
-              {t("duration_range_title")}
-            </button>
-            <div className="flex flex-col gap-3 p-3.5">
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  min={1}
-                  value={rLow}
-                  onChange={(e) => setRLow(e.target.value)}
-                  className="h-9 w-12 text-center text-sm"
-                />
-                <span className="text-muted-foreground">–</span>
-                <Input
-                  type="number"
-                  min={1}
-                  value={rHigh}
-                  onChange={(e) => setRHigh(e.target.value)}
-                  className="h-9 w-12 text-center text-sm"
-                />
-                <Select
-                  value={rUnit}
-                  onValueChange={(u: RangeUnit) => setRUnit(u)}
-                >
-                  <SelectTrigger className="h-9 flex-1 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {RANGE_UNITS.map((u) => (
-                      <SelectItem key={u} value={u}>
-                        {DURATION_UNIT_LABELS[u].plural}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {t("duration_range_help", {
-                  low: rLow || "—",
-                  high: rHigh || "—",
-                  unit: DURATION_UNIT_LABELS[rUnit].plural,
+                {t("use_duration", {
+                  duration: formatDurationLabel(customDuration),
                 })}
+              </button>
+            )}
+            {suggestions.map((s) => (
+              <button
+                type="button"
+                key={`${s.decoded.value}-${s.decoded.unit}`}
+                onClick={() => commitDuration(s.decoded)}
+                className={cn(
+                  "flex w-full items-center justify-between px-3.5 py-2 text-left text-sm hover:bg-accent",
+                  isSelected(s.decoded) && "bg-accent",
+                )}
+              >
+                {s.label}
+                {isSelected(s.decoded) && (
+                  <Check className="size-3.5 shrink-0 text-primary" />
+                )}
+              </button>
+            ))}
+            {!customDuration && suggestions.length === 0 && (
+              <div className="px-3.5 py-2 text-sm text-muted-foreground">
+                {t("no_duration_found")}
               </div>
-            </div>
-            <div className="flex justify-end border-t px-3 py-2.5">
-              <Button size="sm" onClick={commitRange}>
-                {t("done")}
-              </Button>
-            </div>
-          </>
-        )}
-
-        {view === "period" && (
-          <>
+            )}
+          </div>
+          {/* Dedicated, visually distinct range & period actions. */}
+          <div className="border-t py-1">
             <button
               type="button"
-              onClick={() => setView("list")}
-              className="flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
+              onClick={() => {
+                seedRange();
+                setView("range");
+              }}
+              className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
             >
-              <ChevronLeft className="size-4 text-muted-foreground" />
-              {t("duration_period_title")}
+              <ArrowLeftRight className="size-4 shrink-0" />
+              <span className="flex-1">{t("duration_set_range")}</span>
+              <ChevronRight className="size-3.5 shrink-0" />
             </button>
-            <div className="flex flex-col gap-3 p-3.5">
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium">{t("start")}</span>
-                <Input
-                  type="date"
-                  value={pStart}
-                  onChange={(e) => setPStart(e.target.value)}
-                  className="h-9 text-sm"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium">{t("end")}</span>
-                <Input
-                  type="date"
-                  value={pEnd}
-                  onChange={(e) => setPEnd(e.target.value)}
-                  className="h-9 text-sm"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end border-t px-3 py-2.5">
-              <Button
-                size="sm"
-                onClick={commitPeriod}
-                disabled={!pStart || !pEnd}
+            <button
+              type="button"
+              onClick={() => {
+                seedPeriod();
+                setView("period");
+              }}
+              className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
+            >
+              <CalendarIcon className="size-4 shrink-0" />
+              <span className="flex-1">{t("duration_set_period")}</span>
+              <ChevronRight className="size-3.5 shrink-0" />
+            </button>
+          </div>
+        </>
+      )}
+
+      {view === "range" && (
+        <>
+          <button
+            type="button"
+            onClick={() => setView("list")}
+            className="flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
+          >
+            <ChevronLeft className="size-4 text-muted-foreground" />
+            {t("duration_range_title")}
+          </button>
+          <div className="flex flex-col gap-3 p-3.5">
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={1}
+                inputMode="numeric"
+                aria-label={t("start")}
+                value={rLow}
+                onChange={(e) => setRLow(e.target.value)}
+                className="h-9 w-12 text-center text-sm"
+              />
+              <span className="text-muted-foreground">–</span>
+              <Input
+                type="number"
+                min={1}
+                inputMode="numeric"
+                aria-label={t("end")}
+                value={rHigh}
+                onChange={(e) => setRHigh(e.target.value)}
+                className="h-9 w-12 text-center text-sm"
+              />
+              <Select
+                value={rUnit}
+                onValueChange={(u: RangeUnit) => setRUnit(u)}
               >
-                {t("done")}
-              </Button>
+                <SelectTrigger className="h-9 flex-1 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RANGE_UNITS.map((u) => (
+                    <SelectItem key={u} value={u}>
+                      {DURATION_UNIT_LABELS[u].plural}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </>
-        )}
-      </PopoverContent>
-    </Popover>
+            <div className="text-xs text-muted-foreground">
+              {t("duration_range_help", {
+                low: rLow || "—",
+                high: rHigh || "—",
+                unit: DURATION_UNIT_LABELS[rUnit].plural,
+              })}
+            </div>
+          </div>
+          <div className="flex justify-end border-t px-3 py-2.5">
+            <Button size="sm" onClick={commitRange} disabled={!rangeValid}>
+              {t("done")}
+            </Button>
+          </div>
+        </>
+      )}
+
+      {view === "period" && (
+        <>
+          <button
+            type="button"
+            onClick={() => setView("list")}
+            className="flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
+          >
+            <ChevronLeft className="size-4 text-muted-foreground" />
+            {t("duration_set_period")}
+          </button>
+          <div className="flex justify-center p-2">
+            <Calendar
+              mode="range"
+              selected={draftRange}
+              onSelect={setDraftRange}
+              numberOfMonths={1}
+              autoFocus
+            />
+          </div>
+          <div className="flex justify-end border-t px-3 py-2.5">
+            <Button
+              size="sm"
+              onClick={commitPeriod}
+              disabled={!draftRange?.from || !draftRange?.to}
+            >
+              {t("done")}
+            </Button>
+          </div>
+        </>
+      )}
+    </ComboboxInput>
   );
 }
