@@ -35,7 +35,7 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import {
-  AdministrableProductType,
+  type AdministrableProductType,
   ProductKnowledgeType,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 
