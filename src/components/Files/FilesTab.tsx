@@ -43,7 +43,7 @@ export const FilesTab = ({
     encounter?.permissions ?? [],
   );
 
-  const pluginTabs = useCareAppTabs<FilesTabsProps>("fileTabs");
+  const pluginTabs = useCareAppTabs<FilesTabsProps>("encounterFileTabs");
   const allowedTabs = ["all", "reports", ...Object.keys(pluginTabs)];
   const tabValue = allowedTabs.includes(qParams.file) ? qParams.file : "all";
 

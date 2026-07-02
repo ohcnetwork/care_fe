@@ -197,8 +197,7 @@ export type PluginOverride = {
 };
 
 type SupportedPluginExtensions =
-  | "DoctorConnectButtons"
-  | "PatientExternalRegistration";
+  "DoctorConnectButtons" | "PatientExternalRegistration";
 
 export type PluginManifest = {
   plugin: string;
@@ -214,7 +213,7 @@ export type PluginManifest = {
     string,
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
-  fileTabs?: Record<string, LazyComponent<React.FC<FilesTabsProps>>>;
+  encounterFileTabs?: Record<string, LazyComponent<React.FC<FilesTabsProps>>>;
   devices?: readonly PluginDeviceManifest[];
   /** Component overrides provided by this plugin */
   overrides?: readonly PluginOverride[];
