@@ -97,8 +97,8 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Environment Setup
 
 - Node.js 24+ is required (check `.node-version` file)
-- Install Node.js 22: `curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs`
-- Or use nvm: `nvm install 22 && nvm use 22`
+- Install Node.js 24: `curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - && sudo apt-get install -y nodejs`
+- Or use nvm: `nvm install 24 && nvm use 24`
 
 ### Bootstrap, Build, and Test the Repository
 
