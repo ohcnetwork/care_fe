@@ -55,7 +55,7 @@ export function DateQuestion({
       onChange={handleSelect}
       disabled={disabled}
       classes={classes}
-      buttonClassName="border-r-0 rounded-r-none! border-gray-300! shadow-none!"
+      buttonClassName="border-r-0 rounded-r-none! border-gray-300 shadow-none!"
     />
   );
 }
