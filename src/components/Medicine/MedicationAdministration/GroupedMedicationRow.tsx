@@ -225,7 +225,14 @@ const IndividualMedicationRow: React.FC<{
                 className="w-full h-7 mt-1 text-primary-700 border-primary-500 hover:bg-primary-50 font-medium text-xs"
                 onClick={() => onAdminister(medication)}
               >
-                <CareIcon icon="l-syringe" className="size-3 mr-1" />
+                <CareIcon
+                  icon={
+                    productType === ProductKnowledgeType.medication
+                      ? "l-syringe"
+                      : "l-utensils"
+                  }
+                  className="size-3 mr-1"
+                />
                 {productType === ProductKnowledgeType.medication
                   ? t("administer")
                   : t("record_intake")}
@@ -489,7 +496,14 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                   className="w-full h-8 text-primary-700 border-primary-500 hover:bg-primary-50 font-medium"
                   onClick={() => onAdministerGroup(group)}
                 >
-                  <CareIcon icon="l-syringe" className="size-4 mr-1" />
+                  <CareIcon
+                    icon={
+                      productType === ProductKnowledgeType.medication
+                        ? "l-syringe"
+                        : "l-utensils"
+                    }
+                    className="size-4 mr-1"
+                  />
                   {productType === ProductKnowledgeType.medication
                     ? t("administer")
                     : t("record_intake")}
