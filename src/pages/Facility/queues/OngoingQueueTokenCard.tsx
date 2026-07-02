@@ -264,7 +264,9 @@ function OngoingQueueTokenCardInner({
     return (
       <Drawer>
         <DrawerTrigger>
-          <TokenTrigger token={token} facilityId={facilityId} />
+          <div role="button" tabIndex={0} className="w-full">
+            <TokenTrigger token={token} facilityId={facilityId} />
+          </div>
         </DrawerTrigger>
         <DrawerContent className="flex flex-col items-center px-3 pb-2">
           <TokenContent
@@ -283,7 +285,9 @@ function OngoingQueueTokenCardInner({
   return (
     <Dialog>
       <DialogTrigger>
-        <TokenTrigger token={token} facilityId={facilityId} />
+        <div role="button" tabIndex={0} className="w-full">
+          <TokenTrigger token={token} facilityId={facilityId} />
+        </div>
       </DialogTrigger>
       <DialogContent className="flex flex-col items-center px-3 pb-2">
         <TokenContent
@@ -512,6 +516,13 @@ const TokenContent = ({
   showEnteredInErrorDialog: boolean;
 }) => {
   const { t } = useTranslation();
+
+  const [servicePointAction, setServicePointAction] =
+    useState<ServicePointSelectorAction>("serve");
+
+  const [openServicePointSelector, setOpenServicePointSelector] =
+    useState(false);
+
   const actions = useTokenActions({
     facilityId,
     token,
@@ -522,11 +533,6 @@ const TokenContent = ({
       setOpenServicePointSelector(true);
     },
   });
-  const [servicePointAction, setServicePointAction] =
-    useState<ServicePointSelectorAction>("serve");
-
-  const [openServicePointSelector, setOpenServicePointSelector] =
-    useState(false);
 
   const queueStatus = getQueueTokenStatus(token);
   const queryClient = useQueryClient();
