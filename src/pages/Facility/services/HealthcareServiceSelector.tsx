@@ -109,7 +109,7 @@ export const HealthcareServiceSelector = ({
   ) => {
     const service = option.value;
     return (
-      <div className="flex items-center gap-1 w-full flex-wrap">
+      <div className="flex items-center gap-1 w-full min-w-0">
         <div className="relative size-5 rounded-sm flex items-center justify-center">
           <ColoredIndicator
             id={service.id}
@@ -158,7 +158,7 @@ export const HealthcareServiceSelector = ({
             className="size-4 relative z-1"
           />
         </div>
-        <span className="truncate">{service.name}</span>
+        <span className="truncate min-w-0 flex-1">{service.name}</span>
       </div>
     );
   };
@@ -184,7 +184,7 @@ export const HealthcareServiceSelector = ({
       renderSelected={renderSelected}
       valueCompare={valueCompare}
       enableRadio
-      className="min-w-60"
+      className="sm:min-w-60"
       align="start"
     />
   );

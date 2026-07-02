@@ -168,7 +168,7 @@ function GenericAutocompleteRadio<T>({
               key={itemKey}
               htmlFor={itemKey}
               className={cn(
-                "border rounded-md p-2 w-full cursor-pointer sm:w-auto hover:border-primary-500 group text-left",
+                "border rounded-md p-2 w-full cursor-pointer sm:w-auto sm:max-w-xs hover:border-primary-500 group text-left",
                 isSelected
                   ? "bg-primary-100 border-primary-500"
                   : "bg-white border-gray-300",
@@ -313,6 +313,14 @@ function GenericAutocompleteDropdown<T>({
     setOpen(false);
   };
 
+  // Reset search on close
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen && !freeInput) {
+      onSearch?.("");
+    }
+  };
+
   const commandContent = (
     <>
       <CommandInput
@@ -378,8 +386,8 @@ function GenericAutocompleteDropdown<T>({
 
   if (isMobile) {
     return (
-      <div className="flex relative w-full">
-        <Drawer open={open} onOpenChange={setOpen}>
+      <div className="flex relative w-full min-w-0">
+        <Drawer open={open} onOpenChange={handleOpenChange}>
           <DrawerTrigger asChild>
             <Button
               aria-invalid={props["aria-invalid"]}
@@ -389,14 +397,16 @@ function GenericAutocompleteDropdown<T>({
               role="combobox"
               aria-expanded={open}
               className={cn(
-                "w-full justify-between",
+                "w-full min-w-0 justify-between",
                 className,
                 selectedOption && showClearButton && "rounded-r-none",
               )}
               disabled={disabled}
               type="button"
             >
-              <span className="overflow-hidden">{renderTriggerContent()}</span>
+              <span className="min-w-0 flex-1 overflow-hidden text-left">
+                {renderTriggerContent()}
+              </span>
             </Button>
           </DrawerTrigger>
           <DrawerContent
@@ -431,8 +441,8 @@ function GenericAutocompleteDropdown<T>({
   }
 
   return (
-    <div className="flex relative w-full">
-      <Popover open={open} onOpenChange={setOpen} modal={true}>
+    <div className="flex relative w-full min-w-0">
+      <Popover open={open} onOpenChange={handleOpenChange} modal={true}>
         <PopoverTrigger asChild className={popoverClassName}>
           <Button
             title={getTriggerTitle()}
@@ -441,7 +451,7 @@ function GenericAutocompleteDropdown<T>({
             aria-invalid={props["aria-invalid"]}
             aria-expanded={open}
             className={cn(
-              "w-full justify-between",
+              "w-full min-w-0 justify-between",
               className,
               selectedOption && showClearButton && "rounded-r-none",
             )}
@@ -450,7 +460,9 @@ function GenericAutocompleteDropdown<T>({
             ref={buttonRef}
             data-shortcut-id={shortcutId}
           >
-            {renderTriggerContent()}
+            <span className="min-w-0 flex-1 overflow-hidden text-left">
+              {renderTriggerContent()}
+            </span>
           </Button>
         </PopoverTrigger>
         <PopoverContent
