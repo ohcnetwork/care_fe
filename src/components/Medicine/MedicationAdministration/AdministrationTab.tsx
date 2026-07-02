@@ -643,6 +643,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                       onDiscontinue={handleDiscontinueClick}
                       onDiscontinueGroup={handleDiscontinueGroupClick}
                       canWrite={canWrite}
+                      productType={selectedProductType}
                     />
                   ))}
               </div>

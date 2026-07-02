@@ -80,7 +80,7 @@ export const MedicineAdminDialog = ({
     if (administrationRequest.id) return t("update");
     return productType === ProductKnowledgeType.medication
       ? t("administer_medicine")
-      : t("administer_nutritional_product");
+      : t("record_intake");
   };
 
   const handleSubmit = () => {
@@ -100,7 +100,7 @@ export const MedicineAdminDialog = ({
                 : t(
                     productType === ProductKnowledgeType.medication
                       ? "administer_medicine"
-                      : "administer_nutritional_product",
+                      : "record_intake",
                   )}
             </DialogTitle>
           </div>
@@ -117,6 +117,7 @@ export const MedicineAdminDialog = ({
             onMedicationChange={onMedicationChange}
             isValid={setIsFormValid}
             otherGroupRequests={otherGroupRequests}
+            productType={productType}
           />
         </div>
 

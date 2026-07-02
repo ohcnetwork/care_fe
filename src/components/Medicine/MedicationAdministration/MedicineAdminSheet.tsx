@@ -58,6 +58,7 @@ interface MedicineListItemProps {
   lastAdministeredBy?: string;
   onAdministrationChange: (request: MedicationAdministrationRequest) => void;
   isValid: (valid: boolean) => void;
+  productType: AdministrableProductType;
 }
 
 const MedicineListItem = ({
@@ -69,6 +70,7 @@ const MedicineListItem = ({
   lastAdministeredBy,
   onAdministrationChange,
   isValid,
+  productType,
 }: MedicineListItemProps) => {
   const { t } = useTranslation();
 
@@ -111,6 +113,7 @@ const MedicineListItem = ({
               administrationRequest={administrationRequest}
               onChange={onAdministrationChange}
               isValid={isValid}
+              productType={productType}
             />
           )}
         </div>
@@ -260,7 +263,7 @@ export function MedicineAdminSheet({
             <SheetTitle className="text-xl">
               {productType === ProductKnowledgeType.medication
                 ? t("administer_medicines")
-                : t("administer_nutritional_products")}
+                : t("record_intake")}
             </SheetTitle>
           </SheetHeader>
 
@@ -278,6 +281,7 @@ export function MedicineAdminSheet({
                     handleAdministrationChange(medicine.id, request)
                   }
                   isValid={(valid) => handleFormValidation(medicine.id, valid)}
+                  productType={productType}
                 />
               ))}
             </div>
@@ -304,7 +308,7 @@ export function MedicineAdminSheet({
                   : `${
                       productType === ProductKnowledgeType.medication
                         ? t("administer_medicines")
-                        : t("administer_nutritional_products")
+                        : t("record_intake")
                     } (${selectedMedicines.size})`}
               </Button>
             </div>

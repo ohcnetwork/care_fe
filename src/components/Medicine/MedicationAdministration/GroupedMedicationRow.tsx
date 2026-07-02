@@ -29,6 +29,10 @@ import {
   INACTIVE_MEDICATION_STATUSES,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 import {
   GroupedMedication,
@@ -56,6 +60,7 @@ interface GroupedMedicationRowProps {
     admin: MedicationAdministrationRead,
   ) => void;
   canWrite: boolean;
+  productType: AdministrableProductType;
 }
 
 // Individual medication row within expanded group
@@ -72,6 +77,7 @@ const IndividualMedicationRow: React.FC<{
   onDiscontinue: (medication: MedicationRequestRead) => void;
   canWrite: boolean;
   groupHasActiveRequests: boolean;
+  productType: AdministrableProductType;
 }> = ({
   medication,
   visibleSlots,
@@ -82,6 +88,7 @@ const IndividualMedicationRow: React.FC<{
   onDiscontinue,
   canWrite,
   groupHasActiveRequests,
+  productType,
 }) => {
   const { t } = useTranslation();
   const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
@@ -219,7 +226,9 @@ const IndividualMedicationRow: React.FC<{
                 onClick={() => onAdminister(medication)}
               >
                 <CareIcon icon="l-syringe" className="size-3 mr-1" />
-                {t("administer")}
+                {productType === ProductKnowledgeType.medication
+                  ? t("administer")
+                  : t("record_intake")}
               </Button>
             )}
           </div>
@@ -261,6 +270,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
   onDiscontinue,
   onDiscontinueGroup,
   canWrite,
+  productType,
 }) => {
   const { t } = useTranslation();
   const isExpanded = expandedGroups.has(group.productId);
@@ -480,7 +490,9 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                   onClick={() => onAdministerGroup(group)}
                 >
                   <CareIcon icon="l-syringe" className="size-4 mr-1" />
-                  {t("administer")}
+                  {productType === ProductKnowledgeType.medication
+                    ? t("administer")
+                    : t("record_intake")}
                 </Button>
               )}
             </div>
@@ -519,6 +531,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
             onDiscontinue={onDiscontinue}
             canWrite={canWrite}
             groupHasActiveRequests={group.hasActiveRequests}
+            productType={productType}
           />
         ))}
       </CollapsibleContent>
