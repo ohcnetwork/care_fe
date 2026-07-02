@@ -156,6 +156,16 @@ const config = [
       "react/no-unescaped-entities": "off",
     },
   },
+  // react-three-fiber uses custom JSX intrinsics (mesh, group, sphereGeometry, etc.)
+  // with three.js-specific props (args, position, castShadow, etc.) that the
+  // react plugin flags as unknown. Disable for the 3D body site components.
+  {
+    files: ["src/components/BodySite/**/*.{ts,tsx}"],
+    rules: {
+      "react/no-unknown-property": "off",
+    },
+  },
+
   // No Relative import paths rule
   {
     files: ["**/*.{js,jsx,ts,tsx}"],

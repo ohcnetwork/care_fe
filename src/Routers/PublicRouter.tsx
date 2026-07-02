@@ -4,6 +4,7 @@ import { Redirect, useRoutes } from "raviger";
 import { Authenticate } from "@/components/Auth/Authenticate";
 import Login from "@/components/Auth/Login";
 import ResetPassword from "@/components/Auth/ResetPassword";
+import BodySitePreview from "@/components/BodySite/BodySitePreview";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import InvalidReset from "@/components/ErrorPages/InvalidReset";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
@@ -52,6 +53,7 @@ export const routes = {
   "/session-expired": () => <SessionExpired />,
   "/licenses": () => <LicensesPage />,
   "/invalid-reset": () => <InvalidReset />,
+  "/preview/body-site": () => <BodySitePreview />,
 };
 
 export default function PublicRouter() {
