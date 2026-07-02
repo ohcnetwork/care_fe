@@ -33,6 +33,24 @@ const ACTION_TO_STATUS: Record<ServicePointSelectorAction, TokenStatus> = {
   change_service_point: TokenStatus.IN_PROGRESS,
 };
 
+const ACTION_TO_CONTENT: Record<
+  ServicePointSelectorAction,
+  { title: string; description: string }
+> = {
+  serve: {
+    title: "serve_token",
+    description: "serve_confirmation",
+  },
+  move_to_up_next: {
+    title: "move_to_up_next",
+    description: "move_to_up_next_description",
+  },
+  change_service_point: {
+    title: "change_service_point",
+    description: "change_service_point_description",
+  },
+};
+
 export const ServicePointSelector = ({
   open,
   onOpenChange,
@@ -52,26 +70,7 @@ export const ServicePointSelector = ({
   const isMobile = useBreakpoints({ default: true, sm: false });
   const queryClient = useQueryClient();
 
-  const getTitleOrDescription = (action: ServicePointSelectorAction) => {
-    switch (action) {
-      case "serve":
-        return {
-          title: t("serve_token"),
-          description: t("serve_confirmation"),
-        };
-      case "move_to_up_next":
-        return {
-          title: t("move_to_up_next"),
-          description: t("move_to_up_next_description"),
-        };
-      case "change_service_point":
-        return {
-          title: t("change_service_point"),
-          description: t("change_service_point_description"),
-        };
-    }
-  };
-  const { title, description } = getTitleOrDescription(action);
+  const { title, description } = ACTION_TO_CONTENT[action];
 
   const targetStatus =
     action === "change_service_point" ? token.status : ACTION_TO_STATUS[action];
@@ -127,9 +126,11 @@ export const ServicePointSelector = ({
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle className="text-base text-left">{title}</DrawerTitle>
+            <DrawerTitle className="text-base text-left">
+              {t(title)}
+            </DrawerTitle>
             <DrawerDescription className="text-sm text-gray-600 text-left">
-              {description}
+              {t(description)}
             </DrawerDescription>
           </DrawerHeader>
           <div className="p-3 pb-6">
@@ -154,9 +155,9 @@ export const ServicePointSelector = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>{t(title)}</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
-            {description}
+            {t(description)}
           </DialogDescription>
         </DialogHeader>
         <RadioInput
