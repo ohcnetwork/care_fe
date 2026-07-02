@@ -65,7 +65,13 @@ export const MedicineAdminDialog = ({
     }),
     onSuccess: () => {
       onOpenChange(false);
-      toast.success(t("medication_administration_saved"));
+      toast.success(
+        t(
+          productType === ProductKnowledgeType.medication
+            ? "medication_administration_saved"
+            : "nutritional_product_administration_saved",
+        ),
+      );
     },
   });
 

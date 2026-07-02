@@ -4022,6 +4022,7 @@
   "nutrition_product": "Nutrition Product",
   "nutritional_product": "Nutritional Product",
   "nutritional_product_administration_record": "Nutritional Product Administration Record",
+  "nutritional_product_administration_saved": "Nutritional Product Administration saved",
   "observation": "Observation",
   "observation_additional_details": "Specify additional details about how and where this observation is performed",
   "observation_basic_information": "Enter the basic details and type of the observation",

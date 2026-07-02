@@ -163,7 +163,13 @@ export function MedicineAdminSheet({
       pathParams: { patientId },
     }),
     onSuccess: () => {
-      toast.success(t("medication_administration_saved"));
+      toast.success(
+        t(
+          productType === ProductKnowledgeType.medication
+            ? "medication_administration_saved"
+            : "nutritional_product_administration_saved",
+        ),
+      );
       handleClose();
     },
   });
