@@ -2,6 +2,11 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useUpdateToken } from "@/hooks/useUpdateToken";
 import { ServicePointSelector } from "@/pages/Facility/queues/ServicePointSelector";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
@@ -52,6 +57,9 @@ export default function TokenCardWithButton({
   const isOnlyOneSubQueue =
     !isServicePointsLoading && assignedServicePoints.length === 1;
 
+  const hasNoAssignedServicePoints =
+    !isServicePointsLoading && assignedServicePoints.length === 0;
+
   return (
     <>
       <TokenCard
@@ -64,26 +72,44 @@ export default function TokenCardWithButton({
       />
       {showMarkInServiceButton && token.status === TokenStatus.CREATED && (
         <div className="flex w-full items-center justify-center bg-white p-3 rounded-md -mt-1">
-          <Button
-            className="w-full flex items-center justify-center gap-2 font-semibold"
-            onClick={() => {
-              if (isOnlyOneSubQueue) {
-                updateToken({
-                  status: TokenStatus.IN_PROGRESS,
-                  sub_queue: assignedServicePoints[0].id,
-                  note: token.note,
-                });
-                return;
-              }
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className="w-full"
+                tabIndex={hasNoAssignedServicePoints ? 0 : undefined}
+              >
+                <Button
+                  className="w-full flex items-center justify-center gap-2 font-semibold"
+                  onClick={() => {
+                    if (isOnlyOneSubQueue) {
+                      updateToken({
+                        status: TokenStatus.IN_PROGRESS,
+                        sub_queue: assignedServicePoints[0].id,
+                        note: token.note,
+                      });
+                      return;
+                    }
 
-              onOpenDialogForServicePoint?.();
-              setShowServicepointDialog(true);
-            }}
-            variant="outline_primary"
-            disabled={isUpdating || isServicePointsLoading}
-          >
-            {t("mark_as_in_service")}
-          </Button>
+                    onOpenDialogForServicePoint?.();
+                    setShowServicepointDialog(true);
+                  }}
+                  variant="outline_primary"
+                  disabled={
+                    isUpdating ||
+                    isServicePointsLoading ||
+                    hasNoAssignedServicePoints
+                  }
+                >
+                  {t("mark_as_in_service")}
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {hasNoAssignedServicePoints && (
+              <TooltipContent>
+                {t("no_service_points_are_present")}
+              </TooltipContent>
+            )}
+          </Tooltip>
         </div>
       )}
 
@@ -97,7 +123,7 @@ export default function TokenCardWithButton({
           action="serve"
           onSuccess={() => {
             setShowServicepointDialog(false);
-            toast.success(t("token_assigned_to_service_point"));
+            toast(t("token_assigned_to_service_point"));
             onSuccess?.();
           }}
         />

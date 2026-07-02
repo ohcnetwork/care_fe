@@ -117,10 +117,16 @@ export const ServicePointSelector = ({
             </DrawerDescription>
           </DrawerHeader>
           <div className="p-3 pb-6">
-            <ServicePointsContent
-              subQueues={subQueues}
-              selectedSubQueueId={selectedSubQueueId}
-              onSelect={handleSelect}
+            <RadioInput
+              options={subQueues.map((subQueue) => ({
+                label: subQueue.name,
+                value: subQueue.id,
+              }))}
+              onValueChange={handleSelect}
+              value={selectedSubQueueId}
+              required
+              className="flex flex-col gap-3"
+              labelClassName="p-2"
             />
           </div>
         </DrawerContent>
@@ -137,46 +143,18 @@ export const ServicePointSelector = ({
             {description}
           </DialogDescription>
         </DialogHeader>
-        <ServicePointsContent
-          subQueues={subQueues}
-          selectedSubQueueId={selectedSubQueueId}
-          onSelect={handleSelect}
+        <RadioInput
+          options={subQueues.map((subQueue) => ({
+            label: subQueue.name,
+            value: subQueue.id,
+          }))}
+          onValueChange={handleSelect}
+          value={selectedSubQueueId}
+          required
+          className="flex flex-col gap-3"
+          labelClassName="p-2"
         />
       </DialogContent>
     </Dialog>
-  );
-};
-
-const ServicePointsContent = ({
-  subQueues,
-  selectedSubQueueId,
-  onSelect,
-}: {
-  subQueues: TokenSubQueueRead[];
-  selectedSubQueueId: string;
-  onSelect: (subQueueId: string) => void;
-}) => {
-  const { t } = useTranslation();
-
-  if (subQueues.length === 0) {
-    return (
-      <div className="text-sm text-gray-500 italic">
-        {t("no_service_points")}
-      </div>
-    );
-  }
-
-  return (
-    <RadioInput
-      options={subQueues.map((subQueue) => ({
-        label: subQueue.name,
-        value: subQueue.id,
-      }))}
-      onValueChange={onSelect}
-      value={selectedSubQueueId}
-      required
-      className="flex flex-col gap-3"
-      labelClassName="p-2"
-    />
   );
 };
