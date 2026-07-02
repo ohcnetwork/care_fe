@@ -1186,7 +1186,7 @@ export function DiagnosticReportForm({
                                       .join(", ")
                                   : t("select_files")}
                               </span>
-                              {fileUpload.Input({ className: "hidden" })}
+                              <fileUpload.Input className="hidden" />
                             </Label>
                           </div>
 
