@@ -3,14 +3,15 @@ import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
 import {
@@ -43,7 +44,6 @@ import {
   RotateCcwSquare,
   ScanEye,
   Stethoscope,
-  X,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -217,7 +217,6 @@ export function OngoingQueueTokenCard({
   facilityId: string;
   token: TokenRead | null;
 }) {
-  const { t } = useTranslation();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showEnteredInErrorDialog, setShowEnteredInErrorDialog] =
     useState(false);
@@ -239,7 +238,6 @@ export function OngoingQueueTokenCard({
       setShowCancelDialog={setShowCancelDialog}
       showEnteredInErrorDialog={showEnteredInErrorDialog}
       setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
-      t={t}
     />
   );
 }
@@ -251,7 +249,6 @@ function OngoingQueueTokenCardInner({
   setShowCancelDialog,
   showEnteredInErrorDialog,
   setShowEnteredInErrorDialog,
-  t,
 }: {
   facilityId: string;
   token: TokenRead;
@@ -260,177 +257,45 @@ function OngoingQueueTokenCardInner({
   setShowCancelDialog: (open: boolean) => void;
   showEnteredInErrorDialog: boolean;
   setShowEnteredInErrorDialog: (open: boolean) => void;
-  t: (key: string, options?: Record<string, unknown>) => string;
 }) {
-  const actions = useTokenActions({
-    facilityId,
-    token,
-    onCancelClick: () => setShowCancelDialog(true),
-    onEnteredInErrorClick: () => setShowEnteredInErrorDialog(true),
-    onChangeServicePointClick: () => {
-      setServicePointAction("change_service_point");
-      setOpenServicePointSelector(true);
-    },
-  });
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
-  const [servicePointAction, setServicePointAction] =
-    useState<ServicePointSelectorAction>("serve");
-
-  const [openServicePointSelector, setOpenServicePointSelector] =
-    useState(false);
-
-  return (
-    <Drawer>
-      <DrawerTrigger asChild>
-        <div
-          className={cn(
-            "relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow",
-            token.status === TokenStatus.IN_PROGRESS &&
-              "border border-primary-500",
-          )}
-        >
-          {token.status === TokenStatus.IN_PROGRESS && (
-            <span
-              aria-hidden="true"
-              className="absolute top-4 left-0 inset-y-6 w-1 rounded-r-lg bg-primary-500 h-5"
-            />
-          )}
-          <div className="flex sm:contents items-start justify-between w-full">
-            <div className="flex flex-col items-start gap-1 min-w-0">
-              <span className="text-gray-950 font-semibold">
-                {token.patient ? token.patient.name : renderTokenNumber(token)}
-              </span>
-              {token.patient && (
-                <span className="text-sm text-gray-700">
-                  {formatPatientAge(token.patient, true)},{" "}
-                  {t(`GENDER__${token.patient.gender}`)}
-                </span>
-              )}
-            </div>
-            <ArrowRight size={20} className="sm:hidden text-gray-950 mr-2" />
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
-            {getQueueTokenStatus(token) === QueueTokenStatus.SERVING && (
-              <Button
-                variant="outline_primary"
-                asChild
-                size="md"
-                className="hidden sm:flex"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Link
-                  basePath="/"
-                  href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
-                >
-                  {t("encounter")}
-                </Link>
-              </Button>
-            )}
-            <div
-              className={cn(
-                "flex w-full sm:w-auto gap-2 items-center justify-center py-1 px-3 bg-gray-100 border border-gray-200 rounded-md whitespace-nowrap text-black",
-                getQueueTokenStatus(token) === QueueTokenStatus.SERVING &&
-                  "bg-primary-100 border border-primary-400 text-primary-900",
-              )}
-            >
-              <span
-                className={cn(
-                  "items-center gap-2",
-                  getQueueTokenStatus(token) === QueueTokenStatus.WAITING
-                    ? "flex sm:hidden"
-                    : "flex",
-                )}
-              >
-                <Badge
-                  variant={
-                    QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]
-                  }
-                  className="h-2 w-2 rounded-full p-0 border"
-                />
-                <span className="text-sm font-medium">
-                  {t(`token_status__${getQueueTokenStatus(token)}`)}
-                </span>
-              </span>
-              <span className="text-lg font-bold ">
-                {renderTokenNumber(token)}
-              </span>
-            </div>
-          </div>
-
-          <ArrowRight size={20} className="hidden sm:block shrink-0" />
-        </div>
-      </DrawerTrigger>
-      <DrawerContent className="flex flex-col items-center px-3 pb-2">
-        <div className="w-full max-w-md mx-auto">
-          <DrawerHeader className="flex flex-row items-start justify-between -ml-4">
-            {getQueueTokenStatus(token) === QueueTokenStatus.WAITING ||
-            getQueueTokenStatus(token) === QueueTokenStatus.RECALL ? (
-              <div className="flex flex-col items-start">
-                <span className="text-gray-950 font-semibold">
-                  {token.patient
-                    ? token.patient.name
-                    : renderTokenNumber(token)}
-                </span>
-                {token.patient && (
-                  <span className="text-sm text-gray-700">
-                    {formatPatientAge(token.patient, true)},{" "}
-                    {t(`GENDER__${token.patient.gender}`)}
-                  </span>
-                )}
-              </div>
-            ) : (
-              <div className="flex gap-2 items-center">
-                <h5 className="text-gray-950 font-semibold">
-                  {token.sub_queue?.name}
-                </h5>
-                <Badge
-                  variant={
-                    QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]
-                  }
-                  className="h-2 w-2 rounded-full p-0 border"
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  {t(`token_status__${getQueueTokenStatus(token)}`)}
-                </span>
-              </div>
-            )}
-            <DrawerClose asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 -mr-1 -mt-1 text-gray-600"
-                aria-label={t("close")}
-              >
-                <X className="size-4" />
-              </Button>
-            </DrawerClose>
-          </DrawerHeader>
-          <Separator className="mb-2" />
-          <TokenDrawerContent
+  if (isMobile) {
+    return (
+      <Drawer>
+        <DrawerTrigger>
+          <TokenTrigger token={token} facilityId={facilityId} />
+        </DrawerTrigger>
+        <DrawerContent className="flex flex-col items-center px-3 pb-2">
+          <TokenContent
             facilityId={facilityId}
             token={token}
-            actions={actions}
-            setOpenServicePointSelector={setOpenServicePointSelector}
-            openServicePointSelector={openServicePointSelector}
-            servicePointAction={servicePointAction}
-            setServicePointAction={setServicePointAction}
+            setShowCancelDialog={setShowCancelDialog}
+            setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
+            showCancelDialog={showCancelDialog}
+            showEnteredInErrorDialog={showEnteredInErrorDialog}
           />
-        </div>
-      </DrawerContent>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
-      <CancelTokenDialog
-        open={showCancelDialog}
-        onOpenChange={setShowCancelDialog}
-        token={token}
-      />
-      <EnteredInErrorDialog
-        open={showEnteredInErrorDialog}
-        onOpenChange={setShowEnteredInErrorDialog}
-        facilityId={facilityId}
-        token={token}
-      />
-    </Drawer>
+  return (
+    <Dialog>
+      <DialogTrigger>
+        <TokenTrigger token={token} facilityId={facilityId} />
+      </DialogTrigger>
+      <DialogContent className="flex flex-col items-center px-3 pb-2">
+        <TokenContent
+          facilityId={facilityId}
+          token={token}
+          setShowCancelDialog={setShowCancelDialog}
+          setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
+          showCancelDialog={showCancelDialog}
+          showEnteredInErrorDialog={showEnteredInErrorDialog}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -546,26 +411,125 @@ export function OngoingQueueTokenCardsList({
   );
 }
 
-function TokenDrawerContent({
-  facilityId,
+const TokenTrigger = ({
   token,
-  actions,
-  openServicePointSelector,
-  setOpenServicePointSelector,
-  servicePointAction,
-  setServicePointAction,
+  facilityId,
 }: {
-  facilityId: string;
   token: TokenRead;
-  actions: TokenActionItem[];
-  openServicePointSelector: boolean;
-  setOpenServicePointSelector: (open: boolean) => void;
-  servicePointAction: ServicePointSelectorAction;
-  setServicePointAction: (action: ServicePointSelectorAction) => void;
-}) {
+  facilityId: string;
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div
+      className={cn(
+        "relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow cursor-pointer",
+        token.status === TokenStatus.IN_PROGRESS && "border border-primary-500",
+      )}
+    >
+      {token.status === TokenStatus.IN_PROGRESS && (
+        <span
+          aria-hidden="true"
+          className="absolute top-4 left-0 inset-y-6 w-1 rounded-r-lg bg-primary-500 h-5"
+        />
+      )}
+      <div className="flex sm:contents items-start justify-between w-full">
+        <div className="flex flex-col items-start gap-1 min-w-0">
+          <span className="text-gray-950 font-semibold">
+            {token.patient ? token.patient.name : renderTokenNumber(token)}
+          </span>
+          {token.patient && (
+            <span className="text-sm text-gray-700">
+              {formatPatientAge(token.patient, true)},{" "}
+              {t(`GENDER__${token.patient.gender}`)}
+            </span>
+          )}
+        </div>
+        <ArrowRight size={20} className="sm:hidden text-gray-950 mr-2" />
+      </div>
+
+      <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
+        {getQueueTokenStatus(token) === QueueTokenStatus.SERVING && (
+          <Button
+            variant="outline_primary"
+            asChild
+            size="md"
+            className="hidden sm:flex"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Link
+              basePath="/"
+              href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+            >
+              {t("encounter")}
+            </Link>
+          </Button>
+        )}
+        <div
+          className={cn(
+            "flex w-full sm:w-auto gap-2 items-center justify-center py-1 px-3 bg-gray-100 border border-gray-200 rounded-md whitespace-nowrap text-black",
+            getQueueTokenStatus(token) === QueueTokenStatus.SERVING &&
+              "bg-primary-100 border border-primary-400 text-primary-900",
+          )}
+        >
+          <span
+            className={cn(
+              "items-center gap-2",
+              getQueueTokenStatus(token) === QueueTokenStatus.WAITING
+                ? "flex sm:hidden"
+                : "flex",
+            )}
+          >
+            <Badge
+              variant={QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]}
+              className="h-2 w-2 rounded-full p-0 border"
+            />
+            <span className="text-sm font-medium">
+              {t(`token_status__${getQueueTokenStatus(token)}`)}
+            </span>
+          </span>
+          <span className="text-lg font-bold ">{renderTokenNumber(token)}</span>
+        </div>
+      </div>
+
+      <ArrowRight size={20} className="hidden sm:block shrink-0" />
+    </div>
+  );
+};
+
+const TokenContent = ({
+  token,
+  facilityId,
+  setShowCancelDialog,
+  setShowEnteredInErrorDialog,
+  showCancelDialog,
+  showEnteredInErrorDialog,
+}: {
+  token: TokenRead;
+  facilityId: string;
+  setShowCancelDialog: (open: boolean) => void;
+  setShowEnteredInErrorDialog: (open: boolean) => void;
+  showCancelDialog: boolean;
+  showEnteredInErrorDialog: boolean;
+}) => {
+  const { t } = useTranslation();
+  const actions = useTokenActions({
+    facilityId,
+    token,
+    onCancelClick: () => setShowCancelDialog(true),
+    onEnteredInErrorClick: () => setShowEnteredInErrorDialog(true),
+    onChangeServicePointClick: () => {
+      setServicePointAction("change_service_point");
+      setOpenServicePointSelector(true);
+    },
+  });
+  const [servicePointAction, setServicePointAction] =
+    useState<ServicePointSelectorAction>("serve");
+
+  const [openServicePointSelector, setOpenServicePointSelector] =
+    useState(false);
+
   const queueStatus = getQueueTokenStatus(token);
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
 
   const { assignedServicePoints } = useQueueServicePoints();
 
@@ -604,31 +568,14 @@ function TokenDrawerContent({
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      {queueStatus === QueueTokenStatus.WAITING ||
-      queueStatus === QueueTokenStatus.RECALL ? (
-        <div className="flex w-full sm:w-auto gap-2 items-center justify-center py-1 px-3 bg-gray-100 border border-gray-200 rounded-lg whitespace-nowrap">
-          <span className="flex gap-2 items-center">
-            <Badge
-              variant={QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]}
-              className="h-2 w-2 rounded-full p-0 border"
-            />
-            <span className="text-sm sm:text-base font-medium text-black">
-              {t(`token_status__${getQueueTokenStatus(token)}`)}:
-            </span>
-          </span>
-
-          <span className="text-lg font-bold text-black">
-            {renderTokenNumber(token)}
-          </span>
-        </div>
-      ) : (
-        <div className="flex justify-between bg-gray-50 border border-gray-200 rounded-lg p-2">
-          <div className="flex flex-col">
+    <div className="w-full max-w-md mx-auto space-y-2">
+      <DialogHeader className="flex flex-row items-start justify-between">
+        {getQueueTokenStatus(token) === QueueTokenStatus.WAITING ||
+        getQueueTokenStatus(token) === QueueTokenStatus.RECALL ? (
+          <div className="flex flex-col items-start">
             <span className="text-gray-950 font-semibold">
               {token.patient ? token.patient.name : renderTokenNumber(token)}
             </span>
-
             {token.patient && (
               <span className="text-sm text-gray-700">
                 {formatPatientAge(token.patient, true)},{" "}
@@ -636,122 +583,182 @@ function TokenDrawerContent({
               </span>
             )}
           </div>
+        ) : (
+          <div className="flex gap-2 items-center">
+            <h5 className="text-gray-950 font-semibold">
+              {token.sub_queue?.name}
+            </h5>
+            <Badge
+              variant={QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]}
+              className="h-2 w-2 rounded-full p-0 border"
+            />
+            <span className="text-sm font-medium text-gray-700">
+              {t(`token_status__${getQueueTokenStatus(token)}`)}
+            </span>
+          </div>
+        )}
+      </DialogHeader>
+      <Separator className="mb-2" />
+      <div className="flex flex-col gap-3">
+        {queueStatus === QueueTokenStatus.WAITING ||
+        queueStatus === QueueTokenStatus.RECALL ? (
+          <div className="flex w-full sm:w-auto gap-2 items-center justify-center py-1 px-3 bg-gray-100 border border-gray-200 rounded-lg whitespace-nowrap">
+            <span className="flex gap-2 items-center">
+              <Badge
+                variant={QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]}
+                className="h-2 w-2 rounded-full p-0 border"
+              />
+              <span className="text-sm sm:text-base font-medium text-black">
+                {t(`token_status__${getQueueTokenStatus(token)}`)}:
+              </span>
+            </span>
 
-          <div className="bg-gray-100 border border-gray-200 rounded-lg whitespace-nowrap flex items-center px-2">
             <span className="text-lg font-bold text-black">
               {renderTokenNumber(token)}
             </span>
           </div>
-        </div>
-      )}
-      {token.patient && (
-        <PatientTagsDisplay
-          patient={token.patient}
-          className="text-xs flex-1"
-          showLabel={false}
-        />
-      )}
-      {queueStatus === QueueTokenStatus.WAITING ||
-      queueStatus === QueueTokenStatus.RECALL ? (
-        <div className="flex gap-2 w-full">
-          <Button
-            variant="outline_primary"
-            className="flex-1 gap-1"
-            onClick={() => {
-              if (assignedServicePoints.length === 0) {
-                toast.error(t("no_assigned_service_points"));
-                return;
-              } else if (assignedServicePoints.length === 1) {
-                updateToken({
-                  status: TokenStatus.CREATED,
-                  note: token.note,
-                  sub_queue: assignedServicePoints[0].id,
-                });
-                return;
-              }
-              setServicePointAction("move_to_up_next");
-              setOpenServicePointSelector(true);
-            }}
-            disabled={isPending}
-          >
-            <ArrowUpRight className="size-4 mr-2" />
-            {t("move_to_up_next")}
-          </Button>
-          <Button
-            variant="primary"
-            className="flex-1"
-            onClick={handleUpdateToken}
-            disabled={isPending}
-          >
-            <Megaphone className="size-4 mr-2" />
-            {t("serve")}
-          </Button>
-        </div>
-      ) : queueStatus === QueueTokenStatus.SERVING ? (
-        <Button asChild variant="primary">
-          <Link
-            href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
-            className="flex items-center gap-1"
-          >
-            <Stethoscope className="size-4 mr-2" />
-            <span className="text-white font-semibold">
-              {t("open_encounter")}
-            </span>
-          </Link>
-        </Button>
-      ) : (
-        <div className="flex gap-2 w-full">
-          <Button asChild variant="outline_primary" className="flex-1 group">
+        ) : (
+          <div className="flex justify-between bg-gray-50 border border-gray-200 rounded-lg p-2">
+            <div className="flex flex-col">
+              <span className="text-gray-950 font-semibold">
+                {token.patient ? token.patient.name : renderTokenNumber(token)}
+              </span>
+
+              {token.patient && (
+                <span className="text-sm text-gray-700">
+                  {formatPatientAge(token.patient, true)},{" "}
+                  {t(`GENDER__${token.patient.gender}`)}
+                </span>
+              )}
+            </div>
+
+            <div className="bg-gray-100 border border-gray-200 rounded-lg whitespace-nowrap flex items-center px-2">
+              <span className="text-lg font-bold text-black">
+                {renderTokenNumber(token)}
+              </span>
+            </div>
+          </div>
+        )}
+        {token.patient && (
+          <PatientTagsDisplay
+            patient={token.patient}
+            className="text-xs flex-1"
+            showLabel={false}
+          />
+        )}
+        {queueStatus === QueueTokenStatus.WAITING ||
+        queueStatus === QueueTokenStatus.RECALL ? (
+          <div className="flex gap-2 w-full">
+            <Button
+              variant="outline_primary"
+              className="flex-1 gap-1"
+              onClick={() => {
+                if (assignedServicePoints.length === 0) {
+                  toast.error(t("no_assigned_service_points"));
+                  return;
+                } else if (assignedServicePoints.length === 1) {
+                  updateToken({
+                    status: TokenStatus.CREATED,
+                    note: token.note,
+                    sub_queue: assignedServicePoints[0].id,
+                  });
+                  return;
+                }
+                setServicePointAction("move_to_up_next");
+                setOpenServicePointSelector(true);
+              }}
+              disabled={isPending}
+            >
+              <ArrowUpRight className="size-4 mr-2" />
+              {t("move_to_up_next")}
+            </Button>
+            <Button
+              variant="primary"
+              className="flex-1"
+              onClick={handleUpdateToken}
+              disabled={isPending}
+            >
+              <Megaphone className="size-4 mr-2" />
+              {t("serve")}
+            </Button>
+          </div>
+        ) : queueStatus === QueueTokenStatus.SERVING ? (
+          <Button asChild variant="primary">
             <Link
               href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
               className="flex items-center gap-1"
             >
-              <Stethoscope className="size-4 mr-2 group-hover:text-white" />
-              <span className="text-primary font-semibold group-hover:text-white">
-                {t("encounter")}
+              <Stethoscope className="size-4 mr-2" />
+              <span className="text-white font-semibold">
+                {t("open_encounter")}
               </span>
             </Link>
           </Button>
-          <Button
-            variant="primary"
-            onClick={handleUpdateToken}
-            disabled={isPending}
-            className="flex-1"
-          >
-            <Megaphone className="size-4 mr-2" />
-            <span className="text-white font-semibold">{t("serve")}</span>
-          </Button>
-        </div>
-      )}
-      <div className="flex flex-col gap-2 pt-3">
-        <span className="text-gray-600 text-sm">{t("more_actions")}</span>
-        <div className="flex flex-col gap-1">
-          {actions.map((action) => (
-            <div key={action.key}>
-              {action.separatorBefore && <Separator className="my-2" />}
-              <Button
-                variant="ghost"
-                className={cn(
-                  "flex gap-3 text-gray-950 text-sm font-semibold w-full justify-start underline",
-                  action.danger && "text-danger-600",
-                )}
-                onClick={action.onSelect}
+        ) : (
+          <div className="flex gap-2 w-full">
+            <Button asChild variant="outline_primary" className="flex-1 group">
+              <Link
+                href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
+                className="flex items-center gap-1"
               >
-                <span>{action.icon}</span>
-                {action.label}
-              </Button>
-            </div>
-          ))}
+                <Stethoscope className="size-4 mr-2 group-hover:text-white" />
+                <span className="text-primary font-semibold group-hover:text-white">
+                  {t("encounter")}
+                </span>
+              </Link>
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleUpdateToken}
+              disabled={isPending}
+              className="flex-1"
+            >
+              <Megaphone className="size-4 mr-2" />
+              <span className="text-white font-semibold">{t("serve")}</span>
+            </Button>
+          </div>
+        )}
+        <div className="flex flex-col gap-2 pt-3">
+          <span className="text-gray-600 text-sm">{t("more_actions")}</span>
+          <div className="flex flex-col gap-1">
+            {actions.map((action) => (
+              <div key={action.key}>
+                {action.separatorBefore && <Separator className="my-2" />}
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "flex gap-3 text-gray-950 text-sm font-semibold w-full justify-start underline",
+                    action.danger && "text-danger-600",
+                  )}
+                  onClick={action.onSelect}
+                >
+                  <span>{action.icon}</span>
+                  {action.label}
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
+        <ServicePointSelector
+          open={openServicePointSelector}
+          onOpenChange={setOpenServicePointSelector}
+          facilityId={facilityId}
+          token={token}
+          subQueues={assignedServicePoints}
+          action={servicePointAction}
+        />
       </div>
-      <ServicePointSelector
-        open={openServicePointSelector}
-        onOpenChange={setOpenServicePointSelector}
+      <CancelTokenDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        token={token}
+      />
+      <EnteredInErrorDialog
+        open={showEnteredInErrorDialog}
+        onOpenChange={setShowEnteredInErrorDialog}
         facilityId={facilityId}
         token={token}
-        subQueues={assignedServicePoints}
-        action={servicePointAction}
       />
     </div>
   );
-}
+};
