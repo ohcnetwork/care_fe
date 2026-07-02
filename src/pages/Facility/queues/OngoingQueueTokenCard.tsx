@@ -533,6 +533,8 @@ const TokenContent = ({
 
   const { assignedServicePoints } = useQueueServicePoints();
 
+  const hasNoAssignedServicePoints = assignedServicePoints.length === 0;
+
   const { mutate: updateToken, isPending } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
@@ -552,10 +554,7 @@ const TokenContent = ({
   });
 
   const handleUpdateToken = () => {
-    if (assignedServicePoints.length === 0) {
-      toast.error(t("no_assigned_service_points"));
-      return;
-    } else if (assignedServicePoints.length === 1) {
+    if (assignedServicePoints.length === 1) {
       updateToken({
         status: TokenStatus.IN_PROGRESS,
         note: token.note,
@@ -646,6 +645,13 @@ const TokenContent = ({
             showLabel={false}
           />
         )}
+        {hasNoAssignedServicePoints && (
+          <div className="flex gap-2 w-full border-2 border-dotted p-2 rounded-lg items-center justify-center">
+            <span className="italic text-sm text-gray-500">
+              {t("no_service_points_are_present")}
+            </span>
+          </div>
+        )}
         {queueStatus === QueueTokenStatus.WAITING ||
         queueStatus === QueueTokenStatus.RECALL ? (
           <div className="flex gap-2 w-full">
@@ -653,10 +659,7 @@ const TokenContent = ({
               variant="outline_primary"
               className="flex-1 gap-1"
               onClick={() => {
-                if (assignedServicePoints.length === 0) {
-                  toast.error(t("no_assigned_service_points"));
-                  return;
-                } else if (assignedServicePoints.length === 1) {
+                if (assignedServicePoints.length === 1) {
                   updateToken({
                     status: TokenStatus.CREATED,
                     note: token.note,
@@ -667,7 +670,7 @@ const TokenContent = ({
                 setServicePointAction("move_to_up_next");
                 setOpenServicePointSelector(true);
               }}
-              disabled={isPending}
+              disabled={isPending || hasNoAssignedServicePoints}
             >
               <ArrowUpRight className="size-4 mr-2" />
               {t("move_to_up_next")}
@@ -676,7 +679,7 @@ const TokenContent = ({
               variant="primary"
               className="flex-1"
               onClick={handleUpdateToken}
-              disabled={isPending}
+              disabled={isPending || hasNoAssignedServicePoints}
             >
               <Megaphone className="size-4 mr-2" />
               {t("serve")}
