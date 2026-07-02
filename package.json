@@ -182,8 +182,7 @@
     "uuid": "^14.0.0",
     "vite": "^8.0.14",
     "vite-plugin-checker": "^0.14.1",
-    "vite-plugin-pwa": "^1.3.0",
-    "vite-plugin-static-copy": "^4.1.0"
+    "vite-plugin-pwa": "^1.3.0"
   },
   "optionalDependencies": {
     "@esbuild/linux-arm64": "latest",
