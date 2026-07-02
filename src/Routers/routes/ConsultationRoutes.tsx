@@ -13,6 +13,8 @@ import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 import ReportViewer from "@/pages/Encounters/ReportViewer";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
+import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
+
 const ExcalidrawEditor = lazy(
   () => import("@/components/Common/Drawings/ExcalidrawEditor"),
 );
@@ -82,14 +84,16 @@ const consultationRoutes: AppRoutes = {
     return acc;
   }, {}),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/type/:productType/administrations/print":
-    ({ facilityId, encounterId, patientId, productType }) => (
-      <PrintMedicationAdministration
-        facilityId={facilityId}
-        encounterId={encounterId}
-        patientId={patientId}
-        productType={productType}
-      />
-    ),
+    ({ facilityId, encounterId, patientId, productType }) =>
+      (productType === ProductKnowledgeType.medication ||
+        productType === ProductKnowledgeType.nutritional_product) && (
+        <PrintMedicationAdministration
+          facilityId={facilityId}
+          encounterId={encounterId}
+          patientId={patientId}
+          productType={productType}
+        />
+      ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/template/:templateSlug":
     ({ encounterId, templateSlug }) => (
       <ReportViewer encounterId={encounterId} templateSlug={templateSlug} />
