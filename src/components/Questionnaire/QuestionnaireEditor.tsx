@@ -1988,10 +1988,7 @@ function QuestionEditor({
                 newCondition = {
                   question: condition.question,
                   operator: condition.operator as
-                    | "greater"
-                    | "less"
-                    | "greater_or_equals"
-                    | "less_or_equals",
+                    "greater" | "less" | "greater_or_equals" | "less_or_equals",
                   answer: Number(value),
                 };
               } else {

@@ -731,9 +731,7 @@ export function ServiceRequestQuestion({
 
   const handleActivityDefinitionSelect = (
     value:
-      | ActivityDefinitionReadSpec
-      | ActivityDefinitionReadSpec[]
-      | undefined,
+      ActivityDefinitionReadSpec | ActivityDefinitionReadSpec[] | undefined,
   ) => {
     const def = Array.isArray(value) ? value[0] : value;
     setSelectedActivityDefinition(def?.slug || null);

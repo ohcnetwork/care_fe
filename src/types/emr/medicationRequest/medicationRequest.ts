@@ -807,9 +807,7 @@ export function parseMedicationStringToRequest(
 
 export function displayMedicationName(
   medication?:
-    | MedicationRequest
-    | MedicationRequestRead
-    | MedicationRequestCreate,
+    MedicationRequest | MedicationRequestRead | MedicationRequestCreate,
 ): string {
   if (!medication) {
     return "";

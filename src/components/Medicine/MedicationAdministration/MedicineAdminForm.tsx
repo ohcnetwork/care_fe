@@ -713,12 +713,10 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                   occurrence_period_start: now,
                 };
 
-                if (
-                  !(
-                    administrationRequest.status === "in_progress" ||
-                    administrationRequest.status === "not_done"
-                  )
-                ) {
+                if (!(
+                  administrationRequest.status === "in_progress" ||
+                  administrationRequest.status === "not_done"
+                )) {
                   newRequest.occurrence_period_end = now;
                 }
 

@@ -40,8 +40,7 @@ export interface DiscountMonetaryComponent extends SharedMonetaryFields {
 }
 
 export type MonetaryComponent =
-  | StandardMonetaryComponent
-  | DiscountMonetaryComponent;
+  StandardMonetaryComponent | DiscountMonetaryComponent;
 
 export enum DiscountApplicabilityOrder {
   total_desc = "total_desc",

@@ -7,11 +7,7 @@ import { LocationRead, OperationalStatus } from "@/types/location/location";
 
 export type LocationScreen = "overview" | "assign" | "modify";
 export type LocationAction =
-  | "assign"
-  | "move"
-  | "promote"
-  | "complete"
-  | "edit_time";
+  "assign" | "move" | "promote" | "complete" | "edit_time";
 
 export interface LocationSheetState {
   screen: LocationScreen;
