@@ -166,7 +166,7 @@ export function SupplyDeliveryTable({
   }, [deliveries]);
 
   const formatExpiryDate = (expiryDate?: string) => {
-    return expiryDate ? formatDate(new Date(expiryDate), "dd/MM/yyyy") : "-";
+    return expiryDate ? formatDate(expiryDate, "dd/MM/yyyy") : "-";
   };
 
   return (
