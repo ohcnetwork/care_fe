@@ -39,6 +39,7 @@ import {
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { MonetaryAmountInput } from "@/components/ui/monetary-display";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -416,17 +417,11 @@ export function ProductFormContent({
                 <FormItem>
                   <FormLabel>{t("standard_pack_size")}</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      placeholder={t("enter_standard_pack_size")}
+                    <MonetaryAmountInput
                       {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value ? Number(e.target.value) : undefined,
-                        )
-                      }
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value || "")}
+                      placeholder="0.00"
                     />
                   </FormControl>
                   <FormMessage />
