@@ -166,7 +166,7 @@ const config = [
   },
   // No Relative import paths rule
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
+    files: ["src/**/*.{js,jsx,ts,tsx}"],
     plugins: {
       "no-relative-import-paths": noRelativeImportPaths,
     },
@@ -175,6 +175,7 @@ const config = [
         "error",
         {
           allowSameFolder: true,
+          rootDir: "src",
           prefix: "@",
         },
       ],
