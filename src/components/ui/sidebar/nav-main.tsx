@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { useAtom } from "jotai";
 import { ChevronRight } from "lucide-react";
 import { ActiveLink, useFullPath, usePath } from "raviger";
@@ -29,6 +30,8 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { isSafeExternalUrl, isSafeNavUrl } from "@/Utils/url";
+
 const isChildActive = (link: NavigationLink) => {
   if (!link.children) return false;
   const currentPath = window.location.pathname;
@@ -55,6 +58,8 @@ export interface NavigationLink {
   children?: NavigationLink[];
 }
 
+const isRenderableNavLink = (link: NavigationLink) => isSafeNavUrl(link.url);
+
 function NavLink({
   href,
   isSelected,
@@ -62,6 +67,7 @@ function NavLink({
   exactActiveClass,
   className,
   onClick,
+  openInNewTab,
   children,
 }: {
   href: string;
@@ -70,10 +76,31 @@ function NavLink({
   exactActiveClass?: string;
   className?: string;
   onClick?: (e: React.MouseEvent) => void;
+  openInNewTab?: boolean;
   children: ReactNode;
 }) {
-  const resolvedExact = exactActiveClass ?? activeClass;
   const { toggleSidebar, isMobile } = useSidebar();
+  const isExternal = isSafeExternalUrl(href);
+
+  if (isExternal || openInNewTab) {
+    const shouldOpenInNewTab = openInNewTab ?? isExternal;
+    return (
+      <a
+        href={href}
+        onClick={onClick}
+        className={className}
+        target={shouldOpenInNewTab ? "_blank" : undefined}
+        rel={shouldOpenInNewTab ? "noopener noreferrer" : undefined}
+      >
+        {children}
+        {shouldOpenInNewTab && (
+          <span className="sr-only">{t("opens_in_new_tab")}</span>
+        )}
+      </a>
+    );
+  }
+
+  const resolvedExact = exactActiveClass ?? activeClass;
 
   return (
     <ActiveLink
@@ -96,7 +123,13 @@ function NavLink({
   );
 }
 
-export function NavMain({ links }: { links: NavigationLink[] }) {
+export function NavMain({
+  links,
+  groupClassName,
+}: {
+  links: NavigationLink[];
+  groupClassName?: string;
+}) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const path = usePath();
@@ -148,6 +181,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                     <NavLink
                       href={link.url}
                       isSelected={isSelected(link.url)}
+                      openInNewTab={link.openInNewTab}
                       activeClass="bg-white text-green-700 shadow-sm"
                     >
                       {link.icon ? (
@@ -235,6 +269,7 @@ function CollapsibleNavItem({
                       <NavLink
                         href={subItem.url}
                         isSelected={isSubItemSelected(subItem.url)}
+                        openInNewTab={subItem.openInNewTab}
                         className="w-full"
                         activeClass={cn(
                           subItem.url
@@ -271,6 +306,7 @@ function NavItem({
     <NavLink
       href={item.url}
       isSelected={selected}
+      openInNewTab={item.openInNewTab}
       className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
       activeClass="bg-gray-100 text-green-700"
       onClick={() => setOpen(false)}
@@ -309,7 +345,7 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex flex-col gap-1">
-          {link.children?.map((subItem) => (
+          {link.children?.filter(isRenderableNavLink).map((subItem) => (
             <NavItem key={subItem.name} item={subItem} setOpen={setOpen} />
           ))}
         </div>
