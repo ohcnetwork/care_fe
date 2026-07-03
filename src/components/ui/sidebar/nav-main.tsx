@@ -345,9 +345,12 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex flex-col gap-1">
-          {link.children?.filter(isRenderableNavLink).map((subItem) => (
-            <NavItem key={subItem.name} item={subItem} setOpen={setOpen} />
-          ))}
+          {link.children
+            ?.filter((subItem) => subItem.visibility !== false)
+            .filter(isRenderableNavLink)
+            .map((subItem) => (
+              <NavItem key={subItem.name} item={subItem} setOpen={setOpen} />
+            ))}
         </div>
       </PopoverContent>
     </Popover>
