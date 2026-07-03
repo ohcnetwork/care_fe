@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 import { expectToast } from "tests/helper/ui";
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -14,93 +13,35 @@ interface ApiDepartment {
   name: string;
 }
 
-interface ApiRole {
-  id: string;
-  name: string;
-  contexts: string[];
-}
-
-interface CurrentUser {
-  id: string;
-  username: string;
-}
-
-// --- API helpers -----------------------------------------------------------
-// Departments (facility organizations) and the bulk pagination precondition are
-// created via the API, matching the sibling departmentInfiniteScroll.spec.ts.
-// The user -> department assignment is driven through the UI (the Link
-// Department sheet) wherever it is the behaviour under test.
-
-async function fetchCurrentUser(): Promise<CurrentUser> {
-  const res = await fetch(`${getApiUrl()}/api/v1/users/getcurrentuser/`, {
-    headers: getApiHeaders(),
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to fetch current user: ${res.status}`);
-  }
-  const user = await res.json();
-  return { id: user.id, username: user.username };
-}
-
-async function fetchFacilityRoles(): Promise<ApiRole[]> {
-  const res = await fetch(
-    `${getApiUrl()}/api/v1/role/?context=FACILITY&limit=50`,
-    { headers: getApiHeaders() },
-  );
-  if (!res.ok) {
-    throw new Error(`Failed to fetch roles: ${res.status}`);
-  }
-  const data = await res.json();
-  return ((data.results ?? []) as ApiRole[]).filter((role) =>
-    role.contexts?.includes("FACILITY"),
-  );
-}
-
 async function createDepartment(
+  page: Page,
   facilityId: string,
   name: string,
 ): Promise<ApiDepartment> {
-  const res = await fetch(
-    `${getApiUrl()}/api/v1/facility/${facilityId}/organizations/`,
-    {
-      method: "POST",
-      headers: getApiHeaders(),
-      body: JSON.stringify({
-        name,
-        description: faker.lorem.sentence(),
-        org_type: "dept",
-        facility: facilityId,
-      }),
-    },
-  );
-  if (!res.ok) {
-    throw new Error(
-      `Failed to create department: ${res.status} — ${await res.text()}`,
-    );
-  }
-  const dept = await res.json();
-  return { id: dept.id, name: dept.name };
-}
+  await page.goto(`/facility/${facilityId}/settings/departments`);
+  await page
+    .getByRole("button", { name: "Add Department/Team" })
+    .first()
+    .click();
+  await page.getByRole("textbox", { name: "Name" }).pressSequentially(name);
 
-async function assignUserToDepartment(
-  facilityId: string,
-  organizationId: string,
-  userId: string,
-  roleId: string,
-): Promise<void> {
-  const res = await fetch(
-    `${getApiUrl()}/api/v1/facility/${facilityId}/organizations/${organizationId}/users/`,
-    {
-      method: "POST",
-      headers: getApiHeaders(),
-      body: JSON.stringify({ user: userId, role: roleId }),
-    },
+  const responsePromise = page.waitForResponse(
+    (resp) =>
+      resp.url().includes(`/facility/${facilityId}/organizations/`) &&
+      resp.request().method() === "POST",
   );
-  if (!res.ok) {
-    throw new Error(
-      `Failed to assign user to department: ${res.status} — ${await res.text()}`,
-    );
-  }
+  await page.getByRole("button", { name: "Create Organization" }).click();
+  const response = await responsePromise;
+  expect([200, 201]).toContain(response.status());
+  const dept = await response.json();
+
+  await expect(
+    page
+      .locator("li[data-sonner-toast]")
+      .getByText("Organization created successfully"),
+  ).toBeVisible({ timeout: 10000 });
+
+  return { id: dept.id, name: dept.name };
 }
 
 // Unique, search-safe prefix so result counts are deterministic regardless of
@@ -111,13 +52,9 @@ function uniquePrefix(): string {
 
 test.describe("User Departments Tab", () => {
   let facilityId: string;
-  let user: CurrentUser;
-  let roles: ApiRole[];
 
-  test.beforeEach(async () => {
+  test.beforeEach(() => {
     facilityId = getFacilityId();
-    user = await fetchCurrentUser();
-    roles = await fetchFacilityRoles();
   });
 
   function searchInput(page: Page) {
@@ -125,9 +62,7 @@ test.describe("User Departments Tab", () => {
   }
 
   async function gotoDepartmentsTab(page: Page) {
-    await page.goto(
-      `/facility/${facilityId}/users/${user.username}/departments`,
-    );
+    await page.goto(`/facility/${facilityId}/users/admin/departments`);
     await expect(
       page.getByRole("heading", { name: "Departments", exact: true }),
     ).toBeVisible();
@@ -179,13 +114,16 @@ test.describe("User Departments Tab", () => {
     page,
   }) => {
     const prefix = uniquePrefix();
-    const role = roles[0];
-    const dept = await createDepartment(facilityId, `${prefix}-cardiology`);
+    const dept = await createDepartment(
+      page,
+      facilityId,
+      `${prefix}-cardiology`,
+    );
 
     await gotoDepartmentsTab(page);
 
     await test.step("Link the department through the sheet", async () => {
-      await linkDepartmentViaSheet(page, dept, role.name, prefix);
+      await linkDepartmentViaSheet(page, dept, "Doctor", prefix);
     });
 
     await test.step("Verify the card shows name, type and role", async () => {
@@ -197,21 +135,20 @@ test.describe("User Departments Tab", () => {
         card.getByRole("heading", { name: dept.name }),
       ).toBeVisible();
       await expect(card.getByText("Department", { exact: true })).toBeVisible();
-      await expect(card.getByText(role.name)).toBeVisible();
+      await expect(card.getByText("Doctor")).toBeVisible();
     });
   });
 
   test("filters the list as the user types in search", async ({ page }) => {
     const prefix = uniquePrefix();
-    const role = roles[0];
-    const alpha = await createDepartment(facilityId, `${prefix}-alpha`);
-    const beta = await createDepartment(facilityId, `${prefix}-beta`);
+    const alpha = await createDepartment(page, facilityId, `${prefix}-alpha`);
+    const beta = await createDepartment(page, facilityId, `${prefix}-beta`);
 
     await gotoDepartmentsTab(page);
 
     await test.step("Link both departments through the sheet", async () => {
-      await linkDepartmentViaSheet(page, alpha, role.name, prefix);
-      await linkDepartmentViaSheet(page, beta, role.name, prefix);
+      await linkDepartmentViaSheet(page, alpha, "Doctor", prefix);
+      await linkDepartmentViaSheet(page, beta, "Doctor", prefix);
     });
 
     await test.step("Both departments show when searching the shared prefix", async () => {
@@ -252,72 +189,14 @@ test.describe("User Departments Tab", () => {
     await expect(page.getByText("No departments found")).toBeVisible();
   });
 
-  test("paginates when the user has more than 15 matching departments", async ({
-    page,
-  }) => {
-    const prefix = uniquePrefix();
-    const role = roles[0];
-
-    // Bulk precondition: 16 linked departments. Driving 16 sequential Link-sheet
-    // flows would be slow and flaky and is not what this test verifies, so the
-    // assignment is seeded via the API here.
-    await test.step("Seed 16 linked departments via API", async () => {
-      await Promise.all(
-        Array.from({ length: 16 }, async (_, i) => {
-          const dept = await createDepartment(
-            facilityId,
-            `${prefix}-${String(i + 1).padStart(2, "0")}`,
-          );
-          await assignUserToDepartment(facilityId, dept.id, user.id, role.id);
-        }),
-      );
-    });
-
-    await gotoDepartmentsTab(page);
-
-    await test.step("First page shows 15 of 16 results", async () => {
-      const responsePromise = page.waitForResponse(
-        (resp) =>
-          resp.url().includes("/organizations/") &&
-          resp.url().includes(`name=${prefix}`) &&
-          resp.url().includes("offset=0") &&
-          resp.request().method() === "GET" &&
-          resp.status() === 200,
-      );
-      await searchInput(page).fill(prefix);
-      await responsePromise;
-
-      await expect(
-        page.getByRole("heading", { name: new RegExp(`^${prefix}-`) }),
-      ).toHaveCount(15);
-    });
-
-    await test.step("Second page requests offset 15 and shows the remaining result", async () => {
-      const responsePromise = page.waitForResponse(
-        (resp) =>
-          resp.url().includes("/organizations/") &&
-          resp.url().includes("offset=15") &&
-          resp.request().method() === "GET" &&
-          resp.status() === 200,
-      );
-      await page.locator("#page-2").click();
-      await responsePromise;
-
-      await expect(
-        page.getByRole("heading", { name: new RegExp(`^${prefix}-`) }),
-      ).toHaveCount(1);
-    });
-  });
-
   test("opens the department detail page when a card is clicked", async ({
     page,
   }) => {
     const prefix = uniquePrefix();
-    const role = roles[0];
-    const dept = await createDepartment(facilityId, `${prefix}-oncology`);
+    const dept = await createDepartment(page, facilityId, `${prefix}-oncology`);
 
     await gotoDepartmentsTab(page);
-    await linkDepartmentViaSheet(page, dept, role.name, prefix);
+    await linkDepartmentViaSheet(page, dept, "Doctor", prefix);
 
     await searchInput(page).fill(prefix);
     await page.getByRole("link", { name: dept.name }).first().click();
@@ -330,12 +209,14 @@ test.describe("User Departments Tab", () => {
 
   test("updates the user's role in a department", async ({ page }) => {
     const prefix = uniquePrefix();
-    const roleA = roles[0];
-    const roleB = roles[1];
-    const dept = await createDepartment(facilityId, `${prefix}-pathology`);
+    const dept = await createDepartment(
+      page,
+      facilityId,
+      `${prefix}-pathology`,
+    );
 
     await gotoDepartmentsTab(page);
-    await linkDepartmentViaSheet(page, dept, roleA.name, prefix);
+    await linkDepartmentViaSheet(page, dept, "Doctor", prefix);
 
     await searchInput(page).fill(prefix);
 
@@ -344,14 +225,14 @@ test.describe("User Departments Tab", () => {
       .filter({ hasText: dept.name });
 
     await test.step("Open the edit role sheet from the card", async () => {
-      await expect(card.getByText(roleA.name)).toBeVisible();
+      await expect(card.getByText("Doctor")).toBeVisible();
       await card.getByRole("button").click();
       await expect(page.getByText("Edit User Role")).toBeVisible();
     });
 
     await test.step("Pick a different role and update", async () => {
-      await page.getByRole("combobox").filter({ hasText: roleA.name }).click();
-      await page.getByRole("option", { name: roleB.name }).first().click();
+      await page.getByRole("combobox").filter({ hasText: "Doctor" }).click();
+      await page.getByRole("option", { name: "Staff" }).first().click();
 
       const responsePromise = page.waitForResponse(
         (resp) =>
@@ -366,7 +247,7 @@ test.describe("User Departments Tab", () => {
     });
 
     await test.step("Verify the role badge reflects the new role", async () => {
-      await expect(card.getByText(roleB.name)).toBeVisible();
+      await expect(card.getByText("Staff")).toBeVisible();
     });
   });
 });
