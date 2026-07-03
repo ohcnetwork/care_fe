@@ -64,12 +64,11 @@ self.addEventListener("notificationclick", (e) => {
         client.url.includes(self.location.origin),
       );
       if (existingClient) {
-        try {
-          await existingClient.navigate(targetUrl);
-          return await existingClient.focus();
-        } catch {
-          // navigate may fail
-        }
+        // App is already open: focus it and let the page handle navigation.
+        // A live page has message listeners ready, unlike a fresh load.
+        await existingClient.focus();
+        existingClient.postMessage({ type: "NOTIFICATION_CLICK", data });
+        return;
       }
       return self.clients
         .openWindow(targetUrl)
