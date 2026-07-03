@@ -206,9 +206,19 @@ export function timingBoundsToRepeat(bounds?: TimingBounds): RepeatBoundFields {
   };
 }
 
+/**
+ * Period bounds are date-only (stored as UTC calendar-date timestamps). Parse
+ * one to a LOCAL Date so both the display and the active-window math land on the
+ * clinician's calendar day — an end stored at 23:59:59.999Z would otherwise roll
+ * to the next day for UTC+ users (e.g. "Ends 26" instead of "Ends 25" at +5:30).
+ */
+function periodBoundToLocalDate(iso: string, endOfDay = false): Date {
+  return new Date(`${dateOnly(iso)}T${endOfDay ? "23:59:59.999" : "00:00:00"}`);
+}
+
 function formatBoundDate(iso?: string): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-US", {
+  return periodBoundToLocalDate(iso).toLocaleDateString("en-US", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -281,7 +291,7 @@ export function getMedicationActiveWindow(
     // order was placed (authored_on), not when the record was persisted.
     const instructionStart =
       bounds?.type === "period" && bounds.value.start
-        ? new Date(bounds.value.start)
+        ? periodBoundToLocalDate(bounds.value.start)
         : authoredStart;
     if (!start || instructionStart < start) start = instructionStart;
 
@@ -289,7 +299,7 @@ export function getMedicationActiveWindow(
     switch (bounds?.type) {
       case "period":
         instructionEnd = bounds.value.end
-          ? new Date(bounds.value.end)
+          ? periodBoundToLocalDate(bounds.value.end, true)
           : undefined;
         break;
       case "duration":

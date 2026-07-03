@@ -329,22 +329,20 @@ export function DurationInput({
           <div className="flex flex-col gap-3 p-3.5">
             <div className="flex items-center gap-2">
               <Input
-                type="number"
-                min={1}
+                type="text"
                 inputMode="numeric"
                 aria-label={t("start")}
                 value={rLow}
-                onChange={(e) => setRLow(e.target.value)}
+                onChange={(e) => setRLow(e.target.value.replace(/\D/g, ""))}
                 className="h-9 w-12 text-center text-sm"
               />
               <span className="text-muted-foreground">–</span>
               <Input
-                type="number"
-                min={1}
+                type="text"
                 inputMode="numeric"
                 aria-label={t("end")}
                 value={rHigh}
-                onChange={(e) => setRHigh(e.target.value)}
+                onChange={(e) => setRHigh(e.target.value.replace(/\D/g, ""))}
                 className="h-9 w-12 text-center text-sm"
               />
               <Select
