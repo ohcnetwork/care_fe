@@ -60,9 +60,11 @@ import {
   ProductKnowledgeStatus,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { goBack } from "@/Utils/utils";
+
 const formSchema = z.object({
   status: z.enum(ProductStatusOptions),
   product_knowledge: z.string().min(1, "Product Knowledge is required"),
@@ -74,8 +76,9 @@ const formSchema = z.object({
     .required(),
   expiration_date: z.date(),
   standard_pack_size: z.number().min(0).optional(),
-  purchase_price: z.number().min(0).optional(),
+  purchase_price: zodDecimal({ min: 0 }).optional().nullable(),
 });
+
 export default function ProductForm({
   facilityId,
   productId,
@@ -226,7 +229,9 @@ export function ProductFormContent({
               ? new Date(existingData.expiration_date)
               : undefined,
             standard_pack_size: existingData.standard_pack_size,
-            purchase_price: existingData.purchase_price,
+            purchase_price: existingData.purchase_price
+              ? round(existingData.purchase_price)
+              : undefined,
           }
         : {
             status: ProductStatusOptions.active,
@@ -282,7 +287,7 @@ export function ProductFormContent({
         charge_item_definition: formattedData.charge_item_definition,
         product_knowledge: formattedData.product_knowledge,
         standard_pack_size: formattedData.standard_pack_size,
-        purchase_price: formattedData.purchase_price,
+        purchase_price: formattedData.purchase_price ?? undefined,
         extensions: {},
       };
       updateProduct(updatePayload);
@@ -294,7 +299,7 @@ export function ProductFormContent({
         product_knowledge: formattedData.product_knowledge,
         charge_item_definition: formattedData.charge_item_definition,
         standard_pack_size: formattedData.standard_pack_size,
-        purchase_price: formattedData.purchase_price,
+        purchase_price: formattedData.purchase_price ?? undefined,
         extensions: {},
       };
       createProduct(createPayload);

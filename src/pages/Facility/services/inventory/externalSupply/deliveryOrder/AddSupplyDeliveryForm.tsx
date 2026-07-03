@@ -498,9 +498,7 @@ export function AddSupplyDeliveryForm({
           product_knowledge: item.product_knowledge.slug,
           charge_item_definition: chargeItemSlug,
           standard_pack_size: item.supplied_item_pack_size,
-          purchase_price: item.purchase_price
-            ? parseFloat(item.purchase_price)
-            : undefined,
+          purchase_price: item.purchase_price,
           extensions: {},
         };
 
