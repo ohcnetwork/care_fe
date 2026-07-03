@@ -1430,6 +1430,7 @@ export function MedicationRequestQuestion({
               placeholder={addMedicationPlaceholder}
               onProductEntitySelected={handleAddProductMedication}
               enableProduct
+              modal={false}
             >
               {newMedicationSheetContent}
             </EntitySelectionDrawer>

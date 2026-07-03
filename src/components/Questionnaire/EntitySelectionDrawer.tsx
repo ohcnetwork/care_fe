@@ -94,6 +94,12 @@ interface EntitySelectionDrawerProps {
    * Defaults to `false`.
    */
   enableProduct?: boolean;
+  /**
+   * Whether the drawer is modal. When `false`, Vaul does not lock body scroll,
+   * which lets popovers opened inside the drawer (portaled to `document.body`)
+   * scroll normally. Defaults to `true`.
+   */
+  modal?: boolean;
 }
 
 export function EntitySelectionDrawer({
@@ -109,6 +115,7 @@ export function EntitySelectionDrawer({
   children,
   placeholder,
   enableProduct = false,
+  modal = true,
 }: EntitySelectionDrawerProps) {
   const { t } = useTranslation();
   const [selectedEntity, setSelectedEntity] = useState<Code | null>(null);
@@ -181,7 +188,12 @@ export function EntitySelectionDrawer({
           }
         />
       )}
-      <Drawer open={open} onOpenChange={onOpenChange} repositionInputs>
+      <Drawer
+        open={open}
+        onOpenChange={onOpenChange}
+        repositionInputs
+        modal={modal}
+      >
         <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
           {selectedEntity ? (
             <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)] mt-2">

@@ -237,7 +237,7 @@ export function DurationInput({
       aria-invalid={hasError}
       aria-label={t("duration")}
       onFocus={() => inputRef.current?.select()}
-      contentClassName="w-72"
+      contentClassName="w-72 max-h-(--radix-popover-content-available-height) overflow-y-auto overscroll-contain"
       className={cn(
         "h-9 text-sm",
         BoundIcon && "pl-9",
@@ -252,7 +252,7 @@ export function DurationInput({
     >
       {view === "list" && (
         <>
-          <div className="max-h-56 overflow-y-auto py-1">
+          <div className="py-1">
             {customDuration && (
               <button
                 type="button"
