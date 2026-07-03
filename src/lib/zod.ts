@@ -6,7 +6,7 @@ export function initZod() {
   z.config({
     customError: (issue) => {
       if (issue.input === undefined) {
-        return i18n.t("field_required");
+        return i18n.t("required");
       }
     },
   });
