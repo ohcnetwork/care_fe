@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { z } from "zod";
 
 /**
@@ -28,7 +29,8 @@ export type NavScope = (typeof NAV_SCOPES)[number];
  * - `placement`: sidebar contexts the link appears in; defaults to every context.
  *
  * Icons are assigned automatically: Lucide `ExternalLink` for http(s) URLs,
- * Lucide `Link` for internal paths.
+ * Lucide `Link` for internal paths. Plugins may override this with a custom
+ * `icon` (see `PluginNavLink`); env links always use the automatic icon.
  */
 export const customNavLinkSchema = z.object({
   name: z.string(),
@@ -39,5 +41,12 @@ export const customNavLinkSchema = z.object({
 
 /** Config shape for env JSON and plugin `customNavItems` entries. */
 export type CustomNavLink = z.input<typeof customNavLinkSchema>;
+
+/**
+ * Plugin variant of {@link CustomNavLink} that may carry a custom `icon`.
+ * When `icon` is omitted, the automatic URL-based icon is used. Not available
+ * for env links, whose JSON config cannot hold React elements.
+ */
+export type PluginNavLink = CustomNavLink & { icon?: ReactNode };
 
 export const customNavLinksSchema = z.array(customNavLinkSchema);
