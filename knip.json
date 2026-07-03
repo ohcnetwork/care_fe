@@ -18,5 +18,5 @@
     "src/Utils/decimal.ts": ["exports"]
   },
   "ignoreUnresolved": ["__federation__", "@/supportedBrowsers"],
-  "ignoreDependencies": ["workbox-core", "workbox-precaching"]
+  "ignoreDependencies": ["workbox-core", "workbox-precaching", "pdfjs-dist"]
 }
