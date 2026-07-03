@@ -126,11 +126,14 @@ export default function AppRouter() {
   const sidebarFor = isAdminPage ? SidebarFor.ADMIN : SidebarFor.FACILITY;
 
   // While plugin manifests are still resolving, an unmatched route may belong to a plugin whose
-  // routes haven't been merged yet show a loader instead of flashing the 404 page.
+  // routes haven't been merged yet — show a loader instead of flashing the 404 page. Only the
+  // initial fetch (status "pending") counts; background refetches must not flash the loader.
   const careApps = useCareApps();
   const arePluginsResolving =
-    useIsFetching({ queryKey: ["enabled-plugins"] }) > 0 ||
-    careApps.some((plugin) => plugin.isLoading);
+    useIsFetching({
+      queryKey: ["enabled-plugins"],
+      predicate: (query) => query.state.status === "pending",
+    }) > 0 || careApps.some((plugin) => plugin.isLoading);
 
   const pages =
     appPages ||
