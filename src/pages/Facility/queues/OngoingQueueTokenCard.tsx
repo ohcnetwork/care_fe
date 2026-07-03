@@ -426,7 +426,7 @@ const TokenTrigger = ({
   return (
     <div
       className={cn(
-        "relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow cursor-pointer",
+        "relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow hover:cursor-pointer hover:shadow-md",
         token.status === TokenStatus.IN_PROGRESS && "border border-primary-500",
       )}
     >
