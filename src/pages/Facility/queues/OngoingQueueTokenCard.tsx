@@ -264,9 +264,7 @@ function OngoingQueueTokenCardInner({
     return (
       <Drawer>
         <DrawerTrigger>
-          <div role="button" tabIndex={0} className="w-full">
-            <TokenTrigger token={token} facilityId={facilityId} />
-          </div>
+          <TokenTrigger token={token} facilityId={facilityId} />
         </DrawerTrigger>
         <DrawerContent className="flex flex-col items-center px-3 pb-2">
           <TokenContent
@@ -285,9 +283,7 @@ function OngoingQueueTokenCardInner({
   return (
     <Dialog>
       <DialogTrigger>
-        <div role="button" tabIndex={0} className="w-full">
-          <TokenTrigger token={token} facilityId={facilityId} />
-        </div>
+        <TokenTrigger token={token} facilityId={facilityId} />
       </DialogTrigger>
       <DialogContent className="flex flex-col items-center px-3 pb-2">
         <TokenContent
@@ -418,16 +414,20 @@ export function OngoingQueueTokenCardsList({
 const TokenTrigger = ({
   token,
   facilityId,
+  className,
+  ...props
 }: {
   token: TokenRead;
   facilityId: string;
-}) => {
+} & React.ComponentProps<"div">) => {
   const { t } = useTranslation();
   return (
     <div
+      {...props}
       className={cn(
         "relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow hover:cursor-pointer hover:shadow-md",
         token.status === TokenStatus.IN_PROGRESS && "border border-primary-500",
+        className,
       )}
     >
       {token.status === TokenStatus.IN_PROGRESS && (
@@ -719,7 +719,7 @@ const TokenContent = ({
             <Button
               variant="primary"
               onClick={handleUpdateToken}
-              disabled={isPending}
+              disabled={isPending || hasNoAssignedServicePoints}
               className="flex-1"
             >
               <Megaphone className="size-4 mr-2" />
