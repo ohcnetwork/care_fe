@@ -326,8 +326,15 @@ export default function ServiceRequestShow({
     }
   };
 
-  const isFinal =
-    request?.diagnostic_reports?.[0]?.status === DiagnosticReportStatus.final;
+  const isFinal = request.diagnostic_reports.some(
+    (report) => report.status === DiagnosticReportStatus.final,
+  );
+
+  const totalReports = request.diagnostic_reports.length;
+  const pendingReports = request.diagnostic_reports.filter(
+    (report) => report.status !== DiagnosticReportStatus.final,
+  ).length;
+  const hasPendingReports = pendingReports > 0;
 
   const canMarkAsComplete =
     isFinal ||
@@ -361,11 +368,11 @@ export default function ServiceRequestShow({
                         className="font-semibold"
                         onClick={() =>
                           navigate(
-                            `/facility/${facilityId}/patient/${request.encounter.patient.id}/diagnostic_reports/${request.diagnostic_reports[0].id}`,
+                            `/facility/${facilityId}/patient/${request.encounter.patient.id}/service_request/${serviceRequestId}/diagnostic_reports/print`,
                           )
                         }
                       >
-                        {t("view_report")}
+                        {t("view_full_report")}
                         <ShortcutBadge actionId="view-report" />
                       </Button>
                     )}
@@ -638,7 +645,12 @@ export default function ServiceRequestShow({
                   {t("complete_service_request")}
                 </p>
                 <p className="text-xs text-gray-600">
-                  {t("complete_service_request_help_text")}
+                  {hasPendingReports
+                    ? t("reports_pending_final_review", {
+                        pending: pendingReports,
+                        total: totalReports,
+                      })
+                    : t("complete_service_request_help_text")}
                 </p>
               </div>
               <Button
@@ -648,7 +660,7 @@ export default function ServiceRequestShow({
                   setCompletionNote(request.note ?? "");
                   setIsCompleteDialogOpen(true);
                 }}
-                disabled={isCompletingServiceRequest}
+                disabled={isCompletingServiceRequest || hasPendingReports}
               >
                 {t("mark_as_complete")}
                 <ShortcutBadge actionId="mark-as-complete" />

@@ -10,6 +10,7 @@ import {
   Save,
   Trash2,
   Upload,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -194,43 +195,84 @@ export function DiagnosticReportForm({
             ))}
           </div>
           {isMultipleDiagnosticReport && (
-            <div className="-mt-3 rounded-b-lg bg-gray-100 px-2 pb-2 pt-5">
+            <div className="-mt-3 rounded-b-lg bg-gray-100 px-2 pb-2 pt-4">
               {showReportTypeSelect ? (
-                <Select
-                  value={selectedReportCode?.code ?? ""}
-                  onValueChange={(value) => {
-                    const code =
-                      activityDefinition?.diagnostic_report_codes?.find(
-                        (c) => c.code === value,
-                      );
-                    setSelectedReportCode(code || null);
-                    if (code) {
-                      handleCreateReport(code);
-                      setShowReportTypeSelect(false);
-                      setSelectedReportCode(null);
-                    }
-                  }}
-                  disabled={!hasCollectedSpecimens || disableEdit}
-                >
-                  <SelectTrigger className="w-full bg-white">
-                    <SelectValue
-                      placeholder={t("select_diagnostic_report_type")}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {activityDefinition?.diagnostic_report_codes?.map(
-                      (code) => (
-                        <SelectItem key={code.code} value={code.code}>
-                          <div className="flex flex-col">
-                            <span className="truncate">
-                              {code.display} ({code.code})
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ),
-                    )}
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col items-stretch gap-2 rounded-lg border border-gray-200 bg-gray-100 p-4">
+                  <Button
+                    onClick={() => setShowReportTypeSelect(false)}
+                    variant="ghost"
+                    size="icon"
+                    className="self-end"
+                  >
+                    <X className="size-4" />
+                  </Button>
+                  <div className="w-full flex-1 space-y-2">
+                    <Label className="text-sm font-medium text-gray-950">
+                      {t("select_diagnostic_report_type")}
+                    </Label>
+                    <Select
+                      value={selectedReportCode?.code ?? ""}
+                      onValueChange={(value) => {
+                        const code =
+                          activityDefinition?.diagnostic_report_codes?.find(
+                            (c) => c.code === value,
+                          );
+                        setSelectedReportCode(code || null);
+                      }}
+                      disabled={!hasCollectedSpecimens || disableEdit}
+                    >
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue
+                          placeholder={t("select_diagnostic_report_type")}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {activityDefinition?.diagnostic_report_codes?.map(
+                          (code) => (
+                            <SelectItem key={code.code} value={code.code}>
+                              <div className="flex flex-col">
+                                <span className="truncate">
+                                  {code.display} ({code.code})
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ),
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex ml-auto items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      className="underline"
+                      onClick={() => {
+                        setSelectedReportCode(null);
+                      }}
+                      disabled={disableEdit || isCreatingReport}
+                    >
+                      {t("clear")}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        if (!selectedReportCode) return;
+                        handleCreateReport(selectedReportCode);
+                        setShowReportTypeSelect(false);
+                        setSelectedReportCode(null);
+                      }}
+                      disabled={
+                        disableEdit ||
+                        isCreatingReport ||
+                        !hasCollectedSpecimens ||
+                        !selectedReportCode
+                      }
+                      className="w-full sm:w-auto"
+                    >
+                      <Plus className="size-4 mr-2" />
+                      {t("create_report")}
+                    </Button>
+                  </div>
+                </div>
               ) : (
                 <Button
                   variant="ghost"
@@ -288,9 +330,9 @@ function DiagnosticReportItem({
   const [observations, setObservations] = useState<ObservationsByDefinition>(
     {},
   );
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
-  const [conclusion, setConclusion] = useState<string>(report.conclusion || "");
+  const [conclusion, setConclusion] = useState("");
 
   const { data: fullReport } = useQuery({
     queryKey: ["diagnosticReport", report.id],
@@ -434,10 +476,10 @@ function DiagnosticReportItem({
       setObservations(initialObservations);
     }
 
-    if (fullReport?.conclusion && conclusion === (report.conclusion || "")) {
-      setConclusion(fullReport.conclusion);
+    if (fullReport) {
+      setConclusion(fullReport.conclusion || "");
     }
-  }, [fullReport, report.conclusion, conclusion]);
+  }, [fullReport]);
 
   function handleValueChange(
     definitionId: string,
@@ -1289,7 +1331,7 @@ const CreateDiagnosticReportForm = ({
   hasCollectedSpecimens: boolean;
   isMultipleDiagnosticReport: boolean;
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const { t } = useTranslation();
 
   const [selectedReportCode, setSelectedReportCode] = useState<Code | null>(

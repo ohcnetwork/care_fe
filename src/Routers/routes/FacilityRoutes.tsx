@@ -80,13 +80,33 @@ const FacilityRoutes: AppRoutes = {
     return acc;
   }, {}),
   ...[
-    "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print",
-    "/organization/organizationId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print",
+    "/facility/:facilityId/patient/:patientId/service_request/:serviceRequestId/diagnostic_report/:diagnosticReportId/print",
+    "/organization/organizationId/patient/:patientId/service_request/:serviceRequestId/diagnostic_report/:diagnosticReportId/print",
   ].reduce((acc: AppRoutes, path) => {
-    acc[path] = ({ patientId, diagnosticReportId }) => (
+    acc[path] = ({
+      patientId,
+      diagnosticReportId,
+      serviceRequestId,
+      facilityId,
+    }) => (
       <DiagnosticReportPrint
         patientId={patientId}
         diagnosticReportId={diagnosticReportId}
+        serviceRequestId={serviceRequestId}
+        facilityId={facilityId}
+      />
+    );
+    return acc;
+  }, {}),
+  ...[
+    "/facility/:facilityId/patient/:patientId/service_request/:serviceRequestId/diagnostic_reports/print",
+    "/organization/organizationId/patient/:patientId/service_request/:serviceRequestId/diagnostic_reports/print",
+  ].reduce((acc: AppRoutes, path) => {
+    acc[path] = ({ patientId, serviceRequestId, facilityId }) => (
+      <DiagnosticReportPrint
+        patientId={patientId}
+        serviceRequestId={serviceRequestId}
+        facilityId={facilityId}
       />
     );
     return acc;

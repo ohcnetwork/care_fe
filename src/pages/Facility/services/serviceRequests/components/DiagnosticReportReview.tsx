@@ -3,8 +3,9 @@ import {
   CheckCircle2,
   ChevronsDownUp,
   ChevronsUpDown,
-  ExternalLink,
+  Download,
   FileCheck2,
+  FileText,
 } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useState } from "react";
@@ -92,7 +93,7 @@ function DiagnosticReportReviewItem({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [conclusion, setConclusion] = useState<string>(report.conclusion || "");
   const [showApproveDialog, setShowApproveDialog] = useState(false);
 
@@ -306,16 +307,27 @@ function DiagnosticReportReviewItem({
               )}
 
               {report.status === DiagnosticReportStatus.final && (
-                <div className="flex justify-end">
-                  <Link
-                    basePath="/"
-                    href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}`}
-                  >
-                    <Button variant="primary" className="gap-2">
-                      <ExternalLink className="h-4 w-4" />
+                <div className="flex gap-2 justify-end">
+                  <Button variant="ghost" className="gap-2">
+                    <Link
+                      basePath="/"
+                      href={`/facility/${facilityId}/patient/${patientId}/service_request/${report.service_request?.id}/diagnostic_report/${report.id}/print`}
+                      className="flex items-center gap-2 underline"
+                    >
+                      <Download className="size-4" />
+                      {t("download_report")}
+                    </Link>
+                  </Button>
+                  <Button variant="outline">
+                    <Link
+                      basePath="/"
+                      href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}`}
+                      className="flex items-center gap-2"
+                    >
+                      <FileText className="size-4" />
                       {t("view_report")}
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               )}
 
