@@ -601,7 +601,7 @@
   "administered_via_method": "via {{method}}",
   "administration_dosage_range_error": "Dosage should be between start and target dosage",
   "administration_notes": "Administration Notes",
-  "administration_out_of_range_warning": "This administration is outside the medication's prescribed schedule.",
+  "administration_out_of_range_warning": "This administration is outside the prescribed schedule.",
   "administrator": "Administrator",
   "admission_source": "Admission Source",
   "admit_source": "Admit Source",

@@ -10,7 +10,7 @@ import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 import ReportViewer from "@/pages/Encounters/ReportViewer";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
-import { AdministrableProductType } from "@/types/inventory/productKnowledge/productKnowledge";
+import type { AdministrableProductType } from "@/types/inventory/productKnowledge/productKnowledge";
 
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/prescription/:prescriptionId/print":
