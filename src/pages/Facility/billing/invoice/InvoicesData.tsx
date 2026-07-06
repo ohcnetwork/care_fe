@@ -153,10 +153,10 @@ export default function InvoicesData({
         patient: qParams.patient,
         created_by: qParams.created_by,
         created_date_after: created_date_after
-          ? dateTimeQueryString(new Date(created_date_after))
+          ? dateTimeQueryString(created_date_after)
           : undefined,
         created_date_before: created_date_before
-          ? dateTimeQueryString(new Date(created_date_before), true)
+          ? dateTimeQueryString(created_date_before, true)
           : undefined,
       },
     }),
