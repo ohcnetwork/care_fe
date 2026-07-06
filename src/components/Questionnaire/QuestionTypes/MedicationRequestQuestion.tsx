@@ -1143,7 +1143,10 @@ export function MedicationRequestQuestion({
             <div
               className={cn(
                 "relative lg:border border-gray-200 rounded-md",
-                showAdvancedFields ? "max-w-[2678px]" : "max-w-[1108px]",
+                // Must equal the sum of the grid-column tracks below so the
+                // table can expand to its full content width. Keep in sync when
+                // a column width changes (e.g. the duration column at index 3).
+                showAdvancedFields ? "max-w-[2718px]" : "max-w-[1148px]",
                 {
                   "bg-gray-50/50": !desktopLayout,
                 },

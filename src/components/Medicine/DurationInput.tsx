@@ -236,6 +236,8 @@ export function DurationInput({
       disabled={disabled}
       aria-invalid={hasError}
       aria-label={t("duration")}
+      drawerOnMobile
+      title={t("duration")}
       onFocus={() => inputRef.current?.select()}
       contentClassName="w-72"
       className={cn(
