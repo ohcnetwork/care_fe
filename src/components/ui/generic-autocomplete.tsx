@@ -31,6 +31,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { X } from "lucide-react";
 
 interface GenericAutoCompleteOptionBase<T> {
   label: string;
@@ -154,6 +155,21 @@ function GenericAutocompleteRadio<T>({
 
   return (
     <div className={cn("space-y-2", className)}>
+      {value !== null && showClearButton && (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onChange(null)}
+            disabled={disabled}
+            className="h-7 px-2 text-gray-500"
+          >
+            <X className="h-3 w-3 mr-1" />
+            {t("clear")}
+          </Button>
+        </div>
+      )}
       <RadioGroup
         value={selectedKey ?? ""}
         onValueChange={handleValueChange}
@@ -186,19 +202,6 @@ function GenericAutocompleteRadio<T>({
           );
         })}
       </RadioGroup>
-      {value !== null && showClearButton && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => onChange(null)}
-          disabled={disabled}
-          className="h-7 px-2 text-xs text-gray-500"
-        >
-          <Cross2Icon className="mr-1 size-3" />
-          {t("clear")}
-        </Button>
-      )}
     </div>
   );
 }
