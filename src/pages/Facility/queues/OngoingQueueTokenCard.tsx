@@ -263,7 +263,7 @@ function OngoingQueueTokenCardInner({
   if (isMobile) {
     return (
       <Drawer>
-        <DrawerTrigger>
+        <DrawerTrigger asChild>
           <TokenTrigger token={token} facilityId={facilityId} />
         </DrawerTrigger>
         <DrawerContent className="flex flex-col items-center px-3 pb-2">
@@ -282,7 +282,7 @@ function OngoingQueueTokenCardInner({
 
   return (
     <Dialog>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <TokenTrigger token={token} facilityId={facilityId} />
       </DialogTrigger>
       <DialogContent className="flex flex-col items-center px-3 pb-2">
