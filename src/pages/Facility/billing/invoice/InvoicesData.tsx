@@ -42,6 +42,7 @@ import {
   InvoiceRead,
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import facilityApi from "@/types/facility/facilityApi";
 import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
 import {
@@ -68,6 +69,16 @@ export default function InvoicesData({
   });
 
   const { created_date_after, created_date_before } = qParams;
+
+  const { data: createdByUser } = useQuery({
+    queryKey: ["facilityUser", facilityId, qParams.created_by],
+    queryFn: query(facilityApi.getUser, {
+      pathParams: { facilityId, userId: qParams.created_by },
+    }),
+    enabled: !!facilityId && !!qParams.created_by,
+  });
+
+  const selectedCreatedByUsers = createdByUser ? [createdByUser] : [];
 
   const filters = [
     invoiceStatusFilter("status"),
@@ -115,7 +126,7 @@ export default function InvoicesData({
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     status: qParams.status ? [qParams.status] : undefined,
-    created_by: [],
+    created_by: selectedCreatedByUsers,
     created_date:
       created_date_after || created_date_before
         ? {
