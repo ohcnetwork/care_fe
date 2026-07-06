@@ -44,7 +44,7 @@ interface GenericAutocompleteBaseProps<T = string> {
   options: GenericAutoCompleteOption<T>[];
   isLoading?: boolean;
   value: T | null;
-  onChange: (value: T) => void;
+  onChange: (value: T | null) => void;
   onSearch?: (value: string) => void;
   placeholder?: string;
   inputPlaceholder?: string;
@@ -119,7 +119,7 @@ function getOptionKey<T>(option: GenericAutoCompleteOption<T>): string {
 interface GenericAutocompleteRadioProps<T> {
   options: GenericAutoCompleteOption<T>[];
   value: T | null;
-  onChange: (value: T) => void;
+  onChange: (value: T | null) => void;
   renderOption?: (
     option: GenericAutoCompleteOption<T>,
     isSelected: boolean,
@@ -191,7 +191,7 @@ function GenericAutocompleteRadio<T>({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => onChange(null as T)}
+          onClick={() => onChange(null)}
           disabled={disabled}
           className="h-7 px-2 text-xs text-gray-500"
         >
@@ -207,7 +207,7 @@ interface GenericAutocompleteDropdownProps<T> {
   options: GenericAutoCompleteOption<T>[];
   isLoading: boolean;
   value: T | null;
-  onChange: (value: T) => void;
+  onChange: (value: T | null) => void;
   onSearch?: (value: string) => void;
   placeholder: string;
   inputPlaceholder: string;
@@ -305,7 +305,7 @@ function GenericAutocompleteDropdown<T>({
   const handleClear = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onChange(null as T);
+    onChange(null);
     if (freeInput) {
       setInputValue("");
     }
