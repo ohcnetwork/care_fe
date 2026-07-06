@@ -77,7 +77,7 @@ import {
   buildTimingForTextDosage,
   displayMedicationName,
   DoseRange,
-  formatDurationLabel,
+  getTimingBounds,
   INACTIVE_MEDICATION_STATUSES,
   MEDICATION_REQUEST_INTENT,
   MedicationRequestCreate,
@@ -87,6 +87,8 @@ import {
   MedicationRequestTemplateSpec,
   parseMedicationStringToRequest,
   sumManSlots,
+  timingBoundsToRepeat,
+  validateTimingBounds,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
@@ -247,10 +249,14 @@ const MEDICATION_REQUEST_FIELDS = {
     validate: (value: unknown) => {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
+      // A real frequency carries an explicit FHIR timing code, an as-needed
+      // flag, or a free-text M-A-N pattern. A bare `timing` is not enough:
+      // setting a duration alone auto-creates a `frequency:1` repeat with no
+      // code/text, which must not satisfy the frequency requirement.
       return !!(
-        dosageInstruction?.timing ||
         dosageInstruction?.as_needed_boolean ||
-        dosageInstruction?.text
+        dosageInstruction?.text ||
+        dosageInstruction?.timing?.code
       );
     },
   },
@@ -260,11 +266,12 @@ const MEDICATION_REQUEST_FIELDS = {
     validate: (value: unknown) => {
       const dosageInstruction =
         value as MedicationRequestCreate["dosage_instruction"][0];
-      if (dosageInstruction?.timing) {
-        const duration = dosageInstruction.timing.repeat.bounds_duration;
-        return !!(duration?.value && duration?.unit);
-      }
-      return true;
+      const bounds = getTimingBounds(dosageInstruction?.timing?.repeat);
+      // Duration is optional — only validate the contents of a bound that was
+      // actually set (range low <= high, period start <= end, etc.).
+      if (!bounds) return true;
+      const error = validateTimingBounds(bounds);
+      return error ? t(error) : true;
     },
   },
 } as const;
@@ -319,10 +326,13 @@ export function validateMedicationRequestQuestion(
           index,
         );
 
-        return fieldErrors.map((error) => ({
-          ...error,
-          error: t("field_required"),
-        }));
+        return fieldErrors.map((error) =>
+          // Duration carries a specific "why it's invalid" message; the
+          // required dose/frequency fields read as a plain required error.
+          error.field_key?.endsWith(".duration")
+            ? error
+            : { ...error, error: t("field_required") },
+        );
       },
     );
 
@@ -1133,7 +1143,10 @@ export function MedicationRequestQuestion({
             <div
               className={cn(
                 "relative lg:border border-gray-200 rounded-md",
-                showAdvancedFields ? "max-w-[2678px]" : "max-w-[1108px]",
+                // Must equal the sum of the grid-column tracks below so the
+                // table can expand to its full content width. Keep in sync when
+                // a column width changes (e.g. the duration column at index 3).
+                showAdvancedFields ? "max-w-[2718px]" : "max-w-[1148px]",
                 {
                   "bg-gray-50/50": !desktopLayout,
                 },
@@ -1144,8 +1157,8 @@ export function MedicationRequestQuestion({
                 className={cn(
                   "hidden lg:grid bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500",
                   showAdvancedFields
-                    ? "grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
-                    : "grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
+                    ? "grid-cols-[280px_220px_180px_200px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
+                    : "grid-cols-[280px_220px_180px_200px_40px_180px_48px]",
                 )}
               >
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
@@ -1330,9 +1343,8 @@ export function MedicationRequestQuestion({
 
                                               {freq && ` · ${freq}`}
 
-                                              {di?.timing?.repeat
-                                                ?.bounds_duration?.value &&
-                                                ` · ${formatDurationLabel(di.timing.repeat.bounds_duration)}`}
+                                              {formatDuration(di) &&
+                                                ` · ${formatDuration(di)}`}
                                             </div>
                                           );
                                         },
@@ -1669,8 +1681,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       className={cn(
         "grid grid-cols-1 border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
         showAdvancedFields
-          ? "lg:grid-cols-[280px_220px_180px_160px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
-          : "lg:grid-cols-[280px_220px_180px_160px_40px_180px_48px]",
+          ? "lg:grid-cols-[280px_220px_180px_200px_40px_300px_180px_250px_180px_160px_220px_280px_180px_48px]"
+          : "lg:grid-cols-[280px_220px_180px_200px_40px_180px_48px]",
         {
           "opacity-40 pointer-events-none": disabled,
         },
@@ -1869,50 +1881,46 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 <div className="border-t border-dashed border-gray-300 my-1" />
               )}
               <DurationInput
-                value={di?.timing?.repeat?.bounds_duration}
-                onChange={(duration) => {
-                  if (!duration) {
-                    if (di?.timing) {
-                      handleUpdateDosageInstruction(dIdx, {
-                        timing: {
-                          ...di.timing,
-                          repeat: {
-                            ...di.timing.repeat,
-                            bounds_duration: { value: "0", unit: "d" },
-                          },
-                        },
-                      });
-                    }
-                    return;
-                  }
-
+                value={getTimingBounds(di?.timing?.repeat)}
+                onChange={(bounds) => {
                   if (di?.timing) {
                     handleUpdateDosageInstruction(dIdx, {
                       timing: {
                         ...di.timing,
                         repeat: {
                           ...di.timing.repeat,
-                          bounds_duration: duration,
+                          ...timingBoundsToRepeat(bounds),
+                        },
+                      },
+                    });
+                  } else if (di?.text && sumManSlots(di.text) !== null) {
+                    // Text M-A-N dosage: keep the frequency derived from the
+                    // pattern (e.g. 1-0-1) for every bound type, then apply the
+                    // chosen duration / range / period.
+                    const base = buildTimingForTextDosage(di.text, {
+                      value: "0",
+                      unit: "d",
+                    });
+                    handleUpdateDosageInstruction(dIdx, {
+                      timing: {
+                        ...base,
+                        repeat: {
+                          ...base.repeat,
+                          ...timingBoundsToRepeat(bounds),
                         },
                       },
                     });
                   } else {
-                    if (di?.text && sumManSlots(di.text) !== null) {
-                      handleUpdateDosageInstruction(dIdx, {
-                        timing: buildTimingForTextDosage(di.text, duration),
-                      });
-                    } else {
-                      handleUpdateDosageInstruction(dIdx, {
-                        timing: {
-                          repeat: {
-                            frequency: 1,
-                            period: "1",
-                            period_unit: "d",
-                            bounds_duration: duration,
-                          },
+                    handleUpdateDosageInstruction(dIdx, {
+                      timing: {
+                        repeat: {
+                          frequency: 1,
+                          period: "1",
+                          period_unit: "d",
+                          ...timingBoundsToRepeat(bounds),
                         },
-                      });
-                    }
+                      },
+                    });
                   }
                 }}
                 disabled={disabled || di?.as_needed_boolean || isReadOnly}
