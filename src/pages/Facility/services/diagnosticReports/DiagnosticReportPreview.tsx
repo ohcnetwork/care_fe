@@ -101,7 +101,7 @@ export const DiagnosticReportPreview = ({
 
   const { diagnosticReports, isLoading } = useQueries({
     queries: diagnosticReportIds.map((diagnosticReportId) => ({
-      queryKey: ["diagnosticReport", patientId, diagnosticReportId],
+      queryKey: ["diagnosticReport", diagnosticReportId],
       queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
         pathParams: {
           patient_external_id: patientId,

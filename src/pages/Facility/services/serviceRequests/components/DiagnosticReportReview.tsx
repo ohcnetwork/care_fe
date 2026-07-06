@@ -308,7 +308,7 @@ function DiagnosticReportReviewItem({
 
               {report.status === DiagnosticReportStatus.final && (
                 <div className="flex gap-2 justify-end">
-                  <Button variant="ghost" className="gap-2">
+                  <Button variant="ghost" className="gap-2" asChild>
                     <Link
                       basePath="/"
                       href={`/facility/${facilityId}/patient/${patientId}/service_request/${report.service_request?.id}/diagnostic_report/${report.id}/print`}
@@ -318,7 +318,7 @@ function DiagnosticReportReviewItem({
                       {t("download_report")}
                     </Link>
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" asChild>
                     <Link
                       basePath="/"
                       href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}`}
