@@ -131,6 +131,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const { facilityId } = useCurrentFacilitySilently();
   const [selectedProductType, setSelectedProductType] =
     useState<AdministrableProductType>(ProductKnowledgeType.medication);
+  const isMedication = selectedProductType === ProductKnowledgeType.medication;
 
   const currentDate = new Date();
   const [endSlotDate, setEndSlotDate] = useState(currentDate);
@@ -518,8 +519,14 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   ) {
     content = (
       <EmptyState
-        message={t(`no_${selectedProductType}s`)}
-        description={t(`no_${selectedProductType}s_to_administer`)}
+        message={
+          isMedication ? t("no_medications") : t("no_nutritional_products")
+        }
+        description={
+          isMedication
+            ? t("no_medications_to_administer")
+            : t("no_nutritional_products_to_administer")
+        }
       />
     );
   } else if (
@@ -655,10 +662,16 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 <div className="p-3 border-t border-gray-200 bg-gray-50 text-center">
                   <span className="text-xs text-gray-500">
                     {showStopped
-                      ? t(`showing_all_${selectedProductType}s`)
-                      : t(`n_discontinued_${selectedProductType}s_hidden`, {
-                          count: stoppedMedications.results.length,
-                        })}
+                      ? isMedication
+                        ? t("showing_all_medications")
+                        : t("showing_all_nutritional_products")
+                      : isMedication
+                        ? t("n_discontinued_medications_hidden", {
+                            count: stoppedMedications.results.length,
+                          })
+                        : t("n_discontinued_nutritional_products_hidden", {
+                            count: stoppedMedications.results.length,
+                          })}
                   </span>
                 </div>
               )}
@@ -703,7 +716,11 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-sm bg-white border rounded-lg px-3 py-1.5">
                 <CareIcon icon="l-search" className="text-lg text-gray-400" />
                 <Input
-                  placeholder={t(`search_${selectedProductType}`)}
+                  placeholder={
+                    isMedication
+                      ? t("search_medication")
+                      : t("search_nutritional_product")
+                  }
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 shadow-none border-0 bg-transparent text-sm outline-none focus-visible:ring-0 py-0! placeholder:text-gray-400 h-6 px-0"
@@ -730,16 +747,10 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                   disabled={!activeMedications?.results?.length}
                 >
                   <CareIcon
-                    icon={
-                      selectedProductType === ProductKnowledgeType.medication
-                        ? "l-syringe"
-                        : "l-utensils"
-                    }
+                    icon={isMedication ? "l-syringe" : "l-utensils"}
                     className="mr-2 size-4"
                   />
-                  {selectedProductType === ProductKnowledgeType.medication
-                    ? t("administer_medicine")
-                    : t("record_intake")}
+                  {isMedication ? t("administer_medicine") : t("record_intake")}
                 </Button>
               )}
               {facilityIdExists && (
@@ -756,7 +767,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     className="h-9"
                   >
                     <CareIcon icon="l-file-medical-alt" className="mr-2" />
-                    {selectedProductType === ProductKnowledgeType.medication
+                    {isMedication
                       ? t("view_drug_chart")
                       : t("view_intake_chart")}
                   </Button>

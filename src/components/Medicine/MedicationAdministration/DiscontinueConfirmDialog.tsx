@@ -20,7 +20,10 @@ import {
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import { type AdministrableProductType } from "@/types/inventory/productKnowledge/productKnowledge";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 import { GroupedMedication } from "./utils";
 
@@ -46,6 +49,7 @@ export const DiscontinueConfirmDialog: React.FC<
   productType,
 }) => {
   const { t } = useTranslation();
+  const isMedication = productType === ProductKnowledgeType.medication;
 
   // Count active requests in group
   const activeCount = group
@@ -57,19 +61,34 @@ export const DiscontinueConfirmDialog: React.FC<
     : 0;
 
   const title = group
-    ? t(`discontinue_${productType}_group_title`, {
-        product: group.productName,
-      })
-    : t(`discontinue_${productType}`);
+    ? isMedication
+      ? t("discontinue_medication_group_title", {
+          product: group.productName,
+        })
+      : t("discontinue_nutritional_product_group_title", {
+          product: group.productName,
+        })
+    : isMedication
+      ? t("discontinue_medication")
+      : t("discontinue_nutritional_product");
 
   const description = group
-    ? t(`discontinue_${productType}_group_description`, {
-        count: activeCount,
-        product: group.productName,
-      })
-    : t(`discontinue_${productType}_description`, {
-        medication: medication ? displayMedicationName(medication) : "",
-      });
+    ? isMedication
+      ? t("discontinue_medication_group_description", {
+          count: activeCount,
+          product: group.productName,
+        })
+      : t("discontinue_nutritional_product_group_description", {
+          count: activeCount,
+          product: group.productName,
+        })
+    : isMedication
+      ? t("discontinue_medication_description", {
+          medication: medication ? displayMedicationName(medication) : "",
+        })
+      : t("discontinue_nutritional_product_description", {
+          medication: medication ? displayMedicationName(medication) : "",
+        });
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
