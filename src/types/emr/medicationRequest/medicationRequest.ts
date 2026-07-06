@@ -151,12 +151,216 @@ export interface DoseRange {
   high: DosageQuantity;
 }
 
+/** A range of timing quantities, e.g. dose duration between low and high. */
+export interface TimingRange {
+  low: BoundsDuration;
+  high: BoundsDuration;
+}
+
+/** An explicit period with timezone-aware ISO-8601 start/end timestamps. */
+export interface PeriodSpec {
+  start?: string;
+  end?: string;
+}
+
+/**
+ * The scheduling bound on `timing.repeat`, as a discriminated union — exactly
+ * one of duration / range / period. On the wire these live as three mutually
+ * exclusive optional fields; use {@link getTimingBounds} /
+ * {@link timingBoundsToRepeat} to convert at the boundary.
+ */
+export type TimingBounds =
+  | { type: "duration"; value: BoundsDuration }
+  | { type: "range"; value: TimingRange }
+  | { type: "period"; value: PeriodSpec };
+
+type RepeatBoundFields = Pick<
+  Timing["repeat"],
+  "bounds_duration" | "bounds_range" | "bounds_period"
+>;
+
+/** Read the active bound off a `timing.repeat`, or undefined if none is set. */
+export function getTimingBounds(
+  repeat?: RepeatBoundFields,
+): TimingBounds | undefined {
+  if (repeat?.bounds_range)
+    return { type: "range", value: repeat.bounds_range };
+  if (repeat?.bounds_period)
+    return { type: "period", value: repeat.bounds_period };
+  if (repeat?.bounds_duration && repeat.bounds_duration.value !== "0") {
+    return { type: "duration", value: repeat.bounds_duration };
+  }
+  return undefined;
+}
+
+/**
+ * Expand a {@link TimingBounds} (or undefined) into the three repeat fields,
+ * with the inactive ones set to undefined. Spread into an existing
+ * `timing.repeat` to switch the active bound.
+ */
+export function timingBoundsToRepeat(bounds?: TimingBounds): RepeatBoundFields {
+  return {
+    bounds_duration: bounds?.type === "duration" ? bounds.value : undefined,
+    bounds_range: bounds?.type === "range" ? bounds.value : undefined,
+    bounds_period: bounds?.type === "period" ? bounds.value : undefined,
+  };
+}
+
+/**
+ * Period bounds are date-only (stored as UTC calendar-date timestamps). Parse
+ * one to a LOCAL Date so both the display and the active-window math land on the
+ * clinician's calendar day — an end stored at 23:59:59.999Z would otherwise roll
+ * to the next day for UTC+ users (e.g. "Ends 26" instead of "Ends 25" at +5:30).
+ */
+function periodBoundToLocalDate(iso: string, endOfDay = false): Date {
+  return new Date(`${dateOnly(iso)}T${endOfDay ? "23:59:59.999" : "00:00:00"}`);
+}
+
+function formatBoundDate(iso?: string): string {
+  if (!iso) return "—";
+  return periodBoundToLocalDate(iso).toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export interface MedicationActiveWindow {
+  /** When the request becomes active. */
+  start: Date;
+  /** When it stops being active, or undefined for open-ended requests. */
+  end?: Date;
+}
+
+/**
+ * Derive the active window of a medication request from its scheduling bounds,
+ * clamped by lifecycle events.
+ *
+ * Start:
+ * - `bounds_period.start` when present — the prescriber-set start is
+ *   authoritative, whether it's in the past (documenting an ongoing course) or
+ *   the future (scheduled to begin later).
+ * - otherwise `authored_on` — duration/range bounds are relative durations with
+ *   no explicit start, so the course is anchored to when the order was placed
+ *   (not `created_date`, which is merely when the record was persisted).
+ *
+ * End:
+ * - `bounds_period` → its explicit end; `bounds_duration` → `start + duration`;
+ *   `bounds_range` → `start + high` (longest end, so administration isn't cut
+ *   off early — treat `low → high` as a taper-off zone in the UI); no bound →
+ *   open-ended.
+ * - clamped to the discontinuation time for inactive requests: a med stopped
+ *   early ends when it was stopped, not when its prescribed course would have.
+ *   `modified_date` is exact here — bounds are set once at creation and edits
+ *   create a new record, so an inactive record's only mutation is its stop.
+ *
+ * `status` stays authoritative for active/inactive; this only bounds where the
+ * schedule applies. Across multiple dosage instructions (e.g. taper/step
+ * regimens) the window is the union of each instruction's window — earliest
+ * start to latest end, open-ended if any instruction is — so no valid slot is
+ * dimmed or gated.
+ */
+export function getMedicationActiveWindow(
+  request: Pick<
+    MedicationRequestRead,
+    "authored_on" | "modified_date" | "status" | "dosage_instruction"
+  >,
+): MedicationActiveWindow {
+  const authoredStart = new Date(request.authored_on);
+
+  const addDuration = (from: Date, d: BoundsDuration) =>
+    new Date(
+      from.getTime() + convertToHours(d.value, d.unit).toNumber() * 3_600_000,
+    );
+
+  // Union each dosage instruction's window. With one instruction this is the
+  // single window; with several it spans the whole regimen.
+  const instructions = request.dosage_instruction?.length
+    ? request.dosage_instruction
+    : [undefined];
+
+  let start: Date | undefined;
+  let end: Date | undefined;
+  let openEnded = false;
+
+  for (const instruction of instructions) {
+    const bounds = getTimingBounds(instruction?.timing?.repeat);
+
+    // bounds_period carries an explicit, prescriber-authoritative start;
+    // relative bounds (duration/range) have none, so they anchor to when the
+    // order was placed (authored_on), not when the record was persisted.
+    const instructionStart =
+      bounds?.type === "period" && bounds.value.start
+        ? periodBoundToLocalDate(bounds.value.start)
+        : authoredStart;
+    if (!start || instructionStart < start) start = instructionStart;
+
+    let instructionEnd: Date | undefined;
+    switch (bounds?.type) {
+      case "period":
+        instructionEnd = bounds.value.end
+          ? periodBoundToLocalDate(bounds.value.end, true)
+          : undefined;
+        break;
+      case "duration":
+        instructionEnd = addDuration(instructionStart, bounds.value);
+        break;
+      case "range":
+        instructionEnd = addDuration(instructionStart, bounds.value.high);
+        break;
+    }
+    if (instructionEnd === undefined) openEnded = true;
+    else if (!end || instructionEnd > end) end = instructionEnd;
+  }
+
+  start = start ?? authoredStart;
+  let finalEnd = openEnded ? undefined : end;
+
+  // Discontinued early → the window ends when it was stopped.
+  const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
+    request.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
+  );
+  if (isInactive && request.modified_date) {
+    const stoppedAt = new Date(request.modified_date);
+    if (!finalEnd || stoppedAt < finalEnd) finalEnd = stoppedAt;
+  }
+
+  return { start, end: finalEnd };
+}
+
+/** Human-readable label for a scheduling bound, for read-only render sites. */
+export function formatTimingBounds(bounds: TimingBounds): string {
+  switch (bounds.type) {
+    case "duration":
+      return formatDurationLabel(bounds.value);
+    case "range": {
+      const { low, high } = bounds.value;
+      const info = DURATION_UNIT_LABELS[high.unit];
+      const unit = info
+        ? Number(high.value) === 1
+          ? info.singular
+          : info.plural
+        : high.unit;
+      return `${low.value}–${high.value} ${unit}`;
+    }
+    case "period":
+      return `${formatBoundDate(bounds.value.start)} → ${formatBoundDate(
+        bounds.value.end,
+      )}`;
+  }
+}
+
 export interface Timing {
   repeat: {
     frequency: number;
     period: string;
     period_unit: (typeof UCUM_TIME_UNITS)[number];
-    bounds_duration: BoundsDuration;
+    // Exactly one of bounds_duration / bounds_range / bounds_period is set.
+    // ponytail: not encoded as a discriminated union — backend enforces the
+    // one-of constraint; switch to a union if the form needs to enforce it too.
+    bounds_duration?: BoundsDuration;
+    bounds_range?: TimingRange;
+    bounds_period?: PeriodSpec;
   };
   /** Optional in FHIR (0..1). Omitted for text-only dosage patterns. */
   code?: Code;
@@ -1397,14 +1601,6 @@ export function decodeDurationValue(
 }
 
 /**
- * Encode a BoundsDuration to the autocomplete value format.
- */
-export function encodeDurationValue(duration?: BoundsDuration): string {
-  if (!duration?.value || duration.value === "0") return "";
-  return `${duration.value}-${duration.unit}`;
-}
-
-/**
  * Format a BoundsDuration as a human-readable label.
  */
 export function formatDurationLabel(duration?: BoundsDuration): string {
@@ -1413,6 +1609,125 @@ export function formatDurationLabel(duration?: BoundsDuration): string {
   if (!info) return `${duration.value} ${duration.unit}`;
   const numVal = parseFloat(duration.value);
   return `${duration.value} ${numVal === 1 ? info.singular : info.plural}`;
+}
+
+// ─── Range parsing / validation ─────────────────────────────────────
+
+const RANGE_UNIT_ALIASES: Record<string, (typeof UCUM_TIME_UNITS)[number]> = {
+  d: "d",
+  day: "d",
+  days: "d",
+  w: "wk",
+  wk: "wk",
+  week: "wk",
+  weeks: "wk",
+  mo: "mo",
+  month: "mo",
+  months: "mo",
+};
+
+/** Build a validated {@link TimingRange} from raw parts, or undefined. */
+function makeTimingRange(
+  low?: string,
+  high?: string,
+  unitStr?: string,
+): TimingRange | undefined {
+  const lowNum = Number(low);
+  const highNum = Number(high);
+  const unit =
+    (unitStr && RANGE_UNIT_ALIASES[unitStr.toLowerCase()]) ||
+    (unitStr &&
+    UCUM_TIME_UNITS.includes(unitStr as (typeof UCUM_TIME_UNITS)[number])
+      ? (unitStr as (typeof UCUM_TIME_UNITS)[number])
+      : undefined);
+  if (!unit) return undefined;
+  if (!Number.isInteger(lowNum) || !Number.isInteger(highNum)) return undefined;
+  if (lowNum <= 0 || highNum <= 0 || lowNum > highNum) return undefined;
+  return {
+    low: { value: String(lowNum), unit },
+    high: { value: String(highNum), unit },
+  };
+}
+
+/**
+ * Parse a day-range typed by the user, e.g. "5-7 days", "5 – 7 d", "5 to 7
+ * weeks". Returns a validated {@link TimingRange} (positive, low <= high), or
+ * undefined for anything malformed.
+ */
+export function parseRangeString(input: string): TimingRange | undefined {
+  const match = input
+    .trim()
+    .toLowerCase()
+    .match(/^(\d+)\s*(?:-|–|to)\s*(\d+)\s*([a-z]*)$/);
+  if (!match) return undefined;
+  const [, low, high, unitStr] = match;
+  return makeTimingRange(low, high, unitStr || "d");
+}
+
+/** i18n key describing why a {@link TimingBounds} is invalid. */
+export type TimingBoundsError =
+  | "invalid_duration"
+  | "invalid_day_range"
+  | "invalid_period_dates";
+
+/**
+ * Validate the *contents* of a {@link TimingBounds} — not just its presence:
+ * duration is a positive whole number with a known unit; a range is positive
+ * with `low <= high`; a period has both dates with `start <= end`. Returns an
+ * i18n key for the problem, or null when valid. Shared by the duration picker
+ * and the questionnaire submit gate so both agree on what "valid" means.
+ */
+export function validateTimingBounds(
+  bounds: TimingBounds,
+): TimingBoundsError | null {
+  switch (bounds.type) {
+    case "duration": {
+      const n = Number(bounds.value.value);
+      const validUnit = UCUM_TIME_UNITS.includes(bounds.value.unit);
+      return Number.isInteger(n) && n > 0 && validUnit
+        ? null
+        : "invalid_duration";
+    }
+    case "range": {
+      const low = Number(bounds.value.low.value);
+      const high = Number(bounds.value.high.value);
+      const ok =
+        Number.isInteger(low) &&
+        Number.isInteger(high) &&
+        low > 0 &&
+        high > 0 &&
+        low <= high;
+      return ok ? null : "invalid_day_range";
+    }
+    case "period": {
+      const { start, end } = bounds.value;
+      if (!start || !end) return "invalid_period_dates";
+      return new Date(start).getTime() <= new Date(end).getTime()
+        ? null
+        : "invalid_period_dates";
+    }
+  }
+}
+
+// ─── Date-only <-> ISO helpers (timezone-stable) ────────────────────
+//
+// Period bounds are calendar dates, not instants. We anchor them at UTC so a
+// "YYYY-MM-DD" round-trips to the same calendar day regardless of the user's
+// timezone (a naive `new Date("YYYY-MM-DDT00:00:00")` would shift the day for
+// UTC+ users — e.g. clinicians on care.ohc.network at +5:30).
+
+/** "YYYY-MM-DD" from a stored ISO timestamp (UTC calendar date). */
+export function dateOnly(iso?: string): string {
+  return iso ? iso.slice(0, 10) : "";
+}
+
+/** A "YYYY-MM-DD" value to a UTC ISO timestamp at the day's start or end. */
+export function dateOnlyToIso(
+  date: string,
+  endOfDay = false,
+): string | undefined {
+  if (!date) return undefined;
+  return `${date}T${endOfDay ? "23:59:59.999" : "00:00:00.000"}Z`;
 }
 
 // ─── Shared dose-quantity computation helpers ───────────────────────
@@ -1460,6 +1775,34 @@ export function convertToHours(value: string, unit: string): Decimal {
  *  - Standard FHIR frequency × period
  *  - Dose ranges (tapered, uses average)
  */
+/**
+ * The course length in days from whichever scheduling bound is set: a duration
+ * directly, a range by its longest end (`high`, so dispensing covers the full
+ * course), or a period by `end - start`. Null when no usable bound is present.
+ */
+function effectiveDurationDays(repeat: Timing["repeat"]): Decimal | null {
+  if (repeat.bounds_duration && repeat.bounds_duration.value !== "0") {
+    return convertToDays(
+      repeat.bounds_duration.value,
+      repeat.bounds_duration.unit,
+    );
+  }
+  if (repeat.bounds_range) {
+    return convertToDays(
+      repeat.bounds_range.high.value,
+      repeat.bounds_range.high.unit,
+    );
+  }
+  if (repeat.bounds_period?.start && repeat.bounds_period.end) {
+    const ms =
+      new Date(repeat.bounds_period.end).getTime() -
+      new Date(repeat.bounds_period.start).getTime();
+    if (ms <= 0) return null;
+    return divide(ms, 86_400_000) as Decimal;
+  }
+  return null;
+}
+
 export function computeTotalDoseQuantity(
   instruction: MedicationRequestDosageInstruction,
 ): Decimal | null {
@@ -1467,30 +1810,25 @@ export function computeTotalDoseQuantity(
   if (!doseValue) return null;
 
   const repeat = instruction.timing?.repeat;
-  if (!repeat?.bounds_duration || !repeat.period_unit) return null;
+  if (!repeat?.period_unit) return null;
 
-  const { frequency = 1, period = "1", period_unit, bounds_duration } = repeat;
+  // Course length from duration / range / period (not just bounds_duration).
+  const durationDays = effectiveDurationDays(repeat);
+  if (durationDays === null || !durationDays.greaterThan(0)) return null;
+
+  const { frequency = 1, period = "1", period_unit } = repeat;
 
   // M-A-N text patterns: compute from actual slot values
   if (instruction.text) {
     const slotSum = sumManSlots(instruction.text);
     if (slotSum !== null) {
-      const durationDays = convertToDays(
-        bounds_duration.value,
-        bounds_duration.unit,
-      );
-      if (durationDays.greaterThan(0)) {
-        return multiply(multiply(doseValue, slotSum), durationDays) as Decimal;
-      }
+      return multiply(multiply(doseValue, slotSum), durationDays) as Decimal;
     }
     // Not a valid M-A-N pattern -- fall through to standard FHIR computation
   }
 
   // Standard FHIR: dose × numberOfDoses
-  const totalDurationInHours = convertToHours(
-    bounds_duration.value,
-    bounds_duration.unit,
-  );
+  const totalDurationInHours = multiply(durationDays, 24) as Decimal;
   const periodInHours = convertToHours(period, period_unit);
 
   if (isZero(periodInHours)) return null;
