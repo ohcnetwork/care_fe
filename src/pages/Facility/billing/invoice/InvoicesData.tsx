@@ -44,7 +44,11 @@ import {
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
-import { dateTimeQueryString, formatDateTime } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  formatDateTime,
+} from "@/Utils/utils";
 
 export default function InvoicesData({
   facilityId,
@@ -92,10 +96,10 @@ export default function InvoicesData({
         ...query,
         created_date: undefined,
         created_date_after: dateRange?.from
-          ? dateTimeQueryString(dateRange.from as Date)
+          ? dateQueryString(dateRange.from as Date)
           : undefined,
         created_date_before: dateRange?.to
-          ? dateTimeQueryString(dateRange.to as Date, true)
+          ? dateQueryString(dateRange.to as Date)
           : undefined,
       };
     }
@@ -133,8 +137,12 @@ export default function InvoicesData({
         status: qParams.status,
         patient: qParams.patient,
         created_by: qParams.created_by,
-        created_date_after: qParams.created_date_after,
-        created_date_before: qParams.created_date_before,
+        created_date_after: created_date_after
+          ? dateTimeQueryString(new Date(created_date_after))
+          : undefined,
+        created_date_before: created_date_before
+          ? dateTimeQueryString(new Date(created_date_before), true)
+          : undefined,
       },
     }),
   });
