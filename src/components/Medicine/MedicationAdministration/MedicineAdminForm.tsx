@@ -1,4 +1,4 @@
-import { formatDistanceToNow, startOfMinute, subDays } from "date-fns";
+import { format, formatDistanceToNow, startOfMinute, subDays } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,7 +8,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import RadioInput from "@/components/ui/RadioInput";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +29,7 @@ import {
 } from "@/components/Medicine/utils";
 
 import { formatName } from "@/Utils/utils";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   MEDICATION_ADMINISTRATION_STATUS,
   MedicationAdministrationRequest,
@@ -203,20 +203,33 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   onMedicationChange,
   formId,
   isValid,
-  compact = false,
   otherGroupRequests,
 }) => {
   const { t } = useTranslation();
+  const { selectedEncounter: encounter } = useEncounter();
+
+  const isEncounterEnded = !!encounter?.period?.end;
+
+  const effectiveEndDate = (() => {
+    const encounterEnd = encounter?.period?.end
+      ? new Date(encounter.period.end)
+      : new Date();
+
+    if (administrationRequest.id) {
+      const entryDate = new Date(administrationRequest.occurrence_period_start);
+      if (entryDate > encounterEnd) return entryDate;
+    }
+    return encounterEnd;
+  })();
 
   const [isPastTime, setIsPastTime] = useState(
-    administrationRequest.occurrence_period_start !==
-      administrationRequest.occurrence_period_end || !!administrationRequest.id,
+    isEncounterEnded ||
+      administrationRequest.occurrence_period_start !==
+        administrationRequest.occurrence_period_end ||
+      !!administrationRequest.id,
   );
   const [startTimeError, setStartTimeError] = useState("");
   const [endTimeError, setEndTimeError] = useState("");
-  const [showAdvanced, setShowAdvanced] = useState(
-    !!administrationRequest.id || isPastTime,
-  );
 
   const validateDateTime = (date: Date, isStartTime: boolean): string => {
     const now = startOfMinute(new Date());
@@ -224,7 +237,13 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
       new Date(administrationRequest.occurrence_period_start),
     );
     date = startOfMinute(date);
+    const effectiveEnd = startOfMinute(effectiveEndDate);
 
+    if (isEncounterEnded && date > effectiveEnd) {
+      return t("time_after_encounter_end_error", {
+        date: format(effectiveEnd, "dd/MM/yyyy hh:mm a"),
+      });
+    }
     if (date > now) {
       return t(
         isStartTime ? "start_time_future_error" : "end_time_future_error",
@@ -341,210 +360,6 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           }),
     });
   };
-
-  const handleAdministerNow = () => {
-    const now = new Date().toISOString();
-    onChange({
-      ...administrationRequest,
-      status: "completed",
-      occurrence_period_start: now,
-      occurrence_period_end: now,
-    });
-    setIsPastTime(false);
-    setShowAdvanced(false);
-  };
-
-  // Compact mode for sheet - simplified form
-  if (compact) {
-    return (
-      <div className="space-y-4">
-        {/* Quick Actions */}
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant={!showAdvanced ? "default" : "outline"}
-            size="sm"
-            className={cn(
-              "flex-1",
-              !showAdvanced && "bg-green-600 hover:bg-green-700",
-            )}
-            onClick={handleAdministerNow}
-          >
-            <CareIcon icon="l-check-circle" className="size-4 mr-1.5" />
-            {t("administer_now")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-gray-600"
-          >
-            <CareIcon
-              icon={showAdvanced ? "l-angle-up" : "l-angle-down"}
-              className="size-4 mr-1"
-            />
-            {showAdvanced ? t("less_options") : t("more_options")}
-          </Button>
-        </div>
-
-        {/* Status Badge */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">{t("status")}:</span>
-          <Badge
-            variant={
-              administrationRequest.status === "completed"
-                ? "green"
-                : administrationRequest.status === "in_progress"
-                  ? "blue"
-                  : "secondary"
-            }
-          >
-            {t(administrationRequest.status)}
-          </Badge>
-        </div>
-
-        {/* Advanced Options */}
-        {showAdvanced && (
-          <div className="space-y-4 pt-2 border-t border-gray-200">
-            {/* Status Select */}
-            <div className="space-y-2">
-              <Label className="text-sm">{t("status")}</Label>
-              <Select
-                value={administrationRequest.status}
-                onValueChange={(value: MedicationAdministrationStatus) => {
-                  const newRequest = {
-                    ...administrationRequest,
-                    status: value,
-                  };
-
-                  if (value === "in_progress" || value === "not_done") {
-                    delete newRequest.occurrence_period_end;
-                  } else if (
-                    value === "completed" &&
-                    !administrationRequest.occurrence_period_end
-                  ) {
-                    newRequest.occurrence_period_end =
-                      administrationRequest.occurrence_period_start;
-                  }
-
-                  onChange(newRequest);
-                }}
-              >
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder={t("select_status")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {MEDICATION_ADMINISTRATION_STATUS.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {t(status)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Time Selection */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label className="text-sm">{t("start_time")}</Label>
-                <div className="flex gap-2">
-                  <DatePicker
-                    date={
-                      administrationRequest.occurrence_period_start
-                        ? new Date(
-                            administrationRequest.occurrence_period_start,
-                          )
-                        : undefined
-                    }
-                    onChange={(date) => {
-                      if (!date) return;
-                      handleDateChange(date.toISOString(), true);
-                    }}
-                    disabled={(date) => {
-                      const now = new Date();
-                      const encounterStart = subDays(
-                        new Date(medication.authored_on),
-                        1,
-                      );
-                      return date < encounterStart || date > now;
-                    }}
-                    className="flex-1"
-                  />
-                  <Input
-                    type="time"
-                    className="w-24 text-sm"
-                    value={formatTime(
-                      administrationRequest.occurrence_period_start,
-                    )}
-                    onChange={(e) => handleTimeChange(e, true)}
-                  />
-                </div>
-                {startTimeError && (
-                  <p className="text-xs text-red-500">{startTimeError}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm">{t("end_time")}</Label>
-                <div className="flex gap-2">
-                  <DatePicker
-                    date={
-                      administrationRequest.occurrence_period_end
-                        ? new Date(administrationRequest.occurrence_period_end)
-                        : undefined
-                    }
-                    onChange={(date) => {
-                      if (!date) return;
-                      handleDateChange(date.toISOString(), false);
-                    }}
-                    disabled={(date) => {
-                      const now = new Date();
-                      const encounterStart = subDays(
-                        new Date(medication.authored_on),
-                        1,
-                      );
-                      return date < encounterStart || date > now;
-                    }}
-                    className="flex-1"
-                    disablePicker={
-                      administrationRequest.status === "in_progress"
-                    }
-                  />
-                  <Input
-                    type="time"
-                    className="w-24 text-sm"
-                    value={formatTime(
-                      administrationRequest.occurrence_period_end,
-                    )}
-                    onChange={(e) => handleTimeChange(e, false)}
-                    disabled={administrationRequest.status === "in_progress"}
-                  />
-                </div>
-                {endTimeError && (
-                  <p className="text-xs text-red-500">{endTimeError}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Notes */}
-            <div className="space-y-2">
-              <Label className="text-sm">{t("notes")}</Label>
-              <Textarea
-                name={`${formId}notes`}
-                value={administrationRequest.note || ""}
-                onChange={(e) =>
-                  onChange({ ...administrationRequest, note: e.target.value })
-                }
-                placeholder={t("add_notes_optional")}
-                rows={2}
-                className="resize-none text-sm"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
 
   // Full form mode for dialog
   return (
@@ -700,36 +515,44 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
 
       {!administrationRequest.id && (
         <div className="space-y-2">
-          <Label>{t("is_this_administration_for_a_past_time")}?</Label>
-          <RadioInput
-            name={`${formId}isPastTime`}
-            value={isPastTime ? "yes" : "no"}
-            onValueChange={(newValue: string) => {
-              setIsPastTime(newValue === "yes");
-              if (newValue === "no") {
-                const now = new Date().toISOString();
-                const newRequest = {
-                  ...administrationRequest,
-                  occurrence_period_start: now,
-                };
+          <div className="space-y-2">
+            <Label>{t("is_this_administration_for_a_past_time")}?</Label>
+            <RadioInput
+              name={`${formId}isPastTime`}
+              value={isPastTime ? "yes" : "no"}
+              onValueChange={(newValue: string) => {
+                setIsPastTime(newValue === "yes");
+                if (newValue === "no") {
+                  const periodDate = effectiveEndDate.toISOString();
+                  const newRequest = {
+                    ...administrationRequest,
+                    occurrence_period_start: periodDate,
+                  };
 
-                if (
-                  !(
-                    administrationRequest.status === "in_progress" ||
-                    administrationRequest.status === "not_done"
-                  )
-                ) {
-                  newRequest.occurrence_period_end = now;
+                  if (
+                    !(
+                      administrationRequest.status === "in_progress" ||
+                      administrationRequest.status === "not_done"
+                    )
+                  ) {
+                    newRequest.occurrence_period_end = periodDate;
+                  }
+
+                  onChange(newRequest);
                 }
-
-                onChange(newRequest);
-              }
-            }}
-            options={[
-              { value: "yes", label: t("yes") },
-              { value: "no", label: t("no") },
-            ]}
-          />
+              }}
+              options={[
+                { value: "yes", label: t("yes") },
+                { value: "no", label: t("no") },
+              ]}
+              disabled={isEncounterEnded}
+            />
+          </div>
+          {isEncounterEnded && (
+            <p className="text-sm text-gray-500">
+              {t("medicine_administration_encounter_end")}
+            </p>
+          )}
         </div>
       )}
 
@@ -747,12 +570,11 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
               handleDateChange(date.toISOString(), true);
             }}
             disabled={(date) => {
-              const now = new Date();
               const encounterStart = subDays(
                 new Date(medication.authored_on),
                 1,
               );
-              return date < encounterStart || date > now;
+              return date < encounterStart || date > effectiveEndDate;
             }}
             disablePicker={!isPastTime || !!administrationRequest.id}
             className="flex-1"
@@ -784,12 +606,11 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
               handleDateChange(date.toISOString(), false);
             }}
             disabled={(date) => {
-              const now = new Date();
               const encounterStart = subDays(
                 new Date(medication.authored_on),
                 1,
               );
-              return date < encounterStart || date > now;
+              return date < encounterStart || date > effectiveEndDate;
             }}
             className="flex-1"
             disablePicker={

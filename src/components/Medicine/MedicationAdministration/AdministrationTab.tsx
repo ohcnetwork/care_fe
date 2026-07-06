@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow, max } from "date-fns";
 import { Link, usePathParams } from "raviger";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -34,6 +34,7 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { DiscontinueConfirmDialog } from "./DiscontinueConfirmDialog";
 import { GroupedMedicationRow } from "./GroupedMedicationRow";
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
@@ -123,36 +124,8 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const subpathMatch = usePathParams("/facility/:facilityId/*");
   const facilityIdExists = !!subpathMatch?.facilityId;
   const { facilityId } = useCurrentFacilitySilently();
-
-  const currentDate = new Date();
-  const [endSlotDate, setEndSlotDate] = useState(currentDate);
+  const { selectedEncounter: encounter } = useEncounter();
   const [showStopped, setShowStopped] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [endSlotIndex, setEndSlotIndex] = useState(
-    Math.floor(currentDate.getHours() / 6),
-  );
-  // Calculate visible slots based on end slot
-  const visibleSlots = useMemo(() => {
-    const slots = [];
-    let currentIndex = endSlotIndex;
-    let currentDate = new Date(endSlotDate);
-
-    // Add slots from right to left
-    for (let i = 0; i < 4; i++) {
-      if (currentIndex < 0) {
-        currentIndex = 3;
-        currentDate = new Date(currentDate);
-        currentDate.setDate(currentDate.getDate() - 1);
-      }
-      slots.unshift({
-        ...TIME_SLOTS[currentIndex],
-        date: new Date(currentDate),
-      });
-      currentIndex--;
-    }
-    return slots;
-  }, [endSlotDate, endSlotIndex]);
-
   const queryClient = useQueryClient();
 
   // Queries
@@ -219,6 +192,70 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     );
   }, [administrations?.results]);
 
+  // Calculate last modified date
+  const lastModifiedDate = useMemo(() => {
+    if (!administrations?.results?.length) return null;
+
+    const activeRequestIds = new Set(
+      (activeMedications?.results || []).map((m) => m.id),
+    );
+
+    const relevantAdmins = administrations.results.filter(
+      (admin) => showStopped || activeRequestIds.has(admin.request),
+    );
+
+    if (!relevantAdmins.length) return null;
+
+    return new Date(
+      Math.max(
+        ...relevantAdmins.map((a) =>
+          new Date(a.occurrence_period_start).getTime(),
+        ),
+      ),
+    );
+  }, [administrations?.results, activeMedications?.results, showStopped]);
+
+  const currentDate = useMemo(() => {
+    if (!encounter?.period?.end) return new Date();
+    const encounterEnd = new Date(encounter.period.end);
+    return lastModifiedDate
+      ? max([lastModifiedDate, encounterEnd])
+      : encounterEnd;
+  }, [encounter?.period?.end, encounter?.id, lastModifiedDate]);
+
+  const [endSlotDate, setEndSlotDate] = useState(currentDate);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [endSlotIndex, setEndSlotIndex] = useState(
+    Math.floor(currentDate.getHours() / 6),
+  );
+
+  useEffect(() => {
+    setEndSlotDate(currentDate);
+    setEndSlotIndex(Math.floor(currentDate.getHours() / 6));
+  }, [currentDate]);
+
+  // Calculate visible slots based on end slot
+  const visibleSlots = useMemo(() => {
+    const slots = [];
+    let currentIndex = endSlotIndex;
+    let currentDate = new Date(endSlotDate);
+
+    // Add slots from right to left
+    for (let i = 0; i < 4; i++) {
+      if (currentIndex < 0) {
+        currentIndex = 3;
+        currentDate = new Date(currentDate);
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+      slots.unshift({
+        ...TIME_SLOTS[currentIndex],
+        date: new Date(currentDate),
+      });
+      currentIndex--;
+    }
+    return slots;
+  }, [endSlotDate, endSlotIndex]);
+
   // Calculate earliest authored date from all medications
   const getEarliestAuthoredDate = (medications: MedicationRequestRead[]) => {
     if (!medications?.length) return null;
@@ -269,19 +306,6 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
   const [selectedGroupForAdmin, setSelectedGroupForAdmin] =
     useState<GroupedMedication | null>(null);
 
-  // Calculate last modified date
-  const lastModifiedDate = useMemo(() => {
-    if (!administrations?.results?.length) return null;
-
-    const sortedAdmins = [...administrations.results].sort(
-      (a, b) =>
-        new Date(b.occurrence_period_start).getTime() -
-        new Date(a.occurrence_period_start).getTime(),
-    );
-
-    return new Date(sortedAdmins[0].occurrence_period_start);
-  }, [administrations?.results]);
-
   // Mutations
   const { mutate: discontinueMedication } = useMutation({
     mutationFn: mutate(medicationRequestApi.upsert, {
@@ -326,29 +350,29 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
   const handleAdminister = useCallback(
     (medication: MedicationRequestRead) => {
-      if (!encounterId) {
+      if (!encounter?.id) {
         return;
       }
       setAdministrationRequest(
-        createMedicationAdministrationRequest(medication, encounterId),
+        createMedicationAdministrationRequest(medication, encounter),
       );
       setSelectedMedication(medication);
       setDialogOpen(true);
     },
-    [encounterId],
+    [encounter?.id],
   );
 
   const handleMedicationChangeInDialog = useCallback(
     (medication: MedicationRequestRead) => {
-      if (!encounterId) {
+      if (!encounter?.id) {
         return;
       }
       setAdministrationRequest(
-        createMedicationAdministrationRequest(medication, encounterId),
+        createMedicationAdministrationRequest(medication, encounter),
       );
       setSelectedMedication(medication);
     },
-    [encounterId],
+    [encounter?.id],
   );
 
   const handleEditAdministration = useCallback(
@@ -769,7 +793,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
           medications={activeMedications?.results || []}
           lastAdministeredDates={lastAdministeredDetails?.dates}
           patientId={patientId}
-          encounterId={encounterId}
+          encounter={encounter}
           selectedGroup={selectedGroupForAdmin || undefined}
         />
       )}

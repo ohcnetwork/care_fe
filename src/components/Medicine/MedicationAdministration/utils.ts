@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import {
   MedicationAdministrationRead,
   MedicationAdministrationRequest,
@@ -51,11 +52,14 @@ export function getDosageFromInstruction(
 }
 export function createMedicationAdministrationRequest(
   medication: MedicationRequestRead,
-  encounterId: string,
+  encounter: EncounterRead | undefined,
 ): MedicationAdministrationRequest {
+  const occurrencePeriod = encounter?.period?.end
+    ? format(new Date(encounter.period.end), "yyyy-MM-dd'T'HH:mm")
+    : format(new Date(), "yyyy-MM-dd'T'HH:mm");
   return {
     request: medication.id,
-    encounter: encounterId,
+    encounter: encounter?.id || "",
     ...(medication.medication?.code && {
       medication: {
         code: medication.medication?.code,
@@ -66,8 +70,8 @@ export function createMedicationAdministrationRequest(
     ...(medication.requested_product && {
       administered_product: medication.requested_product.id,
     }),
-    occurrence_period_start: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-    occurrence_period_end: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+    occurrence_period_start: occurrencePeriod,
+    occurrence_period_end: occurrencePeriod,
     note: "",
     status: "completed",
     // Default administration dosage from the first instruction

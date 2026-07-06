@@ -161,17 +161,49 @@ export const PrintMedicationAdministration = (props: {
     };
   }, [medicationRequests, showDiscontinued]);
 
-  // Get date ranges for the chart - one week per range from encounter
-  // start through encounter end (or today if ongoing), in chronological order.
+  const latestAdminDate = useMemo(() => {
+    if (!medicationAdministrations?.results?.length) return null;
+
+    const visibleGroups = [
+      ...groupedMedications.regular,
+      ...groupedMedications.prn,
+    ];
+    const visibleRequestIds = new Set(
+      visibleGroups.flatMap((g) => g.requests.map((r) => r.id)),
+    );
+
+    const relevantAdmins = medicationAdministrations.results.filter((admin) =>
+      visibleRequestIds.has(admin.request),
+    );
+
+    if (!relevantAdmins.length) return null;
+
+    return new Date(
+      Math.max(
+        ...relevantAdmins.map((a) =>
+          new Date(a.occurrence_period_start).getTime(),
+        ),
+      ),
+    );
+  }, [medicationAdministrations?.results, groupedMedications]);
+
+  // Get date range for the chart
   const dateRanges = useMemo(() => {
     if (!encounter?.period?.start) return [];
-
+    let effectiveEndDate = encounter?.period?.end
+      ? new Date(encounter.period.end)
+      : undefined;
+    if (
+      latestAdminDate &&
+      effectiveEndDate &&
+      latestAdminDate > effectiveEndDate
+    ) {
+      effectiveEndDate = latestAdminDate;
+    }
     const start = new Date(encounter.period.start);
     start.setHours(0, 0, 0, 0);
 
-    const end = encounter.period.end
-      ? new Date(encounter.period.end)
-      : new Date();
+    const end = effectiveEndDate ? effectiveEndDate : new Date();
     end.setHours(23, 59, 59, 999);
 
     if (end < start) return [];
@@ -189,7 +221,7 @@ export const PrintMedicationAdministration = (props: {
     }
 
     return weeks;
-  }, [encounter]);
+  }, [encounter, latestAdminDate]);
 
   // Index administrations by request ID, date, and time slot
   const adminIndex = useMemo(() => {

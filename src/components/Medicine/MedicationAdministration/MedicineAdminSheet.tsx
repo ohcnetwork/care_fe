@@ -27,6 +27,7 @@ import {
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
 
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { MedicineAdminForm } from "./MedicineAdminForm";
 import {
   GroupedMedication,
@@ -40,7 +41,7 @@ interface Props {
   medications: MedicationRequestRead[];
   lastAdministeredDates?: Record<string, string>;
   patientId: string;
-  encounterId: string;
+  encounter: EncounterRead | undefined;
   selectedGroup?: GroupedMedication;
 }
 
@@ -120,7 +121,7 @@ export function MedicineAdminSheet({
   medications,
   lastAdministeredDates,
   patientId,
-  encounterId,
+  encounter,
   selectedGroup,
 }: Props) {
   const { t } = useTranslation();
@@ -145,12 +146,12 @@ export function MedicineAdminSheet({
         setAdministrationRequests({
           [latestRequest.id]: createMedicationAdministrationRequest(
             latestRequest,
-            encounterId,
+            encounter,
           ),
         });
       }
     }
-  }, [open, selectedGroup, encounterId]);
+  }, [open, selectedGroup, encounter?.id]);
 
   const { mutate: upsertAdministrations, isPending } = useMutation({
     mutationFn: mutate(medicationAdministrationApi.upsert, {
@@ -172,10 +173,7 @@ export function MedicineAdminSheet({
           if (medicine) {
             setAdministrationRequests((prev) => ({
               ...prev,
-              [id]: createMedicationAdministrationRequest(
-                medicine,
-                encounterId,
-              ),
+              [id]: createMedicationAdministrationRequest(medicine, encounter),
             }));
           }
         } else {
@@ -188,7 +186,7 @@ export function MedicineAdminSheet({
         return next;
       });
     },
-    [medications, encounterId],
+    [medications, encounter?.id],
   );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
