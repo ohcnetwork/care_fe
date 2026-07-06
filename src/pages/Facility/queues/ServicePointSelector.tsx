@@ -133,7 +133,7 @@ export const ServicePointSelector = ({
               {t(description)}
             </DrawerDescription>
           </DrawerHeader>
-          <div className="p-3 pb-6">
+          <div className="overflow-y-auto p-3 pb-6">
             <RadioInput
               options={subQueues.map((subQueue) => ({
                 label: subQueue.name,
@@ -160,17 +160,19 @@ export const ServicePointSelector = ({
             {t(description)}
           </DialogDescription>
         </DialogHeader>
-        <RadioInput
-          options={subQueues.map((subQueue) => ({
-            label: subQueue.name,
-            value: subQueue.id,
-          }))}
-          required
-          onValueChange={handleSelect}
-          value={selectedSubQueueId}
-          className="flex flex-col gap-3"
-          classNameInput="p-2"
-        />
+        <div className="overflow-y-auto max-h-[50vh] p-3">
+          <RadioInput
+            options={subQueues.map((subQueue) => ({
+              label: subQueue.name,
+              value: subQueue.id,
+            }))}
+            required
+            onValueChange={handleSelect}
+            value={selectedSubQueueId}
+            className="flex flex-col gap-3"
+            classNameInput="p-2"
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
