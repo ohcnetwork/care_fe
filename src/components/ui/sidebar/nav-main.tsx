@@ -1,8 +1,8 @@
-import { t } from "i18next";
 import { useAtom } from "jotai";
 import { ChevronRight } from "lucide-react";
 import { ActiveLink, useFullPath, usePath } from "raviger";
 import { Fragment, ReactNode, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { navExpansionAtom } from "@/atoms/navExpansionAtom";
 import { cn } from "@/lib/utils";
@@ -80,6 +80,7 @@ function NavLink({
   children: ReactNode;
 }) {
   const { toggleSidebar, isMobile } = useSidebar();
+  const { t } = useTranslation();
   const isExternal = isSafeExternalUrl(href);
 
   if (isExternal || openInNewTab) {
