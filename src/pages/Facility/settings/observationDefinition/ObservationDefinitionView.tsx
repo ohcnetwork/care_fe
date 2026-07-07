@@ -229,7 +229,7 @@ export default function ObservationDefinitionView({
       category: definition.category,
       code: definition.code,
       permitted_data_type: definition.permitted_data_type,
-      component: definition.component || [],
+      component: definition.component,
       body_site: definition.body_site,
       method: definition.method,
       permitted_unit: definition.permitted_unit,
