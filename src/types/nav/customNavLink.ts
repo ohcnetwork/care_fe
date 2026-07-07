@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { z } from "zod";
 
+import { isSafeNavUrl } from "@/Utils/url";
+
 /**
  * Sidebar contexts a custom nav link can be placed in.
  * "all" makes the link appear in every context (persistent surface).
@@ -34,7 +36,10 @@ export type NavScope = (typeof NAV_SCOPES)[number];
  */
 export const customNavLinkSchema = z.object({
   name: z.string(),
-  url: z.string(),
+  url: z.string().refine(isSafeNavUrl, {
+    message:
+      "url must be an internal app path starting with / (and not //) or an absolute http(s) URL",
+  }),
   openInNewTab: z.boolean().optional(),
   placement: z.array(z.enum(NAV_SCOPES)).default(["all"]),
 });

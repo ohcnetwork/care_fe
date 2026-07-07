@@ -1,13 +1,9 @@
-// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import {
   ENCOUNTER_CLASS,
   ENCOUNTER_DISCHARGE_DISPOSITION,
   EncounterDischargeDisposition,
 } from "../src/types/emr/encounter/encounter";
-// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import { customNavLinksSchema } from "../src/types/nav/customNavLink";
-// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import { isSafeNavUrl } from "../src/Utils/url";
 
 import { z } from "zod";
 
@@ -60,19 +56,7 @@ const customShortcutsSchemaString = jsonAsStringSchema
 
 const customNavLinksSchemaString = jsonAsStringSchema
   .transform((val) => JSON.parse(val))
-  .pipe(customNavLinksSchema)
-  .superRefine((links, ctx) => {
-    links.forEach((link, index) => {
-      if (!isSafeNavUrl(link.url)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "url must be an internal app path starting with / (and not //) or an absolute http(s) URL",
-          path: [index, "url"],
-        });
-      }
-    });
-  });
+  .pipe(customNavLinksSchema);
 
 const VALID_ROUNDING_METHODS = [
   "ROUND_UP",
