@@ -10,6 +10,8 @@ import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 import ReportViewer from "@/pages/Encounters/ReportViewer";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
+import type { AdministrableProductType } from "@/types/inventory/productKnowledge/productKnowledge";
+
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/prescription/:prescriptionId/print":
     ({ facilityId, patientId, prescriptionId }) => (
@@ -74,12 +76,13 @@ const consultationRoutes: AppRoutes = {
     };
     return acc;
   }, {}),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/medicines/administrations/print":
-    ({ facilityId, encounterId, patientId }) => (
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/type/:productType/administrations/print":
+    ({ facilityId, encounterId, patientId, productType }) => (
       <PrintMedicationAdministration
         facilityId={facilityId}
         encounterId={encounterId}
         patientId={patientId}
+        productType={productType as AdministrableProductType}
       />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/template/:templateSlug":
