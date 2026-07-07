@@ -127,8 +127,11 @@ function Calendar({
     "size-8 rounded-md p-0 font-normal transition-none aria-selected:opacity-100",
     props.dayButtonClassName,
   );
+  // Band color for range days. Uses bg-primary-100 (a defined token) rather than
+  // bg-accent — this theme never defines an `accent` color, so bg-accent renders
+  // nothing and the in-range days would be invisible.
   const buttonRangeClassName =
-    "bg-accent [&>button]:bg-primary [&>button]:text-primary-foreground hover:[&>button]:bg-primary hover:[&>button]:text-primary-foreground";
+    "bg-primary-100 [&>button]:bg-primary [&>button]:text-primary-foreground hover:[&>button]:bg-primary hover:[&>button]:text-primary-foreground";
   const _rangeStartClassName = cn(
     buttonRangeClassName,
     "day-range-start rounded-s-md",
@@ -140,7 +143,7 @@ function Calendar({
     props.rangeEndClassName,
   );
   const _rangeMiddleClassName = cn(
-    "bg-accent text-foreground! [&>button]:bg-transparent [&>button]:text-foreground! hover:[&>button]:bg-transparent hover:[&>button]:text-foreground!",
+    "bg-primary-100 [&>button]:bg-transparent [&>button]:text-primary-900 hover:[&>button]:bg-primary-200",
     props.rangeMiddleClassName,
   );
   const _selectedClassName = cn(
