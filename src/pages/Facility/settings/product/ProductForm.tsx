@@ -230,9 +230,10 @@ export function ProductFormContent({
               ? new Date(existingData.expiration_date)
               : undefined,
             standard_pack_size: existingData.standard_pack_size,
-            purchase_price: existingData.purchase_price
-              ? round(existingData.purchase_price)
-              : undefined,
+            purchase_price:
+              existingData.purchase_price != null
+                ? round(existingData.purchase_price)
+                : undefined,
           }
         : {
             status: ProductStatusOptions.active,
@@ -417,11 +418,17 @@ export function ProductFormContent({
                 <FormItem>
                   <FormLabel>{t("standard_pack_size")}</FormLabel>
                   <FormControl>
-                    <MonetaryAmountInput
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder={t("enter_standard_pack_size")}
                       {...field}
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value || "")}
-                      placeholder="0.00"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : undefined,
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -435,18 +442,11 @@ export function ProductFormContent({
                 <FormItem>
                   <FormLabel>{t("purchase_price")}</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      placeholder={t("enter_purchase_price")}
+                    <MonetaryAmountInput
                       {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value ? Number(e.target.value) : undefined,
-                        )
-                      }
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value || null)}
+                      placeholder={t("enter_purchase_price")}
                     />
                   </FormControl>
                   <FormMessage />

@@ -149,7 +149,7 @@ export default function ProductView({ facilityId, productId }: Props) {
                 <p className="text-sm text-gray-500">{t("purchase_price")}</p>
                 <MonetaryDisplay
                   className="text-gray-700"
-                  value={product.purchase_price}
+                  amount={product.purchase_price}
                 />
               </div>
             )}
