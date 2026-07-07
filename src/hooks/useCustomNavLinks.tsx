@@ -12,7 +12,7 @@ import {
   customNavLinkSchema,
 } from "@/types/nav/customNavLink";
 
-import { isSafeExternalUrl } from "@/Utils/url";
+import { isSafeExternalUrl, isSafeNavUrl } from "@/Utils/url";
 
 import careConfig from "@careConfig";
 
@@ -77,5 +77,6 @@ export function useCustomNavLinks(scope: NavScope): NavigationLink[] {
 
   return links
     .filter((link) => matchesScope(link.placement ?? ["all"], scope))
+    .filter((link) => isSafeNavUrl(link.url))
     .map((link) => toNavigationLink(link, t));
 }
