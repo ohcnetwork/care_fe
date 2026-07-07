@@ -71,7 +71,7 @@ import {
   InvoiceChargeItemTitle,
   useMedicationDispenseData,
 } from "@/pages/Facility/billing/invoice/components/InvoiceChargeItemTitle";
-import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
+import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
