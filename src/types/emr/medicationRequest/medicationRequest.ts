@@ -1640,9 +1640,7 @@ export function parseRangeString(input: string): TimingRange | undefined {
 
 /** i18n key describing why a {@link TimingBounds} is invalid. */
 export type TimingBoundsError =
-  | "invalid_duration"
-  | "invalid_day_range"
-  | "invalid_period_dates";
+  "invalid_duration" | "invalid_day_range" | "invalid_period_dates";
 
 /**
  * Validate the *contents* of a {@link TimingBounds} — not just its presence:
