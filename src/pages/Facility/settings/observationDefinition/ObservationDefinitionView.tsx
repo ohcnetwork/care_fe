@@ -223,10 +223,19 @@ export default function ObservationDefinitionView({
   const handleDelete = () => {
     if (!definition) return;
     updateObservationDefinition({
-      ...definition,
-      component: definition.component || [],
-      slug_value: definition.slug_config.slug_value,
+      title: definition.title,
       status: ObservationDefinitionStatus.RETIRED,
+      description: definition.description,
+      category: definition.category,
+      code: definition.code,
+      permitted_data_type: definition.permitted_data_type,
+      component: definition.component || [],
+      body_site: definition.body_site,
+      method: definition.method,
+      permitted_unit: definition.permitted_unit,
+      derived_from_uri: definition.derived_from_uri,
+      qualified_ranges: definition.qualified_ranges,
+      slug_value: definition.slug_config.slug_value,
     });
   };
 
