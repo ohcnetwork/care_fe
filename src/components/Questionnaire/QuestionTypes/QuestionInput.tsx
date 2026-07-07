@@ -386,7 +386,8 @@ export function QuestionInput({
       !question.structured_type &&
       !question.repeats &&
       question.type !== "text" &&
-      question.type !== "string";
+      question.type !== "string" &&
+      question.type !== "url";
     // Wide / multi-field inputs (e.g. quantity) look cramped with the notes
     // button attached on the right, so render it on the next line instead.
     const notesBelow = question.type === "quantity";
