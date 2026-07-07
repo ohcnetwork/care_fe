@@ -42,7 +42,7 @@ export interface BaseObservationDefinition {
   component: ObservationDefinitionComponent[] | null;
   body_site: Code | null;
   method: Code | null;
-  permitted_unit?: Code;
+  permitted_unit?: Code | null;
   derived_from_uri?: string;
   qualified_ranges: QualifiedRange[];
 }
