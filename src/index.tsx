@@ -1,8 +1,6 @@
 import "@/style/index.css";
 import "reactflow/dist/style.css";
 
-import * as Sentry from "@sentry/browser";
-
 import App from "@/App";
 import { AuthContextType, AuthUserContext } from "@/hooks/useAuthUser";
 import { initI18n } from "@/i18n";
@@ -41,13 +39,6 @@ window.addEventListener("vite:preloadError", (event) => {
     window.location.reload();
   }
 });
-
-if (import.meta.env.PROD) {
-  Sentry.init({
-    environment: import.meta.env.MODE,
-    dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
-  });
-}
 
 // Initialize i18n with namespaces from API before rendering the app
 initI18n()
