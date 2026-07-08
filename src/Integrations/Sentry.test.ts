@@ -15,6 +15,14 @@ describe("scrubUrl", () => {
     ).toBe("/facility/<id>/patients/<id>/encounter");
   });
 
+  it("strips query strings and replaces UUID path segments together", () => {
+    expect(
+      scrubUrl(
+        "/facility/0198aaaa-1111-7bbb-8ccc-2ddddddddddd/patients?phone_number=999",
+      ),
+    ).toBe("/facility/<id>/patients");
+  });
+
   it("leaves non-sensitive urls intact", () => {
     expect(scrubUrl("/login")).toBe("/login");
   });
