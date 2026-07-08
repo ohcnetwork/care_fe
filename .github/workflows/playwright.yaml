@@ -23,6 +23,7 @@ env:
   REACT_CARE_API_URL: http://localhost:9000
   BACKEND_STARTUP_TIMEOUT: 120
   TEST_SHARDS: 3
+  REACT_CUSTOM_NAV_LINKS: '[{"name":"Documentation","url":"https://docs.ohc.network","placement":["all"]},{"name":"Questionnaire","url":"/admin/questionnaire","placement":["all"]},{"name":"Landing","url":"https://ohc.network","openInNewTab":false,"placement":["admin","organization"]}]'
 
 jobs:
   # Detect if test-related files changed
@@ -165,7 +166,7 @@ jobs:
         run: |
           echo "Cache miss on first attempt, waiting 30s for propagation..."
           sleep 30
-      
+
       - name: Restore build cache (retry)
         if: steps.cache-restore.outputs.cache-hit != 'true'
         id: cache-restore-retry
