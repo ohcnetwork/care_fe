@@ -11,7 +11,7 @@ jobs:
   validate-jira-ticket:
     runs-on: ubuntu-24.04-arm
     if: >
-      github.event.pull_request.user.type != 'Bot' &&
+      !contains(fromJSON('["renovate[bot]", "dependabot[bot]", "dependabot-preview[bot]"]'), github.event.pull_request.user.login) &&
       github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
