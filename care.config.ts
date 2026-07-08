@@ -327,6 +327,15 @@ const careConfig = {
   ),
 
   /**
+   * Enable questionnaire draft-saving if set to "true".
+   * When disabled, users cannot save questionnaire responses as drafts.
+   */
+  enableQuestionnaireDraft: booleanFromString(
+    env.REACT_ENABLE_QUESTIONNAIRE_DRAFT,
+    false,
+  ),
+
+  /**
    * Default state for tax inclusive pricing in inventory
    * When true, base price is calculated from MRP by removing tax
    */

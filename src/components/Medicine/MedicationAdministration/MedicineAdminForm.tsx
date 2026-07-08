@@ -39,6 +39,10 @@ import {
   getMedicationActiveWindow,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 interface MedicineAdminFormProps {
   medication: MedicationRequestRead;
@@ -48,6 +52,7 @@ interface MedicineAdminFormProps {
   onChange: (request: MedicationAdministrationRequest) => void;
   onMedicationChange?: (medication: MedicationRequestRead) => void;
   formId: string;
+  productType: AdministrableProductType;
   isValid?: (valid: boolean) => void;
   compact?: boolean;
   otherGroupRequests?: MedicationRequestRead[];
@@ -208,6 +213,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   isValid,
   compact = false,
   otherGroupRequests,
+  productType,
 }) => {
   const { t } = useTranslation();
 
@@ -393,7 +399,9 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             onClick={handleAdministerNow}
           >
             <CareIcon icon="l-check-circle" className="size-4 mr-1.5" />
-            {t("administer_now")}
+            {productType === ProductKnowledgeType.medication
+              ? t("administer_now")
+              : t("record_intake_now")}
           </Button>
           <Button
             type="button"
