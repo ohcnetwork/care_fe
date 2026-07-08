@@ -87,7 +87,7 @@ export function DateTimeQuestion({
         date={currentValue}
         onChange={handleSelect}
         disablePicker={disabled}
-        className="flex-1 border-gray-300 shadow-none!"
+        className="flex-1 border-gray-300 shadow-none"
       />
       <Input
         type="time"
