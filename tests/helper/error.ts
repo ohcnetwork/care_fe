@@ -14,5 +14,7 @@ import type { Locator } from "@playwright/test";
  * await expect(errorMessage).toContainText("Required");
  */
 export function getFieldErrorMessage(fieldLocator: Locator): Locator {
-  return fieldLocator.locator("..").locator('[data-slot="form-message"]');
+  return fieldLocator
+    .locator("xpath=ancestor::*[@data-slot='form-item']")
+    .locator('[data-slot="form-message"]');
 }
