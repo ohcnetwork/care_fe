@@ -1,8 +1,9 @@
 import {
   computeTotalDoseQuantity,
   DoseRange,
-  formatDurationLabel,
+  formatTimingBounds,
   getFrequencyDisplayLabel,
+  getTimingBounds,
   MedicationRequestDosageInstruction,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { round } from "@/Utils/decimal";
@@ -64,15 +65,15 @@ export function formatFrequency(
 }
 
 /**
- * Standard duration display for a dosage instruction.
- * Returns human-readable label like "5 days", "2 weeks".
+ * Standard duration display for a dosage instruction. Handles all three
+ * scheduling bounds — duration ("5 days"), range ("5–7 days"), and period
+ * ("Jun 01, 2026 → Jun 08, 2026").
  */
 export function formatDuration(
   instruction?: MedicationRequestDosageInstruction,
 ): string {
-  const duration = instruction?.timing?.repeat?.bounds_duration;
-  if (!duration?.value || duration.value === "0") return "";
-  return formatDurationLabel(duration);
+  const bounds = getTimingBounds(instruction?.timing?.repeat);
+  return bounds ? formatTimingBounds(bounds) : "";
 }
 
 /**
