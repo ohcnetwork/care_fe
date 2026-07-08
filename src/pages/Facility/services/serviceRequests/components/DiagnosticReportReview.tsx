@@ -47,8 +47,9 @@ import fileApi from "@/types/files/fileApi";
 interface DiagnosticReportReviewProps {
   facilityId: string;
   patientId: string;
-  serviceRequestId: string;
   diagnosticReports: DiagnosticReportRead[];
+
+  serviceRequestId?: string;
   disableEdit: boolean;
 }
 
@@ -56,6 +57,7 @@ export function DiagnosticReportReview({
   facilityId,
   patientId,
   diagnosticReports,
+  serviceRequestId,
   disableEdit,
 }: DiagnosticReportReviewProps) {
   const { t } = useTranslation();
@@ -73,6 +75,7 @@ export function DiagnosticReportReview({
           report={report}
           facilityId={facilityId}
           patientId={patientId}
+          serviceRequestId={serviceRequestId}
           disableEdit={disableEdit}
         />
       ))}
@@ -84,11 +87,13 @@ function DiagnosticReportReviewItem({
   report,
   facilityId,
   patientId,
+  serviceRequestId,
   disableEdit,
 }: {
   report: DiagnosticReportRead;
   facilityId: string;
   patientId: string;
+  serviceRequestId?: string;
   disableEdit: boolean;
 }) {
   const { t } = useTranslation();
@@ -97,7 +102,7 @@ function DiagnosticReportReviewItem({
   const [conclusion, setConclusion] = useState<string>(report.conclusion || "");
   const [showApproveDialog, setShowApproveDialog] = useState(false);
 
-  const { data: fullReport } = useQuery({
+  const { data: fullReport, isFetched: isReportFetched } = useQuery({
     queryKey: ["diagnosticReport", report.id],
     queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
       pathParams: {
@@ -108,20 +113,19 @@ function DiagnosticReportReviewItem({
     enabled: !!report.id && isExpanded,
   });
 
-  const { data: files = { results: [], count: 0 } } = useQuery<
-    PaginatedResponse<FileReadMinimal>
-  >({
-    queryKey: ["files", "diagnostic_report", report.id],
-    queryFn: query(fileApi.list, {
-      queryParams: {
-        file_type: "diagnostic_report",
-        associating_id: report.id,
-        limit: 100,
-        offset: 0,
-      },
-    }),
-    enabled: !!report.id && isExpanded,
-  });
+  const { data: files = { results: [], count: 0 }, isFetched: isFilesFetched } =
+    useQuery<PaginatedResponse<FileReadMinimal>>({
+      queryKey: ["files", "diagnostic_report", report.id],
+      queryFn: query(fileApi.list, {
+        queryParams: {
+          file_type: "diagnostic_report",
+          associating_id: report.id,
+          limit: 100,
+          offset: 0,
+        },
+      }),
+      enabled: !!report.id && isExpanded,
+    });
 
   const { mutate: updateDiagnosticReport, isPending: isUpdatingReport } =
     useMutation({
@@ -166,6 +170,8 @@ function DiagnosticReportReviewItem({
   };
 
   const isReportNotReviewable =
+    isReportFetched &&
+    isFilesFetched &&
     (!reportDetail.observations || reportDetail.observations.length === 0) &&
     (!files?.results || files.results.length === 0) &&
     !reportDetail.conclusion;
@@ -311,7 +317,7 @@ function DiagnosticReportReviewItem({
                   <Button variant="outline" className="gap-2" asChild>
                     <Link
                       basePath="/"
-                      href={`/facility/${facilityId}/patient/${patientId}/service_request/${report.service_request?.id}/diagnostic_report/${report.id}/print`}
+                      href={`/facility/${facilityId}/patient/${patientId}/service_request/${serviceRequestId}/diagnostic_report/${report.id}/print`}
                       className="flex items-center gap-2"
                     >
                       <Printer className="size-4" />
@@ -321,7 +327,7 @@ function DiagnosticReportReviewItem({
                   <Button variant="outline" asChild>
                     <Link
                       basePath="/"
-                      href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}`}
+                      href={`/facility/${facilityId}/patient/${patientId}/service_request/${serviceRequestId}/diagnostic_reports/${report.id}`}
                       className="flex items-center gap-2"
                     >
                       <FileText className="size-4" />

@@ -242,13 +242,16 @@ const DiagnosticReportPreviewItem = ({
     if (!files.results.length) return;
 
     const fetchAllUrls = async () => {
-      const urls: Record<string, string> = {};
+      const entries = await Promise.all(
+        files.results
+          .filter((file) => file.id)
+          .map(async (file) => [file.id!, await getFileUrl(file)] as const),
+      );
 
-      for (const file of files.results) {
-        if (!file.id) continue;
-        const url = await getFileUrl(file);
+      const urls: Record<string, string> = {};
+      for (const [id, url] of entries) {
         if (url) {
-          urls[file.id] = url;
+          urls[id] = url;
         }
       }
 

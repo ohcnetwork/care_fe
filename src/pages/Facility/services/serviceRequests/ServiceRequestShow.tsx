@@ -326,12 +326,12 @@ export default function ServiceRequestShow({
     }
   };
 
-  const isFinal = request.diagnostic_reports.some(
+  const isFinal = diagnosticReports.some(
     (report) => report.status === DiagnosticReportStatus.final,
   );
 
-  const totalReports = request.diagnostic_reports.length;
-  const pendingReports = request.diagnostic_reports.filter(
+  const totalReports = diagnosticReports.length;
+  const pendingReports = diagnosticReports.filter(
     (report) => report.status !== DiagnosticReportStatus.final,
   ).length;
   const hasPendingReports = pendingReports > 0;
@@ -623,8 +623,8 @@ export default function ServiceRequestShow({
             <DiagnosticReportReview
               facilityId={facilityId}
               patientId={request.encounter.patient.id}
-              serviceRequestId={serviceRequestId}
               diagnosticReports={diagnosticReports}
+              serviceRequestId={serviceRequestId}
               disableEdit={disableEdit}
             />
           )}

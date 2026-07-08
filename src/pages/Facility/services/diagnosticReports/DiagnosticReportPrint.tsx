@@ -34,11 +34,7 @@ export default function DiagnosticReportPrint({
     ?.filter((report) => report.status === DiagnosticReportStatus.final)
     ?.map((report) => report.id);
 
-  if (!diagnosticReportId && !serviceRequestId) {
-    return <div>{t("service_request_not_found")}</div>;
-  }
-
-  if (serviceRequestId && isLoadingRequest) {
+  if (isLoadingRequest) {
     return <Loading />;
   }
 

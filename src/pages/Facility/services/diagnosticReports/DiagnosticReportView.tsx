@@ -89,16 +89,18 @@ export default function DiagnosticReportView({
           <ArrowLeft />
           <span>{t("back")}</span>
         </BackButton>
-        <Button variant="outline" asChild>
-          <Link
-            href={`/facility/${facilityId}/patient/${report.encounter.patient.id}/service_request/${report.service_request?.id}/diagnostic_report/${diagnosticReportId}/print`}
-            className="flex items-center gap-2"
-          >
-            <Printer className="size-4 mr-2" />
-            {t("print")}
-            <ShortcutBadge actionId="print-report" />
-          </Link>
-        </Button>
+        {report.service_request?.id && (
+          <Button variant="outline" asChild>
+            <Link
+              href={`/facility/${facilityId}/patient/${report.encounter.patient.id}/service_request/${report.service_request.id}/diagnostic_report/${diagnosticReportId}/print`}
+              className="flex items-center gap-2"
+            >
+              <Printer className="size-4 mr-2" />
+              {t("print")}
+              <ShortcutBadge actionId="print-report" />
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="space-y-6">

@@ -170,7 +170,7 @@ function DiagnosticReportDetailCard({
                     navigate(
                       buildEncounterUrl(
                         patientId,
-                        `/diagnostic_reports/${report.id}/print`,
+                        `/service_request/${report.service_request?.id}/diagnostic_report/${report.id}/print`,
                         facilityId,
                       ),
                     )
