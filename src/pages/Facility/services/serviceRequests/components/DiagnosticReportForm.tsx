@@ -330,7 +330,7 @@ function DiagnosticReportItem({
   const [observations, setObservations] = useState<ObservationsByDefinition>(
     {},
   );
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [conclusion, setConclusion] = useState("");
 

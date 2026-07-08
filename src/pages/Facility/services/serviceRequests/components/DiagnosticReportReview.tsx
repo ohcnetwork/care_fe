@@ -3,9 +3,9 @@ import {
   CheckCircle2,
   ChevronsDownUp,
   ChevronsUpDown,
-  Download,
   FileCheck2,
   FileText,
+  Printer,
 } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useState } from "react";
@@ -308,14 +308,14 @@ function DiagnosticReportReviewItem({
 
               {report.status === DiagnosticReportStatus.final && (
                 <div className="flex gap-2 justify-end">
-                  <Button variant="ghost" className="gap-2" asChild>
+                  <Button variant="outline" className="gap-2" asChild>
                     <Link
                       basePath="/"
                       href={`/facility/${facilityId}/patient/${patientId}/service_request/${report.service_request?.id}/diagnostic_report/${report.id}/print`}
-                      className="flex items-center gap-2 underline"
+                      className="flex items-center gap-2"
                     >
-                      <Download className="size-4" />
-                      {t("download_report")}
+                      <Printer className="size-4" />
+                      {t("print_report")}
                     </Link>
                   </Button>
                   <Button variant="outline" asChild>
