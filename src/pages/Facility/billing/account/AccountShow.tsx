@@ -57,7 +57,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
-import { isPositive } from "@/Utils/decimal";
+import { isPositive, isZero } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
@@ -181,8 +181,10 @@ export function AccountShow({
       setCloseAccountStatus({
         sheetOpen: false,
         reason: isBillingClosed
-          ? account?.billing_status
-          : AccountBillingStatus.closed_baddebt,
+          ? account.billing_status
+          : isZero(account.total_balance)
+            ? AccountBillingStatus.closed_completed
+            : AccountBillingStatus.closed_baddebt,
       });
     }
   }, [account, isBillingClosed]);
@@ -287,6 +289,19 @@ export function AccountShow({
 
   const isAccountBillableAndActive =
     !!account && isAccountActiveAndBillable(account);
+
+  // For a settled (zero-balance) account, closing as "completed" is the
+  // expected outcome, so it becomes the default and first-listed reason.
+  const isZeroBalance = isZero(account.total_balance);
+  const closeReasonOptions = Object.keys(closeBillingStatusColorMap);
+  const orderedCloseReasonOptions = isZeroBalance
+    ? [
+        AccountBillingStatus.closed_completed,
+        ...closeReasonOptions.filter(
+          (key) => key !== AccountBillingStatus.closed_completed,
+        ),
+      ]
+    : closeReasonOptions;
 
   const tabs = {
     invoices: {
@@ -768,7 +783,7 @@ export function AccountShow({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {Object.keys(closeBillingStatusColorMap).map((key) => (
+              {orderedCloseReasonOptions.map((key) => (
                 <SelectItem key={key} value={key}>
                   {t(key)}
                 </SelectItem>
