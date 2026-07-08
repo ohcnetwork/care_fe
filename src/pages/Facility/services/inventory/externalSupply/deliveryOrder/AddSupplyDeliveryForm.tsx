@@ -83,6 +83,7 @@ import { round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { ExtensionContexts } from "@/Utils/schema/types";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
@@ -109,11 +110,11 @@ const supplyDeliveryItemSchema = z.object({
   informational_components: z.array(z.custom<MonetaryComponent>()).optional(),
   tax_components: z.array(z.custom<MonetaryComponent>()).optional(),
   discount_components: z.array(z.custom<MonetaryComponent>()).optional(),
-  extensions: z.record(z.unknown()).optional(),
+  extensions: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const createFormSchema = z.object({
-  supplied_item_type: z.nativeEnum(SupplyDeliveryType),
+  supplied_item_type: z.enum(SupplyDeliveryType),
   items: z
     .array(supplyDeliveryItemSchema)
     .min(1, "At least one item is required"),
@@ -161,13 +162,18 @@ export function AddSupplyDeliveryForm({
 
   // Process extensions for form rendering (includes owner, defaults, fieldMetadata)
   const processedExtensions = useMemo(
-    () => processExtensions(allExtensions),
+    () =>
+      processExtensions(allExtensions, ExtensionContexts.supply_delivery_form),
     [allExtensions],
   );
 
   // Get extension field metadata with extension name for table headers
   const extensionFields = useMemo(
-    () => getExtensionFieldsWithName(allExtensions),
+    () =>
+      getExtensionFieldsWithName(
+        allExtensions,
+        ExtensionContexts.supply_delivery_table,
+      ),
     [allExtensions],
   );
 
@@ -492,9 +498,7 @@ export function AddSupplyDeliveryForm({
           product_knowledge: item.product_knowledge.slug,
           charge_item_definition: chargeItemSlug,
           standard_pack_size: item.supplied_item_pack_size,
-          purchase_price: item.purchase_price
-            ? parseFloat(item.purchase_price)
-            : undefined,
+          purchase_price: item.purchase_price,
           extensions: {},
         };
 
