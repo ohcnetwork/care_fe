@@ -76,7 +76,6 @@ export default function PrescriptionListSelector({
         });
         return response;
       },
-      enabled: !!facilityId,
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
         const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
