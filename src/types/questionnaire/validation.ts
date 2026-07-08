@@ -22,10 +22,6 @@ export interface FieldErrorProps<T extends string> {
   errors?: QuestionValidationError[];
 }
 
-export function createFieldKeys<T extends { [K: string]: string }>(keys: T) {
-  return keys as { readonly [P in keyof T]: T[P] };
-}
-
 export function useFieldError(
   questionId: string,
   errors?: QuestionValidationError[],
@@ -50,20 +46,6 @@ export function useFieldError(
   };
 
   return { hasError, getError };
-}
-
-export function createValidationError(
-  questionId: string,
-  fieldKey: string,
-  error: string,
-): QuestionValidationError {
-  return {
-    question_id: questionId,
-    field_key: fieldKey,
-    error,
-    type: "validation_error",
-    msg: error,
-  };
 }
 
 export function validateFields(

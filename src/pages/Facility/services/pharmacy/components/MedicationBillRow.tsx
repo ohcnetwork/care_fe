@@ -105,8 +105,7 @@ export function MedicationBillRow({
   const { t } = useTranslation();
 
   const productKnowledge = field.productKnowledge as
-    | ProductKnowledgeBase
-    | undefined;
+    ProductKnowledgeBase | undefined;
   const substitution = form.watch(`items.${index}.substitution`);
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;

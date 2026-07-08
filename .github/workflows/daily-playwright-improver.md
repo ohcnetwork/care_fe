@@ -7,6 +7,12 @@ on:
   schedule:
     - cron: "0 3 * * 1-5" # 03:00 UTC, weekdays only
   workflow_dispatch:
+# Only run on the upstream repository. Forks don't have COPILOT_GITHUB_TOKEN
+# configured, so scheduled runs on forks would otherwise fail loudly and spam
+# fork maintainers with daily failure notifications. This condition short-circuits
+# every job cleanly (workflow shows as skipped, no error) on any repo other than
+# ohcnetwork/care_fe.
+if: ${{ github.repository == 'ohcnetwork/care_fe' }}
 permissions: read-all
 tools:
   github:
