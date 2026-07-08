@@ -100,7 +100,12 @@ test.describe("Custom sidebar nav links (env)", () => {
 
     await link.click();
     await expect(page).toHaveURL(
-      new RegExp(new URL(externalSameTab!.url).host.replace(/\./g, "\\.")),
+      new RegExp(
+        new URL(externalSameTab!.url).host.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          "\\$&",
+        ),
+      ),
     );
   });
 
