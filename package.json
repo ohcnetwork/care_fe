@@ -37,6 +37,9 @@
     "build": "npm run build:meta && npm run supported-browsers && npm run build:react",
     "postinstall": "tsx scripts/install-platform-deps.ts && tsx scripts/generate-headers.ts",
     "test": "snyk test",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "typecheck": "npm run supported-browsers && tsc --noEmit -p tsconfig.json",
     "playwright:test": "playwright test",
     "playwright:test:ui": "playwright test --ui",
     "playwright:test:headed": "playwright test --headed",
@@ -195,6 +198,7 @@
     "vite-plugin-checker": "^0.9.0",
     "vite-plugin-pwa": "^1.0.0",
     "vite-plugin-static-copy": "^2.0.0",
+    "vitest": "^3.2.7",
     "zod": "^3.24.2"
   },
   "optionalDependencies": {
