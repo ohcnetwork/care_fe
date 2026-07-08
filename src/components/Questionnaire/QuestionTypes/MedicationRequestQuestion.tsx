@@ -2381,6 +2381,3 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     </div>
   );
 };
-
-// Re-export reverseFrequencyOption from MedicationTimingSelect for backwards compatibility
-export { reverseFrequencyOption } from "@/components/Medicine/MedicationTimingSelect";
