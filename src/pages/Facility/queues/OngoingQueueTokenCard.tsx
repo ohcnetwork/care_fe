@@ -559,19 +559,6 @@ const TokenContent = ({
     },
   });
 
-  const handleUpdateToken = () => {
-    if (assignedServicePoints.length === 1) {
-      updateToken({
-        status: TokenStatus.IN_PROGRESS,
-        note: token.note,
-        sub_queue: assignedServicePoints[0].id,
-      });
-      return;
-    }
-    setServicePointAction("serve");
-    setOpenServicePointSelector(true);
-  };
-
   return (
     <div className="w-full max-w-md mx-auto space-y-2">
       <DialogHeader className="flex flex-row items-start justify-between">
@@ -684,7 +671,18 @@ const TokenContent = ({
             <Button
               variant="primary"
               className="flex-1"
-              onClick={handleUpdateToken}
+              onClick={() => {
+                if (assignedServicePoints.length === 1) {
+                  updateToken({
+                    status: TokenStatus.IN_PROGRESS,
+                    note: token.note,
+                    sub_queue: assignedServicePoints[0].id,
+                  });
+                  return;
+                }
+                setServicePointAction("serve");
+                setOpenServicePointSelector(true);
+              }}
               disabled={isPending || hasNoAssignedServicePoints}
             >
               <Megaphone className="size-4 mr-2" />
@@ -718,7 +716,13 @@ const TokenContent = ({
             </Button>
             <Button
               variant="primary"
-              onClick={handleUpdateToken}
+              onClick={() => {
+                updateToken({
+                  status: TokenStatus.IN_PROGRESS,
+                  note: token.note,
+                  sub_queue: token.sub_queue?.id || null,
+                });
+              }}
               disabled={isPending || hasNoAssignedServicePoints}
               className="flex-1"
             >
