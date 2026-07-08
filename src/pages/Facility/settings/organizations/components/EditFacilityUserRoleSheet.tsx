@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -40,9 +40,7 @@ export default function EditUserRoleSheet({
 }: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<RoleBase>({
-    ...userRole.role,
-  });
+  const [selectedRole, setSelectedRole] = useState<RoleBase>();
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const { t } = useTranslation();
 
@@ -110,6 +108,13 @@ export default function EditUserRoleSheet({
       role: selectedRole.id,
     });
   };
+
+  useEffect(() => {
+    if (open) {
+      setSelectedRole(userRole.role);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   return (
     <>
