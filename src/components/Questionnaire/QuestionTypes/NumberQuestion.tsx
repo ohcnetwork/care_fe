@@ -29,27 +29,15 @@ export function NumberQuestion({
 }: NumberQuestionProps) {
   const handleChange = (value: string) => {
     clearError();
-    const emptyValue = value === "";
-
-    if (emptyValue) {
-      const newValues = questionnaireResponse.values.filter(
-        (_, i) => i !== index,
-      );
-      updateQuestionnaireResponseCB(
-        newValues,
-        questionnaireResponse.question_id,
-        questionnaireResponse.note,
-      );
-      return;
-    }
-
-    const numericValue = question.type === "decimal" ? value : parseInt(value);
-
     const newValues = [...questionnaireResponse.values];
-    newValues[index] = {
-      type: "number",
-      value: numericValue,
-    };
+
+    if (value === "") {
+      newValues[index] = { type: "number", value: undefined };
+    } else {
+      const numericValue =
+        question.type === "decimal" ? value : parseInt(value);
+      newValues[index] = { type: "number", value: numericValue };
+    }
 
     updateQuestionnaireResponseCB(
       newValues,
