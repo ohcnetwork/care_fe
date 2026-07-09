@@ -319,7 +319,7 @@ const careConfig = {
   ),
 
   /**
-   * Show token generation button in patient home if set to "true".
+   * Show token generation button in patient home if set to "true"
    */
   enableTokenGenerationInPatientHome: booleanFromString(
     env.REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME,
