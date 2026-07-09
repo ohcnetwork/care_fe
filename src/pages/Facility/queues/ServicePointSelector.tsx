@@ -23,9 +23,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export type ServicePointSelectorAction =
-  | "serve"
-  | "move_to_up_next"
-  | "change_service_point";
+  "serve" | "move_to_up_next" | "change_service_point";
 
 const ACTION_TO_STATUS: Record<ServicePointSelectorAction, TokenStatus> = {
   serve: TokenStatus.IN_PROGRESS,
@@ -144,6 +142,7 @@ export const ServicePointSelector = ({
               value={selectedSubQueueId}
               className="flex flex-col gap-3"
               classNameInput="p-2"
+              disabled={isPending}
             />
           </div>
         </DrawerContent>
@@ -171,6 +170,7 @@ export const ServicePointSelector = ({
             value={selectedSubQueueId}
             className="flex flex-col gap-3"
             classNameInput="p-2"
+            disabled={isPending}
           />
         </div>
       </DialogContent>

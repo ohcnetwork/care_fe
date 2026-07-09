@@ -424,6 +424,14 @@ const TokenTrigger = ({
   return (
     <div
       {...props}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          e.currentTarget.click();
+        }
+      }}
       className={cn(
         "relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow hover:cursor-pointer hover:shadow-md",
         token.status === TokenStatus.IN_PROGRESS && "border border-primary-500",
@@ -537,9 +545,10 @@ const TokenContent = ({
   const queueStatus = getQueueTokenStatus(token);
   const queryClient = useQueryClient();
 
-  const { assignedServicePoints } = useQueueServicePoints();
+  const { assignedServicePoints, isLoadingSubQueues } = useQueueServicePoints();
 
-  const hasNoAssignedServicePoints = assignedServicePoints.length === 0;
+  const hasNoAssignedServicePoints =
+    assignedServicePoints.length === 0 && !isLoadingSubQueues;
 
   const { mutate: updateToken, isPending } = useMutation({
     mutationFn: mutate(tokenApi.update, {
