@@ -811,6 +811,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 className={cn(
                   "justify-between px-3 py-2 w-full shadow-xs border border-gray-300 font-medium h-auto min-h-9",
                   disabled && "opacity-50 cursor-not-allowed",
+                  value && !shouldHideClearButton && "rounded-r-none",
                   className,
                 )}
                 disabled={disabled}
@@ -830,7 +831,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               <Button
                 variant="outline"
                 onClick={handleClearSelection}
-                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300"
+                className="rounded-l-none shadow-none text-gray-400 border-gray-300 border-l-0 h-9.5"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
