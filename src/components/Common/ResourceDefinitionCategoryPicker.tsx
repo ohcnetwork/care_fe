@@ -929,6 +929,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                   "hover:bg-gray-50 hover:text-gray-900",
                   "transition-all duration-200",
                   disabled && "opacity-50 cursor-not-allowed",
+                  value && !shouldHideClearButton && "rounded-r-none",
                   className,
                 )}
                 disabled={disabled}
@@ -960,7 +961,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               <Button
                 variant="outline"
                 onClick={handleClearSelection}
-                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300"
+                className="rounded-l-none shadow-none text-gray-400 border-gray-300 border-l-0 h-[38px]"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
