@@ -531,8 +531,7 @@ export function ConditionEditor<
       const currentValue = conditions[index].value;
       const updatedValue = {
         ...(currentValue as
-          | AgeOperationInRangeValue
-          | AgeOperationEqualityValue),
+          AgeOperationInRangeValue | AgeOperationEqualityValue),
         value_type: value,
       };
       setConditions(

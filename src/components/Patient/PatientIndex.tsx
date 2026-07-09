@@ -64,8 +64,7 @@ const ENCOUNTER_SEARCH_PATIENT_NAME = "name" as const;
 const ENCOUNTER_SEARCH_EXTERNAL_IDENTIFIER = "external_identifier" as const;
 
 type PatientSearchMode =
-  | typeof SEARCH_MODE_IDENTIFIER
-  | typeof SEARCH_MODE_ENCOUNTER;
+  typeof SEARCH_MODE_IDENTIFIER | typeof SEARCH_MODE_ENCOUNTER;
 type EncounterSearchKey =
   | typeof ENCOUNTER_SEARCH_PATIENT_NAME
   | typeof ENCOUNTER_SEARCH_EXTERNAL_IDENTIFIER;
