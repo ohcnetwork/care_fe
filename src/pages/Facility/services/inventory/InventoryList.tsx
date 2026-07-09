@@ -230,6 +230,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                   <TableCell className="font-semibold flex items-center gap-2 underline">
                     <button
                       type="button"
+                      className="hover:text-gray-700"
                       onClick={() => {
                         setSelectedProductKnowledgeDrawer(
                           inventory.product.product_knowledge,
