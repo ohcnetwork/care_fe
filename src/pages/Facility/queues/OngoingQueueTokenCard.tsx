@@ -252,7 +252,6 @@ function OngoingQueueTokenCardInner({
 }: {
   facilityId: string;
   token: TokenRead;
-  options?: React.ReactNode;
   showCancelDialog: boolean;
   setShowCancelDialog: (open: boolean) => void;
   showEnteredInErrorDialog: boolean;
@@ -672,7 +671,9 @@ const TokenContent = ({
                 setServicePointAction("move_to_up_next");
                 setOpenServicePointSelector(true);
               }}
-              disabled={isPending || hasNoAssignedServicePoints}
+              disabled={
+                isPending || isLoadingSubQueues || hasNoAssignedServicePoints
+              }
             >
               <ArrowUpRight className="size-4 mr-2" />
               {t("move_to_up_next")}
@@ -692,7 +693,9 @@ const TokenContent = ({
                 setServicePointAction("serve");
                 setOpenServicePointSelector(true);
               }}
-              disabled={isPending || hasNoAssignedServicePoints}
+              disabled={
+                isPending || isLoadingSubQueues || hasNoAssignedServicePoints
+              }
             >
               <Megaphone className="size-4 mr-2" />
               {t("serve")}
@@ -732,7 +735,9 @@ const TokenContent = ({
                   sub_queue: token.sub_queue?.id || null,
                 });
               }}
-              disabled={isPending || hasNoAssignedServicePoints}
+              disabled={
+                isPending || isLoadingSubQueues || hasNoAssignedServicePoints
+              }
               className="flex-1"
             >
               <Megaphone className="size-4 mr-2" />

@@ -20,7 +20,7 @@ export function useQueueServicePoints() {
   const servicPointKey = `${resourceType}:${resourceId}`;
 
   const { data: subQueues, isLoading: isLoadingSubQueues } = useQuery({
-    queryKey: ["servicePoints", facilityId],
+    queryKey: ["servicePoints", facilityId, resourceType, resourceId],
     queryFn: query(tokenSubQueueApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
