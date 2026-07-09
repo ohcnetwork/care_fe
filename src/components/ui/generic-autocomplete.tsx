@@ -32,6 +32,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { X } from "lucide-react";
+import { useState } from "react";
 
 interface GenericAutoCompleteOptionBase<T> {
   label: string;
@@ -117,6 +118,10 @@ function getOptionKey<T>(option: GenericAutoCompleteOption<T>): string {
   return option.label;
 }
 
+function getOptionDomId(groupId: string, optionKey: string): string {
+  return `ga-${groupId}-${encodeURIComponent(optionKey).replace(/%/g, "_")}`;
+}
+
 interface GenericAutocompleteRadioProps<T> {
   options: GenericAutoCompleteOption<T>[];
   value: T | null;
@@ -142,6 +147,7 @@ function GenericAutocompleteRadio<T>({
   className,
 }: GenericAutocompleteRadioProps<T>) {
   const { t } = useTranslation();
+  const groupId = React.useId();
 
   const selectedOption = options.find((opt) => valueCompare(opt.value, value));
   const selectedKey = selectedOption ? getOptionKey(selectedOption) : null;
@@ -155,7 +161,7 @@ function GenericAutocompleteRadio<T>({
 
   return (
     <div className={cn("space-y-2", className)}>
-      {value !== null && showClearButton && (
+      {value && showClearButton && (
         <div className="flex justify-end">
           <Button
             type="button"
@@ -178,11 +184,12 @@ function GenericAutocompleteRadio<T>({
       >
         {options.map((option) => {
           const itemKey = getOptionKey(option);
+          const itemId = getOptionDomId(groupId, itemKey);
           const isSelected = valueCompare(option.value, value);
           return (
             <Label
               key={itemKey}
-              htmlFor={itemKey}
+              htmlFor={itemId}
               className={cn(
                 "border rounded-md p-2 w-full cursor-pointer sm:w-auto sm:max-w-xs hover:border-primary-500 group text-left",
                 isSelected
@@ -192,7 +199,7 @@ function GenericAutocompleteRadio<T>({
             >
               <RadioGroupItem
                 value={itemKey}
-                id={itemKey}
+                id={itemId}
                 className="h-4 w-4 text-primary focus:ring-primary group-hover:border-primary-500"
               />
               {renderOption?.(option, isSelected) ?? (
@@ -272,19 +279,15 @@ function GenericAutocompleteDropdown<T>({
     valueCompare(option.value, value),
   );
 
-  // Sync the inputValue with value prop changes (only for string/freeInput mode)
-  React.useEffect(() => {
+  // Sync the inputValue when the value prop changes (only for string/freeInput
+  // mode). Adjusting state during render avoids a setState-in-effect cascade.
+  const [prevValue, setPrevValue] = React.useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
     if (typeof value === "string") {
-      const selected = options.find((option) =>
-        valueCompare(option.value, value),
-      );
-      if (value) {
-        setInputValue(selected ? selected.label : value);
-      } else {
-        setInputValue("");
-      }
+      setInputValue(value ? (selectedOption?.label ?? value) : "");
     }
-  }, [value, options, valueCompare]);
+  }
 
   // Handle changes in the CommandInput.
   const handleInputChange = (newValue: string) => {
@@ -329,6 +332,7 @@ function GenericAutocompleteDropdown<T>({
       <CommandInput
         placeholder={inputPlaceholder}
         disabled={disabled}
+        value={freeInput && typeof value === "string" ? inputValue : undefined}
         onValueChange={handleInputChange}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm md:pr-0"
         autoFocus
@@ -402,7 +406,7 @@ function GenericAutocompleteDropdown<T>({
               className={cn(
                 "w-full min-w-0 justify-between",
                 className,
-                selectedOption && showClearButton && "rounded-r-none",
+                value && showClearButton && "rounded-r-none",
               )}
               disabled={disabled}
               type="button"
@@ -424,7 +428,7 @@ function GenericAutocompleteDropdown<T>({
             </div>
           </DrawerContent>
         </Drawer>
-        {selectedOption && showClearButton ? (
+        {value && showClearButton ? (
           <Button
             variant="outline"
             size="icon"
@@ -456,7 +460,7 @@ function GenericAutocompleteDropdown<T>({
             className={cn(
               "w-full min-w-0 justify-between",
               className,
-              selectedOption && showClearButton && "rounded-r-none",
+              value && showClearButton && "rounded-r-none",
             )}
             disabled={disabled}
             onClick={() => setOpen(!open)}
@@ -478,7 +482,7 @@ function GenericAutocompleteDropdown<T>({
           <Command shouldFilter={!onSearch}>{commandContent}</Command>
         </PopoverContent>
       </Popover>
-      {selectedOption && showClearButton ? (
+      {value && showClearButton ? (
         <Button
           variant="outline"
           size="icon"
@@ -538,9 +542,11 @@ export default function GenericAutocomplete<T = string>({
 }: GenericAutocompleteProps<T>) {
   // Capture initial options count to determine variant (radio vs dropdown)
   // This prevents switching variants when search results change
-  const initialOptionsCountRef = React.useRef<number | null>(null);
-  if (initialOptionsCountRef.current === null && options.length > 0) {
-    initialOptionsCountRef.current = options.length;
+  const [initialOptionsCount, setInitialOptionsCount] = useState<number | null>(
+    null,
+  );
+  if (initialOptionsCount === null && options.length > 0) {
+    setInitialOptionsCount(options.length);
   }
 
   // Use radio buttons if:
@@ -549,9 +555,9 @@ export default function GenericAutocomplete<T = string>({
   const useRadioButtons =
     !freeInput &&
     enableRadio &&
-    initialOptionsCountRef.current !== null &&
-    initialOptionsCountRef.current > 0 &&
-    initialOptionsCountRef.current <= DEFAULT_INLINE_OPTIONS_LIMIT;
+    initialOptionsCount !== null &&
+    initialOptionsCount > 0 &&
+    initialOptionsCount <= DEFAULT_INLINE_OPTIONS_LIMIT;
 
   if (useRadioButtons) {
     return (
