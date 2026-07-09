@@ -227,27 +227,29 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
             <TableBody>
               {data?.results?.map((inventory) => (
                 <TableRow key={inventory.id}>
-                  <TableCell
-                    onClick={() => {
-                      setSelectedProductKnowledgeDrawer(
-                        inventory.product.product_knowledge,
-                      );
-                      setShowAllDeliveries(true);
-                    }}
-                    className="font-semibold flex gap-2 cursor-pointer"
-                  >
-                    {inventory.product.product_knowledge.name}
-                    <Link
-                      href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
-                      basePath="/"
-                      className="flex items-center gap-2"
-                      onClick={(e) => e.stopPropagation()}
+                  <TableCell className="font-semibold">
+                    <button
+                      onClick={() => {
+                        setSelectedProductKnowledgeDrawer(
+                          inventory.product.product_knowledge,
+                        );
+                        setShowAllDeliveries(true);
+                      }}
+                      className="w-full flex items-center gap-2 underline"
                     >
-                      <CareIcon
-                        icon="l-external-link-alt"
-                        className="size-4 text-gray-500 hover:text-gray-700"
-                      />
-                    </Link>
+                      {inventory.product.product_knowledge.name}
+                      <Link
+                        href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
+                        basePath="/"
+                        className="flex items-center gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <CareIcon
+                          icon="l-external-link-alt"
+                          className="size-4 text-gray-500 hover:text-gray-700"
+                        />
+                      </Link>
+                    </button>
                   </TableCell>
                   <TableCell
                     className={cn(
@@ -315,16 +317,6 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
           <DrawerHeader>
             <DrawerTitle>{t("all_deliveries")}</DrawerTitle>
           </DrawerHeader>
-          <ProductKnowledgeSelect
-            value={selectedProductKnowledgeDrawer}
-            onChange={(value) => {
-              setSelectedProductKnowledgeDrawer(value);
-            }}
-            placeholder={t("filter_by_product")}
-            disableFavorites
-            alignContent="end"
-            className="max-w-min min-w-fit ml-auto"
-          />
           <ProductDeliveriesDrawerContent
             facilityId={facilityId}
             locationId={locationId}
