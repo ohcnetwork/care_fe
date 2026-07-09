@@ -35,6 +35,7 @@ import { Code } from "@/types/base/code/code";
 import {
   DoseRange,
   MedicationRequestDosageInstruction,
+  timingBoundsToRepeat,
   UCUM_TIME_UNITS,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
@@ -418,7 +419,7 @@ export const AddMedicationSheet = ({
                                 value={
                                   isZero(
                                     localDosageInstruction.timing.repeat
-                                      .bounds_duration.value,
+                                      .bounds_duration?.value ?? "0",
                                   )
                                     ? ""
                                     : localDosageInstruction.timing.repeat
@@ -432,11 +433,19 @@ export const AddMedicationSheet = ({
                                       ...localDosageInstruction.timing,
                                       repeat: {
                                         ...localDosageInstruction.timing.repeat,
-                                        bounds_duration: {
-                                          value,
-                                          unit: localDosageInstruction.timing
-                                            .repeat.bounds_duration.unit,
-                                        },
+                                        // Pharmacy orders only edit duration —
+                                        // emit a single bound, clearing any
+                                        // range/period the original order had.
+                                        ...timingBoundsToRepeat({
+                                          type: "duration",
+                                          value: {
+                                            value,
+                                            unit:
+                                              localDosageInstruction.timing
+                                                .repeat.bounds_duration?.unit ??
+                                              UCUM_TIME_UNITS[0],
+                                          },
+                                        }),
                                       },
                                     },
                                   });
@@ -455,13 +464,16 @@ export const AddMedicationSheet = ({
                                 if (localDosageInstruction?.timing?.repeat) {
                                   const value =
                                     localDosageInstruction?.timing?.repeat
-                                      ?.bounds_duration?.value ?? 0;
+                                      ?.bounds_duration?.value ?? "";
                                   handleUpdateDosageInstruction({
                                     timing: {
                                       ...localDosageInstruction.timing,
                                       repeat: {
                                         ...localDosageInstruction.timing.repeat,
-                                        bounds_duration: { value, unit },
+                                        ...timingBoundsToRepeat({
+                                          type: "duration",
+                                          value: { value, unit },
+                                        }),
                                       },
                                     },
                                   });

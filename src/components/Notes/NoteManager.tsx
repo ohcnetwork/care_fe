@@ -466,7 +466,7 @@ export function NoteManager({
     }
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const canSend =

@@ -373,8 +373,7 @@ export default function AllMedicationBillForm({ patientId }: Props) {
                 `items.${substitutingItemIndex}`,
               );
               const originalMedication = originalItem.medication as
-                | MedicationRequestRead
-                | undefined;
+                MedicationRequestRead | undefined;
               const initialQuantity = originalMedication
                 ? computeMedicationDispenseQuantity(originalMedication)
                 : "0";
