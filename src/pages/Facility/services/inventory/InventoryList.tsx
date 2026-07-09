@@ -229,6 +229,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                 <TableRow key={inventory.id}>
                   <TableCell className="font-semibold">
                     <button
+                      type="button"
                       onClick={() => {
                         setSelectedProductKnowledgeDrawer(
                           inventory.product.product_knowledge,
@@ -305,7 +306,13 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
         <Pagination totalCount={data?.count || 0} />
       </div>
 
-      <Drawer open={showAllDeliveries} onOpenChange={setShowAllDeliveries}>
+      <Drawer
+        open={showAllDeliveries}
+        onOpenChange={(open) => {
+          setShowAllDeliveries(open);
+          if (!open) setSelectedProductKnowledgeDrawer(undefined);
+        }}
+      >
         <DrawerContent className="max-w-7xl mx-auto px-4 sm:px-16 pb-10">
           <DrawerHeader>
             <DrawerTitle className="mb-2">{t("all_deliveries")}</DrawerTitle>
