@@ -65,7 +65,7 @@ function ProductDeliveriesDrawerContent({
 
   const { data: deliveries, isLoading } = useQuery({
     queryKey: [
-      "productDeliveries",
+      "supplyDeliveries",
       facilityId,
       locationId,
       selectedProductKnowledge?.id,
@@ -77,6 +77,7 @@ function ProductDeliveriesDrawerContent({
         supplied_inventory_item_product_knowledge: selectedProductKnowledge?.id,
       },
     }),
+    enabled: !!selectedProductKnowledge?.id,
   });
 
   return (
@@ -86,7 +87,6 @@ function ProductDeliveriesDrawerContent({
       ) : deliveries?.results && deliveries.results.length > 0 ? (
         <SupplyDeliveryTable
           deliveries={deliveries.results}
-          internal
           facilityId={facilityId}
           linkToProduct
         />
@@ -302,17 +302,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
         <Pagination totalCount={data?.count || 0} />
       </div>
 
-      <Drawer
-        open={showAllDeliveries}
-        onOpenChange={(open) => {
-          setShowAllDeliveries(open);
-          if (!open) {
-            setTimeout(() => {
-              setSelectedProductKnowledgeDrawer(undefined);
-            }, 100);
-          }
-        }}
-      >
+      <Drawer open={showAllDeliveries} onOpenChange={setShowAllDeliveries}>
         <DrawerContent className="max-w-7xl mx-auto px-4 sm:px-16 pb-10">
           <DrawerHeader>
             <DrawerTitle>{t("all_deliveries")}</DrawerTitle>
