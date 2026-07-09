@@ -82,7 +82,7 @@ test.describe("Queue token in-service flow", () => {
       // dialog is shown to pick where to serve. With a single service point the
       // app serves immediately without a dialog. Handle both so the test does
       // not depend on how many service points the fixture has.
-      const serveDialog = page.getByRole("dialog", { name: /serve token/i });
+      const serveDialog = page.getByRole("dialog", { name: /serve patient/i });
       const dialogAppeared = await serveDialog
         .waitFor({ state: "visible", timeout: 3000 })
         .then(() => true)

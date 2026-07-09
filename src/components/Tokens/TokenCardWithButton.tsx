@@ -52,6 +52,7 @@ export default function TokenCardWithButton({
       facilityId: facility.id,
       resourceType: token.resource_type,
       resourceId: token.resource.id,
+      enabled: showMarkInServiceButton && token.status === TokenStatus.CREATED,
     });
 
   const isOnlyOneSubQueue =

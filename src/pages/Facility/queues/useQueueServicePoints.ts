@@ -17,10 +17,12 @@ export function useQueueServicePoints({
   facilityId,
   resourceType,
   resourceId,
+  enabled = true,
 }: {
   facilityId: string;
   resourceType: SchedulableResourceType;
   resourceId: string;
+  enabled?: boolean;
 }) {
   const [assignedServicePoints, setAssignedServicePoints] = useAtom(atom);
   const servicPointKey = `${facilityId}:${resourceType}:${resourceId}`;
@@ -36,6 +38,7 @@ export function useQueueServicePoints({
         status: TokenSubQueueStatus.ACTIVE,
       },
     }),
+    enabled,
   });
 
   const allServicePoints = subQueues?.results;
