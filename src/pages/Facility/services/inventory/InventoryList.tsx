@@ -227,7 +227,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
             <TableBody>
               {data?.results?.map((inventory) => (
                 <TableRow key={inventory.id}>
-                  <TableCell className="font-semibold">
+                  <TableCell className="font-semibold flex items-center gap-2 underline">
                     <button
                       type="button"
                       onClick={() => {
@@ -236,24 +236,22 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                         );
                         setShowAllDeliveries(true);
                       }}
-                      className="w-full flex items-center gap-2 underline"
                     >
                       {inventory.product.product_knowledge.name}
-                      <Link
-                        href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
-                        basePath="/"
-                        className="flex items-center gap-2"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <CareIcon
-                          icon="l-external-link-alt"
-                          className="size-4 text-gray-500 hover:text-gray-700"
-                        />
-                        <span className="sr-only">
-                          {t("view_product_details")}
-                        </span>
-                      </Link>
                     </button>
+                    <Link
+                      href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
+                      basePath="/"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <CareIcon
+                        icon="l-external-link-alt"
+                        className="size-4 text-gray-500 hover:text-gray-700"
+                      />
+                      <span className="sr-only">
+                        {t("view_product_details")}
+                      </span>
+                    </Link>
                   </TableCell>
                   <TableCell
                     className={cn(
