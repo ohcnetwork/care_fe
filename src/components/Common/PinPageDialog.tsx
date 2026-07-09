@@ -24,7 +24,7 @@ interface PinPageDialogProps {
   url?: string;
 }
 
-export function PinPageDialog({ url }: PinPageDialogProps) {
+function PinPageDialog({ url }: PinPageDialogProps) {
   const { t } = useTranslation();
   const [open, onOpenChange] = useState(false);
   const {
