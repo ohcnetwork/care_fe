@@ -13,7 +13,7 @@ export function useUpdateToken({
   token: TokenRead;
   onSuccess?: () => void;
 }) {
-  const { mutate: updateToken, isPending: isUpdating } = useMutation({
+  return useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
         facility_id: facilityId,
@@ -44,6 +44,4 @@ export function useUpdateToken({
       onSuccess?.();
     },
   });
-
-  return { updateToken, isUpdating };
 }

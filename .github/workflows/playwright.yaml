@@ -69,7 +69,6 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
-          REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME: "true"
 
       - name: Save build and node_modules to cache
         uses: actions/cache/save@v4

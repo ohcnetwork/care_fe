@@ -29,18 +29,18 @@ import { ChevronsDownUp, ChevronsUpDown, TicketIcon } from "lucide-react";
 interface PatientTokensListProps {
   patientId: string;
   facility: FacilityRead;
-  initialExpanded?: string;
+  initialExpandedTokenId?: string;
 }
 
 export default function PatientTokensList({
   patientId,
   facility,
-  initialExpanded,
+  initialExpandedTokenId,
 }: PatientTokensListProps) {
   const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [expandedTokens, setExpandedTokens] = useState(
-    () => new Set(initialExpanded ? [initialExpanded] : []),
+    () => new Set(initialExpandedTokenId ? [initialExpandedTokenId] : []),
   );
 
   const handleDateChange = (date: Date | undefined) => {
@@ -126,8 +126,8 @@ export default function PatientTokensList({
 
       {[
         // ordered by selected token first, then remaining token
-        ...tokens.filter((token) => token.id === initialExpanded),
-        ...tokens.filter((token) => token.id !== initialExpanded),
+        ...tokens.filter((token) => token.id === initialExpandedTokenId),
+        ...tokens.filter((token) => token.id !== initialExpandedTokenId),
       ].map((token) => {
         const isExpanded = expandedTokens.has(token.id);
 
@@ -190,7 +190,7 @@ export default function PatientTokensList({
                       token={token}
                       facility={facility}
                       showMarkInServiceButton={
-                        initialExpanded === token.id &&
+                        initialExpandedTokenId === token.id &&
                         token.status === TokenStatus.CREATED
                       }
                       cardClassName="rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"

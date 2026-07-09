@@ -37,7 +37,7 @@ export default function TokenCardWithButton({
   const { t } = useTranslation();
   const [showServicepointDialog, setShowServicepointDialog] = useState(false);
 
-  const { updateToken, isUpdating } = useUpdateToken({
+  const { mutate: updateToken, isPending: isUpdating } = useUpdateToken({
     facilityId: facility.id,
     token,
     onSuccess: () => {

@@ -50,6 +50,18 @@ const resolveApiUrl = (): string => {
   return env.REACT_CARE_API_URL ?? "";
 };
 
+/**
+ * Runtime override for the build-time `REACT_*` env var of the same name.
+ * Lets E2E tests toggle the flag for a single spec(queueTokenInService) (via localStorage set in an
+ * init script) without producing a dedicated build.
+ */
+const tokenGenerationInPatientHomeOverride =
+  typeof window !== "undefined"
+    ? (window.localStorage?.getItem(
+        "REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME",
+      ) ?? undefined)
+    : undefined;
+
 const careConfig = {
   apiUrl: resolveApiUrl(),
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
@@ -319,10 +331,13 @@ const careConfig = {
   ),
 
   /**
-   * Show token generation button in patient home if set to "true"
+   * Show token generation button in patient home if set to "true".
+   * A runtime localStorage override (same key) takes precedence so E2E tests
+   * can enable it for a single spec without a dedicated build.
    */
   enableTokenGenerationInPatientHome: booleanFromString(
-    env.REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME,
+    tokenGenerationInPatientHomeOverride ??
+      env.REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME,
     false,
   ),
 

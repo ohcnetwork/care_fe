@@ -68,7 +68,7 @@ export const ServicePointSelector = ({
 }) => {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const { updateToken, isUpdating } = useUpdateToken({
+  const { mutate: updateToken, isPending: isUpdating } = useUpdateToken({
     facilityId,
     token,
     onSuccess,

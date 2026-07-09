@@ -7,8 +7,19 @@ test.use({ storageState: "tests/.auth/user.json" });
 test.describe("Queue token in-service flow", () => {
   let facilityId: string;
 
-  test.beforeEach(() => {
+  test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
+
+    // Enable the token-generation-in-patient-home feature for this spec only.
+    // The flag is a build-time env (REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME)
+    // that careConfig also honors as a localStorage override at runtime, so we
+    // set it here instead of building the whole app with it enabled.
+    await page.addInitScript(() => {
+      window.localStorage.setItem(
+        "REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME",
+        "true",
+      );
+    });
   });
 
   test("opens a queued token on patient home via token_id and marks it In-service", async ({

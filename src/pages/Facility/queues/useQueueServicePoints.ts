@@ -36,7 +36,6 @@ export function useQueueServicePoints({
         status: TokenSubQueueStatus.ACTIVE,
       },
     }),
-    enabled: !!resourceType && !!resourceId && !!facilityId,
   });
 
   const allServicePoints = subQueues?.results;

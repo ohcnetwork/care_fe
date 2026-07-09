@@ -290,7 +290,7 @@ export default function PatientHome() {
                 <PatientTokensList
                   patientId={patientData.id}
                   facility={facility}
-                  initialExpanded={token_id}
+                  initialExpandedTokenId={token_id}
                 />
               )}
             </div>
