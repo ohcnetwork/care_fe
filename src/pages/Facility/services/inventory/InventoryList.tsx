@@ -305,7 +305,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
       <Drawer open={showAllDeliveries} onOpenChange={setShowAllDeliveries}>
         <DrawerContent className="max-w-7xl mx-auto px-4 sm:px-16 pb-10">
           <DrawerHeader>
-            <DrawerTitle>{t("all_deliveries")}</DrawerTitle>
+            <DrawerTitle className="mb-2">{t("all_deliveries")}</DrawerTitle>
           </DrawerHeader>
           <ProductDeliveriesDrawerContent
             facilityId={facilityId}

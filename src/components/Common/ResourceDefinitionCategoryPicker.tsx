@@ -960,8 +960,9 @@ export function ResourceDefinitionCategoryPicker<T>({
             {value && !shouldHideClearButton && (
               <Button
                 variant="outline"
+                type="button"
                 onClick={handleClearSelection}
-                className="rounded-l-none shadow-none text-gray-400 border-gray-300 border-l-0 h-[38px]"
+                className="rounded-l-none shadow-none text-gray-400 border-gray-300 border-l-0 h-9.5"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
