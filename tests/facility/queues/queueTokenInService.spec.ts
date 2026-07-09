@@ -15,10 +15,7 @@ test.describe("Queue token in-service flow", () => {
     // that careConfig also honors as a localStorage override at runtime, so we
     // set it here instead of building the whole app with it enabled.
     await page.addInitScript(() => {
-      window.localStorage.setItem(
-        "REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME",
-        "true",
-      );
+      process.env.REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME = "true";
     });
   });
 
