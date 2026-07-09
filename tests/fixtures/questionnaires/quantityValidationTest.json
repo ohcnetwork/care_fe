@@ -1,0 +1,35 @@
+{
+  "title": "Quantity Validation Test",
+  "slug": "quantity-validation-test",
+  "description": "Tests optional quantity questions allow empty responses but reject partial entries.",
+  "version": "1.0",
+  "status": "active",
+  "subject_type": "encounter",
+  "questions": [
+    {
+      "id": "c1000001-0001-4000-8000-000000000001",
+      "link_id": "G-001",
+      "text": "Quantity Validation",
+      "type": "group",
+      "questions": [
+        {
+          "id": "c1000001-0001-4000-8000-000000000002",
+          "link_id": "Q-001",
+          "text": "Optional dose",
+          "type": "quantity",
+          "answer_option": [],
+          "answer_value_set": "system-route"
+        }
+      ]
+    },
+    {
+      "id": "c1000001-0001-4000-8000-000000000003",
+      "link_id": "Q-002",
+      "text": "Patient Name",
+      "type": "string",
+      "required": false,
+      "questions": []
+    }
+  ],
+  "tags": []
+}

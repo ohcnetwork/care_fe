@@ -6,9 +6,20 @@ import { test } from "@playwright/test";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test("ensure enable-when questionnaire exists", async () => {
-  const slug = "enable-when-test";
-  const fixturePath = "tests/fixtures/questionnaires/enableWhenTest.json";
+  await ensureQuestionnaireExists(
+    "enable-when-test",
+    "tests/fixtures/questionnaires/enableWhenTest.json",
+  );
+});
 
+test("ensure quantity validation questionnaire exists", async () => {
+  await ensureQuestionnaireExists(
+    "quantity-validation-test",
+    "tests/fixtures/questionnaires/quantityValidationTest.json",
+  );
+});
+
+async function ensureQuestionnaireExists(slug: string, fixturePath: string) {
   const authFile = path.resolve("tests/.auth/user.json");
   if (!fs.existsSync(authFile)) {
     throw new Error("Auth file not found — run auth setup first");
@@ -23,8 +34,8 @@ test("ensure enable-when questionnaire exists", async () => {
   if (!tokenEntry) {
     throw new Error("No access token in auth storage state");
   }
-
   const accessToken = tokenEntry.value;
+
   const apiUrl = process.env.REACT_CARE_API_URL || "http://localhost:9000";
   const headers = {
     Authorization: `Bearer ${accessToken}`,
@@ -90,7 +101,7 @@ test("ensure enable-when questionnaire exists", async () => {
     );
   }
   console.log(`✅ Questionnaire created: ${slug}`);
-});
+}
 
 async function prepareFixture(
   fixture: Record<string, unknown>,
