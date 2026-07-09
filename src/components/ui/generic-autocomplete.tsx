@@ -32,7 +32,6 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { X } from "lucide-react";
-import { useState } from "react";
 
 interface GenericAutoCompleteOptionBase<T> {
   label: string;
@@ -542,9 +541,9 @@ export default function GenericAutocomplete<T = string>({
 }: GenericAutocompleteProps<T>) {
   // Capture initial options count to determine variant (radio vs dropdown)
   // This prevents switching variants when search results change
-  const [initialOptionsCount, setInitialOptionsCount] = useState<number | null>(
-    null,
-  );
+  const [initialOptionsCount, setInitialOptionsCount] = React.useState<
+    number | null
+  >(null);
   if (initialOptionsCount === null && options.length > 0) {
     setInitialOptionsCount(options.length);
   }
