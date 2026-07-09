@@ -48,9 +48,9 @@ interface QParams {
   flow?: "queue" | "dispense";
   action?: "schedule" | "create_encounter";
   token_id?: string;
-  queue_id: string;
-  resource_type: SchedulableResourceType;
-  resource_id: string;
+  queue_id?: string;
+  resource_type?: SchedulableResourceType;
+  resource_id?: string;
 }
 
 export default function PatientHome() {
@@ -130,7 +130,7 @@ export default function PatientHome() {
         </Alert>
       ) : patientData ? (
         <div className="space-y-6 md:max-w-5xl mx-auto">
-          {isQueueFlow && (
+          {isQueueFlow && resource_type && resource_id && queue_id && (
             <Button asChild type="button" variant="outline">
               <Link
                 href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resource_type]}/${resource_id}/queues/${queue_id}/ongoing`}

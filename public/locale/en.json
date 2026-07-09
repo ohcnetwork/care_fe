@@ -3346,7 +3346,7 @@
   "mark_as_fully_received": "Mark as Fully Received",
   "mark_as_in_progress": "Mark as In Progress",
   "mark_as_in_service": "Mark as In-service",
-  "mark_as_in_service_with_name": "Mark as In-service to name {{name}}",
+  "mark_as_in_service_with_name": "Mark as In-service to {{name}}",
   "mark_as_invalid": "Mark as Invalid",
   "mark_as_noshow": "Mark as no-show",
   "mark_as_noshow_warning": "This action cannot be undone. The appointment will be marked No-Show and the patient will be notified.",
