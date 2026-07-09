@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownUp } from "lucide-react";
+import { ArrowDownUp, Truck } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,12 @@ import useFilters from "@/hooks/useFilters";
 
 import { isLessThan, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -33,7 +39,9 @@ import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import { InventoryStatusOptions } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
+import { SupplyDeliveryTable } from "./SupplyDeliveryTable";
 
 const SORT_OPTIONS = {
   low_to_high: "net_content",
@@ -41,6 +49,57 @@ const SORT_OPTIONS = {
 } as const;
 
 type SortOptionKey = keyof typeof SORT_OPTIONS;
+
+interface ProductDeliveriesDrawerContentProps {
+  facilityId: string;
+  locationId: string;
+  selectedProductKnowledge?: ProductKnowledgeBase;
+}
+
+function ProductDeliveriesDrawerContent({
+  facilityId,
+  locationId,
+  selectedProductKnowledge,
+}: ProductDeliveriesDrawerContentProps) {
+  const { t } = useTranslation();
+
+  const { data: deliveries, isLoading } = useQuery({
+    queryKey: [
+      "productDeliveries",
+      facilityId,
+      locationId,
+      selectedProductKnowledge?.id,
+    ],
+    queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
+      queryParams: {
+        facility: facilityId,
+        destination: locationId,
+        supplied_inventory_item_product_knowledge: selectedProductKnowledge?.id,
+      },
+    }),
+  });
+
+  return (
+    <div className="space-y-4 overflow-y-auto pt-4 max-h-[68vh]">
+      {isLoading ? (
+        <TableSkeleton count={2} />
+      ) : deliveries?.results && deliveries.results.length > 0 ? (
+        <SupplyDeliveryTable
+          deliveries={deliveries.results}
+          internal
+          facilityId={facilityId}
+          linkToProduct
+        />
+      ) : (
+        <EmptyState
+          icon={<Truck className="size-5 text-primary-600" />}
+          title={t("no_deliveries_found")}
+          description={t("no_deliveries_found_description")}
+        />
+      )}
+    </div>
+  );
+}
 
 interface InventoryListProps {
   facilityId: string;
@@ -57,6 +116,11 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
   const [selectedProductKnowledge, setSelectedProductKnowledge] = useState<
     ProductKnowledgeBase | undefined
   >(undefined);
+
+  // State for the "all deliveries" drawer
+  const [showAllDeliveries, setShowAllDeliveries] = useState(false);
+  const [selectedProductKnowledgeDrawer, setSelectedProductKnowledgeDrawer] =
+    useState<ProductKnowledgeBase | undefined>(undefined);
 
   // Clear selected product knowledge when query parameter is cleared
   useEffect(() => {
@@ -163,16 +227,25 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
             <TableBody>
               {data?.results?.map((inventory) => (
                 <TableRow key={inventory.id}>
-                  <TableCell className="font-semibold">
+                  <TableCell
+                    onClick={() => {
+                      setSelectedProductKnowledgeDrawer(
+                        inventory.product.product_knowledge,
+                      );
+                      setShowAllDeliveries(true);
+                    }}
+                    className="font-semibold flex gap-2 cursor-pointer"
+                  >
+                    {inventory.product.product_knowledge.name}
                     <Link
                       href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
                       basePath="/"
                       className="flex items-center gap-2"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      {inventory.product.product_knowledge.name}
                       <CareIcon
                         icon="l-external-link-alt"
-                        className="size-4 text-gray-500"
+                        className="size-4 text-gray-500 hover:text-gray-700"
                       />
                     </Link>
                   </TableCell>
@@ -226,6 +299,39 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
       <div className="mt-8 flex justify-center">
         <Pagination totalCount={data?.count || 0} />
       </div>
+
+      <Drawer
+        open={showAllDeliveries}
+        onOpenChange={(open) => {
+          setShowAllDeliveries(open);
+          if (!open) {
+            setTimeout(() => {
+              setSelectedProductKnowledgeDrawer(undefined);
+            }, 100);
+          }
+        }}
+      >
+        <DrawerContent className="max-w-7xl mx-auto px-4 sm:px-16 pb-10">
+          <DrawerHeader>
+            <DrawerTitle>{t("all_deliveries")}</DrawerTitle>
+          </DrawerHeader>
+          <ProductKnowledgeSelect
+            value={selectedProductKnowledgeDrawer}
+            onChange={(value) => {
+              setSelectedProductKnowledgeDrawer(value);
+            }}
+            placeholder={t("filter_by_product")}
+            disableFavorites
+            alignContent="end"
+            className="max-w-min min-w-fit ml-auto"
+          />
+          <ProductDeliveriesDrawerContent
+            facilityId={facilityId}
+            locationId={locationId}
+            selectedProductKnowledge={selectedProductKnowledgeDrawer}
+          />
+        </DrawerContent>
+      </Drawer>
     </Page>
   );
 }
