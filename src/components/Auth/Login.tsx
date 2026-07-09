@@ -240,7 +240,7 @@ const Login = (props: LoginProps) => {
     return form;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     ViewCache.invalidateAll();
     const validated = validateData();
@@ -280,7 +280,7 @@ const Login = (props: LoginProps) => {
     }
     return form;
   };
-  const handleForgetSubmit = async (e: React.FormEvent) => {
+  const handleForgetSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     const valid = validateForgetData();
     if (!valid) return;
@@ -297,7 +297,7 @@ const Login = (props: LoginProps) => {
   };
 
   // Handle OTP flow
-  const handlePatientLogin = async (e: React.FormEvent) => {
+  const handlePatientLogin = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
     if (!isOtpSent) {

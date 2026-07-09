@@ -146,11 +146,11 @@ function ObservationDefinitionFormContent({
         .min(5, t("character_count_validation", { min: 5, max: 25 }))
         .max(25, t("character_count_validation", { min: 5, max: 25 })),
       description: z.string().min(1, t("field_required")),
-      status: z.nativeEnum(ObservationDefinitionStatus),
+      status: z.enum(ObservationDefinitionStatus),
       category: z.enum(
         OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]],
       ),
-      permitted_data_type: z.nativeEnum(QuestionType),
+      permitted_data_type: z.enum(QuestionType),
       code: CodeSchema,
       body_site: CodeSchema.nullable(),
       method: CodeSchema.nullable(),
@@ -159,7 +159,7 @@ function ObservationDefinitionFormContent({
         .array(
           z.object({
             code: CodeSchema,
-            permitted_data_type: z.nativeEnum(QuestionType),
+            permitted_data_type: z.enum(QuestionType),
             permitted_unit: CodeSchema.nullable(),
             qualified_ranges: qualifiedRangeSchema.default([]),
           }),

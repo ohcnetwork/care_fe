@@ -20,13 +20,6 @@ export const MEDICATION_REQUEST_STATUS_COLORS = {
   entered_in_error: "destructive",
 } as const satisfies Record<MedicationRequestStatus, string>;
 
-export const MEDICATION_REQUEST_PRIORITY_COLORS = {
-  stat: "secondary",
-  urgent: "yellow",
-  asap: "destructive",
-  routine: "indigo",
-} as const satisfies Record<MedicationPriority, string>;
-
 export const DOSAGE_UNITS_CODES = [
   {
     code: "{tbl}",
@@ -457,13 +450,6 @@ export enum MedicationPriority {
   ASAP = "asap",
   ROUTINE = "routine",
 }
-
-export const MEDICATION_PRIORITY_COLORS = {
-  stat: "secondary",
-  urgent: "yellow",
-  asap: "destructive",
-  routine: "indigo",
-} as const satisfies Record<MedicationPriority, string>;
 
 export interface MedicationRequestRead {
   id: string;
@@ -1025,9 +1011,7 @@ export function parseMedicationStringToRequest(
 
 export function displayMedicationName(
   medication?:
-    | MedicationRequest
-    | MedicationRequestRead
-    | MedicationRequestCreate,
+    MedicationRequest | MedicationRequestRead | MedicationRequestCreate,
 ): string {
   if (!medication) {
     return "";
@@ -1095,16 +1079,6 @@ export function evalSlot(slot: string): number {
     return den ? num / den : 0;
   }
   return Number(slot) || 0;
-}
-
-/**
- * Check whether all non-zero slots in a M-A-N string have the same dose.
- */
-export function isUniformMan(manString: string): boolean {
-  const slots = manString.split("-");
-  const nonZero = slots.filter((s) => evalSlot(s) !== 0);
-  if (nonZero.length === 0) return true;
-  return nonZero.every((s) => evalSlot(s) === evalSlot(nonZero[0]));
 }
 
 /**
@@ -1611,64 +1585,9 @@ export function formatDurationLabel(duration?: BoundsDuration): string {
   return `${duration.value} ${numVal === 1 ? info.singular : info.plural}`;
 }
 
-// ─── Range parsing / validation ─────────────────────────────────────
-
-const RANGE_UNIT_ALIASES: Record<string, (typeof UCUM_TIME_UNITS)[number]> = {
-  d: "d",
-  day: "d",
-  days: "d",
-  w: "wk",
-  wk: "wk",
-  week: "wk",
-  weeks: "wk",
-  mo: "mo",
-  month: "mo",
-  months: "mo",
-};
-
-/** Build a validated {@link TimingRange} from raw parts, or undefined. */
-function makeTimingRange(
-  low?: string,
-  high?: string,
-  unitStr?: string,
-): TimingRange | undefined {
-  const lowNum = Number(low);
-  const highNum = Number(high);
-  const unit =
-    (unitStr && RANGE_UNIT_ALIASES[unitStr.toLowerCase()]) ||
-    (unitStr &&
-    UCUM_TIME_UNITS.includes(unitStr as (typeof UCUM_TIME_UNITS)[number])
-      ? (unitStr as (typeof UCUM_TIME_UNITS)[number])
-      : undefined);
-  if (!unit) return undefined;
-  if (!Number.isInteger(lowNum) || !Number.isInteger(highNum)) return undefined;
-  if (lowNum <= 0 || highNum <= 0 || lowNum > highNum) return undefined;
-  return {
-    low: { value: String(lowNum), unit },
-    high: { value: String(highNum), unit },
-  };
-}
-
-/**
- * Parse a day-range typed by the user, e.g. "5-7 days", "5 – 7 d", "5 to 7
- * weeks". Returns a validated {@link TimingRange} (positive, low <= high), or
- * undefined for anything malformed.
- */
-export function parseRangeString(input: string): TimingRange | undefined {
-  const match = input
-    .trim()
-    .toLowerCase()
-    .match(/^(\d+)\s*(?:-|–|to)\s*(\d+)\s*([a-z]*)$/);
-  if (!match) return undefined;
-  const [, low, high, unitStr] = match;
-  return makeTimingRange(low, high, unitStr || "d");
-}
-
 /** i18n key describing why a {@link TimingBounds} is invalid. */
 export type TimingBoundsError =
-  | "invalid_duration"
-  | "invalid_day_range"
-  | "invalid_period_dates";
+  "invalid_duration" | "invalid_day_range" | "invalid_period_dates";
 
 /**
  * Validate the *contents* of a {@link TimingBounds} — not just its presence:
