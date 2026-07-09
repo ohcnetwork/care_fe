@@ -197,8 +197,7 @@ export type PluginOverride = {
 };
 
 type SupportedPluginExtensions =
-  | "DoctorConnectButtons"
-  | "PatientExternalRegistration";
+  "DoctorConnectButtons" | "PatientExternalRegistration";
 
 export type PluginManifest = {
   plugin: string;
