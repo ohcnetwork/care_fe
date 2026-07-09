@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file is the single source of truth for guidance to AI coding agents (Claude Code, Codex, Cursor, GitHub Copilot, Gemini, etc.) when working with code in this repository.
+This file is the single source of truth for guidance for AI coding agents (Claude Code, Codex, Cursor, GitHub Copilot, Gemini, etc.) when working with code in this repository.
 
 > **Note:** Tool-specific entry points such as `CLAUDE.md` inherit from this file. Keep all shared guidance here so every agent stays in sync.
 
@@ -34,7 +34,7 @@ cd <care-backend-dir>
 .venv/bin/python manage.py load_fixtures              # Load test data
 ```
 
-**Backend fixture credentials:**
+**Backend fixture credentials (local fixture data only — do not use on deployed instances):**
 
 | Role           | Username         | Password   |
 | -------------- | ---------------- | ---------- |
@@ -53,7 +53,7 @@ cd <care-backend-dir>
 | Manager | `care-role-manager` | `Ohcn@123` |
 | Member  | `care-role-member`  | `Ohcn@123` |
 
-**Playwright E2E test credentials** (used in `tests/setup/*.setup.ts`):
+**Playwright E2E test credentials (local/test only; do not use on deployed instances)** (used in `tests/setup/*.setup.ts`):
 
 | Storage State                    | Username         | Password   |
 | -------------------------------- | ---------------- | ---------- |
