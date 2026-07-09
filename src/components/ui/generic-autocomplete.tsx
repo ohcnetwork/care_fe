@@ -70,7 +70,6 @@ interface GenericAutocompleteBaseProps<T = string> {
   ) => React.ReactNode;
   /** Custom renderer for the selected value in the dropdown trigger button */
   renderSelected?: (option: GenericAutoCompleteOption<T>) => React.ReactNode;
-  /** Function to compare values for equality. Defaults to === for primitives */
   ref?: React.RefCallback<HTMLButtonElement | null>;
   enableRadio?: boolean;
   "aria-invalid"?: boolean;
