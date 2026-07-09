@@ -2,6 +2,14 @@ import { expect, test } from "@playwright/test";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
+declare global {
+  interface Window {
+    __CORE_ENV__: Record<string, unknown> & {
+      enableTokenGenerationInPatientHome: boolean;
+    };
+  }
+}
+
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Queue token in-service flow", () => {
@@ -10,12 +18,8 @@ test.describe("Queue token in-service flow", () => {
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
 
-    // Enable the token-generation-in-patient-home feature for this spec only.
-    // The flag is a build-time env (REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME)
-    // that careConfig also honors as a localStorage override at runtime, so we
-    // set it here instead of building the whole app with it enabled.
     await page.addInitScript(() => {
-      process.env.REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME = "true";
+      window.__CORE_ENV__.enableTokenGenerationInPatientHome = true;
     });
   });
 
