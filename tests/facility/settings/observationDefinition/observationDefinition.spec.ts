@@ -578,14 +578,17 @@ test.describe("Observation Definition Form with Interpretation", () => {
       await addGenderCondition(page, 1, "Male");
       await addNumericRange(page, 1, false, "Normal", 0, 100);
       await page.getByRole("button", { name: "Save" }).click();
+
+      // Explicitly wait for the sheet's exit animation to complete and the
+      // dialog to unmount, so the overlay no longer intercepts clicks
+      await page.getByRole("dialog").waitFor({ state: "detached" });
     });
 
     // Edit interpretation
     await test.step("Edit interpretation", async () => {
       await page
-        .locator(".flex.flex-col.sm\\:flex-row")
-        .nth(0)
-        .locator("button:has(svg.lucide-square-pen)")
+        .getByRole("button", { name: "Edit interpretation" })
+        .first()
         .click();
 
       // Wait for sheet to open
@@ -642,6 +645,10 @@ test.describe("Observation Definition Form with Interpretation", () => {
       await addNumericRange(page, 1, false, "Normal", 0, 100);
       await page.getByRole("button", { name: "Save" }).click();
 
+      // Explicitly wait for the sheet's exit animation to complete and the
+      // dialog to unmount, so the overlay no longer intercepts clicks
+      await page.getByRole("dialog").waitFor({ state: "detached" });
+
       // Verify interpretation appears
       await expect(
         page.getByText("Observation Interpretation (1)"),
@@ -651,9 +658,8 @@ test.describe("Observation Definition Form with Interpretation", () => {
     // Delete interpretation
     await test.step("Delete interpretation", async () => {
       await page
-        .locator(".flex.flex-col.sm\\:flex-row")
-        .nth(0)
-        .locator("button:has(svg.lucide-trash-2)")
+        .getByRole("button", { name: "Delete interpretation" })
+        .first()
         .click();
 
       // Verify interpretation is removed
@@ -770,14 +776,17 @@ test.describe("Observation Definition Form with Interpretation", () => {
       await addGenderCondition(page, 1, "Male");
       await addNumericRange(page, 1, false, "Normal", 0, 100);
       await page.getByRole("button", { name: "Save" }).click();
+
+      // Explicitly wait for the sheet's exit animation to complete and the
+      // dialog to unmount, so the overlay no longer intercepts clicks
+      await page.getByRole("dialog").waitFor({ state: "detached" });
     });
 
     // Edit and cancel
     await test.step("Edit and cancel", async () => {
       await page
-        .locator(".flex.flex-col.sm\\:flex-row")
-        .nth(0)
-        .locator("button:has(svg.lucide-square-pen)")
+        .getByRole("button", { name: "Edit interpretation" })
+        .first()
         .click();
 
       await expect(

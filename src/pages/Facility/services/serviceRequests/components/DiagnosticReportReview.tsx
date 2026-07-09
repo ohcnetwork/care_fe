@@ -327,7 +327,7 @@ function DiagnosticReportReviewItem({
                   <Button variant="outline" asChild>
                     <Link
                       basePath="/"
-                      href={`/facility/${facilityId}/patient/${patientId}/service_request/${serviceRequestId}/diagnostic_reports/${report.id}`}
+                      href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}`}
                       className="flex items-center gap-2"
                     >
                       <FileText className="size-4" />
