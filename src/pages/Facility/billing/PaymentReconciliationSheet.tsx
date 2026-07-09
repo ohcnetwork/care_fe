@@ -8,7 +8,12 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Banknote,
   BanknoteArrowUp,
@@ -22,6 +27,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import careConfig from "@careConfig";
 
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Form,
   FormControl,
@@ -45,12 +51,15 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { ChevronUp } from "lucide-react";
 
 import { paymentReconcilationLocationAtom } from "@/atoms/paymentReconcilationLocationAtom";
 import { LocationPicker } from "@/components/Location/LocationPicker";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { useCareApps } from "@/hooks/useCareApps";
+import { PLUGIN_Component } from "@/PluginEngine";
 import {
   ExtensionEntityType,
   getCombinedExtensionProps,
@@ -262,6 +271,13 @@ const PaymentReconciliationSheetBase = ({
     }
   }, [selectedLocationObject, form]);
 
+
+  const careApps = useCareApps();
+  const isInvoiceRecordPaymentPluginsPresent = careApps.some(
+    (plugin) =>
+      !plugin.isLoading && plugin.components?.InvoiceRecordPaymentOptions,
+  );
+
   const { mutate: submitPayment, isPending } = useMutation({
     mutationFn: mutate(paymentReconciliationApi.createPaymentReconciliation, {
       pathParams: { facilityId },
@@ -377,11 +393,11 @@ const PaymentReconciliationSheetBase = ({
             {invoice
               ? isCreditNote
                 ? t("recording_refund_for_invoice", {
-                    id: invoice.number,
-                  })
+                  id: invoice.number,
+                })
                 : t("recording_payment_for_invoice", {
-                    id: invoice.number,
-                  })
+                  id: invoice.number,
+                })
               : isCreditNote
                 ? t("recording_refund")
                 : t("recording_payment")}
@@ -726,28 +742,51 @@ const PaymentReconciliationSheetBase = ({
                   <ShortcutBadge actionId="cancel-action" />
                 </Button>
 
-                <Button
-                  type="submit"
-                  disabled={isPending || isExtensionsLoading}
-                  aria-label={
-                    isCreditNote ? t("record_credit_note") : t("record_payment")
-                  }
-                >
-                  {isPending ? (
-                    <>
-                      <CareIcon
-                        icon="l-spinner"
-                        className="mr-2 size-4 animate-spin"
-                      />
-                      {t("processing_with_dots")}
-                    </>
-                  ) : isCreditNote ? (
-                    t("record_credit_note")
-                  ) : (
-                    t("record_payment")
+                <ButtonGroup className="w-full">
+                  <Button
+                    type="submit"
+                    disabled={isPending}
+                    aria-label={t("record_payment")}
+                  >
+                    {isPending ? (
+                      <>
+                        <CareIcon
+                          icon="l-spinner"
+                          className="mr-2 size-4 animate-spin"
+                        />
+                        {t("processing_with_dots")}
+                      </>
+                    ) : isCreditNote ? (
+                      t("record_credit_note")
+                    ) : (
+                      t("record_payment")
+                    )}
+                    <ShortcutBadge actionId="submit-action" />
+                  </Button>
+                  {isInvoiceRecordPaymentPluginsPresent && invoice && (
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline_primary"
+                          size="icon"
+                          aria-label="More Options"
+                        >
+                          <ChevronUp />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-full">
+                        <DropdownMenuGroup>
+                          <PLUGIN_Component
+                            __name="InvoiceRecordPaymentOptions"
+                            facilityId={facilityId}
+                            invoice={invoice}
+                            form={form}
+                          />
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
-                  <ShortcutBadge actionId="submit-action" />
-                </Button>
+                </ButtonGroup>
               </div>
             </SheetFooter>
           </form>
