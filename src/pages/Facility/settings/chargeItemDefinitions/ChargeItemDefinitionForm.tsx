@@ -253,15 +253,15 @@ export function ChargeItemDefinitionForm({
   useEffect(() => {
     if (isUpdate) return;
 
-    const subscription = form.watch((value, { name }) => {
-      if (name === "title") {
-        form.setValue("slug_value", generateSlugValue(value.title), {
+    return form.subscribe({
+      formState: { values: true },
+      name: "title",
+      callback: ({ values }) => {
+        form.setValue("slug_value", generateSlugValue(values.title), {
           shouldValidate: true,
         });
-      }
+      },
     });
-
-    return () => subscription.unsubscribe();
   }, [form, isUpdate]);
 
   // Get current form values
