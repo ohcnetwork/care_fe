@@ -18,8 +18,26 @@ test.describe("Queue token in-service flow", () => {
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
 
+    // The app assigns `window.__CORE_ENV__ = careConfig` (a reference to the
+    // module object the UI reads) only after its own scripts run, which is
+    // after addInitScript. Setting the flag directly here would either throw
+    // (the object doesn't exist yet) or be overwritten by that assignment.
+    // Instead, intercept the assignment with a setter and flip the flag on the
+    // real object as it is assigned, so the UI sees it enabled.
     await page.addInitScript(() => {
-      window.__CORE_ENV__.enableTokenGenerationInPatientHome = true;
+      let coreEnv: Window["__CORE_ENV__"] | undefined;
+      Object.defineProperty(window, "__CORE_ENV__", {
+        configurable: true,
+        get() {
+          return coreEnv;
+        },
+        set(value) {
+          coreEnv = value;
+          if (value && typeof value === "object") {
+            value.enableTokenGenerationInPatientHome = true;
+          }
+        },
+      });
     });
   });
 
