@@ -39,7 +39,9 @@ async function createInvoiceWithChargeItem(
   await page.getByRole("button", { name: "Create Invoice" }).click();
   await expect(page).toHaveURL(/\/billing\/invoices\/[a-f0-9-]+$/);
 
-  return page.url().match(/\/billing\/invoices\/([a-f0-9-]+)$/)?.[1] ?? "";
+  const invoiceId = page.url().match(/\/billing\/invoices\/([a-f0-9-]+)$/)?.[1];
+  expect(invoiceId).toBeTruthy();
+  return invoiceId as string;
 }
 
 test.describe("Print Invoice", () => {

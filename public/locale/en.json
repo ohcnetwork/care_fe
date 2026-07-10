@@ -4277,6 +4277,7 @@
   "patient_preparation": "Patient Preparation",
   "patient_profile": "Patient Profile",
   "patient_profile_created_by": "Patient profile created by",
+  "patient_qr_code": "Patient QR code",
   "patient_records_found": "Patient Records Found",
   "patient_records_found_description": "It appears that there are patient records that contain the same             phone number as the one you just entered. ",
   "patient_registration": "Patient Registration",

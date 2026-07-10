@@ -96,6 +96,7 @@ export function PrintableInvoiceBillTo({
         level="M"
         marginSize={0}
         className={qrClassName}
+        title={t("patient_qr_code")}
       />
     </div>
   );
@@ -126,6 +127,8 @@ export function PrintableInvoice({
     invoice.credit_notes?.filter(
       (p) => p.status === PaymentReconciliationStatus.active,
     ) ?? [];
+
+  const taxColumns = getApplicableTaxColumns(invoice);
 
   return (
     <>
@@ -168,7 +171,7 @@ export function PrintableInvoice({
                 <TableHead className={invoiceTableHeadClass}>
                   {t("discount")}
                 </TableHead>
-                {getApplicableTaxColumns(invoice).map((taxCode) => (
+                {taxColumns.map((taxCode) => (
                   <TableHead key={taxCode} className={invoiceTableHeadClass}>
                     {t(taxCode)}
                   </TableHead>
@@ -182,7 +185,7 @@ export function PrintableInvoice({
               {invoice.charge_items.length === 0 ? (
                 <TableRow className="border-b border-gray-200">
                   <TableCell
-                    colSpan={7 + getApplicableTaxColumns(invoice).length}
+                    colSpan={6 + taxColumns.length}
                     className="text-center text-gray-500"
                   >
                     {t("no_charge_items")}
@@ -257,7 +260,7 @@ export function PrintableInvoice({
                             ))}
                         </div>
                       </TableCell>
-                      {getApplicableTaxColumns(invoice).map((taxCode) => (
+                      {taxColumns.map((taxCode) => (
                         <TableCell
                           key={taxCode}
                           className={cn(invoiceTableCellClass, "text-right")}
