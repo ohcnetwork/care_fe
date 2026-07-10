@@ -37,7 +37,7 @@ import {
 import { goBack, valuesOf } from "@/Utils/utils";
 
 import { slugValueSchema } from "@/types/base/slug/schema";
-import { generateSlugValue } from "@/Utils/validators";
+import { generateSlugValue } from "@/Utils/slug";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 

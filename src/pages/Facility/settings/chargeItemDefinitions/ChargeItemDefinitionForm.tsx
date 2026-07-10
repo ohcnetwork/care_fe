@@ -66,8 +66,8 @@ import facilityApi from "@/types/facility/facilityApi";
 import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { generateSlugValue } from "@/Utils/slug";
 import { goBack } from "@/Utils/utils";
-import { generateSlugValue } from "@/Utils/validators";
 
 interface ChargeItemDefinitionFormProps {
   facilityId: string;

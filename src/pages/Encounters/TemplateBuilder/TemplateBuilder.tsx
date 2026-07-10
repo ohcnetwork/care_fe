@@ -46,7 +46,8 @@ import {
 import templateApi from "@/types/emr/template/templateApi";
 
 import queryClient from "@/Utils/request/queryClient";
-import { generateSlugValue } from "@/Utils/validators";
+
+import { generateSlugValue } from "@/Utils/slug";
 import { cn } from "@/lib/utils";
 import { slugValueSchema } from "@/types/base/slug/schema";
 import { zodResolver } from "@hookform/resolvers/zod";

@@ -65,7 +65,7 @@ import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareS
 import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlugValue } from "@/Utils/validators";
+import { generateSlugValue } from "@/Utils/slug";
 
 export default function ActivityDefinitionForm({
   facilityId,

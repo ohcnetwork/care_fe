@@ -43,7 +43,7 @@ import {
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import { slugValueSchema } from "@/types/base/slug/schema";
-import { generateSlugValue } from "@/Utils/validators";
+import { generateSlugValue } from "@/Utils/slug";
 import { ResourceSubTypePicker } from "./ResourceSubTypePicker";
 
 interface ResourceCategoryFormProps {

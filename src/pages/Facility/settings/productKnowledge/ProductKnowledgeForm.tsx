@@ -35,7 +35,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlugValue } from "@/Utils/validators";
+
 import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { slugValueSchema } from "@/types/base/slug/schema";
@@ -50,6 +50,7 @@ import {
   UCUM_TIME_UNITS_CODES,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import { generateSlugValue } from "@/Utils/slug";
 
 const createFormSchema = (
   t: (key: string, options?: Record<string, unknown>) => string,
