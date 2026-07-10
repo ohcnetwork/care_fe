@@ -1118,6 +1118,19 @@ export function DiagnosticReportForm({
                 )}
 
                 <div className="space-y-4">
+                  {fullReport?.status ===
+                    DiagnosticReportStatus.preliminary && (
+                    <div className="flex justify-end space-x-4">
+                      <Button
+                        variant="primary"
+                        onClick={handleSubmit}
+                        disabled={isSubmitting || disableEdit}
+                      >
+                        <Save className="size-4 mr-2" />
+                        {t("save_results")}
+                      </Button>
+                    </div>
+                  )}
                   {files?.results && files.results.length > 0 && (
                     <div className="mt-3">
                       <div className="text-lg font-medium">
@@ -1212,20 +1225,6 @@ export function DiagnosticReportForm({
                           )}
                         </div>
                       </div>
-                    </div>
-                  )}
-
-                  {fullReport?.status ===
-                    DiagnosticReportStatus.preliminary && (
-                    <div className="flex justify-end space-x-4">
-                      <Button
-                        variant="primary"
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || disableEdit}
-                      >
-                        <Save className="size-4 mr-2" />
-                        {t("save_results")}
-                      </Button>
                     </div>
                   )}
                 </div>
