@@ -8,7 +8,7 @@ import {
 
 import { NonEmptyArray } from "@/Utils/types";
 import Decimal from "decimal.js";
-import { CountryCode } from "libphonenumber-js/types.cjs";
+import { CountryCode } from "libphonenumber-js";
 
 const env = import.meta.env;
 
@@ -323,6 +323,15 @@ const careConfig = {
    */
   enableTokenGenerationInPatientHome: booleanFromString(
     env.REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME,
+    false,
+  ),
+
+  /**
+   * Enable questionnaire draft-saving if set to "true".
+   * When disabled, users cannot save questionnaire responses as drafts.
+   */
+  enableQuestionnaireDraft: booleanFromString(
+    env.REACT_ENABLE_QUESTIONNAIRE_DRAFT,
     false,
   ),
 

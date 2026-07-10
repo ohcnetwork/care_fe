@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { keysOf } from "@/Utils/utils";
 import { LANGUAGES } from "@/i18n";
 
-export const LanguageSelectorLogin = () => {
+const LanguageSelectorLogin = () => {
   const { i18n, t } = useTranslation();
   useEffect(() => {
     document.documentElement.setAttribute("lang", i18n.language);
