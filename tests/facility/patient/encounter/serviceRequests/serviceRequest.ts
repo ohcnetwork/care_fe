@@ -8,26 +8,9 @@ import {
   selectFromValueSet,
 } from "tests/helper/ui";
 
-export const STATUS_OPTIONS = [
-  "Draft",
-  "Active",
-  "On Hold",
-  "Entered in Error",
-  "Ended",
-  "Completed",
-  "Revoked",
-  "Unknown",
-];
-
 export const ACTIVITY_DEFINITIONS = [
   "Urinalysis",
   "Lipid Panel",
-  "Fasting Blood Glucose",
-];
-
-export const OBSERVATION_DEFINITIONS = [
-  "Urinalysis Observation",
-  "Lipid Panel Observation",
   "Fasting Blood Glucose",
 ];
 

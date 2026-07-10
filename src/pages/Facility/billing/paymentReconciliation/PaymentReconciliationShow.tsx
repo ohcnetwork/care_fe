@@ -51,7 +51,7 @@ function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-export function PaymentReconciliationShow({
+function PaymentReconciliationShow({
   facilityId,
   paymentReconciliationId,
 }: {
