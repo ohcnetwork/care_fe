@@ -100,9 +100,9 @@ export default function UserForm({
       last_name: z.string().min(1, t("field_required")),
       email: isEditMode
         ? z.string().optional()
-        : z.string().email(t("invalid_email_address")),
+        : z.email(t("invalid_email_address")),
       phone_number: validators().phoneNumber.required,
-      gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
+      gender: z.enum(GENDERS, { error: t("gender_is_required") }),
       prefix: z.string().optional(),
       suffix: z.string().optional(),
       geo_organization: z.string().optional(),

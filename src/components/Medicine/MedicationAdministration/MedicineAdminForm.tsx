@@ -35,7 +35,14 @@ import {
   MedicationAdministrationRequest,
   MedicationAdministrationStatus,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  getMedicationActiveWindow,
+  MedicationRequestRead,
+} from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 interface MedicineAdminFormProps {
   medication: MedicationRequestRead;
@@ -45,6 +52,7 @@ interface MedicineAdminFormProps {
   onChange: (request: MedicationAdministrationRequest) => void;
   onMedicationChange?: (medication: MedicationRequestRead) => void;
   formId: string;
+  productType: AdministrableProductType;
   isValid?: (valid: boolean) => void;
   compact?: boolean;
   otherGroupRequests?: MedicationRequestRead[];
@@ -205,6 +213,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   isValid,
   compact = false,
   otherGroupRequests,
+  productType,
 }) => {
   const { t } = useTranslation();
 
@@ -354,6 +363,25 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
     setShowAdvanced(false);
   };
 
+  // Non-blocking warning: administering outside the prescribed window (before it
+  // starts or after it ends) is allowed — e.g. back-dating an early dose or a
+  // late catch-up — but must always be flagged so it's a deliberate choice.
+  const activeWindow = getMedicationActiveWindow(medication);
+  const adminStart = administrationRequest.occurrence_period_start
+    ? new Date(administrationRequest.occurrence_period_start)
+    : undefined;
+  const outOfRange =
+    !!adminStart &&
+    ((activeWindow.start instanceof Date &&
+      !isNaN(activeWindow.start.getTime()) &&
+      adminStart < activeWindow.start) ||
+      (!!activeWindow.end && adminStart > activeWindow.end));
+  const outOfRangeWarning = outOfRange ? (
+    <p className="text-xs text-amber-600">
+      {t("administration_out_of_range_warning")}
+    </p>
+  ) : null;
+
   // Compact mode for sheet - simplified form
   if (compact) {
     return (
@@ -371,7 +399,9 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             onClick={handleAdministerNow}
           >
             <CareIcon icon="l-check-circle" className="size-4 mr-1.5" />
-            {t("administer_now")}
+            {productType === ProductKnowledgeType.medication
+              ? t("administer_now")
+              : t("record_intake_now")}
           </Button>
           <Button
             type="button"
@@ -483,6 +513,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 {startTimeError && (
                   <p className="text-xs text-red-500">{startTimeError}</p>
                 )}
+                {outOfRangeWarning}
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">{t("end_time")}</Label>
@@ -713,12 +744,10 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                   occurrence_period_start: now,
                 };
 
-                if (
-                  !(
-                    administrationRequest.status === "in_progress" ||
-                    administrationRequest.status === "not_done"
-                  )
-                ) {
+                if (!(
+                  administrationRequest.status === "in_progress" ||
+                  administrationRequest.status === "not_done"
+                )) {
                   newRequest.occurrence_period_end = now;
                 }
 
@@ -768,6 +797,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         {startTimeError && (
           <p className="text-sm text-red-500">{startTimeError}</p>
         )}
+        {outOfRangeWarning}
       </div>
 
       <div className="space-y-2">

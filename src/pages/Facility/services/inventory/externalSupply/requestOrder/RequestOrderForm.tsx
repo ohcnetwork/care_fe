@@ -69,10 +69,10 @@ const createRequestOrderFormSchema = (
   z.object({
     name: z.string().min(1, t("name_is_required")),
     note: z.string().optional(),
-    intent: z.nativeEnum(RequestOrderIntent),
-    category: z.nativeEnum(RequestOrderCategory),
-    priority: z.nativeEnum(RequestOrderPriority),
-    reason: z.nativeEnum(RequestOrderReason),
+    intent: z.enum(RequestOrderIntent),
+    category: z.enum(RequestOrderCategory),
+    priority: z.enum(RequestOrderPriority),
+    reason: z.enum(RequestOrderReason),
     supplier: internal
       ? z.string().optional()
       : z.string().min(1, t("supplier_required")),

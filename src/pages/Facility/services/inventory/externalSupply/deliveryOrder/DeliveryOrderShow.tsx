@@ -74,6 +74,7 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { ExtensionContexts } from "@/Utils/schema/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface Props {
@@ -225,7 +226,11 @@ export function DeliveryOrderShow({
   );
 
   const extensionFields = useMemo(
-    () => getExtensionFieldsWithName(allExtensions),
+    () =>
+      getExtensionFieldsWithName(
+        allExtensions,
+        ExtensionContexts.supply_delivery_order_summary,
+      ),
     [allExtensions],
   );
 
