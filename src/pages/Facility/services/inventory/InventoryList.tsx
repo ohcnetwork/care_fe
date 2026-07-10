@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 
 import Page from "@/components/Common/Page";
+import Pagination from "@/components/Common/Pagination";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
   Table,
@@ -50,6 +51,8 @@ const SORT_OPTIONS = {
 
 type SortOptionKey = keyof typeof SORT_OPTIONS;
 
+const DELIVERIES_PER_PAGE = 10;
+
 interface ProductDeliveriesDrawerContentProps {
   facilityId: string;
   locationId: string;
@@ -62,6 +65,7 @@ function ProductDeliveriesDrawerContent({
   selectedProductKnowledge,
 }: ProductDeliveriesDrawerContentProps) {
   const { t } = useTranslation();
+  const [page, setPage] = useState(1);
 
   const { data: deliveries, isLoading } = useQuery({
     queryKey: [
@@ -69,12 +73,15 @@ function ProductDeliveriesDrawerContent({
       facilityId,
       locationId,
       selectedProductKnowledge?.id,
+      page,
     ],
-    queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
+    queryFn: query(supplyDeliveryApi.listSupplyDelivery, {
       queryParams: {
         facility: facilityId,
         destination: locationId,
         supplied_inventory_item_product_knowledge: selectedProductKnowledge?.id,
+        limit: DELIVERIES_PER_PAGE,
+        offset: (page - 1) * DELIVERIES_PER_PAGE,
       },
     }),
     enabled: !!selectedProductKnowledge?.id,
@@ -85,11 +92,19 @@ function ProductDeliveriesDrawerContent({
       {isLoading ? (
         <TableSkeleton count={2} />
       ) : deliveries?.results && deliveries.results.length > 0 ? (
-        <SupplyDeliveryTable
-          deliveries={deliveries.results}
-          facilityId={facilityId}
-          linkToProduct
-        />
+        <>
+          <SupplyDeliveryTable
+            deliveries={deliveries.results}
+            facilityId={facilityId}
+            linkToProduct
+          />
+          <Pagination
+            data={{ totalCount: deliveries.count }}
+            onChange={(newPage) => setPage(newPage)}
+            defaultPerPage={DELIVERIES_PER_PAGE}
+            cPage={page}
+          />
+        </>
       ) : (
         <EmptyState
           icon={<Truck className="size-5 text-primary-600" />}
