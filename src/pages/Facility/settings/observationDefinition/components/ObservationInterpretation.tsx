@@ -465,6 +465,7 @@ export function ObservationInterpretation<
                       type="button"
                       variant="ghost"
                       size="icon"
+                      aria-label={t("edit_interpretation")}
                       className="size-8 text-gray-400 hover:text-gray-700"
                       onClick={() => handleEditInterpretation(index)}
                     >
@@ -474,6 +475,7 @@ export function ObservationInterpretation<
                       type="button"
                       variant="ghost"
                       size="icon"
+                      aria-label={t("delete_interpretation")}
                       className="size-8 text-gray-400 hover:text-red-600"
                       onClick={() => handleRemoveInterpretation(index)}
                     >

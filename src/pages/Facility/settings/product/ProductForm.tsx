@@ -39,6 +39,7 @@ import {
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { MonetaryAmountInput } from "@/components/ui/monetary-display";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -60,11 +61,13 @@ import {
   ProductKnowledgeStatus,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { goBack } from "@/Utils/utils";
+
 const formSchema = z.object({
-  status: z.nativeEnum(ProductStatusOptions),
+  status: z.enum(ProductStatusOptions),
   product_knowledge: z.string().min(1, "Product Knowledge is required"),
   charge_item_definition: z.string().optional(),
   batch: z
@@ -73,9 +76,10 @@ const formSchema = z.object({
     })
     .required(),
   expiration_date: z.date(),
-  standard_pack_size: z.coerce.number().min(0).optional(),
-  purchase_price: z.coerce.number().min(0).optional(),
+  standard_pack_size: z.number().min(0).optional(),
+  purchase_price: zodDecimal({ min: 0 }).optional().nullable(),
 });
+
 export default function ProductForm({
   facilityId,
   productId,
@@ -226,7 +230,10 @@ export function ProductFormContent({
               ? new Date(existingData.expiration_date)
               : undefined,
             standard_pack_size: existingData.standard_pack_size,
-            purchase_price: existingData.purchase_price,
+            purchase_price:
+              existingData.purchase_price != null
+                ? round(existingData.purchase_price)
+                : undefined,
           }
         : {
             status: ProductStatusOptions.active,
@@ -282,7 +289,7 @@ export function ProductFormContent({
         charge_item_definition: formattedData.charge_item_definition,
         product_knowledge: formattedData.product_knowledge,
         standard_pack_size: formattedData.standard_pack_size,
-        purchase_price: formattedData.purchase_price,
+        purchase_price: formattedData.purchase_price ?? undefined,
         extensions: {},
       };
       updateProduct(updatePayload);
@@ -294,7 +301,7 @@ export function ProductFormContent({
         product_knowledge: formattedData.product_knowledge,
         charge_item_definition: formattedData.charge_item_definition,
         standard_pack_size: formattedData.standard_pack_size,
-        purchase_price: formattedData.purchase_price,
+        purchase_price: formattedData.purchase_price ?? undefined,
         extensions: {},
       };
       createProduct(createPayload);
@@ -435,18 +442,11 @@ export function ProductFormContent({
                 <FormItem>
                   <FormLabel>{t("purchase_price")}</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      placeholder={t("enter_purchase_price")}
+                    <MonetaryAmountInput
                       {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value ? Number(e.target.value) : undefined,
-                        )
-                      }
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value || null)}
+                      placeholder={t("enter_purchase_price")}
                     />
                   </FormControl>
                   <FormMessage />

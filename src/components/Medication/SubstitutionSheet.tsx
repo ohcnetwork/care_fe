@@ -50,8 +50,8 @@ export const substitutionSchema = z.object({
     .refine((value) => value !== undefined, {
       message: "Substituted product knowledge is required",
     }),
-  type: z.nativeEnum(SubstitutionType),
-  reason: z.nativeEnum(SubstitutionReason),
+  type: z.enum(SubstitutionType),
+  reason: z.enum(SubstitutionReason),
 });
 
 export type SubstitutionFormValues = z.infer<typeof substitutionSchema>;

@@ -148,12 +148,12 @@ interface PaymentReconciliationSheetProps {
 
 const createBaseSchema = () =>
   z.object({
-    reconciliation_type: z.nativeEnum(PaymentReconciliationType),
-    status: z.nativeEnum(PaymentReconciliationStatus),
-    kind: z.nativeEnum(PaymentReconciliationKind),
-    issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
-    outcome: z.nativeEnum(PaymentReconciliationOutcome),
-    method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+    reconciliation_type: z.enum(PaymentReconciliationType),
+    status: z.enum(PaymentReconciliationStatus),
+    kind: z.enum(PaymentReconciliationKind),
+    issuer_type: z.enum(PaymentReconciliationIssuerType),
+    outcome: z.enum(PaymentReconciliationOutcome),
+    method: z.enum(PaymentReconciliationPaymentMethod),
     payment_datetime: z.string().refine((val) => new Date(val) <= new Date(), {
       message: t("payment_date_cannot_be_in_future"),
     }),
@@ -172,7 +172,9 @@ const createBaseSchema = () =>
       : z.string().optional(),
   });
 
-const createFormSchema = (extValidation: z.ZodType<Record<string, unknown>>) =>
+const createFormSchema = (
+  extValidation: z.ZodType<Record<string, unknown>, Record<string, unknown>>,
+) =>
   createBaseSchema()
     .extend({
       extensions: extValidation.optional(),
@@ -235,8 +237,8 @@ const PaymentReconciliationSheetBase = ({
   const extensions = useEntityExtensions({
     entityType: ExtensionEntityType.payment_reconciliation,
     schemaType: "write",
-    form,
     context: ExtensionContexts.payment_reconciliation_form,
+    form,
   });
 
   // Watch for payment method changes

@@ -48,7 +48,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     name: z.string().trim().min(1, t("field_required")),
     description: z.string().optional(),
     contexts: z
-      .array(z.nativeEnum(RoleContext))
+      .array(z.enum(RoleContext))
       .min(1, t("at_least_one_context_required")),
     permissions: z
       .array(z.string())

@@ -58,10 +58,10 @@ const lotSelectionSchema = z
 
 export type LotSelection = z.infer<typeof lotSelectionSchema>;
 
-const billMedicationLineItemSchema = z
+export const billMedicationLineItemSchema = z
   .object({
     /** The reference id for the dispense line item */
-    reference_id: z.string().uuid(),
+    reference_id: z.uuid(),
 
     /** Whether the item is selected for billing */
     isSelected: z.boolean(),
@@ -86,8 +86,8 @@ const billMedicationLineItemSchema = z
     substitution: z
       .object({
         substitutedProductKnowledge: z.custom<ProductKnowledgeBase>(),
-        type: z.nativeEnum(SubstitutionType),
-        reason: z.nativeEnum(SubstitutionReason),
+        type: z.enum(SubstitutionType),
+        reason: z.enum(SubstitutionReason),
       })
       .nullable(),
 

@@ -8,7 +8,7 @@ import {
 
 import { NonEmptyArray } from "@/Utils/types";
 import Decimal from "decimal.js";
-import { CountryCode } from "libphonenumber-js/types.cjs";
+import { CountryCode } from "libphonenumber-js";
 
 const env = import.meta.env;
 
@@ -79,8 +79,7 @@ const careConfig = {
       : undefined),
 
   defaultDischargeDisposition: env.REACT_DEFAULT_DISCHARGE_DISPOSITION as
-    | EncounterDischargeDisposition
-    | undefined,
+    EncounterDischargeDisposition | undefined,
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
@@ -342,17 +341,12 @@ const careConfig = {
   ),
 
   /**
-   * Maximum number of medication dispenses allowed for billing per dispense
-   * order.
-   *
-   * Defaults to `REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT` if set, otherwise 200.
-   * Must not exceed `REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT`.
+   * Enable questionnaire draft-saving if set to "true".
+   * When disabled, users cannot save questionnaire responses as drafts.
    */
-  maxDispensesPerDispenseOrder: parseInt(
-    env.REACT_MAX_DISPENSES_PER_DISPENSE_ORDER ||
-      env.REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT ||
-      "200",
-    10,
+  enableQuestionnaireDraft: booleanFromString(
+    env.REACT_ENABLE_QUESTIONNAIRE_DRAFT,
+    false,
   ),
 
   /**

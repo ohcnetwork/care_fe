@@ -893,5 +893,3 @@ export function DispenseOrderView({
     </Page>
   );
 }
-
-export default DispenseOrderView;

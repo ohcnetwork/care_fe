@@ -2,8 +2,8 @@ import { formatMedicationLine } from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { billMedicationLineItemSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { DispensedItemsSheet } from "@/pages/Facility/services/pharmacy/components/DispensedItemsSheet";
-import { MedicationBillSubstitution } from "@/pages/Facility/services/pharmacy/types";
 import {
   MedicationRequestDispenseStatus,
   MedicationRequestDosageInstruction,
@@ -14,12 +14,15 @@ import { PopoverContent } from "@radix-ui/react-popover";
 import { Check, X } from "lucide-react";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
+import z from "zod";
 
 interface MedicineInfoCardProps {
   trigger: React.ReactNode;
   medication: MedicationRequestRead | null;
   effectiveProductKnowledge: ProductKnowledgeBase | null;
-  substitution: MedicationBillSubstitution | null;
+  substitution: z.infer<
+    typeof billMedicationLineItemSchema.shape.substitution
+  > | null;
   productKnowledge: ProductKnowledgeBase | null;
   dosageInstructions: MedicationRequestDosageInstruction[];
 }
