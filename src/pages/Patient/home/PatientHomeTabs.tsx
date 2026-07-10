@@ -99,6 +99,7 @@ export default function PatientHomeTabs({
 
         {activeTab === "tokens" && canListTokens && isTab && (
           <PatientTokensList
+            key={token_id}
             patientId={patientId}
             facility={facility}
             initialExpandedTokenId={token_id}

@@ -130,17 +130,21 @@ export default function PatientHome() {
         </Alert>
       ) : patientData ? (
         <div className="space-y-6 md:max-w-5xl mx-auto">
-          {isQueueFlow && resource_type && resource_id && queue_id && (
-            <Button asChild type="button" variant="outline">
-              <Link
-                href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resource_type]}/${resource_id}/queues/${queue_id}/ongoing`}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft />
-                {t("queue")}
-              </Link>
-            </Button>
-          )}
+          {isQueueFlow &&
+            resource_type &&
+            resourceTypeToResourcePathSlug[resource_type] &&
+            resource_id &&
+            queue_id && (
+              <Button asChild type="button" variant="outline">
+                <Link
+                  href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resource_type]}/${resource_id}/queues/${queue_id}/ongoing`}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft />
+                  {t("queue")}
+                </Link>
+              </Button>
+            )}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
               <div className="">
@@ -288,6 +292,7 @@ export default function PatientHome() {
             <div className="space-y-4">
               {canListTokens && !isTab && (
                 <PatientTokensList
+                  key={token_id}
                   patientId={patientData.id}
                   facility={facility}
                   initialExpandedTokenId={token_id}

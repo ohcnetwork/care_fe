@@ -35,13 +35,13 @@ export default function TokenCardWithButton({
   onOpenDialogForServicePoint,
 }: TokenCardWithButtonProps) {
   const { t } = useTranslation();
-  const [showServicepointDialog, setShowServicepointDialog] = useState(false);
+  const [showServicePointDialog, setShowServicePointDialog] = useState(false);
 
   const { mutate: updateToken, isPending: isUpdating } = useUpdateToken({
     facilityId: facility.id,
     token,
     onSuccess: () => {
-      setShowServicepointDialog(false);
+      setShowServicePointDialog(false);
       toast(t("token_assigned_to_service_point"));
       onSuccess?.();
     },
@@ -92,7 +92,7 @@ export default function TokenCardWithButton({
                     }
 
                     onOpenDialogForServicePoint?.();
-                    setShowServicepointDialog(true);
+                    setShowServicePointDialog(true);
                   }}
                   variant="outline_primary"
                   disabled={
@@ -116,14 +116,14 @@ export default function TokenCardWithButton({
 
       {!isOnlyOneSubQueue && showMarkInServiceButton && (
         <ServicePointSelector
-          open={showServicepointDialog}
-          onOpenChange={setShowServicepointDialog}
+          open={showServicePointDialog}
+          onOpenChange={setShowServicePointDialog}
           token={token}
           facilityId={facility.id}
           subQueues={assignedServicePoints}
           action="serve"
           onSuccess={() => {
-            setShowServicepointDialog(false);
+            setShowServicePointDialog(false);
             toast(t("token_assigned_to_service_point"));
             onSuccess?.();
           }}
