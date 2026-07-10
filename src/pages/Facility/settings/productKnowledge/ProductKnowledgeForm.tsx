@@ -57,8 +57,8 @@ const createFormSchema = (
   return z.object({
     name: z.string().min(1, { message: t("name_is_required") }),
     slug_value: slugValueSchema(),
-    product_type: z.nativeEnum(ProductKnowledgeType),
-    status: z.nativeEnum(ProductKnowledgeStatus),
+    product_type: z.enum(ProductKnowledgeType),
+    status: z.enum(ProductKnowledgeStatus),
     alternate_identifier: z.string().trim().optional(),
     category: z.string(),
     code: CodeSchema.nullable(),
@@ -68,7 +68,7 @@ const createFormSchema = (
     names: z
       .array(
         z.object({
-          name_type: z.nativeEnum(ProductNameTypes),
+          name_type: z.enum(ProductNameTypes),
           name: z.string().min(1, { message: t("name_is_required") }),
         }),
       )
@@ -764,7 +764,7 @@ function ProductKnowledgeFormContent({
                                     {t("duration_unit")}
                                   </FormLabel>
                                   <Select
-                                    value={field.value.code}
+                                    value={field.value?.code}
                                     onValueChange={(value) => {
                                       const selectedUnit =
                                         UCUM_TIME_UNITS_CODES.find(

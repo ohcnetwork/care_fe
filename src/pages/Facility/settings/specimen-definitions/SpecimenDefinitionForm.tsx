@@ -55,7 +55,7 @@ import { navigate } from "raviger";
 
 const typeTestedSchema = z.object({
   is_derived: z.boolean(),
-  preference: z.nativeEnum(Preference),
+  preference: z.enum(Preference),
   container: z
     .object({
       description: z.string().optional(),
@@ -182,12 +182,8 @@ function SpecimenDefinitionFormContent({
   const formSchema = z.object({
     title: z.string().min(1, t("field_required")),
     slug_value: slugValueSchema(),
-    status: z.nativeEnum(SpecimenDefinitionStatus),
     description: z.string().min(1, t("field_required")),
-    derived_from_uri: z
-      .string()
-      .url({ message: t("field_required") })
-      .optional(),
+    derived_from_uri: z.url({ message: t("field_required") }).optional(),
     type_collected: CodeSchema,
     patient_preparation: z.array(CodeSchema).min(0),
     collection: CodeSchema.optional(),

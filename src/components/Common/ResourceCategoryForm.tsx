@@ -73,7 +73,7 @@ export function ResourceCategoryForm({
     title: z.string().min(1, t("field_required")),
     slug_value: slugValueSchema(),
     description: z.string().optional(),
-    resource_sub_type: z.nativeEnum(ResourceCategorySubType),
+    resource_sub_type: z.enum(ResourceCategorySubType),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
