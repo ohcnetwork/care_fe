@@ -30,6 +30,16 @@ async function addChargeItem(
   title: string,
 ): Promise<void> {
   const picker = page.getByRole("combobox").filter({ hasText: /add charges/i });
+
+  // The inline picker auto-opens on an empty invoice. Wait for that popover and
+  // dismiss it so the helper can reopen it from a stable, closed state — clicking
+  // the trigger while the auto-open overlay is still settling flakes ("<html>
+  // intercepts pointer events").
+  const popover = page.locator("[data-radix-popper-content-wrapper]").first();
+  await popover.waitFor({ state: "visible" }).catch(() => {});
+  await page.keyboard.press("Escape");
+  await popover.waitFor({ state: "hidden" }).catch(() => {});
+
   await selectFromDefinitionCategoryPicker(page, picker, {
     navigateCategories: [category],
     search: title,

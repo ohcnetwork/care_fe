@@ -73,6 +73,7 @@ function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
           phone_number: patient.phone_number ?? "",
           year_of_birth: patient.year_of_birth?.toString() ?? "",
           partial_id: getPartialId(patient),
+          facility: facilityId,
         },
       }),
       enabled: true,
@@ -96,7 +97,9 @@ function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
     <PrintPreview
       title={`${t("invoices")} (${invoices.length})`}
       watermark={
-        invoices.length === 1 ? getInvoiceWatermark(invoices[0], t) : undefined
+        invoices.length === 1
+          ? getInvoiceWatermark(invoices[0], t, { includeDraft: true })
+          : undefined
       }
       disabled={isLoadingDispenses}
       facility={facility}

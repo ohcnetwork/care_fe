@@ -60,7 +60,13 @@ export function InvoiceBillTo({
           </span>
         </div>
       </div>
-      <QRCodeSVG value={patient.id} size={100} level="M" marginSize={0} />
+      <QRCodeSVG
+        value={patient.id}
+        size={100}
+        level="M"
+        marginSize={0}
+        className="mr-2"
+      />
     </div>
   );
 }
