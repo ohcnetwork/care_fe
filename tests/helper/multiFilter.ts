@@ -8,13 +8,18 @@ export function selectedMultiFilterBar(page: Page, label: RegExp) {
 }
 
 export async function clearSelectedMultiFilter(page: Page, label: RegExp) {
+  await page.keyboard.press("Escape");
   await selectedMultiFilterBar(page, label)
     .locator('[data-slot="button"]')
     .click();
 }
 
 export async function clearAllMultiFilters(page: Page) {
-  await page.getByRole("button", { name: /clear all/i }).click();
+  await page.keyboard.press("Escape");
+  await page
+    .locator('[data-slot="button"]')
+    .filter({ hasText: /clear all/i })
+    .click();
 }
 
 export async function openMultiFilter(
@@ -33,6 +38,7 @@ export async function applyDateFilterPreset(
 ) {
   await openMultiFilter(page, filterName);
   await page.getByRole("menuitem", { name: presetName }).click();
+  await page.keyboard.press("Escape");
 }
 
 export async function applyCustomDateFilterRange(
@@ -48,6 +54,7 @@ export async function applyCustomDateFilterRange(
   await dateInputs.first().fill(after);
   await dateInputs.nth(1).fill(before);
   await page.getByRole("button", { name: /confirm/i }).click();
+  await page.keyboard.press("Escape");
 }
 
 export async function applyFacilityUserMineFilter(
