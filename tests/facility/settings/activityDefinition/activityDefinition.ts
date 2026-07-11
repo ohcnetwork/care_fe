@@ -6,8 +6,8 @@ import {
   closeAnyOpenPopovers,
   expectToast,
   selectFromCategoryPicker,
-  selectFromCommand,
   selectFromLocationMultiSelect,
+  selectFromRadio,
   selectFromRequirements,
   selectFromValueSet,
 } from "tests/helper/ui";
@@ -220,13 +220,7 @@ export async function createActivityDefinition(
       closeAfterSelect: true,
     });
 
-    const healthcareServiceTrigger = page
-      .getByRole("combobox")
-      .filter({ hasText: /select.*healthcare service/i });
-    await selectFromCommand(page, healthcareServiceTrigger, {
-      search: data.healthcareService!,
-      itemIndex: 0,
-    });
+    await selectFromRadio(page, { name: data.healthcareService! });
 
     const locationsTrigger = page
       .getByRole("combobox")

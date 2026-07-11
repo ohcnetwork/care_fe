@@ -1,6 +1,4 @@
-import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { XIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,29 +6,11 @@ import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
 
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import GenericAutocomplete, {
+  GenericAutocompleteOption,
+} from "@/components/ui/generic-autocomplete";
 
 import query from "@/Utils/request/query";
-import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   HealthcareServiceReadSpec,
   InternalType,
@@ -55,15 +35,9 @@ export const HealthcareServiceSelector = ({
   internalType,
 }: HealthcareServiceSelectorProps) => {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const isMobile = useBreakpoints({ default: true, sm: false });
 
-  const {
-    data: services,
-    isLoading,
-    isFetching,
-  } = useQuery({
+  const { data: services, isLoading } = useQuery({
     queryKey: ["healthcareServices", facilityId, searchValue, internalType],
     queryFn: query.debounced(healthcareServiceApi.listHealthcareService, {
       pathParams: { facilityId },
@@ -73,149 +47,78 @@ export const HealthcareServiceSelector = ({
         ...(searchValue && { name: searchValue }),
       },
     }),
-    enabled: open,
   });
 
   const getIconName = (name: string): DuoToneIconName =>
     `d-${name}` as DuoToneIconName;
 
-  const triggerButton = (
-    <Button
-      variant="outline"
-      role="combobox"
-      className="min-w-60 w-full justify-start"
-      disabled={isLoading}
-    >
-      {selected ? (
-        <div className="flex items-center gap-2">
-          <div className="relative size-6 rounded-sm flex items-center justify-center">
-            <ColoredIndicator
-              id={selected.id}
-              className="absolute inset-0 rounded-sm opacity-20"
-            />
-            <CareIcon
-              icon={
-                selected.styling_metadata?.careIcon
-                  ? getIconName(selected.styling_metadata.careIcon)
-                  : "d-health-worker"
-              }
-              className="size-4 relative z-1"
-            />
-          </div>
-          <span className="truncate">{selected.name}</span>
-        </div>
-      ) : (
-        <span className="text-gray-400">{t("select_healthcare_service")}</span>
-      )}
-      <CaretDownIcon className="ml-auto" />
-    </Button>
-  );
+  const serviceMap = new Map((services?.results ?? []).map((s) => [s.id, s]));
 
-  const commandContent = (
-    <Command shouldFilter={false}>
-      <CommandInput
-        placeholder={t("search")}
-        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
-        value={searchValue}
-        onValueChange={setSearchValue}
-        autoFocus
-      />
-      <CommandList>
-        <CommandEmpty>
-          {isFetching ? t("searching") : t("no_services_found")}
-        </CommandEmpty>
-        <CommandGroup>
-          {selected && clearSelection && (
-            <CommandItem
-              onSelect={() => {
-                onSelect(null);
-                setOpen(false);
-              }}
-              className="cursor-pointer w-full h-9"
-            >
-              <>
-                <XIcon />
-                <span> {t("clear_selection")}</span>
-              </>
-            </CommandItem>
-          )}
-          {services?.results.map((service) => (
-            <CommandItem
-              key={service.id}
-              value={service.name}
-              onSelect={() => {
-                onSelect(service);
-                setOpen(false);
-              }}
-              className="cursor-pointer w-full"
-            >
-              <div className="flex items-center gap-2 w-full">
-                <div className="relative size-6 rounded-sm flex items-center justify-center">
-                  <ColoredIndicator
-                    id={service.id}
-                    className="absolute inset-0 rounded-sm opacity-20"
-                  />
-                  <CareIcon
-                    icon={
-                      service.styling_metadata?.careIcon
-                        ? getIconName(service.styling_metadata.careIcon)
-                        : "d-health-worker"
-                    }
-                    className="size-4 relative z-1"
-                  />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span
-                    className="truncate text-sm font-medium"
-                    title={service.name}
-                  >
-                    {service.name}
-                  </span>
-                  {service.extra_details && (
-                    <span className="text-xs text-gray-500 truncate">
-                      {service.extra_details}
-                    </span>
-                  )}
-                </div>
-                {selected?.id === service.id && (
-                  <CheckIcon className="ml-auto" />
-                )}
-              </div>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </CommandList>
-    </Command>
-  );
+  const options: GenericAutocompleteOption<string>[] = (
+    services?.results ?? []
+  ).map((service) => ({
+    label: service.name,
+    value: service.id,
+  }));
 
-  if (isMobile) {
+  const renderServiceRow = (id: string) => {
+    const service = serviceMap.get(id);
+    if (!service) return null;
     return (
-      <Drawer open={open} onOpenChange={setOpen} direction="bottom">
-        <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-        <DrawerContent
-          aria-describedby={undefined}
-          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
-        >
-          <DrawerTitle className="sr-only">
-            {t("select_healthcare_service")}
-          </DrawerTitle>
-          <div className="mt-6 h-full">{commandContent}</div>
-        </DrawerContent>
-      </Drawer>
+      <div className="flex items-center gap-2 w-full min-w-0">
+        <div className="relative size-6 shrink-0 rounded-sm flex items-center justify-center">
+          <ColoredIndicator
+            id={service.id}
+            className="absolute inset-0 rounded-sm opacity-20"
+          />
+          <CareIcon
+            icon={
+              service.styling_metadata?.careIcon
+                ? getIconName(service.styling_metadata.careIcon)
+                : "d-health-worker"
+            }
+            className="size-4 relative z-1"
+          />
+        </div>
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="truncate text-sm font-medium" title={service.name}>
+            {service.name}
+          </span>
+          {service.extra_details && (
+            <span className="text-xs text-gray-500 truncate">
+              {service.extra_details}
+            </span>
+          )}
+        </div>
+      </div>
     );
-  }
+  };
 
   return (
-    <Popover open={open} onOpenChange={setOpen} modal={true}>
-      <PopoverTrigger asChild disabled={isLoading}>
-        {triggerButton}
-      </PopoverTrigger>
-      <PopoverContent
-        className="p-0 w-(--radix-popover-trigger-width)"
-        align="start"
-      >
-        {commandContent}
-      </PopoverContent>
-    </Popover>
+    <GenericAutocomplete<string>
+      options={options}
+      isLoading={isLoading}
+      value={selected?.id ?? null}
+      onChange={(id) => {
+        onSelect(id ? (serviceMap.get(id) ?? null) : null);
+      }}
+      onSearch={setSearchValue}
+      placeholder={t("select_healthcare_service")}
+      inputPlaceholder={t("search")}
+      noOptionsMessage={t("no_services_found")}
+      enableRadio={true}
+      showClearButton={clearSelection}
+      renderOption={(option) => renderServiceRow(option.value)}
+      renderTrigger={(opt) =>
+        opt ? (
+          renderServiceRow(opt.value)
+        ) : (
+          <span className="text-gray-400">
+            {t("select_healthcare_service")}
+          </span>
+        )
+      }
+      className="min-w-60"
+    />
   );
 };

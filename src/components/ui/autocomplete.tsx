@@ -1,3 +1,10 @@
+/**
+ * @deprecated Use `GenericAutocomplete` from `@/components/ui/generic-autocomplete` instead.
+ * Migration is a drop-in rename for `string`-valued usages:
+ *   `import Autocomplete from "@/components/ui/autocomplete"`
+ *   → `import GenericAutocomplete from "@/components/ui/generic-autocomplete"`
+ * The props contract is identical for `T = string`.
+ */
 import { CaretSortIcon, CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import * as React from "react";
 import { useTranslation } from "react-i18next";

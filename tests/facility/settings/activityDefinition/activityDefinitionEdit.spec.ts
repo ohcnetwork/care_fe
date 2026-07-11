@@ -9,8 +9,8 @@ import {
   expectToast,
   getCardByTitle,
   selectFromCategoryPicker,
-  selectFromCommand,
   selectFromLocationMultiSelect,
+  selectFromRadio,
   selectFromRequirements,
   selectFromValueSet,
 } from "tests/helper/ui";
@@ -96,10 +96,10 @@ test.describe("activity definition edit", () => {
     ).toBeVisible();
 
     await expect(
-      page.getByRole("combobox").filter({
-        hasText: createdAD.healthcareService!,
-      }),
-    ).toBeVisible();
+      page
+        .locator('[data-testid="autocomplete-radio-group"]')
+        .getByRole("radio", { name: createdAD.healthcareService! }),
+    ).toBeChecked();
 
     await expect(
       page
@@ -184,13 +184,7 @@ test.describe("activity definition edit", () => {
       closeAfterSelect: true,
     });
 
-    const healthcareServiceTrigger = page
-      .getByRole("combobox")
-      .filter({ hasText: /select.*healthcare service/i });
-    await selectFromCommand(page, healthcareServiceTrigger, {
-      search: "main pharmacy",
-      itemIndex: 0,
-    });
+    await selectFromRadio(page, { name: "main pharmacy" });
 
     const locationsTrigger = page
       .getByRole("combobox")

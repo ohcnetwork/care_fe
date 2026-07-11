@@ -693,3 +693,45 @@ export async function clickTabOrMenuItem(
     `Tab "${tabName}" not found as visible tab or in dropdown menu`,
   );
 }
+
+interface SelectFromRadioOptions {
+  /** Accessible name (aria-label) of the radio option to select. */
+  name: string;
+  /**
+   * Locator scoping the search to a specific container.
+   * Defaults to the whole page when omitted.
+   */
+  scope?: Locator;
+}
+
+/**
+ * Helper for GenericAutocomplete in radio mode.
+ *
+ * Finds the radio group by `data-testid="autocomplete-radio-group"` (or within a
+ * provided scope), then clicks the radio option whose accessible name matches
+ * `name`.  Works for both initial selection and re-selection.
+ *
+ * Key behaviour:
+ * - Radio options carry `role="radio"` and `aria-label=<service name>`
+ * - The radio row also carries `data-testid="autocomplete-radio-option"`
+ * - Clicking the currently-selected option deselects it (toggle behaviour)
+ *
+ * @example
+ * await selectFromRadio(page, { name: "Main Pharmacy" });
+ * await selectFromRadio(page, { name: "Lab Services", scope: page.locator("#form-section") });
+ */
+export async function selectFromRadio(
+  page: Page,
+  { name, scope }: SelectFromRadioOptions,
+) {
+  const root = scope ?? page;
+  const radioGroup = root
+    .locator('[data-testid="autocomplete-radio-group"]')
+    .first();
+  await radioGroup.waitFor({ state: "visible" });
+
+  const radioOption = radioGroup.getByRole("radio", { name });
+  await radioOption.waitFor({ state: "visible" });
+  await radioOption.scrollIntoViewIfNeeded();
+  await radioOption.click();
+}
