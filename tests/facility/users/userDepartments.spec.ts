@@ -80,7 +80,7 @@ test.describe("User Departments Tab", () => {
           .isVisible()
           .catch(() => false)) ||
         (await page
-          .getByText("No Departments Assigned")
+          .getByText("No departments assigned")
           .isVisible()
           .catch(() => false));
       expect(restored).toBe(true);
