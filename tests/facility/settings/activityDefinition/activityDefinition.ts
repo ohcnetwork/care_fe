@@ -6,8 +6,8 @@ import {
   closeAnyOpenPopovers,
   expectToast,
   selectFromCategoryPicker,
+  selectFromGenericAutocomplete,
   selectFromLocationMultiSelect,
-  selectFromRadio,
   selectFromRequirements,
   selectFromValueSet,
 } from "tests/helper/ui";
@@ -220,7 +220,13 @@ export async function createActivityDefinition(
       closeAfterSelect: true,
     });
 
-    await selectFromRadio(page, { name: data.healthcareService! });
+    await selectFromGenericAutocomplete(
+      page,
+      page
+        .getByRole("combobox")
+        .filter({ hasText: /select.*healthcare service/i }),
+      { name: data.healthcareService! },
+    );
 
     const locationsTrigger = page
       .getByRole("combobox")

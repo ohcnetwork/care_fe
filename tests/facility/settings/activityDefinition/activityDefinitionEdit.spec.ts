@@ -9,8 +9,8 @@ import {
   expectToast,
   getCardByTitle,
   selectFromCategoryPicker,
+  selectFromGenericAutocomplete,
   selectFromLocationMultiSelect,
-  selectFromRadio,
   selectFromRequirements,
   selectFromValueSet,
 } from "tests/helper/ui";
@@ -95,11 +95,22 @@ test.describe("activity definition edit", () => {
         .first(),
     ).toBeVisible();
 
-    await expect(
-      page
-        .locator('[data-testid="autocomplete-radio-group"]')
-        .getByRole("radio", { name: createdAD.healthcareService! }),
-    ).toBeChecked();
+    // Pre-fill check: works in both radio mode (≤5 services) and dropdown mode (>5)
+    const radioGroup = page.locator('[data-testid="autocomplete-radio-group"]');
+    const isRadioMode = await radioGroup
+      .isVisible({ timeout: 2000 })
+      .catch(() => false);
+    if (isRadioMode) {
+      await expect(
+        radioGroup.getByRole("radio", { name: createdAD.healthcareService! }),
+      ).toBeChecked();
+    } else {
+      await expect(
+        page.getByRole("combobox").filter({
+          hasText: createdAD.healthcareService!,
+        }),
+      ).toBeVisible();
+    }
 
     await expect(
       page
@@ -184,7 +195,13 @@ test.describe("activity definition edit", () => {
       closeAfterSelect: true,
     });
 
-    await selectFromRadio(page, { name: "main pharmacy" });
+    await selectFromGenericAutocomplete(
+      page,
+      page
+        .getByRole("combobox")
+        .filter({ hasText: /select.*healthcare service/i }),
+      { name: "main pharmacy" },
+    );
 
     const locationsTrigger = page
       .getByRole("combobox")

@@ -735,3 +735,58 @@ export async function selectFromRadio(
   await radioOption.scrollIntoViewIfNeeded();
   await radioOption.click();
 }
+
+interface SelectFromGenericAutocompleteOptions {
+  /**
+   * Accessible name of the option to select (used in radio mode and as the
+   * default search term in dropdown mode).
+   */
+  name: string;
+  /** Override the search term used in dropdown/command mode. */
+  search?: string;
+}
+
+/**
+ * Mode-agnostic helper for `GenericAutocomplete` fields.
+ *
+ * `GenericAutocomplete` renders inline radio buttons when `enableRadio=true`
+ * and the loaded option count is ≤ `RADIO_TRIGGER_MAX_OPTIONS`; otherwise it
+ * renders a searchable dropdown/popover. The exact mode depends on how many
+ * options exist in the backend, which can vary across environments.
+ *
+ * This helper probes for the radio group first (short 2 s window), then falls
+ * back to `selectFromCommand` so tests pass regardless of the active mode.
+ *
+ * @param trigger – Locator for the combobox trigger button used in dropdown
+ *   mode (ignored when radio mode is active).
+ *
+ * @example
+ * const trigger = page.getByRole("combobox").filter({ hasText: /select.*healthcare service/i });
+ * await selectFromGenericAutocomplete(page, trigger, { name: "Main Pharmacy" });
+ */
+export async function selectFromGenericAutocomplete(
+  page: Page,
+  trigger: Locator,
+  { name, search }: SelectFromGenericAutocompleteOptions,
+) {
+  const radioGroup = page
+    .locator('[data-testid="autocomplete-radio-group"]')
+    .first();
+  const isRadioMode = await radioGroup
+    .isVisible({ timeout: 2000 })
+    .catch(() => false);
+
+  if (isRadioMode) {
+    const radioOption = radioGroup.getByRole("radio", { name });
+    await radioOption.waitFor({ state: "visible" });
+    await radioOption.scrollIntoViewIfNeeded();
+    await radioOption.click();
+    return;
+  }
+
+  // Dropdown mode
+  await selectFromCommand(page, trigger, {
+    search: search ?? name,
+    itemIndex: 0,
+  });
+}
