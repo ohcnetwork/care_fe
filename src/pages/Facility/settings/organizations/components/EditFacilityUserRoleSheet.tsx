@@ -40,7 +40,7 @@ export default function EditUserRoleSheet({
 }: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<RoleBase>();
+  const [selectedRole, setSelectedRole] = useState<RoleBase>(userRole.role);
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const { t } = useTranslation();
 

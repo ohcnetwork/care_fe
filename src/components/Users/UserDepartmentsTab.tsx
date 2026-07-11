@@ -7,11 +7,14 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { userChildProps } from "@/components/Common/UserColumns";
 import LinkUserToDepartmentSheet from "@/components/Users/LinkUserToDepartmentSheet";
+
+import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import EditFacilityUserRoleSheet from "@/pages/Facility/settings/organizations/components/EditFacilityUserRoleSheet";
@@ -113,65 +116,106 @@ function DepartmentCard({
 export default function UserDepartmentsTab({ userData }: userChildProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 12,
+    disableCache: true,
+  });
 
   const { data: departmentsData, isLoading } = useQuery({
-    queryKey: ["facilityOrganizations", "byUser", facilityId, userData.id],
-    queryFn: query(facilityOrganizationApi.list, {
+    queryKey: [
+      "facilityOrganizations",
+      "byUser",
+      facilityId,
+      userData.id,
+      qParams,
+    ],
+    queryFn: query.debounced(facilityOrganizationApi.list, {
       pathParams: { facilityId: facilityId! },
       queryParams: {
         containing_user: userData.id,
+        name: qParams.search || undefined,
+        limit: resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
     enabled: !!facilityId,
   });
 
-  if (isLoading) {
-    return (
-      <div className="mt-8 space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          {t("departments")}
-        </h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <CardGridSkeleton count={6} />
-        </div>
-      </div>
-    );
-  }
-
   const departments = departmentsData?.results ?? [];
+  const totalCount = departmentsData?.count ?? 0;
 
   return (
     <div className="mt-8 space-y-4">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <h3 className="text-lg font-semibold text-gray-900">
           {t("departments")}
         </h3>
-        <LinkUserToDepartmentSheet
-          userId={userData.id}
-          facilityId={facilityId}
-        />
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-64">
+            <CareIcon
+              icon="l-search"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+            />
+            <Input
+              placeholder={t("search_departments")}
+              value={qParams.search || ""}
+              onChange={(e) => {
+                updateQuery({ search: e.target.value || undefined });
+              }}
+              className="w-full pl-8"
+            />
+          </div>
+          <LinkUserToDepartmentSheet
+            userId={userData.id}
+            facilityId={facilityId}
+          />
+        </div>
       </div>
 
-      {departments.length === 0 ? (
+      {isLoading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <CardGridSkeleton count={6} />
+        </div>
+      ) : departments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
           <CareIcon icon="l-building" className="h-16 w-16 text-gray-400" />
-          <p className="mt-4 text-lg font-medium text-gray-600">
-            {t("no_departments_assigned")}
-          </p>
-          <p className="mt-2 text-sm text-gray-500">
-            {t("click_link_department_to_get_started")}
-          </p>
+          {qParams.search ? (
+            <>
+              <p className="mt-4 text-lg font-medium text-gray-600">
+                {t("no_departments_found")}
+              </p>
+              <p className="mt-2 text-sm text-gray-500">
+                {t("try_different_search")}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="mt-4 text-lg font-medium text-gray-600">
+                {t("no_departments_assigned")}
+              </p>
+              <p className="mt-2 text-sm text-gray-500">
+                {t("click_link_department_to_get_started")}
+              </p>
+            </>
+          )}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {departments.map((department) => (
-            <DepartmentCard
-              key={department.id}
-              department={department}
-              userData={userData}
-              facilityId={facilityId}
-            />
-          ))}
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {departments.map((department) => (
+              <DepartmentCard
+                key={department.id}
+                department={department}
+                userData={userData}
+                facilityId={facilityId}
+              />
+            ))}
+          </div>
+          {totalCount > resultsPerPage && (
+            <div className="flex justify-center">
+              <Pagination totalCount={totalCount} />
+            </div>
+          )}
         </div>
       )}
     </div>

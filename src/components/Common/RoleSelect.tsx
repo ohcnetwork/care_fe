@@ -183,7 +183,9 @@ export function RoleSelect({
       className={cn("w-full justify-between", className)}
       disabled={disabled}
     >
-      <span className={cn(!selectedRole && "text-gray-500")}>
+      <span
+        className={cn("truncate min-w-0", !selectedRole && "text-gray-500")}
+      >
         {selectedRole ? selectedRole.name : placeholder || t("select_role")}
       </span>
       <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
