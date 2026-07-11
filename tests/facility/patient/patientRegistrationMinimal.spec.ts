@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -91,6 +92,7 @@ async function selectGeoOrganization(page: Page) {
           .nth(count)
           .waitFor({ state: "visible", timeout: 3000 });
       } catch {
+        // No new combobox appeared — we've filled all required levels
         break;
       }
     }
@@ -168,9 +170,9 @@ test.describe("Patient Registration — minimal registration env variable", () =
 
       await test.step("Verify the address required error and no success", async () => {
         const addressField = page.getByRole("textbox", { name: "Address" });
-        await expect(
-          addressField.locator("..").locator('[data-slot="form-message"]'),
-        ).toContainText(/required/i);
+        await expect(getFieldErrorMessage(addressField)).toContainText(
+          /required/i,
+        );
 
         await expect(
           page
