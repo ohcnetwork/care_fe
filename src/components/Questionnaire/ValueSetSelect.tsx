@@ -40,6 +40,7 @@ interface Props {
   closeOnSelect?: boolean;
   mobileTrigger?: React.ReactNode;
   onClear?: () => void;
+  clearTestId?: string;
 }
 
 export default function ValueSetSelect({
@@ -56,6 +57,8 @@ export default function ValueSetSelect({
   title,
   mobileTrigger,
   onClear,
+  clearTestId = "valueset-clear",
+  disabled,
   ...props
 }: Props & ButtonProps) {
   const { t } = useTranslation();
@@ -97,6 +100,7 @@ export default function ValueSetSelect({
                   onClear && value && "rounded-r-none border-r-0",
                   !value?.display && "text-gray-500 hover:bg-white",
                 )}
+                disabled={disabled}
                 {...props}
               >
                 <span>
@@ -139,8 +143,9 @@ export default function ValueSetSelect({
             variant="ghost"
             size="sm"
             onClick={onClear}
-            data-testid="valueset-clear"
+            data-testid={clearTestId}
             aria-label={t("clear")}
+            disabled={disabled}
             className="h-8 border-l hover:bg-transparent w-9 rounded-none text-gray-400 border-gray-400"
           >
             <X className="size-4" />
@@ -189,6 +194,7 @@ export default function ValueSetSelect({
             onClear && value && "rounded-r-none border-r-0",
             !value?.display && "text-gray-500 hover:bg-white",
           )}
+          disabled={disabled}
           {...props}
         >
           <span className="truncate">
@@ -239,8 +245,9 @@ export default function ValueSetSelect({
           variant="ghost"
           size="sm"
           onClick={onClear}
-          data-testid="valueset-clear"
+          data-testid={clearTestId}
           aria-label={t("clear")}
+          disabled={disabled}
           className="h-8 border-l hover:bg-transparent w-9 rounded-none text-gray-400 border-gray-400"
         >
           <X className="size-4" />

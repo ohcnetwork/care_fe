@@ -134,6 +134,8 @@ export const QuantityQuestion = memo(function QuantityQuestion({
               value={currentCoding}
               onSelect={handleCodingChange}
               onClear={handleClearCoding}
+              clearTestId="quantity-coding-clear"
+              disabled={disabled}
             />
           </div>
         </div>
@@ -161,6 +163,8 @@ export const QuantityQuestion = memo(function QuantityQuestion({
             value={currentUnit}
             onSelect={handleUnitChange}
             onClear={handleClearUnit}
+            clearTestId="quantity-unit-clear"
+            disabled={disabled}
           />
         </div>
       </div>
