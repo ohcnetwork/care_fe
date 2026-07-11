@@ -112,6 +112,7 @@ function GenericAutocompleteInner<T>(
   _ref: React.Ref<HTMLButtonElement | null>,
 ) {
   const [open, setOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
   const { t } = useTranslation();
 
@@ -120,13 +121,18 @@ function GenericAutocompleteInner<T>(
       ? (options.find((o) => o.value === value) ?? null)
       : null;
 
-  const showRadio = enableRadio && options.length <= RADIO_TRIGGER_MAX_OPTIONS;
+  // Decide radio vs dropdown against the eager-fetched (unfiltered) option
+  // count. While a search term is active the list is server-filtered, so a
+  // narrowed result must not collapse an open dropdown into radios.
+  const showRadio =
+    enableRadio && !searchTerm && options.length <= RADIO_TRIGGER_MAX_OPTIONS;
 
   const handleClear = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onChange(null);
     onSearch?.("");
+    setSearchTerm("");
     setOpen(false);
   };
 
@@ -228,7 +234,10 @@ function GenericAutocompleteInner<T>(
       <CommandInput
         placeholder={inputPlaceholder}
         disabled={disabled}
-        onValueChange={(v) => onSearch?.(v)}
+        onValueChange={(v) => {
+          setSearchTerm(v);
+          onSearch?.(v);
+        }}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm md:pr-0"
         autoFocus
       />
