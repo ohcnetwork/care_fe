@@ -106,10 +106,12 @@ function RepeatingNotesButton({
   questionnaireResponse,
   onUpdateNote,
   disabled,
+  testId,
 }: {
   questionnaireResponse: QuestionnaireResponse;
   onUpdateNote: (note: string) => void;
   disabled?: boolean;
+  testId?: string;
 }) {
   const { t } = useTranslation();
   const [notesOpen, setNotesOpen] = useState(false);
@@ -122,6 +124,7 @@ function RepeatingNotesButton({
         <button
           type="button"
           disabled={disabled}
+          data-testid={testId}
           className={cn(
             "flex items-center justify-center w-10 h-10 border border-gray-300 rounded-md bg-gray-100/20",
             hasNotes && "bg-orange-50 border-orange-300",
@@ -454,12 +457,13 @@ export function QuestionInput({
                       question.repeats || question.type === "text",
                   })}
                 >
-                  {/* For basic types (not structured, not text/string/url, not repeating), use integrated notes */}
+                  {/* For basic types (not structured, not text/string/url, not repeating, not quantity), use integrated notes */}
                   {!question.structured_type &&
                   !question.repeats &&
                   question.type !== "text" &&
                   question.type !== "string" &&
-                  question.type !== "url" ? (
+                  question.type !== "url" &&
+                  question.type !== "quantity" ? (
                     <InputWithNotes
                       questionnaireResponse={questionnaireResponse}
                       onUpdateNote={(note) => {
@@ -473,6 +477,26 @@ export function QuestionInput({
                     >
                       {renderSingleInput(index)}
                     </InputWithNotes>
+                  ) : question.type === "quantity" && !question.repeats ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex-1 min-w-0">
+                        {renderSingleInput(index)}
+                      </div>
+                      <div className="flex items-center">
+                        <RepeatingNotesButton
+                          questionnaireResponse={questionnaireResponse}
+                          onUpdateNote={(note) => {
+                            updateQuestionnaireResponseCB(
+                              [...questionnaireResponse.values],
+                              questionnaireResponse.question_id,
+                              note,
+                            );
+                          }}
+                          disabled={disabled}
+                          testId="quantity-notes-button"
+                        />
+                      </div>
+                    </div>
                   ) : (
                     <div className="flex-1 min-w-0">
                       {renderSingleInput(index)}

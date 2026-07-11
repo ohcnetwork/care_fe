@@ -1,0 +1,29 @@
+{
+  "title": "Quantity Validation Test",
+  "slug": "quantity-validation-test",
+  "description": "Tests all-or-nothing validation for quantity questions (value + coding + unit must all be filled together)",
+  "version": "1.0",
+  "status": "active",
+  "subject_type": "encounter",
+  "tags": [],
+  "questions": [
+    {
+      "id": "b2000001-0001-4000-8000-000000000001",
+      "link_id": "Q-001",
+      "text": "Reference Note",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "b2000001-0001-4000-8000-000000000002",
+      "link_id": "Q-002",
+      "text": "Route Quantity",
+      "type": "quantity",
+      "answer_option": [],
+      "answer_value_set": "system-route",
+      "required": false,
+      "questions": []
+    }
+  ]
+}

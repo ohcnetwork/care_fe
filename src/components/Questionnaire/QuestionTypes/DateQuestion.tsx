@@ -1,5 +1,7 @@
 import "react-day-picker/style.css";
 
+import { cn } from "@/lib/utils";
+
 import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 
 import type {
@@ -49,12 +51,27 @@ export function DateQuestion({
     );
   };
 
+  const handleClear = () => {
+    clearError();
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "date",
+      value: undefined,
+    };
+    updateQuestionnaireResponseCB(
+      newValues,
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
+  };
+
   return (
     <CombinedDatePicker
       value={currentValue}
       onChange={handleSelect}
+      onClear={handleClear}
       disabled={disabled}
-      classes={classes}
+      classes={cn("shadow-xs", classes)}
     />
   );
 }

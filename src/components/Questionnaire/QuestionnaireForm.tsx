@@ -416,6 +416,9 @@ export function QuestionnaireForm({
   });
 
   const { mutate: submitBatch, isPending: isSubmitPending } = useMutation({
+    // Migrating this submit pipeline to useBatchRequest is a broad refactor
+    // out of scope for ENG-642.
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       setServerErrors(undefined);
@@ -755,7 +758,13 @@ export function QuestionnaireForm({
           return;
         }
 
-        if (q.required && isQuestionEnabled(q, form.responses)) {
+        // Quantity is validated for all-or-nothing even when optional, so it
+        // must enter this block regardless of `q.required`; other types keep
+        // the required-only behavior.
+        if (
+          isQuestionEnabled(q, form.responses) &&
+          (q.required || q.type === "quantity")
+        ) {
           // Handle appointment validation
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
@@ -772,7 +781,38 @@ export function QuestionnaireForm({
           const hasCoding = hasProperty(response?.values, "coding");
           const hasUnit = hasProperty(response?.values, "unit");
 
-          if (!hasValue && !hasCoding && !hasUnit) {
+          if (q.type === "quantity") {
+            // For quantity: all rendered fields must be filled together (all-or-nothing)
+            const hasCodingField = !!q.answer_value_set;
+            // unit field always renders for quantity
+            const hasUnitField = true;
+            const allFilledCount = [
+              hasValue,
+              hasCodingField && hasCoding,
+              hasUnitField && hasUnit,
+            ].filter(Boolean).length;
+            const requiredFieldCount = [
+              true,
+              hasCodingField,
+              hasUnitField,
+            ].filter(Boolean).length;
+            const isFullyEmpty = !hasValue && !hasCoding && !hasUnit;
+            const isPartiallyFilled =
+              !isFullyEmpty && allFilledCount < requiredFieldCount;
+            if (isPartiallyFilled || (q.required && isFullyEmpty)) {
+              errors.push({
+                question_id: q.id,
+                error: isPartiallyFilled
+                  ? t("quantity_all_fields_required")
+                  : t("field_required"),
+                type: "validation_error",
+                msg: isPartiallyFilled
+                  ? t("quantity_all_fields_required")
+                  : t("field_required"),
+              });
+              firstErrorId = firstErrorId ? firstErrorId : q.id;
+            }
+          } else if (!hasValue && !hasCoding && !hasUnit) {
             errors.push({
               question_id: q.id,
               error: t("field_required"),
@@ -855,12 +895,20 @@ export function QuestionnaireForm({
 
     // Then, add questionnaire submission requests
     formsWithValidation.forEach((form) => {
-      const validResponses = form.responses.filter(
-        (response) =>
-          !response.structured_type &&
-          response.values.length > 0 &&
-          response.values?.[0]?.value !== "",
-      );
+      const validResponses = form.responses.filter((response) => {
+        if (response.structured_type) return false;
+        if (response.values.length === 0) return false;
+        // At least one entry must have a non-empty value, coding, or unit
+        return response.values.some(
+          (v) =>
+            (v.value !== undefined &&
+              v.value !== null &&
+              v.value !== "" &&
+              !(typeof v.value === "number" && isNaN(v.value))) ||
+            v.coding != null ||
+            v.unit != null,
+        );
+      });
       if (validResponses.length > 0) {
         requests.push({
           url: `/api/v1/questionnaire/${form.questionnaire.slug}/submit/`,
@@ -882,35 +930,46 @@ export function QuestionnaireForm({
               )
               .map((response) => ({
                 question_id: response.question_id,
-                values: response.values.map((value) => {
-                  if (value.type === "date" && value.value) {
-                    const date = new Date(value.value);
-                    if (isNaN(date.getTime())) {
-                      return { ...value, value: "" };
+                values: response.values
+                  .filter((value) => {
+                    const isEmpty =
+                      value.value === undefined ||
+                      value.value === null ||
+                      value.value === "" ||
+                      (typeof value.value === "number" && isNaN(value.value));
+                    return (
+                      !isEmpty || value.coding != null || value.unit != null
+                    );
+                  })
+                  .map((value) => {
+                    if (value.type === "date" && value.value) {
+                      const date = new Date(value.value);
+                      if (isNaN(date.getTime())) {
+                        return { ...value, value: "" };
+                      }
+                      const formattedDate = dateQueryString(date);
+                      return {
+                        ...value,
+                        value: formattedDate,
+                      };
+                    } else if (value.type === "dateTime" && value.value) {
+                      return {
+                        ...value,
+                        value: value.value.toISOString(),
+                      };
                     }
-                    const formattedDate = dateQueryString(date);
-                    return {
-                      ...value,
-                      value: formattedDate,
-                    };
-                  } else if (value.type === "dateTime" && value.value) {
-                    return {
-                      ...value,
-                      value: value.value.toISOString(),
-                    };
-                  }
-                  if (value.unit) {
-                    return {
-                      value: value.value?.toString(),
-                      unit: value.unit,
-                      coding: value.coding,
-                    };
-                  }
-                  if (value.coding) {
-                    return { coding: value.coding };
-                  }
-                  return { value: String(value.value) };
-                }),
+                    if (value.unit) {
+                      return {
+                        value: value.value?.toString(),
+                        unit: value.unit,
+                        coding: value.coding,
+                      };
+                    }
+                    if (value.coding) {
+                      return { coding: value.coding };
+                    }
+                    return { value: String(value.value) };
+                  }),
                 note: response.note,
                 body_site: response.body_site,
                 method: response.method,

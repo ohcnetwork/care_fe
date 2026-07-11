@@ -4659,6 +4659,7 @@
   "qualification": "Qualification",
   "qualification_required": "Qualification is required",
   "quantity": "Quantity",
+  "quantity_all_fields_required": "All quantity fields must be filled together",
   "quantity_approved": "Quantity Approved",
   "quantity_cannot_be_zero": "Quantity cannot be zero",
   "quantity_cannot_be_zero_for_items": "Quantity cannot be 0 enter quantity for items: {{items}}",

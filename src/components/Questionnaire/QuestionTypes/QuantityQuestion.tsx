@@ -90,6 +90,38 @@ export const QuantityQuestion = memo(function QuantityQuestion({
     );
   };
 
+  const handleClearUnit = () => {
+    clearError();
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "quantity",
+      value: currentValue,
+      unit: undefined,
+      coding: currentCoding,
+    };
+    updateQuestionnaireResponseCB(
+      newValues,
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
+  };
+
+  const handleClearCoding = () => {
+    clearError();
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "quantity",
+      value: currentValue,
+      unit: currentUnit,
+      coding: undefined,
+    };
+    updateQuestionnaireResponseCB(
+      newValues,
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
+  };
+
   return (
     <div className="flex flex-col sm:flex-row gap-4 sm:flex-wrap">
       {question.answer_value_set && (
@@ -97,9 +129,11 @@ export const QuantityQuestion = memo(function QuantityQuestion({
           <Label htmlFor={`${question.id}-coding`}>Type</Label>
           <div className="w-full sm:w-[200px]">
             <ValueSetSelect
+              data-testid="quantity-coding-select"
               system={question.answer_value_set}
               value={currentCoding}
               onSelect={handleCodingChange}
+              onClear={handleClearCoding}
             />
           </div>
         </div>
@@ -108,6 +142,7 @@ export const QuantityQuestion = memo(function QuantityQuestion({
         <Label htmlFor={`${question.id}-value`}>Value</Label>
         <Input
           id={`${question.id}-value`}
+          data-testid="quantity-value-input"
           type="number"
           inputMode="decimal"
           pattern="[0-9]*[.]?[0-9]*"
@@ -120,11 +155,12 @@ export const QuantityQuestion = memo(function QuantityQuestion({
       </div>
       <div className="space-y-2">
         <Label htmlFor={`${question.id}-unit`}>Unit</Label>
-        <div className="w-[200px]">
+        <div className="w-[200px]" data-testid="quantity-unit-select">
           <ValueSetSelect
             system="system-ucum-units"
             value={currentUnit}
             onSelect={handleUnitChange}
+            onClear={handleClearUnit}
           />
         </div>
       </div>

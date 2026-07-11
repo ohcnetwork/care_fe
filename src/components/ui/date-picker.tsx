@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -21,6 +22,7 @@ interface DatePickerProps {
   className?: string;
   disablePicker?: boolean;
   dateFormat?: string;
+  onClear?: () => void;
 }
 
 export function DatePicker({
@@ -30,12 +32,13 @@ export function DatePicker({
   className,
   disablePicker,
   dateFormat = "PPP",
+  onClear,
 }: DatePickerProps) {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
 
-  return (
+  const picker = (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
@@ -44,6 +47,7 @@ export function DatePicker({
             "w-full justify-start text-left font-normal",
             !date && "text-gray-500",
             "sm:w-auto",
+            onClear && date && "rounded-r-none border-r-0",
             className,
           )}
           disabled={disablePicker}
@@ -80,5 +84,31 @@ export function DatePicker({
         />
       </PopoverContent>
     </Popover>
+  );
+
+  // Only introduce the clear affordance (and its wrapper) when a caller opts in
+  // via `onClear`; other callers keep the original single-trigger structure.
+  if (!onClear) {
+    return picker;
+  }
+
+  return (
+    <div className="flex flex-1 items-center">
+      {picker}
+      {date && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onClear}
+          disabled={disablePicker}
+          data-testid="datetime-picker-clear"
+          aria-label={t("clear")}
+          className="h-8 border-l hover:bg-transparent w-9 rounded-none text-gray-400 border-gray-400"
+        >
+          <X className="size-4" />
+        </Button>
+      )}
+    </div>
   );
 }

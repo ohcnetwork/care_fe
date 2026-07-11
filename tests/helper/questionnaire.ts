@@ -1,5 +1,5 @@
 import { type Page, expect } from "@playwright/test";
-import { expectToast } from "tests/helper/ui";
+import { expectToast, selectFromValueSet } from "tests/helper/ui";
 
 /**
  * Locates the question container div for a given label.
@@ -154,4 +154,35 @@ export async function clearBooleanField(
   currentOption: "Yes" | "No",
 ) {
   await selectBooleanOption(page, labelText, currentOption);
+}
+
+/**
+ * Fills the numeric value input of a quantity question.
+ */
+export async function fillQuantityValue(page: Page, value: string) {
+  const input = page.getByTestId("quantity-value-input");
+  await input.scrollIntoViewIfNeeded();
+  await input.fill(value);
+}
+
+/**
+ * Selects a coding option from the quantity coding ValueSetSelect (answer_value_set).
+ * Uses the first matching result for the given search term.
+ */
+export async function selectQuantityCoding(page: Page, search: string) {
+  // data-testid="quantity-coding-select" is spread onto the Button trigger
+  const trigger = page.getByTestId("quantity-coding-select");
+  await selectFromValueSet(page, trigger, { search, itemIndex: 0 });
+}
+
+/**
+ * Selects a unit from the quantity unit ValueSetSelect (system-ucum-units).
+ * Uses the first matching result for the given search term.
+ */
+export async function selectQuantityUnit(page: Page, search: string) {
+  // data-testid="quantity-unit-select" is on the wrapper div; the combobox button is inside
+  const trigger = page
+    .getByTestId("quantity-unit-select")
+    .getByRole("combobox");
+  await selectFromValueSet(page, trigger, { search, itemIndex: 0 });
 }

@@ -52,6 +52,20 @@ export function DateTimeQuestion({
     );
   };
 
+  const handleClear = () => {
+    clearError();
+    const newValues = [...questionnaireResponse.values];
+    newValues[index] = {
+      type: "dateTime",
+      value: undefined,
+    };
+    updateQuestionnaireResponseCB(
+      newValues,
+      questionnaireResponse.question_id,
+      questionnaireResponse.note,
+    );
+  };
+
   const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const [hours, minutes] = event.target.value.split(":").map(Number);
     if (isNaN(hours) || isNaN(minutes)) return;
@@ -86,8 +100,9 @@ export function DateTimeQuestion({
       <DatePicker
         date={currentValue}
         onChange={handleSelect}
+        onClear={handleClear}
         disablePicker={disabled}
-        className="flex-1"
+        className="flex-1 shadow-xs"
       />
       <Input
         type="time"

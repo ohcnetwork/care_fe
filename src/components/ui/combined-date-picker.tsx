@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { X } from "lucide-react";
 import { useState } from "react";
 import "react-day-picker/style.css";
 import { useTranslation } from "react-i18next";
@@ -28,6 +29,7 @@ interface CombinedDatePickerProps {
   dateFormat?: string;
   disabled?: boolean;
   blockDate?: (date: Date) => boolean;
+  onClear?: () => void;
 }
 
 export function CombinedDatePicker({
@@ -41,6 +43,7 @@ export function CombinedDatePicker({
   classes,
   dateFormat = "PPP",
   blockDate,
+  onClear,
 }: CombinedDatePickerProps) {
   const { t } = useTranslation();
 
@@ -106,6 +109,20 @@ export function CombinedDatePicker({
           </Tabs>
         </PopoverContent>
       </Popover>
+      {onClear && value && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onClear}
+          disabled={disabled}
+          data-testid="date-picker-clear"
+          aria-label={t("clear")}
+          className="h-8 border-l hover:bg-transparent w-9 rounded-none text-gray-400 border-gray-400"
+        >
+          <X className="size-4" />
+        </Button>
+      )}
     </div>
   );
 }
