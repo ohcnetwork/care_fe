@@ -52,14 +52,15 @@ export const HealthcareServiceSelector = ({
   const getIconName = (name: string): DuoToneIconName =>
     `d-${name}` as DuoToneIconName;
 
-  const serviceMap = new Map((services?.results ?? []).map((s) => [s.id, s]));
+  const results = services?.results ?? [];
+  const serviceMap = new Map(results.map((s) => [s.id, s]));
 
-  const options: GenericAutocompleteOption<string>[] = (
-    services?.results ?? []
-  ).map((service) => ({
-    label: service.name,
-    value: service.id,
-  }));
+  const options: GenericAutocompleteOption<string>[] = results.map(
+    (service) => ({
+      label: service.name,
+      value: service.id,
+    }),
+  );
 
   const renderServiceRow = (id: string) => {
     const service = serviceMap.get(id);

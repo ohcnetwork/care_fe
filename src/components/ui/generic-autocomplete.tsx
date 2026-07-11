@@ -59,7 +59,7 @@ interface GenericAutocompleteProps<T> {
   popoverContentClassName?: string;
   closeOnSelect?: boolean;
   showClearButton?: boolean;
-  /** When true and options.length <= RADIO_THRESHOLD, renders as RadioGroup */
+  /** When true and options.length <= RADIO_TRIGGER_MAX_OPTIONS (and not loading), renders as RadioGroup */
   enableRadio?: boolean;
   radioClassName?: string;
   /**
@@ -84,33 +84,30 @@ interface GenericAutocompleteProps<T> {
   shortcutId?: string;
 }
 
-function GenericAutocompleteInner<T>(
-  {
-    options,
-    isLoading = false,
-    value,
-    onChange,
-    onSearch,
-    placeholder = "Select...",
-    inputPlaceholder = "Search option...",
-    noOptionsMessage = "No options found",
-    disabled,
-    align = "center",
-    className,
-    popoverClassName,
-    popoverContentClassName,
-    closeOnSelect = true,
-    showClearButton = true,
-    enableRadio = false,
-    radioClassName,
-    renderOption,
-    renderTrigger,
-    ref,
-    shortcutId,
-    ...props
-  }: GenericAutocompleteProps<T>,
-  _ref: React.Ref<HTMLButtonElement | null>,
-) {
+function GenericAutocomplete<T>({
+  options,
+  isLoading = false,
+  value,
+  onChange,
+  onSearch,
+  placeholder = "Select...",
+  inputPlaceholder = "Search option...",
+  noOptionsMessage = "No options found",
+  disabled,
+  align = "center",
+  className,
+  popoverClassName,
+  popoverContentClassName,
+  closeOnSelect = true,
+  showClearButton = true,
+  enableRadio = false,
+  radioClassName,
+  renderOption,
+  renderTrigger,
+  ref,
+  shortcutId,
+  ...props
+}: GenericAutocompleteProps<T>) {
   const [open, setOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -121,11 +118,16 @@ function GenericAutocompleteInner<T>(
       ? (options.find((o) => o.value === value) ?? null)
       : null;
 
-  // Decide radio vs dropdown against the eager-fetched (unfiltered) option
-  // count. While a search term is active the list is server-filtered, so a
-  // narrowed result must not collapse an open dropdown into radios.
+  // Show radio buttons only when: radio is enabled, the component isn't loading
+  // (would render a blank group), there are actual options to display, and no
+  // active search term (which would narrow the server-filtered count below the
+  // threshold without reflecting the true total).
   const showRadio =
-    enableRadio && !searchTerm && options.length <= RADIO_TRIGGER_MAX_OPTIONS;
+    enableRadio &&
+    !isLoading &&
+    options.length > 0 &&
+    !searchTerm &&
+    options.length <= RADIO_TRIGGER_MAX_OPTIONS;
 
   const handleClear = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -155,9 +157,9 @@ function GenericAutocompleteInner<T>(
           }}
           disabled={disabled}
         >
-          {options.map((option, i) => {
+          {options.map((option) => {
             const isSelected = selectedOption?.value === option.value;
-            const id = `radio-option-${i}`;
+            const id = `radio-option-${String(option.value)}`;
             return (
               <div
                 key={id}
@@ -248,15 +250,19 @@ function GenericAutocompleteInner<T>(
           <CommandEmpty>{noOptionsMessage}</CommandEmpty>
         )}
         <CommandGroup>
-          {options.map((option, i) => {
+          {options.map((option) => {
             const isSelected = selectedOption?.value === option.value;
             return (
               <CommandItem
-                key={i}
+                key={String(option.value)}
                 value={`${option.label} - ${String(option.value)}`}
                 onSelect={() => {
                   onChange(option.value);
-                  if (closeOnSelect) setOpen(false);
+                  if (closeOnSelect) {
+                    setOpen(false);
+                    setSearchTerm("");
+                    onSearch?.("");
+                  }
                 }}
               >
                 {renderOption ? (
@@ -316,6 +322,7 @@ function GenericAutocompleteInner<T>(
         </Drawer>
         {selectedOption && showClearButton ? (
           <Button
+            type="button"
             variant="outline"
             size="icon"
             className="rounded-l-none border-l-0 text-gray-400 h-auto"
@@ -368,6 +375,7 @@ function GenericAutocompleteInner<T>(
       </Popover>
       {selectedOption && showClearButton ? (
         <Button
+          type="button"
           variant="outline"
           size="icon"
           className="rounded-l-none border-l-0 text-gray-400 h-auto"
@@ -395,11 +403,5 @@ function GenericAutocompleteInner<T>(
     </div>
   );
 }
-
-const GenericAutocomplete = React.forwardRef(GenericAutocompleteInner) as <T>(
-  props: GenericAutocompleteProps<T> & {
-    ref?: React.Ref<HTMLButtonElement | null>;
-  },
-) => React.ReactElement;
 
 export default GenericAutocomplete;

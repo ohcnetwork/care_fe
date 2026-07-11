@@ -98,7 +98,8 @@ test.describe("activity definition edit", () => {
     // Pre-fill check: works in both radio mode (≤5 services) and dropdown mode (>5)
     const radioGroup = page.locator('[data-testid="autocomplete-radio-group"]');
     const isRadioMode = await radioGroup
-      .isVisible({ timeout: 2000 })
+      .waitFor({ state: "visible", timeout: 2000 })
+      .then(() => true)
       .catch(() => false);
     if (isRadioMode) {
       await expect(

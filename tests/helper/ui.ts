@@ -731,7 +731,8 @@ export async function selectFromGenericAutocomplete(
     .locator('[data-testid="autocomplete-radio-group"]')
     .first();
   const isRadioMode = await radioGroup
-    .isVisible({ timeout: 2000 })
+    .waitFor({ state: "visible", timeout: 2000 })
+    .then(() => true)
     .catch(() => false);
 
   if (isRadioMode) {
