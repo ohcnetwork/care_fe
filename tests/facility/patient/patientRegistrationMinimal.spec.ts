@@ -11,9 +11,11 @@ test.use({ storageState: "tests/.auth/user.json" });
  * env variable (careConfig.patientRegistration.minimalPatientRegistration).
  *
  * The variable is baked into the production build (see care.config.ts), so a
- * single build can only be in one mode. The mode is detected from the same env
- * the build was produced with (playwright.config.ts loads .env/.env.local), and
- * the mode-specific suites skip when the build does not support them.
+ * single build can only be in one mode. Rather than reading env vars or
+ * requiring CI configuration changes, the active mode is detected at runtime
+ * from the rendered registration form: in minimal mode the "Additional
+ * Details" accordion trigger is labeled "(Optional)". The mode-specific
+ * suites skip themselves when the build is in the other mode.
  *
  * When enabled (minimal/quick registration):
  * - The "Additional Details" accordion section is collapsed and labeled "(Optional)"
@@ -22,9 +24,14 @@ test.use({ storageState: "tests/.auth/user.json" });
  * - The "Additional Details" section is expanded by default with no "(Optional)" label
  * - Address is required and submitting without it shows a field error
  */
-const isMinimalRegistrationEnabled =
-  // Matches booleanFromString(env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION, false)
-  process.env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION === "true";
+async function detectMinimalRegistrationEnabled(page: Page): Promise<boolean> {
+  const additionalDetailsTrigger = page.getByRole("button", {
+    name: "Additional Details",
+  });
+  await additionalDetailsTrigger.waitFor({ state: "visible" });
+  const text = await additionalDetailsTrigger.textContent();
+  return text?.toLowerCase().includes("optional") ?? false;
+}
 
 function generatePatientBasics() {
   return {
@@ -69,9 +76,11 @@ async function selectGeoOrganization(page: Page) {
       .scrollIntoViewIfNeeded();
 
     const geoRegion = page.getByRole("region", { name: "Additional Details" });
+    // Safety bound — geo org hierarchies are shallow (state → district → ...)
+    const MAX_GEO_LEVELS = 10;
     let previousCount = 0;
 
-    while (true) {
+    for (let level = 0; level < MAX_GEO_LEVELS; level++) {
       const comboboxes = geoRegion.getByRole("combobox");
       const count = await comboboxes.count();
       if (count === previousCount) break;
@@ -116,7 +125,9 @@ test.describe("Patient Registration — minimal registration env variable", () =
     });
     await expect(additionalDetailsTrigger).toBeVisible();
 
-    if (isMinimalRegistrationEnabled) {
+    const isMinimal = await detectMinimalRegistrationEnabled(page);
+
+    if (isMinimal) {
       await test.step("Section is optional and collapsed by default", async () => {
         await expect(additionalDetailsTrigger).toContainText(/optional/i);
         await expect(additionalDetailsTrigger).toHaveAttribute(
@@ -142,11 +153,13 @@ test.describe("Patient Registration — minimal registration env variable", () =
   });
 
   test.describe("when minimal registration is disabled (default)", () => {
-    // Build-time env variable — this build does not support this mode.
-    test.skip(
-      isMinimalRegistrationEnabled,
-      "Build was produced with REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION=true",
-    );
+    test.beforeEach(async ({ page }) => {
+      // Build-time env variable — skip when this build is in the other mode.
+      test.skip(
+        await detectMinimalRegistrationEnabled(page),
+        "Build was produced with REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION=true",
+      );
+    });
 
     test("marks the address field as required", async ({ page }) => {
       const addressLabel = page
@@ -184,11 +197,13 @@ test.describe("Patient Registration — minimal registration env variable", () =
   });
 
   test.describe("when minimal registration is enabled", () => {
-    // Build-time env variable — this build does not support this mode.
-    test.skip(
-      !isMinimalRegistrationEnabled,
-      "Build was produced without REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION=true",
-    );
+    test.beforeEach(async ({ page }) => {
+      // Build-time env variable — skip when this build is in the other mode.
+      test.skip(
+        !(await detectMinimalRegistrationEnabled(page)),
+        "Build was produced without REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION=true",
+      );
+    });
 
     test("does not mark the address field as required", async ({ page }) => {
       await page.getByRole("button", { name: "Additional Details" }).click();
