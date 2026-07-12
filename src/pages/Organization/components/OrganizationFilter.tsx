@@ -25,13 +25,14 @@ interface OrganizationFilterProps {
   skipLevels?: number[];
   required?: boolean;
   className?: string;
+  onClear?: () => void;
 }
 
 const DEFAULT_ORG_LEVELS = 2;
 
 export default function OrganizationFilter(props: OrganizationFilterProps) {
   const { t } = useTranslation();
-  const { onChange, selected, skipLevels } = props;
+  const { onChange, selected, skipLevels, onClear } = props;
 
   const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
   const [orgTypes, setOrgTypes] = useState<string[]>([]);
@@ -109,6 +110,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
     });
     setSelectedLevels([]);
     onChange({ organization: undefined, facility_type: undefined });
+    onClear?.();
   };
   const levelCount = selectedLevels.length
     ? Math.min(selectedLevels.length + 1, DEFAULT_ORG_LEVELS)
