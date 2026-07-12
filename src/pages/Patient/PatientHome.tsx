@@ -135,7 +135,7 @@ export default function PatientHome() {
             resourceTypeToResourcePathSlug[resource_type] &&
             resource_id &&
             queue_id && (
-              <Button asChild type="button" variant="outline">
+              <Button asChild variant="outline">
                 <Link
                   href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resource_type]}/${resource_id}/queues/${queue_id}/ongoing`}
                   className="flex items-center gap-2"

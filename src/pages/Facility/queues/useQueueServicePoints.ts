@@ -25,7 +25,7 @@ export function useQueueServicePoints({
   enabled?: boolean;
 }) {
   const [assignedServicePoints, setAssignedServicePoints] = useAtom(atom);
-  const servicPointKey = `${facilityId}:${resourceType}:${resourceId}`;
+  const servicePointKey = `${facilityId}:${resourceType}:${resourceId}`;
 
   const { data: subQueues, isPending: isServicePointsLoading } = useQuery({
     queryKey: ["servicePoints", facilityId, resourceType, resourceId],
@@ -44,7 +44,7 @@ export function useQueueServicePoints({
   const allServicePoints = subQueues?.results;
 
   const assignedServicePointIds =
-    assignedServicePoints[servicPointKey] ??
+    assignedServicePoints[servicePointKey] ??
     allServicePoints?.map((subQueue) => subQueue.id) ??
     [];
 
@@ -63,7 +63,7 @@ export function useQueueServicePoints({
 
       setAssignedServicePoints({
         ...assignedServicePoints,
-        [servicPointKey]:
+        [servicePointKey]:
           updated.size !== allServicePoints?.length ? [...updated] : undefined,
       });
     },

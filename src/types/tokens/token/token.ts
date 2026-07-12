@@ -32,18 +32,6 @@ export const TokenFinalStatuses: TokenStatus[] = [
   TokenStatus.ENTERED_IN_ERROR,
 ];
 
-export const TOKEN_STATUS_COLORS = {
-  UNFULFILLED: "secondary",
-  CREATED: "blue",
-  IN_PROGRESS: "yellow",
-  FULFILLED: "green",
-  CANCELLED: "destructive",
-  ENTERED_IN_ERROR: "destructive",
-} as const satisfies Record<
-  TokenStatus,
-  React.ComponentProps<typeof Badge>["variant"]
->;
-
 export enum QueueTokenStatus {
   WAITING = "waiting",
   CALLED = "called",
