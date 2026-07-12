@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Camera,
   ChevronsDownUp,
   ChevronsUpDown,
   CloudUpload,
@@ -68,6 +69,8 @@ import { FileListTable } from "@/components/Files/FileListTable";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 import { Badge } from "@/components/ui/badge";
 import { PLUGIN_Component } from "@/PluginEngine";
+
+import { DottedDivider } from "@/components/careui/dotted-divider";
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import { formatName } from "@/Utils/utils";
 import { format } from "date-fns";
@@ -415,16 +418,12 @@ function DiagnosticReportItem({
 
   // Handle file upload dialog
   useEffect(() => {
-    if (
-      fileUpload.files.length > 0 &&
-      fileUpload.files[0] !== undefined &&
-      !fileUpload.previewing
-    ) {
-      setOpenUploadDialog(true);
-    } else {
+    if (disableEdit || fileUpload.files.length === 0 || fileUpload.previewing) {
       setOpenUploadDialog(false);
+    } else {
+      setOpenUploadDialog(true);
     }
-  }, [fileUpload.files, fileUpload.previewing]);
+  }, [fileUpload.files, fileUpload.previewing, disableEdit]);
 
   useEffect(() => {
     if (!openUploadDialog) {
@@ -1291,18 +1290,118 @@ function DiagnosticReportItem({
                     </CardContent>
                   </Card>
                 )}
-                {report?.status === DiagnosticReportStatus.preliminary && (
-                  <div className="flex justify-end space-x-4">
-                    <Button
-                      variant="primary"
-                      onClick={handleSubmit}
-                      disabled={isSubmitting || disableEdit}
-                    >
-                      <Save className="size-4 mr-2" />
-                      {t("save_results")}
-                    </Button>
-                  </div>
-                )}
+
+                <div className="space-y-4">
+                  {fullReport?.status ===
+                    DiagnosticReportStatus.preliminary && (
+                    <div className="flex justify-end space-x-4">
+                      <Button
+                        variant="primary"
+                        onClick={handleSubmit}
+                        disabled={isSubmitting || disableEdit}
+                      >
+                        <Save className="size-4 mr-2" />
+                        {t("save_results")}
+                      </Button>
+                    </div>
+                  )}
+                  {files?.results && files.results.length > 0 && (
+                    <div className="mt-3">
+                      <div className="text-lg font-medium">
+                        {t("uploaded_files")}
+                      </div>
+                      <FileListTable
+                        files={files.results}
+                        type="diagnostic_report"
+                        associatingId={report.id}
+                        canEdit={!disableEdit}
+                        showHeader={false}
+                      />
+                    </div>
+                  )}
+
+                  {fullReport?.status ===
+                    DiagnosticReportStatus.preliminary && (
+                    <div className="space-y-5">
+                      <DottedDivider className=" text-gray-500" />
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-6 py-5 shadow-sm mt-2">
+                        <div className="flex flex-col items-center text-center">
+                          <h3 className="text-base font-semibold text-gray-950">
+                            {t("attach_result_files")}
+                          </h3>
+                          <p className="mt-1.5 text-sm text-gray-600">
+                            {t("add_supporting_photos_or_documents", {
+                              formats:
+                                BACKEND_ALLOWED_EXTENSIONS.slice(0, 5)
+                                  .join(", ")
+                                  .toUpperCase() + `, ${t("etc")}`,
+                            })}
+                          </p>
+                          <div className="mt-4 flex flex-col sm:flex-row gap-3 w-full sm:items-center sm:justify-center">
+                            <Button
+                              variant="outline"
+                              className=" border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white"
+                              disabled={disableEdit}
+                              onClick={() => fileUpload.handleCameraCapture()}
+                            >
+                              <Camera className="size-4" />
+                              {t("take_photo")}
+                            </Button>
+                            <Button
+                              asChild
+                              variant="outline"
+                              className={cn(
+                                "border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white",
+                                disableEdit
+                                  ? "pointer-events-none opacity-50"
+                                  : "cursor-pointer",
+                              )}
+                            >
+                              <Label
+                                htmlFor={
+                                  disableEdit
+                                    ? undefined
+                                    : "file_upload_diagnostic_report"
+                                }
+                              >
+                                <Upload className="size-4" />
+                                {t("upload_files")}
+                              </Label>
+                            </Button>
+                            <fileUpload.Input
+                              className="hidden"
+                              disabled={disableEdit}
+                            />
+                          </div>
+
+                          {fileUpload.files.length > 0 && (
+                            <div className="mt-5 w-full max-w-md space-y-2">
+                              <div
+                                className="truncate text-sm text-gray-600"
+                                title={fileUpload.files
+                                  .map((file) => file.name)
+                                  .join(", ")}
+                              >
+                                {fileUpload.files
+                                  .map((file) => file.name)
+                                  .join(", ")}
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full border-gray-300 bg-white"
+                                disabled={disableEdit}
+                                onClick={() => fileUpload.clearFiles()}
+                              >
+                                {t("clear")}
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
