@@ -152,7 +152,7 @@ export function DiagnosticReportForm({
       onSuccess: () => {
         toast.success(t("diagnostic_report_created_successfully"));
         queryClient.invalidateQueries({
-          queryKey: ["serviceRequest"],
+          queryKey: ["serviceRequest", facilityId, serviceRequestId],
         });
         queryClient.invalidateQueries({
           queryKey: ["diagnosticReport"],

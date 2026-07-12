@@ -292,41 +292,43 @@ const DiagnosticReportPreviewItem = ({
   });
 
   return (
-    <div className="mt-8 border-t border-gray-300 pt-6 break-inside-avoid">
+    <div className="mt-8 border-t border-gray-300 pt-6">
       {/* Report header with per-report details */}
-      <h2 className="text-lg font-semibold mb-3">{report.code?.display}</h2>
-      <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1 mb-6">
-        <div className="grid grid-cols-[6rem_auto_1fr] items-center">
-          <span className="text-gray-600">{t("category")}</span>
-          <span className="text-gray-600">:</span>
-          <span className="font-semibold ml-2 wrap-break-word">
-            {report.category?.display || "-"}
-          </span>
-        </div>
-        <div className="grid grid-cols-[6rem_auto_1fr] items-center">
-          <span className="text-gray-600">{t("report_date")}</span>
-          <span className="text-gray-600">:</span>
-          <span className="font-semibold ml-2">
-            {report.created_date &&
-              format(new Date(report.created_date), "dd-MM-yyyy")}
-          </span>
-        </div>
-        <div className="grid grid-cols-[6rem_auto_1fr] items-center">
-          <span className="text-gray-600">{t("requested_by")}</span>
-          <span className="text-gray-600">:</span>
-          <span className="font-semibold ml-2">
-            {formatName(report.requester)}
-          </span>
-        </div>
-        {report.encounter.current_location && (
+      <div className="break-inside-avoid">
+        <h2 className="text-lg font-semibold mb-3">{report.code?.display}</h2>
+        <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1 mb-6">
           <div className="grid grid-cols-[6rem_auto_1fr] items-center">
-            <span className="text-gray-600">{t("location")}</span>
+            <span className="text-gray-600">{t("category")}</span>
             <span className="text-gray-600">:</span>
-            <span className="font-semibold ml-2">
-              {report.encounter.current_location.name}
+            <span className="font-semibold ml-2 wrap-break-word">
+              {report.category?.display || "-"}
             </span>
           </div>
-        )}
+          <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+            <span className="text-gray-600">{t("report_date")}</span>
+            <span className="text-gray-600">:</span>
+            <span className="font-semibold ml-2">
+              {report.created_date &&
+                format(new Date(report.created_date), "dd-MM-yyyy")}
+            </span>
+          </div>
+          <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+            <span className="text-gray-600">{t("requested_by")}</span>
+            <span className="text-gray-600">:</span>
+            <span className="font-semibold ml-2">
+              {formatName(report.requester)}
+            </span>
+          </div>
+          {report.encounter.current_location && (
+            <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+              <span className="text-gray-600">{t("location")}</span>
+              <span className="text-gray-600">:</span>
+              <span className="font-semibold ml-2">
+                {report.encounter.current_location.name}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-8">

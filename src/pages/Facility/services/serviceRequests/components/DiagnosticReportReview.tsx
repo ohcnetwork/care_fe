@@ -99,7 +99,7 @@ function DiagnosticReportReviewItem({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [conclusion, setConclusion] = useState<string>(report.conclusion || "");
   const [showApproveDialog, setShowApproveDialog] = useState(false);
 
@@ -138,15 +138,15 @@ function DiagnosticReportReviewItem({
       }),
       onSuccess: () => {
         toast.success(t("diagnostic_report_approved_successfully"));
-        // Invalidate all related queries to update workflow status
+        // Invalidate only the queries affected by this approval
         queryClient.invalidateQueries({
-          queryKey: ["serviceRequest"],
+          queryKey: ["serviceRequest", facilityId, serviceRequestId],
         });
         queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport"],
+          queryKey: ["diagnosticReport", report.id],
         });
         queryClient.invalidateQueries({
-          queryKey: ["files"],
+          queryKey: ["files", "diagnostic_report", report.id],
         });
       },
     });
