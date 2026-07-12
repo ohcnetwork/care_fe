@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
@@ -32,7 +33,14 @@ interface WorkflowProgressProps {
   variant?: "sheet" | "card";
 }
 
-function TimelineNode({ event }: { event: TimelineEvent }) {
+function TimelineNode({
+  event,
+  isLatest,
+}: {
+  event: TimelineEvent;
+  isLatest?: boolean;
+}) {
+  const { t } = useTranslation();
   return (
     <div className="relative flex gap-8 pl-8 pt-0.5 group">
       <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center">
@@ -60,16 +68,19 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
       <div className="flex flex-col gap-1 pb-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3
-              className={cn(
-                "font-medium text-base",
-                event.status === "completed" && "text-gray-900",
-                event.status === "in_progress" && "text-blue-900",
-                event.status === "pending" && "text-gray-500",
-              )}
-            >
-              {event.title}
-            </h3>
+            <div className="flex items-center gap-6">
+              <h3
+                className={cn(
+                  "font-medium text-base",
+                  event.status === "completed" && "text-gray-900",
+                  event.status === "in_progress" && "text-blue-900",
+                  event.status === "pending" && "text-gray-500",
+                )}
+              >
+                {event.title}
+              </h3>
+              {isLatest && <Badge variant="primary">{t("latest")}</Badge>}
+            </div>
             <p className="text-sm text-gray-500">{event.description}</p>
             <p className="text-sm text-gray-500">{event.additional_info}</p>
             <time className="text-sm text-gray-500 whitespace-nowrap">
@@ -93,7 +104,7 @@ function WorkflowContent({ events }: { events: TimelineEvent[] }) {
       <ScrollArea className="h-[calc(100vh-10rem)]">
         <div className="p-4 space-y-2">
           {events.map((event, index) => (
-            <TimelineNode key={index} event={event} />
+            <TimelineNode key={index} event={event} isLatest={index === 0} />
           ))}
         </div>
       </ScrollArea>
@@ -153,7 +164,7 @@ export function WorkflowProgress({
   request.diagnostic_reports?.forEach((report: DiagnosticReportRead) => {
     events.push({
       title: "Diagnostic Report Created",
-      description: `${request.title} diagnostic report created`,
+      description: `${report.code?.display} report created`,
       timestamp: report.created_date,
       status: "completed",
     });
@@ -167,17 +178,17 @@ export function WorkflowProgress({
           : "Diagnostic Report In Progress",
       description:
         report.status === "final"
-          ? `Report approved and finalized`
-          : `Report created and pending approval`,
+          ? `${report.code?.display} report approved and finalized`
+          : `${report.code?.display} report created and pending approval`,
       timestamp:
         report.status === "final" ? report.modified_date : report.created_date,
       status: report.status === "final" ? "completed" : "in_progress",
     });
   });
 
-  // Sort events by timestamp
+  // Sort events by timestamp (latest first)
   events.sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   );
 
   if (variant === "sheet") {

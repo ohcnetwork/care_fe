@@ -70,6 +70,7 @@ import { Badge } from "@/components/ui/badge";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import { formatName } from "@/Utils/utils";
+import { format } from "date-fns";
 
 interface DiagnosticReportFormProps {
   patientId: string;
@@ -930,33 +931,45 @@ function DiagnosticReportItem({
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger asChild className="px-2 py-4">
           <CardHeader>
-            <div className="flex flex-row justify-between items-start sm:items-center gap-4 sm:gap-2 rounded-md">
-              <div className="flex items-center gap-2">
-                <CardTitle>
-                  <p className="flex items-center gap-1.5">
-                    <NotepadText className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
-                    <span className="text-base/9 text-gray-950 font-medium">
-                      {isMultipleDiagnosticReport
-                        ? report.code?.display
-                        : report.service_request?.title}
-                    </span>
-                  </p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2 rounded-md">
+              <div className="flex items-center gap-2 min-w-0 w-full sm:w-auto">
+                <CardTitle className="min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <NotepadText className="size-6 shrink-0 text-gray-950 stroke-[1.5px]" />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-base text-gray-950 font-medium truncate">
+                        {isMultipleDiagnosticReport
+                          ? report.code?.display
+                          : report.service_request?.title}
+                      </span>
+                      <span className="text-sm text-gray-500 truncate">
+                        {t("last_updated")}:{" "}
+                        {fullReport
+                          ? format(
+                              fullReport.modified_date,
+                              "hh:mm a, MMM dd, yyyy",
+                            )
+                          : "-"}
+                      </span>
+                    </div>
+                  </div>
                 </CardTitle>
               </div>
-              <div className="flex items-center gap-5">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-5 w-full sm:w-auto">
-                  {report.created_by && (
+              <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-5 w-full sm:w-auto">
+                {fullReport && (
+                  <div className="flex items-center gap-2 min-w-0">
                     <Avatar
-                      name={formatName(report.created_by, true)}
-                      className="size-5"
-                      imageUrl={report.created_by.profile_picture_url}
+                      name={formatName(fullReport.created_by, true)}
+                      className="size-5 shrink-0"
+                      imageUrl={fullReport.created_by.profile_picture_url}
                     />
-                  )}
-                  <span className="text-sm/9 text-gray-700 font-medium">
-                    {formatName(report.created_by)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-700 font-medium truncate">
+                      {formatName(fullReport.created_by)}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 shrink-0">
                   <Badge
                     variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
                   >
@@ -965,7 +978,7 @@ function DiagnosticReportItem({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-10 border border-gray-400 bg-white shadow p-4"
+                    className="size-10"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsExpanded(!isExpanded);

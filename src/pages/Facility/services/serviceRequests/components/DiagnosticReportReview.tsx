@@ -43,6 +43,7 @@ import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportAp
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
+import { format } from "date-fns";
 
 interface DiagnosticReportReviewProps {
   facilityId: string;
@@ -187,58 +188,73 @@ function DiagnosticReportReviewItem({
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger asChild className="px-2 py-4">
           <CardHeader>
-            <div className="flex justify-between items-center rounded-md">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2 rounded-md">
+              <div className="flex items-center gap-2 min-w-0 w-full sm:w-auto">
                 <CardTitle
                   className={cn(
-                    "text-gray-950 ml-2",
+                    "text-gray-950 min-w-0",
                     isReportNotReviewable && "text-gray-400",
                   )}
                 >
-                  <p className="flex items-center gap-3">
-                    <FileCheck2 className="size-6  font-normal text-base stroke-[1.5px]" />{" "}
-                    <span className="text-base/9  font-medium">
-                      {report.code?.display ?? report.service_request?.title}
-                    </span>
-                  </p>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileCheck2 className="size-6 shrink-0 text-gray-950 stroke-[1.5px]" />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-base text-gray-950 font-medium truncate">
+                        {report.code?.display ?? report.service_request?.title}
+                      </span>
+                      <span className="text-sm text-gray-500 truncate">
+                        {t("last_updated")}:{" "}
+                        {fullReport
+                          ? format(
+                              fullReport.modified_date,
+                              "hh:mm a, MMM dd, yyyy",
+                            )
+                          : "-"}
+                      </span>
+                    </div>
+                  </div>
                 </CardTitle>
               </div>
-              <div className="flex items-center gap-5">
+              <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 sm:gap-5 w-full sm:w-auto">
                 {isReportNotReviewable && (
-                  <span className="text-sm/9 text-gray-400 font-medium">
+                  <span className="text-sm text-gray-400 font-medium">
                     {t("no_observations_entered")}
                   </span>
                 )}
-                {report.created_by && (
-                  <div className="flex items-center gap-2">
+                {reportDetail.created_by && (
+                  <div className="flex items-center gap-2 min-w-0">
                     <Avatar
-                      name={formatName(report.created_by, true)}
-                      className="size-5"
-                      imageUrl={report.created_by.profile_picture_url}
+                      name={formatName(reportDetail.created_by, true)}
+                      className="size-5 shrink-0"
+                      imageUrl={reportDetail.created_by.profile_picture_url}
                     />
-                    <span className="text-sm/9 text-gray-700 font-medium">
-                      {formatName(report.created_by)}
+                    <span className="text-sm text-gray-700 font-medium truncate">
+                      {formatName(reportDetail.created_by)}
                     </span>
                   </div>
                 )}
-                <Badge variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}>
-                  {t(report.status)}
-                </Badge>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-10 border border-gray-400 bg-white shadow p-4"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsExpanded(!isExpanded);
-                  }}
-                >
-                  {isExpanded ? (
-                    <ChevronsDownUp className="size-5" />
-                  ) : (
-                    <ChevronsUpDown className="size-5" />
-                  )}
-                </Button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge
+                    variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
+                  >
+                    {t(report.status)}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-10 border border-gray-400 bg-white shadow p-4"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsExpanded(!isExpanded);
+                    }}
+                  >
+                    {isExpanded ? (
+                      <ChevronsDownUp className="size-5" />
+                    ) : (
+                      <ChevronsUpDown className="size-5" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>

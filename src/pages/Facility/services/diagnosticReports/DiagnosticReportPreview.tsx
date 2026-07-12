@@ -128,7 +128,7 @@ export const DiagnosticReportPreview = ({
   return (
     <div className="flex justify-center items-center">
       <PrintPreview
-        title={`${t("diagnostic_report", { count: 1 })} - ${serviceRequest?.title || t("diagnostic_report", { count: 1 })}`}
+        title={`${t("diagnostic_report", { count: diagnosticReportIds.length })} - ${serviceRequest?.title || t("diagnostic_report", { count: diagnosticReportIds.length })}`}
         facility={facility}
         templateSlug={PrintTemplateType.diagnostic_report}
       >

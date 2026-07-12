@@ -215,14 +215,14 @@ export default function FileUploadDialog({
         {fileUpload.files.length > 1 && (
           <div className="flex items-center gap-2 mt-4">
             <Checkbox
-              id={`${idPrefix}file_upload_${type}`}
+              id={`${idPrefix}combine_files_pdf_${type}`}
               checked={isPdf}
               onCheckedChange={(checked: boolean) => setIsPdf(checked)}
               disabled={fileUpload.uploading}
               className="cursor-pointer"
             />
             <Label
-              htmlFor={`${idPrefix}file_upload_${type}`}
+              htmlFor={`${idPrefix}combine_files_pdf_${type}`}
               className="cursor-pointer"
             >
               {t("combine_files_pdf")}

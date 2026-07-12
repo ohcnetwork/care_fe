@@ -176,6 +176,7 @@ function DiagnosticReportDetailCard({
                     )
                   }
                   data-shortcut-id="print-button"
+                  disabled={!report.service_request?.id}
                 >
                   <Printer className="size-4" />
                 </Button>
