@@ -164,13 +164,15 @@ export function WorkflowProgress({
   request.diagnostic_reports?.forEach((report: DiagnosticReportRead) => {
     events.push({
       title: "Diagnostic Report Created",
-      description: `${report.code?.display} report created`,
+      description: `${report.code?.display ?? report.service_request?.title ?? "Diagnostic"} report created`,
       timestamp: report.created_date,
       status: "completed",
     });
   });
 
   request.diagnostic_reports?.forEach((report: DiagnosticReportRead) => {
+    const diagnosticReportName =
+      report.code?.display ?? report.service_request?.title ?? "Diagnostic";
     events.push({
       title:
         report.status === "final"
@@ -178,8 +180,8 @@ export function WorkflowProgress({
           : "Diagnostic Report In Progress",
       description:
         report.status === "final"
-          ? `${report.code?.display} report approved and finalized`
-          : `${report.code?.display} report created and pending approval`,
+          ? `${diagnosticReportName} report approved and finalized`
+          : `${diagnosticReportName} report created and pending approval`,
       timestamp:
         report.status === "final" ? report.modified_date : report.created_date,
       status: report.status === "final" ? "completed" : "in_progress",

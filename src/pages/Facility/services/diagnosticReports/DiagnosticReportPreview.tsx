@@ -19,8 +19,8 @@ import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Document, Page, pdfjs } from "react-pdf";
-pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+import "@/lib/pdfWorker";
+import { Document, Page } from "react-pdf";
 
 // TODO: Replace with PDFViewer or extract this to a component
 function PDFRenderer({ fileUrl }: { fileUrl: string }) {

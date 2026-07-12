@@ -34,12 +34,8 @@ export default function DiagnosticReportPrint({
     ?.filter((report) => report.status === DiagnosticReportStatus.final)
     ?.map((report) => report.id);
 
-  if (isLoadingRequest) {
+  if (isLoadingRequest || !request) {
     return <Loading />;
-  }
-
-  if (!request) {
-    return null;
   }
 
   const resolvedDiagnosticReportIds = diagnosticReportId

@@ -50,7 +50,7 @@ interface DiagnosticReportReviewProps {
   patientId: string;
   diagnosticReports: DiagnosticReportRead[];
 
-  serviceRequestId?: string;
+  serviceRequestId: string;
   disableEdit: boolean;
 }
 
@@ -94,7 +94,7 @@ function DiagnosticReportReviewItem({
   report: DiagnosticReportRead;
   facilityId: string;
   patientId: string;
-  serviceRequestId?: string;
+  serviceRequestId: string;
   disableEdit: boolean;
 }) {
   const { t } = useTranslation();
@@ -206,7 +206,7 @@ function DiagnosticReportReviewItem({
                         {t("last_updated")}:{" "}
                         {fullReport
                           ? format(
-                              fullReport.modified_date,
+                              new Date(fullReport.modified_date),
                               "hh:mm a, MMM dd, yyyy",
                             )
                           : "-"}

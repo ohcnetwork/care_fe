@@ -945,7 +945,7 @@ function DiagnosticReportItem({
                         {t("last_updated")}:{" "}
                         {fullReport
                           ? format(
-                              fullReport.modified_date,
+                              new Date(fullReport.modified_date),
                               "hh:mm a, MMM dd, yyyy",
                             )
                           : "-"}
