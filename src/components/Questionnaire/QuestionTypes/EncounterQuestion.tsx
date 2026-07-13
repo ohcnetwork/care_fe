@@ -134,32 +134,6 @@ export function EncounterQuestion({
     discharge_summary_advice: null,
   });
 
-  useEffect(() => {
-    if (
-      encounter.status === EncounterStatus.DISCHARGED ||
-      encounter.status === EncounterStatus.COMPLETED ||
-      encounter.status === EncounterStatus.CANCELLED ||
-      encounter.status === EncounterStatus.DISCONTINUED ||
-      encounter.status === EncounterStatus.ENTERED_IN_ERROR
-    ) {
-      if (!encounter.period.end) {
-        handleUpdateEncounter({
-          period: {
-            ...encounter.period,
-            end: encounterData?.period?.end ?? new Date().toISOString(),
-          },
-        });
-      }
-    } else {
-      handleUpdateEncounter({
-        period: {
-          ...encounter.period,
-          end: undefined,
-        },
-      });
-    }
-  }, [encounter.status]);
-
   // Transform EncounterRead to EncounterEdit format
   const transformEncounterForUpdate = (
     read: EncounterRead,
@@ -174,28 +148,6 @@ export function EncounterQuestion({
       discharge_summary_advice: read.discharge_summary_advice,
     };
   };
-
-  // Update encounter state when data is loaded
-  useEffect(() => {
-    if (encounterData) {
-      const updates = transformEncounterForUpdate(encounterData);
-      if (toDischarge === "true") {
-        updates.status = EncounterStatus.DISCHARGED;
-      }
-      handleUpdateEncounter(updates);
-    }
-  }, [encounterData]);
-
-  useEffect(() => {
-    const formStateValue = (
-      questionnaireResponse.values[0]?.value as EncounterEdit[]
-    )?.[0];
-    if (formStateValue) {
-      setEncounter(() => ({
-        ...formStateValue,
-      }));
-    }
-  }, [questionnaireResponse]);
 
   const handleUpdateEncounter = (updates: Partial<EncounterEdit>) => {
     clearError();
@@ -238,6 +190,56 @@ export function EncounterQuestion({
       questionnaireResponse.question_id,
     );
   };
+
+  useEffect(() => {
+    if (
+      encounter.status === EncounterStatus.DISCHARGED ||
+      encounter.status === EncounterStatus.COMPLETED ||
+      encounter.status === EncounterStatus.CANCELLED ||
+      encounter.status === EncounterStatus.DISCONTINUED ||
+      encounter.status === EncounterStatus.ENTERED_IN_ERROR
+    ) {
+      if (!encounter.period.end) {
+        handleUpdateEncounter({
+          period: {
+            ...encounter.period,
+            end: encounterData?.period?.end ?? new Date().toISOString(),
+          },
+        });
+      }
+    } else {
+      handleUpdateEncounter({
+        period: {
+          ...encounter.period,
+          end: undefined,
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [encounter.status]);
+
+  // Update encounter state when data is loaded
+  useEffect(() => {
+    if (encounterData) {
+      const updates = transformEncounterForUpdate(encounterData);
+      if (toDischarge === "true") {
+        updates.status = EncounterStatus.DISCHARGED;
+      }
+      handleUpdateEncounter(updates);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [encounterData]);
+
+  useEffect(() => {
+    const formStateValue = (
+      questionnaireResponse.values[0]?.value as EncounterEdit[]
+    )?.[0];
+    if (formStateValue) {
+      setEncounter(() => ({
+        ...formStateValue,
+      }));
+    }
+  }, [questionnaireResponse]);
 
   if (isLoading) {
     return <div>{t("loading_encounter")}</div>;
@@ -385,7 +387,7 @@ export function EncounterQuestion({
       {/* Hospitalization Details - Only show for relevant encounter classes */}
       {["imp", "obsenc", "emer"].includes(encounter.encounter_class) && (
         <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
-          <h3 className="text-lg font-semibold break-words">
+          <h3 className="text-lg font-semibold wrap-break-word">
             {t("hospitalization_details")}
           </h3>
 
