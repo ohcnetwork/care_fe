@@ -164,11 +164,7 @@ export function EncounterDetails({
         <DetailRow label={t("patient")} value={patient.name} isStrong />
         <DetailRow
           label={`${t("age")} / ${t("sex")}`}
-          value={
-            patient
-              ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
-              : undefined
-          }
+          value={`${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
         />
         {patient?.instance_identifiers
           ?.filter(

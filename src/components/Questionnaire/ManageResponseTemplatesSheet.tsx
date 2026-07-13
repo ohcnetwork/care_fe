@@ -1019,7 +1019,7 @@ export default function ManageResponseTemplatesSheet({
           />
 
           {facilityId &&
-            (!editingTemplate || (editingTemplate && templateDetails)) && (
+            (!editingTemplate || templateDetails) && (
               <div className="space-y-1.5">
                 <FacilityOrganizationSelector
                   key={editingTemplate?.id || "new"}

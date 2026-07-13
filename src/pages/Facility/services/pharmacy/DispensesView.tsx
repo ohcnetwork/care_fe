@@ -112,33 +112,31 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
           {t("back_to_dispense_queue")}
         </Button>
       </div>
-      {dispenseOrder && (
-        <Card className="flex gap-4 mb-4 p-4 rounded-none shadow-none bg-gray-100">
-          <PatientHeader
-            patient={dispenseOrder.patient}
-            facilityId={facilityId}
-          />
-          {prescriptionTags && prescriptionTags.length > 0 && (
-            <div className="flex flex-col gap-1 items-start mt-5">
-              <span className="text-xs text-gray-700">
-                {t("prescription_tags")}:
-              </span>
-              <div className="flex flex-wrap items-start gap-2 text-sm whitespace-nowrap">
-                {prescriptionTags.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant="secondary"
-                    className="capitalize"
-                    title={tag.description}
-                  >
-                    {getTagHierarchyDisplay(tag)}
-                  </Badge>
-                ))}
-              </div>
+      <Card className="flex gap-4 mb-4 p-4 rounded-none shadow-none bg-gray-100">
+        <PatientHeader
+          patient={dispenseOrder.patient}
+          facilityId={facilityId}
+        />
+        {prescriptionTags && prescriptionTags.length > 0 && (
+          <div className="flex flex-col gap-1 items-start mt-5">
+            <span className="text-xs text-gray-700">
+              {t("prescription_tags")}:
+            </span>
+            <div className="flex flex-wrap items-start gap-2 text-sm whitespace-nowrap">
+              {prescriptionTags.map((tag) => (
+                <Badge
+                  key={tag.id}
+                  variant="secondary"
+                  className="capitalize"
+                  title={tag.description}
+                >
+                  {getTagHierarchyDisplay(tag)}
+                </Badge>
+              ))}
             </div>
-          )}
-        </Card>
-      )}
+          </div>
+        )}
+      </Card>
 
       {/* Dispense Order Header */}
       <div className="bg-white border rounded-md p-4 mb-4">

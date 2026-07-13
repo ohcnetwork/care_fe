@@ -524,11 +524,9 @@ const Login = (props: LoginProps) => {
                       <TabsTrigger className="flex-1" value="staff">
                         {t("staff_login")}
                       </TabsTrigger>
-                      {!disablePatientLogin && (
-                        <TabsTrigger className="flex-1" value="patient">
-                          {t("patient_login")}
-                        </TabsTrigger>
-                      )}
+                      <TabsTrigger className="flex-1" value="patient">
+                        {t("patient_login")}
+                      </TabsTrigger>
                     </TabsList>
 
                     {/* Staff Login */}

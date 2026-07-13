@@ -413,8 +413,6 @@ export default function ServiceRequestList({
               <TableSkeleton count={5} />
             </div>
           </>
-        ) : serviceRequests.length === 0 && !isLoading ? (
-          <EmptyState />
         ) : serviceRequests.length === 0 ? (
           <EmptyState />
         ) : (

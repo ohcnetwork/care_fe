@@ -151,7 +151,7 @@ export default function GovtOrganizationSelector({
         newLevels.push(organization);
         return newLevels;
       });
-      if (!required || (required && !organization.has_children)) {
+      if (!required || !organization.has_children) {
         onChange(organization.id);
       } else if (
         requiredDepth != null &&
