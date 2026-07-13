@@ -1,5 +1,4 @@
 import careConfig from "@careConfig";
-import { useIsFetching } from "@tanstack/react-query";
 import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
 
 import IconIndex from "@/CAREUI/icons/Index";
@@ -8,17 +7,12 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
-import Loading from "@/components/Common/Loading";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
 import useAuthUser from "@/hooks/useAuthUser";
-import {
-  useCareApps,
-  useOrganizationRoutes,
-  usePluginRoutes,
-} from "@/hooks/useCareApps";
+import { useOrganizationRoutes, usePluginRoutes } from "@/hooks/useCareApps";
 import useSidebarState from "@/hooks/useSidebarState";
 
 import { routes as publicRoutes } from "@/Routers/PublicRouter";
@@ -125,21 +119,7 @@ export default function AppRouter() {
 
   const sidebarFor = isAdminPage ? SidebarFor.ADMIN : SidebarFor.FACILITY;
 
-  // While plugin manifests are still resolving, an unmatched route may belong to a plugin whose
-  // routes haven't been merged yet — show a loader instead of flashing the 404 page. Only the
-  // initial fetch (status "pending") counts; background refetches must not flash the loader.
-  const careApps = useCareApps();
-  const arePluginsResolving =
-    useIsFetching({
-      queryKey: ["enabled-plugins"],
-      predicate: (query) => query.state.status === "pending",
-    }) > 0 || careApps.some((plugin) => plugin.isLoading);
-
-  const pages =
-    appPages ||
-    adminPages ||
-    publicRedirectsPages ||
-    (arePluginsResolving ? <Loading /> : <ErrorPage />);
+  const pages = appPages || adminPages || publicRedirectsPages || <ErrorPage />;
 
   const user = useAuthUser();
 
