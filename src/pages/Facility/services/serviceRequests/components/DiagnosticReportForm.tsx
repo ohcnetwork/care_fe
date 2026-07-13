@@ -112,8 +112,6 @@ interface ObservationValue {
   interpretation?: Interpretation;
   status: ObservationStatus;
   components: Record<string, ComponentValue>;
-
-  facilityId?: string;
 }
 
 // New interface to handle multiple observations per definition
