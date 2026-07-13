@@ -7,13 +7,7 @@
  * JSON Schema property types
  */
 export type JSONSchemaType =
-  | "string"
-  | "number"
-  | "integer"
-  | "boolean"
-  | "object"
-  | "array"
-  | "null";
+  "string" | "number" | "integer" | "boolean" | "object" | "array" | "null";
 
 /**
  * x-ui control types for custom UI rendering

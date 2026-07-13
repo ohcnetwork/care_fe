@@ -89,9 +89,7 @@ export default function InvoicesData({
   const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
     let query = { ...filterQuery };
     const createdByValue = filterQuery.created_by as
-      | UserReadMinimal
-      | UserReadMinimal[]
-      | undefined;
+      UserReadMinimal | UserReadMinimal[] | undefined;
     if (createdByValue !== undefined) {
       const user = Array.isArray(createdByValue)
         ? createdByValue[0]
