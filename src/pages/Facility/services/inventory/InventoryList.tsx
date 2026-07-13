@@ -246,10 +246,10 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
             <TableBody>
               {data?.results?.map((inventory) => (
                 <TableRow key={inventory.id}>
-                  <TableCell className="font-semibold flex items-center gap-2 underline">
+                  <TableCell className="font-semibold space-x-2">
                     <button
                       type="button"
-                      className="hover:text-gray-700"
+                      className="hover:text-gray-700 underline"
                       onClick={() => {
                         setSelectedProductKnowledgeDrawer(
                           inventory.product.product_knowledge,
