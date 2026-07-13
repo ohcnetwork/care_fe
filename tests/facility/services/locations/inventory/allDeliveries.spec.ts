@@ -106,4 +106,52 @@ test.describe("Inventory Summary — All Deliveries drawer", () => {
       await expect(drawer.getByText("No delivery found")).toBeVisible();
     });
   });
+
+  test("paginates the deliveries within the drawer", async ({ page }) => {
+    await test.step("Wait for the inventory row to render", async () => {
+      await expect(
+        page.getByRole("button", { name: PRODUCT_NAME }),
+      ).toBeVisible();
+    });
+
+    // Seeded pharmacy products have a single delivery, so the pagination
+    // controls are otherwise hidden. Keep the real (valid) delivery rows but
+    // inflate the reported count past DELIVERIES_PER_PAGE (10) so a second page
+    // exists and the controls render.
+    await test.step("Inflate the deliveries count to expose pagination", async () => {
+      await page.route(
+        (url) =>
+          url.pathname === "/api/v1/supply_delivery/" &&
+          url.searchParams.has("supplied_inventory_item_product_knowledge"),
+        async (route) => {
+          const response = await route.fetch();
+          const json = await response.json();
+          json.count = 15;
+          await route.fulfill({ response, json });
+        },
+      );
+    });
+
+    await test.step("Open the drawer and confirm the first page renders", async () => {
+      await page.getByRole("button", { name: PRODUCT_NAME }).click();
+      const drawer = page.locator('[data-slot="drawer-content"]');
+      await expect(drawer.getByText("All Deliveries")).toBeVisible();
+      await expect(
+        drawer.getByRole("link", { name: PRODUCT_NAME }),
+      ).toBeVisible();
+    });
+
+    await test.step("Navigate to page 2 and assert the offset advances", async () => {
+      const drawer = page.locator('[data-slot="drawer-content"]');
+      const page2Response = page.waitForResponse(
+        (resp) =>
+          resp.url().includes("/api/v1/supply_delivery/") &&
+          resp.request().method() === "GET" &&
+          resp.url().includes("offset=10") &&
+          resp.ok(),
+      );
+      await drawer.getByRole("button", { name: "2", exact: true }).click();
+      await page2Response;
+    });
+  });
 });
