@@ -146,7 +146,7 @@ export function EncounterQuestion({
         handleUpdateEncounter({
           period: {
             ...encounter.period,
-            end: new Date().toISOString(),
+            end: encounterData?.period?.end ?? new Date().toISOString(),
           },
         });
       }
