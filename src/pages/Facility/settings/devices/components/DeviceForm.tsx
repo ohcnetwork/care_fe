@@ -92,7 +92,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
           if (normalizedValue) {
             if (valueMap.has(normalizedValue)) {
               ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: "custom",
                 message: t("duplicate_contact_values_not_allowed"),
                 path: [index, "value"],
               });

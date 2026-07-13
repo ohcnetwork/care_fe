@@ -406,8 +406,7 @@ export default function MedicationBillForm({
                 `items.${substitutingItemIndex}`,
               );
               const originalMedication = originalItem.medication as
-                | MedicationRequestRead
-                | undefined;
+                MedicationRequestRead | undefined;
               const initialQuantity = originalMedication
                 ? computeMedicationDispenseQuantity(originalMedication)
                 : "0";
