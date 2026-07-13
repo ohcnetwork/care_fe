@@ -59,6 +59,18 @@ interface AutocompleteProps {
   shortcutId?: string;
 }
 
+/**
+ * @deprecated Use `GenericAutocomplete` from `@/components/ui/generic-autocomplete`
+ * instead. `GenericAutocomplete` supports TypeScript generics, radio mode, and a
+ * richer render-prop API.
+ *
+ * **Migration guide:**
+ * - Rename `Autocomplete` → `GenericAutocomplete`.
+ * - Add `emptyValue=""` if your state is typed as `string` (keeps the rename
+ *   zero-diff; remove it when you migrate the state type to `string | null`).
+ * - `freeInput` is not yet supported in `GenericAutocomplete`; leave those sites
+ *   on this component until a follow-up lands.
+ */
 export default function Autocomplete({
   options,
   isLoading = false,
