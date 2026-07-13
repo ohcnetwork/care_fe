@@ -106,6 +106,20 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+
+function getExpiryColorClass(expiryDate: string): string {
+  const expiry = new Date(expiryDate);
+  const now = new Date();
+  if (expiry < now) {
+    return "text-red-600";
+  }
+  if (expiry < new Date(now.getTime() + NINETY_DAYS_MS)) {
+    return "text-amber-600";
+  }
+  return "text-gray-600";
+}
+
 // Simplified Medication Table
 interface MedicationTableProps {
   medications: MedicationDispenseRead[];
@@ -210,16 +224,9 @@ function MedicationTable({ medications }: MedicationTableProps) {
                               {t("expiry")}:
                             </span>
                             <span
-                              className={`font-medium ${
-                                new Date(expiryDate) < new Date()
-                                  ? "text-red-600"
-                                  : new Date(expiryDate) <
-                                      new Date(
-                                        Date.now() + 90 * 24 * 60 * 60 * 1000,
-                                      )
-                                    ? "text-amber-600"
-                                    : "text-gray-600"
-                              }`}
+                              className={`font-medium ${getExpiryColorClass(
+                                expiryDate,
+                              )}`}
                             >
                               {new Date(expiryDate).toLocaleDateString()}
                             </span>

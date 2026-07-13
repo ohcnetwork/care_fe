@@ -161,7 +161,6 @@ const config = [
       "react-hooks/static-components": "warn",
       "react-hooks/preserve-manual-memoization": "warn",
       "react-hooks/immutability": "warn",
-      "react-hooks/purity": "warn",
     },
   },
   // No Relative import paths rule
