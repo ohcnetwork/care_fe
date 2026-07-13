@@ -16,8 +16,9 @@ describe("decimal helpers (backend-matching money math)", () => {
     expect(round("10.004")).toBe("10.00");
   });
 
-  it("roundUp always rounds toward positive infinity to whole units", () => {
+  it("roundUp always rounds away from zero to whole units", () => {
     expect(roundUp("10.01")).toBe("11");
+    expect(roundUp("-10.01")).toBe("-11");
   });
 
   it("divides at configured precision and rounds for display", () => {
