@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 
 import Page from "@/components/Common/Page";
-import Pagination from "@/components/Common/Pagination";
+import PaginationComponent from "@/components/Common/Pagination";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
   Table,
@@ -102,7 +102,7 @@ function ProductDeliveriesDrawerContent({
             facilityId={facilityId}
             linkToProduct
           />
-          <Pagination
+          <PaginationComponent
             data={{ totalCount: deliveries.count }}
             onChange={(newPage) => setPage(newPage)}
             defaultPerPage={DELIVERIES_PER_PAGE}
