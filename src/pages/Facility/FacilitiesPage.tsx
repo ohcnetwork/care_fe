@@ -58,7 +58,7 @@ export function FacilitiesPage() {
           skipLevels={[]}
           selected={qParams.organization}
           onChange={(filter) => updateQuery(filter)}
-          onClear={() => updateQuery({ name: undefined })}
+          onClear={() => updateQuery({ organization: undefined, facility_type: undefined, name: undefined })}
           className="flex flex-row w-full"
         />
         <SearchInput
