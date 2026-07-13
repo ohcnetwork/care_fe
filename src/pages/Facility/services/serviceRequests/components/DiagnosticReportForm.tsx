@@ -3,8 +3,8 @@ import {
   Camera,
   ChevronsDownUp,
   ChevronsUpDown,
-  CloudUpload,
   FileUp,
+  MoreVertical,
   NotepadText,
   Plus,
   PlusCircle,
@@ -71,6 +71,13 @@ import { Badge } from "@/components/ui/badge";
 import { PLUGIN_Component } from "@/PluginEngine";
 
 import { DottedDivider } from "@/components/careui/dotted-divider";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import { formatName } from "@/Utils/utils";
 import { format } from "date-fns";
@@ -203,7 +210,10 @@ export function DiagnosticReportForm({
               {showReportTypeSelect ? (
                 <div className="flex flex-col items-stretch gap-2 rounded-lg border border-gray-200 bg-gray-100 p-4">
                   <Button
-                    onClick={() => setShowReportTypeSelect(false)}
+                    onClick={() => {
+                      setShowReportTypeSelect(false);
+                      setSelectedReportCode(null);
+                    }}
                     variant="ghost"
                     size="icon"
                     className="self-end"
@@ -968,7 +978,7 @@ function DiagnosticReportItem({
                   </div>
                 )}
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   <Badge
                     variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
                   >
@@ -989,6 +999,30 @@ function DiagnosticReportItem({
                       <ChevronsUpDown className="size-5" />
                     )}
                   </Button>
+                  {observationDefinitions.length > 0 && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <ObservationHistorySheet
+                          patientId={patientId}
+                          diagnosticReportId={report.id}
+                        >
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
+                            {t("view_observation_history")}
+                          </DropdownMenuItem>
+                        </ObservationHistorySheet>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
               </div>
             </div>
@@ -1200,75 +1234,6 @@ function DiagnosticReportItem({
                 })}
 
               <div className="space-y-4">
-                {files?.results && files.results.length > 0 && (
-                  <div className="mt-6">
-                    <div className="text-lg font-medium">
-                      {t("uploaded_files")}
-                    </div>
-                    <FileListTable
-                      files={files.results}
-                      type="diagnostic_report"
-                      associatingId={report.id}
-                      canEdit={!disableEdit}
-                      showHeader={false}
-                    />
-                  </div>
-                )}
-
-                {report?.status === DiagnosticReportStatus.preliminary && (
-                  <Card className="mt-4 bg-gray-50 border-gray-200 shadow-none cursor-auto">
-                    <CardContent className="p-4">
-                      <div className="space-y-4">
-                        <div className="flex flex-col items-center justify-between gap-1">
-                          <CloudUpload className="size-10 border border-gray-100 rounded-md p-2 bg-white" />
-                          <Label className="text-base font-medium">
-                            {t("choose_file")}
-                          </Label>
-                          <div className="text-sm text-gray-500 mb-2">
-                            {t("allowed_formats_are", {
-                              formats:
-                                BACKEND_ALLOWED_EXTENSIONS.slice(0, 5).join(
-                                  ", ",
-                                ) +
-                                ", " +
-                                t("etc"),
-                            })}
-                          </div>
-                          <Label
-                            htmlFor={inputId}
-                            className="inline-flex items-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground border-gray-300 shadow-sm"
-                          >
-                            <Upload className="mr-2 size-4" />
-                            <span
-                              className="truncate font-semibold"
-                              title={fileUpload.files
-                                .map((file) => file.name)
-                                .join(", ")}
-                            >
-                              {fileUpload.files.length > 0
-                                ? fileUpload.files
-                                    .map((file) => file.name)
-                                    .join(", ")
-                                : t("select_files")}
-                            </span>
-                            {fileUpload.Input({ className: "hidden" })}
-                          </Label>
-                        </div>
-
-                        {fileUpload.files.length > 0 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full"
-                            onClick={() => fileUpload.clearFiles()}
-                          >
-                            {t("clear")}
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
                 {report.status !== DiagnosticReportStatus.final && (
                   <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-gray-50">
                     <CardContent className="p-4 space-y-2">
@@ -1476,7 +1441,7 @@ const CreateDiagnosticReportForm = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-10 border border-gray-400 bg-white shadow p-4"
+                    className="size-10"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsExpanded(!isExpanded);

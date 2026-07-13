@@ -5,6 +5,7 @@ import {
   ChevronsUpDown,
   FileCheck2,
   FileText,
+  MoreVertical,
   Printer,
 } from "lucide-react";
 import { Link } from "raviger";
@@ -32,8 +33,15 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
+import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
   DiagnosticReportRead,
@@ -41,6 +49,7 @@ import {
 } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
+import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 import { format } from "date-fns";
@@ -49,7 +58,7 @@ interface DiagnosticReportReviewProps {
   facilityId: string;
   patientId: string;
   diagnosticReports: DiagnosticReportRead[];
-
+  observationDefinitions: ObservationDefinitionReadSpec[];
   serviceRequestId: string;
   disableEdit: boolean;
 }
@@ -59,6 +68,7 @@ export function DiagnosticReportReview({
   patientId,
   diagnosticReports,
   serviceRequestId,
+  observationDefinitions,
   disableEdit,
 }: DiagnosticReportReviewProps) {
   const { t } = useTranslation();
@@ -77,6 +87,7 @@ export function DiagnosticReportReview({
           facilityId={facilityId}
           patientId={patientId}
           serviceRequestId={serviceRequestId}
+          observationDefinitions={observationDefinitions}
           disableEdit={disableEdit}
         />
       ))}
@@ -89,12 +100,14 @@ function DiagnosticReportReviewItem({
   facilityId,
   patientId,
   serviceRequestId,
+  observationDefinitions,
   disableEdit,
 }: {
   report: DiagnosticReportRead;
   facilityId: string;
   patientId: string;
   serviceRequestId: string;
+  observationDefinitions: ObservationDefinitionReadSpec[];
   disableEdit: boolean;
 }) {
   const { t } = useTranslation();
@@ -242,7 +255,7 @@ function DiagnosticReportReviewItem({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-10 border border-gray-400 bg-white shadow p-4"
+                    className="size-10"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsExpanded(!isExpanded);
@@ -254,6 +267,30 @@ function DiagnosticReportReviewItem({
                       <ChevronsUpDown className="size-5" />
                     )}
                   </Button>
+                  {observationDefinitions.length > 0 && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <ObservationHistorySheet
+                          patientId={patientId}
+                          diagnosticReportId={report.id}
+                        >
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
+                            {t("view_observation_history")}
+                          </DropdownMenuItem>
+                        </ObservationHistorySheet>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
               </div>
             </div>
