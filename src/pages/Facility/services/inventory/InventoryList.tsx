@@ -96,7 +96,7 @@ function ProductDeliveriesDrawerContent({
       {isLoading ? (
         <TableSkeleton count={2} />
       ) : deliveries?.results && deliveries.results.length > 0 ? (
-        <div className="flex flex-col item-center">
+        <div className="flex flex-col items-center">
           <SupplyDeliveryTable
             deliveries={deliveries.results}
             facilityId={facilityId}
