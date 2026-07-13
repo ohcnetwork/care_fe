@@ -7,11 +7,7 @@ import { LocationRead, OperationalStatus } from "@/types/location/location";
 
 export type LocationScreen = "overview" | "assign" | "modify";
 export type LocationAction =
-  | "assign"
-  | "move"
-  | "promote"
-  | "complete"
-  | "edit_time";
+  "assign" | "move" | "promote" | "complete" | "edit_time";
 
 export interface LocationSheetState {
   screen: LocationScreen;
@@ -219,7 +215,7 @@ export interface NavigationHandlers {
   onBedSelect: (bed: LocationRead) => void;
   onCheckBedStatus: (bed: LocationRead) => void;
   onSearchChange: (value: string) => void;
-  onSearch: (e: React.FormEvent) => void;
+  onSearch: (e: React.SubmitEvent) => void;
   onShowAvailableChange: (value: boolean) => void;
   onLoadMore: () => void;
   onClearSelection: () => void;

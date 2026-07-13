@@ -9,7 +9,6 @@ import {
 } from "vite";
 
 import federation from "@originjs/vite-plugin-federation";
-import reactScan from "@react-scan/vite-plugin-react-scan";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
@@ -18,7 +17,6 @@ import { marked } from "marked";
 import path from "path";
 import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
-import { viteStaticCopy } from "vite-plugin-static-copy";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
@@ -430,19 +428,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "decimal.js",
         ],
       }),
-      viteStaticCopy({
-        targets: [
-          {
-            src: "node_modules/pdfjs-dist/build/pdf.worker.min.mjs",
-            dest: "",
-          },
-        ],
-      }),
       react(),
-      reactScan({
-        enable:
-          env.NODE_ENV === "development" && env.ENABLE_REACT_SCAN === "true",
-      }),
       checker({
         typescript: true,
         eslint: {
