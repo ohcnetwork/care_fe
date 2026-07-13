@@ -67,6 +67,10 @@ function ProductDeliveriesDrawerContent({
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
 
+  useEffect(() => {
+    setPage(1);
+  }, [selectedProductKnowledge?.id]);
+
   const { data: deliveries, isLoading } = useQuery({
     queryKey: [
       "supplyDeliveries",
@@ -92,7 +96,7 @@ function ProductDeliveriesDrawerContent({
       {isLoading ? (
         <TableSkeleton count={2} />
       ) : deliveries?.results && deliveries.results.length > 0 ? (
-        <>
+        <div className="flex flex-col item-center">
           <SupplyDeliveryTable
             deliveries={deliveries.results}
             facilityId={facilityId}
@@ -104,7 +108,7 @@ function ProductDeliveriesDrawerContent({
             defaultPerPage={DELIVERIES_PER_PAGE}
             cPage={page}
           />
-        </>
+        </div>
       ) : (
         <EmptyState
           icon={<Truck className="size-5 text-primary-600" />}
