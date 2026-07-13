@@ -199,6 +199,7 @@ export function SupplyDeliveryTable({
           <TableHead rowSpan={2}>
             {isRequester ? t("received_date") : t("dispatched_date")}
           </TableHead>
+          <TableHead rowSpan={2}>{t("expiry_date")}</TableHead>
           <TableHead
             colSpan={1 + informationalCodes.length}
             className="text-center border-b"
@@ -303,6 +304,16 @@ export function SupplyDeliveryTable({
             <TableCell>
               {delivery.created_date &&
                 formatDate(new Date(delivery.created_date), "dd/MM/yyyy")}
+            </TableCell>
+            <TableCell>
+              {(() => {
+                const expiryDate =
+                  delivery.supplied_inventory_item?.product?.expiration_date ||
+                  delivery.supplied_item?.expiration_date;
+                return expiryDate
+                  ? formatDate(new Date(expiryDate), "dd/MM/yyyy")
+                  : "-";
+              })()}
             </TableCell>
             <TableCell>
               <MonetaryDisplay
