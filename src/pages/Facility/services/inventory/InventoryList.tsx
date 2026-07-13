@@ -97,7 +97,6 @@ function ProductDeliveriesDrawerContent({
             deliveries={deliveries.results}
             facilityId={facilityId}
             linkToProduct
-            initialSerialNumber={(page - 1) * DELIVERIES_PER_PAGE}
           />
           <PaginationComponent
             data={{ totalCount: deliveries.count }}

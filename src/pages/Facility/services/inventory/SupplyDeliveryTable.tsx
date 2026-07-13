@@ -63,7 +63,6 @@ interface SupplyDeliveryTableProps {
   isRequester?: boolean;
   facilityId?: string;
   linkToProduct?: boolean;
-  initialSerialNumber?: number;
 }
 
 export function SupplyDeliveryTable({
@@ -79,7 +78,6 @@ export function SupplyDeliveryTable({
   isRequester = false,
   facilityId,
   linkToProduct = false,
-  initialSerialNumber = 0,
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -159,7 +157,7 @@ export function SupplyDeliveryTable({
   // Build a map of delivery id -> serial number for non-cancelled deliveries
   const serialNumberMap = useMemo(() => {
     const map = new Map<string, number>();
-    let serial = initialSerialNumber + 1;
+    let serial = 1;
     for (const delivery of deliveries) {
       if (
         ACTIVE_SUPPLY_DELIVERY_STATUSES.includes(
@@ -170,7 +168,7 @@ export function SupplyDeliveryTable({
       }
     }
     return map;
-  }, [deliveries, initialSerialNumber]);
+  }, [deliveries]);
 
   return (
     <Table>
