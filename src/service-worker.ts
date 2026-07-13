@@ -59,20 +59,45 @@ self.addEventListener("notificationclick", (e) => {
   const targetUrl = `${fallbackUrl}#notification_click=${clickParam}`;
 
   e.waitUntil(
-    self.clients.matchAll({ type: "window" }).then(async (clientsArr) => {
-      const existingClient = clientsArr.find((client) =>
-        client.url.includes(self.location.origin),
-      );
-      if (existingClient) {
-        // App is already open: focus it and let the page handle navigation.
-        // A live page has message listeners ready, unlike a fresh load.
-        await existingClient.focus();
-        existingClient.postMessage({ type: "NOTIFICATION_CLICK", data });
-        return;
-      }
-      return self.clients
-        .openWindow(targetUrl)
-        .then((windowClient) => (windowClient ? windowClient.focus() : null));
-    }),
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then(async (clientsArr) => {
+        const sameOriginClients = clientsArr.filter((client) => {
+          try {
+            return new URL(client.url).origin === self.location.origin;
+          } catch {
+            return false;
+          }
+        });
+        const existingClient =
+          sameOriginClients.find((client) => client.focused) ??
+          sameOriginClients.find(
+            (client) => client.visibilityState === "visible",
+          ) ??
+          sameOriginClients[0];
+
+        if (existingClient) {
+          // App is already open: focus it and let the page handle navigation.
+          // A live page has message listeners ready, unlike a fresh load.
+          try {
+            const focusedClient = await existingClient.focus();
+            focusedClient.postMessage({ type: "NOTIFICATION_CLICK", data });
+            return;
+          } catch {
+            // Fall back to opening a new window if the matched client closes or
+            // becomes unfocusable before the notification click is handled.
+          }
+        }
+
+        const windowClient = await self.clients.openWindow(targetUrl);
+
+        if (windowClient) {
+          try {
+            await windowClient.focus();
+          } catch {
+            // Some browsers can reject focus if the new client is no longer active.
+          }
+        }
+      }),
   );
 });
