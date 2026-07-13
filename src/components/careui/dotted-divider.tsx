@@ -2,14 +2,17 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-function DottedDivider({ className, ...props }: React.ComponentProps<"div">) {
+function DottedDivider({
+  className,
+  ...props
+}: Omit<React.ComponentProps<"div">, "children">) {
   const id = React.useId();
   const patternId = `dotted-divider-${id.replace(/:/g, "")}`;
 
   return (
     <div
       data-slot="dotted-divider"
-      className={cn("h-2 w-full text-border-strong", className)}
+      className={cn("text-gray-300 h-2 w-full", className)}
       {...props}
     >
       <svg
