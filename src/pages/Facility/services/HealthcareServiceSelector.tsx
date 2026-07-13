@@ -100,6 +100,7 @@ export const HealthcareServiceSelector = ({
       isLoading={isLoading}
       onSearch={setSearchValue}
       placeholder={t("select_healthcare_service")}
+      inputPlaceholder={t("search")}
       noOptionsMessage={t("no_services_found")}
       enableRadio
       clearSelection={clearSelection}

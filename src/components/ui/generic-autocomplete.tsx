@@ -151,6 +151,15 @@ export default function GenericAutocomplete<T>({
     [options, value, getOptionKey],
   );
 
+  // When clearSelection is explicitly set, it gates clearing in all modes.
+  // When not set, showClearButton controls the dropdown clear button (Autocomplete compat).
+  const canClear =
+    clearSelection !== undefined && clearSelection !== false
+      ? true
+      : clearSelection === false
+        ? false
+        : showClearButton;
+
   const emitEmpty = () =>
     onChange(emptyValue !== undefined ? emptyValue : null);
 
@@ -271,7 +280,8 @@ export default function GenericAutocomplete<T>({
     </>
   );
 
-  const hasSelection = selectedOption !== undefined;
+  // W3: base on value, not options — value stays known even when filtered options don't include it.
+  const hasSelection = value !== null;
 
   if (isMobile) {
     return (
@@ -287,7 +297,7 @@ export default function GenericAutocomplete<T>({
               className={cn(
                 "w-full justify-between",
                 className,
-                hasSelection && showClearButton && "rounded-r-none",
+                hasSelection && canClear && "rounded-r-none",
               )}
               disabled={disabled}
               type="button"
@@ -309,8 +319,9 @@ export default function GenericAutocomplete<T>({
             </div>
           </DrawerContent>
         </Drawer>
-        {hasSelection && showClearButton ? (
+        {hasSelection && canClear ? (
           <Button
+            type="button"
             variant="outline"
             size="icon"
             className="rounded-l-none border-l-0 text-gray-400 h-auto"
@@ -340,7 +351,7 @@ export default function GenericAutocomplete<T>({
             className={cn(
               "w-full justify-between",
               className,
-              hasSelection && showClearButton && "rounded-r-none",
+              hasSelection && canClear && "rounded-r-none",
             )}
             disabled={disabled}
             onClick={() => setOpen(!open)}
@@ -367,8 +378,9 @@ export default function GenericAutocomplete<T>({
           <Command shouldFilter={false}>{commandContent}</Command>
         </PopoverContent>
       </Popover>
-      {hasSelection && showClearButton ? (
+      {hasSelection && canClear ? (
         <Button
+          type="button"
           variant="outline"
           size="icon"
           className="rounded-l-none border-l-0 text-gray-400 h-auto"
