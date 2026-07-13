@@ -23,7 +23,7 @@ export interface ProductBase {
   batch?: ProductBatch;
   expiration_date?: string;
   standard_pack_size?: number;
-  purchase_price?: number;
+  purchase_price?: string;
 }
 
 export interface ProductCreate extends Omit<ProductBase, "id"> {
