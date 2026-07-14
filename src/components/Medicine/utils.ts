@@ -77,39 +77,6 @@ export function formatDuration(
 }
 
 /**
- * Compact one-line medication summary:
- *   "1 tablet × 1-0-1 (Twice a day) × 5 days = 10 tablets"
- */
-export function formatMedicationLine(
-  instruction?: MedicationRequestDosageInstruction,
-  unitLabel = "units",
-): string {
-  if (!instruction) return "";
-  const parts: string[] = [];
-
-  // Dosage
-  const dosage = formatDosage(instruction);
-  if (dosage) parts.push(dosage);
-
-  // Frequency
-  const freq = formatFrequency(instruction);
-  if (freq) parts.push(freq);
-
-  // Duration
-  const dur = formatDuration(instruction);
-  if (dur) parts.push(dur);
-
-  if (parts.length === 0) return "";
-
-  // Total
-  const total = formatTotalUnits([instruction], unitLabel);
-  if (total) {
-    return `${parts.join(" × ")} = ${total}`;
-  }
-  return parts.join(" × ");
-}
-
-/**
  * Separator used between dosage instruction texts in print/preview contexts.
  */
 export const DOSAGE_INSTRUCTION_SEPARATOR = "\n┄┄┄┄┄┄┄┄┄\n";
