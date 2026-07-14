@@ -808,6 +808,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
+                type="button"
                 className={cn(
                   "justify-between px-3 py-2 w-full shadow-xs border border-gray-300 font-medium h-auto min-h-9",
                   disabled && "opacity-50 cursor-not-allowed",
