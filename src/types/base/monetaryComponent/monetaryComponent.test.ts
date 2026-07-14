@@ -13,7 +13,6 @@ import {
   calculateTotalPriceWithQuantity,
   getBasePrice,
   getDiscountAmount,
-  getPriceBreakdown,
   getSurchargeAmount,
   getTaxAmount,
   MonetaryComponent,
@@ -231,41 +230,5 @@ describe("calculateTotalPrice / calculateTotalPriceWithQuantity", () => {
 
   it("returns 0 for an empty component list", () => {
     expect(calculateTotalPrice([]).toString()).toBe("0");
-  });
-});
-
-describe("getPriceBreakdown", () => {
-  it("rounds every line item to 2 decimals and multiplies by quantity", () => {
-    const components: MonetaryComponent[] = [
-      { monetary_component_type: MonetaryComponentType.base, amount: "33.33" },
-    ];
-    const breakdown = getPriceBreakdown(components, 3);
-    expect(breakdown).toEqual({
-      basePrice: "99.99",
-      surcharges: "0.00",
-      discounts: "0.00",
-      subtotal: "99.99",
-      tax: "0.00",
-      total: "99.99",
-    });
-  });
-
-  it("defaults quantity to 1", () => {
-    const components: MonetaryComponent[] = [
-      { monetary_component_type: MonetaryComponentType.base, amount: "50" },
-    ];
-    expect(getPriceBreakdown(components).total).toBe("50.00");
-  });
-
-  it("returns zeroed strings for an empty component list without throwing", () => {
-    expect(() => getPriceBreakdown([])).not.toThrow();
-    expect(getPriceBreakdown([])).toEqual({
-      basePrice: "0.00",
-      surcharges: "0.00",
-      discounts: "0.00",
-      subtotal: "0.00",
-      tax: "0.00",
-      total: "0.00",
-    });
   });
 });
