@@ -22,7 +22,8 @@ export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
 }
 
 /**
- * Whether a dosage should be highlighted (dose range, or quantity ≠ 1).
+ * Whether a dosage should be highlighted — true for dose ranges and for
+ * quantities whose rounded display value is not exactly 1.
  */
 export function isNonUnitDose(
   instruction?: MedicationRequestDosageInstruction,
@@ -32,7 +33,7 @@ export function isNonUnitDose(
 
   const { dose_range, dose_quantity } = doseAndRate;
   if (dose_range) return true;
-  if (!dose_quantity?.value) return false;
+  if (dose_quantity?.value == null) return false;
   return round(dose_quantity.value) !== round(1);
 }
 

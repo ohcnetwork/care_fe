@@ -348,7 +348,7 @@ export function MedicationStatementQuestion({
                           const freq = formatFrequency(di) || "";
                           return (
                             <div className="flex flex-col">
-                              <FormattedDosage instruction={di} />
+                              <FormattedDosage instruction={di} fallback="" />
                               {freq && <span>{freq}</span>}
                             </div>
                           );

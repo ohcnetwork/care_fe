@@ -11,6 +11,7 @@ import {
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Create Patient Prescription", () => {
+  test.describe.configure({ mode: "serial" });
   let facilityId: string;
 
   test.beforeEach(async ({ page }) => {
@@ -106,9 +107,10 @@ test.describe("Create Patient Prescription", () => {
       await expect(table).toContainText(frequency.display);
       await expect(table).toContainText(selectedInstruction);
       // Non-unit dosages (value !== 1) are visually highlighted
-      await expect(
-        table.locator(".bg-yellow-100").filter({ hasText: dosage }).first(),
-      ).toBeVisible();
+      const medicationRow = table
+        .getByRole("row")
+        .filter({ hasText: medicineName });
+      await expect(medicationRow.locator(".bg-yellow-100")).toBeVisible();
     });
   });
 

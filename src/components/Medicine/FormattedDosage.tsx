@@ -7,7 +7,7 @@ import { formatDosage, isNonUnitDose } from "./utils";
 interface FormattedDosageProps {
   instruction?: MedicationRequestDosageInstruction;
   /**
-   * Highlight dosages whose value is not a single unit
+   * Highlight dosages that are dose ranges or whose value is not a single unit
    */
   highlight?: boolean;
   className?: string;
@@ -16,7 +16,7 @@ interface FormattedDosageProps {
 
 /**
  * Renders a formatted dosage string and, by default, visually highlights
- * non-unit dosages
+ * non-unit dosages (dose ranges and quantities ≠ 1)
  */
 export function FormattedDosage({
   instruction,
