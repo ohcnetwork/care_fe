@@ -78,7 +78,7 @@ export default function InvoicesData({
     enabled: !!facilityId && !!qParams.created_by,
   });
 
-  const selectedCreatedByUsers = createdByUser ? [createdByUser] : [];
+  const selectedCreatedByUsers = createdByUser ? [createdByUser] : undefined;
 
   const filters = [
     invoiceStatusFilter("status"),
