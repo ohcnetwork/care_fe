@@ -26,7 +26,8 @@ test.describe("Create Patient Prescription", () => {
 
   test("Add medication to patient prescription", async ({ page }) => {
     const medicineName = faker.helpers.arrayElement(medicineNames);
-    const dosage = faker.number.int({ min: 1, max: 100 }).toString();
+    // Use a non-unit dose (value !== 1) so the dosage is highlighted
+    const dosage = faker.number.int({ min: 2, max: 100 }).toString();
     const frequency = faker.helpers.arrayElement(frequencies);
     const selectedInstruction = faker.helpers.arrayElement(instructions);
     const notes = "testing notes";
@@ -104,6 +105,10 @@ test.describe("Create Patient Prescription", () => {
       await expect(table).toContainText(dosage);
       await expect(table).toContainText(frequency.display);
       await expect(table).toContainText(selectedInstruction);
+      // Non-unit dosages (value !== 1) are visually highlighted
+      await expect(
+        table.locator(".bg-yellow-100").filter({ hasText: dosage }).first(),
+      ).toBeVisible();
     });
   });
 });
