@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
@@ -133,16 +134,21 @@ const IndividualMedicationRow: React.FC<{
             )}
             gap="sm"
             renderItem={(di) => {
-              const text = [
-                formatDosage(di),
-                formatFrequency(di),
-                di.method?.display,
-              ]
+              const dosage = formatDosage(di);
+              const instructionText = [formatFrequency(di), di.method?.display]
                 .filter(Boolean)
                 .join(", ");
               return (
                 <div>
-                  {text && <div>{text}</div>}
+                  {(dosage || instructionText) && (
+                    <div>
+                      {dosage && (
+                        <FormattedDosage instruction={di} fallback="" />
+                      )}
+                      {dosage && instructionText && ", "}
+                      {instructionText}
+                    </div>
+                  )}
                   {di.route?.display && (
                     <Badge variant="blue" className="text-xs mt-0.5">
                       {di.route.display}
@@ -397,7 +403,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                     return (
                       <div>
                         <div>
-                          {formatDosage(di)}
+                          <FormattedDosage instruction={di} />
                           {freq && <span className="text-gray-400"> · </span>}
                           {freq}
                           {di.method?.display && (

@@ -21,6 +21,21 @@ export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
   return "";
 }
 
+/**
+ * Whether a dosage represents a quantity other than a single unit (value ≠ 1).
+ */
+export function isNonUnitDose(
+  instruction?: MedicationRequestDosageInstruction,
+): boolean {
+  const doseAndRate = instruction?.dose_and_rate;
+  if (!doseAndRate) return false;
+
+  const { dose_range, dose_quantity } = doseAndRate;
+  if (dose_range) return true;
+  if (dose_quantity) return Number(dose_quantity.value) !== 1;
+  return false;
+}
+
 // Helper function to format dosage instructions in Rx style
 export function formatSig(instruction?: MedicationRequestDosageInstruction) {
   if (!instruction) return "";

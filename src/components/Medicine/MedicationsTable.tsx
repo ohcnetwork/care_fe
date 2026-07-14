@@ -21,12 +21,8 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 
 import { DosageInstructionList } from "./DosageInstructionList";
-import {
-  formatDosage,
-  formatDuration,
-  formatFrequency,
-  formatSig,
-} from "./utils";
+import { FormattedDosage } from "./FormattedDosage";
+import { formatDuration, formatFrequency, formatSig } from "./utils";
 
 interface MedicationsTableProps {
   medications: MedicationRequestRead[];
@@ -103,7 +99,7 @@ export const MedicationsTable = ({
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
                     <DosageInstructionList
                       instructions={instructions}
-                      renderItem={(di) => formatDosage(di) || "-"}
+                      renderItem={(di) => <FormattedDosage instruction={di} />}
                     />
                   </TableCell>
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
