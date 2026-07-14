@@ -110,7 +110,9 @@ test.describe("Create Patient Prescription", () => {
       const medicationRow = table
         .getByRole("row")
         .filter({ hasText: medicineName });
-      await expect(medicationRow.locator(".bg-yellow-100")).toBeVisible();
+      const highlightedDosage = medicationRow.locator(".bg-yellow-100");
+      await expect(highlightedDosage).toHaveCount(1);
+      await expect(highlightedDosage.first()).toBeVisible();
     });
   });
 
@@ -194,6 +196,7 @@ test.describe("Create Patient Prescription", () => {
       const table = page.getByRole("table");
       await expect(table).toBeVisible();
       await expect(table).toContainText(medicineName);
+      await expect(table).toContainText(dosage);
       // Unit dosages (value === 1) are NOT visually highlighted
       const medicationRow = table.getByRole("row").filter({
         hasText: medicineName,
