@@ -358,9 +358,9 @@ export const SelectedDepartmentBadge = ({
   const color = getColorForOrg(org.id);
 
   return (
-    <div className="flex items-center gap-2 min-w-0 shrink-0">
+    <div className="flex items-center gap-2 min-w-0">
       <span className={cn(color, "rounded-full size-2 border shrink-0")} />
-      <span className="text-sm whitespace-nowrap truncate max-w-[150px]">
+      <span className="text-sm whitespace-nowrap truncate min-w-0">
         {org.name}
       </span>
     </div>

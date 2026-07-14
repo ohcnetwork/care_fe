@@ -37,7 +37,7 @@ function SubMenuFilter({
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-[var(--radix-dropdown-menu-trigger-width)] p-0"
+        className="w-(--radix-dropdown-menu-trigger-width) p-0"
         align="start"
       >
         {availableOptions.map((option) => (
@@ -89,13 +89,13 @@ export function SelectedFilterBar({
     >
       <div
         className={cn(
-          "flex items-center bg-white rounded-md border border-gray-200 w-fit",
+          "flex items-center bg-white rounded-md border border-gray-200 w-full max-w-full min-w-0 overflow-hidden md:w-fit",
           selectedBarClassName,
         )}
       >
         <DropdownMenuTrigger asChild>
           <div
-            className="flex items-center gap-2 px-3 h-9 border-gray-200 text-sm"
+            className="flex items-center gap-2 px-3 h-9 border-gray-200 text-sm shrink-0"
             onClick={onClick}
           >
             {filter?.icon}
@@ -111,8 +111,8 @@ export function SelectedFilterBar({
           }
           availableOptions={availableOperations ?? []}
         />
-        <div className="flex items-center gap-2 px-3 h-9 border-gray-200 whitespace-nowrap">
-          <span className="truncate text-gray-950 font-medium">
+        <div className="flex items-center gap-2 px-3 h-9 border-gray-200 whitespace-nowrap min-w-0 flex-1 overflow-hidden">
+          <span className="truncate text-gray-950 font-medium min-w-0">
             {filter.renderSelected?.(selected, filter, onFilterChange)}
           </span>
         </div>
@@ -120,13 +120,13 @@ export function SelectedFilterBar({
           <Button
             variant="ghost"
             onClick={clearFilter}
-            className="flex border-l rounded-l-none border-gray-200 hover:bg-gray-50"
+            className="flex border-l rounded-l-none border-gray-200 hover:bg-gray-50 shrink-0"
           >
             <X className="h-5 w-5 text-gray-600" />
           </Button>
         )}
       </div>
-      <DropdownMenuContent className="w-[320px] p-0" align="start">
+      <DropdownMenuContent className="w-80 p-0" align="start">
         <FilterRenderer
           activeFilter={filter.key}
           selectedFilters={selectedFilters}
