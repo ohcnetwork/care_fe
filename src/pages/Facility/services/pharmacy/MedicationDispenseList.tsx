@@ -144,7 +144,9 @@ function MedicationTable({
                 <TableCell className="text-gray-950 font-medium">
                   <DosageInstructionList
                     instructions={instructions}
-                    renderItem={(di) => <FormattedDosage instruction={di} />}
+                    renderItem={(di) => (
+                      <FormattedDosage instruction={di} fallback="-" />
+                    )}
                   />
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
