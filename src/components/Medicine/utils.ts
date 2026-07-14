@@ -32,8 +32,8 @@ export function isNonUnitDose(
 
   const { dose_range, dose_quantity } = doseAndRate;
   if (dose_range) return true;
-  if (dose_quantity) return Number(dose_quantity.value) !== 1;
-  return false;
+  if (!dose_quantity?.value) return false;
+  return round(dose_quantity.value) !== round(1);
 }
 
 // Helper function to format dosage instructions in Rx style
