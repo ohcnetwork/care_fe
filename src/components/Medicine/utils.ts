@@ -21,6 +21,22 @@ export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
   return "";
 }
 
+/**
+ * Whether a dosage should be highlighted — true for dose ranges and for
+ * quantities whose rounded display value is not exactly 1.
+ */
+export function isNonUnitDose(
+  instruction?: MedicationRequestDosageInstruction,
+): boolean {
+  const doseAndRate = instruction?.dose_and_rate;
+  if (!doseAndRate) return false;
+
+  const { dose_range, dose_quantity } = doseAndRate;
+  if (dose_range) return true;
+  if (dose_quantity?.value == null) return false;
+  return round(dose_quantity.value) !== round(1);
+}
+
 // Helper function to format dosage instructions in Rx style
 export function formatSig(instruction?: MedicationRequestDosageInstruction) {
   if (!instruction) return "";
