@@ -60,7 +60,7 @@ export default function PublicPatientRegistration(
         .string()
         .min(1, t("field_required"))
         .refine(validateName, t("min_char_length_error", { min_length: 3 })),
-      gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
+      gender: z.enum(GENDERS, { error: t("gender_is_required") }),
       address: z.string().min(1, t("field_required")),
       age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
@@ -72,7 +72,7 @@ export default function PublicPatientRegistration(
       const field = data.ageInputType === "age" ? "age" : "date_of_birth";
       if (!data[field]) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("field_required"),
           path: [field],
         });
@@ -85,7 +85,7 @@ export default function PublicPatientRegistration(
         Number(data.age) < 0
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("age_less_than_0"),
           path: ["age"],
         });

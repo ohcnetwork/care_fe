@@ -306,9 +306,7 @@ export default function MedicationDispenseList({
   };
   for (const med of allMedications) {
     const key = (med.dispense_status || "incomplete") as
-      | "incomplete"
-      | "partial"
-      | "complete";
+      "incomplete" | "partial" | "complete";
     countsInit[key] += 1;
   }
   const dispenseCounts = countsInit;
@@ -380,8 +378,8 @@ export default function MedicationDispenseList({
                 onValueChange={(value) =>
                   setDispenseFilter(
                     (value as
-                      | "all"
-                      | keyof typeof MedicationRequestDispenseStatus) ?? "all",
+                      "all" | keyof typeof MedicationRequestDispenseStatus) ??
+                      "all",
                   )
                 }
                 options={["all", "incomplete", "partial", "complete"]}

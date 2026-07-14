@@ -103,48 +103,6 @@ export function isTimeInSlot(
   return date >= slotStartDate && date < slotEndDate;
 }
 
-export function getAdministrationsForTimeSlot<
-  T extends {
-    occurrence_period_start: string;
-    request: string;
-  },
->(
-  administrations: T[],
-  medicationId: string,
-  slotDate: Date,
-  start: string,
-  end: string,
-): T[] {
-  return administrations.filter((admin) => {
-    const adminDate = new Date(admin.occurrence_period_start);
-    return (
-      admin.request === medicationId &&
-      isTimeInSlot(adminDate, { date: slotDate, start, end })
-    );
-  });
-}
-
-export function getCurrentTimeSlotIndex(): number {
-  const hour = new Date().getHours();
-  if (hour < 6) return 0;
-  if (hour < 12) return 1;
-  if (hour < 18) return 2;
-  return 3;
-}
-
-export function getEarliestAuthoredDate(
-  medications: MedicationRequestRead[],
-): Date | null {
-  if (!medications?.length) return null;
-  return new Date(
-    Math.min(
-      ...medications.map((med) =>
-        new Date(med.authored_on || med.created_date).getTime(),
-      ),
-    ),
-  );
-}
-
 /**
  * Groups medications by their requested_product.id or medication.code
  * Returns sorted array with active groups first, then alphabetically by name
