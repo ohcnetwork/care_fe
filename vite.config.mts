@@ -103,7 +103,11 @@ function getMimeType(filePath: string) {
 }
 
 function parseRegisteredComponentNames(value: string | undefined) {
-  if (!value || value.trim() === "" || value.trim() === "*") {
+  if (!value || value.trim() === "") {
+    return new Set<string>();
+  }
+
+  if (value.trim() === "*") {
     return null;
   }
 

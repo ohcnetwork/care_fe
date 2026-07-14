@@ -74,7 +74,8 @@ REACT_MFE_REGISTERED_COMPONENTS=BookAppointmentDetails,Login,AuthHero
 
 Behavior:
 
-- Empty, unset, or `*` registers every exported component.
+- Empty or unset registers **no** components (no wrapper overhead, no overrides possible).
+- `*` registers every exported component.
 - A comma-separated list registers only those exact component names.
 - Unknown names fail the Vite build/dev server startup.
 - Duplicate exported component names are still rejected so registration keys stay
