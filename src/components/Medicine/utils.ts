@@ -22,7 +22,7 @@ export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
 }
 
 /**
- * Whether a dosage represents a quantity other than a single unit (value ≠ 1).
+ * Whether a dosage should be highlighted (dose range, or quantity ≠ 1).
  */
 export function isNonUnitDose(
   instruction?: MedicationRequestDosageInstruction,
