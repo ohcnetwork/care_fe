@@ -22,7 +22,7 @@ export function FormattedDosage({
   instruction,
   highlight = true,
   className,
-  fallback = "-",
+  fallback = "",
 }: FormattedDosageProps) {
   const text = formatDosage(instruction);
   if (!text) return <>{fallback}</>;
