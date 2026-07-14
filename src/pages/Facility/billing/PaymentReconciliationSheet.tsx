@@ -51,7 +51,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronUp } from "lucide-react";
+// Remove this line and add ChevronUp to the existing lucide-react import above
 
 import { paymentReconcilationLocationAtom } from "@/atoms/paymentReconcilationLocationAtom";
 import { LocationPicker } from "@/components/Location/LocationPicker";
