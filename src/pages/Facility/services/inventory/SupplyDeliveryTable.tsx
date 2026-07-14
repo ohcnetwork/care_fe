@@ -63,6 +63,7 @@ interface SupplyDeliveryTableProps {
   isRequester?: boolean;
   facilityId?: string;
   linkToProduct?: boolean;
+  showLocations?: boolean;
 }
 
 export function SupplyDeliveryTable({
@@ -78,6 +79,7 @@ export function SupplyDeliveryTable({
   isRequester = false,
   facilityId,
   linkToProduct = false,
+  showLocations = false,
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -190,6 +192,12 @@ export function SupplyDeliveryTable({
           <TableHead rowSpan={2}>{t("#")}</TableHead>
           <TableHead rowSpan={2}>{t("item")}</TableHead>
           <TableHead rowSpan={2}>{t("batch")}</TableHead>
+          {showLocations && (
+            <>
+              <TableHead rowSpan={2}>{t("origin")}</TableHead>
+              <TableHead rowSpan={2}>{t("destination")}</TableHead>
+            </>
+          )}
           <TableHead rowSpan={2}>{t("requested_qty")}</TableHead>
           {!internal && <TableHead rowSpan={2}>{t("pack_size")}</TableHead>}
           {!internal && <TableHead rowSpan={2}>{t("pack_qty")}</TableHead>}
@@ -255,10 +263,13 @@ export function SupplyDeliveryTable({
               onClick={() => onDeliveryClick?.(delivery)}
             >
               {(() => {
-                const productId = internal
+                const internalDelivery =
+                  internal || !!delivery.supplied_inventory_item?.product?.id;
+
+                const productId = internalDelivery
                   ? delivery.supplied_inventory_item?.product?.id
                   : delivery.supplied_item?.id;
-                const productName = internal
+                const productName = internalDelivery
                   ? delivery.supplied_inventory_item?.product?.product_knowledge
                       ?.name
                   : delivery.supplied_item?.product_knowledge?.name;
@@ -286,6 +297,19 @@ export function SupplyDeliveryTable({
               {delivery.supplied_inventory_item?.product?.batch?.lot_number ||
                 "-"}
             </TableCell>
+            {showLocations && (
+              <>
+                <TableCell>
+                  {delivery?.order?.origin?.name ||
+                    delivery?.order?.supplier?.name ||
+                    delivery?.order?.patient?.name ||
+                    "-"}
+                </TableCell>
+                <TableCell>
+                  {delivery?.order?.destination?.name || "-"}
+                </TableCell>
+              </>
+            )}
             <TableCell>
               {delivery.supply_request
                 ? round(delivery.supply_request.quantity)

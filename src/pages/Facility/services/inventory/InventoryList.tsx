@@ -97,6 +97,7 @@ function ProductDeliveriesDrawerContent({
             deliveries={deliveries.results}
             facilityId={facilityId}
             linkToProduct
+            showLocations
           />
           <PaginationComponent
             data={{ totalCount: deliveries.count }}
