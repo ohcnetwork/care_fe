@@ -20,6 +20,7 @@ import {
   CreditCard,
   Landmark,
   Signature,
+  ChevronUp,
 } from "lucide-react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -51,7 +52,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-// Remove this line and add ChevronUp to the existing lucide-react import above
 
 import { paymentReconcilationLocationAtom } from "@/atoms/paymentReconcilationLocationAtom";
 import { LocationPicker } from "@/components/Location/LocationPicker";
