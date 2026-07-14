@@ -1,27 +1,27 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { t } from "i18next";
-import { useAtom } from "jotai";
-import { useEffect, useMemo, useRef } from "react";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-import * as z from "zod";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { t } from "i18next";
+import { useAtom } from "jotai";
 import {
   Banknote,
   BanknoteArrowUp,
+  ChevronUp,
   CreditCard,
   Landmark,
   Signature,
-  ChevronUp,
 } from "lucide-react";
+import { useEffect, useMemo, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -59,7 +59,6 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareApps } from "@/hooks/useCareApps";
-import { PLUGIN_Component } from "@/PluginEngine";
 import {
   ExtensionEntityType,
   getCombinedExtensionProps,
@@ -68,6 +67,7 @@ import {
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
 import { register } from "@/lib/override/register";
+import { PLUGIN_Component } from "@/PluginEngine";
 import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -271,7 +271,6 @@ const PaymentReconciliationSheetBase = ({
     }
   }, [selectedLocationObject, form]);
 
-
   const careApps = useCareApps();
   const isInvoiceRecordPaymentPluginsPresent = careApps.some(
     (plugin) =>
@@ -393,11 +392,11 @@ const PaymentReconciliationSheetBase = ({
             {invoice
               ? isCreditNote
                 ? t("recording_refund_for_invoice", {
-                  id: invoice.number,
-                })
+                    id: invoice.number,
+                  })
                 : t("recording_payment_for_invoice", {
-                  id: invoice.number,
-                })
+                    id: invoice.number,
+                  })
               : isCreditNote
                 ? t("recording_refund")
                 : t("recording_payment")}
@@ -747,7 +746,9 @@ const PaymentReconciliationSheetBase = ({
                     type="submit"
                     disabled={isPending || isExtensionsLoading}
                     aria-label={
-                      isCreditNote ? t("record_credit_note") : t("record_payment")
+                      isCreditNote
+                        ? t("record_credit_note")
+                        : t("record_payment")
                     }
                   >
                     {isPending ? (
@@ -771,7 +772,7 @@ const PaymentReconciliationSheetBase = ({
                         <Button
                           variant="outline_primary"
                           size="icon"
-                          aria-label="More Options"
+                          aria-label={t("more_options")}
                         >
                           <ChevronUp />
                         </Button>
