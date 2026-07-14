@@ -745,8 +745,10 @@ const PaymentReconciliationSheetBase = ({
                 <ButtonGroup className="w-full">
                   <Button
                     type="submit"
-                    disabled={isPending}
-                    aria-label={t("record_payment")}
+                    disabled={isPending || isExtensionsLoading}
+                    aria-label={
+                      isCreditNote ? t("record_credit_note") : t("record_payment")
+                    }
                   >
                     {isPending ? (
                       <>
