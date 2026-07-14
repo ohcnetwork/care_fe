@@ -28,7 +28,7 @@ export const FacilityMapsLink = ({
 
   return (
     <Link
-      className="text-primary hover:underline inline-flex items-center gap-1"
+      className="text-primary hover:underline flex items-center gap-1 w-fit"
       href={getMapUrl(latitude, longitude)}
       target={target}
       rel="noreferrer"
