@@ -99,7 +99,9 @@ export const MedicationsTable = ({
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
                     <DosageInstructionList
                       instructions={instructions}
-                      renderItem={(di) => <FormattedDosage instruction={di} />}
+                      renderItem={(di) => (
+                        <FormattedDosage instruction={di} fallback="-" />
+                      )}
                     />
                   </TableCell>
                   <TableCell className="py-2 px-3 break-words whitespace-normal">
