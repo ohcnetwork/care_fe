@@ -173,7 +173,9 @@ export function DispenseHistory({
                   <TableCell className="text-gray-950">
                     <DosageInstructionList
                       instructions={instructions}
-                      renderItem={(di) => <FormattedDosage instruction={di} />}
+                      renderItem={(di) => (
+                        <FormattedDosage instruction={di} fallback="-" />
+                      )}
                     />
                   </TableCell>
                   <TableCell className="text-gray-950">
