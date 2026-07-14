@@ -66,6 +66,14 @@ interface EncounterQuestionProps {
   errors?: QuestionValidationError[];
 }
 
+const TERMINAL_ENCOUNTER_STATUSES: EncounterStatus[] = [
+  EncounterStatus.DISCHARGED,
+  EncounterStatus.COMPLETED,
+  EncounterStatus.CANCELLED,
+  EncounterStatus.DISCONTINUED,
+  EncounterStatus.ENTERED_IN_ERROR,
+];
+
 const ENCOUNTER_FIELDS: FieldDefinitions = {
   DISCHARGE_DISPOSITION: {
     key: "hospitalization.discharge_disposition",
@@ -192,27 +200,16 @@ export function EncounterQuestion({
   };
 
   useEffect(() => {
-    if (
-      encounter.status === EncounterStatus.DISCHARGED ||
-      encounter.status === EncounterStatus.COMPLETED ||
-      encounter.status === EncounterStatus.CANCELLED ||
-      encounter.status === EncounterStatus.DISCONTINUED ||
-      encounter.status === EncounterStatus.ENTERED_IN_ERROR
-    ) {
-      if (!encounter.period.end) {
-        handleUpdateEncounter({
-          period: {
-            ...encounter.period,
-            end: encounterData?.period?.end ?? new Date().toISOString(),
-          },
-        });
-      }
-    } else {
+    const isTerminal = TERMINAL_ENCOUNTER_STATUSES.includes(encounter.status);
+    const desiredEnd = isTerminal
+      ? (encounter.period.end ??
+        encounterData?.period?.end ??
+        new Date().toISOString())
+      : undefined;
+
+    if (encounter.period.end !== desiredEnd) {
       handleUpdateEncounter({
-        period: {
-          ...encounter.period,
-          end: undefined,
-        },
+        period: { ...encounter.period, end: desiredEnd },
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
