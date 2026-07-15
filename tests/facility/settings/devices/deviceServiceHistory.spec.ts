@@ -72,11 +72,6 @@ test.describe("Device Service History", () => {
 
     await expect(page.getByText(notes)).toBeVisible();
 
-    // Wait for the "Add Service Record" sheet to fully close before editing,
-    // otherwise its Service Date picker and Notes field overlap with the edit
-    // sheet's, causing a strict-mode violation.
-    await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
-
     await page
       .locator('[data-slot="card"]')
       .filter({ hasText: notes })
@@ -84,8 +79,15 @@ test.describe("Device Service History", () => {
       .first()
       .click();
 
+    // Scope all edit-sheet interactions to its dialog to avoid strict-mode
+    // violations when the Add sheet is still in the DOM during its close animation.
+    const editSheet = page.getByRole("dialog", {
+      name: "Edit Service Record",
+    });
+    await expect(editSheet).toBeVisible({ timeout: 10000 });
+
     const pastYear = new Date().getFullYear() - 1;
-    await page
+    await editSheet
       .locator('[data-slot="form-item"]')
       .filter({ hasText: "Service Date" })
       .locator('[data-slot="popover-trigger"]')
@@ -93,9 +95,11 @@ test.describe("Device Service History", () => {
     await page.locator(".rdp-years_dropdown").selectOption(pastYear.toString());
     await page.locator('[role="gridcell"]:not([data-outside])').first().click();
 
-    await page.getByRole("textbox", { name: "Notes *" }).fill(updatedNotes);
+    await editSheet
+      .getByRole("textbox", { name: "Notes *" })
+      .fill(updatedNotes);
 
-    await page.getByRole("button", { name: "Update" }).click();
+    await editSheet.getByRole("button", { name: "Update" }).click();
 
     const updatedCard = page
       .locator('[data-slot="card"]')
@@ -181,11 +185,6 @@ test.describe("Device Service History", () => {
 
     await expect(page.getByText(notes)).toBeVisible();
 
-    // Wait for the "Add Service Record" sheet to fully close before editing,
-    // otherwise its Service Date picker and Notes field overlap with the edit
-    // sheet's, causing a strict-mode violation.
-    await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
-
     await page
       .locator('[data-slot="card"]')
       .filter({ hasText: notes })
@@ -193,14 +192,21 @@ test.describe("Device Service History", () => {
       .first()
       .click();
 
-    const updateButton = page.getByRole("button", { name: "Update" });
+    // Scope all edit-sheet interactions to its dialog to avoid strict-mode
+    // violations when the Add sheet is still in the DOM during its close animation.
+    const editSheet = page.getByRole("dialog", {
+      name: "Edit Service Record",
+    });
+    await expect(editSheet).toBeVisible({ timeout: 10000 });
+
+    const updateButton = editSheet.getByRole("button", { name: "Update" });
     await expect(updateButton).toBeDisabled();
 
-    await page.getByRole("textbox", { name: "Notes *" }).fill(updatedNotes);
+    await editSheet.getByRole("textbox", { name: "Notes *" }).fill(updatedNotes);
 
     await expect(updateButton).toBeEnabled();
 
-    await page.getByRole("textbox", { name: "Notes *" }).fill(notes);
+    await editSheet.getByRole("textbox", { name: "Notes *" }).fill(notes);
 
     await expect(updateButton).toBeDisabled();
   });
