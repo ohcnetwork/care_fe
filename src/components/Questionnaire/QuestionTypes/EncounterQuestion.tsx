@@ -272,13 +272,17 @@ export function EncounterQuestion({
             </SelectTrigger>
             <SelectContent>
               {Object.values(EncounterStatus)
-                .filter((encounterStatus: EncounterStatus) =>
-                  encounter.status === EncounterStatus.DISCHARGED
-                    ? encounterStatus === EncounterStatus.DISCHARGED
-                    : !NON_SELECTABLE_ENCOUNTER_STATUSES.includes(
-                        encounterStatus,
-                      ),
-                )
+                .filter((encounterStatus: EncounterStatus) => {
+                  if (encounter.status === EncounterStatus.COMPLETED) {
+                    return encounterStatus === EncounterStatus.COMPLETED;
+                  }
+                  if (encounter.status === EncounterStatus.DISCHARGED) {
+                    return encounterStatus === EncounterStatus.DISCHARGED;
+                  }
+                  return !NON_SELECTABLE_ENCOUNTER_STATUSES.includes(
+                    encounterStatus,
+                  );
+                })
                 .map((encounterStatus: EncounterStatus) => (
                   <SelectItem key={encounterStatus} value={encounterStatus}>
                     {t(`encounter_status__${encounterStatus}`)}
