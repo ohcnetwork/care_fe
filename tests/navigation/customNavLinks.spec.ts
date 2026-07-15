@@ -29,6 +29,21 @@ const CUSTOM_NAV_LINKS: CustomNavLink[] = [
   },
 ];
 
+const UNSAFE_NAV_LINKS: CustomNavLink[] = [
+  {
+    name: "Unsafe Javascript",
+    url: "javascript:void(0)",
+    placement: ["all"],
+  },
+  {
+    name: "Unsafe Protocol Relative",
+    url: "//evil.example.com/phish",
+    placement: ["all"],
+  },
+];
+
+const CUSTOM_NAV_LINKS_FIXTURE = [...CUSTOM_NAV_LINKS, ...UNSAFE_NAV_LINKS];
+
 const isExternal = (url: string) => /^https?:\/\//i.test(url);
 const isInternal = (url: string) =>
   url.startsWith("/") && !url.startsWith("//");
@@ -74,7 +89,25 @@ test.describe("Custom sidebar nav links (env)", () => {
           }
         },
       });
-    }, CUSTOM_NAV_LINKS);
+    }, CUSTOM_NAV_LINKS_FIXTURE);
+  });
+
+  test("does not render unsafe custom nav link URLs", async ({ page }) => {
+    test.skip(!externalNewTab || !internal, "safe fixture links required");
+    await page.goto(`/facility/${getFacilityId()}/overview`);
+
+    const footer = page.locator(
+      '[data-sidebar="footer"] [data-sidebar="group"]',
+    );
+
+    await expect(customLink(page, externalNewTab!.url)).toBeVisible();
+    await expect(customLink(page, internal!.url)).toBeVisible();
+
+    for (const link of UNSAFE_NAV_LINKS) {
+      await expect(footer.locator(`a[href="${link.url}"]`)).toHaveCount(0);
+    }
+    await expect(footer.locator('a[href^="javascript:"]')).toHaveCount(0);
+    await expect(footer.locator('a[href^="//"]')).toHaveCount(0);
   });
 
   test("opens an external link in a new tab", async ({ page, context }) => {
