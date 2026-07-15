@@ -291,7 +291,7 @@
         {
           "question": "I-004",
           "operator": "equals",
-          "answer": 15
+          "answer": "15"
         }
       ]
     },
@@ -306,7 +306,7 @@
         {
           "question": "I-004",
           "operator": "equals",
-          "answer": 15
+          "answer": "15"
         }
       ]
     },
@@ -329,7 +329,7 @@
         {
           "question": "I-007",
           "operator": "not_equals",
-          "answer": 15
+          "answer": "15"
         }
       ]
     },
@@ -344,7 +344,7 @@
         {
           "question": "I-007",
           "operator": "not_equals",
-          "answer": 15
+          "answer": "15"
         }
       ]
     },
