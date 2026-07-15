@@ -41,7 +41,7 @@ export function FacilitySwitcher({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={(open) => !open && setSearchQuery("")}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"

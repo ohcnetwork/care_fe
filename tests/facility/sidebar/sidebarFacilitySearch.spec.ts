@@ -16,13 +16,6 @@ test.describe("Sidebar Facility Switcher - Search", () => {
 
     const searchInput = page.getByPlaceholder(/search/i);
 
-    // If more than 1 facility exists, search should be visible; otherwise skip
-    const initialFacilities = await page.getByRole("menuitem").all();
-    if (initialFacilities.length <= 1) {
-      test.skip();
-      return;
-    }
-
     const isSearchVisible = await searchInput.isVisible().catch(() => false);
     if (!isSearchVisible) {
       test.skip();

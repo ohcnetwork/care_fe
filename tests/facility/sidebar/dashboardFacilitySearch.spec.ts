@@ -8,13 +8,6 @@ test.describe("Dashboard - Facility Search", () => {
     await expect(page.getByRole("tab", { name: "Facilities" })).toBeVisible();
     const searchInput = page.getByPlaceholder(/Search Facilities/i);
 
-    // If more than 1 facility exists, search should be visible; otherwise skip
-    const initialFacilities = await page.getByRole("link").all();
-    if (initialFacilities.length <= 1) {
-      test.skip();
-      return;
-    }
-
     const isSearchVisible = await searchInput.isVisible().catch(() => false);
     if (!isSearchVisible) {
       test.skip();
