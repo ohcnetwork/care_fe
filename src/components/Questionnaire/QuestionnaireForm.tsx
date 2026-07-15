@@ -5,6 +5,8 @@ import { flushSync } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import careConfig from "@careConfig";
+
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -549,7 +551,7 @@ export function QuestionnaireForm({
 
   // Check if questionnaire is saveable as draft (no structured questions)
   const isDraftSaveable = useMemo(() => {
-    if (import.meta.env.REACT_ENABLE_QUESTIONNAIRE_DRAFT !== "true") {
+    if (!careConfig.enableQuestionnaireDraft) {
       return false;
     }
 

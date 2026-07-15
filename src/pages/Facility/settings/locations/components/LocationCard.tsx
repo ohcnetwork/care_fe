@@ -47,7 +47,7 @@ interface Props {
   setPage?: (page: number) => void;
 }
 
-export function LocationCard({
+export function SettingsLocationCard({
   location,
   onEdit,
   onView,
