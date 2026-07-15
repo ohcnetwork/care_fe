@@ -32,7 +32,7 @@ export function NumberQuestion({
     const newValues = [...questionnaireResponse.values];
     newValues[index] = {
       type: "number",
-      value: emptyValue ? undefined : numericValue,
+      value: emptyValue ? "" : numericValue,
     };
 
     updateQuestionnaireResponseCB(

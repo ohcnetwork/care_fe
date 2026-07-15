@@ -69,6 +69,12 @@ async function fillOtherIntegerSources(page: Page, excludeLabel: string) {
 }
 
 test.describe("Enable When — Integer Operators", () => {
+  // These tests submit to the same shared setup encounter and assert that
+  // hidden labels/values are absent from the shared overview. Playwright runs
+  // with fullyParallel: true, so run this block serially to avoid tests
+  // polluting each other's overview results.
+  test.describe.configure({ mode: "serial" });
+
   test.use({ storageState: "tests/.auth/user.json" });
 
   test.beforeEach(async ({ page }) => {
