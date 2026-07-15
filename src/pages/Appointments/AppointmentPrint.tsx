@@ -110,7 +110,10 @@ export default function AppointmentPrint(props: Props) {
   const patient = appointment?.patient;
   const token = appointment?.token;
 
-  const patientExtensionData = usePatientExtensionData(patient?.extensions);
+  const patientExtensionData = usePatientExtensionData(
+    patient?.extensions,
+    "appointment_print",
+  );
 
   if (isLoading || !appointment || !facility) {
     return (
@@ -456,7 +459,12 @@ export default function AppointmentPrint(props: Props) {
             rightContent={format(new Date(), "PP 'at' p")}
             leftContent={
               <>
-                <span className="font-semibold">{t("last_updated_by")}:</span>{" "}
+                <span className="font-semibold">{t("created_by")}:</span>{" "}
+                {formatName(appointment.created_by)}
+                <span className="text-gray-400"> | </span>
+                <span className="font-semibold">
+                  {t("last_updated_by")}:
+                </span>{" "}
                 {formatName(appointment.updated_by)}
               </>
             }

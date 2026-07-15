@@ -52,8 +52,7 @@ const TokenCard = ({
   const patient = token?.patient ?? appointment?.patient;
   // Get patient with identifiers (appointment.patient has more data)
   const patientWithIdentifiers = appointment?.patient as
-    | PatientRead
-    | undefined;
+    PatientRead | undefined;
   const patientTags =
     patientWithIdentifiers?.instance_tags ?? patient?.instance_tags;
 
@@ -61,6 +60,7 @@ const TokenCard = ({
 
   const patientExtensionData = usePatientExtensionData(
     appointment?.patient?.extensions,
+    "appointment_print",
   );
 
   return (

@@ -96,7 +96,7 @@ export function PrintAllQuestionnaireResponses({
             </h2>
           </div>
 
-          <EncounterDetails
+          <PrintableEncounterDetails
             encounter={encounter}
             patient={encounter?.patient ?? patient}
           />
@@ -113,7 +113,7 @@ export function PrintAllQuestionnaireResponses({
           {questionnaireResponses?.results?.map(
             (item: QuestionnaireResponse) => (
               <div key={item.id} className="w-full">
-                <ResponseCard key={item.id} item={item} />
+                <PrintableResponseCard key={item.id} item={item} />
               </div>
             ),
           )}
@@ -150,7 +150,7 @@ interface EncounterDetailsProps {
   patient?: PatientRead;
 }
 
-export function EncounterDetails({
+export function PrintableEncounterDetails({
   encounter,
   patient,
 }: EncounterDetailsProps) {
@@ -279,17 +279,11 @@ function QuestionGroup({
   }[];
   level?: number;
 }) {
-  const hasResponses = responses.some((r) =>
-    group.questions?.some((q) => q.id === r.question_id),
-  );
-
-  if (!hasResponses) return null;
-
   return (
     <div className={cn("space-y-2", group.styling_metadata?.classes)}>
-      {!!level && group.text && (
+      {group.text && (
         <div className="flex flex-col space-y-1">
-          <h4 className="text-sm font-medium text-secondary-700">
+          <h4 className="text-lg font-semibold text-black">
             {group.text}
             {group.code && (
               <span className="ml-1 text-xs text-gray-500">
@@ -297,7 +291,7 @@ function QuestionGroup({
               </span>
             )}
           </h4>
-          {level === 0 && <Separator className="my-2" />}
+          {level === 0 && <Separator />}
         </div>
       )}
       <div
@@ -337,7 +331,7 @@ interface ResponseCardProps {
   item?: QuestionnaireResponse;
 }
 
-export function ResponseCard({ item }: ResponseCardProps) {
+export function PrintableResponseCard({ item }: ResponseCardProps) {
   const { t } = useTranslation();
 
   if (!item) return null;
@@ -375,7 +369,9 @@ export function ResponseCard({ item }: ResponseCardProps) {
               const response = item.responses.find(
                 (r) => r.question_id === question.id,
               );
-              if (!response) return null;
+              if (!response) {
+                return null;
+              }
 
               return (
                 <QuestionResponseValue

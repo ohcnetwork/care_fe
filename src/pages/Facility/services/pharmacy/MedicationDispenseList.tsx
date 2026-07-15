@@ -34,8 +34,8 @@ import {
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import {
-  formatDoseRange,
   formatDuration,
   formatFrequency,
   formatTotalUnits,
@@ -52,7 +52,6 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 
-import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -145,13 +144,9 @@ function MedicationTable({
                 <TableCell className="text-gray-950 font-medium">
                   <DosageInstructionList
                     instructions={instructions}
-                    renderItem={(di) => {
-                      const dosage = di.dose_and_rate?.dose_quantity;
-                      const text = dosage
-                        ? `${round(dosage.value)} ${dosage.unit.display}`
-                        : formatDoseRange(di.dose_and_rate?.dose_range);
-                      return text || "-";
-                    }}
+                    renderItem={(di) => (
+                      <FormattedDosage instruction={di} fallback="-" />
+                    )}
                   />
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
@@ -306,9 +301,7 @@ export default function MedicationDispenseList({
   };
   for (const med of allMedications) {
     const key = (med.dispense_status || "incomplete") as
-      | "incomplete"
-      | "partial"
-      | "complete";
+      "incomplete" | "partial" | "complete";
     countsInit[key] += 1;
   }
   const dispenseCounts = countsInit;
@@ -380,8 +373,8 @@ export default function MedicationDispenseList({
                 onValueChange={(value) =>
                   setDispenseFilter(
                     (value as
-                      | "all"
-                      | keyof typeof MedicationRequestDispenseStatus) ?? "all",
+                      "all" | keyof typeof MedicationRequestDispenseStatus) ??
+                      "all",
                   )
                 }
                 options={["all", "incomplete", "partial", "complete"]}

@@ -130,6 +130,7 @@ export default function ServiceRequestShow({
   });
 
   const { mutate: executeBatch } = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -677,6 +678,7 @@ export default function ServiceRequestShow({
                     completeServiceRequest({
                       status: Status.completed,
                       note: completionNote.trim() || null,
+                      locations: request.locations.map((loc) => loc.id),
                     })
                   }
                   onCancel={() => setIsCompleteDialogOpen(false)}
@@ -705,6 +707,7 @@ export default function ServiceRequestShow({
                     completeServiceRequest({
                       status: Status.completed,
                       note: completionNote.trim() || null,
+                      locations: request.locations.map((loc) => loc.id),
                     })
                   }
                   onCancel={() => setIsCompleteDialogOpen(false)}

@@ -70,8 +70,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
-    status: z.nativeEnum(ResourceRequestStatus),
-    category: z.nativeEnum(ResourceRequestCategory),
+    status: z.enum(ResourceRequestStatus),
+    category: z.enum(ResourceRequestCategory),
     assigned_facility: z
       .object({
         id: z.string(),
