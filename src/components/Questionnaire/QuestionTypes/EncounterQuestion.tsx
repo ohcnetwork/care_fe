@@ -66,6 +66,12 @@ interface EncounterQuestionProps {
   errors?: QuestionValidationError[];
 }
 
+const NON_SELECTABLE_ENCOUNTER_STATUSES: EncounterStatus[] = [
+  EncounterStatus.DISCHARGED,
+  EncounterStatus.UNKNOWN,
+  EncounterStatus.COMPLETED,
+];
+
 const ENCOUNTER_FIELDS: FieldDefinitions = {
   DISCHARGE_DISPOSITION: {
     key: "hospitalization.discharge_disposition",
@@ -269,8 +275,9 @@ export function EncounterQuestion({
                 .filter((encounterStatus: EncounterStatus) =>
                   encounter.status === EncounterStatus.DISCHARGED
                     ? encounterStatus === EncounterStatus.DISCHARGED
-                    : encounterStatus !== EncounterStatus.DISCHARGED &&
-                      encounterStatus !== EncounterStatus.UNKNOWN,
+                    : !NON_SELECTABLE_ENCOUNTER_STATUSES.includes(
+                        encounterStatus,
+                      ),
                 )
                 .map((encounterStatus: EncounterStatus) => (
                   <SelectItem key={encounterStatus} value={encounterStatus}>
