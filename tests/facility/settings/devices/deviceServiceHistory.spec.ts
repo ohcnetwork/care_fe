@@ -72,6 +72,11 @@ test.describe("Device Service History", () => {
 
     await expect(page.getByText(notes)).toBeVisible();
 
+    // Wait for the "Add Service Record" sheet to fully close before editing,
+    // otherwise its Service Date picker and Notes field overlap with the edit
+    // sheet's, causing a strict-mode violation.
+    await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
+
     await page
       .locator('[data-slot="card"]')
       .filter({ hasText: notes })
@@ -175,6 +180,11 @@ test.describe("Device Service History", () => {
     await page.getByRole("button", { name: "Save" }).click();
 
     await expect(page.getByText(notes)).toBeVisible();
+
+    // Wait for the "Add Service Record" sheet to fully close before editing,
+    // otherwise its Service Date picker and Notes field overlap with the edit
+    // sheet's, causing a strict-mode violation.
+    await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
 
     await page
       .locator('[data-slot="card"]')
