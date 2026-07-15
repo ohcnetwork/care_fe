@@ -25,11 +25,12 @@ const DATE_CELL_FORMAT = "dd/MM/yy, hh:mm a";
 const getDateQueryParam = (daysAgo: number) =>
   format(subDays(new Date(), daysAgo), "yyyy-MM-dd");
 
-const getDateRangeLabel = (after: string, before: string) =>
-  `${format(parse(after, "yyyy-MM-dd", new Date()), "d MMM")} - ${format(
-    parse(before, "yyyy-MM-dd", new Date()),
-    "d MMM",
-  )}`;
+const getDateRangeLabel = (after: string, before: string) => {
+  const from = parse(after, "yyyy-MM-dd", new Date());
+  const to = parse(before, "yyyy-MM-dd", new Date());
+  const fmt = from.getFullYear() !== to.getFullYear() ? "d MMM yy" : "d MMM";
+  return `${format(from, fmt)} - ${format(to, fmt)}`;
+};
 
 const invoiceRows = (page: Page) =>
   page.locator('[data-slot="table-body"] [data-slot="table-row"]');
