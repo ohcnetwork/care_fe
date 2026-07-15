@@ -99,7 +99,7 @@ export function LocationNavigation({
               <Button
                 variant="outline"
                 size="sm"
-                className="text-gray-950 border-gray-400 font-semibold"
+                className="text-gray-950 font-semibold"
                 onClick={onClearSelection}
               >
                 <XIcon className="size-4" />
