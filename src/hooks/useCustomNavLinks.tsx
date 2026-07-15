@@ -31,9 +31,6 @@ function parseLinks(value: unknown): PluginNavLink[] {
   });
 }
 
-/** Static at build time; validated once when the module loads. */
-const envCustomNavLinks = parseLinks(careConfig.customNavLinks);
-
 function matchesScope(placement: NavScope[], scope: NavScope): boolean {
   return placement.includes(scope) || placement.includes("all");
 }
@@ -67,7 +64,7 @@ export function useCustomNavLinks(scope: NavScope): NavigationLink[] {
   const careApps = useCareApps();
 
   const links = [
-    ...envCustomNavLinks,
+    ...parseLinks(careConfig.customNavLinks),
     ...parseLinks(
       careApps.flatMap((app) =>
         !app.isLoading && app.customNavItems ? app.customNavItems : [],

@@ -3,38 +3,53 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-const raw = process.env.REACT_CUSTOM_NAV_LINKS;
-
-type CustomNavLink = {
+interface CustomNavLink {
   name: string;
   url: string;
   openInNewTab?: boolean;
-  placement?: string[];
-};
+  placement: string[];
+}
 
-const links: CustomNavLink[] = raw ? JSON.parse(raw) : [];
+const CUSTOM_NAV_LINKS: CustomNavLink[] = [
+  {
+    name: "Documentation",
+    url: "https://docs.ohc.network",
+    placement: ["all"],
+  },
+  {
+    name: "Questionnaire",
+    url: "/admin/questionnaire",
+    placement: ["all"],
+  },
+  {
+    name: "Landing",
+    url: "https://ohc.network",
+    openInNewTab: false,
+    placement: ["admin", "organization"],
+  },
+];
 
 const isExternal = (url: string) => /^https?:\/\//i.test(url);
 const isInternal = (url: string) =>
   url.startsWith("/") && !url.startsWith("//");
 const showsOn = (link: CustomNavLink, scope: string) =>
-  (link.placement ?? ["all"]).some((p) => p === scope || p === "all");
+  link.placement.some((p) => p === scope || p === "all");
 // Mirrors the app: external URLs default to new-tab, internal to same-tab,
 // unless openInNewTab overrides it.
 const opensInNewTab = (link: CustomNavLink) =>
   link.openInNewTab ?? isExternal(link.url);
 
 // Links visible in the facility sidebar (placement includes "facility" or "all").
-const externalNewTab = links.find(
+const externalNewTab = CUSTOM_NAV_LINKS.find(
   (l) =>
     isExternal(l.url) && l.openInNewTab !== false && showsOn(l, "facility"),
 );
 // A same-tab internal link (internal URLs are same-tab unless openInNewTab: true).
-const internal = links.find(
+const internal = CUSTOM_NAV_LINKS.find(
   (l) => isInternal(l.url) && !opensInNewTab(l) && showsOn(l, "facility"),
 );
 // An external link explicitly forced to open in the same tab (openInNewTab: false).
-const externalSameTab = links.find(
+const externalSameTab = CUSTOM_NAV_LINKS.find(
   (l) => isExternal(l.url) && l.openInNewTab === false,
 );
 
@@ -44,8 +59,22 @@ const customLink = (page: Page, url: string) =>
     .locator(`a[href="${url}"]`);
 
 test.describe("Custom sidebar nav links (env)", () => {
-  test.beforeEach(() => {
-    test.skip(!raw, "REACT_CUSTOM_NAV_LINKS was not set for this build");
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript((fixture) => {
+      let coreEnv: Record<string, unknown> | undefined;
+      Object.defineProperty(window, "__CORE_ENV__", {
+        configurable: true,
+        get() {
+          return coreEnv;
+        },
+        set(value) {
+          coreEnv = value;
+          if (value && typeof value === "object") {
+            value.customNavLinks = fixture;
+          }
+        },
+      });
+    }, CUSTOM_NAV_LINKS);
   });
 
   test("opens an external link in a new tab", async ({ page, context }) => {
