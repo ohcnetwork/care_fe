@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -32,8 +32,10 @@ import {
 } from "@/types/questionnaire/batch";
 import type {
   QuestionnaireResponse,
+  ResponseContext,
   ResponseValue,
 } from "@/types/questionnaire/form";
+import { CONTEXT_STRUCTURED_TYPES } from "@/types/questionnaire/form";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 import {
   type Question,
@@ -48,6 +50,10 @@ import BackButton from "@/components/Common/BackButton";
 import { validateEncounterQuestion } from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { ArrowLeft } from "lucide-react";
+import {
+  DraftContextChange,
+  DraftContextChangesScreen,
+} from "./DraftContextChangesScreen";
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
@@ -56,6 +62,11 @@ import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationS
 import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
+import {
+  RecordLike,
+  diffResponseContext,
+  mergeRecoveredValues,
+} from "./structured/contextMatch";
 import { getStructuredRequests } from "./structured/handlers";
 
 import queryClient from "@/Utils/request/queryClient";
@@ -388,6 +399,20 @@ export function QuestionnaireForm({
   const [isInitialized, setIsInitialized] = useState(false);
   const [draftMismatchError, setDraftMismatchError] = useState(false);
 
+  // Draft-recovery context reconciliation (structured questions only).
+  const [reconcile, setReconcile] = useState<
+    | { phase: "done" }
+    | { phase: "reconciling" }
+    | { phase: "changed"; changes: DraftContextChange[] }
+  >({ phase: "done" });
+  const [reconcileTimedOut, setReconcileTimedOut] = useState(false);
+  const draftContextSnapshot = useRef<
+    Record<
+      string,
+      { context: ResponseContext[] | undefined; draftRecords: RecordLike[] }
+    >
+  >({});
+
   const {
     data: questionnaireData,
     isLoading: isQuestionnaireLoading,
@@ -549,33 +574,13 @@ export function QuestionnaireForm({
 
   const isPending = isSubmitPending || isDraftPending;
 
-  // Check if questionnaire is saveable as draft (no structured questions)
+  // Single-questionnaire drafts (structured questions supported via context
+  // reconciliation on recovery).
   const isDraftSaveable = useMemo(() => {
     if (!careConfig.enableQuestionnaireDraft) {
       return false;
     }
-
-    if (!questionnaireSlug || questionnaireForms.length > 1) {
-      return false;
-    }
-
-    const findStructuredQuestions = (questions: Question[]): boolean => {
-      for (const q of questions) {
-        if (q.type === "structured") {
-          return true;
-        }
-        if (q.type === "group" && q.questions) {
-          if (findStructuredQuestions(q.questions)) {
-            return true;
-          }
-        }
-      }
-      return false;
-    };
-
-    return !questionnaireForms.some((form) =>
-      findStructuredQuestions(form.questionnaire.questions),
-    );
+    return !!questionnaireSlug && questionnaireForms.length <= 1;
   }, [questionnaireSlug, questionnaireForms]);
 
   // TODO: Use useBlocker hook after switching to tanstack router
@@ -602,16 +607,39 @@ export function QuestionnaireForm({
             return;
           }
 
-          // Restore the draft state
+          // Restore the draft state. For context-bearing structured questions,
+          // stash the draft's saved context + records and strip context, so the
+          // components repopulate it from fresh fetches for reconciliation.
+          const draftResponses =
+            draftQuestionnaireResponses?.responses ||
+            initializeResponses(questionnaire.questions);
+
+          const snapshot: typeof draftContextSnapshot.current = {};
+          const restoredResponses = draftResponses.map((r) => {
+            if (
+              !r.structured_type ||
+              !(CONTEXT_STRUCTURED_TYPES as readonly string[]).includes(
+                r.structured_type,
+              )
+            ) {
+              return r;
+            }
+            snapshot[r.question_id] = {
+              context: r.context,
+              draftRecords: (r.values?.[0]?.value as RecordLike[]) ?? [],
+            };
+            return { ...r, context: undefined };
+          });
+          draftContextSnapshot.current = snapshot;
+
           setQuestionnaireForms([
-            {
-              questionnaire,
-              responses:
-                draftQuestionnaireResponses?.responses ||
-                initializeResponses(questionnaire.questions),
-              errors: [],
-            },
+            { questionnaire, responses: restoredResponses, errors: [] },
           ]);
+          setReconcile(
+            Object.keys(snapshot).length
+              ? { phase: "reconciling" }
+              : { phase: "done" },
+          );
           setIsInitialized(true);
         }
       } else if (questionnaire) {
@@ -634,6 +662,76 @@ export function QuestionnaireForm({
     draftData,
     isDraftFetching,
   ]);
+
+  // Bounded wait: if a structured fetch never resolves, stop waiting.
+  useEffect(() => {
+    if (reconcile.phase !== "reconciling") return;
+    setReconcileTimedOut(false);
+    const timer = setTimeout(() => setReconcileTimedOut(true), 8000);
+    return () => clearTimeout(timer);
+  }, [reconcile.phase]);
+
+  // Once fresh context is populated, reconcile the draft against it: preserve
+  // the draft's edits/new rows, reflect server add/remove, and warn only when
+  // the server's records actually drifted from the draft's snapshot.
+  useEffect(() => {
+    if (reconcile.phase !== "reconciling") return;
+    const snapshot = draftContextSnapshot.current;
+    const form = questionnaireForms[0];
+    if (!form) return;
+
+    const applicableIds = Object.keys(snapshot);
+    const allPopulated = applicableIds.every(
+      (qid) =>
+        form.responses.find((x) => x.question_id === qid)?.context !==
+        undefined,
+    );
+    if (!allPopulated && !reconcileTimedOut) return;
+
+    const changes: DraftContextChange[] = [];
+    const responses = form.responses.map((r) => {
+      const snap = snapshot[r.question_id];
+      // Skip if not applicable or fresh context never arrived (keep draft as-is).
+      if (!snap || r.context === undefined) return r;
+
+      const freshContext = r.context;
+      const freshRecords = (r.values?.[0]?.value as RecordLike[]) ?? [];
+      const freshContextIds = new Set(freshContext.map((c) => c.id));
+      const merged = mergeRecoveredValues(
+        snap.draftRecords,
+        freshRecords,
+        freshContextIds,
+      );
+
+      // Warn only on real drift — editing a value changes the value, not the
+      // context, so an unedited server record produces no warning.
+      const diff = diffResponseContext(snap.context, freshContext);
+      if (!diff.matches) {
+        const question = findQuestionById(
+          form.questionnaire.questions,
+          r.question_id,
+        );
+        changes.push({
+          questionId: r.question_id,
+          title: question?.text ?? r.structured_type ?? r.question_id,
+          added: diff.added as RecordLike[],
+          removed: diff.removed as RecordLike[],
+          changed: diff.changed.map((c) => c.fresh) as RecordLike[],
+        });
+      }
+
+      const nextValue = {
+        type: r.structured_type,
+        value: merged,
+      } as unknown as ResponseValue;
+      return { ...r, values: [nextValue] };
+    });
+
+    setQuestionnaireForms([{ ...form, responses }]);
+    setReconcile(
+      changes.length ? { phase: "changed", changes } : { phase: "done" },
+    );
+  }, [reconcile.phase, questionnaireForms, reconcileTimedOut]);
 
   // Show loading while fetching questionnaire or draft
   if (isQuestionnaireLoading || (continueDraftId && isDraftFetching)) {
@@ -963,6 +1061,20 @@ export function QuestionnaireForm({
 
   return (
     <div className="flex gap-4">
+      {/* Draft recovery: fixed overlay while structured context repopulates,
+          keeping the form mounted underneath so its components fetch. */}
+      {reconcile.phase !== "done" && (
+        <div className="fixed inset-0 z-50 overflow-auto bg-white">
+          {reconcile.phase === "reconciling" ? (
+            <Loading />
+          ) : (
+            <DraftContextChangesScreen
+              changes={reconcile.changes}
+              onContinue={() => setReconcile({ phase: "done" })}
+            />
+          )}
+        </div>
+      )}
       {/* Left Navigation */}
       <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
         <BackButton className="w-full">
@@ -1075,6 +1187,27 @@ export function QuestionnaireForm({
                 if (!isDirty) {
                   setIsDirty(true);
                 }
+              }}
+              setResponseContext={(
+                questionId: string,
+                context: ResponseContext[],
+              ) => {
+                // Derived-from-fetch snapshot: preserve values/note, and don't
+                // mark the form dirty (would trip the unsaved-changes prompt).
+                setQuestionnaireForms((existingForms) =>
+                  existingForms.map((formItem) =>
+                    formItem.questionnaire.id === form.questionnaire.id
+                      ? {
+                          ...formItem,
+                          responses: formItem.responses.map((r) =>
+                            r.question_id === questionId
+                              ? { ...r, context }
+                              : r,
+                          ),
+                        }
+                      : formItem,
+                  ),
+                );
               }}
               disabled={isPending}
               activeGroupId={activeGroupId}

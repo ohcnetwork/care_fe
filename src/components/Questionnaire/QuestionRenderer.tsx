@@ -7,6 +7,7 @@ import { StructuredQuestionType } from "@/components/Questionnaire/data/Structur
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
+  ResponseContext,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -24,6 +25,7 @@ interface QuestionRendererProps {
   questions: Question[];
   responses: QuestionnaireResponse[];
   onResponseChange: (values: ResponseValue[], questionId: string) => void;
+  setResponseContext: (questionId: string, context: ResponseContext[]) => void;
   errors: QuestionValidationError[];
   clearError: (questionId: string) => void;
   disabled?: boolean;
@@ -39,6 +41,7 @@ export function QuestionRenderer({
   questions,
   responses,
   onResponseChange,
+  setResponseContext,
   errors,
   clearError,
   disabled,
@@ -82,6 +85,7 @@ export function QuestionRenderer({
               encounterId={encounterId}
               questionnaireResponses={responses}
               updateQuestionnaireResponseCB={onResponseChange}
+              setResponseContext={setResponseContext}
               errors={errors}
               clearError={clearError}
               disabled={disabled || isPreview}
