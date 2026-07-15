@@ -31,6 +31,14 @@ const NON_TRIGGER_GTE = "5"; // < 15
 const TRIGGER_LTE = "15"; // ≤ 15 (boundary)
 const NON_TRIGGER_LTE = "20"; // > 15
 
+/**
+ * Represents a single integer source field with its label and test value.
+ */
+interface IntegerSource {
+  label: string;
+  value: string | undefined;
+}
+
 // Safe values for filling other integer source fields so required dependents don't block submit.
 // Each safe value must NOT trigger the respective operator for that source.
 const SAFE = {
@@ -49,7 +57,7 @@ const SAFE = {
  * Skips the source being actively tested (identified by `excludeLabel`).
  */
 async function fillOtherIntegerSources(page: Page, excludeLabel: string) {
-  const sources: { label: string; value: string | undefined }[] = [
+  const sources: IntegerSource[] = [
     { label: "Patient Count", value: SAFE.exists },
     { label: "Exact Match Count", value: SAFE.equals },
     { label: "Non-Standard Count", value: SAFE.notEquals },

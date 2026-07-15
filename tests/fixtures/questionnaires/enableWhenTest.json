@@ -291,22 +291,22 @@
         {
           "question": "I-004",
           "operator": "equals",
-          "answer": "15"
+          "answer": 15
         }
       ]
     },
     {
-      "id": "e1000001-0001-4000-8000-000000000006",
-      "link_id": "I-006",
-      "text": "Match Count Notes",
+      "id": "e1000001-0001-4000-8000-000000000005",
+      "link_id": "I-005",
+      "text": "Match Count Diagnosis",
       "type": "string",
-      "required": false,
+      "required": true,
       "questions": [],
       "enable_when": [
         {
           "question": "I-004",
           "operator": "equals",
-          "answer": "15"
+          "answer": 15
         }
       ]
     },
@@ -329,22 +329,22 @@
         {
           "question": "I-007",
           "operator": "not_equals",
-          "answer": "15"
+          "answer": 15
         }
       ]
     },
     {
-      "id": "e1000001-0001-4000-8000-000000000009",
-      "link_id": "I-009",
-      "text": "Count Deviation Notes",
+      "id": "e1000001-0001-4000-8000-000000000008",
+      "link_id": "I-008",
+      "text": "Count Deviation Reason",
       "type": "string",
-      "required": false,
+      "required": true,
       "questions": [],
       "enable_when": [
         {
           "question": "I-007",
           "operator": "not_equals",
-          "answer": "15"
+          "answer": 15
         }
       ]
     },
@@ -367,7 +367,7 @@
         {
           "question": "I-010",
           "operator": "greater",
-          "answer": "15"
+          "answer": 15
         }
       ]
     },
@@ -382,7 +382,7 @@
         {
           "question": "I-010",
           "operator": "greater",
-          "answer": "15"
+          "answer": 15
         }
       ]
     },
@@ -405,7 +405,7 @@
         {
           "question": "I-013",
           "operator": "less",
-          "answer": "15"
+          "answer": 15
         }
       ]
     },
@@ -420,7 +420,7 @@
         {
           "question": "I-013",
           "operator": "less",
-          "answer": "15"
+          "answer": 15
         }
       ]
     },
@@ -443,7 +443,7 @@
         {
           "question": "I-016",
           "operator": "greater_or_equals",
-          "answer": "15"
+          "answer": 15
         }
       ]
     },
@@ -458,7 +458,7 @@
         {
           "question": "I-016",
           "operator": "greater_or_equals",
-          "answer": "15"
+          "answer": 15
         }
       ]
     },
@@ -481,7 +481,7 @@
         {
           "question": "I-019",
           "operator": "less_or_equals",
-          "answer": "15"
+          "answer": 15
         }
       ]
     },
@@ -496,7 +496,7 @@
         {
           "question": "I-019",
           "operator": "less_or_equals",
-          "answer": "15"
+          "answer": 15
         }
       ]
     }
