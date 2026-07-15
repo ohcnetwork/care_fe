@@ -83,7 +83,7 @@ export default function PatientLogin({
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isValidPhoneNumber(phoneNumber)) {
       setError(t("phone_number_validation_error"));
