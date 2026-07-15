@@ -139,7 +139,7 @@ const IndividualMedicationRow: React.FC<{
                 .filter(Boolean)
                 .join(", ");
               return (
-                <div>
+                <div className="text-wrap break-all">
                   {(dosage || instructionText) && (
                     <div>
                       {dosage && (
@@ -170,7 +170,7 @@ const IndividualMedicationRow: React.FC<{
             {t(medication.status)}
           </Badge>
         </div>
-        <div className="text-xs text-gray-500 mt-0.5">
+        <div className="text-xs text-gray-500 mt-0.5 text-wrap break-all">
           {t("added_on")}:{" "}
           {format(
             new Date(medication.authored_on || medication.created_date),
@@ -402,7 +402,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                     const freq = formatFrequency(di);
                     return (
                       <div>
-                        <div>
+                        <div className="text-wrap break-all">
                           <FormattedDosage instruction={di} />
                           {freq && <span className="text-gray-400"> · </span>}
                           {freq}
@@ -445,7 +445,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
 
               {/* Last administered */}
               {group.lastAdministeredTime && (
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="text-xs text-gray-500 mt-1 text-wrap break-all">
                   {t("last_administered")}:{" "}
                   {formatDistanceToNow(new Date(group.lastAdministeredTime))}{" "}
                   {t("ago")}
