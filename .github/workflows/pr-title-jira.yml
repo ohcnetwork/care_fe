@@ -18,7 +18,7 @@ jobs:
         with:
           script: |
             // Configure JIRA project keys here
-            const jiraProjectKeys = ['ENG'];
+            const jiraProjectKeys = ['ENG', 'QA'];
 
             const prTitle = context.payload.pull_request.title;
 
