@@ -53,18 +53,19 @@ export function isQuestionEnabled(
       return value;
     }
 
-    const normalizedAnswers = dependentValues.map((v) =>
-      normalizeValue(v.value),
-    );
+    const normalizedAnswers = dependentValues
+      .map((v) => normalizeValue(v.value))
+      .filter((v) => v !== "" && v !== null && v !== undefined);
+
+    // If no non-empty answers remain, the source is effectively unanswered
+    // (e.g. a number field cleared to ""), so every operator evaluates to
+    // false and the dependent stays hidden. This prevents empty numeric
+    // values from being coerced to 0 in the ordering comparisons below.
+    if (normalizedAnswers.length === 0) return false;
 
     switch (enableWhen.operator) {
       case "exists":
-        return (
-          normalizedAnswers.length > 0 &&
-          normalizedAnswers.some(
-            (v) => v !== "" && v !== null && v !== undefined,
-          )
-        );
+        return normalizedAnswers.length > 0;
 
       case "equals":
         return normalizedAnswers.includes(enableWhen.answer);

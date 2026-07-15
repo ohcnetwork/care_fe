@@ -775,6 +775,10 @@ test.describe("Enable When — Integer Operators", () => {
 
       await test.step("Change source to non-triggering value — dependents hide", async () => {
         await clearIntegerField(page, "Low Count");
+        // A cleared (empty) numeric source must hide dependents. An empty value
+        // must not be coerced to 0 and satisfy the `less` comparison (0 < 15).
+        await checkVisibility(page, "Low Count Alert Action", false);
+        await checkVisibility(page, "Low Count Alert Notes", false);
         await fillIntegerField(page, "Low Count", NON_TRIGGER_LESS);
         await checkVisibility(page, "Low Count Alert Action", false);
         await checkVisibility(page, "Low Count Alert Notes", false);
@@ -1049,6 +1053,11 @@ test.describe("Enable When — Integer Operators", () => {
 
       await test.step("Change source to non-triggering value — dependents hide", async () => {
         await clearIntegerField(page, "Threshold Count LTE");
+        // A cleared (empty) numeric source must hide dependents. An empty value
+        // must not be coerced to 0 and satisfy the `less_or_equals` comparison
+        // (0 <= 15).
+        await checkVisibility(page, "LTE Count Alert Action", false);
+        await checkVisibility(page, "LTE Count Alert Notes", false);
         await fillIntegerField(page, "Threshold Count LTE", NON_TRIGGER_LTE);
         await checkVisibility(page, "LTE Count Alert Action", false);
         await checkVisibility(page, "LTE Count Alert Notes", false);
