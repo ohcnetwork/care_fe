@@ -296,11 +296,11 @@
       ]
     },
     {
-      "id": "e1000001-0001-4000-8000-000000000005",
-      "link_id": "I-005",
-      "text": "Match Count Diagnosis",
+      "id": "e1000001-0001-4000-8000-000000000006",
+      "link_id": "I-006",
+      "text": "Match Count Notes",
       "type": "string",
-      "required": true,
+      "required": false,
       "questions": [],
       "enable_when": [
         {
@@ -334,11 +334,11 @@
       ]
     },
     {
-      "id": "e1000001-0001-4000-8000-000000000008",
-      "link_id": "I-008",
-      "text": "Count Deviation Reason",
+      "id": "e1000001-0001-4000-8000-000000000009",
+      "link_id": "I-009",
+      "text": "Count Deviation Notes",
       "type": "string",
-      "required": true,
+      "required": false,
       "questions": [],
       "enable_when": [
         {
