@@ -62,24 +62,20 @@ export function DiscountMonetaryComponentForm({
         .object({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
-          // null means the OTHER value type is active (set by handleValueTypeChange).
-          // An empty string means the user cleared the active field — z.string().min(1)
-          // then fires the friendly "field_required" message at the field level.
-          // Using z.union avoids the z.preprocess + .nullable() pitfall where
-          // ZodNullable short-circuits before the preprocess function runs.
           factor: z.union([
             z.null(),
-            z.string()
+            z
+              .string()
               .min(1, { message: t("field_required") })
               .pipe(zodDecimal({ min: 0, max: 100 })),
           ]),
           amount: z.union([
             z.null(),
-            z.string()
+            z
+              .string()
               .min(1, { message: t("field_required") })
               .pipe(zodDecimal({ min: 0 })),
           ]),
-          // trim() strips whitespace before the min(1) check.
           title: z
             .string()
             .trim()
@@ -120,8 +116,10 @@ export function DiscountMonetaryComponentForm({
     defaultValues: {
       monetary_component_type: MonetaryComponentType.discount,
       code: defaultValues?.code,
-      factor: defaultValues?.factor != null ? round(defaultValues.factor) : null,
-      amount: defaultValues?.amount != null ? round(defaultValues.amount) : null,
+      factor:
+        defaultValues?.factor != null ? round(defaultValues.factor) : null,
+      amount:
+        defaultValues?.amount != null ? round(defaultValues.amount) : null,
       title: defaultValues?.title || "",
       conditions:
         defaultValues?.conditions?.map((condition) => ({
@@ -332,8 +330,6 @@ export function DiscountMonetaryComponentForm({
         </Card>
 
         <div className="pt-2">
-          {/* Fix #14040: isValid prevents submitting an invalid form;
-              isDirty prevents re-saving unchanged values. */}
           <Button
             type="submit"
             className="w-full"
