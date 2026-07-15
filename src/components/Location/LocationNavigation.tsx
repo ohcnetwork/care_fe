@@ -8,10 +8,8 @@ import { Switch } from "@/components/ui/switch";
 
 import { LocationRead } from "@/types/location/location";
 
-import { LocationAssociationRead } from "@/types/location/association";
 import { BedListing } from "./BedListing";
 import { BedStatusLegend } from "./BedStatusLegend";
-import { LinkedBedListing } from "./LinkedBedListing";
 import { LocationBreadcrumb } from "./LocationBreadcrumb";
 import { LocationCardList } from "./LocationCardList";
 
@@ -21,7 +19,6 @@ interface LocationNavigationProps {
   selectedLocation: LocationRead | null;
   locationHistory: LocationRead[];
   selectedBed: LocationRead | null;
-  selectedLinkedBed: LocationAssociationRead | undefined;
   showAvailableOnly: boolean;
   searchTerm: string;
   isLoadingLocations: boolean;
@@ -29,15 +26,13 @@ interface LocationNavigationProps {
   hasMore: boolean;
   onLocationClick: (location: LocationRead) => void;
   onBedSelect: (bed: LocationRead) => void;
-  onLinkedBedSelect: (bed: LocationAssociationRead) => void;
   onCheckBedStatus: (bed: LocationRead) => void;
   onSearchChange: (value: string) => void;
-  onSearch: (e: React.FormEvent) => void;
+  onSearch: (e: React.SubmitEvent) => void;
   onShowAvailableChange: (value: boolean) => void;
   onLoadMore: () => void;
   onGoBack: () => void;
   onClearSelection: () => void;
-  linkedLocations: LocationAssociationRead[];
 }
 
 export function LocationNavigation({
@@ -46,7 +41,6 @@ export function LocationNavigation({
   selectedLocation,
   locationHistory,
   selectedBed,
-  selectedLinkedBed,
   showAvailableOnly,
   searchTerm,
   isLoadingLocations,
@@ -54,7 +48,6 @@ export function LocationNavigation({
   hasMore,
   onLocationClick,
   onBedSelect,
-  onLinkedBedSelect,
   onCheckBedStatus,
   onSearchChange,
   onSearch,
@@ -62,7 +55,6 @@ export function LocationNavigation({
   onLoadMore,
   onGoBack,
   onClearSelection,
-  linkedLocations,
 }: LocationNavigationProps) {
   const { t } = useTranslation();
 
@@ -82,19 +74,6 @@ export function LocationNavigation({
           />
         </div>
       </form>
-
-      {linkedLocations.length > 0 && (
-        <div className="space-y-2 mt-4">
-          <h2 className="text-base font-semibold mt-2">
-            {t("linked_locations")}
-          </h2>
-          <LinkedBedListing
-            linkedBeds={linkedLocations}
-            selectedLinkedBed={selectedLinkedBed}
-            onLinkedBedSelect={onLinkedBedSelect}
-          />
-        </div>
-      )}
 
       <div className="space-y-2">
         <div className="flex flex-col justify-between">

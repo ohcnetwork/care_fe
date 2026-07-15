@@ -89,8 +89,6 @@ export const PERMISSION_VIEW_TEMPLATE_SCHEMA = "can_view_template_schema";
 export const PERMISSION_GENERATE_REPORT_FROM_TEMPLATE =
   "can_generate_report_from_template";
 export const PERMISSION_MANAGE_TEMPLATE = "can_manage_template";
-export const PERMISSION_CREATE_CHARGE_ITEM_DEFINITION =
-  "can_create_charge_item_definition";
 export const PERMISSION_SET_CHARGE_ITEM_DEFINITION =
   "can_set_charge_item_definition";
 
