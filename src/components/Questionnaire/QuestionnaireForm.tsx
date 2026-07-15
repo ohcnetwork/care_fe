@@ -575,12 +575,17 @@ export function QuestionnaireForm({
   const isPending = isSubmitPending || isDraftPending;
 
   // Single-questionnaire drafts (structured questions supported via context
-  // reconciliation on recovery).
+  // reconciliation on recovery). Structured edit questionnaires (diagnosis,
+  // service_request, allergy_intolerance, …) are frontend-only — their slug is
+  // not a real backend questionnaire — so they can't be saved as drafts.
   const isDraftSaveable = useMemo(() => {
     if (!careConfig.enableQuestionnaireDraft) {
       return false;
     }
-    return !!questionnaireSlug && questionnaireForms.length <= 1;
+    if (!questionnaireSlug || FIXED_QUESTIONNAIRES[questionnaireSlug]) {
+      return false;
+    }
+    return questionnaireForms.length <= 1;
   }, [questionnaireSlug, questionnaireForms]);
 
   // TODO: Use useBlocker hook after switching to tanstack router
