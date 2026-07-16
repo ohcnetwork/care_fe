@@ -1,3 +1,5 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import batchApi from "@/types/base/batch/batchApi";
 import {
   DispenseOrderRead,
@@ -12,9 +14,6 @@ import {
 import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequest";
 import mutate from "@/Utils/request/mutate";
 import { HttpMethod } from "@/Utils/request/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 interface Options {
   facilityId: string;
@@ -26,25 +25,67 @@ interface Options {
 
 export interface UpdateDispenseOrderStatusArgs {
   newStatus: DispenseOrderStatus;
-  /**
-   * When `true`, in-flight dispenses (preparation/in_progress) transitioning
-   * because the order moves to `draft` will be set to `on_hold` instead of
-   * `preparation`.
-   */
-  hold?: boolean;
 }
 
-const STATUS_TO_DISPENSE_STATUS: Record<
-  DispenseOrderStatus,
-  MedicationDispenseStatus
+interface BatchRequest {
+  url: string;
+  method: string;
+  reference_id: string;
+  body: unknown;
+}
+
+/**
+ * Order statuses whose transition cascades to the associated dispenses.
+ *
+ * Final corrections (`abandoned` / `entered_in_error`) are intentionally
+ * excluded — the backend handles cancelling their dispenses.
+ */
+const DISPENSE_STATUS_BY_ORDER_STATUS: Partial<
+  Record<DispenseOrderStatus, MedicationDispenseStatus>
 > = {
-  [DispenseOrderStatus.draft]: MedicationDispenseStatus.preparation,
+  [DispenseOrderStatus.draft]: MedicationDispenseStatus.on_hold,
   [DispenseOrderStatus.in_progress]: MedicationDispenseStatus.in_progress,
   [DispenseOrderStatus.completed]: MedicationDispenseStatus.completed,
-  [DispenseOrderStatus.abandoned]: MedicationDispenseStatus.cancelled,
-  [DispenseOrderStatus.entered_in_error]:
-    MedicationDispenseStatus.entered_in_error,
 };
+
+function buildDispenseUpdate(
+  { newStatus }: UpdateDispenseOrderStatusArgs,
+  dispenses: MedicationDispenseRead[],
+): BatchRequest | null {
+  const targetStatus = DISPENSE_STATUS_BY_ORDER_STATUS[newStatus];
+
+  // Final corrections (abandoned / entered_in_error) don't touch dispenses.
+  if (!targetStatus) {
+    return null;
+  }
+
+  // Skip dispenses already cancelled / in error / declined, and completed
+  // dispenses which must not be moved backward.
+  const inFlight = dispenses.filter(
+    (dispense) =>
+      !MEDICATION_DISPENSE_CANCELLED_STATUSES.includes(dispense.status) &&
+      dispense.status !== MedicationDispenseStatus.completed,
+  );
+
+  if (inFlight.length === 0) {
+    return null;
+  }
+
+  const datapoints: MedicationDispenseUpsert[] = inFlight.map((dispense) => ({
+    id: dispense.id,
+    status: targetStatus,
+    category: MedicationCategory.outpatient,
+    when_prepared: dispense.when_prepared,
+    dosage_instruction: dispense.dosage_instruction,
+  }));
+
+  return {
+    url: `/api/v1/medication/dispense/upsert/`,
+    method: HttpMethod.POST,
+    reference_id: `update_medication_dispenses`,
+    body: { datapoints },
+  };
+}
 
 export default function useUpdateDispenseOrderStatus({
   facilityId,
@@ -53,93 +94,34 @@ export default function useUpdateDispenseOrderStatus({
   dispenses,
   onSuccess,
 }: Options) {
-  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: ({ newStatus, hold }: UpdateDispenseOrderStatusArgs) => {
-      const requests: Array<{
-        url: string;
-        method: string;
-        reference_id: string;
-        body: unknown;
-      }> = [
+  return useMutation({
+    mutationFn: (args: UpdateDispenseOrderStatusArgs) => {
+      const requests: BatchRequest[] = [
         {
           url: `/api/v1/facility/${facilityId}/order/dispense/${dispenseOrder.id}/`,
           method: HttpMethod.PATCH,
           reference_id: `update_dispense_order_${dispenseOrder.id}`,
-          body: { status: newStatus },
+          body: { status: args.newStatus },
         },
       ];
 
-      // Final corrections (abandoned / entered_in_error) cascade to each
-      // associated dispense only when the order isn't already completed.
-      // If the order is completed, backend handles the cancellation of
-      // already-completed dispenses.
-      const isFinalCorrection =
-        newStatus === DispenseOrderStatus.abandoned ||
-        newStatus === DispenseOrderStatus.entered_in_error;
-
-      const orderAlreadyCompleted =
-        dispenseOrder.status === DispenseOrderStatus.completed;
-
-      const inFlight = dispenses.filter((dispense) => {
-        // For final corrections on already-completed orders, backend will
-        // handle cancelling the associated dispenses — skip client-side.
-        if (isFinalCorrection && orderAlreadyCompleted) {
-          return false;
-        }
-
-        // Don't move dispenses that are already cancelled / in error / declined.
-        if (MEDICATION_DISPENSE_CANCELLED_STATUSES.includes(dispense.status)) {
-          return false;
-        }
-
-        // Don't move completed dispenses backward unless applying a final correction.
-        if (
-          dispense.status === MedicationDispenseStatus.completed &&
-          !isFinalCorrection
-        ) {
-          return false;
-        }
-        return true;
-      });
-
-      if (inFlight.length > 0) {
-        const newDispenseStatus =
-          hold && newStatus === DispenseOrderStatus.draft
-            ? MedicationDispenseStatus.on_hold
-            : STATUS_TO_DISPENSE_STATUS[newStatus];
-
-        const updates: MedicationDispenseUpsert[] = inFlight.map((d) => ({
-          id: d.id,
-          status: newDispenseStatus,
-          category: MedicationCategory.outpatient,
-          when_prepared: d.when_prepared,
-          dosage_instruction: d.dosage_instruction,
-        }));
-
-        requests.push({
-          url: `/api/v1/medication/dispense/upsert/`,
-          method: HttpMethod.POST,
-          reference_id: `update_medication_dispenses`,
-          body: { datapoints: updates },
-        });
+      const dispenseUpdate = buildDispenseUpdate(args, dispenses);
+      if (dispenseUpdate) {
+        requests.push(dispenseUpdate);
       }
 
       return mutate(batchApi.batchRequest)({ requests });
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (_, { newStatus }) => {
       queryClient.invalidateQueries({
         queryKey: ["dispenseOrder", facilityId, dispenseOrder.id],
       });
       queryClient.invalidateQueries({
         queryKey: ["medication_dispense", dispenseOrder.id, locationId],
       });
-      toast.success(t("medication_dispense_updated"));
-      onSuccess?.(variables.newStatus);
+      onSuccess?.(newStatus);
     },
   });
-
-  return mutation;
 }

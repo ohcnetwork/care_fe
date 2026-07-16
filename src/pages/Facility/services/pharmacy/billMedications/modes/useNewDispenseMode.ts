@@ -6,9 +6,6 @@ import useBillMedications from "@/pages/Facility/services/pharmacy/billMedicatio
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 interface Options {
   facilityId: string;
@@ -28,8 +25,6 @@ export default function useNewDispenseMode({
   patientId,
   encounterId,
 }: Options): BillMedicationsMode {
-  const { t } = useTranslation();
-
   const { data: encounter, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(encounterApi.get, {
@@ -43,13 +38,6 @@ export default function useNewDispenseMode({
       locationId,
       patientId,
       fallbackEncounterId: encounterId,
-      onSuccess: (dispenseOrder) => {
-        toast.success(t("medications_billed_successfully"));
-        navigate(
-          `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}`,
-          { replace: true },
-        );
-      },
     });
 
   const submit = (values: BillMedicationsFormValues) => {

@@ -5,7 +5,7 @@ import {
   ChargeItemBatchResponse,
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
+import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import {
   DispenseOrderBatchResponse,
@@ -20,13 +20,15 @@ import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import mutate from "@/Utils/request/mutate";
 import { HttpMethod } from "@/Utils/request/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { navigate } from "raviger";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 interface Options {
   facilityId: string;
   locationId: string;
   patientId: string;
   fallbackEncounterId: string;
-  onSuccess?: (dispenseOrder: DispenseOrderRead) => void;
 }
 
 export default function useBillMedications({
@@ -34,8 +36,8 @@ export default function useBillMedications({
   locationId,
   patientId,
   fallbackEncounterId,
-  onSuccess,
 }: Options) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data: account, refetch: refetchAccount } =
@@ -67,26 +69,6 @@ export default function useBillMedications({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
-    },
-  });
-
-  const issueInvoiceMutation = useMutation({
-    mutationFn: (invoice: InvoiceRead) => {
-      return mutate(invoiceApi.updateInvoice, {
-        pathParams: { facilityId, invoiceId: invoice.id },
-      })({
-        status: InvoiceStatus.issued,
-        payment_terms: invoice.payment_terms,
-        note: invoice.note,
-        account: invoice.account?.id || "",
-        charge_items: invoice.charge_items?.map((item) => item.id) || [],
-        issue_date: new Date().toISOString(),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
-      queryClient.invalidateQueries({ queryKey: ["accounts"] });
-      queryClient.invalidateQueries({ queryKey: ["invoice"] });
     },
   });
 
@@ -125,19 +107,25 @@ export default function useBillMedications({
       const accountId = account?.id ?? (await refetchAccount()).data?.id;
 
       if (chargeItems.length > 0 && accountId) {
-        const invoice = await createInvoiceMutation.mutateAsync({
+        await createInvoiceMutation.mutateAsync({
           status: InvoiceStatus.draft,
           account: accountId,
           charge_items: chargeItems.map((item) => item.id),
         });
-
-        await issueInvoiceMutation.mutateAsync(invoice);
       }
 
       return dispenseOrder;
     },
     onSuccess: (response: DispenseOrderRead) => {
-      onSuccess?.(response);
+      queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts", patientId] });
+      queryClient.invalidateQueries({ queryKey: ["invoice"] });
+
+      toast.success(t("medications_billed_successfully"));
+      navigate(
+        `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${response.id}?autoAdvanceStatus=true`,
+        { replace: true },
+      );
     },
   });
 

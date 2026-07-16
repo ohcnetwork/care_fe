@@ -11,8 +11,6 @@ import query from "@/Utils/request/query";
 import { useQueries } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 interface Options {
   facilityId: string;
@@ -27,8 +25,6 @@ export default function usePrescriptionsMode({
   patientId,
   prescriptionIds,
 }: Options): BillMedicationsMode {
-  const { t } = useTranslation();
-
   const { prescriptions, anyEncounter, isLoading } = useQueries({
     queries: prescriptionIds.map((prescriptionId) => ({
       queryKey: ["prescription", patientId, prescriptionId],
@@ -57,13 +53,6 @@ export default function usePrescriptionsMode({
       locationId,
       patientId,
       fallbackEncounterId: anyEncounter?.id ?? "",
-      onSuccess: (dispenseOrder) => {
-        toast.success(t("medications_billed_successfully"));
-        navigate(
-          `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}`,
-          { replace: true },
-        );
-      },
     });
 
   const submit = (values: BillMedicationsFormValues) => {

@@ -11,8 +11,8 @@ import {
   RotateCcw,
   WrenchIcon,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
-import { useMemo, useState } from "react";
+import { Link, navigate, useQueryParams } from "raviger";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -134,6 +134,10 @@ export function DispenseOrderView({
   const [confirmStatusChange, setConfirmStatusChange] =
     useState<DispenseOrderStatus | null>(null);
   const [showCancelled, setShowCancelled] = useState(false);
+
+  const [{ autoAdvanceStatus }, setQParams] = useQueryParams<{
+    autoAdvanceStatus?: string;
+  }>();
 
   const { data: dispenseOrder, isLoading: isLoadingOrder } = useQuery({
     queryKey: ["dispenseOrder", facilityId, dispenseOrderId],
@@ -276,6 +280,21 @@ export function DispenseOrderView({
       },
     });
 
+  // When navigated here right after billing (`?autoAdvanceStatus=true`),
+  // advance the freshly created draft order to in_progress exactly once.
+  const autoAdvanceTriggered = useRef(false);
+  useEffect(() => {
+    if (
+      autoAdvanceStatus === "true" &&
+      !autoAdvanceTriggered.current &&
+      dispenseOrder?.status === DispenseOrderStatus.draft
+    ) {
+      autoAdvanceTriggered.current = true;
+      setQParams({}, { replace: true });
+      updateStatus({ newStatus: DispenseOrderStatus.in_progress });
+    }
+  }, [autoAdvanceStatus, dispenseOrder?.status, setQParams, updateStatus]);
+
   const handlePaymentSuccess = () => {
     queryClient.invalidateQueries({
       queryKey: ["medication_dispense", dispenseOrderId, locationId],
@@ -337,7 +356,7 @@ export function DispenseOrderView({
 
   const handlePutOnHold = () => {
     updateStatus(
-      { newStatus: DispenseOrderStatus.draft, hold: true },
+      { newStatus: DispenseOrderStatus.draft },
       {
         onSuccess: () => {
           setPutOnHoldDialogOpen(false);
