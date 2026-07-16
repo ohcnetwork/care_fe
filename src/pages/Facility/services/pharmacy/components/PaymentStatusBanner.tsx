@@ -101,6 +101,7 @@ interface Props {
   invoiceId?: string;
   unbilledItems: ChargeItemRead[];
   onCreateInvoice?: (items: ChargeItemRead[]) => void;
+  isCreatingInvoice?: boolean;
   onPaymentSuccess: () => void;
   /**
    * When true, disables invoice mutations (create invoice / issue invoice).
@@ -162,6 +163,7 @@ export function PaymentStatusBanner({
   invoiceId,
   unbilledItems,
   onCreateInvoice,
+  isCreatingInvoice = false,
   onPaymentSuccess,
   readOnly = false,
 }: Props) {
@@ -297,6 +299,7 @@ export function PaymentStatusBanner({
             <Button
               variant="primary"
               onClick={() => onCreateInvoice(unbilledItems)}
+              disabled={isCreatingInvoice}
             >
               {t("create_invoice")}
             </Button>

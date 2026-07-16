@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftRight,
   BanIcon,
@@ -15,6 +15,7 @@ import {
 import { Link, navigate } from "raviger";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -62,7 +63,6 @@ import { cn } from "@/lib/utils";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 
-import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import { DispenseItemsTableCard } from "@/pages/Facility/services/pharmacy/components/DispenseGroupCard";
 import { PaymentStatusBanner } from "@/pages/Facility/services/pharmacy/components/PaymentStatusBanner";
 import useUpdateDispenseOrderStatus from "@/pages/Facility/services/pharmacy/hooks/useUpdateDispenseOrderStatus";
@@ -74,6 +74,7 @@ import {
   EXCLUDED_CHARGE_ITEM_STATUSES,
 } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceList, InvoiceStatus } from "@/types/billing/invoice/invoice";
+import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import {
   DISPENSE_ORDER_STATUS_STYLES,
   DispenseOrderStatus,
@@ -88,6 +89,7 @@ import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDisp
 
 import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
 import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -131,10 +133,6 @@ export function DispenseOrderView({
   const [putOnHoldDialogOpen, setPutOnHoldDialogOpen] = useState(false);
   const [confirmStatusChange, setConfirmStatusChange] =
     useState<DispenseOrderStatus | null>(null);
-  const [createInvoiceSheetOpen, setCreateInvoiceSheetOpen] = useState(false);
-  const [billableChargeItems, setBillableChargeItems] = useState<
-    ChargeItemRead[]
-  >([]);
   const [showCancelled, setShowCancelled] = useState(false);
 
   const { data: dispenseOrder, isLoading: isLoadingOrder } = useQuery({
@@ -289,6 +287,25 @@ export function DispenseOrderView({
     if (dispenseOrder?.status === DispenseOrderStatus.draft) {
       updateStatus({ newStatus: DispenseOrderStatus.in_progress });
     }
+  };
+
+  const { mutate: createInvoice, isPending: isCreatingInvoice } = useMutation({
+    mutationFn: mutate(invoiceApi.createInvoice, {
+      pathParams: { facilityId },
+    }),
+    onSuccess: () => {
+      toast.success(t("invoice_created_successfully"));
+      handlePaymentSuccess();
+    },
+  });
+
+  const handleCreateInvoice = (items: ChargeItemRead[]) => {
+    if (!account?.id) return;
+    createInvoice({
+      status: InvoiceStatus.draft,
+      account: account.id,
+      charge_items: items.map((item) => item.id),
+    });
   };
 
   if (isLoadingOrder || isLoadingDispenses) {
@@ -518,10 +535,8 @@ export function DispenseOrderView({
                     unbilledItems={billableItems.map(
                       (dispense) => dispense.charge_item,
                     )}
-                    onCreateInvoice={(items) => {
-                      setBillableChargeItems(items);
-                      setCreateInvoiceSheetOpen(true);
-                    }}
+                    onCreateInvoice={handleCreateInvoice}
+                    isCreatingInvoice={isCreatingInvoice}
                     onPaymentSuccess={handlePaymentSuccess}
                     readOnly={!isOrderOpen}
                   />
@@ -869,24 +884,6 @@ export function DispenseOrderView({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Create invoice sheet */}
-      {account && (
-        <CreateInvoiceSheet
-          facilityId={facilityId}
-          accountId={account.id}
-          open={createInvoiceSheetOpen}
-          onOpenChange={setCreateInvoiceSheetOpen}
-          preSelectedChargeItems={billableChargeItems}
-          sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}`}
-          skipNavigation={true}
-          onSuccess={() => {
-            setCreateInvoiceSheetOpen(false);
-            setBillableChargeItems([]);
-            handlePaymentSuccess();
-          }}
-        />
-      )}
     </Page>
   );
 }
