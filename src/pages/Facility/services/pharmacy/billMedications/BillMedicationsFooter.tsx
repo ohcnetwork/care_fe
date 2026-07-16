@@ -5,7 +5,6 @@ import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { BillMedicationLineItemSchemaType } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { calculateTotalPriceWithQuantity } from "@/types/base/monetaryComponent/monetaryComponent";
 import { add } from "@/Utils/decimal";
-import careConfig from "@careConfig";
 import { AlertTriangleIcon, ArrowRightIcon, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -13,6 +12,8 @@ interface Props {
   isBillingMedications: boolean;
   items: BillMedicationLineItemSchemaType[];
 }
+
+const MAX_DISPENSES_PER_DISPENSE_ORDER = 100;
 
 export const BillMedicationsFooter = ({
   isBillingMedications,
@@ -39,8 +40,7 @@ export const BillMedicationsFooter = ({
     (acc, item) => acc + item.lots.length,
     0,
   );
-  const maxDispenses = careConfig.maxDispensesPerDispenseOrder;
-  const exceedsLimit = dispensesCount > maxDispenses;
+  const exceedsLimit = dispensesCount > MAX_DISPENSES_PER_DISPENSE_ORDER;
 
   return (
     <div className="flex flex-col gap-3 bg-white px-6 py-4 fixed bottom-0 left-0 right-0 z-10 border-t border-gray-200 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
@@ -50,12 +50,12 @@ export const BillMedicationsFooter = ({
           <AlertTitle>
             {t("bill_medications_dispense_limit_exceeded_title", {
               count: dispensesCount,
-              max: maxDispenses,
+              max: MAX_DISPENSES_PER_DISPENSE_ORDER,
             })}
           </AlertTitle>
           <AlertDescription>
             {t("bill_medications_dispense_limit_exceeded_description", {
-              max: maxDispenses,
+              max: MAX_DISPENSES_PER_DISPENSE_ORDER,
             })}
           </AlertDescription>
         </Alert>
