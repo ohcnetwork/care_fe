@@ -62,3 +62,5 @@ export const DISPENSE_ORDER_STATUS_STYLES: Record<
   [DispenseOrderStatus.abandoned]: "secondary",
   [DispenseOrderStatus.entered_in_error]: "destructive",
 };
+
+export const MAX_DISPENSES_PER_DISPENSE_ORDER = 100;

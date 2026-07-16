@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { BillMedicationLineItemSchemaType } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { calculateTotalPriceWithQuantity } from "@/types/base/monetaryComponent/monetaryComponent";
+import { MAX_DISPENSES_PER_DISPENSE_ORDER } from "@/types/emr/dispenseOrder/dispenseOrder";
 import { add } from "@/Utils/decimal";
 import { AlertTriangleIcon, ArrowRightIcon, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -12,8 +13,6 @@ interface Props {
   isBillingMedications: boolean;
   items: BillMedicationLineItemSchemaType[];
 }
-
-const MAX_DISPENSES_PER_DISPENSE_ORDER = 100;
 
 export const BillMedicationsFooter = ({
   isBillingMedications,

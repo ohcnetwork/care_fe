@@ -78,6 +78,7 @@ import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import {
   DISPENSE_ORDER_STATUS_STYLES,
   DispenseOrderStatus,
+  MAX_DISPENSES_PER_DISPENSE_ORDER,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import {
@@ -149,11 +150,17 @@ export function DispenseOrderView({
         location: locationId,
         order: dispenseOrderId,
         // TODO: should we limit only billing atmost 100 in the first place or have a workaround for pagination here?
-        limit: 100,
+        limit: MAX_DISPENSES_PER_DISPENSE_ORDER,
       },
     }),
     select: (data: PaginatedResponse<MedicationDispenseRead>) => data.results,
   });
+
+  const relatedPrescriptionIds = dispenses
+    .map((d) => d.authorizing_request?.prescription?.id)
+    .filter((id): id is string => !!id);
+
+  console.log({ relatedPrescriptionIds });
 
   const { data: account } = usePatientDefaultBillingAccount({
     facilityId,
@@ -503,7 +510,7 @@ export function DispenseOrderView({
           className="text-gray-700 hover:text-gray-900"
         >
           <Link
-            href={`/facility/${facilityId}/locations/${locationId}/medication_requests`}
+            href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${dispenseOrder.patient.id}/prescriptions/${relatedPrescriptionIds.join(",")}`}
             basePath="/"
           >
             <EyeIcon className="size-4" />
