@@ -135,7 +135,7 @@ const getPrescriptionFormValues = (
       items: medications.map((medication) => ({
         reference_id: crypto.randomUUID(),
         isSelected: isMedicationDispenseable(medication),
-        medication,
+        medication: { ...medication, encounter: prescription.encounter.id },
         productKnowledge: medication.requested_product ?? null,
         substitution: null,
         dosageInstructions: medication.dosage_instruction,
