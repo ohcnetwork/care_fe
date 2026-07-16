@@ -138,9 +138,10 @@ export const isValidLongitude = (longitude: number) => {
 
 const getRelativeDateSuffix = (abbreviated: boolean) => {
   return {
-    day: abbreviated ? "d" : "days",
-    month: abbreviated ? "mo" : "months",
-    year: abbreviated ? "Y" : "years",
+    day: abbreviated ? "d" : " days",
+    week: abbreviated ? "wk" : " weeks",
+    month: abbreviated ? "mo" : " months",
+    year: abbreviated ? "Y" : " years",
   };
 };
 
@@ -160,9 +161,12 @@ export const formatPatientAge = (
       ? dayjs(new Date(obj.deceased_datetime))
       : dayjs(new Date());
 
+  const totalDays = end.diff(start, "day");
+
+  // Above 16 years: years only
   const years = end.diff(start, "years");
-  if (years) {
-    return `${years} ${suffixes.year}`;
+  if (years > 16) {
+    return `${years}${suffixes.year}`;
   }
 
   // Skip representing as no. of months/days if we don't know the date of birth
@@ -173,12 +177,34 @@ export const formatPatientAge = (
       : `Born on ${obj.year_of_birth}`;
   }
 
-  const month = end.diff(start, "month");
-  const day = end.diff(start.add(month, "month"), "day");
-  if (month) {
-    return `${month}${suffixes.month} ${day}${suffixes.day}`;
+  // 12 months to 16 years: years and months (suppress 0 months)
+  // Start at 11 months 30 days = 364 days
+  if (totalDays >= 364) {
+    const months = end.diff(start, "month");
+    const leftoverMonths = months % 12;
+    if (leftoverMonths === 0) {
+      return `${years}${suffixes.year}`;
+    }
+    return `${years}${suffixes.year} ${leftoverMonths}${suffixes.month}`;
   }
-  return `${day}${suffixes.day}`;
+
+  // 15 weeks to 11 months 29 days: months and days (include 0 days)
+  // 15 weeks = 105 days
+  if (totalDays >= 105) {
+    const months = end.diff(start, "month");
+    const day = end.diff(start.add(months, "month"), "day");
+    return `${months}${suffixes.month} ${day}${suffixes.day}`;
+  }
+
+  // 29 days to 14 weeks: weeks and leftover days (include 0 days)
+  if (totalDays >= 29) {
+    const weeks = Math.floor(totalDays / 7);
+    const day = totalDays % 7;
+    return `${weeks}${suffixes.week} ${day}${suffixes.day}`;
+  }
+
+  // 0 to 28 days: days only
+  return `${totalDays}${suffixes.day}`;
 };
 
 /**
