@@ -522,7 +522,7 @@ export default function PrescriptionQueue({
                           <Link
                             href={`/medication_requests/patient/${item.encounter.patient.id}/prescriptions/${item.id}`}
                           >
-                            {t("view_prescription")}
+                            {t("view_rx")}
                           </Link>
                         </Button>
                       </span>
