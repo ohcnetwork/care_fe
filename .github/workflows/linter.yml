@@ -19,10 +19,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
+<<<<<<< HEAD
           node-version: "22"
           cache: "npm"
+=======
+          node-version: "24"
+>>>>>>> origin/develop
 
       - name: Install dependencies
         run: npm ci
@@ -30,6 +34,7 @@ jobs:
       - name: Run lint
         run: npm run lint -- --quiet
 
+<<<<<<< HEAD
       - name: Run typecheck
         run: npm run typecheck
 
@@ -38,3 +43,7 @@ jobs:
 
       - name: Run unimported
         run: npm run unimported
+=======
+      - name: Run knip
+        run: npm run knip
+>>>>>>> origin/develop

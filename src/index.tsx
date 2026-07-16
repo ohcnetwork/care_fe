@@ -9,6 +9,7 @@ import careConfig from "@careConfig";
 import React, { Context } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
+import { initZod } from "./lib/zod";
 
 // Extend Window interface to include CARE_API_URL
 declare global {
@@ -29,6 +30,7 @@ if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });
 }
 
+<<<<<<< HEAD
 // Handle stale chunk errors from lazy imports after deployments.
 // Only reload once per session to prevent infinite loops on network failures.
 window.addEventListener("vite:preloadError", (event) => {
@@ -39,26 +41,37 @@ window.addEventListener("vite:preloadError", (event) => {
     window.location.reload();
   }
 });
+=======
+if (import.meta.env.PROD) {
+  Sentry.init({
+    environment: import.meta.env.MODE,
+    dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
+  });
+}
+
+function initApp() {
+  const container = document.getElementById("root");
+
+  if (!container) {
+    throw new Error("Root container not found");
+  }
+
+  const root = createRoot(container);
+
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  );
+}
+>>>>>>> origin/develop
 
 // Initialize i18n with namespaces from API before rendering the app
 initI18n()
-  .then(() => {
-    const root = createRoot(document.getElementById("root") as HTMLElement);
-    root.render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>,
-    );
-    sessionStorage.removeItem("vite-chunk-reload");
-  })
   .catch((error) => {
     console.error("Failed to initialize i18n:", error);
-    // Still render the app even if i18n initialization fails
-    const root = createRoot(document.getElementById("root") as HTMLElement);
-    root.render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>,
-    );
-    sessionStorage.removeItem("vite-chunk-reload");
+  })
+  .finally(() => {
+    initZod();
+    initApp();
   });

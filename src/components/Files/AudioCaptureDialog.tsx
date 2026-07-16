@@ -19,10 +19,7 @@ export interface AudioCaptureDialogProps {
 
 export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
   type Status =
-    | "RECORDING"
-    | "WAITING_TO_RECORD"
-    | "PERMISSION_DENIED"
-    | "RECORDED";
+    "RECORDING" | "WAITING_TO_RECORD" | "PERMISSION_DENIED" | "RECORDED";
 
   const { show, onHide, onCapture, autoRecord = false } = props;
   const [status, setStatus] = useState<Status | null>(null);
