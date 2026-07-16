@@ -34,18 +34,6 @@ const lotSelectionSchema = z
      * quantity and available stock.
      */
     autoSelected: z.boolean().optional(),
-    /**
-     * The id of an existing MedicationDispense that this lot was hydrated
-     * from in the edit-dispense-order flow. Used by the submit handler to
-     * diff against the original snapshot.
-     */
-    existingDispenseId: z.string().optional(),
-    /**
-     * The original quantity of the existing dispense at the time it was
-     * hydrated. Used together with `existingDispenseId` to determine whether
-     * the lot was modified.
-     */
-    existingDispenseQuantity: z.string().optional(),
   })
   .refine(
     (data) =>
@@ -68,13 +56,6 @@ export const billMedicationLineItemSchema = z
 
     /** The medication request */
     medication: z.custom<MedicationRequestRead>().nullable(),
-
-    /**
-     * Encounter override. Used by the edit-dispense-order flow where a
-     * single page can carry items from multiple encounters. When set, takes
-     * precedence over `medication?.encounter` and the page-level fallback.
-     */
-    encounterOverride: z.string().optional(),
 
     /** The dosage instructions for the product */
     dosageInstructions: z.custom<MedicationRequestDosageInstruction[]>(),

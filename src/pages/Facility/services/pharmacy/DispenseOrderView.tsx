@@ -6,7 +6,6 @@ import {
   ExternalLinkIcon,
   EyeIcon,
   PauseCircle,
-  PencilIcon,
   PlayCircle,
   PrinterIcon,
   RotateCcw,
@@ -160,8 +159,6 @@ export function DispenseOrderView({
     .map((d) => d.authorizing_request?.prescription?.id)
     .filter((id): id is string => !!id);
 
-  console.log({ relatedPrescriptionIds });
-
   const { data: account } = usePatientDefaultBillingAccount({
     facilityId,
     patientId: dispenseOrder?.patient.id,
@@ -174,7 +171,6 @@ export function DispenseOrderView({
   );
 
   const invoices = extractInvoicesFromDispenses(dispenses);
-  const hasActiveInvoice = invoices.length > 0;
   const hasBalancedInvoice = invoices.some(
     (inv) => inv.status === InvoiceStatus.balanced,
   );
@@ -548,7 +544,10 @@ export function DispenseOrderView({
                     readOnly={!isOrderOpen}
                   />
                 )}
-                <DispenseItemsTableCard dispenses={groupDispenses} />
+                <DispenseItemsTableCard
+                  dispenses={groupDispenses}
+                  edit={isOrderOpen ? { facilityId, locationId } : undefined}
+                />
               </div>
             );
           })()}
@@ -569,7 +568,10 @@ export function DispenseOrderView({
                     readOnly={!isOrderOpen}
                   />
                 )}
-                <DispenseItemsTableCard dispenses={groupDispenses} />
+                <DispenseItemsTableCard
+                  dispenses={groupDispenses}
+                  edit={isOrderOpen ? { facilityId, locationId } : undefined}
+                />
               </div>
             );
           })}
@@ -667,29 +669,6 @@ export function DispenseOrderView({
                 {t("put_on_hold")}
               </Button>
             )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${dispenseOrder.patient.id}/bill/dispense_order/${dispenseOrderId}`,
-                      )
-                    }
-                    disabled={isUpdatingStatus || hasActiveInvoice}
-                  >
-                    <PencilIcon className="size-4" />
-                    {t("edit_dispense_order")}
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {hasActiveInvoice && (
-                <TooltipContent>
-                  {t("dispense_order_cannot_be_edited_due_to_invoice")}
-                </TooltipContent>
-              )}
-            </Tooltip>
             <div className="flex">
               <Tooltip>
                 <TooltipTrigger asChild>

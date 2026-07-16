@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { EditDispenseSheet } from "@/pages/Facility/services/pharmacy/components/EditDispenseSheet";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
@@ -51,10 +52,32 @@ function getStatusOptions(
   return options;
 }
 
+/**
+ * Whether a dispense can be edited (replaced). Mirrors the restrictions for
+ * cancelling a dispense: the status must be editable and cancellation must
+ * not be blocked by a non-draft invoice.
+ */
+function canEditDispense(dispense: MedicationDispenseRead): boolean {
+  return (
+    EDITABLE_STATUSES.includes(dispense.status) &&
+    getStatusOptions(dispense.charge_item).includes(
+      MedicationDispenseStatus.cancelled,
+    )
+  );
+}
+
+/** Context needed to render the per-row edit action. */
+interface DispenseEditContext {
+  facilityId: string;
+  locationId: string;
+}
+
 function DispenseItemsTable({
   dispenses,
+  edit,
 }: {
   dispenses: MedicationDispenseRead[];
+  edit?: DispenseEditContext;
 }) {
   const { t } = useTranslation();
 
@@ -78,6 +101,13 @@ function DispenseItemsTable({
       <div className="col-start-4 bg-gray-100 py-1 px-3 flex items-center">
         <span className="text-sm font-medium text-gray-700">{t("status")}</span>
       </div>
+      {edit && (
+        <div className="col-start-5 bg-gray-100 py-1 px-3 flex items-center">
+          <span className="text-sm font-medium text-gray-700">
+            {t("actions")}
+          </span>
+        </div>
+      )}
 
       {dispenses.map((dispense) => {
         const instructions = dispense.dosage_instruction ?? [];
@@ -158,6 +188,19 @@ function DispenseItemsTable({
             <div className="bg-white flex flex-col justify-center py-2 px-3 col-start-4 xl:min-w-48">
               <DispenseStatusSelect dispense={dispense} />
             </div>
+
+            {/* Actions */}
+            {edit && (
+              <div className="bg-white flex items-center justify-center py-2 px-3 col-start-5">
+                {canEditDispense(dispense) && (
+                  <EditDispenseSheet
+                    facilityId={edit.facilityId}
+                    locationId={edit.locationId}
+                    dispense={dispense}
+                  />
+                )}
+              </div>
+            )}
           </Fragment>
         );
       })}
@@ -216,12 +259,21 @@ const DispenseStatusSelect = ({
  */
 export function DispenseItemsTableCard({
   dispenses,
+  edit,
 }: {
   dispenses: MedicationDispenseRead[];
+  edit?: DispenseEditContext;
 }) {
   return (
-    <div className="bg-gray-200 border border-gray-200 rounded-md overflow-hidden grid grid-cols-[1fr_1fr_auto_minmax(10rem,auto)] gap-px">
-      <DispenseItemsTable dispenses={dispenses} />
+    <div
+      className={cn(
+        "bg-gray-200 border border-gray-200 rounded-md overflow-hidden grid gap-px",
+        edit
+          ? "grid-cols-[1fr_1fr_auto_minmax(10rem,auto)_auto]"
+          : "grid-cols-[1fr_1fr_auto_minmax(10rem,auto)]",
+      )}
+    >
+      <DispenseItemsTable dispenses={dispenses} edit={edit} />
     </div>
   );
 }

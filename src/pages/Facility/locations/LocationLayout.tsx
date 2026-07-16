@@ -22,7 +22,6 @@ import { PrintDeliveryOrder } from "@/pages/Facility/services/inventory/external
 import { PrintRequestOrder } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/PrintRequestOrder";
 import { ToDispatch } from "@/pages/Facility/services/inventory/ToDispatch";
 import { ToReceive } from "@/pages/Facility/services/inventory/ToReceive";
-import BillMedicationsByDispenseOrder from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByDispenseOrder";
 import BillMedicationsByNewDispense from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByNewDispense";
 import BillMedicationsByPrescriptions from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByPrescriptions";
 import DispenseOrderCompleted from "@/pages/Facility/services/pharmacy/DispenseOrderCompleted";
@@ -110,21 +109,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       encounterId={encounterId}
     />
   ),
-  "/medication_requests/patient/:patientId/bill/dispense_order/:dispenseOrderId":
-    ({
-      patientId,
-      dispenseOrderId,
-    }: {
-      patientId: string;
-      dispenseOrderId: string;
-    }) => (
-      <BillMedicationsByDispenseOrder
-        facilityId={facilityId}
-        locationId={locationId}
-        patientId={patientId}
-        dispenseOrderId={dispenseOrderId}
-      />
-    ),
   "/medication_dispense": () => (
     <MedicationDispenseHistory
       facilityId={facilityId}

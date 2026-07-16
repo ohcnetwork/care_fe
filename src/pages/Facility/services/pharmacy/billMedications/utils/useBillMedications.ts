@@ -26,11 +26,6 @@ interface Options {
   locationId: string;
   patientId: string;
   fallbackEncounterId: string;
-  /**
-   * When set, newly-created dispenses attach to this dispense order via the
-   * `order` field instead of creating a new one. Used by the edit flow.
-   */
-  dispenseOrderId?: string;
   onSuccess?: (dispenseOrder: DispenseOrderRead) => void;
 }
 
@@ -39,7 +34,6 @@ export default function useBillMedications({
   locationId,
   patientId,
   fallbackEncounterId,
-  dispenseOrderId,
   onSuccess,
 }: Options) {
   const queryClient = useQueryClient();
@@ -100,30 +94,15 @@ export default function useBillMedications({
     mutationFn: async ({
       items,
       prescriptionsToComplete,
-      priorRequests,
     }: {
       items: BillMedicationLineItemSchemaType[];
       prescriptionsToComplete?: string[];
-      /**
-       * Extra batch requests to prepend before the dispense create requests.
-       * Used by the edit-dispense-order flow to abandon the old order in the
-       * same batch as creating the replacement.
-       */
-      priorRequests?: Array<{
-        url: string;
-        method: HttpMethod;
-        reference_id: string;
-        body: unknown;
-      }>;
     }) => {
       const requests = [
-        ...(priorRequests ?? []),
-
         ...getDispenseCreateRequests({
           items,
           locationId,
           fallbackEncounterId,
-          dispenseOrderId,
           alternateIdentifier: getDispenseCreateAlternateIdentifier(patientId),
         }),
 
@@ -174,13 +153,11 @@ const getDispenseCreateRequests = ({
   alternateIdentifier,
   locationId,
   fallbackEncounterId,
-  dispenseOrderId,
 }: {
   items: BillMedicationLineItemSchemaType[];
   alternateIdentifier: string;
   locationId: string;
   fallbackEncounterId: string;
-  dispenseOrderId?: string;
 }) => {
   const whenPrepared = new Date();
 
@@ -197,9 +174,7 @@ const getDispenseCreateRequests = ({
         category: item.medication?.category ?? MedicationCategory.outpatient,
         when_prepared: whenPrepared,
         dosage_instruction: item.dosageInstructions ?? [],
-        encounter: (item.medication?.encounter ??
-          item.encounterOverride ??
-          fallbackEncounterId)!,
+        encounter: (item.medication?.encounter ?? fallbackEncounterId)!,
         authorizing_request: item.medication?.id ?? null,
         item: lot.item.id,
         quantity: lot.quantity,
@@ -212,17 +187,10 @@ const getDispenseCreateRequests = ({
               reason: item.substitution.reason,
             }
           : undefined,
-      };
-
-      if (dispenseOrderId) {
-        // Attach to existing dispense order by setting the `order` field. This will be used by the edit flow.
-        body.order = dispenseOrderId;
-      } else {
-        // Create a new dispense order by including the `create_dispense_order` field. This will be used by the new bill medications flow.
-        body.create_dispense_order = {
+        create_dispense_order: {
           alternate_identifier: alternateIdentifier,
-        };
-      }
+        },
+      };
 
       requests.push({
         url: "/api/v1/medication/dispense/",

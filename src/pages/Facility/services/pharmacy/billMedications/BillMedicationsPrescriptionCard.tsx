@@ -553,16 +553,6 @@ const MedicineLineItem = ({
   });
 
   useEffect(() => {
-    const hasExistingDispenseInAnyLot = lots.some(
-      (lot) => !!lot.existingDispenseId,
-    );
-
-    // Skip auto-selection on mount, when any of the already selected lots are
-    // from an existing dispense (edit dispense workflow).
-    if (hasExistingDispenseInAnyLot) {
-      return;
-    }
-
     if (canAutoSelectInventoryItems) {
       autoSelectInventoryItems(undefined);
     }

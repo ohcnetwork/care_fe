@@ -6739,5 +6739,9 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞"
+  "℞": "℞",
+  "edit_dispense": "Edit Dispense",
+  "dispense_updated_successfully": "Dispense updated successfully",
+  "insufficient_stock": "Insufficient stock",
+  "quantity_must_be_greater_than_zero": "Quantity must be greater than 0"
 }
