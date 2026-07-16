@@ -164,14 +164,17 @@ export const formatPatientAge = (
   const totalDays = end.diff(start, "day");
   const years = end.diff(start, "years");
 
-  // >=16 years: years only
-  if (years >= 16) {
+  // >16 years: years only
+  if (years > 16) {
     return `${years} ${suffixes.year}`;
   }
 
   // Skip representing as no. of months/days if we don't know the date of birth
   // since it would anyways be inaccurate.
   if (!obj.date_of_birth) {
+    if (years >= 1) {
+      return `${years} ${suffixes.year}`;
+    }
     return abbreviated
       ? `Born ${obj.year_of_birth}`
       : `Born on ${obj.year_of_birth}`;
@@ -179,9 +182,14 @@ export const formatPatientAge = (
 
   // 12 months to <16 years: years and months
   const months = end.diff(start, "month");
-  if (months >= 12) {
+  if (months >= 12 && years < 16) {
     const remainingMonths = months - years * 12;
     return `${years} ${suffixes.year} ${remainingMonths} ${suffixes.month}`;
+  }
+
+  // >=16 years (exact boundary): years only
+  if (years >= 16) {
+    return `${years} ${suffixes.year}`;
   }
 
   // 15 weeks to 11 months 29 days: months and days
