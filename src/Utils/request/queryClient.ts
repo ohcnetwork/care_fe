@@ -33,6 +33,7 @@ const queryClient = new QueryClient({
 
 const localStoragePersister = createAsyncStoragePersister({
   storage: window.localStorage,
+  key: "REACT_QUERY_OFFLINE_CACHE",
 });
 
 persistQueryClient({
@@ -44,12 +45,11 @@ persistQueryClient({
   buster: localStorage.getItem("app-version") ?? "0.0.0",
 });
 
-export function clearQueryPersistenceCache() {
-  queryClient.invalidateQueries({
-    predicate: (query) => {
-      return query.meta?.persist === true;
-    },
+export function clearQueryPersistenceCache(): Promise<void> {
+  queryClient.removeQueries({
+    predicate: (query) => query.meta?.persist === true,
   });
+  return Promise.resolve(localStoragePersister.removeClient());
 }
 
 export default queryClient;
