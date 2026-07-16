@@ -164,7 +164,7 @@ export const formatPatientAge = (
   const totalDays = end.diff(start, "day");
   const years = end.diff(start, "years");
 
-  // Above 16 years: years only
+  // >=16 years: years only
   if (years >= 16) {
     return `${years} ${suffixes.year}`;
   }
@@ -181,25 +181,25 @@ export const formatPatientAge = (
   const months = end.diff(start, "month");
   if (months >= 12) {
     const remainingMonths = months - years * 12;
-    return `${years}${suffixes.year} ${remainingMonths}${suffixes.month}`;
+    return `${years} ${suffixes.year} ${remainingMonths} ${suffixes.month}`;
   }
 
   // 15 weeks to 11 months 29 days: months and days
   const WEEKS_15_IN_DAYS = 15 * 7; // 105
   if (totalDays >= WEEKS_15_IN_DAYS) {
     const day = end.diff(start.add(months, "month"), "day");
-    return `${months}${suffixes.month} ${day}${suffixes.day}`;
+    return `${months} ${suffixes.month} ${day} ${suffixes.day}`;
   }
 
-  // 29 days to 14 weeks (inclusive): weeks and days
+  // 29 days to <15 weeks (104 days): weeks and days
   if (totalDays >= 29) {
     const weeks = Math.floor(totalDays / 7);
     const days = totalDays % 7;
-    return `${weeks}${suffixes.week} ${days}${suffixes.day}`;
+    return `${weeks} ${suffixes.week} ${days} ${suffixes.day}`;
   }
 
   // 0–28 days: days only
-  return `${totalDays}${suffixes.day}`;
+  return `${totalDays} ${suffixes.day}`;
 };
 
 /**
