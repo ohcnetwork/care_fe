@@ -12,7 +12,7 @@ import {
   RotateCcw,
   WrenchIcon,
 } from "lucide-react";
-import { Link, navigate, useNavigationPrompt } from "raviger";
+import { Link, navigate } from "raviger";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -137,11 +137,7 @@ export function DispenseOrderView({
   >([]);
   const [showCancelled, setShowCancelled] = useState(false);
 
-  const {
-    data: dispenseOrder,
-    isLoading: isLoadingOrder,
-    isFetching: isFetchingOrder,
-  } = useQuery({
+  const { data: dispenseOrder, isLoading: isLoadingOrder } = useQuery({
     queryKey: ["dispenseOrder", facilityId, dispenseOrderId],
     queryFn: query(dispenseOrderApi.get, {
       pathParams: { facilityId, id: dispenseOrderId },
@@ -257,10 +253,11 @@ export function DispenseOrderView({
     dispenseOrder?.status === DispenseOrderStatus.entered_in_error;
 
   // Block in-app navigation and browser back/refresh while order is open
-  useNavigationPrompt(
-    !isFetchingOrder && isOrderOpen,
-    t("dispense_order_leave_warning"),
-  );
+  // TODO: figure out a UX to allow preview RX, invoice prints and all while the order is open, without triggering this prompt.
+  // useNavigationPrompt(
+  //   !isFetchingOrder && isOrderOpen,
+  //   t("dispense_order_leave_warning"),
+  // );
 
   const { mutate: updateStatus, isPending: isUpdatingStatus } =
     useUpdateDispenseOrderStatus({

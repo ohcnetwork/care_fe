@@ -69,7 +69,7 @@ import {
   RefreshCcwIcon,
   XCircleIcon,
 } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -343,27 +343,23 @@ const PrescriptionSummary = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              disabled={!isActive || isPending}
-              onSelect={() => {
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${encounter.patient.id}/prescriptions/${prescription.id}`,
-                );
-              }}
-            >
-              <FileTextIcon />
-              {t("view_prescription")}
+            <DropdownMenuItem disabled={isPending} asChild>
+              <Link
+                href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${encounter.patient.id}/prescriptions/${prescription.id}`}
+                basePath="/"
+              >
+                <FileTextIcon />
+                {t("view_rx")}
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              disabled={isPending}
-              onSelect={() => {
-                navigate(
-                  `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`,
-                );
-              }}
-            >
-              <PrinterIcon />
-              {t("print_prescription")}
+            <DropdownMenuItem disabled={isPending} asChild>
+              <Link
+                href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
+                basePath="/"
+              >
+                <PrinterIcon />
+                {t("print_prescription")}
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               disabled={!isActive || isPending}
