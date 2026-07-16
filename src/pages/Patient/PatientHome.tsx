@@ -170,7 +170,7 @@ export default function PatientHome() {
                     onSuccess={(encounter) => {
                       if (isDispenseFlow && pharmacyDispenseService) {
                         navigate(
-                          `/facility/${facilityId}/locations/${pharmacyDispenseService.locationId}/medication_requests/patient/${patientData.id}/bill?encounterId=${encounter.id}`,
+                          `/facility/${facilityId}/locations/${pharmacyDispenseService.locationId}/medication_requests/patient/${patientData.id}/bill/dispense/${encounter.id}`,
                         );
                       }
                     }}
