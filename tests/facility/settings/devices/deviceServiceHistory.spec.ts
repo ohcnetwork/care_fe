@@ -88,7 +88,7 @@ test.describe("Device Service History", () => {
     // .last() to target the most recently opened dialog so a still-unmounting
     // sheet can't reintroduce a strict-mode match.
     const editSheet = page.getByRole("dialog").last();
-    await expect(editSheet).toBeVisible({ timeout: 10000 });
+    await expect(editSheet).toBeVisible();
 
     const pastYear = new Date().getFullYear() - 1;
     await editSheet
@@ -205,7 +205,7 @@ test.describe("Device Service History", () => {
     // .last() to target the most recently opened dialog so a still-unmounting
     // sheet can't reintroduce a strict-mode match.
     const editSheet = page.getByRole("dialog").last();
-    await expect(editSheet).toBeVisible({ timeout: 10000 });
+    await expect(editSheet).toBeVisible();
 
     const updateButton = editSheet.getByRole("button", { name: "Update" });
     await expect(updateButton).toBeDisabled();

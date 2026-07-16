@@ -66,7 +66,7 @@ test.describe("Patient Files", () => {
       .getByRole("row")
       .filter({ hasText: displayName })
       .first();
-    await expect(fileRow).toBeVisible({ timeout: 10000 });
+    await expect(fileRow).toBeVisible();
     await fileRow.getByRole("button", { name: "View", exact: true }).click();
 
     // The file preview dialog (not the archived-file dialog) must open. Filter
@@ -75,16 +75,14 @@ test.describe("Patient Files", () => {
     const previewDialog = page
       .getByRole("dialog")
       .filter({ hasText: "File Preview" });
-    await expect(previewDialog).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(previewDialog).toBeVisible();
 
     // Close it, scoping to the dialog so page-level toasts named "Close"
     // can't cause a strict-mode match.
     await previewDialog
       .getByRole("button", { name: "Close", exact: true })
       .click();
-    await expect(previewDialog).toBeHidden({ timeout: 10000 });
+    await expect(previewDialog).toBeHidden();
   };
 
   let facilityId: string;
