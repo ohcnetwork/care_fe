@@ -69,9 +69,13 @@ test.describe("Patient Files", () => {
     await expect(fileRow).toBeVisible({ timeout: 10000 });
     await fileRow.getByRole("button", { name: "View", exact: true }).click();
 
-    // The file preview dialog (not the archived-file dialog) must open.
-    const previewDialog = page.getByRole("dialog");
-    await expect(previewDialog.getByText("File Preview")).toBeVisible({
+    // The file preview dialog (not the archived-file dialog) must open. Filter
+    // by its title so an upload sheet or other dialog that may still be mounted
+    // can't cause a strict-mode match on the Close button.
+    const previewDialog = page
+      .getByRole("dialog")
+      .filter({ hasText: "File Preview" });
+    await expect(previewDialog).toBeVisible({
       timeout: 10000,
     });
 

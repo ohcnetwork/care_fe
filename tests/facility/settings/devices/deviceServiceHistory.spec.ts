@@ -84,9 +84,10 @@ test.describe("Device Service History", () => {
       .first()
       .click();
 
-    // With the Add sheet closed, the edit sheet is the only open dialog, so
-    // scope interactions to it instead of matching a hard-coded dialog title.
-    const editSheet = page.getByRole("dialog");
+    // With the Add sheet closed, the edit sheet is the only open dialog. Use
+    // .last() to target the most recently opened dialog so a still-unmounting
+    // sheet can't reintroduce a strict-mode match.
+    const editSheet = page.getByRole("dialog").last();
     await expect(editSheet).toBeVisible({ timeout: 10000 });
 
     const pastYear = new Date().getFullYear() - 1;
@@ -200,9 +201,10 @@ test.describe("Device Service History", () => {
       .first()
       .click();
 
-    // With the Add sheet closed, the edit sheet is the only open dialog, so
-    // scope interactions to it instead of matching a hard-coded dialog title.
-    const editSheet = page.getByRole("dialog");
+    // With the Add sheet closed, the edit sheet is the only open dialog. Use
+    // .last() to target the most recently opened dialog so a still-unmounting
+    // sheet can't reintroduce a strict-mode match.
+    const editSheet = page.getByRole("dialog").last();
     await expect(editSheet).toBeVisible({ timeout: 10000 });
 
     const updateButton = editSheet.getByRole("button", { name: "Update" });
