@@ -85,7 +85,7 @@ test.describe("Device Service History", () => {
       .click();
 
     // With the Add sheet closed, the edit sheet is the only open dialog, so
-    // scope interactions to it (locale-independent, no hard-coded title).
+    // scope interactions to it instead of matching a hard-coded dialog title.
     const editSheet = page.getByRole("dialog");
     await expect(editSheet).toBeVisible({ timeout: 10000 });
 
@@ -201,7 +201,7 @@ test.describe("Device Service History", () => {
       .click();
 
     // With the Add sheet closed, the edit sheet is the only open dialog, so
-    // scope interactions to it (locale-independent, no hard-coded title).
+    // scope interactions to it instead of matching a hard-coded dialog title.
     const editSheet = page.getByRole("dialog");
     await expect(editSheet).toBeVisible({ timeout: 10000 });
 
