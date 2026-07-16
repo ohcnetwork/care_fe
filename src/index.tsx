@@ -30,7 +30,6 @@ if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });
 }
 
-<<<<<<< HEAD
 // Handle stale chunk errors from lazy imports after deployments.
 // Only reload once per session to prevent infinite loops on network failures.
 window.addEventListener("vite:preloadError", (event) => {
@@ -41,13 +40,6 @@ window.addEventListener("vite:preloadError", (event) => {
     window.location.reload();
   }
 });
-=======
-if (import.meta.env.PROD) {
-  Sentry.init({
-    environment: import.meta.env.MODE,
-    dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
-  });
-}
 
 function initApp() {
   const container = document.getElementById("root");
@@ -64,7 +56,6 @@ function initApp() {
     </React.StrictMode>,
   );
 }
->>>>>>> origin/develop
 
 // Initialize i18n with namespaces from API before rendering the app
 initI18n()
