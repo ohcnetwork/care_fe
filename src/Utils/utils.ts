@@ -179,7 +179,7 @@ export const formatPatientAge = (
 
   // 12 months to 16 years: years and months (suppress 0 months)
   // Start at 11 months 30 days = 364 days
-  if (totalDays >= 364) {
+  if (years >= 1) {
     const months = end.diff(start, "month");
     const leftoverMonths = months % 12;
     if (leftoverMonths === 0) {
