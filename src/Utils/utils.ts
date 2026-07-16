@@ -164,8 +164,8 @@ export const formatPatientAge = (
   const totalDays = end.diff(start, "day");
   const years = end.diff(start, "years");
 
-  // >16 years: years only
-  if (years > 16) {
+  // >=16 years: years only
+  if (years >= 16) {
     return `${years} ${suffixes.year}`;
   }
 
@@ -185,11 +185,6 @@ export const formatPatientAge = (
   if (months >= 12 && years < 16) {
     const remainingMonths = months - years * 12;
     return `${years} ${suffixes.year} ${remainingMonths} ${suffixes.month}`;
-  }
-
-  // >=16 years (exact boundary): years only
-  if (years >= 16) {
-    return `${years} ${suffixes.year}`;
   }
 
   // 15 weeks to 11 months 29 days: months and days
