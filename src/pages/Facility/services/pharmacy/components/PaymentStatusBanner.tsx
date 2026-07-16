@@ -330,16 +330,27 @@ export function PaymentStatusBanner({
               </div>
             </div>
           </div>
-          {!readOnly && (
-            <Button
-              variant="primary"
-              onClick={handleIssueInvoice}
-              disabled={isIssuingInvoice}
-            >
-              <SendIcon className="size-4" />
-              {t("issue_invoice")}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" asChild>
+              <Link
+                basePath="/"
+                href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
+              >
+                <ReceiptIcon className="size-4" />
+                {t("view_invoice")}
+              </Link>
             </Button>
-          )}
+            {!readOnly && (
+              <Button
+                variant="primary"
+                onClick={handleIssueInvoice}
+                disabled={isIssuingInvoice}
+              >
+                <SendIcon className="size-4" />
+                {t("issue_invoice")}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     );
