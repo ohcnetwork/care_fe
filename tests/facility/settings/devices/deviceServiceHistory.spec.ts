@@ -72,6 +72,11 @@ test.describe("Device Service History", () => {
 
     await expect(page.getByText(notes)).toBeVisible();
 
+    // Wait for the Add sheet to fully close before opening Edit; otherwise its
+    // controls linger in the DOM during the close animation and collide with
+    // the edit sheet's controls.
+    await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
+
     await page
       .locator('[data-slot="card"]')
       .filter({ hasText: notes })
@@ -79,11 +84,9 @@ test.describe("Device Service History", () => {
       .first()
       .click();
 
-    // Scope all edit-sheet interactions to its dialog to avoid strict-mode
-    // violations when the Add sheet is still in the DOM during its close animation.
-    const editSheet = page.getByRole("dialog", {
-      name: "Edit Service Record",
-    });
+    // With the Add sheet closed, the edit sheet is the only open dialog, so
+    // scope interactions to it (locale-independent, no hard-coded title).
+    const editSheet = page.getByRole("dialog");
     await expect(editSheet).toBeVisible({ timeout: 10000 });
 
     const pastYear = new Date().getFullYear() - 1;
@@ -185,6 +188,11 @@ test.describe("Device Service History", () => {
 
     await expect(page.getByText(notes)).toBeVisible();
 
+    // Wait for the Add sheet to fully close before opening Edit; otherwise its
+    // controls linger in the DOM during the close animation and collide with
+    // the edit sheet's controls.
+    await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
+
     await page
       .locator('[data-slot="card"]')
       .filter({ hasText: notes })
@@ -192,17 +200,17 @@ test.describe("Device Service History", () => {
       .first()
       .click();
 
-    // Scope all edit-sheet interactions to its dialog to avoid strict-mode
-    // violations when the Add sheet is still in the DOM during its close animation.
-    const editSheet = page.getByRole("dialog", {
-      name: "Edit Service Record",
-    });
+    // With the Add sheet closed, the edit sheet is the only open dialog, so
+    // scope interactions to it (locale-independent, no hard-coded title).
+    const editSheet = page.getByRole("dialog");
     await expect(editSheet).toBeVisible({ timeout: 10000 });
 
     const updateButton = editSheet.getByRole("button", { name: "Update" });
     await expect(updateButton).toBeDisabled();
 
-    await editSheet.getByRole("textbox", { name: "Notes *" }).fill(updatedNotes);
+    await editSheet
+      .getByRole("textbox", { name: "Notes *" })
+      .fill(updatedNotes);
 
     await expect(updateButton).toBeEnabled();
 
