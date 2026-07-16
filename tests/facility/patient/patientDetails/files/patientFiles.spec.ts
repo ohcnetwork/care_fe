@@ -56,6 +56,33 @@ test.describe("Patient Files", () => {
     return response;
   };
 
+  // Opens the preview for a specific uploaded file and closes it again,
+  // confirming the file is accessible to the current user.
+  const openFilePreview = async (page: Page, displayName: string) => {
+    // Scope to the row for this exact file so other files on the shared
+    // patient (including archived ones, whose "View" opens a different
+    // dialog) can't be picked up by mistake.
+    const fileRow = page
+      .getByRole("row")
+      .filter({ hasText: displayName })
+      .first();
+    await expect(fileRow).toBeVisible({ timeout: 10000 });
+    await fileRow.getByRole("button", { name: "View", exact: true }).click();
+
+    // The file preview dialog (not the archived-file dialog) must open.
+    const previewDialog = page.getByRole("dialog");
+    await expect(previewDialog.getByText("File Preview")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Close it, scoping to the dialog so page-level toasts named "Close"
+    // can't cause a strict-mode match.
+    await previewDialog
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
+    await expect(previewDialog).toBeHidden({ timeout: 10000 });
+  };
+
   let facilityId: string;
 
   test.beforeEach(async ({ page }) => {
@@ -166,55 +193,35 @@ test.describe("Patient Files", () => {
     page,
     browser,
   }) => {
-    const inputFileName1 = faker.system.fileName();
+    // Unique, extension-free display name so this exact file's row can be
+    // located reliably among other files on the shared patient.
+    const uploadedFileName = `access-${faker.string.alphanumeric(10)}`;
 
-    // Upload file as first user (doctor)
-    await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
+    // Upload the file as the first user (doctor).
+    await uploadFile(
+      page,
+      `tests/fixtures/images/${fileName}`,
+      uploadedFileName,
+    );
 
-    // Wait for the file to appear in the list
-    await expect(
-      page.getByRole("button", { name: /view/i }).first(),
-    ).toBeVisible({ timeout: 10000 });
+    // Capture the stable Files-tab URL to reopen as a different user.
+    const filesUrl = page.url();
 
-    // View the uploaded file
-    await page.getByRole("button", { name: /view/i }).first().click();
+    // The uploader can preview the file they just added.
+    await openFilePreview(page, uploadedFileName);
 
-    // Wait for file viewer to load
-    await expect(
-      page.getByRole("button", { name: "Close", exact: true }),
-    ).toBeVisible({
-      timeout: 5000,
-    });
-    await page.getByRole("button", { name: "Close", exact: true }).click();
-
-    // Save current URL for navigation
-    const currentUrl = page.url();
-
-    // Create a new browser context with nurse authentication
+    // The same file must be accessible to a different user (nurse).
     const nurseContext = await browser.newContext({
       storageState: "tests/.auth/nurse.json",
     });
     const nursePage = await nurseContext.newPage();
-
-    // Navigate to the patient files page as nurse
-    await nursePage.goto(currentUrl);
-
-    // Wait for the files tab to load
-    await expect(
-      nursePage.getByRole("button", { name: /view/i }).first(),
-    ).toBeVisible({ timeout: 10000 });
-
-    // View the file as nurse
-    await nursePage.getByRole("button", { name: /view/i }).first().click();
-
-    // Verify file viewer loaded for nurse
-    await expect(nursePage.getByRole("button", { name: "Close" })).toBeVisible({
-      timeout: 5000,
-    });
-
-    // Clean up
-    await nursePage.close();
-    await nurseContext.close();
+    try {
+      await nursePage.goto(filesUrl);
+      await openFilePreview(nursePage, uploadedFileName);
+    } finally {
+      await nursePage.close();
+      await nurseContext.close();
+    }
   });
 
   test("Add a new patient file and rename it", async ({ page }) => {
