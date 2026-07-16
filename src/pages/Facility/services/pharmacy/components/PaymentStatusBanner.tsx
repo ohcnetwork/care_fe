@@ -233,6 +233,9 @@ export function PaymentStatusBanner({
   const { actualPaidAmount, amountDue } = computePaidAndDueAmount(invoice);
 
   const isFullyPaid = !!invoice && new Decimal(amountDue).lessThanOrEqualTo(0);
+  const isBalanced = invoice?.status === InvoiceStatus.balanced;
+  // Positive/settled state: either fully paid or manually balanced.
+  const isSettled = isFullyPaid || isBalanced;
   const hasPayments = invoice?.payments && invoice.payments.length > 0;
 
   const handleIssueInvoice = () => {
@@ -357,7 +360,7 @@ export function PaymentStatusBanner({
   }
 
   // Issued / Balanced — main banner
-  const bannerStyle = isFullyPaid
+  const bannerStyle = isSettled
     ? "border-primary-300 bg-primary-50"
     : "border-orange-200 bg-orange-50";
 
@@ -377,6 +380,14 @@ export function PaymentStatusBanner({
               <CheckCircleIcon className="size-3" />
               {t("fully_paid")}
             </Badge>
+          ) : isBalanced ? (
+            <Badge
+              variant="secondary"
+              className="bg-green-100 text-green-800 border-green-200 gap-1"
+            >
+              <EqualApproximatelyIcon className="size-3" />
+              {t("balanced")}
+            </Badge>
           ) : (
             <Badge variant="orange">
               <CircleIcon className="size-3" />
@@ -390,7 +401,7 @@ export function PaymentStatusBanner({
           {/* Status block */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2 min-w-0">
-              {isFullyPaid ? (
+              {isSettled ? (
                 <BadgeIndianRupeeIcon
                   className="size-8 text-green-600 shrink-0 bg-primary-100 rounded p-px"
                   strokeWidth={1.5}
@@ -405,12 +416,14 @@ export function PaymentStatusBanner({
                 <span
                   className={cn(
                     "font-semibold",
-                    isFullyPaid ? "text-green-800" : "text-orange-700",
+                    isSettled ? "text-green-800" : "text-orange-700",
                   )}
                 >
                   {isFullyPaid && cashPayment
                     ? t("cash_collected")
-                    : t("invoice_generated")}
+                    : isBalanced
+                      ? t("invoice_balanced")
+                      : t("invoice_generated")}
                 </span>
                 <span className="text-xs text-gray-700 font-medium">
                   {format(
@@ -423,7 +436,7 @@ export function PaymentStatusBanner({
               </div>
             </div>
             <DottedDivider
-              className={isFullyPaid ? "text-green-800" : "text-orange-700"}
+              className={isSettled ? "text-green-800" : "text-orange-700"}
             />
           </div>
 
@@ -446,7 +459,7 @@ export function PaymentStatusBanner({
                       amount={actualPaidAmount}
                       className={cn(
                         "text-xl font-bold",
-                        isFullyPaid ? "text-green-900" : "text-orange-900",
+                        isSettled ? "text-green-900" : "text-orange-900",
                       )}
                     />
                     {isFullyPaid && (
@@ -463,7 +476,7 @@ export function PaymentStatusBanner({
                 amount={amountDue}
                 className={cn(
                   "text-xl font-bold",
-                  isFullyPaid ? "text-gray-900" : "text-orange-900",
+                  isSettled ? "text-gray-900" : "text-orange-900",
                 )}
               />
             </div>
@@ -471,7 +484,7 @@ export function PaymentStatusBanner({
 
           {/* Actions (right aligned) */}
           <div className="flex items-center gap-2 lg:ml-auto flex-wrap my-auto">
-            {isFullyPaid ? (
+            {isSettled ? (
               <>
                 <Button variant="outline" asChild>
                   <Link
