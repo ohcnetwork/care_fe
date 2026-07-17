@@ -830,7 +830,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               <Button
                 variant="outline"
                 onClick={handleClearSelection}
-                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300"
+                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300 py-4.5"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
@@ -960,7 +960,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               <Button
                 variant="outline"
                 onClick={handleClearSelection}
-                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300"
+                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300 py-4.5"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
