@@ -4,8 +4,8 @@ import { useTranslation } from "react-i18next";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import {
-  EncounterDetails,
-  ResponseCard,
+  PrintableEncounterDetails as EncounterDetails,
+  PrintableResponseCard as ResponseCard,
 } from "@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses";
 
 import query from "@/Utils/request/query";

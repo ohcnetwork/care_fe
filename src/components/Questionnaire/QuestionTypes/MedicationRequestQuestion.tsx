@@ -70,7 +70,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { formatDosage } from "@/components/Medicine/utils";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import {
@@ -964,9 +964,16 @@ export function MedicationRequestQuestion({
                           <DosageInstructionList
                             instructions={instructions}
                             renderItem={(di) => {
-                              const dosage = formatDosage(di) || "";
                               const freq = formatFrequency(di) || "";
-                              return [dosage, freq].filter(Boolean).join("\n");
+                              return (
+                                <div className="flex flex-col">
+                                  <FormattedDosage
+                                    instruction={di}
+                                    fallback=""
+                                  />
+                                  {freq && <span>{freq}</span>}
+                                </div>
+                              );
                             }}
                             gap="sm"
                           />
