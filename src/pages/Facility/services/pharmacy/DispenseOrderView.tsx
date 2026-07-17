@@ -520,19 +520,21 @@ export function DispenseOrderView({
             facilityId={facilityId}
           />
         </div>
-        <Button
-          variant="link"
-          asChild
-          className="text-gray-700 hover:text-gray-900"
-        >
-          <Link
-            href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${dispenseOrder.patient.id}/prescriptions/${relatedPrescriptionIds.join(",")}`}
-            basePath="/"
+        {!!relatedPrescriptionIds.length && (
+          <Button
+            variant="link"
+            asChild
+            className="text-gray-700 hover:text-gray-900"
           >
-            <EyeIcon className="size-4" />
-            {t("preview_rx")}
-          </Link>
-        </Button>
+            <Link
+              href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${dispenseOrder.patient.id}/prescriptions/${relatedPrescriptionIds.join(",")}`}
+              basePath="/"
+            >
+              <EyeIcon className="size-4" />
+              {t("preview_rx")}
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Dispense groups (by invoice) */}

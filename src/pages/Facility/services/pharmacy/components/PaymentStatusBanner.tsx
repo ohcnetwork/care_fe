@@ -492,7 +492,7 @@ export function PaymentStatusBanner({
                     basePath="/"
                   >
                     <PrinterIcon className="size-4" />
-                    {t("print_receipt")}
+                    {t("print_invoice")}
                   </Link>
                 </Button>
                 {invoice.status === InvoiceStatus.issued && (
