@@ -177,9 +177,6 @@ function DispenseItemsTable({
                           {freq && <span>{freq}</span>}
                         </span>
                       )}
-                      {di.text && (
-                        <span className="text-gray-500">{di.text}</span>
-                      )}
                     </div>
                   );
                 }}
