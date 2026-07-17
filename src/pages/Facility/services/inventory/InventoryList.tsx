@@ -40,6 +40,7 @@ import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import { InventoryStatusOptions } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { ACTIVE_SUPPLY_DELIVERY_STATUSES } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
 import { SupplyDeliveryTable } from "./SupplyDeliveryTable";
@@ -52,6 +53,9 @@ const SORT_OPTIONS = {
 type SortOptionKey = keyof typeof SORT_OPTIONS;
 
 const DELIVERIES_PER_PAGE = 10;
+
+// Only in-progress and completed deliveries are shown in the deliveries drawer.
+const ACTIVE_DELIVERY_STATUS_FILTER = ACTIVE_SUPPLY_DELIVERY_STATUSES.join(",");
 
 interface ProductDeliveriesDrawerContentProps {
   facilityId: string;
@@ -80,6 +84,7 @@ function ProductDeliveriesDrawerContent({
         facility: facilityId,
         destination: locationId,
         supplied_inventory_item_product_knowledge: selectedProductKnowledge?.id,
+        status: ACTIVE_DELIVERY_STATUS_FILTER,
         limit: DELIVERIES_PER_PAGE,
         offset: (page - 1) * DELIVERIES_PER_PAGE,
       },
@@ -96,6 +101,7 @@ function ProductDeliveriesDrawerContent({
           <SupplyDeliveryTable
             deliveries={deliveries.results}
             facilityId={facilityId}
+            serialNumberOffset={DELIVERIES_PER_PAGE * (page - 1)}
             linkToProduct
             showLocations
           />

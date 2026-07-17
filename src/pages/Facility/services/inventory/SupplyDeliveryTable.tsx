@@ -64,6 +64,7 @@ interface SupplyDeliveryTableProps {
   facilityId?: string;
   linkToProduct?: boolean;
   showLocations?: boolean;
+  serialNumberOffset?: number;
 }
 
 export function SupplyDeliveryTable({
@@ -80,6 +81,7 @@ export function SupplyDeliveryTable({
   facilityId,
   linkToProduct = false,
   showLocations = false,
+  serialNumberOffset = 0,
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -159,7 +161,7 @@ export function SupplyDeliveryTable({
   // Build a map of delivery id -> serial number for non-cancelled deliveries
   const serialNumberMap = useMemo(() => {
     const map = new Map<string, number>();
-    let serial = 1;
+    let serial = serialNumberOffset + 1;
     for (const delivery of deliveries) {
       if (
         ACTIVE_SUPPLY_DELIVERY_STATUSES.includes(
