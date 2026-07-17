@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { RefreshCcwIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,20 +31,9 @@ import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy
 
 import { Code } from "@/types/base/code/code";
 import {
-  ChargeItemBatchResponse,
-  extractChargeItemsFromBatchResponse,
-} from "@/types/billing/chargeItem/chargeItem";
-import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
-import {
-  MedicationDispenseCreate,
-  MedicationDispenseStatus,
-} from "@/types/emr/medicationDispense/medicationDispense";
-import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
-import {
   buildTimingForTextDosage,
   computeMedicationDispenseQuantity,
   getTimingBounds,
-  MedicationCategory,
   MedicationRequestDosageInstruction,
   sumManSlots,
   timingBoundsToRepeat,
@@ -55,51 +44,57 @@ import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/product
 
 import { decimal, isLessThanOrEqual, isPositive } from "@/Utils/decimal";
 import { isLotAllowedForDispensing } from "@/Utils/inventory";
-import { useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 const EMPTY_INSTRUCTION: MedicationRequestDosageInstruction = {
-  as_needed_boolean: false,
+  as_needed_boolean: true,
 };
+
+/**
+ * The medication details collected by {@link AddMedicationRow}. The caller
+ * decides what to do with them (create dispenses, append to a bill form, …).
+ */
+export interface AddMedicationValue {
+  productKnowledge: ProductKnowledgeBase;
+  dosageInstructions: MedicationRequestDosageInstruction[];
+  note: string;
+  lots: LotSelection[];
+}
 
 interface Props {
   facilityId: string;
   locationId: string;
-  dispenseOrderId: string;
   /**
-   * Encounter to attach the created dispenses to. Added medications have no
-   * authorizing request, so the encounter must be supplied by the caller
-   * (derived from the order's existing dispenses).
+   * Called when the user confirms the medication. Receives the picked
+   * product, its dosage instructions, an optional note, and the selected
+   * lots. May return a promise; the sheet closes once it resolves. Reject
+   * (or throw) to keep the sheet open, e.g. when a save fails.
    */
-  encounterId?: string;
-  /**
-   * When set, charge items of the created dispenses are appended to this
-   * draft invoice. When unset, the charge items stay unbilled and the user
-   * can create an invoice manually.
-   */
-  draftInvoiceId?: string;
+  onSave: (value: AddMedicationValue) => void | Promise<void>;
+  /** Whether an external save operation triggered by `onSave` is in progress. */
+  isSaving?: boolean;
+  /** Disables the save action, e.g. when a required context is missing. */
+  disableSave?: boolean;
 }
 
 /**
- * Inline "add row" placeholder for an open dispense order. The medication
- * picker sits directly in the page; picking a medicine opens a sheet to
- * specify full dosage instructions (dose, frequency, duration, PRN reason,
- * route, site, method, additional instructions) and lots. Lots are
- * auto-selected from the computed dispense quantity while remaining fully
- * adjustable. Each selected lot creates one dispense attached to the same
- * dispense order, and the resulting charge items are appended to the given
- * draft invoice, if any.
+ * Inline "add row" placeholder that lets the user add a medication with full
+ * dosage instructions and lot selection. The medication picker sits directly
+ * in the page; picking a medicine opens a sheet to specify full dosage
+ * instructions (dose, frequency, duration, PRN reason, route, site, method,
+ * additional instructions) and lots. Lots are auto-selected from the computed
+ * dispense quantity while remaining fully adjustable. The collected values are
+ * handed back to the caller via `onSave`, which owns what happens next.
  */
-export function AddDispenseMedicationRow({
+export function AddMedicationRow({
   facilityId,
   locationId,
-  dispenseOrderId,
-  encounterId,
-  draftInvoiceId,
+  onSave,
+  isSaving = false,
+  disableSave = false,
 }: Props) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
 
   const [open, setOpen] = useState(false);
   const [productKnowledge, setProductKnowledge] = useState<
@@ -148,37 +143,6 @@ export function AddDispenseMedicationRow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, productKnowledge?.id, requiredQuantity]);
 
-  const { mutateAsync: attachItemsToInvoice } = useMutation({
-    mutationFn: mutate(chargeItemApi.addChargeItemsToInvoice, {
-      pathParams: { facilityId, invoiceId: draftInvoiceId ?? "" },
-    }),
-  });
-
-  /**
-   * Attaches the newly created charge items to the draft invoice. The
-   * existing charge items and invoice metadata are preserved server-side.
-   */
-  const addChargeItemsToDraftInvoice = async (chargeItemIds: string[]) => {
-    if (!draftInvoiceId || chargeItemIds.length === 0) return;
-
-    await attachItemsToInvoice({ charge_items: chargeItemIds });
-  };
-
-  const { mutate: saveMedication, isPending: isSaving } = useBatchRequest({
-    onSuccess: async (response) => {
-      const chargeItems = extractChargeItemsFromBatchResponse(
-        response as ChargeItemBatchResponse,
-      );
-      await addChargeItemsToDraftInvoice(chargeItems.map((item) => item.id));
-
-      queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
-      queryClient.invalidateQueries({ queryKey: ["dispenseOrder"] });
-      queryClient.invalidateQueries({ queryKey: ["invoice"] });
-      toast.success(t("medication_added_successfully"));
-      setOpen(false);
-    },
-  });
-
   const handleSelectMedication = (pk: ProductKnowledgeBase | undefined) => {
     if (!pk) return;
     setProductKnowledge(pk);
@@ -221,32 +185,21 @@ export function AddDispenseMedicationRow({
 
   const areLotsValid = lots.length > 0 && lots.every(isLotValid);
 
-  const handleSave = () => {
-    if (!productKnowledge || !encounterId) return;
+  const handleSave = async () => {
+    if (!productKnowledge) return;
     if (!isDoseValid || !isFrequencyValid || !areLotsValid) return;
 
-    const whenPrepared = new Date();
-
-    saveMedication(
-      lots.map((lot) => ({
-        api: medicationDispenseApi.create,
-        referenceId: `add_medication_lot_${lot.item.id}`,
-        body: {
-          status: MedicationDispenseStatus.preparation,
-          category: MedicationCategory.outpatient,
-          when_prepared: whenPrepared,
-          note: note || undefined,
-          dosage_instruction: [instruction],
-          encounter: encounterId,
-          location: locationId,
-          authorizing_request: null,
-          item: lot.item.id,
-          quantity: lot.quantity,
-          fully_dispensed: true,
-          order: dispenseOrderId,
-        } satisfies MedicationDispenseCreate,
-      })),
-    );
+    try {
+      await onSave({
+        productKnowledge,
+        dosageInstructions: [instruction],
+        note,
+        lots,
+      });
+      setOpen(false);
+    } catch {
+      // Errors are surfaced by the caller's save handler; keep the sheet open.
+    }
   };
 
   const additionalInstructions: Code[] =
@@ -290,7 +243,7 @@ export function AddDispenseMedicationRow({
           <SheetHeader>
             <SheetTitle>{t("add_medication")}</SheetTitle>
             <SheetDescription>
-              {t("add_medication_to_dispense_order_description")}
+              {t("add_medication_description")}
             </SheetDescription>
           </SheetHeader>
 
@@ -571,11 +524,11 @@ export function AddDispenseMedicationRow({
               disabled={
                 isSaving ||
                 isAutoSelecting ||
+                disableSave ||
                 !productKnowledge ||
                 !isDoseValid ||
                 !isFrequencyValid ||
-                !areLotsValid ||
-                !encounterId
+                !areLotsValid
               }
             >
               {t("add_medication")}

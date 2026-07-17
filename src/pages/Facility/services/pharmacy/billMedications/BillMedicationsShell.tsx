@@ -3,7 +3,7 @@ import Page from "@/components/Common/Page";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Form } from "@/components/ui/form";
-import { AddMedicationTrigger } from "@/pages/Facility/services/pharmacy/AddMedicationTrigger";
+import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { BillMedicationsFooter } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsFooter";
 import { BillMedicationsLoadingCard } from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsLoadingCard";
 import {
@@ -13,10 +13,11 @@ import {
 import { billMedicationsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { BillMedicationsMode } from "@/pages/Facility/services/pharmacy/billMedications/modes/types";
 import UnbilledPrescriptionsCard from "@/pages/Facility/services/pharmacy/billMedications/UnbilledPrescriptionsCard";
+import { AddMedicationRow } from "@/pages/Facility/services/pharmacy/components/AddMedicationSheet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pill } from "lucide-react";
 import { useEffect } from "react";
-import { GlobalError, useForm } from "react-hook-form";
+import { GlobalError, useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Fragment } from "react/jsx-runtime";
 import { toast } from "sonner";
@@ -28,12 +29,18 @@ interface Props {
 
 export default function BillMedicationsShell({ facilityId, mode }: Props) {
   const { t } = useTranslation();
+  const { locationId } = useCurrentLocation();
 
   const form = useForm({
     resolver: zodResolver(billMedicationsFormSchema),
     defaultValues: mode.defaultValues,
     mode: "onSubmit",
     reValidateMode: "onChange",
+  });
+
+  const { append: appendOtherItem } = useFieldArray({
+    control: form.control,
+    name: "otherItems",
   });
 
   useEffect(() => {
@@ -140,7 +147,22 @@ export default function BillMedicationsShell({ facilityId, mode }: Props) {
               </div>
             </div>
 
-            <AddMedicationTrigger form={form} />
+            <AddMedicationRow
+              facilityId={facilityId}
+              locationId={locationId}
+              onSave={({ productKnowledge, dosageInstructions, lots }) =>
+                appendOtherItem({
+                  reference_id: crypto.randomUUID(),
+                  isSelected: true,
+                  medication: null,
+                  dosageInstructions,
+                  productKnowledge,
+                  substitution: null,
+                  lots,
+                  allGiven: true,
+                })
+              }
+            />
           </div>
           <div className="h-20" />
           <BillMedicationsFooter
