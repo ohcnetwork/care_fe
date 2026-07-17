@@ -1,9 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { PencilIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { formatMedicationLine } from "@/components/Medicine/utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,13 +29,15 @@ import {
 import { InventoryItemsSelector } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import { LotSelection } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 
-import batchApi from "@/types/base/batch/batchApi";
 import {
+  getSubstitutionReasonDisplay,
+  getSubstitutionTypeDisplay,
   MedicationDispenseCreate,
   MedicationDispenseRead,
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
+import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 
 import {
   add,
@@ -41,9 +46,9 @@ import {
   isPositive,
   roundWhole,
 } from "@/Utils/decimal";
-import mutate from "@/Utils/request/mutate";
+import { useBatchRequest } from "@/Utils/request/batch";
 import query from "@/Utils/request/query";
-import { HttpMethod } from "@/Utils/request/types";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface Props {
   facilityId: string;
@@ -79,8 +84,7 @@ export function EditDispenseSheet({ facilityId, locationId, dispense }: Props) {
   });
   const encounterId = encounterFromRequest ?? retrievedDispense?.encounter.id;
 
-  const { mutate: saveEdit, isPending: isSaving } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
+  const { mutate: saveEdit, isPending: isSaving } = useBatchRequest({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
       queryClient.invalidateQueries({ queryKey: ["dispenseOrder"] });
@@ -147,22 +151,19 @@ export function EditDispenseSheet({ facilityId, locationId, dispense }: Props) {
       order: dispense.order.id,
     };
 
-    saveEdit({
-      requests: [
-        {
-          url: `/api/v1/medication/dispense/${dispense.id}/`,
-          method: HttpMethod.PUT,
-          reference_id: `decline_${dispense.id}`,
-          body: { status: MedicationDispenseStatus.declined },
-        },
-        {
-          url: "/api/v1/medication/dispense/",
-          method: HttpMethod.POST,
-          reference_id: `replace_${dispense.id}`,
-          body: createBody,
-        },
-      ],
-    });
+    saveEdit([
+      {
+        api: medicationDispenseApi.update,
+        pathParams: { id: dispense.id },
+        referenceId: `decline_${dispense.id}`,
+        body: { status: MedicationDispenseStatus.declined },
+      },
+      {
+        api: medicationDispenseApi.create,
+        referenceId: `replace_${dispense.id}`,
+        body: createBody,
+      },
+    ]);
   };
 
   return (
@@ -180,10 +181,10 @@ export function EditDispenseSheet({ facilityId, locationId, dispense }: Props) {
       <SheetContent className="sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("edit_dispense")}</SheetTitle>
-          <SheetDescription>
-            {dispense.item.product.product_knowledge.name}
-          </SheetDescription>
+          <SheetDescription>{t("edit_dispense_description")}</SheetDescription>
         </SheetHeader>
+
+        <ExistingDispenseDetails dispense={dispense} />
 
         <div className="flex flex-col gap-6 px-4">
           <div className="flex flex-col gap-2">
@@ -258,5 +259,134 @@ export function EditDispenseSheet({ facilityId, locationId, dispense }: Props) {
         </SheetFooter>
       </SheetContent>
     </Sheet>
+  );
+}
+
+/**
+ * Read-only summary of the dispense being edited: the dispensed medicine
+ * (with substitution context when it differs from what was prescribed),
+ * current lot & quantity, prescriber details, and the dosage instructions.
+ */
+function ExistingDispenseDetails({
+  dispense,
+}: {
+  dispense: MedicationDispenseRead;
+}) {
+  const { t } = useTranslation();
+
+  const medication = dispense.authorizing_request;
+  const batchNumber = dispense.item.product.batch?.lot_number;
+  const expiryDate = dispense.item.product.expiration_date;
+  const baseUnit =
+    dispense.item.product.product_knowledge.base_unit?.display || t("units");
+  const instructions = dispense.dosage_instruction?.length
+    ? dispense.dosage_instruction
+    : (medication?.dosage_instruction ?? []);
+  const substitution = dispense.substitution?.was_substituted
+    ? dispense.substitution
+    : undefined;
+
+  const dispensedName = dispense.item.product.product_knowledge.name;
+  const prescribedName = medication ? displayMedicationName(medication) : "";
+  // Only surface the prescribed medicine when it differs from what is being
+  // dispensed — otherwise showing the same name twice adds nothing.
+  const isDifferentFromPrescribed =
+    !!prescribedName && prescribedName !== dispensedName;
+
+  return (
+    <div className="mx-4 flex flex-col gap-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
+      {/* Dispensed medicine (with substitution context) + lot & quantity */}
+      <div className="flex flex-col gap-0.5">
+        {isDifferentFromPrescribed && (
+          <span className="text-xs italic text-gray-500 line-through">
+            {prescribedName}
+          </span>
+        )}
+        <span className="flex items-center gap-2 font-semibold text-gray-900">
+          {dispensedName}
+          {(isDifferentFromPrescribed || substitution) && (
+            <Badge variant="orange">{t("substituted")}</Badge>
+          )}
+        </span>
+        {substitution && (
+          <span className="text-xs text-gray-600">
+            {getSubstitutionTypeDisplay(t, substitution.substitution_type)}
+            <span className="mx-1.5 text-gray-400">·</span>
+            {getSubstitutionReasonDisplay(t, substitution.reason)}
+          </span>
+        )}
+        <span className="text-xs text-gray-600">
+          {batchNumber && (
+            <>
+              {t("batch")}:{" "}
+              <span className="font-medium text-gray-900">{batchNumber}</span>
+              <span className="mx-1.5 text-gray-400">·</span>
+            </>
+          )}
+          {expiryDate && (
+            <>
+              {t("expiry_abbrevated")}:{" "}
+              <span className="font-medium text-gray-900">
+                {format(new Date(expiryDate), "dd/MM/yyyy")}
+              </span>
+              <span className="mx-1.5 text-gray-400">·</span>
+            </>
+          )}
+          {t("quantity")}:{" "}
+          <span className="font-medium text-gray-900">
+            {roundWhole(dispense.quantity)} {baseUnit}
+          </span>
+        </span>
+      </div>
+
+      {/* Prescriber details — the medicine name is already shown above */}
+      {medication && (
+        <div className="flex flex-col gap-0.5 border-t border-gray-200 pt-2">
+          <span className="text-xs text-gray-600">
+            {t("prescribed_by")}:{" "}
+            <span className="font-medium text-gray-900">
+              {formatName(medication.requester ?? medication.created_by)}
+            </span>
+            <span className="mx-1.5 text-gray-400">·</span>
+            {formatDateTime(medication.authored_on)}
+          </span>
+          {medication.note && (
+            <span className="text-xs text-gray-600">
+              {t("note")}: {medication.note}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Dosage instructions */}
+      {instructions.length > 0 && (
+        <div className="flex flex-col gap-1 border-t border-gray-200 pt-2">
+          <span className="text-xs font-medium text-gray-500">
+            {t("instructions")}
+          </span>
+          {instructions.map((instruction, index) => (
+            <div key={index} className="flex flex-col">
+              <span className="text-gray-900">
+                {formatMedicationLine(instruction, { unitLabel: baseUnit }) ||
+                  "-"}
+              </span>
+              {instruction.text && (
+                <span className="text-xs text-gray-600">
+                  {instruction.text}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Dispense note */}
+      {dispense.note && (
+        <div className="flex flex-col gap-0.5 border-t border-gray-200 pt-2">
+          <span className="text-xs font-medium text-gray-500">{t("note")}</span>
+          <span className="text-gray-900">{dispense.note}</span>
+        </div>
+      )}
+    </div>
   );
 }

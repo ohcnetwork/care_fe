@@ -87,6 +87,7 @@ import {
 } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 
+import { AddDispenseMedicationRow } from "@/pages/Facility/services/pharmacy/components/AddDispenseMedicationSheet";
 import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
 import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
 import mutate from "@/Utils/request/mutate";
@@ -162,6 +163,23 @@ export function DispenseOrderView({
   const relatedPrescriptionIds = dispenses
     .map((d) => d.authorizing_request?.prescription?.id)
     .filter((id): id is string => !!id);
+
+  // Encounter for medications added directly to this order (they have no
+  // authorizing request). Any dispense's encounter works — prefer one from an
+  // authorizing request, else recover it from the first dispense's retrieve
+  // shape.
+  const knownEncounterId = dispenses.find(
+    (d) => d.authorizing_request?.encounter,
+  )?.authorizing_request?.encounter;
+  const { data: firstDispenseRetrieve } = useQuery({
+    queryKey: ["medication_dispense_retrieve", dispenses[0]?.id],
+    queryFn: query(medicationDispenseApi.get, {
+      pathParams: { id: dispenses[0]?.id ?? "" },
+    }),
+    enabled: !knownEncounterId && !!dispenses[0]?.id,
+  });
+  const orderEncounterId =
+    knownEncounterId ?? firstDispenseRetrieve?.encounter.id;
 
   const { data: account } = usePatientDefaultBillingAccount({
     facilityId,
@@ -354,6 +372,25 @@ export function DispenseOrderView({
   // surfaces the next-action buttons instead.
   const showBanners = !isOrderCancelled;
 
+  // Charge items of medications added directly to the order attach to the
+  // first draft invoice, if any. With no draft invoice they stay unbilled and
+  // the user can create an invoice manually.
+  const draftInvoiceId = invoices.find(
+    (inv) => inv.status === InvoiceStatus.draft,
+  )?.id;
+
+  // Placeholder "add row" rendered below the dispense tables while the order
+  // is open.
+  const addMedicationRow = isOrderOpen ? (
+    <AddDispenseMedicationRow
+      facilityId={facilityId}
+      locationId={locationId}
+      dispenseOrderId={dispenseOrderId}
+      encounterId={orderEncounterId}
+      draftInvoiceId={draftInvoiceId}
+    />
+  ) : null;
+
   const handlePutOnHold = () => {
     updateStatus(
       { newStatus: DispenseOrderStatus.draft },
@@ -408,42 +445,6 @@ export function DispenseOrderView({
               </TooltipProvider>
             )}
           </div>
-        </div>
-        <div className="flex items-start gap-x-8 gap-y-2 text-sm flex-wrap">
-          <div className="flex flex-col">
-            <span className="text-xs text-gray-500">{t("location")}:</span>
-            <span className="font-semibold text-gray-900 text-xs">
-              {dispenseOrder.location.name}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-gray-500">{t("created")}:</span>
-            <span className="font-semibold text-gray-900 text-xs">
-              {dispenseOrder.created_by
-                ? formatName(dispenseOrder.created_by)
-                : t("unknown")}
-              <span className="text-gray-400 mx-1.5">·</span>
-              <span className="text-gray-700 font-normal">
-                {format(dispenseOrder.created_date, "PPPpp")}
-              </span>
-            </span>
-          </div>
-          {dispenseOrder.modified_date !== dispenseOrder.created_date && (
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-500">
-                {t("last_updated")}:
-              </span>
-              <span className="font-semibold text-gray-900 text-xs">
-                {dispenseOrder.updated_by
-                  ? formatName(dispenseOrder.updated_by)
-                  : t("unknown")}
-                <span className="text-gray-400 mx-1.5">·</span>
-                <span className="text-gray-700 font-normal">
-                  {formatDateTime(dispenseOrder.modified_date)}
-                </span>
-              </span>
-            </div>
-          )}
         </div>
       </div>
 
@@ -536,11 +537,14 @@ export function DispenseOrderView({
 
       {/* Dispense groups (by invoice) */}
       {filteredDispenses.length === 0 ? (
-        <EmptyState
-          title={t("no_medications_found")}
-          description={t("no_medications_found_description")}
-          icon={<CareIcon icon="l-tablets" className="text-primary size-6" />}
-        />
+        <div className="flex flex-col gap-6">
+          <EmptyState
+            title={t("no_medications_found")}
+            description={t("no_medications_found_description")}
+            icon={<CareIcon icon="l-tablets" className="text-primary size-6" />}
+          />
+          {addMedicationRow}
+        </div>
       ) : (
         <div className="flex flex-col gap-6 pb-24">
           {/* Unbilled group — dispenses not yet settled in an active invoice */}
@@ -595,6 +599,9 @@ export function DispenseOrderView({
             );
           })}
 
+          {/* Placeholder row to add a new medication to the order */}
+          {addMedicationRow}
+
           {/* Cancelled dispenses — collapsible, always shown last */}
           {(() => {
             const groupDispenses = cancelledDispenses.filter(matchesFilter);
@@ -626,6 +633,47 @@ export function DispenseOrderView({
           })()}
         </div>
       )}
+
+      {/* Audit information (location, created, updated) */}
+      <div
+        className={cn(
+          "mt-6 flex items-start gap-x-8 gap-y-2 text-sm flex-wrap border-t border-gray-200 pt-4",
+          isOrderOpen && "pb-28",
+        )}
+      >
+        <div className="flex flex-col">
+          <span className="text-xs text-gray-500">{t("location")}:</span>
+          <span className="font-semibold text-gray-900 text-xs">
+            {dispenseOrder.location.name}
+          </span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-xs text-gray-500">{t("created")}:</span>
+          <span className="font-semibold text-gray-900 text-xs">
+            {dispenseOrder.created_by
+              ? formatName(dispenseOrder.created_by)
+              : t("unknown")}
+            <span className="text-gray-400 mx-1.5">·</span>
+            <span className="text-gray-700 font-normal">
+              {format(dispenseOrder.created_date, "PPPpp")}
+            </span>
+          </span>
+        </div>
+        {dispenseOrder.modified_date !== dispenseOrder.created_date && (
+          <div className="flex flex-col">
+            <span className="text-xs text-gray-500">{t("last_updated")}:</span>
+            <span className="font-semibold text-gray-900 text-xs">
+              {dispenseOrder.updated_by
+                ? formatName(dispenseOrder.updated_by)
+                : t("unknown")}
+              <span className="text-gray-400 mx-1.5">·</span>
+              <span className="text-gray-700 font-normal">
+                {formatDateTime(dispenseOrder.modified_date)}
+              </span>
+            </span>
+          </div>
+        )}
+      </div>
 
       {/* Sticky footer action bar */}
       {isOrderOpen && (
