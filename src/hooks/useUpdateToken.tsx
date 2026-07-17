@@ -26,9 +26,6 @@ export function useUpdateToken({
         queryKey: ["token", token.id],
       });
       queryClient.invalidateQueries({
-        queryKey: ["token", facilityId, token.queue.id, token.id],
-      });
-      queryClient.invalidateQueries({
         queryKey: ["infinite-tokens", facilityId, token.queue.id],
       });
       if (token.patient?.id) {

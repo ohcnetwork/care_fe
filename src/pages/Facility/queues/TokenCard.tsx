@@ -10,7 +10,6 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { formatPatientAge } from "@/Utils/utils";
 import { Separator } from "@/components/ui/separator";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { cn } from "@/lib/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import {
   formatScheduleResourceName,
@@ -24,19 +23,10 @@ interface Props {
   id?: string;
   token: TokenRetrieve;
   facility: FacilityRead;
-  className?: string;
-  tokenActions?: boolean;
   showlogo?: boolean;
 }
 
-const TokenCard = ({
-  id,
-  token,
-  facility,
-  className,
-  tokenActions = true,
-  showlogo = true,
-}: Props) => {
+const TokenCard = ({ id, token, facility, showlogo = true }: Props) => {
   const { t } = useTranslation();
   const isLargeScreen = useBreakpoints({ lg: true, default: false });
 
@@ -66,10 +56,7 @@ const TokenCard = ({
   return (
     <Card
       id={id}
-      className={cn(
-        "p-3 pt-0 border border-gray-300 relative hover:scale-101 hover:shadow-md transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none",
-        className,
-      )}
+      className="p-3 pt-0 border border-gray-300 relative hover:scale-101 transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"
     >
       {showlogo && (
         <div className="absolute inset-0 opacity-[0.1] pointer-events-none bg-[url('/images/care_logo_gray.svg')] bg-center bg-no-repeat bg-[length:40%_auto] lg:bg-[length:60%_auto]" />
@@ -165,33 +152,31 @@ const TokenCard = ({
             </div>
           </div>
         </div>
-        {tokenActions && (
-          <div>
-            <Separator className="my-3 print:hidden" />
-            <div className="flex items-center justify-between">
-              <Button
-                variant="link"
-                asChild
-                className="text-base font-semibold underline capitalize text-gray-950"
+        <div>
+          <Separator className="my-3 print:hidden" />
+          <div className="flex items-center justify-between">
+            <Button
+              variant="link"
+              asChild
+              className="text-base font-semibold underline capitalize text-gray-950"
+            >
+              <Link
+                href={`/facility/${facility.id}/${resourceTypeToResourcePathSlug[token.resource_type]}/${token.resource.id}/queues/${token.queue.id}`}
               >
-                <Link
-                  href={`/facility/${facility.id}/${resourceTypeToResourcePathSlug[token.resource_type]}/${token.resource.id}/queues/${token.queue.id}`}
-                >
-                  {t("queue_board")}
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => printToken(token.id)}
-                className="text-base font-semibold text-gray-950"
-              >
-                <PrinterIcon className="mr-2 size-4" />
-                {t("print")}
-                <ShortcutBadge actionId="print-button" />
-              </Button>
-            </div>
+                {t("queue_board")}
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => printToken(token.id)}
+              className="text-base font-semibold text-gray-950"
+            >
+              <PrinterIcon className="mr-2 size-4" />
+              {t("print")}
+              <ShortcutBadge actionId="print-button" />
+            </Button>
           </div>
-        )}
+        </div>
       </div>
     </Card>
   );

@@ -19,8 +19,6 @@ interface TokenCardWithButtonProps {
   token: TokenRetrieve;
   facility: FacilityRead;
   showMarkInServiceButton?: boolean;
-  cardClassName?: string;
-  tokenActions?: boolean;
   onSuccess?: () => void;
   onOpenDialogForServicePoint?: () => void;
 }
@@ -29,8 +27,6 @@ export default function TokenCardWithButton({
   token,
   facility,
   showMarkInServiceButton = true,
-  cardClassName,
-  tokenActions = false,
   onSuccess,
   onOpenDialogForServicePoint,
 }: TokenCardWithButtonProps) {
@@ -68,8 +64,6 @@ export default function TokenCardWithButton({
         token={token}
         facility={facility}
         id={`token-card-${token.id}`}
-        className={cardClassName}
-        tokenActions={tokenActions}
       />
       {showMarkInServiceButton && token.status === TokenStatus.CREATED && (
         <div className="flex w-full items-center justify-center bg-white p-3 rounded-md -mt-1">

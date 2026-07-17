@@ -20,9 +20,11 @@ import {
   getQueueTokenStatus,
   QUEUE_TOKEN_STATUS_COLORS,
   renderTokenNumber,
+  TokenRetrieve,
   TokenStatus,
 } from "@/types/tokens/token/token";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
 import { ChevronsDownUp, ChevronsUpDown, TicketIcon } from "lucide-react";
 
@@ -39,7 +41,7 @@ export default function PatientTokensList({
 }: PatientTokensListProps) {
   const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [expandedTokens, setExpandedTokens] = useState(
+  const [expandedTokenIds, setExpandedTokenIds] = useState(
     () => new Set(initialExpandedTokenId ? [initialExpandedTokenId] : []),
   );
 
@@ -51,26 +53,34 @@ export default function PatientTokensList({
 
   const { data, isLoading } = useQuery({
     queryKey: ["tokens", patientId, facility.id, selectedDate],
-    queryFn: query(scheduleApis.appointments.get_tokens, {
+    queryFn: query.paginated(scheduleApis.appointments.get_tokens, {
       pathParams: { patientId },
       queryParams: {
         facility: facility.id,
-        limit: 50,
+        limit: 200,
         date: dateQueryString(selectedDate),
       },
+    }),
+    // ordered by selected token first, then remaining tokens
+    select: (data: PaginatedResponse<TokenRetrieve>) => ({
+      ...data,
+      results: [
+        ...data.results.filter((token) => token.id === initialExpandedTokenId),
+        ...data.results.filter((token) => token.id !== initialExpandedTokenId),
+      ],
     }),
   });
 
   const tokens = data?.results || [];
 
   const toggleTokenExpansion = (tokenId: string) => {
-    const newExpanded = new Set(expandedTokens);
+    const newExpanded = new Set(expandedTokenIds);
     if (newExpanded.has(tokenId)) {
       newExpanded.delete(tokenId);
     } else {
       newExpanded.add(tokenId);
     }
-    setExpandedTokens(newExpanded);
+    setExpandedTokenIds(newExpanded);
   };
 
   if (isLoading) {
@@ -124,12 +134,8 @@ export default function PatientTokensList({
         />
       )}
 
-      {[
-        // ordered by selected token first, then remaining token
-        ...tokens.filter((token) => token.id === initialExpandedTokenId),
-        ...tokens.filter((token) => token.id !== initialExpandedTokenId),
-      ].map((token) => {
-        const isExpanded = expandedTokens.has(token.id);
+      {tokens.map((token) => {
+        const isExpanded = expandedTokenIds.has(token.id);
 
         return (
           <Collapsible
@@ -195,7 +201,6 @@ export default function PatientTokensList({
                         initialExpandedTokenId === token.id &&
                         token.status === TokenStatus.CREATED
                       }
-                      cardClassName="rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"
                     />
                   </div>
                 </CardContent>

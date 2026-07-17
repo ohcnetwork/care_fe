@@ -37,7 +37,6 @@ export enum QueueTokenStatus {
   CALLED = "called",
   RECALL = "recall",
   SERVING = "serving",
-
   FULFILLED = "fulfilled",
   CANCELLED = "cancelled",
   ENTERED_IN_ERROR = "entered_in_error",
@@ -56,7 +55,7 @@ export const QUEUE_TOKEN_STATUS_COLORS = {
   React.ComponentProps<typeof Badge>["variant"]
 >;
 
-const TOKEN_TO_QUEUE_STATUS: Record<TokenStatus, QueueTokenStatus> = {
+const TOKEN_TO_QUEUE_STATUS = {
   [TokenStatus.UNFULFILLED]: QueueTokenStatus.RECALL,
   [TokenStatus.IN_PROGRESS]: QueueTokenStatus.SERVING,
   [TokenStatus.FULFILLED]: QueueTokenStatus.FULFILLED,
