@@ -125,7 +125,7 @@ export const InventoryItemsSelector = ({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="py-1 px-2 border-gray-300 shadow-none"
+          className="py-1 px-3 border-gray-300 shadow-none w-full font-normal"
           type="button"
           disabled={disabled}
         >

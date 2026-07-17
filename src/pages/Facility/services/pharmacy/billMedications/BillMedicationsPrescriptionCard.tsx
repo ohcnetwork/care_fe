@@ -556,8 +556,11 @@ const MedicineLineItem = ({
     if (canAutoSelectInventoryItems) {
       autoSelectInventoryItems(undefined);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canAutoSelectInventoryItems, autoSelectInventoryItems]);
+  }, [
+    canAutoSelectInventoryItems,
+    autoSelectInventoryItems,
+    effectiveProductKnowledge?.id,
+  ]);
 
   return (
     <div className="contents group divide-x divide-gray-200">
