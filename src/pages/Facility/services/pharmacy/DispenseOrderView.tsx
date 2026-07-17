@@ -292,13 +292,14 @@ export function DispenseOrderView({
       locationId,
       dispenseOrder: dispenseOrder!,
       dispenses,
-      onSuccess: (newStatus) => {
-        if (newStatus === DispenseOrderStatus.completed) {
-          navigate(
-            `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/completed`,
-            { replace: true },
-          );
-        }
+      onSuccess: () => {
+        // TODO: add this when completed page gets mini print previews
+        // if (newStatus === DispenseOrderStatus.completed) {
+        //   navigate(
+        //     `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/completed`,
+        //     { replace: true },
+        //   );
+        // }
       },
     });
 

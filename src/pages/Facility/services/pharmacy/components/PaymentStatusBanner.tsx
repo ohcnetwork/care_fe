@@ -45,6 +45,7 @@ import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
+import { MarkInvoiceAsBalancedDialog } from "@/pages/Facility/billing/invoice/components/MarkInvoiceAsBalancedDialog";
 
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
@@ -657,35 +658,16 @@ export function PaymentStatusBanner({
       </AlertDialog>
 
       {/* Mark as Balanced Confirmation */}
-      <AlertDialog
+      <MarkInvoiceAsBalancedDialog
         open={markBalancedDialogOpen}
         onOpenChange={setMarkBalancedDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("mark_invoice_as_balanced")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("mark_as_balanced_confirmation")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isMarkingBalanced}>
-              {t("no_go_back")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                handleMarkAsBalanced();
-                setMarkBalancedDialogOpen(false);
-              }}
-              disabled={isMarkingBalanced}
-            >
-              <CheckCircleIcon className="size-4" />
-              {t("yes_mark_as_balanced")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        invoice={invoice}
+        isPending={isMarkingBalanced}
+        onConfirm={() => {
+          handleMarkAsBalanced();
+          setMarkBalancedDialogOpen(false);
+        }}
+      />
     </>
   );
 }

@@ -314,5 +314,3 @@ export const InventoryItemsSelector = ({
     </Popover>
   );
 };
-
-// TODO: auto close popover when quantity matches the required quantity only
