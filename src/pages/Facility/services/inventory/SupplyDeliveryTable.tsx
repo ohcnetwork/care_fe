@@ -172,7 +172,7 @@ export function SupplyDeliveryTable({
       }
     }
     return map;
-  }, [deliveries]);
+  }, [deliveries, serialNumberOffset]);
 
   return (
     <Table>
