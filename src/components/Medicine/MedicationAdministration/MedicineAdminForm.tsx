@@ -22,12 +22,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { getDosageFromInstruction } from "@/components/Medicine/MedicationAdministration/utils";
-import {
-  formatDosage,
-  formatDuration,
-  formatFrequency,
-} from "@/components/Medicine/utils";
+import { formatDuration, formatFrequency } from "@/components/Medicine/utils";
 
 import { formatName } from "@/Utils/utils";
 import {
@@ -124,7 +121,9 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
           >
             <div>
               <Label className="text-xs text-gray-500">{t("dosage")}</Label>
-              <p className="font-medium">{formatDosage(di)}</p>
+              <p className="font-medium">
+                <FormattedDosage instruction={di} />
+              </p>
             </div>
             <div>
               <Label className="text-xs text-gray-500">{t("frequency")}</Label>
@@ -173,7 +172,9 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
               <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <Label className="text-xs text-gray-500">{t("dosage")}</Label>
-                  <p className="font-medium">{formatDosage(di)}</p>
+                  <p className="font-medium">
+                    <FormattedDosage instruction={di} />
+                  </p>
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">
@@ -619,9 +620,8 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
               const isCurrentMedication = req.id === medication.id;
               const canSelect = !isCurrentMedication && onMedicationChange;
               const instructionSummaries = req.dosage_instruction.map((di) => {
-                const dosage = formatDosage(di);
                 const freq = formatFrequency(di);
-                return { dosage, freq };
+                return { di, freq };
               });
               return (
                 <button
@@ -653,7 +653,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                                 : "text-gray-700"
                             }
                           >
-                            {summary.dosage}
+                            <FormattedDosage instruction={summary.di} />
                           </span>
                           {summary.freq && (
                             <span
