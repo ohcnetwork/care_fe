@@ -178,7 +178,7 @@ export const formatPatientAge = (
   }
 
   // 12 months to 16 years: years and months (suppress 0 months)
-  // Start at 11 months 30 days = 364 days
+  // Gated on calendar-aware diff('years') >= 1 (i.e. on or after the first birthday)
   if (years >= 1) {
     const months = end.diff(start, "month");
     const leftoverMonths = months % 12;
