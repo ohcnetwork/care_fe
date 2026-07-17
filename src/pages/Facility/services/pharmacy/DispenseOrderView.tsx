@@ -93,7 +93,7 @@ import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDe
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 import { format } from "date-fns";
 
 export function DispenseOrderView({
@@ -638,7 +638,7 @@ export function DispenseOrderView({
       <div
         className={cn(
           "mt-6 flex items-start gap-x-8 gap-y-2 text-sm flex-wrap border-t border-gray-200 pt-4",
-          isOrderOpen && "pb-28",
+          isOrderOpen && "pb-16",
         )}
       >
         <div className="flex flex-col">
@@ -661,14 +661,14 @@ export function DispenseOrderView({
         </div>
         {dispenseOrder.modified_date !== dispenseOrder.created_date && (
           <div className="flex flex-col">
-            <span className="text-xs text-gray-500">{t("last_updated")}:</span>
+            <span className="text-xs text-gray-500">{t("updated")}:</span>
             <span className="font-semibold text-gray-900 text-xs">
               {dispenseOrder.updated_by
                 ? formatName(dispenseOrder.updated_by)
                 : t("unknown")}
               <span className="text-gray-400 mx-1.5">·</span>
               <span className="text-gray-700 font-normal">
-                {formatDateTime(dispenseOrder.modified_date)}
+                {format(dispenseOrder.modified_date, "PPPpp")}
               </span>
             </span>
           </div>

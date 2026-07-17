@@ -186,8 +186,8 @@ export function EditDispenseSheet({ facilityId, locationId, dispense }: Props) {
 
         <ExistingDispenseDetails dispense={dispense} />
 
-        <div className="flex flex-col gap-6 px-4">
-          <div className="flex flex-col gap-2">
+        <div className="flex gap-3 py-4">
+          <div className="flex flex-col gap-2 w-full">
             <Label>{t("select_lot")}</Label>
             <InventoryItemsSelector
               facilityId={facilityId}
@@ -294,7 +294,7 @@ function ExistingDispenseDetails({
     !!prescribedName && prescribedName !== dispensedName;
 
   return (
-    <div className="mx-4 flex flex-col gap-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
+    <div className="my-4 flex flex-col gap-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
       {/* Dispensed medicine (with substitution context) + lot & quantity */}
       <div className="flex flex-col gap-0.5">
         {isDifferentFromPrescribed && (
