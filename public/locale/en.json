@@ -4626,6 +4626,7 @@
   "print_header": "Print Header",
   "print_header_placeholder": "Enter the text to display as the header when printing documents for this facility",
   "print_invoice": "Print Invoice",
+  "print_invoices": "Print Invoices",
   "print_prescription": "Print Prescription",
   "print_prescriptions": "Print Prescriptions",
   "print_qr_codes": "Print QR Codes",

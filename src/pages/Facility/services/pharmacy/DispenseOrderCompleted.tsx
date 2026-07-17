@@ -1,17 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
-import { LucideBadgeCheck } from "lucide-react";
+import { LucideBadgeCheck, PrinterIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
+import { MAX_DISPENSES_PER_DISPENSE_ORDER } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
+import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
+import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 
 import { DottedDivider } from "@/components/careui/dotted-divider";
 import { Button } from "@/components/ui/button";
+import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
 import { Link } from "raviger";
 
 interface Props {
@@ -22,6 +27,7 @@ interface Props {
 
 export default function DispenseOrderCompleted({
   facilityId,
+  locationId,
   dispenseOrderId,
 }: Props) {
   const { t } = useTranslation();
@@ -33,6 +39,23 @@ export default function DispenseOrderCompleted({
     }),
     enabled: !!dispenseOrderId,
   });
+
+  const { data: dispenses = [] } = useQuery({
+    queryKey: ["medication_dispense", dispenseOrderId, locationId],
+    queryFn: query(medicationDispenseApi.list, {
+      queryParams: {
+        location: locationId,
+        order: dispenseOrderId,
+        limit: MAX_DISPENSES_PER_DISPENSE_ORDER,
+      },
+    }),
+    select: (data: PaginatedResponse<MedicationDispenseRead>) => data.results,
+    enabled: !!dispenseOrderId,
+  });
+
+  const invoiceIds = extractInvoicesFromDispenses(dispenses).map(
+    (invoice) => invoice.id,
+  );
 
   if (isLoadingOrder) {
     return <TableSkeleton count={5} />;
@@ -68,6 +91,22 @@ export default function DispenseOrderCompleted({
               {t("next_pharmacy_action_question")}
             </span>
             <div className="flex flex-col gap-3">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full"
+                type="button"
+                disabled={invoiceIds.length === 0}
+                asChild
+              >
+                <Link
+                  href={`/facility/${facilityId}/billing/invoices/${invoiceIds.join(",")}/print`}
+                  basePath="/"
+                >
+                  <PrinterIcon className="size-4" />
+                  {t("print_invoices")}
+                </Link>
+              </Button>
               <Button
                 variant="primary"
                 size="lg"
