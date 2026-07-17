@@ -67,15 +67,16 @@ function useTokenActions({
   onCancelClick,
   onEnteredInErrorClick,
   onChangeServicePointClick,
+  assignedServicePointIds,
 }: {
   facilityId: string;
   token: TokenRead;
   onCancelClick: () => void;
   onEnteredInErrorClick: () => void;
+  assignedServicePointIds: string[];
   onChangeServicePointClick: () => void;
 }): TokenActionItem[] {
   const { t } = useTranslation();
-  const { assignedServicePointIds } = useQueueServicePoints();
   const queryClient = useQueryClient();
 
   const { mutate: updateToken } = useMutation({
@@ -527,11 +528,15 @@ const TokenContent = ({
   const [servicePointAction, setServicePointAction] =
     useState<ServicePointSelectorAction>("serve");
 
+  const { assignedServicePoints, assignedServicePointIds, isLoadingSubQueues } =
+    useQueueServicePoints();
+
   const [openServicePointSelector, setOpenServicePointSelector] =
     useState(false);
 
   const actions = useTokenActions({
     facilityId,
+    assignedServicePointIds,
     token,
     onCancelClick: () => setShowCancelDialog(true),
     onEnteredInErrorClick: () => setShowEnteredInErrorDialog(true),
@@ -543,8 +548,6 @@ const TokenContent = ({
 
   const queueStatus = getQueueTokenStatus(token);
   const queryClient = useQueryClient();
-
-  const { assignedServicePoints, isLoadingSubQueues } = useQueueServicePoints();
 
   const hasNoAssignedServicePoints =
     assignedServicePoints.length === 0 && !isLoadingSubQueues;
@@ -570,8 +573,8 @@ const TokenContent = ({
   return (
     <div className="w-full max-w-md mx-auto space-y-2">
       <DialogHeader className="flex flex-row items-start justify-between">
-        {getQueueTokenStatus(token) === QueueTokenStatus.WAITING ||
-        getQueueTokenStatus(token) === QueueTokenStatus.RECALL ? (
+        {queueStatus === QueueTokenStatus.WAITING ||
+        queueStatus === QueueTokenStatus.RECALL ? (
           <div className="flex flex-col items-start">
             <span className="text-gray-950 font-semibold">
               {token.patient ? token.patient.name : renderTokenNumber(token)}
@@ -589,11 +592,11 @@ const TokenContent = ({
               {token.sub_queue?.name}
             </h5>
             <Badge
-              variant={QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]}
+              variant={QUEUE_TOKEN_STATUS_COLORS[queueStatus]}
               className="h-2 w-2 rounded-full p-0 border"
             />
             <span className="text-sm font-medium text-gray-700">
-              {t(`token_status__${getQueueTokenStatus(token)}`)}
+              {t(`token_status__${queueStatus}`)}
             </span>
           </div>
         )}
@@ -605,11 +608,11 @@ const TokenContent = ({
           <div className="flex w-full sm:w-auto gap-2 items-center justify-center py-1 px-3 bg-gray-100 border border-gray-200 rounded-lg whitespace-nowrap">
             <span className="flex gap-2 items-center">
               <Badge
-                variant={QUEUE_TOKEN_STATUS_COLORS[getQueueTokenStatus(token)]}
+                variant={QUEUE_TOKEN_STATUS_COLORS[queueStatus]}
                 className="h-2 w-2 rounded-full p-0 border"
               />
               <span className="text-sm sm:text-base font-medium text-black">
-                {t(`token_status__${getQueueTokenStatus(token)}`)}:
+                {t(`token_status__${queueStatus}`)}:
               </span>
             </span>
 
