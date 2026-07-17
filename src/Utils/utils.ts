@@ -141,7 +141,7 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
     day: abbreviated ? "d" : " days",
     week: abbreviated ? "wk" : " weeks",
     month: abbreviated ? "mo" : " months",
-    year: abbreviated ? " Y" : " years",
+    year: abbreviated ? "Y" : " years",
   };
 };
 
@@ -163,7 +163,7 @@ export const formatPatientAge = (
 
   const totalDays = end.diff(start, "day");
 
-  // Above 16 years: years only
+  // More than 16 years (17th birthday onward): years only
   const years = end.diff(start, "years");
   if (years > 16) {
     return `${years}${suffixes.year}`;
