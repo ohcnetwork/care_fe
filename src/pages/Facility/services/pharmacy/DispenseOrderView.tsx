@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftRight,
+  BadgeCheck,
   BanIcon,
   ChevronDown,
   ExternalLinkIcon,
@@ -274,6 +275,9 @@ export function DispenseOrderView({
   const isOrderCancelled =
     dispenseOrder?.status === DispenseOrderStatus.abandoned ||
     dispenseOrder?.status === DispenseOrderStatus.entered_in_error;
+
+  const isOrderCompleted =
+    dispenseOrder?.status === DispenseOrderStatus.completed;
 
   // Block in-app navigation and browser back/refresh while order is open
   // TODO: figure out a UX to allow preview RX, invoice prints and all while the order is open, without triggering this prompt.
@@ -640,7 +644,7 @@ export function DispenseOrderView({
       <div
         className={cn(
           "mt-6 flex items-start gap-x-8 gap-y-2 text-sm flex-wrap border-t border-gray-200 pt-4",
-          isOrderOpen && "pb-16",
+          (isOrderOpen || isOrderCompleted) && "pb-16",
         )}
       >
         <div className="flex flex-col">
@@ -799,21 +803,26 @@ export function DispenseOrderView({
         </div>
       )}
 
-      {/* Completed-state quick actions row (Medication Return, Print) */}
-      {!isOrderOpen &&
-        dispenseOrder.status === DispenseOrderStatus.completed && (
-          <div className="mt-4 flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/print`,
-                )
-              }
-            >
-              <PrinterIcon className="size-4" />
-              {t("print")}
-            </Button>
+      {/* Sticky footer action bar (completed) */}
+      {!isOrderOpen && isOrderCompleted && (
+        <div className="fixed bottom-0 left-0 right-0 z-10 px-4 md:px-6 py-3 bg-white border-t border-gray-200 shadow-md flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-50">
+              <BadgeCheck
+                className="size-5 text-primary-700"
+                strokeWidth={1.5}
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-900">
+                {t("dispense_completed_title")}
+              </span>
+              <span className="text-xs text-gray-500">
+                {t("next_pharmacy_action_question")}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
             <MedicationReturnSheet
               facilityId={facilityId}
               locationId={locationId}
@@ -830,6 +839,59 @@ export function DispenseOrderView({
                 </Button>
               }
             />
+            <Button
+              variant="outline"
+              onClick={() =>
+                navigate(
+                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/print`,
+                )
+              }
+            >
+              <PrinterIcon className="size-4" />
+              {t("print")}
+            </Button>
+            {/* Next pharmacy actions — primary split button */}
+            <div className="flex">
+              <Button variant="primary" className="rounded-r-none" asChild>
+                <Link
+                  href={`/facility/${facilityId}/locations/${locationId}/medication_requests`}
+                  basePath="/"
+                >
+                  {t("prescription_queue")}
+                </Link>
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="primary"
+                    size="icon"
+                    className="rounded-l-none border-l border-l-white/20"
+                    aria-label={t("next_pharmacy_action_question")}
+                  >
+                    <ChevronDown className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/facility/${facilityId}/locations/${locationId}/medication_dispense`}
+                      basePath="/"
+                    >
+                      {t("go_to_dispenses")}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/facility/${facilityId}/locations/${locationId}/medication_return`}
+                      basePath="/"
+                    >
+                      {t("medicine_returns")}
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            {/* Cancel options */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -859,7 +921,8 @@ export function DispenseOrderView({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        )}
+        </div>
+      )}
 
       {/* Put on hold confirmation */}
       <AlertDialog

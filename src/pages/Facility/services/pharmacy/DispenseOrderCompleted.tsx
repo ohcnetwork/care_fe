@@ -12,7 +12,7 @@ import query from "@/Utils/request/query";
 
 import { DottedDivider } from "@/components/careui/dotted-divider";
 import { Button } from "@/components/ui/button";
-import { Link, Redirect } from "raviger";
+import { Link } from "raviger";
 
 interface Props {
   facilityId: string;
@@ -22,7 +22,6 @@ interface Props {
 
 export default function DispenseOrderCompleted({
   facilityId,
-  locationId,
   dispenseOrderId,
 }: Props) {
   const { t } = useTranslation();
@@ -41,14 +40,6 @@ export default function DispenseOrderCompleted({
 
   if (!dispenseOrder) {
     return <ErrorPage />;
-  }
-
-  if (dispenseOrder.status !== "completed") {
-    return (
-      <Redirect
-        to={`/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}`}
-      />
-    );
   }
 
   return (
