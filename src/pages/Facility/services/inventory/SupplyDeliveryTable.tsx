@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { formatDate } from "date-fns";
+import { formatDate, parseISO } from "date-fns";
 import { EllipsisVertical } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useMemo, useRef } from "react";
@@ -293,7 +293,7 @@ export function SupplyDeliveryTable({
                   delivery.supplied_inventory_item?.product?.expiration_date ||
                   delivery.supplied_item?.expiration_date;
                 return expiry
-                  ? formatDate(new Date(expiry), "dd/MM/yyyy")
+                  ? formatDate(parseISO(expiry), "dd/MM/yyyy")
                   : "-";
               })()}
             </TableCell>
