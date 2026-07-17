@@ -57,9 +57,10 @@ export default function PatientTokensList({
       pathParams: { patientId },
       queryParams: {
         facility: facility.id,
-        limit: 200,
         date: dateQueryString(selectedDate),
       },
+      pageSize: 200,
+      maxPages: 1,
     }),
     // ordered by selected token first, then remaining tokens
     select: (data: PaginatedResponse<TokenRetrieve>) => ({
