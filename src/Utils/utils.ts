@@ -141,7 +141,7 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
     day: abbreviated ? "d" : " days",
     week: abbreviated ? "wk" : " weeks",
     month: abbreviated ? "mo" : " months",
-    year: abbreviated ? "Y" : " years",
+    year: abbreviated ? " Y" : " years",
   };
 };
 
