@@ -1,5 +1,8 @@
+import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import {
-  formatMedicationLine,
+  formatDuration,
+  formatFrequency,
   formatTotalUnits,
 } from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
@@ -297,11 +300,22 @@ const PrescriptionCard = ({
           </div>
 
           <div className="bg-white py-2 px-3 flex flex-col items-start justify-center">
-            <span className="text-sm font-medium text-gray-950">
-              {formatMedicationLine(medication.dosage_instruction[0], {
-                includeTotal: false,
-              })}
-            </span>
+            <DosageInstructionList
+              instructions={medication.dosage_instruction}
+              gap="sm"
+              itemClassName="text-sm font-medium text-gray-950 flex items-center gap-1 capitalize"
+              renderItem={(di) => {
+                const rest = [formatFrequency(di), formatDuration(di)]
+                  .filter(Boolean)
+                  .join(" × ");
+                return (
+                  <>
+                    <FormattedDosage instruction={di} fallback="-" />
+                    {rest && <span>× {rest}</span>}
+                  </>
+                );
+              }}
+            />
             {medication.note && (
               <span className="text-sm font-medium text-gray-700">
                 {medication.note}

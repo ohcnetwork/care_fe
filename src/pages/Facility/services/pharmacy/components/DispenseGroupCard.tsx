@@ -1,3 +1,5 @@
+import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -160,21 +162,28 @@ function DispenseItemsTable({
 
             {/* Instructions */}
             <div className="bg-white flex flex-col justify-center py-2 px-3 col-start-2">
-              {instructions.map((di, idx) => {
-                const dosageText = [formatDosage(di), formatFrequency(di)]
-                  .filter(Boolean)
-                  .join(" · ");
-                return (
-                  <div key={idx} className="flex flex-col text-sm font-medium">
-                    {dosageText && (
-                      <span className="text-gray-900">{dosageText}</span>
-                    )}
-                    {di.text && (
-                      <span className="text-gray-500">{di.text}</span>
-                    )}
-                  </div>
-                );
-              })}
+              <DosageInstructionList
+                instructions={instructions}
+                gap="sm"
+                renderItem={(di) => {
+                  const dose = formatDosage(di);
+                  const freq = formatFrequency(di);
+                  return (
+                    <div className="flex flex-col text-sm font-medium">
+                      {(dose || freq) && (
+                        <span className="text-gray-900 flex items-center gap-1">
+                          {dose && <FormattedDosage instruction={di} />}
+                          {dose && freq && <span>·</span>}
+                          {freq && <span>{freq}</span>}
+                        </span>
+                      )}
+                      {di.text && (
+                        <span className="text-gray-500">{di.text}</span>
+                      )}
+                    </div>
+                  );
+                }}
+              />
             </div>
 
             {/* Quantity */}

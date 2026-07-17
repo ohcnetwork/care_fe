@@ -1,6 +1,5 @@
 import {
   computeTotalDoseQuantity,
-  DoseRange,
   formatTimingBounds,
   getFrequencyDisplayLabel,
   getTimingBounds,
@@ -58,11 +57,6 @@ export function formatSig(instruction?: MedicationRequestDosageInstruction) {
   }
 
   return parts.join(" ");
-}
-
-export function formatDoseRange(range?: DoseRange): string {
-  if (!range?.high?.value) return "";
-  return `${round(range.low.value)} → ${round(range.high?.value)} ${range.high?.unit?.display}`;
 }
 
 /**

@@ -1,6 +1,12 @@
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
-import { formatMedicationLine } from "@/components/Medicine/utils";
+import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
+import {
+  formatDuration,
+  formatFrequency,
+  formatTotalUnits,
+} from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -901,18 +907,26 @@ const MedicineLineItemMedication = ({
             </span>
           )}
           <div className="flex flex-col gap-0.5">
-            {dosageInstructions?.map((instruction, index) => {
-              const line = formatMedicationLine(instruction);
-              if (!line) return null;
-              return (
-                <span
-                  key={index}
-                  className="text-sm text-gray-700 font-medium flex items-center gap-1 whitespace-nowrap capitalize"
-                >
-                  {line}
-                </span>
-              );
-            })}
+            {dosageInstructions && dosageInstructions.length > 0 && (
+              <DosageInstructionList
+                instructions={dosageInstructions}
+                gap="sm"
+                itemClassName="text-sm text-gray-700 font-medium flex items-center gap-1 whitespace-nowrap capitalize"
+                renderItem={(di) => {
+                  const rest = [formatFrequency(di), formatDuration(di)]
+                    .filter(Boolean)
+                    .join(" × ");
+                  const total = formatTotalUnits([di], "units");
+                  return (
+                    <>
+                      <FormattedDosage instruction={di} fallback="-" />
+                      {rest && <span>× {rest}</span>}
+                      {total && <span>= {total}</span>}
+                    </>
+                  );
+                }}
+              />
+            )}
           </div>
         </div>
         <div className="flex gap-1">
