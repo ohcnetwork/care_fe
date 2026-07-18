@@ -155,6 +155,20 @@ export function GenericAutocomplete<T>({
       ? (options.find((o) => o.key === resolveKey(value)) ?? null)
       : null;
 
+  // When the query hasn't run yet (e.g. open=false, non-radio mode) options is
+  // empty and selectedOption would be null even though a value is set.  Build a
+  // synthetic option from the value itself so renderTrigger / defaultRenderTrigger
+  // can still display something meaningful — label falls back to the resolved key.
+  const effectiveSelected: GenericAutocompleteOption<T> | null =
+    selectedOption ??
+    (value != null
+      ? {
+          key: resolveKey(value),
+          label: resolveKey(value),
+          value,
+        }
+      : null);
+
   // A value is considered "set" when it is not null/undefined.
   // We intentionally do NOT treat empty-string as "unset" here; callers that
   // want to represent "cleared" should pass null instead.
@@ -184,8 +198,8 @@ export function GenericAutocomplete<T>({
     );
 
   const triggerContent = renderTrigger
-    ? renderTrigger(selectedOption, resolvedPlaceholder)
-    : defaultRenderTrigger(selectedOption, resolvedPlaceholder);
+    ? renderTrigger(effectiveSelected, resolvedPlaceholder)
+    : defaultRenderTrigger(effectiveSelected, resolvedPlaceholder);
 
   const handleSelect = (option: GenericAutocompleteOption<T>) => {
     onChange(option.value);
@@ -198,6 +212,13 @@ export function GenericAutocomplete<T>({
     onChange(null);
     handleOpenChange(false);
   };
+
+  // ── Radio loading skeleton ───────────────────────────────────────────────────
+  // When radio is requested but data hasn't arrived yet, show a skeleton rather
+  // than the combobox trigger button to avoid a flash from combobox → radio.
+  if (radio && isLoading) {
+    return <CardListSkeleton count={3} />;
+  }
 
   // ── Radio mode ──────────────────────────────────────────────────────────────
   if (showRadio) {
