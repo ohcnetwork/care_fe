@@ -143,7 +143,10 @@ export function GenericAutocomplete<T>({
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
-    if (!next) setSearchValue("");
+    if (!next) {
+      setSearchValue("");
+      onSearch?.("");
+    }
     onOpenChange?.(next);
   };
 
