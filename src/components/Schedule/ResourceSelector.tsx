@@ -79,6 +79,7 @@ export const ScheduleResourceSelector = ({
             });
           }}
           internalType={InternalType.scheduling}
+          radio
         />
       );
 
