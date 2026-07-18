@@ -132,6 +132,7 @@ export function GenericAutocomplete<T>({
 }: GenericAutocompleteProps<T>) {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
 
   // Apply translation defaults here so they are always localised.
@@ -142,6 +143,7 @@ export function GenericAutocomplete<T>({
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
+    if (!next) setSearchValue("");
     onOpenChange?.(next);
   };
 
@@ -268,7 +270,11 @@ export function GenericAutocomplete<T>({
       <CommandInput
         placeholder={resolvedInputPlaceholder}
         disabled={disabled}
-        onValueChange={(v) => onSearch?.(v)}
+        value={searchValue}
+        onValueChange={(v) => {
+          setSearchValue(v);
+          onSearch?.(v);
+        }}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm md:pr-0"
         autoFocus
       />
@@ -329,7 +335,7 @@ export function GenericAutocomplete<T>({
       className={cn(
         "w-full justify-between",
         className,
-        hasValue && "rounded-r-none",
+        hasValue && clearSelection && "rounded-r-none",
       )}
       disabled={disabled}
       type="button"
@@ -356,7 +362,7 @@ export function GenericAutocomplete<T>({
             </div>
           </DrawerContent>
         </Drawer>
-        {hasValue && (
+        {hasValue && clearSelection && (
           <Button
             variant="outline"
             size="icon"
@@ -390,7 +396,7 @@ export function GenericAutocomplete<T>({
           <Command shouldFilter={false}>{commandContent}</Command>
         </PopoverContent>
       </Popover>
-      {hasValue && (
+      {hasValue && clearSelection && (
         <Button
           variant="outline"
           size="icon"
