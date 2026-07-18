@@ -46,11 +46,7 @@ export const HealthcareServiceSelector = ({
   const [searchValue, setSearchValue] = useState("");
   const [open, setOpen] = useState(false);
 
-  const {
-    data: services,
-    isLoading,
-    isFetching,
-  } = useQuery({
+  const { data: services, isLoading } = useQuery({
     queryKey: ["healthcareServices", facilityId, searchValue, internalType],
     queryFn: query.debounced(healthcareServiceApi.listHealthcareService, {
       pathParams: { facilityId },
@@ -92,6 +88,7 @@ export const HealthcareServiceSelector = ({
                 : "d-health-worker"
             }
             className="size-4 relative z-1"
+            aria-hidden="true"
           />
         </div>
         <div className="flex flex-col min-w-0 flex-1">
@@ -99,7 +96,10 @@ export const HealthcareServiceSelector = ({
             {service.name}
           </span>
           {service.extra_details && (
-            <span className="text-xs text-gray-500 truncate">
+            <span
+              className="text-xs text-gray-500 truncate"
+              title={service.extra_details}
+            >
               {service.extra_details}
             </span>
           )}
@@ -129,6 +129,7 @@ export const HealthcareServiceSelector = ({
                   : "d-health-worker"
               }
               className="size-4 relative z-1"
+              aria-hidden="true"
             />
           </div>
           <span className="truncate">{service.name}</span>
@@ -141,14 +142,15 @@ export const HealthcareServiceSelector = ({
   return (
     <GenericAutocomplete<HealthcareServiceReadSpec>
       options={options}
-      isLoading={isLoading || isFetching}
+      isLoading={isLoading}
+      getOptionKey={(service) => service.id}
       value={selected}
       onChange={onSelect}
       onSearch={setSearchValue}
       onOpenChange={setOpen}
       placeholder={t("select_healthcare_service")}
       inputPlaceholder={t("search")}
-      noOptionsMessage={isFetching ? t("searching") : t("no_services_found")}
+      noOptionsMessage={t("no_services_found")}
       clearSelection={clearSelection}
       radio={radio}
       renderOption={renderOption}

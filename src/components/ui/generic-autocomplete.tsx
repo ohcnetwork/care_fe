@@ -44,8 +44,19 @@ export interface GenericAutocompleteOption<T> {
 interface GenericAutocompleteProps<T> {
   options: GenericAutocompleteOption<T>[];
   isLoading?: boolean;
-  /** Currently selected value — pass null/undefined to indicate nothing selected */
+  /**
+   * Currently selected value — pass null/undefined to indicate nothing
+   * selected. For object types, identity comparison is unreliable; the
+   * component resolves the selected option by key via `getOptionKey`.
+   */
   value: T | null | undefined;
+  /**
+   * Extract the stable key from the current value so the component can find
+   * the matching option even when the value object is a different reference
+   * than the one in `options` (e.g. loaded from an API response).
+   * Defaults to `String(value)` which works for string-typed T.
+   */
+  getOptionKey?: (value: T) => string;
   /** Called with the full value object, or null when cleared */
   onChange: (value: T | null) => void;
   onSearch?: (value: string) => void;
@@ -63,6 +74,8 @@ interface GenericAutocompleteProps<T> {
   /**
    * When true, show a "Clear selection" item at the top of the list when a
    * value is selected. Calls onChange(null).
+   * Note: "has a value" means value is not null/undefined; callers that use
+   * an empty string to represent "cleared" should pass null instead.
    */
   clearSelection?: boolean;
   /**
@@ -99,11 +112,12 @@ export function GenericAutocomplete<T>({
   options,
   isLoading = false,
   value,
+  getOptionKey,
   onChange,
   onSearch,
-  placeholder = "Select...",
-  inputPlaceholder = "Search option...",
-  noOptionsMessage = "No options found",
+  placeholder,
+  inputPlaceholder,
+  noOptionsMessage,
   disabled,
   align = "center",
   className,
@@ -120,17 +134,44 @@ export function GenericAutocomplete<T>({
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
 
+  // Apply translation defaults here so they are always localised.
+  const resolvedPlaceholder = placeholder ?? t("select_an_option");
+  const resolvedInputPlaceholder = inputPlaceholder ?? t("search_options");
+  const resolvedNoOptionsMessage =
+    noOptionsMessage ?? t("no_search_options_available");
+
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     onOpenChange?.(next);
   };
 
-  // Find the option that matches the current value
-  const selectedOption = options.find((o) => o.value === value) ?? null;
+  // Resolve the selected option by key rather than by reference equality so
+  // that API-fetched objects (different instances) still match.
+  const resolveKey = (v: T): string =>
+    getOptionKey ? getOptionKey(v) : String(v);
 
-  const hasValue =
-    value !== null && value !== undefined && value !== ("" as unknown as T);
-  const showRadio = radio && !isLoading && options.length <= RADIO_THRESHOLD;
+  const selectedOption =
+    value != null
+      ? (options.find((o) => o.key === resolveKey(value)) ?? null)
+      : null;
+
+  // A value is considered "set" when it is not null/undefined.
+  // We intentionally do NOT treat empty-string as "unset" here; callers that
+  // want to represent "cleared" should pass null instead.
+  const hasValue = value !== null && value !== undefined;
+
+  // Radio mode is active only when:
+  //   • radio prop is true
+  //   • not in an initial loading state (skeleton shown instead)
+  //   • there is at least one option (avoids a blank radio group)
+  //   • options count is within the threshold
+  // We do NOT suppress radio on isFetching — background refetches should not
+  // collapse the radio group back to a popover.
+  const showRadio =
+    radio &&
+    !isLoading &&
+    options.length > 0 &&
+    options.length <= RADIO_THRESHOLD;
 
   const defaultRenderTrigger = (
     selected: GenericAutocompleteOption<T> | null,
@@ -143,8 +184,8 @@ export function GenericAutocomplete<T>({
     );
 
   const triggerContent = renderTrigger
-    ? renderTrigger(selectedOption, placeholder)
-    : defaultRenderTrigger(selectedOption, placeholder);
+    ? renderTrigger(selectedOption, resolvedPlaceholder)
+    : defaultRenderTrigger(selectedOption, resolvedPlaceholder);
 
   const handleSelect = (option: GenericAutocompleteOption<T>) => {
     onChange(option.value);
@@ -170,6 +211,7 @@ export function GenericAutocomplete<T>({
         }}
         disabled={disabled}
         className="flex flex-col gap-2"
+        aria-label={resolvedPlaceholder}
       >
         {options.map((option) => {
           const isSelected = option.key === radioValue;
@@ -203,7 +245,7 @@ export function GenericAutocomplete<T>({
   const commandContent = (
     <>
       <CommandInput
-        placeholder={inputPlaceholder}
+        placeholder={resolvedInputPlaceholder}
         disabled={disabled}
         onValueChange={(v) => onSearch?.(v)}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm md:pr-0"
@@ -213,7 +255,7 @@ export function GenericAutocomplete<T>({
         {isLoading ? (
           <CardListSkeleton count={3} />
         ) : (
-          <CommandEmpty>{noOptionsMessage}</CommandEmpty>
+          <CommandEmpty>{resolvedNoOptionsMessage}</CommandEmpty>
         )}
         <CommandGroup>
           {hasValue && clearSelection && (
@@ -266,7 +308,7 @@ export function GenericAutocomplete<T>({
       className={cn(
         "w-full justify-between",
         className,
-        selectedOption && "rounded-r-none",
+        hasValue && "rounded-r-none",
       )}
       disabled={disabled}
       type="button"
@@ -293,7 +335,7 @@ export function GenericAutocomplete<T>({
             </div>
           </DrawerContent>
         </Drawer>
-        {hasValue && selectedOption && (
+        {hasValue && (
           <Button
             variant="outline"
             size="icon"
@@ -327,7 +369,7 @@ export function GenericAutocomplete<T>({
           <Command shouldFilter={false}>{commandContent}</Command>
         </PopoverContent>
       </Popover>
-      {hasValue && selectedOption && (
+      {hasValue && (
         <Button
           variant="outline"
           size="icon"
