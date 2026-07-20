@@ -12,6 +12,7 @@ import Page from "@/components/Common/Page";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
+import { formatPatientName } from "@/Utils/utils";
 import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
 import patientApi from "@/types/emr/patient/patientApi";
 
@@ -94,7 +95,9 @@ function ClinicalHistoryPage({
     <Page
       title={
         patient
-          ? t("patient_clinical_history_page_title", { name: patient?.name })
+          ? t("patient_clinical_history_page_title", {
+              name: formatPatientName(patient?.name),
+            })
           : t("loading")
       }
       hideTitleOnPage
@@ -114,7 +117,7 @@ function ClinicalHistoryPage({
             {patient ? (
               <h5 className="text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
                 {t("patient_clinical_history_page_title", {
-                  name: patient.name,
+                  name: formatPatientName(patient.name),
                 })}
               </h5>
             ) : (

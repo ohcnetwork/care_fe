@@ -28,7 +28,7 @@ import { useCareApps } from "@/hooks/useCareApps";
 import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import { formatName } from "@/Utils/utils";
+import { formatName, formatPatientName } from "@/Utils/utils";
 
 export function FacilityNavUser({
   selectedFacilityId,
@@ -163,11 +163,11 @@ export function PatientNavUser() {
                 <>
                   <Avatar
                     className="size-8 rounded-lg"
-                    name={patient?.name || phoneNumber}
+                    name={formatPatientName(patient?.name) || phoneNumber}
                   />
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
-                      {patient?.name || phoneNumber}
+                      {formatPatientName(patient?.name) || phoneNumber}
                     </span>
                     {patient && (
                       <span className="truncate text-xs">{phoneNumber}</span>
@@ -179,7 +179,7 @@ export function PatientNavUser() {
               {!open && !isMobile && (
                 <div className="flex flex-row items-center">
                   <Avatar
-                    name={patient?.name || phoneNumber}
+                    name={formatPatientName(patient?.name) || phoneNumber}
                     className="size-8 rounded-lg"
                   />
                 </div>
@@ -196,11 +196,11 @@ export function PatientNavUser() {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar
                   className="size-8 rounded-lg"
-                  name={patient?.name || phoneNumber}
+                  name={formatPatientName(patient?.name) || phoneNumber}
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {patient?.name || phoneNumber}
+                    {formatPatientName(patient?.name) || phoneNumber}
                   </span>
                   {patient && (
                     <span className="truncate text-xs">{phoneNumber}</span>

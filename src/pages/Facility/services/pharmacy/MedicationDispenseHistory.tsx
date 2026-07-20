@@ -23,7 +23,11 @@ import useFilters from "@/hooks/useFilters";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
-import { dateQueryString, formatDateTime } from "@/Utils/utils";
+import {
+  dateQueryString,
+  formatDateTime,
+  formatPatientName,
+} from "@/Utils/utils";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -334,7 +338,7 @@ export default function MedicationDispenseHistory({
                         })
                       }
                     >
-                      {item.patient.name}
+                      {formatPatientName(item.patient.name)}
                       <div className="text-xs text-gray-500">
                         {t("created_at")}: {formatDateTime(item.created_date)}
                       </div>

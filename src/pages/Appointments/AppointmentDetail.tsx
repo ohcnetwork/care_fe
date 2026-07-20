@@ -50,7 +50,12 @@ import {
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName, getReadableDuration, goBack } from "@/Utils/utils";
+import {
+  formatName,
+  formatPatientName,
+  getReadableDuration,
+  goBack,
+} from "@/Utils/utils";
 import {
   AvatarIcon,
   CalendarIcon,
@@ -492,7 +497,9 @@ export default function AppointmentDetail(props: Props) {
                         <CreateEncounterForm
                           patientId={appointment.patient.id}
                           facilityId={facilityId}
-                          patientName={appointment.patient.name}
+                          patientName={formatPatientName(
+                            appointment.patient.name,
+                          )}
                           appointment={appointment.id}
                           defaultOpen={from_queue === "true"}
                           defaultStatus={EncounterStatus.IN_PROGRESS}
@@ -516,7 +523,9 @@ export default function AppointmentDetail(props: Props) {
                       <CreateEncounterForm
                         patientId={appointment.patient.id}
                         facilityId={facilityId}
-                        patientName={appointment.patient.name}
+                        patientName={formatPatientName(
+                          appointment.patient.name,
+                        )}
                         appointment={appointment.id}
                         disableRedirectOnSuccess={true}
                         trigger={
@@ -640,7 +649,7 @@ const AppointmentDetailsContent = ({
                   )}
                   {appointment.booked_by
                     ? formatName(appointment.booked_by)
-                    : `${appointment.patient.name} (${t("patient")})`}{" "}
+                    : `${formatPatientName(appointment.patient.name)} (${t("patient")})`}{" "}
                 </p>
                 {t("on")}{" "}
                 {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}

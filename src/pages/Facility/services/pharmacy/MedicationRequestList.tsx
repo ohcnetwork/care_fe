@@ -72,6 +72,7 @@ import {
   dateTimeQueryString,
   formatDateTime,
   formatName,
+  formatPatientName,
 } from "@/Utils/utils";
 import careConfig from "@careConfig";
 
@@ -345,7 +346,7 @@ export default function MedicationRequestList({
                       })
                     }
                   >
-                    {item.encounter.patient.name}
+                    {formatPatientName(item.encounter.patient.name)}
                     <div className="text-xs text-gray-500">
                       {t("by")}: {formatName(item.prescribed_by)}
                     </div>

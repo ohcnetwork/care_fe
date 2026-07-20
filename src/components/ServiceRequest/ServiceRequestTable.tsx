@@ -24,6 +24,7 @@ import {
   SERVICE_REQUEST_STATUS_COLORS,
   ServiceRequestReadSpec,
 } from "@/types/emr/serviceRequest/serviceRequest";
+import { formatPatientName } from "@/Utils/utils";
 
 interface ServiceRequestTableProps {
   requests: ServiceRequestReadSpec[];
@@ -80,7 +81,7 @@ export default function ServiceRequestTable({
                   onClick={() => onPatientClick?.(request)}
                 >
                   <div className="font-semibold text-gray-900">
-                    {request.encounter.patient.name}
+                    {formatPatientName(request.encounter.patient.name)}
                   </div>
                   <div className="text-xs text-gray-500">
                     {request.encounter.patient.id}

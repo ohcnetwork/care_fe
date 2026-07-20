@@ -27,7 +27,7 @@ import { validateName } from "@/common/validation";
 
 import { usePubSub } from "@/Utils/pubsubContext";
 import mutate from "@/Utils/request/mutate";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatPatientName } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
@@ -149,7 +149,7 @@ export default function PublicPatientRegistration(
 
   const onSubmit = form.handleSubmit((data) => {
     const formattedData = {
-      name: data.name,
+      name: formatPatientName(data.name),
       gender: data.gender,
       address: data.address || "",
       date_of_birth:
@@ -208,7 +208,18 @@ export default function PublicPatientRegistration(
                   <FormItem className="flex flex-col">
                     <FormLabel aria-required>{t("patient_name")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder={t("type_name")} />
+                      <Input
+                        {...field}
+                        placeholder={t("type_name")}
+                        onBlur={() => {
+                          const formatted = formatPatientName(
+                            field.value ?? "",
+                          );
+                          if (formatted !== (field.value ?? "")) {
+                            field.onChange(formatted);
+                          }
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

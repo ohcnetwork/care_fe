@@ -7,6 +7,7 @@ import {
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
+import { formatPatientName } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
@@ -48,7 +49,7 @@ export function CancelTokenDialog({
       onOpenChange={onOpenChange}
       title={t("cancel_token")}
       description={t("cancel_token_confirmation", {
-        patientName: token.patient?.name,
+        patientName: formatPatientName(token.patient?.name),
         tokenNumber: renderTokenNumber(token),
       })}
       onConfirm={() =>

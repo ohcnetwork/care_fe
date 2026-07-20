@@ -53,7 +53,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
-import { dateTimeQueryString } from "@/Utils/utils";
+import { dateTimeQueryString, formatPatientName } from "@/Utils/utils";
 
 import { isPositive } from "@/Utils/decimal";
 import AccountSheet from "./AccountSheet";
@@ -278,7 +278,7 @@ export function AccountList({
                         </div>
                         {!hidePatientName && (
                           <div className="flex items-center gap-1 text-sm text-gray-600 wrap-break-word">
-                            {account.patient.name}
+                            {formatPatientName(account.patient.name)}
                           </div>
                         )}
                       </div>

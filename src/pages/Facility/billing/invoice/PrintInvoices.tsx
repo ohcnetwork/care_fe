@@ -42,7 +42,7 @@ import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge, formatPatientName } from "@/Utils/utils";
 
 interface PrintInvoicesProps {
   facilityId: string;
@@ -189,7 +189,7 @@ function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
                     {t("bill_to")}:
                   </div>
                   <p className="font-semibold text-base">
-                    {firstInvoice.account.patient.name}
+                    {formatPatientName(firstInvoice.account.patient.name)}
                     <span className="text-gray-600 ml-2 font-normal">
                       ({t(`GENDER__${firstInvoice.account.patient.gender}`)},{" "}
                       {formatPatientAge(firstInvoice.account.patient, true)})

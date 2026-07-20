@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { formatName } from "@/Utils/utils";
+import { formatName, formatPatientName } from "@/Utils/utils";
 import { DeviceEncounterHistory } from "@/types/device/device";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { UserReadMinimal } from "@/types/user/user";
@@ -40,7 +40,7 @@ function EncounterNode({
             basePath={`/facility/${encounter.facility.id}`}
             className="flex gap-1"
           >
-            {encounter.patient.name}
+            {formatPatientName(encounter.patient.name)}
             <CareIcon
               icon="l-external-link-alt"
               className="size-3 opacity-50"
