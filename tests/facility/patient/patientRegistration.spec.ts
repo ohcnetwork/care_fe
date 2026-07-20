@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
-import { applyCareConfig } from "tests/helper/careConfig";
+import {
+  applyCareConfig,
+  isCareConfigOverrideActive,
+} from "tests/helper/careConfig";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -163,9 +166,7 @@ async function verifyPatientCard(
 ) {
   await test.step("Verify patient details in the card", async () => {
     await page.waitForURL("**/patients/home**");
-    await expect(page.getByRole("heading", { name: data.name })).toBeVisible({
-      timeout: 15000,
-    });
+    await expect(page.getByRole("heading", { name: data.name })).toBeVisible();
     await expect(
       page.getByText(new RegExp(`Y,\\s*${data.gender}`, "i")).first(),
     ).toBeVisible();
@@ -457,6 +458,11 @@ test.describe("Patient Registration config overrides (per-file)", () => {
     await applyCareConfig(page, { minimalPatientRegistration: true });
     await page.goto(`/facility/${facilityId}/patient/create`);
 
+    test.skip(
+      !(await isCareConfigOverrideActive(page)),
+      "E2E config override seam not enabled; build with `npm run build:e2e`",
+    );
+
     const patientData = generatePatientData();
     await fillBasicInfo(page, patientData);
     await fillDateOfBirth(page, patientData.dateOfBirth);
@@ -473,6 +479,11 @@ test.describe("Patient Registration config overrides (per-file)", () => {
     const facilityId = getFacilityId();
     await applyCareConfig(page, { minGeoOrganizationLevelsRequired: 1 });
     await page.goto(`/facility/${facilityId}/patient/create`);
+
+    test.skip(
+      !(await isCareConfigOverrideActive(page)),
+      "E2E config override seam not enabled; build with `npm run build:e2e`",
+    );
 
     const patientData = generatePatientData();
     await fillBasicInfo(page, patientData);
