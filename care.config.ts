@@ -82,7 +82,7 @@ interface E2EConfigOverrides {
 function readE2EConfigOverrides(): E2EConfigOverrides {
   if (
     !booleanFromString(env.REACT_ENABLE_E2E_CONFIG_OVERRIDES, false) ||
-    typeof window !== "object"
+    typeof window === "undefined"
   ) {
     return {};
   }
