@@ -50,6 +50,32 @@ const resolveApiUrl = (): string => {
   return env.REACT_CARE_API_URL ?? "";
 };
 
+/**
+ * E2E test-only runtime overrides for patient-registration config.
+ *
+ * Build-time `import.meta.env.REACT_*` values are inlined and frozen into the
+ * bundle, so Playwright specs (which run against the production `preview`
+ * build) cannot flip them per test file. To make per-file control possible, a
+ * spec sets `window.__CARE_E2E_CONFIG__` via `page.addInitScript(...)` — which
+ * runs before this module loads — and the values below are consulted first.
+ *
+ * This seam is gated behind the `REACT_ENABLE_E2E_CONFIG_OVERRIDES` build flag
+ * (default off), so it is completely inert in normal production builds. The
+ * affected flags only relax client-side form validation; the backend
+ * independently enforces required fields, so this is not a security boundary.
+ */
+interface E2EConfigOverrides {
+  minGeoOrganizationLevelsRequired?: number;
+  minimalPatientRegistration?: boolean;
+}
+
+const e2eConfigOverrides: E2EConfigOverrides =
+  booleanFromString(env.REACT_ENABLE_E2E_CONFIG_OVERRIDES, false) &&
+  typeof window !== "undefined"
+    ? ((window as unknown as { __CARE_E2E_CONFIG__?: E2EConfigOverrides })
+        .__CARE_E2E_CONFIG__ ?? {})
+    : {};
+
 const careConfig = {
   apiUrl: resolveApiUrl(),
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
@@ -79,8 +105,7 @@ const careConfig = {
       : undefined),
 
   defaultDischargeDisposition: env.REACT_DEFAULT_DISCHARGE_DISPOSITION as
-    | EncounterDischargeDisposition
-    | undefined,
+    EncounterDischargeDisposition | undefined,
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
@@ -274,19 +299,19 @@ const careConfig = {
      * If not set, all levels are required.
      */
     minGeoOrganizationLevelsRequired:
-      env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED
+      e2eConfigOverrides.minGeoOrganizationLevelsRequired ??
+      (env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED
         ? Math.max(
             parseInt(env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED, 10),
             1,
           )
-        : undefined,
+        : undefined),
 
     defaultGeoOrganization: env.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG,
 
-    minimalPatientRegistration: booleanFromString(
-      env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION,
-      false,
-    ),
+    minimalPatientRegistration:
+      e2eConfigOverrides.minimalPatientRegistration ??
+      booleanFromString(env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION, false),
 
     globalPatientEditAccessEnabled: booleanFromString(
       env.REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED,
