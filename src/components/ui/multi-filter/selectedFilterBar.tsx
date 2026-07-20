@@ -63,6 +63,7 @@ export function SelectedFilterBar({
   onFilterChange,
   onOperationChange,
   selectedBarClassName,
+  selectedValueClassName,
   facilityId,
 }: {
   selectedFilterKey: string;
@@ -74,6 +75,7 @@ export function SelectedFilterBar({
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   onOperationChange: (filterKey: string, operation: string) => void;
   selectedBarClassName?: string;
+  selectedValueClassName?: string;
   facilityId?: string;
 }) {
   const { t } = useTranslation();
@@ -111,16 +113,22 @@ export function SelectedFilterBar({
           }
           availableOptions={availableOperations ?? []}
         />
-        <div className="flex items-center gap-2 px-3 h-9 border-gray-200 whitespace-nowrap min-w-0 flex-1 overflow-hidden">
-          <span className="truncate text-gray-950 font-medium min-w-0">
+        <div
+          className={cn(
+            "flex h-9 min-w-0 flex-1 items-center gap-2 overflow-hidden whitespace-nowrap border-gray-200 px-3 md:max-w-64 lg:max-w-80 xl:max-w-96",
+            selectedValueClassName,
+          )}
+        >
+          <div className="flex min-w-0 flex-1 overflow-hidden text-gray-950 font-medium">
             {filter.renderSelected?.(selected, filter, onFilterChange)}
-          </span>
+          </div>
         </div>
         {!filter?.disableClear && (
           <Button
             variant="ghost"
             onClick={clearFilter}
-            className="flex border-l rounded-l-none border-gray-200 hover:bg-gray-50 shrink-0"
+            size="icon"
+            className="ml-auto size-9 shrink-0 rounded-l-none border-l border-gray-200 p-0 hover:bg-gray-50"
           >
             <X className="h-5 w-5 text-gray-600" />
           </Button>

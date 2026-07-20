@@ -112,7 +112,7 @@ export default function InvoicesData({
   return (
     <>
       <div className="flex flex-wrap items-start gap-2 pb-4">
-        {!showIdentifierFilter && (
+        {showIdentifierFilter && (
           <div className="w-full sm:w-auto sm:shrink-0">
             <PatientIdentifierFilter
               onSelect={(patientId, patientName) =>

@@ -269,9 +269,9 @@ export const EncounterShow = (props: Props) => {
         </Card>
         <PatientDeceasedInfo patient={patient} />
       </div>
-      <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
+      <div className="flex min-w-0 flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
         <EncounterHistorySelector />
-        <div className="w-full">
+        <div className="w-full min-w-0">
           <div className="hidden lg:block">
             {isSelectedEncounterLoading ? (
               <Skeleton className="h-10 w-md" />
