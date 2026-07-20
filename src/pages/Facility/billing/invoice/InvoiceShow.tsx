@@ -93,7 +93,7 @@ import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
-export function InvoiceShow({
+function InvoiceShow({
   facilityId,
   invoiceId,
   paymentType,
