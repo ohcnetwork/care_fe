@@ -40,7 +40,9 @@ type PatientRegistrationProps = {
   staffId: string;
 };
 
-export function PatientRegistration(props: PatientRegistrationProps) {
+export default function PublicPatientRegistration(
+  props: PatientRegistrationProps,
+) {
   const { staffId } = props;
   const { t } = useTranslation();
   const [{ slotId, reason }] = useQueryParams();
