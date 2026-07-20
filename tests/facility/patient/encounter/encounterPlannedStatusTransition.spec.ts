@@ -46,7 +46,7 @@ function encounterStatusCombobox(page: Page) {
   return page
     .locator('label[data-slot="label"]')
     .filter({ hasText: /^Encounter Status$/ })
-    .locator("xpath=..")
+    .locator("..")
     .getByRole("combobox");
 }
 
