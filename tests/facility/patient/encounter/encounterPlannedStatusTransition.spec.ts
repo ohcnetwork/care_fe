@@ -85,6 +85,10 @@ async function cancelEncounterFromCurrentForm(page: Page) {
 }
 
 test.describe("Planned Encounter Status Transition", () => {
+  // Each test creates a live encounter on the shared patient; running in parallel
+  // would exceed the backend's live-encounter-per-patient limit and fail creation.
+  test.describe.configure({ mode: "serial" });
+
   test.beforeEach(async ({ page }) => {
     await createPlannedEncounterWithFutureDate(page);
   });
