@@ -10,8 +10,9 @@ import {
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-const VALIDATION_ERROR_TEXT =
-  "period: Value error, Start Date cannot be greater than End Date";
+// Assert only the stable portion of the backend validation message; field-path
+// prefixes like "period:" may change while the core error stays the same.
+const VALIDATION_ERROR_TEXT = "Start Date cannot be greater than End Date";
 
 async function selectFutureDateInCalendar(page: Page) {
   const nextMonthButton = await openCalendarAndGetNextMonthButton(page);
@@ -30,10 +31,13 @@ async function createPlannedEncounterWithFutureDate(page: Page) {
   await selectFutureDateInCalendar(page);
 
   const dialog = getEncounterCreateDialog(page);
-  await dialog.getByRole("button", { name: /^Create Encounter/ }).click();
 
-  // Submit navigates to the encounter detail page.
-  await page.waitForURL(/\/encounter\/[^/]+/);
+  // Submit navigates to the encounter detail page. Register the URL listener
+  // before clicking so a fast navigation can't race past it.
+  await Promise.all([
+    page.waitForURL(/\/encounter\/[^/]+/),
+    dialog.getByRole("button", { name: /^Create Encounter/ }).click(),
+  ]);
   await expect(
     page.getByRole("button", { name: "Encounter Actions" }),
   ).toBeVisible();
@@ -91,6 +95,19 @@ test.describe("Planned Encounter Status Transition", () => {
 
   test.beforeEach(async ({ page }) => {
     await createPlannedEncounterWithFutureDate(page);
+  });
+
+  // Best-effort cleanup: if a test failed before its inline cleanup step, try
+  // to cancel the encounter so it doesn't remain live and trip the backend's
+  // 5-live-encounter-per-patient limit on later runs.
+  test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status === testInfo.expectedStatus) return;
+    try {
+      await openEncounterUpdateForm(page);
+      await cancelEncounterFromCurrentForm(page);
+    } catch {
+      // Encounter may already be terminal or the page in an unexpected state.
+    }
   });
 
   test("allows transition from Planned to In Progress", async ({ page }) => {

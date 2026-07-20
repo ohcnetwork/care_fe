@@ -175,14 +175,18 @@ export function EncounterQuestion({
         });
       }
     } else {
-      handleUpdateEncounter({
-        period: {
-          ...encounter.period,
-          end: undefined,
-        },
-      });
+      if (encounter.period.end) {
+        handleUpdateEncounter({
+          period: {
+            ...encounter.period,
+            end: undefined,
+          },
+        });
+      }
     }
-  }, [encounter.status]);
+    // Re-run when the period changes too (e.g. status picked first, then the
+    // start date edited to a future date) so the end date stays consistent.
+  }, [encounter.status, encounter.period.start, encounter.period.end]);
 
   // Transform EncounterRead to EncounterEdit format
   const transformEncounterForUpdate = (
