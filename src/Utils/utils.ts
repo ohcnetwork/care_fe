@@ -163,7 +163,7 @@ export const formatPatientAge = (
 
   const totalDays = end.diff(start, "day");
 
-  // 17 years or older (diff('years') > 16): years only
+  // On or after the 17th birthday (diff('years') >= 17): years only
   const years = end.diff(start, "years");
   if (years > 16) {
     return abbreviated
