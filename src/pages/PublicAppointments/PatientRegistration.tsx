@@ -208,16 +208,7 @@ export default function PublicPatientRegistration(
                   <FormItem className="flex flex-col">
                     <FormLabel aria-required>{t("patient_name")}</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        placeholder={t("type_name")}
-                        onBlur={() => {
-                          const formatted = field.value ?? "";
-                          if (formatted !== (field.value ?? "")) {
-                            field.onChange(formatted);
-                          }
-                        }}
-                      />
+                      <Input {...field} placeholder={t("type_name")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

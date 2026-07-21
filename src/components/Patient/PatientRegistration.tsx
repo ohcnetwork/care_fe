@@ -517,12 +517,6 @@ const PatientBasicsContent = ({
                 placeholder={t("type_name")}
                 {...field}
                 value={field.value ?? ""}
-                onBlur={() => {
-                  const formatted = field.value ?? "";
-                  if (formatted !== (field.value ?? "")) {
-                    field.onChange(formatted);
-                  }
-                }}
               />
             </FormControl>
             <FormMessage />
