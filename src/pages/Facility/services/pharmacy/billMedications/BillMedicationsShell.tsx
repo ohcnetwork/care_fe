@@ -13,7 +13,7 @@ import {
 import { billMedicationsFormSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { BillMedicationsMode } from "@/pages/Facility/services/pharmacy/billMedications/modes/types";
 import UnbilledPrescriptionsCard from "@/pages/Facility/services/pharmacy/billMedications/UnbilledPrescriptionsCard";
-import { AddMedicationRow } from "@/pages/Facility/services/pharmacy/components/AddMedicationSheet";
+import { AddMedicationSheet } from "@/pages/Facility/services/pharmacy/components/AddMedicationSheet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pill } from "lucide-react";
 import { useEffect } from "react";
@@ -147,7 +147,7 @@ export default function BillMedicationsShell({ facilityId, mode }: Props) {
               </div>
             </div>
 
-            <AddMedicationRow
+            <AddMedicationSheet
               facilityId={facilityId}
               locationId={locationId}
               onSave={({ productKnowledge, dosageInstructions, lots }) =>

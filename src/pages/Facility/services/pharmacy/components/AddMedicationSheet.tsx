@@ -47,7 +47,7 @@ const EMPTY_INSTRUCTION: MedicationRequestDosageInstruction = {
 };
 
 /**
- * The medication details collected by {@link AddMedicationRow}. The caller
+ * The medication details collected by {@link AddMedicationSheet}. The caller
  * decides what to do with them (create dispenses, append to a bill form, …).
  */
 export interface AddMedicationValue {
@@ -82,7 +82,7 @@ interface Props {
  * dispense quantity while remaining fully adjustable. The collected values are
  * handed back to the caller via `onSave`, which owns what happens next.
  */
-export function AddMedicationRow({
+export function AddMedicationSheet({
   facilityId,
   locationId,
   onSave,
