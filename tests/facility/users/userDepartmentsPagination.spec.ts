@@ -67,10 +67,10 @@ async function ensureDepartmentsAndLinkToUser(): Promise<{
   if (!usersRes.ok)
     throw new Error(`Failed to list users: ${usersRes.status}`);
   const usersData = (await usersRes.json()) as {
-    results: Array<{ user: { id: string } }>;
+    results: Array<{ id: string }>;
   };
   if (!usersData.results.length) throw new Error("No users found in facility");
-  const userId = usersData.results[0].user.id;
+  const userId = usersData.results[0].id;
 
   // --- link each department to the user (best-effort; ignore 409 duplicates) ---
   for (const dept of allDepts) {
