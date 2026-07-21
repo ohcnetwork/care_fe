@@ -53,7 +53,7 @@ import {
 } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { getLocationPath } from "@/types/location/utils";
-import { round } from "@/Utils/decimal";
+import { isLessThanOrEqual, isPositive, round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
 import { DotsVerticalIcon, MinusCircledIcon } from "@radix-ui/react-icons";
@@ -605,35 +605,28 @@ const MedicineLineItem = ({
 
             <div className="flex flex-col divide-y divide-gray-200 h-full w-full">
               {effectiveProductKnowledge &&
-                lots.map((_, index) => (
-                  <FormField
+                lots.map((lot, index) => (
+                  <div
                     key={`${name}.lots.${index}`}
-                    control={form.control}
-                    name={`${name}.lots.${index}`}
-                    render={({ field }) => (
-                      <FormItem className="w-full flex-1 flex flex-col justify-center px-3 py-2">
-                        <FormControl>
-                          <InventoryItemsSelector
-                            {...field}
-                            selected={lots}
-                            onChange={(lots) => {
-                              form.setValue(`${name}.lots`, lots, {
-                                shouldDirty: true,
-                                shouldTouch: true,
-                                shouldValidate: true,
-                              });
-                            }}
-                            facilityId={facilityId}
-                            locationId={locationId}
-                            productKnowledgeId={effectiveProductKnowledge.id}
-                            showOnlyAvailable
-                            disabled={disabled || isAutoSelectingInventoryItems}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    className="w-full flex-1 flex flex-col justify-center px-3 py-2"
+                  >
+                    <InventoryItemsSelector
+                      value={lot}
+                      selected={lots}
+                      onChange={(lots) => {
+                        form.setValue(`${name}.lots`, lots, {
+                          shouldDirty: true,
+                          shouldTouch: true,
+                          shouldValidate: true,
+                        });
+                      }}
+                      facilityId={facilityId}
+                      locationId={locationId}
+                      productKnowledgeId={effectiveProductKnowledge.id}
+                      showOnlyAvailable
+                      disabled={disabled || isAutoSelectingInventoryItems}
+                    />
+                  </div>
                 ))}
               {lots.length === 0 && (
                 <div className="w-full flex-1 flex flex-col justify-center px-3 py-2">
@@ -666,29 +659,50 @@ const MedicineLineItem = ({
           {/* Quantity */}
           <div className="relative bg-white">
             <div className="flex flex-col divide-y divide-gray-200 h-full w-full">
-              {lots.map((_, index) => (
-                <FormField
-                  key={`${name}.lots.${index}.quantity`}
-                  control={form.control}
-                  name={`${name}.lots.${index}.quantity`}
-                  render={({ field }) => (
-                    <FormItem className="w-full flex-1 flex flex-col justify-center px-3">
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          max={lots[index].item.net_content}
-                          {...field}
-                          className="w-20"
-                          placeholder="0"
-                          disabled={disabled || isAutoSelectingInventoryItems}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ))}
+              {lots.map((lot, index) => {
+                const quantity = lot.quantity || "0";
+                const invalid =
+                  !isPositive(quantity) ||
+                  !isLessThanOrEqual(quantity, lot.item.net_content);
+                return (
+                  <div
+                    key={`${name}.lots.${index}.quantity`}
+                    className="w-full flex-1 flex flex-col justify-center px-3"
+                  >
+                    <Input
+                      type="number"
+                      min={0}
+                      max={lot.item.net_content}
+                      value={lot.quantity}
+                      onChange={(e) =>
+                        form.setValue(
+                          `${name}.lots`,
+                          lots.map((l, i) =>
+                            i === index
+                              ? { ...l, quantity: e.target.value }
+                              : l,
+                          ),
+                          {
+                            shouldDirty: true,
+                            shouldTouch: true,
+                            shouldValidate: true,
+                          },
+                        )
+                      }
+                      className="w-20"
+                      placeholder="0"
+                      disabled={disabled || isAutoSelectingInventoryItems}
+                    />
+                    {invalid && (
+                      <span className="text-xs text-red-600">
+                        {isPositive(quantity)
+                          ? t("insufficient_stock")
+                          : t("quantity_must_be_greater_than_zero")}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
