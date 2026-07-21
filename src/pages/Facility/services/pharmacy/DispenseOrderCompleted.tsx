@@ -145,8 +145,6 @@ export default function DispenseOrderCompleted({
         </div>
 
         <DottedDivider />
-
-        {/* TODO: print stuffs */}
       </div>
     </Page>
   );

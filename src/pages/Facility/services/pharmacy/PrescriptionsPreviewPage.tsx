@@ -159,8 +159,6 @@ export default function PrescriptionsPreviewPage({
         </div>
 
         <div className="flex flex-col gap-2">
-          <div>{/* TODO: select all / print all / etc... */}</div>
-          {/* TODO: remove divide-x/y in favour of controlled borders */}
           <PrescriptionsPreviewTable
             prescriptions={prescriptions}
             filters={{

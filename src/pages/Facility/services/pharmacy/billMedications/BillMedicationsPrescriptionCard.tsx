@@ -705,7 +705,6 @@ const MedicineLineItem = ({
           </div>
 
           {/* All Given */}
-          {/* TODO: auto toggle this based on the quantity of the lots */}
           <div className="bg-white py-2 px-3 flex items-center justify-center">
             {medication ? (
               <FormField

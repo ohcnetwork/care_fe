@@ -1,4 +1,6 @@
-import { formatMedicationLine } from "@/components/Medicine/utils";
+import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
+import { formatDuration, formatFrequency } from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
@@ -61,10 +63,22 @@ export const MedicineInfoPopover = ({
                     medication?.medication?.display ||
                     t("unknown_medication")}
                 </h4>
-                <span className="text-xs text-gray-600">
-                  {/* TODO: handle multiple dosage instructions */}
-                  {formatMedicationLine(dosageInstructions[0])}
-                </span>
+                <DosageInstructionList
+                  instructions={dosageInstructions}
+                  gap="sm"
+                  itemClassName="text-xs text-gray-600 flex items-center gap-1 capitalize"
+                  renderItem={(di) => {
+                    const rest = [formatFrequency(di), formatDuration(di)]
+                      .filter(Boolean)
+                      .join(" × ");
+                    return (
+                      <>
+                        <FormattedDosage instruction={di} fallback="-" />
+                        {rest && <span> × {rest}</span>}
+                      </>
+                    );
+                  }}
+                />
               </div>
               <Button
                 variant="ghost"
