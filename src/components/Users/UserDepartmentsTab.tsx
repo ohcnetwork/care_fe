@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -144,6 +145,32 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
     enabled: !!facilityId,
   });
 
+  const departments = departmentsData?.results ?? [];
+  const totalCount = departmentsData?.count ?? 0;
+  const hasSearch = !!qParams.search;
+
+  // Auto-reset to page 1 when the current page is out of range (e.g., after
+  // filtering reduces the total below the current offset). Only fires when
+  // there is no active search so we don't wrongly reset during a search.
+  useEffect(() => {
+    if (
+      !isLoading &&
+      !hasSearch &&
+      totalCount > 0 &&
+      departments.length === 0 &&
+      (qParams.page || 1) > 1
+    ) {
+      updateQuery({ page: 1 });
+    }
+  }, [
+    isLoading,
+    hasSearch,
+    totalCount,
+    departments.length,
+    qParams.page,
+    updateQuery,
+  ]);
+
   if (isLoading) {
     return (
       <div className="mt-8 space-y-4">
@@ -156,10 +183,6 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
       </div>
     );
   }
-
-  const departments = departmentsData?.results ?? [];
-  const totalCount = departmentsData?.count ?? 0;
-  const hasSearch = !!qParams.search;
 
   return (
     <div className="mt-8 space-y-4">
@@ -204,7 +227,7 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
             {t("click_link_department_to_get_started")}
           </p>
         </div>
-      ) : departments.length === 0 && (hasSearch || totalCount > 0) ? (
+      ) : departments.length === 0 && hasSearch ? (
         <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
           <CareIcon
             icon="l-search"

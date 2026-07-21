@@ -137,13 +137,20 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
     await page.waitForLoadState("networkidle");
   }
 
-  /** Wait for the organizations API response that is specifically fetching departments for a user. */
-  function waitForOrgsResponse(page: import("@playwright/test").Page) {
+  /** Wait for the organizations API response that is specifically fetching departments for a user.
+   * Pass an optional `pin` substring to require that substring also be present in the URL,
+   * preventing a concurrent/debounce-delayed prior request from resolving the promise early.
+   */
+  function waitForOrgsResponse(
+    page: import("@playwright/test").Page,
+    pin?: string,
+  ) {
     return page.waitForResponse(
       (resp) =>
         resp.request().method() === "GET" &&
         resp.url().includes("/organizations/") &&
         resp.url().includes("containing_user=") &&
+        (pin === undefined || resp.url().includes(pin)) &&
         resp.status() === 200,
     );
   }
@@ -175,7 +182,7 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
     const page1Names = await cards1.allTextContents();
 
     // navigate to page 2 using the stable id set by the Pagination component
-    const responsePromise = waitForOrgsResponse(page);
+    const responsePromise = waitForOrgsResponse(page, "offset=12");
     await page.locator("#page-2").click();
     await responsePromise;
 
@@ -201,7 +208,7 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
     await goToDepartmentsTab(page);
 
     const searchTerm = DEPT_PREFIX;
-    const responsePromise = waitForOrgsResponse(page);
+    const responsePromise = waitForOrgsResponse(page, `name=${encodeURIComponent(searchTerm)}`);
     await page
       .getByPlaceholder("Search by department/team name")
       .fill(searchTerm);
@@ -228,12 +235,12 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
     const baselineNames = await cards.allTextContents();
 
     // type a search and wait for the filtered response
-    const searchResponse = waitForOrgsResponse(page);
+    const searchResponse = waitForOrgsResponse(page, `name=${encodeURIComponent(DEPT_PREFIX)}`);
     await input.fill(DEPT_PREFIX);
     await searchResponse;
 
     // clear it and wait for the restored response
-    const clearResponse = waitForOrgsResponse(page);
+    const clearResponse = waitForOrgsResponse(page, "offset=0");
     await input.fill("");
     await clearResponse;
 
@@ -247,7 +254,7 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
   }) => {
     await goToDepartmentsTab(page);
 
-    const responsePromise = waitForOrgsResponse(page);
+    const responsePromise = waitForOrgsResponse(page, "name=zzz_no_match_xyz_999");
     await page
       .getByPlaceholder("Search by department/team name")
       .fill("zzz_no_match_xyz_999");
