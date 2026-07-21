@@ -40,6 +40,8 @@ import UserSelector from "@/components/Common/UserSelector";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { register } from "@/lib/override";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName, mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
@@ -62,7 +64,7 @@ interface ResourceProps {
   id?: string;
 }
 
-export default function ResourceForm({ facilityId, id }: ResourceProps) {
+function ResourceForm({ facilityId, id }: ResourceProps) {
   const [facilitySearch, setFacilitySearch] = useState("");
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
@@ -566,3 +568,5 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     </div>
   );
 }
+
+export default register("ResourceForm", ResourceForm);
