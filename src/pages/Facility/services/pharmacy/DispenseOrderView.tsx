@@ -268,6 +268,15 @@ export function DispenseOrderView({
     [dispenses],
   );
 
+  // True when the order has at least one non-cancelled dispense.
+  const hasNonCancelledDispenses = useMemo(
+    () =>
+      dispenses.some(
+        (d) => !MEDICATION_DISPENSE_CANCELLED_STATUSES.includes(d.status),
+      ),
+    [dispenses],
+  );
+
   const isOrderOpen =
     dispenseOrder?.status === DispenseOrderStatus.draft ||
     dispenseOrder?.status === DispenseOrderStatus.in_progress;
@@ -560,6 +569,15 @@ export function DispenseOrderView({
         </div>
       ) : (
         <div className="flex flex-col gap-6 pb-24">
+          {/* Placeholder shown when every dispense in the order is cancelled */}
+          {!hasNonCancelledDispenses && (
+            <EmptyState
+              title={t("no_active_dispenses")}
+              description={t("no_active_dispenses_description")}
+              icon={<BanIcon className="text-gray-400 size-6" />}
+            />
+          )}
+
           {/* Unbilled group — dispenses not yet settled in an active invoice */}
           {(() => {
             const groupDispenses = unbilledDispenses.filter(matchesFilter);
@@ -621,7 +639,7 @@ export function DispenseOrderView({
             if (groupDispenses.length === 0) return null;
             return (
               <Collapsible
-                open={showCancelled}
+                open={showCancelled || !hasNonCancelledDispenses}
                 onOpenChange={setShowCancelled}
                 className="flex flex-col gap-3"
               >
@@ -634,7 +652,8 @@ export function DispenseOrderView({
                   <ChevronDown
                     className={cn(
                       "size-4 text-gray-500 transition-transform",
-                      showCancelled && "rotate-180",
+                      (showCancelled || !hasNonCancelledDispenses) &&
+                        "rotate-180",
                     )}
                   />
                 </CollapsibleTrigger>
@@ -708,18 +727,6 @@ export function DispenseOrderView({
             )}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            {/* TODO: consider adding this print? */}
-            {/* <Button
-              variant="outline"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/print`,
-                )
-              }
-            >
-              <PrinterIcon className="size-4" />
-              {t("print")}
-            </Button> */}
             {hasOnHoldDispenses ? (
               <Button
                 variant="outline"
@@ -830,22 +837,24 @@ export function DispenseOrderView({
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <MedicationReturnSheet
-              facilityId={facilityId}
-              locationId={locationId}
-              patient={dispenseOrder.patient}
-              onSuccess={(deliveryOrder) => {
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}/?dispenseOrderIds=${dispenseOrderId}`,
-                );
-              }}
-              trigger={
-                <Button variant="outline">
-                  <RotateCcw className="size-4" />
-                  {t("medication_return")}
-                </Button>
-              }
-            />
+            {hasNonCancelledDispenses && (
+              <MedicationReturnSheet
+                facilityId={facilityId}
+                locationId={locationId}
+                patient={dispenseOrder.patient}
+                onSuccess={(deliveryOrder) => {
+                  navigate(
+                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${deliveryOrder.id}/?dispenseOrderIds=${dispenseOrderId}`,
+                  );
+                }}
+                trigger={
+                  <Button variant="outline">
+                    <RotateCcw className="size-4" />
+                    {t("medication_return")}
+                  </Button>
+                }
+              />
+            )}
             <Button
               variant="outline"
               onClick={() =>

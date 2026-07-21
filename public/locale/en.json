@@ -3657,6 +3657,8 @@
   "no_active_account_found": "No active account found",
   "no_active_account_warning_description": "This patient does not have an active billing account. Proceeding with this action will create a new billing account for the patient.",
   "no_active_beds_assigned": "No active beds assigned",
+  "no_active_dispenses": "No active dispenses",
+  "no_active_dispenses_description": "Every dispense in this order has been cancelled. There are no active medications to bill or dispense.",
   "no_active_encounters_found": "No active encounters found",
   "no_active_medication_recorded": "No Active Medication Recorded",
   "no_active_products": "No active products",
