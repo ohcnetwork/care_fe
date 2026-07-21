@@ -143,6 +143,7 @@ export const formatPatientAge = (
   // Skip representing as no. of months/days if we don't know the date of birth
   // since it would anyways be inaccurate.
   if (!obj.date_of_birth) {
+    if (!obj.year_of_birth) return "Age unknown";
     return abbreviated
       ? `Born ${obj.year_of_birth}`
       : `Born on ${obj.year_of_birth}`;
