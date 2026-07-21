@@ -166,9 +166,18 @@ async function verifyPatientCard(
 ) {
   await test.step("Verify patient details in the card", async () => {
     await page.waitForURL("**/patients/home**");
-    await expect(page.getByRole("heading", { name: data.name })).toBeVisible();
+    // Scope to the specific patient's card so the age/gender assertion cannot
+    // match another patient's line elsewhere on the page. Using `has` with the
+    // name heading also excludes the hidden (mobile) hover-card trigger.
+    const patientCard = page.locator(
+      '[data-slot="patient-info-hover-card-trigger"]',
+      { has: page.getByRole("heading", { name: data.name }) },
+    );
     await expect(
-      page.getByText(new RegExp(`Y,\\s*${data.gender}`, "i")).first(),
+      patientCard.getByRole("heading", { name: data.name }),
+    ).toBeVisible();
+    await expect(
+      patientCard.getByText(new RegExp(`Y,\\s*${data.gender}`, "i")),
     ).toBeVisible();
   });
 }
