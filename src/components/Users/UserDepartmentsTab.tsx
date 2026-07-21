@@ -177,8 +177,10 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
         <CareIcon
           icon="l-search"
           className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+          aria-hidden="true"
         />
         <Input
+          aria-label={t("search_by_department_team_name")}
           placeholder={t("search_by_department_team_name")}
           value={qParams.search || ""}
           onChange={(e) => {
@@ -188,28 +190,32 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
         />
       </div>
 
-      {departments.length === 0 ? (
-        hasSearch ? (
-          <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
-            <CareIcon icon="l-search" className="h-16 w-16 text-gray-400" />
-            <p className="mt-4 text-lg font-medium text-gray-600">
-              {t("no_departments_found")}
-            </p>
-            <p className="mt-2 text-sm text-gray-500">
-              {t("search_no_results")}
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
-            <CareIcon icon="l-building" className="h-16 w-16 text-gray-400" />
-            <p className="mt-4 text-lg font-medium text-gray-600">
-              {t("no_departments_assigned")}
-            </p>
-            <p className="mt-2 text-sm text-gray-500">
-              {t("click_link_department_to_get_started")}
-            </p>
-          </div>
-        )
+      {totalCount === 0 && !hasSearch ? (
+        <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
+          <CareIcon
+            icon="l-building"
+            className="h-16 w-16 text-gray-400"
+            aria-hidden="true"
+          />
+          <p className="mt-4 text-lg font-medium text-gray-600">
+            {t("no_departments_assigned")}
+          </p>
+          <p className="mt-2 text-sm text-gray-500">
+            {t("click_link_department_to_get_started")}
+          </p>
+        </div>
+      ) : departments.length === 0 && (hasSearch || totalCount > 0) ? (
+        <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
+          <CareIcon
+            icon="l-search"
+            className="h-16 w-16 text-gray-400"
+            aria-hidden="true"
+          />
+          <p className="mt-4 text-lg font-medium text-gray-600">
+            {t("no_departments_found")}
+          </p>
+          <p className="mt-2 text-sm text-gray-500">{t("search_no_results")}</p>
+        </div>
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -137,10 +137,14 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
     await page.waitForLoadState("networkidle");
   }
 
-  /** Wait for the organizations API response after an action. */
+  /** Wait for the organizations API response that is specifically fetching departments for a user. */
   function waitForOrgsResponse(page: import("@playwright/test").Page) {
     return page.waitForResponse(
-      (resp) => resp.url().includes("/organizations/") && resp.status() === 200,
+      (resp) =>
+        resp.request().method() === "GET" &&
+        resp.url().includes("/organizations/") &&
+        resp.url().includes("containing_user=") &&
+        resp.status() === 200,
     );
   }
 
