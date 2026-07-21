@@ -60,7 +60,6 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatPatientName } from "@/Utils/utils";
 
 interface Props {
   facilityId: string;
@@ -337,10 +336,12 @@ export default function MedicationReturnShow({
                   <Trans
                     i18nKey="medication_return_for_patient"
                     values={{
-                      patient: formatPatientName(deliveryOrder.patient.name),
+                      patient: deliveryOrder.patient.name,
                     }}
                     components={{
-                      strong: <span className="font-semibold text-gray-700" />,
+                      strong: (
+                        <span className="font-semibold text-gray-700 capitalize" />
+                      ),
                     }}
                   />
                 </p>
@@ -426,7 +427,9 @@ export default function MedicationReturnShow({
                         navigate(`/patient/${deliveryOrder.patient?.id}`)
                       }
                     >
-                      {formatPatientName(deliveryOrder.patient.name)}
+                      <span className="capitalize">
+                        {deliveryOrder.patient.name}
+                      </span>
                     </Button>
                   </div>
                 </div>

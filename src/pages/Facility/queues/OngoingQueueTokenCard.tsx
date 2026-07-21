@@ -28,7 +28,6 @@ import {
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
-import { formatPatientName } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BringToFront,
@@ -328,9 +327,9 @@ function OngoingQueueTokenCardInner({
               className="font-semibold hover:underline transition-colors min-w-0"
             >
               <span className="font-semibold flex items-center gap-1 min-w-0">
-                <span className="truncate">
+                <span className="truncate capitalize">
                   {token.patient
-                    ? formatPatientName(token.patient.name)
+                    ? token.patient.name
                     : renderTokenNumber(token)}
                 </span>
                 <ExternalLink className="size-4 shrink-0" />
@@ -435,7 +434,7 @@ function EnteredInErrorDialog({
       onOpenChange={onOpenChange}
       title={t("mark_as_entered_in_error")}
       description={t("mark_as_entered_in_error_confirmation", {
-        patientName: formatPatientName(token.patient?.name),
+        patientName: token.patient?.name,
         tokenNumber: renderTokenNumber(token),
       })}
       onConfirm={() =>

@@ -17,7 +17,6 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatPatientName } from "@/Utils/utils";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
@@ -51,7 +50,7 @@ function PatientCard({
     >
       <CardHeader>
         <CardTitle className="capitalize text-lg font-semibold">
-          {formatPatientName(patient.name)}
+          {patient.name}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">

@@ -74,20 +74,6 @@ export const formatName = (
   return name || user.username || "-";
 };
 
-export function formatPatientName(name: string | null | undefined): string {
-  if (!name) return "";
-  const normalized = name.trim().replace(/\s+/g, " ");
-
-  if (!normalized || normalized !== normalized.toLocaleLowerCase()) {
-    return normalized;
-  }
-
-  return normalized
-    .split(" ")
-    .map((word) => word.charAt(0).toLocaleUpperCase() + word.slice(1))
-    .join(" ");
-}
-
 export const relativeTime = (time?: DateLike) => {
   return dayjs(time).fromNow();
 };

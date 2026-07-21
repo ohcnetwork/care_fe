@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/table";
 
 import { PartialPatientModel, PatientRead } from "@/types/emr/patient/patient";
-import { formatPatientName } from "@/Utils/utils";
 
 interface Props {
   open: boolean;
@@ -82,7 +81,7 @@ const DuplicatePatientDialog = ({
                       <TableRow key={i}>
                         <TableCell>
                           <div className="font-semibold capitalize">
-                            {formatPatientName(patient.name)}
+                            {patient.name}
                           </div>
                           <div className="break-words text-xs">
                             ID : {patient.id}

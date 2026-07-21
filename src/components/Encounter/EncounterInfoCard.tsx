@@ -28,12 +28,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { LocationTypeIcons } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
-import {
-  formatDateTime,
-  formatName,
-  formatPatientAge,
-  formatPatientName,
-} from "@/Utils/utils";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import { Clock, Stethoscope } from "lucide-react";
 
 export interface EncounterInfoCardProps {
@@ -65,8 +60,8 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-1 min-w-0 flex-wrap items-center gap-x-2 gap-y-1 justify-between">
             <div className="min-w-0 flex-1 basis-full sm:basis-auto">
-              <h3 className="text-lg font-semibold text-gray-950 break-words">
-                {formatPatientName(encounter.patient.name)}
+              <h3 className="text-lg font-semibold text-gray-950 break-words capitalize">
+                {encounter.patient.name}
               </h3>
               <p className="text-sm text-gray-700">
                 {formatPatientAge(encounter.patient, true)},{" "}

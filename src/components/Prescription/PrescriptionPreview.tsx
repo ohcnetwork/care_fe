@@ -18,12 +18,7 @@ import {
 } from "@/components/Medicine/utils";
 
 import query from "@/Utils/request/query";
-import {
-  formatDateTime,
-  formatName,
-  formatPatientAge,
-  formatPatientName,
-} from "@/Utils/utils";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
@@ -196,7 +191,7 @@ export const PrescriptionPreview = ({
 
   return (
     <PrintPreview
-      title={`${t("prescriptions")} - ${formatPatientName(patient.name)}`}
+      title={`${t("prescriptions")} - ${patient.name}`}
       disabled={!hasMedications}
       facility={facility}
       templateSlug={PrintTemplateType.prescription}
@@ -206,11 +201,7 @@ export const PrescriptionPreview = ({
           {/* Patient Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6 pb-3">
             <div className="space-y-1">
-              <DetailRow
-                label={t("patient")}
-                value={formatPatientName(patient.name)}
-                isStrong
-              />
+              <DetailRow label={t("patient")} value={patient.name} isStrong />
               <DetailRow
                 label={`${t("age")} / ${t("sex")}`}
                 value={

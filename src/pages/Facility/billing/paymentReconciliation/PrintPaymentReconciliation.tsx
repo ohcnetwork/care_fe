@@ -30,12 +30,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
-import {
-  formatDateTime,
-  formatName,
-  formatPatientAge,
-  formatPatientName,
-} from "@/Utils/utils";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
 const outcomeMap: Record<
   PaymentReconciliationOutcome,
@@ -137,7 +132,7 @@ function PrintPaymentReconciliation({
             <div className="space-y-1">
               <DetailRow
                 label={t("name")}
-                value={formatPatientName(payment.account.patient.name)}
+                value={payment.account.patient.name}
                 width="w-16"
                 isStrong
               />

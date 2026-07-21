@@ -8,7 +8,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { add } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge, formatPatientName } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 import { getPermissions } from "@/common/Permissions";
 import PrintFooter from "@/components/Common/PrintFooter";
 import TagBadge from "@/components/Tags/TagBadge";
@@ -208,7 +208,7 @@ export default function AppointmentPrint(props: Props) {
                 <>
                   <DetailRow
                     label={t("patient")}
-                    value={`${formatPatientName(patient?.name)} | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
+                    value={`${patient?.name} | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
                   />
                   {patientExtensionData.map((field) => (
                     <DetailRow

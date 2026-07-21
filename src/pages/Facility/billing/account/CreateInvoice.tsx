@@ -77,12 +77,7 @@ import { UserReadMinimal } from "@/types/user/user";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import {
-  formatDateTime,
-  formatName,
-  formatPatientName,
-  goBack,
-} from "@/Utils/utils";
+import { formatDateTime, formatName, goBack } from "@/Utils/utils";
 
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import { DateTimePicker } from "@/components/Common/DateTimePicker";
@@ -437,8 +432,8 @@ export function CreateInvoicePage({
                   <span className="text-gray-700 text-sm font-medium">
                     {t("patient_name")}
                   </span>
-                  <div className="font-semibold text-gray-950">
-                    {formatPatientName(account.patient.name)}
+                  <div className="font-semibold text-gray-950 capitalize">
+                    {account.patient.name}
                   </div>
                 </div>
                 <div>

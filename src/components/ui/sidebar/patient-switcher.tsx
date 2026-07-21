@@ -19,7 +19,6 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
-import { formatPatientName } from "@/Utils/utils";
 
 interface PatientSwitcherProps {
   className?: string;
@@ -71,17 +70,13 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
                     <div className="flex flex-row justify-between items-center gap-2 w-full text-primary-800">
                       <Avatar
                         name={
-                          formatPatientName(
-                            patientUserContext.selectedPatient?.name,
-                          ) || "User"
+                          patientUserContext.selectedPatient?.name || "User"
                         }
                         className="size-5"
                       />
                       <div className="flex flex-row items-center justify-between w-full gap-2">
-                        <span className="font-semibold truncate max-w-32">
-                          {formatPatientName(
-                            patientUserContext.selectedPatient?.name,
-                          )}
+                        <span className="font-semibold truncate max-w-32 capitalize">
+                          {patientUserContext.selectedPatient?.name}
                         </span>
                         <span className="text-xs text-secondary-600">
                           {t("switch")}
@@ -93,9 +88,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
                     <div className="flex flex-row items-center -ml-1.5">
                       <Avatar
                         name={
-                          formatPatientName(
-                            patientUserContext.selectedPatient?.name,
-                          ) || "User"
+                          patientUserContext.selectedPatient?.name || "User"
                         }
                         className="size-4"
                       />
@@ -107,8 +100,8 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
           </TooltipTrigger>
           {!open && !isMobile && (
             <TooltipContent side="right" align="center">
-              <p>
-                {formatPatientName(patientUserContext.selectedPatient?.name)}
+              <p className="capitalize">
+                {patientUserContext.selectedPatient?.name}
               </p>
             </TooltipContent>
           )}
@@ -116,12 +109,9 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
         <SelectContent>
           {patientUserContext.patients?.map((patient) => (
             <SelectItem key={patient.id} value={patient.id}>
-              <div className="flex flex-row items-center gap-2">
-                <Avatar
-                  name={formatPatientName(patient.name)}
-                  className="size-5"
-                />
-                {formatPatientName(patient.name)}
+              <div className="flex flex-row items-center gap-2 capitalize">
+                <Avatar name={patient.name} className="size-5" />
+                {patient.name}
               </div>
             </SelectItem>
           ))}

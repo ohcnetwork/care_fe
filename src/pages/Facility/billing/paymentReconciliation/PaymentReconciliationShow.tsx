@@ -34,12 +34,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  formatName,
-  formatPatientAge,
-  formatPatientName,
-  goBack,
-} from "@/Utils/utils";
+import { formatName, formatPatientAge, goBack } from "@/Utils/utils";
 
 // Helper for friendly display of enum values
 function humanize(str: string): string {
@@ -189,8 +184,8 @@ function PaymentReconciliationShow({
                     <div className="text-sm text-gray-500 mb-1">
                       {t("patient_name")}
                     </div>
-                    <div className="font-semibold text-lg">
-                      {formatPatientName(payment.account.patient.name) || "-"}
+                    <div className="font-semibold text-lg capitalize">
+                      {payment.account.patient.name || "-"}
                     </div>
                   </div>
                   <div>

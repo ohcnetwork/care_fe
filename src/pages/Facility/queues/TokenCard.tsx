@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { formatPatientAge, formatPatientName } from "@/Utils/utils";
+import { formatPatientAge } from "@/Utils/utils";
 import { Separator } from "@/components/ui/separator";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
@@ -84,8 +84,8 @@ const TokenCard = ({
                   <Label className="text-sm font-normal text-gray-600">
                     {t("patient_name")}:
                   </Label>
-                  <p className="font-semibold break-words">
-                    {formatPatientName(token.patient.name)}
+                  <p className="font-semibold break-words capitalize">
+                    {token.patient.name}
                   </p>
                   <p className="text-sm font-medium text-gray-700">
                     {`${formatPatientAge(token.patient, true)}, ${t(`GENDER__${token.patient.gender}`)}`}

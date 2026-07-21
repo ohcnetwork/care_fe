@@ -26,7 +26,6 @@ import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatPatientName } from "@/Utils/utils";
 import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceTypeIcon";
 import { usePluginDevice } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 import { ContactPoint } from "@/types/common/contactPoint";
@@ -200,11 +199,9 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
                       <Link
                         href={`/encounter/${device.current_encounter.id}/updates`}
                         basePath={`/facility/${device.current_encounter.facility.id}/patient/${device.current_encounter.patient.id}`}
-                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1 truncate"
+                        className="text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1 truncate capitalize"
                       >
-                        {formatPatientName(
-                          device.current_encounter.patient.name,
-                        )}
+                        {device.current_encounter.patient.name}
                         <ExternalLink className="size-3 flex-shrink-0" />
                       </Link>
                     ) : (

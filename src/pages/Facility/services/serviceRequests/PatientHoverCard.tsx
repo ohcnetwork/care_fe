@@ -12,7 +12,7 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { formatPatientAge, formatPatientName } from "@/Utils/utils";
+import { formatPatientAge } from "@/Utils/utils";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -88,18 +88,18 @@ function PatientHoverCardTrigger({
       )}
     >
       <div className="size-12">
-        <Avatar name={formatPatientName(patient.name)} />
+        <Avatar name={patient.name} />
       </div>
 
       <div className="flex flex-col">
         <div className="flex flex-row gap-2 items-center">
           <h5
             className={cn(
-              "text-lg font-semibold whitespace-nowrap",
+              "text-lg font-semibold whitespace-nowrap capitalize",
               !disabled && "underline",
             )}
           >
-            {formatPatientName(patient.name)}
+            {patient.name}
           </h5>
           {!disabled && <ChevronDown size={16} />}
         </div>

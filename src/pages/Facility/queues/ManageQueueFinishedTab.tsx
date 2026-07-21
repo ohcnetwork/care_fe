@@ -22,7 +22,6 @@ import {
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
-import { formatPatientName } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BringToFront,
@@ -107,9 +106,9 @@ export function ManageQueueFinishedTab({
                               token_id: token.id,
                             },
                           ).toString()}`}
-                          className="hover:underline transition-colors flex items-center gap-1"
+                          className="hover:underline transition-colors flex items-center gap-1 capitalize"
                         >
-                          {formatPatientName(token.patient.name)}
+                          {token.patient.name}
                           <ExternalLink className="size-3" />
                         </Link>
                       ) : (
@@ -222,9 +221,7 @@ const FinishedTokenCard = forwardRef<
               ).toString()}`}
               className="text-sm font-medium hover:underline flex items-center gap-1 min-w-0"
             >
-              <span className="truncate">
-                {formatPatientName(token.patient.name)}
-              </span>
+              <span className="truncate capitalize">{token.patient.name}</span>
               <ExternalLink className="size-3 shrink-0" />
             </Link>
           ) : (
@@ -415,7 +412,7 @@ function FinishedTokenOptions({
         onOpenChange={setShowMoveBackToInServiceDialog}
         title={t("move_back_to_in_service")}
         description={t("move_back_to_in_service_confirmation", {
-          patientName: formatPatientName(token.patient?.name),
+          patientName: token.patient?.name,
           tokenNumber: renderTokenNumber(token),
         })}
         onConfirm={handleMoveBackToInService}
@@ -430,7 +427,7 @@ function FinishedTokenOptions({
         onOpenChange={setShowMoveBackToWaitingDialog}
         title={t("move_back_to_waiting")}
         description={t("move_back_to_waiting_confirmation", {
-          patientName: formatPatientName(token.patient?.name),
+          patientName: token.patient?.name,
           tokenNumber: renderTokenNumber(token),
         })}
         onConfirm={handleMoveBackToWaiting}

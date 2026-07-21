@@ -32,7 +32,7 @@ import PatientHomeTabs from "@/pages/Patient/home/PatientHomeTabs";
 import { PLUGIN_Component } from "@/PluginEngine";
 import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
-import { formatPatientName, goBack } from "@/Utils/utils";
+import { goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
 import { useAtomValue } from "jotai";
 import { Link, navigate, useQueryParams } from "raviger";
@@ -157,7 +157,7 @@ export default function PatientHome() {
                   <CreateEncounterForm
                     patientId={patientData.id}
                     facilityId={facilityId}
-                    patientName={formatPatientName(patientData.name)}
+                    patientName={patientData.name}
                     defaultOpen={isQueueFlow || action === "create_encounter"}
                     trigger={
                       <QuickAction

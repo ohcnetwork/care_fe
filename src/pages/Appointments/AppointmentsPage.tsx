@@ -81,7 +81,6 @@ import {
   dateQueryString,
   formatDateTime,
   formatPatientAge,
-  formatPatientName,
   goBack,
 } from "@/Utils/utils";
 
@@ -728,8 +727,8 @@ function AppointmentCard({
     <div className="bg-white p-3 rounded shadow-sm group hover:ring-1 hover:ring-primary-700 hover:ring-offset-1 hover:ring-offset-white hover:shadow-md transition-all duration-100 ease-in-out">
       <div className="flex justify-between items-start mb-2">
         <div>
-          <h3 className="font-semibold text-base group-hover:text-primary-700 transition-all duration-200 ease-in-out">
-            {formatPatientName(patient.name)}
+          <h3 className="font-semibold text-base group-hover:text-primary-700 transition-all duration-200 ease-in-out capitalize">
+            {patient.name}
           </h3>
           <p className="text-sm text-gray-700">
             {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
@@ -957,8 +956,8 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
             className="size-4 invisible group-hover:visible"
           />
           <span className="flex flex-col">
-            <span className="text-sm font-semibold">
-              {formatPatientName(patient.name)}
+            <span className="text-sm font-semibold capitalize">
+              {patient.name}
             </span>
             <span className="text-xs text-gray-500">
               {formatPatientAge(patient, true)},{" "}
