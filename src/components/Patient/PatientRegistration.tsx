@@ -63,7 +63,7 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { ExtensionContexts } from "@/Utils/schema/types";
-import { dateQueryString, formatPatientName, goBack } from "@/Utils/utils";
+import { dateQueryString, goBack } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -325,7 +325,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
 
     const basePayload = {
       ...restValues,
-      name: formatPatientName(restValues.name),
 
       age:
         restValues.age_or_dob === "dob"
@@ -517,12 +516,6 @@ const PatientBasicsContent = ({
                 placeholder={t("type_name")}
                 {...field}
                 value={field.value ?? ""}
-                onBlur={() => {
-                  const formatted = formatPatientName(field.value ?? "");
-                  if (formatted !== (field.value ?? "")) {
-                    field.onChange(formatted);
-                  }
-                }}
               />
             </FormControl>
             <FormMessage />

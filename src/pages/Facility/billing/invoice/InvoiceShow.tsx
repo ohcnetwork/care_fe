@@ -87,7 +87,7 @@ import { add, multiply, round, subtract } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName, formatPatientName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -432,7 +432,7 @@ function InvoiceShow({
                 ).toString()}`}
               >
                 <div className="font-semibold text-gray-950 underline">
-                  {formatPatientName(invoice.account.patient.name)}
+                  {invoice.account.patient.name}
                   <SquareArrowOutUpRight className="ml-1 size-4 inline" />
                 </div>
               </Link>
@@ -792,7 +792,7 @@ function InvoiceShow({
                   </div>
                   <div>
                     <p className="font-semibold text-gray-950 text-base ml-2">
-                      {formatPatientName(invoice.account.patient.name)}
+                      {invoice.account.patient.name}
                     </p>
                     <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
                       {t("address")}:{" "}

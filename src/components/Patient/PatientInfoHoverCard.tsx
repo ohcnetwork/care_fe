@@ -9,7 +9,7 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { formatPatientAge, formatPatientName } from "@/Utils/utils";
+import { formatPatientAge } from "@/Utils/utils";
 import { Phone } from "lucide-react";
 import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -40,12 +40,10 @@ export const PatientInfoHoverCard = ({
       <div className="flex justify-between">
         <div className="flex items-center gap-4">
           <div className="size-12">
-            <Avatar name={formatPatientName(patient.name)} />
+            <Avatar name={patient.name} />
           </div>
           <div className="flex flex-col">
-            <h5 className="text-lg font-semibold">
-              {formatPatientName(patient.name)}
-            </h5>
+            <h5 className="text-lg font-semibold">{patient.name}</h5>
             <span className="text-gray-700 text-sm font-medium">
               {formatPatientAge(patient, true)},{" "}
               {t(`GENDER__${patient.gender}`)}

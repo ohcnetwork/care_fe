@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { formatPatientAge, formatPatientName } from "@/Utils/utils";
+import { formatPatientAge } from "@/Utils/utils";
 import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Button } from "@/components/ui/button";
@@ -90,7 +90,7 @@ const TokenCard = ({
                   {t("patient_name")}:
                 </Label>
                 <p className="font-semibold wrap-break-word text-sm">
-                  {formatPatientName(patient.name) || "--"}
+                  {patient.name || "--"}
                 </p>
                 <p className="pl-1 text-sm text-gray-600 font-medium">
                   {formatPatientAge(patient, true)},{" "}

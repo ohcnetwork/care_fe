@@ -24,7 +24,6 @@ import {
   dateQueryString,
   formatDateTime,
   formatPatientAge,
-  formatPatientName,
 } from "@/Utils/utils";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -156,7 +155,7 @@ export function PrintAppointments({
               )}
               {qParams.patient && (
                 <p className="text-gray-600">
-                  {t("patient")}: {formatPatientName(selectedPatient?.name)}
+                  {t("patient")}: {selectedPatient?.name}
                 </p>
               )}
               {practitioners.length === 1 && (
@@ -214,7 +213,7 @@ export function PrintAppointments({
                       <TableCell className="p-2 align-top break-words whitespace-normal">
                         <div>
                           <p className="font-medium">
-                            {formatPatientName(appointment.patient.name)}
+                            {appointment.patient.name}
                           </p>
                           <p className="text-sm text-gray-600 flex items-center gap-1">
                             {formatPatientAge(appointment.patient, true)},{" "}

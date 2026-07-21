@@ -36,7 +36,7 @@ import {
   ProductKnowledgeType,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge, formatPatientName } from "@/Utils/utils";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 
 // Generate time slots based on count per day
 const generateTimeSlots = (count: number) => {
@@ -262,7 +262,7 @@ export const PrintMedicationAdministration = (props: {
     <PrintPreview
       title={`${
         isMedication ? t("drug_chart") : t("intake_chart")
-      } - ${formatPatientName(encounter?.patient.name)}`}
+      } - ${encounter?.patient.name}`}
       disabled={!hasData}
       facility={facility}
       templateSlug={PrintTemplateType.medication_administration}
@@ -352,7 +352,7 @@ export const PrintMedicationAdministration = (props: {
                 {t("patient_name")}
               </div>
               <div className="font-bold text-base">
-                {formatPatientName(encounter?.patient.name)}
+                {encounter?.patient.name}
               </div>
             </div>
             <div className="p-2">

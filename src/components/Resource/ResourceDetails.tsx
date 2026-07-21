@@ -18,7 +18,7 @@ import { FacilityRead } from "@/types/facility/facility";
 import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
 import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName, formatPatientName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 function PatientCard({ patient }: { patient: PatientRead }) {
   const { t } = useTranslation();
@@ -36,9 +36,7 @@ function PatientCard({ patient }: { patient: PatientRead }) {
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1">
             <p className="text-sm font-medium">{t("name")}</p>
-            <p className="text-sm text-gray-500">
-              {formatPatientName(patient.name)}
-            </p>
+            <p className="text-sm text-gray-500">{patient.name}</p>
           </div>
 
           <div className="space-y-1">

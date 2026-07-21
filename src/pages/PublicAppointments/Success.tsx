@@ -10,7 +10,7 @@ import Loading from "@/components/Common/Loading";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
-import { formatName, formatPatientName } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { getUserFromLocalStorage } from "@/types/scheduling/schedule";
 
@@ -73,9 +73,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
           <h2 className="text-sm font-medium text-gray-500 mb-1">
             {t("patient")}:
           </h2>
-          <p className="text-lg font-medium">
-            {formatPatientName(appointmentData?.patient.name)}
-          </p>
+          <p className="text-lg font-medium">{appointmentData?.patient.name}</p>
         </div>
 
         <div>

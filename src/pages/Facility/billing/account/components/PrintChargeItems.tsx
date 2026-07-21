@@ -57,12 +57,7 @@ import useFilters from "@/hooks/useFilters";
 
 import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
-import {
-  formatDateTime,
-  formatName,
-  formatPatientAge,
-  formatPatientName,
-} from "@/Utils/utils";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import BackButton from "@/components/Common/BackButton";
 
 interface DetailRowProps {
@@ -445,7 +440,7 @@ export const PrintChargeItems = (props: {
                         <div className="space-y-1">
                           <DetailRow
                             label={t("name")}
-                            value={formatPatientName(account?.patient?.name)}
+                            value={account?.patient?.name}
                             width="w-22"
                           />
                           <DetailRow

@@ -25,7 +25,6 @@ import {
 import patientApi from "@/types/emr/patient/patientApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
-import { formatPatientName } from "@/Utils/utils";
 
 interface CreateDispenseSheetProps {
   facilityId: string;
@@ -151,7 +150,7 @@ export function CreateDispenseSheet({
           <SheetDescription>
             {selectedPatient
               ? t("dispense_for_patient", {
-                  patientName: formatPatientName(selectedPatient.name),
+                  patientName: selectedPatient.name,
                 })
               : t("select_patient_to_dispense")}
           </SheetDescription>

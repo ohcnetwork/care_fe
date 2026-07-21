@@ -22,7 +22,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { formatDateTime, formatPatientName } from "@/Utils/utils";
+import { formatDateTime } from "@/Utils/utils";
 
 import { CreateMedicationReturnSheet } from "@/pages/Facility/services/pharmacy/CreateMedicationReturnSheet";
 import {
@@ -193,7 +193,7 @@ function MedicationReturnTable({
         {deliveries.map((delivery: DeliveryOrderRetrieve) => (
           <TableRow key={delivery.id}>
             <TableCell className="font-medium">{delivery.name}</TableCell>
-            <TableCell>{formatPatientName(delivery.patient?.name)}</TableCell>
+            <TableCell>{delivery.patient?.name}</TableCell>
             <TableCell>{delivery.destination.name}</TableCell>
             <TableCell className="text-sm text-gray-600">
               {formatDateTime(delivery.created_date)}

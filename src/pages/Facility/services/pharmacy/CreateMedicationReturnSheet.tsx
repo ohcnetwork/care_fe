@@ -44,7 +44,6 @@ import {
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import { formatPatientName } from "@/Utils/utils";
 
 const medicationReturnSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -109,7 +108,7 @@ export function CreateMedicationReturnSheet({
     (patient: PatientListRead | PartialPatientModel) => {
       setSelectedPatient(patient);
       form.reset({
-        name: `${t("medication_return")} - ${formatPatientName(patient.name)}`,
+        name: `${t("medication_return")} - ${patient.name}`,
         note: "",
       });
     },
@@ -159,7 +158,7 @@ export function CreateMedicationReturnSheet({
           <SheetDescription>
             {selectedPatient
               ? t("create_medication_return_description", {
-                  patientName: formatPatientName(selectedPatient.name),
+                  patientName: selectedPatient.name,
                 })
               : t("select_patient_to_create_return")}
           </SheetDescription>

@@ -27,7 +27,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { dateQueryString, formatPatientName } from "@/Utils/utils";
+import { dateQueryString } from "@/Utils/utils";
 
 import { cn } from "@/lib/utils";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
@@ -195,7 +195,7 @@ export default function CreateTokenForm({
             {patient?.name ? (
               <Trans
                 i18nKey="create_token_for_patient"
-                values={{ patientName: formatPatientName(patient?.name) }}
+                values={{ patientName: patient?.name }}
                 components={{
                   strong: <strong className="font-semibold text-gray-950" />,
                 }}
