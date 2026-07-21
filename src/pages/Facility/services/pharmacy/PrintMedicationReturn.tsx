@@ -23,7 +23,7 @@ import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/pa
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatPatientAge, formatPatientName } from "@/Utils/utils";
 
 interface DetailRowProps {
   label: string;
@@ -125,7 +125,7 @@ const MedicationReturnPreview = ({
 
   return (
     <PrintPreview
-      title={`${t("medication_return")} - ${patient.name}`}
+      title={`${t("medication_return")} - ${formatPatientName(patient.name)}`}
       disabled={!supplyDeliveries?.length}
       facility={facility}
       templateSlug={PrintTemplateType.medication_return}
@@ -138,7 +138,11 @@ const MedicationReturnPreview = ({
         {/* Patient Details */}
         <div className="grid md:grid-cols-2 print:grid-cols-2 gap-6 border-t border-gray-200 pt-2">
           <div className="space-y-2">
-            <DetailRow label={t("patient")} value={patient.name} isStrong />
+            <DetailRow
+              label={t("patient")}
+              value={formatPatientName(patient.name)}
+              isStrong
+            />
             <DetailRow
               label={`${t("age")} / ${t("sex")}`}
               value={

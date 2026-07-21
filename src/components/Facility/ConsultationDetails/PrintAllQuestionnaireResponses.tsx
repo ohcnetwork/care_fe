@@ -23,7 +23,12 @@ import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import {
+  formatDateTime,
+  formatName,
+  formatPatientAge,
+  formatPatientName,
+} from "@/Utils/utils";
 
 type PrintAllQuestionnaireResponsesProps = {
   questionnaireId: string;
@@ -161,7 +166,11 @@ export function PrintableEncounterDetails({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-6 mb-8">
       <div className="space-y-2">
-        <DetailRow label={t("patient")} value={patient.name} isStrong />
+        <DetailRow
+          label={t("patient")}
+          value={formatPatientName(patient.name)}
+          isStrong
+        />
         <DetailRow
           label={`${t("age")} / ${t("sex")}`}
           value={

@@ -81,6 +81,7 @@ import {
   dateQueryString,
   formatDateTime,
   formatPatientAge,
+  formatPatientName,
   goBack,
 } from "@/Utils/utils";
 
@@ -728,7 +729,7 @@ function AppointmentCard({
       <div className="flex justify-between items-start mb-2">
         <div>
           <h3 className="font-semibold text-base group-hover:text-primary-700 transition-all duration-200 ease-in-out">
-            {patient.name}
+            {formatPatientName(patient.name)}
           </h3>
           <p className="text-sm text-gray-700">
             {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
@@ -956,7 +957,9 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
             className="size-4 invisible group-hover:visible"
           />
           <span className="flex flex-col">
-            <span className="text-sm font-semibold">{patient.name}</span>
+            <span className="text-sm font-semibold">
+              {formatPatientName(patient.name)}
+            </span>
             <span className="text-xs text-gray-500">
               {formatPatientAge(patient, true)},{" "}
               {t(`GENDER__${patient.gender}`)}

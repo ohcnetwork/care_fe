@@ -37,6 +37,7 @@ import {
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import mutate from "@/Utils/request/mutate";
+import { formatPatientName } from "@/Utils/utils";
 
 const medicationReturnSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -91,7 +92,7 @@ export function MedicationReturnSheet({
   useEffect(() => {
     if (isOpen) {
       form.reset({
-        name: `Medication Return - ${patient.name}`,
+        name: `Medication Return - ${formatPatientName(patient.name)}`,
         note: "",
       });
     }
@@ -123,7 +124,7 @@ export function MedicationReturnSheet({
           <SheetTitle>{t("create_medication_return")}</SheetTitle>
           <SheetDescription>
             {t("create_medication_return_description", {
-              patientName: patient.name,
+              patientName: formatPatientName(patient.name),
             })}
           </SheetDescription>
         </SheetHeader>

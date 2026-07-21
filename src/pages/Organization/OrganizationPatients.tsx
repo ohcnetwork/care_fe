@@ -17,6 +17,7 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { formatPatientName } from "@/Utils/utils";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -148,12 +149,12 @@ export default function OrganizationPatients({
                           <div className="flex items-start justify-between">
                             <div className="flex items-start space-x-4">
                               <Avatar
-                                name={patient.name || ""}
+                                name={formatPatientName(patient.name)}
                                 className="size-10"
                               />
                               <div>
                                 <h3 className="text-sm font-medium text-gray-900">
-                                  {patient.name}
+                                  {formatPatientName(patient.name)}
                                 </h3>
                                 <p className="text-sm text-gray-500">
                                   {formatPhoneNumberIntl(patient.phone_number)}

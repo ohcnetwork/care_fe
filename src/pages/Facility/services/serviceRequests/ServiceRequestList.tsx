@@ -53,7 +53,11 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import locationApi from "@/types/location/locationApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
-import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  formatPatientName,
+} from "@/Utils/utils";
 
 function EmptyState() {
   const { t } = useTranslation();
@@ -91,7 +95,7 @@ function ServiceRequestCard({
           <div className="flex-1 min-w-0">
             <div className="mb-2">
               <div className="font-semibold text-gray-900">
-                {request.encounter.patient.name}
+                {formatPatientName(request.encounter.patient.name)}
               </div>
               <div className="text-xs text-gray-500">
                 {request.encounter.patient.id}

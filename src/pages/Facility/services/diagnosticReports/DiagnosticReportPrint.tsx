@@ -9,7 +9,7 @@ import fileApi from "@/types/files/fileApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge, formatPatientName } from "@/Utils/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
@@ -223,7 +223,7 @@ export default function DiagnosticReportPrint({
               <span className="text-gray-600">{t("patient")}</span>
               <span className="text-gray-600">:</span>
               <span className="font-semibold ml-2 wrap-break-word">
-                {report.encounter?.patient?.name}
+                {formatPatientName(report.encounter?.patient?.name)}
               </span>
             </div>
             {report.encounter?.patient &&

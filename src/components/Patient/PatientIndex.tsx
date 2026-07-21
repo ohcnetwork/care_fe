@@ -41,6 +41,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
+import { formatPatientName } from "@/Utils/utils";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
@@ -390,7 +391,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                   onClick={() => handlePatientSelect(index)}
                                 >
                                   <TableCell className="font-medium">
-                                    {patient.name}
+                                    {formatPatientName(patient.name)}
                                     {!patientList?.partial && (
                                       <p className="text-xs text-gray-500 text-wrap line-clamp-2">
                                         {"address" in patient &&
@@ -521,7 +522,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                 >
                                   <TableCell>
                                     <p className="font-medium text-wrap">
-                                      {encounter.patient.name}
+                                      {formatPatientName(
+                                        encounter.patient.name,
+                                      )}
                                       {encounter.external_identifier && (
                                         <span className="text-gray-700">
                                           {" "}

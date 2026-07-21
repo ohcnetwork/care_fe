@@ -18,7 +18,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
-import { goBack } from "@/Utils/utils";
+import { formatPatientName, goBack } from "@/Utils/utils";
 import { TimelineWrapper } from "@/components/Common/TimelineWrapper";
 import { EmptyState } from "@/components/ui/empty-state";
 import { usePermissions } from "@/context/PermissionContext";
@@ -82,7 +82,7 @@ const EncounterHistory = (props: PatientProps) => {
                       <CreateEncounterForm
                         facilityId={facilityId}
                         patientId={patientId}
-                        patientName={patientData.name}
+                        patientName={formatPatientName(patientData.name)}
                         trigger={
                           <Button>
                             <PlusIcon />

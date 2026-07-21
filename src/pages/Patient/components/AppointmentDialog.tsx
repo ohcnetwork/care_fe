@@ -38,7 +38,7 @@ import {
   PublicAppointment,
 } from "@/types/scheduling/schedule";
 import mutate from "@/Utils/request/mutate";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatPatientAge, formatPatientName } from "@/Utils/utils";
 
 function AppointmentDialog({
   appointment,
@@ -102,7 +102,7 @@ function AppointmentDialog({
               <div className="space-y-1">
                 <Label className="text-xs">{t("patient_name")}</Label>
                 <p className="font-semibold text-base">
-                  {appointment.patient.name}
+                  {formatPatientName(appointment.patient.name)}
                 </p>
                 <p className="text-sm text-gray-600 font-medium">
                   {formatPatientAge(appointment.patient, true)},{" "}
