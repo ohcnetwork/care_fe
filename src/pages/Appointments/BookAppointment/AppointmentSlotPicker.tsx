@@ -105,7 +105,11 @@ export function AppointmentSlotPicker({
   // Fetch the patient's other active appointments to check for
   // duplicate/clash conflicts when a slot is clicked.
   const patientAppointmentsQuery = useQuery({
-    queryKey: ["patient-active-appointments-for-conflict-check", patientId],
+    queryKey: [
+      "patient-active-appointments-for-conflict-check",
+      facilityId,
+      patientId,
+    ],
     queryFn: query(scheduleApi.appointments.getAppointments, {
       pathParams: { patientId: patientId ?? "" },
       queryParams: {
@@ -367,17 +371,24 @@ export function AppointmentSlotPicker({
                       return button;
                     }
 
+                    // Dismissing the alert (via the close button, Escape, or
+                    // an outside click) must be treated the same as explicitly
+                    // picking another slot: the conflicting slot is deselected
+                    // rather than left silently selected without
+                    // acknowledgment.
+                    const dismissConflict = () => {
+                      setConflictAlert(null);
+                      handleSlotSelect(undefined);
+                    };
+
                     const conflictAlertContent = (
                       <AppointmentConflictAlert
                         type={conflictAlert.type}
                         conflictingAppointment={conflictAlert.appointment}
                         newSlot={slot}
                         newResource={newResource}
-                        onClose={() => setConflictAlert(null)}
-                        onPickAnotherSlot={() => {
-                          setConflictAlert(null);
-                          handleSlotSelect(undefined);
-                        }}
+                        onClose={dismissConflict}
+                        onPickAnotherSlot={dismissConflict}
                         onContinueAnyway={() => {
                           setConflictAlert(null);
                           onConflictAcknowledged?.();
@@ -392,7 +403,7 @@ export function AppointmentSlotPicker({
                           <Drawer
                             open
                             onOpenChange={(open) => {
-                              if (!open) setConflictAlert(null);
+                              if (!open) dismissConflict();
                             }}
                           >
                             <DrawerContent>
@@ -413,7 +424,7 @@ export function AppointmentSlotPicker({
                         key={slot.id}
                         open
                         onOpenChange={(open) => {
-                          if (!open) setConflictAlert(null);
+                          if (!open) dismissConflict();
                         }}
                       >
                         <PopoverTrigger asChild>{button}</PopoverTrigger>

@@ -57,6 +57,7 @@ export const AppointmentConflictAlert = ({
         <button
           type="button"
           onClick={onClose}
+          aria-label={t("close")}
           className="text-gray-400 hover:text-gray-600 shrink-0"
         >
           <X className="size-4" />
