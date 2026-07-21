@@ -7,11 +7,14 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { userChildProps } from "@/components/Common/UserColumns";
 import LinkUserToDepartmentSheet from "@/components/Users/LinkUserToDepartmentSheet";
+
+import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import EditFacilityUserRoleSheet from "@/pages/Facility/settings/organizations/components/EditFacilityUserRoleSheet";
@@ -114,12 +117,28 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
 
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: 12,
+    disableCache: true,
+  });
+
   const { data: departmentsData, isLoading } = useQuery({
-    queryKey: ["facilityOrganizations", "byUser", facilityId, userData.id],
-    queryFn: query(facilityOrganizationApi.list, {
+    queryKey: [
+      "facilityOrganizations",
+      "byUser",
+      facilityId,
+      userData.id,
+      qParams.page,
+      resultsPerPage,
+      qParams.search,
+    ],
+    queryFn: query.debounced(facilityOrganizationApi.list, {
       pathParams: { facilityId: facilityId! },
       queryParams: {
         containing_user: userData.id,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
+        limit: resultsPerPage,
+        name: qParams.search || undefined,
       },
     }),
     enabled: !!facilityId,
@@ -139,6 +158,8 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
   }
 
   const departments = departmentsData?.results ?? [];
+  const totalCount = departmentsData?.count ?? 0;
+  const hasSearch = !!qParams.search;
 
   return (
     <div className="mt-8 space-y-4">
@@ -152,27 +173,61 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
         />
       </div>
 
+      <div className="relative w-full sm:w-72 max-w-full">
+        <CareIcon
+          icon="l-search"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+        />
+        <Input
+          placeholder={t("search_by_department_team_name")}
+          value={qParams.search || ""}
+          onChange={(e) => {
+            updateQuery({ search: e.target.value || undefined, page: 1 });
+          }}
+          className="w-full pl-8"
+        />
+      </div>
+
       {departments.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
-          <CareIcon icon="l-building" className="h-16 w-16 text-gray-400" />
-          <p className="mt-4 text-lg font-medium text-gray-600">
-            {t("no_departments_assigned")}
-          </p>
-          <p className="mt-2 text-sm text-gray-500">
-            {t("click_link_department_to_get_started")}
-          </p>
-        </div>
+        hasSearch ? (
+          <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
+            <CareIcon icon="l-search" className="h-16 w-16 text-gray-400" />
+            <p className="mt-4 text-lg font-medium text-gray-600">
+              {t("no_departments_found")}
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              {t("search_no_results")}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
+            <CareIcon icon="l-building" className="h-16 w-16 text-gray-400" />
+            <p className="mt-4 text-lg font-medium text-gray-600">
+              {t("no_departments_assigned")}
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              {t("click_link_department_to_get_started")}
+            </p>
+          </div>
+        )
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {departments.map((department) => (
-            <DepartmentCard
-              key={department.id}
-              department={department}
-              userData={userData}
-              facilityId={facilityId}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {departments.map((department) => (
+              <DepartmentCard
+                key={department.id}
+                department={department}
+                userData={userData}
+                facilityId={facilityId}
+              />
+            ))}
+          </div>
+          {totalCount > resultsPerPage && (
+            <div className="flex justify-center">
+              <Pagination totalCount={totalCount} />
+            </div>
+          )}
+        </>
       )}
     </div>
   );
