@@ -8,7 +8,10 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import { MAX_DISPENSES_PER_DISPENSE_ORDER } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
-import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
+import {
+  MEDICATION_DISPENSE_CANCELLED_STATUSES,
+  MedicationDispenseRead,
+} from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 
 import query from "@/Utils/request/query";
@@ -47,6 +50,7 @@ export default function DispenseOrderCompleted({
         location: locationId,
         order: dispenseOrderId,
         limit: MAX_DISPENSES_PER_DISPENSE_ORDER,
+        exclude_status: MEDICATION_DISPENSE_CANCELLED_STATUSES.join(","),
       },
     }),
     select: (data: PaginatedResponse<MedicationDispenseRead>) => data.results,
