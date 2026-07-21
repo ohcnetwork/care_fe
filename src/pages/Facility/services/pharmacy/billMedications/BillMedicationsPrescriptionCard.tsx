@@ -533,6 +533,7 @@ const MedicineLineItem = ({
         shouldValidate: true,
       });
     },
+    autoSelectOnMount: !lots.some((lot) => !lot.autoSelected),
   });
 
   return (

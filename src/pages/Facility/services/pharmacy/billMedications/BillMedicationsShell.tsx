@@ -99,8 +99,6 @@ export default function BillMedicationsShell({ facilityId, mode }: Props) {
             )}
 
             <div className="flex flex-col gap-2">
-              <div>{/* TODO: select all / print all / etc... */}</div>
-              {/* TODO: remove divide-x/y in favour of controlled borders */}
               <div className="grid grid-cols-[auto_1fr_1fr_auto_6rem_auto_auto] divide-x divide-y divide-gray-200 rounded-md border border-gray-200 overflow-auto">
                 {mode.isLoading ? (
                   <BillMedicationsLoadingCard />
@@ -158,7 +156,7 @@ export default function BillMedicationsShell({ facilityId, mode }: Props) {
                   dosageInstructions,
                   productKnowledge,
                   substitution: null,
-                  lots,
+                  lots: lots.map((lot) => ({ ...lot, autoSelected: false })),
                   allGiven: true,
                 })
               }
