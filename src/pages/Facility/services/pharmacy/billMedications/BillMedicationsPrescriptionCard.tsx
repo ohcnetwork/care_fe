@@ -3,6 +3,7 @@ import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
 import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
 import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import {
+  computeMedicationDispenseQuantity,
   formatDuration,
   formatFrequency,
   formatTotalUnits,
@@ -42,7 +43,6 @@ import {
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
-  computeMedicationDispenseQuantity,
   displayMedicationName,
   MedicationRequestDispenseStatus,
   MedicationRequestRead,
@@ -546,7 +546,7 @@ const MedicineLineItem = ({
 
       const quantity = computeMedicationDispenseQuantity(dosageInstructions);
       const autoSelectedLots = selectEligibleInventoryItems(data.results, {
-        quantity: decimal(quantity),
+        quantity: decimal(quantity ?? "0"),
         canSelect: isLotAllowedForDispensing,
       });
 
@@ -921,7 +921,14 @@ const MedicineLineItemMedication = ({
                     <>
                       <FormattedDosage instruction={di} fallback="-" />
                       {rest && <span>× {rest}</span>}
-                      {total && <span>= {total}</span>}
+                      {total && (
+                        <span>
+                          ={" "}
+                          <span className="underline underline-offset-2 decoration-dotted decoration-gray-500 font-semibold">
+                            {total}
+                          </span>
+                        </span>
+                      )}
                     </>
                   );
                 }}

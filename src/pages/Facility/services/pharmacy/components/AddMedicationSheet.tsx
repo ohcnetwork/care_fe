@@ -24,6 +24,8 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { cn } from "@/lib/utils";
 
+import { computeMedicationDispenseQuantity } from "@/components/Medicine/utils";
+
 import { InventoryItemsSelector } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { LotSelection } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
@@ -32,7 +34,6 @@ import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy
 import { Code } from "@/types/base/code/code";
 import {
   buildTimingForTextDosage,
-  computeMedicationDispenseQuantity,
   getTimingBounds,
   MedicationRequestDosageInstruction,
   sumManSlots,
@@ -111,7 +112,7 @@ export function AddMedicationRow({
 
   const requiredQuantity = productKnowledge
     ? computeMedicationDispenseQuantity([instruction])
-    : "1";
+    : null;
 
   const { mutate: autoSelectLots, isPending: isAutoSelecting } = useMutation({
     mutationFn: mutate(inventoryApi.list, {
@@ -126,7 +127,7 @@ export function AddMedicationRow({
     onSuccess: (data: PaginatedResponse<InventoryRead>) => {
       setLots(
         selectEligibleInventoryItems(data.results, {
-          quantity: decimal(requiredQuantity),
+          quantity: decimal(requiredQuantity ?? "0"),
           canSelect: isLotAllowedForDispensing,
         }),
       );

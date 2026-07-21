@@ -129,11 +129,11 @@ export const InventoryItemsSelector = ({
           type="button"
           disabled={disabled}
         >
-          <div className="flex flex-col min-w-40 items-start gap-1 w-full">
+          <div className="flex flex-col min-w-48 items-start gap-1 w-full">
             {!value ? (
               <span className="text-gray-500">{t("select_stock")}</span>
             ) : (
-              <div className="flex justify-between p-1 w-full">
+              <div className="flex flex-wrap justify-between w-full">
                 <span
                   className={cn(
                     "font-medium text-sm truncate max-w-28",

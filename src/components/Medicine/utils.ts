@@ -1,3 +1,5 @@
+import Decimal from "decimal.js";
+
 import {
   computeTotalDoseQuantity,
   formatTimingBounds,
@@ -5,7 +7,15 @@ import {
   getTimingBounds,
   MedicationRequestDosageInstruction,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import { round } from "@/Utils/decimal";
+import { decimal, round, roundUp } from "@/Utils/decimal";
+
+/**
+ * Unit codes that can be dispensed as whole, billable items. Any other unit
+ * (e.g. mL, mg) cannot be resolved to a dispensable count from inventory —
+ * there is no way to know how many bottles/vials "520 mL" maps to — so such
+ * doses are treated as unknown.
+ */
+const DISPENSABLE_UNIT_CODES = ["{tbl}", "{count}"];
 
 // Helper function to format dosage in Rx style
 export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
@@ -204,4 +214,55 @@ export function formatTotalUnits(
   if (!hasAnyDose) return "";
 
   return `${round(String(totalValue))} ${doseUnit}${hasTapered ? " (tapered)" : ""}`;
+}
+
+/**
+ * Dispense quantity for a set of dosage instructions — i.e. how many whole,
+ * billable units to hand out. Returns `null` when the quantity cannot be
+ * determined ("unknown").
+ *
+ * A single instruction is unknown when:
+ *  - it is titrated / tapered (has a `dose_range`), or
+ *  - it has no dose quantity value, or
+ *  - its unit is not a dispensable whole-item unit (only `{tbl}` and
+ *    `{count}` can be counted for dispensing).
+ *
+ * If any instruction is unknown, the whole dispense quantity is unknown.
+ * Otherwise the per-instruction totals (each accounting for its own course
+ * duration / day range) are summed and rounded up.
+ */
+export function computeMedicationDispenseQuantity(
+  instructions: MedicationRequestDosageInstruction[] | undefined,
+): string | null {
+  if (!instructions?.length) return null;
+
+  const quantities = instructions.map((instruction): Decimal | null => {
+    const doseAndRate = instruction.dose_and_rate;
+
+    // Titrated / tapered doses have no determinate dispense quantity.
+    if (doseAndRate?.dose_range) return null;
+
+    const doseValue = doseAndRate?.dose_quantity?.value;
+    if (!doseValue) return null;
+
+    // Only whole, countable units can be dispensed.
+    const unitCode = doseAndRate?.dose_quantity?.unit?.code;
+    if (!unitCode || !DISPENSABLE_UNIT_CODES.includes(unitCode)) return null;
+
+    // PRN / as-needed: dispense a single dose worth.
+    if (instruction.as_needed_boolean) return decimal(doseValue);
+
+    // Scheduled: total across the course duration (handles day ranges).
+    return computeTotalDoseQuantity(instruction) ?? decimal(doseValue);
+  });
+
+  // If any instruction is unknown, the total is unknown.
+  if (quantities.some((quantity) => quantity === null)) return null;
+
+  const total = (quantities as Decimal[]).reduce(
+    (sum, quantity) => sum.plus(quantity),
+    decimal(0),
+  );
+
+  return total.greaterThan(0) ? roundUp(total) : null;
 }
