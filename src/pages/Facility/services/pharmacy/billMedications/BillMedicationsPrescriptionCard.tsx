@@ -890,6 +890,7 @@ const MedicineLineItemMedication = ({
                       {rest && <span> × {rest}</span>}
                       {total && (
                         <span>
+                          {" "}
                           ={" "}
                           <span className="underline underline-offset-2 decoration-dotted decoration-gray-500 font-semibold">
                             {total}
