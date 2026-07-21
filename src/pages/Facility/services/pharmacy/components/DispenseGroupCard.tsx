@@ -2,6 +2,7 @@ import { DosageInstructionList } from "@/components/Medicine/DosageInstructionLi
 import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { formatDuration, formatFrequency } from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { EditDispenseSheet } from "@/pages/Facility/services/pharmacy/components/EditDispenseSheet";
+import { MedicationRequestInfoPopover } from "@/pages/Facility/services/pharmacy/components/MedicationRequestInfoPopover";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
@@ -24,6 +26,7 @@ import { roundWhole } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { BadgeInfo } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Fragment } from "react/jsx-runtime";
 import { toast } from "sonner";
@@ -136,9 +139,27 @@ function DispenseItemsTable({
                 isCancelled && "text-red-500 line-through decoration-1",
               )}
             >
-              <span className="text-gray-900 font-semibold">
-                {dispense.item.product.product_knowledge.name}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-gray-900 font-semibold">
+                  {dispense.item.product.product_knowledge.name}
+                </span>
+                {dispense.authorizing_request && (
+                  <MedicationRequestInfoPopover
+                    authorizingRequest={dispense.authorizing_request}
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        className="size-6 text-gray-500 no-underline"
+                        title={t("prescription_details")}
+                      >
+                        <BadgeInfo className="size-4" />
+                      </Button>
+                    }
+                  />
+                )}
+              </div>
               <div className="flex gap-2">
                 <span
                   className={cn(
