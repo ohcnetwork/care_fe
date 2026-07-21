@@ -1,6 +1,6 @@
 import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
 import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
-import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
+import { formatDuration, formatFrequency } from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -165,19 +165,16 @@ function DispenseItemsTable({
               <DosageInstructionList
                 instructions={instructions}
                 gap="sm"
+                itemClassName="text-sm font-medium text-gray-950 flex items-center gap-1 capitalize"
                 renderItem={(di) => {
-                  const dose = formatDosage(di);
-                  const freq = formatFrequency(di);
+                  const rest = [formatFrequency(di), formatDuration(di)]
+                    .filter(Boolean)
+                    .join(" × ");
                   return (
-                    <div className="flex flex-col text-sm font-medium">
-                      {(dose || freq) && (
-                        <span className="text-gray-900 flex items-center gap-1">
-                          {dose && <FormattedDosage instruction={di} />}
-                          {dose && freq && <span>·</span>}
-                          {freq && <span>{freq}</span>}
-                        </span>
-                      )}
-                    </div>
+                    <>
+                      <FormattedDosage instruction={di} fallback="-" />
+                      {rest && <span> × {rest}</span>}
+                    </>
                   );
                 }}
               />

@@ -1,6 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
 import { RefreshCcwIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -29,7 +28,6 @@ import { computeMedicationDispenseQuantity } from "@/components/Medicine/utils";
 import { InventoryItemsSelector } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { LotSelection } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
-import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
 
 import { Code } from "@/types/base/code/code";
 import {
@@ -39,14 +37,10 @@ import {
   sumManSlots,
   timingBoundsToRepeat,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import { InventoryRead } from "@/types/inventory/product/inventory";
-import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
-import { decimal, isLessThanOrEqual, isPositive } from "@/Utils/decimal";
-import { isLotAllowedForDispensing } from "@/Utils/inventory";
-import mutate from "@/Utils/request/mutate";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { isLessThanOrEqual, isPositive } from "@/Utils/decimal";
+import { useInventoryItemsAutoSelect } from "@/pages/Facility/services/pharmacy/billMedications/utils/useInventoryItemsAutoSelect";
 
 const EMPTY_INSTRUCTION: MedicationRequestDosageInstruction = {
   as_needed_boolean: true,
@@ -114,35 +108,20 @@ export function AddMedicationRow({
     ? computeMedicationDispenseQuantity([instruction])
     : null;
 
-  const { mutate: autoSelectLots, isPending: isAutoSelecting } = useMutation({
-    mutationFn: mutate(inventoryApi.list, {
-      pathParams: { facilityId, locationId },
-      queryParams: {
-        product_knowledge: productKnowledge?.id || "",
-        status: "active",
-        limit: 100,
-        net_content_gt: 0,
-      },
-    }),
-    onSuccess: (data: PaginatedResponse<InventoryRead>) => {
-      setLots(
-        selectEligibleInventoryItems(data.results, {
-          quantity: decimal(requiredQuantity ?? "0"),
-          canSelect: isLotAllowedForDispensing,
-        }),
-      );
+  const {
+    autoSelectInventoryItems,
+    isAutoSelectingInventoryItems,
+    canAutoSelectInventoryItems,
+  } = useInventoryItemsAutoSelect({
+    facilityId,
+    locationId,
+    productKnowledge: productKnowledge || null,
+    dosageInstructions: [instruction],
+    autoSelectOnMount: open && !lots.some((lot) => !lot.autoSelected),
+    onSelect: (autoSelectedLots) => {
+      setLots(autoSelectedLots);
     },
   });
-
-  // Auto-select lots whenever enough information is present (product picked)
-  // and the required quantity changes — unless the user has adjusted lots
-  // manually, in which case their selection is left untouched.
-  useEffect(() => {
-    if (!open || !productKnowledge) return;
-    if (lots.some((lot) => !lot.autoSelected)) return;
-    autoSelectLots(undefined);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, productKnowledge?.id, requiredQuantity]);
 
   const handleSelectMedication = (pk: ProductKnowledgeBase | undefined) => {
     if (!pk) return;
@@ -432,21 +411,23 @@ export function AddMedicationRow({
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <Label>{t("select_lot")}</Label>
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      type="button"
-                      onClick={() => autoSelectLots(undefined)}
-                      disabled={isSaving || isAutoSelecting}
-                      title={t("auto_select_lots")}
-                    >
-                      <RefreshCcwIcon
-                        className={cn(
-                          "size-3.5 text-gray-500",
-                          isAutoSelecting && "animate-spin",
-                        )}
-                      />
-                    </Button>
+                    {canAutoSelectInventoryItems && (
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        type="button"
+                        onClick={() => autoSelectInventoryItems()}
+                        disabled={isSaving || isAutoSelectingInventoryItems}
+                        title={t("auto_select_lots")}
+                      >
+                        <RefreshCcwIcon
+                          className={cn(
+                            "size-3.5 text-gray-500",
+                            isAutoSelectingInventoryItems && "animate-spin",
+                          )}
+                        />
+                      </Button>
+                    )}
                   </div>
 
                   {lots.map((lot, index) => (
@@ -460,7 +441,7 @@ export function AddMedicationRow({
                           value={lot}
                           selected={lots}
                           onChange={setLots}
-                          disabled={isSaving || isAutoSelecting}
+                          disabled={isSaving || isAutoSelectingInventoryItems}
                         />
                         <Input
                           type="number"
@@ -482,7 +463,7 @@ export function AddMedicationRow({
                           }
                           className="w-24"
                           placeholder="0"
-                          disabled={isSaving || isAutoSelecting}
+                          disabled={isSaving || isAutoSelectingInventoryItems}
                         />
                       </div>
                       {!isLotValid(lot) && (
@@ -503,7 +484,7 @@ export function AddMedicationRow({
                       showOnlyAvailable
                       selected={lots}
                       onChange={setLots}
-                      disabled={isSaving || isAutoSelecting}
+                      disabled={isSaving || isAutoSelectingInventoryItems}
                     />
                   )}
                 </div>
@@ -524,7 +505,7 @@ export function AddMedicationRow({
               onClick={handleSave}
               disabled={
                 isSaving ||
-                isAutoSelecting ||
+                isAutoSelectingInventoryItems ||
                 disableSave ||
                 !productKnowledge ||
                 !isDoseValid ||

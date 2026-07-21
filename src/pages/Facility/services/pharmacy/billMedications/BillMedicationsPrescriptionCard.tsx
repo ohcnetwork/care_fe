@@ -3,7 +3,6 @@ import { SubstitutionSheet } from "@/components/Medication/SubstitutionSheet";
 import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
 import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import {
-  computeMedicationDispenseQuantity,
   formatDuration,
   formatFrequency,
   formatTotalUnits,
@@ -34,7 +33,7 @@ import {
   billMedicationsFormSchema,
   LotSelection,
 } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
-import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
+import { useInventoryItemsAutoSelect } from "@/pages/Facility/services/pharmacy/billMedications/utils/useInventoryItemsAutoSelect";
 import { isMedicationDispenseable } from "@/pages/Facility/services/pharmacy/billMedications/utils/utils";
 import { MedicineInfoPopover } from "@/pages/Facility/services/pharmacy/components/MedicineInfoPopover";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -53,13 +52,9 @@ import {
   PrescriptionStatus,
 } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
-import { InventoryRead } from "@/types/inventory/product/inventory";
-import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { getLocationPath } from "@/types/location/utils";
-import { decimal, round } from "@/Utils/decimal";
-import { isLotAllowedForDispensing } from "@/Utils/inventory";
+import { round } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { DotsVerticalIcon, MinusCircledIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -76,7 +71,7 @@ import {
   XCircleIcon,
 } from "lucide-react";
 import { Link } from "raviger";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -522,51 +517,23 @@ const MedicineLineItem = ({
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;
 
-  const canAutoSelectInventoryItems = !!(
-    dosageInstructions && effectiveProductKnowledge
-  );
-
   const {
-    mutate: autoSelectInventoryItems,
-    isPending: isAutoSelectingInventoryItems,
-  } = useMutation({
-    mutationFn: mutate(inventoryApi.list, {
-      pathParams: { facilityId, locationId },
-      queryParams: {
-        product_knowledge: effectiveProductKnowledge?.id || "",
-        status: "active",
-        limit: 100,
-        net_content_gt: 0,
-      },
-    }),
-    onSuccess: (data: PaginatedResponse<InventoryRead>) => {
-      if (!canAutoSelectInventoryItems) {
-        return;
-      }
-
-      const quantity = computeMedicationDispenseQuantity(dosageInstructions);
-      const autoSelectedLots = selectEligibleInventoryItems(data.results, {
-        quantity: decimal(quantity ?? "0"),
-        canSelect: isLotAllowedForDispensing,
-      });
-
-      form.setValue(`${name}.lots`, autoSelectedLots, {
+    canAutoSelectInventoryItems,
+    isAutoSelectingInventoryItems,
+    autoSelectInventoryItems,
+  } = useInventoryItemsAutoSelect({
+    facilityId,
+    locationId,
+    productKnowledge: effectiveProductKnowledge,
+    dosageInstructions,
+    onSelect: (lots) => {
+      form.setValue(`${name}.lots`, lots, {
         shouldDirty: true,
         shouldTouch: true,
         shouldValidate: true,
       });
     },
   });
-
-  useEffect(() => {
-    if (canAutoSelectInventoryItems) {
-      autoSelectInventoryItems(undefined);
-    }
-  }, [
-    canAutoSelectInventoryItems,
-    autoSelectInventoryItems,
-    effectiveProductKnowledge?.id,
-  ]);
 
   return (
     <div className="contents group divide-x divide-gray-200">
@@ -621,7 +588,7 @@ const MedicineLineItem = ({
               <Button
                 variant="white"
                 type="button"
-                onClick={() => autoSelectInventoryItems(undefined)}
+                onClick={() => autoSelectInventoryItems()}
                 disabled={disabled || isAutoSelectingInventoryItems}
                 className="absolute top-1/2 -translate-y-1/2 -right-2.25 size-4.5 [&_svg]:size-3 z-10 text-gray-500"
                 size="xs"
@@ -920,7 +887,7 @@ const MedicineLineItemMedication = ({
                   return (
                     <>
                       <FormattedDosage instruction={di} fallback="-" />
-                      {rest && <span>× {rest}</span>}
+                      {rest && <span> × {rest}</span>}
                       {total && (
                         <span>
                           ={" "}

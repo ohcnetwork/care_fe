@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { PencilIcon, ReplaceIcon } from "lucide-react";
 import { useState } from "react";
@@ -9,7 +9,9 @@ import {
   SubstitutionFormValues,
   SubstitutionSheet,
 } from "@/components/Medication/SubstitutionSheet";
-import { formatMedicationLine } from "@/components/Medicine/utils";
+import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
+import { formatDuration, formatFrequency } from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +34,7 @@ import {
 
 import { InventoryItemsSelector } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import { LotSelection } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
-import { selectEligibleInventoryItems } from "@/pages/Facility/services/pharmacy/billMedications/utils/itemsAutoSelect";
+import { useInventoryItemsAutoSelect } from "@/pages/Facility/services/pharmacy/billMedications/utils/useInventoryItemsAutoSelect";
 
 import {
   getSubstitutionReasonDisplay,
@@ -43,22 +45,16 @@ import {
 } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
-import { InventoryRead } from "@/types/inventory/product/inventory";
-import inventoryApi from "@/types/inventory/product/inventoryApi";
 
 import {
   add,
-  decimal,
   isEqual,
   isLessThanOrEqual,
   isPositive,
   roundWhole,
 } from "@/Utils/decimal";
-import { isLotAllowedForDispensing } from "@/Utils/inventory";
 import { useBatchRequest } from "@/Utils/request/batch";
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface Props {
@@ -115,28 +111,23 @@ export function EditDispenseSheet({ facilityId, locationId, dispense }: Props) {
     autoSelected: false,
   });
 
-  // Auto-selects the best lot(s) of a product for the original dispense
-  // quantity, mirroring the bill-medications auto-select. The edit sheet is
-  // single-lot, so the first eligible lot is used.
-  const { mutate: autoSelectLot, isPending: isAutoSelecting } = useMutation({
-    mutationFn: (productKnowledgeId: string) =>
-      mutate(inventoryApi.list, {
-        pathParams: { facilityId, locationId },
-        queryParams: {
-          product_knowledge: productKnowledgeId,
-          status: "active",
-          limit: 100,
-          net_content_gt: 0,
-        },
-      })(undefined),
-    onSuccess: (data: PaginatedResponse<InventoryRead>) => {
-      const [selected] = selectEligibleInventoryItems(data.results, {
-        quantity: decimal(roundWhole(dispense.quantity)),
-        canSelect: isLotAllowedForDispensing,
-      });
-      setLot(selected ?? null);
-    },
-  });
+  // Auto-select an eligible lot for the effective product. Runs on product
+  // change (e.g. when substituting) as long as the current lot isn't a
+  // manual / original selection. The edit sheet is single-lot, so the first
+  // eligible lot is used.
+  const dosageInstructions = dispense.dosage_instruction?.length
+    ? dispense.dosage_instruction
+    : (medication?.dosage_instruction ?? []);
+
+  const { isAutoSelectingInventoryItems: isAutoSelecting } =
+    useInventoryItemsAutoSelect({
+      facilityId,
+      locationId,
+      productKnowledge: effectivePk,
+      dosageInstructions,
+      autoSelectOnMount: false,
+      onSelect: (autoSelectedLots) => setLot(autoSelectedLots[0] ?? null),
+    });
 
   const applySubstitution = (value: SubstitutionFormValues | null) => {
     setSubstitution(value);
@@ -145,10 +136,9 @@ export function EditDispenseSheet({ facilityId, locationId, dispense }: Props) {
       // Switching back to the dispensed product restores the original lot.
       setLot(initialLot());
     } else {
-      // Substituting to a different product: clear the current lot and
-      // auto-select an eligible lot for the new product.
+      // Substituting to a different product: clear the current lot so the
+      // auto-select effect picks an eligible lot for the new product.
       setLot(null);
-      autoSelectLot(nextPk.id);
     }
   };
 
@@ -491,19 +481,22 @@ function ExistingDispenseDetails({
           <span className="text-xs font-medium text-gray-500">
             {t("instructions")}
           </span>
-          {instructions.map((instruction, index) => (
-            <div key={index} className="flex flex-col">
-              <span className="text-gray-900">
-                {formatMedicationLine(instruction, { unitLabel: baseUnit }) ||
-                  "-"}
-              </span>
-              {instruction.text && (
-                <span className="text-xs text-gray-600">
-                  {instruction.text}
-                </span>
-              )}
-            </div>
-          ))}
+          <DosageInstructionList
+            instructions={instructions}
+            gap="sm"
+            itemClassName="text-sm font-medium text-gray-950 flex items-center gap-1 capitalize"
+            renderItem={(di) => {
+              const rest = [formatFrequency(di), formatDuration(di)]
+                .filter(Boolean)
+                .join(" × ");
+              return (
+                <>
+                  <FormattedDosage instruction={di} fallback="-" />
+                  {rest && <span> × {rest}</span>}
+                </>
+              );
+            }}
+          />
         </div>
       )}
 

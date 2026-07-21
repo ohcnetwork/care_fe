@@ -311,7 +311,7 @@ const PrescriptionCard = ({
                 return (
                   <>
                     <FormattedDosage instruction={di} fallback="-" />
-                    {rest && <span>× {rest}</span>}
+                    {rest && <span> × {rest}</span>}
                   </>
                 );
               }}
