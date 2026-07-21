@@ -35,7 +35,9 @@ import {
 import { InventoryItemsSelector } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import { LotSelection } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { useInventoryItemsAutoSelect } from "@/pages/Facility/services/pharmacy/billMedications/utils/useInventoryItemsAutoSelect";
+import { useAttachChargeItemsToInvoice } from "@/pages/Facility/services/pharmacy/hooks/useAttachChargeItemsToInvoice";
 
+import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import {
   getSubstitutionReasonDisplay,
   getSubstitutionTypeDisplay,
@@ -61,6 +63,13 @@ interface Props {
   facilityId: string;
   locationId: string;
   dispense: MedicationDispenseRead;
+  /** Account used to create a new draft invoice when no draft invoice exists. */
+  accountId?: string;
+  /**
+   * When set, the replacement dispense's charge item is appended to this draft
+   * invoice. When unset, a new draft invoice is created for the account.
+   */
+  draftInvoiceId?: string;
 }
 
 /**
@@ -68,14 +77,28 @@ interface Props {
  * medication dispense.
  *
  * Editing never mutates the original dispense in place — when there are
- * changes, the original dispense is marked as `declined` (restoring its
+ * changes, the original dispense is marked as `cancelled` (restoring its
  * stock) and a replacement dispense is created under the same dispense
  * order (carrying the same authorizing request) in a single batch request.
- * When there are no changes, nothing is submitted.
+ * The replacement's charge item is then settled into the invoice (appended
+ * to the draft invoice, or a new draft invoice is created). When there are no
+ * changes, nothing is submitted.
  */
-export function EditDispenseSheet({ facilityId, locationId, dispense }: Props) {
+export function EditDispenseSheet({
+  facilityId,
+  locationId,
+  dispense,
+  accountId,
+  draftInvoiceId,
+}: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+  const attachChargeItemsToInvoice = useAttachChargeItemsToInvoice({
+    facilityId,
+    accountId,
+    draftInvoiceId,
+  });
 
   const medication = dispense.authorizing_request;
   const dispensedPk = dispense.item.product.product_knowledge;
@@ -155,9 +178,22 @@ export function EditDispenseSheet({ facilityId, locationId, dispense }: Props) {
   const encounterId = encounterFromRequest ?? retrievedDispense?.encounter.id;
 
   const { mutate: saveEdit, isPending: isSaving } = useBatchRequest({
-    onSuccess: () => {
+    onSuccess: async (response) => {
+      // Settle only the replacement's charge item — the cancelled original's
+      // charge item is excluded by matching on its reference id.
+      const replacement = response.results.find(
+        (result) => result.reference_id === `replace_${dispense.id}`,
+      );
+      const chargeItem = (
+        replacement?.data as { charge_item?: ChargeItemRead } | undefined
+      )?.charge_item;
+      if (chargeItem) {
+        await attachChargeItemsToInvoice([chargeItem.id]);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
       queryClient.invalidateQueries({ queryKey: ["dispenseOrder"] });
+      queryClient.invalidateQueries({ queryKey: ["invoice"] });
       toast.success(t("dispense_updated_successfully"));
       setOpen(false);
     },
@@ -184,7 +220,7 @@ export function EditDispenseSheet({ facilityId, locationId, dispense }: Props) {
       !isSameLot ||
       !isEqual(lot.quantity || "0", dispense.quantity));
 
-  // Declining the original dispense restores its stock, so when the same lot
+  // Cancelling the original dispense restores its stock, so when the same lot
   // is kept, the original quantity is available on top of the lot's current
   // net content.
   const maxQuantity = lot
@@ -235,8 +271,8 @@ export function EditDispenseSheet({ facilityId, locationId, dispense }: Props) {
       {
         api: medicationDispenseApi.update,
         pathParams: { id: dispense.id },
-        referenceId: `decline_${dispense.id}`,
-        body: { status: MedicationDispenseStatus.declined },
+        referenceId: `cancel_${dispense.id}`,
+        body: { status: MedicationDispenseStatus.cancelled },
       },
       {
         api: medicationDispenseApi.create,

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -6,12 +6,12 @@ import {
   AddMedicationRow,
   AddMedicationValue,
 } from "@/pages/Facility/services/pharmacy/components/AddMedicationSheet";
+import { useAttachChargeItemsToInvoice } from "@/pages/Facility/services/pharmacy/hooks/useAttachChargeItemsToInvoice";
 
 import {
   ChargeItemBatchResponse,
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
-import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import {
   MedicationDispenseCreate,
   MedicationDispenseStatus,
@@ -20,7 +20,6 @@ import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDisp
 import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequest";
 
 import { useBatchRequest } from "@/Utils/request/batch";
-import mutate from "@/Utils/request/mutate";
 
 interface Props {
   facilityId: string;
@@ -33,9 +32,12 @@ interface Props {
    */
   encounterId?: string;
   /**
+   * Account used to create a new draft invoice when no draft invoice exists.
+   */
+  accountId?: string;
+  /**
    * When set, charge items of the created dispenses are appended to this
-   * draft invoice. When unset, the charge items stay unbilled and the user
-   * can create an invoice manually.
+   * draft invoice. When unset, a new draft invoice is created for the account.
    */
   draftInvoiceId?: string;
 }
@@ -43,40 +45,32 @@ interface Props {
 /**
  * Dispense-order-specific wrapper around {@link AddMedicationRow}. Each
  * selected lot creates one dispense attached to the same dispense order, and
- * the resulting charge items are appended to the given draft invoice, if any.
+ * the resulting charge items are appended to the given draft invoice (or a
+ * newly created draft invoice when none exists).
  */
 export function AddDispenseMedicationRow({
   facilityId,
   locationId,
   dispenseOrderId,
   encounterId,
+  accountId,
   draftInvoiceId,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: attachItemsToInvoice } = useMutation({
-    mutationFn: mutate(chargeItemApi.addChargeItemsToInvoice, {
-      pathParams: { facilityId, invoiceId: draftInvoiceId ?? "" },
-    }),
+  const attachChargeItemsToInvoice = useAttachChargeItemsToInvoice({
+    facilityId,
+    accountId,
+    draftInvoiceId,
   });
-
-  /**
-   * Attaches the newly created charge items to the draft invoice. The
-   * existing charge items and invoice metadata are preserved server-side.
-   */
-  const addChargeItemsToDraftInvoice = async (chargeItemIds: string[]) => {
-    if (!draftInvoiceId || chargeItemIds.length === 0) return;
-
-    await attachItemsToInvoice({ charge_items: chargeItemIds });
-  };
 
   const { mutateAsync: saveMedication, isPending: isSaving } = useBatchRequest({
     onSuccess: async (response) => {
       const chargeItems = extractChargeItemsFromBatchResponse(
         response as ChargeItemBatchResponse,
       );
-      await addChargeItemsToDraftInvoice(chargeItems.map((item) => item.id));
+      await attachChargeItemsToInvoice(chargeItems.map((item) => item.id));
 
       queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
       queryClient.invalidateQueries({ queryKey: ["dispenseOrder"] });

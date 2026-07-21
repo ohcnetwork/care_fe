@@ -392,9 +392,16 @@ export function DispenseOrderView({
       locationId={locationId}
       dispenseOrderId={dispenseOrderId}
       encounterId={orderEncounterId}
+      accountId={account?.id}
       draftInvoiceId={draftInvoiceId}
     />
   ) : null;
+
+  // Per-row edit context; the replacement dispense's charge item is settled
+  // into the draft invoice (or a new one is created for the account).
+  const editContext = isOrderOpen
+    ? { facilityId, locationId, accountId: account?.id, draftInvoiceId }
+    : undefined;
 
   const handlePutOnHold = () => {
     updateStatus(
@@ -491,7 +498,6 @@ export function DispenseOrderView({
             )}
           </div>
         ) : (
-          // TODO: show account's balance if account balance is negative
           <Button variant="link" className="underline" asChild>
             <Link
               href={`/facility/${facilityId}/billing/account/${account?.id}`}
@@ -576,7 +582,7 @@ export function DispenseOrderView({
                 )}
                 <DispenseItemsTableCard
                   dispenses={groupDispenses}
-                  edit={isOrderOpen ? { facilityId, locationId } : undefined}
+                  edit={editContext}
                 />
               </div>
             );
@@ -600,7 +606,7 @@ export function DispenseOrderView({
                 )}
                 <DispenseItemsTableCard
                   dispenses={groupDispenses}
-                  edit={isOrderOpen ? { facilityId, locationId } : undefined}
+                  edit={editContext}
                 />
               </div>
             );
