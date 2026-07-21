@@ -173,6 +173,10 @@ export function PaymentStatusBanner({
     enabled: !!invoiceId,
   });
 
+  if (invoice) {
+    accountId = invoice.account.id;
+  }
+
   const invalidateQueries = () => {
     queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
     queryClient.invalidateQueries({ queryKey: ["accounts"] });
@@ -349,11 +353,11 @@ export function PaymentStatusBanner({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {accountId && (
+                    {invoice.account.id && (
                       <DropdownMenuItem asChild>
                         <Link
                           basePath="/"
-                          href={`/facility/${facilityId}/billing/account/${accountId}`}
+                          href={`/facility/${facilityId}/billing/account/${invoice.account.id}`}
                         >
                           <BanknoteIcon className="size-4" />
                           {t("go_to_account")}
@@ -552,6 +556,14 @@ export function PaymentStatusBanner({
                         </Link>
                       </DropdownMenuItem>
                     )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => promptCancel()}
+                      variant="destructive"
+                    >
+                      <BanIcon />
+                      {t("cancel_invoice")}
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
