@@ -79,7 +79,10 @@ async function ensureDepartmentsAndLinkToUser(): Promise<{
       `${apiUrl}/api/v1/facility/${facilityId}/organizations/${dept.id}/users/`,
       { headers },
     );
-    if (!rolesRes.ok) continue;
+    if (!rolesRes.ok)
+      throw new Error(
+        `Failed to list users for dept ${dept.id}: ${rolesRes.status}`,
+      );
     const rolesData = (await rolesRes.json()) as {
       results: Array<{ user: { id: string }; role: { id: string } }>;
     };
@@ -93,11 +96,15 @@ async function ensureDepartmentsAndLinkToUser(): Promise<{
       `${apiUrl}/api/v1/role/?limit=1`,
       { headers },
     );
-    if (!roleListRes.ok) continue;
+    if (!roleListRes.ok)
+      throw new Error(`Failed to fetch roles: ${roleListRes.status}`);
     const roleListData = (await roleListRes.json()) as {
       results: Array<{ id: string }>;
     };
-    if (!roleListData.results.length) continue;
+    if (!roleListData.results.length)
+      throw new Error(
+        `No roles available — cannot link dept ${dept.id} to user ${userId}`,
+      );
     const roleId = roleListData.results[0].id;
 
     const linkRes = await fetch(
@@ -254,10 +261,11 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
   }) => {
     await goToDepartmentsTab(page);
 
-    const responsePromise = waitForOrgsResponse(page, "name=zzz_no_match_xyz_999");
+    const noMatchTerm = `ZZZ-NoMatch-${faker.string.alphanumeric(12)}`;
+    const responsePromise = waitForOrgsResponse(page, `name=${encodeURIComponent(noMatchTerm)}`);
     await page
       .getByPlaceholder("Search by department/team name")
-      .fill("zzz_no_match_xyz_999");
+      .fill(noMatchTerm);
     await responsePromise;
 
     await expect(page.getByText("No departments found")).toBeVisible();
