@@ -364,8 +364,6 @@ export interface MedicationRequestDosageInstruction {
   text?: string;
   additional_instruction?: Code[];
   patient_instruction?: string;
-  // TODO: query: how to map for "Immediate" frequency
-  // TODO: query how to map Days
   timing?: Timing;
   /**
    * True if it is a PRN medication

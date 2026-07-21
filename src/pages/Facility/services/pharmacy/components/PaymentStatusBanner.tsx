@@ -9,11 +9,13 @@ import {
   ChevronDown,
   CircleIcon,
   EqualApproximatelyIcon,
+  ExternalLinkIcon,
   LinkIcon,
   PrinterIcon,
   ReceiptIcon,
   ReceiptIndianRupeeIcon,
   SendIcon,
+  TriangleAlertIcon,
 } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
@@ -38,7 +40,10 @@ import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReco
 import { MarkInvoiceAsBalancedDialog } from "@/pages/Facility/billing/invoice/components/MarkInvoiceAsBalancedDialog";
 import { useInvoiceStatusActions } from "@/pages/Facility/billing/invoice/components/useInvoiceStatusActions";
 
-import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
+import {
+  ChargeItemRead,
+  ChargeItemServiceResource,
+} from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { PaymentReconciliationStatus } from "@/types/billing/paymentReconciliation/paymentReconciliation";
@@ -228,6 +233,10 @@ export function PaymentStatusBanner({
   // Positive/settled state: either fully paid or manually balanced.
   const isSettled = isFullyPaid || isBalanced;
   const hasPayments = invoice?.payments && invoice.payments.length > 0;
+  const hasNonMedicationItems = invoice?.charge_items?.some(
+    (item) =>
+      item.service_resource !== ChargeItemServiceResource.medication_dispense,
+  );
 
   const handleIssueInvoice = () => {
     if (!invoice) return;
@@ -419,6 +428,29 @@ export function PaymentStatusBanner({
             </Badge>
           )}
         </div>
+
+        {hasNonMedicationItems && (
+          <div className="mx-3 mb-3 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-sm text-amber-800">
+            <TriangleAlertIcon className="mt-0.5 size-4 shrink-0" />
+            <p>
+              {t("invoice_includes_non_medication_items")}{" "}
+              <Link
+                basePath="/"
+                href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
+                className="inline-flex items-center gap-0.5 font-medium underline"
+              >
+                {t("view_invoice")}
+                <ExternalLinkIcon className="size-3" />
+              </Link>{" "}
+              {t("to_see_all_charge_items_in_invoice")}
+              {!isBalanced && (
+                <span className="block mt-1 text-amber-700">
+                  {t("invoice_only_medications_hint")}
+                </span>
+              )}
+            </p>
+          </div>
+        )}
 
         {/* Body row */}
         <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6 bg-white rounded-md p-3 shadow-xs">
