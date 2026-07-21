@@ -72,6 +72,20 @@ async function ensureDepartmentsAndLinkToUser(): Promise<{
   if (!usersData.results.length) throw new Error("No users found in facility");
   const userId = usersData.results[0].id;
 
+  // --- fetch a valid role id once (role ID is the same for all departments) ---
+  const roleListRes = await fetch(
+    `${apiUrl}/api/v1/role/?limit=1`,
+    { headers },
+  );
+  if (!roleListRes.ok)
+    throw new Error(`Failed to fetch roles: ${roleListRes.status}`);
+  const roleListData = (await roleListRes.json()) as {
+    results: Array<{ id: string }>;
+  };
+  if (!roleListData.results.length)
+    throw new Error(`No roles available — cannot link departments to user ${userId}`);
+  const roleId = roleListData.results[0].id;
+
   // --- link each department to the user (best-effort; ignore 409 duplicates) ---
   for (const dept of allDepts) {
     // get already-linked users for this org
@@ -90,22 +104,6 @@ async function ensureDepartmentsAndLinkToUser(): Promise<{
       (r) => r.user.id === userId,
     );
     if (alreadyLinked) continue;
-
-    // fetch a valid role id
-    const roleListRes = await fetch(
-      `${apiUrl}/api/v1/role/?limit=1`,
-      { headers },
-    );
-    if (!roleListRes.ok)
-      throw new Error(`Failed to fetch roles: ${roleListRes.status}`);
-    const roleListData = (await roleListRes.json()) as {
-      results: Array<{ id: string }>;
-    };
-    if (!roleListData.results.length)
-      throw new Error(
-        `No roles available — cannot link dept ${dept.id} to user ${userId}`,
-      );
-    const roleId = roleListData.results[0].id;
 
     const linkRes = await fetch(
       `${apiUrl}/api/v1/facility/${facilityId}/organizations/${dept.id}/users/`,
