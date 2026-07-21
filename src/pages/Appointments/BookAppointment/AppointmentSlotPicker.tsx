@@ -2,16 +2,34 @@ import {
   Appointment,
   GetSlotsForDayResponse,
   SchedulableResourceType,
+  ScheduleResource,
   TokenSlot,
+  UpcomingAppointmentStatuses,
 } from "@/types/scheduling/schedule";
-import { format, isWithinInterval } from "date-fns";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  areIntervalsOverlapping,
+  format,
+  isSameDay,
+  isWithinInterval,
+} from "date-fns";
+import { Ref, useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import RadioInput from "@/components/ui/RadioInput";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
+import {
+  AppointmentConflictAlert,
+  AppointmentConflictType,
+} from "@/pages/Appointments/BookAppointment/AppointmentConflictAlert";
 import {
   getUniqueSchedulesFromSlots,
   groupSlotsByAvailability,
@@ -32,6 +50,15 @@ interface AppointmentSlotPickerProps {
   currentAppointment?: Appointment;
   selectedDate: Date;
   resourceType: SchedulableResourceType;
+  patientId?: string;
+  newResource?: ScheduleResource;
+  onConflictAcknowledged?: () => void;
+}
+
+interface ConflictAlertState {
+  slotId: string;
+  type: AppointmentConflictType;
+  appointment: Appointment;
 }
 
 export function AppointmentSlotPicker({
@@ -43,8 +70,16 @@ export function AppointmentSlotPicker({
   currentAppointment,
   selectedDate,
   resourceType,
+  patientId,
+  newResource,
+  onConflictAcknowledged,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
+  const isMobile = useBreakpoints({ default: true, sm: false });
+
+  const [conflictAlert, setConflictAlert] = useState<ConflictAlertState | null>(
+    null,
+  );
 
   const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, resourceId, dateQueryString(selectedDate)],
@@ -67,6 +102,73 @@ export function AppointmentSlotPicker({
     },
   });
 
+  // Fetch the patient's other active appointments to check for
+  // duplicate/clash conflicts when a slot is clicked.
+  const patientAppointmentsQuery = useQuery({
+    queryKey: ["patient-active-appointments-for-conflict-check", patientId],
+    queryFn: query(scheduleApi.appointments.getAppointments, {
+      pathParams: { patientId: patientId ?? "" },
+      queryParams: {
+        facility: facilityId,
+        status: UpcomingAppointmentStatuses.join(","),
+        limit: 100,
+      },
+    }),
+    enabled: !!patientId,
+  });
+
+  const checkForConflict = useCallback(
+    (
+      slot: Pick<TokenSlot, "id" | "start_datetime" | "end_datetime">,
+    ): { type: AppointmentConflictType; appointment: Appointment } | null => {
+      const appointments = (
+        patientAppointmentsQuery.data?.results ?? []
+      ).filter((appointment) => appointment.id !== currentAppointment?.id);
+
+      const newSlotInterval = {
+        start: new Date(slot.start_datetime),
+        end: new Date(slot.end_datetime),
+      };
+
+      const duplicate = appointments.find(
+        (appointment) =>
+          appointment.resource_type === resourceType &&
+          appointment.resource.id === resourceId &&
+          isSameDay(
+            new Date(appointment.token_slot.start_datetime),
+            newSlotInterval.start,
+          ),
+      );
+      if (duplicate) {
+        return { type: "duplicate", appointment: duplicate };
+      }
+
+      const clash = appointments.find((appointment) => {
+        if (
+          appointment.resource_type !== SchedulableResourceType.Practitioner ||
+          appointment.resource.id === resourceId
+        ) {
+          return false;
+        }
+        return areIntervalsOverlapping(newSlotInterval, {
+          start: new Date(appointment.token_slot.start_datetime),
+          end: new Date(appointment.token_slot.end_datetime),
+        });
+      });
+      if (clash) {
+        return { type: "clash", appointment: clash };
+      }
+
+      return null;
+    },
+    [
+      patientAppointmentsQuery.data,
+      currentAppointment,
+      resourceType,
+      resourceId,
+    ],
+  );
+
   // Update slot details when a slot is selected
   const handleSlotSelect = useCallback(
     (slotId: string | undefined) => {
@@ -82,6 +184,28 @@ export function AppointmentSlotPicker({
     },
     [onSlotSelect, onSlotDetailsChange, slotsQuery.data],
   );
+
+  // Runs the duplicate/clash check the moment a slot is clicked by the user.
+  const handleSlotClick = useCallback(
+    (slot: Pick<TokenSlot, "id" | "start_datetime" | "end_datetime">) => {
+      const isDeselecting = selectedSlotId === slot.id;
+      handleSlotSelect(isDeselecting ? undefined : slot.id);
+
+      if (isDeselecting || !patientId) {
+        setConflictAlert(null);
+        return;
+      }
+
+      const conflict = checkForConflict(slot);
+      setConflictAlert(conflict ? { slotId: slot.id, ...conflict } : null);
+    },
+    [selectedSlotId, handleSlotSelect, patientId, checkForConflict],
+  );
+
+  // Clear any stale conflict alert when the resource or date changes.
+  useEffect(() => {
+    setConflictAlert(null);
+  }, [resourceId, resourceType, selectedDate]);
 
   const { slotGroups, availableSlots, uniqueSchedules } = useMemo(() => {
     const allSlots = slotsQuery.data || [];
@@ -228,19 +352,82 @@ export function AppointmentSlotPicker({
                   </span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-1 xl:grid-cols-3 2xl:grid-cols-5 gap-2">
-                  {slots.map((slot) => (
-                    <TokenSlotButton
-                      key={slot.id}
-                      slot={slot}
-                      availability={availability}
-                      selectedSlotId={selectedSlotId}
-                      onClick={() => {
-                        handleSlotSelect(
-                          selectedSlotId === slot.id ? undefined : slot.id,
-                        );
-                      }}
-                    />
-                  ))}
+                  {slots.map((slot) => {
+                    const button = (
+                      <TokenSlotButton
+                        key={slot.id}
+                        slot={slot}
+                        availability={availability}
+                        selectedSlotId={selectedSlotId}
+                        onClick={() => handleSlotClick(slot)}
+                      />
+                    );
+
+                    if (conflictAlert?.slotId !== slot.id) {
+                      return button;
+                    }
+
+                    const conflictAlertContent = (
+                      <AppointmentConflictAlert
+                        type={conflictAlert.type}
+                        conflictingAppointment={conflictAlert.appointment}
+                        newSlot={slot}
+                        newResource={newResource}
+                        onClose={() => setConflictAlert(null)}
+                        onPickAnotherSlot={() => {
+                          setConflictAlert(null);
+                          handleSlotSelect(undefined);
+                        }}
+                        onContinueAnyway={() => {
+                          setConflictAlert(null);
+                          onConflictAcknowledged?.();
+                        }}
+                      />
+                    );
+
+                    if (isMobile) {
+                      return (
+                        <div key={slot.id}>
+                          {button}
+                          <Drawer
+                            open
+                            onOpenChange={(open) => {
+                              if (!open) setConflictAlert(null);
+                            }}
+                          >
+                            <DrawerContent>
+                              <DrawerTitle className="sr-only">
+                                {conflictAlert.type === "duplicate"
+                                  ? t("multiple_appointment_alert")
+                                  : t("timing_clash_alert")}
+                              </DrawerTitle>
+                              {conflictAlertContent}
+                            </DrawerContent>
+                          </Drawer>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <Popover
+                        key={slot.id}
+                        open
+                        onOpenChange={(open) => {
+                          if (!open) setConflictAlert(null);
+                        }}
+                      >
+                        <PopoverTrigger asChild>{button}</PopoverTrigger>
+                        <PopoverContent
+                          side="bottom"
+                          align="start"
+                          sideOffset={8}
+                          className="w-80 p-0 rounded-xl shadow-lg"
+                        >
+                          {conflictAlertContent}
+                        </PopoverContent>
+                      </Popover>
+                    );
+                  })}
                 </div>
                 <Separator className="my-6" />
               </div>
@@ -257,12 +444,14 @@ export const TokenSlotButton = ({
   selectedSlotId,
   onClick,
   className,
+  ref,
 }: {
   slot: Omit<TokenSlot, "availability">;
   availability: TokenSlot["availability"];
   selectedSlotId: string | undefined;
   onClick: () => void;
   className?: string;
+  ref?: Ref<HTMLButtonElement>;
 }) => {
   const { t } = useTranslation();
 
@@ -275,6 +464,7 @@ export const TokenSlotButton = ({
 
   return (
     <Button
+      ref={ref}
       key={slot.id}
       size="lg"
       type="button"
