@@ -49,6 +49,7 @@ import {
   dateQueryString,
   dateTimeQueryString,
   formatDateTime,
+  parseLocalDate,
 } from "@/Utils/utils";
 
 export default function InvoicesData({
@@ -128,12 +129,8 @@ export default function InvoicesData({
     created_date:
       created_date_after || created_date_before
         ? {
-            from: created_date_after
-              ? new Date(`${created_date_after}T00:00:00`)
-              : undefined,
-            to: created_date_before
-              ? new Date(`${created_date_before}T00:00:00`)
-              : undefined,
+            from: parseLocalDate(created_date_after),
+            to: parseLocalDate(created_date_before),
           }
         : undefined,
   });
