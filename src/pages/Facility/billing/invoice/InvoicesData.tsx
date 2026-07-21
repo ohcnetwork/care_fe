@@ -75,7 +75,7 @@ export default function InvoicesData({
     queryFn: query(facilityApi.getUser, {
       pathParams: { facilityId, userId: qParams.created_by },
     }),
-    enabled: !!facilityId && !!qParams.created_by,
+    enabled: !!qParams.created_by,
   });
 
   const selectedCreatedByUsers = createdByUser ? [createdByUser] : undefined;
