@@ -273,12 +273,10 @@ export function EncounterQuestion({
             <SelectContent>
               {Object.values(EncounterStatus)
                 .filter((encounterStatus: EncounterStatus) => {
-                  if (encounter.status === EncounterStatus.COMPLETED) {
-                    return encounterStatus === EncounterStatus.COMPLETED;
-                  }
-                  if (encounter.status === EncounterStatus.DISCHARGED) {
-                    return encounterStatus === EncounterStatus.DISCHARGED;
-                  }
+                  if (
+                    NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounter.status)
+                  )
+                    return encounterStatus === encounter.status;
                   return !NON_SELECTABLE_ENCOUNTER_STATUSES.includes(
                     encounterStatus,
                   );
