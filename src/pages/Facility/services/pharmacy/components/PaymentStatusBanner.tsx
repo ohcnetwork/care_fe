@@ -22,16 +22,6 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +36,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import { MarkInvoiceAsBalancedDialog } from "@/pages/Facility/billing/invoice/components/MarkInvoiceAsBalancedDialog";
+import { useInvoiceStatusActions } from "@/pages/Facility/billing/invoice/components/useInvoiceStatusActions";
 
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
@@ -172,7 +163,6 @@ export function PaymentStatusBanner({
   const queryClient = useQueryClient();
 
   const [paymentSheetOpen, setPaymentSheetOpen] = useState(false);
-  const [cancelInvoiceDialogOpen, setCancelInvoiceDialogOpen] = useState(false);
   const [markBalancedDialogOpen, setMarkBalancedDialogOpen] = useState(false);
 
   const { data: invoice, isLoading: isLoadingInvoice } = useQuery({
@@ -215,20 +205,16 @@ export function PaymentStatusBanner({
     },
   });
 
-  const { mutate: cancelInvoice, isPending: isCancellingInvoice } = useMutation(
-    {
-      mutationFn: invoiceId
-        ? mutate(invoiceApi.cancelInvoice, {
-            pathParams: { facilityId, invoiceId },
-          })
-        : async () => undefined,
+  const { promptCancel, dialogs: invoiceStatusDialogs } =
+    useInvoiceStatusActions({
+      facilityId,
+      invoiceId,
+      invoice,
       onSuccess: () => {
-        toast.success(t("invoice_cancelled_successfully"));
         invalidateQueries();
         onPaymentSuccess();
       },
-    },
-  );
+    });
 
   const unbilledTotal = sumTotalPrices(unbilledItems);
   const { actualPaidAmount, amountDue } = computePaidAndDueAmount(invoice);
@@ -316,47 +302,80 @@ export function PaymentStatusBanner({
   // Draft invoice — show Issue Invoice CTA
   if (invoice.status === InvoiceStatus.draft) {
     return (
-      <div className="border border-gray-200 bg-gray-50 rounded-md p-3">
-        <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-medium text-gray-900">
-                  {t("draft_invoice")}
-                </h3>
-              </div>
-              <div className="mt-1 flex items-center gap-4 text-sm">
-                <span className="text-gray-600">{t("invoice_total")}:</span>
-                <MonetaryDisplay
-                  amount={invoice.total_gross}
-                  className="font-bold text-gray-900"
-                />
+      <>
+        <div className="border border-gray-200 bg-gray-50 rounded-md p-3">
+          <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-medium text-gray-900">
+                    {t("draft_invoice")}
+                  </h3>
+                </div>
+                <div className="mt-1 flex items-center gap-4 text-sm">
+                  <span className="text-gray-600">{t("invoice_total")}:</span>
+                  <MonetaryDisplay
+                    amount={invoice.total_gross}
+                    className="font-bold text-gray-900"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" asChild>
-              <Link
-                basePath="/"
-                href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
-              >
-                <ReceiptIcon className="size-4" />
-                {t("view_invoice")}
-              </Link>
-            </Button>
-            {!readOnly && (
-              <Button
-                variant="primary"
-                onClick={handleIssueInvoice}
-                disabled={isIssuingInvoice}
-              >
-                <SendIcon className="size-4" />
-                {t("issue_invoice")}
+            <div className="flex items-center gap-2">
+              <Button variant="outline" asChild>
+                <Link
+                  basePath="/"
+                  href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
+                >
+                  <ReceiptIcon className="size-4" />
+                  {t("view_invoice")}
+                </Link>
               </Button>
-            )}
+              {!readOnly && (
+                <Button
+                  variant="primary"
+                  onClick={handleIssueInvoice}
+                  disabled={isIssuingInvoice}
+                >
+                  <SendIcon className="size-4" />
+                  {t("issue_invoice")}
+                </Button>
+              )}
+              {!readOnly && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <CareIcon icon="l-ellipsis-v" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {accountId && (
+                      <DropdownMenuItem asChild>
+                        <Link
+                          basePath="/"
+                          href={`/facility/${facilityId}/billing/account/${accountId}`}
+                        >
+                          <BanknoteIcon className="size-4" />
+                          {t("go_to_account")}
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem
+                      onClick={() => promptCancel()}
+                      variant="destructive"
+                    >
+                      <BanIcon />
+                      {t("cancel_invoice")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+
+        {invoiceStatusDialogs}
+      </>
     );
   }
 
@@ -596,7 +615,7 @@ export function PaymentStatusBanner({
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem
-                          onClick={() => setCancelInvoiceDialogOpen(true)}
+                          onClick={() => promptCancel()}
                           variant="destructive"
                         >
                           <BanIcon />
@@ -626,36 +645,8 @@ export function PaymentStatusBanner({
         />
       )}
 
-      {/* Cancel Invoice Confirmation */}
-      <AlertDialog
-        open={cancelInvoiceDialogOpen}
-        onOpenChange={setCancelInvoiceDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("cancel_invoice")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("cancel_invoice_confirmation", {
-                invoiceNumber: invoice.number,
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isCancellingInvoice}>
-              {t("no_go_back")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                cancelInvoice({ reason: "cancelled" });
-                setCancelInvoiceDialogOpen(false);
-              }}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              {isCancellingInvoice ? t("cancelling") : t("yes_cancel_invoice")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Cancel / status-change confirmations */}
+      {invoiceStatusDialogs}
 
       {/* Mark as Balanced Confirmation */}
       <MarkInvoiceAsBalancedDialog
