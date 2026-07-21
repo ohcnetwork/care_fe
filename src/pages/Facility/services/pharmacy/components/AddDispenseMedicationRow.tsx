@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import {
-  AddMedicationRow,
+  AddMedicationSheet,
   AddMedicationValue,
 } from "@/pages/Facility/services/pharmacy/components/AddMedicationSheet";
 import { useAttachChargeItemsToInvoice } from "@/pages/Facility/services/pharmacy/hooks/useAttachChargeItemsToInvoice";
@@ -111,7 +111,7 @@ export function AddDispenseMedicationRow({
   };
 
   return (
-    <AddMedicationRow
+    <AddMedicationSheet
       facilityId={facilityId}
       locationId={locationId}
       onSave={handleSave}
