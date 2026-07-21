@@ -349,7 +349,7 @@ test.describe("Patient Registration", () => {
     await page.waitForURL("**/patients/**");
     await expect(
       page.getByRole("button", {
-        name: new RegExp(`.*Born on ${expectedYearOfBirth}, Male`),
+        name: new RegExp(`.*Born ${expectedYearOfBirth}, Male`),
       }),
     ).toBeVisible();
 
