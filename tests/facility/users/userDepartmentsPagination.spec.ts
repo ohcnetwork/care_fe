@@ -5,14 +5,15 @@ import { getFacilityId } from "tests/support/facilityId";
 
 const PAGE_SIZE = 12;
 const DEPT_COUNT = PAGE_SIZE + 3; // 15 — enough to trigger pagination
-const DEPT_PREFIX = "PaginationTest";
+// Per-run unique prefix avoids stale records from prior runs satisfying the
+// count without being linked to the current test user.
+const DEPT_PREFIX = `PaginationTest-${faker.string.alphanumeric(8)}`;
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 /** Ensure at least DEPT_COUNT departments with the prefix exist, and link them to the first user. */
 async function ensureDepartmentsAndLinkToUser(): Promise<{
   userId: string;
-  deptNames: string[];
 }> {
   const facilityId = getFacilityId();
   const apiUrl = getApiUrl();
@@ -57,7 +58,6 @@ async function ensureDepartmentsAndLinkToUser(): Promise<{
   }
 
   const allDepts = [...existing, ...created].slice(0, DEPT_COUNT);
-  const deptNames = allDepts.map((d) => d.name);
 
   // --- pick the first user in the facility ---
   const usersRes = await fetch(
@@ -74,11 +74,12 @@ async function ensureDepartmentsAndLinkToUser(): Promise<{
 
   // --- link each department to the user (best-effort; ignore 409 duplicates) ---
   for (const dept of allDepts) {
-    // get available roles for this org
+    // get already-linked users for this org
     const rolesRes = await fetch(
       `${apiUrl}/api/v1/facility/${facilityId}/organizations/${dept.id}/users/`,
       { headers },
     );
+    if (!rolesRes.ok) continue;
     const rolesData = (await rolesRes.json()) as {
       results: Array<{ user: { id: string }; role: { id: string } }>;
     };
@@ -99,7 +100,7 @@ async function ensureDepartmentsAndLinkToUser(): Promise<{
     if (!roleListData.results.length) continue;
     const roleId = roleListData.results[0].id;
 
-    await fetch(
+    const linkRes = await fetch(
       `${apiUrl}/api/v1/facility/${facilityId}/organizations/${dept.id}/users/`,
       {
         method: "POST",
@@ -107,17 +108,21 @@ async function ensureDepartmentsAndLinkToUser(): Promise<{
         body: JSON.stringify({ user: userId, role: roleId }),
       },
     );
+    // 409 = already linked (race or duplicate); anything else is an unexpected failure
+    if (!linkRes.ok && linkRes.status !== 409) {
+      const txt = await linkRes.text();
+      throw new Error(
+        `Failed to link dept ${dept.id} to user ${userId}: ${linkRes.status} — ${txt}`,
+      );
+    }
   }
 
-  return { userId, deptNames };
+  return { userId };
 }
 
 test.describe("UserDepartmentsTab — search and pagination", () => {
-  let deptNames: string[] = [];
-
   test.beforeAll(async () => {
-    const result = await ensureDepartmentsAndLinkToUser();
-    deptNames = result.deptNames;
+    await ensureDepartmentsAndLinkToUser();
   });
 
   async function goToDepartmentsTab(page: import("@playwright/test").Page) {
@@ -130,6 +135,13 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
     await page.waitForLoadState("networkidle");
     await page.getByText("Departments", { exact: true }).click();
     await page.waitForLoadState("networkidle");
+  }
+
+  /** Wait for the organizations API response after an action. */
+  function waitForOrgsResponse(page: import("@playwright/test").Page) {
+    return page.waitForResponse(
+      (resp) => resp.url().includes("/organizations/") && resp.status() === 200,
+    );
   }
 
   test("search input is visible above the department cards", async ({
@@ -145,8 +157,8 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
     page,
   }) => {
     await goToDepartmentsTab(page);
-    // Pagination component renders when count > PAGE_SIZE
-    const pagination = page.getByRole("navigation");
+    // Scope to the pagination container (nav rendered inside useFilters Pagination)
+    const pagination = page.locator("nav").filter({ has: page.locator("#page-2") });
     await expect(pagination).toBeVisible();
   });
 
@@ -158,9 +170,10 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
     await expect(cards1.first()).toBeVisible();
     const page1Names = await cards1.allTextContents();
 
-    // navigate to page 2
-    await page.getByRole("button", { name: "2" }).click();
-    await page.waitForLoadState("networkidle");
+    // navigate to page 2 using the stable id set by the Pagination component
+    const responsePromise = waitForOrgsResponse(page);
+    await page.locator("#page-2").click();
+    await responsePromise;
 
     const cards2 = page.locator(".grid h3");
     await expect(cards2.first()).toBeVisible();
@@ -184,10 +197,11 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
     await goToDepartmentsTab(page);
 
     const searchTerm = DEPT_PREFIX;
+    const responsePromise = waitForOrgsResponse(page);
     await page
       .getByPlaceholder("Search by department/team name")
       .fill(searchTerm);
-    await page.waitForLoadState("networkidle");
+    await responsePromise;
 
     const cards = page.locator(".grid h3");
     await expect(cards.first()).toBeVisible();
@@ -209,13 +223,15 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
     await expect(cards.first()).toBeVisible();
     const baselineNames = await cards.allTextContents();
 
-    // type a search
+    // type a search and wait for the filtered response
+    const searchResponse = waitForOrgsResponse(page);
     await input.fill(DEPT_PREFIX);
-    await page.waitForLoadState("networkidle");
+    await searchResponse;
 
-    // clear it
+    // clear it and wait for the restored response
+    const clearResponse = waitForOrgsResponse(page);
     await input.fill("");
-    await page.waitForLoadState("networkidle");
+    await clearResponse;
 
     await expect(cards.first()).toBeVisible();
     const restoredNames = await cards.allTextContents();
@@ -227,10 +243,11 @@ test.describe("UserDepartmentsTab — search and pagination", () => {
   }) => {
     await goToDepartmentsTab(page);
 
+    const responsePromise = waitForOrgsResponse(page);
     await page
       .getByPlaceholder("Search by department/team name")
       .fill("zzz_no_match_xyz_999");
-    await page.waitForLoadState("networkidle");
+    await responsePromise;
 
     await expect(page.getByText("No departments found")).toBeVisible();
     // the pre-existing zero-departments state must NOT appear
