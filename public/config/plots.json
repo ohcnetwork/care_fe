@@ -80,6 +80,11 @@
                         "code": "59408-5",
                         "system": "http://loinc.org",
                         "display": "SpO2 (pulse oximetry)"
+                    },
+                    {
+                        "code": "20564-1",
+                        "system": "http://loinc.org",
+                        "display": "Oxygen saturation in blood"
                     }
                 ]
             },
