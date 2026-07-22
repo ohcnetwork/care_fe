@@ -372,7 +372,11 @@ export function EditDispenseSheet({
               max={maxQuantity}
               value={lot?.quantity ?? ""}
               onChange={(e) =>
-                lot && setLot({ ...lot, quantity: e.target.value })
+                lot &&
+                setLot({
+                  ...lot,
+                  quantity: e.target.value ? roundWhole(e.target.value) : "",
+                })
               }
               className="w-28"
               placeholder="0"

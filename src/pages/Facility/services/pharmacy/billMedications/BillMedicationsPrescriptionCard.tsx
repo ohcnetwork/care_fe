@@ -53,7 +53,12 @@ import {
 } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { getLocationPath } from "@/types/location/utils";
-import { isLessThanOrEqual, isPositive, round } from "@/Utils/decimal";
+import {
+  isLessThanOrEqual,
+  isPositive,
+  round,
+  roundWhole,
+} from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
 import { DotsVerticalIcon, MinusCircledIcon } from "@radix-ui/react-icons";
@@ -679,7 +684,12 @@ const MedicineLineItem = ({
                           `${name}.lots`,
                           lots.map((l, i) =>
                             i === index
-                              ? { ...l, quantity: e.target.value }
+                              ? {
+                                  ...l,
+                                  quantity: e.target.value
+                                    ? roundWhole(e.target.value)
+                                    : "",
+                                }
                               : l,
                           ),
                           {

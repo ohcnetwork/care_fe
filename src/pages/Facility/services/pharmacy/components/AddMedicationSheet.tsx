@@ -39,7 +39,7 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
-import { isLessThanOrEqual, isPositive } from "@/Utils/decimal";
+import { isLessThanOrEqual, isPositive, roundWhole } from "@/Utils/decimal";
 import { useInventoryItemsAutoSelect } from "@/pages/Facility/services/pharmacy/billMedications/utils/useInventoryItemsAutoSelect";
 
 const EMPTY_INSTRUCTION: MedicationRequestDosageInstruction = {
@@ -453,7 +453,9 @@ export function AddMedicationSheet({
                                 i === index
                                   ? {
                                       ...l,
-                                      quantity: e.target.value,
+                                      quantity: e.target.value
+                                        ? roundWhole(e.target.value)
+                                        : "",
                                       autoSelected: false,
                                     }
                                   : l,
