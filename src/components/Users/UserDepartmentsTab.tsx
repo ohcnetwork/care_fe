@@ -134,7 +134,7 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
       qParams.page,
       resultsPerPage,
     ],
-    queryFn: query(facilityOrganizationApi.list, {
+    queryFn: query.debounced(facilityOrganizationApi.list, {
       pathParams: { facilityId: facilityId! },
       queryParams: {
         containing_user: userData.id,
@@ -180,6 +180,7 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
         value={qParams.name || ""}
         onChange={(e) => updateQuery({ name: e.target.value })}
         placeholder={t("search_departments")}
+        aria-label={t("search_departments")}
         className="max-w-sm"
       />
 
@@ -206,20 +207,18 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
           </div>
         )
       ) : (
-        <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {departments.map((department) => (
-              <DepartmentCard
-                key={department.id}
-                department={department}
-                userData={userData}
-                facilityId={facilityId}
-              />
-            ))}
-          </div>
-          <Pagination totalCount={totalCount} />
-        </>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {departments.map((department) => (
+            <DepartmentCard
+              key={department.id}
+              department={department}
+              userData={userData}
+              facilityId={facilityId}
+            />
+          ))}
+        </div>
       )}
+      {totalCount > 0 && <Pagination totalCount={totalCount} />}
     </div>
   );
 }
