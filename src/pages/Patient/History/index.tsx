@@ -114,7 +114,7 @@ function ClinicalHistoryPage({
           <Separator orientation="vertical" />
           <div className="min-w-0">
             {patient ? (
-              <h5 className="text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+              <h5 className="text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis capitalize">
                 {t("patient_clinical_history_page_title", {
                   name: patient.name,
                 })}
