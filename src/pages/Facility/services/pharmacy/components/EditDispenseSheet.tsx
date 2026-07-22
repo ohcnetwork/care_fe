@@ -245,7 +245,7 @@ export function EditDispenseSheet({
     if (!encounterId) return;
 
     const createBody: MedicationDispenseCreate = {
-      status: MedicationDispenseStatus.preparation,
+      status: dispense.status,
       category: dispense.category,
       when_prepared: new Date(),
       note: dispense.note,
