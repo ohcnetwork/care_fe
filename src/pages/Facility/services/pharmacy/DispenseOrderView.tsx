@@ -149,20 +149,51 @@ export function DispenseOrderView({
   });
 
   const {
-    data: dispenses = [],
-    isLoading: isLoadingDispenses,
-    isFetching: isFetchingDispenses,
+    data: activeDispenses = [],
+    isLoading: isLoadingActiveDispenses,
+    isFetching: isFetchingActiveDispenses,
   } = useQuery({
-    queryKey: ["medication_dispense", dispenseOrderId, locationId],
+    queryKey: ["medication_dispense", dispenseOrderId, locationId, "active"],
     queryFn: query(medicationDispenseApi.list, {
       queryParams: {
         location: locationId,
         order: dispenseOrderId,
         limit: MAX_DISPENSES_PER_DISPENSE_ORDER,
+        exclude_status: MEDICATION_DISPENSE_CANCELLED_STATUSES.join(","),
       },
     }),
     select: (data: PaginatedResponse<MedicationDispenseRead>) => data.results,
   });
+
+  const {
+    data: cancelledDispenses = [],
+    isLoading: isLoadingCancelledDispenses,
+    isFetching: isFetchingCancelledDispenses,
+  } = useQuery({
+    queryKey: ["medication_dispense", dispenseOrderId, locationId, "cancelled"],
+    queryFn: query(medicationDispenseApi.list, {
+      queryParams: {
+        location: locationId,
+        order: dispenseOrderId,
+        limit: MAX_DISPENSES_PER_DISPENSE_ORDER,
+        status: MEDICATION_DISPENSE_CANCELLED_STATUSES.join(","),
+      },
+    }),
+    select: (data: PaginatedResponse<MedicationDispenseRead>) => data.results,
+  });
+
+  const isLoadingDispenses =
+    isLoadingActiveDispenses || isLoadingCancelledDispenses;
+  const isFetchingDispenses =
+    isFetchingActiveDispenses || isFetchingCancelledDispenses;
+
+  // Combined view (active + cancelled) for computations that need every
+  // dispense of the order. Memoized to preserve reference stability for
+  // downstream memo dependencies.
+  const dispenses = useMemo(
+    () => [...activeDispenses, ...cancelledDispenses],
+    [activeDispenses, cancelledDispenses],
+  );
 
   const relatedPrescriptionIds = dispenses
     .map((d) => d.authorizing_request?.prescription?.id)
@@ -209,44 +240,36 @@ export function DispenseOrderView({
       inv.status === InvoiceStatus.balanced,
   );
 
-  // Group dispenses: one group per active invoice, plus an "unbilled" bucket
-  // for dispenses whose charge item has no active invoice. Cancelled dispenses
-  // are pulled out into their own collapsible section. Unbilled first, then
-  // invoice groups ordered oldest → newest.
-  const { unbilledDispenses, invoiceGroups, cancelledDispenses } =
-    useMemo(() => {
-      const unbilled: MedicationDispenseRead[] = [];
-      const cancelled: MedicationDispenseRead[] = [];
-      const byInvoice = new Map<
-        string,
-        { meta: InvoiceList; dispenses: MedicationDispenseRead[] }
-      >();
-      dispenses.forEach((dispense) => {
-        // Cancelled dispenses are surfaced separately, not in unbilled/invoice.
-        if (MEDICATION_DISPENSE_CANCELLED_STATUSES.includes(dispense.status)) {
-          cancelled.push(dispense);
-          return;
-        }
-        const inv = dispense.charge_item?.paid_invoice;
-        if (inv) {
-          const group = byInvoice.get(inv.id) ?? { meta: inv, dispenses: [] };
-          group.dispenses.push(dispense);
-          byInvoice.set(inv.id, group);
-        } else {
-          unbilled.push(dispense);
-        }
-      });
-      const groups = Array.from(byInvoice.values()).sort(
-        (a, b) =>
-          new Date(a.meta.created_date).getTime() -
-          new Date(b.meta.created_date).getTime(),
-      );
-      return {
-        unbilledDispenses: unbilled,
-        invoiceGroups: groups,
-        cancelledDispenses: cancelled,
-      };
-    }, [dispenses]);
+  // Group active dispenses: one group per active invoice, plus an "unbilled"
+  // bucket for dispenses whose charge item has no active invoice. Cancelled
+  // dispenses are fetched via a separate query. Unbilled first, then invoice
+  // groups ordered oldest → newest.
+  const { unbilledDispenses, invoiceGroups } = useMemo(() => {
+    const unbilled: MedicationDispenseRead[] = [];
+    const byInvoice = new Map<
+      string,
+      { meta: InvoiceList; dispenses: MedicationDispenseRead[] }
+    >();
+    activeDispenses.forEach((dispense) => {
+      const inv = dispense.charge_item?.paid_invoice;
+      if (inv) {
+        const group = byInvoice.get(inv.id) ?? { meta: inv, dispenses: [] };
+        group.dispenses.push(dispense);
+        byInvoice.set(inv.id, group);
+      } else {
+        unbilled.push(dispense);
+      }
+    });
+    const groups = Array.from(byInvoice.values()).sort(
+      (a, b) =>
+        new Date(a.meta.created_date).getTime() -
+        new Date(b.meta.created_date).getTime(),
+    );
+    return {
+      unbilledDispenses: unbilled,
+      invoiceGroups: groups,
+    };
+  }, [activeDispenses]);
 
   // Completion is allowed only when every billable item is either excluded
   // (not_billable / aborted / entered_in_error) or settled in a balanced
@@ -430,7 +453,7 @@ export function DispenseOrderView({
   };
 
   const handleResumePreparation = () => {
-    updateStatus({ newStatus: DispenseOrderStatus.draft });
+    updateStatus({ newStatus: DispenseOrderStatus.in_progress });
   };
 
   const handleStartInProgress = () => {
