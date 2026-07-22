@@ -204,6 +204,7 @@ const PaymentReconciliationSheetBase = ({
 }: PaymentReconciliationSheetProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  useShortcutSubContext("facility:billing:payment:-global");
   const formRef = useRef<HTMLFormElement>(null);
   const [selectedLocationObject, setSelectedLocationObject] = useAtom(
     paymentReconcilationLocationAtom(facilityId),
@@ -935,6 +936,7 @@ function PaymentReconciliationSuccessView({
           >
             <EqualApproximatelyIcon className="size-4" />
             {t("mark_as_balanced")}
+            <ShortcutBadge actionId="mark-as-balanced" />
           </Button>
         )}
       </div>
