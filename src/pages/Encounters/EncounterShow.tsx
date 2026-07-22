@@ -237,14 +237,16 @@ export const EncounterShow = (props: Props) => {
           />
           {selectedEncounter && (
             <div className="flex max-md:flex-col items-end justify-center gap-4">
-              <PLUGIN_Component
-                __name="PatientInfoCardQuickActions"
-                encounter={selectedEncounter}
-                className={cn(
-                  buttonVariants({ variant: "primary_gradient" }),
-                  "text-base font-semibold rounded-md w-full",
-                )}
-              />
+              <div>
+                <PLUGIN_Component
+                  __name="PatientInfoCardQuickActions"
+                  encounter={selectedEncounter}
+                  className={cn(
+                    buttonVariants({ variant: "primary_gradient" }),
+                    "text-base font-semibold rounded-md w-full",
+                  )}
+                />
+              </div>
 
               <EncounterCommandDialog
                 encounter={selectedEncounter}
