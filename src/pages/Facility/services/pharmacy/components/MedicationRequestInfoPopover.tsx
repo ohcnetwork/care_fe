@@ -7,14 +7,17 @@ import {
 } from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   displayMedicationName,
   MEDICATION_REQUEST_STATUS_COLORS,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { formatName } from "@/Utils/utils";
-import { PopoverContent } from "@radix-ui/react-popover";
 import { format } from "date-fns";
 import { X } from "lucide-react";
 import { useState } from "react";

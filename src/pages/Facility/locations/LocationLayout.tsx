@@ -31,9 +31,6 @@ import MedicationReturnList from "@/pages/Facility/services/pharmacy/MedicationR
 import MedicationReturnShow from "@/pages/Facility/services/pharmacy/MedicationReturnShow";
 import PrescriptionQueue from "@/pages/Facility/services/pharmacy/PrescriptionQueue";
 import PrescriptionsPreviewPage from "@/pages/Facility/services/pharmacy/PrescriptionsPreviewPage";
-import PrescriptionsView, {
-  PharmacyMedicationTab,
-} from "@/pages/Facility/services/pharmacy/PrescriptionsView";
 import { PrintDispenseOrder } from "@/pages/Facility/services/pharmacy/PrintDispenseOrder";
 import { PrintMedicationReturn } from "@/pages/Facility/services/pharmacy/PrintMedicationReturn";
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
@@ -64,20 +61,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       patientId={patientId}
       locationId={locationId}
       prescriptionIds={prescriptionIds.split(",")}
-    />
-  ),
-  "/medication_requests/patient/:patientId/prescription/:prescriptionId": ({
-    patientId,
-    prescriptionId,
-  }: {
-    patientId: string;
-    prescriptionId: string;
-  }) => (
-    <PrescriptionsView
-      facilityId={facilityId}
-      patientId={patientId}
-      tab={PharmacyMedicationTab.PENDING}
-      prescriptionId={prescriptionId}
     />
   ),
   "/medication_requests/patient/:patientId/bill/prescriptions/:prescriptionIds":

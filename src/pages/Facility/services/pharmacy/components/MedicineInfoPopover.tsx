@@ -3,7 +3,11 @@ import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { formatDuration, formatFrequency } from "@/components/Medicine/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { billMedicationLineItemSchema } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { DispensedItemsSheet } from "@/pages/Facility/services/pharmacy/components/DispensedItemsSheet";
 import {
@@ -12,7 +16,6 @@ import {
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import { PopoverContent } from "@radix-ui/react-popover";
 import { Check, X } from "lucide-react";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";

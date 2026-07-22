@@ -5562,6 +5562,7 @@
   "select_location_to_request": "Select a location to request this service",
   "select_locations": "Select locations",
   "select_lot": "Select Lot",
+  "select_lot_batch": "Select Lot Batch",
   "select_lots": "Select Lots",
   "select_lots_first": "Select lots first",
   "select_managed_role_organization": "Select managed responsibility",

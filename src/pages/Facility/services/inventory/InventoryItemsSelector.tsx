@@ -244,6 +244,7 @@ export const InventoryItemsSelector = ({
                         <Checkbox
                           checked={isSelected}
                           disabled={isRestricted}
+                          aria-label={t("select_lot_batch")}
                         />
                       </td>
                       <td className="p-2">
