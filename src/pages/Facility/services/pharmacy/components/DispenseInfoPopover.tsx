@@ -1,3 +1,4 @@
+import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
 import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import {
@@ -13,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
@@ -221,15 +223,36 @@ const ChargeItemInfoSection = ({
           {roundWhole(chargeItem.quantity)}
         </span>
       </div>
-      <div className="flex justify-between gap-2">
-        <span className="text-sm font-medium text-gray-600">
-          {t("total_price")}
-        </span>
-        <MonetaryDisplay
-          className="text-sm font-semibold text-gray-950"
-          amount={chargeItem.total_price}
-        />
-      </div>
+
+      {chargeItem.total_price_components.length > 0 && (
+        <div className="rounded-md border border-gray-200 bg-gray-50">
+          <ChargeItemPriceDisplay
+            priceComponents={chargeItem.total_price_components}
+          />
+          <Separator />
+          <div className="flex justify-between gap-2 p-3">
+            <span className="text-sm font-semibold text-gray-950">
+              {t("total_price")}
+            </span>
+            <MonetaryDisplay
+              className="text-sm font-semibold text-gray-950"
+              amount={chargeItem.total_price}
+            />
+          </div>
+        </div>
+      )}
+
+      {chargeItem.total_price_components.length === 0 && (
+        <div className="flex justify-between gap-2">
+          <span className="text-sm font-medium text-gray-600">
+            {t("total_price")}
+          </span>
+          <MonetaryDisplay
+            className="text-sm font-semibold text-gray-950"
+            amount={chargeItem.total_price}
+          />
+        </div>
+      )}
 
       {paidInvoice && (
         <div className="flex items-center justify-between gap-2">

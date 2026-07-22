@@ -291,9 +291,11 @@ const DispenseStatusSelect = ({
 export function DispenseItemsTableCard({
   dispenses,
   edit,
+  isFetching,
 }: {
   dispenses: MedicationDispenseRead[];
   edit?: DispenseEditContext;
+  isFetching?: boolean;
 }) {
   return (
     <div
@@ -302,6 +304,7 @@ export function DispenseItemsTableCard({
         edit
           ? "grid-cols-[1fr_1fr_auto_minmax(10rem,auto)_auto]"
           : "grid-cols-[1fr_1fr_auto_minmax(10rem,auto)]",
+        isFetching && "animate-pulse opacity-20 pointer-events-none",
       )}
     >
       <DispenseItemsTable dispenses={dispenses} edit={edit} />

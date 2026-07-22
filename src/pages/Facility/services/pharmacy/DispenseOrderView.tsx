@@ -148,7 +148,11 @@ export function DispenseOrderView({
     }),
   });
 
-  const { data: dispenses = [], isLoading: isLoadingDispenses } = useQuery({
+  const {
+    data: dispenses = [],
+    isLoading: isLoadingDispenses,
+    isFetching: isFetchingDispenses,
+  } = useQuery({
     queryKey: ["medication_dispense", dispenseOrderId, locationId],
     queryFn: query(medicationDispenseApi.list, {
       queryParams: {
@@ -600,6 +604,7 @@ export function DispenseOrderView({
                 <DispenseItemsTableCard
                   dispenses={groupDispenses}
                   edit={editContext}
+                  isFetching={isFetchingDispenses}
                 />
               </div>
             );
@@ -624,6 +629,7 @@ export function DispenseOrderView({
                 <DispenseItemsTableCard
                   dispenses={groupDispenses}
                   edit={editContext}
+                  isFetching={isFetchingDispenses}
                 />
               </div>
             );
