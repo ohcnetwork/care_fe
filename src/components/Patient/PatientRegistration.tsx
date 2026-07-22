@@ -325,7 +325,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
 
     const basePayload = {
       ...restValues,
-      name: restValues.name,
 
       age:
         restValues.age_or_dob === "dob"
