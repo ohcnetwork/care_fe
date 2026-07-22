@@ -154,7 +154,6 @@ export function DispenseOrderView({
       queryParams: {
         location: locationId,
         order: dispenseOrderId,
-        // TODO: should we limit only billing atmost 100 in the first place or have a workaround for pagination here?
         limit: MAX_DISPENSES_PER_DISPENSE_ORDER,
       },
     }),
