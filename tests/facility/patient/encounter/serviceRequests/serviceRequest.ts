@@ -27,6 +27,10 @@ export interface ServiceRequestTestData {
   requestor?: string;
 }
 
+export type ServiceRequestOverrides = Partial<
+  Pick<ServiceRequestTestData, "activityDefinition" | "priority">
+>;
+
 export function generateServiceRequestTestData(
   allFields: boolean = false,
 ): ServiceRequestTestData {
@@ -56,8 +60,9 @@ export async function createServiceRequest(
   patientId: string,
   encounterId: string,
   allFields: boolean = false,
+  overrides: ServiceRequestOverrides = {},
 ): Promise<ServiceRequestTestData> {
-  const data = generateServiceRequestTestData(allFields);
+  const data = { ...generateServiceRequestTestData(allFields), ...overrides };
 
   await page.goto(
     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
