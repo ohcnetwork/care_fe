@@ -23,7 +23,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { cn } from "@/lib/utils";
 
-import { computeMedicationDispenseQuantity } from "@/components/Medicine/utils";
+import { formatTotalUnits } from "@/components/Medicine/utils";
 
 import { InventoryItemsSelector } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
@@ -103,10 +103,6 @@ export function AddMedicationSheet({
   const updateInstruction = (
     updates: Partial<MedicationRequestDosageInstruction>,
   ) => setInstruction((prev) => ({ ...prev, ...updates }));
-
-  const requiredQuantity = productKnowledge
-    ? computeMedicationDispenseQuantity([instruction])
-    : null;
 
   const {
     autoSelectInventoryItems,
@@ -203,7 +199,10 @@ export function AddMedicationSheet({
     });
   };
 
-  const baseUnitLabel = productKnowledge?.base_unit?.display || t("units");
+  const requiredQuantityText = formatTotalUnits(
+    [instruction],
+    productKnowledge?.base_unit?.display || t("units"),
+  );
 
   return (
     <>
@@ -403,7 +402,7 @@ export function AddMedicationSheet({
                 <span className="text-xs text-gray-600">
                   {t("required_quantity")}:{" "}
                   <span className="font-medium text-gray-900">
-                    {requiredQuantity} {baseUnitLabel}
+                    {requiredQuantityText}
                   </span>
                 </span>
 
