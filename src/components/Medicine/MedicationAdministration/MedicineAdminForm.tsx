@@ -669,7 +669,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                         </div>
                       ))}
                       {req.note && (
-                        <div className="text-xs text-gray-500 italic whitespace-pre-wrap">
+                        <div className="text-xs text-gray-500 italic whitespace-pre-wrap break-words">
                           {req.note}
                         </div>
                       )}

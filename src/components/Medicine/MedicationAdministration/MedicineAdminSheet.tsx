@@ -89,7 +89,7 @@ const MedicineListItem = ({
             )}
           </div>
           {medicine.note && (
-            <p className="text-sm text-gray-500 italic whitespace-pre-wrap">
+            <p className="text-sm text-gray-500 italic whitespace-pre-wrap break-words">
               {medicine.note}
             </p>
           )}
