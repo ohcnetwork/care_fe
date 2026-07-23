@@ -88,6 +88,11 @@ const MedicineListItem = ({
               </span>
             )}
           </div>
+          {medicine.note && (
+            <p className="text-sm text-gray-500 italic whitespace-pre-wrap">
+              {medicine.note}
+            </p>
+          )}
         </div>
         <div className="mt-1 mr-6">
           <Checkbox
