@@ -39,6 +39,7 @@ type Props = {
   facility?: FacilityRead;
   templateSlug: string;
   hideFacilityHeader?: boolean;
+  footer?: ReactNode;
 };
 
 export default function PrintPreview(props: Props) {
@@ -103,6 +104,7 @@ export default function PrintPreview(props: Props) {
         facility={props.facility}
         templateSlug={props.templateSlug}
         hideFacilityHeader={props.hideFacilityHeader}
+        footer={props.footer}
       >
         {props.children}
       </FacilityPrintLayout>
@@ -312,11 +314,13 @@ function FacilityPrintLayout({
   facility,
   children,
   hideFacilityHeader,
+  footer,
 }: {
   templateSlug?: string;
   facility?: FacilityRead;
   children: ReactNode;
   hideFacilityHeader?: boolean;
+  footer?: ReactNode;
 }) {
   if (!facility) {
     return <>{children}</>;
@@ -383,6 +387,7 @@ function FacilityPrintLayout({
           />
         </div>
       )}
+      {footer && <div>{footer}</div>}
     </div>
   );
 }
