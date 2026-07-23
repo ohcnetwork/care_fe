@@ -146,6 +146,23 @@ export function DiagnosticReportForm({
     !!activityDefinition?.diagnostic_report_codes &&
     activityDefinition.diagnostic_report_codes.length > 0;
 
+  // Report codes already used by existing diagnostic reports
+  const usedReportCodes = new Set(
+    diagnosticReports
+      .map((report) => report.code?.code)
+      .filter((code): code is string => !!code),
+  );
+
+  // Report codes still available to create a new diagnostic report for
+  const availableReportCodes =
+    activityDefinition?.diagnostic_report_codes?.filter(
+      (code) => !usedReportCodes.has(code.code),
+    ) ?? [];
+
+  const activeDiagnosticReports = diagnosticReports.filter(
+    (report) => report.status !== DiagnosticReportStatus.final,
+  );
+
   // Creating a new diagnostic report
   const { mutate: createDiagnosticReport, isPending: isCreatingReport } =
     useMutation({
@@ -187,10 +204,10 @@ export function DiagnosticReportForm({
 
   return (
     <>
-      {diagnosticReports.length > 0 && (
+      {activeDiagnosticReports.length > 0 && (
         <div className="relative">
           <div className="relative z-10 space-y-3">
-            {diagnosticReports.map((report) => (
+            {activeDiagnosticReports.map((report) => (
               <DiagnosticReportItem
                 key={report.id}
                 report={report}
@@ -203,7 +220,7 @@ export function DiagnosticReportForm({
               />
             ))}
           </div>
-          {isMultipleDiagnosticReport && (
+          {isMultipleDiagnosticReport && availableReportCodes.length > 0 && (
             <div className="-mt-3 rounded-b-lg bg-gray-100 px-2 pb-2 pt-4">
               {showReportTypeSelect ? (
                 <div className="flex flex-col items-stretch gap-2 rounded-lg border border-gray-200 bg-gray-100 p-4">
@@ -239,17 +256,15 @@ export function DiagnosticReportForm({
                         />
                       </SelectTrigger>
                       <SelectContent>
-                        {activityDefinition?.diagnostic_report_codes?.map(
-                          (code) => (
-                            <SelectItem key={code.code} value={code.code}>
-                              <div className="flex flex-col">
-                                <span className="truncate">
-                                  {code.display} ({code.code})
-                                </span>
-                              </div>
-                            </SelectItem>
-                          ),
-                        )}
+                        {availableReportCodes.map((code) => (
+                          <SelectItem key={code.code} value={code.code}>
+                            <div className="flex flex-col">
+                              <span className="truncate">
+                                {code.display} ({code.code})
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -304,8 +319,12 @@ export function DiagnosticReportForm({
           )}
         </div>
       )}
-      {diagnosticReports.length === 0 && (
+      {((availableReportCodes.length > 0 &&
+        activeDiagnosticReports.length === 0) ||
+        (availableReportCodes.length === 0 &&
+          diagnosticReports.length === 0)) && (
         <CreateDiagnosticReportForm
+          availableReportCodes={availableReportCodes}
           hasCollectedSpecimens={hasCollectedSpecimens}
           isMultipleDiagnosticReport={isMultipleDiagnosticReport}
           activityDefinition={activityDefinition}
@@ -1321,11 +1340,7 @@ function DiagnosticReportItem({
                               )}
                             >
                               <Label
-                                htmlFor={
-                                  disableEdit
-                                    ? undefined
-                                    : "file_upload_diagnostic_report"
-                                }
+                                htmlFor={disableEdit ? undefined : inputId}
                               >
                                 <Upload className="size-4" />
                                 {t("upload_files")}
@@ -1392,6 +1407,7 @@ const CreateDiagnosticReportForm = ({
   handleCreateReport,
   hasCollectedSpecimens,
   isMultipleDiagnosticReport,
+  availableReportCodes,
 }: {
   activityDefinition?: {
     diagnostic_report_codes?: Code[];
@@ -1405,6 +1421,7 @@ const CreateDiagnosticReportForm = ({
   handleCreateReport: (code?: Code) => void;
   hasCollectedSpecimens: boolean;
   isMultipleDiagnosticReport: boolean;
+  availableReportCodes: Code[];
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const { t } = useTranslation();
@@ -1518,17 +1535,15 @@ const CreateDiagnosticReportForm = ({
                         />
                       </SelectTrigger>
                       <SelectContent>
-                        {activityDefinition?.diagnostic_report_codes?.map(
-                          (code) => (
-                            <SelectItem key={code.code} value={code.code}>
-                              <div className="flex flex-col">
-                                <span className="truncate">
-                                  {code.display} ({code.code})
-                                </span>
-                              </div>
-                            </SelectItem>
-                          ),
-                        )}
+                        {availableReportCodes.map((code) => (
+                          <SelectItem key={code.code} value={code.code}>
+                            <div className="flex flex-col">
+                              <span className="truncate">
+                                {code.display} ({code.code})
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

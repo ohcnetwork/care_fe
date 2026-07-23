@@ -266,10 +266,6 @@ export default function ServiceRequestShow({
     activityDefinition.observation_result_requirements ?? [];
   const diagnosticReports = request.diagnostic_reports || [];
 
-  const activeDiagnosticReports = diagnosticReports.filter(
-    (report) => report.status !== DiagnosticReportStatus.final,
-  );
-
   const assignedSpecimenIds = new Set<string>();
 
   const preparePrintAllQRCodes = async () => {
@@ -325,7 +321,7 @@ export default function ServiceRequestShow({
     }
   };
 
-  const isFinal = diagnosticReports.some(
+  const hasFinalizedReport = diagnosticReports.some(
     (report) => report.status === DiagnosticReportStatus.final,
   );
 
@@ -336,7 +332,7 @@ export default function ServiceRequestShow({
   const hasPendingReports = pendingReports > 0;
 
   const canMarkAsComplete =
-    isFinal ||
+    hasFinalizedReport ||
     CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE.includes(request.category);
   const canShowCompleteCta =
     !request?.activity_definition?.diagnostic_report_codes || canMarkAsComplete;
@@ -361,7 +357,7 @@ export default function ServiceRequestShow({
               {canShowCompleteCta && (
                 <div className="flex items-center gap-2">
                   <>
-                    {isFinal && (
+                    {hasFinalizedReport && (
                       <Button
                         variant="primary"
                         className="font-semibold"
@@ -586,7 +582,7 @@ export default function ServiceRequestShow({
               facilityId={facilityId}
               serviceRequestId={serviceRequestId}
               observationDefinitions={observationRequirements}
-              diagnosticReports={activeDiagnosticReports}
+              diagnosticReports={diagnosticReports}
               activityDefinition={activityDefinition}
               specimens={request.specimens || []}
               disableEdit={disableEdit}

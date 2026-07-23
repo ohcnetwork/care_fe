@@ -167,21 +167,6 @@ export function WorkflowProgress({
     });
   });
 
-  // Add diagnostic report events
-  request.diagnostic_reports?.forEach((report: DiagnosticReportRead) => {
-    events.push({
-      title: t("diagnostic_report_created"),
-      description: t("diagnostic_report_created_description", {
-        name:
-          report.code?.display ??
-          report.service_request?.title ??
-          t("diagnostic"),
-      }),
-      timestamp: report.created_date,
-      status: "completed",
-    });
-  });
-
   request.diagnostic_reports?.forEach((report: DiagnosticReportRead) => {
     const diagnosticReportName =
       report.code?.display ?? report.service_request?.title ?? t("diagnostic");
@@ -201,6 +186,21 @@ export function WorkflowProgress({
       timestamp:
         report.status === "final" ? report.modified_date : report.created_date,
       status: report.status === "final" ? "completed" : "in_progress",
+    });
+  });
+
+  // Add diagnostic report events
+  request.diagnostic_reports?.forEach((report: DiagnosticReportRead) => {
+    events.push({
+      title: t("diagnostic_report_created"),
+      description: t("diagnostic_report_created_description", {
+        name:
+          report.code?.display ??
+          report.service_request?.title ??
+          t("diagnostic"),
+      }),
+      timestamp: report.created_date,
+      status: "completed",
     });
   });
 
