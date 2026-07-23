@@ -91,7 +91,7 @@ export function SelectedFilterBar({
     >
       <div
         className={cn(
-          "flex items-center bg-white rounded-md border border-gray-200 w-full max-w-full min-w-0 overflow-hidden md:w-fit",
+          "flex w-full max-w-full min-w-0 shrink-0 basis-full items-center overflow-hidden rounded-md border border-gray-200 bg-white md:w-fit md:basis-auto",
           selectedBarClassName,
         )}
       >
@@ -115,7 +115,7 @@ export function SelectedFilterBar({
         />
         <div
           className={cn(
-            "flex h-9 min-w-0 flex-1 items-center gap-2 overflow-hidden whitespace-nowrap border-gray-200 px-3 md:max-w-64 lg:max-w-80 xl:max-w-96",
+            "flex h-9 w-0 min-w-0 flex-1 items-center gap-2 overflow-hidden whitespace-nowrap border-gray-200 px-3 md:w-auto md:flex-none md:max-w-64 lg:max-w-80 xl:max-w-96",
             selectedValueClassName,
           )}
         >

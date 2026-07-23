@@ -143,14 +143,14 @@ export default function InvoicesData({
           </div>
         </div>
 
-        <div className="w-full sm:w-auto">
+        <div className="w-full min-w-0 sm:w-auto">
           <MultiFilter
             selectedFilters={selectedFilters}
             onFilterChange={handleFilterChange}
             onOperationChange={handleOperationChange}
             onClearAll={handleClearAll}
             onClearFilter={handleClearFilter}
-            className="w-full items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
+            className="w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
             triggerButtonClassName="self-start sm:self-center"
             clearAllButtonClassName="self-center"
             facilityId={facilityId}
