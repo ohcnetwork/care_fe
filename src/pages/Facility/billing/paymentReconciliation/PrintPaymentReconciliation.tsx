@@ -73,7 +73,7 @@ const DetailRow = ({
   );
 };
 
-export function PrintPaymentReconciliation({
+function PrintPaymentReconciliation({
   facilityId,
   paymentReconciliationId,
 }: PrintPaymentReconciliationProps) {

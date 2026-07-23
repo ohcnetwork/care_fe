@@ -110,7 +110,7 @@ export const qualifiedRangeSchema = z.array(
         data.valueset_interpretation.length > 0
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("ranges_valueset_conflict_error"),
           path: ["_interpretation_type"],
         });
@@ -120,7 +120,7 @@ export const qualifiedRangeSchema = z.array(
         (!data.ranges || data.ranges.length === 0)
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("required"),
           path: ["ranges"],
         });
@@ -131,13 +131,13 @@ export const qualifiedRangeSchema = z.array(
           data.valueset_interpretation.length === 0)
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("required"),
           path: ["valueset_interpretation"],
         });
       }
     }),
-) as z.ZodType<QualifiedRange[]>;
+) as z.ZodType<QualifiedRange[], QualifiedRange[]>;
 
 export const getRangeSummary = (range: NumericRange) => {
   if (!range.min && !range.max) {
@@ -167,82 +167,4 @@ export const getValuesetSummary = (valueset: CustomValueSet) => {
     display: valueset.interpretation.display,
     valueset: valueset.valueset,
   });
-};
-
-export const COLOR_OPTIONS = {
-  primary: {
-    label: "Primary",
-    class: "bg-primary-400",
-    hex: "#4ad80e",
-  },
-  secondary: {
-    label: "Secondary",
-    class: "bg-gray-100",
-    hex: "#f9fafb",
-  },
-  outline: {
-    label: "Outline",
-    class: "bg-gray-300",
-    hex: "#e5e7eb",
-  },
-  danger: {
-    label: "Danger",
-    class: "bg-red-600",
-    hex: "#dc2626",
-  },
-  destructive: {
-    label: "Destructive",
-    class: "bg-red-300",
-    hex: "#fca5a5",
-  },
-  indigo: {
-    label: "Indigo",
-    class: "bg-indigo-300",
-    hex: "#c7d2fe",
-  },
-  purple: {
-    label: "Purple",
-    class: "bg-purple-300",
-    hex: "#e9d5ff",
-  },
-  blue: {
-    label: "Blue",
-    class: "bg-blue-300",
-    hex: "#bfdbfe",
-  },
-  sky: {
-    label: "Sky",
-    class: "bg-sky-300",
-    hex: "#bae6fd",
-  },
-  cyan: {
-    label: "Cyan",
-    class: "bg-cyan-300",
-    hex: "#a5f3fc",
-  },
-  teal: {
-    label: "Teal",
-    class: "bg-teal-300",
-    hex: "#99f6e4",
-  },
-  green: {
-    label: "Green",
-    class: "bg-green-300",
-    hex: "#bbf7d0",
-  },
-  yellow: {
-    label: "Yellow",
-    class: "bg-yellow-300",
-    hex: "#fef08a",
-  },
-  orange: {
-    label: "Orange",
-    class: "bg-orange-300",
-    hex: "#fed7aa",
-  },
-  pink: {
-    label: "Pink",
-    class: "bg-pink-300",
-    hex: "#fbcfe8",
-  },
 };

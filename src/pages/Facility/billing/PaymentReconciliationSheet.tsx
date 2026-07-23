@@ -58,6 +58,7 @@ import {
   useEntityExtensions,
   useExtensionSchemas,
 } from "@/hooks/useExtensions";
+import { register } from "@/lib/override/register";
 import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -78,6 +79,7 @@ import {
 } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { ExtensionContexts } from "@/Utils/schema/types";
 import Decimal from "decimal.js";
 
 const PAYMENT_METHODS = [
@@ -137,12 +139,12 @@ interface PaymentReconciliationSheetProps {
 
 const createBaseSchema = () =>
   z.object({
-    reconciliation_type: z.nativeEnum(PaymentReconciliationType),
-    status: z.nativeEnum(PaymentReconciliationStatus),
-    kind: z.nativeEnum(PaymentReconciliationKind),
-    issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
-    outcome: z.nativeEnum(PaymentReconciliationOutcome),
-    method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+    reconciliation_type: z.enum(PaymentReconciliationType),
+    status: z.enum(PaymentReconciliationStatus),
+    kind: z.enum(PaymentReconciliationKind),
+    issuer_type: z.enum(PaymentReconciliationIssuerType),
+    outcome: z.enum(PaymentReconciliationOutcome),
+    method: z.enum(PaymentReconciliationPaymentMethod),
     payment_datetime: z.string().refine((val) => new Date(val) <= new Date(), {
       message: t("payment_date_cannot_be_in_future"),
     }),
@@ -161,7 +163,9 @@ const createBaseSchema = () =>
       : z.string().optional(),
   });
 
-const createFormSchema = (extValidation: z.ZodType<Record<string, unknown>>) =>
+const createFormSchema = (
+  extValidation: z.ZodType<Record<string, unknown>, Record<string, unknown>>,
+) =>
   createBaseSchema()
     .extend({
       extensions: extValidation.optional(),
@@ -179,7 +183,7 @@ const createFormSchema = (extValidation: z.ZodType<Record<string, unknown>>) =>
       },
     );
 
-export function PaymentReconciliationSheet({
+const PaymentReconciliationSheetBase = ({
   open,
   onOpenChange,
   facilityId,
@@ -188,7 +192,7 @@ export function PaymentReconciliationSheet({
   accountId,
   onSuccess,
   isCreditNote = false,
-}: PaymentReconciliationSheetProps) {
+}: PaymentReconciliationSheetProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
@@ -204,6 +208,7 @@ export function PaymentReconciliationSheet({
     () =>
       getCombinedExtensionProps(
         getExtensions(ExtensionEntityType.payment_reconciliation, "write"),
+        ExtensionContexts.payment_reconciliation_form,
       ),
     [getExtensions],
   );
@@ -221,6 +226,7 @@ export function PaymentReconciliationSheet({
   const extensions = useEntityExtensions({
     entityType: ExtensionEntityType.payment_reconciliation,
     schemaType: "write",
+    context: ExtensionContexts.payment_reconciliation_form,
     form,
   });
 
@@ -749,6 +755,9 @@ export function PaymentReconciliationSheet({
       </SheetContent>
     </Sheet>
   );
-}
+};
 
-export default PaymentReconciliationSheet;
+export const PaymentReconciliationSheet = register(
+  "PaymentReconciliationSheet",
+  PaymentReconciliationSheetBase,
+);

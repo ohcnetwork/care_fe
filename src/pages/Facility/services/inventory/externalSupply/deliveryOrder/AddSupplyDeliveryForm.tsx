@@ -110,11 +110,11 @@ const supplyDeliveryItemSchema = z.object({
   informational_components: z.array(z.custom<MonetaryComponent>()).optional(),
   tax_components: z.array(z.custom<MonetaryComponent>()).optional(),
   discount_components: z.array(z.custom<MonetaryComponent>()).optional(),
-  extensions: z.record(z.unknown()).optional(),
+  extensions: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const createFormSchema = z.object({
-  supplied_item_type: z.nativeEnum(SupplyDeliveryType),
+  supplied_item_type: z.enum(SupplyDeliveryType),
   items: z
     .array(supplyDeliveryItemSchema)
     .min(1, "At least one item is required"),
@@ -172,7 +172,7 @@ export function AddSupplyDeliveryForm({
     () =>
       getExtensionFieldsWithName(
         allExtensions,
-        ExtensionContexts.supply_delivery_form,
+        ExtensionContexts.supply_delivery_table,
       ),
     [allExtensions],
   );
@@ -498,9 +498,7 @@ export function AddSupplyDeliveryForm({
           product_knowledge: item.product_knowledge.slug,
           charge_item_definition: chargeItemSlug,
           standard_pack_size: item.supplied_item_pack_size,
-          purchase_price: item.purchase_price
-            ? parseFloat(item.purchase_price)
-            : undefined,
+          purchase_price: item.purchase_price,
           extensions: {},
         };
 
