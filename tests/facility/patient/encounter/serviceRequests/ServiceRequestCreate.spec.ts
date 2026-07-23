@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectToast } from "tests/helper/ui";
+import { clickTabOrMenuItem, expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
