@@ -30,10 +30,7 @@ export function PatientAge({ patient, abbreviated = true }: PatientAgeProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span
-          className="cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-          tabIndex={0}
-        >
+        <span className="cursor-default">
           {ageString}
         </span>
       </TooltipTrigger>
