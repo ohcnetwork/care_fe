@@ -86,10 +86,10 @@ const PrescriptionContent = ({
               </span>
             </p>
             {prescription.note && (
-              <p className="text-xs print:text-[11px] text-gray-700 mt-0.5 flex gap-1">
+              <div className="text-xs print:text-[11px] text-gray-700 mt-0.5 flex gap-1">
                 {t("note")}:
                 <Markdown content={prescription.note} prose={false} />
-              </p>
+              </div>
             )}
           </div>
         </div>
