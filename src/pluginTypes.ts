@@ -1,4 +1,6 @@
+import { FilesTabsProps } from "@/components/Files/FilesTab";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
+import type { OverrideCondition } from "@/lib/override";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { DeviceDetail } from "@/types/device/device";
@@ -11,10 +13,9 @@ import {
 import { FacilityRead } from "@/types/facility/facility";
 import { PlugConfigMeta } from "@/types/plugConfig";
 import { UserReadMinimal } from "@/types/user/user";
-import { LazyExoticComponent, ReactNode } from "react";
+import { ComponentType, LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
-import { pluginMap } from "./pluginMap";
 import { AppRoutes } from "./Routers/AppRouter";
 
 export type DoctorConnectButtonComponentType = React.FC<{
@@ -84,6 +85,11 @@ export type ServiceRequestComponentType = React.FC<{
   serviceRequestId: string;
 }>;
 
+export type NoteMessageInputComponentType = React.FC<{
+  message: string;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
+}>;
+
 export type EncounterOverviewTopComponentType = React.FC<{
   encounter: EncounterRead;
   patientId: string;
@@ -115,6 +121,12 @@ export type DiagnosticReportOverrideComponentType = React.FC<{
   disabled?: boolean;
 }>;
 
+// To Support additional options to create delivery orders
+export type DeliveryOrderActionsComponentType = React.FC<{
+  facilityId: string;
+  locationId: string;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -130,8 +142,11 @@ export type SupportedPluginComponents = {
   PatientSearchActions: PatientSearchActionsComponentType;
   PatientInfoCardActions: PatientInfoCardActionsComponentType;
   ServiceRequestAction: ServiceRequestComponentType;
+  NoteMessageInput: NoteMessageInputComponentType;
   EncounterOverviewTop: EncounterOverviewTopComponentType;
   DiagnosticReportOverride: DiagnosticReportOverrideComponentType;
+  PatientHomeQuickActions: PatientHomeActionsComponentType;
+  DeliveryOrderActions: DeliveryOrderActionsComponentType;
 };
 
 // Create a type for lazy-loaded components
@@ -164,9 +179,25 @@ export type PluginDeviceManifest = {
   encounterOverview?: React.FC<{ encounter: EncounterRead }>;
 };
 
+/**
+ * Plugin override definition for replacing registered components
+ */
+export type PluginOverride = {
+  /** The key of the component to override (must be registered with register()) */
+  component: string;
+  /** The replacement component */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  replacement: ComponentType<any> | LazyExoticComponent<ComponentType<any>>;
+  /** Optional conditions for when this override applies */
+  condition?: OverrideCondition;
+  /** Priority (higher = takes precedence, default 0) */
+  priority?: number;
+  /** Description for debugging */
+  description?: string;
+};
+
 type SupportedPluginExtensions =
-  | "DoctorConnectButtons"
-  | "PatientExternalRegistration";
+  "DoctorConnectButtons" | "PatientExternalRegistration";
 
 export type PluginManifest = {
   plugin: string;
@@ -182,11 +213,12 @@ export type PluginManifest = {
     string,
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
+  encounterFileTabs?: Record<string, LazyComponent<React.FC<FilesTabsProps>>>;
   devices?: readonly PluginDeviceManifest[];
+  /** Component overrides provided by this plugin */
+  overrides?: readonly PluginOverride[];
 };
 
 export type PluginManifestWithMeta = PluginManifest & {
   meta: PlugConfigMeta;
 };
-
-export { pluginMap };

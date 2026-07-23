@@ -22,12 +22,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { getDosageFromInstruction } from "@/components/Medicine/MedicationAdministration/utils";
-import {
-  formatDosage,
-  formatDuration,
-  formatFrequency,
-} from "@/components/Medicine/utils";
+import { formatDuration, formatFrequency } from "@/components/Medicine/utils";
 
 import { formatName } from "@/Utils/utils";
 import {
@@ -35,7 +32,14 @@ import {
   MedicationAdministrationRequest,
   MedicationAdministrationStatus,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  getMedicationActiveWindow,
+  MedicationRequestRead,
+} from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 interface MedicineAdminFormProps {
   medication: MedicationRequestRead;
@@ -45,6 +49,7 @@ interface MedicineAdminFormProps {
   onChange: (request: MedicationAdministrationRequest) => void;
   onMedicationChange?: (medication: MedicationRequestRead) => void;
   formId: string;
+  productType: AdministrableProductType;
   isValid?: (valid: boolean) => void;
   compact?: boolean;
   otherGroupRequests?: MedicationRequestRead[];
@@ -116,7 +121,9 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
           >
             <div>
               <Label className="text-xs text-gray-500">{t("dosage")}</Label>
-              <p className="font-medium">{formatDosage(di)}</p>
+              <p className="font-medium">
+                <FormattedDosage instruction={di} />
+              </p>
             </div>
             <div>
               <Label className="text-xs text-gray-500">{t("frequency")}</Label>
@@ -165,7 +172,9 @@ const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
               <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <Label className="text-xs text-gray-500">{t("dosage")}</Label>
-                  <p className="font-medium">{formatDosage(di)}</p>
+                  <p className="font-medium">
+                    <FormattedDosage instruction={di} />
+                  </p>
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">
@@ -205,6 +214,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   isValid,
   compact = false,
   otherGroupRequests,
+  productType,
 }) => {
   const { t } = useTranslation();
 
@@ -354,6 +364,25 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
     setShowAdvanced(false);
   };
 
+  // Non-blocking warning: administering outside the prescribed window (before it
+  // starts or after it ends) is allowed — e.g. back-dating an early dose or a
+  // late catch-up — but must always be flagged so it's a deliberate choice.
+  const activeWindow = getMedicationActiveWindow(medication);
+  const adminStart = administrationRequest.occurrence_period_start
+    ? new Date(administrationRequest.occurrence_period_start)
+    : undefined;
+  const outOfRange =
+    !!adminStart &&
+    ((activeWindow.start instanceof Date &&
+      !isNaN(activeWindow.start.getTime()) &&
+      adminStart < activeWindow.start) ||
+      (!!activeWindow.end && adminStart > activeWindow.end));
+  const outOfRangeWarning = outOfRange ? (
+    <p className="text-xs text-amber-600">
+      {t("administration_out_of_range_warning")}
+    </p>
+  ) : null;
+
   // Compact mode for sheet - simplified form
   if (compact) {
     return (
@@ -371,7 +400,9 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             onClick={handleAdministerNow}
           >
             <CareIcon icon="l-check-circle" className="size-4 mr-1.5" />
-            {t("administer_now")}
+            {productType === ProductKnowledgeType.medication
+              ? t("administer_now")
+              : t("record_intake_now")}
           </Button>
           <Button
             type="button"
@@ -483,6 +514,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 {startTimeError && (
                   <p className="text-xs text-red-500">{startTimeError}</p>
                 )}
+                {outOfRangeWarning}
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">{t("end_time")}</Label>
@@ -588,9 +620,8 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
               const isCurrentMedication = req.id === medication.id;
               const canSelect = !isCurrentMedication && onMedicationChange;
               const instructionSummaries = req.dosage_instruction.map((di) => {
-                const dosage = formatDosage(di);
                 const freq = formatFrequency(di);
-                return { dosage, freq };
+                return { di, freq };
               });
               return (
                 <button
@@ -622,7 +653,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                                 : "text-gray-700"
                             }
                           >
-                            {summary.dosage}
+                            <FormattedDosage instruction={summary.di} />
                           </span>
                           {summary.freq && (
                             <span
@@ -713,12 +744,10 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                   occurrence_period_start: now,
                 };
 
-                if (
-                  !(
-                    administrationRequest.status === "in_progress" ||
-                    administrationRequest.status === "not_done"
-                  )
-                ) {
+                if (!(
+                  administrationRequest.status === "in_progress" ||
+                  administrationRequest.status === "not_done"
+                )) {
                   newRequest.occurrence_period_end = now;
                 }
 
@@ -768,6 +797,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         {startTimeError && (
           <p className="text-sm text-red-500">{startTimeError}</p>
         )}
+        {outOfRangeWarning}
       </div>
 
       <div className="space-y-2">
