@@ -30,9 +30,7 @@ export function PatientAge({ patient, abbreviated = true }: PatientAgeProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="cursor-default">
-          {ageString}
-        </span>
+        <span className="cursor-default">{ageString}</span>
       </TooltipTrigger>
       <TooltipContent>
         <span>{breakdown}</span>
