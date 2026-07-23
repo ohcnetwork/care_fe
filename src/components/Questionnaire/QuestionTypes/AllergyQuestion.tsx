@@ -48,6 +48,7 @@ import {
 
 import { CATEGORY_ICONS } from "@/components/Patient/allergy/list";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -551,6 +552,7 @@ const AllergyItem = ({
 };
 
 export function AllergyQuestion({
+  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -674,6 +676,7 @@ export function AllergyQuestion({
 
   return (
     <div className="space-y-4">
+      <QuestionLabel question={question} />
       {allergies.length > 0 && (
         <div className="rounded-lg lg:border lg:border-gray-200">
           <div className="hidden lg:block overflow-x-auto">

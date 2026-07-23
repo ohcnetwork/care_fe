@@ -464,9 +464,10 @@ export const DiagnosticReportsTab = ({
     newActivityDefinition: string | undefined,
   ) => {
     if (newActivityDefinition) {
-      setQueryParams({ activityDefinition: newActivityDefinition });
+      setQueryParams({ ...qParams, activityDefinition: newActivityDefinition });
     } else {
-      setQueryParams({});
+      const { activityDefinition: _activityDefinition, ...rest } = qParams;
+      setQueryParams(rest);
     }
   };
 

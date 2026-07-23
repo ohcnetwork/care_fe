@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
@@ -11,6 +10,7 @@ import PrintTable from "@/components/Common/PrintTable";
 
 import { Badge } from "@/components/ui/badge";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
@@ -18,6 +18,7 @@ import {
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { SupplyDeliveryRead } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
+import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 
 interface DetailRowProps {
@@ -95,7 +96,7 @@ const DeliveryOrderContent = ({
 
               return {
                 product: productName || "-",
-                quantity: String(delivery.supplied_item_quantity || "-"),
+                quantity: round(delivery.supplied_item_quantity),
                 status: t(delivery.status),
                 condition: t(delivery.supplied_item_condition || "normal"),
                 lot_batch_number: batchNumber || "-",
@@ -129,32 +130,11 @@ const DeliveryOrderPreview = ({
     <PrintPreview
       title={`${t("delivery_order")} - ${deliveryOrder.name}`}
       disabled={!supplyDeliveries?.length}
+      facility={facility}
+      templateSlug={PrintTemplateType.delivery_order}
     >
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-start mb-2 pb-2 border-b border-gray-200">
-          <div className="flex items-start gap-4">
-            <div className="text-left">
-              <h1 className="text-2xl font-medium">{facility?.name}</h1>
-              {facility?.address && (
-                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                  {facility.address}
-                  {facility.phone_number && (
-                    <p className="text-gray-500 text-sm">
-                      {t("phone")}: {facility.phone_number}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          <img
-            src={careConfig.mainLogo?.dark}
-            alt="Logo"
-            className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
-          />
-        </div>
-
-        <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
+        <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
           {t("delivery_order")}
         </h2>
 

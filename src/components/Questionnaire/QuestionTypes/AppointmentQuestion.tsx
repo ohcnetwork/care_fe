@@ -16,6 +16,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
 import useAuthUser from "@/hooks/useAuthUser";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
@@ -179,6 +180,7 @@ export function AppointmentQuestion({
 
   return (
     <div className="space-y-4">
+      <QuestionLabel question={question} />
       <AppointmentFormSection
         facilityId={facilityId}
         selectedTags={selectedTags}

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 
-import useAppHistory from "@/hooks/useAppHistory";
+import { navigate } from "raviger";
 
 type ErrorType = "PAGE_NOT_FOUND" | "PAGE_LOAD_ERROR" | "CUSTOM_ERROR";
 
@@ -32,7 +32,6 @@ export default function ErrorPage({
   ...props
 }: ErrorPageProps) {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
@@ -176,7 +175,7 @@ export default function ErrorPage({
         <div className="mt-6">
           <Button
             onClick={() => {
-              goBack("/");
+              navigate("/", { replace: true });
               window.location.reload();
             }}
             className="rounded-md bg-primary-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-800"

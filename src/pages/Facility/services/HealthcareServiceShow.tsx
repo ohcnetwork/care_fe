@@ -43,6 +43,11 @@ function LocationCard({
     service_type: InternalType | undefined,
   ) => {
     switch (service_type) {
+      case InternalType.store:
+        return {
+          text: t("view_inventory"),
+          link: `/facility/${facilityId}/locations/${locationId}/inventory/summary`,
+        };
       case InternalType.pharmacy:
         return {
           text: t("view_prescriptions"),
@@ -123,7 +128,7 @@ export default function HealthcareServiceShow({
 
   return (
     <div className="container px-4 mx-auto max-w-4xl space-y-6">
-      <BackButton to={`/facility/${facilityId}/services`}>
+      <BackButton>
         <ArrowLeft />
         <span>{t("back_to_services")}</span>
       </BackButton>

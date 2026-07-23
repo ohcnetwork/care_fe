@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
@@ -9,6 +8,11 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
+import {
+  formatDosage,
+  formatFrequency,
+  joinInstructionTexts,
+} from "@/components/Medicine/utils";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
@@ -16,7 +20,9 @@ import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -79,21 +85,14 @@ const DispenseOrderContent = ({
               { key: "expiry_date" },
               { key: "prepared_date" },
             ]}
+            classNameCell="whitespace-pre-line"
             rows={dispenses.map((dispense) => {
-              const instruction = dispense.dosage_instruction[0] ?? {};
-              const frequency = instruction?.timing?.code;
-              const dosage = instruction?.dose_and_rate?.dose_quantity;
+              const instructions = dispense.dosage_instruction ?? [];
 
               return {
                 medicine: dispense.item.product.product_knowledge.name,
-                dosage: dosage ? `${dosage.value} ${dosage.unit.display}` : "-",
-                frequency: instruction?.as_needed_boolean
-                  ? `${t("as_needed_prn")} ${
-                      instruction?.as_needed_for?.display
-                        ? `(${instruction.as_needed_for.display})`
-                        : ""
-                    }`
-                  : frequency?.display || "-",
+                dosage: joinInstructionTexts(instructions, formatDosage),
+                frequency: joinInstructionTexts(instructions, formatFrequency),
                 quantity: round(dispense.quantity) || "-",
                 lot_batch_number:
                   dispense.item.product.batch?.lot_number || "-",
@@ -133,32 +132,11 @@ const DispenseOrderPreview = ({
     <PrintPreview
       title={`${t("dispense_order")} - ${patient.name}`}
       disabled={!dispenses?.length}
+      facility={facility}
+      templateSlug={PrintTemplateType.dispense_order}
     >
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-start mb-2 pb-2 border-b border-gray-200">
-          <div className="flex items-start gap-4">
-            <div className="text-left">
-              <h1 className="text-2xl font-medium">{facility?.name}</h1>
-              {facility?.address && (
-                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                  {facility.address}
-                  {facility.phone_number && (
-                    <p className="text-gray-500 text-sm">
-                      {t("phone")}: {facility.phone_number}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          <img
-            src={careConfig.mainLogo?.dark}
-            alt="Logo"
-            className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
-          />
-        </div>
-
-        <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
+        <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
           {t("dispense_order")}
         </h2>
 

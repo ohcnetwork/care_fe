@@ -7,11 +7,6 @@ import {
   QuestionnaireSetOrganizations,
   QuestionnaireUpdate,
 } from "./questionnaire";
-import {
-  QuestionnaireTagBase,
-  QuestionnaireTagRead,
-  QuestionnaireTagSet,
-} from "./tags";
 
 export default {
   list: {
@@ -77,13 +72,6 @@ export default {
     TRes: Type<PaginatedResponse<Organization>>(),
   },
 
-  setTags: {
-    path: "/api/v1/questionnaire/{slug}/set_tags/",
-    method: HttpMethod.POST,
-    TBody: Type<QuestionnaireTagSet>(),
-    TRes: Type<void>(),
-  },
-
   addFavorite: {
     path: "/api/v1/questionnaire/{slug}/add_favorite/",
     method: HttpMethod.POST,
@@ -98,25 +86,5 @@ export default {
     path: "/api/v1/questionnaire/favorite_lists/",
     method: HttpMethod.GET,
     TRes: Type<string[]>(),
-  },
-
-  tags: {
-    list: {
-      path: "/api/v1/questionnaire_tag/",
-      method: HttpMethod.GET,
-      TRes: Type<PaginatedResponse<QuestionnaireTagRead>>(),
-    },
-    create: {
-      path: "/api/v1/questionnaire_tag/",
-      method: HttpMethod.POST,
-      TBody: Type<QuestionnaireTagBase>(),
-      TRes: Type<QuestionnaireTagRead>(),
-    },
-    update: {
-      path: "/api/v1/questionnaire_tag/{slug}/",
-      method: HttpMethod.PUT,
-      TBody: Type<QuestionnaireTagBase>(),
-      TRes: Type<QuestionnaireTagRead>(),
-    },
   },
 } as const;

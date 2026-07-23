@@ -31,8 +31,7 @@ export default function RailPanel({
           aria-expanded={open}
           onClick={() => onOpenChange(!open)}
           className={cn(
-            "border border-gray-200 rounded-sm bg-gray-200 h-full relative transition-all duration-300 ease-in-out",
-            open ? "w-auto" : "w-4",
+            "border border-gray-200 rounded-sm bg-gray-200 h-full relative transition-all duration-300 ease-in-out w-auto",
             open ? "cursor-w-resize" : "cursor-e-resize",
           )}
         >

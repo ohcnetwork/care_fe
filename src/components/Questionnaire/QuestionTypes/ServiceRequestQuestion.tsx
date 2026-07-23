@@ -6,7 +6,6 @@ import { toast } from "sonner";
 
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import UserSelector from "@/components/Common/UserSelector";
-import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
 import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -39,6 +38,7 @@ import { add } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { getBasePrice } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
@@ -50,6 +50,7 @@ import {
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import { Question } from "@/types/questionnaire/question";
 import {
   ActivityDefinitionTemplateSpec,
   QuestionnaireResponseTemplateReadSpec,
@@ -58,6 +59,7 @@ import { questionnaireResponseTemplateApi } from "@/types/questionnaire/question
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 import { Decimal } from "decimal.js";
 
+import { AddToTemplateDialog } from "@/components/Questionnaire/AddToTemplateDialog";
 import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
 
 export function buildServiceRequestForTemplate(
@@ -107,6 +109,7 @@ interface ServiceRequestQuestionProps {
   disabled?: boolean;
   errors?: QuestionValidationError[];
   questionnaireSlug?: string;
+  question: Question;
 }
 
 const SERVICE_REQUEST_FIELDS = {
@@ -136,6 +139,9 @@ const SERVICE_REQUEST_FIELDS = {
   },
 } as const;
 
+/**
+ * @public
+ */
 export function validateServiceRequestQuestion(
   values: ServiceRequestReadSpec[],
   questionId: string,
@@ -403,6 +409,7 @@ export function ServiceRequestQuestion({
   encounterId,
   errors,
   questionnaireSlug,
+  question,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
   const currentUser = useAuthUser() as CurrentUserRead;
@@ -724,9 +731,7 @@ export function ServiceRequestQuestion({
 
   const handleActivityDefinitionSelect = (
     value:
-      | ActivityDefinitionReadSpec
-      | ActivityDefinitionReadSpec[]
-      | undefined,
+      ActivityDefinitionReadSpec | ActivityDefinitionReadSpec[] | undefined,
   ) => {
     const def = Array.isArray(value) ? value[0] : value;
     setSelectedActivityDefinition(def?.slug || null);
@@ -910,6 +915,7 @@ export function ServiceRequestQuestion({
 
   return (
     <div className="space-y-4">
+      <QuestionLabel question={question} />
       <AddToTemplateDialog
         open={!!serviceRequestToAddToTemplate}
         onOpenChange={(open) => {

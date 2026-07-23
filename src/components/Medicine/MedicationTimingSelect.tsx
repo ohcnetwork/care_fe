@@ -80,7 +80,7 @@ export function MedicationTimingSelect({
     // Find the key that matches the timing code
     const matchingEntry = Object.entries(
       MEDICATION_REQUEST_TIMING_OPTIONS,
-    ).find(([, option]) => option.timing.code.code === timing.code.code);
+    ).find(([, option]) => option.timing.code?.code === timing.code?.code);
 
     return matchingEntry?.[0] || "";
   }, [timing, asNeeded]);
@@ -116,18 +116,4 @@ export function MedicationTimingSelect({
       showClearButton={false}
     />
   );
-}
-
-/**
- * Helper function to reverse lookup a timing key from a timing object.
- * Moved here from MedicationRequestQuestion.tsx for reuse.
- */
-export function reverseFrequencyOption(timing?: Timing): string {
-  if (!timing?.code?.code) return "";
-
-  const matchingEntry = Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(
-    ([, option]) => option.timing.code.code === timing.code.code,
-  );
-
-  return matchingEntry?.[0] || "";
 }

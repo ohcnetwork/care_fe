@@ -16,6 +16,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
+
 import query from "@/Utils/request/query";
 import { cn } from "@/lib/utils";
 import {
@@ -89,6 +91,7 @@ export function validateEncounterQuestion(
 }
 
 export function EncounterQuestion({
+  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -242,6 +245,7 @@ export function EncounterQuestion({
 
   return (
     <div className="space-y-6">
+      <QuestionLabel question={question} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Details */}
         <div className="space-y-2">

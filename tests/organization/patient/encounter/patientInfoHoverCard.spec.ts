@@ -14,7 +14,7 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     await page.getByRole("tab", { name: "Encounters" }).click();
 
     // Click "View Encounter" link
-    await page.getByRole("link", { name: "View Encounter" }).click();
+    await page.getByRole("link", { name: "View Encounter" }).first().click();
 
     // Verify URL contains organizationId and NOT facilityId
     expect(page.url()).toContain(`/organization/organizationId/patient/`);

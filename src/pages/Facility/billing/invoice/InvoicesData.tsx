@@ -66,9 +66,7 @@ export default function InvoicesData({
   const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
     let query = { ...filterQuery };
     const createdByValue = filterQuery.created_by as
-      | UserReadMinimal
-      | UserReadMinimal[]
-      | undefined;
+      UserReadMinimal | UserReadMinimal[] | undefined;
     if (createdByValue !== undefined) {
       const user = Array.isArray(createdByValue)
         ? createdByValue[0]
@@ -100,7 +98,7 @@ export default function InvoicesData({
       queryParams: {
         account: accountId,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         number: qParams.search,
         status: qParams.status,
         patient: qParams.patient,
@@ -113,7 +111,7 @@ export default function InvoicesData({
 
   return (
     <>
-      <div className="flex flex-col md:flex-row justify-between gap-2 pb-4">
+      <div className="flex flex-col md:flex-row gap-2 pb-4">
         <div className="w-full md:w-auto md:flex gap-2 space-y-2 md:space-y-0">
           {showIdentifierFilter && (
             <PatientIdentifierFilter

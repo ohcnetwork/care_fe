@@ -31,7 +31,9 @@ interface ImportMetaEnv {
   readonly REACT_DEFAULT_PAYMENT_TERMS?: string;
   readonly REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB?: string;
   readonly REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION?: string;
+  readonly REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED?: string;
   readonly REACT_DISABLE_PATIENT_LOGIN?: string;
+  readonly REACT_ENABLE_QUESTIONNAIRE_DRAFT?: string;
   readonly REACT_CUSTOM_REMOTE_I18N_URL?: string;
   readonly REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE?: string;
   readonly REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME?: string;
@@ -43,6 +45,8 @@ interface ImportMetaEnv {
   readonly REACT_DECIMAL_PRECISION?: string;
   readonly REACT_ACCOUNTING_PRECISION?: string;
   readonly REACT_DECIMAL_ROUNDING_METHOD?: string;
+  readonly REACT_MAX_FORM_DIALOG_FAVORITES?: string;
+  readonly REACT_MEDICATION_VALUE_SET_SELECT_DEFAULT_TAB?: string;
 
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;
@@ -55,3 +59,5 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+declare module "@fontsource/*";

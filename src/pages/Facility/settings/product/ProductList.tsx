@@ -29,6 +29,8 @@ import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   PRODUCT_STATUS_COLORS,
   ProductRead,
@@ -69,6 +71,11 @@ function ProductCard({
                 {format(new Date(product.expiration_date), "PPP")}
               </p>
             )}
+            {product.standard_pack_size != null && (
+              <p className="mt-1 text-xs text-gray-400">
+                {t("pack_size")}: {product.standard_pack_size}
+              </p>
+            )}
           </div>
           <div className="ml-auto flex flex-wrap gap-2">
             <ProductActions product={product} facilityId={facilityId} />
@@ -97,7 +104,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
       },
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         product_knowledge: qParams.product_knowledge_slug,
       },
@@ -192,41 +199,61 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                       <TableHead>{t("name")}</TableHead>
                       <TableHead>{t("status")}</TableHead>
                       <TableHead>{t("lot_number")}</TableHead>
+                      <TableHead>{t("pack_size")}</TableHead>
                       <TableHead>{t("expires")}</TableHead>
+                      <TableHead>{t("base_price")}</TableHead>
                       <TableHead>{t("actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody className="bg-white">
-                    {products.map((product: ProductRead) => (
-                      <TableRow key={product.id} className="divide-x">
-                        <TableCell className="font-medium">
-                          {product.product_knowledge.name}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={PRODUCT_STATUS_COLORS[product.status]}
-                          >
-                            {t(product.status)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {product.batch?.lot_number || "-"}
-                        </TableCell>
-                        <TableCell>
-                          {product.expiration_date
-                            ? format(new Date(product.expiration_date), "PPP")
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <ProductActions
-                              product={product}
-                              facilityId={facilityId}
-                            />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {products.map((product: ProductRead) => {
+                      const basePrice =
+                        product.charge_item_definition?.price_components.find(
+                          (c) =>
+                            c.monetary_component_type ===
+                            MonetaryComponentType.base,
+                        )?.amount;
+                      return (
+                        <TableRow key={product.id} className="divide-x">
+                          <TableCell className="font-medium whitespace-pre-wrap">
+                            {product.product_knowledge.name}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={PRODUCT_STATUS_COLORS[product.status]}
+                            >
+                              {t(product.status)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {product.batch?.lot_number || "-"}
+                          </TableCell>
+                          <TableCell>
+                            {product.standard_pack_size ?? "-"}
+                          </TableCell>
+                          <TableCell>
+                            {product.expiration_date
+                              ? format(new Date(product.expiration_date), "PPP")
+                              : "-"}
+                          </TableCell>
+                          <TableCell>
+                            {basePrice ? (
+                              <MonetaryDisplay amount={basePrice} />
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <ProductActions
+                                product={product}
+                                facilityId={facilityId}
+                              />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>

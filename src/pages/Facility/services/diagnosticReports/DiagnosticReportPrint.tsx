@@ -1,28 +1,24 @@
+import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import PrintFooter from "@/components/Common/PrintFooter";
+import "@/lib/pdfWorker";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import careConfig from "@careConfig";
+import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
+import { FileReadMinimal } from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName, formatPatientAge } from "@/Utils/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Document, Page, pdfjs } from "react-pdf";
-
-import PrintPreview from "@/CAREUI/misc/PrintPreview";
-
-import PrintFooter from "@/components/Common/PrintFooter";
-
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { formatName, formatPatientAge } from "@/Utils/utils";
-import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
-import { FileReadMinimal } from "@/types/files/file";
-import fileApi from "@/types/files/fileApi";
-import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { Document, Page } from "react-pdf";
 
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import { DiagnosticReportResultsTable } from "./components/DiagnosticReportResultsTable";
-
-pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
 // TODO: Replace with PDFViewer or extract this to a component
 function PDFRenderer({ fileUrl }: { fileUrl: string }) {
@@ -44,6 +40,8 @@ function PDFRenderer({ fileUrl }: { fileUrl: string }) {
               pageNumber={index + 1}
               width={Math.min(window.innerWidth * 0.9, 600)}
               scale={1.2}
+              renderTextLayer={false}
+              renderAnnotationLayer={false}
             />
           ))}
         </div>
@@ -210,33 +208,11 @@ export default function DiagnosticReportPrint({
     <div className="flex justify-center items-center">
       <PrintPreview
         title={`${t("diagnostic_report", { count: 1 })} - ${report.code?.display || report.service_request?.title || t("diagnostic_report", { count: 1 })}`}
+        facility={facility}
+        templateSlug={PrintTemplateType.diagnostic_report}
       >
-        <div className="max-w-4xl mx-auto">
-          {/* Header with Facility Name and Logo */}
-          <div className="flex justify-between items-start pb-2 border-b border-gray-200">
-            <div className="flex items-start gap-4">
-              <div className="text-left">
-                <h1 className="text-2xl font-medium">{facility?.name}</h1>
-                {facility?.address && (
-                  <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                    {facility.address}
-                    {facility.phone_number && (
-                      <p className="text-gray-500 text-sm">
-                        {t("phone")}: {facility.phone_number}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Care Logo"
-              className="h-10 w-auto object-contain ml-6"
-            />
-          </div>
-
-          <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
+        <div>
+          <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
             {report.service_request?.title ||
               t("diagnostic_report", { count: 1 })}
           </h2>
@@ -305,6 +281,15 @@ export default function DiagnosticReportPrint({
                 {formatName(report.requester)}
               </span>
             </div>
+            {report.encounter.current_location && (
+              <div className="grid grid-cols-[6rem_auto_1fr] items-center">
+                <span className="text-gray-600">{t("location")}</span>
+                <span className="text-gray-600">:</span>
+                <span className="font-semibold ml-2">
+                  {report.encounter.current_location.name}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="mt-8 space-y-8">

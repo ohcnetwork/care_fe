@@ -57,7 +57,6 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
@@ -82,6 +81,7 @@ import {
   dateQueryString,
   formatDateTime,
   formatPatientAge,
+  goBack,
 } from "@/Utils/utils";
 
 import { booleanFromString } from "@/common/utils";
@@ -208,7 +208,6 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     .filter(Boolean) as TagConfig[];
 
   const { hasPermission } = usePermissions();
-  const { goBack } = useAppHistory();
 
   const { canViewAppointments } = getPermissions(
     hasPermission,
@@ -748,17 +747,23 @@ function AppointmentCard({
             )}
           </p>
         </div>
-
-        {appointment.token && (
-          <div className="flex">
-            <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
-              <p className="text-[10px] uppercase">{t("token")}</p>
-              <p className="font-bold text-2xl uppercase">
-                {appointment.token?.number ?? "--"}
-              </p>
+        <div className="flex flex-col gap-2">
+          {patient.deceased_datetime && (
+            <Badge variant="destructive" className="h-5 justify-center text-xs">
+              {t("deceased")}
+            </Badge>
+          )}
+          {appointment.token && (
+            <div className="flex">
+              <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
+                <p className="text-[10px] uppercase">{t("token")}</p>
+                <p className="font-bold text-lg uppercase">
+                  {renderTokenNumber(appointment.token)}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div className="flex flex-wrap gap-1">
         {appointment.tags.map((tag) => (
@@ -843,7 +848,7 @@ function AppointmentRow(props: {
         tags: props.tags,
         tags_behavior: props.tags_behavior,
         limit: props.resultsPerPage,
-        offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
+        offset: ((props.page || 1) - 1) * props.resultsPerPage,
         patient: props.patient,
         resource_type: props.resourceType,
         resource_ids: props.resourceIds.join(","),
@@ -951,7 +956,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
 
   return (
     <>
-      <TableCell className="py-6 group-hover:bg-gray-100 bg-white rounded-l-lg">
+      <TableCell className="flex flex-row gap-2 py-6 group-hover:bg-gray-100 bg-white rounded-l-lg">
         <span className="flex flex-row items-center gap-2">
           <CareIcon
             icon="l-draggabledots"
@@ -965,6 +970,14 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
             </span>
           </span>
         </span>
+        {patient.deceased_datetime && (
+          <Badge
+            variant="destructive"
+            className="h-6 justify-center text-xs mt-1"
+          >
+            {t("deceased")}
+          </Badge>
+        )}
       </TableCell>
       {/* TODO: Replace with relevant information */}
       {appointment.resource_type === SchedulableResourceType.Practitioner && (

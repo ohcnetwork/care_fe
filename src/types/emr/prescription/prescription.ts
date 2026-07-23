@@ -27,6 +27,7 @@ export interface PrescritionList extends Prescription {
   prescribed_by: UserReadMinimal;
   encounter: EncounterRead;
   created_date: string;
+  tags?: TagConfig[];
 }
 
 export interface PrescriptionRead extends Prescription {
@@ -49,24 +50,6 @@ export interface PrescriptionGroup {
 // GroupedPrescription
 export interface GroupedPrescription {
   [key: string]: PrescriptionGroup;
-}
-
-export function groupMedicationsByPrescription(
-  medications: MedicationRequestRead[],
-): PrescriptionGroup[] {
-  return Object.values(
-    medications.reduce<Record<string, PrescriptionGroup>>((acc, medication) => {
-      const prescriptionId = medication.prescription?.id || "no_prescription";
-      if (!acc[prescriptionId]) {
-        acc[prescriptionId] = {
-          requests: [],
-          prescription: medication.prescription as PrescriptionRead,
-        };
-      }
-      acc[prescriptionId].requests.push(medication);
-      return acc;
-    }, {}),
-  );
 }
 
 export interface PrescriptionSummary extends PrescritionList {

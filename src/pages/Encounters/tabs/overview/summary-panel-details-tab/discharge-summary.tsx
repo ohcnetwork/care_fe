@@ -17,7 +17,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
-import { EmptyState } from "./empty-state";
+import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
 export const DischargeDetails = () => {
   const { t } = useTranslation();
@@ -53,21 +53,22 @@ export const DischargeDetails = () => {
         {dischargeStatus ? (
           <>
             <div className="flex justify-between items-center">
-              <div className="flex flex-col text-xs gap-1">
-                <span className=" text-gray-700">
-                  {t("discharge_date_and_time")}:
-                </span>
-                <div className="flex flex-row gap-1 font-semibold">
+              {encounter.period.end && (
+                <div className="flex flex-col text-xs gap-1">
+                  <span className="text-gray-700">
+                    {t("discharge_date_and_time")}:
+                  </span>
+
                   <div className="flex flex-row gap-1 font-semibold">
                     <span className="text-gray-950">
-                      {format(dischargeStatus.moved_at, "dd MMM yyyy")},
+                      {format(encounter.period.end, "dd MMM yyyy")},
                     </span>
                     <span className="text-gray-700">
-                      {format(dischargeStatus.moved_at, "hh:mma")}
+                      {format(encounter.period.end, "hh:mma")}
                     </span>
                   </div>
                 </div>
-              </div>
+              )}
               <Badge variant="green">{t("discharged")}</Badge>
             </div>
             <Dialog>

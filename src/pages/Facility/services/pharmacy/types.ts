@@ -61,7 +61,7 @@ export type MedicationBillField = MedicationBillFormItem & { id: string };
 export const medicationBillFormSchema = z.object({
   items: z.array(
     z.object({
-      reference_id: z.string().uuid(),
+      reference_id: z.uuid(),
       medication: z.custom<MedicationRequestRead>().optional(),
       productKnowledge: z.custom<ProductKnowledgeBase>().optional(),
       isSelected: z.boolean(),
@@ -82,8 +82,8 @@ export const medicationBillFormSchema = z.object({
           substitutedProductKnowledge: z
             .custom<ProductKnowledgeBase>()
             .optional(),
-          type: z.nativeEnum(SubstitutionType),
-          reason: z.nativeEnum(SubstitutionReason),
+          type: z.enum(SubstitutionType),
+          reason: z.enum(SubstitutionReason),
         })
         .optional(),
       prescriptionId: z.string().optional(),

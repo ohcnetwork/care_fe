@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PlusCircle, Trash2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { PlusCircle, Search, Trash2 } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Form,
   FormControl,
@@ -45,14 +46,16 @@ import {
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
-import { round, zodDecimal } from "@/Utils/decimal";
+import { roundWhole, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { formatDateTime } from "@/Utils/utils";
 
 const returnItemSchema = z.object({
   supplied_inventory_item: z.string().min(1, "Please select a stock item"),
   supplied_item: z.string().optional(), // Product ID from the inventory item
   supplied_item_quantity: zodDecimal({ min: 1 }),
+  original_dispense_quantity: z.string().optional(),
   product_knowledge: z
     .custom<ProductKnowledgeBase>()
     .refine((data) => data?.slug, {
@@ -90,6 +93,19 @@ export function AddMedicationReturnItemForm({
   );
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
   const [selectedDispenses, setSelectedDispenses] = useState<string[]>([]);
+  const [dispenseSearchQuery, setDispenseSearchQuery] = useState("");
+
+  const filteredDispenses = useMemo(() => {
+    if (!dispenseSearchQuery) return medicationDispenses;
+    const query = dispenseSearchQuery.toLowerCase();
+    return medicationDispenses.filter((dispense) => {
+      const productName =
+        dispense.item.product.product_knowledge.name?.toLowerCase() || "";
+      const batchNumber =
+        dispense.item.product.batch?.lot_number?.toLowerCase() || "";
+      return productName.includes(query) || batchNumber.includes(query);
+    });
+  }, [medicationDispenses, dispenseSearchQuery]);
 
   const createEmptyItem = useCallback(
     (): ReturnItemValues => ({
@@ -97,6 +113,7 @@ export function AddMedicationReturnItemForm({
       supplied_inventory_item: "",
       supplied_item: "",
       supplied_item_quantity: "1",
+      original_dispense_quantity: undefined,
     }),
     [],
   );
@@ -121,12 +138,16 @@ export function AddMedicationReturnItemForm({
 
   const loadFromMedicationDispenses = () => {
     setIsSelectDialogOpen(true);
-    handleSelectAll(true);
+    setSelectedDispenses([]);
+    setDispenseSearchQuery("");
   };
 
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = (
+    checked: boolean,
+    dispenses: MedicationDispenseRead[] = filteredDispenses,
+  ) => {
     if (checked) {
-      setSelectedDispenses(medicationDispenses.map((dispense) => dispense.id));
+      setSelectedDispenses(dispenses.map((dispense) => dispense.id));
     } else {
       setSelectedDispenses([]);
     }
@@ -149,7 +170,8 @@ export function AddMedicationReturnItemForm({
     const itemsFromDispenses = selectedMedicationDispenses.map((dispense) => ({
       supplied_inventory_item: dispense.item.id,
       supplied_item: dispense.item.product.id,
-      supplied_item_quantity: dispense.quantity,
+      supplied_item_quantity: roundWhole(dispense.quantity),
+      original_dispense_quantity: roundWhole(dispense.quantity),
       product_knowledge: dispense.item.product.product_knowledge,
     }));
     form.setValue("items", itemsFromDispenses);
@@ -292,32 +314,38 @@ export function AddMedicationReturnItemForm({
                               <FormField
                                 control={form.control}
                                 name={`items.${index}.product_knowledge`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <ProductKnowledgeSelect
-                                        value={field.value}
-                                        onChange={(productKnowledge) => {
-                                          field.onChange(productKnowledge);
-                                          setNewlyAddedRowIndex(null);
-                                          // Reset inventory item when product changes
-                                          form.setValue(
-                                            `items.${index}.supplied_inventory_item`,
-                                            "",
-                                          );
-                                        }}
-                                        placeholder={t("select_product")}
-                                        className="w-full"
-                                        disableFavorites
-                                        hideClearButton
-                                        defaultOpen={
-                                          newlyAddedRowIndex === index
-                                        }
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
+                                render={({ field }) => {
+                                  const isLoadedFromDispense = !!form.watch(
+                                    `items.${index}.original_dispense_quantity`,
+                                  );
+                                  return (
+                                    <FormItem>
+                                      <FormControl>
+                                        <ProductKnowledgeSelect
+                                          value={field.value}
+                                          onChange={(productKnowledge) => {
+                                            field.onChange(productKnowledge);
+                                            setNewlyAddedRowIndex(null);
+                                            // Reset inventory item when product changes
+                                            form.setValue(
+                                              `items.${index}.supplied_inventory_item`,
+                                              "",
+                                            );
+                                          }}
+                                          placeholder={t("select_product")}
+                                          className="w-full"
+                                          disableFavorites
+                                          hideClearButton
+                                          defaultOpen={
+                                            newlyAddedRowIndex === index
+                                          }
+                                          disabled={isLoadedFromDispense}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  );
+                                }}
                               />
                             </TableCell>
                             <TableCell className="align-top p-2">
@@ -329,6 +357,7 @@ export function AddMedicationReturnItemForm({
                                     <FormControl>
                                       <StockLotSelector
                                         net_content_gt={-1}
+                                        hideQuantity
                                         selectedLots={
                                           field.value
                                             ? [
@@ -379,19 +408,30 @@ export function AddMedicationReturnItemForm({
                               <FormField
                                 control={form.control}
                                 name={`items.${index}.supplied_item_quantity`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input
-                                        type="number"
-                                        min={1}
-                                        className="w-20"
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
+                                render={({ field }) => {
+                                  const originalQuantity = form.watch(
+                                    `items.${index}.original_dispense_quantity`,
+                                  );
+                                  return (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          min={1}
+                                          max={
+                                            originalQuantity
+                                              ? Number(originalQuantity)
+                                              : undefined
+                                          }
+                                          step="1"
+                                          className="w-20"
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  );
+                                }}
                               />
                             </TableCell>
                             <TableCell className="align-top p-2">
@@ -489,63 +529,110 @@ export function AddMedicationReturnItemForm({
       </Card>
       {medicationDispenses.length > 0 && (
         <Dialog open={isSelectDialogOpen} onOpenChange={setIsSelectDialogOpen}>
-          <DialogContent className="sm:max-w-xl overflow-y-auto max-h-[80vh]">
+          <DialogContent className="sm:max-w-xl max-h-[80vh] flex flex-col overflow-hidden">
             <DialogHeader>
               <DialogTitle>{t("select_items_to_add")}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="select-all"
-                  checked={
-                    selectedDispenses.length === medicationDispenses.length
-                  }
-                  onCheckedChange={(checked) =>
-                    handleSelectAll(checked as boolean)
-                  }
-                  data-shortcut-id="select-all"
-                />
-                <label
-                  htmlFor="select-all"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {t("select_all")}
-                </label>
-              </div>
-              <div className="border rounded-md divide-y">
-                {medicationDispenses.map((dispense) => (
-                  <div
-                    key={dispense.id}
-                    className="flex items-center space-x-4 p-2 hover:bg-gray-50"
-                  >
-                    <Checkbox
-                      id={dispense.id}
-                      checked={selectedDispenses.includes(dispense.id)}
-                      onCheckedChange={(checked) =>
-                        handleSelectDispense(dispense.id, checked as boolean)
-                      }
-                    />
-                    <div className="flex-1">
-                      <label
-                        htmlFor={dispense.id}
-                        className="text-sm font-medium leading-none"
-                      >
-                        {dispense.item.product.product_knowledge.name}
-                      </label>
-                      {dispense.item.product.batch?.lot_number && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          {t("batch")}: {dispense.item.product.batch.lot_number}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-sm font-medium">
-                      {round(dispense.quantity)}
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+              <Input
+                placeholder={t("search_items")}
+                value={dispenseSearchQuery}
+                onChange={(e) => setDispenseSearchQuery(e.target.value)}
+                className="pl-9"
+                aria-label={t("search_items")}
+              />
             </div>
-            <DialogFooter>
+
+            <div className="flex-1 overflow-y-auto">
+              {filteredDispenses.length === 0 ? (
+                <EmptyState
+                  icon={<Search className="size-4 text-gray-400" />}
+                  title={t("no_results_found")}
+                  description={t("try_different_search")}
+                  className="rounded-md shadow-none border-solid"
+                />
+              ) : (
+                <div className="border rounded-md overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12 text-center">
+                          <Checkbox
+                            id="select-all"
+                            checked={
+                              filteredDispenses.length > 0 &&
+                              filteredDispenses.every((d) =>
+                                selectedDispenses.includes(d.id),
+                              )
+                            }
+                            onCheckedChange={(checked) =>
+                              handleSelectAll(checked as boolean)
+                            }
+                            data-shortcut-id="select-all"
+                          />
+                        </TableHead>
+                        <TableHead>{t("item")}</TableHead>
+                        <TableHead className="text-center">
+                          {t("qty")}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredDispenses.map((dispense) => (
+                        <TableRow
+                          key={dispense.id}
+                          className="hover:bg-gray-50 cursor-pointer select-none"
+                          onClick={() =>
+                            handleSelectDispense(
+                              dispense.id,
+                              !selectedDispenses.includes(dispense.id),
+                            )
+                          }
+                        >
+                          <TableCell className="text-center">
+                            <Checkbox
+                              id={dispense.id}
+                              checked={selectedDispenses.includes(dispense.id)}
+                              onCheckedChange={(checked) =>
+                                handleSelectDispense(
+                                  dispense.id,
+                                  checked as boolean,
+                                )
+                              }
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium">
+                                {dispense.item.product.product_knowledge.name}
+                              </span>
+                              {(dispense.item.product.batch?.lot_number ||
+                                dispense.item.product.expiration_date) && (
+                                <span className="text-xs text-gray-500">
+                                  {dispense.item.product.batch?.lot_number &&
+                                    `${t("lot")}: ${dispense.item.product.batch.lot_number}`}
+                                  {dispense.item.product.batch?.lot_number &&
+                                    dispense.item.product.expiration_date &&
+                                    " | "}
+                                  {dispense.item.product.expiration_date &&
+                                    `${t("expiry")}: ${formatDateTime(dispense.item.product.expiration_date)}`}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center text-sm font-medium">
+                            {roundWhole(dispense.quantity)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+            <DialogFooter className="pt-2 border-t">
               <Button
                 variant="outline"
                 onClick={() => setIsSelectDialogOpen(false)}

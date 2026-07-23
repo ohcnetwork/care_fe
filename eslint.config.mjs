@@ -120,6 +120,24 @@ const config = [
         warn: DEFAULT,
       }),
       "no-undef": "off",
+
+      // Require rendering components to pass an ExtensionContexts.* value when rendering
+      // extensions. Warns by default, errors on pre-commit.
+      "no-restricted-syntax": [
+        dynamicRules({ error: isPreCommit, warn: DEFAULT }),
+        {
+          selector:
+            "CallExpression[callee.name=/^(getExtensionFieldsWithName|processExtensions|getExtensionProps|getCombinedExtensionProps)$/][arguments.length<2]",
+          message:
+            "Pass an ExtensionContexts.* value as the second argument. Create a new context if needed.",
+        },
+        {
+          selector:
+            "CallExpression[callee.name=/^use(Extensions|EntityExtensions)$/] > ObjectExpression:first-child:not(:has(Property[key.name='context']))",
+          message:
+            "Pass `context: ExtensionContexts.<slot>` in the options. Create a new context if needed.",
+        },
+      ],
     },
   },
 
@@ -136,11 +154,19 @@ const config = [
       "react/prop-types": "off",
       "react/no-children-prop": "off",
       "react/no-unescaped-entities": "off",
+      // React Compiler rules added to react-hooks v7 `recommended`. Surfaced as
+      // warnings so the existing code is not blocked; address incrementally.
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/refs": "warn",
+      "react-hooks/static-components": "warn",
+      "react-hooks/preserve-manual-memoization": "warn",
+      "react-hooks/immutability": "warn",
+      "react-hooks/purity": "warn",
     },
   },
   // No Relative import paths rule
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
+    files: ["src/**/*.{js,jsx,ts,tsx}"],
     plugins: {
       "no-relative-import-paths": noRelativeImportPaths,
     },
@@ -149,6 +175,7 @@ const config = [
         "error",
         {
           allowSameFolder: true,
+          rootDir: "src",
           prefix: "@",
         },
       ],

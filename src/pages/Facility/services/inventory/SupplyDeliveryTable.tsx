@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
+import { EllipsisVertical } from "lucide-react";
+import { Link } from "raviger";
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -36,6 +38,7 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import { ExtensionEntityType } from "@/types/extensions/extensions";
 import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import {
+  ACTIVE_SUPPLY_DELIVERY_STATUSES,
   SUPPLY_DELIVERY_CONDITION_COLORS,
   SUPPLY_DELIVERY_STATUS_COLORS,
   SupplyDeliveryRead,
@@ -45,7 +48,7 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import { EllipsisVertical } from "lucide-react";
+import { ExtensionContexts } from "@/Utils/schema/types";
 
 interface SupplyDeliveryTableProps {
   deliveries: SupplyDeliveryRead[];
@@ -58,6 +61,8 @@ interface SupplyDeliveryTableProps {
   deliveryOrderStatus?: DeliveryOrderStatus;
   autoSelectOnMount?: boolean;
   isRequester?: boolean;
+  facilityId?: string;
+  linkToProduct?: boolean;
 }
 
 export function SupplyDeliveryTable({
@@ -71,6 +76,8 @@ export function SupplyDeliveryTable({
   deliveryOrderStatus,
   autoSelectOnMount = false,
   isRequester = false,
+  facilityId,
+  linkToProduct = false,
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -87,7 +94,11 @@ export function SupplyDeliveryTable({
 
   // Get field metadata with extension name for reading namespaced values
   const extensionFields = useMemo(
-    () => getExtensionFieldsWithName(allExtensions),
+    () =>
+      getExtensionFieldsWithName(
+        allExtensions,
+        ExtensionContexts.supply_delivery_table,
+      ),
     [allExtensions],
   );
 
@@ -143,12 +154,28 @@ export function SupplyDeliveryTable({
     selectedDeliveries.length,
   ]);
 
+  // Build a map of delivery id -> serial number for non-cancelled deliveries
+  const serialNumberMap = useMemo(() => {
+    const map = new Map<string, number>();
+    let serial = 1;
+    for (const delivery of deliveries) {
+      if (
+        ACTIVE_SUPPLY_DELIVERY_STATUSES.includes(
+          delivery.status as (typeof ACTIVE_SUPPLY_DELIVERY_STATUSES)[number],
+        )
+      ) {
+        map.set(delivery.id, serial++);
+      }
+    }
+    return map;
+  }, [deliveries]);
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
           {showAllCheckbox && (
-            <TableHead>
+            <TableHead rowSpan={2}>
               <Checkbox
                 checked={allInProgressSelected && selectedDeliveries.length > 0}
                 disabled={inProgressDeliveries.length === 0}
@@ -160,31 +187,51 @@ export function SupplyDeliveryTable({
               <ShortcutBadge actionId="select-all" alwaysShow={false} />
             </TableHead>
           )}
-          <TableHead>{t("item")}</TableHead>
-          <TableHead>{t("batch")}</TableHead>
-          <TableHead>{t("requested_qty")}</TableHead>
-          {!internal && <TableHead>{t("pack_size")}</TableHead>}
-          {!internal && <TableHead>{t("pack_qty")}</TableHead>}
-          <TableHead>
+          <TableHead rowSpan={2}>{t("#")}</TableHead>
+          <TableHead rowSpan={2}>{t("item")}</TableHead>
+          <TableHead rowSpan={2}>{t("batch")}</TableHead>
+          <TableHead rowSpan={2}>{t("requested_qty")}</TableHead>
+          {!internal && <TableHead rowSpan={2}>{t("pack_size")}</TableHead>}
+          {!internal && <TableHead rowSpan={2}>{t("pack_qty")}</TableHead>}
+          <TableHead rowSpan={2}>
             {isRequester ? t("received_qty") : t("dispatched_qty")}
           </TableHead>
-          <TableHead>
+          <TableHead rowSpan={2}>
             {isRequester ? t("received_date") : t("dispatched_date")}
           </TableHead>
-          <TableHead>{t("item_price")}</TableHead>
-          {informationalCodes.map((code) => (
-            <TableHead key={code.code}>{code.display}</TableHead>
-          ))}
-          <TableHead>{t("tax")}</TableHead>
-          <TableHead>{t("disc")}</TableHead>
-          <TableHead>{t("status")}</TableHead>
-          <TableHead>{t("condition")}</TableHead>
+          <TableHead
+            colSpan={1 + informationalCodes.length}
+            className="text-center border-b"
+          >
+            {t("sale")}
+          </TableHead>
+          {!internal && (
+            <TableHead colSpan={2} className="text-center border-b">
+              {t("purchase")}
+            </TableHead>
+          )}
+          <TableHead rowSpan={2}>{t("tax")}</TableHead>
+          <TableHead rowSpan={2}>{t("disc")}</TableHead>
+          <TableHead rowSpan={2}>{t("status")}</TableHead>
+          <TableHead rowSpan={2}>{t("condition")}</TableHead>
           {extensionFields.map((field) => (
-            <TableHead key={`${field.extensionName}-${field.name}`}>
+            <TableHead rowSpan={2} key={`${field.extensionName}-${field.name}`}>
               {field.label}
             </TableHead>
           ))}
-          {showActionsColumn && <TableHead>{t("actions")}</TableHead>}
+          {showActionsColumn && (
+            <TableHead rowSpan={2}>{t("actions")}</TableHead>
+          )}
+        </TableRow>
+        <TableRow>
+          <TableHead>{t("item_price")}</TableHead>
+          {informationalCodes.map((code) => (
+            <TableHead key={code.code} className="border border-r">
+              {code.display}
+            </TableHead>
+          ))}
+          {!internal && <TableHead>{t("pr")}</TableHead>}
+          {!internal && <TableHead className="border-r">{t("tpr")}</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody className="text-sm">
@@ -202,16 +249,38 @@ export function SupplyDeliveryTable({
                 )}
               </TableCell>
             )}
+            <TableCell>{serialNumberMap.get(delivery.id)}</TableCell>
             <TableCell
               className={cn(onDeliveryClick && "cursor-pointer underline")}
               onClick={() => onDeliveryClick?.(delivery)}
             >
-              <div className="font-medium">
-                {internal
+              {(() => {
+                const productId = internal
+                  ? delivery.supplied_inventory_item?.product?.id
+                  : delivery.supplied_item?.id;
+                const productName = internal
                   ? delivery.supplied_inventory_item?.product?.product_knowledge
                       ?.name
-                  : delivery.supplied_item?.product_knowledge?.name}
-              </div>
+                  : delivery.supplied_item?.product_knowledge?.name;
+
+                if (linkToProduct && facilityId && productId) {
+                  return (
+                    <Link
+                      href={`/facility/${facilityId}/settings/product/${productId}`}
+                      className="font-medium text-primary-600 hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                      basePath="/"
+                    >
+                      {productName}
+                    </Link>
+                  );
+                }
+                return (
+                  <div className="font-medium text-wrap wrap-break-word">
+                    {productName}
+                  </div>
+                );
+              })()}
             </TableCell>
             <TableCell>
               {delivery.supplied_inventory_item?.product?.batch?.lot_number ||
@@ -261,6 +330,18 @@ export function SupplyDeliveryTable({
                 </TableCell>
               );
             })}
+            {!internal && (
+              <TableCell>
+                <MonetaryDisplay
+                  amount={delivery.supplied_item?.purchase_price}
+                />
+              </TableCell>
+            )}
+            {!internal && (
+              <TableCell>
+                <MonetaryDisplay amount={delivery.total_purchase_price} />
+              </TableCell>
+            )}
             <TableCell>
               <MonetaryDisplay
                 factor={add(
@@ -313,8 +394,7 @@ export function SupplyDeliveryTable({
             {extensionFields.map((field) => {
               const value = getExtensionValue(
                 delivery.extensions as NamespacedExtensionData,
-                field.extensionName,
-                field.name,
+                field,
               );
               return (
                 <TableCell key={`${field.extensionName}-${field.name}`}>

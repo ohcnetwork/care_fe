@@ -28,7 +28,7 @@ export function PermissionsIndex() {
     queryFn: query(roleApi.listRoles, {
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         name: qParams.name,
       },
     }),

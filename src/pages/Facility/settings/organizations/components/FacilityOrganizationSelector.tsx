@@ -1,7 +1,21 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { Building, ChevronDown, ChevronRight, Loader2, X } from "lucide-react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  Building,
+  ChevronDown,
+  ChevronRight,
+  Loader2,
+  Star,
+  X,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -27,6 +41,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
@@ -38,6 +53,7 @@ interface FacilityOrganizationSelectorProps {
   currentOrganizations?: FacilityOrganizationRead[];
   singleSelection?: boolean;
   optional?: boolean;
+  favoriteList?: string;
 }
 
 export default function FacilityOrganizationSelector(
@@ -50,7 +66,10 @@ export default function FacilityOrganizationSelector(
     facilityId,
     currentOrganizations,
     singleSelection = false,
+    favoriteList,
   } = props;
+
+  const queryClient = useQueryClient();
 
   const [selectedOrganizations, setSelectedOrganizations] = useState<
     FacilityOrganizationRead[]
@@ -64,66 +83,107 @@ export default function FacilityOrganizationSelector(
   const [showAllOrgs, setShowAllOrgs] = useState(false);
   const [open, setOpen] = useState(false);
   const [alreadySelected, setAlreadySelected] = useState(false);
+  const [hasAutoSelectedPreferred, setHasAutoSelectedPreferred] =
+    useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const { data: rootOrganizations, isLoading: isLoadingRoot } = useQuery({
-    queryKey: ["facilityOrganization", facilityOrgSearch, showAllOrgs],
-    queryFn: query.debounced(
-      showAllOrgs
-        ? facilityOrganizationApi.list
-        : facilityOrganizationApi.listMine,
-      {
-        pathParams: { facilityId },
-        queryParams: {
-          parent: "",
-          name: facilityOrgSearch,
-        },
-      },
-    ),
-  });
+  const { ref: inViewRef, inView } = useInView();
 
-  const organizationQueries = useQueries({
-    queries: navigationLevels.map((level) => ({
-      queryKey: ["organizations", level.id, facilityOrgSearch],
-      queryFn: query.debounced(facilityOrganizationApi.list, {
+  // Fetch preferred organizations
+  const { data: preferredOrganizations, isLoading: isLoadingPreferred } =
+    useQuery({
+      queryKey: ["facilityOrganization-favorites", facilityId, favoriteList],
+      queryFn: query(facilityOrganizationApi.list, {
         pathParams: { facilityId },
         queryParams: {
-          parent: level.id,
-          name: facilityOrgSearch,
+          favorite_list: favoriteList,
         },
       }),
-      enabled: !!level.id,
-    })),
+      enabled: !!favoriteList,
+    });
+
+  const preferredOrgIds = useMemo(() => {
+    return preferredOrganizations?.results?.map((org) => org.id) || [];
+  }, [preferredOrganizations]);
+
+  const PAGE_LIMIT = 20;
+
+  const {
+    data: rootOrganizationsData,
+    isLoading: isLoadingRoot,
+    fetchNextPage: fetchNextPageRoot,
+    hasNextPage: hasNextPageRoot,
+    isFetchingNextPage: isFetchingNextPageRoot,
+  } = useInfiniteQuery({
+    queryKey: [
+      "facilityOrganization",
+      facilityId,
+      facilityOrgSearch,
+      showAllOrgs,
+    ],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query.debounced(
+        showAllOrgs
+          ? facilityOrganizationApi.list
+          : facilityOrganizationApi.listMine,
+        {
+          pathParams: { facilityId },
+          queryParams: {
+            parent: "",
+            name: facilityOrgSearch,
+            limit: String(PAGE_LIMIT),
+            offset: String(pageParam),
+          },
+        },
+      )({ signal });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * PAGE_LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    select: (data) => ({
+      results: data?.pages.flatMap((p) => p.results) || [],
+      count: data?.pages[0]?.count || 0,
+    }),
   });
 
-  useEffect(() => {
-    if (value && value.length > 0) {
-      const resolvedOrganizations = value
-        .map((id) => currentOrganizations?.find((org) => org.id === id))
-        .filter((org) => org !== undefined);
-      if (resolvedOrganizations.length > 0) {
-        setSelectedOrganizations(resolvedOrganizations);
-      }
-    } else {
-      setSelectedOrganizations([]);
-    }
-  }, [value, currentOrganizations, showAllOrgs]);
-
-  const handleSelect = (org: FacilityOrganizationRead) => {
-    const isAlreadySelected = !!currentOrganizations?.find(
-      (o) => o.id === org.id,
-    );
-    if (isAlreadySelected) {
-      setAlreadySelected(true);
-      setCurrentSelection(org);
-    }
-    if (org.has_children) {
-      setNavigationLevels([...navigationLevels, org]);
-    } else {
-      handleConfirmSelection(org);
-    }
-    setCurrentSelection(org);
-    setFacilityOrgSearch("");
-  };
+  const {
+    data: childOrganizationsData,
+    isLoading: isLoadingChild,
+    fetchNextPage: fetchNextPageChild,
+    hasNextPage: hasNextPageChild,
+    isFetchingNextPage: isFetchingNextPageChild,
+  } = useInfiniteQuery({
+    queryKey: [
+      "organizations",
+      facilityId,
+      navigationLevels[navigationLevels.length - 1]?.id,
+      facilityOrgSearch,
+    ],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query.debounced(facilityOrganizationApi.list, {
+        pathParams: { facilityId },
+        queryParams: {
+          parent: navigationLevels[navigationLevels.length - 1]?.id,
+          name: facilityOrgSearch,
+          limit: String(PAGE_LIMIT),
+          offset: String(pageParam),
+        },
+      })({ signal });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * PAGE_LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    select: (data) => ({
+      results: data?.pages.flatMap((p) => p.results) || [],
+      count: data?.pages[0]?.count || 0,
+    }),
+    enabled: navigationLevels.length > 0,
+  });
 
   const handleConfirmSelection = useCallback(
     (org: FacilityOrganizationRead) => {
@@ -139,39 +199,50 @@ export default function FacilityOrganizationSelector(
       setNavigationLevels([]);
       setOpen(false);
     },
-    [selectedOrganizations, onChange],
+    [selectedOrganizations, onChange, singleSelection],
   );
-
-  const handleRemoveOrganization = (index: number) => {
-    const newSelection = selectedOrganizations.filter((_, i) => i !== index);
-    setSelectedOrganizations(newSelection);
-    onChange(
-      newSelection.length > 0 ? newSelection.map((org) => org.id) : null,
-    );
-  };
-
-  const handleOrganizationViewChange = (value: string) => {
-    setShowAllOrgs(value === "all");
-    setSelectedOrganizations([]);
-    setCurrentSelection(null);
-    setNavigationLevels([]);
-  };
-
-  const handleOpenChange = (isOpen: boolean) => {
-    setOpen(isOpen);
-    if (!isOpen) {
-      setNavigationLevels([]);
-      setFacilityOrgSearch("");
-    }
-  };
 
   const getCurrentLevelOrganizations = useCallback(() => {
     if (navigationLevels.length === 0) {
-      return rootOrganizations?.results || [];
+      return rootOrganizationsData?.results || [];
     }
-    const lastQuery = organizationQueries[navigationLevels.length - 1];
-    return lastQuery?.data?.results || [];
-  }, [navigationLevels, rootOrganizations, organizationQueries]);
+    return childOrganizationsData?.results || [];
+  }, [navigationLevels, rootOrganizationsData, childOrganizationsData]);
+
+  const getCurrentLevelLoading = useCallback(() => {
+    if (navigationLevels.length === 0) {
+      return isLoadingRoot;
+    }
+    return isLoadingChild;
+  }, [navigationLevels.length, isLoadingRoot, isLoadingChild]);
+
+  const getCurrentLevelFetchingNextPage = useCallback(() => {
+    if (navigationLevels.length === 0) {
+      return isFetchingNextPageRoot;
+    }
+    return isFetchingNextPageChild;
+  }, [
+    navigationLevels.length,
+    isFetchingNextPageRoot,
+    isFetchingNextPageChild,
+  ]);
+
+  useEffect(() => {
+    if (inView) {
+      if (navigationLevels.length === 0 && hasNextPageRoot) {
+        fetchNextPageRoot();
+      } else if (navigationLevels.length > 0 && hasNextPageChild) {
+        fetchNextPageChild();
+      }
+    }
+  }, [
+    inView,
+    navigationLevels.length,
+    hasNextPageRoot,
+    hasNextPageChild,
+    fetchNextPageRoot,
+    fetchNextPageChild,
+  ]);
 
   // Auto-select when there's only one organization available
   useEffect(() => {
@@ -188,7 +259,9 @@ export default function FacilityOrganizationSelector(
       availableOrganizations.length === 1 &&
       !facilityOrgSearch &&
       selectedOrganizations.length === 0 &&
-      !isLoadingRoot
+      !isLoadingRoot &&
+      !isLoadingPreferred &&
+      preferredOrgIds.length === 0
     ) {
       const singleOrg = availableOrganizations[0];
 
@@ -208,9 +281,135 @@ export default function FacilityOrganizationSelector(
     facilityOrgSearch,
     selectedOrganizations,
     isLoadingRoot,
+    isLoadingPreferred,
+    preferredOrgIds.length,
     currentOrganizations,
     props.optional,
+    isLoadingPreferred,
+    preferredOrgIds.length,
   ]);
+
+  useEffect(() => {
+    if (value && value.length > 0) {
+      const resolvedOrganizations = value
+        .map((id) => currentOrganizations?.find((org) => org.id === id))
+        .filter((org) => org !== undefined);
+      if (resolvedOrganizations.length > 0) {
+        setSelectedOrganizations(resolvedOrganizations);
+      }
+    } else {
+      setSelectedOrganizations([]);
+      // Reset the auto-select flag when value is cleared (e.g., form reset)
+      // setHasAutoSelectedPreferred(false);
+    }
+  }, [value, currentOrganizations, showAllOrgs]);
+
+  // Auto-select preferred departments
+  useEffect(() => {
+    if (
+      favoriteList &&
+      preferredOrganizations?.results &&
+      preferredOrganizations.results.length > 0 &&
+      selectedOrganizations.length === 0 &&
+      !hasAutoSelectedPreferred &&
+      !value?.length
+    ) {
+      const orgsToSelect = singleSelection
+        ? [preferredOrganizations.results[0]]
+        : preferredOrganizations.results;
+      setSelectedOrganizations(orgsToSelect);
+      onChange(orgsToSelect.map((org) => org.id));
+      setHasAutoSelectedPreferred(true);
+    }
+  }, [
+    favoriteList,
+    preferredOrganizations,
+    selectedOrganizations,
+    hasAutoSelectedPreferred,
+    value,
+    onChange,
+    singleSelection,
+  ]);
+
+  // Add favorite mutation
+  const addFavoriteMutation = useMutation({
+    mutationFn: (organizationId: string) =>
+      mutate(facilityOrganizationApi.addFavorite, {
+        pathParams: { facilityId, organizationId },
+      })({ favorite_list: favoriteList }),
+    onSuccess: () => {
+      toast.success(t("marked_as_preferred"));
+      queryClient.invalidateQueries({
+        queryKey: ["facilityOrganization-favorites", facilityId, favoriteList],
+      });
+    },
+  });
+
+  // Remove favorite mutation
+  const removeFavoriteMutation = useMutation({
+    mutationFn: (organizationId: string) =>
+      mutate(facilityOrganizationApi.removeFavorite, {
+        pathParams: { facilityId, organizationId },
+      })({ favorite_list: favoriteList }),
+    onSuccess: () => {
+      toast.success(t("removed_from_preferred"));
+      queryClient.invalidateQueries({
+        queryKey: ["facilityOrganization-favorites", facilityId, favoriteList],
+      });
+    },
+  });
+
+  const handleTogglePreferred = (
+    e: React.MouseEvent,
+    org: FacilityOrganizationRead,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isPreferred = preferredOrgIds.includes(org.id);
+    if (isPreferred) {
+      removeFavoriteMutation.mutate(org.id);
+    } else {
+      addFavoriteMutation.mutate(org.id);
+    }
+  };
+
+  const handleSelect = (org: FacilityOrganizationRead) => {
+    const isAlreadySelected = !!currentOrganizations?.find(
+      (o) => o.id === org.id,
+    );
+    if (isAlreadySelected) {
+      setAlreadySelected(true);
+      setCurrentSelection(org);
+    }
+    if (org.has_children) {
+      setNavigationLevels([...navigationLevels, org]);
+    } else {
+      handleConfirmSelection(org);
+    }
+    setCurrentSelection(org);
+    setFacilityOrgSearch("");
+  };
+
+  const handleRemoveOrganization = (index: number) => {
+    const newSelection = selectedOrganizations.filter((_, i) => i !== index);
+    setSelectedOrganizations(newSelection);
+    onChange(
+      newSelection.length > 0 ? newSelection.map((org) => org.id) : null,
+    );
+  };
+
+  const handleOrganizationViewChange = (value: string) => {
+    setShowAllOrgs(value === "all");
+    setNavigationLevels([]);
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setNavigationLevels([]);
+      setFacilityOrgSearch("");
+    }
+  };
 
   const renderNavigationPath = () => {
     return (
@@ -272,8 +471,7 @@ export default function FacilityOrganizationSelector(
         </div>
         <CommandList onWheel={(e) => e.stopPropagation()}>
           <CommandEmpty>
-            {isLoadingRoot ||
-            organizationQueries[navigationLevels.length - 1]?.isLoading ? (
+            {getCurrentLevelLoading() ? (
               <div className="flex items-center justify-center py-6">
                 <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
                 <span className="ml-2 text-sm text-gray-500">
@@ -285,10 +483,7 @@ export default function FacilityOrganizationSelector(
             )}
           </CommandEmpty>
           <CommandGroup>
-            {!(
-              isLoadingRoot ||
-              organizationQueries[navigationLevels.length - 1]?.isLoading
-            ) &&
+            {!getCurrentLevelLoading() &&
               getCurrentLevelOrganizations().map((org) => {
                 const isSelected = currentSelection?.id === org.id;
                 return (
@@ -316,6 +511,17 @@ export default function FacilityOrganizationSelector(
                   </CommandItem>
                 );
               })}
+            {getCurrentLevelOrganizations().length > 0 && (
+              <div ref={inViewRef} className="h-1" />
+            )}
+            {getCurrentLevelFetchingNextPage() && (
+              <div className="flex items-center justify-center py-2">
+                <Loader2 className="size-4 animate-spin text-gray-500" />
+                <span className="ml-2 text-sm text-gray-500">
+                  {t("loading")}
+                </span>
+              </div>
+            )}
           </CommandGroup>
         </CommandList>
         {currentSelection && (
@@ -450,28 +656,59 @@ export default function FacilityOrganizationSelector(
                 </PopoverContent>
               </Popover>
             )}
-            {selectedOrganizations.map((org, index) => (
-              <div
-                key={index}
-                className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5"
-              >
-                <Building className="size-4 text-sky-600 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-sky-900 truncate">
-                    {org.name}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="size-8 p-0 text-gray-500 hover:text-gray-900"
-                  onClick={() => handleRemoveOrganization(index)}
+            {selectedOrganizations.map((org, index) => {
+              const isPreferred = preferredOrgIds.includes(org.id);
+              return (
+                <div
+                  key={index}
+                  className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5"
                 >
-                  <X className="size-4" />
-                  <span className="sr-only">{t("remove_organization")}</span>
-                </Button>
-              </div>
-            ))}
+                  <Building className="size-4 text-sky-600 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-sky-900 truncate">
+                      {org.name}
+                    </p>
+                  </div>
+                  {favoriteList && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "size-8 p-0",
+                        isPreferred
+                          ? "text-yellow-500 hover:text-yellow-600"
+                          : "text-gray-400 hover:text-yellow-500",
+                      )}
+                      type="button"
+                      onClick={(e) => handleTogglePreferred(e, org)}
+                      disabled={
+                        addFavoriteMutation.isPending ||
+                        removeFavoriteMutation.isPending
+                      }
+                    >
+                      <Star
+                        className={cn("size-4", isPreferred && "fill-current")}
+                      />
+                      <span className="sr-only">
+                        {isPreferred
+                          ? t("remove_from_preferred")
+                          : t("mark_as_preferred")}
+                      </span>
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="size-8 p-0 text-gray-500 hover:text-gray-900"
+                    type="button"
+                    onClick={() => handleRemoveOrganization(index)}
+                  >
+                    <X className="size-4" />
+                    <span className="sr-only">{t("remove_organization")}</span>
+                  </Button>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

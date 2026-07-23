@@ -8,13 +8,14 @@ import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/c
 import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import {
   PatientListRead,
+  PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationRead } from "@/types/location/location";
-import { buildLocationHierarchy } from "@/types/location/utils";
+import { getLocationPath } from "@/types/location/utils";
 import { TokenRead } from "@/types/tokens/token/token";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -227,9 +228,7 @@ type HealthcareServiceResource = {
 };
 
 export type ScheduleResource =
-  | UserResource
-  | LocationResource
-  | HealthcareServiceResource;
+  UserResource | LocationResource | HealthcareServiceResource;
 
 export type AppointmentBase = {
   id: string;
@@ -251,6 +250,7 @@ export type PublicAppointment = AppointmentBase & {
 };
 
 export type AppointmentRead = Appointment & {
+  patient: PatientRead;
   tags: TagConfig[];
   updated_by: UserReadMinimal | null;
   created_by: UserReadMinimal;
@@ -305,7 +305,7 @@ export const formatScheduleResourceName = (appointment: ScheduleResource) => {
     case SchedulableResourceType.Practitioner:
       return formatName(appointment.resource);
     case SchedulableResourceType.Location:
-      return buildLocationHierarchy(appointment.resource).join(" > ");
+      return getLocationPath(appointment.resource, " > ");
     case SchedulableResourceType.HealthcareService:
       return appointment.resource.name;
     default:

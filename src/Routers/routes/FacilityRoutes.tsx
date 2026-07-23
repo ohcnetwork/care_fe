@@ -2,6 +2,7 @@ import { Redirect } from "raviger";
 
 import FacilityUsers from "@/components/Facility/FacilityUsers";
 import ResourceCreate from "@/components/Resource/ResourceForm";
+import MedicationDispenseRedirect from "@/pages/Facility/billing/account/components/MedicationDispenseRedirect";
 
 import BedAvailabilityDashboard from "@/pages/Facility/BedAvailabilityDashboard";
 
@@ -99,48 +100,24 @@ const FacilityRoutes: AppRoutes = {
   }) => (
     <AccountShow facilityId={facilityId} accountId={accountId} tab="invoices" />
   ),
-  "/facility/:facilityId/billing/account/:accountId/invoices": ({
-    facilityId,
-    accountId,
-  }) => (
-    <AccountShow facilityId={facilityId} accountId={accountId} tab="invoices" />
-  ),
-  "/facility/:facilityId/billing/account/:accountId/charge_items": ({
-    facilityId,
-    accountId,
-  }) => (
-    <AccountShow
-      facilityId={facilityId}
-      accountId={accountId}
-      tab="charge_items"
-    />
-  ),
   "/facility/:facilityId/billing/account/:accountId/charge_items/print": ({
     facilityId,
     accountId,
   }) => <PrintChargeItems facilityId={facilityId} accountId={accountId} />,
-  "/facility/:facilityId/billing/account/:accountId/payments": ({
+  "/facility/:facilityId/billing/account/:accountId/:tab": ({
     facilityId,
     accountId,
-  }) => (
-    <AccountShow facilityId={facilityId} accountId={accountId} tab="payments" />
-  ),
-  "/facility/:facilityId/billing/account/:accountId/reports": ({
-    facilityId,
-    accountId,
-  }) => (
-    <AccountShow facilityId={facilityId} accountId={accountId} tab="reports" />
-  ),
-  "/facility/:facilityId/billing/account/:accountId/bed_charge_items": ({
-    facilityId,
-    accountId,
-  }) => (
-    <AccountShow
-      facilityId={facilityId}
-      accountId={accountId}
-      tab="bed_charge_items"
-    />
-  ),
+    tab,
+  }) => <AccountShow facilityId={facilityId} accountId={accountId} tab={tab} />,
+  "/facility/:facilityId/billing/account/:accountId/:tab/payment/:paymentType":
+    ({ facilityId, accountId, tab, paymentType }) => (
+      <AccountShow
+        facilityId={facilityId}
+        accountId={accountId}
+        tab={tab}
+        paymentType={paymentType}
+      />
+    ),
   "/facility/:facilityId/billing/account/:accountId/invoices/create": ({
     facilityId,
     accountId,
@@ -152,6 +129,16 @@ const FacilityRoutes: AppRoutes = {
     facilityId,
     invoiceId,
   }) => <InvoiceShow facilityId={facilityId} invoiceId={invoiceId} />,
+  "/facility/:facilityId/billing/invoices/:invoiceId/pay": ({
+    facilityId,
+    invoiceId,
+  }) => (
+    <InvoiceShow
+      facilityId={facilityId}
+      invoiceId={invoiceId}
+      paymentType="pay"
+    />
+  ),
   "/facility/:facilityId/billing/invoice/:invoiceId/print": ({
     facilityId,
     invoiceId,
@@ -189,6 +176,15 @@ const FacilityRoutes: AppRoutes = {
   ),
   "/facility/:facilityId/template/builder/:slug": ({ facilityId, slug }) => (
     <TemplateBuilder facilityId={facilityId} slug={slug} />
+  ),
+  "/facility/:facilityId/medication_dispense/redirect/:medicationDispenseId": ({
+    facilityId,
+    medicationDispenseId,
+  }) => (
+    <MedicationDispenseRedirect
+      facilityId={facilityId}
+      medicationDispenseId={medicationDispenseId}
+    />
   ),
 };
 

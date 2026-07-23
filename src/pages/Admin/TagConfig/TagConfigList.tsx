@@ -42,7 +42,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
     queryFn: query.debounced(tagConfigApi.list, {
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         display: qParams.display,
         status: qParams.status,
         category: qParams.category,

@@ -1,5 +1,8 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
-import { QuestionnaireResponse } from "./questionnaireResponse";
+import {
+  QuestionnaireResponse,
+  QuestionnaireResponseUpdate,
+} from "./questionnaireResponse";
 
 export default {
   get: {
@@ -11,5 +14,11 @@ export default {
     path: "/api/v1/patient/{patientId}/questionnaire_response/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<QuestionnaireResponse>>(),
+  },
+  update: {
+    path: "/api/v1/patient/{patientId}/questionnaire_response/{responseId}/",
+    method: HttpMethod.PUT,
+    TBody: Type<QuestionnaireResponseUpdate>(),
+    TRes: Type<QuestionnaireResponse>(),
   },
 } as const;

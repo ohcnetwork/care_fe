@@ -110,11 +110,12 @@ test.describe("Symptom Questionnaire", () => {
 
     const symptomHistoryRow = symptomHistoryDialog
       .locator('[data-slot="table-body"] tr')
-      .filter({ hasText: symptomName });
+      .filter({ hasText: symptomName })
+      .filter({ hasText: status });
 
-    await expect(symptomHistoryRow).toContainText(status);
-    await expect(symptomHistoryRow).toContainText(severity);
-    await expect(symptomHistoryRow).toContainText(verification);
+    await expect(symptomHistoryRow.first()).toContainText(status);
+    await expect(symptomHistoryRow.first()).toContainText(severity);
+    await expect(symptomHistoryRow.first()).toContainText(verification);
   });
 
   test("verify duplicate symptom cannot be added", async ({ page }) => {

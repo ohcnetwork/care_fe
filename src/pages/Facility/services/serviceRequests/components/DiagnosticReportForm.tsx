@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Camera,
   ChevronsDownUp,
   ChevronsUpDown,
-  CloudUpload,
   NotepadText,
   PlusCircle,
   Save,
@@ -72,6 +72,8 @@ import {
 import fileApi from "@/types/files/fileApi";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+
+import { DottedDivider } from "@/components/careui/dotted-divider";
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 
 interface DiagnosticReportFormProps {
@@ -210,7 +212,6 @@ export function DiagnosticReportForm({
     if (fullReport) {
       // When we get the full report details, ensure UI is in correct state
       setSelectedReportCode(fullReport.code || null);
-      setIsExpanded(true);
     }
   }, [fullReport]);
 
@@ -252,6 +253,7 @@ export function DiagnosticReportForm({
         queryClient.invalidateQueries({
           queryKey: ["diagnosticReport", latestReport?.id],
         });
+        setIsExpanded(false);
       },
       onError: () => {
         toast.success(t("failed_to_update_conclusion"));
@@ -274,16 +276,12 @@ export function DiagnosticReportForm({
 
   // Handle file upload dialog
   useEffect(() => {
-    if (
-      fileUpload.files.length > 0 &&
-      fileUpload.files[0] !== undefined &&
-      !fileUpload.previewing
-    ) {
-      setOpenUploadDialog(true);
-    } else {
+    if (disableEdit || fileUpload.files.length === 0 || fileUpload.previewing) {
       setOpenUploadDialog(false);
+    } else {
+      setOpenUploadDialog(true);
     }
-  }, [fileUpload.files, fileUpload.previewing]);
+  }, [fileUpload.files, fileUpload.previewing, disableEdit]);
 
   useEffect(() => {
     if (!openUploadDialog) {
@@ -344,6 +342,7 @@ export function DiagnosticReportForm({
     definitionId: string,
     index: number,
     value: string,
+    unit?: string,
   ) {
     setObservations((prev) => {
       const observationsList = [...(prev[definitionId] || [])];
@@ -351,7 +350,7 @@ export function DiagnosticReportForm({
         observationsList[index] = {
           id: "",
           value: "",
-          unit: "",
+          unit: unit || "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -724,7 +723,7 @@ export function DiagnosticReportForm({
             component.code.code
           ] || {
             value: "",
-            unit: "",
+            unit: component.permitted_unit?.code || "",
             interpretation: "",
           };
 
@@ -898,13 +897,23 @@ export function DiagnosticReportForm({
             />
             {hasReport && fullReport ? (
               <div className="space-y-6">
+                {fullReport.status !== DiagnosticReportStatus.final && (
+                  <PLUGIN_Component
+                    __name="DiagnosticReportOverride"
+                    observationDefinitions={observationDefinitions}
+                    handleComponentValueChange={handleComponentValueChange}
+                    handleValueChange={handleValueChange}
+                    handleUnitChange={handleUnitChange}
+                    disabled={disableEdit}
+                  />
+                )}
                 {fullReport.status !== DiagnosticReportStatus.final &&
                   observationDefinitions.map((definition) => {
                     const observationsList = observations[definition.id] || [
                       {
                         id: "",
                         value: "",
-                        unit: "",
+                        unit: definition.permitted_unit?.code || "",
                         interpretation: "",
                         status: ObservationStatus.AMENDED,
                         components: {},
@@ -1022,6 +1031,7 @@ export function DiagnosticReportForm({
                                               definition.id,
                                               index,
                                               e.target.value,
+                                              observationData.unit,
                                             )
                                           }
                                           placeholder={t("result_value")}
@@ -1065,7 +1075,8 @@ export function DiagnosticReportForm({
                                       {
                                         id: "",
                                         value: "",
-                                        unit: "",
+                                        unit:
+                                          definition.permitted_unit?.code || "",
                                         status: ObservationStatus.AMENDED,
                                         components: {},
                                       },
@@ -1120,9 +1131,8 @@ export function DiagnosticReportForm({
                       </Button>
                     </div>
                   )}
-
                   {files?.results && files.results.length > 0 && (
-                    <div className="mt-6">
+                    <div className="mt-3">
                       <div className="text-lg font-medium">
                         {t("uploaded_files")}
                       </div>
@@ -1138,58 +1148,84 @@ export function DiagnosticReportForm({
 
                   {fullReport?.status ===
                     DiagnosticReportStatus.preliminary && (
-                    <Card className="mt-4 bg-gray-50 border-gray-200 shadow-none cursor-auto">
-                      <CardContent className="p-4">
-                        <div className="space-y-4">
-                          <div className="flex flex-col items-center justify-between gap-1">
-                            <CloudUpload className="size-10 border border-gray-100 rounded-md p-2 bg-white" />
-                            <Label className="text-base font-medium">
-                              {t("choose_file")}
-                            </Label>
-                            <div className="text-sm text-gray-500 mb-2">
-                              {t("allowed_formats_are", {
-                                formats:
-                                  BACKEND_ALLOWED_EXTENSIONS.slice(0, 5).join(
-                                    ", ",
-                                  ) +
-                                  ", " +
-                                  t("etc"),
-                              })}
-                            </div>
-                            <Label
-                              htmlFor="file_upload_diagnostic_report"
-                              className="inline-flex items-center px-4 py-2 cursor-pointer border rounded-md hover:bg-accent hover:text-accent-foreground border-gray-300 shadow-sm"
+                    <div className="space-y-5">
+                      <DottedDivider className=" text-gray-500" />
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 px-6 py-5 shadow-sm mt-2">
+                        <div className="flex flex-col items-center text-center">
+                          <h3 className="text-base font-semibold text-gray-950">
+                            {t("attach_result_files")}
+                          </h3>
+                          <p className="mt-1.5 text-sm text-gray-600">
+                            {t("add_supporting_photos_or_documents", {
+                              formats:
+                                BACKEND_ALLOWED_EXTENSIONS.slice(0, 5)
+                                  .join(", ")
+                                  .toUpperCase() + `, ${t("etc")}`,
+                            })}
+                          </p>
+                          <div className="mt-4 flex flex-col sm:flex-row gap-3 w-full sm:items-center sm:justify-center">
+                            <Button
+                              variant="outline"
+                              className=" border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white"
+                              disabled={disableEdit}
+                              onClick={() => fileUpload.handleCameraCapture()}
                             >
-                              <Upload className="mr-2 size-4" />
-                              <span
-                                className="truncate font-semibold"
+                              <Camera className="size-4" />
+                              {t("take_photo")}
+                            </Button>
+                            <Button
+                              asChild
+                              variant="outline"
+                              className={cn(
+                                "border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white",
+                                disableEdit
+                                  ? "pointer-events-none opacity-50"
+                                  : "cursor-pointer",
+                              )}
+                            >
+                              <Label
+                                htmlFor={
+                                  disableEdit
+                                    ? undefined
+                                    : "file_upload_diagnostic_report"
+                                }
+                              >
+                                <Upload className="size-4" />
+                                {t("upload_files")}
+                              </Label>
+                            </Button>
+                            <fileUpload.Input
+                              className="hidden"
+                              disabled={disableEdit}
+                            />
+                          </div>
+
+                          {fileUpload.files.length > 0 && (
+                            <div className="mt-5 w-full max-w-md space-y-2">
+                              <div
+                                className="truncate text-sm text-gray-600"
                                 title={fileUpload.files
                                   .map((file) => file.name)
                                   .join(", ")}
                               >
-                                {fileUpload.files.length > 0
-                                  ? fileUpload.files
-                                      .map((file) => file.name)
-                                      .join(", ")
-                                  : t("select_files")}
-                              </span>
-                              {fileUpload.Input({ className: "hidden" })}
-                            </Label>
-                          </div>
-
-                          {fileUpload.files.length > 0 && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="w-full"
-                              onClick={() => fileUpload.clearFiles()}
-                            >
-                              {t("clear")}
-                            </Button>
+                                {fileUpload.files
+                                  .map((file) => file.name)
+                                  .join(", ")}
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full border-gray-300 bg-white"
+                                disabled={disableEdit}
+                                onClick={() => fileUpload.clearFiles()}
+                              >
+                                {t("clear")}
+                              </Button>
+                            </div>
                           )}
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
