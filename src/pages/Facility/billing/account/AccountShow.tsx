@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Hash, MoreVertical } from "lucide-react";
 import { Link, navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -176,18 +176,16 @@ export function AccountShow({
 
   const isBillingClosed = !!account && isAccountBillingClosed(account);
 
-  useEffect(() => {
-    if (account) {
-      setCloseAccountStatus({
-        sheetOpen: false,
-        reason: isBillingClosed
-          ? account.billing_status
-          : isZero(account.total_balance)
-            ? AccountBillingStatus.closed_completed
-            : AccountBillingStatus.closed_baddebt,
-      });
-    }
-  }, [account, isBillingClosed]);
+  const defaultCloseReason = (): AccountBillingStatus => {
+    if (!account) return AccountBillingStatus.closed_baddebt;
+    if (isBillingClosed) return account.billing_status;
+    return isZero(account.total_balance)
+      ? AccountBillingStatus.closed_completed
+      : AccountBillingStatus.closed_baddebt;
+  };
+
+  const openCloseDialog = () =>
+    setCloseAccountStatus({ sheetOpen: true, reason: defaultCloseReason() });
 
   const rebalanceMutation = useMutation({
     mutationFn: mutate(accountApi.rebalanceAccount, {
@@ -290,19 +288,6 @@ export function AccountShow({
   const isAccountBillableAndActive =
     !!account && isAccountActiveAndBillable(account);
 
-  // For a settled (zero-balance) account, closing as "completed" is the
-  // expected outcome, so it becomes the default and first-listed reason.
-  const isZeroBalance = isZero(account.total_balance);
-  const closeReasonOptions = Object.keys(closeBillingStatusColorMap);
-  const orderedCloseReasonOptions = isZeroBalance
-    ? [
-        AccountBillingStatus.closed_completed,
-        ...closeReasonOptions.filter(
-          (key) => key !== AccountBillingStatus.closed_completed,
-        ),
-      ]
-    : closeReasonOptions;
-
   const tabs = {
     invoices: {
       label: t("invoices"),
@@ -381,12 +366,7 @@ export function AccountShow({
               <Button
                 variant="ghost"
                 className="text-gray-950 gap-1 flex flex-row items-center justify-between"
-                onClick={() =>
-                  setCloseAccountStatus({
-                    ...closeAccountStatus,
-                    sheetOpen: true,
-                  })
-                }
+                onClick={openCloseDialog}
               >
                 <CareIcon icon="l-check" className="size-5" />
                 <span className="underline">{t("settle_close")}</span>
@@ -450,12 +430,7 @@ export function AccountShow({
                   <>
                     <DropdownMenuItem
                       className="lg:hidden"
-                      onClick={() =>
-                        setCloseAccountStatus({
-                          ...closeAccountStatus,
-                          sheetOpen: true,
-                        })
-                      }
+                      onClick={openCloseDialog}
                     >
                       {t("settle_close")}
                       <ShortcutBadge actionId="settle-close-account" />
@@ -703,12 +678,7 @@ export function AccountShow({
               isAccountBillingClosed={isBillingClosed}
               canUpdateAccount={canUpdateAccount}
               onAdvance={advanceBillingStatus}
-              onSettleClose={() =>
-                setCloseAccountStatus((prev) => ({
-                  ...prev,
-                  sheetOpen: true,
-                }))
-              }
+              onSettleClose={openCloseDialog}
             />
           </div>
         </div>
@@ -783,7 +753,7 @@ export function AccountShow({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {orderedCloseReasonOptions.map((key) => (
+              {Object.keys(closeBillingStatusColorMap).map((key) => (
                 <SelectItem key={key} value={key}>
                   {t(key)}
                 </SelectItem>
