@@ -131,7 +131,7 @@ export default function PrintTable({
                     <TableCell
                       rowSpan={rowSpan}
                       className={cn(
-                        "wrap-break-words whitespace-normal text-center",
+                        "wrap-break-word whitespace-normal text-center",
                         cellClassName,
                         cellConfig?.[key]?.className,
                       )}

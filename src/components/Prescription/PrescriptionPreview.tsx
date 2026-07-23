@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import { Markdown } from "@/components/ui/markdown";
 
 import Loading from "@/components/Common/Loading";
 import PrintTable from "@/components/Common/PrintTable";
@@ -85,8 +86,9 @@ const PrescriptionContent = ({
               </span>
             </p>
             {prescription.note && (
-              <p className="text-xs print:text-[11px] text-gray-700 mt-0.5">
-                {t("note")}: {prescription.note}
+              <p className="text-xs print:text-[11px] text-gray-700 mt-0.5 flex gap-1">
+                {t("note")}:
+                <Markdown content={prescription.note} prose={false} />
               </p>
             )}
           </div>

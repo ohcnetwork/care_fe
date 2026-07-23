@@ -323,7 +323,12 @@ function FacilityPrintLayout({
   footer?: ReactNode;
 }) {
   if (!facility) {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        {footer && <div>{footer}</div>}
+      </>
+    );
   }
 
   const printTemplate = resolvePrintTemplate(facility, templateSlug);
