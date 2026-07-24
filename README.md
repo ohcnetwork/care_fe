@@ -269,3 +269,7 @@ The build is minified and the filenames include the hashes.
 <a href="https://digitalpublicgoods.net/r/care" target="_blank" rel="noopener noreferrer"><img src="https://github.com/DPGAlliance/dpg-resources/blob/main/docs/assets/dpg-badge.png?raw=true" width="100" alt="Digital Public Goods Badge"></a>
 
 </div>
+
+### Entire Repo 
+
+https://entire.io/gh/ohcnetwork/care_fe
