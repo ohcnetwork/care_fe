@@ -114,35 +114,58 @@ export default function PrintTable({
         </TableHeader>
         <TableBody>
           {!!rows &&
-            rows.map((row, index) => (
-              <TableRow
-                key={index}
-                className={cn(
-                  "bg-transparent hover:bg-transparent divide-x divide-gray-200",
-                  className,
-                  rowClassName?.(row, index),
-                )}
-              >
-                {headers.map(({ key }) => {
-                  if (skipCells[key]?.has(index)) return null;
-                  const spanVal = row[`_span_${key}`];
-                  const rowSpan = spanVal ? parseInt(spanVal) : undefined;
-                  return (
+            rows.map((row, index) => {
+              if (row["_fullspan"]) {
+                const skippedCount = headers.filter(({ key }) =>
+                  skipCells[key]?.has(index),
+                ).length;
+                return (
+                  <TableRow
+                    key={index}
+                    className="bg-transparent hover:bg-transparent"
+                  >
                     <TableCell
-                      rowSpan={rowSpan}
+                      colSpan={headers.length - skippedCount}
                       className={cn(
-                        "wrap-break-word whitespace-normal text-center",
+                        "wrap-break-word whitespace-normal",
                         cellClassName,
-                        cellConfig?.[key]?.className,
                       )}
-                      key={key}
                     >
-                      {getCellContent(key, row[key], index)}
+                      {row["_fullspan"]}
                     </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))}
+                  </TableRow>
+                );
+              }
+              return (
+                <TableRow
+                  key={index}
+                  className={cn(
+                    "bg-transparent hover:bg-transparent divide-x divide-gray-200",
+                    className,
+                    rowClassName?.(row, index),
+                  )}
+                >
+                  {headers.map(({ key }) => {
+                    if (skipCells[key]?.has(index)) return null;
+                    const spanVal = row[`_span_${key}`];
+                    const rowSpan = spanVal ? parseInt(spanVal) : undefined;
+                    return (
+                      <TableCell
+                        rowSpan={rowSpan}
+                        className={cn(
+                          "wrap-break-word whitespace-normal text-center",
+                          cellClassName,
+                          cellConfig?.[key]?.className,
+                        )}
+                        key={key}
+                      >
+                        {getCellContent(key, row[key], index)}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              );
+            })}
         </TableBody>
       </Table>
     </div>

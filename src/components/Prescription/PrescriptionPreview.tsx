@@ -102,36 +102,43 @@ const PrescriptionContent = ({
               { key: "dosage" },
               { key: "schedule" },
               { key: "duration" },
-              { key: "remarks" },
+              { key: "instructions" },
             ]}
-            rows={medications.flatMap((medication, medIndex) => {
-              const instructions = medication.dosage_instruction;
-              const isMulti = instructions.length > 1;
-              return instructions.map((di, idx) => ({
-                _groupedRow:
-                  isMulti && idx < instructions.length - 1 ? "true" : undefined,
-                _span_num:
-                  idx === 0 && isMulti
-                    ? String(instructions.length)
-                    : undefined,
-                _span_medicine:
-                  idx === 0 && isMulti
-                    ? String(instructions.length)
-                    : undefined,
-                _span_remarks:
-                  idx === 0 && isMulti
-                    ? String(instructions.length)
-                    : undefined,
-                num: idx === 0 ? String(medIndex + 1) : "",
-                medicine: idx === 0 ? displayMedicationName(medication) : "",
-                dosage: formatDosage(di) || "-",
-                schedule: formatFrequencyWithInstructions(di) || "-",
-                duration: formatDuration(di) || "-",
-                remarks: [formatSig(di), idx === 0 ? medication.note : ""]
-                  .filter(Boolean)
-                  .join("\n"),
-              }));
-            })}
+            rows={medications.flatMap(
+              (medication, medIndex): Record<string, string | undefined>[] => {
+                const instructions = medication.dosage_instruction;
+                const isMulti = instructions.length > 1;
+                const totalRows =
+                  instructions.length + (medication.note ? 1 : 0);
+                const shouldSpan = totalRows > 1;
+                return [
+                  ...instructions.map((di, idx) => ({
+                    _groupedRow:
+                      isMulti && idx < instructions.length - 1
+                        ? "true"
+                        : undefined,
+                    _span_num:
+                      idx === 0 && shouldSpan ? String(totalRows) : undefined,
+                    _span_medicine:
+                      idx === 0 && shouldSpan ? String(totalRows) : undefined,
+                    num: idx === 0 ? String(medIndex + 1) : "",
+                    medicine:
+                      idx === 0 ? displayMedicationName(medication) : "",
+                    dosage: formatDosage(di) || "-",
+                    schedule: formatFrequencyWithInstructions(di) || "-",
+                    duration: formatDuration(di) || "-",
+                    instructions: formatSig(di) || "-",
+                  })),
+                  ...(medication.note
+                    ? [
+                        {
+                          _fullspan: `${t("note")}: ${medication.note}`,
+                        },
+                      ]
+                    : []),
+                ];
+              },
+            )}
             cellClassName="text-sm print:text-xs wrap-break-word whitespace-break-spaces text-gray-950 font-normal text-left"
             cellConfig={{
               num: { className: "text-center text-gray-600 w-8" },
@@ -139,7 +146,7 @@ const PrescriptionContent = ({
               dosage: { className: "w-24" },
               duration: { className: "border-r w-20" },
               schedule: { className: "min-w-28" },
-              remarks: { className: "min-w-32" },
+              instructions: { className: "min-w-32" },
             }}
             headerClassName="text-gray-700 text-left font-normal bg-gray-50 text-xs print:text-[11px] first:rounded-none border-t"
             tableClassName="border-0 rounded-none"
@@ -150,7 +157,7 @@ const PrescriptionContent = ({
       {/* Doctor's Signature */}
 
       <div className="text-right mt-20 mb-2">
-        <p className="text-sm print:text-xs font-medium text-gray-950 ">
+        <p className="text-sm print:text-xs font-medium text-gray-950">
           {formatName(prescription.prescribed_by)}
         </p>
       </div>
