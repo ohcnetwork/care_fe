@@ -104,7 +104,7 @@ export function AppSidebar({
     if (facilitySidebar) return "facility";
     if (adminSidebar) return "admin";
     if (patientSidebar) return "patient";
-    if (selectedOrganization) return "organization";
+    if (responsibilityId || selectedOrganization) return "organization";
     return "all";
   })();
 
