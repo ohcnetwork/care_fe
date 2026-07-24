@@ -21,7 +21,7 @@ export function CustomNavLinks({ scope }: { scope: NavScope }) {
 
   return (
     <>
-      <Separator className="mb-1 h-0 w-full bg-transparent border-t border-dotted border-sidebar-border" />
+      <Separator className="mb-1 h-0 w-full bg-transparent border-t border-sidebar-foreground/35" />
       <NavMain links={links} groupClassName="p-0" />
     </>
   );
