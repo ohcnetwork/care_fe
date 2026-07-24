@@ -145,8 +145,8 @@ const PrescriptionContent = ({
               medicine: { className: "font-medium max-w-56 min-w-32" },
               dosage: { className: "w-24" },
               duration: { className: "border-r w-20" },
-              schedule: { className: "min-w-28" },
-              instructions: { className: "min-w-32" },
+              schedule: { className: "min-w-24 max-w-56" },
+              instructions: { className: "min-w-28 max-w-56" },
             }}
             headerClassName="text-gray-700 text-left font-normal bg-gray-50 text-xs print:text-[11px] first:rounded-none border-t"
             tableClassName="border-0 rounded-none"
