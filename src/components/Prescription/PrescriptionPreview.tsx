@@ -124,10 +124,10 @@ const PrescriptionContent = ({
                     num: idx === 0 ? String(medIndex + 1) : "",
                     medicine:
                       idx === 0 ? displayMedicationName(medication) : "",
-                    dosage: formatDosage(di) || "-",
-                    schedule: formatFrequencyWithInstructions(di) || "-",
-                    duration: formatDuration(di) || "-",
-                    instructions: formatSig(di) || "-",
+                    dosage: formatDosage(di) || "",
+                    schedule: formatFrequencyWithInstructions(di) || "",
+                    duration: formatDuration(di) || "",
+                    instructions: formatSig(di) || "",
                   })),
                   ...(medication.note
                     ? [
