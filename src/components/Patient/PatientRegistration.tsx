@@ -148,7 +148,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     context: ExtensionContexts.registration,
     form,
     existingData: patientQuery.data?.extensions,
-    context: ExtensionContexts.registration,
   });
 
   const defaultGeoOrgId = careConfig.patientRegistration.defaultGeoOrganization;
