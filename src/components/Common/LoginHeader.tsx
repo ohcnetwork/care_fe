@@ -83,7 +83,7 @@ export const LoginHeader = () => {
             )
           }
         >
-          {t("sign_in")}
+          {t("log_in")}
         </Button>
       </div>
     </header>
