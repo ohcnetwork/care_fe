@@ -5,12 +5,14 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { PasswordInput } from "@/components/ui/input-password";
 
-import { ValidationHelper } from "@/components/Users/UserFormValidations";
+import {
+  NewPasswordErrors,
+  NewPasswordFields,
+  validateNewPasswordFields,
+} from "@/components/Auth/NewPasswordFields";
 
 import { LocalStorageKeys } from "@/common/constants";
-import { validatePassword } from "@/common/validation";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -21,56 +23,26 @@ interface ResetPasswordProps {
 }
 
 const ResetPassword = (props: ResetPasswordProps) => {
-  const initForm: any = {
+  const [form, setForm] = useState({
     password: "",
     confirm: "",
-  };
-
-  const initErr: any = {};
-  const [form, setForm] = useState(initForm);
-  const [errors, setErrors] = useState(initErr);
+  });
+  const [errors, setErrors] = useState<NewPasswordErrors>({});
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
 
   const { t } = useTranslation();
-  const handleChange = (e: any) => {
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
-    const fieldValue = Object.assign({}, form);
-    const errorField = Object.assign({}, errors);
-    if (errorField[name]) {
-      errorField[name] = null;
+    const fieldValue = { ...form, [name]: value };
+    const errorField = { ...errors };
+    if (errorField[name as keyof NewPasswordErrors]) {
+      errorField[name as keyof NewPasswordErrors] = null;
       setErrors(errorField);
     }
-    fieldValue[name] = value;
     setForm(fieldValue);
   };
 
-  const validateData = () => {
-    let hasError = false;
-    const err = Object.assign({}, errors);
-    if (form.password !== form.confirm) {
-      hasError = true;
-      err.confirm = t("password_mismatch");
-    }
-
-    if (!validatePassword(form.password)) {
-      hasError = true;
-      err.password = t("invalid_password");
-    }
-
-    Object.keys(form).forEach((key) => {
-      if (!form[key]) {
-        hasError = true;
-        err[key] = t("field_required");
-      }
-    });
-    if (hasError) {
-      setErrors(err);
-      return false;
-    } else {
-      setErrors({});
-    }
-    return form;
-  };
   const { mutate: resetPassword } = useMutation({
     mutationFn: mutate(authApi.resetPassword),
     onSuccess: () => {
@@ -80,18 +52,20 @@ const ResetPassword = (props: ResetPasswordProps) => {
     },
     onError: (error) => {
       if (error.cause) {
-        setErrors(error.cause);
+        setErrors(error.cause as NewPasswordErrors);
       }
     },
   });
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const valid = validateData();
-    if (valid) {
-      valid.token = props.token;
-      resetPassword(valid);
+    const validationErrors = validateNewPasswordFields(form, t);
+    if (validationErrors) {
+      setErrors(validationErrors);
+      return;
     }
+    setErrors({});
+    resetPassword({ token: props.token, password: form.password });
   };
 
   const { isError } = useQuery({
@@ -106,72 +80,20 @@ const ResetPassword = (props: ResetPasswordProps) => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form
         className="w-full max-w-md mx-auto rounded-lg bg-white shadow-lg p-6"
-        onSubmit={(e) => {
-          handleSubmit(e);
-        }}
+        onSubmit={handleSubmit}
       >
         <div className="py-4 text-center text-xl font-bold">
           {t("reset_password")}
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <PasswordInput
-              name="password"
-              placeholder={t("new_password")}
-              onChange={handleChange}
-              onFocus={() => setIsPasswordFieldFocused(true)}
-              onBlur={() => setIsPasswordFieldFocused(false)}
-            />
-            {errors.password && (
-              <div className="mt-1 text-red-500 text-xs" data-input-error>
-                {errors.password}
-              </div>
-            )}
-            {isPasswordFieldFocused && (
-              <div
-                className="text-small mt-2 pl-2 text-secondary-500"
-                aria-live="polite"
-              >
-                <ValidationHelper
-                  isInputEmpty={!form.password}
-                  successMessage={t("password_success_message")}
-                  validations={[
-                    {
-                      description: "password_length_validation",
-                      fulfilled: form.password?.length >= 8,
-                    },
-                    {
-                      description: "password_lowercase_validation",
-                      fulfilled: /[a-z]/.test(form.password),
-                    },
-                    {
-                      description: "password_uppercase_validation",
-                      fulfilled: /[A-Z]/.test(form.password),
-                    },
-                    {
-                      description: "password_number_validation",
-                      fulfilled: /\d/.test(form.password),
-                    },
-                  ]}
-                />
-              </div>
-            )}
-          </div>
-
-          <div>
-            <PasswordInput
-              name="confirm"
-              placeholder={t("confirm_password")}
-              onChange={handleChange}
-            />
-            {errors.confirm && (
-              <div className="mt-1 text-red-500 text-xs" data-input-error>
-                {errors.confirm}
-              </div>
-            )}
-          </div>
-        </div>
+        <NewPasswordFields
+          password={form.password}
+          confirm={form.confirm}
+          errors={errors}
+          onChange={handleChange}
+          isPasswordFieldFocused={isPasswordFieldFocused}
+          onPasswordFocusChange={setIsPasswordFieldFocused}
+        />
 
         <div className="grid p-4 sm:flex sm:justify-between gap-4 mt-6">
           <Button
@@ -182,12 +104,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
           >
             <span>{t("cancel")}</span>
           </Button>
-          <Button
-            variant="primary"
-            type="submit"
-            onClick={(e) => handleSubmit(e)}
-            className="w-full sm:w-auto"
-          >
+          <Button variant="primary" type="submit" className="w-full sm:w-auto">
             <span>{t("reset")}</span>
           </Button>
         </div>
