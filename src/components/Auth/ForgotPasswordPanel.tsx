@@ -100,14 +100,14 @@ export function ForgotPasswordPanel({
           <p className="text-sm text-gray-500 font-base">
             {t("cant_access_email")}
           </p>
-          <ul className="list-disc inline-flex justify-center w-full">
-            <li
-              onClick={() => setForgotMethod("phone")}
-              className="text-sm font-medium text-primary-500 hover:underline cursor-pointer"
-            >
-              {t("reset_via_phone_number")}
-            </li>
-          </ul>
+          <Button
+            variant="link"
+            type="button"
+            onClick={() => setForgotMethod("phone")}
+            className="h-auto p-0 text-sm font-medium text-primary-500 hover:underline"
+          >
+            {t("reset_via_phone_number")}
+          </Button>
         </div>
       </div>
     </form>

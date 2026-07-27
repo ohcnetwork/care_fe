@@ -47,6 +47,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
     mutationFn: mutate(authApi.resetPassword),
     onSuccess: () => {
       localStorage.removeItem(LocalStorageKeys.accessToken);
+      localStorage.removeItem(LocalStorageKeys.refreshToken);
       toast.success(t("password_reset_success"));
       navigate("/login");
     },

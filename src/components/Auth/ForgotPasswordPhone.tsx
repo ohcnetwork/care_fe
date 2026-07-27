@@ -138,6 +138,7 @@ export function ForgotPasswordPhone({
     mutationFn: mutate(otpApi.confirmPasswordResetOtp, { silent: true }),
     onSuccess: () => {
       localStorage.removeItem(LocalStorageKeys.accessToken);
+      localStorage.removeItem(LocalStorageKeys.refreshToken);
       toast.success(t("password_reset_success"));
       // Already on /login in the usual flow — navigate alone won't remount.
       // Exit forgot-password UI so OTP/password state is cleared.

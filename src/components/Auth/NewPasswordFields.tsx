@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { PasswordInput } from "@/components/ui/input-password";
+import { Label } from "@/components/ui/label";
 
 import { ValidationHelper } from "@/components/Users/UserFormValidations";
 
@@ -64,25 +65,45 @@ export function NewPasswordFields({
   onPasswordFocusChange,
 }: NewPasswordFieldsProps) {
   const { t } = useTranslation();
+  const passwordErrorId = "new-password-error";
+  const confirmErrorId = "confirm-password-error";
+  const passwordHintsId = "new-password-hints";
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="space-y-2">
+        <Label htmlFor="new-password">{t("new_password")}</Label>
         <PasswordInput
+          id="new-password"
           name="password"
           placeholder={t("new_password")}
           value={password}
           onChange={onChange}
           onFocus={() => onPasswordFocusChange(true)}
           onBlur={() => onPasswordFocusChange(false)}
+          aria-invalid={!!errors.password}
+          aria-describedby={
+            [
+              errors.password ? passwordErrorId : null,
+              isPasswordFieldFocused ? passwordHintsId : null,
+            ]
+              .filter(Boolean)
+              .join(" ") || undefined
+          }
         />
         {errors.password && (
-          <div className="mt-1 text-red-500 text-xs" data-input-error>
+          <div
+            id={passwordErrorId}
+            className="mt-1 text-red-500 text-xs"
+            data-input-error
+            role="alert"
+          >
             {errors.password}
           </div>
         )}
         {isPasswordFieldFocused && (
           <div
+            id={passwordHintsId}
             className="text-small mt-2 pl-2 text-secondary-500"
             aria-live="polite"
           >
@@ -112,15 +133,24 @@ export function NewPasswordFields({
         )}
       </div>
 
-      <div>
+      <div className="space-y-2">
+        <Label htmlFor="confirm-password">{t("confirm_password")}</Label>
         <PasswordInput
+          id="confirm-password"
           name="confirm"
           placeholder={t("confirm_password")}
           value={confirm}
           onChange={onChange}
+          aria-invalid={!!errors.confirm}
+          aria-describedby={errors.confirm ? confirmErrorId : undefined}
         />
         {errors.confirm && (
-          <div className="mt-1 text-red-500 text-xs" data-input-error>
+          <div
+            id={confirmErrorId}
+            className="mt-1 text-red-500 text-xs"
+            data-input-error
+            role="alert"
+          >
             {errors.confirm}
           </div>
         )}
