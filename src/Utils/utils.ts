@@ -175,7 +175,7 @@ export const formatPatientAge = (
     const yearStr = s(years, "Y", (n) => (n === 1 ? "year" : "years"));
     if (remainingMonths === 0) return yearStr;
     const monthStr = s(remainingMonths, "mo", (n) =>
-      n === 1 ? " month" : " months",
+      n === 1 ? "month" : "months",
     );
     return `${yearStr} ${monthStr}`;
   }
