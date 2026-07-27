@@ -162,17 +162,17 @@ export const formatPatientAge = (
   const months = end.diff(start, "month");
 
   const s = (n: number, abbr: string, full: (n: number) => string) =>
-    abbreviated ? `${n}${abbr}` : `${n}${full(n)}`;
+    abbreviated ? `${n} ${abbr}` : `${n} ${full(n)}`;
 
   // > 18 years: years only
   if (years > 18) {
-    return s(years, "Y", (n) => (n === 1 ? " year" : " years"));
+    return s(years, "Y", (n) => (n === 1 ? "year" : "years"));
   }
 
   // 2–18 years (inclusive): years and months
   if (years >= 2) {
     const remainingMonths = months - years * 12;
-    const yearStr = s(years, "Y", (n) => (n === 1 ? " year" : " years"));
+    const yearStr = s(years, "Y", (n) => (n === 1 ? "year" : "years"));
     if (remainingMonths === 0) return yearStr;
     const monthStr = s(remainingMonths, "mo", (n) =>
       n === 1 ? " month" : " months",
@@ -183,9 +183,9 @@ export const formatPatientAge = (
   // 1–2 years (inclusive, i.e. 365 days to 2 years): months and days
   if (months >= 12) {
     const remainingDays = end.diff(start.add(months, "month"), "day");
-    const monthStr = s(months, "mo", (n) => (n === 1 ? " month" : " months"));
+    const monthStr = s(months, "mo", (n) => (n === 1 ? "month" : "months"));
     if (remainingDays === 0) return monthStr;
-    const dayStr = s(remainingDays, "d", (n) => (n === 1 ? " day" : " days"));
+    const dayStr = s(remainingDays, "d", (n) => (n === 1 ? "day" : "days"));
     return `${monthStr} ${dayStr}`;
   }
 
@@ -193,14 +193,14 @@ export const formatPatientAge = (
   if (totalDays >= 29) {
     const weeks = Math.floor(totalDays / 7);
     const remainingDays = totalDays % 7;
-    const weekStr = s(weeks, "wk", (n) => (n === 1 ? " week" : " weeks"));
+    const weekStr = s(weeks, "wk", (n) => (n === 1 ? "week" : "weeks"));
     if (remainingDays === 0) return weekStr;
-    const dayStr = s(remainingDays, "d", (n) => (n === 1 ? " day" : " days"));
+    const dayStr = s(remainingDays, "d", (n) => (n === 1 ? "day" : "days"));
     return `${weekStr} ${dayStr}`;
   }
 
   // 0–28 days (inclusive): days only
-  return s(totalDays, "d", (n) => (n === 1 ? " day" : " days"));
+  return s(totalDays, "d", (n) => (n === 1 ? "day" : "days"));
 };
 
 /**
