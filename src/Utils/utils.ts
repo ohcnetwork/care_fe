@@ -136,29 +136,37 @@ export const isValidLongitude = (longitude: number) => {
   return Number.isFinite(longitude) && longitude >= -180 && longitude <= 180;
 };
 
+const getRelativeDateSuffix = (abbreviated: boolean) => {
+  return {
+    day: abbreviated ? "d" : "days",
+    month: abbreviated ? "mo" : "months",
+    year: abbreviated ? "Y" : "years",
+  };
+};
+
 export const formatPatientAge = (
   obj: PatientRead | PatientListRead | PublicPatientRead,
   abbreviated = false,
 ) => {
-  // Skip representing as no. of months/days if we don't know the date of birth
-  // since it would anyways be inaccurate.
-  if (!obj.date_of_birth) {
-    if (!obj.year_of_birth) return "Age unknown";
-    return abbreviated
-      ? `Born ${obj.year_of_birth}`
-      : `Born on ${obj.year_of_birth}`;
-  }
-
-  // Parse date-only ISO strings directly with dayjs to avoid UTC-midnight shift
-  const start = dayjs(obj.date_of_birth);
-
+  const suffixes = getRelativeDateSuffix(abbreviated);
+  const start = dayjs(
+    obj.date_of_birth
+      ? new Date(obj.date_of_birth)
+      : new Date(obj.year_of_birth!, 0, 1),
+  );
   const end =
     "deceased_datetime" in obj && obj.deceased_datetime
       ? dayjs(obj.deceased_datetime)
       : dayjs();
 
+  const years = end.diff(start, "years");
+  // Skip representing as no. of months/days if we don't know the date of birth
+  // since it would anyways be inaccurate.
+  if (!obj.date_of_birth) {
+    return `${obj.year_of_birth} (${years} ${suffixes.year})`;
+  }
+
   const totalDays = end.diff(start, "day");
-  const years = end.diff(start, "year");
   const months = end.diff(start, "month");
 
   const s = (n: number, abbr: string, full: (n: number) => string) =>

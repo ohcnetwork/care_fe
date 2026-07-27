@@ -349,9 +349,11 @@ test.describe("Patient Registration", () => {
     await page.waitForURL("**/patients/**");
 
     const selector = page.getByRole("button", { name: patientName });
-    await expect(selector).toContainText(`Born ${expectedYearOfBirth}, Male`);
-
-    expect(expectedYearOfBirth).toEqual(currentYear - patientAge);
+    const age = currentYear - expectedYearOfBirth;
+    await expect(selector).toContainText(
+      `${expectedYearOfBirth} (${age} Y), Male`,
+    );
+    expect(expectedYearOfBirth).toEqual(age);
   });
 });
 

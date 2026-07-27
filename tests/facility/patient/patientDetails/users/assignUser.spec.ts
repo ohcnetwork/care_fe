@@ -20,9 +20,7 @@ test.describe("Assign users to a patient", () => {
 
   async function navigateToPatientDetails(page: Page) {
     // Click the patient info hover card trigger to reveal the menu
-    await page
-      .getByRole("button", { name: /.*(?:Y|mo|wk|d|Born \d{4})\s*,.*/ })
-      .click();
+    await page.getByRole("button", { name: /\d+\s*(?:Y|mo|wk|d)\b/ }).click();
 
     // Wait for and click the View Profile link
     const viewProfileLink = page.getByRole("link", { name: "View Profile" });

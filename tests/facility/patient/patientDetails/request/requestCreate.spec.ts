@@ -27,9 +27,7 @@ test.describe("Resource Request Creation", () => {
 
     await test.step("Navigate to patient details", async () => {
       await page.getByText("View Encounter").first().click();
-      await page
-        .getByRole("button", { name: /.*(?:Y|mo|wk|d|Born \d{4})\s*,.*/ })
-        .click();
+      await page.getByRole("button", { name: /\d+\s*(?:Y|mo|wk|d)\b/ }).click();
       const viewProfileLink = page.getByRole("link", { name: "View Profile" });
       await viewProfileLink.waitFor({ state: "visible" });
       await viewProfileLink.click();
