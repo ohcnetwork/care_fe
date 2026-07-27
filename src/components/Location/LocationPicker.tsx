@@ -69,13 +69,14 @@ export function LocationPicker({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["locations", facilityId, currentParent, "kind"],
+    queryKey: ["locations", facilityId, currentParent, "kind", searchQuery],
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
         parent: currentParent ? currentParent : undefined,
         mode: "kind",
         ordering: "sort_index",
+        name: searchQuery || undefined,
         status: "active",
         mine: currentParent ? undefined : true,
       },

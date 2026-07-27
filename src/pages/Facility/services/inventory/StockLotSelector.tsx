@@ -26,6 +26,7 @@ import {
   isProductRestrictedFromDispensing,
 } from "@/Utils/inventory";
 import query from "@/Utils/request/query";
+import careConfig from "@careConfig";
 
 export interface SelectedLot {
   selectedInventoryId: string;
@@ -49,6 +50,7 @@ interface StockLotSelectorProps {
   disabled?: boolean;
   showUnitPrice?: boolean;
   net_content_gt?: number;
+  hideQuantity?: boolean;
 }
 
 export default function StockLotSelector({
@@ -67,6 +69,7 @@ export default function StockLotSelector({
   disabled = false,
   showUnitPrice = true,
   net_content_gt = 0,
+  hideQuantity = false,
 }: StockLotSelectorProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -161,7 +164,7 @@ export default function StockLotSelector({
                 return (
                   <div
                     key={lot.selectedInventoryId}
-                    className="flex flex-col w-full bg-gray-50 px-1 py-0.5 border-gray-200 border rounded-sm text-gray-950 gap-0.5"
+                    className="flex flex-wrap w-full bg-gray-50 px-1 py-0.5 border-gray-200 border rounded-sm text-gray-950 gap-0.5"
                   >
                     <div className="flex items-center justify-between gap-1">
                       <span
@@ -192,21 +195,23 @@ export default function StockLotSelector({
                             />
                           </Badge>
                         )}
-                        <Badge
-                          variant={
-                            selectedInventory?.status === "active" &&
-                            isPositive(selectedInventory?.net_content || 0)
-                              ? "primary"
-                              : "destructive"
-                          }
-                          className="border-none rounded-sm text-xs px-1 py-0"
-                        >
-                          {selectedInventory && (
-                            <>{round(selectedInventory.net_content)} </>
-                          )}
-                          {selectedInventory?.product.product_knowledge
-                            .base_unit.display || t("units")}
-                        </Badge>
+                        {!hideQuantity && (
+                          <Badge
+                            variant={
+                              selectedInventory?.status === "active" &&
+                              isPositive(selectedInventory?.net_content || 0)
+                                ? "primary"
+                                : "destructive"
+                            }
+                            className="border-none rounded-sm text-xs px-1 py-0"
+                          >
+                            {selectedInventory && (
+                              <>{round(selectedInventory.net_content)} </>
+                            )}
+                            {selectedInventory?.product.product_knowledge
+                              .base_unit.display || t("units")}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                     {showexpiry &&
@@ -221,7 +226,7 @@ export default function StockLotSelector({
                             {t("expiry_short")}:{" "}
                             {formatDate(
                               selectedInventory.product.expiration_date,
-                              "dd/MM/yyyy",
+                              "MM/yyyy",
                             )}
                           </Badge>
                         </div>
@@ -255,7 +260,9 @@ export default function StockLotSelector({
             ) && (
               <div className="px-2 py-1 bg-red-50 border-b border-red-100">
                 <span className="text-xs text-red-600">
-                  {t("expired_product_cannot_be_dispensed")}
+                  {careConfig.inventory.expiryMonthOffset != null
+                    ? t("expired_or_soon_to_expire_product_cannot_be_dispensed")
+                    : t("expired_product_cannot_be_dispensed")}
                 </span>
               </div>
             )}
@@ -319,10 +326,7 @@ export default function StockLotSelector({
                         >
                           {t("expiry")}:{" "}
                           {inv.product.expiration_date
-                            ? formatDate(
-                                inv.product.expiration_date,
-                                "dd/MM/yyyy",
-                              )
+                            ? formatDate(inv.product.expiration_date, "MM/yyyy")
                             : "-"}
                         </Badge>
                       )}

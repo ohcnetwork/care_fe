@@ -1,7 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   ChevronLeft,
-  Edit,
   EllipsisVertical,
   ExternalLink,
   MoreVertical,
@@ -76,14 +80,14 @@ export default function MedicationReturnShow({
     status: SupplyDeliveryStatus.completed,
     condition: SupplyDeliveryCondition.normal,
   });
-  const [deliveryOrderStatusDialog, setDeliveryOrderStatusDialog] = useState<{
-    open: boolean;
-    status: DeliveryOrderStatus | null;
-  }>({
-    open: false,
-    status: null,
-  });
-  const [{ dispenseOrderId }] = useQueryParams<{ dispenseOrderId?: string }>();
+  const [enteredInErrorDialogOpen, setEnteredInErrorDialogOpen] =
+    useState(false);
+  const [{ dispenseOrderIds: dispenseOrderIdsParam }] = useQueryParams<{
+    dispenseOrderIds?: string;
+  }>();
+
+  const dispenseOrderIds =
+    dispenseOrderIdsParam?.split(",").filter(Boolean) || [];
 
   const { data: deliveryOrder, isLoading } = useQuery({
     queryKey: ["medicationReturns", deliveryOrderId],
@@ -136,7 +140,9 @@ export default function MedicationReturnShow({
       queryClient.invalidateQueries({
         queryKey: ["medicationReturns", deliveryOrderId],
       });
-
+      queryClient.invalidateQueries({
+        queryKey: ["supplyDeliveries", deliveryOrderId],
+      });
       toast.success(
         updatedDeliveryOrder.status === DeliveryOrderStatus.pending
           ? t("order_marked_as_approved_successfully")
@@ -147,16 +153,24 @@ export default function MedicationReturnShow({
     },
   });
 
-  const { data: medicationDispensesResponse } = useQuery({
-    queryKey: ["medication_dispense", dispenseOrderId, locationId],
-    queryFn: query(medicationDispenseApi.list, {
-      queryParams: {
-        location: locationId,
-        limit: 100,
-        order: dispenseOrderId,
-      },
-    }),
-    enabled: !!dispenseOrderId && !!locationId,
+  const { data: medicationDispenses } = useQueries({
+    queries: dispenseOrderIds.map((orderId) => ({
+      queryKey: ["medication_dispense", orderId, locationId],
+      queryFn: query(medicationDispenseApi.list, {
+        queryParams: {
+          location: locationId,
+          limit: 100,
+          order: orderId,
+        },
+      }),
+      enabled: !!orderId && !!locationId,
+    })),
+    combine: (results) => {
+      return {
+        data: results.flatMap((result) => result.data?.results || []),
+        loading: results.some((result) => result.isLoading),
+      };
+    },
   });
 
   function handleSupplyDeliverySuccess() {
@@ -312,7 +326,7 @@ export default function MedicationReturnShow({
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <BackButton size="icon" className="shrink-0" to={basePath}>
+            <BackButton size="icon" className="shrink-0">
               <ChevronLeft />
             </BackButton>
             <div>
@@ -345,18 +359,6 @@ export default function MedicationReturnShow({
             )}
 
             {deliveryOrder.status === DeliveryOrderStatus.draft && (
-              <Button variant="outline" asChild>
-                <Link
-                  basePath="/"
-                  href={`${basePath}/order/${deliveryOrderId}/edit`}
-                >
-                  <Edit /> {t("edit")}
-                  <ShortcutBadge actionId="edit-order" />
-                </Link>
-              </Button>
-            )}
-
-            {deliveryOrder.status === DeliveryOrderStatus.draft && (
               <Button
                 onClick={() =>
                   handleUpdateDeliveryOrderStatus(DeliveryOrderStatus.pending)
@@ -379,7 +381,9 @@ export default function MedicationReturnShow({
               </Button>
             )}
 
-            {deliveryOrder.status === DeliveryOrderStatus.draft && (
+            {(deliveryOrder.status === DeliveryOrderStatus.completed ||
+              deliveryOrder.status === DeliveryOrderStatus.pending ||
+              deliveryOrder.status === DeliveryOrderStatus.draft) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon">
@@ -390,33 +394,12 @@ export default function MedicationReturnShow({
                   <DropdownMenuItem asChild>
                     <Button
                       variant="ghost"
-                      onClick={() =>
-                        setDeliveryOrderStatusDialog({
-                          open: true,
-                          status: DeliveryOrderStatus.entered_in_error,
-                        })
-                      }
+                      onClick={() => setEnteredInErrorDialogOpen(true)}
                       disabled={isUpdating}
                       className="w-full flex justify-stretch"
                     >
                       <CareIcon icon="l-exclamation-circle" />
                       <span>{t("mark_as_entered_in_error")}</span>
-                    </Button>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Button
-                      variant="ghost"
-                      onClick={() =>
-                        setDeliveryOrderStatusDialog({
-                          open: true,
-                          status: DeliveryOrderStatus.abandoned,
-                        })
-                      }
-                      disabled={isUpdating}
-                      className="w-full flex justify-stretch"
-                    >
-                      <CareIcon icon="l-ban" />
-                      <span>{t("mark_as_abandoned")}</span>
                     </Button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -495,7 +478,7 @@ export default function MedicationReturnShow({
                         // Filter out the return invoice itself from related invoices
                         const relatedInvoiceIds = [
                           ...new Set(
-                            medicationDispensesResponse?.results.flatMap(
+                            medicationDispenses.flatMap(
                               (item) =>
                                 item.charge_item?.paid_invoice?.id ?? [],
                             ) || [],
@@ -655,9 +638,7 @@ export default function MedicationReturnShow({
                     locationId={locationId}
                     onSuccess={handleSupplyDeliverySuccess}
                     medicationDispenses={
-                      dispenseOrderId && medicationDispensesResponse?.results
-                        ? medicationDispensesResponse.results
-                        : []
+                      dispenseOrderIds.length > 0 ? medicationDispenses : []
                     }
                   />
                 )}
@@ -787,29 +768,19 @@ export default function MedicationReturnShow({
         </Dialog>
 
         <ConfirmActionDialog
-          open={deliveryOrderStatusDialog.open}
-          onOpenChange={(open) =>
-            setDeliveryOrderStatusDialog((prev) => ({ ...prev, open }))
-          }
-          title={
-            deliveryOrderStatusDialog.status ===
-            DeliveryOrderStatus.entered_in_error
-              ? t("mark_as_entered_in_error")
-              : t("mark_as_abandoned")
-          }
-          description={
-            deliveryOrderStatusDialog.status ===
-            DeliveryOrderStatus.entered_in_error
-              ? t("mark_order_as_entered_in_error_confirmation_description")
-              : t("mark_order_as_abandoned_confirmation_description")
-          }
+          open={enteredInErrorDialogOpen}
+          onOpenChange={setEnteredInErrorDialogOpen}
+          title={t("mark_as_entered_in_error")}
+          description={t(
+            "mark_order_as_entered_in_error_confirmation_description",
+          )}
           confirmText={t("confirm")}
           variant="destructive"
           onConfirm={() => {
-            if (deliveryOrderStatusDialog.status) {
-              handleUpdateDeliveryOrderStatus(deliveryOrderStatusDialog.status);
-            }
-            setDeliveryOrderStatusDialog({ open: false, status: null });
+            handleUpdateDeliveryOrderStatus(
+              DeliveryOrderStatus.entered_in_error,
+            );
+            setEnteredInErrorDialogOpen(false);
           }}
           disabled={isUpdating}
         />

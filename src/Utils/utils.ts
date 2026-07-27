@@ -1,6 +1,5 @@
 import careConfig from "@careConfig";
 import { differenceInMinutes, format } from "date-fns";
-import { toPng } from "html-to-image";
 import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
@@ -10,6 +9,7 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
+import { navigate } from "raviger";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -258,36 +258,11 @@ export const getReadableDuration = (
   }`;
 };
 
-export const saveElementAsImage = async (id: string, filename: string) => {
-  const element = document.getElementById(id);
-  if (!element) return;
-
-  try {
-    const dataUrl = await toPng(element, {
-      quality: 1.0,
-    });
-
-    const link = document.createElement("a");
-    link.download = filename;
-    link.href = dataUrl;
-    link.click();
-  } catch (error) {
-    console.error("Failed to save element as image:", error);
-  }
-};
-
 export const conditionalAttribute = <T>(
   condition: boolean,
   attributes: Record<string, T>,
 ) => {
   return condition ? attributes : {};
-};
-
-export const conditionalArrayAttribute = <T>(
-  condition: boolean,
-  attributes: T[],
-) => {
-  return condition ? attributes : [];
 };
 
 export const stringifyNestedObject = <
@@ -337,34 +312,6 @@ export const readFileAsDataURL = async (file: File) => {
 
   return result_base64 as string;
 };
-export function getWeeklyIntervalsFromTodayTill(pastDate?: Date | string) {
-  if (!pastDate) {
-    return [];
-  }
-
-  const intervals = [];
-  let current = new Date(pastDate);
-  let currentEnd = new Date();
-
-  while (currentEnd >= current) {
-    let currentStart = new Date(currentEnd);
-    currentStart.setDate(currentStart.getDate() - 6);
-
-    if (currentStart < current) {
-      currentStart = current;
-    }
-
-    intervals.push({
-      start: currentStart,
-      end: currentEnd,
-    });
-
-    currentEnd = new Date(currentStart);
-    currentEnd.setDate(currentEnd.getDate() - 1);
-  }
-
-  return intervals;
-}
 
 /**
  * Generates a URL-safe slug from a given string.
@@ -436,6 +383,14 @@ export function deepFreeze<T>(obj: T): T {
 
   Object.freeze(obj);
   Object.values(obj).forEach(deepFreeze);
-
   return obj;
 }
+
+export const goBack = (fallback?: string) => {
+  if (window.history.length > 1) {
+    return history.back();
+  } else if (fallback) {
+    return navigate(fallback);
+  }
+  history.back();
+};

@@ -8,7 +8,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -19,14 +18,15 @@ import { Star } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+
+import careConfig from "@careConfig";
 
 export const FormDialog = ({
   subjectType,
-  questionnaireTag,
   trigger,
 }: {
   subjectType: string;
-  questionnaireTag: string;
   trigger?: React.ReactNode;
 }) => {
   const { t } = useTranslation();
@@ -59,7 +59,8 @@ export const FormDialog = ({
       queryParams: {
         favorite_list: "favorites_form",
         silent: true,
-        limit: 5,
+        status: "active",
+        limit: careConfig.maxFormDialogFavorites,
       },
     }),
   });
@@ -100,34 +101,25 @@ export const FormDialog = ({
     if (isFavorited) {
       removeFavoriteMutation.mutate(slug);
     } else {
+      if (favorites.length >= careConfig.maxFormDialogFavorites) {
+        toast.error(
+          t("max_favorites_reached", {
+            count: careConfig.maxFormDialogFavorites,
+          }),
+        );
+        return;
+      }
       addFavoriteMutation.mutate(slug);
     }
   };
 
-  const taggedQuestionnaires = useQuestionnaireOptions(questionnaireTag);
-  const allQuestionnaires = [
-    ...taggedQuestionnaires.results,
-    ...(questionnaires?.results ?? []),
-  ];
+  const allQuestionnaires = questionnaires?.results ?? [];
 
   const questionnaireIds = new Set([...allQuestionnaires.map((q) => q.id)]);
 
-  const questionnaireList = [...questionnaireIds].map(
-    (id) => allQuestionnaires.find((q) => q.id === id)!,
+  const questionnaireList = [...questionnaireIds].map((id) =>
+    allQuestionnaires.find((q) => q.id === id)!,
   );
-
-  // Handle keyboard shortcut to open forms dialog
-  useEffect(() => {
-    const handleOpenFormsDialog = () => {
-      setOpen(true);
-    };
-
-    document.addEventListener("open-forms-dialog", handleOpenFormsDialog);
-
-    return () => {
-      document.removeEventListener("open-forms-dialog", handleOpenFormsDialog);
-    };
-  }, []);
 
   useEffect(() => {
     if (open) {

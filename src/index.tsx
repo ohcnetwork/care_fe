@@ -11,6 +11,7 @@ import careConfig from "@careConfig";
 import React, { Context } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
+import { initZod } from "./lib/zod";
 
 // Extend Window interface to include CARE_API_URL
 declare global {
@@ -38,23 +39,28 @@ if (import.meta.env.PROD) {
   });
 }
 
+function initApp() {
+  const container = document.getElementById("root");
+
+  if (!container) {
+    throw new Error("Root container not found");
+  }
+
+  const root = createRoot(container);
+
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  );
+}
+
 // Initialize i18n with namespaces from API before rendering the app
 initI18n()
-  .then(() => {
-    const root = createRoot(document.getElementById("root") as HTMLElement);
-    root.render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>,
-    );
-  })
   .catch((error) => {
     console.error("Failed to initialize i18n:", error);
-    // Still render the app even if i18n initialization fails
-    const root = createRoot(document.getElementById("root") as HTMLElement);
-    root.render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>,
-    );
+  })
+  .finally(() => {
+    initZod();
+    initApp();
   });

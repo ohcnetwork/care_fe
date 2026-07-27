@@ -21,6 +21,7 @@ import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading"
 
 import query from "@/Utils/request/query";
 import BackButton from "@/components/Common/BackButton";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { PRODUCT_STATUS_COLORS } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import { PRODUCT_KNOWLEDGE_TYPE_COLORS } from "@/types/inventory/productKnowledge/productKnowledge";
@@ -133,6 +134,23 @@ export default function ProductView({ facilityId, productId }: Props) {
                 <p className="text-gray-700">
                   {format(new Date(product.expiration_date), "PPP")}
                 </p>
+              </div>
+            )}
+            {product.standard_pack_size != null && (
+              <div>
+                <p className="text-sm text-gray-500">
+                  {t("standard_pack_size")}
+                </p>
+                <p className="text-gray-700">{product.standard_pack_size}</p>
+              </div>
+            )}
+            {product.purchase_price != null && (
+              <div>
+                <p className="text-sm text-gray-500">{t("purchase_price")}</p>
+                <MonetaryDisplay
+                  className="text-gray-700"
+                  amount={product.purchase_price}
+                />
               </div>
             )}
           </CardContent>

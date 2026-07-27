@@ -1,13 +1,16 @@
 import {
+  computeTotalDoseQuantity,
   DoseRange,
+  formatTimingBounds,
+  getFrequencyDisplayLabel,
+  getTimingBounds,
   MedicationRequestDosageInstruction,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import { add, divide, isZero, multiply, round } from "@/Utils/decimal";
-import Decimal from "decimal.js";
+import { round } from "@/Utils/decimal";
 
 // Helper function to format dosage in Rx style
-export function formatDosage(instruction: MedicationRequestDosageInstruction) {
-  if (!instruction.dose_and_rate) return "";
+export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
+  if (!instruction?.dose_and_rate) return "";
 
   const { dose_range, dose_quantity } = instruction.dose_and_rate;
   if (dose_range) {
@@ -18,8 +21,25 @@ export function formatDosage(instruction: MedicationRequestDosageInstruction) {
   return "";
 }
 
+/**
+ * Whether a dosage should be highlighted — true for dose ranges and for
+ * quantities whose rounded display value is not exactly 1.
+ */
+export function isNonUnitDose(
+  instruction?: MedicationRequestDosageInstruction,
+): boolean {
+  const doseAndRate = instruction?.dose_and_rate;
+  if (!doseAndRate) return false;
+
+  const { dose_range, dose_quantity } = doseAndRate;
+  if (dose_range) return true;
+  if (dose_quantity?.value == null) return false;
+  return round(dose_quantity.value) !== round(1);
+}
+
 // Helper function to format dosage instructions in Rx style
-export function formatSig(instruction: MedicationRequestDosageInstruction) {
+export function formatSig(instruction?: MedicationRequestDosageInstruction) {
+  if (!instruction) return "";
   const parts: string[] = [];
 
   // Add route if present
@@ -45,22 +65,66 @@ export function formatDoseRange(range?: DoseRange): string {
   return `${round(range.low.value)} → ${round(range.high?.value)} ${range.high?.unit?.display}`;
 }
 
-const convertToHours = (value: string, unit: string) => {
-  switch (unit) {
-    case "h":
-      return value;
-    case "d":
-      return multiply(value, 24);
-    case "wk":
-      return multiply(value, 24 * 7);
-    case "mo":
-      return multiply(value, 24 * 30);
-    case "a":
-      return multiply(value, 24 * 365);
-    default:
-      return new Decimal(0);
+/**
+ * Standard frequency display for a dosage instruction.
+ * Handles M-A-N text, FHIR timing codes, PRN/SOS, and as_needed_for.
+ */
+export function formatFrequency(
+  instruction?: MedicationRequestDosageInstruction,
+): string {
+  if (!instruction) return "";
+  if (instruction.as_needed_boolean) {
+    const reason = instruction.as_needed_for?.display;
+    return reason ? `SOS (${reason})` : "SOS";
   }
-};
+  return getFrequencyDisplayLabel(instruction) || "";
+}
+
+/**
+ * Standard duration display for a dosage instruction. Handles all three
+ * scheduling bounds — duration ("5 days"), range ("5–7 days"), and period
+ * ("Jun 01, 2026 → Jun 08, 2026").
+ */
+export function formatDuration(
+  instruction?: MedicationRequestDosageInstruction,
+): string {
+  const bounds = getTimingBounds(instruction?.timing?.repeat);
+  return bounds ? formatTimingBounds(bounds) : "";
+}
+
+/**
+ * Separator used between dosage instruction texts in print/preview contexts.
+ */
+export const DOSAGE_INSTRUCTION_SEPARATOR = "\n┄┄┄┄┄┄┄┄┄\n";
+
+/**
+ * Join formatted values from all dosage instructions into a single string.
+ * Used in print/preview components where JSX rendering is not available.
+ */
+export function joinInstructionTexts(
+  instructions: MedicationRequestDosageInstruction[],
+  formatter: (di: MedicationRequestDosageInstruction) => string,
+  separator = DOSAGE_INSTRUCTION_SEPARATOR,
+  fallback = "-",
+): string {
+  const text = instructions.map(formatter).filter(Boolean).join(separator);
+  return text || fallback;
+}
+
+/**
+ * Format frequency along with any additional instructions for a single
+ * dosage instruction (e.g. "Twice a day, Take with food").
+ */
+export function formatFrequencyWithInstructions(
+  di: MedicationRequestDosageInstruction,
+): string {
+  const freq = formatFrequency(di);
+  const additional = di.additional_instruction
+    ?.map((item) => item.display)
+    .filter(Boolean)
+    .join(", ");
+  return [freq, additional].filter(Boolean).join(", ");
+}
 
 export function formatTotalUnits(
   dosageInstructions: MedicationRequestDosageInstruction[] | undefined,
@@ -70,61 +134,39 @@ export function formatTotalUnits(
     return "";
   }
 
-  const instruction = dosageInstructions[0];
-  if (!instruction) {
-    return "";
-  }
-
-  if (instruction.as_needed_boolean) {
-    const dose = instruction.dose_and_rate?.dose_quantity?.value;
+  // Check if any instruction is PRN
+  const prnInstruction = dosageInstructions.find((di) => di.as_needed_boolean);
+  if (prnInstruction) {
+    const dose = prnInstruction.dose_and_rate?.dose_quantity?.value;
     const doseUnit =
-      instruction.dose_and_rate?.dose_quantity?.unit?.display || unitText;
+      prnInstruction.dose_and_rate?.dose_quantity?.unit?.display || unitText;
     return dose ? `${round(dose)} ${doseUnit} (PRN)` : "PRN";
   }
 
-  const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
-  if (!doseValue) {
-    return "";
+  // Sum total dose across all instructions
+  let totalValue = 0;
+  let doseUnit = unitText;
+  let hasTapered = false;
+  let hasAnyDose = false;
+
+  for (const instruction of dosageInstructions) {
+    const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
+    if (!doseValue) continue;
+    hasAnyDose = true;
+
+    doseUnit =
+      instruction.dose_and_rate?.dose_quantity?.unit?.display || unitText;
+    if (instruction.dose_and_rate?.dose_range) hasTapered = true;
+
+    const total = computeTotalDoseQuantity(instruction);
+    if (total) {
+      totalValue += parseFloat(String(total));
+    } else {
+      totalValue += parseFloat(doseValue);
+    }
   }
 
-  const repeat = instruction.timing?.repeat;
-  if (!repeat?.bounds_duration || !repeat.period_unit) {
-    return `${round(doseValue)} ${unitText}`;
-  }
+  if (!hasAnyDose) return "";
 
-  const { frequency = 1, period = "1", period_unit, bounds_duration } = repeat;
-
-  const totalDurationInHours = convertToHours(
-    bounds_duration.value,
-    bounds_duration.unit,
-  );
-  const periodInHours = convertToHours(period, period_unit);
-
-  if (isZero(periodInHours)) {
-    return `${round(doseValue)} ${unitText}`;
-  }
-
-  const doseIntervalInHours = divide(periodInHours, frequency);
-
-  if (isZero(doseIntervalInHours)) {
-    return `${round(doseValue)} ${unitText}`;
-  }
-
-  const numberOfDoses = divide(
-    totalDurationInHours,
-    doseIntervalInHours,
-  ).ceil();
-
-  if (instruction.dose_and_rate?.dose_range) {
-    const lowDose = instruction.dose_and_rate.dose_range.low.value || "0";
-    const highDose = instruction.dose_and_rate.dose_range.high.value || "0";
-    const avgDose = divide(add(lowDose, highDose), 2);
-    const totalQuantity = multiply(avgDose, numberOfDoses);
-    return `${round(totalQuantity)} ${unitText} (tapered)`;
-  }
-
-  const totalQuantity = multiply(doseValue, numberOfDoses);
-  const doseUnit =
-    instruction.dose_and_rate?.dose_quantity?.unit?.display || unitText;
-  return `${round(totalQuantity)} ${doseUnit}`;
+  return `${round(String(totalValue))} ${doseUnit}${hasTapered ? " (tapered)" : ""}`;
 }

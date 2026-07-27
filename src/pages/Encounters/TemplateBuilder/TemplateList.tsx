@@ -69,7 +69,7 @@ export default function TemplateList({
         template_type: reportType || qParams.template_type,
         status: qParams.status,
         limit: RESULTS_PER_PAGE_LIMIT,
-        offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
+        offset: ((qParams.page || 1) - 1) * RESULTS_PER_PAGE_LIMIT,
       },
     }),
     enabled: enabled && canListTemplate,

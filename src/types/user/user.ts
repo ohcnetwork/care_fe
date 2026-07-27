@@ -5,11 +5,7 @@ import { FacilityBareMinimum } from "@/types/facility/facility";
 import { Organization } from "@/types/organization/organization";
 
 export type UserType =
-  | "doctor"
-  | "nurse"
-  | "staff"
-  | "volunteer"
-  | "administrator";
+  "doctor" | "nurse" | "staff" | "volunteer" | "administrator";
 
 export interface UserBase {
   id: string;
@@ -36,6 +32,16 @@ export interface UserRead extends UserReadMinimal {
   created_by?: UserReadMinimal;
   email: string;
   flags: string[];
+  role_orgs?: Array<{
+    id: string;
+    organization: Organization;
+    role: {
+      id: string;
+      name: string;
+      description: string;
+      is_system: boolean;
+    };
+  }>;
 }
 
 export interface CurrentUserRead extends UserRead, Permissions {
@@ -58,14 +64,22 @@ export interface CurrentUserRead extends UserRead, Permissions {
 
 // Todo: Once backend adds a proper public user read spec, add it here and update the usages where applicable
 
-export interface UserUpdate extends Omit<UserBase, "id"> {
+export interface UserUpdate {
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  prefix?: string | null;
+  suffix?: string | null;
+  gender: (typeof GENDER_TYPES)[number]["id"];
   geo_organization?: string;
 }
 
 export interface UserCreate extends UserUpdate {
+  username: string;
   password?: string;
   email: string;
   is_service_account?: boolean;
+  role_orgs: Array<{ organization: string; role: string }>;
 }
 
 export interface GetServiceAccountsResponse {

@@ -80,7 +80,7 @@ export default function AddChargeItemSheet({
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
-      queryKey: ["charge-items", qParams],
+      queryKey: ["chargeItems", qParams],
     });
   };
 
@@ -91,12 +91,12 @@ export default function AddChargeItemSheet({
   };
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["charge-items", qParams],
+    queryKey: ["chargeItems", qParams],
     queryFn: query.debounced(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         account: accountId,
         title: qParams.search,
         status: "billable",
@@ -288,6 +288,7 @@ export default function AddChargeItemSheet({
           onOpenChange={setIsAddChargeItemsOpen}
           facilityId={facilityId}
           patientId={account.patient.id}
+          accountId={accountId}
           onChargeItemsAdded={handleChargeItemsAdded}
         />
       )}

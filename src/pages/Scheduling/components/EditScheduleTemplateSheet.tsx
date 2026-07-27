@@ -83,7 +83,7 @@ export default function EditScheduleTemplateSheet({
       <SheetTrigger asChild>
         {trigger || <Button variant="outline" size="sm"></Button>}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-[32rem]">
+      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-128">
         <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -152,10 +152,10 @@ const ScheduleTemplateEditor = ({
     .object({
       name: z.string().min(1, t("field_required")),
       valid_from: z.date({
-        required_error: t("field_required"),
+        error: t("field_required"),
       }),
       valid_to: z.date({
-        required_error: t("field_required"),
+        error: t("field_required"),
       }),
       is_public: z.boolean(),
     })
@@ -267,12 +267,12 @@ const ScheduleTemplateEditor = ({
             />
           </div>
 
-          <div className="flex justify-between items-center">
-            <FormField
-              control={form.control}
-              name="is_public"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-center">
+          <FormField
+            control={form.control}
+            name="is_public"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <div className="flex flex-row items-center gap-2">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
@@ -282,32 +282,40 @@ const ScheduleTemplateEditor = ({
                   <FormLabel className="text-sm">
                     {t("make_template_public")}
                   </FormLabel>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isProcessing}
-                onClick={() => setShowDeleteDialog(true)}
-                size="sm"
-              >
-                <Trash2Icon />
-                {isDeleting ? t("deleting") : t("delete")}
-              </Button>
+                </div>
+                {template.is_public && !field.value && (
+                  <Callout variant="warning" badge="Note">
+                    <p className="text-sm">
+                      {t("template_visibility_change_warning")}
+                    </p>
+                  </Callout>
+                )}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-              <Button
-                variant="primary"
-                type="submit"
-                disabled={isUpdating || !form.formState.isDirty}
-                size="sm"
-              >
-                <SaveIcon />
-                {isUpdating ? t("saving") : t("save")}
-              </Button>
-            </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isProcessing}
+              onClick={() => setShowDeleteDialog(true)}
+              size="sm"
+            >
+              <Trash2Icon />
+              {isDeleting ? t("deleting") : t("delete")}
+            </Button>
+
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={isUpdating || !form.formState.isDirty}
+              size="sm"
+            >
+              <SaveIcon />
+              {isUpdating ? t("saving") : t("save")}
+            </Button>
           </div>
         </form>
       </Form>
@@ -548,16 +556,18 @@ const NewAvailabilityCard = ({
       name: z.string().min(1, t("field_required")),
       slot_type: z.enum(["appointment", "open", "closed"]),
       start_time: z.string().min(1, t("field_required")) as z.ZodType<
+        Time | undefined,
         Time | undefined
       >,
       end_time: z.string().min(1, t("field_required")) as z.ZodType<
+        Time | undefined,
         Time | undefined
       >,
       slot_size_in_minutes: z.number().nullable(),
       tokens_per_slot: z.number().nullable(),
       reason: z.string().trim(),
       weekdays: z
-        .array(z.number() as unknown as z.ZodType<DayOfWeek>)
+        .array(z.number() as unknown as z.ZodType<DayOfWeek, DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
       is_auto_fill: z.boolean().optional(),
       num_of_slots: z.number().min(1, t("number_min_error", { min: 0 })),

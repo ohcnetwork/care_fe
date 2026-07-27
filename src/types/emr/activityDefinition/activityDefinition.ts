@@ -2,8 +2,9 @@ import { Code } from "@/types/base/code/code";
 import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
 import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
-import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
+import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationRead } from "@/types/location/location";
 
@@ -26,6 +27,7 @@ export enum Classification {
   imaging = "imaging",
   surgical_procedure = "surgical_procedure",
   counselling = "counselling",
+  education = "education",
 }
 
 export enum Kind {
@@ -78,9 +80,10 @@ export interface ActivityDefinitionUpdateSpec extends Omit<
 
 export interface ActivityDefinitionReadSpec extends BaseActivityDefinitionSpec {
   version?: number;
+  tags: TagConfig[];
   specimen_requirements: SpecimenDefinitionRead[];
   charge_item_definitions: ChargeItemDefinitionRead[];
-  observation_result_requirements: ObservationDefinitionReadSpec[];
+  observation_result_requirements: ObservationDefinitionRead[];
   locations: LocationRead[];
   category: ResourceCategoryRead;
   healthcare_service: HealthcareServiceReadSpec;

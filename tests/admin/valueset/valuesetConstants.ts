@@ -74,20 +74,9 @@ export const UCUM_CODE_NAME: { [key: string]: string } = {
   "g/dL": "gram per deciliter",
 };
 
-export const VALID_OPERATORS = [
-  "=",
-  "is-a",
-  "descendent-of",
-  "is-not-a",
-  "regex",
-  "in",
-  "not-in",
-  "generalizes",
-  "child-of",
-  "descendent-leaf",
-  "exists",
-];
-
 export const SYSTEM_OPTIONS = ["LOINC", "SNOMED", "UCUM"];
 
 export const STATUS_OPTIONS = ["Active", "Draft", "Retired", "Unknown"];
+
+export const MIN_SLUG_LENGTH = 5;
+export const MAX_SLUG_LENGTH = 25;

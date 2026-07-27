@@ -1,12 +1,23 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-const INT_MAX = 100; // Arbitrary upper limit for integer fields
+// Duration is a native input with plain <button> suggestions in the popover;
+// exact-match avoids catching the range / period action buttons.
+async function selectDuration(page: Page, duration: number, unit: string) {
+  const field = page.getByRole("textbox", { name: "Duration" });
+  await field.click();
+  await field.fill(`${duration} ${unit}`);
+  await page
+    .getByRole("button", { name: `${duration} ${unit}`, exact: true })
+    .click();
+}
+
+const INT_MAX = 70; // Arbitrary upper limit for integer fields
 const DOSAGE_UNITS = [
   "tablets",
   "gram",
@@ -18,26 +29,7 @@ const DOSAGE_UNITS = [
   "count",
 ];
 
-const FREQUENCY_OPTIONS = [
-  "BID (1-0-1)",
-  "TID (1-1-1)",
-  "QID (1-1-1-1)",
-  "AM (1-0-0)",
-  "PM (0-0-1)",
-  "QD (Once a day)",
-  "QOD (Alternate days)",
-  "Q1H (Every 1 hour)",
-  "Q2H (Every 2 hours)",
-  "Q3H (Every 3 hours)",
-  "Q4H (Every 4 hours)",
-  "Q6H (Every 6 hours)",
-  "Q8H (Every 8 hours)",
-  "BED (0-0-1)",
-  "WK (Weekly)",
-  "MO (Monthly)",
-];
-
-const DURATION_UNITS = ["d", "h", "wk", "mo", "a"];
+const DURATION_UNITS = ["days", "hours", "weeks", "months", "years"];
 
 const INTENT_OPTIONS = [
   "proposal",
@@ -60,6 +52,14 @@ const medicationOptions = [
   "Mesna 600 mg oral tablet",
   "Senna 7.5 mg oral tablet",
   "Apixaban 5 mg oral tablet",
+];
+
+export const frequencies = [
+  { input: "1-0-1", display: "1-0-1 (Twice a day)" },
+  { input: "1-1-1", display: "1-1-1 (Thrice a day)" },
+  { input: "1-1-1-1", display: "1-1-1-1 (Four times a day)" },
+  { input: "Q2H", display: "Q2H (Every 2 hours)" },
+  { input: "Q1H", display: "Q1H (Every 1 hour)" },
 ];
 
 const instructionOptions = [
@@ -111,9 +111,9 @@ test.describe("Medication Request Questionnaire", () => {
   let medicationName: string;
   let dosageQuantity: number;
   let dosageUnit: string;
-  let frequency: string;
   let durationUnit: string;
   let duration: number;
+  let frequencyData: { input: string; display: string };
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
@@ -122,9 +122,11 @@ test.describe("Medication Request Questionnaire", () => {
     medicationName = faker.helpers.arrayElement(medicationOptions);
     dosageQuantity = faker.number.int(INT_MAX);
     dosageUnit = faker.helpers.arrayElement(DOSAGE_UNITS);
-    frequency = faker.helpers.arrayElement(FREQUENCY_OPTIONS);
+    frequencyData = faker.helpers.arrayElement(frequencies);
     durationUnit = faker.helpers.arrayElement(DURATION_UNITS);
-    duration = faker.number.int({ min: 1, max: INT_MAX });
+    // min: 2 keeps us in the plural range — the new DurationInput renders
+    // proper singulars ("1 day") which would break exact-match option lookups.
+    duration = faker.number.int({ min: 2, max: INT_MAX });
 
     questionnaireUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`;
 
@@ -160,19 +162,12 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "Select frequency" })
+      .filter({ hasText: "eg. 1-0-1" })
       .click();
-    await page.getByRole("option", { name: frequency, exact: true }).click();
+    await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
+    await page.getByRole("option", { name: frequencyData.display }).click();
 
-    await page
-      .locator('input[type="number"]:not([disabled])')
-      .fill(duration.toString());
-
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: /^d$|^h$|^mo$|^wk$|^a$/ })
-      .click();
-    await page.getByRole("option", { name: durationUnit }).click();
+    await selectDuration(page, duration, durationUnit);
 
     // Select random additional instruction - target only enabled button
     const instruction = faker.helpers.arrayElement(instructionOptions);
@@ -242,7 +237,7 @@ test.describe("Medication Request Questionnaire", () => {
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
       .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
-      .filter({ hasText: frequency })
+      .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
     await expect(medicationRow).toBeVisible();
@@ -277,19 +272,12 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page
       .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: "Select frequency" })
+      .filter({ hasText: "eg. 1-0-1" })
       .click();
-    await page.getByRole("option").filter({ hasText: frequency }).click();
+    await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
+    await page.getByRole("option", { name: frequencyData.display }).click();
 
-    await page
-      .locator('input[type="number"]:not([disabled])')
-      .fill(duration.toString());
-
-    await page
-      .locator('button[role="combobox"]:not([disabled])')
-      .filter({ hasText: /^d$|^h$|^mo$|^wk$|^a$/ })
-      .click();
-    await page.getByRole("option", { name: durationUnit }).click();
+    await selectDuration(page, duration, durationUnit);
 
     await page.getByRole("button", { name: "Submit" }).click();
 
@@ -308,7 +296,7 @@ test.describe("Medication Request Questionnaire", () => {
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
       .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
-      .filter({ hasText: frequency })
+      .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
     await expect(medicationRow).toBeVisible();
@@ -331,14 +319,8 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page.getByRole("button", { name: "Submit" }).click();
 
-    await expect(
-      page.getByText("Dosage*+This field is required"),
-    ).toBeVisible();
+    await expect(page.getByText("Dosage*This field is required")).toBeVisible();
 
-    await expect(
-      page.locator("div").filter({
-        hasText: /^Frequency\*Select frequencyThis field is required$/,
-      }),
-    ).toBeVisible();
+    await expect(page.getByText("Frequency*eg. 1-0-1This field")).toBeVisible();
   });
 });

@@ -29,6 +29,7 @@ import {
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
@@ -43,6 +44,7 @@ import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
+import { Question } from "@/types/questionnaire/question";
 import { UserReadMinimal } from "@/types/user/user";
 
 interface ChargeItemQuestionProps {
@@ -55,6 +57,7 @@ interface ChargeItemQuestionProps {
   ) => void;
   disabled?: boolean;
   errors?: QuestionValidationError[];
+  question: Question;
 }
 
 const CHARGE_ITEM_FIELDS = {
@@ -198,6 +201,7 @@ export function ChargeItemQuestion({
   facilityId,
   encounterId,
   errors,
+  question,
 }: ChargeItemQuestionProps) {
   const { t } = useTranslation();
   const [selectedChargeItemDefinition, setSelectedChargeItemDefinition] =
@@ -282,6 +286,7 @@ export function ChargeItemQuestion({
 
   return (
     <div className="space-y-4">
+      <QuestionLabel question={question} />
       {chargeItems.length > 0 && (
         <Table>
           <TableHeader>

@@ -48,6 +48,7 @@ import otpApi from "@/types/otp/otpApi";
 
 import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 import { invalidateAllPaymentReconcilationLocationCaches } from "@/atoms/paymentReconcilationLocationAtom";
+import { clearQueuePractitionerCache } from "@/atoms/queuePractitionerAtom";
 import { AuthHero } from "./AuthHero";
 
 interface OtpLoginData {
@@ -106,8 +107,7 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
-  const [resendOtpCountdown, setResendOtpCountdown] =
-    useState(resendOtpTimeout);
+  const [resendOtpCountdown, setResendOtpCountdown] = useState(0);
 
   // Timer Function for resend OTP
   useEffect(() => {
@@ -120,7 +120,7 @@ const Login = (props: LoginProps) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [resendOtpCountdown]);
 
   // Remember the last login mode
   useEffect(() => {
@@ -189,12 +189,13 @@ const Login = (props: LoginProps) => {
   });
 
   // Forgot Password Mutation
-  const { mutate: submitForgetPassword } = useMutation({
-    mutationFn: mutate(authApi.forgotPassword),
-    onSuccess: () => {
-      toast.success(t("password_sent"));
-    },
-  });
+  const { mutate: submitForgetPassword, isPending: forgotPasswordPending } =
+    useMutation({
+      mutationFn: mutate(authApi.forgotPassword),
+      onSuccess: () => {
+        toast.success(t("password_sent"));
+      },
+    });
 
   // Login form validation
   const handleChange = (e: any) => {
@@ -238,7 +239,7 @@ const Login = (props: LoginProps) => {
     return form;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     ViewCache.invalidateAll();
     const validated = validateData();
@@ -246,6 +247,7 @@ const Login = (props: LoginProps) => {
 
     FiltersCache.invalidateAll();
     invalidateAllPaymentReconcilationLocationCaches();
+    clearQueuePractitionerCache();
     clearQueryPersistenceCache();
     try {
       await signIn(validated);
@@ -277,7 +279,7 @@ const Login = (props: LoginProps) => {
     }
     return form;
   };
-  const handleForgetSubmit = async (e: React.FormEvent) => {
+  const handleForgetSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     const valid = validateForgetData();
     if (!valid) return;
@@ -294,7 +296,7 @@ const Login = (props: LoginProps) => {
   };
 
   // Handle OTP flow
-  const handlePatientLogin = async (e: React.FormEvent) => {
+  const handlePatientLogin = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
     if (!isOtpSent) {
@@ -493,9 +495,9 @@ const Login = (props: LoginProps) => {
                             type="submit"
                             className="w-full"
                             variant="primary"
-                            disabled={isLoading}
+                            disabled={isLoading || forgotPasswordPending}
                           >
-                            {isLoading ? (
+                            {isLoading || forgotPasswordPending ? (
                               <CircularProgress className="text-white" />
                             ) : (
                               t("send_reset_link")
@@ -655,9 +657,9 @@ const Login = (props: LoginProps) => {
                               type="submit"
                               className="w-full"
                               variant="primary"
-                              disabled={isLoading}
+                              disabled={isLoading || forgotPasswordPending}
                             >
-                              {isLoading ? (
+                              {isLoading || forgotPasswordPending ? (
                                 <CircularProgress className="text-white" />
                               ) : (
                                 t("send_reset_link")

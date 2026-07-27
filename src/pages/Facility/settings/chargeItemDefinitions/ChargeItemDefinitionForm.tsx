@@ -65,7 +65,7 @@ import facilityApi from "@/types/facility/facilityApi";
 import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+import { generateSlug, goBack } from "@/Utils/utils";
 
 interface ChargeItemDefinitionFormProps {
   facilityId: string;
@@ -87,19 +87,18 @@ export function ChargeItemDefinitionForm({
     if (categorySlug) {
       navigate(
         `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}`,
+        {
+          replace: true,
+        },
       );
     } else {
-      navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+      navigate(`/facility/${facilityId}/settings/charge_item_definitions`, {
+        replace: true,
+      });
     }
   },
   onCancel = () => {
-    if (categorySlug) {
-      navigate(
-        `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}`,
-      );
-    } else {
-      navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
-    }
+    goBack();
   },
 }: ChargeItemDefinitionFormProps) {
   const { t } = useTranslation();
@@ -123,7 +122,10 @@ export function ChargeItemDefinitionForm({
     t: (key: string, options?: Record<string, unknown>) => string,
   ) =>
     z.object({
-      title: z.string().min(1, { message: t("title_is_required") }),
+      title: z
+        .string()
+        .trim()
+        .min(1, { message: t("title_is_required") }),
       slug_value: z
         .string()
         .trim()
@@ -138,7 +140,7 @@ export function ChargeItemDefinitionForm({
         }),
       category: z.string().min(1, { message: t("field_required") }),
       _categoryName: z.string().optional(),
-      status: z.nativeEnum(ChargeItemDefinitionStatus),
+      status: z.enum(ChargeItemDefinitionStatus),
       description: z.string().optional(),
       purpose: z.string().optional(),
       derived_from_uri: z
@@ -156,11 +158,12 @@ export function ChargeItemDefinitionForm({
       can_edit_charge_item: z.boolean(),
       price_components: z.array(
         z.object({
-          monetary_component_type: z.nativeEnum(MonetaryComponentType),
+          monetary_component_type: z.enum(MonetaryComponentType),
           code: CodeSchema.optional(),
           factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
           amount: zodDecimal({ min: 0 }).optional().nullable(),
           conditions: z.array(conditionSchema),
+          global_component: z.boolean().optional(),
         }),
       ),
     });
@@ -353,7 +356,12 @@ export function ChargeItemDefinitionForm({
       ...finalData
     } = submissionData;
 
-    upsert(finalData as ChargeItemDefinitionCreate);
+    const submissionDataWithDiscountConfiguration = {
+      ...finalData,
+      discount_configuration: null,
+    } as ChargeItemDefinitionCreate;
+
+    upsert(submissionDataWithDiscountConfiguration);
   };
 
   if (isLoading || !facilityData) {
@@ -503,6 +511,7 @@ export function ChargeItemDefinitionForm({
                         .replace(/[^a-z0-9_-]/g, "");
                       form.setValue("slug_value", sanitizedValue, {
                         shouldValidate: true,
+                        shouldDirty: true,
                       });
                     }}
                   />
@@ -778,6 +787,7 @@ export function ChargeItemDefinitionForm({
               showConditionsEditor
               availableMetrics={availableMetrics}
               className={minimal ? "w-full" : ""}
+              facilityId={facilityId}
             />
 
             {/* Price Summary */}

@@ -1,18 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { format, subDays } from "date-fns";
+import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterClasses";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
-
-const encounterClasses = [
-  "Inpatient",
-  "Ambulatory",
-  "Observation",
-  "Emergency",
-  "Virtual",
-  "Home Health",
-];
 
 const encounterStatuses = ["In Progress", "Planned", "On Hold"];
 
@@ -43,7 +35,7 @@ test.describe("Create an Encounter", () => {
     const createdDateBefore = format(new Date(), "yyyy-MM-dd");
 
     // Select random values for this test run
-    randomEncounterClass = faker.helpers.arrayElement(encounterClasses);
+    randomEncounterClass = faker.helpers.arrayElement(ENCOUNTER_CLASSES);
     randomEncounterStatus = faker.helpers.arrayElement(encounterStatuses);
     randomEncounterPriority = faker.helpers.arrayElement(encounterPriorities);
 
@@ -91,7 +83,7 @@ test.describe("Create an Encounter", () => {
 
     // Click the first patient profile button and view profile
     await page
-      .getByRole("button", { name: /.*\d+\s*Y,/ })
+      .locator('[data-slot="patient-info-hover-card-trigger"]:visible')
       .first()
       .click();
     await page.getByRole("link", { name: "View Profile" }).click();

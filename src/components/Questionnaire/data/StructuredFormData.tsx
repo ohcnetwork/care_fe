@@ -17,7 +17,6 @@ const encounterQuestionnaire: QuestionnaireRead = {
       structured_type: "encounter",
     },
   ],
-  tags: [],
 };
 
 const medication_request_questionnaire: QuestionnaireRead = {
@@ -37,7 +36,6 @@ const medication_request_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const allergy_intolerance_questionnaire: QuestionnaireRead = {
@@ -57,7 +55,6 @@ const allergy_intolerance_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const medication_statement_questionnaire: QuestionnaireRead = {
@@ -77,7 +74,6 @@ const medication_statement_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const service_request_questionnaire: QuestionnaireRead = {
@@ -97,7 +93,6 @@ const service_request_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const diagnosis_questionnaire: QuestionnaireRead = {
@@ -117,7 +112,6 @@ const diagnosis_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const symptom_questionnaire: QuestionnaireRead = {
@@ -137,7 +131,6 @@ const symptom_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const files_questionnaire: QuestionnaireRead = {
@@ -157,7 +150,6 @@ const files_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const time_of_death_questionnaire: QuestionnaireRead = {
@@ -177,7 +169,6 @@ const time_of_death_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const charge_item_questionnaire: QuestionnaireRead = {
@@ -197,7 +188,6 @@ const charge_item_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 const appointment_questionnaire: QuestionnaireRead = {
@@ -217,7 +207,6 @@ const appointment_questionnaire: QuestionnaireRead = {
       required: true,
     },
   ],
-  tags: [],
 };
 
 export const STRUCTURED_QUESTIONS = [

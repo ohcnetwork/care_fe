@@ -46,6 +46,7 @@ import {
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
+import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -73,6 +74,7 @@ import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
+import { Question } from "@/types/questionnaire/question";
 
 interface DiagnosisQuestionProps {
   patientId: string;
@@ -84,6 +86,7 @@ interface DiagnosisQuestionProps {
     note?: string,
   ) => void;
   disabled?: boolean;
+  question: Question;
 }
 
 const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
@@ -346,6 +349,7 @@ export function DiagnosisQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
+  question,
 }: DiagnosisQuestionProps) {
   const { t } = useTranslation();
 
@@ -542,118 +546,121 @@ export function DiagnosisQuestion({
         sortedDiagnoses.length > 0 ? "md:max-w-fit" : "max-w-4xl",
       )}
     >
-      <HistoricalRecordSelector<DiagnosisRequest>
-        title={t("past_diagnoses")}
-        structuredTypes={[
-          {
-            type: t("diagnoses"),
-            converter: convertToDiagnosisRequest,
-            displayFields: [
-              {
-                key: "code",
-                label: t("diagnosis"),
-                render: (code: Code) => code?.display || "-",
-              },
-              {
-                key: "clinical_status",
-                label: t("status"),
-                render: (status: string) => (
-                  <Badge
-                    variant={
-                      DIAGNOSIS_CLINICAL_STATUS_COLORS[
-                        status as keyof typeof DIAGNOSIS_CLINICAL_STATUS_COLORS
-                      ]
-                    }
-                  >
-                    {t(status)}
-                  </Badge>
-                ),
-              },
-              {
-                key: "verification_status",
-                label: t("verification"),
-                render: (verification_status: string) => (
-                  <Badge
-                    variant={
-                      DIAGNOSIS_VERIFICATION_STATUS_COLORS[
-                        verification_status as keyof typeof DIAGNOSIS_VERIFICATION_STATUS_COLORS
-                      ]
-                    }
-                  >
-                    {t(verification_status)}
-                  </Badge>
-                ),
-              },
-              {
-                key: "severity",
-                label: t("severity"),
-                render: (severity: DiagnosisSeverity | null) => (
-                  <Badge
-                    variant={
-                      DIAGNOSIS_SEVERITY_COLORS[
-                        severity as keyof typeof DIAGNOSIS_SEVERITY_COLORS
-                      ]
-                    }
-                  >
-                    {severity ? t(severity) : "-"}
-                  </Badge>
-                ),
-              },
-              {
-                key: "created_by",
-                label: t("recorded_by"),
-                render: (created_by) => (
-                  <div className="flex items-center gap-2">
-                    <Avatar
-                      imageUrl={created_by?.profile_picture_url}
-                      name={formatName(created_by, true)}
-                      className="size-6 rounded-full"
-                    />
-                    <span className="text-sm truncate">
-                      {formatName(created_by)}
-                    </span>
-                  </div>
-                ),
-              },
-              {
-                key: "onset",
-                label: t("onset_date"),
-                render: (onset: Onset) =>
-                  onset?.onset_datetime
-                    ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
-                    : "",
-              },
-            ],
-            expandableFields: [
-              {
-                key: "note",
-                label: t("notes"),
-                render: (note) => note,
-              },
-            ],
-            queryKey: ["diagnoses_and_chronic_conditions", patientId],
-            queryFn: async (
-              limit: number,
-              offset: number,
-              signal: AbortSignal,
-            ) => {
-              const response = await query(diagnosisApi.listDiagnosis, {
-                pathParams: { patientId },
-                queryParams: {
-                  offset,
-                  limit,
-                  exclude_verification_status: "entered_in_error",
-                  category: "encounter_diagnosis,chronic_condition",
+      <div className="flex justify-between items-center flex-wrap">
+        <QuestionLabel question={question} />
+        <HistoricalRecordSelector<DiagnosisRequest>
+          title={t("past_diagnoses")}
+          structuredTypes={[
+            {
+              type: t("diagnoses"),
+              converter: convertToDiagnosisRequest,
+              displayFields: [
+                {
+                  key: "code",
+                  label: t("diagnosis"),
+                  render: (code: Code) => code?.display || "-",
                 },
-              })({ signal });
-              return response;
+                {
+                  key: "clinical_status",
+                  label: t("status"),
+                  render: (status: string) => (
+                    <Badge
+                      variant={
+                        DIAGNOSIS_CLINICAL_STATUS_COLORS[
+                          status as keyof typeof DIAGNOSIS_CLINICAL_STATUS_COLORS
+                        ]
+                      }
+                    >
+                      {t(status)}
+                    </Badge>
+                  ),
+                },
+                {
+                  key: "verification_status",
+                  label: t("verification"),
+                  render: (verification_status: string) => (
+                    <Badge
+                      variant={
+                        DIAGNOSIS_VERIFICATION_STATUS_COLORS[
+                          verification_status as keyof typeof DIAGNOSIS_VERIFICATION_STATUS_COLORS
+                        ]
+                      }
+                    >
+                      {t(verification_status)}
+                    </Badge>
+                  ),
+                },
+                {
+                  key: "severity",
+                  label: t("severity"),
+                  render: (severity: DiagnosisSeverity | null) => (
+                    <Badge
+                      variant={
+                        DIAGNOSIS_SEVERITY_COLORS[
+                          severity as keyof typeof DIAGNOSIS_SEVERITY_COLORS
+                        ]
+                      }
+                    >
+                      {severity ? t(severity) : "-"}
+                    </Badge>
+                  ),
+                },
+                {
+                  key: "created_by",
+                  label: t("recorded_by"),
+                  render: (created_by) => (
+                    <div className="flex items-center gap-2">
+                      <Avatar
+                        imageUrl={created_by?.profile_picture_url}
+                        name={formatName(created_by, true)}
+                        className="size-6 rounded-full"
+                      />
+                      <span className="text-sm truncate">
+                        {formatName(created_by)}
+                      </span>
+                    </div>
+                  ),
+                },
+                {
+                  key: "onset",
+                  label: t("onset_date"),
+                  render: (onset: Onset) =>
+                    onset?.onset_datetime
+                      ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
+                      : "",
+                },
+              ],
+              expandableFields: [
+                {
+                  key: "note",
+                  label: t("notes"),
+                  render: (note) => note,
+                },
+              ],
+              queryKey: ["diagnoses_and_chronic_conditions", patientId],
+              queryFn: async (
+                limit: number,
+                offset: number,
+                signal: AbortSignal,
+              ) => {
+                const response = await query(diagnosisApi.listDiagnosis, {
+                  pathParams: { patientId },
+                  queryParams: {
+                    offset,
+                    limit,
+                    exclude_verification_status: "entered_in_error",
+                    category: "encounter_diagnosis,chronic_condition",
+                  },
+                })({ signal });
+                return response;
+              },
             },
-          },
-        ]}
-        buttonLabel={t("diagnosis_history")}
-        onAddSelected={handleAddHistoricalDiagnoses}
-        disableAPI={isPreview}
-      />
+          ]}
+          buttonLabel={t("diagnosis_history")}
+          onAddSelected={handleAddHistoricalDiagnoses}
+          disableAPI={isPreview}
+        />
+      </div>
 
       {sortedDiagnoses.length > 0 && (
         <div className="md:rounded-lg md:border">

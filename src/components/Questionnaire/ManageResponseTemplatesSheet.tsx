@@ -23,6 +23,13 @@ import * as z from "zod";
 
 import { cn } from "@/lib/utils";
 
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
+import {
+  formatDosage,
+  formatDuration,
+  formatFrequency,
+} from "@/components/Medicine/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -197,20 +204,16 @@ function MedicationsPreview({
             );
           }
 
-          const dosage = med.dosage_instruction?.[0];
-          const doseQty = dosage?.dose_and_rate?.dose_quantity;
-          const timing = dosage?.timing?.code?.code;
-          const duration = dosage?.timing?.repeat?.bounds_duration;
-
-          const dosageInfo = [
-            doseQty?.value &&
-              `${doseQty.value}${doseQty.unit?.display ? ` ${doseQty.unit.display}` : ""}`,
-            timing,
-            duration?.value &&
-              `${duration.value}${duration.unit ? ` ${duration.unit}` : ""}`,
-          ]
-            .filter(Boolean)
-            .join(" • ");
+          const instructions = med.dosage_instruction ?? [];
+          const dosageLines = instructions
+            .map((di) => ({
+              di,
+              dosage: formatDosage(di),
+              instructionText: [formatFrequency(di), formatDuration(di)]
+                .filter(Boolean)
+                .join(" • "),
+            }))
+            .filter((line) => line.dosage || line.instructionText);
 
           return (
             <Button
@@ -234,9 +237,17 @@ function MedicationsPreview({
                 <div className="font-medium text-gray-900 text-xs leading-tight">
                   <MedicationName medication={med} />
                 </div>
-                {dosageInfo && (
+                {dosageLines.length > 0 && (
                   <div className="text-xs text-gray-500 mt-0.5 leading-tight">
-                    {dosageInfo}
+                    {dosageLines.map((line, i) => (
+                      <div key={i}>
+                        {line.dosage && (
+                          <FormattedDosage instruction={line.di} fallback="" />
+                        )}
+                        {line.dosage && line.instructionText && " • "}
+                        {line.instructionText}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -809,57 +820,39 @@ export default function ManageResponseTemplatesSheet({
   const renderTemplateList = () => (
     <div className="space-y-3">
       {/* Action Buttons */}
-      <div className="flex gap-2">
-        {hasItemsToSave && (
-          <Button
-            variant="outline"
-            className="flex-1 gap-2 h-9"
-            onClick={() => {
-              setSavingCurrent(true);
-              setViewMode("create");
-              setEditableMedications(
-                currentMedications.map(
-                  (med) =>
-                    buildMedicationForTemplate(
-                      med,
-                    ) as MedicationRequestTemplateSpec,
-                ),
-              );
-              setEditableActivityDefinitions([...currentActivityDefinitions]);
-            }}
-          >
-            <SaveIcon className="size-3.5" />
-            <span className="text-xs">{t("save_current")}</span>
-            <Badge variant="secondary" className="ml-auto text-xs px-1.5">
-              {totalItemsCount}
-            </Badge>
-          </Button>
-        )}
+      {hasItemsToSave && (
         <Button
           variant="outline"
-          className={cn("gap-2 h-9", hasItemsToSave ? "flex-1" : "w-full")}
+          className="flex-1 gap-2 h-9"
           onClick={() => {
-            setEditingTemplate(null);
-            setSavingCurrent(false);
-            form.reset({
-              name: "",
-              description: "",
-            });
+            setSavingCurrent(true);
             setViewMode("create");
+            setEditableMedications(
+              currentMedications.map(
+                (med) =>
+                  buildMedicationForTemplate(
+                    med,
+                  ) as MedicationRequestTemplateSpec,
+              ),
+            );
+            setEditableActivityDefinitions([...currentActivityDefinitions]);
           }}
         >
-          <PlusIcon className="size-3.5" />
-          <span className="text-xs">{t("new_template")}</span>
+          <SaveIcon className="size-3.5" />
+          <span className="text-xs">{t("save_current")}</span>
+          <Badge variant="secondary" className="ml-auto text-xs px-1.5">
+            {totalItemsCount}
+          </Badge>
         </Button>
-      </div>
+      )}
 
-      <div className="relative">
+      <div className="relative mt-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
         <Input
           placeholder={t("search_templates")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="h-9 text-sm pl-9 pr-9"
+          className="h-9 text-sm px-9"
         />
         {searchQuery && (
           <Button

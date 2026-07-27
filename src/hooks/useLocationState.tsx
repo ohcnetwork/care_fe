@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { LocationRead as LocationListType } from "@/types/location/location";
 
@@ -21,6 +21,7 @@ export function useLocationState(
   initialLocationId?: string,
 ): LocationState & {
   handleLocationSelect: (location: LocationListType) => void;
+  setSelectedLocation: (location: LocationListType | null) => void;
   handleToggleExpand: (locationId: string) => void;
   handleSearchChange: (value: string) => void;
   handlePageChange: (page: number) => void;
@@ -32,6 +33,18 @@ export function useLocationState(
     searchQuery: "",
     currentPage: 1,
   });
+
+  // Sync selectedLocationId when initialLocationId prop changes
+  // This handles browser back/forward navigation
+  useEffect(() => {
+    if (initialLocationId !== state.selectedLocationId) {
+      setState((prev) => ({
+        ...prev,
+        selectedLocationId: initialLocationId || null,
+        selectedLocation: null, // Clear cached location data
+      }));
+    }
+  }, [initialLocationId, state.selectedLocationId]);
 
   const handleLocationSelect = useCallback(
     (location: LocationListType) => {
@@ -63,7 +76,19 @@ export function useLocationState(
         searchQuery: "",
       }));
     },
-    [basePath],
+    [basePath, pathType],
+  );
+
+  // Set selected location without navigation (for syncing with URL)
+  const setSelectedLocation = useCallback(
+    (location: LocationListType | null) => {
+      setState((prev) => ({
+        ...prev,
+        selectedLocationId: location?.id || null,
+        selectedLocation: location,
+      }));
+    },
+    [],
   );
 
   const handleToggleExpand = useCallback((locationId: string) => {
@@ -93,6 +118,7 @@ export function useLocationState(
   return {
     ...state,
     handleLocationSelect,
+    setSelectedLocation,
     handleToggleExpand,
     handleSearchChange,
     handlePageChange,
