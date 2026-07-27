@@ -228,7 +228,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   const practitioners = schedulableUserResources?.filter((r) =>
     practitionerIds.includes(r.id),
   );
-  const slotsResourceId =
+  const resourceIds  =
     resourceId ?? practitioners?.map((p) => p.id).join(",") ?? "";
 
   // Enabled only if filtered by a practitioner and a single day
@@ -243,7 +243,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
       "slots",
       facilityId,
       resourceType,
-      slotsResourceId,
+      resourceIds,
       qParams.date_from,
     ],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
@@ -252,7 +252,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         // voluntarily coalesce to empty string since we know query would be
         // enabled only if practitioner and date_from are present
         resource_type: resourceType,
-        resource_id: slotsResourceId,
+        resource_id: resourceIds,
         day: qParams.date_from ?? "",
       },
     }),
