@@ -829,6 +829,7 @@ export function ResourceDefinitionCategoryPicker<T>({
             {value && !shouldHideClearButton && (
               <Button
                 variant="outline"
+                type="button"
                 onClick={handleClearSelection}
                 className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300 py-4.5"
               >

@@ -212,7 +212,7 @@ export const InventoryItemsSelector = ({
                   <th className="p-2 text-left text-sm font-medium text-gray-600">
                     {t("unit_price")}
                   </th>
-                  <th className="p-2 text-left text-sm font-medium text-gray-600">
+                  <th className="p-2 text-right text-sm font-medium text-gray-600">
                     {t("available_stock")}
                   </th>
                   <th className="p-2 text-left text-sm font-medium text-gray-600">
