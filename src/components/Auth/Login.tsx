@@ -127,6 +127,13 @@ const Login = (props: LoginProps) => {
     localStorage.setItem(LocalStorageKeys.loginPreference, mode);
   }, [mode]);
 
+  // Autofocuses when switching tabs
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      document.getElementById(mode === "staff" ? "username" : "phone")?.focus();
+    });
+  }, [mode]);
+
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
     mutationFn: mutate(otpApi.send),
