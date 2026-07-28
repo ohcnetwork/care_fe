@@ -3,9 +3,7 @@ import PrintFooter from "@/components/Common/PrintFooter";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
-import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
-import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
@@ -13,13 +11,14 @@ import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/pa
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName, formatPatientAge } from "@/Utils/utils";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import "@/lib/pdfWorker";
+import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { Document, Page } from "react-pdf";
 
 // TODO: Replace with PDFViewer or extract this to a component
@@ -88,34 +87,16 @@ function ImageRenderer({
   );
 }
 export const DiagnosticReportPreview = ({
-  diagnosticReportIds,
-  patientId,
+  diagnosticReports,
+  isLoading,
   serviceRequest,
 }: {
-  diagnosticReportIds: string[];
-  patientId: string;
+  diagnosticReports: DiagnosticReportRead[];
+  isLoading: boolean;
   serviceRequest: ServiceRequestReadSpec;
 }) => {
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
-
-  const { diagnosticReports, isLoading } = useQueries({
-    queries: diagnosticReportIds.map((diagnosticReportId) => ({
-      queryKey: ["diagnosticReport", diagnosticReportId],
-      queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
-        pathParams: {
-          patient_external_id: patientId,
-          external_id: diagnosticReportId,
-        },
-      }),
-    })),
-    combine: (results) => ({
-      diagnosticReports: results
-        .map((r) => r.data)
-        .filter((data): data is DiagnosticReportRead => !!data),
-      isLoading: results.some((r) => r.isLoading || r.isFetching),
-    }),
-  });
 
   if (isLoading) {
     return (
@@ -125,10 +106,12 @@ export const DiagnosticReportPreview = ({
     );
   }
 
+  const diagnosticReportLength = diagnosticReports.length;
+
   return (
     <div className="flex justify-center items-center">
       <PrintPreview
-        title={`${t("diagnostic_report", { count: diagnosticReportIds.length })} - ${serviceRequest?.title || t("diagnostic_report", { count: diagnosticReportIds.length })}`}
+        title={`${t("diagnostic_report", { count: diagnosticReportLength })} - ${serviceRequest?.title || t("diagnostic_report", { count: diagnosticReportLength })}`}
         facility={facility}
         templateSlug={PrintTemplateType.diagnostic_report}
       >
@@ -146,7 +129,7 @@ export const DiagnosticReportPreview = ({
                 {serviceRequest.encounter.patient.name}
               </span>
             </div>
-            {serviceRequest.encounter?.patient &&
+            {serviceRequest.encounter.patient &&
               "instance_identifiers" in serviceRequest.encounter.patient &&
               serviceRequest.encounter.patient.instance_identifiers
                 .filter(
@@ -319,7 +302,7 @@ const DiagnosticReportPreviewItem = ({
               {formatName(report.requester)}
             </span>
           </div>
-          {report.encounter.current_location && (
+          {report.encounter?.current_location && (
             <div className="grid grid-cols-[6rem_auto_1fr] items-center">
               <span className="text-gray-600">{t("location")}</span>
               <span className="text-gray-600">:</span>
@@ -333,13 +316,15 @@ const DiagnosticReportPreviewItem = ({
 
       <div className="space-y-8">
         {/* Test Results */}
-        <div>
-          <DiagnosticReportResultsTable
-            observations={report.observations.filter(
-              (obs) => obs.status !== ObservationStatus.ENTERED_IN_ERROR,
-            )}
-          />
-        </div>
+        {!!report.observations && report.observations.length > 0 && (
+          <div>
+            <DiagnosticReportResultsTable
+              observations={report.observations.filter(
+                (obs) => obs.status !== ObservationStatus.ENTERED_IN_ERROR,
+              )}
+            />
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
           {report.note && (
             <div className="col-span-full">

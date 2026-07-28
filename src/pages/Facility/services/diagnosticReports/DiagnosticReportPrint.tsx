@@ -5,6 +5,7 @@ import query from "@/Utils/request/query";
 import Loading from "@/components/Common/Loading";
 import { DiagnosticReportPreview } from "@/pages/Facility/services/diagnosticReports/DiagnosticReportPreview";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
+import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
 export default function DiagnosticReportPrint({
@@ -20,7 +21,29 @@ export default function DiagnosticReportPrint({
 }) {
   const { t } = useTranslation();
 
-  const { data: request, isLoading: isLoadingRequest } = useQuery({
+  const { data: data, isLoading: isLoadingReports } = useQuery({
+    queryKey: ["diagnosticReports", patientId, serviceRequestId],
+    queryFn: query(diagnosticReportApi.listDiagnosticReports, {
+      pathParams: { patient_external_id: patientId },
+      queryParams: {
+        service_request: serviceRequestId,
+      },
+    }),
+    enabled: !diagnosticReportId,
+  });
+
+  const { data: fullReport, isLoading: isLoadingReport } = useQuery({
+    queryKey: ["diagnosticReport", diagnosticReportId],
+    queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
+      pathParams: {
+        patient_external_id: patientId,
+        external_id: diagnosticReportId,
+      },
+    }),
+    enabled: !!diagnosticReportId,
+  });
+
+  const { data: request } = useQuery({
     queryKey: ["serviceRequest", facilityId, serviceRequestId],
     queryFn: query(serviceRequestApi.retrieveServiceRequest, {
       pathParams: {
@@ -30,11 +53,13 @@ export default function DiagnosticReportPrint({
     }),
   });
 
-  const diagnosticReportIds = request?.diagnostic_reports
-    ?.filter((report) => report.status === DiagnosticReportStatus.final)
-    ?.map((report) => report.id);
+  const diagnosticReports = fullReport
+    ? [fullReport]
+    : data?.results?.filter(
+        (report) => report.status === DiagnosticReportStatus.final,
+      );
 
-  if (isLoadingRequest) {
+  if (isLoadingReport || isLoadingReports) {
     return <Loading />;
   }
 
@@ -42,18 +67,14 @@ export default function DiagnosticReportPrint({
     return <div>{t("service_request_not_found")}</div>;
   }
 
-  const resolvedDiagnosticReportIds = diagnosticReportId
-    ? [diagnosticReportId]
-    : (diagnosticReportIds ?? []);
-
-  if (resolvedDiagnosticReportIds.length === 0) {
+  if (!diagnosticReports) {
     return <div>{t("no_diagnostic_reports_found")}</div>;
   }
 
   return (
     <DiagnosticReportPreview
-      diagnosticReportIds={resolvedDiagnosticReportIds}
-      patientId={patientId}
+      diagnosticReports={diagnosticReports}
+      isLoading={isLoadingReports || isLoadingReport}
       serviceRequest={request}
     />
   );
