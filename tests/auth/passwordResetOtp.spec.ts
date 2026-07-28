@@ -11,7 +11,7 @@ const LOCAL_OTP = "45612";
 async function openPhonePasswordReset(page: Page) {
   await page.goto("/login");
   await page.getByRole("button", { name: /forgot password/i }).click();
-  await page.getByText(/reset via phone number/i).click();
+  await page.getByText(/reset using phone number/i).click();
 }
 
 async function fillPhoneAndSendOtp(page: Page, phoneNumber: string) {
@@ -40,7 +40,7 @@ async function withAdminPage<T>(
 }
 
 test.describe("OTP password reset", () => {
-  test("resets password via phone OTP for a user", async ({ browser }) => {
+  test("resets password using phone OTP for a user", async ({ browser }) => {
     const user = await withAdminPage(browser, (page) =>
       createDisposableUserViaUi(page),
     );
