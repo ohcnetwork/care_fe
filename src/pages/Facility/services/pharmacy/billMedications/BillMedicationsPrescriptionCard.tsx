@@ -544,6 +544,7 @@ const MedicineLineItem = ({
   return (
     <div className="contents group divide-x divide-gray-200">
       <div
+        data-field-name={name}
         className={cn(
           "col-start-1 bg-white group-hover:bg-gray-100 group-focus-within:bg-gray-100 py-1 px-3 flex items-center transition-all duration-200 ease-in-out",
           !canDispense && "bg-gray-100",

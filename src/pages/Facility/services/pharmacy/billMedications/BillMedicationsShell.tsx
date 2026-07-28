@@ -17,14 +17,57 @@ import { AddMedicationSheet } from "@/pages/Facility/services/pharmacy/component
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pill } from "lucide-react";
 import { useEffect } from "react";
-import { GlobalError, useFieldArray, useForm } from "react-hook-form";
+import {
+  FieldErrors,
+  GlobalError,
+  useFieldArray,
+  useForm,
+} from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Fragment } from "react/jsx-runtime";
 import { toast } from "sonner";
+import { z } from "zod";
 
 interface Props {
   facilityId: string;
   mode: BillMedicationsMode;
+}
+
+/**
+ * Scrolls to the first prescription/other item row that failed validation, so
+ * the user doesn't have to hunt for the error in a long list of medications.
+ */
+function scrollToFirstLineItemError(
+  errors: FieldErrors<z.infer<typeof billMedicationsFormSchema>>,
+) {
+  // Errors for line items are nested arrays keyed by index; walk them in the
+  // same order they are rendered in.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const prescriptions = (errors.prescriptions ?? []) as any[];
+  for (let i = 0; i < prescriptions.length; i++) {
+    const items = prescriptions[i]?.items ?? [];
+    for (let j = 0; j < items.length; j++) {
+      if (items[j]) {
+        scrollToField(`prescriptions.${i}.items.${j}`);
+        return;
+      }
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const otherItems = (errors.otherItems ?? []) as any[];
+  for (let k = 0; k < otherItems.length; k++) {
+    if (otherItems[k]) {
+      scrollToField(`otherItems.${k}`);
+      return;
+    }
+  }
+}
+
+function scrollToField(name: string) {
+  document
+    .querySelector(`[data-field-name="${name}"]`)
+    ?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 export default function BillMedicationsShell({ facilityId, mode }: Props) {
@@ -74,6 +117,7 @@ export default function BillMedicationsShell({ facilityId, mode }: Props) {
               if (errorMessage) {
                 toast.error(errorMessage);
               }
+              scrollToFirstLineItemError(errors);
             },
           )}
         >
