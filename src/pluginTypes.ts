@@ -101,7 +101,7 @@ export type DiagnosticReportOverrideComponentType = React.FC<{
     id: string;
     title?: string;
     code?: { code: string; display?: string };
-    component?: { code: { code: string; display?: string } }[];
+    component?: { code: { code: string; display?: string } }[] | null;
     permitted_unit?: { code: string; display?: string; system?: string } | null;
     permitted_data_type?: string;
   }[];
