@@ -7,17 +7,17 @@
     },
     "push_sessions": true
   },
-  "checkpoints": {
-    "primary": {
-      "type": "git-refs"
-    }
-  },
   "redaction": {
     "pii": {
       "enabled": true,
       "email": true,
       "phone": true,
       "address": true
+    }
+  },
+  "checkpoints": {
+    "primary": {
+      "type": "git-refs"
     }
   }
 }
