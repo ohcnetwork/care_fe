@@ -106,7 +106,7 @@ export function ForgotPasswordPanel({
             onClick={() => setForgotMethod("phone")}
             className="h-auto p-0 text-sm font-medium text-primary-500 hover:underline"
           >
-            {t("reset_via_phone_number")}
+            {t("reset_using_phone_number")}
           </Button>
         </div>
       </div>

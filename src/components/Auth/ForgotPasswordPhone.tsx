@@ -140,8 +140,6 @@ export function ForgotPasswordPhone({
       localStorage.removeItem(LocalStorageKeys.accessToken);
       localStorage.removeItem(LocalStorageKeys.refreshToken);
       toast.success(t("password_reset_success"));
-      // Already on /login in the usual flow — navigate alone won't remount.
-      // Exit forgot-password UI so OTP/password state is cleared.
       onSuccess();
       navigate("/login");
     },
@@ -259,7 +257,7 @@ export function ForgotPasswordPhone({
         <div className="space-y-4">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              {t("reset_via_phone_number")}
+              {t("reset_using_phone_number")}
             </h2>
             <p className="text-sm text-gray-500 mt-2">
               {t("forget_password_phone_instruction")}
