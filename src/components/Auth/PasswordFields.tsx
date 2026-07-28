@@ -7,30 +7,30 @@ import { ValidationHelper } from "@/components/Users/UserFormValidations";
 
 import { validatePassword } from "@/common/validation";
 
-export interface NewPasswordFormValues {
+export interface PasswordFormValues {
   password: string;
   confirm: string;
 }
 
-export interface NewPasswordErrors {
+export interface PasswordErrors {
   password?: string | null;
   confirm?: string | null;
 }
 
-interface NewPasswordFieldsProps {
+interface PasswordFieldsProps {
   password: string;
   confirm: string;
-  errors: NewPasswordErrors;
+  errors: PasswordErrors;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isPasswordFieldFocused: boolean;
   onPasswordFocusChange: (focused: boolean) => void;
 }
 
-export function validateNewPasswordFields(
-  form: NewPasswordFormValues,
+export function validatePasswordFields(
+  form: PasswordFormValues,
   t: (key: string) => string,
-): NewPasswordErrors | null {
-  const err: NewPasswordErrors = {};
+): PasswordErrors | null {
+  const err: PasswordErrors = {};
   let hasError = false;
 
   if (form.password !== form.confirm) {
@@ -56,14 +56,14 @@ export function validateNewPasswordFields(
   return hasError ? err : null;
 }
 
-export function NewPasswordFields({
+export function PasswordFields({
   password,
   confirm,
   errors,
   onChange,
   isPasswordFieldFocused,
   onPasswordFocusChange,
-}: NewPasswordFieldsProps) {
+}: PasswordFieldsProps) {
   const { t } = useTranslation();
   const passwordErrorId = "new-password-error";
   const confirmErrorId = "confirm-password-error";

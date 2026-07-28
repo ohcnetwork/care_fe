@@ -7,10 +7,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 import {
-  NewPasswordErrors,
-  NewPasswordFields,
-  validateNewPasswordFields,
-} from "@/components/Auth/NewPasswordFields";
+  PasswordErrors,
+  PasswordFields,
+  validatePasswordFields,
+} from "@/components/Auth/PasswordFields";
 
 import { LocalStorageKeys } from "@/common/constants";
 
@@ -27,7 +27,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
     password: "",
     confirm: "",
   });
-  const [errors, setErrors] = useState<NewPasswordErrors>({});
+  const [errors, setErrors] = useState<PasswordErrors>({});
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
 
   const { t } = useTranslation();
@@ -36,8 +36,8 @@ const ResetPassword = (props: ResetPasswordProps) => {
     const { value, name } = e.target;
     const fieldValue = { ...form, [name]: value };
     const errorField = { ...errors };
-    if (errorField[name as keyof NewPasswordErrors]) {
-      errorField[name as keyof NewPasswordErrors] = null;
+    if (errorField[name as keyof PasswordErrors]) {
+      errorField[name as keyof PasswordErrors] = null;
       setErrors(errorField);
     }
     setForm(fieldValue);
@@ -53,14 +53,14 @@ const ResetPassword = (props: ResetPasswordProps) => {
     },
     onError: (error) => {
       if (error.cause) {
-        setErrors(error.cause as NewPasswordErrors);
+        setErrors(error.cause as PasswordErrors);
       }
     },
   });
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const validationErrors = validateNewPasswordFields(form, t);
+    const validationErrors = validatePasswordFields(form, t);
     if (validationErrors) {
       setErrors(validationErrors);
       return;
@@ -87,7 +87,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
           {t("reset_password")}
         </div>
 
-        <NewPasswordFields
+        <PasswordFields
           password={form.password}
           confirm={form.confirm}
           errors={errors}

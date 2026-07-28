@@ -22,10 +22,10 @@ import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 
 import {
-  NewPasswordErrors,
-  NewPasswordFields,
-  validateNewPasswordFields,
-} from "@/components/Auth/NewPasswordFields";
+  PasswordErrors,
+  PasswordFields,
+  validatePasswordFields,
+} from "@/components/Auth/PasswordFields";
 import CircularProgress from "@/components/Common/CircularProgress";
 
 import { LocalStorageKeys } from "@/common/constants";
@@ -43,7 +43,7 @@ interface ForgotPasswordPhoneProps {
   onSuccess: () => void;
 }
 
-interface ConfirmFieldErrors extends NewPasswordErrors {
+interface ConfirmFieldErrors extends PasswordErrors {
   otp?: string | null;
   username?: string | null;
   error?: string | null;
@@ -210,7 +210,7 @@ export function ForgotPasswordPhone({
       nextErrors.otp = t("invalid_otp");
     }
 
-    const passwordErrors = validateNewPasswordFields(passwordForm, t);
+    const passwordErrors = validatePasswordFields(passwordForm, t);
     if (passwordErrors) {
       Object.assign(nextErrors, passwordErrors);
     }
@@ -351,7 +351,7 @@ export function ForgotPasswordPhone({
           )}
         </div>
 
-        <NewPasswordFields
+        <PasswordFields
           password={passwordForm.password}
           confirm={passwordForm.confirm}
           errors={errors}
