@@ -163,17 +163,17 @@ export const formatPatientAge = (
   // Skip representing as no. of months/days if we don't know the date of birth
   // since it would anyways be inaccurate.
   if (!obj.date_of_birth) {
-    return `${obj.year_of_birth} (${years} ${suffixes.year})`;
+    return `${obj.year_of_birth} (${years}${suffixes.year})`;
   }
 
   const totalDays = end.diff(start, "day");
   const months = end.diff(start, "month");
 
   const s = (n: number, abbr: string, full: (n: number) => string) =>
-    abbreviated ? `${n} ${abbr}` : `${n} ${full(n)}`;
+    abbreviated ? `${n}${abbr}` : `${n}${full(n)}`;
 
   // > 18 years: years only
-  if (years > 18) {
+  if (years >= 18) {
     return s(years, "Y", (n) => (n === 1 ? "year" : "years"));
   }
 
