@@ -97,7 +97,7 @@ const PrescriptionContent = ({
         {medications && medications.length > 0 && (
           <PrintTable
             headers={[
-              { key: "#" },
+              { key: "hash_tag" },
               { key: "medicine" },
               { key: "dosage" },
               { key: "schedule" },
@@ -117,11 +117,11 @@ const PrescriptionContent = ({
                       isMulti && idx < instructions.length - 1
                         ? "true"
                         : undefined,
-                    _span_num:
+                    _span_hash_tag:
                       idx === 0 && shouldSpan ? String(totalRows) : undefined,
                     _span_medicine:
                       idx === 0 && shouldSpan ? String(totalRows) : undefined,
-                    "#": idx === 0 ? String(medIndex + 1) : "",
+                    hash_tag: idx === 0 ? String(medIndex + 1) : "",
                     medicine:
                       idx === 0 ? displayMedicationName(medication) : "",
                     dosage: formatDosage(di) || "",
@@ -141,7 +141,7 @@ const PrescriptionContent = ({
             )}
             cellClassName="text-sm print:text-xs wrap-break-word whitespace-break-spaces text-gray-950 font-normal text-left"
             cellConfig={{
-              "#": { className: "text-center text-gray-600 w-8" },
+              hash_tag: { className: "text-center text-gray-600 w-8" },
               medicine: { className: "font-medium max-w-56 min-w-32" },
               dosage: { className: "w-24" },
               duration: { className: "border-r w-20" },

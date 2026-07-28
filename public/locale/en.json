@@ -1,5 +1,4 @@
 {
-  "#": "#",
   "2FA_backup_code": "2FA Backup Code",
   "404_message": "This page doesn't exist or may have been moved. Please check the URL and try again.",
   "APPETITE__CANNOT_BE_ASSESSED": "Cannot be assessed",
@@ -2780,6 +2779,7 @@
   "has_note": "Has Note",
   "has_sari": "Has SARI (Severe Acute Respiratory illness)?",
   "has_sub_departments": "Has sub-departments",
+  "hash_tag": "#",
   "header": "Header",
   "header_description": "Configure header elements and layout",
   "header_error": "There are errors in the Header tab. Please fix the errors before saving.",
