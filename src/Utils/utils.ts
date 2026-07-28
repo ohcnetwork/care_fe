@@ -136,19 +136,17 @@ export const isValidLongitude = (longitude: number) => {
   return Number.isFinite(longitude) && longitude >= -180 && longitude <= 180;
 };
 
-const getRelativeDateSuffix = (abbreviated: boolean) => {
-  return {
-    day: abbreviated ? "d" : "days",
-    month: abbreviated ? "mo" : "months",
-    year: abbreviated ? "Y" : "years",
-  };
-};
+const ageUnit = (
+  count: number,
+  unit: "years" | "months" | "weeks" | "days",
+  abbreviated = false,
+) =>
+  abbreviated ? t(`age_${unit}_short`, { count }) : t(`age_${unit}`, { count });
 
 export const formatPatientAge = (
   obj: PatientRead | PatientListRead | PublicPatientRead,
   abbreviated = false,
 ) => {
-  const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
       ? new Date(obj.date_of_birth)
@@ -163,52 +161,44 @@ export const formatPatientAge = (
   // Skip representing as no. of months/days if we don't know the date of birth
   // since it would anyways be inaccurate.
   if (!obj.date_of_birth) {
-    return `${obj.year_of_birth} (${years}${suffixes.year})`;
+    return `${obj.year_of_birth} (${ageUnit(years, "years", true)})`;
   }
 
   const totalDays = end.diff(start, "day");
   const months = end.diff(start, "month");
 
-  const s = (n: number, abbr: string, full: (n: number) => string) =>
-    abbreviated ? `${n}${abbr}` : `${n}${full(n)}`;
-
   // > 18 years: years only
   if (years >= 18) {
-    return s(years, "Y", (n) => (n === 1 ? "year" : "years"));
+    return ageUnit(years, "years", abbreviated);
   }
 
   // 2–18 years (inclusive): years and months
   if (years >= 2) {
     const remainingMonths = months - years * 12;
-    const yearStr = s(years, "Y", (n) => (n === 1 ? "year" : "years"));
+    const yearStr = ageUnit(years, "years", abbreviated);
     if (remainingMonths === 0) return yearStr;
-    const monthStr = s(remainingMonths, "mo", (n) =>
-      n === 1 ? "month" : "months",
-    );
-    return `${yearStr} ${monthStr}`;
+    return `${yearStr} ${ageUnit(remainingMonths, "months", abbreviated)}`;
   }
 
   // 1–2 years (inclusive, i.e. 365 days to 2 years): months and days
   if (months >= 12) {
     const remainingDays = end.diff(start.add(months, "month"), "day");
-    const monthStr = s(months, "mo", (n) => (n === 1 ? "month" : "months"));
+    const monthStr = ageUnit(months, "months", abbreviated);
     if (remainingDays === 0) return monthStr;
-    const dayStr = s(remainingDays, "d", (n) => (n === 1 ? "day" : "days"));
-    return `${monthStr} ${dayStr}`;
+    return `${monthStr} ${ageUnit(remainingDays, "days", abbreviated)}`;
   }
 
   // 29 days to < 12 months: weeks and days
   if (totalDays >= 29) {
     const weeks = Math.floor(totalDays / 7);
     const remainingDays = totalDays % 7;
-    const weekStr = s(weeks, "wk", (n) => (n === 1 ? "week" : "weeks"));
+    const weekStr = ageUnit(weeks, "weeks", abbreviated);
     if (remainingDays === 0) return weekStr;
-    const dayStr = s(remainingDays, "d", (n) => (n === 1 ? "day" : "days"));
-    return `${weekStr} ${dayStr}`;
+    return `${weekStr} ${ageUnit(remainingDays, "days", abbreviated)}`;
   }
 
   // 0–28 days (inclusive): days only
-  return s(totalDays, "d", (n) => (n === 1 ? "day" : "days"));
+  return ageUnit(totalDays, "days", abbreviated);
 };
 
 /**
@@ -233,10 +223,9 @@ export const formatPatientAgeBreakdown = (
   const days = end.diff(start.add(years, "year").add(months, "month"), "day");
 
   const parts: string[] = [];
-  if (years > 0) parts.push(`${years} ${years === 1 ? "year" : "years"}`);
-  if (months > 0) parts.push(`${months} ${months === 1 ? "month" : "months"}`);
-  if (days > 0 || parts.length === 0)
-    parts.push(`${days} ${days === 1 ? "day" : "days"}`);
+  if (years > 0) parts.push(ageUnit(years, "years"));
+  if (months > 0) parts.push(ageUnit(months, "months"));
+  if (days > 0 || parts.length === 0) parts.push(ageUnit(days, "days"));
 
   return parts.join(", ");
 };

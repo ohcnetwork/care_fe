@@ -350,7 +350,7 @@ test.describe("Patient Registration", () => {
 
     const selector = page.getByRole("button", { name: patientName });
     await expect(selector).toContainText(
-      `${expectedYearOfBirth} (${patientAge}Y), Male`,
+      `${expectedYearOfBirth} (${patientAge}y), Male`,
     );
   });
 });
