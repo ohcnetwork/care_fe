@@ -97,7 +97,7 @@ const PrescriptionContent = ({
         {medications && medications.length > 0 && (
           <PrintTable
             headers={[
-              { key: "num" },
+              { key: "#" },
               { key: "medicine" },
               { key: "dosage" },
               { key: "schedule" },
@@ -121,7 +121,7 @@ const PrescriptionContent = ({
                       idx === 0 && shouldSpan ? String(totalRows) : undefined,
                     _span_medicine:
                       idx === 0 && shouldSpan ? String(totalRows) : undefined,
-                    num: idx === 0 ? String(medIndex + 1) : "",
+                    "#": idx === 0 ? String(medIndex + 1) : "",
                     medicine:
                       idx === 0 ? displayMedicationName(medication) : "",
                     dosage: formatDosage(di) || "",
@@ -141,7 +141,7 @@ const PrescriptionContent = ({
             )}
             cellClassName="text-sm print:text-xs wrap-break-word whitespace-break-spaces text-gray-950 font-normal text-left"
             cellConfig={{
-              num: { className: "text-center text-gray-600 w-8" },
+              "#": { className: "text-center text-gray-600 w-8" },
               medicine: { className: "font-medium max-w-56 min-w-32" },
               dosage: { className: "w-24" },
               duration: { className: "border-r w-20" },

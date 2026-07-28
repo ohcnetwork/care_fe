@@ -1,4 +1,5 @@
 {
+  "#": "#",
   "2FA_backup_code": "2FA Backup Code",
   "404_message": "This page doesn't exist or may have been moved. Please check the URL and try again.",
   "APPETITE__CANNOT_BE_ASSESSED": "Cannot be assessed",
@@ -4008,7 +4009,6 @@
   "now": "now",
   "now_serving": "Now Serving",
   "now_using_the_latest_version_of_care": "Now using the latest version of CARE",
-  "num": "#",
   "number_min_error": "Must be at least {{min}}",
   "number_of_aged_dependents": "Number of Aged Dependents (Above 60)",
   "number_of_beds": "Number of beds",
