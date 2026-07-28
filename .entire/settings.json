@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "strategy_options": {
+    "checkpoint_remote": {
+      "provider": "github",
+      "repo": "ohcnetwork/care_fe-checkpoints"
+    },
+    "push_sessions": true
+  },
+  "checkpoints": {
+    "primary": {
+      "type": "git-refs"
+    }
+  },
+  "redaction": {
+    "pii": {
+      "enabled": true,
+      "email": true,
+      "phone": true,
+      "address": true
+    }
+  }
+}
