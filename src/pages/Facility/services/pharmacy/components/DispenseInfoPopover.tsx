@@ -20,7 +20,11 @@ import {
   ChargeItemRead,
 } from "@/types/billing/chargeItem/chargeItem";
 import { INVOICE_STATUS_COLORS } from "@/types/billing/invoice/invoice";
-import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
+import {
+  getSubstitutionReasonDisplay,
+  getSubstitutionTypeDisplay,
+  MedicationDispenseRead,
+} from "@/types/emr/medicationDispense/medicationDispense";
 import {
   displayMedicationName,
   MEDICATION_REQUEST_STATUS_COLORS,
@@ -31,7 +35,7 @@ import { formatName } from "@/Utils/utils";
 import { format } from "date-fns";
 import { X } from "lucide-react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 interface DispenseInfoPopoverProps {
   trigger: React.ReactNode;
@@ -48,9 +52,13 @@ export const DispenseInfoPopover = ({
   const authorizingRequest = dispense.authorizing_request;
   const chargeItem = dispense.charge_item;
 
-  const title = authorizingRequest
+  const dispensedName = dispense.item.product.product_knowledge.name;
+  const substitution = dispense.substitution?.was_substituted
+    ? dispense.substitution
+    : undefined;
+  const prescribedName = authorizingRequest
     ? displayMedicationName(authorizingRequest)
-    : dispense.item.product.product_knowledge.name;
+    : "";
 
   return (
     <Popover open={openPopover} onOpenChange={setOpenPopover}>
@@ -64,11 +72,16 @@ export const DispenseInfoPopover = ({
           <div className="flex justify-between border-b border-gray-200 pb-3">
             <div className="flex flex-col">
               <h4 className="font-semibold text-gray-950 wrap-anywhere">
-                {title || t("unknown_medication")}
+                {dispensedName}
               </h4>
               <span className="text-xs text-gray-600">
                 {t("dispense_details")}
               </span>
+              {substitution && (
+                <div className="mt-1 flex">
+                  <Badge variant="orange">{t("substituted")}</Badge>
+                </div>
+              )}
             </div>
             <Button
               variant="ghost"
@@ -80,6 +93,33 @@ export const DispenseInfoPopover = ({
               <X className="size-4 text-gray-600" />
             </Button>
           </div>
+
+          {substitution && (
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-semibold text-gray-950">
+                {t("substitution")}
+              </span>
+              <span className="text-sm italic text-gray-600 line-through">
+                {prescribedName || t("unknown_medication")}
+              </span>
+              <span className="text-sm">
+                <Trans
+                  i18nKey="substituted_with_product"
+                  values={{
+                    substituted_with: dispensedName,
+                  }}
+                  components={{
+                    strong: <strong className="font-semibold text-gray-950" />,
+                  }}
+                />
+              </span>
+              <span className="text-xs text-gray-600">
+                {getSubstitutionTypeDisplay(t, substitution.substitution_type)}
+                <span className="mx-1.5 text-gray-400">·</span>
+                {getSubstitutionReasonDisplay(t, substitution.reason)}
+              </span>
+            </div>
+          )}
 
           {authorizingRequest ? (
             <PrescriptionInfoSection authorizingRequest={authorizingRequest} />
