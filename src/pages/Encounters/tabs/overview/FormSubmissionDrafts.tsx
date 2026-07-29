@@ -109,7 +109,7 @@ export function FormSubmissionDrafts({
                       size="sm"
                       onClick={() =>
                         navigate(
-                          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.slug}?continue_draft=${submission.id}`,
+                          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}?continue_draft=${submission.id}`,
                         )
                       }
                     >

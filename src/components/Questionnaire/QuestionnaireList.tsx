@@ -87,7 +87,7 @@ const RenderCard = ({
               key={questionnaire.id}
               className="overflow-hidden bg-white rounded-lg cursor-pointer"
               onClick={() =>
-                navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
+                navigate(`/admin/questionnaire/${questionnaire.id}/edit`)
               }
             >
               <CardContent className="p-6 relative flex flex-col">
@@ -126,9 +126,7 @@ const RenderCard = ({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(
-                        `/admin/questionnaire/${questionnaire.slug}/edit`,
-                      );
+                      navigate(`/admin/questionnaire/${questionnaire.id}/edit`);
                     }}
                     className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
                   >
@@ -179,7 +177,7 @@ const RenderTable = ({
                 key={questionnaire.id}
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() =>
-                  navigate(`/admin/questionnaire/${questionnaire.slug}/edit`)
+                  navigate(`/admin/questionnaire/${questionnaire.id}/edit`)
                 }
               >
                 <TableCell className="px-6 py-2">

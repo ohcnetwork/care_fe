@@ -2,7 +2,7 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -49,7 +49,7 @@ export function QuestionnaireSearch({
   placeholder,
   trigger,
   size = "default",
-  onSelect = (selected) => navigate(`questionnaire/${selected.slug}`),
+  onSelect = (selected) => navigate(`questionnaire/${selected.id}`),
   subjectType,
   disabled,
 }: QuestionnaireSearchProps) {
@@ -72,11 +72,12 @@ export function QuestionnaireSearch({
     enabled: isOpen,
   });
 
-  useEffect(() => {
-    if (isOpen) {
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
       setSearch("");
     }
-  }, [isOpen]);
+    setIsOpen(open);
+  };
 
   const content = (
     <Command filter={() => 1}>
@@ -120,7 +121,7 @@ export function QuestionnaireSearch({
 
   if (isMobile) {
     return (
-      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+      <Drawer open={isOpen} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>
           {trigger || (
             <Button
@@ -155,7 +156,7 @@ export function QuestionnaireSearch({
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         {trigger || (
           <Button

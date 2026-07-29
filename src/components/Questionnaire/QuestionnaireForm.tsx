@@ -80,7 +80,7 @@ interface ServerValidationError {
 }
 
 export interface QuestionnaireFormProps {
-  questionnaireSlug?: string;
+  questionnaireId?: string;
   patientId: string;
   encounterId?: string;
   subjectType?: string;
@@ -367,7 +367,7 @@ const initializeResponses = (
 };
 
 export function QuestionnaireForm({
-  questionnaireSlug,
+  questionnaireId,
   patientId,
   encounterId,
   subjectType,
@@ -393,11 +393,11 @@ export function QuestionnaireForm({
     isLoading: isQuestionnaireLoading,
     error: questionnaireError,
   } = useQuery({
-    queryKey: ["questionnaireDetail", questionnaireSlug],
+    queryKey: ["questionnaireDetail", questionnaireId],
     queryFn: query(questionnaireApi.get, {
-      pathParams: { slug: questionnaireSlug ?? "" },
+      pathParams: { id: questionnaireId ?? "" },
     }),
-    enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
+    enabled: !!questionnaireId && !FIXED_QUESTIONNAIRES[questionnaireId],
   });
 
   // Fetch draft if continue_draft query param is present
@@ -416,6 +416,9 @@ export function QuestionnaireForm({
   });
 
   const { mutate: submitBatch, isPending: isSubmitPending } = useMutation({
+    // TODO: migrate to useBatchRequest once it can take pre-built batch entries
+    // (these requests carry raw urls) and can opt out of the global error toast.
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       setServerErrors(undefined);
@@ -555,7 +558,7 @@ export function QuestionnaireForm({
       return false;
     }
 
-    if (!questionnaireSlug || questionnaireForms.length > 1) {
+    if (!questionnaireId || questionnaireForms.length > 1) {
       return false;
     }
 
@@ -576,16 +579,16 @@ export function QuestionnaireForm({
     return !questionnaireForms.some((form) =>
       findStructuredQuestions(form.questionnaire.questions),
     );
-  }, [questionnaireSlug, questionnaireForms]);
+  }, [questionnaireId, questionnaireForms]);
 
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
   useNavigationPrompt(isDirty && !import.meta.env.DEV, t("unsaved_changes"));
 
   useEffect(() => {
-    if (!isInitialized && questionnaireSlug) {
+    if (!isInitialized && questionnaireId) {
       const questionnaire =
-        FIXED_QUESTIONNAIRES[questionnaireSlug] || questionnaireData;
+        FIXED_QUESTIONNAIRES[questionnaireId] || questionnaireData;
 
       // If we have a draft to continue, wait for it to load
       if (continueDraftId) {
@@ -629,7 +632,7 @@ export function QuestionnaireForm({
   }, [
     questionnaireData,
     isInitialized,
-    questionnaireSlug,
+    questionnaireId,
     continueDraftId,
     draftData,
     isDraftFetching,
@@ -863,7 +866,7 @@ export function QuestionnaireForm({
       );
       if (validResponses.length > 0) {
         requests.push({
-          url: `/api/v1/questionnaire/${form.questionnaire.slug}/submit/`,
+          url: `/api/v1/questionnaire/${form.questionnaire.id}/submit/`,
           method: "POST",
           reference_id: form.questionnaire.id,
           body: {
@@ -1025,7 +1028,7 @@ export function QuestionnaireForm({
                   </p>
                 )}
               </div>
-              {form.questionnaire.slug !== questionnaireSlug && (
+              {form.questionnaire.id !== questionnaireId && (
                 <Button
                   type="button"
                   variant="ghost"

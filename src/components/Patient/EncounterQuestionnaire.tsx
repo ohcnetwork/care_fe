@@ -18,7 +18,7 @@ interface Props {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
-  questionnaireSlug?: string;
+  questionnaireId?: string;
   subjectType?: string;
 }
 
@@ -26,7 +26,7 @@ export default function EncounterQuestionnaire({
   facilityId,
   patientId,
   encounterId,
-  questionnaireSlug,
+  questionnaireId,
   subjectType,
 }: Props) {
   const { t } = useTranslation();
@@ -64,7 +64,7 @@ export default function EncounterQuestionnaire({
               patientId={patientId}
               subjectType={subjectType}
               encounterId={encounterId}
-              questionnaireSlug={questionnaireSlug}
+              questionnaireId={questionnaireId}
               onSubmit={() => {
                 if (encounterId && facilityId) {
                   navigate(
