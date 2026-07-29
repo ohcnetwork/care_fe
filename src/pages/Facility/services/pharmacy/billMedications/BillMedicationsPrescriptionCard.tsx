@@ -338,6 +338,8 @@ const PrescriptionSummary = ({
           <Link
             href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
             basePath="/"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             <PrinterIcon />
           </Link>
@@ -353,6 +355,8 @@ const PrescriptionSummary = ({
               <Link
                 href={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${encounter.patient.id}/prescriptions/${prescription.id}`}
                 basePath="/"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <FileTextIcon />
                 {t("view_rx")}
@@ -362,6 +366,8 @@ const PrescriptionSummary = ({
               <Link
                 href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
                 basePath="/"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <PrinterIcon />
                 {t("print_prescription")}
