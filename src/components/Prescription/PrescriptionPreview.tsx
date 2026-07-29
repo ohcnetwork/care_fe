@@ -100,7 +100,7 @@ const PrescriptionContent = ({
               { key: "hash_tag" },
               { key: "medicine" },
               { key: "dosage" },
-              { key: "schedule" },
+              { key: "frequency" },
               { key: "duration" },
               { key: "instructions" },
             ]}
@@ -125,7 +125,7 @@ const PrescriptionContent = ({
                     medicine:
                       idx === 0 ? displayMedicationName(medication) : "",
                     dosage: formatDosage(di) || "",
-                    schedule: formatFrequencyWithInstructions(di) || "",
+                    frequency: formatFrequencyWithInstructions(di) || "",
                     duration: formatDuration(di) || "",
                     instructions: formatSig(di) || "",
                   })),
@@ -145,7 +145,7 @@ const PrescriptionContent = ({
               medicine: { className: "font-medium max-w-56 min-w-32" },
               dosage: { className: "w-24" },
               duration: { className: "border-r w-20" },
-              schedule: { className: "min-w-24 max-w-56" },
+              frequency: { className: "min-w-24 max-w-56" },
               instructions: { className: "min-w-28 max-w-56" },
             }}
             headerClassName="text-gray-700 text-left font-normal bg-gray-50 text-xs print:text-[11px] first:rounded-none border-t"
