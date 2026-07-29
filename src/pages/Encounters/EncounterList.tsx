@@ -33,8 +33,8 @@ import {
 } from "@/components/ui/multi-filter/utils/Utils";
 import {
   Popover,
+  PopoverAnchor,
   PopoverContent,
-  PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 
@@ -583,7 +583,7 @@ export function EncounterList({
                       open={searchOptionsOpen && showSearchOptions}
                       onOpenChange={setSearchOptionsOpen}
                     >
-                      <PopoverTrigger asChild>
+                      <PopoverAnchor asChild>
                         <CommandInput
                           aria-label={selectedSearchType.placeholder}
                           value={searchText}
@@ -606,11 +606,12 @@ export function EncounterList({
                           }}
                           placeholder={selectedSearchType.placeholder}
                         />
-                      </PopoverTrigger>
+                      </PopoverAnchor>
                       <PopoverContent
                         className="w-(--radix-popover-trigger-width) p-0"
                         align="start"
                         onOpenAutoFocus={(event) => event.preventDefault()}
+                        onCloseAutoFocus={(event) => event.preventDefault()}
                       >
                         <CommandList>
                           <CommandGroup>
