@@ -6,7 +6,6 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 
 import query from "@/Utils/request/query";
@@ -16,6 +15,7 @@ import facilityApi from "@/types/facility/facilityApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import FilterHeader from "./filterHeader";
+import { FilterSelectableItem } from "./filterPresentation";
 import { FilterConfig, FilterDateRange } from "./utils/Utils";
 
 function FacilityUserFilterDropdown({
@@ -103,10 +103,9 @@ function FacilityUserFilterDropdown({
               {t("selected")}
             </div>
             {selectedUsers.map((user) => (
-              <DropdownMenuItem
+              <FilterSelectableItem
                 key={user.id}
-                onSelect={(e) => {
-                  e.preventDefault();
+                onSelect={() => {
                   handleUserToggle(user);
                 }}
                 className="flex items-center gap-2 px-2 py-1 cursor-pointer"
@@ -132,7 +131,7 @@ function FacilityUserFilterDropdown({
                     </span>
                   </div>
                 </div>
-              </DropdownMenuItem>
+              </FilterSelectableItem>
             ))}
             <div className="my-2 border-t border-gray-200" />
           </>
@@ -146,9 +145,8 @@ function FacilityUserFilterDropdown({
               <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
                 {t("quick_select")}
               </div>
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
+              <FilterSelectableItem
+                onSelect={() => {
                   handleUserToggle(currentUserInList);
                 }}
                 className="flex items-center gap-2 px-2 py-1 cursor-pointer"
@@ -162,7 +160,7 @@ function FacilityUserFilterDropdown({
                   />
                   <span className="text-sm font-medium">{t("mine")}</span>
                 </div>
-              </DropdownMenuItem>
+              </FilterSelectableItem>
               <div className="my-2 border-t border-gray-200" />
             </>
           )}
@@ -176,10 +174,9 @@ function FacilityUserFilterDropdown({
             {sortedNonSelectedUsers
               .filter((u) => search || u.id !== currentUser.id)
               .map((user) => (
-                <DropdownMenuItem
+                <FilterSelectableItem
                   key={user.id}
-                  onSelect={(e) => {
-                    e.preventDefault();
+                  onSelect={() => {
                     handleUserToggle(user);
                   }}
                   className="flex items-center gap-2 px-2 py-1 cursor-pointer"
@@ -202,7 +199,7 @@ function FacilityUserFilterDropdown({
                       </span>
                     </div>
                   </div>
-                </DropdownMenuItem>
+                </FilterSelectableItem>
               ))}
           </>
         )}

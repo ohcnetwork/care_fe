@@ -53,21 +53,11 @@ function SubMenuFilter({
   );
 }
 
-export function SelectedFilterBar({
-  selectedFilterKey,
-  selectedFilters,
-  onClick,
-  clearFilter,
-  openState,
-  setOpenState,
-  onFilterChange,
-  onOperationChange,
-  selectedBarClassName,
-  facilityId,
-}: {
+interface SelectedFilterBarProps {
   selectedFilterKey: string;
   selectedFilters: Record<string, FilterState>;
   onClick: () => void;
+  onOpenOperationPicker?: () => void;
   clearFilter: () => void;
   openState: boolean;
   setOpenState: (open: boolean) => void;
@@ -75,12 +65,71 @@ export function SelectedFilterBar({
   onOperationChange: (filterKey: string, operation: string) => void;
   selectedBarClassName?: string;
   facilityId?: string;
-}) {
+  isMobile?: boolean;
+}
+
+export function SelectedFilterBar({
+  selectedFilterKey,
+  selectedFilters,
+  onClick,
+  onOpenOperationPicker,
+  clearFilter,
+  openState,
+  setOpenState,
+  onFilterChange,
+  onOperationChange,
+  selectedBarClassName,
+  facilityId,
+  isMobile = false,
+}: SelectedFilterBarProps) {
   const { t } = useTranslation();
   const { filter, selected, selectedOperation, availableOperations } =
     useMultiFilter(selectedFilterKey, selectedFilters);
 
   if (!selectedOperation) return <></>;
+
+  if (isMobile) {
+    return (
+      <div
+        className={cn(
+          "flex items-center bg-white rounded-md border border-gray-200 w-full max-w-full min-w-0 overflow-hidden",
+          selectedBarClassName,
+        )}
+      >
+        <button
+          type="button"
+          className="flex items-center gap-2 px-3 h-9 border-gray-200 text-sm min-w-0 shrink"
+          onClick={onClick}
+        >
+          {filter?.icon}
+          <span className="truncate text-gray-950 font-medium">
+            {t(filter.label)}
+          </span>
+        </button>
+        <button
+          type="button"
+          className="flex items-center gap-2 px-2.5 h-9 border-x border-gray-200 underline cursor-pointer text-sm text-gray-600 whitespace-nowrap shrink-0"
+          onClick={onOpenOperationPicker}
+        >
+          {t(selectedOperation.label)}
+        </button>
+        <div className="flex items-center gap-2 px-3 h-9 border-gray-200 min-w-0 flex-1 overflow-hidden">
+          <span className="truncate text-gray-950 font-medium">
+            {filter.renderSelected?.(selected, filter, onFilterChange)}
+          </span>
+        </div>
+        {!filter?.disableClear && (
+          <Button
+            variant="ghost"
+            onClick={clearFilter}
+            className="flex border-l rounded-l-none border-gray-200 hover:bg-gray-50 shrink-0"
+          >
+            <X className="h-5 w-5 text-gray-600" />
+          </Button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <DropdownMenu
@@ -132,6 +181,7 @@ export function SelectedFilterBar({
           selectedFilters={selectedFilters}
           onFilterChange={onFilterChange}
           facilityId={facilityId}
+          presentation="menu"
         />
       </DropdownMenuContent>
     </DropdownMenu>

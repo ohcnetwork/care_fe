@@ -9,8 +9,6 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -33,6 +31,7 @@ import {
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
 import FilterHeader from "./filterHeader";
+import { FilterSelectableItem, FilterSeparator } from "./filterPresentation";
 import {
   COLOR_PALETTE,
   FilterConfig,
@@ -86,10 +85,9 @@ function TreeViewItem({
 
   return (
     <div>
-      <DropdownMenuItem
+      <FilterSelectableItem
         disabled={isRootLevel && allChildrenSelected}
-        onSelect={(e) => {
-          e.preventDefault();
+        onSelect={() => {
           if (isRootLevel) {
             setExpanded(!expanded);
           } else {
@@ -126,7 +124,7 @@ function TreeViewItem({
             />
           )}
         </div>
-      </DropdownMenuItem>
+      </FilterSelectableItem>
       {expanded && isRootLevel && (
         <div>
           {children?.results?.map((childTag: TagConfig) => {
@@ -254,10 +252,9 @@ function TagFilterDropdown({
                   {t("selected_tags")}
                 </div>
                 {filteredSelectedTags.map((tag, index) => (
-                  <DropdownMenuItem
+                  <FilterSelectableItem
                     key={tag.id}
-                    onSelect={(e) => {
-                      e.preventDefault();
+                    onSelect={() => {
                       handleTagToggle(tag);
                     }}
                     className="flex items-center gap-2 px-2 py-1 cursor-pointer"
@@ -291,9 +288,9 @@ function TagFilterDropdown({
                         <span className="truncate">{tag.display}</span>
                       </span>
                     </div>
-                  </DropdownMenuItem>
+                  </FilterSelectableItem>
                 ))}
-                <DropdownMenuSeparator />
+                <FilterSeparator />
               </>
             )
           );
@@ -333,7 +330,7 @@ function TagFilterDropdown({
                     }}
                   />
                 ))}
-            <DropdownMenuSeparator />
+            <FilterSeparator />
           </>
         )}
 
@@ -344,10 +341,9 @@ function TagFilterDropdown({
               {t("other_tags")}
             </div>
             {nonSelectedRootLevelTags.map((tag, index) => (
-              <DropdownMenuItem
+              <FilterSelectableItem
                 key={tag.id}
-                onSelect={(e) => {
-                  e.preventDefault();
+                onSelect={() => {
                   handleTagToggle(tag);
                 }}
                 className="flex items-center gap-2 px-2 py-1 cursor-pointer"
@@ -372,7 +368,7 @@ function TagFilterDropdown({
                     <span className="truncate">{tag.display}</span>
                   </span>
                 </div>
-              </DropdownMenuItem>
+              </FilterSelectableItem>
             ))}
           </>
         )}
@@ -481,10 +477,9 @@ function GroupSubmenu({
           children.results.map((childTag: TagConfig, index: number) => {
             const isSelected = selectedTags.some((t) => t.id === childTag.id);
             return (
-              <DropdownMenuItem
+              <FilterSelectableItem
                 key={childTag.id}
-                onSelect={(e) => {
-                  e.preventDefault();
+                onSelect={() => {
                   onTagToggle(childTag);
                 }}
                 className="flex items-center gap-2 px-2 py-1 cursor-pointer"
@@ -499,7 +494,7 @@ function GroupSubmenu({
                   />
                   <span className="text-sm">{childTag.display}</span>
                 </div>
-              </DropdownMenuItem>
+              </FilterSelectableItem>
             );
           })
         ) : (

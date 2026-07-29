@@ -6,19 +6,16 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
 
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 
 import query from "@/Utils/request/query";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
-import { Button } from "@/components/ui/button";
 import FilterHeader from "./filterHeader";
+import { FilterSelectableItem, FilterSeparator } from "./filterPresentation";
 import { COLOR_PALETTE, FilterConfig, FilterDateRange } from "./utils/Utils";
 
 const getColorForOrg = (id: string) => {
@@ -64,9 +61,8 @@ function TreeViewItem({
 
   return (
     <div>
-      <DropdownMenuItem
-        onSelect={(e) => {
-          e.preventDefault();
+      <FilterSelectableItem
+        onSelect={() => {
           onOrgToggle(org);
         }}
         className="flex items-center gap-2 px-2 py-1 cursor-pointer"
@@ -97,7 +93,7 @@ function TreeViewItem({
             </Button>
           )}
         </div>
-      </DropdownMenuItem>
+      </FilterSelectableItem>
       {expanded && hasChildren && (
         <div>
           {children?.results?.map((childOrg: FacilityOrganizationRead) => (
@@ -197,10 +193,9 @@ function DepartmentFilterDropdown({
                   {t("selected_departments")}
                 </div>
                 {filteredSelectedOrgs.map((org) => (
-                  <DropdownMenuItem
+                  <FilterSelectableItem
                     key={org.id}
-                    onSelect={(e) => {
-                      e.preventDefault();
+                    onSelect={() => {
                       handleOrgToggle(org);
                     }}
                     className="flex items-center gap-2 px-2 py-1 cursor-pointer"
@@ -227,9 +222,9 @@ function DepartmentFilterDropdown({
                         )}
                       </div>
                     </div>
-                  </DropdownMenuItem>
+                  </FilterSelectableItem>
                 ))}
-                <DropdownMenuSeparator />
+                <FilterSeparator />
               </>
             )
           );
@@ -251,10 +246,9 @@ function DepartmentFilterDropdown({
                   facilityId={facilityId}
                 />
               ) : (
-                <DropdownMenuItem
+                <FilterSelectableItem
                   key={org.id}
-                  onSelect={(e) => {
-                    e.preventDefault();
+                  onSelect={() => {
                     handleOrgToggle(org);
                   }}
                   className="flex items-center gap-2 px-2 py-1 cursor-pointer"
@@ -283,7 +277,7 @@ function DepartmentFilterDropdown({
                         )}
                     </div>
                   </div>
-                </DropdownMenuItem>
+                </FilterSelectableItem>
               ),
             )}
           </>
