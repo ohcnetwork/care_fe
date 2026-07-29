@@ -2,7 +2,7 @@ import { execSync } from "child_process";
 
 // Enables the Entire CLI (https://entire.io) for this repository if the
 // developer has it installed locally. This is a no-op for anyone who does
-// not have the `entire` CLI installed, so it never blocks `npm install`.
+// not have the `entire` CLI installed, so it never blocks the `prepare` step.
 try {
   execSync("entire --version", { stdio: "ignore" });
 } catch {
