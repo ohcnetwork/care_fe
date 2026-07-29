@@ -63,7 +63,7 @@ export const DispenseInfoPopover = ({
         <div className="flex flex-col gap-4">
           <div className="flex justify-between border-b border-gray-200 pb-3">
             <div className="flex flex-col">
-              <h4 className="font-semibold text-gray-950">
+              <h4 className="font-semibold text-gray-950 wrap-anywhere">
                 {title || t("unknown_medication")}
               </h4>
               <span className="text-xs text-gray-600">

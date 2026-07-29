@@ -140,7 +140,7 @@ function DispenseItemsTable({
               )}
             >
               <div className="flex items-center gap-1.5">
-                <span className="text-gray-900 font-semibold">
+                <span className="text-gray-900 font-semibold wrap-anywhere">
                   {dispense.item.product.product_knowledge.name}
                 </span>
                 <DispenseInfoPopover

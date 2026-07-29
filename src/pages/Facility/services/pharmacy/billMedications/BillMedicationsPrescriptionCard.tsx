@@ -883,7 +883,7 @@ const MedicineLineItemMedication = ({
         <div className={cn("flex flex-col", dispenseCompleted && "italic")}>
           <span
             className={cn(
-              "font-semibold text-gray-950",
+              "font-semibold text-gray-950 wrap-anywhere",
               !isSelected && "line-through",
             )}
           >

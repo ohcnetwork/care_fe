@@ -294,7 +294,7 @@ const PrescriptionCard = ({
       {medications.map((medication) => (
         <React.Fragment key={medication.id}>
           <div className="col-start-1 bg-white py-2 px-3 flex items-center">
-            <span className="text-base font-semibold text-gray-950">
+            <span className="text-base font-semibold text-gray-950 wrap-anywhere">
               {displayMedicationName(medication)}
             </span>
           </div>

@@ -324,7 +324,7 @@ export function EditDispenseSheet({
               <div className="flex flex-col gap-1 rounded-md border border-orange-200 bg-orange-50 p-3 text-sm">
                 <div className="flex items-center gap-2">
                   <Badge variant="orange">{t("substituted")}</Badge>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-gray-900 wrap-anywhere">
                     {substitution.substitutedProductKnowledge.name}
                   </span>
                 </div>
@@ -460,7 +460,7 @@ function ExistingDispenseDetails({
           </span>
         )}
         <span className="flex items-center gap-2 font-semibold text-gray-900">
-          {dispensedName}
+          <span className="wrap-anywhere">{dispensedName}</span>
           {(isDifferentFromPrescribed || substitution) && (
             <Badge variant="orange">{t("substituted")}</Badge>
           )}

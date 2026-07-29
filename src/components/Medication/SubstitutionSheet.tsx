@@ -126,8 +126,12 @@ export function SubstitutionSheet({
           <SheetDescription className="text-base" asChild>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span>{t("substituting_for")}:</span>
-                <Badge variant="secondary">{displayName}</Badge>
+                <span className="whitespace-nowrap">
+                  {t("substituting_for")}:
+                </span>
+                <span className="wrap-anywhere">
+                  <Badge variant="secondary">{displayName}</Badge>
+                </span>
               </div>
               <p className="text-sm text-muted-foreground">
                 {t("select_alternative_medication_and_provide_details")}

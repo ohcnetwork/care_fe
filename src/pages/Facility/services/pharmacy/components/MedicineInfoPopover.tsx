@@ -61,7 +61,7 @@ export const MedicineInfoPopover = ({
           <div className="flex flex-col gap-3">
             <div className="flex justify-between border-b border-gray-200 pb-3">
               <div className="flex flex-col">
-                <h4 className="font-semibold text-gray-950">
+                <h4 className="font-semibold text-gray-950 wrap-anywhere">
                   {effectiveProductKnowledge?.name ||
                     medication?.medication?.display ||
                     t("unknown_medication")}
