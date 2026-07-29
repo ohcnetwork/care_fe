@@ -172,7 +172,7 @@ For patient login via phone number:
 
 ## Translations
 
-All strings must be encased in i18n translations. New translation strings must be specified in `public/locale/en.json`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
+All strings must be encased in i18n translations. New translation strings must be specified in `public/locale/en.json`. Do not add translations for languages other than English through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
 
 #### Remote i18n configuration (optional)
 

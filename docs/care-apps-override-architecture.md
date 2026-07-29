@@ -1,384 +1,236 @@
-# Override Framework – Minimal Integration Plan
+# Component Override Framework
 
-> **Note: this is a design-intent document.** It captures the original design and
-> mental model for the override system, not its current API. The shipped
-> implementation lives in `src/lib/override/` — see `register.ts`, `registry.ts`,
-> `bridge.ts`, and `types.ts` for the actual, authoritative code. Where this
-> document and the source disagree, the source wins.
+> **Source of truth:** `src/lib/override/` — see `index.ts`, `register.ts`,
+> `registry.ts`, `bridge.ts`, `contexts.ts`, `OverrideProvider.tsx`, and
+> `types.ts`.
 
-## 🎯 Goal
+## Goal
 
-Introduce a **non-intrusive override system** into the React app such that:
+A **non-intrusive override system** enabling plugins to replace or wrap any
+registered React component — without changing how components are consumed.
 
-- Developers **do not change how components are used**
-- Any component can become **overrideable by default**
-- Overrides are **context-aware (page, role, tree position)**
-- Performance remains **near O(1) at render time**
+Key properties:
 
----
-
-## 🧩 Core Philosophy
-
-We only introduce **two primitives**:
-
-1. `register()` → wraps components to make them overrideable
-2. `<App>` → provides the global override + resolution context
-
-Everything else (DSL, plugins, rules) builds on top of this.
+- Components remain **pure**: no override-awareness in their implementation
+- Overrides are **context-aware** (route, user role, facility type, render stack)
+- Performance is **near O(1)** at render time for most components
+- Plugin bugs **cannot crash the host** (error boundary fallback)
 
 ---
 
-# 1. `register()` – Making Components Overrideable
+## Core API
 
-## ✅ Developer Experience
+### `register(key, BaseComponent)`
 
-Developers only do:
+Wraps a component to make it overrideable. Consumers use the component normally.
 
 ```tsx
-function PatientCard(props) {
+import { register } from "@/lib/override";
+
+function PatientCard(props: PatientCardProps) {
   return <div>Base Card</div>;
 }
 
 export default register("PatientCard", PatientCard);
 ```
 
-No change in usage:
+Usage is unchanged:
 
 ```tsx
-<PatientCard />
+<PatientCard patient={patient} />
 ```
 
----
+**What it does under the hood:**
 
-## 🧠 What `register()` Does
+1. Registers the component in the global `registry` (a `Map<string, RegistryEntry>`)
+2. Returns a wrapper that, at render time:
+   - If no overrides exist → renders `BaseComponent` directly
+   - If overrides exist but none use stack conditions → **fast path**: looks up the precomputed `ResolutionMap`
+   - If stack conditions are present → **stack-aware path**: creates a linked-list stack node and resolves dynamically
+3. Wraps override renders in an `OverrideErrorBoundary` — if the override throws, falls back to a safe message
 
-It wraps the component and handles:
+### `addOverride(key, override)`
 
-1. Fetching the **resolved component**
-2. Maintaining the **render stack (context chain)**
-3. Rendering the correct version
-
----
-
-## ⚙️ Implementation
+Registers an override for a component. Returns a cleanup function.
 
 ```tsx
-function register(key, BaseComponent) {
-  // Ensure registry entry exists
-  registry[key] = registry[key] || {
-    base: BaseComponent,
-    overrides: [],
-    hasStackConditions: false,
-  };
+import { addOverride } from "@/lib/override";
 
-  return function RegisteredComponent(props) {
-    // 1. Get global resolution map (fast path)
-    const resolutionMap = React.useContext(ResolutionContext);
-
-    // 2. Get parent stack (linked structure)
-    const parentStack = React.useContext(StackContext);
-
-    const entry = registry[key];
-
-    // 🚀 FAST PATH (no stack conditions)
-    if (!entry.hasStackConditions) {
-      const Component = resolutionMap[key] || BaseComponent;
-      return <Component {...props} />;
-    }
-
-    // 🔥 STACK-AWARE PATH (only when needed)
-
-    const stack = {
-      value: { name: key },
-      parent: parentStack,
-    };
-
-    const overrideContext = {
-      ...useOverrideContext(),
-      renderStack: stack,
-    };
-
-    const Component = resolveWithStack(key, overrideContext);
-
-    return (
-      <StackContext.Provider value={stack}>
-        <Component {...props} />
-      </StackContext.Provider>
-    );
-  };
-}
+const cleanup = addOverride("PatientCard", {
+  component: CustomPatientCard,
+  condition: { page: "admin", userRole: "doctor" },
+  priority: 10,
+  description: "Custom card for admin doctors",
+});
 ```
 
----
+Overrides are sorted by `priority` (highest first). The first override whose
+`condition` matches the current context wins.
 
-## 🔑 Key Design Decisions
+### `OverrideProvider`
 
-### 1. Linked Stack (O(1))
-
-```ts
-{
-  value: { name: "PatientCard" },
-  parent: previousStack
-}
-```
-
-- No array cloning
-- Cheap to construct
-- Traversable when needed
-
----
-
-### 2. Fast Path vs Stack Path
-
-| Type of Override   | Execution          |
-| ------------------ | ------------------ |
-| Global (page/role) | Precomputed map    |
-| Stack-based        | Runtime resolution |
-
-👉 Most components use **fast path**
-
----
-
-### 3. Invisible to Developers
-
-- No hooks required
-- No prop drilling
-- No API learning curve
-
----
-
-# 2. `<App>` – Providing Global Context
-
-This is where all **heavy computation happens once**.
-
----
-
-## 🧠 Responsibilities
-
-1. Compute **Resolution Map**
-2. Provide **global override context**
-3. Initialize **stack root**
-
----
-
-## ⚙️ Contexts
-
-### 1. OverrideContext (global state)
-
-```ts
-type OverrideContextType = {
-  page?: string;
-  route?: string;
-  userRole?: string;
-  facilityType?: string;
-};
-```
-
----
-
-### 2. ResolutionContext (precomputed map)
-
-```ts
-type ResolutionMap = {
-  [componentName: string]: React.ComponentType<any>;
-};
-```
-
----
-
-### 3. StackContext (linked stack)
-
-```ts
-type RenderStackNode = {
-  value: { name: string };
-  parent: RenderStackNode | null;
-};
-```
-
----
-
-## ⚙️ App Setup
+Placed near the app root; provides resolution context to all registered
+components.
 
 ```tsx
+import { OverrideProvider } from "@/lib/override";
+
 function App() {
-  const overrideContext = {
-    page: getCurrentPage(),
-    userRole: getUserRole(),
-    facilityType: getFacilityType(),
-  };
-
-  const resolutionMap = React.useMemo(() => {
-    return computeResolutionMap(overrideContext, registry);
-  }, [overrideContext]);
-
   return (
-    <OverrideContext.Provider value={overrideContext}>
-      <ResolutionContext.Provider value={resolutionMap}>
-        <StackContext.Provider value={null}>
-          <AppRoutes />
-        </StackContext.Provider>
-      </ResolutionContext.Provider>
-    </OverrideContext.Provider>
+    <OverrideProvider context={{ userRole: user?.role }}>
+      <AppRoutes />
+    </OverrideProvider>
   );
 }
 ```
 
----
+The provider:
 
-# 3. Resolution Flow (End-to-End)
-
-## 🧭 Without Stack
-
-```txt
-<App>
-  → computeResolutionMap()
-
-<PatientCard>
-  → resolutionMap["PatientCard"]
-  → render component (O(1))
-```
+1. Reads the current route via `usePath()` from raviger
+2. Extracts a `page` identifier from the route path
+3. Merges external context (role, facility type, custom values)
+4. Computes a `ResolutionMap` — a pre-resolved `Map<key, Component>` for all
+   components that don't need stack-based resolution
+5. Subscribes to registry changes so the map recomputes when overrides are
+   added/removed at runtime
 
 ---
 
-## 🧭 With Stack
-
-```txt
-<PatientHome>
-  → stack: [PatientHome]
-
-<PatientCard>
-  → stack: [PatientHome, PatientCard]
-
-<PatientButton>
-  → stack: [PatientHome, PatientCard, PatientButton]
-  → resolve with stack conditions
-```
-
----
-
-# 4. Registry Structure
+## Type Definitions
 
 ```ts
-registry = {
-  PatientCard: {
-    base: BasePatientCard,
-    overrides: [...],
-    hasStackConditions: false
-  },
-  PatientButton: {
-    base: BaseButton,
-    overrides: [...],
-    hasStackConditions: true
-  }
-};
+interface OverrideContextType {
+  page?: string;
+  route?: string;
+  userRole?: string;
+  facilityType?: string;
+  custom?: Record<string, unknown>;
+}
+
+interface OverrideCondition {
+  page?: string | string[];
+  userRole?: string | string[];
+  facilityType?: string | string[];
+  stackPath?: string[];              // match component ancestry
+  custom?: (ctx: OverrideContextType) => boolean;
+}
+
+interface Override<P = AnyProps> {
+  component: ComponentType<P>;
+  condition?: OverrideCondition;     // omit = always match
+  priority?: number;                 // higher wins (default 0)
+  description?: string;
+}
+
+interface RegistryEntry<P = AnyProps> {
+  base: ComponentType<P>;
+  overrides: Override<P>[];
+  hasStackConditions: boolean;       // optimization flag
+}
 ```
 
 ---
 
-# 5. Performance Characteristics
+## Resolution Algorithm
 
-| Operation                  | Cost              |
-| -------------------------- | ----------------- |
-| Resolution map computation | O(N rules) (once) |
-| Component lookup           | O(1)              |
-| Stack creation             | O(1)              |
-| Stack traversal            | O(depth) (rare)   |
+### Fast Path (most components)
 
----
+```
+OverrideProvider computes ResolutionMap at context changes:
+  for each registry entry without stack conditions:
+    find first override whose condition matches context
+    store in Map<key, ResolvedComponent>
 
-## ✅ Why This Scales
+RegisteredComponent renders:
+  resolutionMap.get(key) || BaseComponent → render
+```
 
-- No per-component rule evaluation (fast path)
-- Stack only used when necessary
-- Context usage is localized
+Cost: **O(1)** per component render (map lookup).
 
----
+### Stack-Aware Path (opt-in via `stackPath` condition)
 
-# 6. What This Enables
+```
+RegisteredComponent renders:
+  create stack node { name: key, parent: parentStack }
+  walk overrides checking condition + stackPath match
+  render resolved component within StackContext.Provider
+```
 
-With just these two changes:
+Stack matching uses subsequence matching — `["PatientHome", "PatientCard"]`
+matches any render tree where `PatientCard` is a descendant of `PatientHome`.
 
-### ✅ Every component becomes overrideable
-
-### ✅ Plugins can inject behavior
-
-### ✅ UI becomes context-aware
-
-### ✅ No breaking changes to existing code
-
----
-
-# 7. Guardrails (Important)
-
-### ❌ Avoid
-
-- Overusing stack-based conditions
-- Deep stackPath matching
-- Exposing StackContext to general components
+Cost: **O(depth × overrides)** — only activated for components with
+`hasStackConditions: true`.
 
 ---
 
-### ✅ Enforce
+## Federated Plugin Bridge
 
-- Use stack only for edge cases
-- Prefer global context (page, role)
-- Add debug tooling early
-
----
-
-# 8. Minimal Adoption Plan
-
-### Step 1
-
-Introduce:
-
-- `register()`
-- Contexts in `<App>`
-
----
-
-### Step 2
-
-Start registering key components:
+Plugins loaded via Module Federation run in their own module graph and cannot
+import `@/lib/override` directly. The bridge (`bridge.ts`) exposes:
 
 ```ts
-export default register("PatientCard", PatientCard);
+window.__careOverrides.addComponent(key, { component, condition?, priority? })
+```
+
+This global is installed as a side effect when `src/lib/override/index.ts` is
+first imported (before any plugin manifest evaluates).
+
+---
+
+## `__base` Prop Injection
+
+When an override is rendered, the wrapper injects `__base` pointing to the
+original base component. This lets overrides selectively render the original:
+
+```tsx
+function CustomPatientCard({ __base: Base, ...props }) {
+  if (props.compact) return <Base {...props} />;
+  return <div className="custom-wrapper"><Base {...props} /></div>;
+}
 ```
 
 ---
 
-### Step 3
+## Error Isolation
 
-Add first override rules (internal)
+Each override render is wrapped in `OverrideErrorBoundary`. If the override
+throws, the boundary:
+
+1. Logs the error to the console with the component key
+2. Renders a minimal fallback message indicating which plugin override failed
+
+The host app continues running normally.
 
 ---
 
-### Step 4
+## Performance Summary
 
-Introduce plugin-based overrides
+| Operation                   | Cost                        |
+| --------------------------- | --------------------------- |
+| Resolution map computation  | O(registry size × overrides) — runs once per context change |
+| Component render (fast)     | O(1) map lookup             |
+| Stack node creation         | O(1) linked-list append     |
+| Stack-aware resolution      | O(depth) — rare             |
 
 ---
 
-# 🧠 Final Mental Model
+## Debugging
 
-```txt
-Before:
-Component → renders itself
+```ts
+import { getRegisteredKeys, getEntry } from "@/lib/override";
 
-After:
-Component → asks system what it should be → renders that
+// List all registered component keys
+console.log(getRegisteredKeys());
+
+// Inspect a specific entry
+console.log(getEntry("PatientCard"));
 ```
 
----
+Registered components also expose metadata:
 
-# 🚀 Summary
-
-You’ve introduced a system where:
-
-- The **App decides behavior**
-- Components remain **pure and simple**
-- Overrides are **declarative and scalable**
-
-And most importantly:
-
-> **This is achieved with only two changes: `register()` and `<App>` context.**
+```ts
+RegisteredComponent.__override_key__;      // "PatientCard"
+RegisteredComponent.__base_component__;    // original function
+RegisteredComponent.displayName;           // "Registered(PatientCard)"
+```
