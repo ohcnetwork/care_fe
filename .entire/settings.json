@@ -14,10 +14,5 @@
       "phone": true,
       "address": true
     }
-  },
-  "checkpoints": {
-    "primary": {
-      "type": "git-refs"
-    }
   }
 }
