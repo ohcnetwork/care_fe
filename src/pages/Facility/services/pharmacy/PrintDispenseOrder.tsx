@@ -17,10 +17,7 @@ import {
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
-import {
-  MEDICATION_DISPENSE_CANCELLED_STATUSES,
-  MedicationDispenseRead,
-} from "@/types/emr/medicationDispense/medicationDispense";
+import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
@@ -230,7 +227,6 @@ export const PrintDispenseOrder = ({
       queryParams: {
         order: dispenseOrderId,
         location: locationId,
-        exclude_status: MEDICATION_DISPENSE_CANCELLED_STATUSES.join(","),
       },
     }),
     enabled: !!dispenseOrderId && !!locationId,
@@ -242,7 +238,7 @@ export const PrintDispenseOrder = ({
 
   if (!dispenseOrder) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+      <div className="flex h-50 items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("dispense_order_not_found")}
       </div>
     );
@@ -250,7 +246,7 @@ export const PrintDispenseOrder = ({
 
   if (!medicationDispenses?.results?.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+      <div className="flex h-50 items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("no_medication_dispenses_found")}
       </div>
     );
