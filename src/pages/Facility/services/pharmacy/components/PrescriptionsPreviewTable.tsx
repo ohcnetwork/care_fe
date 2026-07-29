@@ -40,6 +40,7 @@ import {
   MinusCircleIcon,
   Pill,
   PrinterIcon,
+  RotateCcwIcon,
   XCircleIcon,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
@@ -118,6 +119,8 @@ const PrescriptionCard = ({
         toast.success(t("prescription_marked_as_completed"));
       } else if (newStatus === PrescriptionStatus.cancelled) {
         toast.success(t("prescription_marked_as_cancelled"));
+      } else if (newStatus === PrescriptionStatus.active) {
+        toast.success(t("prescription_reactivated"));
       }
     },
   });
@@ -213,17 +216,19 @@ const PrescriptionCard = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                disabled={!isActive || isPending}
-                onSelect={() => {
-                  navigate(
-                    `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${encounter.patient.id}/bill/prescriptions/${prescription.id}`,
-                  );
-                }}
-              >
-                <FileTextIcon />
-                {t("bill_prescription")}
-              </DropdownMenuItem>
+              {isActive && (
+                <DropdownMenuItem
+                  disabled={isPending}
+                  onSelect={() => {
+                    navigate(
+                      `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${encounter.patient.id}/bill/prescriptions/${prescription.id}`,
+                    );
+                  }}
+                >
+                  <FileTextIcon />
+                  {t("bill_prescription")}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 disabled={isPending}
                 onSelect={() => {
@@ -235,31 +240,49 @@ const PrescriptionCard = ({
                 <PrinterIcon />
                 {t("print_prescription")}
               </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled={!isActive || isPending}
-                onSelect={() => {
-                  updatePrescriptionStatus({
-                    prescription,
-                    newStatus: PrescriptionStatus.completed,
-                  });
-                }}
-              >
-                <CheckCircleIcon />
-                {t("mark_as_completed")}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled={!isActive || isPending}
-                onSelect={() => {
-                  updatePrescriptionStatus({
-                    prescription,
-                    newStatus: PrescriptionStatus.cancelled,
-                  });
-                }}
-                variant="destructive"
-              >
-                <XCircleIcon />
-                {t("cancel_prescription")}
-              </DropdownMenuItem>
+              {isActive && (
+                <DropdownMenuItem
+                  disabled={isPending}
+                  onSelect={() => {
+                    updatePrescriptionStatus({
+                      prescription,
+                      newStatus: PrescriptionStatus.completed,
+                    });
+                  }}
+                >
+                  <CheckCircleIcon />
+                  {t("mark_as_completed")}
+                </DropdownMenuItem>
+              )}
+              {isActive && (
+                <DropdownMenuItem
+                  disabled={isPending}
+                  onSelect={() => {
+                    updatePrescriptionStatus({
+                      prescription,
+                      newStatus: PrescriptionStatus.cancelled,
+                    });
+                  }}
+                  variant="destructive"
+                >
+                  <XCircleIcon />
+                  {t("cancel_prescription")}
+                </DropdownMenuItem>
+              )}
+              {!isActive && (
+                <DropdownMenuItem
+                  disabled={isPending}
+                  onSelect={() => {
+                    updatePrescriptionStatus({
+                      prescription,
+                      newStatus: PrescriptionStatus.active,
+                    });
+                  }}
+                >
+                  <RotateCcwIcon />
+                  {t("reactivate_prescription")}
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

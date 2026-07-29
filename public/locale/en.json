@@ -4570,6 +4570,7 @@
   "prescription_note_placeholder": "Add any notes for this prescription...",
   "prescription_preview": "Prescription Preview",
   "prescription_queue": "Prescription Queue",
+  "prescription_reactivated": "Prescription reactivated successfully",
   "prescription_status__active": "Billing Pending",
   "prescription_status__cancelled": "Cancelled",
   "prescription_status__completed": "Completed",
