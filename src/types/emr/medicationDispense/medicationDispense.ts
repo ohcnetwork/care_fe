@@ -212,7 +212,7 @@ export interface MedicationDispenseUpsert extends Omit<
 
 export interface MedicationDispenseRead extends MedicationDispenseBase {
   item: InventoryRead;
-  charge_item: ChargeItemRead;
+  charge_item?: ChargeItemRead;
   created_date: string;
   location: LocationRead;
   quantity: string;

@@ -223,7 +223,7 @@ export function DispenseOrderView({
 
   const billableItems = dispenses.filter(
     (d) =>
-      d.charge_item.status === ChargeItemStatus.billable &&
+      d.charge_item?.status === ChargeItemStatus.billable &&
       !MEDICATION_DISPENSE_CANCELLED_STATUSES.includes(d.status),
   );
 
@@ -626,9 +626,9 @@ export function DispenseOrderView({
                     facilityId={facilityId}
                     accountId={account?.id}
                     invoiceId={undefined}
-                    unbilledItems={billableItems.map(
-                      (dispense) => dispense.charge_item,
-                    )}
+                    unbilledItems={billableItems
+                      .map((dispense) => dispense.charge_item)
+                      .filter((item): item is ChargeItemRead => !!item)}
                     onCreateInvoice={handleCreateInvoice}
                     isCreatingInvoice={isCreatingInvoice}
                     onPaymentSuccess={handlePaymentSuccess}

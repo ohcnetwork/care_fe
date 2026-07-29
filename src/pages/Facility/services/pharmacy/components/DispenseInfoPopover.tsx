@@ -94,7 +94,7 @@ export const DispenseInfoPopover = ({
             </div>
           )}
 
-          <ChargeItemInfoSection chargeItem={chargeItem} />
+          {chargeItem && <ChargeItemInfoSection chargeItem={chargeItem} />}
         </div>
       </PopoverContent>
     </Popover>

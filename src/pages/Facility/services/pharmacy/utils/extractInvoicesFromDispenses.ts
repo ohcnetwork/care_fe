@@ -12,7 +12,10 @@ import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicatio
 export function extractInvoicesFromDispenses<T extends MedicationDispenseRead>(
   dispenses: T[],
 ) {
-  const map = new Map<string, NonNullable<T["charge_item"]["paid_invoice"]>>();
+  const map = new Map<
+    string,
+    NonNullable<NonNullable<T["charge_item"]>["paid_invoice"]>
+  >();
   dispenses.forEach((dispense) => {
     const invoice = dispense.charge_item?.paid_invoice;
     if (invoice) {

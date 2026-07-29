@@ -100,7 +100,7 @@ export function DispensedItemsSheet({
                           {item.item.product.product_knowledge.name}
                         </TableCell>
                         <TableCell>
-                          {round(item.charge_item.quantity)}{" "}
+                          {round(item.charge_item?.quantity || "0")}{" "}
                           {/* Unit label from first instruction (unit is consistent across instructions) */}
                           {
                             item.dosage_instruction?.find(
