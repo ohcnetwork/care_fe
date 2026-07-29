@@ -62,7 +62,7 @@ export default function AdminOrganizationFormSheet({
       .trim()
       .min(1, { message: t("field_required") }),
     description: z.string().optional(),
-    org_type: z.nativeEnum(OrgType),
+    org_type: z.enum(OrgType),
   });
 
   const form = useForm({
@@ -97,7 +97,7 @@ export default function AdminOrganizationFormSheet({
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["organization", "list", organizationType, parentId],
+        queryKey: ["organization"],
       });
       toast.success(t("organization_created_successfully"));
       setOpen(false);
@@ -113,10 +113,7 @@ export default function AdminOrganizationFormSheet({
       })(body),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["organization", "list", organizationType, parentId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["organization", org?.id],
+        queryKey: ["organization"],
       });
       toast.success(t("organizations_updated_successfully"));
       setOpen(false);

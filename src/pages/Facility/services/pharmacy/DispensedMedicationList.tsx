@@ -40,6 +40,7 @@ import Decimal from "decimal.js";
 import { useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 import {
   AlertDialog,
@@ -66,7 +67,6 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import ViewDefaultAccountButton from "@/pages/Facility/billing/account/ViewDefaultAccountButton";
 import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
-import batchApi from "@/types/base/batch/batchApi";
 import accountApi from "@/types/billing/account/accountApi";
 import {
   INVOICE_STATUS_COLORS,
@@ -90,8 +90,11 @@ import { PatientListRead } from "@/types/emr/patient/patient";
 
 import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HttpMethod, Type } from "@/Utils/request/types";
+import { formatDateTime } from "@/Utils/utils";
 import {
   ArrowUpRightSquare,
   BanknoteIcon,
@@ -172,10 +175,7 @@ function MedicationTable({ medications }: MedicationTableProps) {
         </TableHeader>
         <TableBody>
           {medications.map((medication) => {
-            const instruction = medication.dosage_instruction?.[0];
-
-            const dosageText = formatDosage(instruction) || null;
-            const frequencyText = formatFrequency(instruction);
+            const instructions = medication.dosage_instruction ?? [];
 
             const batchNumber = medication.item.product.batch?.lot_number;
             const expiryDate = medication.item.product.expiration_date;
@@ -187,13 +187,17 @@ function MedicationTable({ medications }: MedicationTableProps) {
                     <span className="text-gray-900 font-medium">
                       {medication.item.product.product_knowledge.name}
                     </span>
-                    {(dosageText || frequencyText) && (
-                      <span className="text-sm text-gray-500">
-                        {[dosageText, frequencyText]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </span>
-                    )}
+                    {instructions.map((di, idx) => {
+                      const dosage = formatDosage(di);
+                      const freq = formatFrequency(di);
+                      return dosage || freq ? (
+                        <span key={idx} className="text-sm text-gray-500">
+                          {dosage && <FormattedDosage instruction={di} />}
+                          {dosage && freq && " · "}
+                          {freq}
+                        </span>
+                      ) : null;
+                    })}
                     {(batchNumber || expiryDate) && (
                       <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
                         {batchNumber && (
@@ -597,21 +601,14 @@ function InvoiceCard({
                               </span>
                               {getPaymentReference(payment) && (
                                 <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                                  Ref: {getPaymentReference(payment)}
+                                  {t("reference")}:{" "}
+                                  {getPaymentReference(payment)}
                                 </span>
                               )}
                             </div>
                             {payment.payment_datetime && (
                               <p className="text-xs text-gray-500 mt-0.5">
-                                {new Date(
-                                  payment.payment_datetime,
-                                ).toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {formatDateTime(payment.payment_datetime)}
                               </p>
                             )}
                           </div>
@@ -1067,8 +1064,7 @@ export default function DispensedMedicationList({
   });
 
   const { mutate: updateDispenseOrder, isPending: isUpdatingDispenseOrder } =
-    useMutation({
-      mutationFn: mutate(batchApi.batchRequest),
+    useBatchRequest({
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ["dispenseOrder", facilityId, dispenseOrder.id],
@@ -1086,16 +1082,15 @@ export default function DispensedMedicationList({
   const handleUpdateDispenseOrder = (
     newDispenseOrderStatus: DispenseOrderStatus = DispenseOrderStatus.completed,
   ) => {
-    const requests: Array<{
-      url: string;
-      method: string;
-      reference_id: string;
-      body: unknown;
-    }> = [
+    const requests: BatchRequestObject[] = [
       {
-        url: `/api/v1/facility/${facilityId}/order/dispense/${dispenseOrder.id}/`,
-        method: "PATCH",
-        reference_id: `update_dispense_order_${dispenseOrder.id}`,
+        api: {
+          path: "/api/v1/facility/{facilityId}/order/dispense/{id}/",
+          method: HttpMethod.PATCH,
+          TRes: Type<DispenseOrderRead>(),
+        },
+        pathParams: { facilityId, id: dispenseOrder.id },
+        referenceId: `update_dispense_order_${dispenseOrder.id}`,
         body: { status: newDispenseOrderStatus },
       },
     ];
@@ -1136,14 +1131,13 @@ export default function DispensedMedicationList({
         }),
       );
       requests.push({
-        url: `/api/v1/medication/dispense/upsert/`,
-        method: "POST",
-        reference_id: `update_medication_dispenses`,
+        api: medicationDispenseApi.upsert,
+        referenceId: `update_medication_dispenses`,
         body: { datapoints: updates },
       });
     }
 
-    updateDispenseOrder({ requests });
+    updateDispenseOrder(requests);
   };
 
   // Filter medications by status

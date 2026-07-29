@@ -34,7 +34,7 @@ import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationSheet from "./LocationSheet";
-import { LocationCard } from "./components/LocationCard";
+import { SettingsLocationCard as LocationCard } from "./components/LocationCard";
 import { LocationTable } from "./components/LocationTable";
 
 interface Props {

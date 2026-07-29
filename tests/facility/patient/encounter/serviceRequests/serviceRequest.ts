@@ -8,20 +8,8 @@ import {
   selectFromValueSet,
 } from "tests/helper/ui";
 
-export const STATUS_OPTIONS = [
-  "Draft",
-  "Active",
-  "On Hold",
-  "Entered in Error",
-  "Ended",
-  "Completed",
-  "Revoked",
-  "Unknown",
-];
-
 export const ACTIVITY_DEFINITIONS = [
   "Urinalysis",
-  "Complete Blood Count (CBC) Panel",
   "Lipid Panel",
   "Fasting Blood Glucose",
 ];
@@ -38,6 +26,10 @@ export interface ServiceRequestTestData {
   notes?: string;
   requestor?: string;
 }
+
+export type ServiceRequestOverrides = Partial<
+  Pick<ServiceRequestTestData, "activityDefinition" | "priority">
+>;
 
 export function generateServiceRequestTestData(
   allFields: boolean = false,
@@ -68,8 +60,9 @@ export async function createServiceRequest(
   patientId: string,
   encounterId: string,
   allFields: boolean = false,
+  overrides: ServiceRequestOverrides = {},
 ): Promise<ServiceRequestTestData> {
-  const data = generateServiceRequestTestData(allFields);
+  const data = { ...generateServiceRequestTestData(allFields), ...overrides };
 
   await page.goto(
     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/service_requests`,
