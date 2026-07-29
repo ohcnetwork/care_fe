@@ -65,7 +65,7 @@ export const DispenseInfoPopover = ({
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
         className="flex flex-col border border-gray-200 shadow-lg p-4 rounded-md gap-4 w-100 bg-white z-50"
-        side="bottom"
+        side="right"
         align="start"
       >
         <div className="flex flex-col gap-4">
