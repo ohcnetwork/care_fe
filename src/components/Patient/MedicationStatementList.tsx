@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
+import { MedicationRequestEmptyState as EmptyState } from "@/components/Medicine/MedicationRequestTable";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
