@@ -76,13 +76,13 @@ function UpcomingVisitCard({
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="outline" size="sm" className="min-h-11" asChild>
           <Link href={`/patient/visits/${appointment.id}`}>
             {t("view_details")}
           </Link>
         </Button>
         {canReschedule && (
-          <Button size="sm" asChild>
+          <Button size="sm" className="min-h-11" asChild>
             <Link
               href={`/facility/${appointment.facility.id}/appointments/${appointment.resource.id}/reschedule/${appointment.id}`}
             >
@@ -94,7 +94,7 @@ function UpcomingVisitCard({
           <CancelAppointmentButton
             appointment={appointment}
             size="sm"
-            className="col-span-2"
+            className="col-span-2 min-h-11"
           />
         )}
       </div>

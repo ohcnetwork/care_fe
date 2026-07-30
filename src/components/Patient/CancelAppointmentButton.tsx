@@ -92,10 +92,11 @@ export function CancelAppointmentButton({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>
+            <AlertDialogCancel className="min-h-11" disabled={isPending}>
               {t("patient_visits__keep_appointment")}
             </AlertDialogCancel>
             <AlertDialogAction
+              className="min-h-11"
               disabled={isPending}
               onClick={(event) => {
                 // Keep the dialog up until the request resolves.
