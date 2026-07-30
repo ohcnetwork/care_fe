@@ -17,6 +17,8 @@ interface OrgSelectProps {
   placeholder?: string;
   inputPlaceholder?: string;
   noOptionsMessage?: string;
+  /** Organization IDs to exclude from the list of options. */
+  excludeIds?: string[];
 }
 
 export function OrgSelect({
@@ -28,6 +30,7 @@ export function OrgSelect({
   placeholder,
   inputPlaceholder,
   noOptionsMessage,
+  excludeIds,
 }: OrgSelectProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,6 +64,11 @@ export function OrgSelect({
     ? [...searchOptions, ...(selectedData?.results || [])]
     : searchOptions;
 
+  const excludeSet = new Set(excludeIds ?? []);
+  const visibleOptions = allOptions.filter(
+    (org) => org.id === value || !excludeSet.has(org.id),
+  );
+
   return (
     <Autocomplete
       value={value || ""}
@@ -75,7 +83,7 @@ export function OrgSelect({
         }
       }}
       onSearch={setSearchQuery}
-      options={allOptions.map((org) => ({
+      options={visibleOptions.map((org) => ({
         label: org.name,
         value: org.id,
       }))}
