@@ -87,7 +87,7 @@ export function PatientHeaderTabs<T extends string>({
           onClick={() => onChange(tab.key)}
           aria-current={value === tab.key ? "page" : undefined}
           className={cn(
-            "-mb-px border-b-[2.5px] pb-2.5 text-sm transition-colors",
+            "-mb-px flex min-h-11 items-center border-b-[2.5px] pb-2.5 text-sm transition-colors",
             value === tab.key
               ? "border-primary-700 font-bold text-primary-700"
               : "border-transparent font-semibold text-gray-600 hover:text-gray-900",
@@ -140,7 +140,7 @@ export function PatientAppShell({
       onClick={() => setSwitcherOpen(true)}
       disabled={!canSwitch}
       className={cn(
-        "flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 py-1 pl-1 pr-3",
+        "flex min-h-11 items-center gap-2 rounded-full border border-gray-200 bg-gray-50 py-1 pl-1 pr-3",
         canSwitch && "hover:border-gray-300",
       )}
     >
@@ -226,7 +226,11 @@ export function PatientAppShell({
                   {title}
                 </h1>
               ) : (
-                <Link href="/patient/home" aria-label={t("care")}>
+                <Link
+                  href="/patient/home"
+                  aria-label={t("care")}
+                  className="flex min-h-11 items-center"
+                >
                   <img
                     src={careConfig.mainLogo?.dark}
                     alt={t("care")}

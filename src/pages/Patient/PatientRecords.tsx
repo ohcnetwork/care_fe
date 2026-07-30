@@ -44,7 +44,7 @@ function FilterChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors",
+        "inline-flex min-h-11 items-center rounded-full px-4 text-xs font-semibold transition-colors",
         active
           ? "bg-gray-900 text-white"
           : "border border-gray-200 bg-white text-gray-900 hover:border-gray-300",
