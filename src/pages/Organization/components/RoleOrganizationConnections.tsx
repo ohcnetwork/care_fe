@@ -39,6 +39,7 @@ function ConnectionCard({
   onRemove,
   canManageOrganization,
   viewLabel,
+  viewAriaLabel,
   removeLabel,
 }: {
   organization: OrganizationParent | Organization;
@@ -46,6 +47,7 @@ function ConnectionCard({
   onRemove: () => void;
   canManageOrganization: boolean;
   viewLabel: string;
+  viewAriaLabel: string;
   removeLabel: string;
 }) {
   return (
@@ -64,6 +66,7 @@ function ConnectionCard({
         <Link
           href={`/admin/organizations/role/${organization.id}`}
           className="text-xs font-medium text-gray-900 underline underline-offset-2 hover:text-gray-600"
+          aria-label={viewAriaLabel}
         >
           {viewLabel}
         </Link>
@@ -167,38 +170,50 @@ export default function RoleOrganizationConnections({ organization }: Props) {
   const managedIds = currentManagedOrganizations.map((org) => org.id);
   const managingIds = currentManagingOrganizations.map((org) => org.id);
 
-  const handleSelectManaged = (selected?: Organization) => {
-    if (!selected) return;
-    if (selected.id === organization.id) {
+  /** Shared guard + mutate call for linking two role organizations together. */
+  const addOrganizationLink = ({
+    organizationId,
+    targetOrganizationId,
+    existingIds,
+    successMessage,
+  }: {
+    organizationId: string;
+    targetOrganizationId: string;
+    existingIds: string[];
+    successMessage: string;
+  }) => {
+    if (targetOrganizationId === organizationId) {
       toast.error(t("role_organization_cannot_manage_itself"));
       return;
     }
-    if (managedIds.includes(selected.id)) {
+    if (existingIds.includes(targetOrganizationId)) {
       toast.error(t("organization_already_linked"));
       return;
     }
     manageOrganization({
       action: "add",
+      organizationId,
+      targetOrganizationId,
+      successMessage,
+    });
+  };
+
+  const handleSelectManaged = (selected?: Organization) => {
+    if (!selected) return;
+    addOrganizationLink({
       organizationId: organization.id,
       targetOrganizationId: selected.id,
+      existingIds: managedIds,
       successMessage: t("managed_role_organization_added_successfully"),
     });
   };
 
   const handleSelectManaging = (selected?: Organization) => {
     if (!selected) return;
-    if (selected.id === organization.id) {
-      toast.error(t("role_organization_cannot_manage_itself"));
-      return;
-    }
-    if (managingIds.includes(selected.id)) {
-      toast.error(t("organization_already_linked"));
-      return;
-    }
-    manageOrganization({
-      action: "add",
+    addOrganizationLink({
       organizationId: selected.id,
       targetOrganizationId: organization.id,
+      existingIds: managingIds,
       successMessage: t("managing_organization_added_successfully"),
     });
   };
@@ -237,6 +252,9 @@ export default function RoleOrganizationConnections({ organization }: Props) {
                 isPending={isPending}
                 canManageOrganization={canManageOrganization}
                 viewLabel={t("view")}
+                viewAriaLabel={t("view_organization", {
+                  name: managedOrganization.name,
+                })}
                 removeLabel={t("remove")}
                 onRemove={() =>
                   manageOrganization({
@@ -301,6 +319,9 @@ export default function RoleOrganizationConnections({ organization }: Props) {
                 isPending={isPending}
                 canManageOrganization={canManageOrganization}
                 viewLabel={t("view")}
+                viewAriaLabel={t("view_organization", {
+                  name: managingOrganization.name,
+                })}
                 removeLabel={t("remove")}
                 onRemove={() =>
                   manageOrganization({

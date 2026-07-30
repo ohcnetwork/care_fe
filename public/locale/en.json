@@ -6609,6 +6609,7 @@
   "view_observation_history": "View Observation History",
   "view_on_map": "View on Map",
   "view_order": "View Order",
+  "view_organization": "View {{name}}",
   "view_patient": "View Patient",
   "view_patient_account_or_invoice_dialog": "View the patient <strong>account</strong> or the <strong>invoice</strong> for <strong>{{patientName}}</strong>.",
   "view_patients": "View Patients",

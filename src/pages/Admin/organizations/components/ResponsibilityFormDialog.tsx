@@ -146,10 +146,11 @@ export default function ResponsibilityFormDialog({ org, trigger }: Props) {
           name="name"
           render={({ field }) => (
             <FormItem className="space-y-2">
-              <FormLabel aria-required>{t("title")}</FormLabel>
+              <FormLabel>{t("title")}</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                  aria-required
                   placeholder={t("responsibility_form_name_placeholder")}
                 />
               </FormControl>

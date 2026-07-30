@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Pencil, Plus, Search } from "lucide-react";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
@@ -256,6 +257,7 @@ function ResponsibilityList({
 }) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
+  const searchInputId = useId();
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["organization", "list", OrgType.ROLE, search],
@@ -282,13 +284,17 @@ function ResponsibilityList({
         ))}
       </div>
     ) : items.length > 0 ? (
-      <div className={cn(mobile ? "" : "space-y-1 p-2")}>
+      <div
+        data-slot="responsibility-list"
+        className={cn(mobile ? "" : "space-y-1 p-2")}
+      >
         {items.map((item) => {
           const isSelected = !mobile && item.id === selectedId;
           return (
             <button
               key={item.id}
               type="button"
+              data-slot="responsibility-row"
               onClick={() => onSelect(item.id)}
               className={cn(
                 "group flex w-full items-center justify-between gap-3 text-left transition-colors",
@@ -340,8 +346,12 @@ function ResponsibilityList({
     >
       <div className="border-b border-gray-100 p-3">
         <div className="relative">
+          <Label htmlFor={searchInputId} className="sr-only">
+            {t("responsibility_search")}
+          </Label>
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
           <Input
+            id={searchInputId}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("responsibility_search")}

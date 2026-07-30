@@ -23,7 +23,10 @@ async function searchResponsibility(page: Page, term: string) {
 
 /** Locates a responsibility row in the directory list by its (unique) name. */
 function listRow(page: Page, name: string) {
-  return page.getByRole("button").filter({ hasText: name });
+  return page
+    .locator('[data-slot="responsibility-list"]')
+    .getByRole("button")
+    .filter({ hasText: name });
 }
 
 async function createResponsibility(

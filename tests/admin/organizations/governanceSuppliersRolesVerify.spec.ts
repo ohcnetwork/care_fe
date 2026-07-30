@@ -162,8 +162,8 @@ test.describe("Admin organization lists", () => {
 
       if (type === "role") {
         const orgRow = page
-          .getByRole("button")
-          .filter({ has: page.locator("svg.lucide-chevron-right") })
+          .locator('[data-slot="responsibility-list"]')
+          .locator('[data-slot="responsibility-row"]')
           .first();
         const emptyState = page.getByText(/no organizations found/i);
         await expect(orgRow.or(emptyState)).toBeVisible();
