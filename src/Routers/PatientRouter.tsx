@@ -14,6 +14,8 @@ import useSidebarState from "@/hooks/useSidebarState";
 
 import PatientUserProvider from "@/Providers/PatientUserProvider";
 import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
+import PatientDiagnosticReports from "@/pages/Patient/PatientDiagnosticReports";
+import PatientMedications from "@/pages/Patient/PatientMedications";
 import PatientIndex from "@/pages/Patient/index";
 import PublicPatientRegistration from "@/pages/PublicAppointments/PatientRegistration";
 import PatientSelect from "@/pages/PublicAppointments/PatientSelect";
@@ -30,6 +32,8 @@ const DashboardRoutes = {
     appointmentId: string;
   }) => <AppointmentSuccess appointmentId={appointmentId} />,
   "/patient/home": () => <PatientIndex />,
+  "/patient/medications": () => <PatientMedications />,
+  "/patient/diagnostic_reports": () => <PatientDiagnosticReports />,
   "/patient/:id": ({ id }: { id: string }) => (
     <PatientProfile id={id} page="demography" />
   ),

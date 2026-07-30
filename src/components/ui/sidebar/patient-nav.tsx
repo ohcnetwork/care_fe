@@ -38,6 +38,16 @@ function generatePatientLinks(
       icon: <CareIcon icon="d-calendar" />,
     },
     {
+      name: t("medications"),
+      url: "/patient/medications",
+      icon: <CareIcon icon="l-tablets" />,
+    },
+    {
+      name: t("diagnostic_reports"),
+      url: "/patient/diagnostic_reports",
+      icon: <CareIcon icon="l-file-medical" />,
+    },
+    {
       name: t("nearby_facilities"),
       url: `/nearby_facilities/?${queryParams.toString()}`,
       icon: <CareIcon icon="d-hospital" />,
