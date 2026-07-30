@@ -1,101 +1,208 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import dayjs from "dayjs";
+import { CalendarPlus, Check, Clock, Share2 } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
+import { formatPatientAge } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { getUserFromLocalStorage } from "@/types/scheduling/schedule";
+import {
+  PublicAppointment,
+  formatScheduleResourceName,
+} from "@/types/scheduling/schedule";
+import { renderTokenNumber } from "@/types/tokens/token/token";
+
+/** Local (floating) ICS timestamp — slot datetimes are timezone naive. */
+const icsStamp = (value: string) => dayjs(value).format("YYYYMMDDTHHmmss");
+
+function buildCalendarFile(appointment: PublicAppointment, title: string) {
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//care//appointment//EN",
+    "BEGIN:VEVENT",
+    `UID:${appointment.id}`,
+    `DTSTART:${icsStamp(appointment.token_slot.start_datetime)}`,
+    `DTEND:${icsStamp(appointment.token_slot.end_datetime)}`,
+    `SUMMARY:${title}`,
+    `LOCATION:${appointment.facility.name}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ];
+  return `data:text/calendar;charset=utf-8,${encodeURIComponent(
+    lines.join("\r\n"),
+  )}`;
+}
+
+function DetailRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex justify-between gap-3.5">
+      <span className="shrink-0 text-[13px] text-gray-500">{label}</span>
+      <span className="text-right text-[13.5px] font-semibold text-gray-900">
+        {children}
+      </span>
+    </div>
+  );
+}
 
 export function AppointmentSuccess(props: { appointmentId: string }) {
   const { appointmentId } = props;
   const { t } = useTranslation();
 
-  const patientUserContext = usePatientContext();
-  const tokenData = patientUserContext?.tokenData;
+  const { tokenData } = usePatientContext();
 
-  const userData = getUserFromLocalStorage();
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["appointment", tokenData.phoneNumber],
+  // Deliberately unscoped: the booking may be for a linked family member
+  // rather than the profile the app is currently showing.
+  const { data, isLoading } = useQuery({
+    queryKey: ["appointment", tokenData?.phoneNumber],
     queryFn: query(PublicAppointmentApi.getAppointments, {
-      headers: {
-        Authorization: `Bearer ${tokenData.token}`,
-      },
+      headers: { Authorization: `Bearer ${tokenData?.token}` },
     }),
-    enabled: !!tokenData.token,
+    enabled: !!tokenData?.token,
   });
 
-  if (error) {
-    toast.error(t("appointment_not_found"));
-  }
+  const appointment = data?.results.find((entry) => entry.id === appointmentId);
 
-  const appointmentData = data?.results.find(
-    (appointment) => appointment.id === appointmentId,
-  );
-
-  if (isLoading || !appointmentData) {
+  if (isLoading) {
     return <Loading />;
   }
 
-  const appointmentTime = appointmentData.token_slot.start_datetime;
-  const appointmentDate = format(appointmentTime, "do MMMM");
-  const appointmentTimeSlot = format(appointmentTime, "hh:mm a");
+  if (!appointment) {
+    return (
+      <div className="mx-auto max-w-[480px] p-10 text-center">
+        <p className="text-sm text-gray-600">{t("appointment_not_found")}</p>
+        <Button className="mt-6" asChild>
+          <Link href="/patient/home">{t("patient_booking__back_to_home")}</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const start = dayjs(appointment.token_slot.start_datetime);
+  const resourceName = formatScheduleResourceName(appointment);
+  const summaryTitle = t("patient_booking__calendar_title", {
+    name: resourceName,
+  });
+
+  const handleShare = async () => {
+    const text = [
+      summaryTitle,
+      start.format("ddd, D MMM YYYY · h:mm A"),
+      appointment.facility.name,
+      appointment.token
+        ? `${t("token")} ${renderTokenNumber(appointment.token)}`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: summaryTitle, text });
+      } catch {
+        // Dismissing the native share sheet is not an error worth surfacing.
+      }
+      return;
+    }
+
+    await navigator.clipboard.writeText(text);
+    toast.success(t("copied_to_clipboard"));
+  };
 
   return (
-    <div className="mx-auto p-2 max-w-3xl">
-      <div className="bg-secondary-100/50 rounded-lg shadow-xs p-12 border border-secondary-400 text-center mb-12">
-        <div className="inline-flex items-center justify-center size-16 rounded-full bg-green-100 mb-6">
-          <CareIcon icon="l-check" className="size-8 text-green-600" />
+    <div className="min-h-dvh bg-gray-50">
+      <div className="mx-auto flex max-w-[480px] flex-col">
+        <div className="bg-primary-700 px-7 pb-12 pt-10 text-center text-white">
+          <span className="mx-auto mb-3.5 flex size-16 items-center justify-center rounded-full bg-white/20">
+            <Check className="size-8" strokeWidth={2.6} />
+          </span>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {t("appointment_booking_success")}
+          </h1>
         </div>
 
-        <h1 className="text-2xl font-medium text-gray-900 mb-2">
-          {t("appointment_booking_success")}
-        </h1>
-      </div>
+        <div className="-mt-6 flex flex-col gap-4 px-4 pb-8">
+          <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            {appointment.token && (
+              <div className="flex flex-col items-center gap-0.5 border-b border-dashed border-gray-300 pb-4">
+                <span className="text-[10.5px] font-bold uppercase tracking-widest text-gray-500">
+                  {t("patient_booking__your_token")}
+                </span>
+                <span className="text-[42px] font-bold leading-none tracking-tight text-primary-700">
+                  {renderTokenNumber(appointment.token)}
+                </span>
+              </div>
+            )}
 
-      <div className="grid grid-cols-2 gap-8">
-        <div>
-          <h2 className="text-sm font-medium text-gray-500 mb-1">
-            {t("doctor_nurse")}:
-          </h2>
-          <p className="text-lg font-medium">{formatName(userData)}</p>
+            <div className="flex flex-col gap-2.5">
+              <DetailRow label={t("patient")}>
+                {appointment.patient.name} ·{" "}
+                {formatPatientAge(appointment.patient, true)}
+              </DetailRow>
+              <DetailRow label={t(appointment.resource_type, { count: 1 })}>
+                {resourceName}
+              </DetailRow>
+              <DetailRow label={t("date")}>
+                {start.format("ddd, D MMM YYYY · h:mm A")}
+              </DetailRow>
+              <DetailRow label={t("facility")}>
+                {appointment.facility.name}
+              </DetailRow>
+              <DetailRow label={t("status")}>{t(appointment.status)}</DetailRow>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2.5">
+            <Button variant="outline" asChild>
+              <a
+                href={buildCalendarFile(appointment, summaryTitle)}
+                download={`appointment-${appointment.id}.ics`}
+              >
+                <CalendarPlus className="size-4" />
+                {t("patient_booking__add_to_calendar")}
+              </a>
+            </Button>
+            <Button variant="outline" onClick={handleShare}>
+              <Share2 className="size-4" />
+              {t("share")}
+            </Button>
+          </div>
+
+          <div className="flex gap-2.5 rounded-2xl border border-gray-200 bg-white p-4">
+            <Clock
+              className="mt-0.5 size-4 shrink-0 text-primary-700"
+              strokeWidth={1.9}
+            />
+            <div className="flex flex-col gap-1">
+              <span className="text-[13px] font-semibold text-gray-900">
+                {t("patient_booking__arrive_early_heading")}
+              </span>
+              <span className="text-[12.5px] leading-relaxed text-gray-600">
+                {t("patient_booking__arrive_early_description")}
+              </span>
+            </div>
+          </div>
+
+          <Button variant="secondary" size="lg" className="h-12" asChild>
+            <Link href="/patient/home">
+              {t("patient_booking__back_to_home")}
+            </Link>
+          </Button>
         </div>
-
-        <div>
-          <h2 className="text-sm font-medium text-gray-500 mb-1">
-            {t("patient")}:
-          </h2>
-          <p className="text-lg font-medium">{appointmentData?.patient.name}</p>
-        </div>
-
-        <div>
-          <h2 className="text-sm font-medium text-gray-500 mb-1">
-            {t("date")}:
-          </h2>
-          <p className="text-lg font-medium">{appointmentDate}</p>
-        </div>
-
-        <div>
-          <h2 className="text-sm font-medium text-gray-500 mb-1">
-            {t("time")}:
-          </h2>
-          <p className="text-lg font-medium">{appointmentTimeSlot}</p>
-        </div>
-      </div>
-
-      <div className="mt-12 text-left space-y-2">
-        <p className="text-gray-900">
-          {formatName(userData)} {t("doc_will_visit_patient")}
-        </p>
-        <p className="text-gray-600">{t("thank_you_for_choosing")}</p>
       </div>
     </div>
   );

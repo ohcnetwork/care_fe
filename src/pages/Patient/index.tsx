@@ -1,207 +1,375 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { Link, navigate } from "raviger";
-import { useState } from "react";
+import {
+  Activity,
+  CalendarDays,
+  CalendarPlus,
+  ChevronRight,
+  FileText,
+} from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { formatDosage } from "@/components/Medicine/utils";
+import {
+  CancelAppointmentButton,
+  isAppointmentCancellable,
+} from "@/components/Patient/CancelAppointmentButton";
+import { PatientAppShell } from "@/components/Patient/PatientAppShell";
 
+import {
+  usePatientAppointments,
+  usePatientDiagnosticReports,
+  usePatientPrescriptions,
+} from "@/hooks/usePatientPortalData";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
-import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
+import patientPortalApi from "@/types/emr/patientPortal/patientPortalApi";
 import {
-  APPOINTMENT_STATUS_COLORS,
+  PRESCRIPTION_STATUS_STYLES,
+  PrescritionList,
+} from "@/types/emr/prescription/prescription";
+import {
   PublicAppointment,
+  SchedulableResourceType,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
+import { renderTokenNumber } from "@/types/tokens/token/token";
 
-import AppointmentDialog from "./components/AppointmentDialog";
+import { reportFlagSummary, reportTitle } from "./records/reportUtils";
+
+const QUICK_ACTIONS = [
+  {
+    key: "book_appointment",
+    href: "/nearby_facilities",
+    icon: CalendarPlus,
+  },
+  {
+    key: "prescriptions",
+    href: "/patient/records?tab=prescriptions",
+    icon: FileText,
+  },
+  {
+    key: "diagnostic_reports",
+    href: "/patient/records?tab=reports",
+    icon: Activity,
+  },
+  { key: "visits", href: "/patient/visits", icon: CalendarDays },
+] as const;
+
+function UpcomingAppointmentCard({
+  appointment,
+}: {
+  appointment: PublicAppointment;
+}) {
+  const { t } = useTranslation();
+  const start = dayjs(appointment.token_slot.start_datetime);
+
+  // The reschedule route is practitioner-scoped, so only offer it for those.
+  const canReschedule =
+    appointment.resource_type === SchedulableResourceType.Practitioner;
+
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-primary-200 bg-primary-50 p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-[10.5px] font-bold uppercase tracking-widest text-primary-700">
+          {t("patient_home__upcoming_appointment")}
+        </span>
+        {appointment.token && (
+          <Badge variant="primary">
+            {t("token")} {renderTokenNumber(appointment.token)}
+          </Badge>
+        )}
+      </div>
+
+      <div className="flex items-start gap-3">
+        <div className="w-[52px] shrink-0 rounded-xl border border-primary-200 bg-white py-1.5 text-center">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-primary-700">
+            {start.format("ddd")}
+          </div>
+          <div className="text-xl font-bold leading-tight text-gray-900">
+            {start.format("DD")}
+          </div>
+          <div className="text-[10px] text-gray-500">{start.format("MMM")}</div>
+        </div>
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="font-bold text-gray-900">
+            {formatScheduleResourceName(appointment)}
+          </span>
+          <span className="text-[13px] text-gray-600">
+            {start.format("h:mm A")} · {appointment.facility.name}
+          </span>
+          <span className="text-[13px] text-gray-600">
+            {t(appointment.status)}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/patient/visits/${appointment.id}`}>
+            {t("view_details")}
+          </Link>
+        </Button>
+        {canReschedule && (
+          <Button size="sm" asChild>
+            <Link
+              href={`/facility/${appointment.facility.id}/appointments/${appointment.resource.id}/reschedule/${appointment.id}`}
+            >
+              {t("reschedule")}
+            </Link>
+          </Button>
+        )}
+        {isAppointmentCancellable(appointment) && (
+          <CancelAppointmentButton
+            appointment={appointment}
+            size="sm"
+            className="col-span-2"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The prescription list payload carries no medicines, so the most recent
+ * prescriptions are expanded to show what was actually prescribed.
+ */
+function RecentMedicinesPreview({
+  prescriptions,
+  token,
+}: {
+  prescriptions: PrescritionList[];
+  token?: string;
+}) {
+  const { t } = useTranslation();
+
+  const details = useQueries({
+    queries: prescriptions.map((prescription) => ({
+      queryKey: ["portal-prescription", prescription.id],
+      queryFn: query(patientPortalApi.getPrescription, {
+        pathParams: { id: prescription.id },
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      enabled: !!token,
+    })),
+  });
+
+  // Carry each prescription's status alongside its medicines so the badge
+  // reflects reality rather than assuming everything shown is ongoing.
+  const medications = details
+    .flatMap((detail, index) =>
+      (detail.data?.medications ?? []).map((medication) => ({
+        medication,
+        status: prescriptions[index]?.status,
+      })),
+    )
+    .slice(0, 3);
+
+  if (details.some((detail) => detail.isLoading)) {
+    return <Skeleton className="h-14 w-full rounded-xl" />;
+  }
+
+  if (!medications.length) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      {medications.map(({ medication, status }) => (
+        <div
+          key={medication.id}
+          className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2.5"
+        >
+          <span className="h-8 w-1.5 shrink-0 rounded-full bg-primary-700" />
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="truncate text-[14.5px] font-semibold text-gray-900">
+              {displayMedicationName(medication)}
+            </span>
+            <span className="truncate text-xs text-gray-600">
+              {formatDosage(medication.dosage_instruction?.[0]) || "-"}
+            </span>
+          </div>
+          {status && (
+            <Badge
+              variant={PRESCRIPTION_STATUS_STYLES[status]}
+              className="shrink-0"
+            >
+              {t(status)}
+            </Badge>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SectionHeader({ title, href }: { title: string; href: string }) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-baseline justify-between">
+      <span className="font-bold text-gray-900">{title}</span>
+      <Link href={href} className="text-[13px] font-semibold text-primary-700">
+        {t("see_all")}
+      </Link>
+    </div>
+  );
+}
 
 function PatientPortalIndex() {
   const { t } = useTranslation();
+  const { selectedPatient, tokenData, isLoadingPatients } = usePatientContext();
 
-  const [selectedAppointment, setSelectedAppointment] = useState<
-    PublicAppointment | undefined
-  >();
-  const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
+  const { nextAppointment, isLoading: isLoadingAppointments } =
+    usePatientAppointments();
+  const { prescriptions, isLoading: isLoadingPrescriptions } =
+    usePatientPrescriptions();
+  const { ready: readyReports, isLoading: isLoadingReports } =
+    usePatientDiagnosticReports();
 
-  const patient = usePatientContext();
-  const selectedPatient = patient?.selectedPatient;
-  const tokenData = patient?.tokenData;
+  const isLoading =
+    isLoadingPatients ||
+    isLoadingAppointments ||
+    isLoadingPrescriptions ||
+    isLoadingReports;
 
-  if (!tokenData) {
-    navigate("/login");
-  }
+  const hasNothingRecorded =
+    !isLoading &&
+    !nextAppointment &&
+    !prescriptions.length &&
+    !readyReports.length;
 
-  const { data: appointmentsData, isLoading } = useQuery({
-    queryKey: ["appointment", tokenData?.phoneNumber],
-    queryFn: query(PublicAppointmentApi.getAppointments, {
-      headers: {
-        Authorization: `Bearer ${tokenData?.token}`,
-      },
-    }),
-    enabled: !!tokenData?.token,
-  });
-
-  if (isLoading) {
-    return (
-      <div>
-        <div className="flex justify-between w-full mb-8">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-8 w-48" />
-        </div>
-        <Skeleton className="h-8 w-48" />
-        <div className="grid gap-4 mt-4">
-          <CardListSkeleton count={6} />
-        </div>
-      </div>
-    );
-  }
-
-  const appointments = appointmentsData?.results
-    .filter((appointment) => appointment?.patient.id == selectedPatient?.id)
-    .sort(
-      (a, b) =>
-        new Date(a.token_slot.start_datetime).getTime() -
-        new Date(b.token_slot.start_datetime).getTime(),
-    );
-
-  const pastAppointments = appointments?.filter((appointment) =>
-    dayjs().isAfter(dayjs(appointment.token_slot.start_datetime)),
-  );
-
-  const scheduledAppointments = appointments?.filter((appointment) =>
-    dayjs().isBefore(dayjs(appointment.token_slot.start_datetime)),
-  );
-
-  const getAppointmentCard = (appointment: PublicAppointment) => {
-    const appointmentTime = dayjs(appointment.token_slot.start_datetime);
-    const appointmentDate = appointmentTime.format("DD MMMM YYYY");
-    const appointmentTimeSlot = appointmentTime.format("hh:mm a");
-    return (
-      <Card key={appointment.id} className="shadow-sm overflow-hidden">
-        <CardHeader className="px-6 pb-3 bg-secondary-200 flex flex-col md:flex-row justify-between">
-          <CardTitle>
-            <div className="flex flex-col">
-              <span className="text-xs font-medium">
-                {t(appointment.resource_type, { count: 1 })}:{" "}
-              </span>
-              <span className="text-sm">
-                {formatScheduleResourceName(appointment)}
-              </span>
-            </div>
-          </CardTitle>
-          <Button
-            variant="secondary"
-            className="border border-secondary-400"
-            onClick={() => {
-              setSelectedAppointment(appointment);
-              setAppointmentDialogOpen(true);
-            }}
-          >
-            <span>{t("view_details")}</span>
-          </Button>
-        </CardHeader>
-
-        <CardContent className="mt-2 pt-2 px-6 pb-3">
-          <div className="flex flex-col md:flex-row gap-4 justify-between">
-            <div className="flex flex-row gap-3 justify-between md:flex-row md:flex-grow md:mr-6">
-              <div className="flex flex-col gap-0 items-start md:flex-grow md:mr-4">
-                <span className="text-xs font-medium">{t("location")}: </span>
-                <span className="text-sm">
-                  <Link href={`/facility/${appointment.facility.id}`}>
-                    <span className="text-sm underline underline-offset-2 hover:cursor-pointer">
-                      {appointment.facility?.name}
-                    </span>
-                  </Link>
-                </span>
-              </div>
-              <div className="flex flex-col gap-0 items-start md:flex-none">
-                <span className="text-xs font-medium">{t("status")}: </span>
-                <span>
-                  <Badge
-                    variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
-                  >
-                    {t(appointment.status)}
-                  </Badge>
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-row gap-3 justify-between md:flex-none">
-              <div className="flex flex-col gap-0 items-start">
-                <span className="text-xs font-medium">{t("date")}: </span>
-                <span className="text-sm">{appointmentDate}</span>
-              </div>
-              <div className="flex flex-col gap-0 items-start">
-                <span className="text-xs font-medium">{t("time_slot")}: </span>
-                <span className="text-sm">{appointmentTimeSlot}</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const getAppointmentCardContent = (
-    appointments: PublicAppointment[] | undefined,
-  ) => {
-    return (
-      <div className="grid gap-4 mb-2">
-        {appointments && appointments.length > 0 ? (
-          appointments.map((appointment) => getAppointmentCard(appointment))
-        ) : (
-          <div className="col-span-full text-center bg-white shadow-sm rounded p-4 font-medium">
-            {t("no_appointments")}
-          </div>
-        )}
-      </div>
-    );
-  };
+  const firstName = selectedPatient?.name.split(" ")[0] ?? "";
 
   return (
-    <>
-      <AppointmentDialog
-        setAppointmentDialogOpen={setAppointmentDialogOpen}
-        appointment={selectedAppointment}
-        open={appointmentDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedAppointment(undefined);
-          }
-          setAppointmentDialogOpen(open);
-        }}
-      />
-      <div className="container mx-auto mt-2">
-        <div className="flex justify-between w-full">
-          <span className="text-xl font-bold">{t("appointments")}</span>
-          <Button variant="primary_gradient" className="sticky right-0" asChild>
-            <Link href="/facilities">
-              <span>{t("book_appointment")}</span>
-            </Link>
-          </Button>
+    <PatientAppShell>
+      <div className="flex flex-col gap-4 p-4">
+        <div>
+          <h2 className="text-[22px] font-bold tracking-tight text-gray-900">
+            {t("patient_home__greeting", { name: firstName })}
+          </h2>
+          <p className="text-[13.5px] text-gray-600">
+            {dayjs().format("dddd, D MMMM")}
+            {selectedPatient?.geo_organization?.name &&
+              ` · ${selectedPatient.geo_organization.name}`}
+          </p>
         </div>
-        <Tabs defaultValue="scheduled" className="mt-4">
-          <TabsList>
-            <TabsTrigger value="scheduled">{t("scheduled")}</TabsTrigger>
-            <TabsTrigger value="history">{t("history")}</TabsTrigger>
-          </TabsList>
-          <TabsContent value="scheduled">
-            {getAppointmentCardContent(scheduledAppointments)}
-          </TabsContent>
-          <TabsContent value="history">
-            {getAppointmentCardContent(pastAppointments)}
-          </TabsContent>
-        </Tabs>
+
+        {isLoading ? (
+          <>
+            <Skeleton className="h-44 w-full rounded-2xl" />
+            <Skeleton className="h-20 w-full rounded-2xl" />
+          </>
+        ) : hasNothingRecorded ? (
+          <div className="flex flex-col items-center gap-3 rounded-2xl border-[1.5px] border-dashed border-gray-300 bg-white px-5 py-7 text-center">
+            <span className="flex size-16 items-center justify-center rounded-2xl bg-gray-100">
+              <CalendarDays
+                className="size-7 text-gray-400"
+                strokeWidth={1.6}
+              />
+            </span>
+            <div>
+              <span className="block text-[17px] font-bold text-gray-900">
+                {t("patient_home__empty_heading")}
+              </span>
+              <span className="mt-1 block text-[13.5px] leading-relaxed text-gray-600">
+                {t("patient_home__empty_description", { name: firstName })}
+              </span>
+            </div>
+            <Button className="w-full" asChild>
+              <Link href="/nearby_facilities">
+                {t("patient_home__book_first_appointment")}
+              </Link>
+            </Button>
+          </div>
+        ) : (
+          <>
+            {nextAppointment && (
+              <UpcomingAppointmentCard appointment={nextAppointment} />
+            )}
+
+            <div className="grid grid-cols-4 gap-2">
+              {QUICK_ACTIONS.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <Link
+                    key={action.key}
+                    href={action.href}
+                    className="flex flex-col items-center gap-1.5 rounded-2xl border border-gray-200 bg-white px-1 py-3 hover:border-primary-200 hover:bg-primary-50"
+                  >
+                    <Icon
+                      className="size-5 text-primary-700"
+                      strokeWidth={1.8}
+                    />
+                    <span className="text-center text-[11px] font-semibold leading-tight text-gray-900">
+                      {t(action.key)}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {!!prescriptions.length && (
+              <div className="flex flex-col gap-2">
+                <SectionHeader
+                  title={t("patient_home__recent_prescriptions")}
+                  href="/patient/records?tab=prescriptions"
+                />
+                <RecentMedicinesPreview
+                  prescriptions={prescriptions.slice(0, 2)}
+                  token={tokenData?.token}
+                />
+              </div>
+            )}
+
+            {!!readyReports.length && (
+              <div className="flex flex-col gap-2">
+                <SectionHeader
+                  title={t("patient_home__recent_reports")}
+                  href="/patient/records?tab=reports"
+                />
+                {readyReports.slice(0, 2).map((report) => {
+                  const flags = reportFlagSummary(report);
+                  return (
+                    <Link
+                      key={report.id}
+                      href={`/patient/records/reports/${report.id}`}
+                      className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-gray-300"
+                    >
+                      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="truncate text-[14.5px] font-semibold text-gray-900">
+                          {reportTitle(report, t)}
+                        </span>
+                        <span className="truncate text-xs text-gray-600">
+                          {dayjs(report.created_date).format("DD MMM YYYY")}
+                        </span>
+                      </div>
+                      {flags > 0 ? (
+                        <Badge variant="yellow">
+                          {t("patient_records__flagged_count", {
+                            count: flags,
+                          })}
+                        </Badge>
+                      ) : (
+                        <Badge variant="green">{t("normal")}</Badge>
+                      )}
+                      <ChevronRight className="size-4 shrink-0 text-gray-400" />
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </>
+    </PatientAppShell>
   );
 }
 

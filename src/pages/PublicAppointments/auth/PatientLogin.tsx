@@ -1,25 +1,15 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import careConfig from "@careConfig";
 import dayjs from "dayjs";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { AlertCircle, Lock } from "lucide-react";
 import { navigate } from "raviger";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { isValidPhoneNumber } from "react-phone-number-input";
-import { toast } from "sonner";
-import { z } from "zod";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   InputOTP,
   InputOTPGroup,
@@ -31,227 +21,250 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import CircularProgress from "@/components/Common/CircularProgress";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
+import { usePatientOtpLogin } from "@/hooks/usePatientOtpLogin";
 
-import { LoginByOtpResponse, TokenData } from "@/types/otp/otp";
-import otpApi from "@/types/otp/otpApi";
-import mutate from "@/Utils/request/mutate";
-import { goBack } from "@/Utils/utils";
+import PatientAuthLayout from "./PatientAuthLayout";
 
-const FormSchema = z.object({
-  pin: z.string().min(5, {
-    message: "Your one-time password must be 5 characters.",
-  }),
-});
+/** Tokens are minted for 15 minutes; re-use one that still has life in it. */
+const TOKEN_FRESHNESS_MINUTES = 14;
 
-export default function PatientLogin({
-  facilityId,
-  staffId,
-  page,
-}: {
-  facilityId: string;
-  staffId: string;
-  page: string;
-}) {
+const formatCountdown = (seconds: number) =>
+  `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(
+    seconds % 60,
+  ).padStart(2, "0")}`;
+
+interface PatientLoginProps {
+  /** Where to land after a successful verification. */
+  redirectTo?: string;
+}
+
+export default function PatientLogin({ redirectTo }: PatientLoginProps) {
   const { t } = useTranslation();
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [error, setError] = useState("");
-  const OTPForm = useForm({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      pin: "",
-    },
-  });
-  const { patientLogin } = useAuthContext();
-  const { patientToken: tokenData } = useAuthContext();
+  const { patientToken } = useAuthContext();
+  const [hasConsented, setHasConsented] = useState(false);
 
-  if (
-    tokenData &&
-    Object.keys(tokenData).length > 0 &&
-    dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
-  ) {
-    navigate(
-      `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
+  const {
+    otpLength,
+    phone,
+    otp,
+    isOtpSent,
+    phoneError,
+    otpError,
+    countdown,
+    isSendingOtp,
+    isVerifyingOtp,
+    isPhoneValid,
+    isOtpComplete,
+    updatePhone,
+    updateOtp,
+    sendOtp,
+    resendOtp,
+    verifyOtp,
+    restartLogin,
+  } = usePatientOtpLogin({ redirectTo });
+
+  const hasFreshToken =
+    !!patientToken?.token &&
+    dayjs(patientToken.createdAt).isAfter(
+      dayjs().subtract(TOKEN_FRESHNESS_MINUTES, "minutes"),
     );
-  }
-  const { mutate: sendOTP, isPending: isSendOTPLoading } = useMutation({
-    mutationFn: mutate(otpApi.send),
-    onSuccess: () => {
-      toast.success(t("send_otp_success"));
-      if (page === "send") {
-        navigate(`/facility/${facilityId}/appointments/${staffId}/otp/verify`);
-      }
-    },
-  });
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!isValidPhoneNumber(phoneNumber)) {
-      setError(t("phone_number_validation_error"));
-      return;
+  useEffect(() => {
+    if (hasFreshToken) {
+      navigate(redirectTo ?? "/patient/select-profile");
     }
-    sendOTP({ phone_number: phoneNumber });
-  };
+  }, [hasFreshToken, redirectTo]);
 
-  const { mutate: verifyOTP, isPending: isVerifyOTPLoading } = useMutation({
-    mutationFn: mutate(otpApi.login),
-    onSuccess: (response: LoginByOtpResponse) => {
-      if (response.access) {
-        const tokenData: TokenData = {
-          token: response.access,
-          phoneNumber: phoneNumber,
-          createdAt: new Date().toISOString(),
-        };
-        patientLogin(
-          tokenData,
-          `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
-        );
-      }
-    },
-  });
-
-  const handleVerifySubmit = async (data: z.infer<typeof FormSchema>) => {
-    verifyOTP({ phone_number: phoneNumber, otp: data.pin });
-  };
-
-  const renderPhoneNumberForm = () => {
+  if (isOtpSent) {
     return (
-      <div className="mt-4 flex flex-col gap-2">
-        <span className="text-xl font-semibold">
-          {t("enter_phone_number_to_login_register")}
-        </span>
-        <form
-          onSubmit={handleSubmit}
-          className="flex mt-2 flex-col gap-4 shadow-sm border border-gray-200 p-8 rounded-lg"
-        >
-          <div className="space-y-2">
-            <Label>{t("phone_number")}</Label>
-            <PhoneInput
-              value={phoneNumber}
-              onChange={(value) => {
-                setPhoneNumber(value || "");
-                setError("");
-              }}
-              placeholder={t("enter_phone_number")}
-              disabled={isSendOTPLoading}
-            />
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-          </div>
-          <Button
-            variant="primary_gradient"
-            type="submit"
-            disabled={isSendOTPLoading}
+      <PatientAuthLayout onBack={restartLogin}>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          {t("patient_login__otp_heading")}
+        </h1>
+        <p className="mt-2.5 text-[15px] leading-relaxed text-gray-600">
+          {t("patient_login__otp_sent_to", { phone })}
+          {" · "}
+          <button
+            type="button"
+            onClick={restartLogin}
+            className="font-semibold text-primary-700 hover:underline"
           >
-            <span className="bg-linear-to-b from-white/15 to-transparent"></span>
-            {isSendOTPLoading ? (
+            {t("patient_login__back_to_login")}
+          </button>
+        </p>
+
+        <form
+          className="mt-9"
+          onSubmit={(event) => {
+            event.preventDefault();
+            verifyOtp();
+          }}
+        >
+          <InputOTP
+            value={otp}
+            onChange={updateOtp}
+            maxLength={otpLength}
+            pattern={REGEXP_ONLY_DIGITS}
+            autoComplete="one-time-code"
+            autoFocus
+            containerClassName="gap-2.5"
+            aria-label={t("enter_otp")}
+            aria-invalid={!!otpError}
+          >
+            {Array.from({ length: otpLength }).map((_, index) => (
+              <InputOTPGroup key={index} className="flex-1">
+                <InputOTPSlot
+                  index={index}
+                  className={cn(
+                    "h-14 w-full rounded-xl! border! text-2xl font-bold",
+                    otpError
+                      ? "border-red-500! text-red-600"
+                      : "border-gray-300!",
+                  )}
+                />
+              </InputOTPGroup>
+            ))}
+          </InputOTP>
+
+          {otpError && (
+            <div className="mt-3.5 flex items-start gap-2.5 text-red-600">
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+              <p className="text-[13px] font-semibold leading-snug">
+                {t(otpError)}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-5 flex items-center justify-between">
+            {countdown > 0 ? (
+              <>
+                <span className="text-[13.5px] text-gray-600">
+                  {t("patient_login__resend_in")}{" "}
+                  <span className="font-mono font-bold text-gray-900">
+                    {formatCountdown(countdown)}
+                  </span>
+                </span>
+                <span className="text-[13.5px] font-semibold text-gray-400">
+                  {t("resend_otp")}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-[13.5px] text-gray-600">
+                  {t("didnt_receive_a_message")}
+                </span>
+                <button
+                  type="button"
+                  onClick={resendOtp}
+                  disabled={isSendingOtp}
+                  className="text-[13.5px] font-bold text-primary-700 hover:underline disabled:opacity-50"
+                >
+                  {t("resend_otp")}
+                </button>
+              </>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            size="lg"
+            className="mt-8 h-12 w-full text-base"
+            disabled={!isOtpComplete || isVerifyingOtp}
+          >
+            {isVerifyingOtp ? (
               <CircularProgress className="text-white" />
             ) : (
-              t("send_otp")
+              t("patient_login__verify_continue")
             )}
           </Button>
         </form>
-      </div>
-    );
-  };
 
-  const renderVerifyForm = () => {
-    return (
-      <div className="mt-4 flex flex-col gap-1">
-        <span className="text-xl font-semibold">
-          {t("please_check_your_messages")}
-        </span>
-        <span className="text-sm">
-          {t("we_ve_sent_you_a_code_to")}{" "}
-          <span className="font-bold">{phoneNumber}</span>
-        </span>
-        <Form {...OTPForm}>
-          <form
-            onSubmit={OTPForm.handleSubmit(handleVerifySubmit)}
-            className="flex mt-2 flex-col gap-4 shadow-sm border border-gray-200 p-8 rounded-lg"
-          >
-            <FormField
-              control={OTPForm.control}
-              name="pin"
-              render={({ field }) => (
-                <FormItem className="flex flex-col items-center">
-                  <FormLabel className="text-base flex-wrap">
-                    {t("enter_the_verification_code")}
-                  </FormLabel>
-                  <FormControl>
-                    <InputOTP
-                      maxLength={5}
-                      {...field}
-                      className="focus:ring-0"
-                      autoFocus
-                    >
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                      </InputOTPGroup>
-                      <InputOTPGroup>
-                        <InputOTPSlot index={1} />
-                      </InputOTPGroup>
-                      <InputOTPGroup>
-                        <InputOTPSlot index={2} />
-                      </InputOTPGroup>
-                      <InputOTPGroup>
-                        <InputOTPSlot index={3} />
-                      </InputOTPGroup>
-                      <InputOTPGroup>
-                        <InputOTPSlot index={4} />
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button
-              variant="primary_gradient"
-              type="submit"
-              className="w-full h-12 text-lg"
-              disabled={isVerifyOTPLoading}
-            >
-              {isVerifyOTPLoading ? (
-                <CircularProgress className="text-white" />
-              ) : (
-                t("verify_otp")
-              )}
-            </Button>
-            {isSendOTPLoading ? (
-              <div className="w-full flex justify-center">
-                <CircularProgress className="text-secondary-800" />
-              </div>
-            ) : (
-              <a
-                className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
-                onClick={() => sendOTP({ phone_number: phoneNumber })}
-              >
-                {t("didnt_receive_a_message")} {t("resend_otp")}
-              </a>
-            )}
-          </form>
-        </Form>
-      </div>
+        <div className="mt-6 flex gap-2.5 rounded-lg border border-gray-200 bg-gray-50 p-3.5">
+          <Lock className="mt-0.5 size-4 shrink-0 text-primary-700" />
+          <p className="text-[12.5px] leading-snug text-gray-600">
+            {t("patient_login__otp_security_note")}
+          </p>
+        </div>
+      </PatientAuthLayout>
     );
-  };
+  }
 
   return (
-    <div className="container max-w-3xl mx-auto p-10">
-      <Button
-        variant="outline"
-        className="border border-secondary-400"
-        onClick={() =>
-          page === "send"
-            ? goBack(`/facility/${facilityId}`)
-            : navigate(
-                `/facility/${facilityId}/appointments/${staffId}/otp/send`,
-              )
-        }
+    <PatientAuthLayout
+      showLogo
+      footer={
+        careConfig.patientSupportPhone && (
+          <p className="text-center text-[13px] text-gray-600">
+            {t("patient_login__helpline")}{" "}
+            <a
+              href={`tel:${careConfig.patientSupportPhone}`}
+              className="font-semibold text-primary-700 hover:underline"
+            >
+              {careConfig.patientSupportPhone}
+            </a>
+          </p>
+        )
+      }
+    >
+      <h1 className="text-[28px] font-bold leading-tight tracking-tight text-gray-900">
+        {t("patient_login__heading")}
+      </h1>
+      <p className="mt-2.5 text-[15px] leading-relaxed text-gray-600">
+        {t("patient_login__subheading", { length: otpLength })}
+      </p>
+
+      <form
+        className="mt-8"
+        onSubmit={(event) => {
+          event.preventDefault();
+          sendOtp();
+        }}
       >
-        <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
-        <span className="text-sm underline">{t("back")}</span>
-      </Button>
-      {page === "send" ? renderPhoneNumberForm() : renderVerifyForm()}
-    </div>
+        <Label htmlFor="patient-login-phone" className="mb-2 block text-[13px]">
+          {t("phone_number")}
+        </Label>
+        <PhoneInput
+          id="patient-login-phone"
+          value={phone}
+          onChange={updatePhone}
+          placeholder={t("enter_phone_number")}
+          disabled={isSendingOtp}
+          autoFocus
+        />
+        {phoneError && (
+          <p className="mt-2 text-sm text-red-500">{t(phoneError)}</p>
+        )}
+
+        {/* Sibling label rather than a wrapping one: a <label> around a Radix
+            checkbox forwards its click to the button and double-toggles it. */}
+        <div className="mt-5 flex items-start gap-2.5">
+          <Checkbox
+            id="patient-login-consent"
+            checked={hasConsented}
+            onCheckedChange={(checked) => setHasConsented(checked === true)}
+            className="mt-px"
+          />
+          <Label
+            htmlFor="patient-login-consent"
+            className="cursor-pointer text-[12.5px] font-normal leading-snug text-gray-600"
+          >
+            {t("patient_login__consent")}
+          </Label>
+        </div>
+
+        <Button
+          type="submit"
+          size="lg"
+          className="mt-7 h-12 w-full text-base"
+          disabled={!isPhoneValid || !hasConsented || isSendingOtp}
+        >
+          {isSendingOtp ? (
+            <CircularProgress className="text-white" />
+          ) : (
+            t("send_otp")
+          )}
+        </Button>
+      </form>
+    </PatientAuthLayout>
   );
 }

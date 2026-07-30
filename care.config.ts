@@ -79,8 +79,7 @@ const careConfig = {
       : undefined),
 
   defaultDischargeDisposition: env.REACT_DEFAULT_DISCHARGE_DISPOSITION as
-    | EncounterDischargeDisposition
-    | undefined,
+    EncounterDischargeDisposition | undefined,
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
@@ -245,6 +244,18 @@ const careConfig = {
   resendOtpTimeout: env.REACT_APP_RESEND_OTP_TIMEOUT
     ? parseInt(env.REACT_APP_RESEND_OTP_TIMEOUT, 10)
     : 30,
+
+  /**
+   * Number of digits in the OTP sent for patient login and password reset.
+   * Must match the backend's `OTP_LENGTH` setting, which defaults to 5.
+   */
+  otpLength: env.REACT_OTP_LENGTH ? parseInt(env.REACT_OTP_LENGTH, 5) : 5,
+
+  /**
+   * Health helpline shown to patients who cannot sign in. Deployment specific,
+   * so the prompt is hidden entirely when this is unset.
+   */
+  patientSupportPhone: env.REACT_PATIENT_SUPPORT_PHONE,
 
   imageUploadMaxSizeInMB: env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)

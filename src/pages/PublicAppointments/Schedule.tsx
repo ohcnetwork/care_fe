@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isWithinInterval } from "date-fns";
+import dayjs from "dayjs";
 import { Loader2 } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -8,23 +9,24 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import Calendar from "@/CAREUI/interactive/Calendar";
-
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
+import { PatientSwitcherSheet } from "@/components/Patient/PatientSwitcherSheet";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString, formatName, goBack } from "@/Utils/utils";
-import { TokenSlotButton } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
+import {
+  dateQueryString,
+  formatName,
+  formatPatientAge,
+  goBack,
+} from "@/Utils/utils";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
@@ -35,6 +37,17 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
+import BookingStepLayout from "./BookingStepLayout";
+
+/** Facility → practitioner → slot → reason → confirmation. */
+const TOTAL_STEPS = 5;
+const SLOT_STEP = 3;
+const REASON_STEP = 4;
+
+/** Days offered in the horizontal date strip. */
+const DATE_STRIP_DAYS = 6;
+const REASON_MAX_LENGTH = 300;
+
 interface AppointmentsProps {
   facilityId: string;
   staffId: string;
@@ -44,22 +57,26 @@ interface AppointmentsProps {
 export function ScheduleAppointment(props: AppointmentsProps) {
   const { t } = useTranslation();
   const { facilityId, staffId, appointmentId } = props;
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
-  const [reason, setReason] = useState("");
   const queryClient = useQueryClient();
 
-  const patientUserContext = usePatientContext();
-  const tokenData = patientUserContext?.tokenData;
+  const { tokenData, selectedPatient } = usePatientContext();
 
-  if (!staffId) {
-    toast.error(t("staff_username_not_found"));
-    navigate(`/facility/${facilityId}`);
-  } else if (!tokenData) {
-    toast.error(t("phone_number_not_found"));
-    navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
-  }
+  const [step, setStep] = useState<typeof SLOT_STEP | typeof REASON_STEP>(
+    SLOT_STEP,
+  );
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
+  // Undefined until the patient types, so a rescheduled appointment's existing
+  // note can seed the field without an effect that fights user input.
+  const [reasonDraft, setReasonDraft] = useState<string>();
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+
+  useEffect(() => {
+    if (!staffId) {
+      toast.error(t("staff_username_not_found"));
+      navigate(`/facility/${facilityId}`);
+    }
+  }, [staffId, facilityId, t]);
 
   const { data: appointmentData } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],
@@ -70,26 +87,18 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   });
 
   const appointment = appointmentData?.results.find(
-    (appointment) => appointment.id === appointmentId,
+    (entry) => entry.id === appointmentId,
   );
 
-  useEffect(() => {
-    if (appointment) {
-      setReason(appointment.note);
-    }
-  }, [appointment]);
+  const reason = reasonDraft ?? appointment?.note ?? "";
 
-  const { data: facilityResponse, error: facilityError } = useQuery({
+  const { data: facilityResponse } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(publicFacilityApi.getAny, {
       pathParams: { id: facilityId },
       silent: true,
     }),
   });
-
-  if (facilityError) {
-    toast.error(t("error_fetching_facility_data"));
-  }
 
   const { data: userData, error: userError } = useQuery({
     queryKey: ["user", facilityId, staffId],
@@ -116,26 +125,23 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         day: dateQueryString(selectedDate),
       },
       headers: {
-        Authorization: `Bearer ${tokenData.token}`,
+        Authorization: `Bearer ${tokenData?.token}`,
       },
       silent: true,
     }),
-    select: (data: { results: TokenSlot[] }) => {
-      return data.results.filter((slot) => {
-        // Filter out slots that are happening right now
+    select: (data: { results: TokenSlot[] }) =>
+      data.results.filter((slot) => {
+        // Skip the slot currently in progress and, when rescheduling, the
+        // appointment's own slot.
         const isCurrentlyActive = isWithinInterval(new Date(), {
           start: slot.start_datetime,
           end: slot.end_datetime,
         });
-
-        // Filter out the current appointment's slot when rescheduling
         const isCurrentAppointmentSlot =
           appointment && slot.id === appointment.token_slot.id;
-
         return !isCurrentlyActive && !isCurrentAppointmentSlot;
-      });
-    },
-    enabled: !!selectedDate && !!tokenData.token,
+      }),
+    enabled: !!selectedDate && !!tokenData?.token,
   });
 
   if (slotsQuery.error) {
@@ -155,16 +161,13 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       mutationFn: mutate(PublicAppointmentApi.createAppointment, {
         pathParams: { id: selectedSlot?.id || "" },
         headers: {
-          Authorization: `Bearer ${tokenData.token}`,
+          Authorization: `Bearer ${tokenData?.token}`,
         },
       }),
       onSuccess: (data: PublicAppointment) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({
-          queryKey: [
-            ["patients", tokenData.phoneNumber],
-            ["appointment", tokenData.phoneNumber],
-          ],
+          queryKey: ["appointment", tokenData?.phoneNumber],
         });
         navigate(`/facility/${facilityId}/appointments/${data.id}/success`, {
           replace: true,
@@ -176,188 +179,252 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     useMutation({
       mutationFn: mutate(PublicAppointmentApi.cancelAppointment, {
         headers: {
-          Authorization: `Bearer ${tokenData.token}`,
+          Authorization: `Bearer ${tokenData?.token}`,
         },
       }),
-      onSuccess: (appointment: PublicAppointment) => {
+      onSuccess: (cancelled: PublicAppointment) => {
         toast.success(t("appointment_cancelled"));
         queryClient.invalidateQueries({
-          queryKey: ["appointment", tokenData.phoneNumber],
+          queryKey: ["appointment", tokenData?.phoneNumber],
         });
-        createAppointment({
-          note: reason,
-          patient: appointment.patient.id,
-        });
+        createAppointment({ note: reason, patient: cancelled.patient.id });
       },
     });
 
-  const handleRescheduleAppointment = (appointment: PublicAppointment) => {
-    cancelAppointment({
-      appointment: appointment.id,
-      patient: appointment.patient.id,
-    });
+  const isSubmitting = isCreatingAppointment || isCancellingAppointment;
+
+  // Changing the day invalidates any slot already picked for the previous one.
+  const selectDate = (date: Date) => {
+    setSelectedDate(date);
+    setSelectedSlot(undefined);
   };
 
-  useEffect(() => {
-    setSelectedSlot(undefined);
-  }, [selectedDate]);
-
-  const renderDay = (date: Date) => {
-    const isSelected = date.toDateString() === selectedDate?.toDateString();
-
-    return (
-      <button
-        onClick={() => setSelectedDate(date)}
-        className={cn(
-          "h-full w-full hover:bg-gray-50 rounded-lg",
-          isSelected ? "bg-white ring-2 ring-primary-500" : "bg-gray-100",
-        )}
-      >
-        <span>{date.getDate()}</span>
-      </button>
-    );
+  const handleConfirm = () => {
+    if (appointmentId && appointment) {
+      cancelAppointment({
+        appointment: appointment.id,
+        patient: appointment.patient.id,
+      });
+      return;
+    }
+    if (!selectedPatient) {
+      toast.error(t("select_patient"));
+      return;
+    }
+    createAppointment({ note: reason, patient: selectedPatient.id });
   };
 
   if (!userData) {
     return <Loading />;
   }
 
-  return (
-    <div className="flex flex-col">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex px-2 pb-4 justify-start">
-          <Button
-            variant="outline"
-            className="border border-secondary-400"
-            onClick={() => goBack(`/facility/${facilityId}`)}
-          >
-            <span className="text-sm underline">{t("back")}</span>
-          </Button>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="sm:w-1/3">
-            <Card className={cn("overflow-hidden bg-white")}>
-              <div className="flex flex-col">
-                <div className="flex flex-col gap-4 py-4 justify-between h-full">
-                  <Avatar
-                    imageUrl={userData.profile_picture_url}
-                    name={formatName(userData, true)}
-                    className="size-96 self-center rounded-sm"
-                  />
+  const practitionerName = formatName(userData);
+  const dateStrip = Array.from({ length: DATE_STRIP_DAYS }, (_, offset) =>
+    dayjs().add(offset, "day"),
+  );
+  const slotGroups = groupSlotsByAvailability(slotsQuery.data ?? []);
 
-                  <div className="flex grow flex-col px-4">
-                    <h3 className="truncate text-xl font-semibold">
-                      {formatName(userData)}
-                    </h3>
-                    <p className="text-sm text-gray-500 truncate">
-                      {userData.user_type}
-                    </p>
-
-                    {/* <p className="text-xs mt-4">Education: </p>
-                    <p className="text-sm text-gray-500 truncate">
-                      {userData.qualification}
-                    </p> */}
-                  </div>
-                </div>
-
-                <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
-                  <div className="flex justify-between items-center">
-                    <div className="text-sm text-gray-500">
-                      {facilityResponse?.name}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
-          <div className="flex-1 mx-2">
-            <div className="flex flex-col gap-6">
-              <span className="text-base font-semibold">
-                {appointmentId
-                  ? t("reschedule_appointment_with")
-                  : t("book_an_appointment_with")}{" "}
-                {formatName(userData)}
-              </span>
-              <div>
-                <Label className="mb-2">{t("note")}</Label>
-                <Textarea
-                  placeholder={t("appointment_note")}
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                />
-              </div>
-              <Calendar
-                month={selectedMonth}
-                onMonthChange={setSelectedMonth}
-                renderDay={renderDay}
-                setSelectedDate={setSelectedDate}
-                highlightToday={false}
-              />
-              <div className="space-y-6">
-                {slotsQuery.data && slotsQuery.data.length > 0 ? (
-                  groupSlotsByAvailability(slotsQuery.data).map(
-                    ({ availability, slots }) => (
-                      <div key={availability.name}>
-                        <h4 className="text-lg font-semibold mb-3">
-                          {availability.name}
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {slots.map((slot) => (
-                            <TokenSlotButton
-                              key={slot.id}
-                              slot={slot}
-                              availability={availability}
-                              selectedSlotId={selectedSlot?.id}
-                              onClick={() =>
-                                setSelectedSlot({ ...slot, availability })
-                              }
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ),
-                  )
-                ) : (
-                  <div>{t("no_slots_available")}</div>
-                )}
+  if (step === REASON_STEP) {
+    return (
+      <BookingStepLayout
+        title={t("patient_booking__reason_for_visit")}
+        step={REASON_STEP}
+        totalSteps={TOTAL_STEPS}
+        onBack={() => setStep(SLOT_STEP)}
+        footer={
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between rounded-xl bg-gray-100 px-3.5 py-2.5">
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate text-[11.5px] text-gray-500">
+                  {selectedSlot &&
+                    dayjs(selectedSlot.start_datetime).format(
+                      "ddd D MMM · h:mm A",
+                    )}
+                </span>
+                <span className="truncate text-[13.5px] font-semibold text-gray-900">
+                  {practitionerName}
+                </span>
               </div>
             </div>
+            <Button
+              size="lg"
+              className="h-12 w-full text-base"
+              disabled={isSubmitting || !selectedSlot}
+              onClick={handleConfirm}
+            >
+              {isSubmitting && (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              )}
+              {appointmentId
+                ? t("reschedule_appointment")
+                : t("patient_booking__confirm_appointment")}
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-4 p-4">
+          {selectedPatient && !appointmentId && (
+            <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3.5">
+              <Avatar
+                name={selectedPatient.name}
+                className="size-9 shrink-0 rounded-full"
+              />
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-[14.5px] font-bold text-gray-900">
+                  {selectedPatient.name} ·{" "}
+                  {formatPatientAge(selectedPatient, true)}
+                </span>
+                <span className="truncate text-[11.5px] text-gray-500">
+                  {t(`GENDER__${selectedPatient.gender}`)}
+                </span>
+              </div>
+              {/* Switching happens in place via the shared sheet — the old
+                  patient-select page is gone. */}
+              <button
+                type="button"
+                onClick={() => setSwitcherOpen(true)}
+                className="shrink-0 text-[13px] font-semibold text-primary-700"
+              >
+                {t("change")}
+              </button>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="booking-reason" className="text-[13px]">
+              {t("patient_booking__what_brings_you_in")}
+            </Label>
+            <Textarea
+              id="booking-reason"
+              value={reason}
+              maxLength={REASON_MAX_LENGTH}
+              rows={4}
+              onChange={(event) => setReasonDraft(event.target.value)}
+              placeholder={t("appointment_note")}
+            />
+            <span className="text-[11.5px] text-gray-500">
+              {t("patient_booking__reason_hint")} {reason.length}/
+              {REASON_MAX_LENGTH}
+            </span>
           </div>
         </div>
-      </div>
-      <div className="bg-secondary-200 h-20">
-        {selectedSlot?.id && (
-          <div className="container mx-auto flex flex-row justify-end mt-6">
-            {(isCreatingAppointment || isCancellingAppointment) && (
-              <Loader2 className="size-4 animate-spin self-center mr-2" />
-            )}
-            {appointment?.status !== "in_consultation" && (
-              <Button
-                variant="primary_gradient"
-                disabled={isCreatingAppointment || isCancellingAppointment}
-                onClick={() => {
-                  if (appointmentId && appointment) {
-                    handleRescheduleAppointment(appointment);
-                  } else {
-                    navigate(
-                      `/facility/${facilityId}/appointments/${staffId}/patient-select`,
-                      {
-                        query: {
-                          slotId: selectedSlot?.id,
-                          reason: reason,
-                        },
-                      },
-                    );
-                  }
-                }}
-              >
-                {appointmentId ? t("reschedule_appointment") : t("continue")}
-                <CareIcon icon="l-arrow-right" className="size-4" />
-              </Button>
-            )}
+
+        <PatientSwitcherSheet
+          open={switcherOpen}
+          onOpenChange={setSwitcherOpen}
+        />
+      </BookingStepLayout>
+    );
+  }
+
+  return (
+    <BookingStepLayout
+      title={t("patient_booking__pick_a_slot")}
+      subtitle={practitionerName}
+      step={SLOT_STEP}
+      totalSteps={TOTAL_STEPS}
+      onBack={() => goBack(`/facility/${facilityId}`)}
+      footer={
+        <div className="flex flex-col gap-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] text-gray-600">{t("selected")}</span>
+            <span className="text-sm font-bold text-gray-900">
+              {selectedSlot
+                ? dayjs(selectedSlot.start_datetime).format(
+                    "ddd D MMM · h:mm A",
+                  )
+                : "-"}
+            </span>
           </div>
+          <Button
+            size="lg"
+            className="h-12 w-full text-base"
+            disabled={!selectedSlot}
+            onClick={() => setStep(REASON_STEP)}
+          >
+            {t("continue")}
+          </Button>
+        </div>
+      }
+    >
+      <div className="flex flex-col gap-5 p-4">
+        {facilityResponse?.name && (
+          <p className="text-[12.5px] text-gray-600">{facilityResponse.name}</p>
+        )}
+
+        <div className="flex flex-col gap-2.5">
+          <span className="text-sm font-bold text-gray-900">
+            {dayjs(selectedDate).format("MMMM YYYY")}
+          </span>
+          <div className="grid grid-cols-6 gap-1.5">
+            {dateStrip.map((day) => {
+              const isSelected = day.isSame(dayjs(selectedDate), "day");
+              return (
+                <button
+                  key={day.toISOString()}
+                  type="button"
+                  onClick={() => selectDate(day.toDate())}
+                  aria-pressed={isSelected}
+                  className={cn(
+                    "rounded-xl border py-2 text-center transition-colors",
+                    isSelected
+                      ? "border-primary-700 bg-primary-700 text-white"
+                      : "border-gray-200 bg-white hover:border-gray-300",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "text-[10.5px] font-semibold uppercase",
+                      isSelected ? "opacity-85" : "text-gray-500",
+                    )}
+                  >
+                    {day.format("ddd")}
+                  </div>
+                  <div className="text-[17px] font-bold">{day.format("D")}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {slotsQuery.isLoading ? (
+          <p className="text-sm text-gray-600">{t("loading")}</p>
+        ) : slotGroups.length ? (
+          slotGroups.map(({ availability, slots }) => (
+            <div key={availability.name} className="flex flex-col gap-2.5">
+              <span className="text-[13.5px] font-bold text-gray-900">
+                {availability.name}
+              </span>
+              <div className="grid grid-cols-3 gap-2">
+                {slots.map((slot) => {
+                  const isFull = slot.allocated >= availability.tokens_per_slot;
+                  const isSelected = selectedSlot?.id === slot.id;
+                  return (
+                    <button
+                      key={slot.id}
+                      type="button"
+                      disabled={isFull}
+                      onClick={() => setSelectedSlot({ ...slot, availability })}
+                      className={cn(
+                        "rounded-xl border py-2.5 text-center text-[13.5px] font-semibold transition-colors",
+                        isSelected
+                          ? "border-primary-700 bg-primary-700 text-white"
+                          : isFull
+                            ? "border-gray-200 bg-white text-gray-400 line-through"
+                            : "border-gray-200 bg-white text-gray-900 hover:border-primary-200",
+                      )}
+                    >
+                      {dayjs(slot.start_datetime).format("h:mm A")}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-gray-600">{t("no_slots_available")}</p>
         )}
       </div>
-    </div>
+    </BookingStepLayout>
   );
 }

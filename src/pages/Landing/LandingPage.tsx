@@ -309,7 +309,7 @@ export function LandingPage() {
                   <Button
                     variant="outline"
                     className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
-                    onClick={() => navigate(`/login?mode=patient`)}
+                    onClick={() => navigate("/patient/login")}
                   >
                     {t("patient_login")}
                   </Button>
