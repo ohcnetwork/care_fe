@@ -20,6 +20,9 @@ function typeHeadingPattern(type: OrganizationType) {
 }
 
 function searchInput(page: Page, type: OrganizationType) {
+  if (type === "role") {
+    return page.getByRole("textbox", { name: /search responsibilities/i });
+  }
   if (isFlatOrgType(type)) {
     return page.getByRole("textbox", { name: /^search$/i });
   }
@@ -150,15 +153,25 @@ test.describe("Admin organization lists", () => {
         continue;
       }
 
+      if (type === "role") {
+        const orgRow = page
+          .getByRole("button")
+          .filter({ has: page.locator("svg.lucide-chevron-right") })
+          .first();
+        const emptyState = page.getByText(/no organizations found/i);
+        await expect(orgRow.or(emptyState)).toBeVisible();
+        await expect(
+          page.getByRole("button", { name: /new responsibility/i }),
+        ).toBeVisible();
+        continue;
+      }
+
       const sidebar = firstResizablePanel(page);
       const orgRow = sidebar.getByRole("button").first();
       const emptyState = page.getByText(/no organizations found/i);
       await expect(orgRow.or(emptyState)).toBeVisible();
 
-      const createCta =
-        type === "role"
-          ? page.getByRole("button", { name: /create responsibility/i })
-          : page.getByRole("button", { name: /add organization/i });
+      const createCta = page.getByRole("button", { name: /add organization/i });
       await expect(createCta).toBeVisible();
     }
   });
