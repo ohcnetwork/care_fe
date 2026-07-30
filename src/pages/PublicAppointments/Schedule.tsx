@@ -40,7 +40,7 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import BookingStepLayout from "./BookingStepLayout";
 
 /** Facility → practitioner → slot → reason → confirmation. */
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 4;
 const SLOT_STEP = 3;
 const REASON_STEP = 4;
 
@@ -248,7 +248,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
             </div>
             <Button
               size="lg"
-              className="h-12 w-full text-base"
+              className="h-11 w-full text-sm"
               disabled={isSubmitting || !selectedSlot}
               onClick={handleConfirm}
             >
@@ -283,7 +283,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
               <button
                 type="button"
                 onClick={() => setSwitcherOpen(true)}
-                className="shrink-0 text-sm font-semibold text-primary-700"
+                className="-mr-1.5 flex min-h-11 shrink-0 items-center px-1.5 text-sm font-semibold text-primary-700"
               >
                 {t("change")}
               </button>
@@ -298,7 +298,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
               id="booking-reason"
               value={reason}
               maxLength={REASON_MAX_LENGTH}
-              rows={4}
+              className="min-h-24 px-3 py-3 leading-normal"
               onChange={(event) => setReasonDraft(event.target.value)}
               placeholder={t("appointment_note")}
             />
@@ -320,10 +320,13 @@ export function ScheduleAppointment(props: AppointmentsProps) {
   return (
     <BookingStepLayout
       title={t("patient_booking__pick_a_slot")}
-      subtitle={practitionerName}
+      subtitle={[practitionerName, facilityResponse?.name]
+        .filter(Boolean)
+        .join(" · ")}
       step={SLOT_STEP}
       totalSteps={TOTAL_STEPS}
       onBack={() => goBack(`/facility/${facilityId}`)}
+      footerBordered
       footer={
         <div className="flex flex-col gap-2.5">
           <div className="flex items-center justify-between">
@@ -338,7 +341,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           </div>
           <Button
             size="lg"
-            className="h-12 w-full text-base"
+            className="h-11 w-full text-sm"
             disabled={!selectedSlot}
             onClick={() => setStep(REASON_STEP)}
           >
@@ -348,10 +351,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       }
     >
       <div className="flex flex-col gap-5 p-4">
-        {facilityResponse?.name && (
-          <p className="text-xs text-gray-600">{facilityResponse.name}</p>
-        )}
-
         <div className="flex flex-col gap-2.5">
           <span className="text-sm font-bold text-gray-900">
             {dayjs(selectedDate).format("MMMM YYYY")}
@@ -392,9 +391,19 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         ) : slotGroups.length ? (
           slotGroups.map(({ availability, slots }) => (
             <div key={availability.name} className="flex flex-col gap-2.5">
-              <span className="text-sm font-bold text-gray-900">
-                {availability.name}
-              </span>
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-sm font-bold text-gray-900">
+                  {availability.name}
+                </span>
+                {slots.length > 0 && (
+                  <span className="shrink-0 text-xs text-gray-600">
+                    {dayjs(slots[0].start_datetime).format("h:mm A")} –{" "}
+                    {dayjs(slots[slots.length - 1].end_datetime).format(
+                      "h:mm A",
+                    )}
+                  </span>
+                )}
+              </div>
               <div className="grid grid-cols-3 gap-2">
                 {slots.map((slot) => {
                   const isFull = slot.allocated >= availability.tokens_per_slot;
@@ -406,7 +415,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                       disabled={isFull}
                       onClick={() => setSelectedSlot({ ...slot, availability })}
                       className={cn(
-                        "rounded-xl border py-2.5 text-center text-sm font-semibold transition-colors",
+                        "flex min-h-11 items-center justify-center rounded-xl border text-center text-sm font-semibold transition-colors",
                         isSelected
                           ? "border-primary-700 bg-primary-700 text-white"
                           : isFull

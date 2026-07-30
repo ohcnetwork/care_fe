@@ -37,7 +37,7 @@ export default function SelectProfile() {
 
   if (isLoadingPatients) {
     return (
-      <PatientAuthLayout>
+      <PatientAuthLayout className="px-6 pt-9">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="mt-3 h-5 w-full" />
         <div className="mt-6 flex flex-col gap-2.5">
@@ -52,8 +52,8 @@ export default function SelectProfile() {
   // Nothing linked to this number yet — registering is the only way forward.
   if (!patients?.length) {
     return (
-      <PatientAuthLayout>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+      <PatientAuthLayout className="px-6 pt-9">
+        <h1 className="text-[26px] font-bold leading-tight tracking-tight text-gray-900">
           {t("patient_select__empty_heading")}
         </h1>
         <p className="mt-2.5 text-base leading-relaxed text-gray-600">
@@ -69,8 +69,8 @@ export default function SelectProfile() {
   }
 
   return (
-    <PatientAuthLayout>
-      <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+    <PatientAuthLayout className="px-6 pt-9">
+      <h1 className="text-[26px] font-bold leading-tight tracking-tight text-gray-900">
         {t("patient_select__heading")}
       </h1>
       <p className="mt-2 text-base leading-relaxed text-gray-600">

@@ -13,7 +13,7 @@ import publicFacilityApi from "@/types/facility/publicFacilityApi";
 
 import BookingStepLayout from "./BookingStepLayout";
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 4;
 
 /**
  * Step 2 of booking: pick who the appointment is with. Keeps the patient inside
@@ -50,6 +50,16 @@ export default function BookPractitioner({
       step={2}
       totalSteps={TOTAL_STEPS}
       onBack={() => navigate("/nearby_facilities")}
+      footer={
+        practitioners.length > 0 && (
+          <div className="flex items-start gap-2.5 rounded-xl bg-gray-100 px-3.5 py-3">
+            <Info className="mt-0.5 size-4 shrink-0 text-gray-500" />
+            <p className="text-xs leading-snug text-gray-600">
+              {t("patient_booking__practitioner_hint")}
+            </p>
+          </div>
+        )
+      }
     >
       <div className="flex min-w-0 flex-col gap-3 p-4">
         {isLoading ? (
@@ -67,7 +77,7 @@ export default function BookPractitioner({
               <Avatar
                 imageUrl={practitioner.profile_picture_url}
                 name={formatName(practitioner)}
-                className="size-11 shrink-0 rounded-full"
+                className="size-[50px] shrink-0 rounded-full"
               />
               {/* No qualification or next-available-slot on this payload, so
                   the name is all we can honestly show. */}

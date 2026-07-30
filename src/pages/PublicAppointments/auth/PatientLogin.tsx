@@ -5,6 +5,7 @@ import { AlertCircle, Lock } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import { cn } from "@/lib/utils";
 
@@ -78,18 +79,20 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
   if (isOtpSent) {
     return (
       <PatientAuthLayout onBack={restartLogin}>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+        <h1 className="text-[26px] font-bold leading-tight tracking-tight text-gray-900">
           {t("patient_login__otp_heading")}
         </h1>
         <p className="mt-2.5 text-base leading-relaxed text-gray-600">
-          {t("patient_login__otp_sent_to", { phone })}
+          {t("patient_login__otp_sent_to", {
+            phone: formatPhoneNumberIntl(phone) || phone,
+          })}
           {" · "}
           <button
             type="button"
             onClick={restartLogin}
             className="font-semibold text-primary-700 hover:underline"
           >
-            {t("patient_login__back_to_login")}
+            {t("change")}
           </button>
         </p>
 
@@ -116,9 +119,9 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
                 <InputOTPSlot
                   index={index}
                   className={cn(
-                    "h-14 w-full rounded-xl! border! text-2xl font-bold",
+                    "h-14 w-full rounded-xl! border-[1.5px]! text-2xl font-bold",
                     otpError
-                      ? "border-red-500! text-red-600"
+                      ? "border-red-600! text-red-600"
                       : "border-gray-300!",
                   )}
                 />
@@ -179,7 +182,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
           </Button>
         </form>
 
-        <div className="mt-6 flex gap-2.5 rounded-lg border border-gray-200 bg-gray-50 p-3.5">
+        <div className="mt-6 flex gap-2.5 rounded-2xl border border-gray-100 bg-gray-50 p-3.5">
           <Lock className="mt-0.5 size-4 shrink-0 text-primary-700" />
           <p className="text-xs leading-snug text-gray-600">
             {t("patient_login__otp_security_note")}
@@ -193,6 +196,9 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
     <PatientAuthLayout
       showLogo
       footer={
+        // The design also pins an operator attribution under this, but that
+        // line belongs to the deployment, not to CARE — so the helpline is the
+        // only thing worth pinning here.
         careConfig.patientSupportPhone && (
           <p className="text-center text-sm text-gray-600">
             {t("patient_login__helpline")}{" "}
@@ -220,11 +226,15 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
           sendOtp();
         }}
       >
-        <Label htmlFor="patient-login-phone" className="mb-2 block text-sm">
-          {t("phone_number")}
+        <Label
+          htmlFor="patient-login-phone"
+          className="mb-2 block text-sm font-semibold text-gray-900"
+        >
+          {t("mobile_number")}
         </Label>
         <PhoneInput
           id="patient-login-phone"
+          className="h-[52px] overflow-hidden rounded-2xl [&_button]:border-gray-300 [&_button]:bg-gray-50"
           value={phone}
           onChange={updatePhone}
           placeholder={t("enter_phone_number")}
@@ -232,7 +242,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
           autoFocus
         />
         {phoneError && (
-          <p className="mt-2 text-sm text-red-500">{t(phoneError)}</p>
+          <p className="mt-2 text-sm text-red-600">{t(phoneError)}</p>
         )}
 
         {/* Sibling label rather than a wrapping one: a <label> around a Radix
@@ -242,7 +252,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
             id="patient-login-consent"
             checked={hasConsented}
             onCheckedChange={(checked) => setHasConsented(checked === true)}
-            className="mt-px"
+            className="mt-px data-[state=checked]:border-primary-700 data-[state=checked]:bg-primary-700 data-[state=checked]:text-white"
           />
           <Label
             htmlFor="patient-login-consent"

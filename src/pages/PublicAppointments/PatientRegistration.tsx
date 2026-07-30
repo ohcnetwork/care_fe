@@ -241,9 +241,9 @@ export default function PublicPatientRegistration(
               type="button"
               onClick={() => navigate(backTo)}
               aria-label={t("back")}
-              className="-ml-1 flex size-8 shrink-0 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100"
+              className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100"
             >
-              <ArrowLeft className="size-5" strokeWidth={1.9} />
+              <ArrowLeft className="size-[22px]" strokeWidth={1.9} />
             </button>
             <img
               src={careConfig.mainLogo?.dark}

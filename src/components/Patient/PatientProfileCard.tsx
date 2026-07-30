@@ -3,8 +3,6 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Avatar } from "@/components/Common/Avatar";
-
 import { formatPatientAge } from "@/Utils/utils";
 import {
   BloodGroupChoices,
@@ -31,6 +29,47 @@ export function patientMetaLine(
   return parts.join(" · ");
 }
 
+/** Monogram for a patient circle; splits on spaces so any script works. */
+export function patientInitials(name: string): string {
+  return (
+    name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((word) => word[0] ?? "")
+      .join("")
+      .toUpperCase() || "-"
+  );
+}
+
+/**
+ * Portal avatar. Unlike `Avatar` the tint is semantic rather than hashed: the
+ * patient you are viewing is primary-filled, everyone else is neutral, so the
+ * colour alone tells you whose records are on screen.
+ */
+export function PatientAvatar({
+  name,
+  active,
+  className,
+}: {
+  name: string;
+  active?: boolean;
+  className?: string;
+}) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-full font-bold",
+        active ? "bg-primary-700 text-white" : "bg-gray-100 text-gray-600",
+        className,
+      )}
+    >
+      {patientInitials(name)}
+    </span>
+  );
+}
+
 interface PatientProfileCardProps {
   patient: PublicPatientRead;
   selected: boolean;
@@ -53,29 +92,32 @@ export function PatientProfileCard({
       onClick={() => onSelect(patient)}
       aria-pressed={selected}
       className={cn(
-        "flex w-full items-center gap-3.5 rounded-2xl border p-4 text-left transition-colors",
+        "flex w-full items-center gap-[13px] rounded-[14px] p-3.5 text-left transition-colors",
         selected
-          ? "border-primary-700 bg-primary-50"
-          : "border-gray-200 bg-white hover:border-gray-300",
+          ? "border-[1.5px] border-primary-700 bg-primary-50"
+          : "border border-gray-200 bg-white hover:border-gray-300",
       )}
     >
-      <Avatar name={patient.name} className="size-11 shrink-0 rounded-full" />
+      <PatientAvatar
+        name={patient.name}
+        active={selected}
+        className="size-[42px] text-sm"
+      />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate font-bold text-gray-900">{patient.name}</span>
-        <span className="truncate text-sm text-gray-600">
+        <span className="truncate text-base font-bold text-gray-900">
+          {patient.name}
+        </span>
+        <span className="truncate text-xs text-gray-600">
           {subtitle ?? patientMetaLine(patient, t)}
         </span>
       </div>
-      <span
-        className={cn(
-          "flex size-6 shrink-0 items-center justify-center rounded-full",
-          selected
-            ? "bg-primary-700 text-white"
-            : "border-[1.5px] border-gray-300",
-        )}
-      >
-        {selected && <Check className="size-3.5" strokeWidth={3.2} />}
-      </span>
+      {/* Only the selected row carries a mark — an empty ring on the others
+          reads as an unchecked radio the user is meant to fill in. */}
+      {selected && (
+        <span className="flex size-[22px] shrink-0 items-center justify-center rounded-full bg-primary-700 text-white">
+          <Check className="size-3.5" strokeWidth={3.2} />
+        </span>
+      )}
     </button>
   );
 }

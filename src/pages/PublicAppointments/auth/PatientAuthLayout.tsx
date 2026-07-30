@@ -32,29 +32,32 @@ export default function PatientAuthLayout({
     <div className="flex min-h-dvh justify-center bg-white sm:items-center sm:bg-gray-100">
       <div className="flex w-full max-w-[480px] flex-col bg-white sm:min-h-[min(844px,90dvh)] sm:rounded-3xl sm:border sm:border-gray-200 sm:shadow-sm">
         {onBack && (
-          <div className="flex items-center px-4 pt-4">
+          <div className="flex items-center px-5 pt-4">
             <button
               type="button"
               onClick={onBack}
               aria-label={t("back")}
               className="flex size-10 items-center justify-center rounded-xl text-gray-900 hover:bg-gray-100"
             >
-              <ArrowLeft className="size-5" />
+              <ArrowLeft className="size-[22px]" strokeWidth={1.9} />
             </button>
           </div>
         )}
         <div
           className={cn(
             "flex flex-1 flex-col px-7 pb-7",
-            onBack ? "pt-6" : "pt-14",
+            onBack ? "pt-7" : "pt-14",
             className,
           )}
         >
+          {/* The design draws its own "care." lockup, but the logo is
+              deployment-configurable — so take the design's compact scale and
+              leave the mark itself to whoever is running this instance. */}
           {showLogo && (
             <img
               src={careConfig.mainLogo?.dark}
               alt={t("care")}
-              className="mb-12 h-9 w-auto self-start"
+              className="mb-14 h-[38px] w-auto self-start"
             />
           )}
           {children}

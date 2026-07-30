@@ -5,35 +5,79 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import {
-  CancelAppointmentButton,
-  isAppointmentCancellable,
-} from "@/components/Patient/CancelAppointmentButton";
-import {
   PatientAppShell,
   PatientHeaderTabs,
 } from "@/components/Patient/PatientAppShell";
+import {
+  PatientBadge,
+  type PatientBadgeTone,
+} from "@/components/Patient/PatientBadge";
 
 import { usePatientAppointments } from "@/hooks/usePatientPortalData";
 
 // Plugin-extended instance — `fromNow()` needs dayjs/plugin/relativeTime.
 import dayjs from "@/Utils/dayjs";
+import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 
 import {
-  APPOINTMENT_STATUS_COLORS,
+  AppointmentStatus,
   PublicAppointment,
-  SchedulableResourceType,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 
 type VisitsTab = "upcoming" | "history";
 
+/**
+ * The staff-side `APPOINTMENT_STATUS_COLORS` spans six hues; the portal keeps
+ * to its own palette — green for a live or finished visit, gray for everything
+ * that did not happen.
+ */
+export const VISIT_STATUS_TONES: Record<AppointmentStatus, PatientBadgeTone> = {
+  proposed: "neutral",
+  pending: "neutral",
+  booked: "primary",
+  arrived: "primary",
+  checked_in: "primary",
+  waitlist: "neutral",
+  in_consultation: "primary",
+  fulfilled: "success",
+  noshow: "neutral",
+  cancelled: "neutral",
+  entered_in_error: "neutral",
+  rescheduled: "neutral",
+};
+
+/**
+ * History arrives newest-first, so a run of consecutive rows sharing a year is
+ * exactly the group the design labels.
+ */
+function groupVisitsByYear(history: PublicAppointment[]) {
+  return history.reduce<{ year: string; visits: PublicAppointment[] }[]>(
+    (groups, appointment) => {
+      const year = dayjs(appointment.token_slot.start_datetime).format("YYYY");
+      const current = groups.at(-1);
+      if (current?.year === year) {
+        current.visits.push(appointment);
+      } else {
+        groups.push({ year, visits: [appointment] });
+      }
+      return groups;
+    },
+    [],
+  );
+}
+
+/**
+ * Reschedule and cancel used to sit on this card, which put two destructive-ish
+ * decisions in front of someone who was only scanning the list. The card now
+ * carries the appointment's own detail and opens the visit, where those actions
+ * live alongside the full context.
+ */
 function UpcomingVisitCard({
   appointment,
 }: {
@@ -41,19 +85,20 @@ function UpcomingVisitCard({
 }) {
   const { t } = useTranslation();
   const start = dayjs(appointment.token_slot.start_datetime);
-  const canReschedule =
-    appointment.resource_type === SchedulableResourceType.Practitioner;
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-primary-200 bg-primary-50 p-4">
+    <Link
+      href={`/patient/visits/${appointment.id}`}
+      className="flex flex-col gap-3 rounded-2xl border border-primary-200 bg-primary-50 p-4 hover:border-primary-700"
+    >
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-bold uppercase tracking-widest text-primary-700">
           {start.fromNow()}
         </span>
         {appointment.token && (
-          <Badge variant="primary">
+          <PatientBadge tone="solid">
             {t("token")} {renderTokenNumber(appointment.token)}
-          </Badge>
+          </PatientBadge>
         )}
       </div>
       <div className="flex items-start gap-3">
@@ -66,39 +111,21 @@ function UpcomingVisitCard({
           </div>
           <div className="text-[10px] text-gray-500">{start.format("MMM")}</div>
         </div>
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="font-bold text-gray-900">
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="truncate font-bold text-gray-900">
             {formatScheduleResourceName(appointment)}
           </span>
-          <span className="text-sm text-gray-600">
-            {start.format("h:mm A")} · {appointment.facility.name}
+          <span className="truncate text-sm text-gray-600">
+            {appointment.token_slot.availability.name} ·{" "}
+            {formatSlotTimeRange(appointment.token_slot)}
+          </span>
+          <span className="truncate text-sm text-gray-600">
+            {appointment.facility.name}
           </span>
         </div>
+        <ChevronRight className="mt-0.5 size-4.5 shrink-0 text-primary-700" />
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        <Button variant="outline" size="sm" className="min-h-11" asChild>
-          <Link href={`/patient/visits/${appointment.id}`}>
-            {t("view_details")}
-          </Link>
-        </Button>
-        {canReschedule && (
-          <Button size="sm" className="min-h-11" asChild>
-            <Link
-              href={`/facility/${appointment.facility.id}/appointments/${appointment.resource.id}/reschedule/${appointment.id}`}
-            >
-              {t("reschedule")}
-            </Link>
-          </Button>
-        )}
-        {isAppointmentCancellable(appointment) && (
-          <CancelAppointmentButton
-            appointment={appointment}
-            size="sm"
-            className="col-span-2 min-h-11"
-          />
-        )}
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -106,7 +133,8 @@ function PastVisitRow({ appointment }: { appointment: PublicAppointment }) {
   const { t } = useTranslation();
   const start = dayjs(appointment.token_slot.start_datetime);
   const isMissed =
-    appointment.status === "noshow" || appointment.status === "cancelled";
+    appointment.status === AppointmentStatus.NO_SHOW ||
+    appointment.status === AppointmentStatus.CANCELLED;
 
   return (
     <Link
@@ -129,15 +157,27 @@ function PastVisitRow({ appointment }: { appointment: PublicAppointment }) {
           <span className="truncate text-sm font-bold text-gray-900">
             {formatScheduleResourceName(appointment)}
           </span>
-          <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
-            {t(appointment.status)}
-          </Badge>
+          {/* A visit that went ahead needs no pill — only the exceptions do. */}
+          {appointment.status !== AppointmentStatus.FULFILLED && (
+            <PatientBadge tone={VISIT_STATUS_TONES[appointment.status]}>
+              {t(appointment.status)}
+            </PatientBadge>
+          )}
         </div>
         <span className="truncate text-xs text-gray-600">
           {appointment.facility.name}
         </span>
+        <span className="truncate text-xs text-gray-600">
+          {[
+            start.format("h:mm A"),
+            appointment.token &&
+              `${t("token")} ${renderTokenNumber(appointment.token)}`,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </span>
       </div>
-      <ChevronRight className="size-4 shrink-0 text-gray-400" />
+      <ChevronRight className="size-4.5 shrink-0 text-gray-600" />
     </Link>
   );
 }
@@ -180,8 +220,17 @@ export default function PatientVisits() {
             />
           )
         ) : history.length ? (
-          history.map((appointment) => (
-            <PastVisitRow key={appointment.id} appointment={appointment} />
+          groupVisitsByYear(history).map(({ year, visits }) => (
+            <div key={year} className="flex flex-col gap-3">
+              <span className="text-[11px] font-bold uppercase tracking-[0.09em] text-gray-500">
+                {year === dayjs().format("YYYY")
+                  ? t("patient_visits__earlier_this_year")
+                  : year}
+              </span>
+              {visits.map((appointment) => (
+                <PastVisitRow key={appointment.id} appointment={appointment} />
+              ))}
+            </div>
           ))
         ) : (
           <EmptyState

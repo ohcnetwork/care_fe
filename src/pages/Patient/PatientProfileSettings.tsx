@@ -1,19 +1,23 @@
 import careConfig from "@careConfig";
-import { Check, Plus } from "lucide-react";
+import { Languages, Plus } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import { cn } from "@/lib/utils";
 
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { Avatar } from "@/components/Common/Avatar";
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import { PatientAppShell } from "@/components/Patient/PatientAppShell";
-import { patientMetaLine } from "@/components/Patient/PatientProfileCard";
+import { PatientBadge } from "@/components/Patient/PatientBadge";
+import {
+  PatientAvatar,
+  patientInitials,
+  patientMetaLine,
+} from "@/components/Patient/PatientProfileCard";
 
+import { useAppVersion } from "@/hooks/useAppVersion";
 import { useAuthContext } from "@/hooks/useAuthUser";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -25,6 +29,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 export default function PatientProfileSettings() {
   const { t } = useTranslation();
   const { signOut } = useAuthContext();
+  const { versionInfo } = useAppVersion();
   const {
     patients,
     selectedPatient,
@@ -33,28 +38,51 @@ export default function PatientProfileSettings() {
     tokenData,
   } = usePatientContext();
 
+  // Nothing flags the owner, so it is the profile registered against the
+  // number this session signed in with — falling back to the first profile
+  // when the stored number is formatted differently.
+  const owner =
+    patients?.find(
+      (patient) => patient.phone_number === tokenData?.phoneNumber,
+    ) ?? patients?.[0];
+
+  const footerNote = [
+    // The build id is a UUID — show enough of it to quote to support without
+    // running a 36-character string across the footer.
+    versionInfo?.version && `v${versionInfo.version.slice(0, 8)}`,
+    careConfig.customDescription,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <PatientAppShell title={t("profile")}>
-      <div className="flex flex-col gap-4 p-4">
-        {/* The account itself has no name or editable fields — it is the number. */}
+      <div className="flex flex-1 flex-col gap-4 p-4">
         <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-700 text-sm font-bold text-white">
-            {tokenData?.phoneNumber?.slice(-2) ?? "--"}
+            {owner ? patientInitials(owner.name) : "-"}
           </span>
           <div className="flex min-w-0 flex-col">
             <span className="truncate font-bold text-gray-900">
-              {tokenData?.phoneNumber
-                ? formatPhoneNumberIntl(tokenData.phoneNumber)
-                : "-"}
+              {owner?.name ??
+                (tokenData?.phoneNumber
+                  ? formatPhoneNumberIntl(tokenData.phoneNumber)
+                  : "-")}
             </span>
             <span className="truncate text-xs text-gray-600">
-              {t("patient_profile__account_description")}
+              {[
+                tokenData?.phoneNumber &&
+                  formatPhoneNumberIntl(tokenData.phoneNumber),
+                t("patient_profile__account_owner"),
+              ]
+                .filter(Boolean)
+                .join(" · ")}
             </span>
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
+          <span className="text-[11px] font-bold uppercase tracking-[0.09em] text-gray-500">
             {t("patient_profile__patients_on_this_number")} ·{" "}
             {patients?.length ?? 0}
           </span>
@@ -76,9 +104,10 @@ export default function PatientProfileSettings() {
                       index > 0 && "border-t border-gray-100",
                     )}
                   >
-                    <Avatar
+                    <PatientAvatar
                       name={patient.name}
-                      className="size-9 shrink-0 rounded-full"
+                      active={isActive}
+                      className="size-9 text-xs"
                     />
                     <div className="flex min-w-0 flex-1 flex-col">
                       <span className="truncate text-sm font-semibold text-gray-900">
@@ -89,12 +118,11 @@ export default function PatientProfileSettings() {
                       </span>
                     </div>
                     {isActive ? (
-                      <Badge variant="green" className="shrink-0">
-                        <Check className="size-3" strokeWidth={3} />
+                      <PatientBadge tone="primary" className="shrink-0">
                         {t("active")}
-                      </Badge>
+                      </PatientBadge>
                     ) : (
-                      <span className="shrink-0 text-sm font-semibold text-primary-700">
+                      <span className="shrink-0 text-xs font-semibold text-primary-700">
                         {t("switch")}
                       </span>
                     )}
@@ -113,30 +141,40 @@ export default function PatientProfileSettings() {
           </Link>
         </div>
 
-        <div className="flex flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-3.5">
-          <span className="text-sm font-semibold text-gray-900">
-            {t("language")}
-          </span>
-          <LanguageSelector />
+        {/* A settings row, not a form field: the label owns the row and the
+            selector reads as the value on its right. */}
+        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+          <div className="flex min-h-11 items-center gap-3 px-4 py-2.5">
+            <Languages
+              className="size-4.5 shrink-0 text-gray-900"
+              strokeWidth={1.8}
+            />
+            <span className="flex-1 text-sm text-gray-900">
+              {t("language")}
+            </span>
+            <div className="shrink-0 [&_[data-slot=select-trigger]]:border-0 [&_[data-slot=select-trigger]]:bg-transparent [&_[data-slot=select-trigger]]:px-0 [&_[data-slot=select-trigger]]:text-xs [&_[data-slot=select-trigger]]:font-medium [&_[data-slot=select-trigger]]:text-gray-600 [&_[data-slot=select-trigger]]:shadow-none [&_[data-slot=select-trigger]]:data-[size=default]:h-11">
+              <LanguageSelector />
+            </div>
+          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={async () => {
-            // signOut() lands on the staff /login; a patient belongs on theirs.
-            await signOut();
-            navigate("/patient/login", { replace: true });
-          }}
-          className="mt-2 py-2 text-center text-sm font-bold text-red-600 hover:underline"
-        >
-          {t("sign_out")}
-        </button>
+        <div className="mt-auto flex flex-col items-center gap-1.5 pt-4">
+          <button
+            type="button"
+            onClick={async () => {
+              // signOut() lands on the staff /login; a patient belongs on theirs.
+              await signOut();
+              navigate("/patient/login", { replace: true });
+            }}
+            className="flex min-h-11 items-center px-3 text-sm font-semibold text-red-600 hover:underline"
+          >
+            {t("sign_out")}
+          </button>
 
-        {careConfig.customDescription && (
-          <p className="text-center text-xs text-gray-400">
-            {careConfig.customDescription}
-          </p>
-        )}
+          {footerNote && (
+            <span className="text-[11px] text-gray-400">{footerNote}</span>
+          )}
+        </div>
       </div>
     </PatientAppShell>
   );

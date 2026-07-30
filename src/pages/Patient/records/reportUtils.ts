@@ -1,3 +1,5 @@
+import { Activity, FileText, type LucideIcon, SquarePlus } from "lucide-react";
+
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
   ObservationRead,
@@ -32,6 +34,28 @@ export function reportTitle(
     report.category?.display ||
     t("diagnostic_report")
   );
+}
+
+/**
+ * Glyph for the report's icon tile. The modality is spelled differently by
+ * every source in the chain, so match on a substring of whichever one answers
+ * first and fall back to the neutral document.
+ */
+export function reportIcon(report: DiagnosticReportRead): LucideIcon {
+  const modality = (
+    report.service_request?.activity_definition?.classification ||
+    report.service_request?.category ||
+    report.category?.display ||
+    ""
+  ).toLowerCase();
+
+  if (modality.includes("imaging") || modality.includes("radiolog")) {
+    return SquarePlus;
+  }
+  if (modality.includes("lab")) {
+    return Activity;
+  }
+  return FileText;
 }
 
 export function observationLabel(
