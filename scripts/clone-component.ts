@@ -180,13 +180,13 @@ interface ImportRef {
   quoteEnd: number;
 }
 
-function findImports(code: string): ImportRef[] {
+function findImports(code: string, filePath?: string): ImportRef[] {
+  const fileName = filePath ? path.basename(filePath) : "file.tsx";
   const sourceFile = ts.createSourceFile(
-    "file.tsx",
+    fileName,
     code,
     ts.ScriptTarget.Latest,
     true,
-    ts.ScriptKind.TSX,
   );
   const refs: ImportRef[] = [];
 
@@ -424,7 +424,7 @@ function clone(args: Args): Report {
     const code = isCodeFile(abs) ? fs.readFileSync(abs, "utf8") : null;
 
     if (code !== null) {
-      const refs = findImports(code);
+      const refs = findImports(code, abs);
       for (const ref of refs) {
         const aliased = resolveAlias(ref.spec, abs);
         if (!aliased) {
@@ -453,7 +453,7 @@ function clone(args: Args): Report {
         if (!visited.has(resolved)) queue.push(resolved);
       }
 
-      writeFile(dest, rewriteCode(code, findImports(code)), args, report);
+      writeFile(dest, rewriteCode(code, findImports(code, abs)), args, report);
     } else {
       // Binary asset – copy bytes verbatim.
       writeFile(dest, fs.readFileSync(abs), args, report);
