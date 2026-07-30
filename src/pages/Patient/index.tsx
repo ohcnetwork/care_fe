@@ -214,7 +214,10 @@ function SectionHeader({ title, href }: { title: string; href: string }) {
   return (
     <div className="flex items-baseline justify-between">
       <span className="font-bold text-gray-900">{title}</span>
-      <Link href={href} className="text-sm font-semibold text-primary-700">
+      <Link
+        href={href}
+        className="flex min-h-11 items-center text-sm font-semibold text-primary-700"
+      >
         {t("see_all")}
       </Link>
     </div>
