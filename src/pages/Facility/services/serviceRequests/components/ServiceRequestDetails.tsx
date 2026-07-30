@@ -8,7 +8,7 @@ import { formatName } from "@/Utils/utils";
 import { LocationNode } from "@/components/Location/LocationTree";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
-import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
+import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
 import {
   SERVICE_REQUEST_PRIORITY_COLORS,
   SERVICE_REQUEST_STATUS_COLORS,
@@ -130,7 +130,7 @@ export function ServiceRequestDetails({
               </div>
               <div className="font-sm font-normal flex flex-wrap gap-1">
                 {observationRequirements.map(
-                  (test: ObservationDefinitionReadSpec) => (
+                  (test: ObservationDefinitionRead) => (
                     <Badge key={test.id} variant="secondary">
                       {test.title}
                     </Badge>

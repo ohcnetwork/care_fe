@@ -20,10 +20,11 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import usePatientExtensionData from "@/hooks/usePatientExtensionData";
 import {
+  getOrgLabel,
   Organization,
   OrganizationParent,
-  getOrgLabel,
 } from "@/types/organization/organization";
 import careConfig from "@careConfig";
 
@@ -36,6 +37,11 @@ export const Demography = (props: PatientProps) => {
   const { canWritePatient } = getPermissions(
     hasPermission,
     patientData.permissions,
+  );
+
+  const patientExtensionData = usePatientExtensionData(
+    patientData.extensions,
+    "patient_summary",
   );
 
   const [activeSection, _setActiveSection] = useState<string | null>(null);
@@ -55,7 +61,7 @@ export const Demography = (props: PatientProps) => {
       navigate(`/patient/${patientId}/tags`);
       return;
     }
-    if (sectionId === "general-info") {
+    if (sectionId === "general-info" || sectionId === "additional-details") {
       if (facilityId) {
         navigate(
           `/facility/${facilityId}/patient/${patientId}/update?section=${sectionId}`,
@@ -142,6 +148,18 @@ export const Demography = (props: PatientProps) => {
     });
   };
 
+  const extensionInformation: Data = {
+    id: "additional-details",
+    allowEdit:
+      (canWritePatient ||
+        careConfig.patientRegistration.globalPatientEditAccessEnabled) &&
+      !!facilityId,
+    details: patientExtensionData.map((field) => ({
+      label: field.name,
+      value: field.value,
+    })),
+  };
+
   const data: Data[] = [
     {
       id: "general-info",
@@ -190,10 +208,7 @@ export const Demography = (props: PatientProps) => {
               {formatPatientAge(patientData, true)})
             </>
           ) : (
-            <>
-              {patientData.year_of_birth} ({formatPatientAge(patientData, true)}
-              )
-            </>
+            <>{formatPatientAge(patientData, true)}</>
           ),
         },
         {
@@ -240,6 +255,7 @@ export const Demography = (props: PatientProps) => {
           : []),
       ],
     },
+    ...(extensionInformation.details.length > 0 ? [extensionInformation] : []),
     {
       id: "identifiers",
       allowEdit: false,

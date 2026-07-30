@@ -679,6 +679,7 @@ export default function ServiceRequestShow({
                     completeServiceRequest({
                       status: Status.completed,
                       note: completionNote.trim() || null,
+                      locations: request.locations.map((loc) => loc.id),
                     })
                   }
                   onCancel={() => setIsCompleteDialogOpen(false)}
@@ -707,6 +708,7 @@ export default function ServiceRequestShow({
                     completeServiceRequest({
                       status: Status.completed,
                       note: completionNote.trim() || null,
+                      locations: request.locations.map((loc) => loc.id),
                     })
                   }
                   onCancel={() => setIsCompleteDialogOpen(false)}

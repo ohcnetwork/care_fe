@@ -8,7 +8,7 @@ import {
 
 import { NonEmptyArray } from "@/Utils/types";
 import Decimal from "decimal.js";
-import { CountryCode } from "libphonenumber-js/types.cjs";
+import { CountryCode } from "libphonenumber-js";
 
 const env = import.meta.env;
 
@@ -168,6 +168,35 @@ const careConfig = {
     return undefined;
   })(),
 
+  /**
+   * Screen position for toast notifications (Sonner)
+   * Valid values: top-left, top-center, top-right, bottom-left, bottom-center, bottom-right
+   * Defaults to top-center if unset or invalid.
+   */
+  toastPosition: (() => {
+    const validPositions = [
+      "top-left",
+      "top-center",
+      "top-right",
+      "bottom-left",
+      "bottom-center",
+      "bottom-right",
+    ] as const;
+
+    const defaultPosition: (typeof validPositions)[number] = "top-center";
+    const position = env.REACT_TOAST_POSITION;
+    if (!position) return defaultPosition;
+
+    if (validPositions.includes(position as (typeof validPositions)[number])) {
+      return position as (typeof validPositions)[number];
+    }
+
+    console.warn(
+      `Invalid REACT_TOAST_POSITION: "${position}". Valid values are: ${validPositions.join(", ")}. Falling back to ${defaultPosition}.`,
+    );
+    return defaultPosition;
+  })(),
+
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
         const [module, cdn] = app.split("@");
@@ -207,6 +236,11 @@ const careConfig = {
     code: (env.REACT_DEFAULT_COUNTRY || "IN") as CountryCode,
     name: env.REACT_DEFAULT_COUNTRY_NAME || "India",
   },
+
+  medicationValueSetSelectDefaultTab:
+    env.REACT_MEDICATION_VALUE_SET_SELECT_DEFAULT_TAB === "valueset"
+      ? "valueset"
+      : "product",
 
   resendOtpTimeout: env.REACT_APP_RESEND_OTP_TIMEOUT
     ? parseInt(env.REACT_APP_RESEND_OTP_TIMEOUT, 10)
@@ -289,6 +323,15 @@ const careConfig = {
    */
   enableTokenGenerationInPatientHome: booleanFromString(
     env.REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME,
+    false,
+  ),
+
+  /**
+   * Enable questionnaire draft-saving if set to "true".
+   * When disabled, users cannot save questionnaire responses as drafts.
+   */
+  enableQuestionnaireDraft: booleanFromString(
+    env.REACT_ENABLE_QUESTIONNAIRE_DRAFT,
     false,
   ),
 

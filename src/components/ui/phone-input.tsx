@@ -121,7 +121,7 @@ function InputComponent({
   const [announcement, setAnnouncement] = React.useState("");
 
   const handleBeforeInput = React.useCallback(
-    (e: React.FormEvent<HTMLInputElement>) => {
+    (e: React.InputEvent<HTMLInputElement>) => {
       const inputEvent = e.nativeEvent as InputEvent;
       const newData = inputEvent.data || "";
 

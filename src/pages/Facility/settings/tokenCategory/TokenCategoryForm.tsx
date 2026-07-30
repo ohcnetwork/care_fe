@@ -134,7 +134,7 @@ export function TokenCategoryFormContent({
 
   const formSchema = z.object({
     name: z.string().trim().min(1, t("field_required")),
-    resource_type: z.nativeEnum(SchedulableResourceType),
+    resource_type: z.enum(SchedulableResourceType),
     shorthand: z
       .string()
       .trim()

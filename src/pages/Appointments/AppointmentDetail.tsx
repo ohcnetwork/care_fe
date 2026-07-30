@@ -43,6 +43,7 @@ import {
   AppointmentRead,
   AppointmentStatus,
   AppointmentUpdateRequest,
+  CancelledAppointmentStatuses,
   SchedulableResourceType,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
@@ -110,7 +111,10 @@ import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import { FacilityRead } from "@/types/facility/facility";
+import { TokenFinalStatuses, TokenStatus } from "@/types/tokens/token/token";
+import tokenApi from "@/types/tokens/token/tokenApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
@@ -303,9 +307,9 @@ export default function AppointmentDetail(props: Props) {
             facility={facility}
           />
           <div className="mt-6 pl-0 md:pl-4 flex-1">
-            <h3 className="text-base font-semibold">{t("token")}</h3>
             {appointment.token?.number ? (
               <>
+                <h3 className="text-base font-semibold">{t("token")}</h3>
                 <div id="single-print">
                   <TokenCard
                     appointment={appointment}
@@ -315,44 +319,47 @@ export default function AppointmentDetail(props: Props) {
                 </div>
               </>
             ) : (
-              !["fulfilled"].includes(appointment.status) &&
+              !AppointmentFinalStatuses.includes(appointment.status) &&
               canWriteToken && (
-                <div className="bg-gray-100 border border-gray-200 rounded flex flex-col items-center justify-center text-center">
-                  <ReceiptText className="size-8 text-gray-500 mt-4" />
-                  <div className="mt-2">
-                    <h6 className="text-gray-900 text-sm font-semibold">
-                      {t("token_not_generated")}
-                    </h6>
-                    <p className="text-gray-900 text-sm">
-                      {t("token_not_generated_description")}
-                    </p>
+                <>
+                  <h3 className="text-base font-semibold">{t("token")}</h3>
+                  <div className="bg-gray-100 border border-gray-200 rounded flex flex-col items-center justify-center text-center">
+                    <ReceiptText className="size-8 text-gray-500 mt-4" />
+                    <div className="mt-2">
+                      <h6 className="text-gray-900 text-sm font-semibold">
+                        {t("token_not_generated")}
+                      </h6>
+                      <p className="text-gray-900 text-sm">
+                        {t("token_not_generated_description")}
+                      </p>
+                    </div>
+                    <div className="mt-2 mb-4">
+                      <TokenGenerationSheet
+                        facilityId={facility.id}
+                        resourceType={appointment.resource_type}
+                        appointmentId={appointment.id}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            className="px-6"
+                            disabled={AppointmentFinalStatuses.includes(
+                              appointment.status,
+                            )}
+                          >
+                            <PlusCircledIcon className="size-4 mr-2" />
+                            {t("generate_token")}
+                            <ShortcutBadge actionId="generate-token" />
+                          </Button>
+                        }
+                        onSuccess={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: ["appointment", appointment.id],
+                          });
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="mt-2 mb-4">
-                    <TokenGenerationSheet
-                      facilityId={facility.id}
-                      resourceType={appointment.resource_type}
-                      appointmentId={appointment.id}
-                      trigger={
-                        <Button
-                          variant="outline"
-                          className="px-6"
-                          disabled={AppointmentFinalStatuses.includes(
-                            appointment.status,
-                          )}
-                        >
-                          <PlusCircledIcon className="size-4 mr-2" />
-                          {t("generate_token")}
-                          <ShortcutBadge actionId="generate-token" />
-                        </Button>
-                      }
-                      onSuccess={() => {
-                        queryClient.invalidateQueries({
-                          queryKey: ["appointment", appointment.id],
-                        });
-                      }}
-                    />
-                  </div>
-                </div>
+                </>
               )
             )}
             {appointment.associated_encounter?.id && (
@@ -454,79 +461,83 @@ export default function AppointmentDetail(props: Props) {
                 </CardContent>
               </Card>
             )}
-            {/* Lets only show encounter details if the appointment is not in a final status or if there is an encounter linked to the appointment */}
-            {![...AppointmentFinalStatuses].includes(appointment.status) && (
-              <div>
-                <h3 className="text-base font-semibold mt-4">
-                  {t("quick_actions")}
-                </h3>
-                <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
-                  {/* Start Consultation - For booked and checked in appointments */}
-                  {["booked", "checked_in"].includes(currentStatus) &&
-                    canCheckIn &&
-                    (appointment.associated_encounter?.id ? (
-                      // When encounter exists: set status to in_consultation and redirect
-                      <QuickAction
-                        icon={<PlusSquare className="text-primary-500" />}
-                        title={t("start_consultation")}
-                        actionId="start-consultation"
-                        onClick={() => {
-                          updateAppointment({
-                            status: AppointmentStatus.IN_CONSULTATION,
-                            note: appointment.note,
-                          });
-                          navigate(
-                            `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
-                          );
-                        }}
-                      />
-                    ) : (
-                      // When no encounter exists: create encounter and set status to in_consultation
+            <div>
+              <h3 className="text-base font-semibold mt-4">
+                {t("quick_actions")}
+              </h3>
+              <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
+                {!AppointmentFinalStatuses.includes(appointment.status) && (
+                  <>
+                    {/* Start Consultation - For booked and checked in appointments */}
+                    {["booked", "checked_in"].includes(currentStatus) &&
+                      canCheckIn &&
+                      (appointment.associated_encounter?.id ? (
+                        // When encounter exists: set status to in_consultation and redirect
+                        <QuickAction
+                          icon={<PlusSquare className="text-primary-500" />}
+                          title={t("start_consultation")}
+                          actionId="start-consultation"
+                          onClick={() => {
+                            updateAppointment({
+                              status: AppointmentStatus.IN_CONSULTATION,
+                              note: appointment.note,
+                            });
+                            navigate(
+                              `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                            );
+                          }}
+                        />
+                      ) : (
+                        // When no encounter exists: create encounter and set status to in_consultation
+                        <CreateEncounterForm
+                          patientId={appointment.patient.id}
+                          facilityId={facilityId}
+                          patientName={appointment.patient.name}
+                          appointment={appointment.id}
+                          defaultOpen={from_queue === "true"}
+                          defaultStatus={EncounterStatus.IN_PROGRESS}
+                          trigger={
+                            <QuickAction
+                              icon={<PlusSquare className="text-primary-500" />}
+                              title={t("start_consultation")}
+                              actionId="start-consultation"
+                            />
+                          }
+                          onSuccess={() => {
+                            updateAppointment({
+                              status: AppointmentStatus.IN_CONSULTATION,
+                              note: appointment.note,
+                            });
+                          }}
+                        />
+                      ))}
+
+                    {!appointment.associated_encounter?.id && (
                       <CreateEncounterForm
                         patientId={appointment.patient.id}
                         facilityId={facilityId}
                         patientName={appointment.patient.name}
                         appointment={appointment.id}
-                        defaultOpen={from_queue === "true"}
-                        defaultStatus={EncounterStatus.IN_PROGRESS}
+                        disableRedirectOnSuccess={true}
                         trigger={
                           <QuickAction
-                            icon={<PlusSquare className="text-primary-500" />}
-                            title={t("start_consultation")}
-                            actionId="start-consultation"
+                            icon={
+                              <SquareActivity className="text-orange-500" />
+                            }
+                            title={t("create_planned_encounter")}
+                            actionId="create-encounter"
                           />
                         }
                         onSuccess={() => {
-                          updateAppointment({
-                            status: AppointmentStatus.IN_CONSULTATION,
-                            note: appointment.note,
+                          queryClient.invalidateQueries({
+                            queryKey: ["appointment", appointment.id],
                           });
                         }}
                       />
-                    ))}
-
-                  {!appointment.associated_encounter?.id && (
-                    <CreateEncounterForm
-                      patientId={appointment.patient.id}
-                      facilityId={facilityId}
-                      patientName={appointment.patient.name}
-                      appointment={appointment.id}
-                      disableRedirectOnSuccess={true}
-                      trigger={
-                        <QuickAction
-                          icon={<SquareActivity className="text-orange-500" />}
-                          title={t("create_planned_encounter")}
-                          actionId="create-encounter"
-                        />
-                      }
-                      onSuccess={() => {
-                        queryClient.invalidateQueries({
-                          queryKey: ["appointment", appointment.id],
-                        });
-                      }}
-                    />
-                  )}
-                  {/* Print Appointment */}
+                    )}
+                  </>
+                )}
+                {!CancelledAppointmentStatuses.includes(appointment.status) && (
                   <QuickAction
                     icon={<PrinterIcon className="size-4" />}
                     title={t("print_appointment")}
@@ -534,17 +545,16 @@ export default function AppointmentDetail(props: Props) {
                     basePath="/"
                     href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
                   />
-
-                  <QuickAction
-                    icon={<Wallet className="size-4" />}
-                    title={t("accounts")}
-                    actionId="goto-account"
-                    basePath="/"
-                    href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${appointment.patient.id}&patient_name=${appointment.patient.name}`}
-                  />
-                </div>
+                )}
+                <QuickAction
+                  icon={<Wallet className="size-4" />}
+                  title={t("accounts")}
+                  actionId="goto-account"
+                  basePath="/"
+                  href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${appointment.patient.id}&patient_name=${encodeURIComponent(appointment.patient.name || "")}`}
+                />
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -783,43 +793,151 @@ const AppointmentActions = ({
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
   const [newNote, setNewVisitReason] = useState(appointment.note);
   const [oldNote, setRescheduleReason] = useState(appointment.note);
-
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [note, setNote] = useState(appointment.note);
 
-  const { mutate: cancelAppointment, isPending: isCancelling } = useMutation({
-    mutationFn: mutate(scheduleApis.appointments.cancel, {
-      pathParams: { facilityId, id: appointment.id },
-    }),
-    onSuccess: () => {
-      toast.success(t("appointment_cancelled"));
-      queryClient.invalidateQueries({
-        queryKey: ["appointment", appointment.id],
-      });
-    },
-  });
-
-  const { mutate: rescheduleAppointment, isPending: isRescheduling } =
-    useMutation({
-      mutationFn: mutate(scheduleApis.appointments.reschedule, {
-        pathParams: { facilityId, id: appointment.id },
-      }),
-      onSuccess: (newAppointment: Appointment) => {
-        toast.success(t("appointment_rescheduled"));
+  const { mutate: executeBatch, isPending: isPending } = useBatchRequest({
+    onSuccess: ({ results }) => {
+      if (
+        results.find((result) => result.reference_id === "cancel-appointment")
+      ) {
+        queryClient.invalidateQueries({
+          queryKey: ["appointment", appointment.id],
+        });
+        toast.success(t("appointment_cancelled"));
+      }
+      if (results.find((result) => result.reference_id === "token-cancelled")) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            "infinite-tokens",
+            facilityId,
+            appointment.token?.queue.id || "",
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            "token-queue-summary",
+            facilityId,
+            appointment.token?.queue.id || "",
+          ],
+        });
+      }
+      if (
+        results.find(
+          (result) => result.reference_id === "reschedule-appointment",
+        )
+      ) {
         queryClient.invalidateQueries({
           queryKey: ["appointment", appointment.id],
         });
         setIsRescheduleOpen(false);
         setSelectedSlotId(undefined);
         setRescheduleReason("");
-        navigate(
-          `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
+        const result = results.find(
+          (result) => result.reference_id === "reschedule-appointment",
         );
+        const newAppointment = result?.data as Appointment;
+        if (newAppointment) {
+          navigate(
+            `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${newAppointment.id}`,
+          );
+        }
+      }
+      if (results.find((result) => result.reference_id === "token-cancelled")) {
+        queryClient.invalidateQueries({
+          queryKey: [
+            "infinite-tokens",
+            facilityId,
+            appointment.token?.queue.id || "",
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            "token-queue-summary",
+            facilityId,
+            appointment.token?.queue.id || "",
+          ],
+        });
+      }
+    },
+  });
+
+  const addCancelAppointment = (reason: string, note?: string) => {
+    let requests: BatchRequestObject[] = [];
+    requests.push({
+      api: scheduleApis.appointments.cancel,
+      pathParams: {
+        facilityId,
+        id: appointment.id,
+      },
+      referenceId: "cancel-appointment",
+      body: {
+        reason: reason,
+        note: note,
       },
     });
+    if (
+      appointment.token &&
+      !TokenFinalStatuses.includes(appointment.token.status)
+    ) {
+      requests.push({
+        api: tokenApi.update,
+        pathParams: {
+          facility_id: facilityId,
+          queue_id: appointment.token.queue.id,
+          id: appointment.token.id,
+        },
+        referenceId: "token-cancelled",
+        body: {
+          note: appointment.token.note,
+          sub_queue: appointment.token.sub_queue?.id || null,
+          status: TokenStatus.CANCELLED,
+        },
+      });
+    }
+    executeBatch(requests);
+  };
+
+  const addRescheduleAppointment = () => {
+    let requests: BatchRequestObject[] = [];
+    requests.push({
+      api: scheduleApis.appointments.reschedule,
+      pathParams: {
+        facilityId,
+        id: appointment.id,
+      },
+      referenceId: "reschedule-appointment",
+      body: {
+        new_slot: selectedSlotId || "",
+        previous_booking_note: oldNote,
+        new_booking_note: newNote,
+        tags: appointment.tags.map((tag) => tag.id),
+      },
+    });
+    if (
+      appointment.token &&
+      !TokenFinalStatuses.includes(appointment.token.status)
+    ) {
+      requests.push({
+        api: tokenApi.update,
+        referenceId: "token-cancelled",
+        pathParams: {
+          facility_id: facilityId,
+          queue_id: appointment.token.queue.id,
+          id: appointment.token.id,
+        },
+        body: {
+          note: appointment.token.note,
+          sub_queue: appointment.token.sub_queue?.id || null,
+          status: TokenStatus.CANCELLED,
+        },
+      });
+    }
+    executeBatch(requests);
+  };
 
   if (AppointmentFinalStatuses.includes(currentStatus)) {
     return null;
@@ -1025,21 +1143,10 @@ const AppointmentActions = ({
                           </Button>
                           <Button
                             variant="default"
-                            disabled={!selectedSlotId || isRescheduling}
-                            onClick={() => {
-                              if (selectedSlotId) {
-                                rescheduleAppointment({
-                                  new_slot: selectedSlotId,
-                                  previous_booking_note: oldNote,
-                                  new_booking_note: newNote,
-                                  tags: appointment.tags.map((tag) => tag.id),
-                                });
-                              }
-                            }}
+                            disabled={!selectedSlotId || isPending}
+                            onClick={addRescheduleAppointment}
                           >
-                            {isRescheduling
-                              ? t("rescheduling")
-                              : t("reschedule")}
+                            {isPending ? t("rescheduling") : t("reschedule")}
                           </Button>
                         </div>
                       </div>
@@ -1085,7 +1192,7 @@ const AppointmentActions = ({
                       onClick={() =>
                         updateAppointment({
                           status: AppointmentStatus.NO_SHOW,
-                          note: note,
+                          note,
                         })
                       }
                       className={cn(buttonVariants({ variant: "destructive" }))}
@@ -1133,16 +1240,11 @@ const AppointmentActions = ({
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() =>
-                        cancelAppointment({
-                          reason: "cancelled",
-                          note: note,
-                        })
-                      }
+                      onClick={() => addCancelAppointment("cancelled", note)}
                       className={cn(buttonVariants({ variant: "destructive" }))}
                       disabled={!note.trim()}
                     >
-                      {isCancelling ? (
+                      {isPending ? (
                         <Loader2 className="size-4 animate-spin mr-2" />
                       ) : (
                         t("confirm")
@@ -1179,11 +1281,11 @@ const AppointmentActions = ({
                   <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() =>
-                      cancelAppointment({ reason: "entered_in_error" })
+                      addCancelAppointment("entered_in_error", note)
                     }
                     className={cn(buttonVariants({ variant: "destructive" }))}
                   >
-                    {isCancelling ? (
+                    {isPending ? (
                       <Loader2 className="size-4 animate-spin mr-2" />
                     ) : (
                       t("confirm")
