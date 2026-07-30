@@ -70,8 +70,12 @@ export default function AdminOrganizationList({
   });
 
   const handleOrganizationSelect = useCallback(
-    (organization: Organization) => {
-      navigate(`/admin/organizations/${organizationType}/${organization.id}`);
+    (organization?: Organization) => {
+      navigate(
+        organization
+          ? `/admin/organizations/${organizationType}/${organization.id}`
+          : `/admin/organizations/${organizationType}`,
+      );
     },
     [organizationType],
   );
@@ -134,9 +138,7 @@ export default function AdminOrganizationList({
           <div className="md:hidden">
             <OrgSelect
               value={organizationId}
-              onChange={(selectedOrg) => {
-                if (selectedOrg) handleOrganizationSelect(selectedOrg);
-              }}
+              onChange={handleOrganizationSelect}
               orgType={organizationType as OrgType}
               placeholder={
                 isRoleOrg
@@ -148,13 +150,13 @@ export default function AdminOrganizationList({
           </div>
 
           <ResizablePanelGroup
-            direction="horizontal"
+            orientation="horizontal"
             className="min-h-[calc(100vh-14rem)] rounded-lg"
           >
             <ResizablePanel
-              defaultSize={25}
-              minSize={18}
-              maxSize={35}
+              defaultSize="25%"
+              minSize="18%"
+              maxSize="35%"
               className="h-full hidden md:block"
             >
               <FlatOrgSidebar
@@ -169,7 +171,7 @@ export default function AdminOrganizationList({
               className="hidden md:flex items-center justify-center"
             />
 
-            <ResizablePanel defaultSize={75} className="pl-0 md:pl-4">
+            <ResizablePanel defaultSize="75%" className="pl-0 md:pl-4">
               <div className="h-full rounded-lg bg-white md:shadow-lg">
                 {organizationId && org ? (
                   <div className="space-y-6 p-5">
@@ -227,13 +229,13 @@ export default function AdminOrganizationList({
         </div>
 
         <ResizablePanelGroup
-          direction="horizontal"
+          orientation="horizontal"
           className="min-h-[calc(100vh-14rem)] rounded-lg"
         >
           <ResizablePanel
-            defaultSize={20}
-            minSize={15}
-            maxSize={30}
+            defaultSize="20%"
+            minSize="15%"
+            maxSize="30%"
             className="h-full hidden md:block"
           >
             <AdminOrganizationNavbar
@@ -250,7 +252,7 @@ export default function AdminOrganizationList({
             className="hidden md:flex items-center justify-center"
           />
 
-          <ResizablePanel defaultSize={80} className="pl-0 md:pl-4">
+          <ResizablePanel defaultSize="80%" className="pl-0 md:pl-4">
             <div className="space-y-3 overflow-hidden rounded-lg md:bg-white md:shadow-lg sm:space-y-4">
               {organizationId && (
                 <div className="md:pt-4 flex items-center mx-auto max-w-4xl">

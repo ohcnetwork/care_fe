@@ -111,7 +111,7 @@ export interface ChargeItemsTableProps {
   patientId: string;
   canAddChargeItems?: boolean;
 }
-export function ChargeItemsTable({
+function ChargeItemsTable({
   facilityId,
   accountId,
   patientId,
@@ -154,9 +154,7 @@ export function ChargeItemsTable({
           break;
         case "created_by": {
           const createdByValue = value as
-            | UserReadMinimal
-            | UserReadMinimal[]
-            | undefined;
+            UserReadMinimal | UserReadMinimal[] | undefined;
           const user = Array.isArray(createdByValue)
             ? createdByValue[0]
             : createdByValue;
@@ -197,8 +195,7 @@ export function ChargeItemsTable({
   // Convert date filter values to API query params
   const getDateQueryParams = () => {
     const dateRange = selectedFilters.created_date?.selected as
-      | FilterDateRange
-      | undefined;
+      FilterDateRange | undefined;
     if (!dateRange) return {};
     return {
       created_date_after: dateRange.from?.toISOString(),

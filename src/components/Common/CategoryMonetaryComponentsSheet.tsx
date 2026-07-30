@@ -167,7 +167,7 @@ export function CategoryMonetaryComponentsSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="sm:max-w-xl overflow-y-auto">
+      <SheetContent className="sm:max-w-3xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("set_monetary_components")}</SheetTitle>
           <SheetDescription>
@@ -200,6 +200,7 @@ export function CategoryMonetaryComponentsSheet({
               type={MonetaryComponentType.discount}
               showConditionsEditor
               availableMetrics={availableMetrics}
+              facilityId={facilityId}
             />
 
             <div className="flex gap-2 pt-4">

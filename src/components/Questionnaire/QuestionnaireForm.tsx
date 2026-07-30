@@ -1,8 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+
+import careConfig from "@careConfig";
 
 import { cn } from "@/lib/utils";
 
@@ -508,7 +511,7 @@ export function QuestionnaireForm({
   const { mutate: createDraft, isPending: isCreateDraftPending } = useMutation({
     mutationFn: mutate(formSubmissionApi.create),
     onSuccess: () => {
-      setIsDirty(false);
+      flushSync(() => setIsDirty(false));
       toast.success(t("draft_saved_successfully"));
       navigate(
         `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
@@ -528,7 +531,7 @@ export function QuestionnaireForm({
         pathParams: { external_id: data.id },
       })(data.body),
     onSuccess: () => {
-      setIsDirty(false);
+      flushSync(() => setIsDirty(false));
       toast.success(t("draft_saved_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["formSubmission", continueDraftId],
@@ -548,7 +551,7 @@ export function QuestionnaireForm({
 
   // Check if questionnaire is saveable as draft (no structured questions)
   const isDraftSaveable = useMemo(() => {
-    if (import.meta.env.REACT_ENABLE_QUESTIONNAIRE_DRAFT !== "true") {
+    if (!careConfig.enableQuestionnaireDraft) {
       return false;
     }
 

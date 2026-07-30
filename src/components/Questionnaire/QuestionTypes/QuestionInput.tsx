@@ -23,6 +23,7 @@ import type {
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
+import { QuestionDescription } from "@/components/Questionnaire/QuestionDescription";
 import { AllergyQuestion } from "./AllergyQuestion";
 import { BooleanQuestion } from "./BooleanQuestion";
 import { ChargeItemQuestion } from "./ChargeItemQuestion";
@@ -392,9 +393,7 @@ export function QuestionInput({
               isSubQuestion={isSubQuestion}
               className="mb-2 text-md"
             />
-            {question.description && (
-              <p className="text-sm text-gray-500">{question.description}</p>
-            )}
+            <QuestionDescription question={question} />
           </div>
           <InputWithNotes
             questionnaireResponse={questionnaireResponse}
@@ -445,11 +444,7 @@ export function QuestionInput({
                       question={question}
                       isSubQuestion={isSubQuestion}
                     />
-                    {question.description && (
-                      <p className="text-sm text-gray-500">
-                        {question.description}
-                      </p>
-                    )}
+                    <QuestionDescription question={question} />
                   </div>
                 )}
                 <div
@@ -459,11 +454,12 @@ export function QuestionInput({
                       question.repeats || question.type === "text",
                   })}
                 >
-                  {/* For basic types (not structured, not text/string, not repeating), use integrated notes */}
+                  {/* For basic types (not structured, not text/string/url, not repeating), use integrated notes */}
                   {!question.structured_type &&
                   !question.repeats &&
                   question.type !== "text" &&
-                  question.type !== "string" ? (
+                  question.type !== "string" &&
+                  question.type !== "url" ? (
                     <InputWithNotes
                       questionnaireResponse={questionnaireResponse}
                       onUpdateNote={(note) => {

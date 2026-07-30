@@ -252,7 +252,7 @@ export default function TagAssignmentSheet({
     }
   };
 
-  const isLoadingTags = isSettingTags || isRemovingTags;
+  const isTagMutationInProgress = isSettingTags || isRemovingTags;
 
   return (
     <>
@@ -262,8 +262,7 @@ export default function TagAssignmentSheet({
           onChange={handleTagChange}
           facilityId={facilityId}
           resource={ENTITY_TO_RESOURCE_MAP[entityType]}
-          disabled={isLoadingTags}
-          isLoading={isLoadingTags}
+          isTagMutationInProgress={isTagMutationInProgress}
           trigger={trigger}
         />
       )}

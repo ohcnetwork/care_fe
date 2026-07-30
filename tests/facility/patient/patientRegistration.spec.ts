@@ -1,4 +1,6 @@
+import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
@@ -7,27 +9,35 @@ test.use({ storageState: "tests/.auth/user.json" });
  * Test data generator for patient registration
  */
 function generatePatientData() {
-  const timestamp = Date.now();
   return {
-    name: `Test Patient ${timestamp}`,
-    phoneNumber: `9${Math.floor(Math.random() * 1000000000)
-      .toString()
-      .padStart(9, "0")}`,
-    gender: "Male",
+    name: faker.person.fullName(),
+    phoneNumber: `${faker.helpers.arrayElement([7, 8, 9])}${faker.string.numeric(9)}`,
+    gender: faker.helpers.arrayElement([
+      "Male",
+      "Female",
+      "Transgender",
+      "Non-binary",
+    ]),
     dateOfBirth: {
-      day: "16",
-      month: "06",
-      year: "2009",
+      day: faker.number.int({ min: 1, max: 28 }).toString().padStart(2, "0"),
+      month: faker.number.int({ min: 1, max: 12 }).toString().padStart(2, "0"),
+      year: faker.number.int({ min: 1950, max: 2009 }).toString(),
     },
-    bloodGroup: "A+",
-    state: "Rajasthan", //not used currently
-    pincode: "302020",
-    address: "123 Test Street, Test City",
+    bloodGroup: faker.helpers.arrayElement([
+      "A+",
+      "A-",
+      "B+",
+      "B-",
+      "O+",
+      "O-",
+      "AB+",
+      "AB-",
+    ]),
+    pincode: `${faker.number.int({ min: 1, max: 9 })}${faker.string.numeric(5)}`,
+    address: faker.location.streetAddress({ useFullAddress: true }),
     emergencyContact: {
-      name: `Emergency Contact ${timestamp}`,
-      phoneNumber: `9${Math.floor(Math.random() * 1000000000)
-        .toString()
-        .padStart(9, "0")}`,
+      name: faker.person.fullName(),
+      phoneNumber: `${faker.helpers.arrayElement([7, 8, 9])}${faker.string.numeric(9)}`,
     },
   };
 }
@@ -67,7 +77,7 @@ async function fillDateOfBirth(
 async function selectBloodGroup(page: Page, bloodGroup: string) {
   await test.step("Select blood group", async () => {
     await page.getByRole("combobox", { name: /blood group/i }).click();
-    await page.getByRole("option", { name: bloodGroup }).click();
+    await page.getByRole("option", { name: bloodGroup, exact: true }).click();
   });
 }
 
@@ -97,15 +107,35 @@ async function fillAdditionalDetails(
       .getByRole("button", { name: /register patient/i })
       .scrollIntoViewIfNeeded();
 
-    const stateCombobox = page
-      .getByRole("region", { name: "Additional Details" })
-      .getByRole("combobox");
-    await stateCombobox.waitFor({ state: "visible" });
-    await stateCombobox.click();
+    // Geo org comboboxes are cascading — the next one only appears after selecting the previous
+    const geoRegion = page.getByRole("region", { name: "Additional Details" });
+    let previousCount = 0;
 
-    const stateOption = page.getByRole("option").first();
-    await stateOption.waitFor({ state: "visible" });
-    await stateOption.click();
+    while (true) {
+      const comboboxes = geoRegion.getByRole("combobox");
+      const count = await comboboxes.count();
+      if (count === previousCount) break;
+
+      const combobox = comboboxes.nth(count - 1);
+      await combobox.waitFor({ state: "visible" });
+      await combobox.click();
+
+      const option = page.getByRole("option").first();
+      await option.waitFor({ state: "visible" });
+      await option.click();
+
+      previousCount = count;
+      // Wait for either a new combobox to appear (more levels) or timeout (no more levels)
+      try {
+        await geoRegion
+          .getByRole("combobox")
+          .nth(count)
+          .waitFor({ state: "visible", timeout: 3000 });
+      } catch {
+        // No new combobox appeared — we've filled all required levels
+        break;
+      }
+    }
   });
 }
 
@@ -116,7 +146,7 @@ async function submitRegistration(page: Page) {
       page
         .locator("li[data-sonner-toast]")
         .getByText(/patient registered successfully/i),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15000 });
   });
 }
 
@@ -198,6 +228,68 @@ test.describe("Patient Registration", () => {
     });
   });
 
+  test("should show validation error when only first geo org level is selected", async ({
+    page,
+  }) => {
+    const patientData = generatePatientData();
+    await startRegistration(page);
+    await fillBasicInfo(page, patientData);
+    await fillDateOfBirth(page, patientData.dateOfBirth);
+    await selectBloodGroup(page, patientData.bloodGroup);
+
+    await test.step("Open additional details and fill only first state", async () => {
+      const additionalDetailsSection = page.getByRole("button", {
+        name: "Additional Details",
+      });
+      const additionalDetailsSectionText =
+        await additionalDetailsSection.textContent();
+
+      if (additionalDetailsSectionText?.toLowerCase().includes("optional")) {
+        await additionalDetailsSection.click();
+      }
+
+      await page
+        .getByRole("textbox", { name: "Address" })
+        .fill(patientData.address);
+      await page
+        .getByRole("spinbutton", { name: "PIN Code" })
+        .fill(patientData.pincode);
+
+      await page
+        .getByRole("button", { name: /register patient/i })
+        .scrollIntoViewIfNeeded();
+
+      // Select only the first geo org level
+      const geoRegion = page.getByRole("region", {
+        name: "Additional Details",
+      });
+      const firstCombobox = geoRegion.getByRole("combobox").first();
+      await firstCombobox.waitFor({ state: "visible" });
+      await firstCombobox.click();
+
+      const option = page.getByRole("option").first();
+      await option.waitFor({ state: "visible" });
+      await option.click();
+    });
+
+    await test.step("Submit and verify validation error", async () => {
+      await page.getByRole("button", { name: /register patient/i }).click();
+
+      await expect(
+        page
+          .getByText(/geo organization is required when nationality is india/i)
+          .first(),
+      ).toBeVisible();
+
+      // Should NOT show success toast
+      await expect(
+        page
+          .locator("li[data-sonner-toast]")
+          .getByText(/patient registered successfully/i),
+      ).not.toBeVisible();
+    });
+  });
+
   test("should allow patient tags selection", async ({ page }) => {
     const patientData = generatePatientData();
     await startRegistration(page);
@@ -255,12 +347,66 @@ test.describe("Patient Registration", () => {
     await submitRegistration(page);
 
     await page.waitForURL("**/patients/**");
-    await expect(
-      page.getByRole("button", {
-        name: new RegExp(`.*${patientAge} Y, Male`),
-      }),
-    ).toBeVisible();
 
-    expect(expectedYearOfBirth).toEqual(currentYear - patientAge);
+    const selector = page.getByRole("button", { name: patientName });
+    await expect(selector).toContainText(
+      `${expectedYearOfBirth} (${patientAge}y), Male`,
+    );
+  });
+});
+
+test.describe("DOB timezone validation", () => {
+  test.use({ timezoneId: "Asia/Kolkata" });
+
+  // 2024-06-15T19:10:00Z == 2024-06-16 00:40:00 IST
+  const FROZEN_INSTANT = new Date("2024-06-15T19:10:00Z");
+  const TODAY_IST = { day: "16", month: "06", year: "2024" };
+  const TOMORROW_IST = { day: "17", month: "06", year: "2024" };
+
+  test.beforeEach(async ({ page }) => {
+    const facilityId = getFacilityId();
+
+    // Must be installed before any navigation so the app's Date.now() is
+    // overridden from first render.
+    await page.clock.install({ time: FROZEN_INSTANT });
+    await page.clock.setFixedTime(FROZEN_INSTANT);
+
+    await page.goto(`/facility/${facilityId}/patient/create`);
+  });
+
+  test("allows registering a newborn with today's DOB in the IST early-morning window", async ({
+    page,
+  }) => {
+    const patientData = generatePatientData();
+    await fillBasicInfo(page, patientData);
+    await fillDateOfBirth(page, TODAY_IST);
+    await selectBloodGroup(page, patientData.bloodGroup);
+    await fillAdditionalDetails(page, patientData);
+    // Resume clock before submit so API calls and toast timers work normally
+    await page.clock.resume();
+    await submitRegistration(page);
+  });
+
+  test("rejects a DOB that is in the future in local time", async ({
+    page,
+  }) => {
+    const patientData = generatePatientData();
+    await fillBasicInfo(page, patientData);
+    await fillDateOfBirth(page, TOMORROW_IST);
+    await selectBloodGroup(page, patientData.bloodGroup);
+    await fillAdditionalDetails(page, patientData);
+    // Resume clock before submit so form submission and toast work
+    await page.clock.resume();
+
+    await page.getByRole("button", { name: /register patient/i }).click();
+
+    await expect(
+      page.getByText(/date cannot be in the future/i).first(),
+    ).toBeVisible();
+    await expect(
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText(/patient registered successfully/i),
+    ).not.toBeVisible();
   });
 });
