@@ -1,10 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
-import { createContext, useEffect, useState } from "react";
+import { navigate, usePath } from "raviger";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+
+import { Button } from "@/components/ui/button";
+
+import { LocalStorageKeys } from "@/common/constants";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
 import query from "@/Utils/request/query";
-import { navigate } from "@/lib/router/navigate";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import { TokenData } from "@/types/otp/otp";
@@ -13,6 +24,7 @@ export type PatientUserContextType = {
   patients?: PublicPatientRead[];
   selectedPatient: PublicPatientRead | null;
   setSelectedPatient: (patient: PublicPatientRead) => void;
+  isLoadingPatients: boolean;
   tokenData: TokenData;
 };
 
@@ -20,18 +32,28 @@ export const PatientUserContext = createContext<PatientUserContextType | null>(
   null,
 );
 
+const APPOINTMENT_REGISTRATION_PATH_REGEX =
+  /^\/facility\/[^/]+\/appointments\/[^/]+\/patient-registration$/;
+
 interface Props {
   children: React.ReactNode;
 }
 
 export default function PatientUserProvider({ children }: Props) {
-  const [patients, setPatients] = useState<PublicPatientRead[]>([]);
-  const [selectedPatient, setSelectedPatient] =
-    useState<PublicPatientRead | null>(null);
+  const { t } = useTranslation();
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+    () => localStorage.getItem(LocalStorageKeys.selectedPatient),
+  );
+  const path = usePath();
 
-  const { patientToken: tokenData } = useAuthContext();
+  const { patientToken: tokenData, signOut } = useAuthContext();
 
-  const { data: userData } = useQuery({
+  const {
+    data: userData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["patients", tokenData],
     queryFn: query(publicPatientApi.list, {
       headers: {
@@ -41,16 +63,60 @@ export default function PatientUserProvider({ children }: Props) {
     enabled: !!tokenData?.token,
   });
 
+  const patients = useMemo(() => userData?.results ?? [], [userData]);
+
+  // A stored id can go stale (profile unlinked, or a different number signed
+  // in), so resolution always falls back to the first linked profile. The
+  // stored value is only rewritten on an explicit switch.
+  const selectedPatient = useMemo(
+    () =>
+      patients.find((patient) => patient.id === selectedPatientId) ??
+      patients[0] ??
+      null,
+    [patients, selectedPatientId],
+  );
+
+  const setSelectedPatient = useCallback((patient: PublicPatientRead) => {
+    setSelectedPatientId(patient.id);
+    localStorage.setItem(LocalStorageKeys.selectedPatient, patient.id);
+  }, []);
+
+  // Every screen under this provider needs a patient session, so send an
+  // unauthenticated (or signed-out) visitor to the patient login rather than
+  // the public landing page.
   useEffect(() => {
-    if (userData?.results && userData.results.length > 0) {
-      setPatients(userData.results);
-      setSelectedPatient(userData.results[0]);
+    if (!tokenData) {
+      navigate("/", { replace: true });
     }
-  }, [userData]);
+  }, [tokenData]);
+
+  const isProfileSetupPath =
+    path === "/patient/select-profile" ||
+    path === "/patient/add-profile" ||
+    APPOINTMENT_REGISTRATION_PATH_REGEX.test(path || "");
+
+  useEffect(() => {
+    if (tokenData && userData && patients.length === 0 && !isProfileSetupPath) {
+      navigate("/patient/select-profile", { replace: true });
+    }
+  }, [tokenData, userData, patients.length, isProfileSetupPath]);
 
   if (!tokenData) {
-    navigate({ to: "/" });
     return null;
+  }
+
+  if (isError && !userData) {
+    return (
+      <div className="p-6 text-center">
+        <p>{t("network_failure")}</p>
+        <div className="mt-4 flex justify-center gap-2">
+          <Button onClick={() => refetch()}>{t("retry")}</Button>
+          <Button variant="outline" onClick={() => signOut()}>
+            {t("sign_out")}
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -59,7 +125,8 @@ export default function PatientUserProvider({ children }: Props) {
         patients,
         selectedPatient,
         setSelectedPatient,
-        tokenData: tokenData,
+        isLoadingPatients: isLoading,
+        tokenData,
       }}
     >
       {children}

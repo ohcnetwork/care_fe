@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
+import { navigate, usePath } from "raviger";
 import {
   useCallback,
   useEffect,
@@ -21,10 +22,8 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
+import { getRouter } from "@/compat/routerRef";
 import { type AuthStatus, setAuthStatusResolver } from "@/lib/router/auth";
-import { usePathname } from "@/lib/router/location";
-import { navigate } from "@/lib/router/navigate";
-import { getRouter } from "@/lib/router/routerRef";
 
 import mutate from "@/Utils/request/mutate";
 import query, { callApi } from "@/Utils/request/query";
@@ -81,7 +80,7 @@ export default function AuthUserProvider({ children }: Props) {
   const [accessToken, setAccessTokenState] = useState(
     localStorage.getItem(LocalStorageKeys.accessToken),
   );
-  const path = usePathname();
+  const path = usePath();
   const [patientToken, setPatientTokenState] = useState<TokenData | null>(
     JSON.parse(
       localStorage.getItem(LocalStorageKeys.patientTokenKey) || "null",
@@ -206,13 +205,13 @@ export default function AuthUserProvider({ children }: Props) {
         localStorage.setItem("mfa_temp_token", data.temp_token);
         const redirectURL = getRedirectURL();
         const directURL = path !== "/login" ? window.location.href : null;
-        navigate({
-          href: redirectURL
+        navigate(
+          redirectURL
             ? `/2fa?redirect=${redirectURL}`
             : directURL
               ? `/2fa?redirect=${directURL}`
               : "/2fa",
-        });
+        );
         return;
       }
 
@@ -229,7 +228,7 @@ export default function AuthUserProvider({ children }: Props) {
 
         await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
         if (path === "/" || path === "/login") {
-          navigate({ href: getRedirectOr("/") });
+          navigate(getRedirectOr("/"));
         }
       }
     },
@@ -249,7 +248,7 @@ export default function AuthUserProvider({ children }: Props) {
       await clearOtherUsersDrafts();
 
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-      navigate({ href: getRedirectOr("/") });
+      navigate(getRedirectOr("/"));
     },
   });
 
@@ -260,7 +259,7 @@ export default function AuthUserProvider({ children }: Props) {
         LocalStorageKeys.patientTokenKey,
         JSON.stringify(tokenData),
       );
-      navigate({ href: redirectUrl });
+      navigate(redirectUrl);
     },
     [setPatientToken],
   );
@@ -297,18 +296,22 @@ export default function AuthUserProvider({ children }: Props) {
       localStorage.removeItem(LocalStorageKeys.accessToken);
       localStorage.removeItem(LocalStorageKeys.refreshToken);
       localStorage.removeItem(LocalStorageKeys.patientTokenKey);
+      localStorage.removeItem(LocalStorageKeys.selectedPatient);
       if (clearDrafts) clearQuestionnaireFillDrafts();
       setAccessToken(null);
       setPatientToken(null);
 
-      await queryClient.resetQueries({ queryKey: ["currentUser"] });
+      if (patientToken) {
+        await queryClient.cancelQueries();
+        queryClient.clear();
+      } else {
+        await queryClient.resetQueries({ queryKey: ["currentUser"] });
+      }
 
       const redirectURL = getRedirectURL();
-      navigate({
-        href: redirectURL ? `/login?redirect=${redirectURL}` : "/login",
-      });
+      navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");
     },
-    [queryClient, setAccessToken, setPatientToken],
+    [patientToken, queryClient, setAccessToken, setPatientToken],
   );
 
   const signOut = useCallback(() => endSession(true), [endSession]);
