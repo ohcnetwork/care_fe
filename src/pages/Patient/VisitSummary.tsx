@@ -19,8 +19,7 @@ import { PatientBadge } from "@/components/Patient/PatientBadge";
 
 import {
   usePatientAppointments,
-  usePatientDiagnosticReports,
-  usePatientPrescriptions,
+  usePatientEncounterRecords,
 } from "@/hooks/usePatientPortalData";
 
 import { formatName } from "@/Utils/utils";
@@ -53,24 +52,22 @@ export default function VisitSummary({
 }) {
   const { t } = useTranslation();
   const { appointments, isLoading } = usePatientAppointments();
-  const { prescriptions } = usePatientPrescriptions();
-  const { reports } = usePatientDiagnosticReports();
 
   const appointment = appointments.find((entry) => entry.id === appointmentId);
 
-  // The OTP portal exposes no encounter link on appointments, so records are
-  // matched to the visit by date rather than by encounter id.
   const visitDate = appointment
     ? dayjs(appointment.token_slot.start_datetime)
     : undefined;
 
-  const sameDay = (isoDate: string) =>
-    !!visitDate && dayjs(isoDate).isSame(visitDate, "day");
+  // Present only once the patient has actually been seen — until then the
+  // endpoint sends `{}` rather than omitting the key.
+  const encounterId = appointment?.associated_encounter?.id;
 
-  const visitPrescriptions = prescriptions.filter((prescription) =>
-    sameDay(prescription.created_date),
-  );
-  const visitReports = reports.filter((report) => sameDay(report.created_date));
+  const {
+    prescriptions: visitPrescriptions,
+    reports: visitReports,
+    isLoading: isLoadingRecords,
+  } = usePatientEncounterRecords(encounterId);
 
   const isPractitionerVisit =
     appointment?.resource_type === SchedulableResourceType.Practitioner;
@@ -184,6 +181,10 @@ export default function VisitSummary({
                   )}
                 </div>
               </div>
+            )}
+
+            {isLoadingRecords && (
+              <Skeleton className="h-[62px] w-full rounded-[14px]" />
             )}
 
             {(visitPrescriptions.length > 0 || visitReports.length > 0) && (
