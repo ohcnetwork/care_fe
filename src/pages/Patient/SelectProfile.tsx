@@ -56,7 +56,7 @@ export default function SelectProfile() {
         <h1 className="text-2xl font-bold tracking-tight text-gray-900">
           {t("patient_select__empty_heading")}
         </h1>
-        <p className="mt-2.5 text-[15px] leading-relaxed text-gray-600">
+        <p className="mt-2.5 text-base leading-relaxed text-gray-600">
           {t("patient_select__empty_description")}
         </p>
         <Button size="lg" className="mt-8 h-12 w-full text-base" asChild>
@@ -73,7 +73,7 @@ export default function SelectProfile() {
       <h1 className="text-2xl font-bold tracking-tight text-gray-900">
         {t("patient_select__heading")}
       </h1>
-      <p className="mt-2 text-[15px] leading-relaxed text-gray-600">
+      <p className="mt-2 text-base leading-relaxed text-gray-600">
         {t("patient_select__description", { count: patients.length })}
       </p>
 
@@ -89,7 +89,7 @@ export default function SelectProfile() {
 
         <Link
           href="/patient/add-profile"
-          className="flex items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-gray-300 p-4 text-[14.5px] font-semibold text-primary-700 hover:border-primary-700 hover:bg-primary-50"
+          className="flex items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-gray-300 p-4 text-sm font-semibold text-primary-700 hover:border-primary-700 hover:bg-primary-50"
         >
           <Plus className="size-4" strokeWidth={2.2} />
           {t("patient_select__add_family_member")}

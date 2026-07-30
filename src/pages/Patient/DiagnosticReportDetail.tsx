@@ -28,8 +28,8 @@ import {
 function MetaField({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col">
-      <span className="text-[11px] text-gray-500">{label}</span>
-      <span className="text-[12.5px] font-semibold text-gray-900">{value}</span>
+      <span className="text-xs text-gray-500">{label}</span>
+      <span className="text-xs font-semibold text-gray-900">{value}</span>
     </div>
   );
 }
@@ -92,13 +92,13 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
             {observations.length > 0 && (
               <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
                 <div className="grid grid-cols-[1.5fr_0.9fr_1fr] gap-2 border-b border-gray-200 bg-gray-50 px-3.5 py-2.5">
-                  <span className="text-[10.5px] font-bold uppercase tracking-wide text-gray-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500">
                     {t("test")}
                   </span>
-                  <span className="text-[10.5px] font-bold uppercase tracking-wide text-gray-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500">
                     {t("result")}
                   </span>
-                  <span className="text-right text-[10.5px] font-bold uppercase tracking-wide text-gray-500">
+                  <span className="text-right text-[10px] font-bold uppercase tracking-wide text-gray-500">
                     {t("patient_records__reference")}
                   </span>
                 </div>
@@ -111,7 +111,7 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
                       key={observation.id}
                       className="grid grid-cols-[1.5fr_0.9fr_1fr] items-center gap-2 border-b border-gray-100 px-3.5 py-3 last:border-b-0"
                     >
-                      <span className="text-[13.5px] text-gray-900">
+                      <span className="text-sm text-gray-900">
                         {observationLabel(observation, t)}
                       </span>
                       <span
@@ -123,18 +123,18 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
                         <span>
                           {observationValueLabel(observation)}
                           {observation.value?.unit?.display && (
-                            <span className="ml-1 font-sans text-[11px] font-normal text-gray-500">
+                            <span className="ml-1 font-sans text-xs font-normal text-gray-500">
                               {observation.value.unit.display}
                             </span>
                           )}
                         </span>
                         {flagged && interpretation && (
-                          <span className="font-sans text-[10.5px] font-semibold">
+                          <span className="font-sans text-[10px] font-semibold">
                             {interpretation}
                           </span>
                         )}
                       </span>
-                      <span className="text-right text-[11.5px] text-gray-600">
+                      <span className="text-right text-xs text-gray-600">
                         {reference ?? "-"}
                       </span>
                     </div>
@@ -145,17 +145,17 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
 
             {report.conclusion && (
               <div className="flex flex-col gap-1.5 rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                <span className="text-[13px] font-bold text-gray-900">
+                <span className="text-sm font-bold text-gray-900">
                   {t("conclusion")}
                 </span>
-                <span className="text-[12.5px] leading-relaxed text-gray-600">
+                <span className="text-xs leading-relaxed text-gray-600">
                   {report.conclusion}
                 </span>
               </div>
             )}
 
             {report.note && (
-              <p className="text-[12.5px] leading-relaxed text-gray-600">
+              <p className="text-xs leading-relaxed text-gray-600">
                 {report.note}
               </p>
             )}

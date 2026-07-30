@@ -51,8 +51,8 @@ function DetailRow({
 }) {
   return (
     <div className="flex justify-between gap-3.5">
-      <span className="shrink-0 text-[13px] text-gray-500">{label}</span>
-      <span className="text-right text-[13.5px] font-semibold text-gray-900">
+      <span className="shrink-0 text-sm text-gray-500">{label}</span>
+      <span className="text-right text-sm font-semibold text-gray-900">
         {children}
       </span>
     </div>
@@ -139,7 +139,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
           <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             {appointment.token && (
               <div className="flex flex-col items-center gap-0.5 border-b border-dashed border-gray-300 pb-4">
-                <span className="text-[10.5px] font-bold uppercase tracking-widest text-gray-500">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
                   {t("patient_booking__your_token")}
                 </span>
                 <span className="text-[42px] font-bold leading-none tracking-tight text-primary-700">
@@ -188,10 +188,10 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
               strokeWidth={1.9}
             />
             <div className="flex flex-col gap-1">
-              <span className="text-[13px] font-semibold text-gray-900">
+              <span className="text-sm font-semibold text-gray-900">
                 {t("patient_booking__arrive_early_heading")}
               </span>
-              <span className="text-[12.5px] leading-relaxed text-gray-600">
+              <span className="text-xs leading-relaxed text-gray-600">
                 {t("patient_booking__arrive_early_description")}
               </span>
             </div>

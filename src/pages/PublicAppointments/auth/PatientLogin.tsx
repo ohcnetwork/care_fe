@@ -81,7 +81,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
         <h1 className="text-2xl font-bold tracking-tight text-gray-900">
           {t("patient_login__otp_heading")}
         </h1>
-        <p className="mt-2.5 text-[15px] leading-relaxed text-gray-600">
+        <p className="mt-2.5 text-base leading-relaxed text-gray-600">
           {t("patient_login__otp_sent_to", { phone })}
           {" · "}
           <button
@@ -129,7 +129,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
           {otpError && (
             <div className="mt-3.5 flex items-start gap-2.5 text-red-600">
               <AlertCircle className="mt-0.5 size-4 shrink-0" />
-              <p className="text-[13px] font-semibold leading-snug">
+              <p className="text-sm font-semibold leading-snug">
                 {t(otpError)}
               </p>
             </div>
@@ -138,26 +138,26 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
           <div className="mt-5 flex items-center justify-between">
             {countdown > 0 ? (
               <>
-                <span className="text-[13.5px] text-gray-600">
+                <span className="text-sm text-gray-600">
                   {t("patient_login__resend_in")}{" "}
                   <span className="font-mono font-bold text-gray-900">
                     {formatCountdown(countdown)}
                   </span>
                 </span>
-                <span className="text-[13.5px] font-semibold text-gray-400">
+                <span className="text-sm font-semibold text-gray-400">
                   {t("resend_otp")}
                 </span>
               </>
             ) : (
               <>
-                <span className="text-[13.5px] text-gray-600">
+                <span className="text-sm text-gray-600">
                   {t("didnt_receive_a_message")}
                 </span>
                 <button
                   type="button"
                   onClick={resendOtp}
                   disabled={isSendingOtp}
-                  className="text-[13.5px] font-bold text-primary-700 hover:underline disabled:opacity-50"
+                  className="text-sm font-bold text-primary-700 hover:underline disabled:opacity-50"
                 >
                   {t("resend_otp")}
                 </button>
@@ -181,7 +181,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
 
         <div className="mt-6 flex gap-2.5 rounded-lg border border-gray-200 bg-gray-50 p-3.5">
           <Lock className="mt-0.5 size-4 shrink-0 text-primary-700" />
-          <p className="text-[12.5px] leading-snug text-gray-600">
+          <p className="text-xs leading-snug text-gray-600">
             {t("patient_login__otp_security_note")}
           </p>
         </div>
@@ -194,7 +194,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
       showLogo
       footer={
         careConfig.patientSupportPhone && (
-          <p className="text-center text-[13px] text-gray-600">
+          <p className="text-center text-sm text-gray-600">
             {t("patient_login__helpline")}{" "}
             <a
               href={`tel:${careConfig.patientSupportPhone}`}
@@ -209,7 +209,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
       <h1 className="text-[28px] font-bold leading-tight tracking-tight text-gray-900">
         {t("patient_login__heading")}
       </h1>
-      <p className="mt-2.5 text-[15px] leading-relaxed text-gray-600">
+      <p className="mt-2.5 text-base leading-relaxed text-gray-600">
         {t("patient_login__subheading", { length: otpLength })}
       </p>
 
@@ -220,7 +220,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
           sendOtp();
         }}
       >
-        <Label htmlFor="patient-login-phone" className="mb-2 block text-[13px]">
+        <Label htmlFor="patient-login-phone" className="mb-2 block text-sm">
           {t("phone_number")}
         </Label>
         <PhoneInput
@@ -246,7 +246,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
           />
           <Label
             htmlFor="patient-login-consent"
-            className="cursor-pointer text-[12.5px] font-normal leading-snug text-gray-600"
+            className="cursor-pointer text-xs font-normal leading-snug text-gray-600"
           >
             {t("patient_login__consent")}
           </Label>

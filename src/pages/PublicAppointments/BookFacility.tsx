@@ -78,7 +78,7 @@ export default function BookFacility() {
         selectedPatient && (
           <div className="flex items-start gap-2.5 rounded-xl bg-gray-100 px-3.5 py-3">
             <Info className="mt-0.5 size-4 shrink-0 text-gray-500" />
-            <p className="text-[12.5px] leading-snug text-gray-600">
+            <p className="text-xs leading-snug text-gray-600">
               {t("patient_booking__booking_for")}{" "}
               <span className="font-semibold text-gray-900">
                 {selectedPatient.name}
@@ -116,7 +116,7 @@ export default function BookFacility() {
       </div>
 
       <div className="flex min-w-0 flex-col gap-3 p-4">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+        <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
           {!qParams.organization && district?.name
             ? t("patient_booking__facilities_in", { area: district.name })
             : t("patient_booking__all_facilities")}
@@ -138,7 +138,7 @@ export default function BookFacility() {
                 <span className="truncate font-bold text-gray-900">
                   {facility.name}
                 </span>
-                <span className="truncate text-[12.5px] text-gray-600">
+                <span className="truncate text-xs text-gray-600">
                   {[facility.facility_type, facility.address]
                     .filter(Boolean)
                     .join(" · ")}

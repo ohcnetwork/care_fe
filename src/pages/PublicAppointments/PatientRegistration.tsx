@@ -257,7 +257,7 @@ export default function PublicPatientRegistration(
 
           <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
             <div className="flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-4">
-              <span className="rounded-xl bg-primary-50 px-3.5 py-3 text-[12.5px] text-primary-800">
+              <span className="rounded-xl bg-primary-50 px-3.5 py-3 text-xs text-primary-800">
                 {t("phone_number_verified")}:{" "}
                 <span className="font-bold">{tokenData.phoneNumber}</span>
               </span>

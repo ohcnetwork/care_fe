@@ -18,8 +18,8 @@ import { PRESCRIPTION_STATUS_STYLES } from "@/types/emr/prescription/prescriptio
 function MetaField({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col">
-      <span className="text-[11px] text-gray-500">{label}</span>
-      <span className="text-[13px] font-semibold text-gray-900">{value}</span>
+      <span className="text-xs text-gray-500">{label}</span>
+      <span className="text-sm font-semibold text-gray-900">{value}</span>
     </div>
   );
 }
@@ -85,7 +85,7 @@ export default function PrescriptionDetail({ id }: { id: string }) {
               </div>
             </div>
 
-            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
               {t("medications")} · {prescription.medications?.length ?? 0}
             </span>
 
@@ -98,10 +98,10 @@ export default function PrescriptionDetail({ id }: { id: string }) {
 
             {prescription.note && (
               <div className="flex flex-col gap-1.5 rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                <span className="text-[13px] font-bold text-gray-900">
+                <span className="text-sm font-bold text-gray-900">
                   {t("patient_records__doctors_advice")}
                 </span>
-                <span className="text-[12.5px] leading-relaxed text-gray-600">
+                <span className="text-xs leading-relaxed text-gray-600">
                   {prescription.note}
                 </span>
               </div>

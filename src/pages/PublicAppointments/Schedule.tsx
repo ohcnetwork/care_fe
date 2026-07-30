@@ -235,13 +235,13 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center justify-between rounded-xl bg-gray-100 px-3.5 py-2.5">
               <div className="flex min-w-0 flex-col">
-                <span className="truncate text-[11.5px] text-gray-500">
+                <span className="truncate text-xs text-gray-500">
                   {selectedSlot &&
                     dayjs(selectedSlot.start_datetime).format(
                       "ddd D MMM · h:mm A",
                     )}
                 </span>
-                <span className="truncate text-[13.5px] font-semibold text-gray-900">
+                <span className="truncate text-sm font-semibold text-gray-900">
                   {practitionerName}
                 </span>
               </div>
@@ -270,11 +270,11 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 className="size-9 shrink-0 rounded-full"
               />
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-[14.5px] font-bold text-gray-900">
+                <span className="truncate text-sm font-bold text-gray-900">
                   {selectedPatient.name} ·{" "}
                   {formatPatientAge(selectedPatient, true)}
                 </span>
-                <span className="truncate text-[11.5px] text-gray-500">
+                <span className="truncate text-xs text-gray-500">
                   {t(`GENDER__${selectedPatient.gender}`)}
                 </span>
               </div>
@@ -283,7 +283,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
               <button
                 type="button"
                 onClick={() => setSwitcherOpen(true)}
-                className="shrink-0 text-[13px] font-semibold text-primary-700"
+                className="shrink-0 text-sm font-semibold text-primary-700"
               >
                 {t("change")}
               </button>
@@ -291,7 +291,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           )}
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="booking-reason" className="text-[13px]">
+            <Label htmlFor="booking-reason" className="text-sm">
               {t("patient_booking__what_brings_you_in")}
             </Label>
             <Textarea
@@ -302,7 +302,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
               onChange={(event) => setReasonDraft(event.target.value)}
               placeholder={t("appointment_note")}
             />
-            <span className="text-[11.5px] text-gray-500">
+            <span className="text-xs text-gray-500">
               {t("patient_booking__reason_hint")} {reason.length}/
               {REASON_MAX_LENGTH}
             </span>
@@ -327,7 +327,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       footer={
         <div className="flex flex-col gap-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] text-gray-600">{t("selected")}</span>
+            <span className="text-sm text-gray-600">{t("selected")}</span>
             <span className="text-sm font-bold text-gray-900">
               {selectedSlot
                 ? dayjs(selectedSlot.start_datetime).format(
@@ -349,7 +349,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     >
       <div className="flex flex-col gap-5 p-4">
         {facilityResponse?.name && (
-          <p className="text-[12.5px] text-gray-600">{facilityResponse.name}</p>
+          <p className="text-xs text-gray-600">{facilityResponse.name}</p>
         )}
 
         <div className="flex flex-col gap-2.5">
@@ -374,13 +374,13 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 >
                   <div
                     className={cn(
-                      "text-[10.5px] font-semibold uppercase",
+                      "text-[10px] font-semibold uppercase",
                       isSelected ? "opacity-85" : "text-gray-500",
                     )}
                   >
                     {day.format("ddd")}
                   </div>
-                  <div className="text-[17px] font-bold">{day.format("D")}</div>
+                  <div className="text-lg font-bold">{day.format("D")}</div>
                 </button>
               );
             })}
@@ -392,7 +392,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         ) : slotGroups.length ? (
           slotGroups.map(({ availability, slots }) => (
             <div key={availability.name} className="flex flex-col gap-2.5">
-              <span className="text-[13.5px] font-bold text-gray-900">
+              <span className="text-sm font-bold text-gray-900">
                 {availability.name}
               </span>
               <div className="grid grid-cols-3 gap-2">
@@ -406,7 +406,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                       disabled={isFull}
                       onClick={() => setSelectedSlot({ ...slot, availability })}
                       className={cn(
-                        "rounded-xl border py-2.5 text-center text-[13.5px] font-semibold transition-colors",
+                        "rounded-xl border py-2.5 text-center text-sm font-semibold transition-colors",
                         isSelected
                           ? "border-primary-700 bg-primary-700 text-white"
                           : isFull

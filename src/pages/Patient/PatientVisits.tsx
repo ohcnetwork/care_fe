@@ -47,7 +47,7 @@ function UpcomingVisitCard({
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-primary-200 bg-primary-50 p-4">
       <div className="flex items-center justify-between">
-        <span className="text-[10.5px] font-bold uppercase tracking-widest text-primary-700">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-primary-700">
           {start.fromNow()}
         </span>
         {appointment.token && (
@@ -70,7 +70,7 @@ function UpcomingVisitCard({
           <span className="font-bold text-gray-900">
             {formatScheduleResourceName(appointment)}
           </span>
-          <span className="text-[13px] text-gray-600">
+          <span className="text-sm text-gray-600">
             {start.format("h:mm A")} · {appointment.facility.name}
           </span>
         </div>
@@ -117,7 +117,7 @@ function PastVisitRow({ appointment }: { appointment: PublicAppointment }) {
       )}
     >
       <div className="w-11 shrink-0 text-center">
-        <div className="text-[9.5px] font-bold uppercase tracking-wide text-gray-500">
+        <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500">
           {start.format("MMM")}
         </div>
         <div className="text-lg font-bold leading-tight text-gray-900">
@@ -126,7 +126,7 @@ function PastVisitRow({ appointment }: { appointment: PublicAppointment }) {
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <div className="flex items-center gap-2">
-          <span className="truncate text-[14.5px] font-bold text-gray-900">
+          <span className="truncate text-sm font-bold text-gray-900">
             {formatScheduleResourceName(appointment)}
           </span>
           <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>

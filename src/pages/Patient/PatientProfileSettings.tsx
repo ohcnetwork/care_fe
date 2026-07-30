@@ -47,14 +47,14 @@ export default function PatientProfileSettings() {
                 ? formatPhoneNumberIntl(tokenData.phoneNumber)
                 : "-"}
             </span>
-            <span className="truncate text-[12.5px] text-gray-600">
+            <span className="truncate text-xs text-gray-600">
               {t("patient_profile__account_description")}
             </span>
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+          <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
             {t("patient_profile__patients_on_this_number")} ·{" "}
             {patients?.length ?? 0}
           </span>
@@ -81,7 +81,7 @@ export default function PatientProfileSettings() {
                       className="size-9 shrink-0 rounded-full"
                     />
                     <div className="flex min-w-0 flex-1 flex-col">
-                      <span className="truncate text-[14.5px] font-semibold text-gray-900">
+                      <span className="truncate text-sm font-semibold text-gray-900">
                         {patient.name}
                       </span>
                       <span className="truncate text-xs text-gray-600">
@@ -94,7 +94,7 @@ export default function PatientProfileSettings() {
                         {t("active")}
                       </Badge>
                     ) : (
-                      <span className="shrink-0 text-[13px] font-semibold text-primary-700">
+                      <span className="shrink-0 text-sm font-semibold text-primary-700">
                         {t("switch")}
                       </span>
                     )}
@@ -114,7 +114,7 @@ export default function PatientProfileSettings() {
         </div>
 
         <div className="flex flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-3.5">
-          <span className="text-[13px] font-semibold text-gray-900">
+          <span className="text-sm font-semibold text-gray-900">
             {t("language")}
           </span>
           <LanguageSelector />
@@ -133,7 +133,7 @@ export default function PatientProfileSettings() {
         </button>
 
         {careConfig.customDescription && (
-          <p className="text-center text-[11.5px] text-gray-400">
+          <p className="text-center text-xs text-gray-400">
             {careConfig.customDescription}
           </p>
         )}

@@ -87,7 +87,7 @@ export function PatientHeaderTabs<T extends string>({
           onClick={() => onChange(tab.key)}
           aria-current={value === tab.key ? "page" : undefined}
           className={cn(
-            "-mb-px border-b-[2.5px] pb-2.5 text-[14.5px] transition-colors",
+            "-mb-px border-b-[2.5px] pb-2.5 text-sm transition-colors",
             value === tab.key
               ? "border-primary-700 font-bold text-primary-700"
               : "border-transparent font-semibold text-gray-600 hover:text-gray-900",
@@ -149,12 +149,12 @@ export function PatientAppShell({
         className={cn("rounded-full", title ? "size-6" : "size-7")}
       />
       {title ? (
-        <span className="text-[13px] font-semibold text-gray-900">
+        <span className="text-sm font-semibold text-gray-900">
           {abbreviateName(selectedPatient.name)}
         </span>
       ) : (
         <span className="flex flex-col items-start leading-tight">
-          <span className="text-[9.5px] font-bold uppercase tracking-wider text-gray-500">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
             {t("patient_shell__viewing")}
           </span>
           <span className="text-sm font-bold text-gray-900">
@@ -186,7 +186,7 @@ export function PatientAppShell({
             <Icon className="size-5" strokeWidth={1.9} />
             <span
               className={cn(
-                "text-[10.5px]",
+                "text-[10px]",
                 isActive ? "font-bold" : "font-semibold",
               )}
             >
@@ -245,7 +245,7 @@ export function PatientAppShell({
           {switchedTo && (
             <div className="mx-4 mt-3 flex items-center gap-2.5 rounded-xl border border-primary-200 bg-primary-50 px-3.5 py-2.5">
               <Check className="size-4 text-primary-700" strokeWidth={2.4} />
-              <span className="text-[12.5px] font-semibold text-primary-800">
+              <span className="text-xs font-semibold text-primary-800">
                 {t("patient_shell__now_showing", { name: switchedTo })}
               </span>
             </div>

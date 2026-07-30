@@ -78,7 +78,7 @@ function UpcomingAppointmentCard({
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-primary-200 bg-primary-50 p-4">
       <div className="flex items-center justify-between">
-        <span className="text-[10.5px] font-bold uppercase tracking-widest text-primary-700">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-primary-700">
           {t("patient_home__upcoming_appointment")}
         </span>
         {appointment.token && (
@@ -102,12 +102,10 @@ function UpcomingAppointmentCard({
           <span className="font-bold text-gray-900">
             {formatScheduleResourceName(appointment)}
           </span>
-          <span className="text-[13px] text-gray-600">
+          <span className="text-sm text-gray-600">
             {start.format("h:mm A")} · {appointment.facility.name}
           </span>
-          <span className="text-[13px] text-gray-600">
-            {t(appointment.status)}
-          </span>
+          <span className="text-sm text-gray-600">{t(appointment.status)}</span>
         </div>
       </div>
 
@@ -190,7 +188,7 @@ function RecentMedicinesPreview({
         >
           <span className="h-8 w-1.5 shrink-0 rounded-full bg-primary-700" />
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="truncate text-[14.5px] font-semibold text-gray-900">
+            <span className="truncate text-sm font-semibold text-gray-900">
               {displayMedicationName(medication)}
             </span>
             <span className="truncate text-xs text-gray-600">
@@ -216,7 +214,7 @@ function SectionHeader({ title, href }: { title: string; href: string }) {
   return (
     <div className="flex items-baseline justify-between">
       <span className="font-bold text-gray-900">{title}</span>
-      <Link href={href} className="text-[13px] font-semibold text-primary-700">
+      <Link href={href} className="text-sm font-semibold text-primary-700">
         {t("see_all")}
       </Link>
     </div>
@@ -255,7 +253,7 @@ function PatientPortalIndex() {
           <h2 className="text-[22px] font-bold tracking-tight text-gray-900">
             {t("patient_home__greeting", { name: firstName })}
           </h2>
-          <p className="text-[13.5px] text-gray-600">
+          <p className="text-sm text-gray-600">
             {dayjs().format("dddd, D MMMM")}
             {selectedPatient?.geo_organization?.name &&
               ` · ${selectedPatient.geo_organization.name}`}
@@ -276,10 +274,10 @@ function PatientPortalIndex() {
               />
             </span>
             <div>
-              <span className="block text-[17px] font-bold text-gray-900">
+              <span className="block text-lg font-bold text-gray-900">
                 {t("patient_home__empty_heading")}
               </span>
-              <span className="mt-1 block text-[13.5px] leading-relaxed text-gray-600">
+              <span className="mt-1 block text-sm leading-relaxed text-gray-600">
                 {t("patient_home__empty_description", { name: firstName })}
               </span>
             </div>
@@ -308,7 +306,7 @@ function PatientPortalIndex() {
                       className="size-5 text-primary-700"
                       strokeWidth={1.8}
                     />
-                    <span className="text-center text-[11px] font-semibold leading-tight text-gray-900">
+                    <span className="text-center text-xs font-semibold leading-tight text-gray-900">
                       {t(action.key)}
                     </span>
                   </Link>
@@ -344,7 +342,7 @@ function PatientPortalIndex() {
                       className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-gray-300"
                     >
                       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <span className="truncate text-[14.5px] font-semibold text-gray-900">
+                        <span className="truncate text-sm font-semibold text-gray-900">
                           {reportTitle(report, t)}
                         </span>
                         <span className="truncate text-xs text-gray-600">
