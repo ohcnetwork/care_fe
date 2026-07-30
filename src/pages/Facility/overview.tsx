@@ -231,5 +231,3 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     </Page>
   );
 }
-
-export default FacilityOverview;

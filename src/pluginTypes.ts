@@ -1,3 +1,4 @@
+import { FilesTabsProps } from "@/components/Files/FilesTab";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import type { OverrideCondition } from "@/lib/override";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
@@ -100,7 +101,7 @@ export type DiagnosticReportOverrideComponentType = React.FC<{
     id: string;
     title?: string;
     code?: { code: string; display?: string };
-    component?: { code: { code: string; display?: string } }[];
+    component?: { code: { code: string; display?: string } }[] | null;
     permitted_unit?: { code: string; display?: string; system?: string } | null;
     permitted_data_type?: string;
   }[];
@@ -196,8 +197,7 @@ export type PluginOverride = {
 };
 
 type SupportedPluginExtensions =
-  | "DoctorConnectButtons"
-  | "PatientExternalRegistration";
+  "DoctorConnectButtons" | "PatientExternalRegistration";
 
 export type PluginManifest = {
   plugin: string;
@@ -213,6 +213,7 @@ export type PluginManifest = {
     string,
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
+  encounterFileTabs?: Record<string, LazyComponent<React.FC<FilesTabsProps>>>;
   devices?: readonly PluginDeviceManifest[];
   /** Component overrides provided by this plugin */
   overrides?: readonly PluginOverride[];

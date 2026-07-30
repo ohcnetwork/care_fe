@@ -71,8 +71,7 @@ const SEARCH_WITH_NAME = "name" as const;
 const SEARCH_WITH_EXTERNAL_IDENTIFIER = "external_identifier" as const;
 
 type SearchWith =
-  | typeof SEARCH_WITH_NAME
-  | typeof SEARCH_WITH_EXTERNAL_IDENTIFIER;
+  typeof SEARCH_WITH_NAME | typeof SEARCH_WITH_EXTERNAL_IDENTIFIER;
 
 const buildQueryParams = (
   facilityId: string,

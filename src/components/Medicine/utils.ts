@@ -1,8 +1,9 @@
 import {
   computeTotalDoseQuantity,
   DoseRange,
-  formatDurationLabel,
+  formatTimingBounds,
   getFrequencyDisplayLabel,
+  getTimingBounds,
   MedicationRequestDosageInstruction,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { round } from "@/Utils/decimal";
@@ -18,6 +19,22 @@ export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
     return `${round(dose_quantity.value)} ${dose_quantity.unit.display}`;
   }
   return "";
+}
+
+/**
+ * Whether a dosage should be highlighted — true for dose ranges and for
+ * quantities whose rounded display value is not exactly 1.
+ */
+export function isNonUnitDose(
+  instruction?: MedicationRequestDosageInstruction,
+): boolean {
+  const doseAndRate = instruction?.dose_and_rate;
+  if (!doseAndRate) return false;
+
+  const { dose_range, dose_quantity } = doseAndRate;
+  if (dose_range) return true;
+  if (dose_quantity?.value == null) return false;
+  return round(dose_quantity.value) !== round(1);
 }
 
 // Helper function to format dosage instructions in Rx style
@@ -64,48 +81,15 @@ export function formatFrequency(
 }
 
 /**
- * Standard duration display for a dosage instruction.
- * Returns human-readable label like "5 days", "2 weeks".
+ * Standard duration display for a dosage instruction. Handles all three
+ * scheduling bounds — duration ("5 days"), range ("5–7 days"), and period
+ * ("Jun 01, 2026 → Jun 08, 2026").
  */
 export function formatDuration(
   instruction?: MedicationRequestDosageInstruction,
 ): string {
-  const duration = instruction?.timing?.repeat?.bounds_duration;
-  if (!duration?.value || duration.value === "0") return "";
-  return formatDurationLabel(duration);
-}
-
-/**
- * Compact one-line medication summary:
- *   "1 tablet × 1-0-1 (Twice a day) × 5 days = 10 tablets"
- */
-export function formatMedicationLine(
-  instruction?: MedicationRequestDosageInstruction,
-  unitLabel = "units",
-): string {
-  if (!instruction) return "";
-  const parts: string[] = [];
-
-  // Dosage
-  const dosage = formatDosage(instruction);
-  if (dosage) parts.push(dosage);
-
-  // Frequency
-  const freq = formatFrequency(instruction);
-  if (freq) parts.push(freq);
-
-  // Duration
-  const dur = formatDuration(instruction);
-  if (dur) parts.push(dur);
-
-  if (parts.length === 0) return "";
-
-  // Total
-  const total = formatTotalUnits([instruction], unitLabel);
-  if (total) {
-    return `${parts.join(" × ")} = ${total}`;
-  }
-  return parts.join(" × ");
+  const bounds = getTimingBounds(instruction?.timing?.repeat);
+  return bounds ? formatTimingBounds(bounds) : "";
 }
 
 /**

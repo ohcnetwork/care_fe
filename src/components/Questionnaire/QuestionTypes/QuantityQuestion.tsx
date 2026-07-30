@@ -34,8 +34,7 @@ export const QuantityQuestion = memo(function QuantityQuestion({
   index = 0,
 }: QuantityQuestionProps) {
   const currentValue = questionnaireResponse.values[index]?.value as
-    | number
-    | undefined;
+    number | undefined;
   const currentUnit = questionnaireResponse.values[index]?.unit;
   const currentCoding = questionnaireResponse.values[index]?.coding;
 
