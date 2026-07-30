@@ -3,6 +3,8 @@ import { Activity, ChevronRight, FileText } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -114,59 +116,75 @@ export default function VisitSummary({
               </>
             )}
 
-            <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-200 bg-white p-4">
-              <div className="flex items-center gap-3">
-                <Avatar
-                  name={formatScheduleResourceName(appointment)}
-                  colors={CLINICIAN_AVATAR_COLORS}
-                  className="size-11 shrink-0 rounded-full"
-                />
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate font-bold text-gray-900">
-                    {formatScheduleResourceName(appointment)}
-                  </span>
-                  {/* The shell's header carries no subtitle, so the visit's
-                      date is the context this line has to hold. */}
-                  <span className="truncate text-xs text-gray-600">
-                    {visitDate?.format("DD MMM YYYY · h:mm A") ?? "-"}
-                  </span>
-                </div>
-                {/* The pass already carries the status pill above. */}
+            {/* The pass already names the clinician, session, time and
+                facility, so alongside it this card carries only what the pass
+                leaves out — and for an upcoming visit with no reason recorded
+                that is nothing worth a card. A past visit carries the lot. */}
+            {(!isPassVisible || !!appointment.note) && (
+              <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-200 bg-white p-4">
                 {!isPassVisible && (
-                  <PatientBadge tone={VISIT_STATUS_TONES[appointment.status]}>
-                    {t(appointment.status)}
-                  </PatientBadge>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-2.5 border-t border-gray-100 pt-2.5">
-                <MetaField
-                  label={t("facility")}
-                  value={appointment.facility.name}
-                />
-                <MetaField
-                  label={t("session")}
-                  value={appointment.token_slot.availability.name}
-                />
-                {appointment.token && (
-                  <MetaField
-                    label={t("token")}
-                    value={renderTokenNumber(appointment.token)}
-                  />
-                )}
-                <MetaField
-                  label={t("booked_on")}
-                  value={dayjs(appointment.booked_on).format("DD MMM YYYY")}
-                />
-                {appointment.note && (
-                  <div className="col-span-2">
-                    <MetaField
-                      label={t("patient_visits__reason")}
-                      value={appointment.note}
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      name={formatScheduleResourceName(appointment)}
+                      colors={CLINICIAN_AVATAR_COLORS}
+                      className="size-11 shrink-0 rounded-full"
                     />
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate font-bold text-gray-900">
+                        {formatScheduleResourceName(appointment)}
+                      </span>
+                      {/* The shell's header carries no subtitle, so the visit's
+                        date is the context this line has to hold. */}
+                      <span className="truncate text-xs text-gray-600">
+                        {visitDate?.format("DD MMM YYYY · h:mm A") ?? "-"}
+                      </span>
+                    </div>
+                    <PatientBadge tone={VISIT_STATUS_TONES[appointment.status]}>
+                      {t(appointment.status)}
+                    </PatientBadge>
                   </div>
                 )}
+                <div
+                  className={cn(
+                    "grid grid-cols-2 gap-2.5",
+                    !isPassVisible && "border-t border-gray-100 pt-2.5",
+                  )}
+                >
+                  {!isPassVisible && (
+                    <>
+                      <MetaField
+                        label={t("facility")}
+                        value={appointment.facility.name}
+                      />
+                      <MetaField
+                        label={t("session")}
+                        value={appointment.token_slot.availability.name}
+                      />
+                    </>
+                  )}
+                  {appointment.token && !isPassVisible && (
+                    <MetaField
+                      label={t("token")}
+                      value={renderTokenNumber(appointment.token)}
+                    />
+                  )}
+                  {!isPassVisible && (
+                    <MetaField
+                      label={t("booked_on")}
+                      value={dayjs(appointment.booked_on).format("DD MMM YYYY")}
+                    />
+                  )}
+                  {appointment.note && (
+                    <div className="col-span-2">
+                      <MetaField
+                        label={t("patient_visits__reason")}
+                        value={appointment.note}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {(visitPrescriptions.length > 0 || visitReports.length > 0) && (
               <>

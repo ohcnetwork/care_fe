@@ -14,15 +14,13 @@ import {
   PatientHeaderTabs,
 } from "@/components/Patient/PatientAppShell";
 import { PatientBadge } from "@/components/Patient/PatientBadge";
+import { PrescriptionRow } from "@/components/Patient/PrescriptionRow";
 
 import {
   usePatientDiagnosticReports,
   usePatientPrescriptions,
 } from "@/hooks/usePatientPortalData";
 import { usePatientContext } from "@/hooks/usePatientUser";
-
-import { formatName } from "@/Utils/utils";
-import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 
 import {
   reportFlagSummary,
@@ -192,61 +190,12 @@ export default function PatientRecords() {
                     {t("patient_records__earlier")}
                   </span>
                 )}
-                {shownPrescriptions.map((prescription) => {
-                  const isActive =
-                    prescription.status === PrescriptionStatus.active;
-                  return (
-                    <Link
-                      key={prescription.id}
-                      href={`/patient/records/prescriptions/${prescription.id}`}
-                      className={cn(
-                        "flex items-center gap-2.5 rounded-2xl border bg-white p-4 hover:border-gray-300",
-                        isActive
-                          ? "border-primary-200"
-                          : "border-gray-200 opacity-80",
-                      )}
-                    >
-                      {/* The design lists each prescription's medicines here,
-                          but the list payload carries only the header fields —
-                          the medicines arrive with the detail request. So this
-                          stays the design's compact card rather than a rich one
-                          with an empty band where the medicines would go. */}
-                      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <span className="truncate font-bold text-gray-900">
-                          {formatName(prescription.prescribed_by)}
-                        </span>
-                        <span className="truncate text-xs text-gray-600">
-                          {[
-                            dayjs(prescription.created_date).format(
-                              "DD MMM YYYY",
-                            ),
-                            prescription.encounter?.facility?.name,
-                            prescription.name,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </span>
-                      </div>
-                      <PatientBadge
-                        tone={
-                          isActive
-                            ? "success"
-                            : prescription.status ===
-                                PrescriptionStatus.cancelled
-                              ? "danger"
-                              : "neutral"
-                        }
-                      >
-                        {t(prescription.status)}
-                      </PatientBadge>
-                      <ChevronRight
-                        className="size-[17px] shrink-0 text-gray-600"
-                        strokeWidth={2.1}
-                        aria-hidden
-                      />
-                    </Link>
-                  );
-                })}
+                {shownPrescriptions.map((prescription) => (
+                  <PrescriptionRow
+                    key={prescription.id}
+                    prescription={prescription}
+                  />
+                ))}
               </>
             ) : (
               <RecordsEmptyState

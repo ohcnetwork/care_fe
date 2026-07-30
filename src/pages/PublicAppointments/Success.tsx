@@ -9,11 +9,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
+import { AppointmentTokenPass } from "@/components/Patient/AppointmentTokenPass";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   PublicAppointment,
@@ -41,23 +41,6 @@ function buildCalendarFile(appointment: PublicAppointment, title: string) {
   return `data:text/calendar;charset=utf-8,${encodeURIComponent(
     lines.join("\r\n"),
   )}`;
-}
-
-function DetailRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex justify-between gap-3.5">
-      <span className="shrink-0 text-sm text-gray-500">{label}</span>
-      <span className="text-right text-sm font-semibold text-gray-900">
-        {children}
-      </span>
-    </div>
-  );
 }
 
 export function AppointmentSuccess(props: { appointmentId: string }) {
@@ -146,46 +129,12 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
         </div>
 
         <div className="-mt-6 flex flex-col gap-4 px-4 pb-8">
-          <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            {/* Without a token the card still needs a headline, so the booking
-                reference stands in for it. */}
-            {appointment.token ? (
-              <div className="flex flex-col items-center gap-0.5 border-b border-dashed border-gray-300 pb-4">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                  {t("patient_booking__your_token")}
-                </span>
-                <span className="text-[42px] font-bold leading-none tracking-tight text-primary-700">
-                  {renderTokenNumber(appointment.token)}
-                </span>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-0.5 border-b border-dashed border-gray-300 pb-4">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                  {t("patient_booking__booking_reference")}
-                </span>
-                <span className="break-all text-center font-mono text-lg font-bold text-primary-700">
-                  {appointment.id}
-                </span>
-              </div>
-            )}
-
-            <div className="flex flex-col gap-2.5">
-              <DetailRow label={t("patient")}>
-                {appointment.patient.name} ·{" "}
-                {formatPatientAge(appointment.patient, true)}
-              </DetailRow>
-              <DetailRow label={t(appointment.resource_type, { count: 1 })}>
-                {resourceName}
-              </DetailRow>
-              <DetailRow label={t("date")}>
-                {start.format("ddd, D MMM YYYY · h:mm A")}
-              </DetailRow>
-              <DetailRow label={t("facility")}>
-                {appointment.facility.name}
-              </DetailRow>
-              <DetailRow label={t("status")}>{t(appointment.status)}</DetailRow>
-            </div>
-          </div>
+          {/* The same pass the visit screen shows, so what the patient sees the
+              moment they book is what they find again later. */}
+          <AppointmentTokenPass
+            appointment={appointment}
+            className="shadow-sm"
+          />
 
           <div className="grid grid-cols-2 gap-2.5">
             <Button variant="outline" className="h-11" asChild>
