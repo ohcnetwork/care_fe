@@ -58,7 +58,7 @@ export function PatientSwitcherSheet({
           <SheetTitle className="text-xl font-bold tracking-tight">
             {t("patient_switcher__heading")}
           </SheetTitle>
-          <SheetDescription className="text-[13px]">
+          <SheetDescription className="text-sm">
             {t("patient_switcher__description")}
           </SheetDescription>
         </SheetHeader>

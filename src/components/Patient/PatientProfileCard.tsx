@@ -62,7 +62,7 @@ export function PatientProfileCard({
       <Avatar name={patient.name} className="size-11 shrink-0 rounded-full" />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate font-bold text-gray-900">{patient.name}</span>
-        <span className="truncate text-[13px] text-gray-600">
+        <span className="truncate text-sm text-gray-600">
           {subtitle ?? patientMetaLine(patient, t)}
         </span>
       </div>

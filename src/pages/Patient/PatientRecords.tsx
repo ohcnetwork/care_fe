@@ -44,7 +44,7 @@ function FilterChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors",
+        "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors",
         active
           ? "bg-gray-900 text-white"
           : "border border-gray-200 bg-white text-gray-900 hover:border-gray-300",
@@ -135,7 +135,7 @@ export default function PatientRecords() {
                       <span className="truncate font-bold text-gray-900">
                         {formatName(prescription.prescribed_by)}
                       </span>
-                      <span className="truncate text-[12.5px] text-gray-600">
+                      <span className="truncate text-xs text-gray-600">
                         {dayjs(prescription.created_date).format("DD MMM YYYY")}
                         {prescription.encounter?.facility?.name &&
                           ` · ${prescription.encounter.facility.name}`}
@@ -148,10 +148,10 @@ export default function PatientRecords() {
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between border-t border-gray-100 pt-2.5">
-                    <span className="truncate text-[12.5px] text-gray-600">
+                    <span className="truncate text-xs text-gray-600">
                       {prescription.name || t("prescription")}
                     </span>
-                    <span className="flex shrink-0 items-center gap-1 text-[13px] font-semibold text-primary-700">
+                    <span className="flex shrink-0 items-center gap-1 text-sm font-semibold text-primary-700">
                       {t("view")}
                       <ChevronRight className="size-3.5" strokeWidth={2.2} />
                     </span>
@@ -224,7 +224,7 @@ export default function PatientRecords() {
                       <span className="truncate font-bold text-gray-900">
                         {reportTitle(report, t)}
                       </span>
-                      <span className="truncate text-[12.5px] text-gray-600">
+                      <span className="truncate text-xs text-gray-600">
                         {dayjs(report.created_date).format("DD MMM YYYY")}
                         {report.encounter?.facility?.name &&
                           ` · ${report.encounter.facility.name}`}

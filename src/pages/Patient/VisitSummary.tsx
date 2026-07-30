@@ -32,8 +32,8 @@ import { reportTitle } from "./records/reportUtils";
 function MetaField({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col">
-      <span className="text-[11px] text-gray-500">{label}</span>
-      <span className="text-[13px] font-semibold text-gray-900">{value}</span>
+      <span className="text-xs text-gray-500">{label}</span>
+      <span className="text-sm font-semibold text-gray-900">{value}</span>
     </div>
   );
 }
@@ -92,7 +92,7 @@ export default function VisitSummary({
                   <span className="truncate font-bold text-gray-900">
                     {formatScheduleResourceName(appointment)}
                   </span>
-                  <span className="truncate text-[12.5px] text-gray-600">
+                  <span className="truncate text-xs text-gray-600">
                     {appointment.facility.name}
                   </span>
                 </div>
@@ -124,7 +124,7 @@ export default function VisitSummary({
 
             {(visitPrescriptions.length > 0 || visitReports.length > 0) && (
               <>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
                   {t("patient_visits__from_this_visit")}
                 </span>
 
