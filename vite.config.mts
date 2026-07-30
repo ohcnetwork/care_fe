@@ -17,6 +17,7 @@ import { marked } from "marked";
 import path from "path";
 import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
+import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
@@ -99,6 +100,23 @@ function getMimeType(filePath: string) {
     default:
       return "application/octet-stream";
   }
+}
+
+function parseRegisteredComponentNames(value: string | undefined) {
+  if (!value || value.trim() === "") {
+    return new Set<string>();
+  }
+
+  if (value.trim() === "*") {
+    return null;
+  }
+
+  return new Set(
+    value
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean),
+  );
 }
 
 function isPluginManifestPath(rootDir: string, filePath: string) {
@@ -412,6 +430,11 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       careConsoleArt(),
       fixSonnerPackageJson(),
       localPluginDevSupport(),
+      autoRegisterComponents({
+        include: parseRegisteredComponentNames(
+          env.REACT_MFE_REGISTERED_COMPONENTS,
+        ),
+      }),
       tailwindcss(),
       federation({
         name: "core",
