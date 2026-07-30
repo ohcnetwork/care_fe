@@ -149,4 +149,59 @@ export function usePatientDiagnosticReports() {
   }, [data, isLoading, selectedPatient?.id]);
 }
 
+/**
+ * The prescriptions and reports produced by one visit.
+ *
+ * Both OTP list endpoints accept an `encounter` filter, and the appointment
+ * payload carries `associated_encounter` once the patient has been seen — so a
+ * visit's records are fetched server-side rather than guessed at by matching
+ * dates, which grouped every record created on a day onto every visit that day.
+ *
+ * The encounter arrives with the appointment, so the queries stay idle until it
+ * is known; an upcoming visit has no encounter and nothing to show.
+ */
+export function usePatientEncounterRecords(encounter?: string) {
+  const { token, phoneNumber, headers } = useAuthHeaders();
+  const enabled = !!token && !!encounter;
+
+  const { data: prescriptionData, isLoading: isLoadingPrescriptions } =
+    useQuery({
+      queryKey: ["portal-encounter-prescriptions", phoneNumber, encounter],
+      queryFn: query(patientPortalApi.listPrescriptions, {
+        headers,
+        queryParams: { encounter },
+        silent: true,
+      }),
+      enabled,
+    });
+
+  const { data: reportData, isLoading: isLoadingReports } = useQuery({
+    queryKey: ["portal-encounter-diagnostic-reports", phoneNumber, encounter],
+    queryFn: query(patientPortalApi.listDiagnosticReports, {
+      headers,
+      queryParams: { encounter },
+      silent: true,
+    }),
+    enabled,
+  });
+
+  return useMemo(
+    () => ({
+      isLoading: enabled && (isLoadingPrescriptions || isLoadingReports),
+      prescriptions: prescriptionData?.results ?? [],
+      // A report the lab has not finalised is not the patient's to read yet.
+      reports: (reportData?.results ?? []).filter((report) =>
+        READY_REPORT_STATUSES.includes(report.status),
+      ),
+    }),
+    [
+      prescriptionData,
+      reportData,
+      isLoadingPrescriptions,
+      isLoadingReports,
+      enabled,
+    ],
+  );
+}
+
 export { READY_REPORT_STATUSES };
