@@ -38,18 +38,15 @@ function ConnectionCard({
   isPending,
   onRemove,
   canManageOrganization,
-  viewLabel,
-  viewAriaLabel,
   removeLabel,
 }: {
   organization: OrganizationParent | Organization;
   isPending: boolean;
   onRemove: () => void;
   canManageOrganization: boolean;
-  viewLabel: string;
-  viewAriaLabel: string;
   removeLabel: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5">
       <div className="min-w-0">
@@ -66,9 +63,9 @@ function ConnectionCard({
         <Link
           href={`/admin/organizations/role/${organization.id}`}
           className="text-xs font-medium text-gray-900 underline underline-offset-2 hover:text-gray-600"
-          aria-label={viewAriaLabel}
+          aria-label={organization.name}
         >
-          {viewLabel}
+          {t("view")}
         </Link>
         {canManageOrganization && (
           <>
@@ -251,10 +248,6 @@ export default function RoleOrganizationConnections({ organization }: Props) {
                 organization={managedOrganization}
                 isPending={isPending}
                 canManageOrganization={canManageOrganization}
-                viewLabel={t("view")}
-                viewAriaLabel={t("view_organization", {
-                  name: managedOrganization.name,
-                })}
                 removeLabel={t("remove")}
                 onRemove={() =>
                   manageOrganization({
@@ -318,10 +311,6 @@ export default function RoleOrganizationConnections({ organization }: Props) {
                 organization={managingOrganization}
                 isPending={isPending}
                 canManageOrganization={canManageOrganization}
-                viewLabel={t("view")}
-                viewAriaLabel={t("view_organization", {
-                  name: managingOrganization.name,
-                })}
                 removeLabel={t("remove")}
                 onRemove={() =>
                   manageOrganization({
