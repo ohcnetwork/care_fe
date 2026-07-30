@@ -19,7 +19,7 @@ import { OrganizationParent } from "@/types/organization/organization";
 
 import BookingStepLayout from "./BookingStepLayout";
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 4;
 
 /**
  * Walk up from the patient's own geo organization to the district-level one, so
@@ -74,6 +74,37 @@ export default function BookFacility() {
       step={1}
       totalSteps={TOTAL_STEPS}
       onBack={() => navigate("/patient/home")}
+      headerExtra={
+        // OrganizationFilter stacks its controls below `sm`, which leaves its
+        // "Clear" ghost button as a full-width orphan under the select. Pull it
+        // in to a link-sized control, and drop it entirely while it is disabled
+        // — with nothing selected there is nothing to clear.
+        <div className="flex flex-col gap-3 bg-white px-4 pb-3.5 [&>div>button]:h-9 [&>div>button]:self-start [&>div>button]:px-0 [&>div>button:disabled]:hidden">
+          <OrganizationFilter
+            skipLevels={[]}
+            selected={organization}
+            onChange={(filter) =>
+              setQParams(
+                {
+                  organization: filter.organization as string | undefined,
+                  facility_type: filter.facility_type as string | undefined,
+                },
+                { replace: true },
+              )
+            }
+          />
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={t("search_by_facility_name")}
+              className="h-11 bg-gray-50 pl-9 placeholder:text-gray-400"
+              aria-label={t("search_by_facility_name")}
+            />
+          </div>
+        </div>
+      }
       footer={
         selectedPatient && (
           <div className="flex items-start gap-2.5 rounded-xl bg-gray-100 px-3.5 py-3">
@@ -89,32 +120,6 @@ export default function BookFacility() {
         )
       }
     >
-      <div className="flex flex-col gap-3 border-b border-gray-200 bg-white px-4 pb-4">
-        <OrganizationFilter
-          skipLevels={[]}
-          selected={organization}
-          onChange={(filter) =>
-            setQParams(
-              {
-                organization: filter.organization as string | undefined,
-                facility_type: filter.facility_type as string | undefined,
-              },
-              { replace: true },
-            )
-          }
-        />
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-          <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder={t("search_by_facility_name")}
-            className="h-11 bg-gray-50 pl-9"
-            aria-label={t("search_by_facility_name")}
-          />
-        </div>
-      </div>
-
       <div className="flex min-w-0 flex-col gap-3 p-4">
         <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
           {!qParams.organization && district?.name
@@ -134,11 +139,13 @@ export default function BookFacility() {
               href={`/patient/book/${facility.id}`}
               className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 hover:border-primary-200 hover:bg-primary-50/40"
             >
+              {/* Facility names and addresses are long and matter for
+                  choosing — wrap them rather than cutting them off mid-word. */}
               <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="truncate font-bold text-gray-900">
+                <span className="line-clamp-2 font-bold text-gray-900">
                   {facility.name}
                 </span>
-                <span className="truncate text-xs text-gray-600">
+                <span className="line-clamp-2 text-xs text-gray-600">
                   {[facility.facility_type, facility.address]
                     .filter(Boolean)
                     .join(" · ")}

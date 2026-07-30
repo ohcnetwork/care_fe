@@ -46,9 +46,12 @@ export function PatientSwitcherSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
+      {/* The grabber is the only affordance the design gives this sheet, so the
+          primitive's corner X is hidden — it is the sole direct-child button,
+          and Radix keeps Escape and overlay-click dismissal working. */}
       <SheetContent
         side="bottom"
-        className="mx-auto max-h-[85dvh] max-w-[480px] overflow-y-auto rounded-t-3xl p-5 pb-7"
+        className="mx-auto max-h-[85dvh] max-w-[480px] overflow-y-auto rounded-t-[26px] px-5 pb-6 pt-3 [&>button:first-of-type]:hidden"
       >
         <span
           aria-hidden
@@ -76,7 +79,7 @@ export function PatientSwitcherSheet({
 
         <Link
           href="/patient/add-profile"
-          className="mt-4 flex items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-gray-300 p-3.5 text-sm font-semibold text-primary-700 hover:border-primary-700 hover:bg-primary-50"
+          className="mt-4 flex items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-dashed border-gray-300 p-3.5 text-sm font-semibold text-primary-700 hover:border-primary-700 hover:bg-primary-50"
         >
           <Plus className="size-4" strokeWidth={2.2} />
           {t("patient_switcher__link_another")}

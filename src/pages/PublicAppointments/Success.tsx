@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { CalendarPlus, Check, Clock, Share2 } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -124,26 +125,46 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   };
 
   return (
-    <div className="min-h-dvh bg-gray-50">
+    <div className="min-h-dvh bg-white">
       <div className="mx-auto flex max-w-[480px] flex-col">
-        <div className="bg-primary-700 px-7 pb-12 pt-10 text-center text-white">
+        <div className="bg-primary-700 px-7 pb-9 pt-10 text-center text-white">
           <span className="mx-auto mb-3.5 flex size-16 items-center justify-center rounded-full bg-white/20">
             <Check className="size-8" strokeWidth={2.6} />
           </span>
           <h1 className="text-2xl font-bold tracking-tight">
             {t("appointment_booking_success")}
           </h1>
+          {tokenData?.phoneNumber && (
+            <p className="mt-1.5 text-sm text-white/85">
+              {t("patient_booking__sms_sent", {
+                phone:
+                  formatPhoneNumberIntl(tokenData.phoneNumber) ||
+                  tokenData.phoneNumber,
+              })}
+            </p>
+          )}
         </div>
 
         <div className="-mt-6 flex flex-col gap-4 px-4 pb-8">
           <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            {appointment.token && (
+            {/* Without a token the card still needs a headline, so the booking
+                reference stands in for it. */}
+            {appointment.token ? (
               <div className="flex flex-col items-center gap-0.5 border-b border-dashed border-gray-300 pb-4">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
                   {t("patient_booking__your_token")}
                 </span>
                 <span className="text-[42px] font-bold leading-none tracking-tight text-primary-700">
                   {renderTokenNumber(appointment.token)}
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-0.5 border-b border-dashed border-gray-300 pb-4">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                  {t("patient_booking__booking_reference")}
+                </span>
+                <span className="break-all text-center font-mono text-lg font-bold text-primary-700">
+                  {appointment.id}
                 </span>
               </div>
             )}
@@ -167,7 +188,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
-            <Button variant="outline" asChild>
+            <Button variant="outline" className="h-11" asChild>
               <a
                 href={buildCalendarFile(appointment, summaryTitle)}
                 download={`appointment-${appointment.id}.ics`}
@@ -176,13 +197,13 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
                 {t("patient_booking__add_to_calendar")}
               </a>
             </Button>
-            <Button variant="outline" onClick={handleShare}>
+            <Button variant="outline" className="h-11" onClick={handleShare}>
               <Share2 className="size-4" />
               {t("share")}
             </Button>
           </div>
 
-          <div className="flex gap-2.5 rounded-2xl border border-gray-200 bg-white p-4">
+          <div className="flex gap-2.5 rounded-2xl border border-gray-100 bg-gray-50 p-4">
             <Clock
               className="mt-0.5 size-4 shrink-0 text-primary-700"
               strokeWidth={1.9}
@@ -197,7 +218,12 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
             </div>
           </div>
 
-          <Button variant="secondary" size="lg" className="h-12" asChild>
+          <Button
+            variant="secondary"
+            size="lg"
+            className="h-11 w-full text-sm"
+            asChild
+          >
             <Link href="/patient/home">
               {t("patient_booking__back_to_home")}
             </Link>

@@ -37,6 +37,8 @@ export function isAppointmentCancellable(
 interface CancelAppointmentButtonProps {
   appointment: PublicAppointment;
   size?: React.ComponentProps<typeof Button>["size"];
+  /** Lets a call site quieten the trigger where other actions lead. */
+  variant?: React.ComponentProps<typeof Button>["variant"];
   className?: string;
   /** Called after a successful cancellation, e.g. to navigate away. */
   onCancelled?: () => void;
@@ -45,6 +47,7 @@ interface CancelAppointmentButtonProps {
 export function CancelAppointmentButton({
   appointment,
   size,
+  variant = "outline",
   className,
   onCancelled,
 }: CancelAppointmentButtonProps) {
@@ -72,7 +75,7 @@ export function CancelAppointmentButton({
   return (
     <>
       <Button
-        variant="outline"
+        variant={variant}
         size={size}
         className={className}
         onClick={() => setOpen(true)}
@@ -96,7 +99,9 @@ export function CancelAppointmentButton({
               {t("patient_visits__keep_appointment")}
             </AlertDialogCancel>
             <AlertDialogAction
-              className="min-h-11"
+              // AlertDialogAction defaults to the primary green, which would
+              // read as the affirmative choice here. Cancelling is destructive.
+              className="min-h-11 bg-red-600 text-white shadow-sm hover:bg-red-600/90"
               disabled={isPending}
               onClick={(event) => {
                 // Keep the dialog up until the request resolves.

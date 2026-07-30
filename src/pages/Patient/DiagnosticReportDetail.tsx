@@ -4,10 +4,10 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { PatientAppShell } from "@/components/Patient/PatientAppShell";
+import { PatientBadge } from "@/components/Patient/PatientBadge";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -49,6 +49,12 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
 
   const observations = report?.observations ?? [];
   const flags = report ? reportFlagSummary(report) : 0;
+  // The report itself carries no collection time — the earliest sample time
+  // across its observations is the closest stand-in.
+  const collectedAt = observations
+    .map((observation) => observation.effective_datetime)
+    .filter(Boolean)
+    .sort()[0];
 
   return (
     <PatientAppShell
@@ -65,13 +71,19 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
         ) : (
           <>
             <div className="flex flex-wrap gap-4 rounded-2xl border border-gray-200 bg-white p-4">
+              {collectedAt && (
+                <MetaField
+                  label={t("collected")}
+                  value={dayjs(collectedAt).format("DD MMM, h:mm A")}
+                />
+              )}
               <MetaField
                 label={t("reported")}
                 value={dayjs(report.created_date).format("DD MMM, h:mm A")}
               />
               {report.encounter?.facility?.name && (
                 <MetaField
-                  label={t("facility")}
+                  label={t("lab")}
                   value={report.encounter.facility.name}
                 />
               )}
@@ -84,9 +96,9 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
             </div>
 
             {flags > 0 && (
-              <Badge variant="yellow" className="self-start">
+              <PatientBadge tone="warning" className="self-start">
                 {t("patient_records__flagged_count", { count: flags })}
-              </Badge>
+              </PatientBadge>
             )}
 
             {observations.length > 0 && (
@@ -122,7 +134,9 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
                       >
                         <span>
                           {observationValueLabel(observation)}
-                          {observation.value?.unit?.display && (
+                          {/* The reference band already carries the unit; only
+                              repeat it here when there is no band to show. */}
+                          {!reference && observation.value?.unit?.display && (
                             <span className="ml-1 font-sans text-xs font-normal text-gray-500">
                               {observation.value.unit.display}
                             </span>
@@ -144,7 +158,7 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
             )}
 
             {report.conclusion && (
-              <div className="flex flex-col gap-1.5 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+              <div className="flex flex-col gap-1.5 rounded-2xl border border-gray-100 bg-gray-50 p-4">
                 <span className="text-sm font-bold text-gray-900">
                   {t("conclusion")}
                 </span>
@@ -155,12 +169,12 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
             )}
 
             {report.note && (
-              <p className="text-xs leading-relaxed text-gray-600">
+              <p className="rounded-2xl border border-gray-100 bg-gray-50 p-4 text-xs leading-relaxed text-gray-600">
                 {report.note}
               </p>
             )}
 
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 px-3.5 py-3">
+            <div className="rounded-2xl border border-gray-100 bg-gray-50 px-3.5 py-3">
               <span className="text-xs text-gray-600">
                 {t("patient_records__verified_by")}{" "}
                 <span className="font-semibold text-gray-900">
