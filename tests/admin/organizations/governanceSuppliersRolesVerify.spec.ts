@@ -16,7 +16,9 @@ function isFlatOrgType(type: OrganizationType) {
 function typeHeadingPattern(type: OrganizationType) {
   if (type === "govt") return /gov(?:t|ernance|erence)/i;
   if (type === "product_supplier") return /^suppliers$/i;
-  return /responsibilit/i;
+  // Anchored so it doesn't also match the detail panel's nested
+  // "What responsibilities can X manage?" section heading.
+  return /^responsibilities$/i;
 }
 
 function searchInput(page: Page, type: OrganizationType) {
