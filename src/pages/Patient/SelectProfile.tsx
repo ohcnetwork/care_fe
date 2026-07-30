@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { Link, navigate } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,17 @@ export default function SelectProfile() {
     navigate("/patient/home");
   };
 
-  if (isLoadingPatients) {
+  // A single linked profile has nothing to pick, so skip the picker entirely.
+  const onlyPatient = patients?.length === 1 ? patients[0] : null;
+  useEffect(() => {
+    if (!onlyPatient) {
+      return;
+    }
+    setSelectedPatient(onlyPatient);
+    navigate("/patient/home", { replace: true });
+  }, [onlyPatient, setSelectedPatient]);
+
+  if (isLoadingPatients || onlyPatient) {
     return (
       <PatientAuthLayout className="px-6 pt-9">
         <Skeleton className="h-8 w-48" />
