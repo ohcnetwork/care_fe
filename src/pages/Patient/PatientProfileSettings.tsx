@@ -1,20 +1,16 @@
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import careConfig from "@careConfig";
-import { Languages, Plus } from "lucide-react";
+import { Languages, LogOut, Plus } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
-import { cn } from "@/lib/utils";
-
-import { Skeleton } from "@/components/ui/skeleton";
-
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import { PatientAppShell } from "@/components/Patient/PatientAppShell";
-import { PatientBadge } from "@/components/Patient/PatientBadge";
 import {
-  PatientAvatar,
   patientInitials,
-  patientMetaLine,
+  PatientProfileCard,
 } from "@/components/Patient/PatientProfileCard";
 
 import { useAppVersion } from "@/hooks/useAppVersion";
@@ -54,6 +50,10 @@ export default function PatientProfileSettings() {
   ]
     .filter(Boolean)
     .join(" · ");
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/patient/login", { replace: true });
+  };
 
   return (
     <PatientAppShell title={t("profile")}>
@@ -79,6 +79,15 @@ export default function PatientProfileSettings() {
                 .join(" · ")}
             </span>
           </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleSignOut}
+            aria-label={t("sign_out")}
+            className="ml-auto flex size-9 shrink-0 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700"
+          >
+            <LogOut className="size-5" strokeWidth={1.9} />
+          </Button>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -90,45 +99,15 @@ export default function PatientProfileSettings() {
           {isLoadingPatients ? (
             <Skeleton className="h-20 w-full rounded-2xl" />
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-              {patients?.map((patient, index) => {
-                const isActive = patient.id === selectedPatient?.id;
-                return (
-                  <button
-                    key={patient.id}
-                    type="button"
-                    onClick={() => setSelectedPatient(patient)}
-                    aria-pressed={isActive}
-                    className={cn(
-                      "flex w-full items-center gap-3 p-3.5 text-left hover:bg-gray-50",
-                      index > 0 && "border-t border-gray-100",
-                    )}
-                  >
-                    <PatientAvatar
-                      name={patient.name}
-                      active={isActive}
-                      className="size-9 text-xs"
-                    />
-                    <div className="flex min-w-0 flex-1 flex-col">
-                      <span className="truncate text-sm font-semibold text-gray-900">
-                        {patient.name}
-                      </span>
-                      <span className="truncate text-xs text-gray-600">
-                        {patientMetaLine(patient, t)}
-                      </span>
-                    </div>
-                    {isActive ? (
-                      <PatientBadge tone="primary" className="shrink-0">
-                        {t("active")}
-                      </PatientBadge>
-                    ) : (
-                      <span className="shrink-0 text-xs font-semibold text-primary-700">
-                        {t("switch")}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+            <div className="flex flex-col gap-2.5">
+              {patients?.map((patient) => (
+                <PatientProfileCard
+                  key={patient.id}
+                  patient={patient}
+                  selected={patient.id === selectedPatient?.id}
+                  onSelect={setSelectedPatient}
+                />
+              ))}
             </div>
           )}
 
@@ -161,12 +140,8 @@ export default function PatientProfileSettings() {
         <div className="mt-auto flex flex-col items-center gap-1.5 pt-4">
           <button
             type="button"
-            onClick={async () => {
-              // signOut() lands on the staff /login; a patient belongs on theirs.
-              await signOut();
-              navigate("/patient/login", { replace: true });
-            }}
-            className="flex min-h-11 items-center px-3 text-sm font-semibold text-red-600 hover:underline"
+            onClick={handleSignOut}
+            className="mt-2 py-2 text-center text-sm font-bold text-red-600 hover:underline"
           >
             {t("sign_out")}
           </button>

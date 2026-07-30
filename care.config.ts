@@ -249,7 +249,7 @@ const careConfig = {
    * Number of digits in the OTP sent for patient login and password reset.
    * Must match the backend's `OTP_LENGTH` setting, which defaults to 5.
    */
-  otpLength: env.REACT_OTP_LENGTH ? parseInt(env.REACT_OTP_LENGTH, 5) : 5,
+  otpLength: env.REACT_OTP_LENGTH ? parseInt(env.REACT_OTP_LENGTH, 10) : 5,
 
   /**
    * Health helpline shown to patients who cannot sign in. Deployment specific,

@@ -210,16 +210,56 @@ export function PatientAppShell({
     </>
   );
 
-  // One layout at every width: the same mobile-first column, centred on wider
-  // screens. No separate desktop navigation to keep in sync.
+  // Desktop navigation: a persistent left rail replaces the mobile bottom bar.
+  const sideNav = (
+    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-gray-200 bg-white px-3 py-4 lg:flex">
+      <Link
+        href="/patient/home"
+        aria-label={t("care")}
+        className="mb-6 px-3 py-1"
+      >
+        <img
+          src={careConfig.mainLogo?.dark}
+          alt={t("care")}
+          className="h-8 w-auto"
+        />
+      </Link>
+      <nav
+        aria-label={t("patient_shell__navigation")}
+        className="flex flex-col gap-1"
+      >
+        {TABS.map((tab) => {
+          const isActive = path?.startsWith(tab.href);
+          const Icon = tab.icon;
+          return (
+            <Link
+              key={tab.key}
+              href={tab.href}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                isActive
+                  ? "bg-primary-50 font-bold text-primary-700"
+                  : "font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+              )}
+              aria-current={isActive ? "page" : undefined}
+            >
+              <Icon className="size-5" strokeWidth={1.9} />
+              {t(tab.label)}
+            </Link>
+          );
+        })}
+      </nav>
+    </aside>
+  );
+
+  // Mobile is a centred card; desktop drops the card chrome for a left rail
+  // plus a flush content column.
   return (
-    <div className="flex min-h-dvh bg-gray-100">
-      {/* min-w-0 throughout: without it these flex items refuse to shrink
-          below their content's min-content width, and one long record title
-          makes the whole page scroll sideways. */}
+    <div className="flex min-h-dvh bg-gray-100 lg:bg-white">
+      {sideNav}
       <div className="flex min-w-0 flex-1 justify-center">
-        <div className="flex w-full min-w-0 max-w-[480px] flex-col bg-gray-50 sm:my-4 sm:min-h-0 sm:rounded-3xl sm:border sm:border-gray-200 sm:shadow-sm">
-          <header className="sticky top-0 z-10 shrink-0 border-b border-gray-200 bg-white sm:rounded-t-3xl">
+        <div className="flex w-full min-w-0 flex-col bg-gray-50">
+          <header className="sticky top-0 z-10 shrink-0 border-b border-gray-200 bg-white">
             <div className="flex min-w-0 items-center gap-2.5 px-4 py-3">
               {backTo && (
                 <button
@@ -233,7 +273,8 @@ export function PatientAppShell({
               )}
               {/* Two header variants. Home leads with the logo — it is the
                   portal's only branded surface, and the tab bar already tells
-                  you where you are; every other screen leads with its title. */}
+                  you where you are; every other screen leads with its title. The
+                  desktop rail already carries the logo, so hide it there. */}
               {title ? (
                 <h1 className="min-w-0 truncate text-xl font-bold tracking-tight text-gray-900">
                   {title}
@@ -242,7 +283,7 @@ export function PatientAppShell({
                 <Link
                   href="/patient/home"
                   aria-label={t("care")}
-                  className="flex min-h-11 items-center"
+                  className="flex min-h-11 items-center lg:hidden"
                 >
                   <img
                     src={careConfig.mainLogo?.dark}
@@ -273,12 +314,14 @@ export function PatientAppShell({
             )}
           </div>
 
-          <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+          <main className="flex min-w-0 flex-1 flex-col sm:px-4">
+            {children}
+          </main>
 
           {!hideTabs && (
             <nav
               aria-label={t("patient_shell__navigation")}
-              className="sticky bottom-0 grid shrink-0 grid-cols-4 border-t border-gray-200 bg-white px-2.5 pb-6 pt-2.5 sm:rounded-b-3xl sm:pb-2"
+              className="sticky bottom-0 grid shrink-0 grid-cols-4 border-t border-gray-200 bg-white px-2.5 pb-6 pt-2.5 sm:rounded-b-3xl sm:pb-2 lg:hidden"
             >
               {tabBar}
             </nav>
