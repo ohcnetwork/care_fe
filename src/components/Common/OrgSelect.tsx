@@ -17,7 +17,6 @@ interface OrgSelectProps {
   placeholder?: string;
   inputPlaceholder?: string;
   noOptionsMessage?: string;
-  /** Organization IDs to exclude from the list of options. */
   excludeIds?: string[];
 }
 

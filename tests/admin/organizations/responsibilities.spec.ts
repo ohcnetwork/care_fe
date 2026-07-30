@@ -53,6 +53,17 @@ async function selectResponsibility(page: Page, name: string) {
   await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
 }
 
+/**
+ * The detail panel's description paragraph sits right after the heading, but
+ * the sidebar list also renders each item's description text, so a plain
+ * `getByText` match is ambiguous. Scope to the sibling of the detail heading.
+ */
+function detailDescription(page: Page, name: string) {
+  return page
+    .getByRole("heading", { name, exact: true })
+    .locator("xpath=following-sibling::p");
+}
+
 test.describe("Admin Responsibilities Page", () => {
   test.beforeEach(async ({ page }) => {
     await gotoResponsibilities(page);
@@ -88,7 +99,7 @@ test.describe("Admin Responsibilities Page", () => {
     await createResponsibility(page, { name, description });
     await selectResponsibility(page, name);
 
-    await expect(page.getByText(description)).toBeVisible();
+    await expect(detailDescription(page, name)).toHaveText(description);
   });
 
   test("should edit an existing responsibility", async ({ page }) => {
@@ -117,7 +128,9 @@ test.describe("Admin Responsibilities Page", () => {
     await expect(
       page.getByRole("heading", { name: updatedName, exact: true }),
     ).toBeVisible();
-    await expect(page.getByText(updatedDescription)).toBeVisible();
+    await expect(detailDescription(page, updatedName)).toHaveText(
+      updatedDescription,
+    );
 
     await searchResponsibility(page, updatedName);
     await expect(listRow(page, updatedName)).toBeVisible();

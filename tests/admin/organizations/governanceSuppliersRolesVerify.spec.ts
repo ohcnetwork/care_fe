@@ -40,6 +40,11 @@ function firstResizablePanel(page: Page) {
 }
 
 function adminOrgListUrlRegex(type: OrganizationType) {
+  if (type === "role") {
+    // Responsibilities auto-selects and redirects to the first responsibility's
+    // detail route on wide screens, so the list URL may carry a trailing id.
+    return new RegExp(`.*\\/admin\\/organizations\\/role(\\/[^/]+)?$`);
+  }
   return new RegExp(`.*\\/admin\\/organizations\\/${type}$`);
 }
 
