@@ -25,6 +25,7 @@ import fs from "node:fs";
 import { builtinModules } from "node:module";
 import path from "node:path";
 import process from "node:process";
+import ts from "typescript";
 
 const ROOT = path.resolve(__dirname, "..");
 const SRC_ROOT = path.join(ROOT, "src");
@@ -179,200 +180,67 @@ interface ImportRef {
   quoteEnd: number;
 }
 
-function stripCommentsPreserveLength(code: string): string {
-  const chars = code.split("");
-  let index = 0;
-  let state:
-    | "code"
-    | "line-comment"
-    | "block-comment"
-    | "single-quote"
-    | "double-quote"
-    | "template"
-    | "template-expression" = "code";
-  let templateExpressionDepth = 0;
-
-  while (index < chars.length) {
-    const current = chars[index];
-    const next = chars[index + 1];
-
-    if (state === "line-comment") {
-      if (current === "\n") {
-        state = "code";
-      } else {
-        chars[index] = " ";
-      }
-      index += 1;
-      continue;
-    }
-
-    if (state === "block-comment") {
-      if (current === "*" && next === "/") {
-        chars[index] = " ";
-        chars[index + 1] = " ";
-        state = "code";
-        index += 2;
-      } else {
-        if (current !== "\n") {
-          chars[index] = " ";
-        }
-        index += 1;
-      }
-      continue;
-    }
-
-    if (state === "single-quote") {
-      if (current === "\\") {
-        index += 2;
-        continue;
-      }
-      if (current === "'") {
-        state = "code";
-      }
-      index += 1;
-      continue;
-    }
-
-    if (state === "double-quote") {
-      if (current === "\\") {
-        index += 2;
-        continue;
-      }
-      if (current === '"') {
-        state = "code";
-      }
-      index += 1;
-      continue;
-    }
-
-    if (state === "template") {
-      if (current === "\\") {
-        index += 2;
-        continue;
-      }
-      if (current === "`") {
-        state = "code";
-        index += 1;
-        continue;
-      }
-      if (current === "$" && next === "{") {
-        state = "template-expression";
-        templateExpressionDepth = 1;
-        index += 2;
-        continue;
-      }
-      index += 1;
-      continue;
-    }
-
-    if (state === "template-expression") {
-      if (current === "'" || current === '"' || current === "`") {
-        state =
-          current === "'"
-            ? "single-quote"
-            : current === '"'
-              ? "double-quote"
-              : "template";
-        index += 1;
-        continue;
-      }
-      if (current === "/" && next === "/") {
-        chars[index] = " ";
-        chars[index + 1] = " ";
-        state = "line-comment";
-        index += 2;
-        continue;
-      }
-      if (current === "/" && next === "*") {
-        chars[index] = " ";
-        chars[index + 1] = " ";
-        state = "block-comment";
-        index += 2;
-        continue;
-      }
-      if (current === "{") {
-        templateExpressionDepth += 1;
-      } else if (current === "}") {
-        templateExpressionDepth -= 1;
-        if (templateExpressionDepth === 0) {
-          state = "template";
-        }
-      }
-      index += 1;
-      continue;
-    }
-
-    if (current === "/" && next === "/") {
-      chars[index] = " ";
-      chars[index + 1] = " ";
-      state = "line-comment";
-      index += 2;
-      continue;
-    }
-
-    if (current === "/" && next === "*") {
-      chars[index] = " ";
-      chars[index + 1] = " ";
-      state = "block-comment";
-      index += 2;
-      continue;
-    }
-
-    if (current === "'") {
-      state = "single-quote";
-      index += 1;
-      continue;
-    }
-
-    if (current === '"') {
-      state = "double-quote";
-      index += 1;
-      continue;
-    }
-
-    if (current === "`") {
-      state = "template";
-      index += 1;
-      continue;
-    }
-
-    index += 1;
-  }
-
-  return chars.join("");
-}
-
 function findImports(code: string): ImportRef[] {
+  const sourceFile = ts.createSourceFile(
+    "file.tsx",
+    code,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
   const refs: ImportRef[] = [];
-  const searchableCode = stripCommentsPreserveLength(code);
-  // Matches: import ... from "x"; import "x"; export ... from "x";
-  // dynamic import("x"); require("x").
-  const patterns: RegExp[] = [
-    /(?:^|[\s;{}()])import\s+(?:[\s\S]*?from\s+)?(["'])([^"']+)\1/g,
-    /(?:^|[\s;{}()])export\s+[\s\S]*?\sfrom\s+(["'])([^"']+)\1/g,
-    /\bimport\s*\(\s*(["'])([^"']+)\1\s*\)/g,
-    /\brequire\s*\(\s*(["'])([^"']+)\1\s*\)/g,
-  ];
-  for (const re of patterns) {
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(searchableCode)) !== null) {
-      const quote = m[1];
-      const spec = m[2];
-      const quoteStart = m.index + m[0].lastIndexOf(quote + spec + quote);
-      const quoteEnd = quoteStart + spec.length + 2;
-      refs.push({ spec, quoteStart, quoteEnd });
-    }
+
+  function addSpecifier(node: ts.StringLiteral) {
+    // node.getStart() includes the quote character
+    refs.push({
+      spec: node.text,
+      quoteStart: node.getStart(sourceFile),
+      quoteEnd: node.getEnd(),
+    });
   }
-  // De-dupe overlapping matches and sort by position.
-  const seen = new Set<string>();
-  return refs
-    .filter((r) => {
-      const key = `${r.quoteStart}:${r.spec}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .sort((a, b) => a.quoteStart - b.quoteStart);
+
+  function visit(node: ts.Node) {
+    // import "x"; import foo from "x"; import { foo } from "x";
+    if (
+      ts.isImportDeclaration(node) &&
+      ts.isStringLiteral(node.moduleSpecifier)
+    ) {
+      addSpecifier(node.moduleSpecifier);
+      return;
+    }
+    // export { foo } from "x"; export * from "x";
+    if (
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier &&
+      ts.isStringLiteral(node.moduleSpecifier)
+    ) {
+      addSpecifier(node.moduleSpecifier);
+      return;
+    }
+    // import("x")
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+      node.arguments.length === 1 &&
+      ts.isStringLiteral(node.arguments[0])
+    ) {
+      addSpecifier(node.arguments[0]);
+    }
+    // require("x")
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === "require" &&
+      node.arguments.length === 1 &&
+      ts.isStringLiteral(node.arguments[0])
+    ) {
+      addSpecifier(node.arguments[0]);
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  ts.forEachChild(sourceFile, visit);
+  return refs.sort((a, b) => a.quoteStart - b.quoteStart);
 }
 
 /**
