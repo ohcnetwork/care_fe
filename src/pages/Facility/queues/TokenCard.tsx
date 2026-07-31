@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { formatPatientAge } from "@/Utils/utils";
+import { PatientAge } from "@/components/Patient/PatientAge";
 import { Separator } from "@/components/ui/separator";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { FacilityRead } from "@/types/facility/facility";
@@ -75,7 +75,8 @@ const TokenCard = ({ id, token, facility, showlogo = true }: Props) => {
                     {token.patient.name}
                   </p>
                   <p className="text-sm font-medium text-gray-700">
-                    {`${formatPatientAge(token.patient, true)}, ${t(`GENDER__${token.patient.gender}`)}`}
+                    <PatientAge patient={token.patient} />,{" "}
+                    {t(`GENDER__${token.patient.gender}`)}
                   </p>
                 </div>
               )}
