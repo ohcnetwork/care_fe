@@ -1,0 +1,116 @@
+# Questionnaire v2
+
+Management, authoring and rendering for questionnaires, mounted at
+`/admin/questionnaires` and `/facility/{id}/settings/questionnaires`. It is
+the successor to `src/components/Questionnaire` (the legacy editor stays at
+`/admin/questionnaire` until v2 reaches fill-mode parity; the renderer here
+currently ships `preview` and `readonly` modes only).
+
+## Directory map
+
+- `manage/` — list, create, detail, versions, clone; shared form schema
+  (`questionnaireFormSchema.ts`) and the save mutation
+  (`useUpdateQuestionnaire.ts`).
+- `builder/` — question editor shell. `builderReducer.ts` is the single
+  source of edit state (a `Question[]` tree + selection + dirty flag);
+  every edit flows through `dispatch`. Save-time rules live in
+  `saveValidation.ts`.
+- `renderer/` — display engine. Per-instance jotai store (`store.ts`),
+  primitive inputs via `questionTypeRegistry.tsx`, structured questions via
+  `structured/registry.tsx` adapters over the legacy QuestionTypes.
+- `shared/` — presentation primitives and the pure tree utilities
+  (`questionTree.ts`), plus `buildUpdateBody.ts`. `manage/` and `builder/`
+  depend on `shared/`, never on each other.
+- `queryKeys.ts` — the only place TanStack Query keys are built; keys
+  constructed elsewhere silently opt out of invalidation.
+
+## Mounting and scope
+
+Pages never read route params. The router injects a `QuestionnaireScope`
+(`src/types/questionnaire/questionnaire.ts`) — a discriminated union on
+`authContext` carrying `basePath` and the ids that context requires — from
+`src/Routers/routes/adminRoutes.tsx` and
+`src/pages/Facility/settings/layout.tsx`. Mutation surfaces gate on
+`useCanWriteQuestionnaire(scope)`.
+
+## Renderer
+
+Public surface: import `QuestionnaireRenderer` and `renderer/types` only.
+The store, context and registries are internal.
+
+`QuestionnaireRendererProvider` creates one jotai store per instance,
+seeded at creation (never observed empty) and re-seeded only when the
+questionnaire identity changes. React context carries the immutable mount
+config (mode/subject/questionnaire identity); the atoms are the reactive
+copy selectors read. `responsesAtom` is local-only and `errorsAtom` has no
+writer until the fill/submit path lands (see the header of `store.ts`).
+
+Updates are full-body PUTs composed by `shared/buildUpdateBody.ts` from the
+cached detail entry — `useUpdateQuestionnaire` writes `setQueryData` before
+invalidating so the next save never composes from a stale cache. JSON
+export (`downloadQuestionnaireJson`) serializes only definition fields;
+audit/user fields (`created_by`, `updated_by`, …) must never appear in an
+export file.
+
+## Frozen contracts — do not "fix"
+
+- `evaluateEnableWhen` (`renderer/store.ts`) is a behavior-exact port of the
+  legacy `QuestionGroup.isQuestionEnabled`: unanswered dependency → false
+  for every operator; comparison runs over ALL of the dependent question's
+  values; `normalizeValue` (booleans → "Yes"/"No", numbers → strings) is
+  applied unconditionally before any operator. The only deliberate addition:
+  literal-boolean condition *answers* (legacy-corrupt data that could never
+  match) pass through the same normalization in equals/not_equals; string
+  answers compare byte-identically to the legacy port.
+- Boolean enable_when conditions persist the strings `"Yes"`/`"No"`, never
+  JSON booleans (`normalizeBooleanConditionAnswer` in `builderReducer.ts`;
+  builder load migrates legacy true/false via
+  `migrateLegacyBooleanEnableWhen`).
+- `styling_metadata.classes` decorates the question's outer container;
+  `styling_metadata.containerClasses` lays out a group's sub-question
+  container (the builder's layout presets write it). Both are applied only
+  through `sanitizeStylingClasses` — never render author-supplied classes
+  directly.
+
+## Legacy imports (allowlist)
+
+v2 may import from `src/components/Questionnaire` only: `ValueSetSelect`,
+`SelectOrCreateValueset`, `CodingEditor`, `data/StructuredFormData`, the
+`QuestionTypes/*` structured components (exclusively via
+`renderer/structured/registry.tsx`, which also owns the one permitted `any`
+in the renderer), and `OrgSelector` (from
+`ManageQuestionnaireOrganizationsSheet`). A new legacy dependency needs a
+registry/allowlist entry here, not an ad-hoc reach-in.
+
+## Adding a question type
+
+1. Add the value to `QUESTION_TYPES` and `SUPPORTED_QUESTION_TYPES`
+   (`src/types/questionnaire/question.ts`) — the type union, the builder's
+   picker and import validation derive from them.
+2. Give the picker an icon in `builder/QuestionTypePicker.tsx`
+   (`TYPE_ICONS` is a total record — it will not compile without one).
+3. Implement a renderer input (`renderer/inputs/`) implementing
+   `RendererInputProps`; read the response via a discriminant check on
+   `values[0].type` (no casts) and register it in
+   `questionTypeRegistry.tsx`. Structured sub-types register in
+   `structured/registry.tsx` instead.
+4. Add i18n keys (`question_type__*`, description) to
+   `public/locale/en.json`.
+
+## Backend gaps (tracked, not worked around silently)
+
+- `AnswerOption` spec has no `display`/`coding` fields — option display
+  text is dropped on save (pinned by a `test.fail()` spec).
+- `QuestionnaireReadSpec` lacks `modified_date`/`created_date`; the
+  Versions tab shows attribution without chronology until they land.
+- Revision listing has no "all" page size; the Versions tab requests
+  `limit: 100` and surfaces any overflow.
+- The read endpoint can return `version` as a bare number; writers coerce
+  through `String()` (type-required via `QuestionnaireRead.version`).
+
+## Tests
+
+Playwright: `tests/facility/settings/questionnaires/` and
+`tests/admin/questionnaires/` (shared helpers in
+`tests/helper/questionnaireV2.ts`). Legacy editor specs remain in
+`tests/admin/questionnaire/`.
