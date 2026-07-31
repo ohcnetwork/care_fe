@@ -21,8 +21,6 @@ module.exports = {
       },
       colors: {
         primary: {
-          // The 50 step was missing, so every `bg-primary-50` in the app
-          // resolved to transparent and the tint never rendered.
           50: "#f3faf7",
           100: "#def7ec",
           200: "#bcf0da",

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { InfiniteScrollSentinel } from "@/components/Common/InfiniteScrollSentinel";
 import { AppointmentTokenPass } from "@/components/Patient/AppointmentTokenPass";
 import {
   CancelAppointmentButton,
@@ -66,6 +67,8 @@ export default function VisitSummary({
   const {
     prescriptions: visitPrescriptions,
     reports: visitReports,
+    prescriptionPages,
+    reportPages,
     isLoading: isLoadingRecords,
   } = usePatientEncounterRecords(encounterId);
 
@@ -223,6 +226,10 @@ export default function VisitSummary({
                     </Link>
                   );
                 })}
+                <InfiniteScrollSentinel
+                  {...prescriptionPages}
+                  className="h-15.5 rounded-2xl"
+                />
 
                 {visitReports.map((report) => {
                   const title = reportTitle(report, t);
@@ -255,6 +262,10 @@ export default function VisitSummary({
                     </Link>
                   );
                 })}
+                <InfiniteScrollSentinel
+                  {...reportPages}
+                  className="h-15.5 rounded-2xl"
+                />
               </>
             )}
 

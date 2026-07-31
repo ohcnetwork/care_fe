@@ -23,8 +23,6 @@ import PublicRouter from "./PublicRouter";
 
 /** Routes available to a patient signed in with an OTP session. */
 const DashboardRoutes = {
-  // Step 1 of the booking wizard for a signed-in patient. The logged-out
-  // public facility browser stays on FacilitiesPage via PublicRouter.
   "/nearby_facilities": () => <BookFacility />,
   "/facility/:facilityId/appointments/:appointmentId/success": ({
     appointmentId,
@@ -45,8 +43,6 @@ const DashboardRoutes = {
 
   "/patient/profile": () => <PatientProfileSettings />,
 
-  // Step 2 of booking, so the flow never leaves the wizard for the public
-  // facility page.
   "/patient/book/:facilityId": ({ facilityId }: { facilityId: string }) => (
     <BookPractitioner facilityId={facilityId} />
   ),
@@ -113,7 +109,13 @@ export default function PatientRouter() {
 
   if (!pages) {
     if (appointmentPages) {
-      return <PatientUserProvider>{appointmentPages}</PatientUserProvider>;
+      return (
+        <PatientUserProvider>
+          <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
+            {appointmentPages}
+          </ErrorBoundary>
+        </PatientUserProvider>
+      );
     }
     return <PublicRouter />;
   }

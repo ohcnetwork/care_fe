@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { InfiniteScrollSentinel } from "@/components/Common/InfiniteScrollSentinel";
 import {
   PatientAppShell,
   PatientHeaderTabs,
@@ -130,6 +131,7 @@ export default function PatientRecords() {
     prescriptions,
     count: prescriptionCount,
     isLoading: isLoadingPrescriptions,
+    ...prescriptionPages
   } = usePatientPrescriptions({
     status:
       prescriptionFilter === "active"
@@ -141,6 +143,7 @@ export default function PatientRecords() {
     reports,
     count: reportCount,
     isLoading: isLoadingReports,
+    ...reportPages
   } = usePatientDiagnosticReports({
     status:
       reportFilter === "ready"
@@ -207,6 +210,7 @@ export default function PatientRecords() {
                     prescription={prescription}
                   />
                 ))}
+                <InfiniteScrollSentinel {...prescriptionPages} />
               </>
             ) : (
               <RecordsEmptyState
@@ -250,71 +254,88 @@ export default function PatientRecords() {
             {isLoadingReports ? (
               <Skeleton className="h-20 w-full rounded-2xl" />
             ) : reports.length ? (
-              reports.map((report) => {
-                const isReady = READY_REPORT_STATUSES.includes(report.status);
-                const flags = reportFlagSummary(report);
-                const Icon = isReady ? reportIcon(report) : Clock;
-                return (
-                  <Link
-                    key={report.id}
-                    href={`/patient/records/reports/${report.id}`}
-                    className={cn(
-                      "flex items-center gap-3 rounded-2xl border bg-white p-4 hover:border-gray-300",
-                      !isReady
-                        ? "border-dashed border-gray-300 bg-gray-50"
-                        : flags > 0
-                          ? "border-warning-200"
-                          : "border-gray-200",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "flex size-[42px] shrink-0 items-center justify-center rounded-xl",
-                        isReady ? "bg-gray-100" : "bg-white",
-                      )}
-                    >
-                      <Icon
+              <>
+                {reports.map((report) => {
+                  const isReady = READY_REPORT_STATUSES.includes(report.status);
+                  const flags = reportFlagSummary(report);
+                  const Icon = isReady ? reportIcon(report) : Clock;
+                  const className = cn(
+                    "flex items-center gap-3 rounded-2xl border bg-white p-4",
+                    !isReady
+                      ? "border-dashed border-gray-300 bg-gray-50"
+                      : cn(
+                          "hover:border-gray-300",
+                          flags > 0 ? "border-warning-200" : "border-gray-200",
+                        ),
+                  );
+                  const row = (
+                    <>
+                      <span
                         className={cn(
-                          "size-5",
-                          isReady ? "text-gray-900" : "text-gray-400",
+                          "flex size-10.5 shrink-0 items-center justify-center rounded-xl",
+                          isReady ? "bg-gray-100" : "bg-white",
                         )}
-                        strokeWidth={isReady ? 1.8 : 1.9}
-                      />
-                    </span>
-                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="truncate font-bold text-gray-900">
-                        {reportTitle(report, t)}
+                      >
+                        <Icon
+                          className={cn(
+                            "size-5",
+                            isReady ? "text-gray-900" : "text-gray-400",
+                          )}
+                          strokeWidth={isReady ? 1.8 : 1.9}
+                        />
                       </span>
-                      <span className="truncate text-xs text-gray-600">
-                        {dayjs(report.created_date).format("DD MMM YYYY")}
-                        {report.encounter?.facility?.name &&
-                          ` · ${report.encounter.facility.name}`}
-                      </span>
+                      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="truncate font-bold text-gray-900">
+                          {reportTitle(report, t)}
+                        </span>
+                        <span className="truncate text-xs text-gray-600">
+                          {dayjs(report.created_date).format("DD MMM YYYY")}
+                          {report.encounter?.facility?.name &&
+                            ` · ${report.encounter.facility.name}`}
+                        </span>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1.5">
+                        {!isReady ? (
+                          <PatientBadge tone="info">
+                            {t("patient_records__processing")}
+                          </PatientBadge>
+                        ) : flags > 0 ? (
+                          <PatientBadge tone="warning">
+                            {t("patient_records__flagged_count", {
+                              count: flags,
+                            })}
+                          </PatientBadge>
+                        ) : (
+                          <PatientBadge tone="success">
+                            {t("normal")}
+                          </PatientBadge>
+                        )}
+                        {isReady && (
+                          <ChevronRight
+                            className="size-4 text-gray-600"
+                            strokeWidth={2.1}
+                          />
+                        )}
+                      </div>
+                    </>
+                  );
+
+                  return isReady ? (
+                    <Link
+                      key={report.id}
+                      href={`/patient/records/reports/${report.id}`}
+                      className={className}
+                    >
+                      {row}
+                    </Link>
+                  ) : (
+                    <div key={report.id} className={className}>
+                      {row}
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-1.5">
-                      {!isReady ? (
-                        <PatientBadge tone="info">
-                          {t("patient_records__processing")}
-                        </PatientBadge>
-                      ) : flags > 0 ? (
-                        <PatientBadge tone="warning">
-                          {t("patient_records__flagged_count", {
-                            count: flags,
-                          })}
-                        </PatientBadge>
-                      ) : (
-                        <PatientBadge tone="success">
-                          {t("normal")}
-                        </PatientBadge>
-                      )}
-                      <ChevronRight
-                        className="size-4 text-gray-600"
-                        strokeWidth={2.1}
-                      />
-                    </div>
-                  </Link>
-                );
-              })
+                  );
+                })}
+                <InfiniteScrollSentinel {...reportPages} />
+              </>
             ) : (
               <RecordsEmptyState
                 title={
