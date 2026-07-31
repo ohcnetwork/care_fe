@@ -17,12 +17,14 @@ import { Question } from "@/types/questionnaire/question";
 
 interface QuestionOverviewListProps {
   questions: Question[];
+  isSaving: boolean;
   onReorder: (from: number, to: number) => void;
   onEditQuestions: () => void;
 }
 
 export function QuestionOverviewList({
   questions,
+  isSaving,
   onReorder,
   onEditQuestions,
 }: QuestionOverviewListProps) {
@@ -91,7 +93,7 @@ export function QuestionOverviewList({
                           size="icon"
                           className="size-6"
                           onClick={() => toggleExpanded(question.id)}
-                          aria-label={question.text}
+                          aria-label={t("toggle_sub_questions")}
                         >
                           <ChevronsUpDown className="size-4" />
                         </Button>
@@ -103,7 +105,7 @@ export function QuestionOverviewList({
                         variant="ghost"
                         size="icon"
                         className="size-6"
-                        disabled={index === 0}
+                        disabled={index === 0 || isSaving}
                         onClick={() => onReorder(index, index - 1)}
                         aria-label={t("move_up")}
                       >
@@ -114,7 +116,7 @@ export function QuestionOverviewList({
                         variant="ghost"
                         size="icon"
                         className="size-6"
-                        disabled={index === questions.length - 1}
+                        disabled={index === questions.length - 1 || isSaving}
                         onClick={() => onReorder(index, index + 1)}
                         aria-label={t("move_down")}
                       >

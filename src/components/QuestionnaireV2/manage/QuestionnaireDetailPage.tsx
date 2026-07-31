@@ -52,6 +52,11 @@ export interface DetailFormValues {
  * patch, so a PUT never drops fields the current tab doesn't own (e.g.
  * `questions`, `subject_type`, `version`).
  *
+ * Only writable `QuestionnaireBase`/`QuestionnaireUpdate` fields are copied
+ * from the fetched questionnaire — read-only response fields such as `id`,
+ * `auth_context`, `internal_revision`, `created_by`, `updated_by`, and
+ * `modified_date` must never be echoed back in the PUT body.
+ *
  * `version` is defensively coerced to a string: the read endpoint can return
  * it as a raw number (seen with fixture data such as `0.1`), but the update
  * schema requires a string — without this, saving a title/status/reorder
@@ -61,12 +66,21 @@ function buildUpdateBody(
   questionnaire: QuestionnaireRead,
   patch: Partial<QuestionnaireUpdate>,
 ): QuestionnaireUpdate {
-  return {
-    ...questionnaire,
+  const writable: QuestionnaireUpdate = {
+    slug: questionnaire.slug,
     version:
       questionnaire.version == null
         ? questionnaire.version
         : String(questionnaire.version),
+    code: questionnaire.code,
+    questions: questionnaire.questions,
+    title: questionnaire.title,
+    description: questionnaire.description,
+    status: questionnaire.status,
+    subject_type: questionnaire.subject_type,
+  };
+  return {
+    ...writable,
     ...patch,
   };
 }
@@ -111,6 +125,12 @@ export function QuestionnaireDetailPage({
           status: questionnaire.status,
         }
       : undefined,
+    // Reordering questions saves through the same mutation and invalidates
+    // ["questionnairesV2"], which refetches this detail query. Without
+    // `keepDirtyValues`, the `values` binding above would reset every field
+    // (including any unsaved, dirty title/slug/description/status edits) the
+    // moment that refetch resolves.
+    resetOptions: { keepDirtyValues: true },
   });
 
   const { mutate: save, isPending } = useMutation({
@@ -224,7 +244,7 @@ export function QuestionnaireDetailPage({
           <Tabs defaultValue="questions">
             <TabsList>
               <TabsTrigger value="questions">{t("questions")}</TabsTrigger>
-              <TabsTrigger value="versions">{t("version")}</TabsTrigger>
+              <TabsTrigger value="versions">{t("versions")}</TabsTrigger>
             </TabsList>
             <TabsContent value="questions" className="mt-4">
               <div className="grid gap-4 md:grid-cols-[1fr_280px] md:gap-6">
@@ -233,6 +253,7 @@ export function QuestionnaireDetailPage({
                   <OrganizationsField scope={scope} questionnaireId={id} />
                   <QuestionOverviewList
                     questions={questionnaire.questions}
+                    isSaving={isPending}
                     onReorder={(from, to) =>
                       save(
                         buildUpdateBody(questionnaire, {
