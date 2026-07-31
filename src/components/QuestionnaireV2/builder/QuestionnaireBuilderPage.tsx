@@ -30,6 +30,10 @@ import { BuilderTreeNav } from "@/components/QuestionnaireV2/builder/BuilderTree
 import { QuestionEditorCard } from "@/components/QuestionnaireV2/builder/QuestionEditorCard";
 import { buildUpdateBody } from "@/components/QuestionnaireV2/manage/buildUpdateBody";
 import { QuestionnaireRenderer } from "@/components/QuestionnaireV2/renderer/QuestionnaireRenderer";
+import {
+  findQuestionNumber,
+  findTopLevelIndex,
+} from "@/components/QuestionnaireV2/shared/QuestionTreeNav";
 
 import { cn } from "@/lib/utils";
 
@@ -47,22 +51,6 @@ const INITIAL_STATE: BuilderState = {
   selectedId: null,
   dirty: false,
 };
-
-/** Does `question` (or any of its descendants) have id `questionId`? */
-function containsQuestion(question: Question, questionId: string): boolean {
-  if (question.id === questionId) return true;
-  return (question.questions ?? []).some((child) =>
-    containsQuestion(child, questionId),
-  );
-}
-
-/** Index of `questionId`'s top-level ancestor within `questions`. */
-function topLevelIndexOf(questions: Question[], questionId: string): number {
-  const index = questions.findIndex((question) =>
-    containsQuestion(question, questionId),
-  );
-  return index === -1 ? 0 : index;
-}
 
 /** Depth-first search for the first question with blank text. */
 function findFirstBlankTitle(questions: Question[]): Question | undefined {
@@ -170,9 +158,16 @@ export function QuestionnaireBuilderPage({
   const [state, dispatch] = useReducer(builderReducer, INITIAL_STATE);
 
   useEffect(() => {
-    if (questionnaire) {
+    // Skip while the user has unsaved edits (`state.dirty`) — otherwise a
+    // background refetch that returns a new `questionnaire` reference (e.g.
+    // refetchOnReconnect after a network blip) would silently discard them.
+    // The post-save path resets explicitly (see the mutation's onSuccess
+    // below) after dirty has already been cleared, so this guard doesn't
+    // block that path.
+    if (questionnaire && !state.dirty) {
       dispatch({ type: "reset", questions: questionnaire.questions });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionnaire]);
 
   const [{ mode }] = useQueryParams();
@@ -200,6 +195,7 @@ export function QuestionnaireBuilderPage({
     if (blankTitle) {
       toast.error(t("question_titles_required"));
       dispatch({ type: "select", id: blankTitle.id });
+      setView("edit");
       return;
     }
 
@@ -207,6 +203,7 @@ export function QuestionnaireBuilderPage({
     if (emptyGroup) {
       toast.error(t("group_needs_subquestion"));
       dispatch({ type: "select", id: emptyGroup.id });
+      setView("edit");
       return;
     }
 
@@ -236,10 +233,17 @@ export function QuestionnaireBuilderPage({
     ? findQuestion(state.questions, state.selectedId)
     : undefined;
   const topLevelIndex = state.selectedId
-    ? topLevelIndexOf(state.questions, state.selectedId)
+    ? findTopLevelIndex(state.questions, state.selectedId)
     : 0;
   const canGoPrevious = topLevelIndex > 0;
   const canGoNext = topLevelIndex < state.questions.length - 1;
+  // The selected question's own dotted number (e.g. "3.1." for a nested
+  // child) — falls back to the top-level ancestor's ordinal for questions
+  // nested deeper than `findQuestionNumber` numbers (grandchildren+).
+  const selectedNumber =
+    (state.selectedId &&
+      findQuestionNumber(state.questions, state.selectedId)) ||
+    `${topLevelIndex + 1}.`;
 
   return (
     <div className="space-y-4">
@@ -290,7 +294,7 @@ export function QuestionnaireBuilderPage({
             {selectedQuestion ? (
               <QuestionEditorCard
                 question={selectedQuestion}
-                number={`${topLevelIndex + 1}.`}
+                number={selectedNumber}
                 allQuestions={state.questions}
                 dispatch={dispatch}
               />

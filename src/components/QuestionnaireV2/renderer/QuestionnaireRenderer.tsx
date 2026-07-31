@@ -3,7 +3,10 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { QuestionTreeNav } from "@/components/QuestionnaireV2/shared/QuestionTreeNav";
+import {
+  findTopLevelIndex,
+  QuestionTreeNav,
+} from "@/components/QuestionnaireV2/shared/QuestionTreeNav";
 
 import { QuestionField } from "@/components/QuestionnaireV2/renderer/QuestionField";
 import {
@@ -17,7 +20,6 @@ import type {
   RendererSubject,
 } from "@/components/QuestionnaireV2/renderer/types";
 
-import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 interface QuestionnaireRendererProps {
@@ -25,24 +27,6 @@ interface QuestionnaireRendererProps {
   mode: RendererMode;
   subject?: RendererSubject;
   className?: string;
-}
-
-/** Does `question` (or any of its descendants) have id `questionId`? */
-function containsQuestion(question: Question, questionId: string): boolean {
-  if (question.id === questionId) return true;
-  return (question.questions ?? []).some((child) =>
-    containsQuestion(child, questionId),
-  );
-}
-
-/** Maps any question id (top-level or nested) to the index of its top-level
- *  ancestor in `questions` — so selecting a child in the tree nav pages to
- *  its containing top-level question. */
-function findTopLevelIndex(questions: Question[], questionId: string): number {
-  const index = questions.findIndex((question) =>
-    containsQuestion(question, questionId),
-  );
-  return index === -1 ? 0 : index;
 }
 
 export function QuestionnaireRenderer(props: QuestionnaireRendererProps) {
