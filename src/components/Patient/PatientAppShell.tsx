@@ -119,19 +119,10 @@ export function PatientAppShell({
 }: PatientAppShellProps) {
   const { t } = useTranslation();
   const path = usePath();
-  const { selectedPatient, patients, isLoadingPatients } = usePatientContext();
+  const { selectedPatient, patients } = usePatientContext();
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [switchedTo, setSwitchedTo] = useState<string | null>(null);
-
-  // Every patient screen is scoped to a profile, so with none linked the only
-  // useful destination is the picker, which offers to create one.
-  const hasNoProfiles = !isLoadingPatients && patients?.length === 0;
-  useEffect(() => {
-    if (hasNoProfiles) {
-      navigate("/patient/select-profile", { replace: true });
-    }
-  }, [hasNoProfiles]);
 
   useEffect(() => {
     if (!switchedTo) {

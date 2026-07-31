@@ -66,7 +66,7 @@ export function PrescriptionRow({
         {t(prescription.status)}
       </PatientBadge>
       <ChevronRight
-        className="size-[17px] shrink-0 text-gray-600"
+        className="size-4.25 shrink-0 text-gray-600"
         strokeWidth={2.1}
         aria-hidden
       />

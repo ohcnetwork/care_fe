@@ -23,6 +23,10 @@ import {
  * client-side is not possible. Appointments carry a `patient` and are filtered
  * locally.
  *
+ * Status filtering is server-side too, so a list only ever holds the rows the
+ * screen is showing; the statuses are part of the query key so switching a
+ * filter refetches instead of slicing a cached superset.
+ *
  * The selected patient id is part of every query key: without it React Query
  * serves one patient's cached records to another after a switch.
  */
@@ -71,41 +75,51 @@ export function usePatientAppointments() {
   }, [data, isLoading, selectedPatient?.id]);
 }
 
-export function usePatientPrescriptions() {
+export function usePatientPrescriptions({
+  status,
+  enabled = true,
+}: {
+  status?: PrescriptionStatus[];
+  enabled?: boolean;
+} = {}) {
   const { selectedPatient } = usePatientContext();
   const { token, phoneNumber, headers } = useAuthHeaders();
+  // The backend's multi-select filters read a comma separated list, not
+  // repeated query params.
+  const statusParam = status?.join(",");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["portal-prescriptions", phoneNumber, selectedPatient?.id],
+    queryKey: [
+      "portal-prescriptions",
+      phoneNumber,
+      selectedPatient?.id,
+      statusParam,
+    ],
     // Silent: deployments whose backend predates the portal prescription
     // endpoint would otherwise toast "Not Found" on every screen that shows a
     // prescription summary. The empty state covers it.
     queryFn: query(patientPortalApi.listPrescriptions, {
       headers,
-      queryParams: { patient: selectedPatient?.id },
+      queryParams: { patient: selectedPatient?.id, status: statusParam },
       silent: true,
     }),
-    enabled: !!token && !!selectedPatient?.id,
+    enabled: enabled && !!token && !!selectedPatient?.id,
   });
 
-  return useMemo(() => {
-    const prescriptions = (data?.results ?? [])
-      .slice()
-      .sort(
-        (a, b) =>
-          new Date(b.created_date).getTime() -
-          new Date(a.created_date).getTime(),
-      );
-
-    return {
+  return useMemo(
+    () => ({
       isLoading,
-      prescriptions,
-      active: prescriptions.filter(
-        (p) => p.status === PrescriptionStatus.active,
-      ),
-      past: prescriptions.filter((p) => p.status !== PrescriptionStatus.active),
-    };
-  }, [data, isLoading, selectedPatient?.id]);
+      count: data?.count ?? 0,
+      prescriptions: (data?.results ?? [])
+        .slice()
+        .sort(
+          (a, b) =>
+            new Date(b.created_date).getTime() -
+            new Date(a.created_date).getTime(),
+        ),
+    }),
+    [data, isLoading],
+  );
 }
 
 /** A report is readable by the patient once the lab has finalised it. */
@@ -114,39 +128,60 @@ const READY_REPORT_STATUSES = [
   DiagnosticReportStatus.modified,
 ];
 
-export function usePatientDiagnosticReports() {
+export const PROCESSING_REPORT_STATUSES = [
+  DiagnosticReportStatus.registered,
+  DiagnosticReportStatus.partial,
+  DiagnosticReportStatus.preliminary,
+];
+
+export const ACTIVE_PRESCRIPTION_STATUSES = [PrescriptionStatus.active];
+
+export const PAST_PRESCRIPTION_STATUSES = [
+  PrescriptionStatus.completed,
+  PrescriptionStatus.cancelled,
+];
+
+export function usePatientDiagnosticReports({
+  status,
+  enabled = true,
+}: {
+  status?: DiagnosticReportStatus[];
+  enabled?: boolean;
+} = {}) {
   const { selectedPatient } = usePatientContext();
   const { token, phoneNumber, headers } = useAuthHeaders();
+  const statusParam = status?.join(",");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["portal-diagnostic-reports", phoneNumber, selectedPatient?.id],
+    queryKey: [
+      "portal-diagnostic-reports",
+      phoneNumber,
+      selectedPatient?.id,
+      statusParam,
+    ],
     // Silent for the same reason as prescriptions — see above.
     queryFn: query(patientPortalApi.listDiagnosticReports, {
       headers,
-      queryParams: { patient: selectedPatient?.id },
+      queryParams: { patient: selectedPatient?.id, status: statusParam },
       silent: true,
     }),
-    enabled: !!token && !!selectedPatient?.id,
+    enabled: enabled && !!token && !!selectedPatient?.id,
   });
 
-  return useMemo(() => {
-    const reports = (data?.results ?? [])
-      .slice()
-      .sort(
-        (a, b) =>
-          new Date(b.created_date).getTime() -
-          new Date(a.created_date).getTime(),
-      );
-
-    return {
+  return useMemo(
+    () => ({
       isLoading,
-      reports,
-      ready: reports.filter((r) => READY_REPORT_STATUSES.includes(r.status)),
-      processing: reports.filter(
-        (r) => !READY_REPORT_STATUSES.includes(r.status),
-      ),
-    };
-  }, [data, isLoading, selectedPatient?.id]);
+      count: data?.count ?? 0,
+      reports: (data?.results ?? [])
+        .slice()
+        .sort(
+          (a, b) =>
+            new Date(b.created_date).getTime() -
+            new Date(a.created_date).getTime(),
+        ),
+    }),
+    [data, isLoading],
+  );
 }
 
 /**
@@ -179,7 +214,7 @@ export function usePatientEncounterRecords(encounter?: string) {
     queryKey: ["portal-encounter-diagnostic-reports", phoneNumber, encounter],
     queryFn: query(patientPortalApi.listDiagnosticReports, {
       headers,
-      queryParams: { encounter },
+      queryParams: { encounter, status: READY_REPORT_STATUSES.join(",") },
       silent: true,
     }),
     enabled,
@@ -189,10 +224,7 @@ export function usePatientEncounterRecords(encounter?: string) {
     () => ({
       isLoading: enabled && (isLoadingPrescriptions || isLoadingReports),
       prescriptions: prescriptionData?.results ?? [],
-      // A report the lab has not finalised is not the patient's to read yet.
-      reports: (reportData?.results ?? []).filter((report) =>
-        READY_REPORT_STATUSES.includes(report.status),
-      ),
+      reports: reportData?.results ?? [],
     }),
     [
       prescriptionData,

@@ -92,7 +92,7 @@ export function PatientProfileCard({
       onClick={() => onSelect(patient)}
       aria-pressed={selected}
       className={cn(
-        "flex w-full items-center gap-[13px] rounded-[14px] p-3.5 text-left transition-colors",
+        "flex w-full items-center gap-3 rounded-2xl p-3.5 text-left transition-colors",
         selected
           ? "border-[1.5px] border-primary-700 bg-primary-50"
           : "border border-gray-200 bg-white hover:border-gray-300",
@@ -101,7 +101,7 @@ export function PatientProfileCard({
       <PatientAvatar
         name={patient.name}
         active={selected}
-        className="size-[42px] text-sm"
+        className="size-10 text-sm"
       />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate text-base font-bold text-gray-900">
@@ -114,7 +114,7 @@ export function PatientProfileCard({
       {/* Only the selected row carries a mark — an empty ring on the others
           reads as an unchecked radio the user is meant to fill in. */}
       {selected && (
-        <span className="flex size-[22px] shrink-0 items-center justify-center rounded-full bg-primary-700 text-white">
+        <span className="flex size-5.5 shrink-0 items-center justify-center rounded-full bg-primary-700 text-white">
           <Check className="size-3.5" strokeWidth={3.2} />
         </span>
       )}

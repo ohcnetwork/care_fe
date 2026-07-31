@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { navigate as ravigerNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -75,12 +76,12 @@ export const LoginHeader = () => {
           variant="ghost"
           className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
           onClick={() =>
-            navigate({
-              href: `/login?mode=${
+            ravigerNavigate(
+              `/login?mode=${
                 localStorage.getItem(LocalStorageKeys.loginPreference) ??
                 "patient"
               }`,
-            })
+            )
           }
         >
           {t("sign_in")}
