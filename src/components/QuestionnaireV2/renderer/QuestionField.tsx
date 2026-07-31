@@ -4,23 +4,27 @@ import { cn } from "@/lib/utils";
 
 import { NoteAffordance } from "@/components/QuestionnaireV2/renderer/NoteAffordance";
 import { QuestionGroupCard } from "@/components/QuestionnaireV2/renderer/QuestionGroupCard";
-import { useRenderer } from "@/components/QuestionnaireV2/renderer/RendererContext";
 import { QUESTION_TYPE_COMPONENTS } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
+import { useRenderer } from "@/components/QuestionnaireV2/renderer/RendererContext";
 import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/renderer/sanitizeStylingClasses";
 import {
   useQuestionEnabled,
   useQuestionErrors,
 } from "@/components/QuestionnaireV2/renderer/store";
 import { StructuredQuestionSlot } from "@/components/QuestionnaireV2/renderer/structured/StructuredQuestionSlot";
+import { TopLevelCard } from "@/components/QuestionnaireV2/renderer/TopLevelCard";
 
 import type { Question } from "@/types/questionnaire/question";
 
 export function QuestionField({
   question,
   depth,
+  number,
 }: {
   question: Question;
   depth: number;
+  /** Dotted ordinal matching the tree nav (e.g. "8." or "7.1."). */
+  number?: string;
 }) {
   const { t } = useTranslation();
   const { mode } = useRenderer();
@@ -37,6 +41,7 @@ export function QuestionField({
         question={question}
         depth={depth}
         disabled={effectiveDisabled}
+        number={number}
       />
     );
   }
@@ -48,7 +53,14 @@ export function QuestionField({
   const inputId = `question-input-${question.id}`;
   const labelId = `question-label-${question.id}`;
 
-  return (
+  // Chip groups (boolean / choice-with-options) sit directly on the card
+  // background — wrapping them in a full-width bordered box would read as an
+  // empty text input next to the chips.
+  const isChipInput =
+    question.type === "boolean" ||
+    (question.type === "choice" && !!question.answer_option?.length);
+
+  const field = (
     <div
       className={cn(
         "space-y-1.5",
@@ -57,6 +69,11 @@ export function QuestionField({
       )}
     >
       <div className="flex items-center gap-2">
+        {number && (
+          <span className="shrink-0 text-sm font-medium text-gray-800 tabular-nums">
+            {number}
+          </span>
+        )}
         <label
           id={labelId}
           htmlFor={inputId}
@@ -75,7 +92,13 @@ export function QuestionField({
           disabled={effectiveDisabled}
         />
       ) : (
-        <div className="flex items-stretch overflow-hidden rounded-md border border-gray-200">
+        <div
+          className={cn(
+            "flex items-stretch",
+            !isChipInput &&
+              "overflow-hidden rounded-md border border-gray-200 bg-white",
+          )}
+        >
           <div className="min-w-0 flex-1">
             {InputComponent ? (
               <InputComponent
@@ -91,7 +114,10 @@ export function QuestionField({
             )}
           </div>
           {question.type !== "display" && (
-            <NoteAffordance questionId={question.id} />
+            <NoteAffordance
+              questionId={question.id}
+              variant={isChipInput ? "standalone" : "merged"}
+            />
           )}
         </div>
       )}
@@ -102,4 +128,11 @@ export function QuestionField({
       ))}
     </div>
   );
+
+  // Top-level plain questions get the same card shell as top-level groups.
+  if (depth === 0) {
+    return <TopLevelCard>{field}</TopLevelCard>;
+  }
+
+  return field;
 }

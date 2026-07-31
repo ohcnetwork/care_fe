@@ -74,9 +74,9 @@ export interface QuestionTreeNavProps {
   footer?: React.ReactNode;
   /** Builder-only affordances (insert-between "+" buttons etc.) */
   renderSeparator?: (afterIndex: number) => React.ReactNode;
-  /** Top-level question ids currently hidden by enable_when (renderer only) —
-   *  skipped entirely, matching the legacy renderer where hidden questions
-   *  simply don't appear. Numbering stays stable across hides. */
+  /** Question ids (any depth) currently hidden by enable_when (renderer
+   *  only) — skipped entirely, matching the legacy renderer where hidden
+   *  questions simply don't appear. Numbering stays stable across hides. */
   hiddenIds?: Set<string>;
 }
 
@@ -126,21 +126,28 @@ export function QuestionTreeNav({
           {title}
         </h3>
       )}
-      {items.map((item, index) => (
-        <Fragment key={item.question.id}>
-          {row(item, false)}
-          {item.children.length > 0 && (
-            <div className="ml-3 border-l border-gray-200 pl-1">
-              {item.children.map((child) => row(child, true))}
-            </div>
-          )}
-          {index < items.length - 1 && (
-            <div className="relative my-1 border-t border-gray-100">
-              {renderSeparator?.(index)}
-            </div>
-          )}
-        </Fragment>
-      ))}
+      {items.map((item, index) => {
+        // Hidden children drop out too — a row for a question that isn't on
+        // the page is a dead end. Numbering stays stable across hides.
+        const children = item.children.filter(
+          (child) => !hiddenIds?.has(child.question.id),
+        );
+        return (
+          <Fragment key={item.question.id}>
+            {row(item, false)}
+            {children.length > 0 && (
+              <div className="ml-3 border-l border-gray-200 pl-1">
+                {children.map((child) => row(child, true))}
+              </div>
+            )}
+            {index < items.length - 1 && (
+              <div className="relative my-1 border-t border-gray-100">
+                {renderSeparator?.(index)}
+              </div>
+            )}
+          </Fragment>
+        );
+      })}
       {footer}
     </nav>
   );

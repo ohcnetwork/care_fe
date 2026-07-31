@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 import { QuestionField } from "@/components/QuestionnaireV2/renderer/QuestionField";
 import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/renderer/sanitizeStylingClasses";
+import { TopLevelCard } from "@/components/QuestionnaireV2/renderer/TopLevelCard";
 
 import type { Question } from "@/types/questionnaire/question";
 
@@ -13,10 +14,14 @@ export function QuestionGroupCard({
   question,
   depth,
   disabled,
+  number,
 }: {
   question: Question;
   depth: number;
   disabled: boolean;
+  /** Dotted ordinal matching the tree nav (e.g. "7."); children derive
+   *  "7.1.", "7.2.", … from it. */
+  number?: string;
 }) {
   const { t } = useTranslation();
   const children = question.questions ?? [];
@@ -36,62 +41,70 @@ export function QuestionGroupCard({
     question.styling_metadata?.containerClasses,
   );
 
+  const childNumber = (index: number) =>
+    number ? `${number}${index + 1}.` : undefined;
+
   if (depth === 0) {
     return (
-      <div
-        className={cn(
-          "flex items-start gap-3 rounded-lg bg-gray-50 p-4",
-          decorationClasses,
-        )}
-      >
-        <div className="h-4 w-1 shrink-0 rounded-full bg-indigo-500" />
-        <div className="min-w-0 flex-1 space-y-4">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-gray-900">
-              {question.text}
-            </h3>
-            <Badge variant="outline">{t("group")}</Badge>
-          </div>
-          {question.description && (
-            <p className="-mt-2 text-xs text-gray-500">
-              {question.description}
-            </p>
-          )}
-          <fieldset
-            disabled={disabled}
-            className={cn(
-              "border-0 p-0",
-              containerClasses ? cn("gap-4", containerClasses) : "space-y-4",
-            )}
-          >
-            {children.map((child) => (
-              <QuestionField
-                key={child.id}
-                question={child}
-                depth={depth + 1}
-              />
-            ))}
-          </fieldset>
+      <TopLevelCard className={decorationClasses}>
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-gray-900">
+            {number && <span className="mr-1 tabular-nums">{number}</span>}
+            {question.text}
+          </h3>
+          <Badge variant="outline">{t("group")}</Badge>
         </div>
-      </div>
+        {question.description && (
+          <p className="-mt-2 text-xs text-gray-500">{question.description}</p>
+        )}
+        <fieldset
+          disabled={disabled}
+          className={cn(
+            "border-0 p-0",
+            containerClasses ? cn("gap-4", containerClasses) : "space-y-4",
+          )}
+        >
+          {children.map((child, index) => (
+            <QuestionField
+              key={child.id}
+              question={child}
+              depth={depth + 1}
+              number={childNumber(index)}
+            />
+          ))}
+        </fieldset>
+      </TopLevelCard>
     );
   }
 
+  // Nested group: two-tone box — the title sits in its own darker header
+  // strip with a lighter inset body panel beneath it.
   return (
     <div
-      className={cn("space-y-3 rounded-md bg-gray-100 p-4", decorationClasses)}
+      className={cn(
+        "overflow-hidden rounded-md border border-gray-200 bg-gray-200/60",
+        decorationClasses,
+      )}
     >
-      <h4 className="text-sm font-bold text-gray-900">{question.text}</h4>
+      <h4 className="px-3 py-1.5 text-sm font-semibold text-gray-900">
+        {number && <span className="mr-1 tabular-nums">{number}</span>}
+        {question.text}
+      </h4>
       <fieldset
         disabled={disabled}
         className={cn(
-          "gap-4 border-0 p-0",
+          "m-1 gap-4 rounded border-0 bg-gray-50 p-2",
           containerClasses ??
             cn("grid sm:grid-cols-2", leafChildCount >= 3 && "sm:grid-cols-3"),
         )}
       >
-        {children.map((child) => (
-          <QuestionField key={child.id} question={child} depth={depth + 1} />
+        {children.map((child, index) => (
+          <QuestionField
+            key={child.id}
+            question={child}
+            depth={depth + 1}
+            number={childNumber(index)}
+          />
         ))}
       </fieldset>
     </div>

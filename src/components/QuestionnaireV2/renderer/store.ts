@@ -98,12 +98,17 @@ export function evaluateEnableWhen(
       );
 
     case "equals":
-      // enableWhen.answer is boolean | string here (EnableWhenBoolean | EnableWhenString)
-      return normalizedAnswers.includes(enableWhen.answer);
+      // enableWhen.answer is boolean | string here (EnableWhenBoolean |
+      // EnableWhenString). Legacy questionnaires store JSON true/false while
+      // responses normalize to "Yes"/"No" — run the stored answer through
+      // the same normalization so those conditions can ever match. (Only
+      // literal booleans are normalized; string answers pass through
+      // untouched, so non-boolean comparisons are unaffected.)
+      return normalizedAnswers.includes(normalizeValue(enableWhen.answer));
 
     case "not_equals":
       // enableWhen.answer is boolean | string here (EnableWhenBoolean | EnableWhenString)
-      return !normalizedAnswers.includes(enableWhen.answer);
+      return !normalizedAnswers.includes(normalizeValue(enableWhen.answer));
 
     case "greater":
       // enableWhen.answer is number here (EnableWhenNumeric)
@@ -216,6 +221,41 @@ export function useVisibleTopLevelIndices(): number[] {
     [],
   );
   return useAtomValue(visibleIndicesAtom);
+}
+
+/**
+ * Ids of every question in the tree (any depth) currently hidden by its
+ * enable_when conditions — i.e. disabled and not `disabled_display:
+ * "protected"` (protected questions still render, greyed). The tree nav
+ * uses this to drop rows for questions that don't exist on the page,
+ * including nested children the top-level-only pagination set misses.
+ */
+export function useHiddenQuestionIds(): Set<string> {
+  const hiddenIdsAtom = useMemo(
+    () =>
+      atom((get) => {
+        const questionnaire = get(questionnaireAtom);
+        const hidden = new Set<string>();
+        if (!questionnaire) return hidden;
+        const responses = get(responsesAtom);
+        const linkIndex = get(questionIdByLinkIdAtom);
+        const walk = (questions: Question[]) => {
+          for (const question of questions) {
+            if (
+              question.disabled_display !== "protected" &&
+              !isQuestionEnabledInState(question, responses, linkIndex)
+            ) {
+              hidden.add(question.id);
+            }
+            walk(question.questions ?? []);
+          }
+        };
+        walk(questionnaire.questions);
+        return hidden;
+      }),
+    [],
+  );
+  return useAtomValue(hiddenIdsAtom);
 }
 
 export function useQuestionErrors(questionId: string) {
