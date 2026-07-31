@@ -12,7 +12,10 @@ function formatTime(date: Date | undefined) {
     .padStart(2, "0")}`;
 }
 
-export function DateTimeInput({ question, disabled }: RendererInputProps) {
+export function DateTimeQuestionInput({
+  question,
+  disabled,
+}: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
   const value = response?.values[0]?.value as Date | undefined;
 

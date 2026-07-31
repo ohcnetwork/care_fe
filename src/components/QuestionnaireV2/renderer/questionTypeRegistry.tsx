@@ -5,7 +5,7 @@ import { Question, QuestionType } from "@/types/questionnaire/question";
 import { BooleanInput } from "./inputs/BooleanInput";
 import { ChoiceInput } from "./inputs/ChoiceInput";
 import { DateInput } from "./inputs/DateInput";
-import { DateTimeInput } from "./inputs/DateTimeInput";
+import { DateTimeQuestionInput } from "./inputs/DateTimeQuestionInput";
 import { DisplayText } from "./inputs/DisplayText";
 import { NumberInput } from "./inputs/NumberInput";
 import { QuantityInput } from "./inputs/QuantityInput";
@@ -28,7 +28,7 @@ export const QUESTION_TYPE_COMPONENTS: Partial<
   boolean: BooleanInput,
   choice: ChoiceInput,
   date: DateInput,
-  dateTime: DateTimeInput,
+  dateTime: DateTimeQuestionInput,
   time: TimeInput,
   quantity: QuantityInput,
   display: DisplayText,
