@@ -74,7 +74,7 @@ export function ResourceCategoryForm({
       .min(5, t("character_count_validation", { min: 5, max: 25 }))
       .max(25, t("character_count_validation", { min: 5, max: 25 })),
     description: z.string().optional(),
-    resource_sub_type: z.nativeEnum(ResourceCategorySubType),
+    resource_sub_type: z.enum(ResourceCategorySubType),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({

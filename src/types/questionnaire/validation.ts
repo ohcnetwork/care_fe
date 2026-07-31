@@ -5,7 +5,11 @@ import { QuestionValidationError } from "@/types/questionnaire/batch";
 export interface FieldMetadata<T = unknown> {
   key: string;
   required: boolean;
-  validate?: (value: T) => boolean;
+  /**
+   * Returns `true` when valid. Returns `false` for a generic invalid value, or
+   * an already-translated message string to surface a specific reason.
+   */
+  validate?: (value: T) => boolean | string;
 }
 
 export type FieldDefinitions = {
@@ -16,10 +20,6 @@ export interface FieldErrorProps<T extends string> {
   fieldKey: T;
   questionId: string;
   errors?: QuestionValidationError[];
-}
-
-export function createFieldKeys<T extends { [K: string]: string }>(keys: T) {
-  return keys as { readonly [P in keyof T]: T[P] };
 }
 
 export function useFieldError(
@@ -46,20 +46,6 @@ export function useFieldError(
   };
 
   return { hasError, getError };
-}
-
-export function createValidationError(
-  questionId: string,
-  fieldKey: string,
-  error: string,
-): QuestionValidationError {
-  return {
-    question_id: questionId,
-    field_key: fieldKey,
-    error,
-    type: "validation_error",
-    msg: error,
-  };
 }
 
 export function validateFields(

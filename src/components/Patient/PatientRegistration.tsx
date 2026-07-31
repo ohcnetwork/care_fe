@@ -4,6 +4,7 @@ import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
+import GovtOrganizationPicker from "@/components/Organization/GovtOrganizationPicker";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import {
   Accordion,
@@ -36,7 +37,6 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useAppHistory from "@/hooks/useAppHistory";
 import {
   ExtensionEntityType,
   getCombinedExtensionProps,
@@ -46,7 +46,6 @@ import {
 } from "@/hooks/useExtensions";
 import { tzAwareDateTime } from "@/lib/validators";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PLUGIN_Component } from "@/PluginEngine";
 import {
   BloodGroupChoices,
@@ -63,12 +62,13 @@ import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { ExtensionContexts } from "@/Utils/schema/types";
+import { dateQueryString, goBack } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { format, isBefore, isFuture, subYears } from "date-fns";
+import { format, isBefore, subYears } from "date-fns";
 import { TFunction } from "i18next";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { ArrowLeft, CheckIcon } from "lucide-react";
@@ -88,7 +88,6 @@ interface QParams {
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   useShortcutSubContext();
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
   const [{ phone_number, flow }] = useQueryParams<QParams>();
 
@@ -105,6 +104,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     () =>
       getCombinedExtensionProps(
         getExtensions(ExtensionEntityType.patient, "write"),
+        ExtensionContexts.registration,
       ),
     [getExtensions],
   );
@@ -145,6 +145,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   const extensions = useEntityExtensions({
     entityType: ExtensionEntityType.patient,
     schemaType: "write",
+    context: ExtensionContexts.registration,
     form,
     existingData: patientQuery.data?.extensions,
   });
@@ -268,8 +269,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     mutationFn: mutate(patientApi.create),
     onSuccess: (resp: PatientRead) => {
       toast.success(t("patient_registration_success"));
-      // Lets navigate the user to the verify page as the patient is not accessible to the user yet
-      navigate(`/facility/${facilityId}/patients/verify`, {
+      // Navigate the user to the patients home page to access the newly created patient
+      navigate(`/facility/${facilityId}/patients/home`, {
         query: {
           phone_number: resp.phone_number,
           year_of_birth: resp.year_of_birth,
@@ -279,6 +280,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
             open_schedule: "true",
           }),
         },
+        replace: true,
       });
     },
   });
@@ -601,7 +603,6 @@ const PatientBasicsContent = ({
                   value: g.id,
                   label: t(`GENDER__${g.id}`),
                 }))}
-                required={true}
               />
             </FormControl>
             <FormMessage />
@@ -652,7 +653,7 @@ const PatientBasicsContent = ({
                     render={({ field }) => (
                       <FormItem className="w-full md:col-span-2 relative">
                         <FormControl>
-                          <>
+                          <div>
                             <Input
                               {...field}
                               type="number"
@@ -676,7 +677,7 @@ const PatientBasicsContent = ({
                                 {new Date().getFullYear() - Number(field.value)}
                               </span>
                             )}
-                          </>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -757,7 +758,6 @@ const PatientBasicsContent = ({
               </FormLabel>
               <FormControl>
                 <TagSelectorPopover
-                  facilityId={facilityId}
                   selected={selectedTags}
                   onChange={(tags) => {
                     field.onChange(tags.map((tag) => tag.id));
@@ -884,15 +884,29 @@ const AdditionalDetailsContent = ({
         <FormField
           control={form.control}
           name="geo_organization"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem className="contents">
               <FormControl>
-                <GovtOrganizationSelector
-                  {...field}
-                  requiredDepth={minGeoOrganizationLevelsRequired ?? 1}
-                  selected={form.watch("_selected_levels")}
-                  value={form.watch("geo_organization")}
-                  onChange={field.onChange}
+                <GovtOrganizationPicker
+                  ref={field.ref}
+                  aria-invalid={!!fieldState.error}
+                  required={minGeoOrganizationLevelsRequired == null}
+                  requiredDepth={minGeoOrganizationLevelsRequired}
+                  value={form.watch("_selected_levels")[0] ?? null}
+                  onChange={(organization) => {
+                    form.setValue(
+                      "_selected_levels",
+                      organization ? [organization] : [],
+                      { shouldDirty: true },
+                    );
+                    const isValid =
+                      !!organization &&
+                      isGeoOrganizationValid(organization, {
+                        required: minGeoOrganizationLevelsRequired == null,
+                        requiredDepth: minGeoOrganizationLevelsRequired,
+                      });
+                    field.onChange(isValid ? organization.id : "");
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -1031,15 +1045,32 @@ const getAutogeneratedIdentifierConfigs = (facility: FacilityRead) => {
   });
 };
 
+/**
+ * Determines whether the selected government organization satisfies the
+ * configured depth/leaf requirements, mirroring the schema validation.
+ */
+const isGeoOrganizationValid = (
+  organization: Organization,
+  { required, requiredDepth }: { required: boolean; requiredDepth?: number },
+) => {
+  if (requiredDepth != null) {
+    return organization.level_cache + 1 >= requiredDepth;
+  }
+  if (required) {
+    return !organization.has_children;
+  }
+  return true;
+};
+
 const geoOrgValidator = (t: TFunction) => {
   const requiredLevels =
     careConfig.patientRegistration.minGeoOrganizationLevelsRequired;
 
   if (!requiredLevels) {
-    return z.string().uuid({ message: t("geo_organization_is_required") });
+    return z.uuid({ message: t("geo_organization_is_required") });
   }
 
-  return z.string().uuid({
+  return z.uuid({
     message: t("govt_organization_required_depth_validation", {
       depth: requiredLevels,
     }),
@@ -1048,7 +1079,7 @@ const geoOrgValidator = (t: TFunction) => {
 
 const getFormSchema = (
   t: TFunction,
-  extValidation: z.ZodType<Record<string, unknown>>,
+  extValidation: z.ZodType<Record<string, unknown>, Record<string, unknown>>,
 ) => {
   const isQuick = careConfig.patientRegistration.minimalPatientRegistration;
 
@@ -1059,16 +1090,18 @@ const getFormSchema = (
       phone_number: validators().phoneNumber.required,
       emergency_phone_number: validators().phoneNumber.optional,
       emergency_phone_number_same_as_phone_number: z.boolean(),
-      gender: z.enum(GENDERS, { required_error: t("field_required") }),
+      gender: z.enum(GENDERS, { error: t("field_required") }),
       age_or_dob: z.enum(["dob", "age"]),
-      date_of_birth: z
-        .string()
+      date_of_birth: z.iso
         .date()
-        .refine((date) => !isFuture(date), t("date_cannot_be_future"))
+        .refine(
+          (date) => date <= format(new Date(), "yyyy-MM-dd"),
+          t("date_cannot_be_future"),
+        )
         .optional()
         .nullable(),
       age: validators().age.optional().nullable(),
-      blood_group: z.nativeEnum(BloodGroupChoices).optional(),
+      blood_group: z.enum(BloodGroupChoices).optional(),
       tags: z.array(z.string()),
 
       // Fields that would be required only if quick registration is not enabled
@@ -1088,18 +1121,18 @@ const getFormSchema = (
       // Identifier related fields
       required_identifiers: z.array(
         z.object({
-          config: z.string().uuid(),
+          config: z.uuid(),
           value: z.string().nonempty(t("field_required")),
         }),
       ),
       optional_identifiers: z.array(
         z.object({
-          config: z.string().uuid(),
+          config: z.uuid(),
           value: z.string().optional(),
         }),
       ),
       autogenerated_identifiers: z.array(
-        z.object({ config: z.string().uuid(), value: z.string().optional() }),
+        z.object({ config: z.uuid(), value: z.string().optional() }),
       ),
 
       // Extensions
@@ -1112,14 +1145,14 @@ const getFormSchema = (
       // Validate the date of birth / age.
       if (data.age_or_dob === "dob" && !data.date_of_birth) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("field_required"),
           path: ["age_or_dob"],
         });
       }
       if (data.age_or_dob === "age" && !data.age) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("field_required"),
           path: ["age_or_dob"],
         });
@@ -1134,7 +1167,7 @@ const getFormSchema = (
           )
         ) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: "custom",
             message: t("death_date_must_be_after_dob"),
             path: ["deceased_datetime"],
           });

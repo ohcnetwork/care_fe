@@ -48,6 +48,7 @@ interface SearchInputProps extends Omit<
   inputClassName?: string;
   buttonClassName?: string;
   enableOptionButtons?: boolean;
+  hideSearchButton?: boolean;
   onFieldChange?: (options: SearchOption) => void;
   autoFocus?: boolean;
 }
@@ -166,6 +167,7 @@ export default function SearchInput({
   buttonClassName,
   onFieldChange,
   enableOptionButtons = true,
+  hideSearchButton = false,
   autoFocus = false,
   ...props
 }: SearchInputProps) {
@@ -314,7 +316,7 @@ export default function SearchInput({
         aria-haspopup="listbox"
         className="flex items-center rounded-t-lg gap-1"
       >
-        {!isSingleOption && (
+        {!isSingleOption && !hideSearchButton && (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -392,7 +394,7 @@ export default function SearchInput({
                                 {focusedIndex === index && (
                                   <kbd
                                     className="ml-2 border border-gray-300 rounded px-1 bg-white text-xs text-gray-500"
-                                    title="Press Enter to select"
+                                    title={t("press_enter_to_select")}
                                   >
                                     ⏎ Enter
                                   </kbd>

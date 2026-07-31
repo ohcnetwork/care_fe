@@ -31,7 +31,9 @@ import {
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
-import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
+import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
+import { formatDuration, formatFrequency } from "@/components/Medicine/utils";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -42,6 +44,7 @@ import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import {
   MedicationRequestCreate,
+  MedicationRequestDosageInstruction,
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
@@ -341,21 +344,38 @@ export function MedicationStatementQuestion({
                 {
                   key: "dosage_instruction",
                   label: t("dosage"),
-                  render: (instructions) => {
-                    const dosage = formatDosage(instructions[0]) || "";
-                    const frequency = formatFrequency(instructions[0]) || "-";
-                    return `${dosage}\n${frequency}`;
-                  },
+                  render: (instructions) =>
+                    instructions?.length ? (
+                      <DosageInstructionList
+                        instructions={instructions}
+                        renderItem={(di) => {
+                          const freq = formatFrequency(di) || "";
+                          return (
+                            <div className="flex flex-col">
+                              <FormattedDosage instruction={di} fallback="" />
+                              {freq && <span>{freq}</span>}
+                            </div>
+                          );
+                        }}
+                        gap="sm"
+                      />
+                    ) : (
+                      "-"
+                    ),
                 },
                 {
                   key: "dosage_instruction",
                   label: t("duration"),
-                  render: (instructions) => {
-                    const duration =
-                      instructions?.[0]?.timing?.repeat?.bounds_duration;
-                    if (!duration?.value) return "-";
-                    return `${duration.value} ${duration.unit}`;
-                  },
+                  render: (instructions) =>
+                    instructions?.length ? (
+                      <DosageInstructionList
+                        instructions={instructions}
+                        renderItem={(di) => formatDuration(di) || "-"}
+                        gap="sm"
+                      />
+                    ) : (
+                      "-"
+                    ),
                 },
                 {
                   key: "created_by",
@@ -379,7 +399,15 @@ export function MedicationStatementQuestion({
                   key: "dosage_instruction",
                   label: t("instructions"),
                   render: (instructions) =>
-                    instructions?.[0]?.additional_instruction?.[0]?.display,
+                    instructions
+                      ?.flatMap(
+                        (di: MedicationRequestDosageInstruction) =>
+                          di.additional_instruction?.map(
+                            (inst) => inst.display,
+                          ) ?? [],
+                      )
+                      .filter(Boolean)
+                      .join(", ") || undefined,
                 },
                 {
                   key: "note",

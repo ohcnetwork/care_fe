@@ -85,7 +85,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     } else {
       toast.warning(t("switch_camera_is_not_available"));
     }
-  }, [setCameraFacingMode, t]);
+  }, [setCameraFacingMode]);
 
   const captureImage = () => {
     if (!webRef.current) return;
@@ -114,7 +114,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       clearTimeout(timer);
       stopStream();
     };
-  }, [open, startStream, stopStream]);
+  }, [open, cameraFacingMode]);
 
   const handleClose = () => {
     setPreviewImage(null);

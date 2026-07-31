@@ -16,6 +16,8 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import { completedEncounterStatus } from "@/types/emr/encounter/encounter";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+
 export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
   const { facilityId, patientId, patient, primaryEncounter } = useEncounter();
@@ -95,6 +97,7 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
               className="size-4"
             />
             {t("see_clinical_history")}
+            <ShortcutBadge actionId="clinical-history" />
           </Link>
         </Button>
       </div>

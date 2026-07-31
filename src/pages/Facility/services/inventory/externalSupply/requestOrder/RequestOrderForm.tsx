@@ -60,6 +60,7 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { goBack } from "@/Utils/utils";
 
 const createRequestOrderFormSchema = (
   t: (key: string) => string,
@@ -68,10 +69,10 @@ const createRequestOrderFormSchema = (
   z.object({
     name: z.string().min(1, t("name_is_required")),
     note: z.string().optional(),
-    intent: z.nativeEnum(RequestOrderIntent),
-    category: z.nativeEnum(RequestOrderCategory),
-    priority: z.nativeEnum(RequestOrderPriority),
-    reason: z.nativeEnum(RequestOrderReason),
+    intent: z.enum(RequestOrderIntent),
+    category: z.enum(RequestOrderCategory),
+    priority: z.enum(RequestOrderPriority),
+    reason: z.enum(RequestOrderReason),
     supplier: internal
       ? z.string().optional()
       : z.string().min(1, t("supplier_required")),
@@ -214,7 +215,9 @@ export default function RequestOrderForm({
     onSuccess: (requestOrder: RequestOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["requestOrders"] });
       toast.success(t("order_created"));
-      navigate(returnPath + requestOrder.id);
+      navigate(returnPath + requestOrder.id, {
+        replace: true,
+      });
     },
   });
 
@@ -228,7 +231,9 @@ export default function RequestOrderForm({
     onSuccess: (requestOrder: RequestOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["requestOrders"] });
       toast.success(t("order_updated"));
-      navigate(returnPath + requestOrder.id);
+      navigate(returnPath + requestOrder.id, {
+        replace: true,
+      });
     },
   });
 
@@ -551,13 +556,7 @@ export default function RequestOrderForm({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() =>
-                      navigate(
-                        requestOrderId
-                          ? returnPath + requestOrderId
-                          : returnPath,
-                      )
-                    }
+                    onClick={() => goBack()}
                   >
                     {t("cancel")}
                     <ShortcutBadge actionId="cancel-action" />

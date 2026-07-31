@@ -55,7 +55,7 @@ const formSchema = z.object({
     careIcon: z.string().optional(),
   }),
   extra_details: z.string(),
-  internal_type: z.nativeEnum(InternalType).optional(),
+  internal_type: z.enum(InternalType).optional(),
   locations: z
     .array(
       z.object({
@@ -173,7 +173,9 @@ function HealthcareServiceFormContent({
           queryKey: ["healthcareService", healthcareServiceId],
         });
         toast.success(t("healthcare_service_created_successfully"));
-        navigate(`/facility/${facilityId}/settings/healthcare_services`);
+        navigate(`/facility/${facilityId}/settings/healthcare_services`, {
+          replace: true,
+        });
       },
     });
 
@@ -190,6 +192,9 @@ function HealthcareServiceFormContent({
         toast.success(t("healthcare_service_updated_successfully"));
         navigate(
           `/facility/${facilityId}/settings/healthcare_services/${healthcareServiceId}`,
+          {
+            replace: true,
+          },
         );
       },
     });

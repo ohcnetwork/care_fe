@@ -1,11 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import {
-  FieldValues,
-  UseFormReturn,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
+import { useFieldArray, useForm, type UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
 
@@ -32,15 +27,14 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import {
   TERMINOLOGY_SYSTEMS,
   ValueSetBase,
+  ValueSetInclude,
   ValueSetRead,
   ValueSetStatus,
 } from "@/types/valueSet/valueSet";
-import { valuesOf } from "@/Utils/utils";
+import { goBack, valuesOf } from "@/Utils/utils";
 
 import { generateSlug } from "@/Utils/utils";
 import { CodingField } from "./CodingField";
@@ -50,7 +44,18 @@ interface ValueSetFormProps {
   initialData?: ValueSetRead;
   onSubmit: (data: ValueSetBase) => void;
   isSubmitting?: boolean;
-  isSystemDefined?: boolean;
+  isReadOnly?: boolean;
+}
+
+interface ValueSetFormInclude extends Omit<ValueSetInclude, "version"> {
+  version: string;
+}
+
+interface ValueSetFormData extends Omit<ValueSetBase, "compose"> {
+  compose: {
+    exclude: ValueSetFormInclude[];
+    include: ValueSetFormInclude[];
+  };
 }
 
 function ConceptFields({
@@ -61,7 +66,7 @@ function ConceptFields({
 }: {
   nestIndex: number;
   type: "include" | "exclude";
-  parentForm: ReturnType<typeof useForm<ValueSetBase>>;
+  parentForm: UseFormReturn<ValueSetFormData>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation(); // Add translation hook
@@ -91,7 +96,7 @@ function ConceptFields({
           <CodingField
             system={parentForm.watch(`compose.${type}.${nestIndex}.system`)}
             name={`compose.${type}.${nestIndex}.concept.${index}`}
-            form={parentForm as unknown as UseFormReturn<FieldValues>}
+            form={parentForm}
             className="flex-1"
             onRemove={() => remove(index)}
             removeDisabled={disabled}
@@ -111,7 +116,7 @@ function FilterFields({
   nestIndex: number;
   type: "include" | "exclude";
   disabled?: boolean;
-  parentForm: ReturnType<typeof useForm<ValueSetBase>>;
+  parentForm: UseFormReturn<ValueSetFormData>;
 }) {
   const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({
@@ -208,7 +213,7 @@ function RuleFields({
   disabled,
 }: {
   type: "include" | "exclude";
-  form: ReturnType<typeof useForm<ValueSetBase>>;
+  form: UseFormReturn<ValueSetFormData>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -230,6 +235,7 @@ function RuleFields({
           onClick={() =>
             append({
               system: Object.values(TERMINOLOGY_SYSTEMS)[0],
+              version: "",
               concept: [],
               filter: [],
             })
@@ -274,6 +280,23 @@ function RuleFields({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name={`compose.${type}.${index}.version`}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>{t("version")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder={t("version")}
+                        disabled={disabled}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <Button
                 type="button"
                 variant="ghost"
@@ -307,7 +330,7 @@ export function ValueSetForm({
   initialData,
   onSubmit,
   isSubmitting,
-  isSystemDefined,
+  isReadOnly,
 }: ValueSetFormProps) {
   const { t } = useTranslation();
   const valuesetFormSchema = z.object({
@@ -330,6 +353,7 @@ export function ValueSetForm({
       include: z.array(
         z.object({
           system: z.string(),
+          version: z.string(),
           concept: z
             .array(
               z.object({
@@ -352,6 +376,7 @@ export function ValueSetForm({
       exclude: z.array(
         z.object({
           system: z.string(),
+          version: z.string(),
           concept: z
             .array(
               z.object({
@@ -374,9 +399,7 @@ export function ValueSetForm({
     }),
   });
 
-  const { goBack } = useAppHistory();
-
-  const form = useForm({
+  const form = useForm<ValueSetFormData>({
     resolver: zodResolver(valuesetFormSchema),
     defaultValues: {
       name: initialData?.name || "",
@@ -385,8 +408,16 @@ export function ValueSetForm({
       status: initialData?.status || ValueSetStatus.ACTIVE,
       is_system_defined: initialData?.is_system_defined || false,
       compose: {
-        include: initialData?.compose?.include || [],
-        exclude: initialData?.compose?.exclude || [],
+        include:
+          initialData?.compose?.include.map((rule) => ({
+            ...rule,
+            version: rule.version ?? "",
+          })) || [],
+        exclude:
+          initialData?.compose?.exclude.map((rule) => ({
+            ...rule,
+            version: rule.version ?? "",
+          })) || [],
       },
     },
   });
@@ -410,7 +441,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="name"
-          disabled={isSystemDefined}
+          disabled={isReadOnly}
           render={({ field }) => (
             <FormItem>
               <FormLabel aria-required>{t("name")}</FormLabel>
@@ -434,7 +465,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="slug"
-          disabled={isSystemDefined}
+          disabled={isReadOnly}
           render={({ field }) => (
             <FormItem>
               <FormLabel aria-required>{t("slug")}</FormLabel>
@@ -461,7 +492,7 @@ export function ValueSetForm({
         <FormField
           control={form.control}
           name="description"
-          disabled={isSystemDefined}
+          disabled={isReadOnly}
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("description")}</FormLabel>
@@ -482,7 +513,7 @@ export function ValueSetForm({
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
-                disabled={isSystemDefined}
+                disabled={isReadOnly}
               >
                 <FormControl>
                   <SelectTrigger ref={field.ref}>
@@ -503,10 +534,10 @@ export function ValueSetForm({
         />
 
         <div className="space-y-6">
-          <RuleFields type="include" form={form} disabled={isSystemDefined} />
-          <RuleFields type="exclude" form={form} disabled={isSystemDefined} />
+          <RuleFields type="include" form={form} disabled={isReadOnly} />
+          <RuleFields type="exclude" form={form} disabled={isReadOnly} />
         </div>
-        {isSystemDefined && (
+        {isReadOnly && (
           <div className="text-red-600 text-sm flex justify-end">
             {t("saving_is_disabled_for_system_valuesets")}
           </div>
@@ -524,9 +555,7 @@ export function ValueSetForm({
           <Button
             variant="primary"
             type="submit"
-            disabled={
-              isSystemDefined || isSubmitting || !form.formState.isDirty
-            }
+            disabled={isReadOnly || isSubmitting || !form.formState.isDirty}
           >
             {isSubmitting ? t("saving") : t("save_valueset")}
           </Button>

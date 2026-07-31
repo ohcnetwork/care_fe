@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { useEffect, useRef } from "react";
+import { Check } from "lucide-react";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { encounterListFiltersAtom } from "@/atoms/encounterFilterAtom";
@@ -9,6 +10,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   careTeamFilter,
   dateFilter,
@@ -23,10 +30,14 @@ import {
   FilterDateRange,
   longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 
 import Page from "@/components/Common/Page";
-import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
@@ -54,6 +65,12 @@ interface EncounterListProps {
   facilityId: string;
   encounterClass?: EncounterClass;
 }
+
+const SEARCH_WITH_NAME = "name" as const;
+const SEARCH_WITH_EXTERNAL_IDENTIFIER = "external_identifier" as const;
+
+type SearchWith =
+  typeof SEARCH_WITH_NAME | typeof SEARCH_WITH_EXTERNAL_IDENTIFIER;
 
 const buildQueryParams = (
   facilityId: string,
@@ -133,12 +150,22 @@ export function EncounterList({
   const [, setSavedFilters] = useAtom(encounterListFiltersAtom);
   const hasRestoredFilters = useRef(false);
   const hasAppliedDefaultStatus = useRef(false);
+  const [searchWith, setSearchWith] = useState<SearchWith>(
+    qParams.external_identifier
+      ? SEARCH_WITH_EXTERNAL_IDENTIFIER
+      : SEARCH_WITH_NAME,
+  );
+  const [searchText, setSearchText] = useState(
+    qParams.external_identifier || qParams.name || "",
+  );
+  const [searchOptionsOpen, setSearchOptionsOpen] = useState(false);
+  const [activeSearchOptionIndex, setActiveSearchOptionIndex] = useState(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const {
     status,
     priority,
     encounter_id,
-    external_identifier,
     patient_filter,
     created_date_after,
     created_date_before,
@@ -155,6 +182,104 @@ export function EncounterList({
       ),
       created_date_before: dateQueryString(today),
     };
+  };
+
+  const searchWithOptions = [
+    {
+      key: SEARCH_WITH_NAME,
+      label: t("patient_name"),
+      placeholder: t("search_by_patient_name"),
+    },
+    {
+      key: SEARCH_WITH_EXTERNAL_IDENTIFIER,
+      label: t("external_identifier"),
+      placeholder: t("search_by_external_id"),
+    },
+  ];
+
+  useEffect(() => {
+    if (qParams.external_identifier) {
+      setSearchWith(SEARCH_WITH_EXTERNAL_IDENTIFIER);
+      setSearchText(qParams.external_identifier);
+    } else if (qParams.name) {
+      setSearchWith(SEARCH_WITH_NAME);
+      setSearchText(qParams.name);
+    } else {
+      setSearchText("");
+    }
+  }, [qParams.name, qParams.external_identifier]);
+
+  const selectedSearchType =
+    searchWithOptions.find((option) => option.key === searchWith) ||
+    searchWithOptions[0];
+  const showSearchOptions = searchText.trim() !== "";
+
+  const searchQueryParams =
+    searchWith === SEARCH_WITH_NAME
+      ? { name: searchText || undefined, external_identifier: undefined }
+      : { name: undefined, external_identifier: searchText || undefined };
+
+  const updateSearchQuery = (
+    nextSearchWith: SearchWith,
+    nextSearchText: string,
+  ) => {
+    if (nextSearchWith === SEARCH_WITH_NAME) {
+      updateQuery({
+        name: nextSearchText,
+        external_identifier: "",
+      });
+    } else {
+      updateQuery({
+        name: "",
+        external_identifier: nextSearchText,
+      });
+    }
+  };
+
+  const handleSearchWithChange = (nextSearchWith: SearchWith) => {
+    setSearchWith(nextSearchWith);
+    updateSearchQuery(nextSearchWith, searchText);
+    setSearchOptionsOpen(false);
+    searchInputRef.current?.focus();
+  };
+
+  const handleSearchInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && !searchOptionsOpen) {
+      event.preventDefault();
+      updateSearchQuery(searchWith, searchText);
+      return;
+    }
+
+    if (!showSearchOptions) {
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setSearchOptionsOpen(true);
+      setActiveSearchOptionIndex((prev) =>
+        prev < searchWithOptions.length - 1 ? prev + 1 : prev,
+      );
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveSearchOptionIndex((prev) => (prev > 0 ? prev - 1 : prev));
+      return;
+    }
+
+    if (event.key === "Enter" && searchOptionsOpen) {
+      event.preventDefault();
+      handleSearchWithChange(
+        searchWithOptions[activeSearchOptionIndex]?.key || SEARCH_WITH_NAME,
+      );
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setSearchOptionsOpen(false);
+    }
   };
 
   // Restore filters from sessionStorage on mount AND set default dates if needed
@@ -237,13 +362,13 @@ export function EncounterList({
           care_team_user,
         ),
         encounter_class: encounterClass,
-        external_identifier,
+        external_identifier: searchQueryParams.external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
         patient_filter: patient_filter,
-        name: qParams.name,
+        name: searchQueryParams.name,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -494,24 +619,85 @@ export function EncounterList({
       }
     >
       <div className="space-y-4 mt-4 flex flex-col">
-        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col overflow-auto">
-          <div className="flex flex-col">
+        <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col overflow-visible">
+          <div className="flex flex-col overflow-visible">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <SearchInput
-                  id="patient-name-search"
-                  options={[
-                    {
-                      key: "name",
-                      type: "text",
-                      placeholder: t("search_by_patient_name"),
-                      value: qParams.name || "",
-                      display: t("patient_name"),
-                    },
-                  ]}
-                  className="w-full sm:w-auto sm:min-w-64"
-                  onSearch={(key, value) => updateQuery({ [key]: value })}
-                />
+                <div className="relative w-full sm:w-auto sm:min-w-60">
+                  <Popover
+                    open={searchOptionsOpen && showSearchOptions}
+                    onOpenChange={setSearchOptionsOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <div className="relative">
+                        <input
+                          ref={searchInputRef}
+                          value={searchText}
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            setSearchText(value);
+                            setSearchOptionsOpen(value.trim() !== "");
+                            setActiveSearchOptionIndex(0);
+                          }}
+                          onFocus={() => {
+                            if (showSearchOptions) {
+                              setSearchOptionsOpen(true);
+                            }
+                          }}
+                          onKeyDown={handleSearchInputKeyDown}
+                          placeholder={selectedSearchType.placeholder}
+                          className="h-9 w-full rounded-md border bg-white px-2 text-sm shadow-sm focus-visible:outline-none"
+                        />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-(--radix-popover-trigger-width) p-0"
+                      align="start"
+                      onOpenAutoFocus={(event) => {
+                        event.preventDefault();
+                        searchInputRef.current?.focus();
+                      }}
+                    >
+                      <Command>
+                        <CommandList>
+                          <CommandGroup>
+                            {searchWithOptions.map((option, index) => (
+                              <CommandItem
+                                key={option.key}
+                                value={option.key}
+                                onSelect={() =>
+                                  handleSearchWithChange(option.key)
+                                }
+                                className={`flex items-center gap-2 ${
+                                  activeSearchOptionIndex === index
+                                    ? "bg-gray-100"
+                                    : ""
+                                }`}
+                                onMouseEnter={() =>
+                                  setActiveSearchOptionIndex(index)
+                                }
+                              >
+                                <div>
+                                  {searchText}{" "}
+                                  <span className="text-gray-500">
+                                    {option.label}
+                                  </span>
+                                </div>
+                                <Check
+                                  className={`ml-auto size-4 ${
+                                    option.key === searchWith
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  }`}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
                 <PatientIdentifierFilter
                   onSelect={(patientId, patientName) =>
                     updateQuery({

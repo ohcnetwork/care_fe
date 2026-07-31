@@ -14,12 +14,11 @@ import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { TimelineEncounterCard } from "@/components/Facility/EncounterCard";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import { getPermissions } from "@/common/Permissions";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import { TimelineWrapper } from "@/components/Common/TimelineWrapper";
 import { EmptyState } from "@/components/ui/empty-state";
 import { usePermissions } from "@/context/PermissionContext";
@@ -40,7 +39,6 @@ const EncounterHistory = (props: PatientProps) => {
     hasPermission,
     patientData.permissions,
   );
-  const { goBack } = useAppHistory();
 
   const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounterHistory", patientId, qParams],
@@ -48,7 +46,7 @@ const EncounterHistory = (props: PatientProps) => {
       queryParams: {
         patient: patientId,
         limit: 5,
-        offset: ((qParams.page ?? 1) - 1) * 5,
+        offset: ((qParams.page || 1) - 1) * 5,
       },
     }),
     enabled: canViewPatients,
@@ -131,7 +129,7 @@ const EncounterHistory = (props: PatientProps) => {
                     )}
                   >
                     <PaginationComponent
-                      cPage={qParams.page ?? 1}
+                      cPage={qParams.page || 1}
                       defaultPerPage={5}
                       data={{ totalCount: encounterData?.count ?? 0 }}
                       onChange={(page) => setQueryParams({ page })}

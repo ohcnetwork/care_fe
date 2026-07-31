@@ -309,7 +309,7 @@ export default function useFileManager(
                 id="archive-file-reason"
                 rows={6}
                 required
-                placeholder="Type the reason..."
+                placeholder={t("type_the_reason")}
                 value={archiveReason}
                 onChange={(e) => setArchiveReason(e.target.value)}
                 className={cn(

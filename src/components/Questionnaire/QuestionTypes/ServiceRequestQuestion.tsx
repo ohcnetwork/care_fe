@@ -132,6 +132,9 @@ const SERVICE_REQUEST_FIELDS = {
   },
 } as const;
 
+/**
+ * @public
+ */
 export function validateServiceRequestQuestion(
   values: ServiceRequestReadSpec[],
   questionId: string,
@@ -747,9 +750,7 @@ export function ServiceRequestQuestion({
 
   const handleActivityDefinitionSelect = (
     value:
-      | ActivityDefinitionReadSpec
-      | ActivityDefinitionReadSpec[]
-      | undefined,
+      ActivityDefinitionReadSpec | ActivityDefinitionReadSpec[] | undefined,
   ) => {
     const def = Array.isArray(value) ? value[0] : value;
     setSelectedActivityDefinition(def?.slug || null);

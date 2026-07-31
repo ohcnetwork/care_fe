@@ -1,4 +1,4 @@
-import { sleep } from "@/Utils/utils";
+import { isTouchDevice, sleep } from "@/Utils/utils";
 import { useEffect, useState } from "react";
 
 export interface AutoPrintOptions {
@@ -30,7 +30,10 @@ export default function useAutoPrint({
         // Give some time for the print dialog to appear before navigating back
         await sleep(300);
         setIsProcessing(false);
-        window.history.go(-1);
+        // will figure out a better solution later
+        if (!isTouchDevice) {
+          window.history.go(-1);
+        }
       }, delay); // Delay to ensure content is rendered
 
       return () => clearTimeout(timer);

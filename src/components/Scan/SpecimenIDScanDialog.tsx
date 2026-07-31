@@ -27,7 +27,7 @@ interface QRScanDialogProps {
   onScanSuccess?: (specimen: string) => void;
 }
 
-export function QRScanDialog({
+function QRScanDialog({
   open,
   onOpenChange,
   facilityId,

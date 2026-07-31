@@ -39,7 +39,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
       queryParams: {
         username: qParams.username,
         limit: resultsPerPage,
-        offset: (qParams.page - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
       },
     }),
     enabled: !!facilityId,

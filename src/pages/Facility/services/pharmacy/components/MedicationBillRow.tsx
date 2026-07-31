@@ -41,6 +41,7 @@ import {
   MedicationBillLotItem,
 } from "@/pages/Facility/services/pharmacy/types";
 
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import {
   formatDosage,
   formatDuration,
@@ -105,8 +106,7 @@ export function MedicationBillRow({
   const { t } = useTranslation();
 
   const productKnowledge = field.productKnowledge as
-    | ProductKnowledgeBase
-    | undefined;
+    ProductKnowledgeBase | undefined;
   const substitution = form.watch(`items.${index}.substitution`);
   const effectiveProductKnowledge =
     substitution?.substitutedProductKnowledge || productKnowledge;
@@ -303,15 +303,26 @@ export function MedicationBillRow({
               </div>
             </div>
             {field.medication ? (
-              <div>
-                <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
-                  {formatDosage(field.dosageInstructions?.[0])} ×{" "}
-                  {formatFrequency(field.dosageInstructions?.[0])} ×{" "}
-                  {formatDuration(field.dosageInstructions?.[0]) || "-"} ={" "}
-                  <span className="text-gray-700 font-semibold text-sm">
-                    {formatTotalUnits(field.dosageInstructions, t("units"))}
-                  </span>
-                </div>
+              <div className="text-sm text-gray-700 font-medium">
+                {field.dosageInstructions?.map((di, idx) => {
+                  const dosage = formatDosage(di);
+                  const instructionText = [
+                    formatFrequency(di),
+                    formatDuration(di) || "-",
+                  ]
+                    .filter(Boolean)
+                    .join(" × ");
+                  return (
+                    <div key={idx} className="flex items-center gap-1">
+                      {dosage && <FormattedDosage instruction={di} />}
+                      {dosage && instructionText && " × "}
+                      {instructionText}
+                    </div>
+                  );
+                })}
+                <span className="text-gray-700 font-semibold text-sm">
+                  = {formatTotalUnits(field.dosageInstructions, t("units"))}
+                </span>
               </div>
             ) : (
               <div
@@ -330,8 +341,10 @@ export function MedicationBillRow({
                   if (currentDosageInstructions?.dose_and_rate?.dose_quantity) {
                     return (
                       <div className="text-sm text-gray-700 font-medium flex items-center gap-1">
-                        {formatDosage(currentDosageInstructions)} ×{" "}
-                        {formatFrequency(currentDosageInstructions)} ×{" "}
+                        <FormattedDosage
+                          instruction={currentDosageInstructions}
+                        />{" "}
+                        × {formatFrequency(currentDosageInstructions)} ×{" "}
                         {formatDuration(currentDosageInstructions) || "-"} ={" "}
                         <span className="text-gray-700 font-semibold text-sm">
                           {formatTotalUnits(

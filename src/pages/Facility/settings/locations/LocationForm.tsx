@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Info, RotateCcw } from "lucide-react";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -122,43 +122,41 @@ export default function LocationForm({
     name: "bedNames",
   });
 
-  const watchedFormType = form.watch("form");
-  const watchedBulkCreation = form.watch("enableBulkCreation");
-  const watchedNumberOfBeds = form.watch("numberOfBeds");
-  const watchedName = form.watch("name");
-  const watchedCustomizeNames = form.watch("customizeNames");
-
-  const resetToDefaultNames = useCallback(() => {
-    const normalizedName = watchedName?.trim();
-    if (normalizedName && watchedNumberOfBeds) {
+  const resetToDefaultNames = () => {
+    if (form.watch("name") && form.watch("numberOfBeds")) {
       const defaultNames = Array.from(
-        { length: Number.parseInt(watchedNumberOfBeds ?? "0") },
+        { length: Number.parseInt(form.watch("numberOfBeds") ?? "0") },
         (_, index) => ({
-          name: `${normalizedName} ${index + 1}`,
+          name: `${form.watch("name")} ${index + 1}`,
         }),
       );
       replaceBedFields(defaultNames);
     }
-  }, [watchedName, watchedNumberOfBeds, replaceBedFields]);
+  };
 
   useEffect(() => {
-    const normalizedName = watchedName?.trim();
+    const formType = form.watch("form");
+    const bulkCreationEnabled = form.watch("enableBulkCreation");
+    const numberOfBeds = form.watch("numberOfBeds");
+    const locationName = form.watch("name");
+    const customizeNames = form.watch("customizeNames");
+
     if (
-      watchedFormType === "bd" &&
-      watchedBulkCreation &&
-      watchedNumberOfBeds &&
-      normalizedName
+      formType === "bd" &&
+      bulkCreationEnabled &&
+      numberOfBeds &&
+      locationName
     ) {
-      if (!watchedCustomizeNames || bedFields.length === 0) {
+      if (!customizeNames || bedFields.length === 0) {
         resetToDefaultNames();
       } else {
-        const newCount = Number.parseInt(watchedNumberOfBeds ?? "0", 10);
+        const newCount = Number.parseInt(numberOfBeds ?? "0", 10);
         const currentFields = form.getValues("bedNames") ?? [];
         const updatedFields = [...currentFields];
 
         while (updatedFields.length < newCount) {
           updatedFields.push({
-            name: `${normalizedName} ${updatedFields.length + 1}`,
+            name: `${locationName} ${updatedFields.length + 1}`,
           });
         }
 
@@ -166,15 +164,12 @@ export default function LocationForm({
       }
     }
   }, [
-    watchedFormType,
-    watchedBulkCreation,
-    watchedNumberOfBeds,
-    watchedName,
-    watchedCustomizeNames,
+    form.watch("form"),
+    form.watch("enableBulkCreation"),
+    form.watch("numberOfBeds"),
+    form.watch("name"),
+    form.watch("customizeNames"),
     bedFields.length,
-    form,
-    replaceBedFields,
-    resetToDefaultNames,
   ]);
 
   useEffect(() => {
