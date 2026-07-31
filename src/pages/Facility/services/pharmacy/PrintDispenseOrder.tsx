@@ -85,7 +85,7 @@ const DispenseOrderContent = ({
               { key: "expiry_date" },
               { key: "prepared_date" },
             ]}
-            classNameCell="whitespace-pre-line"
+            cellClassName="whitespace-pre-line"
             rows={dispenses.map((dispense) => {
               const instructions = dispense.dosage_instruction ?? [];
 

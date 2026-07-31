@@ -187,7 +187,7 @@ export function SupplyDeliveryTable({
               <ShortcutBadge actionId="select-all" alwaysShow={false} />
             </TableHead>
           )}
-          <TableHead rowSpan={2}>{t("#")}</TableHead>
+          <TableHead rowSpan={2}>{t("hash_tag")}</TableHead>
           <TableHead rowSpan={2}>{t("item")}</TableHead>
           <TableHead rowSpan={2}>{t("batch")}</TableHead>
           <TableHead rowSpan={2}>{t("requested_qty")}</TableHead>
