@@ -43,6 +43,7 @@ import { CloneQuestionnaireDialog } from "./CloneQuestionnaireDialog";
 import { FormPropertiesSidebar } from "./FormPropertiesSidebar";
 import { OrganizationsField } from "./OrganizationsField";
 import { QuestionOverviewList } from "./QuestionOverviewList";
+import { VersionsTab } from "./VersionsTab";
 
 /**
  * Serializes the fetched questionnaire exactly like the v1 editor's export
@@ -287,7 +288,7 @@ export function QuestionnaireDetailPage({
               </div>
             </TabsContent>
             <TabsContent value="versions" className="mt-4">
-              <p className="text-sm text-gray-500">{t("coming_soon")}</p>
+              <VersionsTab scope={scope} questionnaire={questionnaire} />
             </TabsContent>
           </Tabs>
         </form>
