@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -88,6 +89,7 @@ export function QuestionTreeNav({
   renderSeparator,
   hiddenIds,
 }: QuestionTreeNavProps) {
+  const { t } = useTranslation();
   const items = numberQuestions(questions).filter(
     (item) => !hiddenIds?.has(item.question.id),
   );
@@ -106,7 +108,11 @@ export function QuestionTreeNav({
       )}
     >
       <span className="shrink-0">{item.number}</span>
-      <span className="min-w-0">{item.question.text}</span>
+      <span className="min-w-0">
+        {item.question.text || (
+          <span className="italic text-gray-400">{t("untitled_question")}</span>
+        )}
+      </span>
       {activeId === item.question.id && (
         <span className="absolute right-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-gray-900" />
       )}

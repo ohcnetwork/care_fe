@@ -372,7 +372,7 @@ export function QuestionnaireBuilderPage({
 
       {view === "edit" ? (
         <div className="flex flex-col gap-4 md:flex-row">
-          <div className="hidden w-72 shrink-0 md:block">
+          <div className="hidden w-72 shrink-0 self-start md:sticky md:top-4 md:block md:max-h-[calc(100vh-2rem)] md:overflow-y-auto">
             <BuilderTreeNav
               title={questionnaire.title}
               questions={state.questions}
@@ -424,11 +424,14 @@ export function QuestionnaireBuilderPage({
             )}
 
             {state.questions.length > 0 && (
-              <div className="sticky bottom-0 flex items-center gap-2 border-t border-gray-200 bg-white px-4 py-3">
+              <div className="sticky bottom-0 flex flex-wrap items-center gap-2 border-t border-gray-200 bg-white px-2 py-3 sm:px-4">
                 <Button
                   type="button"
                   variant="ghost"
+                  size="sm"
+                  className="shrink-0"
                   disabled={!canGoPrevious}
+                  aria-label={t("previous")}
                   onClick={() =>
                     dispatch({
                       type: "select",
@@ -437,12 +440,12 @@ export function QuestionnaireBuilderPage({
                   }
                 >
                   <ChevronLeft className="size-4" />
-                  {t("previous")}
+                  <span className="hidden sm:inline">{t("previous")}</span>
                 </Button>
                 <Button
                   type="button"
                   variant="outline_primary"
-                  className="flex-1"
+                  className="min-w-0 flex-1"
                   onClick={() =>
                     dispatch({ type: "addQuestion", parentId: null })
                   }
@@ -453,7 +456,10 @@ export function QuestionnaireBuilderPage({
                 <Button
                   type="button"
                   variant="ghost"
+                  size="sm"
+                  className="shrink-0"
                   disabled={!canGoNext}
+                  aria-label={t("next")}
                   onClick={() =>
                     dispatch({
                       type: "select",
@@ -461,7 +467,7 @@ export function QuestionnaireBuilderPage({
                     })
                   }
                 >
-                  {t("next")}
+                  <span className="hidden sm:inline">{t("next")}</span>
                   <ChevronRight className="size-4" />
                 </Button>
               </div>

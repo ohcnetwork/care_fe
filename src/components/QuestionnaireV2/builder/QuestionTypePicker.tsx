@@ -27,6 +27,7 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -130,6 +131,9 @@ export function QuestionTypePicker({
       <CommandItem
         key={type}
         value={type}
+        // Let the search box match what the user actually sees (the
+        // translated label), not just the internal type token.
+        keywords={[t(`question_type__${type}`)]}
         onSelect={() => handleSelectType(type)}
         className="items-start gap-3 py-2"
       >
@@ -176,7 +180,8 @@ export function QuestionTypePicker({
       >
         {step === "list" ? (
           <Command>
-            <CommandList>
+            <CommandInput placeholder={t("search")} />
+            <CommandList className="max-h-[60vh]">
               <CommandEmpty>{t("no_results_found")}</CommandEmpty>
               <CommandGroup heading={t("frequently_used")}>
                 {frequentlyUsed.map(renderTypeRow)}
@@ -203,13 +208,14 @@ export function QuestionTypePicker({
                 {t("question_type__structured")}
               </span>
             </div>
-            <CommandList>
+            <CommandList className="max-h-[60vh]">
               <CommandEmpty>{t("no_results_found")}</CommandEmpty>
               <CommandGroup>
                 {STRUCTURED_QUESTIONS.map((entry) => (
                   <CommandItem
                     key={entry.value}
                     value={entry.value}
+                    keywords={[t(`structured_type__${entry.value}`)]}
                     onSelect={() => handleSelectStructured(entry.value)}
                   >
                     {t(`structured_type__${entry.value}`)}

@@ -57,7 +57,7 @@ test.describe("Questionnaire v2 enable_when visibility", () => {
         .click();
       await page.getByRole("button", { name: "Add a condition" }).click();
 
-      const conditionRow = page.locator('div[class*="sm:grid-cols-3"]');
+      const conditionRow = page.locator('div[class*="sm:grid-cols-2"]');
       const conditionFields = conditionRow.getByRole("combobox");
 
       await conditionFields.nth(0).click();

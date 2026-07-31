@@ -15,7 +15,10 @@ import {
 import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { CollapsibleSettingsCard } from "@/components/QuestionnaireV2/shared/CollapsibleSettingsCard";
 
-import { collectIds } from "@/components/QuestionnaireV2/builder/builderReducer";
+import {
+  collectIds,
+  normalizeBooleanConditionAnswer,
+} from "@/components/QuestionnaireV2/builder/builderReducer";
 
 import {
   EnableWhen,
@@ -49,20 +52,6 @@ function operatorsForType(type: QuestionType | undefined): readonly string[] {
   if (type === "boolean") return BOOLEAN_OPERATORS;
   if (type === "integer" || type === "decimal") return NUMERIC_OPERATORS;
   return STRING_OPERATORS;
-}
-
-/**
- * Boolean conditions persist the strings "Yes"/"No" — never JSON booleans.
- * Both deployed evaluators (v2 store.evaluateEnableWhen and the legacy
- * QuestionGroup.isQuestionEnabled) normalize the dependent boolean *response*
- * to "Yes"/"No" before comparing, so a boolean (or "true"/"false") answer
- * could never match. Mirrors the legacy editor's migration for older
- * questionnaires that stored true/false ("temp fix for boolean answers in
- * existing questionnaires", QuestionnaireEditor.tsx).
- */
-function normalizeBooleanConditionAnswer(answer: unknown): "Yes" | "No" {
-  if (answer === true || answer === "true" || answer === "Yes") return "Yes";
-  return "No";
 }
 
 function buildEnableWhen(
@@ -198,8 +187,12 @@ export function VisibilityConditionsCard({
             return (
               <div key={index}>
                 {index > 0 && (
-                  <div className="flex justify-center py-1">
-                    <span className="text-xs font-semibold uppercase text-gray-400">
+                  <div className="relative flex justify-start py-1 pl-6">
+                    <span
+                      className="absolute left-[1.375rem] top-0 h-full w-px bg-gray-200"
+                      aria-hidden
+                    />
+                    <span className="relative rounded-md border border-gray-200 bg-white px-2 py-0.5 text-xs font-semibold uppercase text-gray-500">
                       {enableBehavior === "all" ? t("and") : t("or")}
                     </span>
                   </div>
@@ -221,8 +214,11 @@ export function VisibilityConditionsCard({
                     </Button>
                   </div>
 
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    <div className="space-y-1">
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {/* Question gets the full first row — it's the field the
+                        author most needs to read; Operator and Answer pair
+                        up on the second row. */}
+                    <div className="space-y-1 sm:col-span-2">
                       <p className="text-xs text-gray-500">{t("question")}</p>
                       <Select
                         value={condition.question || undefined}

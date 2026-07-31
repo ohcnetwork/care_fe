@@ -1,4 +1,11 @@
-import { MoreVertical, Plus, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  MoreVertical,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -105,6 +112,14 @@ export function AnswerOptionsEditor({
     updateOptions(options.filter((_, i) => i !== index));
   };
 
+  const handleMoveOption = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= options.length) return;
+    const next = [...options];
+    [next[index], next[target]] = [next[target], next[index]];
+    updateOptions(next);
+  };
+
   const handleAddOption = () => {
     updateOptions([...options, { value: "" }]);
   };
@@ -135,6 +150,21 @@ export function AnswerOptionsEditor({
 
       {mode === "custom" ? (
         <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <h5 className="text-sm font-medium text-gray-900">
+              {t("set_custom_options")}
+            </h5>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={!options.some((option) => option.initial_selected)}
+              onClick={handleClearDefault}
+            >
+              <X className="size-4" />
+              {t("clear_default")}
+            </Button>
+          </div>
           <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
             <Table>
               <TableHeader>
@@ -142,8 +172,8 @@ export function AnswerOptionsEditor({
                   <TableHead className="w-10">#</TableHead>
                   <TableHead>{t("option_value")}</TableHead>
                   <TableHead>{t("display_text_optional")}</TableHead>
-                  <TableHead className="w-20">{t("default")}</TableHead>
-                  <TableHead className="w-10" />
+                  <TableHead className="w-32">{t("default")}</TableHead>
+                  <TableHead className="w-24">{t("action")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -155,6 +185,7 @@ export function AnswerOptionsEditor({
                     <TableCell>
                       <Input
                         value={option.value}
+                        placeholder={t("option_value")}
                         onChange={(e) =>
                           handleOptionChange(index, { value: e.target.value })
                         }
@@ -163,88 +194,109 @@ export function AnswerOptionsEditor({
                     <TableCell>
                       <Input
                         value={option.display ?? ""}
+                        placeholder={t("display_text_optional")}
                         onChange={(e) =>
                           handleOptionChange(index, { display: e.target.value })
                         }
                       />
                     </TableCell>
                     <TableCell>
-                      <button
-                        type="button"
-                        role="radio"
-                        aria-checked={!!option.initial_selected}
-                        aria-label={t("default")}
-                        onClick={() => handleSetDefault(index)}
-                        className={cn(
-                          "flex size-4 items-center justify-center rounded-full border",
-                          option.initial_selected
-                            ? "border-primary-700"
-                            : "border-gray-300",
-                        )}
-                      >
-                        {option.initial_selected && (
-                          <span className="size-2 rounded-full bg-primary-700" />
-                        )}
-                      </button>
+                      <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                        <button
+                          type="button"
+                          role="radio"
+                          aria-checked={!!option.initial_selected}
+                          aria-label={t("default")}
+                          onClick={() => handleSetDefault(index)}
+                          className={cn(
+                            "flex size-4 shrink-0 items-center justify-center rounded-full border",
+                            option.initial_selected
+                              ? "border-primary-700"
+                              : "border-gray-300",
+                          )}
+                        >
+                          {option.initial_selected && (
+                            <span className="size-2 rounded-full bg-primary-700" />
+                          )}
+                        </button>
+                        {option.initial_selected
+                          ? t("default")
+                          : t("set_as_default")}
+                      </label>
                     </TableCell>
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="size-6"
-                            aria-label={t("more_options")}
-                          >
-                            <MoreVertical className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => handleDeleteOption(index)}
-                          >
-                            <Trash2 className="size-4" />
-                            {t("delete")}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <div className="flex items-center gap-0.5">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-6"
+                          disabled={index === 0}
+                          onClick={() => handleMoveOption(index, -1)}
+                          aria-label={t("move_up")}
+                        >
+                          <ChevronUp className="size-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-6"
+                          disabled={index === options.length - 1}
+                          onClick={() => handleMoveOption(index, 1)}
+                          aria-label={t("move_down")}
+                        >
+                          <ChevronDown className="size-4" />
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-6"
+                              aria-label={t("more_options")}
+                            >
+                              <MoreVertical className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => handleDeleteOption(index)}
+                            >
+                              <Trash2 className="size-4" />
+                              {t("delete")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
-          <div className="flex items-center justify-between">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddOption}
-            >
-              <Plus className="size-4" />
-              {t("add_option")}
-            </Button>
-            {options.some((option) => option.initial_selected) && (
-              <Button
-                type="button"
-                variant="link"
-                size="sm"
-                onClick={handleClearDefault}
-              >
-                {t("clear_default")}
-              </Button>
-            )}
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddOption}
+          >
+            <Plus className="size-4" />
+            {t("add_option")}
+          </Button>
         </div>
       ) : (
-        <SelectOrCreateValueset
-          value={question.answer_value_set}
-          onValueSetChange={(vs) =>
-            onChange({ answer_value_set: vs, answer_option: undefined })
-          }
-        />
+        <div className="space-y-1.5">
+          <Label>{t("select_a_value_set")}</Label>
+          <SelectOrCreateValueset
+            value={question.answer_value_set}
+            onValueSetChange={(vs) =>
+              onChange({ answer_value_set: vs, answer_option: undefined })
+            }
+          />
+        </div>
       )}
 
       {question.type === "quantity" && (

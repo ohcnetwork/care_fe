@@ -114,6 +114,70 @@ export function regenerateQuestionIds(questions: Question[]): Question[] {
 }
 
 /**
+ * Boolean conditions persist the strings "Yes"/"No" — never JSON booleans.
+ * Both deployed evaluators (v2 store.evaluateEnableWhen and the legacy
+ * QuestionGroup.isQuestionEnabled) normalize the dependent boolean *response*
+ * to "Yes"/"No" before comparing, so a boolean (or "true"/"false") answer
+ * could never match. Mirrors the legacy editor's migration for older
+ * questionnaires that stored true/false ("temp fix for boolean answers in
+ * existing questionnaires", QuestionnaireEditor.tsx). Lives here (not in
+ * VisibilityConditionsCard) so the editor display path and the load-time
+ * migration below can't drift.
+ */
+export function normalizeBooleanConditionAnswer(answer: unknown): "Yes" | "No" {
+  if (answer === true || answer === "true" || answer === "Yes") return "Yes";
+  return "No";
+}
+
+/**
+ * Repairs legacy boolean enable_when answers (JSON true/false or the strings
+ * "true"/"false") to the deployed "Yes"/"No" convention, keyed off the
+ * target question's type so string questions that legitimately answer
+ * "true" are left alone. Runs on builder load ("reset"); the repair
+ * persists with the next save. The renderer store additionally normalizes
+ * boolean answers at evaluation time so already-saved questionnaires work
+ * without a re-save.
+ */
+export function migrateLegacyBooleanEnableWhen(
+  questions: Question[],
+): Question[] {
+  const typeByLinkId = new Map<string, Question["type"]>();
+  const indexTypes = (list: Question[]) => {
+    for (const question of list) {
+      if (!typeByLinkId.has(question.link_id)) {
+        typeByLinkId.set(question.link_id, question.type);
+      }
+      indexTypes(question.questions ?? []);
+    }
+  };
+  indexTypes(questions);
+
+  const needsMigration = (condition: EnableWhen): boolean =>
+    typeByLinkId.get(condition.question) === "boolean" &&
+    (condition.operator === "equals" || condition.operator === "not_equals") &&
+    (typeof condition.answer === "boolean" ||
+      condition.answer === "true" ||
+      condition.answer === "false");
+
+  return mapTree(questions, (list) =>
+    list.map((question) => {
+      if (!question.enable_when?.some(needsMigration)) return question;
+      return {
+        ...question,
+        enable_when: question.enable_when.map((condition) =>
+          needsMigration(condition)
+            ? ({
+                ...condition,
+                answer: normalizeBooleanConditionAnswer(condition.answer),
+              } as EnableWhen)
+            : condition,
+        ),
+      };
+    }),
+  );
+}
+
+/**
  * Resolves `ids` against `questions` and unions in every descendant id of
  * each match, so callers can reason about whole subtrees rather than just
  * the literal ids provided. Ids that cannot be found are skipped.
@@ -151,18 +215,22 @@ export function builderReducer(
   action: BuilderAction,
 ): BuilderState {
   switch (action.type) {
-    case "reset":
+    case "reset": {
+      // Legacy boolean conditions are repaired on load; the fix lands with
+      // the next save (state stays clean — dirty: false).
+      const questions = migrateLegacyBooleanEnableWhen(action.questions);
       return {
-        questions: action.questions,
+        questions,
         // Selection is builder working state — a post-save reset keeps the
         // user's place when the previously selected question still exists.
         selectedId:
           action.keepSelectedId &&
-          findQuestion(action.questions, action.keepSelectedId)
+          findQuestion(questions, action.keepSelectedId)
             ? action.keepSelectedId
-            : (action.questions[0]?.id ?? null),
+            : (questions[0]?.id ?? null),
         dirty: false,
       };
+    }
 
     case "replaceAll":
       return {

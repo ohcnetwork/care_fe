@@ -47,9 +47,17 @@ function QuestionCodeField({ question, onChange }: QuestionCodeFieldProps) {
   // satisfy that prop contract.
   const form = useForm();
 
+  // Collapsed summary of the attached code ("LOINC: 2028-9" + display text)
+  // so the author can see which code is bound without expanding the card.
+  const code = question.code;
+  const summaryTitle = code?.code
+    ? `${code.system?.toLowerCase().includes("loinc") ? "LOINC" : t("code")}: ${code.code}`
+    : t("coding_details");
+
   return (
     <CollapsibleSettingsCard
-      title={t("coding_details")}
+      title={summaryTitle}
+      subtitle={code?.display}
       badge={
         question.code?.display ? (
           <Badge variant="green">
@@ -94,19 +102,23 @@ export function QuestionEditorCard({
   return (
     <Card>
       <CardContent className="space-y-4 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3">
-          <div className="flex min-w-0 items-center gap-2">
+        <div className="flex items-start justify-between gap-2 border-b border-gray-100 pb-3">
+          {/* Column stack: ordinal + title on line 1, the type badge on line
+              2 — so long titles truncate instead of wrapping the kebab. */}
+          <div className="flex min-w-0 items-start gap-2">
             <span className="text-sm text-gray-500">{number}</span>
-            <span className="truncate text-sm font-semibold text-gray-900">
-              {question.text || (
-                <span className="italic text-gray-400">
-                  {t("untitled_question")}
-                </span>
-              )}
-            </span>
-            <Badge variant="secondary">
-              {t("question_type")}: {t(`question_type__${question.type}`)}
-            </Badge>
+            <div className="flex min-w-0 flex-col items-start gap-1">
+              <span className="max-w-full truncate text-sm font-semibold text-gray-900">
+                {question.text || (
+                  <span className="italic text-gray-400">
+                    {t("untitled_question")}
+                  </span>
+                )}
+              </span>
+              <Badge variant="secondary">
+                {t("question_type")}: {t(`question_type__${question.type}`)}
+              </Badge>
+            </div>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -114,6 +126,7 @@ export function QuestionEditorCard({
                 type="button"
                 variant="ghost"
                 size="icon"
+                className="shrink-0"
                 aria-label={t("more_options")}
               >
                 <MoreVertical className="size-4" />
@@ -140,6 +153,7 @@ export function QuestionEditorCard({
           <Input
             id={`question-title-${question.id}`}
             value={question.text}
+            placeholder={t("enter_question_title")}
             onChange={(e) => onChange({ text: e.target.value })}
           />
         </div>
@@ -153,17 +167,18 @@ export function QuestionEditorCard({
           />
         </div>
 
-        {(question.type === "choice" || question.type === "quantity") && (
-          <AnswerOptionsEditor question={question} onChange={onChange} />
-        )}
-
         <div className="space-y-1.5">
           <Label>{t("description")}</Label>
           <Input
             value={question.description ?? ""}
+            placeholder={t("type_description")}
             onChange={(e) => onChange({ description: e.target.value })}
           />
         </div>
+
+        {(question.type === "choice" || question.type === "quantity") && (
+          <AnswerOptionsEditor question={question} onChange={onChange} />
+        )}
 
         <QuestionCodeField question={question} onChange={onChange} />
 

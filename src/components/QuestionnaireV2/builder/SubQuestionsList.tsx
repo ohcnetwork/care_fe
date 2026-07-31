@@ -1,9 +1,11 @@
 import {
   ChevronDown,
   ChevronUp,
+  CornerUpRight,
   MoreVertical,
   Plus,
   Trash2,
+  X,
 } from "lucide-react";
 import { Dispatch, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -231,44 +233,11 @@ export function SubQuestionsList({
         </div>
       </div>
 
-      {effectiveChecked.size > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-md bg-gray-50 p-2">
-          <span className="text-sm text-gray-700">
-            {t("sub_questions_selected", { count: effectiveChecked.size })}
-          </span>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setChecked(new Set())}
-          >
-            {t("clear_selection")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
-            onClick={handleBulkDelete}
-          >
-            {t("delete")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={openMoveDialog}
-          >
-            {t("move_n_questions", { count: effectiveChecked.size })}
-          </Button>
-        </div>
-      )}
-
       <div className="space-y-2">
         {children.map((child, index) => (
           <div
             key={child.id}
-            className="flex items-center gap-2 rounded-md border border-gray-200 bg-white p-2"
+            className="flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-white p-2"
           >
             <Checkbox
               checked={effectiveChecked.has(child.id)}
@@ -278,26 +247,33 @@ export function SubQuestionsList({
             <span className="w-6 shrink-0 text-sm text-gray-500">
               {index + 1}.
             </span>
-            <button
-              type="button"
-              className="min-w-0 flex-1 truncate text-left text-sm text-gray-900"
-              onClick={() => dispatch({ type: "select", id: child.id })}
-            >
-              {child.text || (
-                <span className="italic text-gray-400">
-                  {t("untitled_question")}
-                </span>
-              )}
-            </button>
-            <QuestionTypeBadge type={child.type} />
-            {child.required && (
-              <Badge variant="secondary">{t("required")}</Badge>
-            )}
+            {/* On phones the title takes its own full-width line (badges
+                beneath it) so it never gets squeezed to zero width by the
+                inline badges and buttons. */}
+            <div className="flex min-w-0 flex-1 basis-full flex-col items-start gap-1 sm:basis-auto sm:flex-row sm:items-center sm:gap-2">
+              <button
+                type="button"
+                className="w-full min-w-0 truncate text-left text-sm text-gray-900 sm:flex-1"
+                onClick={() => dispatch({ type: "select", id: child.id })}
+              >
+                {child.text || (
+                  <span className="italic text-gray-400">
+                    {t("untitled_question")}
+                  </span>
+                )}
+              </button>
+              <div className="flex shrink-0 gap-1">
+                <QuestionTypeBadge type={child.type} />
+                {child.required && (
+                  <Badge variant="secondary">{t("required")}</Badge>
+                )}
+              </div>
+            </div>
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="size-6"
+              className="size-6 shrink-0"
               disabled={index === 0}
               onClick={() =>
                 dispatch({
@@ -314,7 +290,7 @@ export function SubQuestionsList({
               type="button"
               variant="ghost"
               size="icon"
-              className="size-6"
+              className="size-6 shrink-0"
               disabled={index === children.length - 1}
               onClick={() =>
                 dispatch({
@@ -333,7 +309,7 @@ export function SubQuestionsList({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="size-6"
+                  className="size-6 shrink-0"
                   aria-label={t("more_options")}
                 >
                   <MoreVertical className="size-4" />
@@ -354,6 +330,44 @@ export function SubQuestionsList({
           </div>
         ))}
       </div>
+
+      {/* Bulk bar sits below the rows, next to the checkboxes that drive it,
+          with the actions flush right. */}
+      {effectiveChecked.size > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-md bg-gray-50 p-2">
+          <span className="mr-auto text-sm text-gray-700">
+            {t("sub_questions_selected", { count: effectiveChecked.size })}
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setChecked(new Set())}
+          >
+            <X className="size-4" />
+            {t("clear_selection")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+            onClick={handleBulkDelete}
+          >
+            <Trash2 className="size-4" />
+            {t("delete")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={openMoveDialog}
+          >
+            <CornerUpRight className="size-4" />
+            {t("move_n_questions", { count: effectiveChecked.size })}
+          </Button>
+        </div>
+      )}
 
       <Button
         type="button"
