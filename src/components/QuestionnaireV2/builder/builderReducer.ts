@@ -59,6 +59,23 @@ export function collectIds(question: Question): string[] {
   return [question.id, ...(question.questions ?? []).flatMap(collectIds)];
 }
 
+/**
+ * Resolves `ids` against `questions` and unions in every descendant id of
+ * each match, so callers can reason about whole subtrees rather than just
+ * the literal ids provided. Ids that cannot be found are skipped.
+ */
+function collectSubtreeIds(questions: Question[], ids: string[]): Set<string> {
+  const result = new Set<string>();
+  for (const id of ids) {
+    const question = findQuestion(questions, id);
+    if (!question) continue;
+    for (const collected of collectIds(question)) {
+      result.add(collected);
+    }
+  }
+  return result;
+}
+
 /** Immutably map every questions array in the tree (root included). */
 export function mapTree(
   questions: Question[],
@@ -109,12 +126,13 @@ export function builderReducer(
 
     case "removeQuestions": {
       const ids = new Set(action.ids);
+      const removedIds = collectSubtreeIds(state.questions, action.ids);
       const questions = mapTree(state.questions, (list) =>
         list.filter((q) => !ids.has(q.id)),
       );
       return {
         questions,
-        selectedId: ids.has(state.selectedId ?? "")
+        selectedId: removedIds.has(state.selectedId ?? "")
           ? (questions[0]?.id ?? null)
           : state.selectedId,
         dirty: true,
@@ -135,11 +153,25 @@ export function builderReducer(
     }
 
     case "moveQuestions": {
+      const movedSubtreeIds = collectSubtreeIds(state.questions, action.ids);
+      if (
+        action.targetParentId !== null &&
+        movedSubtreeIds.has(action.targetParentId)
+      ) {
+        // Target is the moved question itself or one of its descendants —
+        // that parent won't exist anymore once the subtree is excised, so
+        // moving there would silently drop the data. No-op instead.
+        return state;
+      }
+
       const ids = new Set(action.ids);
       const moved: Question[] = [];
       const walk = (list: Question[]) => {
         for (const q of list) {
-          if (ids.has(q.id)) moved.push(q);
+          if (ids.has(q.id)) {
+            moved.push(q);
+            continue;
+          }
           walk(q.questions ?? []);
         }
       };
