@@ -4325,7 +4325,7 @@
   "patient_instruction": "Patient Instruction",
   "patient_is_deceased": "Patient is deceased",
   "patient_location": "Patient Location",
-  "patient_login": "Log in as Patient",
+  "patient_login": "Sign in as Patient",
   "patient_login__back_to_login": "Back to login",
   "patient_login__consent": "I consent to care accessing the health records linked to this mobile number.",
   "patient_login__heading": "Sign in to your health records",

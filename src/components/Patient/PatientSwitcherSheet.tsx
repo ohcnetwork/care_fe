@@ -19,7 +19,6 @@ import { PublicPatientRead } from "@/types/emr/patient/patient";
 interface PatientSwitcherSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Called with the newly picked patient so callers can flash a confirmation. */
   onSwitched?: (patient: PublicPatientRead) => void;
 }
 
@@ -46,12 +45,9 @@ export function PatientSwitcherSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      {/* The grabber is the only affordance the design gives this sheet, so the
-          primitive's corner X is hidden — it is the sole direct-child button,
-          and Radix keeps Escape and overlay-click dismissal working. */}
       <SheetContent
         side="bottom"
-        className="mx-auto max-h-[85dvh] max-w-[480px] overflow-y-auto rounded-t-[26px] px-5 pb-6 pt-3 [&>button:first-of-type]:hidden"
+        className="mx-auto max-h-[85dvh] max-w-120 overflow-y-auto rounded-t-3xl px-5 pb-6 pt-3 [&>button:first-of-type]:hidden"
       >
         <span
           aria-hidden

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { navigate, usePath } from "raviger";
 import {
   createContext,
   useCallback,
@@ -37,6 +37,7 @@ export default function PatientUserProvider({ children }: Props) {
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
     () => localStorage.getItem(LocalStorageKeys.selectedPatient),
   );
+  const path = usePath();
 
   const { patientToken: tokenData } = useAuthContext();
 
@@ -76,6 +77,25 @@ export default function PatientUserProvider({ children }: Props) {
       navigate("/patient/login", { replace: true });
     }
   }, [tokenData]);
+
+  // Likewise, they are all scoped to a profile: a number with none linked yet
+  // can only go to the picker, which offers registration. The screens that
+  // create that first profile are the exception.
+  const isProfileSetupPath =
+    path === "/patient/select-profile" ||
+    path === "/patient/add-profile" ||
+    !!path?.endsWith("/patient-registration");
+
+  useEffect(() => {
+    if (
+      tokenData &&
+      !isLoading &&
+      patients.length === 0 &&
+      !isProfileSetupPath
+    ) {
+      navigate("/patient/select-profile", { replace: true });
+    }
+  }, [tokenData, isLoading, patients.length, isProfileSetupPath]);
 
   if (!tokenData) {
     return null;

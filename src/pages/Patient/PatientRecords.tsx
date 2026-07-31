@@ -18,6 +18,10 @@ import { PatientBadge } from "@/components/Patient/PatientBadge";
 import { PrescriptionRow } from "@/components/Patient/PrescriptionRow";
 
 import {
+  ACTIVE_PRESCRIPTION_STATUSES,
+  PAST_PRESCRIPTION_STATUSES,
+  PROCESSING_REPORT_STATUSES,
+  READY_REPORT_STATUSES,
   usePatientDiagnosticReports,
   usePatientPrescriptions,
 } from "@/hooks/usePatientPortalData";
@@ -123,26 +127,29 @@ export default function PatientRecords() {
   const [reportFilter, setReportFilter] = useState<ReportFilter>("all");
 
   const {
-    active: activePrescriptions,
-    past: pastPrescriptions,
+    prescriptions,
+    count: prescriptionCount,
     isLoading: isLoadingPrescriptions,
-  } = usePatientPrescriptions();
+  } = usePatientPrescriptions({
+    status:
+      prescriptionFilter === "active"
+        ? ACTIVE_PRESCRIPTION_STATUSES
+        : PAST_PRESCRIPTION_STATUSES,
+    enabled: activeTab === "prescriptions",
+  });
   const {
     reports,
-    ready: readyReports,
-    processing: processingReports,
+    count: reportCount,
     isLoading: isLoadingReports,
-  } = usePatientDiagnosticReports();
-
-  const shownPrescriptions =
-    prescriptionFilter === "active" ? activePrescriptions : pastPrescriptions;
-
-  const shownReports =
-    reportFilter === "ready"
-      ? readyReports
-      : reportFilter === "processing"
-        ? processingReports
-        : reports;
+  } = usePatientDiagnosticReports({
+    status:
+      reportFilter === "ready"
+        ? READY_REPORT_STATUSES
+        : reportFilter === "processing"
+          ? PROCESSING_REPORT_STATUSES
+          : undefined,
+    enabled: activeTab === "reports",
+  });
 
   const setTab = (next: RecordsTab) =>
     setQueryParams({ tab: next }, { replace: true });
@@ -173,26 +180,28 @@ export default function PatientRecords() {
                 active={prescriptionFilter === "active"}
                 onClick={() => setPrescriptionFilter("active")}
               >
-                {t("active")} · {activePrescriptions.length}
+                {t("active")}
+                {prescriptionFilter === "active" && ` · ${prescriptionCount}`}
               </FilterChip>
               <FilterChip
                 active={prescriptionFilter === "past"}
                 onClick={() => setPrescriptionFilter("past")}
               >
-                {t("past")} · {pastPrescriptions.length}
+                {t("past")}
+                {prescriptionFilter === "past" && ` · ${prescriptionCount}`}
               </FilterChip>
             </div>
 
             {isLoadingPrescriptions ? (
               <Skeleton className="h-24 w-full rounded-2xl" />
-            ) : shownPrescriptions.length ? (
+            ) : prescriptions.length ? (
               <>
                 {prescriptionFilter === "past" && (
                   <span className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.09em] text-gray-500">
                     {t("patient_records__earlier")}
                   </span>
                 )}
-                {shownPrescriptions.map((prescription) => (
+                {prescriptions.map((prescription) => (
                   <PrescriptionRow
                     key={prescription.id}
                     prescription={prescription}
@@ -219,27 +228,30 @@ export default function PatientRecords() {
                 active={reportFilter === "all"}
                 onClick={() => setReportFilter("all")}
               >
-                {t("all")} · {reports.length}
+                {t("all")}
+                {reportFilter === "all" && ` · ${reportCount}`}
               </FilterChip>
               <FilterChip
                 active={reportFilter === "ready"}
                 onClick={() => setReportFilter("ready")}
               >
-                {t("patient_records__ready")} · {readyReports.length}
+                {t("patient_records__ready")}
+                {reportFilter === "ready" && ` · ${reportCount}`}
               </FilterChip>
               <FilterChip
                 active={reportFilter === "processing"}
                 onClick={() => setReportFilter("processing")}
               >
-                {t("patient_records__processing")} · {processingReports.length}
+                {t("patient_records__processing")}
+                {reportFilter === "processing" && ` · ${reportCount}`}
               </FilterChip>
             </div>
 
             {isLoadingReports ? (
               <Skeleton className="h-20 w-full rounded-2xl" />
-            ) : shownReports.length ? (
-              shownReports.map((report) => {
-                const isReady = readyReports.includes(report);
+            ) : reports.length ? (
+              reports.map((report) => {
+                const isReady = READY_REPORT_STATUSES.includes(report.status);
                 const flags = reportFlagSummary(report);
                 const Icon = isReady ? reportIcon(report) : Clock;
                 return (

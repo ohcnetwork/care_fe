@@ -19,6 +19,7 @@ import { patientMetaLine } from "@/components/Patient/PatientProfileCard";
 import { PrescriptionRow } from "@/components/Patient/PrescriptionRow";
 
 import {
+  READY_REPORT_STATUSES,
   usePatientAppointments,
   usePatientDiagnosticReports,
   usePatientPrescriptions,
@@ -172,8 +173,8 @@ function PatientPortalIndex() {
     usePatientAppointments();
   const { prescriptions, isLoading: isLoadingPrescriptions } =
     usePatientPrescriptions();
-  const { ready: readyReports, isLoading: isLoadingReports } =
-    usePatientDiagnosticReports();
+  const { reports: readyReports, isLoading: isLoadingReports } =
+    usePatientDiagnosticReports({ status: READY_REPORT_STATUSES });
 
   const isLoading =
     isLoadingPatients ||
