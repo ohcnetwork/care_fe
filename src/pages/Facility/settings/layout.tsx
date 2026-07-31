@@ -1,6 +1,7 @@
 import { useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
 
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
@@ -250,6 +251,18 @@ const getRoutes = (facilityId: string) => ({
   "/tag_config": () => <TagConfigList facilityId={facilityId} />,
   "/tag_config/:tagId": ({ tagId }: { tagId: string }) => (
     <TagConfigView facilityId={facilityId} tagId={tagId} />
+  ),
+  // NOTE: keep "/questionnaires" registered before the catch-all "*" route.
+  // "/questionnaires/new" and "/questionnaires/:id/edit" will be added in
+  // later tasks — keep them above "*" too, once introduced.
+  "/questionnaires": () => (
+    <QuestionnaireListPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+    />
   ),
   "*": () => <ErrorPage />,
 });

@@ -19,6 +19,11 @@ function generateAdminLinks(
       icon: <CareIcon icon="d-book-open" />,
     },
     {
+      name: t("questionnaires"),
+      url: `${baseUrl}/questionnaires`,
+      icon: <CareIcon icon="d-book-open" />,
+    },
+    {
       name: "Valuesets",
       url: `${baseUrl}/valuesets`,
       icon: <CareIcon icon="l-list-ol-alt" />,

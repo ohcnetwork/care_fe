@@ -4745,6 +4745,7 @@
   "questionnaire_submitted_successfully": "Questionnaire submitted successfully",
   "questionnaire_symptom_no_encounter": "Symptoms cannot be recorded without an active encounter",
   "questionnaire_updated_successfully": "Questionnaire updated successfully",
+  "questionnaires": "Questionnaires",
   "questionniare_load_error": "Failed to load questionnaire. Please try again later.",
   "questions": "Questions",
   "questions_copied": "Questions successfully copied",

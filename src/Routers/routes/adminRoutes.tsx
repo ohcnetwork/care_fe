@@ -2,6 +2,7 @@ import { navigate } from "raviger";
 
 import QuestionnaireEditor from "@/components/Questionnaire/QuestionnaireEditor";
 import { QuestionnaireList } from "@/components/Questionnaire/QuestionnaireList";
+import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import { ValueSetList } from "@/components/ValueSet/ValueSetList";
 
@@ -16,10 +17,18 @@ import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 
+const INSTANCE_SCOPE = {
+  authContext: "instance",
+  basePath: "/admin/questionnaires",
+} as const;
+
 const AdminRoutes: AppRoutes = {
   "/admin/questionnaire": () => <QuestionnaireList />,
   "/admin/questionnaire/create": () => <QuestionnaireEditor />,
   "/admin/questionnaire/:id/edit": ({ id }) => <QuestionnaireEditor id={id} />,
+  "/admin/questionnaires": () => (
+    <QuestionnaireListPage scope={INSTANCE_SCOPE} />
+  ),
   "/admin/valuesets": () => <ValueSetList />,
   "/admin/valuesets/create": () => (
     <ValueSetEditor onSuccess={() => navigate(`/admin/valuesets`)} />
