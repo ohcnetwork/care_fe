@@ -5,66 +5,7 @@ import { cn } from "@/lib/utils";
 
 import { Question } from "@/types/questionnaire/question";
 
-export interface TreeItem {
-  question: Question;
-  number: string;
-  children: TreeItem[];
-}
-
-/** Top-level questions get 1., 2., …; children get parent.child (1.1., 1.2.). */
-export function numberQuestions(questions: Question[]): TreeItem[] {
-  return questions.map((question, i) => ({
-    question,
-    number: `${i + 1}.`,
-    children: (question.questions ?? []).map((child, j) => ({
-      question: child,
-      number: `${i + 1}.${j + 1}.`,
-      children: [],
-    })),
-  }));
-}
-
-/** Does `question` (or any of its descendants) have id `questionId`? */
-function containsQuestion(question: Question, questionId: string): boolean {
-  if (question.id === questionId) return true;
-  return (question.questions ?? []).some((child) =>
-    containsQuestion(child, questionId),
-  );
-}
-
-/** Maps any question id (top-level or nested) to the index of its top-level
- *  ancestor in `questions` — so selecting a child in the tree nav pages to
- *  its containing top-level question. */
-export function findTopLevelIndex(
-  questions: Question[],
-  questionId: string,
-): number {
-  const index = questions.findIndex((question) =>
-    containsQuestion(question, questionId),
-  );
-  return index === -1 ? 0 : index;
-}
-
-/**
- * Looks up `questionId`'s own dotted number (e.g. "3." or "3.1.") from
- * `numberQuestions`'s two-level output. Returns undefined for ids nested
- * deeper than that (grandchildren+), since `numberQuestions` only numbers
- * top-level questions and their immediate children — callers should fall
- * back to the top-level ancestor's ordinal in that case.
- */
-export function findQuestionNumber(
-  questions: Question[],
-  questionId: string,
-): string | undefined {
-  for (const item of numberQuestions(questions)) {
-    if (item.question.id === questionId) return item.number;
-    const child = item.children.find(
-      (childItem) => childItem.question.id === questionId,
-    );
-    if (child) return child.number;
-  }
-  return undefined;
-}
+import { TreeItem, numberQuestions } from "./questionTree";
 
 export interface QuestionTreeNavProps {
   title?: string;

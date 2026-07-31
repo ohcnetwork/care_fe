@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { regenerateQuestionIds } from "@/components/QuestionnaireV2/builder/builderReducer";
+import { regenerateQuestionIds } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { cn } from "@/lib/utils";
 

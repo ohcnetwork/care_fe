@@ -7,10 +7,8 @@ import { Button } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
 
-import {
-  findTopLevelIndex,
-  QuestionTreeNav,
-} from "@/components/QuestionnaireV2/shared/QuestionTreeNav";
+import { QuestionTreeNav } from "@/components/QuestionnaireV2/shared/QuestionTreeNav";
+import { findTopLevelIndex } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { QuestionField } from "@/components/QuestionnaireV2/renderer/QuestionField";
 import {

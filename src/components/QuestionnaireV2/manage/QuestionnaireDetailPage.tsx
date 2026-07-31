@@ -35,8 +35,8 @@ import {
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
 
+import { buildUpdateBody } from "@/components/QuestionnaireV2/shared/buildUpdateBody";
 import { BasicInformationCard } from "./BasicInformationCard";
-import { buildUpdateBody } from "./buildUpdateBody";
 import { CloneQuestionnaireDialog } from "./CloneQuestionnaireDialog";
 import { FormPropertiesSidebar } from "./FormPropertiesSidebar";
 import { OrganizationsField } from "./OrganizationsField";

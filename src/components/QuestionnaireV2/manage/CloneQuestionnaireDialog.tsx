@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { regenerateQuestionIds } from "@/components/QuestionnaireV2/builder/builderReducer";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
+import { regenerateQuestionIds } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import {
   QuestionnaireRead,

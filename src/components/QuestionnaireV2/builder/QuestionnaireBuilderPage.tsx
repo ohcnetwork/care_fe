@@ -34,17 +34,17 @@ import {
   findQuestion,
 } from "@/components/QuestionnaireV2/builder/builderReducer";
 import { BuilderTreeNav } from "@/components/QuestionnaireV2/builder/BuilderTreeNav";
+import { ImportQuestionsDialog } from "@/components/QuestionnaireV2/builder/ImportQuestionsDialog";
 import { QuestionEditorCard } from "@/components/QuestionnaireV2/builder/QuestionEditorCard";
-import { buildUpdateBody } from "@/components/QuestionnaireV2/manage/buildUpdateBody";
-import { ImportQuestionsDialog } from "@/components/QuestionnaireV2/manage/ImportQuestionsDialog";
 import { useUpdateQuestionnaire } from "@/components/QuestionnaireV2/manage/useUpdateQuestionnaire";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { QuestionnaireRenderer } from "@/components/QuestionnaireV2/renderer/QuestionnaireRenderer";
+import { buildUpdateBody } from "@/components/QuestionnaireV2/shared/buildUpdateBody";
 import {
   findQuestionNumber,
   findTopLevelIndex,
   numberQuestions,
-} from "@/components/QuestionnaireV2/shared/QuestionTreeNav";
+} from "@/components/QuestionnaireV2/shared/questionTree";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import { cn } from "@/lib/utils";
