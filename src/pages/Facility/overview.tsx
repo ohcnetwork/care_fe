@@ -221,7 +221,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                       </div>
                       <div className="flex h-7 items-center justify-between gap-1 px-3 py-1 sm:px-4">
                         <span className="min-w-0 truncate text-xs font-medium text-gray-700 sm:text-sm">
-                          {t("go_to")} {shortcut.title}
+                          {t("go_to_page", { page: shortcut.title })}
                         </span>
                         <ArrowUpRight className="size-3.5 shrink-0 text-gray-700 sm:size-4" />
                       </div>
