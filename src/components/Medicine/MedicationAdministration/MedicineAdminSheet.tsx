@@ -305,9 +305,7 @@ export function MedicineAdminSheet({
                 }
                 onClick={(e) => {
                   e.preventDefault();
-                  handleSubmit(
-                    e as unknown as React.FormEvent<HTMLFormElement>,
-                  );
+                  handleSubmit(e as any);
                 }}
               >
                 {isPending

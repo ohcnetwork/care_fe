@@ -10,7 +10,8 @@ import { BadgeInfo } from "lucide-react";
 export interface DisplayField<T> {
   key: keyof T | string;
   label: string;
-  render?: (value: unknown) => React.ReactNode;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  render?: (value: any) => React.ReactNode;
 }
 
 interface RecordItemProps<T> {

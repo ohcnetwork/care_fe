@@ -37,8 +37,7 @@ class PluginRegistry {
 
         await this.loadScript(config.url);
         const pluginModule = pluginWindow[config.name] as
-          | Record<string, unknown>
-          | undefined;
+          Record<string, unknown> | undefined;
         if (!pluginModule) {
           throw new Error(
             `Plugin ${config.name} not found after loading script`,
@@ -48,8 +47,7 @@ class PluginRegistry {
           ...(pluginModule as Omit<Plugin, "routes">),
           routes: config.routes.map((route) => {
             const component = pluginModule[route.component] as
-              | React.ComponentType<Record<string, unknown>>
-              | undefined;
+              React.ComponentType<Record<string, unknown>> | undefined;
             if (!component) {
               throw new Error(
                 `Component ${route.component} not found in plugin ${config.name}`,
