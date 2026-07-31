@@ -102,10 +102,10 @@ export function QuestionTypePicker({
   const [step, setStep] = useState<"list" | "structured">("list");
 
   const frequentlyUsed = SUPPORTED_QUESTION_TYPES.filter((entry) =>
-    FREQUENTLY_USED.includes(entry.value as QuestionType),
+    FREQUENTLY_USED.includes(entry.value),
   );
   const otherTypes = SUPPORTED_QUESTION_TYPES.filter(
-    (entry) => !FREQUENTLY_USED.includes(entry.value as QuestionType),
+    (entry) => !FREQUENTLY_USED.includes(entry.value),
   );
 
   const handleSelectType = (type: QuestionType) => {
@@ -126,7 +126,7 @@ export function QuestionTypePicker({
   };
 
   const renderTypeRow = (entry: (typeof SUPPORTED_QUESTION_TYPES)[number]) => {
-    const type = entry.value as QuestionType;
+    const type = entry.value;
     return (
       <CommandItem
         key={type}

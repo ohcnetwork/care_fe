@@ -28,7 +28,7 @@ import { regenerateQuestionIds } from "@/components/QuestionnaireV2/builder/buil
 
 import { cn } from "@/lib/utils";
 
-import { Question } from "@/types/questionnaire/question";
+import { QUESTION_TYPES, Question } from "@/types/questionnaire/question";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
@@ -60,7 +60,15 @@ function isQuestionLike(value: unknown): value is Question {
     questions?: unknown;
   };
   if (typeof candidate.text !== "string") return false;
-  if (typeof candidate.type !== "string") return false;
+  // Membership, not just typeof: an unknown `type` (e.g. "radio") would flow
+  // into builder state and crash the type picker's TYPE_ICONS lookup, then
+  // be PUT to the API on save.
+  if (
+    typeof candidate.type !== "string" ||
+    !(QUESTION_TYPES as readonly string[]).includes(candidate.type)
+  ) {
+    return false;
+  }
   // link_id is optional (regenerateQuestionIds synthesizes fresh ones), but
   // when present it must be a string.
   if (
