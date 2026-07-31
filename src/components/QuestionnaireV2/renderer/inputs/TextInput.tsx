@@ -1,0 +1,32 @@
+import { useTranslation } from "react-i18next";
+
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
+import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
+
+export function TextInput({ question, disabled }: RendererInputProps) {
+  const { t } = useTranslation();
+  const [response, updateResponse] = useQuestionResponse(question.id);
+  const value = (response?.values[0]?.value as string | undefined) ?? "";
+
+  const handleChange = (next: string) => {
+    updateResponse({ values: next ? [{ type: "string", value: next }] : [] });
+  };
+
+  const props = {
+    value,
+    disabled,
+    placeholder: t("enter_details"),
+    maxLength: question.max_length,
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      handleChange(e.target.value),
+  };
+
+  return question.type === "text" ? (
+    <Textarea rows={3} {...props} />
+  ) : (
+    <Input type={question.type === "url" ? "url" : "text"} {...props} />
+  );
+}
