@@ -42,8 +42,8 @@ export default function BookingStepLayout({
 
   return (
     <div className="flex min-h-dvh justify-center bg-gray-100">
-      <div className="flex w-full min-w-0 max-w-[480px] flex-col bg-gray-50 sm:my-4 sm:min-h-0 sm:rounded-3xl sm:border sm:border-gray-200 sm:shadow-sm">
-        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white sm:rounded-t-3xl">
+      <div className="flex w-full min-w-0 flex-col bg-gray-50 sm:min-h-0">
+        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
           <div className="flex min-w-0 items-center gap-2.5 px-4 pb-2.5 pt-3">
             <button
               type="button"
@@ -51,7 +51,7 @@ export default function BookingStepLayout({
               aria-label={t("back")}
               className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100"
             >
-              <ArrowLeft className="size-[22px]" strokeWidth={1.9} />
+              <ArrowLeft className="size-5" strokeWidth={1.9} />
             </button>
             <div className="flex min-w-0 flex-col leading-tight">
               <span className="truncate font-bold text-gray-900">{title}</span>
@@ -90,7 +90,7 @@ export default function BookingStepLayout({
         {footer && (
           <div
             className={cn(
-              "sticky bottom-0 bg-gray-50 px-4 pb-4 sm:rounded-b-3xl",
+              "sticky bottom-0 bg-gray-50 px-4 pb-4",
               footerBordered ? "border-t border-gray-200 pt-3.5" : "pt-2",
             )}
           >
