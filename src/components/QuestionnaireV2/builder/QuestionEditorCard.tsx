@@ -134,8 +134,11 @@ export function QuestionEditorCard({
         </div>
 
         <div className="space-y-1.5">
-          <Label>{t("question_title")}</Label>
+          <Label htmlFor={`question-title-${question.id}`}>
+            {t("question_title")}
+          </Label>
           <Input
+            id={`question-title-${question.id}`}
             value={question.text}
             onChange={(e) => onChange({ text: e.target.value })}
           />

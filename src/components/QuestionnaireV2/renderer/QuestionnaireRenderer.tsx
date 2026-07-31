@@ -76,18 +76,23 @@ function RendererBody({ className }: { className?: string }) {
 
   return (
     <div className={cn("flex gap-6", className)}>
-      <div className="hidden w-64 shrink-0 lg:block">
-        <QuestionTreeNav
-          title={questionnaire.title}
-          questions={questionnaire.questions}
-          activeId={activeQuestion.id}
-          onSelect={(questionId) =>
-            setActiveGroupIndex(
-              findTopLevelIndex(questionnaire.questions, questionId),
-            )
-          }
-        />
-      </div>
+      {/* A nav with a single entry has nothing to navigate between — and
+          would otherwise show the active question's title a second time
+          right next to its own field label. */}
+      {questionnaire.questions.length > 1 && (
+        <div className="hidden w-64 shrink-0 lg:block">
+          <QuestionTreeNav
+            title={questionnaire.title}
+            questions={questionnaire.questions}
+            activeId={activeQuestion.id}
+            onSelect={(questionId) =>
+              setActiveGroupIndex(
+                findTopLevelIndex(questionnaire.questions, questionId),
+              )
+            }
+          />
+        </div>
+      )}
       <div className="min-w-0 flex-1 rounded-lg bg-white">
         <div className="space-y-1 border-b border-gray-100 p-4">
           <h2 className="text-base font-semibold text-gray-900">
