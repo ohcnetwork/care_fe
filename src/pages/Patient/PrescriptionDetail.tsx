@@ -8,7 +8,12 @@ import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { formatDosage, formatDuration } from "@/components/Medicine/utils";
+import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import {
+  formatDosage,
+  formatDuration,
+  formatSig,
+} from "@/components/Medicine/utils";
 import { PatientAppShell } from "@/components/Patient/PatientAppShell";
 import {
   PatientBadge,
@@ -23,9 +28,11 @@ import {
   displayMedicationName,
   fhirDosageToFrequencyValue,
   INACTIVE_MEDICATION_STATUSES,
+  MedicationRequestDosageInstruction,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import patientPortalApi from "@/types/emr/patientPortal/patientPortalApi";
+import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 
 /**
  * The backend status set is wider than the frontend enum (`on_hold`, `ended`,
@@ -37,11 +44,79 @@ const PRESCRIPTION_BADGE_TONES: Record<string, PatientBadgeTone> = {
   cancelled: "danger",
 };
 
-function MetaField({ label, value }: { label: string; value: string }) {
+function PrescriptionSummary({
+  prescription,
+}: {
+  prescription: PrescriptionRead;
+}) {
+  const { t } = useTranslation();
+
+  const fields: [string, string | null | undefined][] = [
+    [
+      t("prescribed_on"),
+      dayjs(prescription.created_date).format("DD MMM YYYY"),
+    ],
+    [t("facility"), prescription.encounter?.facility?.name],
+    [t("patient"), prescription.encounter?.patient?.name],
+    [t("name"), prescription.name],
+  ];
+
   return (
-    <div className="flex flex-col">
-      <span className="text-xs text-gray-500">{label}</span>
-      <span className="text-sm font-semibold text-gray-900">{value}</span>
+    <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-200 bg-white p-4">
+      <div className="flex items-center justify-between gap-2">
+        <span className="truncate font-bold text-gray-900">
+          {formatName(prescription.prescribed_by)}
+        </span>
+        <PatientBadge
+          tone={PRESCRIPTION_BADGE_TONES[prescription.status] ?? "neutral"}
+        >
+          {t(prescription.status)}
+        </PatientBadge>
+      </div>
+      <div className="grid grid-cols-2 gap-2.5">
+        {fields.map(
+          ([label, value]) =>
+            value && (
+              <div key={label} className="flex flex-col">
+                <span className="text-xs text-gray-500">{label}</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {value}
+                </span>
+              </div>
+            ),
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DosageStep({
+  instruction,
+}: {
+  instruction: MedicationRequestDosageInstruction;
+}) {
+  const frequency = fhirDosageToFrequencyValue(instruction);
+  const dose = [formatDosage(instruction), formatSig(instruction)]
+    .filter(Boolean)
+    .join(" · ");
+  const detail = [
+    formatDuration(instruction),
+    ...(instruction.additional_instruction ?? []).map((code) => code.display),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return (
+    <div className="flex items-start justify-between gap-2.5">
+      <div className="flex min-w-0 flex-col gap-0.5">
+        {dose && <span className="text-xs text-gray-600">{dose}</span>}
+        {detail && <span className="text-xs text-gray-600">{detail}</span>}
+      </div>
+      {frequency && (
+        <span className="shrink-0 rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-xs font-bold text-gray-900">
+          {frequency}
+        </span>
+      )}
     </div>
   );
 }
@@ -49,40 +124,12 @@ function MetaField({ label, value }: { label: string; value: string }) {
 function MedicineCard({ medication }: { medication: MedicationRequestRead }) {
   const { t } = useTranslation();
 
+  // A tapering course carries more than one instruction; every step is rendered
+  // so the regimen is never truncated to its first step.
   const instructions = medication.dosage_instruction ?? [];
-  const [primary] = instructions;
   const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
     medication.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
   );
-
-  const frequency = fhirDosageToFrequencyValue(primary);
-  const meta = [formatDosage(primary), primary?.route?.display]
-    .filter(Boolean)
-    .join(" · ");
-  const detail = [
-    ...(primary?.additional_instruction ?? []).map((code) => code.display),
-    formatDuration(primary),
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
-  // A tapering course carries more than one instruction; each further step gets
-  // its own line so the regimen is never truncated to its first step.
-  const furtherSteps = instructions
-    .slice(1)
-    .map((instruction) =>
-      [
-        formatDosage(instruction),
-        fhirDosageToFrequencyValue(instruction),
-        ...(instruction.additional_instruction ?? []).map(
-          (code) => code.display,
-        ),
-        formatDuration(instruction),
-      ]
-        .filter(Boolean)
-        .join(" · "),
-    )
-    .filter(Boolean);
 
   return (
     <div
@@ -92,31 +139,22 @@ function MedicineCard({ medication }: { medication: MedicationRequestRead }) {
       )}
     >
       <div className="flex items-start justify-between gap-2.5">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-base font-bold text-gray-900">
-            {displayMedicationName(medication)}
-          </span>
-          {meta && <span className="text-xs text-gray-600">{meta}</span>}
-        </div>
-        <div className="flex shrink-0 items-center gap-1.5">
-          {isInactive && (
-            <PatientBadge tone="neutral">{t(medication.status)}</PatientBadge>
-          )}
-          {frequency && (
-            <span className="rounded-lg bg-gray-100 px-2.5 py-1 font-mono text-xs font-bold text-gray-900">
-              {frequency}
-            </span>
-          )}
-        </div>
-      </div>
-      {detail && <span className="text-xs text-gray-600">{detail}</span>}
-      {furtherSteps.map((step, index) => (
-        <span key={index} className="text-xs text-gray-600">
-          {step}
+        <span className="min-w-0 text-base font-bold text-gray-900">
+          {displayMedicationName(medication)}
         </span>
-      ))}
+        {isInactive && (
+          <PatientBadge tone="neutral">{t(medication.status)}</PatientBadge>
+        )}
+      </div>
+      <DosageInstructionList
+        instructions={instructions}
+        gap="sm"
+        renderItem={(instruction) => <DosageStep instruction={instruction} />}
+      />
       {medication.note && (
-        <span className="text-xs text-gray-600">{medication.note}</span>
+        <span className="text-xs text-gray-600">
+          <span className="font-semibold">{t("note")}:</span> {medication.note}
+        </span>
       )}
     </div>
   );
@@ -126,7 +164,7 @@ export default function PrescriptionDetail({ id }: { id: string }) {
   const { t } = useTranslation();
   const { tokenData } = usePatientContext();
 
-  const { data: prescription, isLoading } = useQuery({
+  const { data: prescription } = useQuery({
     queryKey: ["portal-prescription", id],
     queryFn: query(patientPortalApi.getPrescription, {
       pathParams: { id },
@@ -135,6 +173,8 @@ export default function PrescriptionDetail({ id }: { id: string }) {
     enabled: !!tokenData?.token,
   });
 
+  const medications = prescription?.medications ?? [];
+
   return (
     <PatientAppShell
       title={t("prescription")}
@@ -142,55 +182,21 @@ export default function PrescriptionDetail({ id }: { id: string }) {
       hideTabs
     >
       <div className="flex flex-col gap-3 p-4">
-        {isLoading || !prescription ? (
+        {!prescription ? (
           <>
             <Skeleton className="h-28 w-full rounded-2xl" />
             <Skeleton className="h-40 w-full rounded-2xl" />
           </>
         ) : (
           <>
-            <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-200 bg-white p-4">
-              <div className="flex items-center justify-between gap-2">
-                <span className="truncate font-bold text-gray-900">
-                  {formatName(prescription.prescribed_by)}
-                </span>
-                <PatientBadge
-                  tone={
-                    PRESCRIPTION_BADGE_TONES[prescription.status] ?? "neutral"
-                  }
-                >
-                  {t(prescription.status)}
-                </PatientBadge>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5">
-                <MetaField
-                  label={t("prescribed_on")}
-                  value={dayjs(prescription.created_date).format("DD MMM YYYY")}
-                />
-                {prescription.encounter?.facility?.name && (
-                  <MetaField
-                    label={t("facility")}
-                    value={prescription.encounter.facility.name}
-                  />
-                )}
-                {prescription.encounter?.patient?.name && (
-                  <MetaField
-                    label={t("patient")}
-                    value={prescription.encounter.patient.name}
-                  />
-                )}
-                {prescription.name && (
-                  <MetaField label={t("name")} value={prescription.name} />
-                )}
-              </div>
-            </div>
+            <PrescriptionSummary prescription={prescription} />
 
             <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-              {t("medications")} · {prescription.medications?.length ?? 0}
+              {t("medications")} · {medications.length}
             </span>
 
-            {prescription.medications?.length ? (
-              prescription.medications.map((medication) => (
+            {medications.length ? (
+              medications.map((medication) => (
                 <MedicineCard key={medication.id} medication={medication} />
               ))
             ) : (
