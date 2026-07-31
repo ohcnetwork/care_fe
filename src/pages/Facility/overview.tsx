@@ -3,17 +3,23 @@ import {
   ArrowUpRight,
   Box,
   Calendar,
-  ChartLine,
   Database,
-  HeartPulse,
+  LucideIcon,
   RotateCcw,
-  Stethoscope,
   Users,
   Wrench,
   X,
 } from "lucide-react";
 import { Link } from "raviger";
+import { type ComponentType, useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
+
+import {
+  CalendarDuoIcon,
+  ChartDuoIcon,
+  HeartDuoIcon,
+  StethoscopeDuoIcon,
+} from "@/CAREUI/icons/CustomIcons";
 
 import {
   Card,
@@ -45,11 +51,12 @@ import { usePermissions } from "@/context/PermissionContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import facilityApi from "@/types/facility/facilityApi";
 import careConfig from "@careConfig";
-import { useMemo } from "react";
 
 interface FacilityOverviewProps {
   facilityId: string;
 }
+
+type ShortcutIcon = LucideIcon | ComponentType<{ className?: string }>;
 
 export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { t } = useTranslation();
@@ -81,38 +88,44 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Morning";
-    if (hour < 18) return "Afternoon";
-    return "Evening";
+    if (hour < 12) return t("morning");
+    if (hour < 18) return t("afternoon");
+    return t("evening");
   };
 
   // Default shortcuts
-  const defaultShortcuts = [
+  const defaultShortcuts: Array<{
+    title: string;
+    description: string;
+    icon: ShortcutIcon;
+    href: string;
+    visible: boolean;
+  }> = [
     {
       title: t("appointments"),
       description: t("view_appointments"),
-      icon: Calendar,
+      icon: CalendarDuoIcon,
       href: `/facility/${facilityId}/appointments`,
       visible: canViewAppointments,
     },
     {
-      title: t("encounters"),
-      description: t("manage_facility_users"),
-      icon: Stethoscope,
+      title: t("all_encounters"),
+      description: t("view_and_manage_encounters"),
+      icon: StethoscopeDuoIcon,
       href: `/facility/${facilityId}/encounters/patients/${careConfig.defaultEncounterType || "all"}`,
       visible: canListEncounters,
     },
     {
       title: t("services"),
       description: t("view_services"),
-      icon: HeartPulse,
+      icon: HeartDuoIcon,
       href: `/facility/${facilityId}/services`,
       visible: true,
     },
     {
       title: t("analytics"),
       description: t("view_analytics"),
-      icon: ChartLine,
+      icon: ChartDuoIcon,
       href: `/facility/${facilityId}/analytics`,
       visible: isAnalyticsEnabled,
     },
@@ -147,22 +160,22 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
 
   return (
     <Page title="">
-      <div className="container mx-auto space-y-8">
+      <div className="container mx-auto space-y-8 max-w-6xl">
         {/* Welcome Header */}
-        <div className="relative border-3 border-white overflow-hidden text-gray-900 rounded-xl bg-[linear-gradient(to_right,#F9FAFB_0%,#F0F0E6_60%)] sm:bg-[linear-gradient(to_right,#F9FAFB_0%, #F9FAFB_70%, #F0F0E6_100%)] lg:bg-[linear-gradient(to_right,#F5F8FF_0%,#F9FAFB_50%,#F0F0E6_100%)]">
+        <div className="relative overflow-hidden rounded-xl bg-[linear-gradient(to_right,#F9FAFB_0%,#F0F0E6_60%)] pr-36 text-gray-900 sm:bg-[linear-gradient(to_right,#F5F8FF_0%,#F9FAFB_45%,#F0F0E6_100%)] sm:pr-40 md:pr-48">
           <div
-            className="absolute w-full h-full bg-right bg-no-repeat bg-contain rounded-lg mix-blend-darken -right-8 md:right-0"
+            className="absolute -right-8 size-full rounded-lg bg-contain bg-right bg-no-repeat mix-blend-darken md:right-0"
             style={{ backgroundImage: "url('/images/home-banner-icon.webp')" }}
             aria-hidden="true"
           />
           <div
-            className="absolute left-0 w-full h-full bg-left bg-no-repeat bg-contain mix-blend-darken"
+            className="absolute left-0 size-full bg-contain bg-left bg-no-repeat mix-blend-darken"
             style={{ backgroundImage: "url('/images/home-banner-sun.png')" }}
             aria-hidden="true"
           />
 
-          <div className="relative z-10 p-4 md:p-8 max-w-[250px] md:max-w-[280px] lg:max-w-lg">
-            <h1 className="mb-2 font-bold text-gray-900 text-2xl wrap-break-word">
+          <div className="relative z-10 max-w-xl p-4 md:p-8">
+            <h1 className="mb-2 text-xl/8 font-medium wrap-break-word text-gray-600">
               <Trans
                 i18nKey="greet_user"
                 values={{
@@ -170,47 +183,47 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   user: formatName(user),
                 }}
                 components={{
-                  1: <span className="text-gray-700 font-semibold" />,
-                  2: <span className="text-gray-900 font-bold" />,
+                  1: <span className="text-xl/8 font-medium text-gray-600" />,
+                  2: <span className="text-xl/8 font-semibold text-gray-950" />,
                 }}
               />
             </h1>
-            <p>{t("welcome_back")}</p>
+            <p className="text-gray-700">{t("welcome_back")}</p>
           </div>
         </div>
 
         {/* Quick Actions Section */}
         <div className="">
-          <h2 className="mb-6 text-xl font-semibold text-gray-900">
+          <h2 className="text-base/9 font-semibold text-gray-950">
             {t("quick_links")}
           </h2>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
             {shortcuts
               .filter((shortcut) => shortcut.visible)
               .map((shortcut) => (
                 <Link
                   key={shortcut.href}
                   href={shortcut.href}
-                  className="block h-full transition-all duration-200 rounded-xl ring-primary-400 ring-offset-2 hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+                  className="block h-full min-w-0 rounded-lg ring-primary-400 ring-offset-2 transition-all duration-200 hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
                 >
-                  <Card className="h-full overflow-hidden border-0 shadow rounded-xl">
-                    <CardContent className="flex flex-col h-full p-1">
-                      <div className="p-6 space-y-3 bg-gray-100 rounded-xl">
-                        <div className="p-3 rounded-lg bg-primary/10 w-fit">
-                          <shortcut.icon className="size-6 text-primary" />
+                  <Card className="flex h-full flex-col gap-[5px] overflow-hidden rounded-lg border-0 bg-white p-1 shadow-[0_1px_3px_0_rgb(0_0_0_/_0.10),0_1px_2px_0_rgb(0_0_0_/_0.06)]">
+                    <CardContent className="flex flex-1 flex-col gap-[5px] p-0">
+                      <div className="min-h-[100px] space-y-2 rounded-t rounded-b-lg bg-gray-100 px-3 py-2.5 sm:min-h-[115px] sm:space-y-3 sm:px-4 sm:py-3">
+                        <div className="w-fit">
+                          <shortcut.icon className="size-7 text-primary sm:size-8" />
                         </div>
-                        <CardTitle className="m-0 text-lg">
+                        <CardTitle className="m-0 text-sm leading-6 font-semibold text-gray-950 sm:text-base/9">
                           {shortcut.title}
                         </CardTitle>
-                        <CardDescription className="text-gray-500">
+                        <CardDescription className="truncate text-[11px] leading-4 font-normal text-gray-700 sm:text-xs sm:leading-normal">
                           {shortcut.description}
                         </CardDescription>
                       </div>
-                      <div className="flex items-center justify-between p-4">
-                        <span className="text-sm font-medium text-gray-700">
+                      <div className="flex h-7 items-center justify-between gap-1 px-3 py-1 sm:px-4">
+                        <span className="min-w-0 truncate text-xs font-medium text-gray-700 sm:text-sm">
                           {t("go_to")} {shortcut.title}
                         </span>
-                        <ArrowUpRight className="text-gray-400 size-4" />
+                        <ArrowUpRight className="size-3.5 shrink-0 text-gray-700 sm:size-4" />
                       </div>
                     </CardContent>
                   </Card>
@@ -222,8 +235,8 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
         {/* Pinned Links Section */}
         {pinnedLinks.length > 0 && (
           <div className="group/pinned-links">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-semibold text-gray-950">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base/9 font-semibold text-gray-950">
                 {t("pinned_links")}
               </h2>
               <DropdownMenu>
