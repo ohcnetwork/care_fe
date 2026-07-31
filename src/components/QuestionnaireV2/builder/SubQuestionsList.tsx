@@ -46,6 +46,7 @@ import { Question } from "@/types/questionnaire/question";
 interface SubQuestionsListProps {
   question: Question;
   dispatch: Dispatch<BuilderAction>;
+  allQuestions?: Question[];
 }
 
 const LAYOUT_OPTIONS = [
@@ -60,6 +61,10 @@ interface GroupTarget {
   label: string;
 }
 
+/** Sentinel select value representing the questionnaire root (targetParentId: null). */
+const ROOT_MOVE_TARGET_ID = "__top_level__";
+
+/** Walks only `question`'s own subtree — used when the caller can't supply the full tree. */
 function collectGroupTargets(
   question: Question,
   excludeIds: Set<string>,
@@ -77,9 +82,33 @@ function collectGroupTargets(
   return targets;
 }
 
+/** Walks the entire questionnaire tree, collecting every group question as a move target. */
+function collectAllGroupTargets(
+  questions: Question[],
+  excludeIds: Set<string>,
+  untitledLabel: string,
+): GroupTarget[] {
+  const targets: GroupTarget[] = [];
+  for (const question of questions) {
+    if (excludeIds.has(question.id)) continue;
+    if (question.type === "group") {
+      targets.push({ id: question.id, label: question.text || untitledLabel });
+    }
+    targets.push(
+      ...collectAllGroupTargets(
+        question.questions ?? [],
+        excludeIds,
+        untitledLabel,
+      ),
+    );
+  }
+  return targets;
+}
+
 export function SubQuestionsList({
   question,
   dispatch,
+  allQuestions,
 }: SubQuestionsListProps) {
   const { t } = useTranslation();
   const [checked, setChecked] = useState<Set<string>>(new Set());
@@ -92,6 +121,16 @@ export function SubQuestionsList({
   const children = question.questions ?? [];
   const layoutValue =
     question.styling_metadata?.classes ?? LAYOUT_OPTIONS[0].value;
+
+  // `checked` can outlive a row once it's deleted via its own kebab menu
+  // (that dispatch never touches this state). Deriving the effective
+  // selection as the intersection with the current children keeps the
+  // bulk-selection bar/count honest without needing to special-case every
+  // place a question can be removed.
+  const childIds = new Set(children.map((child) => child.id));
+  const effectiveChecked = new Set(
+    Array.from(checked).filter((id) => childIds.has(id)),
+  );
 
   const toggleChecked = (id: string, next: boolean) => {
     setChecked((prev) => {
@@ -113,7 +152,7 @@ export function SubQuestionsList({
   };
 
   const handleBulkDelete = () => {
-    dispatch({ type: "removeQuestions", ids: Array.from(checked) });
+    dispatch({ type: "removeQuestions", ids: Array.from(effectiveChecked) });
     setChecked(new Set());
   };
 
@@ -124,24 +163,38 @@ export function SubQuestionsList({
   };
 
   const movedSubtreeIds = new Set(
-    Array.from(checked).flatMap((id) => {
+    Array.from(effectiveChecked).flatMap((id) => {
       const found = findQuestion(children, id);
       return found ? collectIds(found) : [id];
     }),
   );
-  const groupTargets = collectGroupTargets(
-    question,
-    movedSubtreeIds,
-    t("untitled_question"),
-  );
-  const targetQuestion = findQuestion([question], moveTargetId);
-  const maxPosition = targetQuestion?.questions?.length ?? 0;
+  // With the full tree available, offer every group question across the
+  // questionnaire (not just this group's own subtree) plus a root/"top
+  // level" option, matching the legacy MoveQuestionDialog. Without it, fall
+  // back to walking only the current subtree.
+  const groupTargets = allQuestions
+    ? collectAllGroupTargets(
+        allQuestions,
+        movedSubtreeIds,
+        t("untitled_question"),
+      )
+    : collectGroupTargets(question, movedSubtreeIds, t("untitled_question"));
+  const targetOptions: GroupTarget[] = allQuestions
+    ? [{ id: ROOT_MOVE_TARGET_ID, label: t("top_level") }, ...groupTargets]
+    : groupTargets;
+  const isRootMoveTarget = moveTargetId === ROOT_MOVE_TARGET_ID;
+  const targetQuestion = isRootMoveTarget
+    ? undefined
+    : findQuestion(allQuestions ?? [question], moveTargetId);
+  const maxPosition = isRootMoveTarget
+    ? (allQuestions?.length ?? 0)
+    : (targetQuestion?.questions?.length ?? 0);
 
   const handleConfirmMove = () => {
     dispatch({
       type: "moveQuestions",
-      ids: Array.from(checked),
-      targetParentId: moveTargetId,
+      ids: Array.from(effectiveChecked),
+      targetParentId: isRootMoveTarget ? null : moveTargetId,
       index: Math.min(Math.max(movePosition, 0), maxPosition),
     });
     setChecked(new Set());
@@ -171,10 +224,10 @@ export function SubQuestionsList({
         </div>
       </div>
 
-      {checked.size > 0 && (
+      {effectiveChecked.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 rounded-md bg-gray-50 p-2">
           <span className="text-sm text-gray-700">
-            {t("sub_questions_selected", { count: checked.size })}
+            {t("sub_questions_selected", { count: effectiveChecked.size })}
           </span>
           <Button
             type="button"
@@ -199,7 +252,7 @@ export function SubQuestionsList({
             size="sm"
             onClick={openMoveDialog}
           >
-            {t("move_n_questions", { count: checked.size })}
+            {t("move_n_questions", { count: effectiveChecked.size })}
           </Button>
         </div>
       )}
@@ -211,7 +264,7 @@ export function SubQuestionsList({
             className="flex items-center gap-2 rounded-md border border-gray-200 bg-white p-2"
           >
             <Checkbox
-              checked={checked.has(child.id)}
+              checked={effectiveChecked.has(child.id)}
               onCheckedChange={(value) => toggleChecked(child.id, !!value)}
               aria-label={child.text || t("untitled_question")}
             />
@@ -309,7 +362,7 @@ export function SubQuestionsList({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {t("move_n_questions", { count: checked.size })}
+              {t("move_n_questions", { count: effectiveChecked.size })}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
@@ -320,7 +373,7 @@ export function SubQuestionsList({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {groupTargets.map((target) => (
+                  {targetOptions.map((target) => (
                     <SelectItem key={target.id} value={target.id}>
                       {target.label}
                     </SelectItem>

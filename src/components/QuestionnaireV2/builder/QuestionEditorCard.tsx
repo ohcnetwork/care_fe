@@ -173,7 +173,11 @@ export function QuestionEditorCard({
         />
 
         {question.type === "group" && (
-          <SubQuestionsList question={question} dispatch={dispatch} />
+          <SubQuestionsList
+            question={question}
+            dispatch={dispatch}
+            allQuestions={allQuestions}
+          />
         )}
       </CardContent>
     </Card>

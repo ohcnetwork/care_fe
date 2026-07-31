@@ -6265,6 +6265,7 @@
   "tokens_left": "{{ count }} left",
   "tomorrow": "Tomorrow",
   "top": "Top",
+  "top_level": "Top Level",
   "total": "Total",
   "total_amount": "Total Amount",
   "total_appointments": "Total Appointments",
