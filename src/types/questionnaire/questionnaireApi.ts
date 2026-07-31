@@ -1,12 +1,44 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
+import { Code } from "@/types/base/code/code";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { Organization } from "@/types/organization/organization";
 
 import {
   QuestionnaireCreate,
+  QuestionnaireCreateV2,
   QuestionnaireRead,
+  QuestionnaireSetFacilityOrganizations,
   QuestionnaireSetOrganizations,
   QuestionnaireUpdate,
 } from "./questionnaire";
+
+export interface QuestionnaireSubmitResultValue {
+  value?: string;
+  value_code?: Code;
+  value_quantity?: { value: number; unit?: Code };
+}
+
+export interface QuestionnaireSubmitResult {
+  question_id: string;
+  values: QuestionnaireSubmitResultValue[];
+  note?: string;
+  taken_at?: string;
+  body_site?: Code;
+  method?: Code;
+}
+
+export interface QuestionnaireSubmitBody {
+  resource_id: string;
+  patient: string;
+  encounter?: string;
+  results: QuestionnaireSubmitResult[];
+  form_submission?: string;
+}
+
+export interface QuestionnaireSubmitResourceBody {
+  resource_id: string;
+  results: QuestionnaireSubmitResult[];
+}
 
 export default {
   list: {
@@ -46,19 +78,31 @@ export default {
   submit: {
     path: "/api/v1/questionnaire/{id}/submit/",
     method: HttpMethod.POST,
+    TRes: Type<Record<string, unknown>>(),
+    TBody: Type<QuestionnaireSubmitBody>(),
+  },
+  submitResource: {
+    path: "/api/v1/questionnaire/{id}/submit_resource/",
+    method: HttpMethod.POST,
+    TRes: Type<Record<string, unknown>>(),
+    TBody: Type<QuestionnaireSubmitResourceBody>(),
+  },
+  createV2: {
+    path: "/api/v1/questionnaire/",
+    method: HttpMethod.POST,
+    TBody: Type<QuestionnaireCreateV2>(),
+    TRes: Type<QuestionnaireRead>(),
+  },
+  getFacilityOrganizations: {
+    path: "/api/v1/questionnaire/{id}/get_facility_organizations/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<FacilityOrganizationRead>>(),
+  },
+  setFacilityOrganizations: {
+    path: "/api/v1/questionnaire/{id}/set_facility_organizations/",
+    method: HttpMethod.POST,
+    TBody: Type<QuestionnaireSetFacilityOrganizations>(),
     TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      resource_id: string;
-      encounter?: string;
-      patient: string;
-      responses: Array<{
-        question_id: string;
-        value: string | number | boolean;
-        note?: string;
-        bodysite?: string;
-        method?: string;
-      }>;
-    }>(),
   },
   getOrganizations: {
     path: "/api/v1/questionnaire/{id}/get_organizations/",
