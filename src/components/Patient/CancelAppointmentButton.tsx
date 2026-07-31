@@ -84,7 +84,7 @@ export function CancelAppointmentButton({
       </Button>
 
       <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent className="max-w-[440px]">
+        <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
             <AlertDialogDescription>

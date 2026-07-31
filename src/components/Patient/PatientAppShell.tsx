@@ -9,7 +9,7 @@ import {
   User,
 } from "lucide-react";
 import { Link, navigate, usePath } from "raviger";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -17,10 +17,19 @@ import { cn } from "@/lib/utils";
 import { PatientAvatar } from "@/components/Patient/PatientProfileCard";
 import { PatientSwitcherSheet } from "@/components/Patient/PatientSwitcherSheet";
 
+import { Button } from "@/components/ui/button";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 /** How long the "now showing records for X" confirmation stays up. */
-const SWITCH_NOTICE_MS = 4000;
+const SWITCH_NOTICE_MS = 3000;
+
+/** Lets descendant screens open the shell's shared patient switcher sheet. */
+const PatientShellContext = createContext<{
+  openSwitcher: () => void;
+  canSwitch: boolean;
+}>({ openSwitcher: () => {}, canSwitch: false });
+
+export const usePatientShell = () => useContext(PatientShellContext);
 
 const TABS = [
   { key: "home", href: "/patient/home", icon: Home, label: "home" },
@@ -141,39 +150,21 @@ export function PatientAppShell({
       disabled={!canSwitch}
       className={cn(
         "relative flex items-center rounded-full border border-gray-200 bg-gray-50",
-        // The compact pill is 36px by design; the pseudo-element restores a
-        // 44px hit area without stretching the visible chip.
         "after:absolute after:inset-x-0 after:-inset-y-1 after:content-['']",
-        title
-          ? "min-h-9 gap-2 py-[5px] pl-[5px] pr-[11px]"
-          : "min-h-11 gap-[9px] py-1.5 pl-1.5 pr-3",
+        "min-h-11 gap-2 py-1.5 pl-1.5 pr-3",
         canSwitch && "hover:border-gray-300",
       )}
     >
       <PatientAvatar
         name={selectedPatient.name}
         active
-        className={title ? "size-[26px] text-[10px]" : "size-[30px] text-xs"}
+        className="size-6 text-xs"
       />
-      {title ? (
-        <span className="text-sm font-semibold text-gray-900">
-          {abbreviateName(selectedPatient.name)}
-        </span>
-      ) : (
-        <span className="flex flex-col items-start leading-tight">
-          <span className="text-[10px] font-bold uppercase tracking-[0.09em] text-gray-500">
-            {t("patient_shell__viewing")}
-          </span>
-          <span className="text-sm font-bold text-gray-900">
-            {abbreviateName(selectedPatient.name)}
-          </span>
-        </span>
-      )}
+      <span className="text-sm font-bold text-gray-900">
+        {abbreviateName(selectedPatient.name)}
+      </span>
       {canSwitch && (
-        <ChevronDown
-          className={cn("text-gray-600", title ? "size-3.5" : "size-[15px]")}
-          strokeWidth={2.2}
-        />
+        <ChevronDown className="text-gray-600 size-3.5" strokeWidth={2.2} />
       )}
     </button>
   );
@@ -195,7 +186,7 @@ export function PatientAppShell({
             )}
             aria-current={isActive ? "page" : undefined}
           >
-            <Icon className="size-[21px]" strokeWidth={1.9} />
+            <Icon className="size-5" strokeWidth={1.9} />
             <span
               className={cn(
                 "text-[10px]",
@@ -255,85 +246,89 @@ export function PatientAppShell({
   // Mobile is a centred card; desktop drops the card chrome for a left rail
   // plus a flush content column.
   return (
-    <div className="flex min-h-dvh bg-gray-100 lg:bg-white">
-      {sideNav}
-      <div className="flex min-w-0 flex-1 justify-center">
-        <div className="flex w-full min-w-0 flex-col bg-gray-50">
-          <header className="sticky top-0 z-10 shrink-0 border-b border-gray-200 bg-white">
-            <div className="flex min-w-0 items-center gap-2.5 px-4 py-3">
-              {backTo && (
-                <button
-                  type="button"
-                  onClick={() => navigate(backTo)}
-                  aria-label={t("back")}
-                  className="-ml-1 flex size-8 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100"
-                >
-                  <ArrowLeft className="size-5" strokeWidth={1.9} />
-                </button>
-              )}
-              {/* Two header variants. Home leads with the logo — it is the
-                  portal's only branded surface, and the tab bar already tells
-                  you where you are; every other screen leads with its title. The
-                  desktop rail already carries the logo, so hide it there. */}
-              {title ? (
-                <h1 className="min-w-0 truncate text-xl font-bold tracking-tight text-gray-900">
-                  {title}
-                </h1>
-              ) : (
-                <Link
-                  href="/patient/home"
-                  aria-label={t("care")}
-                  className="flex min-h-11 items-center lg:hidden"
-                >
-                  <img
-                    src={careConfig.mainLogo?.dark}
-                    alt={t("care")}
-                    className="h-7 w-auto shrink-0"
-                  />
-                </Link>
-              )}
-              <div className="ml-auto flex items-center gap-2">
-                {headerAction}
-                {!hideTabs && switcherChip}
+    <PatientShellContext.Provider
+      value={{ openSwitcher: () => setSwitcherOpen(true), canSwitch }}
+    >
+      <div className="flex min-h-dvh bg-gray-100 lg:bg-white">
+        {sideNav}
+        <div className="flex min-w-0 flex-1 justify-center">
+          <div className="flex w-full min-w-0 flex-col bg-gray-50">
+            <header className="sticky top-0 z-10 shrink-0 border-b border-gray-200 bg-white">
+              <div className="flex min-w-0 items-center gap-2.5 px-4 py-3">
+                {backTo && (
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    onClick={() => navigate(backTo)}
+                    aria-label={t("back")}
+                    className="-ml-1 flex size-8 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100"
+                  >
+                    <ArrowLeft className="size-5" strokeWidth={1.9} />
+                  </Button>
+                )}
+                {title ? (
+                  <h1 className="min-w-0 truncate text-xl font-bold tracking-tight text-gray-900">
+                    {title}
+                  </h1>
+                ) : (
+                  <Link
+                    href="/patient/home"
+                    aria-label={t("care")}
+                    className="flex min-h-11 items-center lg:hidden"
+                  >
+                    <img
+                      src={careConfig.mainLogo?.dark}
+                      alt={t("care")}
+                      className="h-7 w-auto shrink-0"
+                    />
+                  </Link>
+                )}
+                <div className="ml-auto flex items-center gap-2">
+                  {headerAction}
+                  {!hideTabs && switcherChip}
+                </div>
               </div>
-            </div>
-            {headerTabs}
-          </header>
+              {headerTabs}
+            </header>
 
-          {/* Switching patient moves the whole app's data scope, so the
+            {/* Switching patient moves the whole app's data scope, so the
               confirmation is announced. The region stays mounted — screen
               readers can miss one inserted together with its content. */}
-          <div role="status" aria-live="polite">
-            {switchedTo && (
-              <div className="mx-4 mt-3 flex items-center gap-2.5 rounded-xl border border-primary-200 bg-primary-50 px-3.5 py-2.5">
-                <Check className="size-4 text-primary-700" strokeWidth={2.4} />
-                <span className="text-xs font-semibold text-primary-800">
-                  {t("patient_shell__now_showing", { name: switchedTo })}
-                </span>
-              </div>
+            <div role="status" aria-live="polite">
+              {switchedTo && (
+                <div className="mx-4 mt-3 flex items-center gap-2.5 rounded-xl border border-primary-200 bg-primary-50 px-3.5 py-2.5">
+                  <Check
+                    className="size-4 text-primary-700"
+                    strokeWidth={2.4}
+                  />
+                  <span className="text-xs font-semibold text-primary-800">
+                    {t("patient_shell__now_showing", { name: switchedTo })}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <main className="flex min-w-0 flex-1 flex-col sm:px-4">
+              {children}
+            </main>
+
+            {!hideTabs && (
+              <nav
+                aria-label={t("patient_shell__navigation")}
+                className="sticky bottom-0 grid shrink-0 grid-cols-4 border-t border-gray-200 bg-white px-2.5 pb-6 pt-2.5 sm:rounded-b-3xl sm:pb-2 lg:hidden"
+              >
+                {tabBar}
+              </nav>
             )}
           </div>
-
-          <main className="flex min-w-0 flex-1 flex-col sm:px-4">
-            {children}
-          </main>
-
-          {!hideTabs && (
-            <nav
-              aria-label={t("patient_shell__navigation")}
-              className="sticky bottom-0 grid shrink-0 grid-cols-4 border-t border-gray-200 bg-white px-2.5 pb-6 pt-2.5 sm:rounded-b-3xl sm:pb-2 lg:hidden"
-            >
-              {tabBar}
-            </nav>
-          )}
         </div>
-      </div>
 
-      <PatientSwitcherSheet
-        open={switcherOpen}
-        onOpenChange={setSwitcherOpen}
-        onSwitched={(patient) => setSwitchedTo(patient.name)}
-      />
-    </div>
+        <PatientSwitcherSheet
+          open={switcherOpen}
+          onOpenChange={setSwitcherOpen}
+          onSwitched={(patient) => setSwitchedTo(patient.name)}
+        />
+      </div>
+    </PatientShellContext.Provider>
   );
 }

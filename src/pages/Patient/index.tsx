@@ -268,7 +268,7 @@ function PatientPortalIndex() {
                   <Link
                     key={action.key}
                     href={action.href}
-                    className="flex flex-col items-center gap-1.5 rounded-[14px] border border-gray-200 bg-white px-1 py-[13px] hover:border-primary-200 hover:bg-primary-50"
+                    className="flex flex-col items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-1 py-4 hover:border-primary-200 hover:bg-primary-50"
                   >
                     <Icon
                       className="size-5 text-primary-700"

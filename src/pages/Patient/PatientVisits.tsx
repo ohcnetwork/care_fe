@@ -89,7 +89,7 @@ function UpcomingVisitCard({
   return (
     <Link
       href={`/patient/visits/${appointment.id}`}
-      className="flex flex-col gap-3 rounded-2xl border border-primary-200 bg-primary-50 p-4 hover:border-primary-700"
+      className="flex flex-col gap-3 rounded-2xl border border-primary-200 bg-linear-to-r from-primary-100/50 to-transparent p-4 hover:border-primary-700"
     >
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-bold uppercase tracking-widest text-primary-700">
@@ -102,7 +102,7 @@ function UpcomingVisitCard({
         )}
       </div>
       <div className="flex items-start gap-3">
-        <div className="w-[52px] shrink-0 rounded-xl border border-primary-200 bg-white py-1.5 text-center">
+        <div className="w-13 shrink-0 rounded-xl border border-primary-200 bg-white py-1.5 text-center">
           <div className="text-[10px] font-bold uppercase tracking-wide text-primary-700">
             {start.format("ddd")}
           </div>

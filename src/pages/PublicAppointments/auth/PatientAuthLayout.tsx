@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
+import { navigate } from "raviger";
 
 interface PatientAuthLayoutProps {
   children: React.ReactNode;
@@ -58,6 +59,7 @@ export default function PatientAuthLayout({
               src={careConfig.mainLogo?.dark}
               alt={t("care")}
               className="mb-14 h-[38px] w-auto self-start"
+              onClick={() => navigate("/")}
             />
           )}
           {children}

@@ -234,7 +234,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
         </Label>
         <PhoneInput
           id="patient-login-phone"
-          className="h-[52px] overflow-hidden rounded-2xl [&_button]:border-gray-300 [&_button]:bg-gray-50"
+          className="h-13 overflow-hidden rounded-xl border border-gray-300 [&_button]:border-0 [&_button]:bg-gray-50 [&_input]:border-0 [&_input]:border-l [&_input]:border-l-gray-300"
           value={phone}
           onChange={updatePhone}
           placeholder={t("enter_phone_number")}

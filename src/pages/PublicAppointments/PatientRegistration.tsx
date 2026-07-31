@@ -234,7 +234,7 @@ export default function PublicPatientRegistration(
       <Form {...form}>
         <form
           onSubmit={onSubmit}
-          className="flex w-full max-w-[480px] flex-col bg-gray-50 sm:my-4 sm:min-h-0 sm:rounded-3xl sm:border sm:border-gray-200 sm:shadow-sm"
+          className="flex w-full flex-col bg-gray-50 sm:min-h-0"
         >
           <header className="sticky top-0 z-10 flex shrink-0 items-center gap-2.5 border-b border-gray-200 bg-white px-4 py-3 sm:rounded-t-3xl">
             <button
@@ -243,7 +243,7 @@ export default function PublicPatientRegistration(
               aria-label={t("back")}
               className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100"
             >
-              <ArrowLeft className="size-[22px]" strokeWidth={1.9} />
+              <ArrowLeft className="size-5" strokeWidth={1.9} />
             </button>
             <img
               src={careConfig.mainLogo?.dark}
@@ -255,8 +255,8 @@ export default function PublicPatientRegistration(
             </h1>
           </header>
 
-          <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
-            <div className="flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-4">
+          <div className="flex min-w-0  flex-col lg:flex-row gap-3 p-4 lg:mx-auto">
+            <div className="flex flex-col lg:min-w-md gap-5 rounded-2xl border border-gray-200 bg-white p-4">
               <span className="rounded-xl bg-primary-50 px-3.5 py-3 text-xs text-primary-800">
                 {t("phone_number_verified")}:{" "}
                 <span className="font-bold">{tokenData.phoneNumber}</span>
@@ -391,7 +391,7 @@ export default function PublicPatientRegistration(
               </div>
             </div>
 
-            <div className="flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-4">
+            <div className="flex flex-col lg:min-w-md gap-5 rounded-2xl border border-gray-200 bg-white p-4">
               <FormField
                 control={form.control}
                 name="address"
@@ -464,19 +464,17 @@ export default function PublicPatientRegistration(
             </div>
           </div>
 
-          <div className="sticky bottom-0 border-t border-gray-200 bg-white p-4 sm:rounded-b-3xl">
-            <div className="grid grid-cols-2 gap-2.5">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => navigate(backTo)}
-              >
-                {t("cancel")}
-              </Button>
-              <Button type="submit" disabled={isCreatingPatient}>
-                {t("register_patient")}
-              </Button>
-            </div>
+          <div className="flex min-w-0 flex-col lg:flex-row gap-3 p-4 lg:mx-auto">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => navigate(backTo)}
+            >
+              {t("cancel")}
+            </Button>
+            <Button type="submit" disabled={isCreatingPatient}>
+              {t("register_patient")}
+            </Button>
           </div>
         </form>
       </Form>

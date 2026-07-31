@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { ChevronRight, Clock, FileText } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   PatientAppShell,
   PatientHeaderTabs,
+  usePatientShell,
 } from "@/components/Patient/PatientAppShell";
 import { PatientBadge } from "@/components/Patient/PatientBadge";
 import { PrescriptionRow } from "@/components/Patient/PrescriptionRow";
@@ -78,15 +79,16 @@ function RecordsEmptyState({
 }) {
   const { t } = useTranslation();
   const { patients } = usePatientContext();
+  const { openSwitcher, canSwitch } = usePatientShell();
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3.5 p-8 text-center">
-      <span className="flex size-[72px] items-center justify-center rounded-[22px] bg-gray-100">
+    <div className="flex flex-1 flex-col items-center justify-center gap-3.5 p-8 text-center max-w-md mx-auto">
+      <span className="flex size-18 items-center justify-center rounded-[22px] bg-gray-100">
         <FileText className="size-8 text-gray-400" strokeWidth={1.6} />
       </span>
       <div>
         <h3 className="mb-1.5 text-lg font-bold text-gray-900">{title}</h3>
-        <p className="text-pretty text-sm leading-[1.5] text-gray-600">
+        <p className="text-pretty text-sm leading-normal text-gray-600">
           {description}
         </p>
       </div>
@@ -96,11 +98,11 @@ function RecordsEmptyState({
             {t("patient_records__book_first_appointment")}
           </Link>
         </Button>
-        {(patients?.length ?? 0) > 1 && (
+        {(patients?.length ?? 0) > 1 && canSwitch && (
           <Button
             variant="ghost"
             className="min-h-11 w-full"
-            onClick={() => navigate("/patient/select-profile")}
+            onClick={openSwitcher}
           >
             {t("patient_records__switch_patient")}
           </Button>
@@ -163,7 +165,7 @@ export default function PatientRecords() {
         />
       }
     >
-      <div className="flex min-w-0 flex-1 flex-col gap-3 p-4 pt-[18px]">
+      <div className="flex min-w-0 flex-1 flex-col gap-3 p-4 pt-4.5">
         {activeTab === "prescriptions" ? (
           <>
             <div className="flex gap-2">
