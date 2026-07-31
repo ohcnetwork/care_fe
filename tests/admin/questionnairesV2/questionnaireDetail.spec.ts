@@ -21,11 +21,29 @@ test.describe("Questionnaire v2 detail", () => {
       await expect(page.getByText("Form Properties")).toBeVisible();
     });
 
+    let newTitle = "";
+
     await test.step("Edit title and save", async () => {
-      const newTitle = `Edited ${faker.word.words(2)} ${Date.now()}`;
+      newTitle = `Edited ${faker.word.words(2)} ${Date.now()}`;
       await page.getByRole("textbox", { name: "Title" }).fill(newTitle);
       await page.getByRole("button", { name: "Save Form" }).click();
       await expectToast(page, "Questionnaire updated successfully");
+    });
+
+    await test.step("Navigate list -> row -> detail and confirm the edit persisted", async () => {
+      await page.goto("/admin/questionnaires");
+      await page.getByPlaceholder("Search Questionnaires").fill(newTitle);
+
+      // The table row's role is overridden to "link" (QuestionnaireListPage
+      // wires role="link" + onClick on the TableRow), not the native "row".
+      const row = page.getByRole("link").filter({ hasText: newTitle });
+      await expect(row).toBeVisible();
+      await row.click();
+
+      await page.waitForURL(/\/admin\/questionnaires\/[0-9a-f-]+$/);
+      await expect(page.getByRole("textbox", { name: "Title" })).toHaveValue(
+        newTitle,
+      );
     });
   });
 });

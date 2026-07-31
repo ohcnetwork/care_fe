@@ -23,25 +23,39 @@ test.describe("Questionnaire v2 create (facility)", () => {
       await page.waitForURL(/\/settings\/questionnaires\/new$/);
     });
 
-    await test.step("Fill and submit", async () => {
+    await test.step("Fill and submit, picking a non-default subject type", async () => {
       await page
         .getByRole("textbox", { name: "Title" })
         .pressSequentially(title);
-      await page.getByRole("radio", { name: "Encounter", exact: true }).click();
+      // "Encounter" is subjectTypeOptions[0] — already selected by default, so
+      // clicking it again would exercise a no-op. Pick "Location" instead so
+      // the assertion below actually pins subject_type selection taking effect.
+      await page.getByRole("radio", { name: "Location", exact: true }).click();
       await page.getByRole("button", { name: "Save Form" }).click();
       await expectToast(page, "Questionnaire created successfully");
     });
 
-    await test.step("Detail page shows the new questionnaire", async () => {
+    await test.step("Detail page shows the new questionnaire with the chosen subject type", async () => {
       await page.waitForURL(/\/settings\/questionnaires\/[0-9a-f-]+$/);
       await expect(page.getByRole("textbox", { name: "Title" })).toHaveValue(
         title,
       );
       await expect(page.getByText("Form Properties")).toBeVisible();
+
+      const subjectTypeGroup = page.getByRole("radiogroup", {
+        name: "Subject Type",
+      });
+      const locationRadio = subjectTypeGroup.getByRole("radio", {
+        name: "Location",
+        exact: true,
+      });
+      await expect(locationRadio).toHaveAttribute("aria-checked", "true");
+      await expect(locationRadio).toBeDisabled();
     });
 
-    await test.step("List shows it", async () => {
+    await test.step("List, scoped by search, shows it", async () => {
       await page.goto(`/facility/${facilityId}/settings/questionnaires`);
+      await page.getByPlaceholder("Search Questionnaires").fill(title);
       await expect(page.locator('[data-slot="table-body"]')).toContainText(
         title,
       );
