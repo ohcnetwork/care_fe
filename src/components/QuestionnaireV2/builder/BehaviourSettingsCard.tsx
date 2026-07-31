@@ -1,0 +1,89 @@
+import { Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
+import { Badge } from "@/components/ui/badge";
+
+import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
+import { CollapsibleSettingsCard } from "@/components/QuestionnaireV2/shared/CollapsibleSettingsCard";
+
+import { Question } from "@/types/questionnaire/question";
+
+interface BehaviourSettingsCardProps {
+  question: Question;
+  onChange: (patch: Partial<Question>) => void;
+}
+
+const DATA_CAPTURE_FLAGS = [
+  { key: "is_component", label: "component" },
+  { key: "collect_time", label: "collect_time" },
+  { key: "collect_performer", label: "collect_performer" },
+  { key: "collect_method", label: "collect_method" },
+  { key: "collect_body_site", label: "collect_body_site" },
+] as const;
+
+export function BehaviourSettingsCard({
+  question,
+  onChange,
+}: BehaviourSettingsCardProps) {
+  const { t } = useTranslation();
+
+  const count = [
+    question.required,
+    question.read_only,
+    question.is_component,
+    question.collect_time,
+    question.collect_performer,
+    question.collect_method,
+    question.collect_body_site,
+  ].filter(Boolean).length;
+
+  return (
+    <CollapsibleSettingsCard
+      title={t("question_behaviour_title")}
+      subtitle={t("question_behaviour_subtitle")}
+      badge={
+        <Badge variant="green">
+          <Check className="size-3" />
+          {t("configured_count", { count })}
+        </Badge>
+      }
+    >
+      <div className="space-y-4">
+        <div className="space-y-1.5">
+          <p className="text-xs font-medium text-gray-500">{t("behaviour")}</p>
+          <div className="flex flex-wrap gap-2">
+            <ChoiceChip
+              control="checkbox"
+              label={t("required")}
+              checked={!!question.required}
+              onCheckedChange={(checked) => onChange({ required: checked })}
+            />
+            <ChoiceChip
+              control="checkbox"
+              label={t("read_only")}
+              checked={!!question.read_only}
+              onCheckedChange={(checked) => onChange({ read_only: checked })}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <p className="text-xs font-medium text-gray-500">
+            {t("data_capture")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {DATA_CAPTURE_FLAGS.map((flag) => (
+              <ChoiceChip
+                key={flag.key}
+                control="checkbox"
+                label={t(flag.label)}
+                checked={!!question[flag.key]}
+                onCheckedChange={(checked) => onChange({ [flag.key]: checked })}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </CollapsibleSettingsCard>
+  );
+}
