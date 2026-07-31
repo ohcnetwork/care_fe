@@ -51,6 +51,20 @@ function operatorsForType(type: QuestionType | undefined): readonly string[] {
   return STRING_OPERATORS;
 }
 
+/**
+ * Boolean conditions persist the strings "Yes"/"No" — never JSON booleans.
+ * Both deployed evaluators (v2 store.evaluateEnableWhen and the legacy
+ * QuestionGroup.isQuestionEnabled) normalize the dependent boolean *response*
+ * to "Yes"/"No" before comparing, so a boolean (or "true"/"false") answer
+ * could never match. Mirrors the legacy editor's migration for older
+ * questionnaires that stored true/false ("temp fix for boolean answers in
+ * existing questionnaires", QuestionnaireEditor.tsx).
+ */
+function normalizeBooleanConditionAnswer(answer: unknown): "Yes" | "No" {
+  if (answer === true || answer === "true" || answer === "Yes") return "Yes";
+  return "No";
+}
+
 function buildEnableWhen(
   targetLinkId: string,
   targetType: QuestionType | undefined,
@@ -59,9 +73,11 @@ function buildEnableWhen(
   if (targetType === "boolean") {
     return {
       question: targetLinkId,
-      operator: operator as "exists" | "equals" | "not_equals",
-      answer: false,
-    };
+      operator,
+      // "Yes"/"No" string, matching the legacy editor's storage format (see
+      // normalizeBooleanConditionAnswer above).
+      answer: "No",
+    } as EnableWhen;
   }
   if (targetType === "integer" || targetType === "decimal") {
     return {
@@ -117,7 +133,7 @@ export function VisibilityConditionsCard({
     const next = [...enableWhen];
     let answer: EnableWhen["answer"];
     if (targetType === "boolean") {
-      answer = rawValue === "true";
+      answer = normalizeBooleanConditionAnswer(rawValue);
     } else if (targetType === "integer" || targetType === "decimal") {
       answer = Number(rawValue) || 0;
     } else {
@@ -255,7 +271,11 @@ export function VisibilityConditionsCard({
                       <p className="text-xs text-gray-500">{t("answer")}</p>
                       {target?.type === "boolean" ? (
                         <Select
-                          value={String(condition.answer)}
+                          // Tolerates legacy true/false answers on load; any
+                          // change re-writes them as "Yes"/"No".
+                          value={normalizeBooleanConditionAnswer(
+                            condition.answer,
+                          )}
                           onValueChange={(value) =>
                             handleAnswerChange(index, value, target?.type)
                           }
@@ -264,8 +284,8 @@ export function VisibilityConditionsCard({
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="true">{t("yes")}</SelectItem>
-                            <SelectItem value="false">{t("no")}</SelectItem>
+                            <SelectItem value="Yes">{t("yes")}</SelectItem>
+                            <SelectItem value="No">{t("no")}</SelectItem>
                           </SelectContent>
                         </Select>
                       ) : target?.type === "integer" ||
