@@ -19,6 +19,7 @@ import {
 
 import { cn } from "@/lib/utils";
 
+import { PatientAge } from "@/components/Patient/PatientAge";
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
@@ -28,7 +29,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { LocationTypeIcons } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
-import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { Clock, Stethoscope } from "lucide-react";
 
 export interface EncounterInfoCardProps {
@@ -57,18 +58,18 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
       )}
     >
       <CardHeader className="bg-gray-100 px-4 pt-2 pb-1">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex flex-1 flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-950 truncate">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-1 min-w-0 flex-wrap items-center gap-x-2 gap-y-1 justify-between">
+            <div className="min-w-0 flex-1 basis-full sm:basis-auto">
+              <h3 className="text-lg font-semibold text-gray-950 break-words">
                 {encounter.patient.name}
               </h3>
               <p className="text-sm text-gray-700">
-                {formatPatientAge(encounter.patient, true)},{" "}
+                <PatientAge patient={encounter.patient} />,{" "}
                 {t(`GENDER__${encounter.patient.gender}`)}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 shrink-0">
               {encounter.patient.deceased_datetime && (
                 <Badge variant="destructive">{t("deceased")}</Badge>
               )}
@@ -180,7 +181,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
         )}
       </CardContent>
 
-      <CardFooter className="flex justify-end items-center px-4 py-2 gap-4 mt-auto">
+      <CardFooter className="flex flex-wrap justify-end items-center px-2 py-2 gap-x-1 gap-y-2 mt-auto">
         <Button variant="link" aria-label={t("patient_home")} asChild>
           <Link
             basePath="/"

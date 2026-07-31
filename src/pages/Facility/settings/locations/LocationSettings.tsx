@@ -33,7 +33,7 @@ import locationApi from "@/types/location/locationApi";
 import LocationMap from "./LocationMap";
 import LocationSheet from "./LocationSheet";
 import LocationView from "./LocationView";
-import { LocationCard } from "./components/LocationCard";
+import { SettingsLocationCard as LocationCard } from "./components/LocationCard";
 import { LocationTable } from "./components/LocationTable";
 
 interface LocationSettingsProps {

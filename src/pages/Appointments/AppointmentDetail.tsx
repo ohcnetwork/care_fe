@@ -43,6 +43,7 @@ import {
   AppointmentRead,
   AppointmentStatus,
   AppointmentUpdateRequest,
+  CancelledAppointmentStatuses,
   SchedulableResourceType,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
@@ -307,9 +308,9 @@ export default function AppointmentDetail(props: Props) {
             facility={facility}
           />
           <div className="mt-6 pl-0 md:pl-4 flex-1">
-            <h3 className="text-base font-semibold">{t("token")}</h3>
             {appointment.token?.number ? (
               <>
+                <h3 className="text-base font-semibold">{t("token")}</h3>
                 <div id="single-print">
                   <TokenCard
                     appointment={appointment}
@@ -319,44 +320,47 @@ export default function AppointmentDetail(props: Props) {
                 </div>
               </>
             ) : (
-              !["fulfilled"].includes(appointment.status) &&
+              !AppointmentFinalStatuses.includes(appointment.status) &&
               canWriteToken && (
-                <div className="bg-gray-100 border border-gray-200 rounded flex flex-col items-center justify-center text-center">
-                  <ReceiptText className="size-8 text-gray-500 mt-4" />
-                  <div className="mt-2">
-                    <h6 className="text-gray-900 text-sm font-semibold">
-                      {t("token_not_generated")}
-                    </h6>
-                    <p className="text-gray-900 text-sm">
-                      {t("token_not_generated_description")}
-                    </p>
+                <>
+                  <h3 className="text-base font-semibold">{t("token")}</h3>
+                  <div className="bg-gray-100 border border-gray-200 rounded flex flex-col items-center justify-center text-center">
+                    <ReceiptText className="size-8 text-gray-500 mt-4" />
+                    <div className="mt-2">
+                      <h6 className="text-gray-900 text-sm font-semibold">
+                        {t("token_not_generated")}
+                      </h6>
+                      <p className="text-gray-900 text-sm">
+                        {t("token_not_generated_description")}
+                      </p>
+                    </div>
+                    <div className="mt-2 mb-4">
+                      <TokenGenerationSheet
+                        facilityId={facility.id}
+                        resourceType={appointment.resource_type}
+                        appointmentId={appointment.id}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            className="px-6"
+                            disabled={AppointmentFinalStatuses.includes(
+                              appointment.status,
+                            )}
+                          >
+                            <PlusCircledIcon className="size-4 mr-2" />
+                            {t("generate_token")}
+                            <ShortcutBadge actionId="generate-token" />
+                          </Button>
+                        }
+                        onSuccess={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: ["appointment", appointment.id],
+                          });
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="mt-2 mb-4">
-                    <TokenGenerationSheet
-                      facilityId={facility.id}
-                      resourceType={appointment.resource_type}
-                      appointmentId={appointment.id}
-                      trigger={
-                        <Button
-                          variant="outline"
-                          className="px-6"
-                          disabled={AppointmentFinalStatuses.includes(
-                            appointment.status,
-                          )}
-                        >
-                          <PlusCircledIcon className="size-4 mr-2" />
-                          {t("generate_token")}
-                          <ShortcutBadge actionId="generate-token" />
-                        </Button>
-                      }
-                      onSuccess={() => {
-                        queryClient.invalidateQueries({
-                          queryKey: ["appointment", appointment.id],
-                        });
-                      }}
-                    />
-                  </div>
-                </div>
+                </>
               )
             )}
             {appointment.associated_encounter?.id && (
@@ -458,79 +462,83 @@ export default function AppointmentDetail(props: Props) {
                 </CardContent>
               </Card>
             )}
-            {/* Lets only show encounter details if the appointment is not in a final status or if there is an encounter linked to the appointment */}
-            {![...AppointmentFinalStatuses].includes(appointment.status) && (
-              <div>
-                <h3 className="text-base font-semibold mt-4">
-                  {t("quick_actions")}
-                </h3>
-                <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
-                  {/* Start Consultation - For booked and checked in appointments */}
-                  {["booked", "checked_in"].includes(currentStatus) &&
-                    canCheckIn &&
-                    (appointment.associated_encounter?.id ? (
-                      // When encounter exists: set status to in_consultation and redirect
-                      <QuickAction
-                        icon={<PlusSquare className="text-primary-500" />}
-                        title={t("start_consultation")}
-                        actionId="start-consultation"
-                        onClick={() => {
-                          updateAppointment({
-                            status: AppointmentStatus.IN_CONSULTATION,
-                            note: appointment.note,
-                          });
-                          navigate(
-                            `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
-                          );
-                        }}
-                      />
-                    ) : (
-                      // When no encounter exists: create encounter and set status to in_consultation
+            <div>
+              <h3 className="text-base font-semibold mt-4">
+                {t("quick_actions")}
+              </h3>
+              <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
+                {!AppointmentFinalStatuses.includes(appointment.status) && (
+                  <>
+                    {/* Start Consultation - For booked and checked in appointments */}
+                    {["booked", "checked_in"].includes(currentStatus) &&
+                      canCheckIn &&
+                      (appointment.associated_encounter?.id ? (
+                        // When encounter exists: set status to in_consultation and redirect
+                        <QuickAction
+                          icon={<PlusSquare className="text-primary-500" />}
+                          title={t("start_consultation")}
+                          actionId="start-consultation"
+                          onClick={() => {
+                            updateAppointment({
+                              status: AppointmentStatus.IN_CONSULTATION,
+                              note: appointment.note,
+                            });
+                            navigate(
+                              `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                            );
+                          }}
+                        />
+                      ) : (
+                        // When no encounter exists: create encounter and set status to in_consultation
+                        <CreateEncounterForm
+                          patientId={appointment.patient.id}
+                          facilityId={facilityId}
+                          patientName={appointment.patient.name}
+                          appointment={appointment.id}
+                          defaultOpen={from_queue === "true"}
+                          defaultStatus={EncounterStatus.IN_PROGRESS}
+                          trigger={
+                            <QuickAction
+                              icon={<PlusSquare className="text-primary-500" />}
+                              title={t("start_consultation")}
+                              actionId="start-consultation"
+                            />
+                          }
+                          onSuccess={() => {
+                            updateAppointment({
+                              status: AppointmentStatus.IN_CONSULTATION,
+                              note: appointment.note,
+                            });
+                          }}
+                        />
+                      ))}
+
+                    {!appointment.associated_encounter?.id && (
                       <CreateEncounterForm
                         patientId={appointment.patient.id}
                         facilityId={facilityId}
                         patientName={appointment.patient.name}
                         appointment={appointment.id}
-                        defaultOpen={from_queue === "true"}
-                        defaultStatus={EncounterStatus.IN_PROGRESS}
+                        disableRedirectOnSuccess={true}
                         trigger={
                           <QuickAction
-                            icon={<PlusSquare className="text-primary-500" />}
-                            title={t("start_consultation")}
-                            actionId="start-consultation"
+                            icon={
+                              <SquareActivity className="text-orange-500" />
+                            }
+                            title={t("create_planned_encounter")}
+                            actionId="create-encounter"
                           />
                         }
                         onSuccess={() => {
-                          updateAppointment({
-                            status: AppointmentStatus.IN_CONSULTATION,
-                            note: appointment.note,
+                          queryClient.invalidateQueries({
+                            queryKey: ["appointment", appointment.id],
                           });
                         }}
                       />
-                    ))}
-
-                  {!appointment.associated_encounter?.id && (
-                    <CreateEncounterForm
-                      patientId={appointment.patient.id}
-                      facilityId={facilityId}
-                      patientName={appointment.patient.name}
-                      appointment={appointment.id}
-                      disableRedirectOnSuccess={true}
-                      trigger={
-                        <QuickAction
-                          icon={<SquareActivity className="text-orange-500" />}
-                          title={t("create_planned_encounter")}
-                          actionId="create-encounter"
-                        />
-                      }
-                      onSuccess={() => {
-                        queryClient.invalidateQueries({
-                          queryKey: ["appointment", appointment.id],
-                        });
-                      }}
-                    />
-                  )}
-                  {/* Print Appointment */}
+                    )}
+                  </>
+                )}
+                {!CancelledAppointmentStatuses.includes(appointment.status) && (
                   <QuickAction
                     icon={<PrinterIcon className="size-4" />}
                     title={t("print_appointment")}
@@ -538,17 +546,16 @@ export default function AppointmentDetail(props: Props) {
                     basePath="/"
                     href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
                   />
-
-                  <QuickAction
-                    icon={<Wallet className="size-4" />}
-                    title={t("accounts")}
-                    actionId="goto-account"
-                    basePath="/"
-                    href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${appointment.patient.id}&patient_name=${appointment.patient.name}`}
-                  />
-                </div>
+                )}
+                <QuickAction
+                  icon={<Wallet className="size-4" />}
+                  title={t("accounts")}
+                  actionId="goto-account"
+                  basePath="/"
+                  href={`/facility/${facilityId}/billing/account?status=active&patient_filter=${appointment.patient.id}&patient_name=${encodeURIComponent(appointment.patient.name || "")}`}
+                />
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

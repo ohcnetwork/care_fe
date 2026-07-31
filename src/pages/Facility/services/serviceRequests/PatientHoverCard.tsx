@@ -1,4 +1,5 @@
 import { Avatar } from "@/components/Common/Avatar";
+import { PatientAge } from "@/components/Patient/PatientAge";
 import { PatientInfoHoverCard } from "@/components/Patient/PatientInfoHoverCard";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
@@ -12,7 +13,6 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { formatPatientAge } from "@/Utils/utils";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -114,7 +114,7 @@ function PatientHoverCardTrigger({
           {patient.name}
         </h5>
         <span className="flex flex-start text-gray-700">
-          {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
+          <PatientAge patient={patient} />, {t(`GENDER__${patient.gender}`)}
         </span>
       </div>
       {!disabled && <ChevronDown size={16} className="self-start mt-1" />}

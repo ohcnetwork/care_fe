@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { FileText, NotebookPen } from "lucide-react";
+import { FileText } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 import { PERMISSION_LIST_TEMPLATE } from "@/common/Permissions";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { usePermissions } from "@/context/PermissionContext";
+import { useHasPermission } from "@/context/PermissionContext";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import templateApi from "@/types/emr/template/templateApi";
@@ -21,9 +21,7 @@ export const SummaryPanelReportsTab = ({
   const { selectedEncounterId, facilityId } = useEncounter();
   const { facility } = useCurrentFacilitySilently();
   const { t } = useTranslation();
-  const { hasPermission } = usePermissions();
-
-  const canListTemplate = hasPermission(
+  const canListTemplate = useHasPermission(
     PERMISSION_LIST_TEMPLATE,
     facility?.permissions,
   );
@@ -54,13 +52,6 @@ export const SummaryPanelReportsTab = ({
         <h6 className="text-gray-950 font-semibold">{t("reports")}</h6>
       </div>
       <div className="flex flex-col @md:grid @md:grid-cols-2 gap-3">
-        <Button variant="outline" className="justify-start w-full" asChild>
-          <Link href={`../${selectedEncounterId}/treatment_summary`}>
-            <NotebookPen />
-            {t("treatment_summary")}
-          </Link>
-        </Button>
-
         {templates.map((template) => (
           <Button
             key={template.id}

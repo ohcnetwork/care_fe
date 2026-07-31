@@ -99,5 +99,3 @@ export function useOverrideContextUpdater() {
   const context = React.useContext(OverrideContext);
   return context;
 }
-
-export default OverrideProvider;

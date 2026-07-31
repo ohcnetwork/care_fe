@@ -64,6 +64,5 @@ export enum PrintTemplateType {
   medication_administration = "medication_administration",
   diagnostic_report = "diagnostic_report",
   questionnaire_response_logs = "questionnaire_response_logs",
-  treatment_summary = "treatment_summary",
   resource_letter = "resource_letter",
 }

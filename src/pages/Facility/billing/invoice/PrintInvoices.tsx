@@ -49,7 +49,7 @@ interface PrintInvoicesProps {
   invoiceIds: string;
 }
 
-export function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
+function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
   const { t } = useTranslation();
 
   // Parse comma-separated invoice IDs

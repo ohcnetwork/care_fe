@@ -1,17 +1,22 @@
-import { faker } from "@faker-js/faker";
-import { expect, Page, test } from "@playwright/test";
-import { format, subDays } from "date-fns";
+import { expect, test } from "@playwright/test";
 import { clickTabOrMenuItem, expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
-import {
-  ACTIVITY_DEFINITIONS,
-  createServiceRequest,
-  OBSERVATION_DEFINITIONS,
-} from "./serviceRequest";
+import { createServiceRequest } from "./serviceRequest";
 
-test.use({ storageState: "tests/.auth/user.json" });
+test.use({
+  storageState: "tests/.auth/user.json",
+  // Use Chromium's fake media stream so the in-browser camera capture works
+  // headlessly and permission prompts are auto-accepted.
+  permissions: ["camera"],
+  launchOptions: {
+    args: [
+      "--use-fake-device-for-media-stream",
+      "--use-fake-ui-for-media-stream",
+    ],
+  },
+});
 
 let facilityId: string;
 let patientId: string;
@@ -102,28 +107,12 @@ test.describe("Patient Service Request Tab", () => {
     ).toBeVisible();
   });
 
-  async function navigateToEncounterPage(page: Page) {
-    const facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
-    );
-
-    await page.getByText("View Encounter").first().click();
-  }
-
   test("ensure unit is autofilled for observations in service request", async ({
     page,
   }) => {
     await page.goto(`/facility/${facilityId}/settings/observation_definitions`);
-    const observationDefinitionTitle = faker.helpers.arrayElement(
-      OBSERVATION_DEFINITIONS,
-    );
-    const activityDefinitionTitle = ACTIVITY_DEFINITIONS.find((title) =>
-      observationDefinitionTitle.includes(title),
-    )!;
+    // Use fixed pair to avoid collisions with tests 1 & 2 which randomly pick definitions
+    const observationDefinitionTitle = "Urinalysis Observation";
     await page
       .getByRole("textbox", { name: "Search definitions" })
       .fill(observationDefinitionTitle);
@@ -134,23 +123,30 @@ test.describe("Patient Service Request Tab", () => {
     await page.getByPlaceholder("Select Unit").fill("milligram");
     await page.getByRole("option", { name: "milligram (mg)" }).click();
     await page.getByRole("button", { name: "Save" }).click();
-    await navigateToEncounterPage(page);
 
-    await page.getByRole("tab", { name: "Service Requests" }).click();
-    await page.getByRole("link", { name: "Create Service Request" }).click();
+    const serviceRequestData = await createServiceRequest(
+      page,
+      facilityId,
+      patientId,
+      encounterId,
+      false,
+      { activityDefinition: "Urinalysis" },
+    );
+
+    await clickTabOrMenuItem(page, /service requests/i);
+    await expect(page).toHaveURL(/\/service_requests$/);
     await page
-      .getByRole("combobox")
-      .filter({ hasText: "Select Activity Definition" })
+      .locator('[data-slot="table-body"] [data-slot="table-row"]')
+      .filter({ hasText: serviceRequestData.activityDefinition })
+      .first()
+      .getByRole("button", { name: "See Details" })
       .click();
-    await page
-      .getByPlaceholder("Search activity definitions")
-      .fill(activityDefinitionTitle);
-    await page.getByRole("option", { name: activityDefinitionTitle }).click();
-    await page.getByRole("button", { name: "Submit" }).click();
-    await page.getByRole("tab", { name: "Service Requests" }).click();
-    await page.getByRole("button", { name: "See Details" }).first().click();
     await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Collect Specimen" }).click();
+    await expect(
+      page.getByText("QR code generated successfully"),
+    ).toBeVisible();
+    await page.waitForLoadState("networkidle");
     await expect(page.getByText("Sample Identification")).toBeVisible();
     await page.getByPlaceholder("Value", { exact: true }).fill("2");
     await expect(page.getByPlaceholder("Value", { exact: true })).toHaveValue(
@@ -159,17 +155,122 @@ test.describe("Patient Service Request Tab", () => {
     await page
       .getByRole("textbox", { name: "Type your Notes" })
       .fill("Test Notes");
-    await expect(
-      page.getByRole("button", { name: "Collect ⇧ + ENTER" }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Collect ⇧ + ENTER" }).click();
-    await expectToast(page, /specimen collected/i);
+    const collectButton = page.getByRole("button", {
+      name: "Collect ⇧ + ENTER",
+    });
+    await expect(collectButton).toBeEnabled();
+    const specimenResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/specimen/") &&
+        resp.request().method() === "PUT" &&
+        resp.status() === 200,
+    );
+    const specimenCollectedToast = expectToast(page, /specimen collected/i);
+    await Promise.all([
+      collectButton.click(),
+      specimenResponse,
+      specimenCollectedToast,
+    ]);
     await page
       .getByRole("combobox")
       .filter({ hasText: "Select Diagnostic Report Type" })
       .click();
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: "Create Report" }).click();
-    await expect(page.getByRole("combobox")).toContainText("mg");
+    const observationCombobox = page
+      .locator('[data-slot="card-content"]')
+      .filter({ hasText: "Observation 1" })
+      .getByRole("combobox");
+    await observationCombobox.scrollIntoViewIfNeeded();
+    await expect(observationCombobox).toContainText("mg");
   });
+});
+
+test("should fill result value, capture a photo and save results", async ({
+  page,
+}) => {
+  const serviceRequestData = await createServiceRequest(
+    page,
+    facilityId,
+    patientId,
+    encounterId,
+    false,
+    { activityDefinition: "Urinalysis" },
+  );
+
+  // Open the service request detail view
+  await clickTabOrMenuItem(page, /service requests/i);
+  await expect(page).toHaveURL(/\/service_requests$/);
+  await page
+    .locator('[data-slot="table-body"] [data-slot="table-row"]')
+    .filter({ hasText: serviceRequestData.activityDefinition })
+    .first()
+    .getByRole("button", { name: "See Details" })
+    .click();
+  await page.waitForLoadState("networkidle");
+
+  // Collect the specimen so a diagnostic report can be created
+  await page.getByRole("button", { name: "Collect Specimen" }).click();
+  await expect(page.getByText("QR code generated successfully")).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByText("Sample Identification")).toBeVisible();
+  await page.getByPlaceholder("Value", { exact: true }).fill("2");
+  await page
+    .getByRole("textbox", { name: "Type your Notes" })
+    .fill("Test Notes");
+  const collectButton = page.getByRole("button", {
+    name: "Collect ⇧ + ENTER",
+  });
+  await expect(collectButton).toBeEnabled();
+  const specimenCollectedToast = expectToast(page, /specimen collected/i);
+  await Promise.all([collectButton.click(), specimenCollectedToast]);
+
+  // Create the diagnostic report
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "Select Diagnostic Report Type" })
+    .click();
+  await page.getByRole("option").first().click();
+  await page.getByRole("button", { name: "Create Report" }).click();
+
+  // Fill the result value
+  const resultInput = page.getByPlaceholder("Result value").first();
+  await resultInput.scrollIntoViewIfNeeded();
+  await resultInput.fill("5");
+  await expect(resultInput).toHaveValue("5");
+
+  // Take a photo using the in-browser camera
+  await page.getByRole("button", { name: "Take Photo" }).click();
+  const cameraSheet = page.locator('[data-slot="sheet-content"]');
+  await expect(cameraSheet).toBeVisible();
+
+  // Capture button (the large circular shutter)
+  const captureButton = cameraSheet.locator("button", {
+    has: page.locator("div.border-black"),
+  });
+  await expect(captureButton).toBeVisible();
+  await captureButton.click();
+
+  // Confirm the captured preview
+  const confirmButton = cameraSheet.locator("button", {
+    has: page.locator("svg.lucide-check"),
+  });
+  await expect(confirmButton).toBeVisible();
+  await confirmButton.click();
+
+  // The upload dialog opens with the captured file
+  const uploadDialog = page.getByRole("dialog", { name: /upload file/i });
+  await expect(uploadDialog).toBeVisible();
+  await uploadDialog
+    .getByPlaceholder("Enter File Name")
+    .fill(`capture-${Date.now()}`);
+  const uploadSuccessToast = expectToast(page, /file uploaded successfully/i);
+  await Promise.all([
+    uploadDialog.getByRole("button", { name: "Upload" }).click(),
+    uploadSuccessToast,
+  ]);
+
+  // Save the results
+  await page.getByRole("button", { name: "Save Results" }).click();
+  await expect(page.getByText("Test results saved successfully")).toBeVisible();
 });

@@ -5,8 +5,9 @@ import {
 } from "@/types/location/association";
 import { LocationRead, OperationalStatus } from "@/types/location/location";
 
-export type LocationScreen = "view" | "assign" | "modify";
-export type LocationAction = "move" | "complete" | "cancel" | "new";
+export type LocationScreen = "overview" | "assign" | "modify";
+export type LocationAction =
+  "assign" | "move" | "promote" | "complete" | "edit_time";
 
 export interface LocationSheetState {
   screen: LocationScreen;
@@ -27,12 +28,12 @@ export interface LocationTimeConfig {
 
 export interface CurrentLocations {
   currentLocation: LocationAssociationRead | undefined;
-  activeLocations: LocationAssociationRead[];
+  reservedLocations: LocationAssociationRead[];
   plannedLocations: LocationAssociationRead[];
 }
 
 /**
- * Gets the current, active (non-current), and planned locations from encounter history
+ * Gets the current, reserved, and planned locations from encounter history
  */
 export function getCurrentLocations(
   encounter: EncounterRead,
@@ -45,18 +46,19 @@ export function getCurrentLocations(
       loc.location.id === currentEncounterLocation.id,
   );
 
-  const activeLocations = encounter.location_history.filter(
-    (loc) =>
-      (loc.status === "active" || loc.status === "reserved") &&
-      currentEncounterLocation &&
-      loc.location.id !== currentEncounterLocation.id,
+  const reservedLocations = encounter.location_history.filter(
+    (loc) => loc.status === "reserved",
   );
 
   const plannedLocations = encounter.location_history.filter(
     (loc) => loc.status === "planned",
   );
 
-  return { currentLocation, activeLocations, plannedLocations };
+  return {
+    currentLocation,
+    reservedLocations,
+    plannedLocations,
+  };
 }
 
 /**
@@ -193,31 +195,33 @@ export interface AssignmentHandlers {
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
   onMove: () => void;
+  onAddBed?: () => void;
   onComplete: (location: LocationAssociationRead) => void;
   onUpdateTime: (location: LocationAssociationRead) => void;
-  onCancel: (
-    status: "active" | "planned",
+  onCancelBed: (
+    status: LocationAssociationStatus,
     location: LocationAssociationRead,
   ) => void;
   onCancelEdit: () => void;
   onConfirmEdit: (location: LocationAssociationRead) => void;
   onConfirmTime: (plannedLocation?: LocationAssociationRead) => void;
-  onAssignLinkedBed?: (location: LocationAssociationRead) => void;
+  onAssignNowPlanned: (location: LocationAssociationRead) => void;
+  onAssignNowReserved: (location: LocationAssociationRead) => void;
+  resetScreen: () => void;
 }
 
 export interface NavigationHandlers {
   onLocationClick: (location: LocationRead) => void;
   onBedSelect: (bed: LocationRead) => void;
-  onLinkedBedSelect: (bed: LocationAssociationRead) => void;
   onCheckBedStatus: (bed: LocationRead) => void;
   onSearchChange: (value: string) => void;
-  onSearch: (e: React.FormEvent) => void;
+  onSearch: (e: React.SubmitEvent) => void;
   onShowAvailableChange: (value: boolean) => void;
   onLoadMore: () => void;
   onClearSelection: () => void;
   onGoBack: () => void;
-  onAssignNowPlanned: (location: LocationAssociationRead) => void;
   onScheduleForLater: () => void;
+  onAddReservedBed: () => void;
   onAssignNow: () => void;
   showAvailableOnly: boolean;
   searchTerm: string;
