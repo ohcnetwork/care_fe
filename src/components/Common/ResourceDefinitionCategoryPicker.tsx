@@ -863,6 +863,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                       size="sm"
                       onClick={handleClearSelection}
                       className="text-gray-500 hover:text-gray-700"
+                      type="button"
                     >
                       <X className="mr-1" />
                       {t("clear")}
@@ -962,6 +963,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 variant="outline"
                 onClick={handleClearSelection}
                 className="rounded-l-none -ml-1 shadow-none text-gray-400 border-gray-300 h-auto"
+                type="button"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
@@ -1002,6 +1004,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                         size="sm"
                         onClick={handleClearSelection}
                         className="h-4 px-2 text-xs text-gray-500 hover:text-gray-700"
+                        type="button"
                       >
                         <X className="mr-1" />
                         {t("clear")}
@@ -1130,6 +1133,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                       size="sm"
                       className="size-6 p-0 hover:bg-gray-200"
                       onClick={() => handleRemoveDefinition(def)}
+                      type="button"
                     >
                       <X className="size-4" />
                       <span className="sr-only">{t("remove")}</span>
