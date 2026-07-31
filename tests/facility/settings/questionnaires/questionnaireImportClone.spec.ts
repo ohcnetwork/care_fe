@@ -99,14 +99,14 @@ test.describe("Questionnaire v2 import and clone", () => {
       await page.getByRole("button", { name: "Back" }).click();
       await page.waitForURL(/\/settings\/questionnaires\/[0-9a-f-]+$/);
 
-      await page.getByRole("button", { name: "Clone Form" }).click();
+      await page.getByRole("button", { name: "Clone Questionnaire" }).click();
       const dialog = page.getByRole("dialog", { name: "Clone Questionnaire" });
       await expect(dialog).toBeVisible();
       await expect(dialog.getByRole("textbox", { name: "Title" })).toHaveValue(
         `${title} (Copy)`,
       );
 
-      await dialog.getByRole("button", { name: "Clone Form" }).click();
+      await dialog.getByRole("button", { name: "Clone Questionnaire" }).click();
       await expectToast(page, "Questionnaire cloned successfully");
       // The source detail URL already matches the generic detail pattern, so
       // a plain regex wait would resolve immediately without ever navigating

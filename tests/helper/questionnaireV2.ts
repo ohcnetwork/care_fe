@@ -34,7 +34,7 @@ export async function createQuestionnaire(
       .getByRole("radio", { name: status })
       .click();
   }
-  await page.getByRole("button", { name: "Save Form" }).click();
+  await page.getByRole("button", { name: "Save Questionnaire" }).click();
   await expectToast(page, "Questionnaire created successfully");
   await page.waitForURL(QUESTIONNAIRE_DETAIL_URL);
   return page.url();

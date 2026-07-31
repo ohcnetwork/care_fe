@@ -140,7 +140,7 @@ function generateFacilityLinks(
           url: `${baseUrl}/settings/departments`,
         },
         {
-          name: t("questionnaires"),
+          name: t("questionnaire_other"),
           url: `${baseUrl}/settings/questionnaires`,
         },
         {

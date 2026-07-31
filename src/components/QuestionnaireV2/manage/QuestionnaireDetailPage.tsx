@@ -187,7 +187,7 @@ export function QuestionnaireDetailPage({
                         onClick={() => navigate(scope.basePath)}
                         className="cursor-pointer"
                       >
-                        {t("questionnaires")}
+                        {t("questionnaire_other")}
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />

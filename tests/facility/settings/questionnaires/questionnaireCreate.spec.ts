@@ -31,7 +31,7 @@ test.describe("Questionnaire v2 create (facility)", () => {
       // clicking it again would exercise a no-op. Pick "Location" instead so
       // the assertion below actually pins subject_type selection taking effect.
       await page.getByRole("radio", { name: "Location", exact: true }).click();
-      await page.getByRole("button", { name: "Save Form" }).click();
+      await page.getByRole("button", { name: "Save Questionnaire" }).click();
       await expectToast(page, "Questionnaire created successfully");
     });
 
@@ -40,7 +40,7 @@ test.describe("Questionnaire v2 create (facility)", () => {
       await expect(page.getByRole("textbox", { name: "Title" })).toHaveValue(
         title,
       );
-      await expect(page.getByText("Form Properties")).toBeVisible();
+      await expect(page.getByText("Questionnaire Properties")).toBeVisible();
 
       // subject_type is create-only, so the detail sidebar renders it as a
       // static value (no radio group) under the Subject Type label.

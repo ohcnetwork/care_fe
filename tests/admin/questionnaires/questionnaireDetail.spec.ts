@@ -16,7 +16,7 @@ test.describe("Questionnaire v2 detail", () => {
         basePath: "/admin/questionnaires",
         title,
       });
-      await expect(page.getByText("Form Properties")).toBeVisible();
+      await expect(page.getByText("Questionnaire Properties")).toBeVisible();
     });
 
     let newTitle = "";
@@ -24,7 +24,7 @@ test.describe("Questionnaire v2 detail", () => {
     await test.step("Edit title and save", async () => {
       newTitle = `Edited ${faker.word.words(2)} ${Date.now()}`;
       await page.getByRole("textbox", { name: "Title" }).fill(newTitle);
-      await page.getByRole("button", { name: "Save Form" }).click();
+      await page.getByRole("button", { name: "Save Questionnaire" }).click();
       await expectToast(page, "Questionnaire updated successfully");
     });
 
