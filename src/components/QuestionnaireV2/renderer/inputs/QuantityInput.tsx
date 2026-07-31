@@ -13,8 +13,11 @@ import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store
 export function QuantityInput({ question, disabled }: RendererInputProps) {
   const { t } = useTranslation();
   const [response, updateResponse] = useQuestionResponse(question.id);
-  const value = response?.values[0]?.value as number | undefined;
-  const coding = response?.values[0]?.coding;
+  // Discriminant check instead of a cast — a mismatched stored value renders
+  // empty instead of leaking a wrong-typed value into the input.
+  const first = response?.values[0];
+  const value = first?.type === "quantity" ? first.value : undefined;
+  const coding = first?.coding;
 
   const handleValueChange = (raw: string) => {
     const numericValue = raw === "" ? undefined : parseFloat(raw);

@@ -17,7 +17,11 @@ export function DateTimeQuestionInput({
   disabled,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
-  const value = response?.values[0]?.value as Date | undefined;
+  // Discriminant check instead of a cast — a mismatched stored value (e.g. a
+  // seeded string from answer_option) would otherwise reach formatTime and
+  // crash on date.getHours() during render.
+  const first = response?.values[0];
+  const value = first?.type === "dateTime" ? first.value : undefined;
 
   const handleDateChange = (date: Date | undefined) => {
     if (!date) return;

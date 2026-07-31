@@ -12,7 +12,10 @@ export function BooleanInput({
 }: RendererInputProps) {
   const { t } = useTranslation();
   const [response, updateResponse] = useQuestionResponse(question.id);
-  const value = response?.values[0]?.value as boolean | undefined;
+  // Discriminant check instead of a cast — a mismatched stored value (e.g. a
+  // seeded string from answer_option) renders unanswered instead of crashing.
+  const first = response?.values[0];
+  const value = first?.type === "boolean" ? first.value : undefined;
 
   const handleChange = (next: boolean) => {
     updateResponse({ values: [{ type: "boolean", value: next }] });

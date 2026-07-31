@@ -9,7 +9,10 @@ export function NumberInput({
   inputId,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
-  const value = response?.values[0]?.value as number | undefined;
+  // Discriminant check instead of a cast — a mismatched stored value renders
+  // empty instead of leaking a wrong-typed value into the input.
+  const first = response?.values[0];
+  const value = first?.type === "number" ? first.value : undefined;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateResponse({

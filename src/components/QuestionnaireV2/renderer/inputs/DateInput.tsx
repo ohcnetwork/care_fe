@@ -7,7 +7,10 @@ import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store
 
 export function DateInput({ question, disabled }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
-  const value = response?.values[0]?.value as Date | undefined;
+  // Discriminant check instead of a cast — a mismatched stored value (e.g. a
+  // seeded string from answer_option) renders empty instead of crashing.
+  const first = response?.values[0];
+  const value = first?.type === "date" ? first.value : undefined;
 
   const handleChange = (date: Date | undefined) => {
     if (!date) return;

@@ -1,3 +1,12 @@
+/**
+ * Renderer state scope: the renderer currently ships preview/read-only modes
+ * only (`RendererMode`), so `responsesAtom` is local working state with no
+ * submission consumer yet, and `errorsAtom` has readers (QuestionField,
+ * StructuredQuestionSlot) but no writer — validation errors cannot appear
+ * until the fill/submit path lands, which will add the writer, a `"fill"`
+ * mode and a real `clearError`. Neither is broken; they are the seams the
+ * submit flow plugs into.
+ */
 import { atom, useAtom, useAtomValue } from "jotai";
 import { useMemo } from "react";
 
