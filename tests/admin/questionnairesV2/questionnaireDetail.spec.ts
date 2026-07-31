@@ -8,11 +8,16 @@ test.describe("Questionnaire v2 detail", () => {
   test("open a questionnaire from the admin list and edit its title", async ({
     page,
   }) => {
-    await page.goto("/admin/questionnaires");
+    const title = `QV2 Detail ${Date.now()}`;
 
-    await test.step("Open first questionnaire", async () => {
-      await page.locator('[data-slot="table-body"] tr').first().click();
-      await page.waitForURL(/\/admin\/questionnaires\/[^/]+$/);
+    await test.step("Create a questionnaire to own for this test", async () => {
+      await page.goto("/admin/questionnaires/new");
+      await page
+        .getByRole("textbox", { name: "Title" })
+        .pressSequentially(title);
+      await page.getByRole("button", { name: "Save Form" }).click();
+      await expectToast(page, "Questionnaire created successfully");
+      await page.waitForURL(/\/admin\/questionnaires\/[0-9a-f-]+$/);
       await expect(page.getByText("Form Properties")).toBeVisible();
     });
 
