@@ -13,6 +13,11 @@ interface BehaviourSettingsCardProps {
   onChange: (patch: Partial<Question>) => void;
 }
 
+const BEHAVIOUR_FLAGS = [
+  { key: "required", label: "required" },
+  { key: "read_only", label: "read_only" },
+] as const;
+
 const DATA_CAPTURE_FLAGS = [
   { key: "is_component", label: "component" },
   { key: "collect_time", label: "collect_time" },
@@ -27,15 +32,11 @@ export function BehaviourSettingsCard({
 }: BehaviourSettingsCardProps) {
   const { t } = useTranslation();
 
-  const count = [
-    question.required,
-    question.read_only,
-    question.is_component,
-    question.collect_time,
-    question.collect_performer,
-    question.collect_method,
-    question.collect_body_site,
-  ].filter(Boolean).length;
+  // Derived from the same flag lists that render the chips, so adding a
+  // flag can never silently miss the "configured" badge count.
+  const count = [...BEHAVIOUR_FLAGS, ...DATA_CAPTURE_FLAGS].filter(
+    (flag) => question[flag.key],
+  ).length;
 
   return (
     <CollapsibleSettingsCard
@@ -54,18 +55,15 @@ export function BehaviourSettingsCard({
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-gray-500">{t("behaviour")}</p>
           <div className="flex flex-wrap gap-2">
-            <ChoiceChip
-              control="checkbox"
-              label={t("required")}
-              checked={!!question.required}
-              onCheckedChange={(checked) => onChange({ required: checked })}
-            />
-            <ChoiceChip
-              control="checkbox"
-              label={t("read_only")}
-              checked={!!question.read_only}
-              onCheckedChange={(checked) => onChange({ read_only: checked })}
-            />
+            {BEHAVIOUR_FLAGS.map((flag) => (
+              <ChoiceChip
+                key={flag.key}
+                control="checkbox"
+                label={t(flag.label)}
+                checked={!!question[flag.key]}
+                onCheckedChange={(checked) => onChange({ [flag.key]: checked })}
+              />
+            ))}
           </div>
         </div>
 
