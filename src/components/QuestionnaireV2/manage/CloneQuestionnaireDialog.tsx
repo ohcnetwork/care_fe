@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 import { regenerateQuestionIds } from "@/components/QuestionnaireV2/builder/builderReducer";
+import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import {
   QuestionnaireRead,
@@ -109,7 +110,7 @@ export function CloneQuestionnaireDialog({
   const { mutate: clone, isPending } = useMutation({
     mutationFn: mutate(questionnaireApi.createV2),
     onSuccess: (created: QuestionnaireRead) => {
-      queryClient.invalidateQueries({ queryKey: ["questionnairesV2"] });
+      queryClient.invalidateQueries({ queryKey: questionnaireKeys.all });
       toast.success(t("questionnaire_cloned_successfully"));
       onOpenChange(false);
       navigate(`${scope.basePath}/${created.id}`);

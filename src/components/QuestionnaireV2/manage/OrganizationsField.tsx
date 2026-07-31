@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
 import { OrgSelector } from "@/components/Questionnaire/ManageQuestionnaireOrganizationsSheet";
+import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
@@ -98,7 +99,7 @@ function InstanceOrganizationsField({
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["questionnairesV2", "organizations", questionnaireId],
+    queryKey: questionnaireKeys.organizations(questionnaireId),
     // silent: cross-scope questionnaires 403 here on page load (see
     // OrganizationsUnavailableCard) — surfaced inline, not as a toast.
     queryFn: query(questionnaireApi.getOrganizations, {
@@ -127,7 +128,7 @@ function InstanceOrganizationsField({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["questionnairesV2", "organizations", questionnaireId],
+        queryKey: questionnaireKeys.organizations(questionnaireId),
       });
       toast.success(t("organizations_updated"));
     },
@@ -212,7 +213,7 @@ function FacilityOrganizationsField({
   const queryClient = useQueryClient();
 
   const { data: current, isError } = useQuery({
-    queryKey: ["questionnairesV2", "organizations", questionnaireId],
+    queryKey: questionnaireKeys.organizations(questionnaireId),
     // silent for the same cross-scope reason as the instance variant.
     queryFn: query(questionnaireApi.getFacilityOrganizations, {
       pathParams: { id: questionnaireId },
@@ -226,7 +227,7 @@ function FacilityOrganizationsField({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["questionnairesV2", "organizations", questionnaireId],
+        queryKey: questionnaireKeys.organizations(questionnaireId),
       });
       toast.success(t("organizations_updated"));
     },

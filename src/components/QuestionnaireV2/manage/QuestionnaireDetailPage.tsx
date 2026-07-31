@@ -1,11 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check, Copy, Download, Eye } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { LabeledActionButton } from "@/components/QuestionnaireV2/shared/LabeledActionButton";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
@@ -33,7 +33,6 @@ import {
   formatRevision,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 import { BasicInformationCard } from "./BasicInformationCard";
@@ -46,6 +45,7 @@ import {
   questionnaireBasicSchema,
 } from "./questionnaireFormSchema";
 import { QuestionOverviewList } from "./QuestionOverviewList";
+import { useUpdateQuestionnaire } from "./useUpdateQuestionnaire";
 import { VersionsTab } from "./VersionsTab";
 
 /**
@@ -89,7 +89,6 @@ export function QuestionnaireDetailPage({
   id: string;
 }) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const [cloneOpen, setCloneOpen] = useState(false);
   const { canWrite, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);
@@ -99,7 +98,7 @@ export function QuestionnaireDetailPage({
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["questionnairesV2", "detail", id],
+    queryKey: questionnaireKeys.detail(id),
     queryFn: query(questionnaireApi.get, { pathParams: { id } }),
   });
 
@@ -114,26 +113,16 @@ export function QuestionnaireDetailPage({
         }
       : undefined,
     // Reordering questions saves through the same mutation and invalidates
-    // ["questionnairesV2"], which refetches this detail query. Without
+    // questionnaireKeys.all, which refetches this detail query. Without
     // `keepDirtyValues`, the `values` binding above would reset every field
     // (including any unsaved, dirty title/slug/description/status edits) the
     // moment that refetch resolves.
     resetOptions: { keepDirtyValues: true },
   });
 
-  const { mutate: save, isPending } = useMutation({
-    mutationFn: mutate(questionnaireApi.update, { pathParams: { id } }),
-    onSuccess: (updated: QuestionnaireRead) => {
-      // Write the response into the cache BEFORE invalidating — the next
-      // save composes its full PUT body from this cached questionnaire, and
-      // relying on the invalidation refetch alone leaves a stale window (one
-      // network round-trip) where a second quick action would silently
-      // revert the change that just persisted.
-      queryClient.setQueryData(["questionnairesV2", "detail", id], updated);
-      queryClient.invalidateQueries({ queryKey: ["questionnairesV2"] });
-      toast.success(t("questionnaire_updated_successfully"));
-    },
-  });
+  // Owns the setQueryData-before-invalidate cache sequence and the success
+  // toast (see the hook's doc comment).
+  const { mutate: save, isPending } = useUpdateQuestionnaire(id);
 
   const onSubmit = (values: DetailFormValues) => {
     if (!questionnaire) return;

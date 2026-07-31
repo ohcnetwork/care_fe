@@ -15,6 +15,7 @@ import { Form } from "@/components/ui/form";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { SegmentedRadioGroup } from "@/components/QuestionnaireV2/shared/SegmentedRadioGroup";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
@@ -93,7 +94,7 @@ export function QuestionnaireCreatePage({
   const { mutate: create, isPending } = useMutation({
     mutationFn: mutate(questionnaireApi.createV2),
     onSuccess: (created: QuestionnaireRead) => {
-      queryClient.invalidateQueries({ queryKey: ["questionnairesV2"] });
+      queryClient.invalidateQueries({ queryKey: questionnaireKeys.all });
       toast.success(t("questionnaire_created_successfully"));
       navigate(`${scope.basePath}/${created.id}`);
     },

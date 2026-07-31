@@ -25,6 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import useFilters from "@/hooks/useFilters";
@@ -66,12 +67,7 @@ export function QuestionnaireListPage({
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: [
-      "questionnairesV2",
-      scope.authContext,
-      scope.facilityId,
-      qParams,
-    ],
+    queryKey: questionnaireKeys.list(scope, qParams),
     queryFn: query.debounced(questionnaireApi.list, {
       queryParams: {
         limit: resultsPerPage,

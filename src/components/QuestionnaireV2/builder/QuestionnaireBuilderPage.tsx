@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Check,
@@ -37,6 +37,8 @@ import { BuilderTreeNav } from "@/components/QuestionnaireV2/builder/BuilderTree
 import { QuestionEditorCard } from "@/components/QuestionnaireV2/builder/QuestionEditorCard";
 import { buildUpdateBody } from "@/components/QuestionnaireV2/manage/buildUpdateBody";
 import { ImportQuestionsDialog } from "@/components/QuestionnaireV2/manage/ImportQuestionsDialog";
+import { useUpdateQuestionnaire } from "@/components/QuestionnaireV2/manage/useUpdateQuestionnaire";
+import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { QuestionnaireRenderer } from "@/components/QuestionnaireV2/renderer/QuestionnaireRenderer";
 import {
   findQuestionNumber,
@@ -48,12 +50,8 @@ import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWri
 import { cn } from "@/lib/utils";
 
 import { Question } from "@/types/questionnaire/question";
-import {
-  QuestionnaireRead,
-  QuestionnaireScope,
-} from "@/types/questionnaire/questionnaire";
+import { QuestionnaireScope } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 const INITIAL_STATE: BuilderState = {
@@ -182,14 +180,13 @@ export function QuestionnaireBuilderPage({
   id: string;
 }) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
 
   const {
     data: questionnaire,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["questionnairesV2", "detail", id],
+    queryKey: questionnaireKeys.detail(id),
     queryFn: query(questionnaireApi.get, { pathParams: { id } }),
   });
 
@@ -246,23 +243,16 @@ export function QuestionnaireBuilderPage({
     [questionnaire, state.questions],
   );
 
-  const { mutate: save, isPending } = useMutation({
-    mutationFn: mutate(questionnaireApi.update, { pathParams: { id } }),
-    onSuccess: (updated: QuestionnaireRead) => {
-      // setQueryData BEFORE invalidate: buildUpdateBody composes the next
-      // PUT from this cached questionnaire (title/slug/status), so the cache
-      // must reflect this save immediately rather than after the refetch.
-      queryClient.setQueryData(["questionnairesV2", "detail", id], updated);
-      queryClient.invalidateQueries({ queryKey: ["questionnairesV2"] });
-      toast.success(t("questionnaire_updated_successfully"));
-      // Keep the user's place in the editor instead of bouncing to question 1.
-      dispatch({
-        type: "reset",
-        questions: updated.questions,
-        keepSelectedId: state.selectedId,
-      });
-    },
-  });
+  // Owns the setQueryData-before-invalidate cache sequence and the success
+  // toast (see the hook's doc comment); onSaved keeps the user's place in
+  // the editor instead of bouncing to question 1.
+  const { mutate: save, isPending } = useUpdateQuestionnaire(id, (updated) =>
+    dispatch({
+      type: "reset",
+      questions: updated.questions,
+      keepSelectedId: state.selectedId,
+    }),
+  );
 
   const backPath = `${scope.basePath}/${id}`;
 

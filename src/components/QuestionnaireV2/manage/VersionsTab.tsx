@@ -15,6 +15,7 @@ import {
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { QuestionnaireRenderer } from "@/components/QuestionnaireV2/renderer/QuestionnaireRenderer";
 
 import { cn } from "@/lib/utils";
@@ -70,7 +71,7 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
   );
 
   const { data: revisions, isLoading } = useQuery({
-    queryKey: ["questionnairesV2", "revisions", questionnaire.id],
+    queryKey: questionnaireKeys.revisions(questionnaire.id),
     queryFn: query(questionnaireApi.list, {
       // Backend gap: the revisions list has no way to request "all of them"
       // — pass a generously large page size so questionnaires with a long
@@ -88,7 +89,7 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
   const totalRevisions = revisions?.count ?? pastRevisions.length;
 
   const { data: revisionDetail, isLoading: isRevisionLoading } = useQuery({
-    queryKey: ["questionnairesV2", "revision-detail", openRevision?.id],
+    queryKey: questionnaireKeys.revisionDetail(openRevision?.id),
     queryFn: query(questionnaireApi.get, {
       pathParams: { id: openRevision?.id ?? "" },
     }),
