@@ -181,6 +181,20 @@ export function QuestionnaireBuilderPage({
   );
   const [importOpen, setImportOpen] = useState(importParam === "1");
 
+  useEffect(() => {
+    // The dialog's open state above already captured `?import=1` — strip it
+    // from the URL (preserving any other params, e.g. `mode`) so a refresh
+    // or Back navigation doesn't reopen the dialog.
+    if (importParam !== "1") return;
+    const params = new URLSearchParams(window.location.search);
+    params.delete("import");
+    const search = params.toString();
+    navigate(`${scope.basePath}/${id}/edit${search ? `?${search}` : ""}`, {
+      replace: true,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useNavigationPrompt(state.dirty, t("unsaved_changes_warning"));
 
   const { mutate: save, isPending } = useMutation({

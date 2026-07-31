@@ -166,10 +166,19 @@ export function QuestionnaireListPage({
               {questionnaires.map((questionnaire) => (
                 <TableRow
                   key={questionnaire.id}
-                  className="group cursor-pointer"
+                  role="link"
+                  tabIndex={0}
+                  className="group cursor-pointer focus-visible:bg-gray-100/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-500"
                   onClick={() =>
                     navigate(`${scope.basePath}/${questionnaire.id}`)
                   }
+                  onKeyDown={(e) => {
+                    if (e.target !== e.currentTarget) return;
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`${scope.basePath}/${questionnaire.id}`);
+                    }
+                  }}
                 >
                   <TableCell className="font-medium">
                     {questionnaire.title}

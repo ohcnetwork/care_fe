@@ -10,7 +10,7 @@ export function NumberInput({ question, disabled }: RendererInputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateResponse({
       values:
-        e.target.value === ""
+        e.target.value === "" || Number.isNaN(e.target.valueAsNumber)
           ? []
           : [{ type: "number", value: e.target.valueAsNumber }],
     });
@@ -25,6 +25,9 @@ export function NumberInput({ question, disabled }: RendererInputProps) {
       step={question.type === "integer" ? 1 : undefined}
       disabled={disabled}
       onChange={handleChange}
+      // Merges the field's own border into the note zone's left border —
+      // see QuestionField's outer wrapper for the other half of this pairing.
+      className="rounded-r-none border-r-0"
     />
   );
 }

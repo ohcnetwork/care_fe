@@ -70,13 +70,20 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
   const { data: revisions, isLoading } = useQuery({
     queryKey: ["questionnairesV2", "revisions", questionnaire.id],
     queryFn: query(questionnaireApi.list, {
-      queryParams: { parent_revision: questionnaire.id },
+      // Backend gap: the revisions list has no way to request "all of them"
+      // — pass a generously large page size so questionnaires with a long
+      // history don't silently lose older versions off the end of the
+      // default page. The count-vs-length check below surfaces the rest.
+      queryParams: { parent_revision: questionnaire.id, limit: 100 },
     }),
   });
 
+  // Falls back the same way `internal_revision` is displayed below (`?? 1`)
+  // so the sort order and the printed version numbers never disagree.
   const pastRevisions = [...(revisions?.results ?? [])].sort(
-    (a, b) => (b.internal_revision ?? 0) - (a.internal_revision ?? 0),
+    (a, b) => (b.internal_revision ?? 1) - (a.internal_revision ?? 1),
   );
+  const totalRevisions = revisions?.count ?? pastRevisions.length;
 
   const { data: revisionDetail, isLoading: isRevisionLoading } = useQuery({
     queryKey: ["questionnairesV2", "revision-detail", openRevision?.id],
@@ -164,6 +171,12 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
                       <span className="font-medium text-gray-900">
                         v{revision.internal_revision ?? 1}
                       </span>
+                      {/* Backend gap: past revisions don't carry their own
+                          status (QuestionnaireRead.status here still
+                          reflects the *current* record's status, not what
+                          this revision's was when it was superseded), so
+                          every past entry is shown with a neutral "Retired"
+                          badge rather than the real historical status. */}
                       <Badge variant="secondary">{t("retired")}</Badge>
                     </div>
                     {metaLine(
@@ -190,6 +203,15 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
                 </div>
               </div>
             ))
+          )}
+
+          {totalRevisions > pastRevisions.length && (
+            <p className="pl-7 text-sm text-gray-400">
+              {t("showing_latest_of_versions", {
+                shown: pastRevisions.length,
+                total: totalRevisions,
+              })}
+            </p>
           )}
         </div>
       )}

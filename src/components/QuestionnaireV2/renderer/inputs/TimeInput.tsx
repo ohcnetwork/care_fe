@@ -17,7 +17,9 @@ export function TimeInput({ question, disabled }: RendererInputProps) {
     <Input
       type="time"
       value={value}
-      className="h-9 text-sm sm:text-base"
+      // rounded-r-none/border-r-0 merge the field's own border into the note
+      // zone's left border — see QuestionField's outer wrapper.
+      className="h-9 rounded-r-none border-r-0 text-sm sm:text-base"
       onChange={handleChange}
       disabled={disabled}
     />

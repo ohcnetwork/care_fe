@@ -49,7 +49,10 @@ export function DateTimeQuestionInput({
       />
       <Input
         type="time"
-        className="sm:w-[150px] sm:border-r-0 sm:ring-r-0 sm:focus-visible:ring-0 h-9 text-sm sm:text-base"
+        // At sm+ this is the rightmost field in the row, so its border
+        // merges into the note zone's left border (see QuestionField).
+        // Below sm the fields stack and each keeps its own border.
+        className="sm:w-[150px] sm:rounded-r-none sm:border-r-0 sm:ring-r-0 sm:focus-visible:ring-0 h-9 text-sm sm:text-base"
         value={formatTime(value)}
         onChange={handleTimeChange}
         disabled={disabled || !value}
