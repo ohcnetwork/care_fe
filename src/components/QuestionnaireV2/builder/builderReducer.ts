@@ -1,4 +1,4 @@
-import { Question } from "@/types/questionnaire/question";
+import { EnableWhen, Question } from "@/types/questionnaire/question";
 
 export interface BuilderState {
   questions: Question[];
@@ -8,6 +8,7 @@ export interface BuilderState {
 
 export type BuilderAction =
   | { type: "reset"; questions: Question[] }
+  | { type: "replaceAll"; questions: Question[] }
   | { type: "select"; id: string | null }
   | { type: "addQuestion"; parentId: string | null; index?: number }
   | { type: "updateQuestion"; id: string; patch: Partial<Question> }
@@ -60,6 +61,50 @@ export function collectIds(question: Question): string[] {
 }
 
 /**
+ * Deep-clones a question tree with fresh `id`s and `link_id`s (used by clone
+ * and import, where reusing the source's ids would collide with the
+ * originals once both exist as separate questionnaires/questions).
+ *
+ * `enable_when[].question` references point at a sibling's `link_id`, so a
+ * naive per-question regeneration would leave those references dangling.
+ * Instead this builds an old→new `link_id` map for the whole tree up front,
+ * then rewrites every condition's `question` through that map — conditions
+ * whose target isn't in the map (e.g. it pointed outside the copied subtree)
+ * are dropped rather than left pointing at a stale id.
+ */
+export function regenerateQuestionIds(questions: Question[]): Question[] {
+  const linkIdMap = new Map<string, string>();
+  const mapLinkIds = (list: Question[]) => {
+    for (const question of list) {
+      linkIdMap.set(question.link_id, `Q-${crypto.randomUUID().slice(0, 8)}`);
+      mapLinkIds(question.questions ?? []);
+    }
+  };
+  mapLinkIds(questions);
+
+  const remapEnableWhen = (
+    enableWhen: EnableWhen[] | undefined,
+  ): EnableWhen[] | undefined =>
+    enableWhen
+      ?.filter((condition) => linkIdMap.has(condition.question))
+      .map((condition) => ({
+        ...condition,
+        question: linkIdMap.get(condition.question)!,
+      }));
+
+  const walk = (list: Question[]): Question[] =>
+    list.map((question) => ({
+      ...question,
+      id: crypto.randomUUID(),
+      link_id: linkIdMap.get(question.link_id)!,
+      enable_when: remapEnableWhen(question.enable_when),
+      questions: walk(question.questions ?? []),
+    }));
+
+  return walk(questions);
+}
+
+/**
  * Resolves `ids` against `questions` and unions in every descendant id of
  * each match, so callers can reason about whole subtrees rather than just
  * the literal ids provided. Ids that cannot be found are skipped.
@@ -102,6 +147,13 @@ export function builderReducer(
         questions: action.questions,
         selectedId: action.questions[0]?.id ?? null,
         dirty: false,
+      };
+
+    case "replaceAll":
+      return {
+        questions: action.questions,
+        selectedId: action.questions[0]?.id ?? null,
+        dirty: true,
       };
 
     case "select":

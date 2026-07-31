@@ -3,7 +3,10 @@ import {
   ChevronsUpDown,
   ChevronUp,
   GripVertical,
+  ListChecks,
+  Plus,
   SquarePen,
+  Upload,
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,6 +23,7 @@ interface QuestionOverviewListProps {
   isSaving: boolean;
   onReorder: (from: number, to: number) => void;
   onEditQuestions: () => void;
+  onImportQuestions: () => void;
 }
 
 export function QuestionOverviewList({
@@ -27,6 +31,7 @@ export function QuestionOverviewList({
   isSaving,
   onReorder,
   onEditQuestions,
+  onImportQuestions,
 }: QuestionOverviewListProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -56,9 +61,33 @@ export function QuestionOverviewList({
       </div>
 
       {questions.length === 0 ? (
-        <p className="py-6 text-center text-sm text-gray-500">
-          {t("no_data_found")}
-        </p>
+        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 py-10 text-center">
+          <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
+            <ListChecks className="size-6 text-primary" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-gray-900">
+              {t("no_questions_added_yet")}
+            </p>
+            <p className="text-sm text-gray-500">
+              {t("import_questions_hint")}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button
+              type="button"
+              variant="outline_primary"
+              onClick={onEditQuestions}
+            >
+              <Plus className="size-4" />
+              {t("add_first_question")}
+            </Button>
+            <Button type="button" variant="outline" onClick={onImportQuestions}>
+              <Upload className="size-4" />
+              {t("import_questions")}
+            </Button>
+          </div>
+        </div>
       ) : (
         <div className="space-y-2">
           {questions.map((question, index) => {

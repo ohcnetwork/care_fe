@@ -29,6 +29,7 @@ import {
 import { BuilderTreeNav } from "@/components/QuestionnaireV2/builder/BuilderTreeNav";
 import { QuestionEditorCard } from "@/components/QuestionnaireV2/builder/QuestionEditorCard";
 import { buildUpdateBody } from "@/components/QuestionnaireV2/manage/buildUpdateBody";
+import { ImportQuestionsDialog } from "@/components/QuestionnaireV2/manage/ImportQuestionsDialog";
 import { QuestionnaireRenderer } from "@/components/QuestionnaireV2/renderer/QuestionnaireRenderer";
 import {
   findQuestionNumber,
@@ -106,7 +107,13 @@ function EditPreviewToggle({ view, onChange }: EditPreviewToggleProps) {
   );
 }
 
-function BuilderEmptyState({ onAddFirst }: { onAddFirst: () => void }) {
+function BuilderEmptyState({
+  onAddFirst,
+  onImport,
+}: {
+  onAddFirst: () => void;
+  onImport: () => void;
+}) {
   const { t } = useTranslation();
 
   return (
@@ -126,9 +133,7 @@ function BuilderEmptyState({ onAddFirst }: { onAddFirst: () => void }) {
         {t("or")}
         <span className="h-px flex-1 bg-gray-200" />
       </div>
-      {/* Import Questions is wired up in a later task; keep it visible but
-          inert until then so the empty state matches the target design. */}
-      <Button type="button" variant="outline" disabled title={t("coming_soon")}>
+      <Button type="button" variant="outline" onClick={onImport}>
         <Upload className="size-4" />
         {t("import_questions")}
       </Button>
@@ -170,10 +175,11 @@ export function QuestionnaireBuilderPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionnaire]);
 
-  const [{ mode }] = useQueryParams();
+  const [{ mode, import: importParam }] = useQueryParams();
   const [view, setView] = useState<"edit" | "preview">(
     mode === "preview" ? "preview" : "edit",
   );
+  const [importOpen, setImportOpen] = useState(importParam === "1");
 
   useNavigationPrompt(state.dirty, t("unsaved_changes_warning"));
 
@@ -303,6 +309,7 @@ export function QuestionnaireBuilderPage({
                 onAddFirst={() =>
                   dispatch({ type: "addQuestion", parentId: null })
                 }
+                onImport={() => setImportOpen(true)}
               />
             )}
 
@@ -358,6 +365,15 @@ export function QuestionnaireBuilderPage({
           subject={{ facilityId: scope.facilityId }}
         />
       )}
+
+      <ImportQuestionsDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImport={(questions) => {
+          dispatch({ type: "replaceAll", questions });
+          toast.success(t("questionnaire_imported_successfully"));
+        }}
+      />
     </div>
   );
 }

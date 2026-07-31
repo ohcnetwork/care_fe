@@ -1,7 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Copy, Download, Eye } from "lucide-react";
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -23,9 +24,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { LabeledActionButton } from "@/components/QuestionnaireV2/shared/LabeledActionButton";
+
 import {
   QUESTIONNAIRE_STATUS_COLORS,
   QuestionStatus,
+  QuestionnaireRead,
   QuestionnaireScope,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
@@ -35,9 +39,25 @@ import { swapElements } from "@/Utils/request/utils";
 
 import { BasicInformationCard } from "./BasicInformationCard";
 import { buildUpdateBody } from "./buildUpdateBody";
+import { CloneQuestionnaireDialog } from "./CloneQuestionnaireDialog";
 import { FormPropertiesSidebar } from "./FormPropertiesSidebar";
 import { OrganizationsField } from "./OrganizationsField";
 import { QuestionOverviewList } from "./QuestionOverviewList";
+
+/**
+ * Serializes the fetched questionnaire exactly like the v1 editor's export
+ * (data-URI + a programmatic `<a download>` click) so downloaded files stay
+ * compatible with the import flow on either version.
+ */
+function downloadQuestionnaireJson(questionnaire: QuestionnaireRead) {
+  const dataStr = JSON.stringify(questionnaire, null, 2);
+  const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
+
+  const linkElement = document.createElement("a");
+  linkElement.setAttribute("href", dataUri);
+  linkElement.setAttribute("download", `${questionnaire.slug}.json`);
+  linkElement.click();
+}
 
 export interface DetailFormValues {
   title: string;
@@ -55,6 +75,7 @@ export function QuestionnaireDetailPage({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [cloneOpen, setCloneOpen] = useState(false);
 
   const {
     data: questionnaire,
@@ -229,13 +250,40 @@ export function QuestionnaireDetailPage({
                     onEditQuestions={() =>
                       navigate(`${scope.basePath}/${id}/edit`)
                     }
+                    onImportQuestions={() =>
+                      navigate(`${scope.basePath}/${id}/edit?import=1`)
+                    }
                   />
                 </div>
                 <FormPropertiesSidebar
                   scope={scope}
                   questionnaire={questionnaire}
                   form={form}
-                />
+                >
+                  <LabeledActionButton
+                    label={t("check_how_form_looks")}
+                    onClick={() =>
+                      navigate(`${scope.basePath}/${id}/edit?mode=preview`)
+                    }
+                  >
+                    <Eye className="size-4" />
+                    {t("preview_form")}
+                  </LabeledActionButton>
+                  <LabeledActionButton
+                    label={t("create_copy_of_form")}
+                    onClick={() => setCloneOpen(true)}
+                  >
+                    <Copy className="size-4" />
+                    {t("clone_form")}
+                  </LabeledActionButton>
+                  <LabeledActionButton
+                    label={t("download_the_form")}
+                    onClick={() => downloadQuestionnaireJson(questionnaire)}
+                  >
+                    <Download className="size-4" />
+                    {t("download_json")}
+                  </LabeledActionButton>
+                </FormPropertiesSidebar>
               </div>
             </TabsContent>
             <TabsContent value="versions" className="mt-4">
@@ -244,6 +292,13 @@ export function QuestionnaireDetailPage({
           </Tabs>
         </form>
       </Form>
+
+      <CloneQuestionnaireDialog
+        scope={scope}
+        questionnaire={questionnaire}
+        open={cloneOpen}
+        onOpenChange={setCloneOpen}
+      />
     </div>
   );
 }
