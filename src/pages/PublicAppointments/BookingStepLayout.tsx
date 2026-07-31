@@ -44,7 +44,7 @@ export default function BookingStepLayout({
     <div className="flex min-h-dvh justify-center bg-gray-100">
       <div className="flex w-full min-w-0 flex-col bg-gray-50 sm:min-h-0">
         <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
-          <div className="flex min-w-0 items-center gap-2.5 px-4 pb-2.5 pt-3">
+          <div className="flex min-w-0 items-center gap-2.5 px-4 pb-2.5 pt-3 xl:w-2/3 xl:mx-auto">
             <button
               type="button"
               onClick={onBack}
@@ -66,7 +66,7 @@ export default function BookingStepLayout({
             </span>
           </div>
           <div
-            className="flex gap-1 px-4 pb-3"
+            className="flex gap-1 px-4 pb-3 xl:w-2/3 xl:mx-auto"
             role="progressbar"
             aria-valuenow={step}
             aria-valuemin={1}
@@ -82,15 +82,17 @@ export default function BookingStepLayout({
               />
             ))}
           </div>
-          {headerExtra}
+          <div className=" xl:w-2/3 xl:mx-auto">{headerExtra}</div>
         </header>
 
-        <div className="flex flex-1 flex-col">{children}</div>
+        <div className="flex flex-1 flex-col  xl:w-2/3 xl:mx-auto">
+          {children}
+        </div>
 
         {footer && (
           <div
             className={cn(
-              "sticky bottom-0 bg-gray-50 px-4 pb-4",
+              "sticky bottom-0 bg-gray-50 px-4 pb-4 xl:w-2/3 xl:mx-auto",
               footerBordered ? "border-t border-gray-200 pt-3.5" : "pt-2",
             )}
           >

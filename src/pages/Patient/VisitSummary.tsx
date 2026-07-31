@@ -260,7 +260,7 @@ export default function VisitSummary({
 
             {/* Every action for this appointment collects here, off the list
                 cards, so changing a booking is a deliberate step. */}
-            <div className="mt-auto flex flex-col gap-2 pt-4">
+            <div className="mt-auto flex flex-col md:flex-row gap-2 pt-4">
               {canReschedule && (
                 <Button className="min-h-11 w-full" asChild>
                   <Link
@@ -279,14 +279,14 @@ export default function VisitSummary({
                   </Link>
                 </Button>
               )}
-              {isAppointmentCancellable(appointment) && (
-                <CancelAppointmentButton
-                  appointment={appointment}
-                  variant="ghost"
-                  className="min-h-11 w-full text-red-600 hover:bg-red-50 hover:text-red-700"
-                  onCancelled={() => navigate("/patient/visits")}
-                />
-              )}
+              {visitDate?.isAfter(dayjs()) &&
+                isAppointmentCancellable(appointment) && (
+                  <CancelAppointmentButton
+                    appointment={appointment}
+                    className="min-h-11 w-full text-red-600 hover:bg-red-50 hover:text-red-700"
+                    onCancelled={() => navigate("/patient/visits")}
+                  />
+                )}
             </div>
           </>
         )}
