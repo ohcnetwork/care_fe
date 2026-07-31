@@ -92,7 +92,11 @@ const apiUrlMapSchema = jsonAsStringSchema
 
 const envSchema = z
   .object({
-    REACT_CARE_API_URL: z.string().url().optional(),
+    // An empty string is allowed and means "use relative, same-origin API
+    // requests": the frontend calls /api on whatever origin served it. This
+    // suits a single reverse proxy that serves the frontend and the API on
+    // the same origin.
+    REACT_CARE_API_URL: z.string().url().or(z.literal("")).optional(),
     REACT_CARE_URL_MAP: apiUrlMapSchema.optional(),
     REACT_APP_TITLE: z.string(),
     REACT_APP_META_DESCRIPTION: z.string(),
@@ -172,8 +176,10 @@ const envSchema = z
     REACT_MAX_FORM_DIALOG_FAVORITES: numberAsString.optional(),
   })
   .superRefine(async (data, ctx) => {
-    // Ensure at least one API URL configuration is provided
-    if (!data.REACT_CARE_API_URL && !data.REACT_CARE_URL_MAP) {
+    // Ensure the API URL is configured. An empty REACT_CARE_API_URL is a valid
+    // choice (relative, same-origin requests), so only a fully unset value
+    // combined with no URL map is treated as an error.
+    if (data.REACT_CARE_API_URL === undefined && !data.REACT_CARE_URL_MAP) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
