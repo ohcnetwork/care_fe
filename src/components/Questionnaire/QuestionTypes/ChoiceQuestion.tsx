@@ -115,7 +115,8 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
     if (!question.repeats) {
       return (
         <ValueSetSelect
-          system={question.answer_value_set}
+          system={question.answer_value_set.slug ?? ""}
+          valuesetId={question.answer_value_set.external_id}
           value={currentCoding}
           onSelect={(newValue) => handleCodingChange(newValue, 0)}
         ></ValueSetSelect>
@@ -128,7 +129,8 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
             <div key={idx} className="flex items-center mb-2">
               <div className="flex-1">
                 <ValueSetSelect
-                  system={question.answer_value_set!}
+                  system={question.answer_value_set!.slug ?? ""}
+                  valuesetId={question.answer_value_set!.external_id}
                   value={value.coding}
                   onSelect={(newValue) => handleCodingChange(newValue, idx)}
                 />
@@ -156,7 +158,8 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
         <div className={cn(questionnaireResponse.values.length && "mr-9")}>
           <ValueSetSelect
             closeOnSelect={false}
-            system={question.answer_value_set}
+            system={question.answer_value_set.slug ?? ""}
+            valuesetId={question.answer_value_set.external_id}
             value={null}
             onSelect={handleCodingChange}
           />

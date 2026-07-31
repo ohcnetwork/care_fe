@@ -24,7 +24,7 @@ const AdminRoutes: AppRoutes = {
   "/admin/valuesets/create": () => (
     <ValueSetEditor onSuccess={() => navigate(`/admin/valuesets`)} />
   ),
-  "/admin/valuesets/:slug/edit": ({ slug }) => <ValueSetEditor slug={slug} />,
+  "/admin/valuesets/:id/edit": ({ id }) => <ValueSetEditor id={id} />,
   "/admin/patient_identifier_config": () => <PatientIdentifierConfigList />,
   "/admin/patient_identifier_config/new": () => <PatientIdentifierConfigForm />,
   "/admin/patient_identifier_config/:id": ({ id }) => (

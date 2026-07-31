@@ -27,6 +27,8 @@ type ButtonProps = Omit<React.ComponentProps<typeof Button>, keyof Props>;
 
 interface Props {
   system: string;
+  /** Pins the lookup to one exact valueset, bypassing slug resolution. */
+  valuesetId?: string;
   value?: Code | null;
   onSelect: (value: Code) => void;
   placeholder?: string;
@@ -42,6 +44,7 @@ interface Props {
 
 export default function ValueSetSelect({
   system,
+  valuesetId,
   value,
   onSelect,
   placeholder = "Search...",
@@ -110,6 +113,7 @@ export default function ValueSetSelect({
           </DrawerTitle>
           <ValueSetSearchContent
             system={system}
+            valuesetId={valuesetId}
             onSelect={(selected) => {
               onSelect(selected);
               if (closeOnSelect) {
@@ -135,6 +139,7 @@ export default function ValueSetSelect({
     return (
       <ValueSetSearchContent
         system={system}
+        valuesetId={valuesetId}
         onSelect={(selected) => {
           onSelect(selected);
           if (closeOnSelect) {
@@ -184,6 +189,7 @@ export default function ValueSetSelect({
         <PopoverContent className="transition-all w-150 p-0" align="start">
           <ValueSetSearchContent
             system={system}
+            valuesetId={valuesetId}
             onSelect={(selected) => {
               onSelect(selected);
               if (closeOnSelect) {

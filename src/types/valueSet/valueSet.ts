@@ -1,4 +1,4 @@
-import { Designation } from "@/types/base/code/code";
+import { CodeConceptMinimal, Designation } from "@/types/base/code/code";
 import {
   ArchiveIcon,
   FileCheckIcon,
@@ -65,7 +65,16 @@ export interface ValueSetRead extends ValueSetBase {
   updated_by: string | null;
 }
 
-export type ValueSetCreate = ValueSetBase;
+export type ValueSetAuthContext =
+  "instance" | "facility_organization" | "facility" | "user";
+
+export interface ValueSetCreate extends ValueSetBase {
+  auth_context: ValueSetAuthContext;
+  inherited: boolean;
+  facility?: string;
+  facility_organization?: string;
+  parent?: string;
+}
 
 export interface ValueSetUpdate extends ValueSetBase {
   id: string;
@@ -74,6 +83,21 @@ export interface ValueSetUpdate extends ValueSetBase {
 export interface ExpandRequest {
   search: string;
   count: number;
+}
+
+export interface ExpandSlugRequest extends ExpandRequest {
+  slug: string;
+  facility?: string;
+}
+
+export interface ExpandSlugResponse {
+  valueset: ValueSetRead;
+  results: CodeConceptMinimal[];
+}
+
+export interface ValueSetConfig {
+  slug?: string;
+  external_id?: string;
 }
 
 export interface ValueSetCodeMetadata {

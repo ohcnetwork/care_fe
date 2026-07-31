@@ -19,6 +19,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code, CodeConceptMinimal, Designation } from "@/types/base/code/code";
 import valueSetApi from "@/types/valueSet/valueSetApi";
 import mutate from "@/Utils/request/mutate";
@@ -85,6 +86,8 @@ function getBestMatchDisplay(
 
 interface Props {
   system: string;
+  /** Pins the lookup to one exact valueset, bypassing slug resolution. */
+  valuesetId?: string;
   onSelect: (value: Code) => void;
   count?: number;
   searchPostFix?: string;
@@ -99,6 +102,7 @@ interface ItemProps {
   option: CodeConceptMinimal;
   isFavourite: boolean;
   onFavourite: () => void;
+  disableFavourite?: boolean;
   onSelect: () => void;
   showCode: boolean;
   search: string;
@@ -107,6 +111,7 @@ interface ItemProps {
 const Item = ({
   option,
   onFavourite,
+  disableFavourite = false,
   onSelect,
   isFavourite,
   showCode,
@@ -133,12 +138,13 @@ const Item = ({
 
         <button
           type="button"
+          disabled={disableFavourite}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             onFavourite();
           }}
-          className="hover:text-primary-500 transition-all text-secondary-900 cursor-pointer"
+          className="hover:text-primary-500 transition-all text-secondary-900 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isFavourite ? <StarFilledIcon /> : <StarIcon />}
         </button>
@@ -149,6 +155,7 @@ const Item = ({
 
 export default function ValueSetSearchContent({
   system,
+  valuesetId: pinnedValuesetId,
   onSelect,
   count = 10,
   searchPostFix = "",
@@ -166,41 +173,96 @@ export default function ValueSetSearchContent({
   );
   const [showBulkClearConfirm, setShowBulkClearConfirm] = useState(false);
 
-  const searchQuery = useQuery({
-    queryKey: ["valueset", system, "expand", count, search],
+  // Outside a facility route this is undefined, and the backend falls back to
+  // instance-level valuesets.
+  const { facilityId } = useCurrentFacilitySilently();
+
+  const pinnedSearchQuery = useQuery({
+    queryKey: ["valueset", pinnedValuesetId, "expand", count, search],
     queryFn: query.debounced(valueSetApi.expand, {
-      pathParams: { slug: system },
+      pathParams: { id: pinnedValuesetId ?? "" },
       body: {
         count,
         search: search + searchPostFix,
       },
     }),
+    enabled: !!pinnedValuesetId,
   });
 
+  const slugSearchQuery = useQuery({
+    queryKey: ["valueset", system, facilityId, "expand_slug", count, search],
+    queryFn: query.debounced(valueSetApi.expandSlug, {
+      body: {
+        slug: system,
+        facility: facilityId,
+        count,
+        search: search + searchPostFix,
+      },
+    }),
+    enabled: !pinnedValuesetId && !!system,
+  });
+
+  const searchQuery = pinnedValuesetId ? pinnedSearchQuery : slugSearchQuery;
+
+  // The slug -> valueset mapping does not vary with the search term, so it is
+  // resolved on its own key. Deriving it from slugSearchQuery would drop it on
+  // every keystroke, and the write endpoints are still id-keyed.
+  const resolveQuery = useQuery({
+    queryKey: ["valueset", "resolve", system, facilityId],
+    queryFn: query(valueSetApi.expandSlug, {
+      body: { slug: system, facility: facilityId, search: "", count: 1 },
+      silent: true,
+    }),
+    enabled: !pinnedValuesetId && !!system,
+    staleTime: Infinity,
+  });
+
+  const valuesetId = pinnedValuesetId ?? resolveQuery.data?.valueset.id;
+
+  // Keyed by whichever identifier addressed the read, so a pinned picker and a
+  // slug picker of the same valueset hold separate entries.
+  const favouritesKey = [
+    "valueset",
+    pinnedValuesetId ?? system,
+    facilityId,
+    "favourites",
+  ];
+  const recentsKey = [
+    "valueset",
+    pinnedValuesetId ?? system,
+    facilityId,
+    "recents",
+  ];
+
   const favouritesQuery = useQuery({
-    queryKey: ["valueset", system, "favourites"],
-    queryFn: query(valueSetApi.favourites, { pathParams: { slug: system } }),
+    queryKey: favouritesKey,
+    queryFn: pinnedValuesetId
+      ? query(valueSetApi.favourites, {
+          pathParams: { id: pinnedValuesetId },
+        })
+      : query(valueSetApi.favouritesBySlug, {
+          queryParams: { slug: system, facility: facilityId },
+          // An unresolvable slug already surfaces through the search request.
+          silent: true,
+        }),
+    enabled: !!pinnedValuesetId || !!system,
   });
 
   const addFavouriteMutation = useMutation({
     mutationFn: mutate(valueSetApi.addFavourite, {
-      pathParams: { slug: system },
+      pathParams: { id: valuesetId ?? "" },
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["valueset", system, "favourites"],
-      });
+      queryClient.invalidateQueries({ queryKey: favouritesKey });
     },
   });
 
   const removeFavouriteMutation = useMutation({
     mutationFn: mutate(valueSetApi.removeFavourite, {
-      pathParams: { slug: system },
+      pathParams: { id: valuesetId ?? "" },
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["valueset", system, "favourites"],
-      });
+      queryClient.invalidateQueries({ queryKey: favouritesKey });
       setItemToRemove(null);
     },
     onError: () => {
@@ -210,12 +272,10 @@ export default function ValueSetSearchContent({
 
   const clearFavouritesMutation = useMutation({
     mutationFn: mutate(valueSetApi.clearFavourites, {
-      pathParams: { slug: system },
+      pathParams: { id: valuesetId ?? "" },
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["valueset", system, "favourites"],
-      });
+      queryClient.invalidateQueries({ queryKey: favouritesKey });
       setShowBulkClearConfirm(false);
     },
     onError: () => {
@@ -224,22 +284,30 @@ export default function ValueSetSearchContent({
   });
 
   const recentsQuery = useQuery({
-    queryKey: ["valueset", system, "recents"],
-    queryFn: query(valueSetApi.recentViews, {
-      pathParams: { slug: system },
-    }),
+    queryKey: recentsKey,
+    queryFn: pinnedValuesetId
+      ? query(valueSetApi.recentViews, {
+          pathParams: { id: pinnedValuesetId },
+        })
+      : query(valueSetApi.recentViewsBySlug, {
+          queryParams: { slug: system, facility: facilityId },
+          silent: true,
+        }),
+    enabled: !!pinnedValuesetId || !!system,
   });
 
   const addRecentMutation = useMutation({
     mutationFn: mutate(valueSetApi.addRecentView, {
-      pathParams: { slug: system },
+      pathParams: { id: valuesetId ?? "" },
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["valueset", system, "recents"],
-      });
+      queryClient.invalidateQueries({ queryKey: recentsKey });
     },
   });
+
+  // The starred column renders before the slug resolves, so every id-keyed
+  // write has to be held back until there is an id to address.
+  const canMutatePreferences = !!valuesetId;
 
   const seenCodes = new Set<string>();
   const searchResults = searchQuery.data?.results || [];
@@ -292,13 +360,8 @@ export default function ValueSetSearchContent({
           autoFocus={!isIOSDevice}
         />
       </div>
-      {searchQuery.isFetching ? (
-        <div className="h-72 flex justify-center items-center py-6 text-gray-500">
-          <Loader2 className="h-5 w-5 animate-spin mr-2" />
-          {t("searching")}
-        </div>
-      ) : (
-        <CommandList className="overflow-y-auto max-h-[55dvh] md:max-h-[35dvh] lg:max-h-[40dvh]">
+      <CommandList className="overflow-y-auto max-h-[55dvh] md:max-h-[35dvh] lg:max-h-[40dvh]">
+        {!searchQuery.isFetching && (
           <CommandEmpty>
             {search.length < 3 ? (
               <p className="p-4 text-sm text-gray-500">
@@ -310,13 +373,21 @@ export default function ValueSetSearchContent({
               </p>
             )}
           </CommandEmpty>
-          <div className="flex">
-            <div
-              className={cn(
-                activeTab === 0 ? "block" : "hidden",
-                "md:block flex-1",
-              )}
-            >
+        )}
+        <div className="flex">
+          <div
+            data-testid="valueset-search-results"
+            className={cn(
+              activeTab === 0 ? "block" : "hidden",
+              "md:block flex-1",
+            )}
+          >
+            {searchQuery.isFetching ? (
+              <div className="h-72 flex justify-center items-center py-6 text-gray-500">
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                {t("searching")}
+              </div>
+            ) : (
               <CommandGroup>
                 {resultsWithRecents.map((option) => (
                   <Item
@@ -331,8 +402,11 @@ export default function ValueSetSearchContent({
                         display: primary || option.display || "",
                         system: option.system || "",
                       });
-                      addRecentMutation.mutate(option);
+                      if (canMutatePreferences) {
+                        addRecentMutation.mutate(option);
+                      }
                     }}
+                    disableFavourite={!canMutatePreferences}
                     onFavourite={() => {
                       const isFavorited = favouritesQuery.data?.find(
                         (favourite) => favourite.code === option.code,
@@ -351,79 +425,84 @@ export default function ValueSetSearchContent({
                   />
                 ))}
               </CommandGroup>
-            </div>
-
-            <div
-              className={cn(
-                activeTab === 1 ? "block" : "hidden",
-                "md:block flex-1",
-                (search.length < 3 && !searchQuery.isFetching) ||
-                  (!favourites?.length && !resultsWithRecents.length)
-                  ? ""
-                  : "md:border-l",
-                "border-gray-200",
-              )}
-            >
-              <CommandGroup>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-normal text-gray-700 p-1">
-                    {t("starred")}
-                  </span>
-                  {favouritesQuery.data && favouritesQuery.data.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowBulkClearConfirm(true)}
-                      className="h-6 px-1 text-xs text-gray-500 hover:text-gray-700"
-                    >
-                      {t("clear")}
-                    </Button>
-                  )}
-                </div>
-                {favouritesQuery.isFetched &&
-                  favouritesQuery.data?.length === 0 && (
-                    <div className="flex items-center flex-col justify-center max-h-[30vh] md:max-h-[35vh] text-xs text-gray-500">
-                      {t("no_starred", {
-                        star: "☆",
-                      })}
-                    </div>
-                  )}
-                {favourites?.map((option) => (
-                  <Item
-                    key={option.code}
-                    option={option}
-                    showCode={showCode}
-                    search={search}
-                    onSelect={() => {
-                      onSelect({
-                        code: option.code,
-                        display: option.display || "",
-                        system: option.system || "",
-                      });
-                      addRecentMutation.mutate(option);
-                    }}
-                    onFavourite={() => {
-                      const isFavorited = favouritesQuery.data?.find(
-                        (favourite) => favourite.code === option.code,
-                      );
-                      if (isFavorited) {
-                        setItemToRemove(option);
-                      } else {
-                        addFavouriteMutation.mutate(option);
-                      }
-                    }}
-                    isFavourite={
-                      !!favouritesQuery.data?.find(
-                        (favourite) => favourite.code === option.code,
-                      )
-                    }
-                  />
-                ))}
-              </CommandGroup>
-            </div>
+            )}
           </div>
-        </CommandList>
-      )}
+
+          <div
+            data-testid="valueset-starred"
+            className={cn(
+              activeTab === 1 ? "block" : "hidden",
+              "md:block flex-1",
+              (search.length < 3 && !searchQuery.isFetching) ||
+                (!favourites?.length && !resultsWithRecents.length)
+                ? ""
+                : "md:border-l",
+              "border-gray-200",
+            )}
+          >
+            <CommandGroup>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-normal text-gray-700 p-1">
+                  {t("starred")}
+                </span>
+                {favouritesQuery.data && favouritesQuery.data.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={!canMutatePreferences}
+                    onClick={() => setShowBulkClearConfirm(true)}
+                    className="h-6 px-1 text-xs text-gray-500 hover:text-gray-700"
+                  >
+                    {t("clear")}
+                  </Button>
+                )}
+              </div>
+              {favouritesQuery.isFetched &&
+                favouritesQuery.data?.length === 0 && (
+                  <div className="flex items-center flex-col justify-center max-h-[30vh] md:max-h-[35vh] text-xs text-gray-500">
+                    {t("no_starred", {
+                      star: "☆",
+                    })}
+                  </div>
+                )}
+              {favourites?.map((option) => (
+                <Item
+                  key={option.code}
+                  option={option}
+                  showCode={showCode}
+                  search={search}
+                  onSelect={() => {
+                    onSelect({
+                      code: option.code,
+                      display: option.display || "",
+                      system: option.system || "",
+                    });
+                    if (canMutatePreferences) {
+                      addRecentMutation.mutate(option);
+                    }
+                  }}
+                  disableFavourite={!canMutatePreferences}
+                  onFavourite={() => {
+                    const isFavorited = favouritesQuery.data?.find(
+                      (favourite) => favourite.code === option.code,
+                    );
+                    if (isFavorited) {
+                      setItemToRemove(option);
+                    } else {
+                      addFavouriteMutation.mutate(option);
+                    }
+                  }}
+                  isFavourite={
+                    !!favouritesQuery.data?.find(
+                      (favourite) => favourite.code === option.code,
+                    )
+                  }
+                />
+              ))}
+            </CommandGroup>
+          </div>
+        </div>
+      </CommandList>
 
       {/* Individual Item Removal Confirmation */}
       <ConfirmActionDialog

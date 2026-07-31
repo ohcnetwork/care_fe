@@ -10,15 +10,19 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 
-import { ValueSetRead, ValueSetStatus } from "@/types/valueSet/valueSet";
+import {
+  ValueSetConfig,
+  ValueSetRead,
+  ValueSetStatus,
+} from "@/types/valueSet/valueSet";
 import valueSetApi from "@/types/valueSet/valueSetApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 
 interface CreateValueSetProps {
-  onValueSetChange?: (valueSet: string) => void;
-  value?: string;
+  onValueSetChange?: (valueSet: ValueSetConfig) => void;
+  value?: ValueSetConfig;
 }
 
 export function SelectOrCreateValueset({
@@ -28,10 +32,6 @@ export function SelectOrCreateValueset({
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [currentValueSet, setCurrentValueSet] = useState<ValueSetRead>();
   const [searchQuery, setSearchQuery] = useState("");
-
-  const handleValueSetChange = (val: string) => {
-    onValueSetChange?.(val);
-  };
 
   const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
     queryKey: ["valuesets", searchQuery],
@@ -44,23 +44,47 @@ export function SelectOrCreateValueset({
     select: (data: PaginatedResponse<ValueSetRead>) => data.results,
   });
 
-  const { data: slugObj, isLoading: isLoadingSlug } = useQuery({
-    queryKey: ["valueset", value],
+  // An imported questionnaire may reference a valueset by slug alone, and
+  // expand_slug is the only endpoint that maps one back to its valueset.
+  const { data: valuesetById, isLoading: isLoadingById } = useQuery({
+    queryKey: ["valueset", value?.external_id],
     queryFn: query(valueSetApi.get, {
-      pathParams: { slug: value! },
+      pathParams: { id: value?.external_id ?? "" },
     }),
-    enabled: !!value,
+    enabled: !!value?.external_id,
   });
 
+  const { data: valuesetBySlug, isLoading: isLoadingBySlug } = useQuery({
+    queryKey: ["valueset", "by-slug", value?.slug],
+    queryFn: query(valueSetApi.expandSlug, {
+      body: { slug: value?.slug ?? "", search: "", count: 1 },
+    }),
+    enabled: !value?.external_id && !!value?.slug,
+  });
+
+  const isLoadingCurrent = isLoadingById || isLoadingBySlug;
+
   useEffect(() => {
-    slugObj && setCurrentValueSet(slugObj);
-  }, [slugObj]);
+    const resolved = valuesetById ?? valuesetBySlug?.valueset;
+    resolved && setCurrentValueSet(resolved);
+  }, [valuesetById, valuesetBySlug]);
 
   const valueSetOptions =
     valuesets?.map((vs) => ({
       label: vs.name,
-      value: vs.slug,
+      value: vs.id,
     })) || [];
+
+  const handleValueSetChange = (selectedId: string) => {
+    const selected =
+      valuesets?.find((vs) => vs.id === selectedId) ??
+      (currentValueSet?.id === selectedId ? currentValueSet : undefined);
+    if (!selected) {
+      return;
+    }
+    // Send both: the id pins the exact valueset, the slug stays readable.
+    onValueSetChange?.({ slug: selected.slug, external_id: selected.id });
+  };
 
   return (
     <div className="flex items-center gap-2 flex-col sm:flex-row">
@@ -71,15 +95,15 @@ export function SelectOrCreateValueset({
             currentValueSet
               ? {
                   label: currentValueSet.name,
-                  value: currentValueSet.slug,
+                  value: currentValueSet.id,
                 }
               : undefined,
           )}
-          value={value ?? ""}
+          value={value?.external_id ?? currentValueSet?.id ?? ""}
           onChange={handleValueSetChange}
           onSearch={setSearchQuery}
           placeholder={t("select_a_value_set")}
-          isLoading={isFetchingValuesets || isLoadingSlug}
+          isLoading={isFetchingValuesets || isLoadingCurrent}
           noOptionsMessage={t("no_valuesets_found")}
         />
       </div>
@@ -97,8 +121,8 @@ export function SelectOrCreateValueset({
           <ValueSetEditor
             onSuccess={(data) => {
               setIsSheetOpen(false);
-              handleValueSetChange(data.slug);
               setCurrentValueSet(data);
+              onValueSetChange?.({ slug: data.slug, external_id: data.id });
             }}
           />
         </SheetContent>
