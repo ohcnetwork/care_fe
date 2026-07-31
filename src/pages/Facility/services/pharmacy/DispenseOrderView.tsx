@@ -195,9 +195,13 @@ export function DispenseOrderView({
     [activeDispenses, cancelledDispenses],
   );
 
-  const relatedPrescriptionIds = dispenses
-    .map((d) => d.authorizing_request?.prescription?.id)
-    .filter((id): id is string => !!id);
+  const relatedPrescriptionIds = Array.from(
+    new Set(
+      activeDispenses
+        .map((d) => d.authorizing_request?.prescription?.id)
+        .filter((id): id is string => !!id),
+    ),
+  );
 
   // Encounter for medications added directly to this order (they have no
   // authorizing request). Any dispense's encounter works — prefer one from an
