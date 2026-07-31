@@ -1,6 +1,7 @@
 import { useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
 import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
 
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
@@ -262,6 +263,16 @@ const getRoutes = (facilityId: string) => ({
         facilityId,
         basePath: `/facility/${facilityId}/settings/questionnaires`,
       }}
+    />
+  ),
+  "/questionnaires/:id": ({ id }: { id: string }) => (
+    <QuestionnaireDetailPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+      id={id}
     />
   ),
   "*": () => <ErrorPage />,

@@ -2,6 +2,7 @@ import { navigate } from "raviger";
 
 import QuestionnaireEditor from "@/components/Questionnaire/QuestionnaireEditor";
 import { QuestionnaireList } from "@/components/Questionnaire/QuestionnaireList";
+import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
 import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import { ValueSetList } from "@/components/ValueSet/ValueSetList";
@@ -28,6 +29,9 @@ const AdminRoutes: AppRoutes = {
   "/admin/questionnaire/:id/edit": ({ id }) => <QuestionnaireEditor id={id} />,
   "/admin/questionnaires": () => (
     <QuestionnaireListPage scope={INSTANCE_SCOPE} />
+  ),
+  "/admin/questionnaires/:id": ({ id }) => (
+    <QuestionnaireDetailPage scope={INSTANCE_SCOPE} id={id} />
   ),
   "/admin/valuesets": () => <ValueSetList />,
   "/admin/valuesets/create": () => (
