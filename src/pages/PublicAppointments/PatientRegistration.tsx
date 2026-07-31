@@ -1,7 +1,10 @@
+import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -29,23 +32,48 @@ import { usePubSub } from "@/Utils/pubsubContext";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
-import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import GovtOrganizationPicker from "@/components/Organization/GovtOrganizationPicker";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
+import { Organization } from "@/types/organization/organization";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { PublicAppointment } from "@/types/scheduling/schedule";
 
+const MIN_GEO_ORG_LEVELS =
+  careConfig.patientRegistration.minGeoOrganizationLevelsRequired;
+
+/**
+ * Mirrors the staff registration rule: with a configured depth the selection
+ * must reach it, otherwise it must bottom out at a leaf organization.
+ */
+function isGeoOrganizationComplete(organization: Organization): boolean {
+  if (MIN_GEO_ORG_LEVELS != null) {
+    return organization.level_cache + 1 >= MIN_GEO_ORG_LEVELS;
+  }
+  return !organization.has_children;
+}
+
 type PatientRegistrationProps = {
-  facilityId: string;
-  staffId: string;
+  /**
+   * Both are absent when a patient adds a family member from the profile
+   * picker rather than mid-booking. In that case no appointment is created and
+   * we return to the picker once the profile exists.
+   */
+  facilityId?: string;
+  staffId?: string;
 };
 
 export default function PublicPatientRegistration(
   props: PatientRegistrationProps,
 ) {
-  const { staffId } = props;
+  const { staffId, facilityId } = props;
   const { t } = useTranslation();
   const [{ slotId, reason }] = useQueryParams();
+
+  const isBookingFlow = !!facilityId && !!staffId;
+  const backTo = isBookingFlow
+    ? `/facility/${facilityId}/appointments/${staffId}/book-appointment`
+    : "/patient/select-profile";
 
   const queryClient = useQueryClient();
 
@@ -128,21 +156,40 @@ export default function PublicPatientRegistration(
       },
     });
 
-  const { mutate: createPatient } = useMutation({
+  // useWatch rather than form.watch(): watch() returns a function the React
+  // Compiler cannot memoize, so it bails out of optimising this component.
+  const ageInputType = useWatch({
+    control: form.control,
+    name: "ageInputType",
+  });
+  const enteredAge = useWatch({ control: form.control, name: "age" });
+
+  const [geoOrganization, setGeoOrganization] = useState<Organization | null>(
+    null,
+  );
+  const [hasSaved, setHasSaved] = useState(false);
+
+  const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
     mutationFn: mutate(publicPatientApi.create, {
       headers: {
         Authorization: `Bearer ${tokenData.token}`,
       },
     }),
     onSuccess: (data: PublicPatientRead) => {
+      setHasSaved(true);
       toast.success(t("patient_created_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["patients"],
       });
       publish("patient:upsert", data);
+      if (!isBookingFlow) {
+        patientUserContext?.setSelectedPatient(data);
+        navigate("/patient/select-profile", { replace: true });
+        return;
+      }
       createAppointment({
         patient: data.id,
-        note: reason ?? "",
+        note: reason.trim() ?? "",
       });
     },
   });
@@ -165,38 +212,52 @@ export default function PublicPatientRegistration(
 
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
+  //
+  // `hasSaved` and `isCreatingPatient` both matter: outside the booking flow no
+  // appointment is ever created, so guarding on `isCreatingAppointment` alone
+  // left the form dirty and prompted "unsaved changes" on a successful save.
   useNavigationPrompt(
-    form.formState.isDirty && !isCreatingAppointment,
+    form.formState.isDirty &&
+      !isCreatingPatient &&
+      !isCreatingAppointment &&
+      !hasSaved,
     t("unsaved_changes"),
   );
 
   // const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   return (
-    <>
-      <div className="container mx-auto p-4 max-w-4xl flex justify-start">
-        <Button
-          variant="outline"
-          className="border border-secondary-400"
-          type="button"
-          onClick={() =>
-            navigate(
-              `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-            )
-          }
-        >
-          <span className="text-sm underline">{t("back")}</span>
-        </Button>
-      </div>
+    // Same 480px column as the rest of the patient app; this page used to rely
+    // on the old sidebar shell for its background and lost it with the switch
+    // to per-page chrome.
+    <div className="flex min-h-dvh justify-center bg-gray-100">
       <Form {...form}>
-        <form onSubmit={onSubmit} className="mx-auto space-y-6">
-          <div className="container mx-auto p-4 max-w-3xl">
-            <h2 className="text-xl font-semibold">
+        <form
+          onSubmit={onSubmit}
+          className="flex w-full flex-col bg-gray-50 sm:min-h-0"
+        >
+          <header className="sticky top-0 z-10 flex shrink-0 items-center gap-2.5 border-b border-gray-200 bg-white px-4 py-3 sm:rounded-t-3xl">
+            <button
+              type="button"
+              onClick={() => navigate(backTo)}
+              aria-label={t("back")}
+              className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-gray-900 hover:bg-gray-100"
+            >
+              <ArrowLeft className="size-5" strokeWidth={1.9} />
+            </button>
+            <img
+              src={careConfig.mainLogo?.dark}
+              alt={t("care")}
+              className="h-6 w-auto shrink-0"
+            />
+            <h1 className="ml-auto min-w-0 truncate text-base font-bold tracking-tight text-gray-900">
               {t("patient_registration")}
-            </h2>
+            </h1>
+          </header>
 
-            <div className="mt-4 space-y-6 flex flex-col bg-white border border-gray-200/50 rounded-md p-8 shadow-md">
-              <span className="inline-block bg-primary-100 p-4 rounded-md w-full mb-4 text-primary-600 text-sm">
+          <div className="flex min-w-0  flex-col lg:flex-row gap-3 p-4 lg:mx-auto">
+            <div className="flex flex-col lg:min-w-md gap-5 rounded-2xl border border-gray-200 bg-white p-4">
+              <span className="rounded-xl bg-primary-50 px-3.5 py-3 text-xs text-primary-800">
                 {t("phone_number_verified")}:{" "}
                 <span className="font-bold">{tokenData.phoneNumber}</span>
               </span>
@@ -224,6 +285,7 @@ export default function PublicPatientRegistration(
                       <RadioInput
                         {...field}
                         onValueChange={field.onChange}
+                        className="grid grid-cols-2 gap-2"
                         options={GENDER_TYPES.map((g) => ({
                           value: g.id,
                           label: t(`GENDER__${g.id}`),
@@ -248,6 +310,7 @@ export default function PublicPatientRegistration(
                         <RadioInput
                           {...field}
                           onValueChange={field.onChange}
+                          className="grid grid-cols-2 gap-2"
                           options={[
                             {
                               value: "date_of_birth",
@@ -262,7 +325,7 @@ export default function PublicPatientRegistration(
                   )}
                 />
 
-                {form.watch("ageInputType") === "date_of_birth" && (
+                {ageInputType === "date_of_birth" && (
                   <FormField
                     control={form.control}
                     name="date_of_birth"
@@ -287,7 +350,7 @@ export default function PublicPatientRegistration(
                   />
                 )}
 
-                {form.watch("ageInputType") === "age" && (
+                {ageInputType === "age" && (
                   <FormField
                     control={form.control}
                     name="age"
@@ -307,17 +370,16 @@ export default function PublicPatientRegistration(
                         <span className="text-xs text-gray-500">
                           {t("age_notice")}
                         </span>
-                        {form.getValues("age") && (
+                        {enteredAge && (
                           <div className="text-sm font-bold">
-                            {Number(form.getValues("age")) <= 0 ? (
+                            {Number(enteredAge) <= 0 ? (
                               <span className="text-red-600">
                                 {t("invalid_age")}
                               </span>
                             ) : (
                               <span className="text-violet-600">
                                 {t("year_of_birth")}:{" "}
-                                {new Date().getFullYear() -
-                                  Number(form.getValues("age"))}
+                                {new Date().getFullYear() - Number(enteredAge)}
                               </span>
                             )}
                           </div>
@@ -329,7 +391,7 @@ export default function PublicPatientRegistration(
               </div>
             </div>
 
-            <div className="space-y-6 mt-12 flex-row bg-white border border-gray-200/50 rounded-md p-8 shadow-md">
+            <div className="flex flex-col lg:min-w-md gap-5 rounded-2xl border border-gray-200 bg-white p-4">
               <FormField
                 control={form.control}
                 name="address"
@@ -372,15 +434,26 @@ export default function PublicPatientRegistration(
               <FormField
                 control={form.control}
                 name="geo_organization"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem className="flex flex-col">
                     <FormControl>
-                      <GovtOrganizationSelector
-                        {...field}
-                        required
+                      <GovtOrganizationPicker
+                        ref={field.ref}
+                        aria-invalid={!!fieldState.error}
+                        required={MIN_GEO_ORG_LEVELS == null}
+                        requiredDepth={MIN_GEO_ORG_LEVELS}
                         authToken={tokenData.token}
-                        onChange={(value) => {
-                          field.onChange(value);
+                        value={geoOrganization}
+                        onChange={(organization) => {
+                          setGeoOrganization(organization);
+                          // Only commit the id once the cascade is deep enough,
+                          // so a half-finished selection fails validation.
+                          field.onChange(
+                            organization &&
+                              isGeoOrganizationComplete(organization)
+                              ? organization.id
+                              : "",
+                          );
                         }}
                       />
                     </FormControl>
@@ -391,33 +464,20 @@ export default function PublicPatientRegistration(
             </div>
           </div>
 
-          <div className="bg-secondary-200 pt-3 pb-8">
-            <div className="flex flex-row gap-2 justify-center sm:ml-64 mt-4">
-              <Button
-                variant="white"
-                className="sm:w-1/5"
-                type="button"
-                onClick={() =>
-                  navigate(
-                    `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-                  )
-                }
-              >
-                <span className="bg-linear-to-b from-white/15 to-transparent" />
-                {t("cancel")}
-              </Button>
-              <Button
-                variant="primary_gradient"
-                className="sm:w-1/5"
-                type="submit"
-              >
-                <span className="bg-linear-to-b from-white/15 to-transparent" />
-                {t("register_patient")}
-              </Button>
-            </div>
+          <div className="flex min-w-0 flex-col lg:flex-row gap-3 p-4 lg:mx-auto">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => navigate(backTo)}
+            >
+              {t("cancel")}
+            </Button>
+            <Button type="submit" disabled={isCreatingPatient}>
+              {t("register_patient")}
+            </Button>
           </div>
         </form>
       </Form>
-    </>
+    </div>
   );
 }

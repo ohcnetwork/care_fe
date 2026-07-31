@@ -25,8 +25,6 @@ import { Avatar } from "@/components/Common/Avatar";
 import { useAppVersion } from "@/hooks/useAppVersion";
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import { useCareApps } from "@/hooks/useCareApps";
-import { usePatientSignOut } from "@/hooks/usePatientSignOut";
-import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { formatName } from "@/Utils/utils";
 
@@ -129,85 +127,6 @@ export function FacilityNavUser({
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut}>
-              <LogOut />
-              {t("logout")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
-  );
-}
-
-export function PatientNavUser() {
-  const { t } = useTranslation();
-  const { isMobile, open } = useSidebar();
-  const signOut = usePatientSignOut();
-  const patientUserContext = usePatientContext();
-
-  const patient = patientUserContext?.selectedPatient;
-  const phoneNumber = patientUserContext?.tokenData.phoneNumber;
-
-  return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              {(open || isMobile) && (
-                <>
-                  <Avatar
-                    className="size-8 rounded-lg"
-                    name={patient?.name || phoneNumber}
-                  />
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      {patient?.name || phoneNumber}
-                    </span>
-                    {patient && (
-                      <span className="truncate text-xs">{phoneNumber}</span>
-                    )}
-                  </div>
-                  <CaretSortIcon className="ml-auto size-4" />
-                </>
-              )}
-              {!open && !isMobile && (
-                <div className="flex flex-row items-center">
-                  <Avatar
-                    name={patient?.name || phoneNumber}
-                    className="size-8 rounded-lg"
-                  />
-                </div>
-              )}
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar
-                  className="size-8 rounded-lg"
-                  name={patient?.name || phoneNumber}
-                />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
-                    {patient?.name || phoneNumber}
-                  </span>
-                  {patient && (
-                    <span className="truncate text-xs">{phoneNumber}</span>
-                  )}
-                </div>
-              </div>
-            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut}>
               <LogOut />

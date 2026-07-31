@@ -74,7 +74,10 @@ function OrganizationLevelSelect({
       <Label className="mb-2">
         {t(
           currentLevel
-            ? `SYSTEM__govt_org_type__${currentLevel.metadata?.govt_org_type}`
+            ? // Without the fallback an organization that carries no
+              // `govt_org_type` yields `SYSTEM__govt_org_type__undefined`,
+              // which has no translation and renders the raw key to the user.
+              `SYSTEM__govt_org_type__${currentLevel.metadata?.govt_org_type || "default"}`
             : index === 0
               ? "SYSTEM__govt_org_type__default"
               : `SYSTEM__govt_org_type__${previousLevel?.metadata?.govt_org_children_type || "default"}`,

@@ -247,6 +247,13 @@ export type Appointment = AppointmentBase & {
 
 export type PublicAppointment = AppointmentBase & {
   patient: PublicPatientRead;
+  /**
+   * The encounter the visit produced, once the patient has actually been seen.
+   * The OTP endpoint sends `{}` rather than omitting the key while the
+   * appointment is still upcoming, so `id` is the only reliable test for
+   * "is there an encounter" — hence `Partial`.
+   */
+  associated_encounter?: Partial<EncounterListRead>;
 };
 
 export type AppointmentRead = Appointment & {

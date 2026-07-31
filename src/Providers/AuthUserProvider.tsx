@@ -163,6 +163,7 @@ export default function AuthUserProvider({
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
+    localStorage.removeItem(LocalStorageKeys.selectedPatient);
     setAccessToken(null);
     setPatientToken(null);
 
