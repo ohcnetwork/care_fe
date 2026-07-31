@@ -1,5 +1,5 @@
 import { Provider as JotaiProvider, createStore } from "jotai";
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
@@ -42,7 +42,11 @@ export function QuestionnaireRendererProvider({
   subject = {},
   children,
 }: ProviderProps) {
-  const store = useMemo(() => createStore(), []);
+  // useState (not useMemo) guarantees the store is created exactly once per
+  // component instance — React may discard a useMemo cache under memory
+  // pressure, which would silently recreate the store and (via the effect
+  // below) wipe any in-progress answers.
+  const [store] = useState(() => createStore());
 
   // Re-seed whenever the questionnaire identity changes (builder preview
   // passes a fresh draft object on each Edit→Preview switch).

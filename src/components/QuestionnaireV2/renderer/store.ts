@@ -2,7 +2,10 @@ import { atom, useAtom, useAtomValue } from "jotai";
 import { useMemo } from "react";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import { EnableWhen, Question } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
@@ -37,13 +40,14 @@ export function initializeResponses(
         walk(question.questions ?? []);
         continue;
       }
-      const initial =
-        question.type === "choice"
-          ? (question.answer_option ?? [])
+      const initial: ResponseValue[] =
+        question.answer_option && question.answer_option.length > 0
+          ? question.answer_option
               .filter((option) => option.initial_selected)
               .map((option) => ({
                 type: "string" as const,
                 value: option.value,
+                coding: option.code ?? undefined,
               }))
           : [];
       responses[question.id] = {
@@ -58,93 +62,69 @@ export function initializeResponses(
   return responses;
 }
 
-/** Port of QuestionGroup.isQuestionEnabled's operator logic.
- *  Handles type coercions from old system: booleans normalize to "Yes"/"No",
- *  numeric comparisons coerce strings to numbers. */
+/** Mirrors QuestionGroup.isQuestionEnabled's `normalizeValue` (old system):
+ *  booleans normalize to "Yes"/"No", numbers stringify, before ANY operator
+ *  is applied — matching the old code's unconditional normalization pass. */
+function normalizeValue(value: unknown): unknown {
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "number") return value.toString();
+  return value;
+}
+
+/** Direct port of QuestionGroup.isQuestionEnabled's `checkCondition`
+ *  (src/components/Questionnaire/QuestionTypes/QuestionGroup.tsx:37-103),
+ *  operating on (enableWhen, response) instead of
+ *  (enableWhen, questionnaireResponses). Preserves faithfully:
+ *  - the unanswered-dependency short-circuit (no recorded values → false,
+ *    for every operator, before any comparison runs)
+ *  - evaluating against ALL of the dependent question's values (not just
+ *    the first), via `.some()` / `.includes()` over the normalized values
+ *  - normalizeValue being applied unconditionally before every operator */
 export function evaluateEnableWhen(
   enableWhen: EnableWhen,
   response: QuestionnaireResponse | undefined,
 ): boolean {
-  const value = response?.values[0]?.value;
+  const dependentValues = response?.values;
+
+  if (!dependentValues || dependentValues.length === 0) return false;
+
+  const normalizedAnswers = dependentValues.map((v) => normalizeValue(v.value));
 
   switch (enableWhen.operator) {
-    case "exists": {
-      // enableWhen.answer is boolean for "exists"
-      const exists = value !== undefined && value !== "" && value !== null;
-      return enableWhen.answer === exists;
-    }
+    case "exists":
+      return (
+        normalizedAnswers.length > 0 &&
+        normalizedAnswers.some((v) => v !== "" && v !== null && v !== undefined)
+      );
 
-    case "equals": {
-      // enableWhen.answer can be boolean or string
-      if (typeof enableWhen.answer === "boolean") {
-        // If the answer we're comparing to is boolean, normalize the response value
-        if (typeof value === "boolean") {
-          return value === enableWhen.answer;
-        }
-        if (typeof value === "string") {
-          // Normalize string response to boolean for comparison
-          const normalized =
-            value === "Yes" ? true : value === "No" ? false : null;
-          return normalized === enableWhen.answer;
-        }
-        return false;
-      }
-      // enableWhen.answer is string
-      if (typeof value === "boolean") {
-        // Normalize boolean to string representation
-        const normalized = value ? "Yes" : "No";
-        return normalized === enableWhen.answer;
-      }
-      return value === enableWhen.answer;
-    }
+    case "equals":
+      // enableWhen.answer is boolean | string here (EnableWhenBoolean | EnableWhenString)
+      return normalizedAnswers.includes(enableWhen.answer);
 
-    case "not_equals": {
-      // enableWhen.answer can be boolean or string
-      if (typeof enableWhen.answer === "boolean") {
-        // If the answer we're comparing to is boolean, normalize the response value
-        if (typeof value === "boolean") {
-          return value !== enableWhen.answer;
-        }
-        if (typeof value === "string") {
-          // Normalize string response to boolean for comparison
-          const normalized =
-            value === "Yes" ? true : value === "No" ? false : null;
-          return normalized !== enableWhen.answer;
-        }
-        return true;
-      }
-      // enableWhen.answer is string
-      if (typeof value === "boolean") {
-        // Normalize boolean to string representation
-        const normalized = value ? "Yes" : "No";
-        return normalized !== enableWhen.answer;
-      }
-      return value !== enableWhen.answer;
-    }
+    case "not_equals":
+      // enableWhen.answer is boolean | string here (EnableWhenBoolean | EnableWhenString)
+      return !normalizedAnswers.includes(enableWhen.answer);
 
-    case "greater": {
-      // enableWhen.answer is number
-      const numValue = typeof value === "number" ? value : Number(value);
-      return !isNaN(numValue) && numValue > enableWhen.answer;
-    }
+    case "greater":
+      // enableWhen.answer is number here (EnableWhenNumeric)
+      return normalizedAnswers.some(
+        (v) => !isNaN(Number(v)) && Number(v) > enableWhen.answer,
+      );
 
-    case "less": {
-      // enableWhen.answer is number
-      const numValue = typeof value === "number" ? value : Number(value);
-      return !isNaN(numValue) && numValue < enableWhen.answer;
-    }
+    case "less":
+      return normalizedAnswers.some(
+        (v) => !isNaN(Number(v)) && Number(v) < enableWhen.answer,
+      );
 
-    case "greater_or_equals": {
-      // enableWhen.answer is number
-      const numValue = typeof value === "number" ? value : Number(value);
-      return !isNaN(numValue) && numValue >= enableWhen.answer;
-    }
+    case "greater_or_equals":
+      return normalizedAnswers.some(
+        (v) => !isNaN(Number(v)) && Number(v) >= enableWhen.answer,
+      );
 
-    case "less_or_equals": {
-      // enableWhen.answer is number
-      const numValue = typeof value === "number" ? value : Number(value);
-      return !isNaN(numValue) && numValue <= enableWhen.answer;
-    }
+    case "less_or_equals":
+      return normalizedAnswers.some(
+        (v) => !isNaN(Number(v)) && Number(v) <= enableWhen.answer,
+      );
 
     default:
       return true;
