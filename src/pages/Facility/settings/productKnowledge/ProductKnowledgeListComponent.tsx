@@ -50,7 +50,7 @@ function ProductKnowledgeCard({
     <Card className="hover:shadow-md transition-shadow overflow-hidden">
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <div className="flex items-start space-x-3 min-w-0 w-full sm:w-auto overflow-hidden">
+          <div className="flex items-start space-x-3 min-w-0 w-full sm:w-auto">
             <div className="flex-shrink-0">
               <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
                 <CareIcon icon="l-folder" className="h-5 w-5" />
