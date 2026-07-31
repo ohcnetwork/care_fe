@@ -286,6 +286,7 @@ interface ResourceCategoryListProps<
   showMonetaryComponentsOption?: boolean;
   children?: React.ReactNode;
   itemSearchConfig?: ItemSearchConfig<T>;
+  emptyStateTitle?: string;
 }
 
 export function ResourceCategoryList<
@@ -304,6 +305,7 @@ export function ResourceCategoryList<
   showMonetaryComponentsOption = false,
   children,
   itemSearchConfig,
+  emptyStateTitle,
 }: ResourceCategoryListProps<T>) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -341,7 +343,7 @@ export function ResourceCategoryList<
         facilityId,
         categorySlug,
         qParams.searchCategory,
-        qParams.page ?? "1",
+        qParams.page || 1,
       ],
       queryFn: query.debounced(resourceCategoryApi.list, {
         pathParams: { facilityId },
@@ -350,7 +352,7 @@ export function ResourceCategoryList<
           parent: categorySlug || "",
           title: qParams.searchCategory,
           limit: resultsPerPage,
-          offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+          offset: ((qParams.page || 1) - 1) * resultsPerPage,
         },
       }),
     },
@@ -362,7 +364,7 @@ export function ResourceCategoryList<
       itemSearchConfig?.queryKeyPrefix || "items",
       facilityId,
       qParams.searchCategory,
-      qParams.page ?? 1,
+      qParams.page || 1,
     ],
     queryFn: query.debounced(itemSearchConfig!.listItems.queryFn, {
       pathParams: { facilityId, ...itemSearchConfig?.listItems.pathParams },
@@ -474,7 +476,9 @@ export function ResourceCategoryList<
             <CareIcon icon="l-folder-open" className="text-primary size-6" />
           }
           title={
-            qParams.searchCategory ? t("no_results") : t("no_categories_found")
+            qParams.searchCategory
+              ? t("no_results")
+              : (emptyStateTitle ?? t("no_categories_found"))
           }
           description={
             qParams.searchCategory

@@ -19,19 +19,42 @@ export enum MonetaryComponentType {
   informational = "informational",
 }
 
-export interface MonetaryComponent {
-  monetary_component_type: MonetaryComponentType;
+interface SharedMonetaryFields {
   code?: Code;
   factor?: string | null;
   amount?: string | null;
   tax_included_amount?: string;
   conditions?: Condition[];
+}
+
+export interface StandardMonetaryComponent extends SharedMonetaryFields {
+  monetary_component_type: Exclude<
+    MonetaryComponentType,
+    MonetaryComponentType.discount
+  >;
+}
+
+export interface DiscountMonetaryComponent extends SharedMonetaryFields {
+  monetary_component_type: MonetaryComponentType.discount;
   global_component?: boolean;
 }
 
-export interface MonetaryComponentRead extends MonetaryComponent {
-  title: string;
+export type MonetaryComponent =
+  StandardMonetaryComponent | DiscountMonetaryComponent;
+
+export enum DiscountApplicabilityOrder {
+  total_desc = "total_desc",
+  total_asc = "total_asc",
 }
+
+export interface DiscountConfiguration {
+  max_applicable: number;
+  applicability_order: DiscountApplicabilityOrder;
+}
+
+export type MonetaryComponentRead = MonetaryComponent & {
+  title: string;
+};
 
 export const MonetaryComponentOrder = {
   informational: 1,
@@ -40,6 +63,15 @@ export const MonetaryComponentOrder = {
   discount: 4,
   tax: 5,
 } as const satisfies Record<MonetaryComponentType, number>;
+
+/**
+ * Type guard to check if a component is a DiscountMonetaryComponent
+ */
+export function isDiscountComponent(
+  component: MonetaryComponent,
+): component is DiscountMonetaryComponent {
+  return component.monetary_component_type === MonetaryComponentType.discount;
+}
 
 // Utility functions for monetary component operations
 
@@ -235,39 +267,4 @@ export function calculateTotalPriceWithQuantity(
 ): Decimal {
   const unitPrice = calculateTotalPrice(priceComponents);
   return multiply(unitPrice, quantity);
-}
-
-/**
- * Get a breakdown of all price components
- */
-export interface PriceBreakdown {
-  basePrice: string;
-  surcharges: string;
-  discounts: string;
-  subtotal: string;
-  tax: string;
-  total: string;
-}
-
-export function getPriceBreakdown(
-  priceComponents: MonetaryComponent[],
-  quantity: string | number = 1,
-): PriceBreakdown {
-  const base = getBasePrice(priceComponents);
-  const surcharges = getSurchargeAmount(priceComponents, base);
-  const discounts = getDiscountAmount(priceComponents, base);
-  const subtotal = add(base, surcharges).minus(discounts);
-  const tax = getTaxAmount(priceComponents, subtotal);
-  const total = add(subtotal, tax);
-
-  const qty = decimal(quantity);
-
-  return {
-    basePrice: round(multiply(base, qty)),
-    surcharges: round(multiply(surcharges, qty)),
-    discounts: round(multiply(discounts, qty)),
-    subtotal: round(multiply(subtotal, qty)),
-    tax: round(multiply(tax, qty)),
-    total: round(multiply(total, qty)),
-  };
 }

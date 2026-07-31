@@ -62,7 +62,7 @@ function generateAdminLinks(
           url: `${baseUrl}/organizations/product_supplier`,
         },
         {
-          name: "Roles",
+          name: "Responsibilities",
           url: `${baseUrl}/organizations/role`,
         },
       ],

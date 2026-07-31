@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
@@ -10,7 +9,9 @@ import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 
 import { Badge } from "@/components/ui/badge";
+import { getCompletedDeliveryQuantity } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import {
   REQUEST_ORDER_STATUS_COLORS,
   RequestOrderRetrieve,
@@ -19,7 +20,7 @@ import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
-import { add, round, subtract } from "@/Utils/decimal";
+import { abs, add, isNegative, max, round, subtract } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import Decimal from "decimal.js";
 
@@ -57,8 +58,8 @@ const RequestOrderContent = ({
   return (
     <div>
       {/* Request Order Header */}
-      <div className="mb-4">
-        <div className="text-2xl font-semibold mb-2 flex items-end gap-4">
+      <div className="mt-3">
+        <div className="text-xl font-semibold flex items-end gap-4">
           <p>{requestOrder.name}</p>
         </div>
         {requestOrder.note && (
@@ -68,7 +69,7 @@ const RequestOrderContent = ({
 
       {/* Supply Requests Table */}
       {supplyRequests && supplyRequests.length > 0 && (
-        <div className="mt-4">
+        <div>
           <p className="text-base font-semibold mb-2">{t("requested_items")}</p>
           <PrintTable
             headers={[
@@ -81,13 +82,20 @@ const RequestOrderContent = ({
             rows={supplyRequests.map((request) => {
               const dispatched =
                 dispatchedQuantities[request.item.id] || new Decimal(0);
-              const remaining = subtract(request.quantity, dispatched);
+              const subtractedQuantity = subtract(request.quantity, dispatched);
+              const remaining = round(max(0, subtractedQuantity));
+
+              const remainingText = isNegative(subtractedQuantity)
+                ? `${remaining} (${t("extra_supplied_quantity", {
+                    quantity: round(abs(subtractedQuantity)),
+                  })})`
+                : remaining;
 
               return {
                 product: request.item.name || "-",
                 quantity: String(round(request.quantity)),
                 dispatched_quantity: String(round(dispatched)),
-                remaining_quantity: String(round(remaining)),
+                remaining_quantity: remainingText,
                 status: t(request.status),
               };
             })}
@@ -116,32 +124,11 @@ const RequestOrderPreview = ({
     <PrintPreview
       title={`${t("request_order")} - ${requestOrder.name}`}
       disabled={!supplyRequests?.length}
+      facility={facility}
+      templateSlug={PrintTemplateType.request_order}
     >
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-start mb-2 pb-2 border-b border-gray-200">
-          <div className="flex items-start gap-4">
-            <div className="text-left">
-              <h1 className="text-2xl font-medium">{facility?.name}</h1>
-              {facility?.address && (
-                <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-sm">
-                  {facility.address}
-                  {facility.phone_number && (
-                    <p className="text-gray-500 text-sm">
-                      {t("phone")}: {facility.phone_number}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          <img
-            src={careConfig.mainLogo?.dark}
-            alt="Logo"
-            className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
-          />
-        </div>
-
-        <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold my-2">
+        <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
           {t("request_order")}
         </h2>
 
@@ -258,7 +245,7 @@ export const PrintRequestOrder = ({
         if (productId) {
           acc[productId] = add(
             acc[productId] || 0,
-            delivery.supplied_item_quantity,
+            getCompletedDeliveryQuantity(delivery),
           );
         }
         return acc;

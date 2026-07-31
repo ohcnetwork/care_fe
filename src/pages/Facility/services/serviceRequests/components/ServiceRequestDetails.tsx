@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatName } from "@/Utils/utils";
 import { LocationNode } from "@/components/Location/LocationTree";
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
-import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
+import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
 import {
   SERVICE_REQUEST_PRIORITY_COLORS,
   SERVICE_REQUEST_STATUS_COLORS,
@@ -111,7 +111,7 @@ export function ServiceRequestDetails({
               </div>
               <div className="font-sm font-normal flex flex-wrap gap-1">
                 {observationRequirements.map(
-                  (test: ObservationDefinitionReadSpec) => (
+                  (test: ObservationDefinitionRead) => (
                     <Badge key={test.id} variant="secondary">
                       {test.title}
                     </Badge>
@@ -125,6 +125,16 @@ export function ServiceRequestDetails({
                 {formatSpecimenRequirements(specimenRequirements)}
               </div>
             </div>
+            {request.body_site && (
+              <div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {t("body_site")}
+                </div>
+                <div className="font-semibold text-gray-700">
+                  {request.body_site.display}
+                </div>
+              </div>
+            )}
           </div>
           <div className="border-l border-gray-200 mx-4" />
           <div className="flex flex-col gap-6">
@@ -157,9 +167,18 @@ export function ServiceRequestDetails({
                 />
               </div>
             )}
+            {request.patient_instruction && (
+              <div>
+                <div className="text-sm text-gray-600 mb-1">
+                  {t("patient_instruction")}
+                </div>
+                <div className="text-sm text-gray-950">
+                  {request.patient_instruction}
+                </div>
+              </div>
+            )}
           </div>
         </div>
-
         {request.note && (
           <div className="mt-4">
             <div className="text-sm text-gray-600 mb-1">{t("note")}:</div>

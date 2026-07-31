@@ -171,7 +171,7 @@ interface ActivityDefinitionListProps {
   setAllowCategoryCreate: (allow: boolean) => void;
 }
 
-export function ActivityDefinitionList({
+export function ActivityDefinitionListContent({
   facilityId,
   categorySlug,
   setAllowCategoryCreate,
@@ -195,7 +195,7 @@ export function ActivityDefinitionList({
       pathParams: { facilityId },
       queryParams: {
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         title: qParams.search,
         status: qParams.status,
         classification: qParams.classification,

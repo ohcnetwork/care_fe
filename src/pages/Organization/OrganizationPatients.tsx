@@ -21,14 +21,21 @@ import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 import EntityBadge from "./components/EntityBadge";
-import OrganizationLayout from "./components/OrganizationLayout";
+import OrganizationLayout, {
+  type RouteContext,
+} from "./components/OrganizationLayout";
 
 interface Props {
   id: string;
   navOrganizationId?: string;
+  routeContext?: RouteContext;
 }
 
-export default function OrganizationPatients({ id, navOrganizationId }: Props) {
+export default function OrganizationPatients({
+  id,
+  navOrganizationId,
+  routeContext,
+}: Props) {
   const { t } = useTranslation();
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
@@ -79,9 +86,9 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
       pathParams: { id },
       queryParams: {
         ...(organization?.org_type === "govt" && { organization: id }),
-        page: qParams.page,
+        page: qParams.page || 1,
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         ...advancedFilter.filter,
       },
     }),
@@ -97,6 +104,7 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
       id={id}
       navOrganizationId={navOrganizationId}
       setOrganization={setOrganization}
+      routeContext={routeContext}
     >
       {() => {
         return (

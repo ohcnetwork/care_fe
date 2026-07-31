@@ -1,0 +1,127 @@
+name: Deploy PR Preview
+
+on:
+  workflow_run:
+    workflows: ["Build PR Preview"]
+    types: [completed]
+
+concurrency:
+  group: cloudflare-preview-deploy-${{ github.event.workflow_run.head_repository.id }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name != github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+      deployments: write
+
+    steps:
+      - name: Get PR number
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const headRepo = context.payload.workflow_run.head_repository;
+            const headBranch = context.payload.workflow_run.head_branch;
+            const headSha = context.payload.workflow_run.head_sha;
+
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${headRepo.owner.login}:${headBranch}`,
+            });
+
+            const pr = prs.find(p => p.head.sha === headSha);
+            if (!pr) {
+              core.setFailed(`No open PR found for ${headRepo.full_name}:${headBranch} @ ${headSha}`);
+              return;
+            }
+            return pr.number.toString();
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pr-preview-build
+          path: build/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Strip untrusted runtime files
+        run: |
+          find build/ -name '_worker.js' -o -name '_worker.bundle' \
+            -o -name '_routes.json' -o -name 'wrangler.toml' \
+            -o -name '*.wasm' | xargs rm -f 2>/dev/null || true
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy build --project-name=${{ secrets.CLOUDFLARE_PROJECT_NAME }} --branch=pr-${{ steps.pr.outputs.result }} --commit-hash=${{ github.event.workflow_run.head_sha }}
+
+      - name: Comment PR with preview URL
+        uses: actions/github-script@v7
+        if: steps.deploy.outputs.pages-deployment-alias-url
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+          PR_NUMBER: ${{ steps.pr.outputs.result }}
+        with:
+          script: |
+            const deploymentUrl = process.env.DEPLOYMENT_URL;
+            const prNumber = parseInt(process.env.PR_NUMBER, 10);
+
+            // Generate QR code URL for easy mobile access
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(deploymentUrl)}`;
+
+            const commentBody = [
+              "### 🚀 Preview Deployment Ready!",
+              "",
+              `**🔗 Preview URL:** ${deploymentUrl}`,
+              "",
+              "**📱 Mobile Access:**",
+              "Scan the QR code below to open the preview on your mobile device.",
+              "",
+              `![QR Code](${qrCodeUrl})`,
+              "",
+              "---",
+              "*This preview will be automatically updated when you push new commits to this PR.*",
+            ].join("\n");
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.login === 'github-actions[bot]' &&
+              comment.body.includes('Preview Deployment Ready')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: commentBody
+              });
+            }

@@ -6,10 +6,11 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -33,6 +34,7 @@ interface MultiQRCodePrintSheetProps {
   children: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  isLoading?: boolean;
 }
 
 export function MultiQRCodePrintSheet({
@@ -40,6 +42,7 @@ export function MultiQRCodePrintSheet({
   children,
   open,
   onOpenChange,
+  isLoading = false,
 }: MultiQRCodePrintSheetProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -165,17 +168,10 @@ export function MultiQRCodePrintSheet({
           )}
 
           <ScrollArea className="h-[calc(100vh-12rem)] pr-4">
-            {localSpecimens.length === 0 ? (
-              <EmptyState
-                icon={
-                  <CareIcon
-                    icon="l-qrcode-scan"
-                    className="text-primary size-6"
-                  />
-                }
-                title={t("no_specimens_available")}
-                description={t("no_specimens_available_description")}
-              />
+            {isLoading ? (
+              <div className="space-y-4">
+                <CardGridSkeleton count={2} />
+              </div>
             ) : (
               <div className="space-y-4">
                 {localSpecimens.map((specimen) => (
