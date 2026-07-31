@@ -1,7 +1,9 @@
-import { ListChecks, Plus, Upload } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+
+import { QuestionsEmptyState } from "@/components/QuestionnaireV2/shared/QuestionsEmptyState";
 
 /** No-questions state for the builder's editor pane. */
 export function BuilderEmptyState({
@@ -15,13 +17,7 @@ export function BuilderEmptyState({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 py-16 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
-        <ListChecks className="size-6 text-primary" />
-      </div>
-      <p className="text-sm font-medium text-gray-900">
-        {t("no_questions_added_yet")}
-      </p>
+    <QuestionsEmptyState className="gap-4 py-16">
       <Button type="button" variant="outline_primary" onClick={onAddFirst}>
         <Plus className="size-4" />
         {t("add_first_question")}
@@ -39,6 +35,6 @@ export function BuilderEmptyState({
           </Button>
         </>
       )}
-    </div>
+    </QuestionsEmptyState>
   );
 }

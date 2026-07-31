@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check, ListChecks } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { navigate, useNavigationPrompt } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -16,6 +16,7 @@ import { Form } from "@/components/ui/form";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
+import { QuestionsEmptyState } from "@/components/QuestionnaireV2/shared/QuestionsEmptyState";
 import { SegmentedRadioGroup } from "@/components/QuestionnaireV2/shared/SegmentedRadioGroup";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
@@ -188,19 +189,10 @@ export function QuestionnaireCreatePage({
                 <h3 className="text-sm font-semibold text-gray-900">
                   {t("questions")}
                 </h3>
-                <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-gray-200 bg-gray-50 py-6 text-center">
-                  <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
-                    <ListChecks className="size-6 text-primary" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-900">
-                      {t("no_questions_added_yet")}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {t("add_your_first_question_hint")}
-                    </p>
-                  </div>
-                </div>
+                <QuestionsEmptyState
+                  hint={t("add_your_first_question_hint")}
+                  className="py-6"
+                />
               </div>
             </div>
 

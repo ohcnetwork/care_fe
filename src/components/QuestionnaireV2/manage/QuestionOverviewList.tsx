@@ -3,7 +3,6 @@ import {
   ChevronsUpDown,
   ChevronUp,
   GripVertical,
-  ListChecks,
   MoreVertical,
   Plus,
   SquarePen,
@@ -21,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { QuestionsEmptyState } from "@/components/QuestionnaireV2/shared/QuestionsEmptyState";
 import { QuestionTypeBadge } from "@/components/QuestionnaireV2/shared/QuestionTypeBadge";
 
 import { cn } from "@/lib/utils";
@@ -92,18 +92,7 @@ export function QuestionOverviewList({
       </div>
 
       {questions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 py-10 text-center">
-          <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
-            <ListChecks className="size-6 text-primary" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-gray-900">
-              {t("no_questions_added_yet")}
-            </p>
-            <p className="text-sm text-gray-500">
-              {t("import_questions_hint")}
-            </p>
-          </div>
+        <QuestionsEmptyState hint={t("import_questions_hint")}>
           {canWrite && (
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Button
@@ -127,7 +116,7 @@ export function QuestionOverviewList({
               </Button>
             </div>
           )}
-        </div>
+        </QuestionsEmptyState>
       ) : (
         <div className="space-y-2">
           {questions.map((question, index) => {
