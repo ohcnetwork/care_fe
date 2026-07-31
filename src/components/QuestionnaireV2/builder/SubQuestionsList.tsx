@@ -14,19 +14,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -35,20 +27,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { BuilderAction } from "@/components/QuestionnaireV2/builder/builderReducer";
+import { MoveQuestionsDialog } from "@/components/QuestionnaireV2/builder/MoveQuestionsDialog";
 import { QuestionTypeBadge } from "@/components/QuestionnaireV2/shared/QuestionTypeBadge";
-
-import {
-  BuilderAction,
-  collectIds,
-  findQuestion,
-} from "@/components/QuestionnaireV2/builder/builderReducer";
 
 import { Question } from "@/types/questionnaire/question";
 
 interface SubQuestionsListProps {
   question: Question;
   dispatch: Dispatch<BuilderAction>;
-  allQuestions?: Question[];
+  /** The full question tree — the move dialog offers targets across it. */
+  allQuestions: Question[];
 }
 
 const LAYOUT_OPTIONS = [
@@ -58,55 +47,6 @@ const LAYOUT_OPTIONS = [
   { value: "grid grid-cols-[1fr_2fr]", label: "layout_wide_end" },
 ] as const;
 
-interface GroupTarget {
-  id: string;
-  label: string;
-}
-
-/** Sentinel select value representing the questionnaire root (targetParentId: null). */
-const ROOT_MOVE_TARGET_ID = "__top_level__";
-
-/** Walks only `question`'s own subtree — used when the caller can't supply the full tree. */
-function collectGroupTargets(
-  question: Question,
-  excludeIds: Set<string>,
-  untitledLabel: string,
-): GroupTarget[] {
-  if (excludeIds.has(question.id)) return [];
-  const targets: GroupTarget[] = [
-    { id: question.id, label: question.text || untitledLabel },
-  ];
-  for (const child of question.questions ?? []) {
-    if (child.type === "group") {
-      targets.push(...collectGroupTargets(child, excludeIds, untitledLabel));
-    }
-  }
-  return targets;
-}
-
-/** Walks the entire questionnaire tree, collecting every group question as a move target. */
-function collectAllGroupTargets(
-  questions: Question[],
-  excludeIds: Set<string>,
-  untitledLabel: string,
-): GroupTarget[] {
-  const targets: GroupTarget[] = [];
-  for (const question of questions) {
-    if (excludeIds.has(question.id)) continue;
-    if (question.type === "group") {
-      targets.push({ id: question.id, label: question.text || untitledLabel });
-    }
-    targets.push(
-      ...collectAllGroupTargets(
-        question.questions ?? [],
-        excludeIds,
-        untitledLabel,
-      ),
-    );
-  }
-  return targets;
-}
-
 export function SubQuestionsList({
   question,
   dispatch,
@@ -115,8 +55,6 @@ export function SubQuestionsList({
   const { t } = useTranslation();
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [moveOpen, setMoveOpen] = useState(false);
-  const [moveTargetId, setMoveTargetId] = useState<string>("");
-  const [movePosition, setMovePosition] = useState(0);
 
   if (question.type !== "group") return null;
 
@@ -163,51 +101,6 @@ export function SubQuestionsList({
   const handleBulkDelete = () => {
     dispatch({ type: "removeQuestions", ids: Array.from(effectiveChecked) });
     setChecked(new Set());
-  };
-
-  const openMoveDialog = () => {
-    setMoveTargetId(question.id);
-    setMovePosition(0);
-    setMoveOpen(true);
-  };
-
-  const movedSubtreeIds = new Set(
-    Array.from(effectiveChecked).flatMap((id) => {
-      const found = findQuestion(children, id);
-      return found ? collectIds(found) : [id];
-    }),
-  );
-  // With the full tree available, offer every group question across the
-  // questionnaire (not just this group's own subtree) plus a root/"top
-  // level" option, matching the legacy MoveQuestionDialog. Without it, fall
-  // back to walking only the current subtree.
-  const groupTargets = allQuestions
-    ? collectAllGroupTargets(
-        allQuestions,
-        movedSubtreeIds,
-        t("untitled_question"),
-      )
-    : collectGroupTargets(question, movedSubtreeIds, t("untitled_question"));
-  const targetOptions: GroupTarget[] = allQuestions
-    ? [{ id: ROOT_MOVE_TARGET_ID, label: t("top_level") }, ...groupTargets]
-    : groupTargets;
-  const isRootMoveTarget = moveTargetId === ROOT_MOVE_TARGET_ID;
-  const targetQuestion = isRootMoveTarget
-    ? undefined
-    : findQuestion(allQuestions ?? [question], moveTargetId);
-  const maxPosition = isRootMoveTarget
-    ? (allQuestions?.length ?? 0)
-    : (targetQuestion?.questions?.length ?? 0);
-
-  const handleConfirmMove = () => {
-    dispatch({
-      type: "moveQuestions",
-      ids: Array.from(effectiveChecked),
-      targetParentId: isRootMoveTarget ? null : moveTargetId,
-      index: Math.min(Math.max(movePosition, 0), maxPosition),
-    });
-    setChecked(new Set());
-    setMoveOpen(false);
   };
 
   return (
@@ -361,7 +254,7 @@ export function SubQuestionsList({
             type="button"
             variant="outline"
             size="sm"
-            onClick={openMoveDialog}
+            onClick={() => setMoveOpen(true)}
           >
             <CornerUpRight className="size-4" />
             {t("move_n_questions", { count: effectiveChecked.size })}
@@ -379,54 +272,26 @@ export function SubQuestionsList({
         {t("add_sub_question")}
       </Button>
 
-      <Dialog open={moveOpen} onOpenChange={setMoveOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {t("move_n_questions", { count: effectiveChecked.size })}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <p className="text-xs text-gray-500">{t("group")}</p>
-              <Select value={moveTargetId} onValueChange={setMoveTargetId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {targetOptions.map((target) => (
-                    <SelectItem key={target.id} value={target.id}>
-                      {target.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <p className="text-xs text-gray-500">{t("position")}</p>
-              <Input
-                type="number"
-                min={0}
-                max={maxPosition}
-                value={movePosition}
-                onChange={(e) => setMovePosition(Number(e.target.value) || 0)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setMoveOpen(false)}
-            >
-              {t("cancel")}
-            </Button>
-            <Button type="button" onClick={handleConfirmMove}>
-              {t("move")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Mounted only while open so its target/position state re-seeds on
+          every open. */}
+      {moveOpen && (
+        <MoveQuestionsDialog
+          allQuestions={allQuestions}
+          selectedIds={Array.from(effectiveChecked)}
+          defaultTargetId={question.id}
+          onOpenChange={setMoveOpen}
+          onMove={(targetParentId, index) => {
+            dispatch({
+              type: "moveQuestions",
+              ids: Array.from(effectiveChecked),
+              targetParentId,
+              index,
+            });
+            setChecked(new Set());
+            setMoveOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

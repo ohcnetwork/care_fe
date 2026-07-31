@@ -4,12 +4,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Eye,
-  ListChecks,
-  LucideIcon,
   Plus,
-  SquarePen,
-  Upload,
 } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useReducer, useState } from "react";
@@ -28,14 +23,17 @@ import {
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { BuilderEmptyState } from "@/components/QuestionnaireV2/builder/BuilderEmptyState";
 import {
   BuilderState,
   builderReducer,
   findQuestion,
 } from "@/components/QuestionnaireV2/builder/builderReducer";
 import { BuilderTreeNav } from "@/components/QuestionnaireV2/builder/BuilderTreeNav";
+import { EditPreviewToggle } from "@/components/QuestionnaireV2/builder/EditPreviewToggle";
 import { ImportQuestionsDialog } from "@/components/QuestionnaireV2/builder/ImportQuestionsDialog";
 import { QuestionEditorCard } from "@/components/QuestionnaireV2/builder/QuestionEditorCard";
+import { findFirstInvalidQuestion } from "@/components/QuestionnaireV2/builder/saveValidation";
 import { useUpdateQuestionnaire } from "@/components/QuestionnaireV2/manage/useUpdateQuestionnaire";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { QuestionnaireRenderer } from "@/components/QuestionnaireV2/renderer/QuestionnaireRenderer";
@@ -47,9 +45,6 @@ import {
 } from "@/components/QuestionnaireV2/shared/questionTree";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
-import { cn } from "@/lib/utils";
-
-import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireScope } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
@@ -59,118 +54,6 @@ const INITIAL_STATE: BuilderState = {
   selectedId: null,
   dirty: false,
 };
-
-/** Depth-first search for the first question with blank text. */
-function findFirstBlankTitle(questions: Question[]): Question | undefined {
-  for (const question of questions) {
-    if (!question.text.trim()) return question;
-    const found = findFirstBlankTitle(question.questions ?? []);
-    if (found) return found;
-  }
-  return undefined;
-}
-
-/** Depth-first search for the first group question with no children. */
-function findFirstEmptyGroup(questions: Question[]): Question | undefined {
-  for (const question of questions) {
-    if (question.type === "group" && (question.questions?.length ?? 0) === 0) {
-      return question;
-    }
-    const found = findFirstEmptyGroup(question.questions ?? []);
-    if (found) return found;
-  }
-  return undefined;
-}
-
-/**
- * Depth-first search for the first question with a visibility condition that
- * has no target question selected. Persisting such a condition would hide
- * the question forever in fill mode (both evaluators resolve link_id "" to
- * "no response" → false), so save is blocked until it's completed or removed.
- */
-function findFirstIncompleteCondition(
-  questions: Question[],
-): Question | undefined {
-  for (const question of questions) {
-    if (question.enable_when?.some((condition) => !condition.question)) {
-      return question;
-    }
-    const found = findFirstIncompleteCondition(question.questions ?? []);
-    if (found) return found;
-  }
-  return undefined;
-}
-
-interface EditPreviewToggleProps {
-  view: "edit" | "preview";
-  onChange: (view: "edit" | "preview") => void;
-}
-
-function EditPreviewToggle({ view, onChange }: EditPreviewToggleProps) {
-  const { t } = useTranslation();
-
-  const pill = (value: "edit" | "preview", label: string, Icon: LucideIcon) => (
-    <button
-      type="button"
-      onClick={() => onChange(value)}
-      className={cn(
-        "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-        view === value
-          ? "bg-white text-gray-900 shadow-sm"
-          : "text-gray-500 hover:text-gray-700",
-      )}
-    >
-      <Icon className="size-4" />
-      {label}
-    </button>
-  );
-
-  return (
-    <div className="flex items-center gap-1 rounded-full bg-gray-100 p-1">
-      {pill("edit", t("edit"), SquarePen)}
-      {pill("preview", t("preview"), Eye)}
-    </div>
-  );
-}
-
-function BuilderEmptyState({
-  onAddFirst,
-  onImport,
-}: {
-  onAddFirst: () => void;
-  /** Omitted when the user lacks questionnaire-write — hides the affordance. */
-  onImport?: () => void;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 py-16 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
-        <ListChecks className="size-6 text-primary" />
-      </div>
-      <p className="text-sm font-medium text-gray-900">
-        {t("no_questions_added_yet")}
-      </p>
-      <Button type="button" variant="outline_primary" onClick={onAddFirst}>
-        <Plus className="size-4" />
-        {t("add_first_question")}
-      </Button>
-      {onImport && (
-        <>
-          <div className="flex w-full max-w-xs items-center gap-2 text-xs font-medium uppercase text-gray-400">
-            <span className="h-px flex-1 bg-gray-200" />
-            {t("or")}
-            <span className="h-px flex-1 bg-gray-200" />
-          </div>
-          <Button type="button" variant="outline" onClick={onImport}>
-            <Upload className="size-4" />
-            {t("import_questions")}
-          </Button>
-        </>
-      )}
-    </div>
-  );
-}
 
 export function QuestionnaireBuilderPage({
   scope,
@@ -259,26 +142,12 @@ export function QuestionnaireBuilderPage({
   const handleSave = () => {
     if (!questionnaire) return;
 
-    const blankTitle = findFirstBlankTitle(state.questions);
-    if (blankTitle) {
-      toast.error(t("question_titles_required"));
-      dispatch({ type: "select", id: blankTitle.id });
-      setView("edit");
-      return;
-    }
-
-    const emptyGroup = findFirstEmptyGroup(state.questions);
-    if (emptyGroup) {
-      toast.error(t("group_needs_subquestion"));
-      dispatch({ type: "select", id: emptyGroup.id });
-      setView("edit");
-      return;
-    }
-
-    const incompleteCondition = findFirstIncompleteCondition(state.questions);
-    if (incompleteCondition) {
-      toast.error(t("condition_target_required"));
-      dispatch({ type: "select", id: incompleteCondition.id });
+    // Rules live in saveValidation.ts; the first failing question is
+    // selected and shown in edit view so the author can fix it.
+    const invalid = findFirstInvalidQuestion(state.questions);
+    if (invalid) {
+      toast.error(t(invalid.messageKey));
+      dispatch({ type: "select", id: invalid.question.id });
       setView("edit");
       return;
     }

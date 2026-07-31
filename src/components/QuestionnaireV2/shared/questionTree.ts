@@ -25,6 +25,20 @@ export function numberQuestions(questions: Question[]): TreeItem[] {
   }));
 }
 
+/** Pre-order depth-first search for the first question matching `predicate`
+ *  — the one walk shape behind id lookup and the builder's save checks. */
+export function findFirstQuestion(
+  questions: Question[],
+  predicate: (question: Question) => boolean,
+): Question | undefined {
+  for (const question of questions) {
+    if (predicate(question)) return question;
+    const found = findFirstQuestion(question.questions ?? [], predicate);
+    if (found) return found;
+  }
+  return undefined;
+}
+
 /** Does `question` (or any of its descendants) have id `questionId`? */
 function containsQuestion(question: Question, questionId: string): boolean {
   if (question.id === questionId) return true;

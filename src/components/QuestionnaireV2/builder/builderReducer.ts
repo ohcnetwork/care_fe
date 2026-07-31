@@ -1,3 +1,5 @@
+import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
+
 import { EnableWhen, Question } from "@/types/questionnaire/question";
 
 export interface BuilderState {
@@ -35,12 +37,7 @@ export function findQuestion(
   questions: Question[],
   id: string,
 ): Question | undefined {
-  for (const question of questions) {
-    if (question.id === id) return question;
-    const found = findQuestion(question.questions ?? [], id);
-    if (found) return found;
-  }
-  return undefined;
+  return findFirstQuestion(questions, (question) => question.id === id);
 }
 
 export function collectIds(question: Question): string[] {
