@@ -2,6 +2,7 @@ import { navigate } from "raviger";
 
 import QuestionnaireEditor from "@/components/Questionnaire/QuestionnaireEditor";
 import { QuestionnaireList } from "@/components/Questionnaire/QuestionnaireList";
+import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
 import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
 import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
@@ -29,6 +30,11 @@ const AdminRoutes: AppRoutes = {
   "/admin/questionnaire/:id/edit": ({ id }) => <QuestionnaireEditor id={id} />,
   "/admin/questionnaires": () => (
     <QuestionnaireListPage scope={INSTANCE_SCOPE} />
+  ),
+  // Must be registered before "/admin/questionnaires/:id" — raviger matches
+  // routes in object order, and "new" would otherwise be captured as an :id.
+  "/admin/questionnaires/new": () => (
+    <QuestionnaireCreatePage scope={INSTANCE_SCOPE} />
   ),
   "/admin/questionnaires/:id": ({ id }) => (
     <QuestionnaireDetailPage scope={INSTANCE_SCOPE} id={id} />
