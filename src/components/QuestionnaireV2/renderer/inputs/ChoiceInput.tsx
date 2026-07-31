@@ -5,14 +5,22 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
 
-export function ChoiceInput({ question, disabled }: RendererInputProps) {
+export function ChoiceInput({
+  question,
+  disabled,
+  labelId,
+}: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
 
   if (question.answer_option?.length) {
     const selectedValue = response?.values[0]?.value;
 
     return (
-      <div className="flex flex-wrap gap-3">
+      <div
+        role="radiogroup"
+        aria-labelledby={labelId}
+        className="flex flex-wrap gap-3"
+      >
         {question.answer_option.map((option) => (
           <ChoiceChip
             key={option.value}

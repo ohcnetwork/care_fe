@@ -73,6 +73,10 @@ export interface QuestionTreeNavProps {
   footer?: React.ReactNode;
   /** Builder-only affordances (insert-between "+" buttons etc.) */
   renderSeparator?: (afterIndex: number) => React.ReactNode;
+  /** Top-level question ids currently hidden by enable_when (renderer only) —
+   *  skipped entirely, matching the legacy renderer where hidden questions
+   *  simply don't appear. Numbering stays stable across hides. */
+  hiddenIds?: Set<string>;
 }
 
 export function QuestionTreeNav({
@@ -82,8 +86,11 @@ export function QuestionTreeNav({
   onSelect,
   footer,
   renderSeparator,
+  hiddenIds,
 }: QuestionTreeNavProps) {
-  const items = numberQuestions(questions);
+  const items = numberQuestions(questions).filter(
+    (item) => !hiddenIds?.has(item.question.id),
+  );
 
   const row = (item: TreeItem, indent: boolean) => (
     <button

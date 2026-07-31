@@ -3,7 +3,11 @@ import { Input } from "@/components/ui/input";
 import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
 
-export function NumberInput({ question, disabled }: RendererInputProps) {
+export function NumberInput({
+  question,
+  disabled,
+  inputId,
+}: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
   const value = response?.values[0]?.value as number | undefined;
 
@@ -18,6 +22,7 @@ export function NumberInput({ question, disabled }: RendererInputProps) {
 
   return (
     <Input
+      id={inputId}
       type="number"
       inputMode={question.type === "decimal" ? "decimal" : "numeric"}
       pattern="[0-9]*[.]?[0-9]*"

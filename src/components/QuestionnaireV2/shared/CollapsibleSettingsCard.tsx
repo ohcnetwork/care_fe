@@ -40,7 +40,12 @@ export function CollapsibleSettingsCard({
         <div className="flex shrink-0 items-center gap-2">
           {badge}
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label={title}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={title}
+            >
               <ChevronsUpDown className="size-4" />
             </Button>
           </CollapsibleTrigger>

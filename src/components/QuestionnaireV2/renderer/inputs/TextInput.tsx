@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
 
-export function TextInput({ question, disabled }: RendererInputProps) {
+export function TextInput({ question, disabled, inputId }: RendererInputProps) {
   const { t } = useTranslation();
   const [response, updateResponse] = useQuestionResponse(question.id);
   const value = (response?.values[0]?.value as string | undefined) ?? "";
@@ -16,6 +16,7 @@ export function TextInput({ question, disabled }: RendererInputProps) {
   };
 
   const props = {
+    id: inputId,
     value,
     disabled,
     placeholder: t("enter_details"),

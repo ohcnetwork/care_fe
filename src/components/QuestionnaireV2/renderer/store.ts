@@ -151,26 +151,71 @@ export function useQuestionResponse(questionId: string) {
   return useAtom(responseAtom);
 }
 
+/** Shared enable_when resolution — extracted (unchanged semantics) so both
+ *  useQuestionEnabled and the pagination hook below evaluate identically. */
+function isQuestionEnabledInState(
+  question: Question,
+  responses: Record<string, QuestionnaireResponse>,
+  linkIndex: Record<string, string>,
+): boolean {
+  if (!question.enable_when?.length) return true;
+  const results = question.enable_when.map((condition) =>
+    evaluateEnableWhen(
+      condition,
+      responses[linkIndex[condition.question] ?? ""],
+    ),
+  );
+  return question.enable_behavior === "any"
+    ? results.some(Boolean)
+    : results.every(Boolean);
+}
+
 export function useQuestionEnabled(question: Question): boolean {
   const enabledAtom = useMemo(
     () =>
-      atom((get) => {
-        if (!question.enable_when?.length) return true;
-        const responses = get(responsesAtom);
-        const linkIndex = get(questionIdByLinkIdAtom);
-        const results = question.enable_when.map((condition) =>
-          evaluateEnableWhen(
-            condition,
-            responses[linkIndex[condition.question] ?? ""],
-          ),
-        );
-        return question.enable_behavior === "any"
-          ? results.some(Boolean)
-          : results.every(Boolean);
-      }),
+      atom((get) =>
+        isQuestionEnabledInState(
+          question,
+          get(responsesAtom),
+          get(questionIdByLinkIdAtom),
+        ),
+      ),
     [question],
   );
   return useAtomValue(enabledAtom);
+}
+
+/**
+ * Indices of top-level questions that should take part in pagination.
+ *
+ * The legacy renderer showed the whole questionnaire in one scroll page, so
+ * an enable_when-hidden question simply didn't appear — the paginated v2
+ * renderer must skip those indices rather than serve blank pages.
+ * `disabled_display: "protected"` questions stay included because
+ * QuestionField still renders them (greyed) when disabled.
+ */
+export function useVisibleTopLevelIndices(): number[] {
+  const visibleIndicesAtom = useMemo(
+    () =>
+      atom((get) => {
+        const questionnaire = get(questionnaireAtom);
+        if (!questionnaire) return [];
+        const responses = get(responsesAtom);
+        const linkIndex = get(questionIdByLinkIdAtom);
+        const indices: number[] = [];
+        questionnaire.questions.forEach((question, index) => {
+          if (
+            question.disabled_display === "protected" ||
+            isQuestionEnabledInState(question, responses, linkIndex)
+          ) {
+            indices.push(index);
+          }
+        });
+        return indices;
+      }),
+    [],
+  );
+  return useAtomValue(visibleIndicesAtom);
 }
 
 export function useQuestionErrors(questionId: string) {

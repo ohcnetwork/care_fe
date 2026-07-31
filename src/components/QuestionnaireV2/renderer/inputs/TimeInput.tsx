@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
 
-export function TimeInput({ question, disabled }: RendererInputProps) {
+export function TimeInput({ question, disabled, inputId }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
   const value = (response?.values[0]?.value as string | undefined) ?? "";
 
@@ -15,6 +15,7 @@ export function TimeInput({ question, disabled }: RendererInputProps) {
 
   return (
     <Input
+      id={inputId}
       type="time"
       value={value}
       // rounded-r-none/border-r-0 merge the field's own border into the note

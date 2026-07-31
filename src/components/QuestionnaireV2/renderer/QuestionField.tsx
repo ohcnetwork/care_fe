@@ -6,6 +6,7 @@ import { NoteAffordance } from "@/components/QuestionnaireV2/renderer/NoteAfford
 import { QuestionGroupCard } from "@/components/QuestionnaireV2/renderer/QuestionGroupCard";
 import { useRenderer } from "@/components/QuestionnaireV2/renderer/RendererContext";
 import { QUESTION_TYPE_COMPONENTS } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
+import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/renderer/sanitizeStylingClasses";
 import {
   useQuestionEnabled,
   useQuestionErrors,
@@ -41,13 +42,26 @@ export function QuestionField({
   }
 
   const InputComponent = QUESTION_TYPE_COMPONENTS[question.type];
+  // Programmatic label association: text-like inputs take `id={inputId}` for
+  // the htmlFor pairing; chip groups (boolean/choice) reference `labelId`
+  // via aria-labelledby on their radiogroup container instead.
+  const inputId = `question-input-${question.id}`;
+  const labelId = `question-label-${question.id}`;
 
   return (
     <div
-      className={cn("space-y-1.5", question.styling_metadata?.containerClasses)}
+      className={cn(
+        "space-y-1.5",
+        // Questionnaire-authored classes — sanitized, never raw.
+        sanitizeStylingClasses(question.styling_metadata?.containerClasses),
+      )}
     >
       <div className="flex items-center gap-2">
-        <label className="text-sm font-medium text-gray-800">
+        <label
+          id={labelId}
+          htmlFor={inputId}
+          className="text-sm font-medium text-gray-800"
+        >
           {question.text}
         </label>
         {question.required && <span className="text-red-500">*</span>}
@@ -67,6 +81,8 @@ export function QuestionField({
               <InputComponent
                 question={question}
                 disabled={effectiveDisabled}
+                inputId={inputId}
+                labelId={labelId}
               />
             ) : (
               <p className="p-2 text-sm italic text-gray-400">

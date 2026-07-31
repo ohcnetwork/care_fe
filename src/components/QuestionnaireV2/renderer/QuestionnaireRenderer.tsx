@@ -14,7 +14,10 @@ import {
   useRenderer,
 } from "@/components/QuestionnaireV2/renderer/RendererContext";
 import { RendererFooter } from "@/components/QuestionnaireV2/renderer/RendererFooter";
-import { activeGroupIndexAtom } from "@/components/QuestionnaireV2/renderer/store";
+import {
+  activeGroupIndexAtom,
+  useVisibleTopLevelIndices,
+} from "@/components/QuestionnaireV2/renderer/store";
 import type {
   RendererMode,
   RendererSubject,
@@ -41,6 +44,9 @@ function RendererBody({ className }: { className?: string }) {
   const { t } = useTranslation();
   const { questionnaire } = useRenderer();
   const [activeGroupIndex, setActiveGroupIndex] = useAtom(activeGroupIndexAtom);
+  // Pagination operates over the enable_when-visible top-level questions
+  // only — a hidden question would otherwise render as a blank page.
+  const visibleIndices = useVisibleTopLevelIndices();
 
   if (questionnaire.questions.length === 0) {
     return (
@@ -55,8 +61,18 @@ function RendererBody({ className }: { className?: string }) {
     );
   }
 
+  // Snap to the first visible question when the stored index points at a
+  // hidden (or out-of-range) one — e.g. its condition stopped matching.
+  const activeIndex = visibleIndices.includes(activeGroupIndex)
+    ? activeGroupIndex
+    : (visibleIndices[0] ?? 0);
   const activeQuestion =
-    questionnaire.questions[activeGroupIndex] ?? questionnaire.questions[0];
+    questionnaire.questions[activeIndex] ?? questionnaire.questions[0];
+  const hiddenIds = new Set(
+    questionnaire.questions
+      .filter((_, index) => !visibleIndices.includes(index))
+      .map((question) => question.id),
+  );
 
   return (
     <div className={cn("flex gap-6", className)}>
@@ -69,6 +85,7 @@ function RendererBody({ className }: { className?: string }) {
             title={questionnaire.title}
             questions={questionnaire.questions}
             activeId={activeQuestion.id}
+            hiddenIds={hiddenIds}
             onSelect={(questionId) =>
               setActiveGroupIndex(
                 findTopLevelIndex(questionnaire.questions, questionId),

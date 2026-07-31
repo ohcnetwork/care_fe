@@ -15,6 +15,10 @@ import { TimeInput } from "./inputs/TimeInput";
 export interface RendererInputProps {
   question: Question;
   disabled: boolean;
+  /** DOM id for the primary control — the question label's htmlFor target. */
+  inputId: string;
+  /** DOM id of the question label, for aria-labelledby on grouped controls. */
+  labelId: string;
 }
 
 export const QUESTION_TYPE_COMPONENTS: Partial<

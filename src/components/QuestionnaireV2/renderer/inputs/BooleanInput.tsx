@@ -5,7 +5,11 @@ import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
 
-export function BooleanInput({ question, disabled }: RendererInputProps) {
+export function BooleanInput({
+  question,
+  disabled,
+  labelId,
+}: RendererInputProps) {
   const { t } = useTranslation();
   const [response, updateResponse] = useQuestionResponse(question.id);
   const value = response?.values[0]?.value as boolean | undefined;
@@ -15,7 +19,11 @@ export function BooleanInput({ question, disabled }: RendererInputProps) {
   };
 
   return (
-    <div className="flex flex-wrap gap-3">
+    <div
+      role="radiogroup"
+      aria-labelledby={labelId}
+      className="flex flex-wrap gap-3"
+    >
       <ChoiceChip
         control="radio"
         label={t("yes")}

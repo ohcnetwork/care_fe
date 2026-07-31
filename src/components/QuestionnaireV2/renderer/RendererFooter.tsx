@@ -4,26 +4,38 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
-import { useRenderer } from "@/components/QuestionnaireV2/renderer/RendererContext";
-import { activeGroupIndexAtom } from "@/components/QuestionnaireV2/renderer/store";
+import {
+  activeGroupIndexAtom,
+  useVisibleTopLevelIndices,
+} from "@/components/QuestionnaireV2/renderer/store";
 
 export function RendererFooter() {
   const { t } = useTranslation();
-  const { questionnaire } = useRenderer();
   const [activeGroupIndex, setActiveGroupIndex] = useAtom(activeGroupIndexAtom);
-  const lastIndex = Math.max(questionnaire.questions.length - 1, 0);
-  // Mirrors RendererBody's `?? questionnaire.questions[0]` fallback — keeps
-  // the Previous/Next disabled state in sync when the atom holds a stale
-  // index (e.g. a shorter question set swapped in after the index was set).
-  const clampedIndex = Math.min(Math.max(activeGroupIndex, 0), lastIndex);
+  // Previous/Next step through the enable_when-visible top-level questions
+  // only, mirroring RendererBody's pagination — hidden questions are
+  // skipped, never served as blank pages.
+  const visibleIndices = useVisibleTopLevelIndices();
+
+  // The stored index may point at a hidden/stale question; RendererBody
+  // snaps to the first visible one in that case, so mirror that here.
+  const rawPosition = visibleIndices.indexOf(activeGroupIndex);
+  const position = rawPosition === -1 ? 0 : rawPosition;
+  const canGoPrevious = position > 0;
+  const canGoNext = position < visibleIndices.length - 1;
+
+  const goTo = (nextPosition: number) => {
+    const nextIndex = visibleIndices[nextPosition];
+    if (nextIndex !== undefined) setActiveGroupIndex(nextIndex);
+  };
 
   return (
     <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3">
       <Button
         type="button"
         variant="ghost"
-        disabled={clampedIndex <= 0}
-        onClick={() => setActiveGroupIndex((index) => Math.max(index - 1, 0))}
+        disabled={!canGoPrevious}
+        onClick={() => goTo(position - 1)}
       >
         <ChevronLeft className="size-4" />
         {t("previous")}
@@ -31,10 +43,8 @@ export function RendererFooter() {
       <Button
         type="button"
         variant="ghost"
-        disabled={clampedIndex >= lastIndex}
-        onClick={() =>
-          setActiveGroupIndex((index) => Math.min(index + 1, lastIndex))
-        }
+        disabled={!canGoNext}
+        onClick={() => goTo(position + 1)}
       >
         {t("next")}
         <ChevronRight className="size-4" />
