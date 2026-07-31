@@ -10,6 +10,7 @@ import {
   useQuestionEnabled,
   useQuestionErrors,
 } from "@/components/QuestionnaireV2/renderer/store";
+import { StructuredQuestionSlot } from "@/components/QuestionnaireV2/renderer/structured/StructuredQuestionSlot";
 
 import type { Question } from "@/types/questionnaire/question";
 
@@ -39,10 +40,7 @@ export function QuestionField({
     );
   }
 
-  const InputComponent =
-    question.type === "structured"
-      ? null // Task 9 replaces this branch with <StructuredQuestionSlot />
-      : QUESTION_TYPE_COMPONENTS[question.type];
+  const InputComponent = QUESTION_TYPE_COMPONENTS[question.type];
 
   return (
     <div
@@ -57,20 +55,30 @@ export function QuestionField({
       {question.description && (
         <p className="text-xs text-gray-500">{question.description}</p>
       )}
-      <div className="flex items-stretch overflow-hidden rounded-md border border-gray-200">
-        <div className="min-w-0 flex-1">
-          {InputComponent ? (
-            <InputComponent question={question} disabled={effectiveDisabled} />
-          ) : (
-            <p className="p-2 text-sm italic text-gray-400">
-              {t("unsupported_question_type")}
-            </p>
+      {question.type === "structured" ? (
+        <StructuredQuestionSlot
+          question={question}
+          disabled={effectiveDisabled}
+        />
+      ) : (
+        <div className="flex items-stretch overflow-hidden rounded-md border border-gray-200">
+          <div className="min-w-0 flex-1">
+            {InputComponent ? (
+              <InputComponent
+                question={question}
+                disabled={effectiveDisabled}
+              />
+            ) : (
+              <p className="p-2 text-sm italic text-gray-400">
+                {t("unsupported_question_type")}
+              </p>
+            )}
+          </div>
+          {question.type !== "display" && (
+            <NoteAffordance questionId={question.id} />
           )}
         </div>
-        {question.type !== "display" && (
-          <NoteAffordance questionId={question.id} />
-        )}
-      </div>
+      )}
       {errors.map((error, i) => (
         <p key={i} className="text-sm text-red-600">
           {error.msg ?? error.error}
