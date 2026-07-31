@@ -17,7 +17,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
-import { EmptyState } from "./empty-state";
+import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
 export const DischargeDetails = () => {
   const { t } = useTranslation();

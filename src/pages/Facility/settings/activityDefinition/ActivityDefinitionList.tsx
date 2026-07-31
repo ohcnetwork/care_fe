@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
 import { ResourceCategoryList } from "@/components/Common/ResourceCategoryList";
-import { ActivityDefinitionList as ActivityDefinitionListComponent } from "@/pages/Facility/settings/activityDefinition/ActivityDefinitionListComponent";
+import { ActivityDefinitionListContent } from "@/pages/Facility/settings/activityDefinition/ActivityDefinitionListComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { Status } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
@@ -58,7 +58,7 @@ export default function ActivityDefinitionList({
         }}
       >
         {categorySlug && (
-          <ActivityDefinitionListComponent
+          <ActivityDefinitionListContent
             facilityId={facilityId}
             categorySlug={categorySlug}
             setAllowCategoryCreate={setAllowCategoryCreate}
