@@ -189,7 +189,7 @@ export default function PublicPatientRegistration(
       }
       createAppointment({
         patient: data.id,
-        note: reason ?? "",
+        note: reason.trim() ?? "",
       });
     },
   });

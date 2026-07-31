@@ -45,7 +45,7 @@ const SLOT_STEP = 3;
 const REASON_STEP = 4;
 
 /** Days offered in the horizontal date strip. */
-const DATE_STRIP_DAYS = 6;
+const DATE_STRIP_DAYS = 30;
 const REASON_MAX_LENGTH = 300;
 
 interface AppointmentsProps {
@@ -187,7 +187,10 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         queryClient.invalidateQueries({
           queryKey: ["appointment", tokenData?.phoneNumber],
         });
-        createAppointment({ note: reason, patient: cancelled.patient.id });
+        createAppointment({
+          note: reason.trim(),
+          patient: cancelled.patient.id,
+        });
       },
     });
 
@@ -211,7 +214,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       toast.error(t("select_patient"));
       return;
     }
-    createAppointment({ note: reason, patient: selectedPatient.id });
+    createAppointment({ note: reason.trim(), patient: selectedPatient.id });
   };
 
   if (!userData) {
@@ -355,7 +358,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           <span className="text-sm font-bold text-gray-900">
             {dayjs(selectedDate).format("MMMM YYYY")}
           </span>
-          <div className="grid grid-cols-6 gap-1.5">
+          <div className="scrollbar-none -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1">
             {dateStrip.map((day) => {
               const isSelected = day.isSame(dayjs(selectedDate), "day");
               return (
@@ -365,7 +368,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                   onClick={() => selectDate(day.toDate())}
                   aria-pressed={isSelected}
                   className={cn(
-                    "rounded-xl border py-2 text-center transition-colors",
+                    "w-14 shrink-0 rounded-xl border py-2 text-center transition-colors",
                     isSelected
                       ? "border-primary-700 bg-primary-700 text-white"
                       : "border-gray-200 bg-white hover:border-gray-300",

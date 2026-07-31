@@ -52,13 +52,18 @@ export default function BookFacility() {
   const district = districtOrganization(selectedPatient);
   const organization = qParams.organization ?? district?.id;
 
+  const facilityType =
+    qParams.facility_type && qParams.facility_type !== "undefined"
+      ? qParams.facility_type
+      : undefined;
+
   const { data, isLoading } = useQuery({
-    queryKey: ["facilities", organization, qParams.facility_type, search],
+    queryKey: ["facilities", organization, facilityType, search],
     queryFn: query.debounced(publicFacilityApi.getAll, {
       queryParams: {
         ...(search && { name: search }),
         ...(organization && { organization }),
-        ...(qParams.facility_type && { facility_type: qParams.facility_type }),
+        ...(facilityType && { facility_type: facilityType }),
         page: 1,
         limit: RESULTS_PER_PAGE_LIMIT,
         offset: 0,
@@ -83,15 +88,20 @@ export default function BookFacility() {
           <OrganizationFilter
             skipLevels={[]}
             selected={organization}
-            onChange={(filter) =>
+            onChange={(filter) => {
+              const merged = { ...qParams, ...filter };
               setQParams(
                 {
-                  organization: filter.organization as string | undefined,
-                  facility_type: filter.facility_type as string | undefined,
+                  ...(merged.organization && {
+                    organization: merged.organization as string,
+                  }),
+                  ...(merged.facility_type && {
+                    facility_type: merged.facility_type as string,
+                  }),
                 },
                 { replace: true },
-              )
-            }
+              );
+            }}
           />
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />

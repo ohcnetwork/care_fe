@@ -83,6 +83,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   });
 
   const handleShare = async () => {
+    const url = window.location.href;
     const text = [
       summaryTitle,
       start.format("ddd, D MMM YYYY · h:mm A"),
@@ -96,20 +97,20 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: summaryTitle, text });
+        await navigator.share({ title: summaryTitle, text, url });
       } catch {
         // Dismissing the native share sheet is not an error worth surfacing.
       }
       return;
     }
 
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(`${text}\n${url}`);
     toast.success(t("copied_to_clipboard"));
   };
 
   return (
     <div className="min-h-dvh bg-white">
-      <div className="mx-auto flex max-w-[480px] flex-col">
+      <div className="mx-auto flex flex-col">
         <div className="bg-primary-700 px-7 pb-9 pt-10 text-center text-white">
           <span className="mx-auto mb-3.5 flex size-16 items-center justify-center rounded-full bg-white/20">
             <Check className="size-8" strokeWidth={2.6} />
@@ -128,7 +129,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
           )}
         </div>
 
-        <div className="-mt-6 flex flex-col gap-4 px-4 pb-8">
+        <div className="-mt-6 flex flex-col gap-4 px-4 pb-8 max-w-md mx-auto">
           {/* The same pass the visit screen shows, so what the patient sees the
               moment they book is what they find again later. */}
           <AppointmentTokenPass
