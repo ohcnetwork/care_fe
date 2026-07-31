@@ -132,7 +132,9 @@ const Login = (props: LoginProps) => {
   // Autofocuses when switching tabs
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      document.getElementById(mode === "staff" ? "username" : "phone")?.focus();
+      document
+        .getElementById(activeMode === "staff" ? "username" : "phone")
+        ?.focus();
     });
     return () => cancelAnimationFrame(frame);
   }, [activeMode]);
