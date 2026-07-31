@@ -79,6 +79,9 @@ export function OrgSelector({
 
   const triggerButton = (
     <Button
+      // OrgSelector renders inside host <form>s (e.g. the questionnaire
+      // detail page) — an untyped button there would submit the form.
+      type="button"
       variant="outline"
       className={cn(
         "w-full justify-start text-left font-normal",

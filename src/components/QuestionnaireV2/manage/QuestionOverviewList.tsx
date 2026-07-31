@@ -21,6 +21,8 @@ import { Question } from "@/types/questionnaire/question";
 interface QuestionOverviewListProps {
   questions: Question[];
   isSaving: boolean;
+  /** When false, every mutation affordance (edit/import/reorder) is hidden. */
+  canWrite: boolean;
   onReorder: (from: number, to: number) => void;
   onEditQuestions: () => void;
   onImportQuestions: () => void;
@@ -29,6 +31,7 @@ interface QuestionOverviewListProps {
 export function QuestionOverviewList({
   questions,
   isSaving,
+  canWrite,
   onReorder,
   onEditQuestions,
   onImportQuestions,
@@ -54,10 +57,19 @@ export function QuestionOverviewList({
         <h3 className="text-sm font-semibold text-gray-900">
           {t("questions")}
         </h3>
-        <Button variant="outline" size="sm" onClick={onEditQuestions}>
-          <SquarePen className="mr-2 size-4" />
-          {t("edit_questions")}
-        </Button>
+        {canWrite && (
+          <Button
+            // Rendered inside the detail page's <form> — without an explicit
+            // type this would double as a submit button and fire a PUT.
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onEditQuestions}
+          >
+            <SquarePen className="mr-2 size-4" />
+            {t("edit_questions")}
+          </Button>
+        )}
       </div>
 
       {questions.length === 0 ? (
@@ -73,20 +85,26 @@ export function QuestionOverviewList({
               {t("import_questions_hint")}
             </p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <Button
-              type="button"
-              variant="outline_primary"
-              onClick={onEditQuestions}
-            >
-              <Plus className="size-4" />
-              {t("add_first_question")}
-            </Button>
-            <Button type="button" variant="outline" onClick={onImportQuestions}>
-              <Upload className="size-4" />
-              {t("import_questions")}
-            </Button>
-          </div>
+          {canWrite && (
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button
+                type="button"
+                variant="outline_primary"
+                onClick={onEditQuestions}
+              >
+                <Plus className="size-4" />
+                {t("add_first_question")}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onImportQuestions}
+              >
+                <Upload className="size-4" />
+                {t("import_questions")}
+              </Button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
@@ -128,30 +146,32 @@ export function QuestionOverviewList({
                         </Button>
                       </>
                     )}
-                    <div className="ml-auto flex items-center gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="size-6"
-                        disabled={index === 0 || isSaving}
-                        onClick={() => onReorder(index, index - 1)}
-                        aria-label={t("move_up")}
-                      >
-                        <ChevronUp className="size-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="size-6"
-                        disabled={index === questions.length - 1 || isSaving}
-                        onClick={() => onReorder(index, index + 1)}
-                        aria-label={t("move_down")}
-                      >
-                        <ChevronDown className="size-4" />
-                      </Button>
-                    </div>
+                    {canWrite && (
+                      <div className="ml-auto flex items-center gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-6"
+                          disabled={index === 0 || isSaving}
+                          onClick={() => onReorder(index, index - 1)}
+                          aria-label={t("move_up")}
+                        >
+                          <ChevronUp className="size-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-6"
+                          disabled={index === questions.length - 1 || isSaving}
+                          onClick={() => onReorder(index, index + 1)}
+                          aria-label={t("move_down")}
+                        >
+                          <ChevronDown className="size-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
 
                   {isExpanded && subQuestions.length > 0 && (

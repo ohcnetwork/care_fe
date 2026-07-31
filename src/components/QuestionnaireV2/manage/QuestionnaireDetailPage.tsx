@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { LabeledActionButton } from "@/components/QuestionnaireV2/shared/LabeledActionButton";
+import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import {
   QUESTIONNAIRE_STATUS_COLORS,
@@ -46,12 +47,20 @@ import { QuestionOverviewList } from "./QuestionOverviewList";
 import { VersionsTab } from "./VersionsTab";
 
 /**
- * Serializes the fetched questionnaire exactly like the v1 editor's export
- * (data-URI + a programmatic `<a download>` click) so downloaded files stay
- * compatible with the import flow on either version.
+ * Serializes only the questionnaire *definition* — the same writable field
+ * set `buildUpdateBody` selects (slug, version, code, questions, title,
+ * description, status, subject_type) plus the id — via a data-URI +
+ * programmatic `<a download>` click, so downloaded files stay compatible
+ * with the import flow on either version. Never serialize the raw API
+ * response here: it carries audit user objects (`created_by`/`updated_by`)
+ * that must not leave the app in an export file.
  */
 function downloadQuestionnaireJson(questionnaire: QuestionnaireRead) {
-  const dataStr = JSON.stringify(questionnaire, null, 2);
+  const definition = {
+    id: questionnaire.id,
+    ...buildUpdateBody(questionnaire, {}),
+  };
+  const dataStr = JSON.stringify(definition, null, 2);
   const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
 
   const linkElement = document.createElement("a");
@@ -77,6 +86,7 @@ export function QuestionnaireDetailPage({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [cloneOpen, setCloneOpen] = useState(false);
+  const { canWrite } = useCanWriteQuestionnaire(scope);
 
   const {
     data: questionnaire,
@@ -118,7 +128,13 @@ export function QuestionnaireDetailPage({
 
   const { mutate: save, isPending } = useMutation({
     mutationFn: mutate(questionnaireApi.update, { pathParams: { id } }),
-    onSuccess: () => {
+    onSuccess: (updated: QuestionnaireRead) => {
+      // Write the response into the cache BEFORE invalidating — the next
+      // save composes its full PUT body from this cached questionnaire, and
+      // relying on the invalidation refetch alone leaves a stale window (one
+      // network round-trip) where a second quick action would silently
+      // revert the change that just persisted.
+      queryClient.setQueryData(["questionnairesV2", "detail", id], updated);
       queryClient.invalidateQueries({ queryKey: ["questionnairesV2"] });
       toast.success(t("questionnaire_updated_successfully"));
     },
@@ -217,10 +233,12 @@ export function QuestionnaireDetailPage({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
-                <Check className="mr-2 size-4" />
-                {t("save_form")}
-              </Button>
+              {canWrite && (
+                <Button type="submit" disabled={isPending}>
+                  <Check className="mr-2 size-4" />
+                  {t("save_form")}
+                </Button>
+              )}
             </div>
           </div>
 
@@ -233,10 +251,15 @@ export function QuestionnaireDetailPage({
               <div className="grid gap-4 md:grid-cols-[1fr_280px] md:gap-6">
                 <div className="space-y-4">
                   <BasicInformationCard form={form} />
-                  <OrganizationsField scope={scope} questionnaireId={id} />
+                  <OrganizationsField
+                    scope={scope}
+                    questionnaireId={id}
+                    canWrite={canWrite}
+                  />
                   <QuestionOverviewList
                     questions={questionnaire.questions}
                     isSaving={isPending}
+                    canWrite={canWrite}
                     onReorder={(from, to) =>
                       save(
                         buildUpdateBody(questionnaire, {
@@ -270,13 +293,15 @@ export function QuestionnaireDetailPage({
                     <Eye className="size-4" />
                     {t("preview_form")}
                   </LabeledActionButton>
-                  <LabeledActionButton
-                    label={t("create_copy_of_form")}
-                    onClick={() => setCloneOpen(true)}
-                  >
-                    <Copy className="size-4" />
-                    {t("clone_form")}
-                  </LabeledActionButton>
+                  {canWrite && (
+                    <LabeledActionButton
+                      label={t("create_copy_of_form")}
+                      onClick={() => setCloneOpen(true)}
+                    >
+                      <Copy className="size-4" />
+                      {t("clone_form")}
+                    </LabeledActionButton>
+                  )}
                   <LabeledActionButton
                     label={t("download_the_form")}
                     onClick={() => downloadQuestionnaireJson(questionnaire)}

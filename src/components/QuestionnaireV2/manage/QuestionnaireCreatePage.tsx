@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +24,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
+
 import { SegmentedRadioGroup } from "@/components/QuestionnaireV2/shared/SegmentedRadioGroup";
+import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import {
   QuestionStatus,
@@ -53,6 +57,8 @@ export function QuestionnaireCreatePage({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { canWrite, isLoading: isPermissionLoading } =
+    useCanWriteQuestionnaire(scope);
 
   const subjectTypeOptions = SUBJECT_TYPES_FOR_CONTEXT[scope.authContext];
 
@@ -132,6 +138,27 @@ export function QuestionnaireCreatePage({
           : undefined,
     });
   };
+
+  if (isPermissionLoading) {
+    return <FormSkeleton rows={10} />;
+  }
+
+  // The whole page is a mutation surface — deep links without write access
+  // get a denied state instead of a form whose submit can only 403.
+  if (!canWrite) {
+    return (
+      <div className="space-y-4">
+        <Alert variant="destructive">
+          <AlertTitle>{t("error")}</AlertTitle>
+          <AlertDescription>{t("permission_denied")}</AlertDescription>
+        </Alert>
+        <Button variant="outline" onClick={() => navigate(scope.basePath)}>
+          <ArrowLeft className="size-4" />
+          {t("back")}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

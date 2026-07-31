@@ -536,6 +536,7 @@ export default function FacilityOrganizationSelector(
             </div>
             {alreadySelected && !currentSelection.has_children && (
               <Button
+                type="button" // Prevents unintended form submission
                 variant="ghost"
                 size="sm"
                 className="h-8 gap-2"
@@ -547,6 +548,7 @@ export default function FacilityOrganizationSelector(
             )}
             {currentSelection.has_children && (
               <Button
+                type="button" // Prevents unintended form submission
                 variant="ghost"
                 size="sm"
                 className="h-8 gap-2"
@@ -634,6 +636,7 @@ export default function FacilityOrganizationSelector(
               <Popover open={open} onOpenChange={handleOpenChange}>
                 <PopoverTrigger asChild>
                   <Button
+                    type="button" // Prevents unintended form submission
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}

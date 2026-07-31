@@ -24,9 +24,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { getPermissions } from "@/common/Permissions";
+import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
-import { usePermissions } from "@/context/PermissionContext";
 import useFilters from "@/hooks/useFilters";
 
 import { cn } from "@/lib/utils";
@@ -49,13 +48,7 @@ export function QuestionnaireListPage({
   scope: QuestionnaireScope;
 }) {
   const { t } = useTranslation();
-  const { hasPermission, userPermissions } = usePermissions();
-  // No object-scoped permissions apply to a cross-facility/instance list —
-  // gate the Create button on the user's own (non-object) permissions.
-  const { canWriteQuestionnaire } = getPermissions(
-    hasPermission,
-    userPermissions,
-  );
+  const { canWrite: canWriteQuestionnaire } = useCanWriteQuestionnaire(scope);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
