@@ -144,8 +144,8 @@ export default function TagConfigForm({
         facility_organization: existingConfig.facility_organization?.id,
         organization: existingConfig.organization?.id,
         color:
-          typeof existingConfig.meta?.color === "string"
-            ? existingConfig.meta.color
+          typeof existingConfig.metadata?.color === "string"
+            ? existingConfig.metadata.color
             : "",
       });
     }
@@ -204,7 +204,7 @@ export default function TagConfigForm({
       priority: data.priority,
       status: data.status,
       resource: data.resource,
-      meta: data.color ? { color: data.color } : {},
+      metadata: data.color ? { color: data.color } : {},
       ...(parentId && { parent: parentId }),
       ...(facilityId && { facility: facilityId }),
       ...(data.facility_organization && {

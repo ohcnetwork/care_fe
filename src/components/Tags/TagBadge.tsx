@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 function getTagColorStyles(tag: TagConfig) {
-  const color = tag.meta?.color; // hex color string or undefined
+  const color = tag.metadata?.color; // hex color string or undefined
   if (!color || typeof color !== "string") return {};
 
   return {
