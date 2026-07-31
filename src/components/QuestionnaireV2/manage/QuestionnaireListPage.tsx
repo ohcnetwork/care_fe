@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   Archive,
+  ClipboardList,
   Eye,
   FileCheck,
   NotepadTextDashed,
@@ -48,7 +49,8 @@ export function QuestionnaireListPage({
   scope: QuestionnaireScope;
 }) {
   const { t } = useTranslation();
-  const { canWrite: canWriteQuestionnaire } = useCanWriteQuestionnaire(scope);
+  const { canWrite: canWriteQuestionnaire, isLoading: isPermissionLoading } =
+    useCanWriteQuestionnaire(scope);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
@@ -115,7 +117,7 @@ export function QuestionnaireListPage({
           ))}
         </div>
 
-        <div className="relative">
+        <div className="relative w-full md:w-[300px]">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
           <Input
             placeholder={t("search_questionnaires")}
@@ -123,13 +125,13 @@ export function QuestionnaireListPage({
             onChange={(e) =>
               updateQuery({ search: e.target.value || undefined })
             }
-            className="w-full pl-9 md:w-[300px]"
+            className="w-full pl-9"
           />
         </div>
 
         {canWriteQuestionnaire && (
           <Button
-            className="ml-auto"
+            className="w-full md:ml-auto md:w-auto"
             onClick={() => navigate(`${scope.basePath}/new`)}
           >
             <Plus className="mr-2 size-4" />
@@ -138,21 +140,36 @@ export function QuestionnaireListPage({
         )}
       </div>
 
-      {isLoading ? (
+      {isLoading || isPermissionLoading ? (
         <TableSkeleton count={10} />
       ) : questionnaires.length === 0 ? (
         <EmptyState
+          icon={<ClipboardList className="size-6 text-primary" />}
           title={t("no_questionnaires_found")}
           description={t("adjust_questionnaire_filters")}
+          action={
+            canWriteQuestionnaire ? (
+              <Button onClick={() => navigate(`${scope.basePath}/new`)}>
+                <Plus className="mr-2 size-4" />
+                {t("create_questionnaire")}
+              </Button>
+            ) : undefined
+          }
         />
       ) : (
         <div className="hidden rounded-lg border md:block">
-          <Table>
+          <Table className="table-fixed">
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[30%]">{t("title")}</TableHead>
-                <TableHead className="w-[50%]">{t("description")}</TableHead>
-                <TableHead>{t("slug")}</TableHead>
+              <TableRow className="bg-gray-50 hover:bg-gray-50">
+                <TableHead className="h-8 w-[30%] text-xs font-medium text-gray-500">
+                  {t("title")}
+                </TableHead>
+                <TableHead className="h-8 w-[50%] text-xs font-medium text-gray-500">
+                  {t("description")}
+                </TableHead>
+                <TableHead className="h-8 w-[20%] text-xs font-medium text-gray-500">
+                  {t("slug")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -173,12 +190,12 @@ export function QuestionnaireListPage({
                     }
                   }}
                 >
-                  <TableCell className="font-medium">
+                  <TableCell className="truncate font-medium">
                     {questionnaire.title}
                   </TableCell>
                   <TableCell className="text-gray-500">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="line-clamp-1">
+                      <span className="min-w-0 flex-1 truncate">
                         {questionnaire.description}
                       </span>
                       <Button
@@ -198,7 +215,7 @@ export function QuestionnaireListPage({
                   <TableCell>
                     <Badge
                       variant="secondary"
-                      className="font-mono font-normal"
+                      className="max-w-full truncate font-normal"
                     >
                       {questionnaire.slug}
                     </Badge>
@@ -210,7 +227,7 @@ export function QuestionnaireListPage({
         </div>
       )}
       {/* Mobile cards */}
-      {!isLoading && questionnaires.length > 0 && (
+      {!isLoading && !isPermissionLoading && questionnaires.length > 0 && (
         <div className="grid gap-3 md:hidden">
           {questionnaires.map((questionnaire) => (
             <button
@@ -223,7 +240,7 @@ export function QuestionnaireListPage({
               <p className="mt-1 line-clamp-2 text-sm text-gray-500">
                 {questionnaire.description}
               </p>
-              <Badge variant="secondary" className="mt-2 font-mono font-normal">
+              <Badge variant="secondary" className="mt-2 font-normal">
                 {questionnaire.slug}
               </Badge>
             </button>

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -156,6 +157,9 @@ export function CloneQuestionnaireDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("clone_questionnaire")}</DialogTitle>
+          <DialogDescription>
+            {t("clone_questionnaire_draft_description")}
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

@@ -40,8 +40,10 @@ export function SegmentedRadioGroup<T extends string>({
       aria-label={ariaLabel}
       // flex-wrap + min-w-fit keep every option label fully visible in
       // narrow containers (e.g. the 280px detail sidebar) instead of
-      // clipping the text.
-      className="flex w-full flex-wrap divide-x divide-gray-200 overflow-hidden rounded-md border border-gray-200"
+      // clipping the text. gap-px over the gray container paints 1px
+      // dividers between cells that survive wrapping onto multiple rows
+      // (divide-x only draws left borders, leaving wrapped rows fused).
+      className="flex w-full flex-wrap gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200"
     >
       {options.map((option, index) => {
         const selected = option.value === value;

@@ -337,15 +337,16 @@ export function ImportQuestionsDialog({
               >
                 {t("cancel")}
               </Button>
-              {mode === "url" && (
-                <Button
-                  type="button"
-                  onClick={handleImportFromUrl}
-                  disabled={isFetching || !url}
-                >
-                  {isFetching ? t("importing") : t("import")}
-                </Button>
-              )}
+              {/* Always render the primary action so the footer keeps the
+                  Cancel/primary rhythm in both modes; in file mode the
+                  dropzone drives the flow, so it stays disabled. */}
+              <Button
+                type="button"
+                onClick={handleImportFromUrl}
+                disabled={mode === "file" || isFetching || !url}
+              >
+                {isFetching ? t("importing") : t("import")}
+              </Button>
             </>
           ) : (
             <>

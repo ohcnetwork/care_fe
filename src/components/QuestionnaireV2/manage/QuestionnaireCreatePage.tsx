@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, ListChecks } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, useNavigationPrompt } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -117,6 +117,13 @@ export function QuestionnaireCreatePage({
       navigate(`${scope.basePath}/${created.id}`);
     },
   });
+
+  // The sibling builder page guards unsaved edits the same way; `!isPending`
+  // keeps the post-create navigate() in onSuccess from tripping the prompt.
+  useNavigationPrompt(
+    form.formState.isDirty && !isPending,
+    t("unsaved_changes_warning"),
+  );
 
   const onSubmit = (values: CreateFormValues) => {
     create({
@@ -256,29 +263,29 @@ export function QuestionnaireCreatePage({
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("questions")}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-gray-200 bg-gray-50 py-10 text-center">
-                    <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
-                      <ListChecks className="size-6 text-primary" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-gray-900">
-                        {t("no_questions_added_yet")}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {t("add_your_first_question_hint")}
-                      </p>
-                    </div>
+              {/* Matches the detail page's Questions container (plain
+                  bordered section, not a nested Card-in-Card). */}
+              <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
+                <h3 className="text-sm font-semibold text-gray-900">
+                  {t("questions")}
+                </h3>
+                <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-gray-200 bg-gray-50 py-6 text-center">
+                  <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
+                    <ListChecks className="size-6 text-primary" />
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-gray-900">
+                      {t("no_questions_added_yet")}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {t("add_your_first_question_hint")}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="h-fit space-y-4 rounded-lg border border-gray-200 bg-white p-4">
+            <div className="h-fit space-y-4">
               <h3 className="text-sm font-semibold text-gray-900">
                 {t("form_properties")}
               </h3>
@@ -317,6 +324,16 @@ export function QuestionnaireCreatePage({
                   }))}
                   aria-label={t("subject_type")}
                 />
+              </div>
+
+              <hr className="border-dashed" />
+
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-gray-500">
+                  {t("version")}
+                </p>
+                {/* eslint-disable-next-line i18next/no-literal-string -- version notation ("v1"), not translatable prose */}
+                <Badge variant="secondary">v1</Badge>
               </div>
             </div>
           </div>
