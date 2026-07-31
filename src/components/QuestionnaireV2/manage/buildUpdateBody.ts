@@ -13,10 +13,11 @@ import {
  * `auth_context`, `internal_revision`, `created_by`, `updated_by`, and
  * `modified_date` must never be echoed back in the PUT body.
  *
- * `version` is defensively coerced to a string: the read endpoint can return
- * it as a raw number (seen with fixture data such as `0.1`), but the update
- * schema requires a string — without this, saving a title/status/reorder
- * change (which never touches `version`) would still 400.
+ * `version` is coerced to a string because `QuestionnaireRead.version` is
+ * `string | number` (the read endpoint can return a bare number, e.g. `0.1`
+ * from fixture data) while the update schema requires a string — without
+ * this, saving a title/status/reorder change (which never touches `version`)
+ * would still 400.
  */
 export function buildUpdateBody(
   questionnaire: QuestionnaireRead,

@@ -31,17 +31,25 @@ import useFilters from "@/hooks/useFilters";
 
 import { cn } from "@/lib/utils";
 import {
+  QUESTIONNAIRE_STATUSES,
   QuestionStatus,
   QuestionnaireScope,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
 
-const STATUS_TABS: { value: QuestionStatus; icon: React.ReactNode }[] = [
-  { value: "active", icon: <FileCheck className="size-4" /> },
-  { value: "draft", icon: <NotepadTextDashed className="size-4" /> },
-  { value: "retired", icon: <Archive className="size-4" /> },
-];
+const STATUS_TAB_ICONS: Record<QuestionStatus, React.ReactNode> = {
+  active: <FileCheck className="size-4" />,
+  draft: <NotepadTextDashed className="size-4" />,
+  retired: <Archive className="size-4" />,
+};
+
+/** Tab order mirrors the canonical status array, so adding a status surfaces
+ *  a tab (and a compile error here until it gets an icon). */
+const STATUS_TABS = QUESTIONNAIRE_STATUSES.map((value) => ({
+  value,
+  icon: STATUS_TAB_ICONS[value],
+}));
 
 export function QuestionnaireListPage({
   scope,

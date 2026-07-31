@@ -28,10 +28,12 @@ import { LabeledActionButton } from "@/components/QuestionnaireV2/shared/Labeled
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import {
+  QUESTIONNAIRE_STATUSES,
   QUESTIONNAIRE_STATUS_COLORS,
   QuestionStatus,
   QuestionnaireRead,
   QuestionnaireScope,
+  formatRevision,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
@@ -115,7 +117,7 @@ export function QuestionnaireDetailPage({
       .max(25, t("character_count_validation", { min: 5, max: 25 }))
       .regex(/^[-\w]+$/, t("slug_format_message")),
     description: z.string(),
-    status: z.enum(["active", "draft", "retired"]),
+    status: z.enum(QUESTIONNAIRE_STATUSES),
   });
 
   const form = useForm<DetailFormValues>({
@@ -243,9 +245,8 @@ export function QuestionnaireDetailPage({
                   >
                     {t(questionnaire.status)}
                   </Badge>
-                  {/* eslint-disable-next-line i18next/no-literal-string -- version notation ("v1"), not translatable prose */}
                   <Badge variant="secondary">
-                    v{questionnaire.internal_revision ?? 1}
+                    {formatRevision(questionnaire.internal_revision)}
                   </Badge>
                 </div>
                 <div className="flex shrink-0 gap-2">

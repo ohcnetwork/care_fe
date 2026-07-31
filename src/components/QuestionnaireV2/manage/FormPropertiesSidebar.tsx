@@ -6,13 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { SegmentedRadioGroup } from "@/components/QuestionnaireV2/shared/SegmentedRadioGroup";
 
 import {
-  QuestionStatus,
+  QUESTIONNAIRE_STATUSES,
   QuestionnaireRead,
+  formatRevision,
 } from "@/types/questionnaire/questionnaire";
 
 import { DetailFormValues } from "./QuestionnaireDetailPage";
-
-const STATUS_OPTIONS: QuestionStatus[] = ["active", "draft", "retired"];
 
 interface FormPropertiesSidebarProps {
   questionnaire: QuestionnaireRead;
@@ -44,7 +43,7 @@ export function FormPropertiesSidebar({
           onChange={(value) =>
             form.setValue("status", value, { shouldDirty: true })
           }
-          options={STATUS_OPTIONS.map((value) => ({
+          options={QUESTIONNAIRE_STATUSES.map((value) => ({
             value,
             label: t(value),
           }))}
@@ -67,9 +66,8 @@ export function FormPropertiesSidebar({
 
       <div className="space-y-1.5">
         <p className="text-xs font-medium text-gray-500">{t("version")}</p>
-        {/* eslint-disable-next-line i18next/no-literal-string -- version notation ("v1"), not translatable prose */}
         <Badge variant="secondary">
-          v{questionnaire.internal_revision ?? 1}
+          {formatRevision(questionnaire.internal_revision)}
         </Badge>
       </div>
     </div>

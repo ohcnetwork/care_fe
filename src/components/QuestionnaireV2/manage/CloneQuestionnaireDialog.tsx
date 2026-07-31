@@ -31,6 +31,7 @@ import { regenerateQuestionIds } from "@/components/QuestionnaireV2/builder/buil
 import {
   QuestionnaireRead,
   QuestionnaireScope,
+  scopeCreateFields,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
@@ -140,15 +141,7 @@ export function CloneQuestionnaireDialog({
       questions: regenerateQuestionIds(
         structuredClone(questionnaire.questions),
       ),
-      auth_context: scope.authContext,
-      facility:
-        scope.authContext === "facility" || scope.authContext === "user"
-          ? scope.facilityId
-          : undefined,
-      facility_organization:
-        scope.authContext === "facility_organization"
-          ? scope.facilityOrganizationId
-          : undefined,
+      ...scopeCreateFields(scope),
     });
   };
 

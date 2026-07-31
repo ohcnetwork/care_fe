@@ -30,17 +30,19 @@ import { SegmentedRadioGroup } from "@/components/QuestionnaireV2/shared/Segment
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import {
+  QUESTIONNAIRE_STATUSES,
   QuestionStatus,
   QuestionnaireRead,
   QuestionnaireScope,
+  SUBJECT_TYPES,
   SUBJECT_TYPES_FOR_CONTEXT,
   SubjectType,
+  formatRevision,
+  scopeCreateFields,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
 import { generateSlug } from "@/Utils/utils";
-
-const STATUS_OPTIONS: QuestionStatus[] = ["active", "draft", "retired"];
 
 interface CreateFormValues {
   title: string;
@@ -70,14 +72,8 @@ export function QuestionnaireCreatePage({
       .max(25, t("character_count_validation", { min: 5, max: 25 }))
       .regex(/^[-\w]+$/, t("slug_format_message")),
     description: z.string(),
-    status: z.enum(["active", "draft", "retired"]),
-    subject_type: z.enum([
-      "patient",
-      "encounter",
-      "location",
-      "device",
-      "facility",
-    ]),
+    status: z.enum(QUESTIONNAIRE_STATUSES),
+    subject_type: z.enum(SUBJECT_TYPES),
   });
 
   const form = useForm<CreateFormValues>({
@@ -134,15 +130,7 @@ export function QuestionnaireCreatePage({
       subject_type: values.subject_type,
       version: "1.0",
       questions: [],
-      auth_context: scope.authContext,
-      facility:
-        scope.authContext === "facility" || scope.authContext === "user"
-          ? scope.facilityId
-          : undefined,
-      facility_organization:
-        scope.authContext === "facility_organization"
-          ? scope.facilityOrganizationId
-          : undefined,
+      ...scopeCreateFields(scope),
     });
   };
 
@@ -299,7 +287,7 @@ export function QuestionnaireCreatePage({
                   onChange={(value) =>
                     form.setValue("status", value, { shouldDirty: true })
                   }
-                  options={STATUS_OPTIONS.map((value) => ({
+                  options={QUESTIONNAIRE_STATUSES.map((value) => ({
                     value,
                     label: t(value),
                   }))}
@@ -332,8 +320,7 @@ export function QuestionnaireCreatePage({
                 <p className="text-xs font-medium text-gray-500">
                   {t("version")}
                 </p>
-                {/* eslint-disable-next-line i18next/no-literal-string -- version notation ("v1"), not translatable prose */}
-                <Badge variant="secondary">v1</Badge>
+                <Badge variant="secondary">{formatRevision()}</Badge>
               </div>
             </div>
           </div>

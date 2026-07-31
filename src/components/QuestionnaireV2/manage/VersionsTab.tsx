@@ -23,6 +23,8 @@ import {
   QUESTIONNAIRE_STATUS_COLORS,
   QuestionnaireRead,
   QuestionnaireScope,
+  formatRevision,
+  revisionOf,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
@@ -78,10 +80,10 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
     }),
   });
 
-  // Falls back the same way `internal_revision` is displayed below (`?? 1`)
-  // so the sort order and the printed version numbers never disagree.
+  // `revisionOf` shares its `?? 1` fallback with `formatRevision`, so the
+  // sort order and the printed version numbers never disagree.
   const pastRevisions = [...(revisions?.results ?? [])].sort(
-    (a, b) => (b.internal_revision ?? 1) - (a.internal_revision ?? 1),
+    (a, b) => revisionOf(b) - revisionOf(a),
   );
   const totalRevisions = revisions?.count ?? pastRevisions.length;
 
@@ -118,9 +120,8 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    {/* eslint-disable-next-line i18next/no-literal-string -- version notation ("v1"), not translatable prose */}
                     <span className="font-medium text-gray-900">
-                      v{questionnaire.internal_revision ?? 1}
+                      {formatRevision(questionnaire.internal_revision)}
                     </span>
                     <Badge
                       variant={
@@ -185,7 +186,7 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium text-gray-900">
-                          v{revision.internal_revision ?? 1}
+                          {formatRevision(revision.internal_revision)}
                         </span>
                         {/* Backend gap: past revisions don't carry their own
                             status (QuestionnaireRead.status here still
@@ -244,9 +245,8 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
           <DialogHeader>
             <DialogTitle>
               {openRevision?.title}{" "}
-              {/* eslint-disable-next-line i18next/no-literal-string -- version notation ("v1"), not translatable prose */}
               <span className="text-gray-500">
-                v{openRevision?.internal_revision ?? 1}
+                {formatRevision(openRevision?.internal_revision)}
               </span>
             </DialogTitle>
           </DialogHeader>
