@@ -418,7 +418,8 @@ const HeaderRow = ({
     form && name
       ? form
           .watch(`${name}.items`)
-          .filter((q) => isMedicationDispenseable(q.medication))
+          .map((item, index) => ({ item, index }))
+          .filter((entry) => isMedicationDispenseable(entry.item.medication))
       : [];
 
   return (
@@ -436,22 +437,27 @@ const HeaderRow = ({
                       if (eligibleItems.length === 0) {
                         return false;
                       }
-                      if (eligibleItems.every((q) => q.isSelected)) {
+                      if (
+                        eligibleItems.every((entry) => entry.item.isSelected)
+                      ) {
                         return true;
                       }
-                      if (eligibleItems.every((q) => !q.isSelected)) {
+                      if (
+                        eligibleItems.every((entry) => !entry.item.isSelected)
+                      ) {
                         return false;
                       }
                       return "indeterminate";
                     })()}
                     onCheckedChange={(checked) => {
-                      const items = eligibleItems;
-                      items.forEach((_, index) => {
-                        form.setValue(
-                          `${name}.items.${index}.isSelected`,
-                          !!checked,
-                        );
-                      });
+                      form.setValues(
+                        Object.fromEntries(
+                          eligibleItems.map((entry) => [
+                            `${name}.items.${entry.index}.isSelected`,
+                            !!checked,
+                          ]),
+                        ),
+                      );
                     }}
                   />
                 </FormControl>
