@@ -650,7 +650,6 @@ export default function ServiceRequestShow({
                 </SheetHeader>
                 <CompletionNoteContent
                   facilityId={facilityId}
-                  serviceRequestId={serviceRequestId}
                   setIsCompleteDialogOpen={setIsCompleteDialogOpen}
                   onCancel={() => setIsCompleteDialogOpen(false)}
                   serviceRequest={request}
@@ -671,7 +670,6 @@ export default function ServiceRequestShow({
                 </DialogHeader>
                 <CompletionNoteContent
                   facilityId={facilityId}
-                  serviceRequestId={serviceRequestId}
                   setIsCompleteDialogOpen={setIsCompleteDialogOpen}
                   onCancel={() => setIsCompleteDialogOpen(false)}
                   serviceRequest={request}
@@ -687,7 +685,6 @@ export default function ServiceRequestShow({
 
 interface CompletionNoteContentProps {
   facilityId: string;
-  serviceRequestId: string;
   onCancel: () => void;
   setIsCompleteDialogOpen: (open: boolean) => void;
   serviceRequest: ServiceRequestReadSpec;
@@ -695,7 +692,6 @@ interface CompletionNoteContentProps {
 
 const CompletionNoteContent = ({
   facilityId,
-  serviceRequestId,
   onCancel,
   setIsCompleteDialogOpen,
   serviceRequest,
@@ -709,13 +705,13 @@ const CompletionNoteContent = ({
     isPending: isCompletingServiceRequest,
   } = useMutation({
     mutationFn: mutate(serviceRequestApi.updateServiceRequest, {
-      pathParams: { facilityId, serviceRequestId },
+      pathParams: { facilityId, serviceRequestId: serviceRequest.id },
     }),
     onSuccess: () => {
       toast.success(t("service_request_completed"));
       setIsCompleteDialogOpen(false);
       queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", facilityId, serviceRequestId],
+        queryKey: ["serviceRequest", facilityId, serviceRequest.id],
       });
     },
   });
