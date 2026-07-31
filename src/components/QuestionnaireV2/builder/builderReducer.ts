@@ -7,7 +7,7 @@ export interface BuilderState {
 }
 
 export type BuilderAction =
-  | { type: "reset"; questions: Question[] }
+  | { type: "reset"; questions: Question[]; keepSelectedId?: string | null }
   | { type: "replaceAll"; questions: Question[] }
   | { type: "select"; id: string | null }
   | { type: "addQuestion"; parentId: string | null; index?: number }
@@ -43,19 +43,6 @@ export function findQuestion(
   return undefined;
 }
 
-export function findParentId(
-  questions: Question[],
-  id: string,
-  parentId: string | null = null,
-): string | null | undefined {
-  for (const question of questions) {
-    if (question.id === id) return parentId;
-    const found = findParentId(question.questions ?? [], id, question.id);
-    if (found !== undefined) return found;
-  }
-  return undefined;
-}
-
 export function collectIds(question: Question): string[] {
   return [question.id, ...(question.questions ?? []).flatMap(collectIds)];
 }
@@ -71,13 +58,23 @@ export function collectIds(question: Question): string[] {
  * then rewrites every condition's `question` through that map — conditions
  * whose target isn't in the map (e.g. it pointed outside the copied subtree)
  * are dropped rather than left pointing at a stale id.
+ *
+ * Imported/hand-edited trees can carry missing or duplicate `link_id`s. Only
+ * the FIRST occurrence of an old link_id claims the map entry (so enable_when
+ * references still resolve deterministically); every other occurrence —
+ * duplicate or missing — gets its own fresh link_id, instead of collapsing
+ * all of them onto one shared regenerated id.
  */
 export function regenerateQuestionIds(questions: Question[]): Question[] {
+  const freshLinkId = () => `Q-${crypto.randomUUID().slice(0, 8)}`;
+
   const linkIdMap = new Map<string, string>();
   const mapLinkIds = (list: Question[]) => {
     for (const question of list) {
-      linkIdMap.set(question.link_id, `Q-${crypto.randomUUID().slice(0, 8)}`);
-      mapLinkIds(question.questions ?? []);
+      if (question.link_id && !linkIdMap.has(question.link_id)) {
+        linkIdMap.set(question.link_id, freshLinkId());
+      }
+      mapLinkIds(Array.isArray(question.questions) ? question.questions : []);
     }
   };
   mapLinkIds(questions);
@@ -92,14 +89,26 @@ export function regenerateQuestionIds(questions: Question[]): Question[] {
         question: linkIdMap.get(condition.question)!,
       }));
 
+  // Same DFS preorder as mapLinkIds, so the occurrence that claimed the map
+  // entry is also the first one seen here.
+  const seen = new Set<string>();
   const walk = (list: Question[]): Question[] =>
-    list.map((question) => ({
-      ...question,
-      id: crypto.randomUUID(),
-      link_id: linkIdMap.get(question.link_id)!,
-      enable_when: remapEnableWhen(question.enable_when),
-      questions: walk(question.questions ?? []),
-    }));
+    list.map((question) => {
+      const mapped =
+        question.link_id && !seen.has(question.link_id)
+          ? linkIdMap.get(question.link_id)
+          : undefined;
+      if (question.link_id) seen.add(question.link_id);
+      return {
+        ...question,
+        id: crypto.randomUUID(),
+        link_id: mapped ?? freshLinkId(),
+        enable_when: remapEnableWhen(question.enable_when),
+        questions: walk(
+          Array.isArray(question.questions) ? question.questions : [],
+        ),
+      };
+    });
 
   return walk(questions);
 }
@@ -145,7 +154,13 @@ export function builderReducer(
     case "reset":
       return {
         questions: action.questions,
-        selectedId: action.questions[0]?.id ?? null,
+        // Selection is builder working state — a post-save reset keeps the
+        // user's place when the previously selected question still exists.
+        selectedId:
+          action.keepSelectedId &&
+          findQuestion(action.questions, action.keepSelectedId)
+            ? action.keepSelectedId
+            : (action.questions[0]?.id ?? null),
         dirty: false,
       };
 

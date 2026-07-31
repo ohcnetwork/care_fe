@@ -42,10 +42,12 @@ export function BehaviourSettingsCard({
       title={t("question_behaviour_title")}
       subtitle={t("question_behaviour_subtitle")}
       badge={
-        <Badge variant="green">
-          <Check className="size-3" />
-          {t("configured_count", { count })}
-        </Badge>
+        count > 0 ? (
+          <Badge variant="green">
+            <Check className="size-3" />
+            {t("configured_count", { count })}
+          </Badge>
+        ) : undefined
       }
     >
       <div className="space-y-4">

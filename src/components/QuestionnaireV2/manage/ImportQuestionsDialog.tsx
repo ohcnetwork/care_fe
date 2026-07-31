@@ -41,14 +41,39 @@ interface ImportQuestionsDialogProps {
   onImport: (questions: Question[]) => void;
 }
 
-/** Narrows an unknown question-ish object down to the fields the importer needs. */
+/** Max accepted size for a fetched questionnaire JSON (bytes/characters). */
+const MAX_IMPORT_SIZE = 5_000_000;
+
+/**
+ * Recursively narrows an unknown question-ish object down to the fields the
+ * importer needs. Validation must recurse: nested `questions` reach the
+ * builder tree and the PUT body unmodified, so a malformed child (missing
+ * `text`, or `questions` that isn't an array) would otherwise surface as a
+ * crash in the confirm step or a save that silently does nothing.
+ */
 function isQuestionLike(value: unknown): value is Question {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as { text?: unknown }).text === "string" &&
-    typeof (value as { type?: unknown }).type === "string"
-  );
+  if (typeof value !== "object" || value === null) return false;
+  const candidate = value as {
+    text?: unknown;
+    type?: unknown;
+    link_id?: unknown;
+    questions?: unknown;
+  };
+  if (typeof candidate.text !== "string") return false;
+  if (typeof candidate.type !== "string") return false;
+  // link_id is optional (regenerateQuestionIds synthesizes fresh ones), but
+  // when present it must be a string.
+  if (
+    candidate.link_id !== undefined &&
+    typeof candidate.link_id !== "string"
+  ) {
+    return false;
+  }
+  if (candidate.questions !== undefined) {
+    if (!Array.isArray(candidate.questions)) return false;
+    return candidate.questions.every(isQuestionLike);
+  }
+  return true;
 }
 
 /**
@@ -84,13 +109,35 @@ export function ImportQuestionsDialog({
   const { dragOver, onDragOver, onDragLeave, fileDropError, setFileDropError } =
     useDragAndDrop();
 
-  const urlSchema = z.url(t("invalid_url"));
+  // http(s) only — z.url() alone admits javascript:, file:, data: etc.
+  const urlSchema = z
+    .url(t("invalid_url"))
+    .refine(
+      (value) => ["http:", "https:"].includes(new URL(value).protocol),
+      t("invalid_url"),
+    );
 
   const { mutate: fetchFromUrl, isPending: isFetching } = useMutation({
-    mutationFn: async (importUrl: string) => {
-      const response = await fetch(importUrl);
+    mutationFn: async (importUrl: string): Promise<unknown> => {
+      // Bounded fetch: timeout + content-type/size sanity checks so a slow
+      // or oversized endpoint can't wedge the tab.
+      const response = await fetch(importUrl, {
+        signal: AbortSignal.timeout(10_000),
+      });
       if (!response.ok) throw new Error("Failed to fetch questionnaire");
-      return response.json();
+      const contentType = response.headers.get("content-type") ?? "";
+      if (contentType && !/json|text/i.test(contentType)) {
+        throw new Error("Unexpected content type");
+      }
+      const declaredLength = Number(response.headers.get("content-length"));
+      if (declaredLength > MAX_IMPORT_SIZE) {
+        throw new Error("Questionnaire file too large");
+      }
+      const text = await response.text();
+      if (text.length > MAX_IMPORT_SIZE) {
+        throw new Error("Questionnaire file too large");
+      }
+      return JSON.parse(text) as unknown;
     },
     onSuccess: (data: unknown) => {
       const questions = extractQuestions(data);
@@ -161,7 +208,15 @@ export function ImportQuestionsDialog({
 
   const handleConfirm = () => {
     if (!pendingQuestions) return;
-    onImport(regenerateQuestionIds(pendingQuestions));
+    try {
+      onImport(regenerateQuestionIds(pendingQuestions));
+    } catch {
+      // Insurance against shapes the validators didn't anticipate — a toast
+      // beats an uncaught throw in an onClick (which the page ErrorBoundary
+      // can't catch and just leaves a dead button).
+      toast.error(t("invalid_json"));
+      return;
+    }
     handleOpenChange(false);
   };
 
@@ -204,6 +259,14 @@ export function ImportQuestionsDialog({
                   onDragLeave={onDragLeave}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
+                  // role="button" divs get no automatic Enter/Space
+                  // activation — wire it up for keyboard users.
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      fileInputRef.current?.click();
+                    }
+                  }}
                 >
                   <div className="flex flex-col items-center gap-2">
                     <Upload className="size-10 text-gray-400" />

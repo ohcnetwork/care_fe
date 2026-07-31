@@ -1,4 +1,5 @@
 import { MoreVertical, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -39,26 +40,37 @@ export function AnswerOptionsEditor({
   onChange,
 }: AnswerOptionsEditorProps) {
   const { t } = useTranslation();
+  // The valueset tab can be open before a valueset has actually been picked —
+  // that transient UI state lives here (keyed by question id, since this
+  // component instance is shared across selected questions) instead of
+  // seeding an empty `answer_value_set: {}` on the question, which would
+  // persist on save and break the picker in both renderers.
+  const [modeOverride, setModeOverride] = useState<{
+    questionId: string;
+    mode: Mode;
+  } | null>(null);
 
   if (question.type !== "choice" && question.type !== "quantity") {
     return null;
   }
 
-  const mode: Mode = question.answer_value_set ? "valueset" : "custom";
+  const derivedMode: Mode = question.answer_value_set ? "valueset" : "custom";
+  const mode: Mode =
+    modeOverride?.questionId === question.id ? modeOverride.mode : derivedMode;
   const options = question.answer_option ?? [];
 
   const handleModeChange = (next: Mode) => {
     if (next === mode) return;
+    setModeOverride({ questionId: question.id, mode: next });
     if (next === "custom") {
       onChange({
         answer_value_set: undefined,
         answer_option: question.answer_option ?? [],
       });
     } else {
-      onChange({
-        answer_value_set: question.answer_value_set ?? {},
-        answer_option: undefined,
-      });
+      // Keep answer_value_set undefined until SelectOrCreateValueset returns
+      // a real valueset (see onValueSetChange below).
+      onChange({ answer_option: undefined });
     }
   };
 

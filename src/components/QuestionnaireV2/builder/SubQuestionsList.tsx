@@ -119,8 +119,12 @@ export function SubQuestionsList({
   if (question.type !== "group") return null;
 
   const children = question.questions ?? [];
+  // Layout presets live in styling_metadata.containerClasses — the deployed
+  // contract shared with the legacy editor (LAYOUT_OPTIONS →
+  // containerClasses) and both renderers, which apply containerClasses to
+  // the sub-question container and keep `classes` for outer decoration.
   const layoutValue =
-    question.styling_metadata?.classes ?? LAYOUT_OPTIONS[0].value;
+    question.styling_metadata?.containerClasses ?? LAYOUT_OPTIONS[0].value;
 
   // `checked` can outlive a row once it's deleted via its own kebab menu
   // (that dispatch never touches this state). Deriving the effective
@@ -146,7 +150,10 @@ export function SubQuestionsList({
       type: "updateQuestion",
       id: question.id,
       patch: {
-        styling_metadata: { ...question.styling_metadata, classes: value },
+        styling_metadata: {
+          ...question.styling_metadata,
+          containerClasses: value,
+        },
       },
     });
   };

@@ -212,7 +212,7 @@ export function QuestionTypePicker({
                     value={entry.value}
                     onSelect={() => handleSelectStructured(entry.value)}
                   >
-                    {entry.label}
+                    {t(`structured_type__${entry.value}`)}
                     {value === "structured" &&
                       structuredType === entry.value && (
                         <Check className="ml-auto size-4 shrink-0" />

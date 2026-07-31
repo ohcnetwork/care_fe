@@ -12,12 +12,19 @@ import {
   Upload,
 } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -34,7 +41,9 @@ import { QuestionnaireRenderer } from "@/components/QuestionnaireV2/renderer/Que
 import {
   findQuestionNumber,
   findTopLevelIndex,
+  numberQuestions,
 } from "@/components/QuestionnaireV2/shared/QuestionTreeNav";
+import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import { cn } from "@/lib/utils";
 
@@ -70,6 +79,25 @@ function findFirstEmptyGroup(questions: Question[]): Question | undefined {
       return question;
     }
     const found = findFirstEmptyGroup(question.questions ?? []);
+    if (found) return found;
+  }
+  return undefined;
+}
+
+/**
+ * Depth-first search for the first question with a visibility condition that
+ * has no target question selected. Persisting such a condition would hide
+ * the question forever in fill mode (both evaluators resolve link_id "" to
+ * "no response" → false), so save is blocked until it's completed or removed.
+ */
+function findFirstIncompleteCondition(
+  questions: Question[],
+): Question | undefined {
+  for (const question of questions) {
+    if (question.enable_when?.some((condition) => !condition.question)) {
+      return question;
+    }
+    const found = findFirstIncompleteCondition(question.questions ?? []);
     if (found) return found;
   }
   return undefined;
@@ -112,7 +140,8 @@ function BuilderEmptyState({
   onImport,
 }: {
   onAddFirst: () => void;
-  onImport: () => void;
+  /** Omitted when the user lacks questionnaire-write — hides the affordance. */
+  onImport?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -128,15 +157,19 @@ function BuilderEmptyState({
         <Plus className="size-4" />
         {t("add_first_question")}
       </Button>
-      <div className="flex w-full max-w-xs items-center gap-2 text-xs font-medium uppercase text-gray-400">
-        <span className="h-px flex-1 bg-gray-200" />
-        {t("or")}
-        <span className="h-px flex-1 bg-gray-200" />
-      </div>
-      <Button type="button" variant="outline" onClick={onImport}>
-        <Upload className="size-4" />
-        {t("import_questions")}
-      </Button>
+      {onImport && (
+        <>
+          <div className="flex w-full max-w-xs items-center gap-2 text-xs font-medium uppercase text-gray-400">
+            <span className="h-px flex-1 bg-gray-200" />
+            {t("or")}
+            <span className="h-px flex-1 bg-gray-200" />
+          </div>
+          <Button type="button" variant="outline" onClick={onImport}>
+            <Upload className="size-4" />
+            {t("import_questions")}
+          </Button>
+        </>
+      )}
     </div>
   );
 }
@@ -170,12 +203,17 @@ export function QuestionnaireBuilderPage({
     // below) after dirty has already been cleared, so this guard doesn't
     // block that path.
     if (questionnaire && !state.dirty) {
-      dispatch({ type: "reset", questions: questionnaire.questions });
+      dispatch({
+        type: "reset",
+        questions: questionnaire.questions,
+        keepSelectedId: state.selectedId,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionnaire]);
 
-  const [{ mode, import: importParam }] = useQueryParams();
+  const [queryParams, setQueryParams] = useQueryParams();
+  const { mode, import: importParam } = queryParams;
   const [view, setView] = useState<"edit" | "preview">(
     mode === "preview" ? "preview" : "edit",
   );
@@ -186,23 +224,42 @@ export function QuestionnaireBuilderPage({
     // from the URL (preserving any other params, e.g. `mode`) so a refresh
     // or Back navigation doesn't reopen the dialog.
     if (importParam !== "1") return;
-    const params = new URLSearchParams(window.location.search);
-    params.delete("import");
-    const search = params.toString();
-    navigate(`${scope.basePath}/${id}/edit${search ? `?${search}` : ""}`, {
-      replace: true,
-    });
+    const { import: _import, ...rest } = queryParams;
+    setQueryParams(rest, { overwrite: true, replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useNavigationPrompt(state.dirty, t("unsaved_changes_warning"));
 
+  const { canWrite } = useCanWriteQuestionnaire(scope);
+
+  // Stable identity across unrelated re-renders (e.g. isPending flips) —
+  // QuestionnaireRendererProvider re-seeds (wiping in-progress preview
+  // answers) whenever this object's identity changes, so it must only change
+  // when the draft actually does.
+  const previewQuestionnaire = useMemo(
+    () =>
+      questionnaire
+        ? { ...questionnaire, questions: state.questions }
+        : undefined,
+    [questionnaire, state.questions],
+  );
+
   const { mutate: save, isPending } = useMutation({
     mutationFn: mutate(questionnaireApi.update, { pathParams: { id } }),
     onSuccess: (updated: QuestionnaireRead) => {
+      // setQueryData BEFORE invalidate: buildUpdateBody composes the next
+      // PUT from this cached questionnaire (title/slug/status), so the cache
+      // must reflect this save immediately rather than after the refetch.
+      queryClient.setQueryData(["questionnairesV2", "detail", id], updated);
       queryClient.invalidateQueries({ queryKey: ["questionnairesV2"] });
       toast.success(t("questionnaire_updated_successfully"));
-      dispatch({ type: "reset", questions: updated.questions });
+      // Keep the user's place in the editor instead of bouncing to question 1.
+      dispatch({
+        type: "reset",
+        questions: updated.questions,
+        keepSelectedId: state.selectedId,
+      });
     },
   });
 
@@ -223,6 +280,14 @@ export function QuestionnaireBuilderPage({
     if (emptyGroup) {
       toast.error(t("group_needs_subquestion"));
       dispatch({ type: "select", id: emptyGroup.id });
+      setView("edit");
+      return;
+    }
+
+    const incompleteCondition = findFirstIncompleteCondition(state.questions);
+    if (incompleteCondition) {
+      toast.error(t("condition_target_required"));
+      dispatch({ type: "select", id: incompleteCondition.id });
       setView("edit");
       return;
     }
@@ -289,14 +354,16 @@ export function QuestionnaireBuilderPage({
           >
             {t("cancel")}
           </Button>
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={!state.dirty || isPending}
-          >
-            <Check className="size-4" />
-            {t("save_changes")}
-          </Button>
+          {canWrite && (
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={!state.dirty || isPending}
+            >
+              <Check className="size-4" />
+              {t("save_changes")}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -310,6 +377,32 @@ export function QuestionnaireBuilderPage({
               dispatch={dispatch}
             />
           </div>
+          {/* Mobile fallback for the tree nav (hidden below md) — without it
+              a phone user who drills into a nested sub-question has no way
+              back to the parent or its siblings. */}
+          {state.questions.length > 0 && (
+            <div className="md:hidden">
+              <Select
+                value={state.selectedId ?? undefined}
+                onValueChange={(selectedId) =>
+                  dispatch({ type: "select", id: selectedId })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t("select_question")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {numberQuestions(state.questions).flatMap((item) =>
+                    [item, ...item.children].map(({ question, number }) => (
+                      <SelectItem key={question.id} value={question.id}>
+                        {number} {question.text || t("untitled_question")}
+                      </SelectItem>
+                    )),
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="min-w-0 flex-1 space-y-4">
             {selectedQuestion ? (
               <QuestionEditorCard
@@ -323,7 +416,7 @@ export function QuestionnaireBuilderPage({
                 onAddFirst={() =>
                   dispatch({ type: "addQuestion", parentId: null })
                 }
-                onImport={() => setImportOpen(true)}
+                onImport={canWrite ? () => setImportOpen(true) : undefined}
               />
             )}
 
@@ -373,21 +466,26 @@ export function QuestionnaireBuilderPage({
           </div>
         </div>
       ) : (
-        <QuestionnaireRenderer
-          questionnaire={{ ...questionnaire, questions: state.questions }}
-          mode="preview"
-          subject={{ facilityId: scope.facilityId }}
-        />
+        previewQuestionnaire && (
+          <QuestionnaireRenderer
+            questionnaire={previewQuestionnaire}
+            mode="preview"
+            subject={{ facilityId: scope.facilityId }}
+          />
+        )
       )}
 
-      <ImportQuestionsDialog
-        open={importOpen}
-        onOpenChange={setImportOpen}
-        onImport={(questions) => {
-          dispatch({ type: "replaceAll", questions });
-          toast.success(t("questionnaire_imported_successfully"));
-        }}
-      />
+      {/* canWrite also guards the ?import=1 deep link for read-only users. */}
+      {canWrite && (
+        <ImportQuestionsDialog
+          open={importOpen}
+          onOpenChange={setImportOpen}
+          onImport={(questions) => {
+            dispatch({ type: "replaceAll", questions });
+            toast.success(t("questionnaire_imported_successfully"));
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -12,29 +12,41 @@ import {
   QuestionnaireUpdate,
 } from "./questionnaire";
 
+/** Mirrors care/emr/resources/questionnaire_response/spec.py
+ *  `QuestionnaireSubmitResultValue`: a plain string `value` plus optional
+ *  `unit` (quantity) / `coding` (coded) — the backend has no value_code or
+ *  value_quantity fields and silently drops unknown keys. */
 export interface QuestionnaireSubmitResultValue {
   value?: string;
-  value_code?: Code;
-  value_quantity?: { value: number; unit?: Code };
+  /** For quantity values. */
+  unit?: Code;
+  /** For coded values. */
+  coding?: Code;
 }
 
+/** Mirrors `QuestionnaireSubmitResult` (same spec module). */
 export interface QuestionnaireSubmitResult {
   question_id: string;
-  values: QuestionnaireSubmitResultValue[];
-  note?: string;
-  taken_at?: string;
   body_site?: Code;
   method?: Code;
+  taken_at?: string;
+  values: QuestionnaireSubmitResultValue[];
+  note?: string;
+  sub_results?: QuestionnaireSubmitResult[][];
 }
 
+/** Mirrors `QuestionnaireSubmitRequest` (POST …/submit/). */
 export interface QuestionnaireSubmitBody {
   resource_id: string;
-  patient: string;
   encounter?: string;
+  patient: string;
   results: QuestionnaireSubmitResult[];
   form_submission?: string;
 }
 
+/** Mirrors resource_spce.py `ResourceQuestionnaireSubmitRequest`
+ *  (POST …/submit_resource/ — note its `results` reuse the base
+ *  QuestionnaireSubmitResult model). */
 export interface QuestionnaireSubmitResourceBody {
   resource_id: string;
   results: QuestionnaireSubmitResult[];
