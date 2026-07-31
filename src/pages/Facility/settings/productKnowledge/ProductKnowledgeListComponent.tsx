@@ -47,7 +47,7 @@ function ProductKnowledgeCard({
   const { t } = useTranslation();
 
   return (
-    <Card className="hover:shadow-md transition-shadow overflow-hidden">
+    <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div className="flex items-start space-x-3 min-w-0 w-full sm:w-auto">
@@ -291,12 +291,12 @@ export function ProductKnowledgeList({
               <Table className="table-fixed">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[35%]">{t("name")}</TableHead>
-                    <TableHead className="w-[15%]">
+                    <TableHead className="w-[40%]">{t("name")}</TableHead>
+                    <TableHead className="w-[20%]">
                       {t("product_type")}
                     </TableHead>
-                    <TableHead className="w-[15%]">{t("status")}</TableHead>
-                    <TableHead className="w-[5%]">{t("actions")}</TableHead>
+                    <TableHead className="w-[20%]">{t("status")}</TableHead>
+                    <TableHead className="w-[20%]">{t("actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

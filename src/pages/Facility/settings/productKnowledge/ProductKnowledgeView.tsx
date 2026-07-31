@@ -144,10 +144,10 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
           {t("back")}
         </BackButton>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">{product.name}</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl font-bold break-words">{product.name}</h1>
               <Badge variant={PRODUCT_KNOWLEDGE_STATUS_COLORS[product.status]}>
                 {t(product.status)}
               </Badge>
