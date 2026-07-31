@@ -33,30 +33,30 @@ interface VersionsTabProps {
   questionnaire: QuestionnaireRead;
 }
 
-/** `{username} · {relative time}`, gracefully collapsing when either half is missing. */
-function metaLine(username?: string, date?: string): string {
-  return [username, date ? relativeTime(date) : undefined]
-    .filter(Boolean)
-    .join(" · ");
-}
-
-/** Left-rail dot + connecting line, stretched to the row's height by the flex row's default `items-stretch`. */
+/** Left-rail dot with connector segments above and below, so consecutive
+ *  nodes read as one continuous timeline. The dot sits ~centred against its
+ *  card rather than level with the card's top corner. */
 function TimelineRail({
   current,
-  showLine,
+  isFirst,
+  isLast,
 }: {
   current: boolean;
-  showLine: boolean;
+  isFirst: boolean;
+  isLast: boolean;
 }) {
   return (
-    <div className="flex w-3 shrink-0 flex-col items-center">
+    <div className="flex w-5 shrink-0 flex-col items-center">
+      <span
+        className={cn("h-8 w-px", isFirst ? "bg-transparent" : "bg-gray-200")}
+      />
       <span
         className={cn(
-          "mt-1.5 size-3 shrink-0 rounded-full ring-4 ring-white",
+          "size-2 shrink-0 rounded-full",
           current ? "bg-primary" : "bg-gray-300",
         )}
       />
-      {showLine && <span className="w-px flex-1 bg-gray-200" />}
+      {!isLast && <span className="w-px flex-1 bg-gray-200" />}
     </div>
   );
 }
@@ -93,8 +93,17 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
     enabled: !!openRevision,
   });
 
+  /** `{username} · {relative time}`; a bare username reads as attribution
+   *  ("Last edited by …") while the backend doesn't return modified_date. */
+  const metaLine = (username?: string, date?: string): string => {
+    if (username && date) return `${username} · ${relativeTime(date)}`;
+    if (date) return relativeTime(date);
+    if (username) return t("last_edited_by", { name: username });
+    return "";
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="max-w-3xl space-y-4">
       <h2 className="text-lg font-semibold text-gray-900">
         {t("version_history")}
       </h2>
@@ -104,49 +113,54 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
       ) : (
         <div className="flex flex-col">
           <div className="flex gap-4">
-            <TimelineRail current showLine={pastRevisions.length > 0} />
+            <TimelineRail current isFirst isLast={false} />
             <div className="min-w-0 flex-1 pb-6">
-              <div className="rounded-lg border border-gray-200 bg-white p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* eslint-disable-next-line i18next/no-literal-string -- version notation ("v1"), not translatable prose */}
-                  <span className="font-medium text-gray-900">
-                    v{questionnaire.internal_revision ?? 1}
-                  </span>
-                  <Badge
-                    variant={QUESTIONNAIRE_STATUS_COLORS[questionnaire.status]}
-                  >
-                    {t(questionnaire.status)}
-                  </Badge>
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* eslint-disable-next-line i18next/no-literal-string -- version notation ("v1"), not translatable prose */}
+                    <span className="font-medium text-gray-900">
+                      v{questionnaire.internal_revision ?? 1}
+                    </span>
+                    <Badge
+                      variant={
+                        QUESTIONNAIRE_STATUS_COLORS[questionnaire.status]
+                      }
+                    >
+                      {t(questionnaire.status)}
+                    </Badge>
+                  </div>
+                  {metaLine(
+                    questionnaire.updated_by?.username,
+                    questionnaire.modified_date,
+                  ) && (
+                    <p className="mt-1 text-sm text-gray-500">
+                      {metaLine(
+                        questionnaire.updated_by?.username,
+                        questionnaire.modified_date,
+                      )}
+                    </p>
+                  )}
                 </div>
-                {metaLine(
-                  questionnaire.updated_by?.username,
-                  questionnaire.modified_date,
-                ) && (
-                  <p className="mt-1 text-sm text-gray-500">
-                    {metaLine(
-                      questionnaire.updated_by?.username,
-                      questionnaire.modified_date,
-                    )}
-                  </p>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-3"
-                  onClick={() =>
-                    navigate(`${scope.basePath}/${questionnaire.id}/edit`)
-                  }
-                >
-                  {t("continue_editing")}
-                </Button>
+                <div className="flex shrink-0 gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      navigate(`${scope.basePath}/${questionnaire.id}/edit`)
+                    }
+                  >
+                    {t("continue_editing")}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
 
           {pastRevisions.length === 0 ? (
             <div className="flex gap-4">
-              <TimelineRail current={false} showLine={false} />
+              <TimelineRail current={false} isFirst={false} isLast />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-6 py-8 text-center">
                   <div className="flex size-10 items-center justify-center rounded-full bg-primary/10">
@@ -163,42 +177,46 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
               <div key={revision.id} className="flex gap-4">
                 <TimelineRail
                   current={false}
-                  showLine={index < pastRevisions.length - 1}
+                  isFirst={false}
+                  isLast={index === pastRevisions.length - 1}
                 />
                 <div className="min-w-0 flex-1 pb-6">
-                  <div className="rounded-lg border border-gray-200 bg-white p-4">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium text-gray-900">
-                        v{revision.internal_revision ?? 1}
-                      </span>
-                      {/* Backend gap: past revisions don't carry their own
-                          status (QuestionnaireRead.status here still
-                          reflects the *current* record's status, not what
-                          this revision's was when it was superseded), so
-                          every past entry is shown with a neutral "Retired"
-                          badge rather than the real historical status. */}
-                      <Badge variant="secondary">{t("retired")}</Badge>
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium text-gray-900">
+                          v{revision.internal_revision ?? 1}
+                        </span>
+                        {/* Backend gap: past revisions don't carry their own
+                            status (QuestionnaireRead.status here still
+                            reflects the *current* record's status, not what
+                            this revision's was when it was superseded), so
+                            every past entry is shown with a neutral "Retired"
+                            badge rather than the real historical status. */}
+                        <Badge variant="secondary">{t("retired")}</Badge>
+                      </div>
+                      {metaLine(
+                        revision.updated_by?.username,
+                        revision.modified_date,
+                      ) && (
+                        <p className="mt-1 text-sm text-gray-500">
+                          {metaLine(
+                            revision.updated_by?.username,
+                            revision.modified_date,
+                          )}
+                        </p>
+                      )}
                     </div>
-                    {metaLine(
-                      revision.updated_by?.username,
-                      revision.modified_date,
-                    ) && (
-                      <p className="mt-1 text-sm text-gray-500">
-                        {metaLine(
-                          revision.updated_by?.username,
-                          revision.modified_date,
-                        )}
-                      </p>
-                    )}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="mt-3"
-                      onClick={() => setOpenRevision(revision)}
-                    >
-                      {t("open")}
-                    </Button>
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setOpenRevision(revision)}
+                      >
+                        {t("open")}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -206,7 +224,7 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
           )}
 
           {totalRevisions > pastRevisions.length && (
-            <p className="pl-7 text-sm text-gray-400">
+            <p className="pl-9 text-sm text-gray-400">
               {t("showing_latest_of_versions", {
                 shown: pastRevisions.length,
                 total: totalRevisions,

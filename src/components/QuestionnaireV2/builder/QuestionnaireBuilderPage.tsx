@@ -231,7 +231,8 @@ export function QuestionnaireBuilderPage({
 
   useNavigationPrompt(state.dirty, t("unsaved_changes_warning"));
 
-  const { canWrite } = useCanWriteQuestionnaire(scope);
+  const { canWrite, isLoading: isPermissionLoading } =
+    useCanWriteQuestionnaire(scope);
 
   // Stable identity across unrelated re-renders (e.g. isPending flips) —
   // QuestionnaireRendererProvider re-seeds (wiping in-progress preview
@@ -295,7 +296,9 @@ export function QuestionnaireBuilderPage({
     save(buildUpdateBody(questionnaire, { questions: state.questions }));
   };
 
-  if (isLoading) {
+  // isPermissionLoading folds in so write affordances (Save Changes, Import)
+  // don't pop in after the facility query resolves.
+  if (isLoading || isPermissionLoading) {
     return <FormSkeleton rows={10} />;
   }
 

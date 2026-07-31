@@ -42,15 +42,10 @@ test.describe("Questionnaire v2 create (facility)", () => {
       );
       await expect(page.getByText("Form Properties")).toBeVisible();
 
-      const subjectTypeGroup = page.getByRole("radiogroup", {
-        name: "Subject Type",
-      });
-      const locationRadio = subjectTypeGroup.getByRole("radio", {
-        name: "Location",
-        exact: true,
-      });
-      await expect(locationRadio).toHaveAttribute("aria-checked", "true");
-      await expect(locationRadio).toBeDisabled();
+      // subject_type is create-only, so the detail sidebar renders it as a
+      // static value (no radio group) under the Subject Type label.
+      await expect(page.getByText("Subject Type")).toBeVisible();
+      await expect(page.getByText("Location", { exact: true })).toBeVisible();
     });
 
     await test.step("List, scoped by search, shows it", async () => {

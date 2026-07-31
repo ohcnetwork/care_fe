@@ -8,8 +8,6 @@ import { SegmentedRadioGroup } from "@/components/QuestionnaireV2/shared/Segment
 import {
   QuestionStatus,
   QuestionnaireRead,
-  QuestionnaireScope,
-  SUBJECT_TYPES_FOR_CONTEXT,
 } from "@/types/questionnaire/questionnaire";
 
 import { DetailFormValues } from "./QuestionnaireDetailPage";
@@ -17,23 +15,24 @@ import { DetailFormValues } from "./QuestionnaireDetailPage";
 const STATUS_OPTIONS: QuestionStatus[] = ["active", "draft", "retired"];
 
 interface FormPropertiesSidebarProps {
-  scope: QuestionnaireScope;
   questionnaire: QuestionnaireRead;
   form: UseFormReturn<DetailFormValues>;
+  /** When false, the status control renders disabled (read-only page). */
+  canWrite: boolean;
   children?: React.ReactNode;
 }
 
 export function FormPropertiesSidebar({
-  scope,
   questionnaire,
   form,
+  canWrite,
   children,
 }: FormPropertiesSidebarProps) {
   const { t } = useTranslation();
   const status = form.watch("status");
 
   return (
-    <div className="h-fit space-y-4 rounded-lg border border-gray-200 bg-white p-4">
+    <div className="h-fit space-y-4">
       <h3 className="text-sm font-semibold text-gray-900">
         {t("form_properties")}
       </h3>
@@ -49,26 +48,17 @@ export function FormPropertiesSidebar({
             value,
             label: t(value),
           }))}
+          disabled={!canWrite}
           aria-label={t("status")}
         />
       </div>
 
       <div className="space-y-1.5">
         <p className="text-xs font-medium text-gray-500">{t("subject_type")}</p>
-        <SegmentedRadioGroup
-          value={questionnaire.subject_type}
-          onChange={() => {
-            // subject_type is create-only on the backend; chips are read-only.
-          }}
-          options={SUBJECT_TYPES_FOR_CONTEXT[scope.authContext].map(
-            (value) => ({
-              value,
-              label: t(value),
-            }),
-          )}
-          disabled
-          aria-label={t("subject_type")}
-        />
+        {/* subject_type is create-only on the backend — render the value
+            statically instead of a fully greyed-out control that reads as
+            broken or permission-denied. */}
+        <Badge variant="secondary">{t(questionnaire.subject_type)}</Badge>
       </div>
 
       <hr className="border-dashed" />

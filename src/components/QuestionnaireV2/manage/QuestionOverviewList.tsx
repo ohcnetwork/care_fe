@@ -4,17 +4,26 @@ import {
   ChevronUp,
   GripVertical,
   ListChecks,
+  MoreVertical,
   Plus,
   SquarePen,
   Upload,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { QuestionTypeBadge } from "@/components/QuestionnaireV2/shared/QuestionTypeBadge";
+
+import { cn } from "@/lib/utils";
 
 import { Question } from "@/types/questionnaire/question";
 
@@ -38,6 +47,11 @@ export function QuestionOverviewList({
 }: QuestionOverviewListProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  // Native HTML5 drag-and-drop reorder for top-level rows: the source index
+  // lives in a ref (dataTransfer as a fallback), the current hover target in
+  // state so the drop indicator re-renders.
+  const dragFromIndex = useRef<number | null>(null);
+  const [dropTarget, setDropTarget] = useState<number | null>(null);
 
   const toggleExpanded = (id: string) => {
     setExpanded((prev) => {
@@ -51,10 +65,15 @@ export function QuestionOverviewList({
     });
   };
 
+  const clearDrag = () => {
+    dragFromIndex.current = null;
+    setDropTarget(null);
+  };
+
   return (
-    <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-gray-900">
+        <h3 className="text-xl font-semibold text-gray-900">
           {t("questions")}
         </h3>
         {canWrite && (
@@ -86,7 +105,7 @@ export function QuestionOverviewList({
             </p>
           </div>
           {canWrite && (
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-3">
               <Button
                 type="button"
                 variant="outline_primary"
@@ -95,6 +114,9 @@ export function QuestionOverviewList({
                 <Plus className="size-4" />
                 {t("add_first_question")}
               </Button>
+              <span className="text-xs font-medium uppercase text-gray-400">
+                {t("or")}
+              </span>
               <Button
                 type="button"
                 variant="outline"
@@ -111,21 +133,68 @@ export function QuestionOverviewList({
           {questions.map((question, index) => {
             const subQuestions = question.questions ?? [];
             const isExpanded = expanded.has(question.id);
+            const isDropTarget =
+              dropTarget === index &&
+              dragFromIndex.current !== null &&
+              dragFromIndex.current !== index;
+            const dropBelow =
+              isDropTarget && (dragFromIndex.current ?? 0) < index;
 
             return (
               <div
                 key={question.id}
-                className="flex items-stretch gap-2 rounded-md bg-gray-50 p-2"
+                draggable={canWrite && !isSaving}
+                onDragStart={(e) => {
+                  dragFromIndex.current = index;
+                  e.dataTransfer.effectAllowed = "move";
+                  e.dataTransfer.setData("text/plain", String(index));
+                }}
+                onDragEnd={clearDrag}
+                onDragOver={(e) => {
+                  if (dragFromIndex.current === null) return;
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                  if (dropTarget !== index) setDropTarget(index);
+                }}
+                onDragLeave={() => {
+                  if (dropTarget === index) setDropTarget(null);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const from =
+                    dragFromIndex.current ??
+                    Number(e.dataTransfer.getData("text/plain"));
+                  clearDrag();
+                  if (!Number.isInteger(from) || from === index) return;
+                  onReorder(from, index);
+                }}
+                className={cn(
+                  "relative flex items-stretch gap-2 rounded-md bg-gray-50 p-2",
+                  // Drop indicator: a rule on the edge the row will land on.
+                  isDropTarget &&
+                    !dropBelow &&
+                    "before:absolute before:inset-x-1 before:-top-1.5 before:h-0.5 before:rounded-full before:bg-primary-500",
+                  isDropTarget &&
+                    dropBelow &&
+                    "before:absolute before:inset-x-1 before:-bottom-1.5 before:h-0.5 before:rounded-full before:bg-primary-500",
+                )}
               >
-                <div className="flex items-center px-1 text-gray-400">
-                  <GripVertical className="size-4" />
-                </div>
-                <div className="flex-1 rounded-md border border-gray-200 bg-white p-3">
-                  <div className="flex flex-wrap items-center gap-2">
+                {canWrite && (
+                  <div
+                    className="flex cursor-grab items-center px-1 text-gray-400 active:cursor-grabbing"
+                    aria-hidden
+                  >
+                    <GripVertical className="size-4" />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1 rounded-md border border-gray-200 bg-white p-3">
+                  <div className="flex items-start gap-2">
                     <span className="text-sm text-gray-500">{index + 1}.</span>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="min-w-0 text-sm font-medium text-gray-900">
                       {question.text}
                     </span>
+                  </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 pl-6">
                     <QuestionTypeBadge type={question.type} />
                     {subQuestions.length > 0 && (
                       <>
@@ -146,32 +215,6 @@ export function QuestionOverviewList({
                         </Button>
                       </>
                     )}
-                    {canWrite && (
-                      <div className="ml-auto flex items-center gap-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="size-6"
-                          disabled={index === 0 || isSaving}
-                          onClick={() => onReorder(index, index - 1)}
-                          aria-label={t("move_up")}
-                        >
-                          <ChevronUp className="size-4" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="size-6"
-                          disabled={index === questions.length - 1 || isSaving}
-                          onClick={() => onReorder(index, index + 1)}
-                          aria-label={t("move_down")}
-                        >
-                          <ChevronDown className="size-4" />
-                        </Button>
-                      </div>
-                    )}
                   </div>
 
                   {isExpanded && subQuestions.length > 0 && (
@@ -184,9 +227,57 @@ export function QuestionOverviewList({
                     </div>
                   )}
                 </div>
+                {canWrite && (
+                  <div className="flex items-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-9"
+                          aria-label={t("more_options")}
+                        >
+                          <MoreVertical className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          disabled={index === 0 || isSaving}
+                          onClick={() => onReorder(index, index - 1)}
+                        >
+                          <ChevronUp className="size-4" />
+                          {t("move_up")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={index === questions.length - 1 || isSaving}
+                          onClick={() => onReorder(index, index + 1)}
+                        >
+                          <ChevronDown className="size-4" />
+                          {t("move_down")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={onEditQuestions}>
+                          <SquarePen className="size-4" />
+                          {t("edit")}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )}
               </div>
             );
           })}
+          {canWrite && (
+            <Button
+              type="button"
+              variant="outline_primary"
+              className="w-full border-dashed"
+              onClick={onEditQuestions}
+            >
+              <Plus className="size-4" />
+              {t("add_question")}
+            </Button>
+          )}
         </div>
       )}
     </div>

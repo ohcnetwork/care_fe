@@ -24,13 +24,16 @@ interface OrganizationsFieldProps {
   canWrite: boolean;
 }
 
-function OrganizationsCard({ children }: { children: React.ReactNode }) {
+/**
+ * Plain labeled field (not a separate card) — Organizations renders as the
+ * fourth field inside the Basic Information card, matching the design where
+ * it is one control among the card's fields rather than its own surface.
+ */
+function OrganizationsFieldShell({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   return (
-    <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
-      <h3 className="text-sm font-semibold text-gray-900">
-        {t("organizations")}
-      </h3>
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-gray-800">{t("organizations")}</p>
       {children}
     </div>
   );
@@ -44,9 +47,9 @@ function OrganizationsCard({ children }: { children: React.ReactNode }) {
 function OrganizationsUnavailableCard() {
   const { t } = useTranslation();
   return (
-    <OrganizationsCard>
+    <OrganizationsFieldShell>
       <p className="text-sm text-gray-500">{t("organizations_unavailable")}</p>
-    </OrganizationsCard>
+    </OrganizationsFieldShell>
   );
 }
 
@@ -157,10 +160,12 @@ function InstanceOrganizationsField({
   };
 
   return (
-    <OrganizationsCard>
-      <div className="flex flex-wrap gap-2 rounded-md border border-dashed border-gray-200 p-3">
-        {!isLoading && selected.length === 0 && (
-          <p className="text-sm text-gray-500">
+    <OrganizationsFieldShell>
+      {/* One control: the selected chips render inline inside the same
+          bordered box as the search trigger, not in a separate dashed box. */}
+      <div className="flex flex-wrap items-center gap-2 rounded-md border border-gray-200 p-1.5">
+        {!isLoading && !canWrite && selected.length === 0 && (
+          <p className="px-1.5 py-1 text-sm text-gray-500">
             {t("no_organizations_selected")}
           </p>
         )}
@@ -178,19 +183,19 @@ function InstanceOrganizationsField({
             )}
           </Badge>
         ))}
+        {canWrite && (
+          <OrgSelector
+            selected={selected.map((org) => org.id)}
+            onToggle={handleToggle}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            isLoading={isSearching}
+            organizations={available}
+            triggerClassName="h-8 w-auto min-w-40 flex-1 border-0 px-1.5 font-normal text-gray-500 shadow-none"
+          />
+        )}
       </div>
-
-      {canWrite && (
-        <OrgSelector
-          selected={selected.map((org) => org.id)}
-          onToggle={handleToggle}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          isLoading={isSearching}
-          organizations={available}
-        />
-      )}
-    </OrganizationsCard>
+    </OrganizationsFieldShell>
   );
 }
 
@@ -235,10 +240,10 @@ function FacilityOrganizationsField({
 
   if (!canWrite) {
     return (
-      <OrganizationsCard>
-        <div className="flex flex-wrap gap-2 rounded-md border border-dashed border-gray-200 p-3">
+      <OrganizationsFieldShell>
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-gray-200 p-1.5">
           {currentIds.length === 0 && (
-            <p className="text-sm text-gray-500">
+            <p className="px-1.5 py-1 text-sm text-gray-500">
               {t("no_organizations_selected")}
             </p>
           )}
@@ -248,12 +253,12 @@ function FacilityOrganizationsField({
             </Badge>
           ))}
         </div>
-      </OrganizationsCard>
+      </OrganizationsFieldShell>
     );
   }
 
   return (
-    <OrganizationsCard>
+    <OrganizationsFieldShell>
       <FacilityOrganizationSelector
         facilityId={facilityId}
         value={currentIds}
@@ -263,6 +268,6 @@ function FacilityOrganizationsField({
           setFacilityOrganizations({ facility_organizations: ids ?? [] })
         }
       />
-    </OrganizationsCard>
+    </OrganizationsFieldShell>
   );
 }

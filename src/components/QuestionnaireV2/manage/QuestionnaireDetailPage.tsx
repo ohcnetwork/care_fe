@@ -36,7 +36,6 @@ import {
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { swapElements } from "@/Utils/request/utils";
 
 import { BasicInformationCard } from "./BasicInformationCard";
 import { buildUpdateBody } from "./buildUpdateBody";
@@ -55,6 +54,16 @@ import { VersionsTab } from "./VersionsTab";
  * response here: it carries audit user objects (`created_by`/`updated_by`)
  * that must not leave the app in an export file.
  */
+/** Move (not swap): removes the element at `from` and reinserts it at `to`,
+ *  so drag-and-drop across several rows shifts the in-between rows instead
+ *  of exchanging the two endpoints. */
+function moveElement<T>(list: T[], from: number, to: number): T[] {
+  const next = [...list];
+  const [moved] = next.splice(from, 1);
+  next.splice(to, 0, moved);
+  return next;
+}
+
 function downloadQuestionnaireJson(questionnaire: QuestionnaireRead) {
   const definition = {
     id: questionnaire.id,
@@ -86,7 +95,8 @@ export function QuestionnaireDetailPage({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [cloneOpen, setCloneOpen] = useState(false);
-  const { canWrite } = useCanWriteQuestionnaire(scope);
+  const { canWrite, isLoading: isPermissionLoading } =
+    useCanWriteQuestionnaire(scope);
 
   const {
     data: questionnaire,
@@ -152,7 +162,9 @@ export function QuestionnaireDetailPage({
     );
   };
 
-  if (isLoading) {
+  // isPermissionLoading folds in so write affordances (Save Form, Edit
+  // Questions, Clone…) don't pop in after the facility query resolves.
+  if (isLoading || isPermissionLoading) {
     return <FormSkeleton rows={10} />;
   }
 
@@ -171,91 +183,107 @@ export function QuestionnaireDetailPage({
     );
   }
 
+  const tabTriggerClasses =
+    "-mb-px h-auto rounded-none border-0 border-b-2 border-transparent bg-transparent px-1 pb-2 pt-0 text-gray-500 shadow-none data-[state=active]:border-gray-900 data-[state=active]:bg-transparent data-[state=active]:text-gray-900 data-[state=active]:shadow-none";
+
   return (
     <div className="space-y-4">
-      <Button
-        variant="outline"
-        size="xs"
-        onClick={() => navigate(scope.basePath)}
-      >
-        <ArrowLeft className="size-4" />
-        {t("back")}
-      </Button>
-
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              onClick={() => navigate(scope.basePath)}
-              className="cursor-pointer"
-            >
-              {t("questionnaires")}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{t(scope.authContext)}</BreadcrumbPage>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage className="font-medium text-gray-900">
-              {questionnaire.title}
-            </BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-bold text-gray-900">
-                {questionnaire.title}
-              </h1>
-              <Badge variant="outline" className="uppercase">
-                {t(scope.authContext)}
-              </Badge>
-              <Badge
-                variant={QUESTIONNAIRE_STATUS_COLORS[questionnaire.status]}
-              >
-                {t(questionnaire.status)}
-              </Badge>
-              {/* eslint-disable-next-line i18next/no-literal-string -- version notation ("v1"), not translatable prose */}
-              <Badge variant="secondary">
-                v{questionnaire.internal_revision ?? 1}
-              </Badge>
-            </div>
-            <div className="flex shrink-0 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(scope.basePath)}
-              >
-                {t("cancel")}
-              </Button>
-              {canWrite && (
-                <Button type="submit" disabled={isPending}>
-                  <Check className="mr-2 size-4" />
-                  {t("save_form")}
-                </Button>
-              )}
-            </div>
-          </div>
-
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <Tabs defaultValue="questions">
-            <TabsList>
-              <TabsTrigger value="questions">{t("questions")}</TabsTrigger>
-              <TabsTrigger value="versions">{t("versions")}</TabsTrigger>
-            </TabsList>
+            {/* Sticky header band: back + breadcrumb, title row and the tab
+                strip stay pinned while the body scrolls beneath, keeping the
+                primary Save Form action reachable on long questionnaires. */}
+            <div className="sticky top-0 z-20 -mx-4 space-y-3 bg-white px-4 py-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="xs"
+                  onClick={() => navigate(scope.basePath)}
+                >
+                  <ArrowLeft className="size-4" />
+                  {t("back")}
+                </Button>
+                <span aria-hidden className="h-6 w-px bg-gray-200" />
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink
+                        onClick={() => navigate(scope.basePath)}
+                        className="cursor-pointer"
+                      >
+                        {t("questionnaires")}
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>{t(scope.authContext)}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage className="font-medium text-gray-900">
+                        {questionnaire.title}
+                      </BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
+
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-xl font-bold text-gray-900">
+                    {questionnaire.title}
+                  </h1>
+                  <Badge variant="outline" className="uppercase">
+                    {t(scope.authContext)}
+                  </Badge>
+                  <Badge
+                    variant={QUESTIONNAIRE_STATUS_COLORS[questionnaire.status]}
+                  >
+                    {t(questionnaire.status)}
+                  </Badge>
+                  {/* eslint-disable-next-line i18next/no-literal-string -- version notation ("v1"), not translatable prose */}
+                  <Badge variant="secondary">
+                    v{questionnaire.internal_revision ?? 1}
+                  </Badge>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate(scope.basePath)}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  {canWrite && (
+                    <Button type="submit" disabled={isPending}>
+                      <Check className="mr-2 size-4" />
+                      {t("save_form")}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <TabsList className="h-auto w-full justify-start gap-6 rounded-none border-b border-gray-200 bg-transparent p-0">
+                <TabsTrigger value="questions" className={tabTriggerClasses}>
+                  {t("questions")}
+                </TabsTrigger>
+                <TabsTrigger value="versions" className={tabTriggerClasses}>
+                  {t("versions")}
+                </TabsTrigger>
+              </TabsList>
+            </div>
             <TabsContent value="questions" className="mt-4">
               <div className="grid gap-4 md:grid-cols-[1fr_280px] md:gap-6">
                 <div className="space-y-4">
-                  <BasicInformationCard form={form} />
-                  <OrganizationsField
-                    scope={scope}
-                    questionnaireId={id}
-                    canWrite={canWrite}
-                  />
+                  <BasicInformationCard form={form} canWrite={canWrite}>
+                    <OrganizationsField
+                      scope={scope}
+                      questionnaireId={id}
+                      canWrite={canWrite}
+                    />
+                  </BasicInformationCard>
                   <QuestionOverviewList
                     questions={questionnaire.questions}
                     isSaving={isPending}
@@ -263,8 +291,8 @@ export function QuestionnaireDetailPage({
                     onReorder={(from, to) =>
                       save(
                         buildUpdateBody(questionnaire, {
-                          questions: swapElements(
-                            [...questionnaire.questions],
+                          questions: moveElement(
+                            questionnaire.questions,
                             from,
                             to,
                           ),
@@ -280,9 +308,9 @@ export function QuestionnaireDetailPage({
                   />
                 </div>
                 <FormPropertiesSidebar
-                  scope={scope}
                   questionnaire={questionnaire}
                   form={form}
+                  canWrite={canWrite}
                 >
                   <LabeledActionButton
                     label={t("check_how_form_looks")}
