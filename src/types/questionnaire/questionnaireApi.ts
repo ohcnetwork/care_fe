@@ -1,5 +1,4 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
-import { Code } from "@/types/base/code/code";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { Organization } from "@/types/organization/organization";
 
@@ -11,46 +10,6 @@ import {
   QuestionnaireSetOrganizations,
   QuestionnaireUpdate,
 } from "./questionnaire";
-
-/** Mirrors care/emr/resources/questionnaire_response/spec.py
- *  `QuestionnaireSubmitResultValue`: a plain string `value` plus optional
- *  `unit` (quantity) / `coding` (coded) — the backend has no value_code or
- *  value_quantity fields and silently drops unknown keys. */
-export interface QuestionnaireSubmitResultValue {
-  value?: string;
-  /** For quantity values. */
-  unit?: Code;
-  /** For coded values. */
-  coding?: Code;
-}
-
-/** Mirrors `QuestionnaireSubmitResult` (same spec module). */
-export interface QuestionnaireSubmitResult {
-  question_id: string;
-  body_site?: Code;
-  method?: Code;
-  taken_at?: string;
-  values: QuestionnaireSubmitResultValue[];
-  note?: string;
-  sub_results?: QuestionnaireSubmitResult[][];
-}
-
-/** Mirrors `QuestionnaireSubmitRequest` (POST …/submit/). */
-export interface QuestionnaireSubmitBody {
-  resource_id: string;
-  encounter?: string;
-  patient: string;
-  results: QuestionnaireSubmitResult[];
-  form_submission?: string;
-}
-
-/** Mirrors resource_spce.py `ResourceQuestionnaireSubmitRequest`
- *  (POST …/submit_resource/ — note its `results` reuse the base
- *  QuestionnaireSubmitResult model). */
-export interface QuestionnaireSubmitResourceBody {
-  resource_id: string;
-  results: QuestionnaireSubmitResult[];
-}
 
 export default {
   list: {
@@ -90,14 +49,19 @@ export default {
   submit: {
     path: "/api/v1/questionnaire/{id}/submit/",
     method: HttpMethod.POST,
-    TRes: Type<Record<string, unknown>>(),
-    TBody: Type<QuestionnaireSubmitBody>(),
-  },
-  submitResource: {
-    path: "/api/v1/questionnaire/{id}/submit_resource/",
-    method: HttpMethod.POST,
-    TRes: Type<Record<string, unknown>>(),
-    TBody: Type<QuestionnaireSubmitResourceBody>(),
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{
+      resource_id: string;
+      encounter?: string;
+      patient: string;
+      responses: Array<{
+        question_id: string;
+        value: string | number | boolean;
+        note?: string;
+        bodysite?: string;
+        method?: string;
+      }>;
+    }>(),
   },
   createV2: {
     path: "/api/v1/questionnaire/",
