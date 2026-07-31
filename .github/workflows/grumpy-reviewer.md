@@ -26,7 +26,17 @@ on:
 # fork maintainers. This condition short-circuits every job cleanly (workflow
 # shows as skipped, no error) on any repo other than ohcnetwork/care_fe.
 if: ${{ github.repository == 'ohcnetwork/care_fe' }}
-permissions: read-all
+# `copilot-requests: write` lets the Copilot engine run on the built-in Actions
+# GITHUB_TOKEN (github.token) via centralized org billing, so NO personal access
+# token (COPILOT_GITHUB_TOKEN) needs to be stored as a repo secret. This requires
+# the org to have centralized Copilot billing enabled (Org → Settings → Copilot →
+# Policies → "Allow use of Copilot CLI billed to the organization"). The remaining
+# scopes are read-only — safe-output jobs get their own write scopes injected.
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+  copilot-requests: write
 # No local clone is needed: the agent reads the PR diff and changed files through
 # the GitHub API. Disabling checkout removes the "pwn request" attack surface that
 # comes from checking out untrusted fork code under pull_request_target.
