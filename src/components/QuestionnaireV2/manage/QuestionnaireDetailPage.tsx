@@ -6,7 +6,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -28,9 +27,7 @@ import { LabeledActionButton } from "@/components/QuestionnaireV2/shared/Labeled
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import {
-  QUESTIONNAIRE_STATUSES,
   QUESTIONNAIRE_STATUS_COLORS,
-  QuestionStatus,
   QuestionnaireRead,
   QuestionnaireScope,
   formatRevision,
@@ -44,6 +41,10 @@ import { buildUpdateBody } from "./buildUpdateBody";
 import { CloneQuestionnaireDialog } from "./CloneQuestionnaireDialog";
 import { FormPropertiesSidebar } from "./FormPropertiesSidebar";
 import { OrganizationsField } from "./OrganizationsField";
+import {
+  DetailFormValues,
+  questionnaireBasicSchema,
+} from "./questionnaireFormSchema";
 import { QuestionOverviewList } from "./QuestionOverviewList";
 import { VersionsTab } from "./VersionsTab";
 
@@ -80,13 +81,6 @@ function downloadQuestionnaireJson(questionnaire: QuestionnaireRead) {
   linkElement.click();
 }
 
-export interface DetailFormValues {
-  title: string;
-  slug: string;
-  description: string;
-  status: QuestionStatus;
-}
-
 export function QuestionnaireDetailPage({
   scope,
   id,
@@ -109,19 +103,8 @@ export function QuestionnaireDetailPage({
     queryFn: query(questionnaireApi.get, { pathParams: { id } }),
   });
 
-  const detailSchema = z.object({
-    title: z.string().min(1, t("field_required")),
-    slug: z
-      .string()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 }))
-      .regex(/^[-\w]+$/, t("slug_format_message")),
-    description: z.string(),
-    status: z.enum(QUESTIONNAIRE_STATUSES),
-  });
-
   const form = useForm<DetailFormValues>({
-    resolver: zodResolver(detailSchema),
+    resolver: zodResolver(questionnaireBasicSchema(t)),
     values: questionnaire
       ? {
           title: questionnaire.title,

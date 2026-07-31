@@ -1,5 +1,5 @@
 import { ChevronsUpDown } from "lucide-react";
-import { UseFormReturn } from "react-hook-form";
+import { FieldValues, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,22 +21,27 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import { DetailFormValues } from "./QuestionnaireDetailPage";
+import { BasicInfoFormValues } from "./questionnaireFormSchema";
 
-interface BasicInformationCardProps {
-  form: UseFormReturn<DetailFormValues>;
+interface BasicInformationCardProps<
+  T extends BasicInfoFormValues & FieldValues,
+> {
+  /** Any form whose values include title/slug/description (detail, create). */
+  form: UseFormReturn<T>;
   /** When false, the fields render disabled (read-only questionnaire). */
   canWrite: boolean;
   /** Extra fields rendered inside the card body (e.g. Organizations). */
   children?: React.ReactNode;
 }
 
-export function BasicInformationCard({
-  form,
-  canWrite,
-  children,
-}: BasicInformationCardProps) {
+export function BasicInformationCard<
+  T extends BasicInfoFormValues & FieldValues,
+>({ form, canWrite, children }: BasicInformationCardProps<T>) {
   const { t } = useTranslation();
+  // Safe: `T extends BasicInfoFormValues` guarantees title/slug/description
+  // exist with exactly these value types on any caller's form; the cast only
+  // erases the caller's extra fields, which this card never touches.
+  const basicForm = form as unknown as UseFormReturn<BasicInfoFormValues>;
 
   return (
     <Collapsible defaultOpen asChild>
@@ -65,7 +70,7 @@ export function BasicInformationCard({
         <CollapsibleContent>
           <CardContent className="space-y-4 border-t border-gray-100 py-4">
             <FormField
-              control={form.control}
+              control={basicForm.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
@@ -79,7 +84,7 @@ export function BasicInformationCard({
             />
 
             <FormField
-              control={form.control}
+              control={basicForm.control}
               name="slug"
               render={({ field }) => (
                 <FormItem>
@@ -96,7 +101,7 @@ export function BasicInformationCard({
             />
 
             <FormField
-              control={form.control}
+              control={basicForm.control}
               name="description"
               render={({ field }) => (
                 <FormItem>

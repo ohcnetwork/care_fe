@@ -11,18 +11,7 @@ import { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -31,7 +20,6 @@ import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWri
 
 import {
   QUESTIONNAIRE_STATUSES,
-  QuestionStatus,
   QuestionnaireRead,
   QuestionnaireScope,
   SUBJECT_TYPES,
@@ -44,11 +32,14 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
 import { generateSlug } from "@/Utils/utils";
 
-interface CreateFormValues {
-  title: string;
-  slug: string;
-  description: string;
-  status: QuestionStatus;
+import { BasicInformationCard } from "./BasicInformationCard";
+import {
+  DetailFormValues,
+  SLUG_MAX_LENGTH,
+  questionnaireBasicSchema,
+} from "./questionnaireFormSchema";
+
+interface CreateFormValues extends DetailFormValues {
   subject_type: SubjectType;
 }
 
@@ -64,15 +55,7 @@ export function QuestionnaireCreatePage({
 
   const subjectTypeOptions = SUBJECT_TYPES_FOR_CONTEXT[scope.authContext];
 
-  const createSchema = z.object({
-    title: z.string().min(1, t("field_required")),
-    slug: z
-      .string()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 }))
-      .regex(/^[-\w]+$/, t("slug_format_message")),
-    description: z.string(),
-    status: z.enum(QUESTIONNAIRE_STATUSES),
+  const createSchema = questionnaireBasicSchema(t).extend({
     subject_type: z.enum(SUBJECT_TYPES),
   });
 
@@ -97,9 +80,11 @@ export function QuestionnaireCreatePage({
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || "", 25), {
-          shouldValidate: true,
-        });
+        form.setValue(
+          "slug",
+          generateSlug(value.title || "", SLUG_MAX_LENGTH),
+          { shouldValidate: true },
+        );
       }
     });
     return () => subscription.unsubscribe();
@@ -194,62 +179,7 @@ export function QuestionnaireCreatePage({
 
           <div className="grid gap-4 md:grid-cols-[1fr_280px] md:gap-6">
             <div className="space-y-4">
-              <Card>
-                <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
-                  <CardTitle>{t("basic_information")}</CardTitle>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">{t("title")}</Badge>
-                    <Badge variant="secondary">{t("slug")}</Badge>
-                    <Badge variant="secondary">{t("description")}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel aria-required>{t("title")}</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="slug"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel aria-required>{t("slug")}</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormDescription className="italic">
-                          {t("slug_format_message")}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("description")}</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} className="min-h-[80px]" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
+              <BasicInformationCard form={form} canWrite />
 
               {/* Matches the detail page's Questions container (plain
                   bordered section, not a nested Card-in-Card). */}

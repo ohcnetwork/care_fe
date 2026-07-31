@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,14 +35,18 @@ import {
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
 
-const SLUG_MAX_LENGTH = 25;
-const SLUG_MIN_LENGTH = 5;
+import {
+  SLUG_MAX_LENGTH,
+  questionnaireBasicSchema,
+} from "./questionnaireFormSchema";
+
 const COPY_SUFFIX = "-copy";
 
 /**
- * `{slug}-copy`, clamped so it still respects the 5-25 char slug rule even
- * when the source slug is already near the 25 char ceiling — truncates the
- * base rather than the suffix so the result still reads as a copy.
+ * `{slug}-copy`, clamped so it still respects the shared slug length rule
+ * even when the source slug is already near the SLUG_MAX_LENGTH ceiling —
+ * truncates the base rather than the suffix so the result still reads as a
+ * copy.
  */
 function defaultCloneSlug(slug: string): string {
   const base = slug
@@ -77,25 +80,9 @@ export function CloneQuestionnaireDialog({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const cloneSchema = z.object({
-    title: z.string().min(1, t("field_required")),
-    slug: z
-      .string()
-      .min(
-        SLUG_MIN_LENGTH,
-        t("character_count_validation", {
-          min: SLUG_MIN_LENGTH,
-          max: SLUG_MAX_LENGTH,
-        }),
-      )
-      .max(
-        SLUG_MAX_LENGTH,
-        t("character_count_validation", {
-          min: SLUG_MIN_LENGTH,
-          max: SLUG_MAX_LENGTH,
-        }),
-      )
-      .regex(/^[-\w]+$/, t("slug_format_message")),
+  const cloneSchema = questionnaireBasicSchema(t).pick({
+    title: true,
+    slug: true,
   });
 
   const form = useForm<CloneFormValues>({

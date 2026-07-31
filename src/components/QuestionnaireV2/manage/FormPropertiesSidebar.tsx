@@ -11,7 +11,7 @@ import {
   formatRevision,
 } from "@/types/questionnaire/questionnaire";
 
-import { DetailFormValues } from "./QuestionnaireDetailPage";
+import { DetailFormValues } from "./questionnaireFormSchema";
 
 interface FormPropertiesSidebarProps {
   questionnaire: QuestionnaireRead;
