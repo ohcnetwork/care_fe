@@ -28,9 +28,7 @@ interface GenericTableProps {
   headers: HeaderRow[];
   rows: TableRowType[] | undefined;
   className?: string;
-  cellClassName?: string;
-  headerClassName?: string;
-  tableClassName?: string;
+  classNameCell?: string;
   cellConfig?: Record<string, CellConfig>;
   renderCell?: (
     key: string,
@@ -44,32 +42,12 @@ export default function PrintTable({
   headers,
   rows,
   className,
-  cellClassName,
-  headerClassName,
-  tableClassName,
+  classNameCell,
   cellConfig,
   renderCell,
   rowClassName,
 }: GenericTableProps) {
   const { t } = useTranslation();
-
-  // Pre-compute which cells are covered by a rowspan from a previous row.
-  // Rows can encode `_span_${key}: "N"` to span N rows for that column.
-  const skipCells: Record<string, Set<number>> = {};
-  headers.forEach(({ key }) => {
-    skipCells[key] = new Set();
-  });
-  rows?.forEach((row, rowIndex) => {
-    headers.forEach(({ key }) => {
-      const spanVal = row[`_span_${key}`];
-      if (spanVal) {
-        const span = parseInt(spanVal);
-        for (let i = 1; i < span; i++) {
-          skipCells[key].add(rowIndex + i);
-        }
-      }
-    });
-  });
 
   const getCellContent = (
     key: string,
@@ -88,12 +66,7 @@ export default function PrintTable({
   };
 
   return (
-    <div
-      className={cn(
-        "overflow-hidden rounded border border-gray-200",
-        tableClassName,
-      )}
-    >
+    <div className="overflow-hidden rounded border border-gray-200">
       <Table className="w-full">
         <TableHeader>
           <TableRow className="bg-transparent hover:bg-transparent divide-x divide-gray-200 border-b-gray-200">
@@ -103,7 +76,6 @@ export default function PrintTable({
                   index == 0 && "first:rounded-l-md",
                   "h-auto py-1 pl-2 pr-2 text-black text-center ",
                   width && `w-${width}`,
-                  headerClassName,
                 )}
                 key={key}
               >
@@ -114,58 +86,29 @@ export default function PrintTable({
         </TableHeader>
         <TableBody>
           {!!rows &&
-            rows.map((row, index) => {
-              if (row["_fullspan"]) {
-                const skippedCount = headers.filter(({ key }) =>
-                  skipCells[key]?.has(index),
-                ).length;
-                return (
-                  <TableRow
-                    key={index}
-                    className="bg-transparent hover:bg-transparent"
+            rows.map((row, index) => (
+              <TableRow
+                key={index}
+                className={cn(
+                  "bg-transparent hover:bg-transparent divide-x divide-gray-200",
+                  className,
+                  rowClassName?.(row, index),
+                )}
+              >
+                {headers.map(({ key }) => (
+                  <TableCell
+                    className={cn(
+                      "wrap-break-words whitespace-normal text-center",
+                      classNameCell,
+                      cellConfig?.[key]?.className,
+                    )}
+                    key={key}
                   >
-                    <TableCell
-                      colSpan={headers.length - skippedCount}
-                      className={cn(
-                        "wrap-break-word whitespace-normal",
-                        cellClassName,
-                      )}
-                    >
-                      {row["_fullspan"]}
-                    </TableCell>
-                  </TableRow>
-                );
-              }
-              return (
-                <TableRow
-                  key={index}
-                  className={cn(
-                    "bg-transparent hover:bg-transparent divide-x divide-gray-200",
-                    className,
-                    rowClassName?.(row, index),
-                  )}
-                >
-                  {headers.map(({ key }) => {
-                    if (skipCells[key]?.has(index)) return null;
-                    const spanVal = row[`_span_${key}`];
-                    const rowSpan = spanVal ? parseInt(spanVal) : undefined;
-                    return (
-                      <TableCell
-                        rowSpan={rowSpan}
-                        className={cn(
-                          "wrap-break-word whitespace-normal text-center",
-                          cellClassName,
-                          cellConfig?.[key]?.className,
-                        )}
-                        key={key}
-                      >
-                        {getCellContent(key, row[key], index)}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
+                    {getCellContent(key, row[key], index)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </div>

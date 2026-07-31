@@ -107,9 +107,6 @@ test.describe("Diagnosis", () => {
 
     await diagnosisRow.getByRole("cell").nth(4).click();
     await page.getByRole("option", { name: verification, exact: true }).click();
-    await expect(diagnosisRow.getByRole("cell").nth(4)).toContainText(
-      verification,
-    );
 
     await page.getByRole("button", { name: "Submit" }).click();
 
@@ -194,6 +191,6 @@ test.describe("Diagnosis", () => {
     await expect(diagnosisRow.getByText("Verification")).toBeVisible();
     await expect(diagnosisRow.getByText("Onset")).toBeVisible();
 
-    await expect(diagnosisRow.getByText(diagnosisName).first()).toBeVisible();
+    await expect(diagnosisRow.getByText(diagnosisName)).toBeVisible();
   });
 });

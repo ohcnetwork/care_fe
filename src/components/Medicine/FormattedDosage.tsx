@@ -31,7 +31,7 @@ export function FormattedDosage({
     return (
       <span
         className={cn(
-          "rounded bg-yellow-100 px-1.5 -mx-1.5 py-0.5 font-semibold text-yellow-900",
+          "rounded bg-yellow-100 px-1.5 py-0.5 font-semibold text-yellow-900",
           className,
         )}
       >

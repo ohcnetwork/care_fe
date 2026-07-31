@@ -7,20 +7,6 @@ import {
   MedicationRequestDosageInstruction,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { round } from "@/Utils/decimal";
-import Decimal from "decimal.js";
-
-/**
- * Round to accounting precision for dosage/medication display.
- * If the fractional part is all zeros (e.g. "5.00"), the decimal portion is omitted.
- */
-export function roundDosage(value: string | number | Decimal): string {
-  const fixed = round(value);
-  const [intPart, fracPart] = fixed.split(".");
-  if (fracPart && /^0+$/.test(fracPart)) {
-    return intPart;
-  }
-  return fixed;
-}
 
 // Helper function to format dosage in Rx style
 export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
@@ -28,9 +14,9 @@ export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
 
   const { dose_range, dose_quantity } = instruction.dose_and_rate;
   if (dose_range) {
-    return `${roundDosage(dose_range.low.value)} ${dose_range.low.unit.display} -> ${roundDosage(dose_range.high.value)} ${dose_range.high.unit.display}`;
+    return `${round(dose_range.low.value)} ${dose_range.low.unit.display} -> ${round(dose_range.high.value)} ${dose_range.high.unit.display}`;
   } else if (dose_quantity) {
-    return `${roundDosage(dose_quantity.value)} ${dose_quantity.unit.display}`;
+    return `${round(dose_quantity.value)} ${dose_quantity.unit.display}`;
   }
   return "";
 }
@@ -48,7 +34,7 @@ export function isNonUnitDose(
   const { dose_range, dose_quantity } = doseAndRate;
   if (dose_range) return true;
   if (dose_quantity?.value == null) return false;
-  return roundDosage(dose_quantity.value) !== roundDosage(1);
+  return round(dose_quantity.value) !== round(1);
 }
 
 // Helper function to format dosage instructions in Rx style
@@ -76,7 +62,7 @@ export function formatSig(instruction?: MedicationRequestDosageInstruction) {
 
 export function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
-  return `${roundDosage(range.low.value)} → ${roundDosage(range.high?.value)} ${range.high?.unit?.display}`;
+  return `${round(range.low.value)} → ${round(range.high?.value)} ${range.high?.unit?.display}`;
 }
 
 /**
@@ -154,7 +140,7 @@ export function formatTotalUnits(
     const dose = prnInstruction.dose_and_rate?.dose_quantity?.value;
     const doseUnit =
       prnInstruction.dose_and_rate?.dose_quantity?.unit?.display || unitText;
-    return dose ? `${roundDosage(dose)} ${doseUnit} (PRN)` : "PRN";
+    return dose ? `${round(dose)} ${doseUnit} (PRN)` : "PRN";
   }
 
   // Sum total dose across all instructions
@@ -182,5 +168,5 @@ export function formatTotalUnits(
 
   if (!hasAnyDose) return "";
 
-  return `${roundDosage(String(totalValue))} ${doseUnit}${hasTapered ? " (tapered)" : ""}`;
+  return `${round(String(totalValue))} ${doseUnit}${hasTapered ? " (tapered)" : ""}`;
 }
