@@ -134,7 +134,7 @@ const Login = (props: LoginProps) => {
     const frame = requestAnimationFrame(() => {
       document.getElementById(mode === "staff" ? "username" : "phone")?.focus();
     });
-    return cancelAnimationFrame(frame);
+    return () => cancelAnimationFrame(frame);
   }, [activeMode]);
 
   // Send OTP Mutation
