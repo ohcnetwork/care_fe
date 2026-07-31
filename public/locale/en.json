@@ -4700,6 +4700,7 @@
   "question_type__string": "String",
   "question_type__structured": "Structured",
   "question_type__text": "Text",
+  "question_type__time": "Time",
   "question_type__url": "URL",
   "question_type_boolean_description": "A simple yes/no question that users can answer with a single click.",
   "question_type_choice_description": "Presents a list of predefined options for users to choose from.",
