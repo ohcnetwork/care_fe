@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { createQuestionnaire } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -11,13 +12,10 @@ test.describe("Questionnaire v2 detail", () => {
     const title = `QV2 Detail ${Date.now()}`;
 
     await test.step("Create a questionnaire to own for this test", async () => {
-      await page.goto("/admin/questionnaires/new");
-      await page
-        .getByRole("textbox", { name: "Title" })
-        .pressSequentially(title);
-      await page.getByRole("button", { name: "Save Form" }).click();
-      await expectToast(page, "Questionnaire created successfully");
-      await page.waitForURL(/\/admin\/questionnaires\/[0-9a-f-]+$/);
+      await createQuestionnaire(page, {
+        basePath: "/admin/questionnaires",
+        title,
+      });
       await expect(page.getByText("Form Properties")).toBeVisible();
     });
 

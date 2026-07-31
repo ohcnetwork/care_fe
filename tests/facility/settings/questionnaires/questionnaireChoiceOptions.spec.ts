@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -15,20 +16,14 @@ test.describe("Questionnaire v2 choice answer options", () => {
     const optionAValue = `mild-${faker.string.alphanumeric(4).toLowerCase()}`;
     const optionBValue = `severe-${faker.string.alphanumeric(4).toLowerCase()}`;
 
-    await test.step("Create a questionnaire", async () => {
-      await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
-      await page
-        .getByRole("textbox", { name: "Title" })
-        .pressSequentially(title);
-      await page.getByRole("button", { name: "Save Form" }).click();
-      await expectToast(page, "Questionnaire created successfully");
-      await page.waitForURL(/\/settings\/questionnaires\/[0-9a-f-]+$/);
+    await test.step("Create a questionnaire and open the builder", async () => {
+      await createQuestionnaireAndOpenBuilder(page, {
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+        title,
+      });
     });
 
     await test.step("Add a choice question with two custom options", async () => {
-      await page.getByRole("button", { name: "Edit Questions" }).click();
-      await page.waitForURL(/\/edit$/);
-
       await page.getByRole("button", { name: "Add First Question" }).click();
       await page
         .getByRole("textbox", { name: "Question Title" })
@@ -97,8 +92,9 @@ test.describe("Questionnaire v2 choice answer options", () => {
     // ChoiceInput.tsx then renders `option.display ?? option.value`, i.e. the
     // raw value, as the chip label. This is a pre-existing backend gap (the
     // AnswerOption class has never had a display field), not a regression on
-    // this frontend branch — see finding [28]'s own note about a related
-    // parked defect ("ChoiceInput answer_option writes lack coding").
+    // this frontend branch. Related same-spec gap: ChoiceInput's
+    // answer_option writes also omit `coding`, dropped by the backend the
+    // same way.
     //
     // This test pins the INTENDED behavior so it starts failing (in the good
     // sense — an "unexpected pass" that flags the fix) the moment the backend
@@ -115,14 +111,10 @@ test.describe("Questionnaire v2 choice answer options", () => {
     const optionValue = `opt-${faker.string.alphanumeric(4).toLowerCase()}`;
     const optionDisplay = `Mild ${faker.string.alphanumeric(4)}`;
 
-    await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
-    await page.getByRole("textbox", { name: "Title" }).pressSequentially(title);
-    await page.getByRole("button", { name: "Save Form" }).click();
-    await expectToast(page, "Questionnaire created successfully");
-    await page.waitForURL(/\/settings\/questionnaires\/[0-9a-f-]+$/);
-
-    await page.getByRole("button", { name: "Edit Questions" }).click();
-    await page.waitForURL(/\/edit$/);
+    await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title,
+    });
     await page.getByRole("button", { name: "Add First Question" }).click();
     await page
       .getByRole("textbox", { name: "Question Title" })

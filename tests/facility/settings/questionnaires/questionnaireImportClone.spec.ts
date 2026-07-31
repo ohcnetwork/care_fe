@@ -3,6 +3,10 @@ import { expect, test } from "@playwright/test";
 import fs from "fs";
 import os from "os";
 import path from "path";
+import {
+  createQuestionnaire,
+  openQuestionBuilder,
+} from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -41,19 +45,14 @@ test.describe("Questionnaire v2 import and clone", () => {
     let detailUrl = "";
 
     await test.step("Create a questionnaire", async () => {
-      await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
-      await page
-        .getByRole("textbox", { name: "Title" })
-        .pressSequentially(title);
-      await page.getByRole("button", { name: "Save Form" }).click();
-      await expectToast(page, "Questionnaire created successfully");
-      await page.waitForURL(/\/settings\/questionnaires\/[0-9a-f-]+$/);
-      detailUrl = page.url();
+      detailUrl = await createQuestionnaire(page, {
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+        title,
+      });
     });
 
     await test.step("Import the JSON file via the file dropzone", async () => {
-      await page.getByRole("button", { name: "Edit Questions" }).click();
-      await page.waitForURL(/\/edit$/);
+      await openQuestionBuilder(page);
 
       await page.getByRole("button", { name: "Import Questions" }).click();
       await expect(

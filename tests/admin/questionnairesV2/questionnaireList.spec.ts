@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { expectToast } from "tests/helper/ui";
+import { createQuestionnaire } from "tests/helper/questionnaireV2";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -12,17 +12,11 @@ test.describe("Questionnaire v2 list", () => {
     const draftTitle = `QV2 List Draft ${Date.now()}`;
 
     await test.step("Create a draft questionnaire to filter for", async () => {
-      await page.goto("/admin/questionnaires/new");
-      await page
-        .getByRole("textbox", { name: "Title" })
-        .pressSequentially(draftTitle);
-      await page
-        .getByRole("radiogroup", { name: "Status" })
-        .getByRole("radio", { name: "Draft" })
-        .click();
-      await page.getByRole("button", { name: "Save Form" }).click();
-      await expectToast(page, "Questionnaire created successfully");
-      await page.waitForURL(/\/admin\/questionnaires\/[0-9a-f-]+$/);
+      await createQuestionnaire(page, {
+        basePath: "/admin/questionnaires",
+        title: draftTitle,
+        status: "Draft",
+      });
     });
 
     await test.step("Page renders with status tabs", async () => {

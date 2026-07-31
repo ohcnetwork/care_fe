@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -19,21 +20,6 @@ function trackQuestionnairePutRequests(page: Page) {
   return requests;
 }
 
-async function createQuestionnaireAndOpenBuilder(
-  page: Page,
-  facilityId: string,
-  title: string,
-) {
-  await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
-  await page.getByRole("textbox", { name: "Title" }).pressSequentially(title);
-  await page.getByRole("button", { name: "Save Form" }).click();
-  await expectToast(page, "Questionnaire created successfully");
-  await page.waitForURL(/\/settings\/questionnaires\/[0-9a-f-]+$/);
-
-  await page.getByRole("button", { name: "Edit Questions" }).click();
-  await page.waitForURL(/\/edit$/);
-}
-
 test.describe("Questionnaire v2 builder save validation", () => {
   test("blocks save when a question has no title", async ({ page }) => {
     const facilityId = getFacilityId();
@@ -42,7 +28,10 @@ test.describe("Questionnaire v2 builder save validation", () => {
     const putRequests = trackQuestionnairePutRequests(page);
 
     await test.step("Create a questionnaire and open the builder", async () => {
-      await createQuestionnaireAndOpenBuilder(page, facilityId, title);
+      await createQuestionnaireAndOpenBuilder(page, {
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+        title,
+      });
     });
 
     await test.step("Save Changes is disabled before any edit", async () => {
@@ -88,7 +77,10 @@ test.describe("Questionnaire v2 builder save validation", () => {
     const putRequests = trackQuestionnairePutRequests(page);
 
     await test.step("Create a questionnaire and open the builder", async () => {
-      await createQuestionnaireAndOpenBuilder(page, facilityId, title);
+      await createQuestionnaireAndOpenBuilder(page, {
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+        title,
+      });
     });
 
     await test.step("Add a group question with no sub-questions", async () => {

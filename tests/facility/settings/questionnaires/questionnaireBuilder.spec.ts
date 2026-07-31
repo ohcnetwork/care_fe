@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -11,19 +12,14 @@ test.describe("Questionnaire v2 builder", () => {
     const title = `QV2 Builder ${Date.now()}`;
     const questionTitle = faker.lorem.words(3);
 
-    await test.step("Create a questionnaire", async () => {
-      await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
-      await page
-        .getByRole("textbox", { name: "Title" })
-        .pressSequentially(title);
-      await page.getByRole("button", { name: "Save Form" }).click();
-      await expectToast(page, "Questionnaire created successfully");
-      await page.waitForURL(/\/settings\/questionnaires\/[0-9a-f-]+$/);
+    await test.step("Create a questionnaire and open the builder", async () => {
+      await createQuestionnaireAndOpenBuilder(page, {
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+        title,
+      });
     });
 
-    await test.step("Open builder and add a question", async () => {
-      await page.getByRole("button", { name: "Edit Questions" }).click();
-      await page.waitForURL(/\/edit$/);
+    await test.step("Add a question", async () => {
       await page.getByRole("button", { name: "Add First Question" }).click();
       await page
         .getByRole("textbox", { name: "Question Title" })
