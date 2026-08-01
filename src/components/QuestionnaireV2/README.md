@@ -88,8 +88,9 @@ registry/allowlist entry here, not an ad-hoc reach-in.
 1. Add the value to `QUESTION_TYPES` and `SUPPORTED_QUESTION_TYPES`
    (`src/types/questionnaire/question.ts`) — the type union, the builder's
    picker and import validation derive from them.
-2. Give the picker an icon in `builder/QuestionTypePicker.tsx`
-   (`TYPE_ICONS` is a total record — it will not compile without one).
+2. Give the type an icon in `shared/questionTypeIcons.ts`
+   (`QUESTION_TYPE_ICONS` is a total record — it will not compile without
+   one). The picker's tiles and the tree nav's row icons both render it.
 3. Implement a renderer input (`renderer/inputs/`) implementing
    `RendererInputProps`; read the response via a discriminant check on
    `values[valueIndex ?? 0].type` (no casts), write positionally through

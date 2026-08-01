@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Question } from "@/types/questionnaire/question";
 
 import { TreeItem, numberQuestions } from "./questionTree";
+import { QUESTION_TYPE_ICONS } from "./questionTypeIcons";
 
 export interface QuestionTreeNavProps {
   title?: string;
@@ -35,30 +36,46 @@ export function QuestionTreeNav({
     (item) => !hiddenIds?.has(item.question.id),
   );
 
-  const row = (item: TreeItem, indent: boolean) => (
-    <button
-      key={item.question.id}
-      type="button"
-      onClick={() => onSelect(item.question.id)}
-      className={cn(
-        "relative flex w-full items-start gap-1 rounded-md px-3 py-2 text-left text-sm",
-        indent && "ml-2",
-        activeId === item.question.id
-          ? "bg-gray-100 font-medium text-gray-900"
-          : "text-gray-700 hover:bg-gray-50",
-      )}
-    >
-      <span className="shrink-0">{item.number}</span>
-      <span className="min-w-0">
-        {item.question.text || (
-          <span className="italic text-gray-400">{t("untitled_question")}</span>
+  const row = (item: TreeItem, indent: boolean) => {
+    const { icon: TypeIcon, tint } = QUESTION_TYPE_ICONS[item.question.type];
+    return (
+      <button
+        key={item.question.id}
+        type="button"
+        onClick={() => onSelect(item.question.id)}
+        className={cn(
+          "relative flex w-full items-start gap-1 rounded-md px-3 py-2 text-left text-sm",
+          indent && "ml-2",
+          activeId === item.question.id
+            ? "bg-gray-100 font-medium text-gray-900"
+            : "text-gray-700 hover:bg-gray-50",
         )}
-      </span>
-      {activeId === item.question.id && (
-        <span className="absolute right-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-gray-900" />
-      )}
-    </button>
-  );
+      >
+        <span className="shrink-0">{item.number}</span>
+        {/* Decorative type recognition cue — aria-hidden keeps row names
+            (number + title) unchanged for a11y and specs. */}
+        <span
+          aria-hidden
+          className={cn(
+            "mt-px flex size-4 shrink-0 items-center justify-center rounded-sm",
+            tint,
+          )}
+        >
+          <TypeIcon className="size-3" />
+        </span>
+        <span className="min-w-0">
+          {item.question.text || (
+            <span className="italic text-gray-400">
+              {t("untitled_question")}
+            </span>
+          )}
+        </span>
+        {activeId === item.question.id && (
+          <span className="absolute right-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-gray-900" />
+        )}
+      </button>
+    );
+  };
 
   return (
     <nav aria-label={title} className="w-full space-y-1">
