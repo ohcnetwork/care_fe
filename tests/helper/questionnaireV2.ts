@@ -1,6 +1,68 @@
 import { type Page } from "@playwright/test";
+import * as fs from "fs";
+import * as path from "path";
 
 import { expectToast } from "./ui";
+
+/** Deterministic backend fixtures loaded by the care repo's E2E fixture
+ *  script (present in the Playwright DB snapshot, so restores keep them). */
+export const KITCHEN_SINK_FACILITY_SLUG = "e2e-kitchen-sink-facility";
+export const KITCHEN_SINK_INSTANCE_SLUG = "e2e-kitchen-sink-instance";
+export const VERSIONED_SLUG = "e2e-versioned";
+/** 18 records named `E2E Pagination 001..018`, facility-scoped, active. */
+export const PAGINATION_TITLE_PREFIX = "E2E Pagination";
+export const PAGINATION_FIXTURE_COUNT = 18;
+
+/** Reads the admin bearer token captured by tests/setup/auth.setup.ts. */
+export function adminApiHeaders(): Record<string, string> {
+  const authFile = path.resolve("tests/.auth/user.json");
+  const storageState = JSON.parse(fs.readFileSync(authFile, "utf-8"));
+  const localStorage: { name: string; value: string }[] =
+    storageState.origins?.[0]?.localStorage ?? [];
+  const token = localStorage.find(
+    (item) => item.name === "care_access_token",
+  )?.value;
+  if (!token) {
+    throw new Error("No access token in tests/.auth/user.json — run setup");
+  }
+  return {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+}
+
+export function apiBaseUrl(): string {
+  return process.env.REACT_CARE_API_URL || "http://localhost:9000";
+}
+
+const slugCache = new Map<string, string>();
+
+/**
+ * Resolves a fixture questionnaire's id from its slug. The detail endpoint
+ * looks up by external_id only (ENG-737 dropped slug lookup) and the list
+ * has no slug filter, so this lists broadly and matches client-side.
+ */
+export async function getQuestionnaireIdBySlug(slug: string): Promise<string> {
+  const cached = slugCache.get(slug);
+  if (cached) return cached;
+  const res = await fetch(`${apiBaseUrl()}/api/v1/questionnaire/?limit=100`, {
+    headers: adminApiHeaders(),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to list questionnaires: ${res.status}`);
+  }
+  const data = (await res.json()) as {
+    results: { id: string; slug: string }[];
+  };
+  const match = data.results.find((entry) => entry.slug === slug);
+  if (!match) {
+    throw new Error(
+      `Fixture questionnaire "${slug}" not found — reload backend E2E fixtures`,
+    );
+  }
+  slugCache.set(slug, match.id);
+  return match.id;
+}
 
 /** Matches the questionnaire v2 detail URL on both mounts
  *  (`/facility/{id}/settings/questionnaires/{uuid}` and

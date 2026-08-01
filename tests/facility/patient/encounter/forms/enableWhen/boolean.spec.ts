@@ -14,8 +14,13 @@ import {
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
+import { getQuestionnaireId } from "tests/support/questionnaireId";
 
-const QUESTIONNAIRE_SLUG = "enable-when-test";
+// Every test in this file submits responses to the same shared encounter and
+// several assert that a hidden dependent is ABSENT from the response
+// overview — running them in parallel lets another test's submission leak
+// into that overview. Opt out of fullyParallel to keep the file sequential.
+test.describe.configure({ mode: "default" });
 
 test.describe("Enable When — Boolean Operators", () => {
   test.use({ storageState: "tests/.auth/user.json" });
@@ -24,9 +29,11 @@ test.describe("Enable When — Boolean Operators", () => {
     const facilityId = getFacilityId();
     const patientId = getPatientId();
     const encounterId = getEncounterId();
+    // The fill route fetches by external_id (slug lookup removed on ENG-737).
+    const questionnaireId = getQuestionnaireId();
 
     await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${QUESTIONNAIRE_SLUG}`,
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
     );
     await expect(
       page.getByText("Has Allergies", { exact: true }),
