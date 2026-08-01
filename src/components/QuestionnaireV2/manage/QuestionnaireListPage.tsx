@@ -74,8 +74,6 @@ export function QuestionnaireListPage({
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         title: qParams.search,
         status: qParams.status,
-        // Backend gap: QuestionnaireFilter has no facility/auth_context params
-        // yet — passed optimistically, harmless if ignored.
         facility: scope.facilityId,
         auth_context: scope.authContext,
       },
