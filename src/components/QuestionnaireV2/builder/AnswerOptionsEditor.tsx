@@ -171,8 +171,7 @@ export function AnswerOptionsEditor({
                 <TableRow>
                   <TableHead className="w-10">#</TableHead>
                   <TableHead>{t("option_value")}</TableHead>
-                  <TableHead>{t("display_text_optional")}</TableHead>
-                  <TableHead className="w-32">{t("default")}</TableHead>
+                  <TableHead className="w-40">{t("default")}</TableHead>
                   <TableHead className="w-24">{t("action")}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -188,15 +187,6 @@ export function AnswerOptionsEditor({
                         placeholder={t("option_value")}
                         onChange={(e) =>
                           handleOptionChange(index, { value: e.target.value })
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        value={option.display ?? ""}
-                        placeholder={t("display_text_optional")}
-                        onChange={(e) =>
-                          handleOptionChange(index, { display: e.target.value })
                         }
                       />
                     </TableCell>

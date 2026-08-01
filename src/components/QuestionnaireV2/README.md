@@ -100,8 +100,10 @@ registry/allowlist entry here, not an ad-hoc reach-in.
 
 ## Backend gaps (tracked, not worked around silently)
 
-- `AnswerOption` spec has no `display`/`coding` fields — option display
-  text is dropped on save (pinned by a `test.fail()` spec).
+- `AnswerOption` spec has no `display`/`coding` fields — the v2 builder
+  therefore does not offer option display text (the column was dropped
+  deliberately). The renderer keeps its `option.display ?? option.value`
+  fallback for legacy data that still carries a display value.
 - `QuestionnaireReadSpec` lacks `modified_date`/`created_date`; the
   Versions tab shows attribution without chronology until they land.
 - Revision listing has no "all" page size; the Versions tab requests
