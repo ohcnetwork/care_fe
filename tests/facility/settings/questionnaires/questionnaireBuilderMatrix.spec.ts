@@ -67,16 +67,10 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
         await page.getByRole("button", { name: "Add Option" }).click();
         await page.getByRole("row").last().getByRole("textbox").fill(value);
       }
-      // The plain ValueSetSelect trigger computes no accessible name (only
-      // the coding card passes aria-label) — match on its placeholder text.
-      const unitTrigger = page
-        .getByRole("combobox")
-        .filter({ hasText: "Search..." });
+      const unitTrigger = page.getByRole("combobox", { name: "Default Unit" });
       await expect(unitTrigger).toBeVisible();
       await selectFromValueSet(page, unitTrigger, { search: "milligram" });
-      await expect(
-        page.getByRole("combobox").filter({ hasText: "milligram" }),
-      ).toBeVisible();
+      await expect(unitTrigger).toContainText("milligram");
     });
 
     await test.step("Author a group with one sub-question", async () => {
@@ -100,13 +94,15 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       ).toBeVisible();
     });
 
-    await test.step("Preview: quantity value input", async () => {
+    await test.step("Preview: quantity value input with the authored default unit", async () => {
       await page
         .getByRole("navigation")
         .getByRole("button", { name: quantityTitle })
         .click();
-      await expect(page.getByText("Value", { exact: true })).toBeVisible();
       await expect(page.getByRole("spinbutton")).toBeVisible();
+      await expect(
+        page.getByRole("combobox", { name: "Unit", exact: true }),
+      ).toContainText("milligram");
     });
 
     await test.step("Preview: group card with its child", async () => {

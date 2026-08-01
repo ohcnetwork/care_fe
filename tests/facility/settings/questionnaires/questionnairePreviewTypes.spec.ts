@@ -125,14 +125,99 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
     });
   });
 
-  test("quantity question renders a value input", async ({ page }) => {
+  test("quantity question: value input with a per-answer unit picker", async ({
+    page,
+  }) => {
     await openKitchenSinkPreview(page);
     await jumpTo(page, "Dose administered");
 
-    await expect(page.getByText("Value", { exact: true })).toBeVisible();
     const input = page.getByRole("spinbutton");
-    await input.fill("250");
-    await expect(input).toHaveValue("250");
+    const unitTrigger = page.getByRole("combobox", {
+      name: "Unit",
+      exact: true,
+    });
+
+    await test.step("Unit picker pre-selects the seeded default unit", async () => {
+      // Fixture seeds question.unit = UCUM milligram.
+      await expect(unitTrigger).toContainText("milligram");
+    });
+
+    await test.step("Entering a value keeps the default unit", async () => {
+      await input.fill("250");
+      await expect(input).toHaveValue("250");
+      await expect(unitTrigger).toContainText("milligram");
+    });
+
+    await test.step("Picking a different unit sticks and keeps the value", async () => {
+      // UCUM search hits the live terminology sandbox (same dependency as
+      // the LOINC coding tests) — drive the picker by hand so an empty
+      // result set degrades to a picker-opens assertion instead of a flake.
+      await unitTrigger.click();
+      const dialog = page.getByRole("dialog").last();
+      const scope = (await dialog.isVisible().catch(() => false))
+        ? dialog
+        : page.locator("[data-radix-popper-content-wrapper]").last();
+      await scope.waitFor({ state: "visible" });
+
+      // The terminology search matches display names, not UCUM codes —
+      // "kg" returns nothing, "kilogram" returns the kg unit.
+      await scope
+        .locator('[data-slot="command-input"]')
+        .first()
+        .fill("kilogram");
+
+      // The search is debounced, so the list keeps showing the pre-search
+      // entry (the selected "milligram" row) for a beat — poll until a
+      // different unit shows up rather than reading the list once.
+      const options = scope
+        .getByTestId("valueset-search-results")
+        .getByRole("option");
+      const readOptionTexts = async () => {
+        const texts: string[] = [];
+        for (let index = 0; index < (await options.count()); index++) {
+          texts.push(
+            (await options.nth(index).innerText()).split("\n")[0]?.trim() ?? "",
+          );
+        }
+        return texts;
+      };
+      let optionTexts: string[] = [];
+      const searchSettled = await expect
+        .poll(
+          async () => {
+            optionTexts = await readOptionTexts();
+            return optionTexts.some(
+              (text) => text && text.toLowerCase() !== "milligram",
+            );
+          },
+          { timeout: 20_000 },
+        )
+        .toBe(true)
+        .then(() => true)
+        .catch(() => false);
+
+      if (!searchSettled) {
+        // Environment issue (terminology sandbox down/empty) — the picker
+        // opened, which is all that can be pinned without live results.
+        test.info().annotations.push({
+          type: "environment",
+          description:
+            "UCUM search returned no results from the terminology sandbox; unit swap not exercised",
+        });
+        await page.keyboard.press("Escape");
+        await expect(unitTrigger).toContainText("milligram");
+        return;
+      }
+
+      // Pick the first hit that is not the seeded default.
+      const pickedIndex = optionTexts.findIndex(
+        (text) => text && text.toLowerCase() !== "milligram",
+      );
+      const pickedDisplay = optionTexts[pickedIndex];
+      await options.nth(pickedIndex).click();
+      await expect(unitTrigger).toContainText(pickedDisplay);
+      await expect(input).toHaveValue("250");
+    });
   });
 
   test("boolean question renders Yes/No radio chips", async ({ page }) => {
