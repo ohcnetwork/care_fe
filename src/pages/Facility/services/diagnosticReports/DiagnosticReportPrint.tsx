@@ -1,10 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import query from "@/Utils/request/query";
 import Loading from "@/components/Common/Loading";
 import { DiagnosticReportPreview } from "@/pages/Facility/services/diagnosticReports/DiagnosticReportPreview";
-import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
+import {
+  DiagnosticReportRead,
+  DiagnosticReportStatus,
+} from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
@@ -21,7 +24,7 @@ export default function DiagnosticReportPrint({
 }) {
   const { t } = useTranslation();
 
-  const { data: data, isLoading: isLoadingReports } = useQuery({
+  const { data: data } = useQuery({
     queryKey: ["diagnosticReports", patientId, serviceRequestId],
     queryFn: query(diagnosticReportApi.listDiagnosticReports, {
       pathParams: { patient_external_id: patientId },
@@ -43,6 +46,29 @@ export default function DiagnosticReportPrint({
     enabled: !!diagnosticReportId,
   });
 
+  const diagnosticReportResults = data?.results;
+
+  const { allDiagnosticReports, isLoading: isLoadingReports } = useQueries({
+    queries:
+      diagnosticReportResults?.map((report) => ({
+        queryKey: ["diagnosticReport", report.id, patientId, facilityId],
+        queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
+          pathParams: {
+            patient_external_id: patientId,
+            external_id: report.id,
+          },
+          queryParams: { facility: facilityId },
+        }),
+        enabled: !diagnosticReportId,
+      })) ?? [],
+    combine: (results) => ({
+      allDiagnosticReports: results
+        .map((r) => r.data)
+        .filter((data): data is DiagnosticReportRead => !!data),
+      isLoading: results.some((r) => r.isLoading || r.isFetching),
+    }),
+  });
+
   const { data: request } = useQuery({
     queryKey: ["serviceRequest", facilityId, serviceRequestId],
     queryFn: query(serviceRequestApi.retrieveServiceRequest, {
@@ -55,7 +81,7 @@ export default function DiagnosticReportPrint({
 
   const diagnosticReports = fullReport
     ? [fullReport]
-    : data?.results?.filter(
+    : allDiagnosticReports.filter(
         (report) => report.status === DiagnosticReportStatus.final,
       );
 
@@ -74,7 +100,7 @@ export default function DiagnosticReportPrint({
   return (
     <DiagnosticReportPreview
       diagnosticReports={diagnosticReports}
-      isLoading={isLoadingReports || isLoadingReport}
+      isLoading={isLoadingReport || isLoadingReports}
       serviceRequest={request}
     />
   );
