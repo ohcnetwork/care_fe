@@ -160,7 +160,9 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
       await jumpTo(page, "Is the patient stable?");
       await page.getByRole("radio", { name: "Yes", exact: true }).click();
       await jumpTo(page, "Protected note");
-      await expect(page.getByPlaceholder("Enter details")).toBeEnabled();
+      await expect(
+        questionBlock(page, "Protected note").getByPlaceholder("Enter details"),
+      ).toBeEnabled();
     });
   });
 
