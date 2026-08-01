@@ -9,101 +9,38 @@ test.describe("Patient Update/Edit", () => {
   let facilityId: string;
   let patientId: string;
 
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     patientId = getPatientId();
+    await page.goto(`/facility/${facilityId}/patient/${patientId}/update`);
+    await expect(
+      page.getByRole("textbox", { name: "Name *", exact: true }),
+    ).toBeVisible();
   });
 
-  test("should load patient update form with existing data", async ({
+  test("should load the update form with existing patient data", async ({
     page,
   }) => {
-    // Navigate to patient update page
-    await page.goto(`/facility/${facilityId}/patient/${patientId}/update`);
-
-    await page.waitForLoadState("networkidle");
-
-    // The update form should display existing patient data
-    // Name field should be pre-filled
-    const nameField = page.getByRole("textbox", { name: /name.*\*/i });
-    await expect(nameField).toBeVisible({ timeout: 10000 });
-
-    // The name field should have a value (pre-filled with existing patient name)
-    const nameValue = await nameField.inputValue();
-    expect(nameValue.length).toBeGreaterThan(0);
-  });
-
-  test("should update patient address", async ({ page }) => {
-    // Navigate to patient update page
-    await page.goto(`/facility/${facilityId}/patient/${patientId}/update`);
-
-    await page.waitForLoadState("networkidle");
-
-    // Wait for form to load with existing data
-    const nameField = page.getByRole("textbox", { name: /name.*\*/i });
-    await expect(nameField).toBeVisible({ timeout: 10000 });
-
-    // Expand additional details if collapsed
-    const additionalDetailsSection = page.getByRole("button", {
-      name: "Additional Details",
+    const nameField = page.getByRole("textbox", {
+      name: "Name *",
+      exact: true,
     });
-    if (await additionalDetailsSection.isVisible().catch(() => false)) {
-      const sectionText = await additionalDetailsSection.textContent();
-      if (sectionText?.toLowerCase().includes("optional")) {
-        await additionalDetailsSection.click();
-      }
-    }
-
-    // Update the address field
-    const newAddress = faker.location.streetAddress();
-    const addressField = page.getByRole("textbox", { name: /address/i });
-
-    if (await addressField.isVisible().catch(() => false)) {
-      await addressField.clear();
-      await addressField.fill(newAddress);
-    }
-
-    // Submit the update
-    const updateButton = page.getByRole("button", { name: /update/i });
-    await updateButton.scrollIntoViewIfNeeded();
-    await updateButton.click();
-
-    // Verify success message
-    await expect(
-      page.getByText(/patient.*updated.*successfully|patient_update_success/i),
-    ).toBeVisible({ timeout: 10000 });
+    expect((await nameField.inputValue()).length).toBeGreaterThan(0);
   });
 
-  test("should display phone number field pre-filled", async ({ page }) => {
-    await page.goto(`/facility/${facilityId}/patient/${patientId}/update`);
-
-    await page.waitForLoadState("networkidle");
-
-    // Phone number field should be pre-filled
+  test("should display the phone number pre-filled", async ({ page }) => {
     const phoneField = page.getByRole("textbox", {
-      name: /phone number.*\*/i,
+      name: "Phone Number *",
+      exact: true,
     });
-    await expect(phoneField).toBeVisible({ timeout: 10000 });
-
-    const phoneValue = await phoneField.inputValue();
-    expect(phoneValue.length).toBeGreaterThan(0);
+    expect((await phoneField.inputValue()).length).toBeGreaterThan(0);
   });
 
-  test("should display gender selection pre-selected", async ({ page }) => {
-    await page.goto(`/facility/${facilityId}/patient/${patientId}/update`);
-
-    await page.waitForLoadState("networkidle");
-
-    // Wait for form to load
-    await expect(page.getByRole("textbox", { name: /name.*\*/i })).toBeVisible({
-      timeout: 10000,
-    });
-
-    // One of the gender radio buttons should be checked
+  test("should display the gender pre-selected", async ({ page }) => {
     const genderRadios = page.getByRole("radio");
     const radioCount = await genderRadios.count();
     expect(radioCount).toBeGreaterThan(0);
 
-    // At least one should be checked
     let hasChecked = false;
     for (let i = 0; i < radioCount; i++) {
       if (await genderRadios.nth(i).isChecked()) {
@@ -114,33 +51,43 @@ test.describe("Patient Update/Edit", () => {
     expect(hasChecked).toBe(true);
   });
 
-  test("should show validation error for invalid phone number", async ({
+  test("should update the patient's name", async ({ page }) => {
+    const emergencyToggle = page.getByRole("checkbox", {
+      name: /different emergency contact/i,
+    });
+    if (await emergencyToggle.isChecked()) await emergencyToggle.click();
+
+    const nameField = page.getByRole("textbox", {
+      name: "Name *",
+      exact: true,
+    });
+    await nameField.clear();
+    await nameField.fill(faker.person.fullName());
+
+    const updateResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes(`/api/v1/patient/${patientId}/`) &&
+        resp.request().method() === "PUT" &&
+        resp.status() === 200,
+    );
+    await page.getByRole("button", { name: /update/i }).click();
+    await updateResponse;
+  });
+
+  test("should show a validation error for an invalid phone number", async ({
     page,
   }) => {
-    await page.goto(`/facility/${facilityId}/patient/${patientId}/update`);
-
-    await page.waitForLoadState("networkidle");
-
-    // Wait for form to load
-    await expect(page.getByRole("textbox", { name: /name.*\*/i })).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Set an invalid phone number
     const phoneField = page.getByRole("textbox", {
-      name: /phone number.*\*/i,
+      name: "Phone Number *",
+      exact: true,
     });
     await phoneField.clear();
     await phoneField.fill("123");
 
-    // Try to submit
-    const updateButton = page.getByRole("button", { name: /update/i });
-    await updateButton.scrollIntoViewIfNeeded();
-    await updateButton.click();
+    await page.getByRole("button", { name: /update/i }).click();
 
-    // Should show validation error
     await expect(
-      page.getByText(/entered phone number is not valid/i).first(),
-    ).toBeVisible({ timeout: 5000 });
+      page.getByText("Entered phone number is not valid").first(),
+    ).toBeVisible();
   });
 });

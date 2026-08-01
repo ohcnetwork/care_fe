@@ -108,14 +108,14 @@ test.describe("Healthcare Service Create & Edit", () => {
 
     // Click edit
     await test.step("Edit the service", async () => {
-      await page.getByRole("link", { name: /edit/i }).click();
+      await page.getByRole("button", { name: "Edit" }).click();
       await page.waitForURL(/\/edit$/);
 
       // Clear and update the name
       await page.getByRole("textbox", { name: /name/i }).clear();
       await page.getByRole("textbox", { name: /name/i }).fill(updatedName);
 
-      await page.getByRole("button", { name: /update/i }).click();
+      await page.getByRole("button", { name: "Save" }).click();
       await expect(
         page.getByText(/healthcare service updated successfully/i),
       ).toBeVisible({ timeout: 10000 });
@@ -127,16 +127,14 @@ test.describe("Healthcare Service Create & Edit", () => {
     });
   });
 
-  test("should show validation error when name is empty", async ({ page }) => {
+  test("should keep the create button disabled until the form is valid", async ({
+    page,
+  }) => {
     await page.getByRole("button", { name: /add healthcare service/i }).click();
     await page.waitForURL(/\/healthcare_services\/new/);
 
-    // Try to submit without filling name
-    await page.getByRole("button", { name: /create/i }).click();
-
-    // Should show validation error
-    await expect(page.getByText(/name is required/i)).toBeVisible({
-      timeout: 5000,
-    });
+    // Name (and a location) are required, so the create action stays disabled
+    // on an empty form.
+    await expect(page.getByRole("button", { name: /create/i })).toBeDisabled();
   });
 });

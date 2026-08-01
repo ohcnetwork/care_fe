@@ -11,70 +11,31 @@ test.describe("Facility Overview Page", () => {
     await page.goto(`/facility/${facilityId}/overview`);
   });
 
-  test("should display facility name and overview page", async ({ page }) => {
-    // Verify the facility overview page loads
-    // The facility name should be visible (fixture creates "FACILITY WITH PATIENTS")
-    await expect(page.getByText(/facility with patient/i).first()).toBeVisible({
-      timeout: 10000,
-    });
+  test("should display the overview page with quick actions", async ({
+    page,
+  }) => {
+    await expect(page.getByText("Welcome back to the overview")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Quick Actions" }),
+    ).toBeVisible();
   });
 
-  test("should show navigation cards for key sections", async ({ page }) => {
-    // Verify key navigation links/cards are visible
-    // The overview page shows quick access cards for various facility sections
-
-    // Encounters link should be present
-    const encountersLink = page.getByRole("link", {
-      name: /encounter/i,
-    });
-    await expect(encountersLink.first()).toBeVisible({ timeout: 10000 });
+  test("should show quick action links for key sections", async ({ page }) => {
+    await expect(page.getByRole("link", { name: /encounters/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /services/i })).toBeVisible();
   });
 
-  test("should navigate to encounters page from overview", async ({ page }) => {
-    // Click on Encounters link
-    const encountersLink = page.getByRole("link", {
-      name: /encounter/i,
-    });
-    await encountersLink.first().click();
+  test("should navigate to encounters from quick actions", async ({ page }) => {
+    await page.getByRole("link", { name: /encounters/i }).click();
 
-    // Verify navigation to encounters page
     await page.waitForURL(/\/encounters/);
     await expect(page).toHaveURL(/\/encounters/);
   });
 
-  test("should navigate to settings from overview", async ({ page }) => {
-    // Look for a Settings link
-    const settingsLink = page.getByRole("link", {
-      name: /setting/i,
-    });
+  test("should navigate to services from quick actions", async ({ page }) => {
+    await page.getByRole("link", { name: /services/i }).click();
 
-    if (
-      await settingsLink
-        .first()
-        .isVisible()
-        .catch(() => false)
-    ) {
-      await settingsLink.first().click();
-      await page.waitForURL(/\/settings/);
-      await expect(page).toHaveURL(/\/settings/);
-    }
-  });
-
-  test("should navigate to patients from overview", async ({ page }) => {
-    // Look for a Patients link
-    const patientsLink = page.getByRole("link", {
-      name: /patient/i,
-    });
-
-    if (
-      await patientsLink
-        .first()
-        .isVisible()
-        .catch(() => false)
-    ) {
-      await patientsLink.first().click();
-      await page.waitForURL(/\/patient/);
-      await expect(page).toHaveURL(/\/patient/);
-    }
+    await page.waitForURL(/\/services/);
+    await expect(page).toHaveURL(/\/services/);
   });
 });

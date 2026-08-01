@@ -55,8 +55,8 @@ test.describe("Healthcare Service View", () => {
     await expect(page.getByText(/pathology lab/i).first()).toBeVisible();
 
     // Verify action buttons are present (Edit, Delete)
-    await expect(page.getByRole("link", { name: /edit/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /delete/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Delete" })).toBeVisible();
   });
 
   test("should view pharmacy healthcare service", async ({ page }) => {
