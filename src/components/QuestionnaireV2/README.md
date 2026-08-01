@@ -2,9 +2,11 @@
 
 Management, authoring and rendering for questionnaires, mounted at
 `/admin/questionnaires` and `/facility/{id}/settings/questionnaires`. It is
-the successor to `src/components/Questionnaire` (the legacy editor stays at
-`/admin/questionnaire` until v2 reaches fill-mode parity; the renderer here
-currently ships `preview` and `readonly` modes only).
+the successor to the legacy questionnaire management UI that used to live in
+`src/components/Questionnaire` (removed). That directory still provides the
+fill-flow renderer (`QuestionnaireForm`, `QuestionTypes/*`, etc.), which v2
+reuses (see Legacy imports below); the renderer here currently ships
+`preview` and `readonly` modes only.
 
 ## Directory map
 
@@ -78,8 +80,7 @@ v2 may import from `src/components/Questionnaire` only: `ValueSetSelect`,
 `SelectOrCreateValueset`, `CodingEditor`, `data/StructuredFormData`, the
 `QuestionTypes/*` structured components (exclusively via
 `renderer/structured/registry.tsx`, which also owns the one permitted `any`
-in the renderer), and `OrgSelector` (from
-`ManageQuestionnaireOrganizationsSheet`). A new legacy dependency needs a
+in the renderer), and `OrgSelector`. A new legacy dependency needs a
 registry/allowlist entry here, not an ad-hoc reach-in.
 
 ## Adding a question type
@@ -115,5 +116,4 @@ registry/allowlist entry here, not an ad-hoc reach-in.
 
 Playwright: `tests/facility/settings/questionnaires/` and
 `tests/admin/questionnaires/` (shared helpers in
-`tests/helper/questionnaireV2.ts`). Legacy editor specs remain in
-`tests/admin/questionnaire/`.
+`tests/helper/questionnaireV2.ts`).

@@ -1,7 +1,5 @@
 import { navigate } from "raviger";
 
-import QuestionnaireEditor from "@/components/Questionnaire/QuestionnaireEditor";
-import { QuestionnaireList } from "@/components/Questionnaire/QuestionnaireList";
 import { QuestionnaireBuilderPage } from "@/components/QuestionnaireV2/builder/QuestionnaireBuilderPage";
 import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
 import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
@@ -26,9 +24,6 @@ const INSTANCE_SCOPE = {
 } as const;
 
 const AdminRoutes: AppRoutes = {
-  "/admin/questionnaire": () => <QuestionnaireList />,
-  "/admin/questionnaire/create": () => <QuestionnaireEditor />,
-  "/admin/questionnaire/:id/edit": ({ id }) => <QuestionnaireEditor id={id} />,
   "/admin/questionnaires": () => (
     <QuestionnaireListPage scope={INSTANCE_SCOPE} />
   ),

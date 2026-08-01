@@ -100,7 +100,7 @@ const accountId = getAccountId();
 `/facility/${facilityId}/encounters`
 
 // Admin pages
-`/admin/questionnaire`
+`/admin/questionnaires`
 `/admin/valueset`
 ```
 
