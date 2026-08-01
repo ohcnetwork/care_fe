@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 
-import { OrgSelector } from "@/components/Questionnaire/ManageQuestionnaireOrganizationsSheet";
+import { OrgSelector } from "@/components/Questionnaire/OrgSelector";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
