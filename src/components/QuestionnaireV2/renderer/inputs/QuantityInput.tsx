@@ -1,7 +1,5 @@
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { Input } from "@/components/ui/input";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -11,11 +9,14 @@ import { ResponseValue } from "@/types/questionnaire/form";
 
 import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
+import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
+import { useValueSetExpansion } from "@/components/QuestionnaireV2/shared/useValueSetExpansion";
 
 import { withEntryAt } from "./withEntryAt";
 
 /** Same UCUM valueset slug the legacy QuantityQuestion's unit picker
- *  searched (backend: CARE_UCUM_UNITS). */
+ *  searched (backend: CARE_UCUM_UNITS). Fallback source when the question
+ *  has no unit valueset of its own. */
 const UCUM_SYSTEM_SLUG = "system-ucum-units";
 
 export function QuantityInput({
@@ -31,12 +32,18 @@ export function QuantityInput({
   const entry = response?.values[valueIndex ?? 0];
   const value = entry?.type === "quantity" ? entry.value : undefined;
   const coding = entry?.coding;
-  // Per-answer unit (legacy contract): a unit picked on THIS entry wins;
-  // the author's `question.unit` is only the pre-selected default. The
-  // backend persists `unit` alone (`answer_unit` is silently dropped by the
-  // Question spec), so the default must never be read from `answer_unit`.
+  // Per-answer unit: a unit picked on THIS entry wins; the author's
+  // `question.unit` is only the pre-selected default. The backend persists
+  // `unit` alone (`answer_unit` is silently dropped by the Question spec),
+  // so the default must never be read from `answer_unit`.
   const pickedUnit = entry?.type === "quantity" ? entry.unit : undefined;
   const unit = pickedUnit ?? question.unit;
+
+  // The question's unit valueset (owner-directed v2 semantics: for quantity,
+  // `answer_value_set` IS the unit-choice source). A bounded expansion
+  // renders every unit as a visible chip; large/failed expansions keep the
+  // search popover, scoped to the same valueset.
+  const { boundedCodes } = useValueSetExpansion(question.answer_value_set);
 
   const writeEntry = (next: ResponseValue) => {
     if (valueIndex === undefined) {
@@ -59,32 +66,50 @@ export function QuantityInput({
     writeEntry({ type: "quantity", value, unit: newUnit, coding });
   };
 
-  const handleCodingChange = (newCoding: Code) => {
-    writeEntry({ type: "quantity", value, unit, coding: newCoding });
-  };
-
   // Merged-row treatment (see QuestionField's bordered wrapper): each control
   // keeps its own left/top/bottom border and drops the right edge, so the
   // next zone's left border is the single separator — same pairing DateInput
   // and NumberInput use against the note affordance. Widths live on wrapper
   // divs because the global `button[role="combobox"] { width: 100% }` rule
   // (src/style/index.css) overrides any width utility on the trigger itself.
+  if (boundedCodes) {
+    // Bounded unit set → every choice is visible: value input on top, one
+    // radio chip per unit beneath (author's default pre-selected).
+    return (
+      <div className="flex w-full flex-col">
+        <Input
+          id={inputId}
+          type="number"
+          inputMode="decimal"
+          pattern="[0-9]*[.]?[0-9]*"
+          value={value?.toString() ?? ""}
+          onChange={(e) => handleValueChange(e.target.value)}
+          step="0.01"
+          disabled={disabled}
+          className="rounded-none border-x-0 border-t-0"
+        />
+        <div
+          role="radiogroup"
+          aria-label={t("unit")}
+          className="flex flex-wrap gap-2 p-2"
+        >
+          {boundedCodes.map((code) => (
+            <ChoiceChip
+              key={code.code}
+              control="radio"
+              label={code.display || code.code}
+              checked={unit?.code === code.code}
+              disabled={disabled}
+              onCheckedChange={() => handleUnitChange(code)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full items-stretch">
-      {question.answer_value_set && (
-        <div className="flex w-40 shrink-0">
-          <ValueSetSelect
-            system={question.answer_value_set.slug ?? ""}
-            valuesetId={question.answer_value_set.external_id}
-            value={coding ?? null}
-            onSelect={handleCodingChange}
-            disabled={disabled}
-            aria-label={t("type")}
-            placeholder={t("type")}
-            className="h-auto justify-between truncate rounded-r-none border-r-0 border-gray-300 font-normal shadow-none"
-          />
-        </div>
-      )}
       <Input
         id={inputId}
         type="number"
@@ -94,14 +119,12 @@ export function QuantityInput({
         onChange={(e) => handleValueChange(e.target.value)}
         step="0.01"
         disabled={disabled}
-        className={cn(
-          "min-w-0 flex-1 rounded-r-none border-r-0",
-          question.answer_value_set && "rounded-l-none",
-        )}
+        className="min-w-0 flex-1 rounded-r-none border-r-0"
       />
       <div className="flex w-36 shrink-0">
         <ValueSetSelect
-          system={UCUM_SYSTEM_SLUG}
+          system={question.answer_value_set?.slug ?? UCUM_SYSTEM_SLUG}
+          valuesetId={question.answer_value_set?.external_id}
           value={unit ?? null}
           onSelect={handleUnitChange}
           disabled={disabled}

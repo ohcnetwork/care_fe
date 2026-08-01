@@ -120,6 +120,12 @@ export function QuestionField({
           {question.text}
         </label>
         {question.required && <span className="text-red-500">*</span>}
+        {/* Question-level unit, any type (legacy QuestionLabel contract):
+            integer/decimal/choice have no answer-time unit picker, so this
+            suffix is their only unit display. */}
+        {question.unit?.code && (
+          <span className="text-sm text-gray-500">({question.unit.code})</span>
+        )}
       </div>
       {question.description && (
         <p className="text-xs text-gray-500">{question.description}</p>
