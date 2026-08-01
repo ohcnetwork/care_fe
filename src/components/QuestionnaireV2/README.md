@@ -77,7 +77,7 @@ export file.
 ## Legacy imports (allowlist)
 
 v2 may import from `src/components/Questionnaire` only: `ValueSetSelect`,
-`SelectOrCreateValueset`, `CodingEditor`, `data/StructuredFormData`, the
+`SelectOrCreateValueset`, `data/StructuredFormData`, the
 `QuestionTypes/*` structured components (exclusively via
 `renderer/structured/registry.tsx`, which also owns the one permitted `any`
 in the renderer), and `OrgSelector`. A new legacy dependency needs a
