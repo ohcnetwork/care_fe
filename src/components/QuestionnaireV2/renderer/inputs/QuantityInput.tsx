@@ -6,38 +6,52 @@ import { Label } from "@/components/ui/label";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { Code } from "@/types/base/code/code";
+import { ResponseValue } from "@/types/questionnaire/form";
 
 import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
 
-export function QuantityInput({ question, disabled }: RendererInputProps) {
+import { withEntryAt } from "./withEntryAt";
+
+export function QuantityInput({
+  question,
+  disabled,
+  valueIndex,
+}: RendererInputProps) {
   const { t } = useTranslation();
   const [response, updateResponse] = useQuestionResponse(question.id);
   // Discriminant check instead of a cast — a mismatched stored value renders
   // empty instead of leaking a wrong-typed value into the input.
-  const first = response?.values[0];
-  const value = first?.type === "quantity" ? first.value : undefined;
-  const coding = first?.coding;
+  const entry = response?.values[valueIndex ?? 0];
+  const value = entry?.type === "quantity" ? entry.value : undefined;
+  const coding = entry?.coding;
+
+  const writeEntry = (next: ResponseValue) => {
+    if (valueIndex === undefined) {
+      updateResponse({ values: [next] });
+      return;
+    }
+    updateResponse({
+      values: withEntryAt(response?.values, valueIndex, next),
+    });
+  };
 
   const handleValueChange = (raw: string) => {
     const numericValue = raw === "" ? undefined : parseFloat(raw);
-    updateResponse({
-      values: [
-        {
-          type: "quantity",
-          value: numericValue,
-          unit: question.unit,
-          coding,
-        },
-      ],
+    writeEntry({
+      type: "quantity",
+      value: numericValue,
+      unit: question.unit,
+      coding,
     });
   };
 
   const handleCodingChange = (newCoding: Code) => {
-    updateResponse({
-      values: [
-        { type: "quantity", value, unit: question.unit, coding: newCoding },
-      ],
+    writeEntry({
+      type: "quantity",
+      value,
+      unit: question.unit,
+      coding: newCoding,
     });
   };
 

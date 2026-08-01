@@ -6,25 +6,48 @@ import { Badge } from "@/components/ui/badge";
 import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { CollapsibleSettingsCard } from "@/components/QuestionnaireV2/shared/CollapsibleSettingsCard";
 
-import { Question } from "@/types/questionnaire/question";
+import { Question, QuestionType } from "@/types/questionnaire/question";
 
 interface BehaviourSettingsCardProps {
   question: Question;
   onChange: (patch: Partial<Question>) => void;
 }
 
-const BEHAVIOUR_FLAGS = [
-  { key: "required", label: "required" },
-  { key: "read_only", label: "read_only" },
-] as const;
+interface BehaviourFlag {
+  key:
+    | "required"
+    | "repeats"
+    | "read_only"
+    | "is_component"
+    | "collect_time"
+    | "collect_performer"
+    | "collect_method"
+    | "collect_body_site";
+  label: string;
+}
 
-const DATA_CAPTURE_FLAGS = [
+const BEHAVIOUR_FLAGS: readonly BehaviourFlag[] = [
+  { key: "required", label: "required" },
+  { key: "repeats", label: "repeatable" },
+  { key: "read_only", label: "read_only" },
+];
+
+const DATA_CAPTURE_FLAGS: readonly BehaviourFlag[] = [
   { key: "is_component", label: "component" },
   { key: "collect_time", label: "collect_time" },
   { key: "collect_performer", label: "collect_performer" },
   { key: "collect_method", label: "collect_method" },
   { key: "collect_body_site", label: "collect_body_site" },
-] as const;
+];
+
+/** Mirrors the legacy editor's HIDE_REPEATABLE_QUESTION_TYPES
+ *  (QuestionnaireEditor.tsx) — these types never offer the Repeats flag. */
+export const NON_REPEATABLE_TYPES: readonly QuestionType[] = [
+  "boolean",
+  "group",
+  "display",
+  "structured",
+];
 
 export function BehaviourSettingsCard({
   question,
@@ -32,9 +55,14 @@ export function BehaviourSettingsCard({
 }: BehaviourSettingsCardProps) {
   const { t } = useTranslation();
 
+  const behaviourFlags = BEHAVIOUR_FLAGS.filter(
+    (flag) =>
+      flag.key !== "repeats" || !NON_REPEATABLE_TYPES.includes(question.type),
+  );
+
   // Derived from the same flag lists that render the chips, so adding a
   // flag can never silently miss the "configured" badge count.
-  const count = [...BEHAVIOUR_FLAGS, ...DATA_CAPTURE_FLAGS].filter(
+  const count = [...behaviourFlags, ...DATA_CAPTURE_FLAGS].filter(
     (flag) => question[flag.key],
   ).length;
 
@@ -55,7 +83,7 @@ export function BehaviourSettingsCard({
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-gray-500">{t("behaviour")}</p>
           <div className="flex flex-wrap gap-2">
-            {BEHAVIOUR_FLAGS.map((flag) => (
+            {behaviourFlags.map((flag) => (
               <ChoiceChip
                 key={flag.key}
                 control="checkbox"

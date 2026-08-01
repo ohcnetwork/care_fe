@@ -17,7 +17,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { AnswerOptionsEditor } from "@/components/QuestionnaireV2/builder/AnswerOptionsEditor";
-import { BehaviourSettingsCard } from "@/components/QuestionnaireV2/builder/BehaviourSettingsCard";
+import {
+  BehaviourSettingsCard,
+  NON_REPEATABLE_TYPES,
+} from "@/components/QuestionnaireV2/builder/BehaviourSettingsCard";
 import { BuilderAction } from "@/components/QuestionnaireV2/builder/builderReducer";
 import { QuestionTypePicker } from "@/components/QuestionnaireV2/builder/QuestionTypePicker";
 import { SubQuestionsList } from "@/components/QuestionnaireV2/builder/SubQuestionsList";
@@ -95,6 +98,13 @@ export function QuestionEditorCard({
     if (changingAwayFromGroup && (question.questions?.length ?? 0) > 0) {
       toast.error(t("group_type_change_blocked"));
       return;
+    }
+    // Mirrors the legacy editor's type-change handling: switching to a type
+    // that never offers Repeats also clears a previously-set flag, so it
+    // can't linger invisibly once the chip disappears.
+    const nextType = patch.type ?? question.type;
+    if (question.repeats && NON_REPEATABLE_TYPES.includes(nextType)) {
+      patch = { ...patch, repeats: false };
     }
     onChange(patch);
   };

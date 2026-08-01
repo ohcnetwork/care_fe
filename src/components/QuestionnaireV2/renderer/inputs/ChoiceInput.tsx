@@ -13,6 +13,42 @@ export function ChoiceInput({
   const [response, updateResponse] = useQuestionResponse(question.id);
 
   if (question.answer_option?.length) {
+    // Repeats → multi-select: same chips, checkbox semantics. Data shape
+    // matches the legacy ChoiceQuestion's MultiSelect exactly — one
+    // `{ type: "string", value }` entry per selected option, toggling off
+    // removes the entry — so enable_when's all-values evaluation and the
+    // eventual submission see the identical array.
+    if (question.repeats) {
+      const values = response?.values ?? [];
+      const isSelected = (optionValue: string) =>
+        values.some((v) => v.value?.toString() === optionValue);
+
+      return (
+        <div
+          role="group"
+          aria-labelledby={labelId}
+          className="flex flex-wrap gap-3"
+        >
+          {question.answer_option.map((option) => (
+            <ChoiceChip
+              key={option.value}
+              control="checkbox"
+              label={option.display ?? option.value}
+              checked={isSelected(option.value)}
+              disabled={disabled}
+              onCheckedChange={() =>
+                updateResponse({
+                  values: isSelected(option.value)
+                    ? values.filter((v) => v.value?.toString() !== option.value)
+                    : [...values, { type: "string", value: option.value }],
+                })
+              }
+            />
+          ))}
+        </div>
+      );
+    }
+
     const selectedValue = response?.values[0]?.value;
 
     return (

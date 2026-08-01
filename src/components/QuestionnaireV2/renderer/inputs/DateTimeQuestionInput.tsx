@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
 
+import { withEntryAt } from "./withEntryAt";
+
 function formatTime(date: Date | undefined) {
   if (!date) return "";
   return `${date.getHours().toString().padStart(2, "0")}:${date
@@ -15,13 +17,27 @@ function formatTime(date: Date | undefined) {
 export function DateTimeQuestionInput({
   question,
   disabled,
+  valueIndex,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
   // Discriminant check instead of a cast — a mismatched stored value (e.g. a
   // seeded string from answer_option) would otherwise reach formatTime and
   // crash on date.getHours() during render.
-  const first = response?.values[0];
-  const value = first?.type === "dateTime" ? first.value : undefined;
+  const entry = response?.values[valueIndex ?? 0];
+  const value = entry?.type === "dateTime" ? entry.value : undefined;
+
+  const writeValue = (date: Date) => {
+    if (valueIndex === undefined) {
+      updateResponse({ values: [{ type: "dateTime", value: date }] });
+      return;
+    }
+    updateResponse({
+      values: withEntryAt(response?.values, valueIndex, {
+        type: "dateTime",
+        value: date,
+      }),
+    });
+  };
 
   const handleDateChange = (date: Date | undefined) => {
     if (!date) return;
@@ -29,7 +45,7 @@ export function DateTimeQuestionInput({
       date.setHours(value.getHours());
       date.setMinutes(value.getMinutes());
     }
-    updateResponse({ values: [{ type: "dateTime", value: date }] });
+    writeValue(date);
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,7 +56,7 @@ export function DateTimeQuestionInput({
     date.setHours(hours);
     date.setMinutes(minutes);
 
-    updateResponse({ values: [{ type: "dateTime", value: date }] });
+    writeValue(date);
   };
 
   return (

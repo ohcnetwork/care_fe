@@ -3,23 +3,36 @@ import { Input } from "@/components/ui/input";
 import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
 
+import { withEntryAt } from "./withEntryAt";
+
 export function NumberInput({
   question,
   disabled,
   inputId,
+  valueIndex,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
   // Discriminant check instead of a cast — a mismatched stored value renders
   // empty instead of leaking a wrong-typed value into the input.
-  const first = response?.values[0];
-  const value = first?.type === "number" ? first.value : undefined;
+  const entry = response?.values[valueIndex ?? 0];
+  const value = entry?.type === "number" ? entry.value : undefined;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateResponse({
-      values:
-        e.target.value === "" || Number.isNaN(e.target.valueAsNumber)
+    const cleared =
+      e.target.value === "" || Number.isNaN(e.target.valueAsNumber);
+    if (valueIndex === undefined) {
+      updateResponse({
+        values: cleared
           ? []
           : [{ type: "number", value: e.target.valueAsNumber }],
+      });
+      return;
+    }
+    updateResponse({
+      values: withEntryAt(response?.values, valueIndex, {
+        type: "number",
+        value: cleared ? undefined : e.target.valueAsNumber,
+      }),
     });
   };
 

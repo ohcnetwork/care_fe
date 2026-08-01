@@ -59,7 +59,7 @@ export file.
   for every operator; comparison runs over ALL of the dependent question's
   values; `normalizeValue` (booleans → "Yes"/"No", numbers → strings) is
   applied unconditionally before any operator. The only deliberate addition:
-  literal-boolean condition *answers* (legacy-corrupt data that could never
+  literal-boolean condition _answers_ (legacy-corrupt data that could never
   match) pass through the same normalization in equals/not_equals; string
   answers compare byte-identically to the legacy port.
 - Boolean enable_when conditions persist the strings `"Yes"`/`"No"`, never
@@ -91,9 +91,10 @@ registry/allowlist entry here, not an ad-hoc reach-in.
    (`TYPE_ICONS` is a total record — it will not compile without one).
 3. Implement a renderer input (`renderer/inputs/`) implementing
    `RendererInputProps`; read the response via a discriminant check on
-   `values[0].type` (no casts) and register it in
-   `questionTypeRegistry.tsx`. Structured sub-types register in
-   `structured/registry.tsx` instead.
+   `values[valueIndex ?? 0].type` (no casts), write positionally through
+   `withEntryAt` when `valueIndex` is set (repeats renders one input per
+   entry), and register it in `questionTypeRegistry.tsx`. Structured
+   sub-types register in `structured/registry.tsx` instead.
 4. Add i18n keys (`question_type__*`, description) to
    `public/locale/en.json`.
 
