@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
-import { expectToast } from "tests/helper/ui";
+import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -38,7 +38,7 @@ test.describe("Questionnaire v2 builder", () => {
     });
   });
 
-  test("add coding opens the coding editor without crashing", async ({
+  test("bind an observation code from the valueset search", async ({
     page,
   }) => {
     const facilityId = getFacilityId();
@@ -55,17 +55,40 @@ test.describe("Questionnaire v2 builder", () => {
         .pressSequentially(faker.lorem.words(3));
     });
 
-    await test.step("Expand Coding Details and add a coding", async () => {
+    const searchTrigger = page.getByRole("combobox", {
+      name: "Search for observation codes",
+    });
+
+    await test.step("Expand Coding Details and open the code search", async () => {
       await page
         .getByRole("button", { name: "Coding Details", exact: true })
         .click();
-      await page.getByRole("button", { name: /add coding/i }).click();
-      // Regression guard: adding a code mounts CodingEditor's FormFields,
-      // which crash the page when no FormProvider wraps them.
-      await expect(page.getByPlaceholder("Enter code")).toBeVisible();
+      await expect(searchTrigger).toBeVisible();
+      await searchTrigger.click();
+      // The valueset search UI opens with its command input…
+      await expect(
+        page.locator('[data-slot="command-input"]').first(),
+      ).toBeVisible();
+      // …and after closing it the editor is still alive (regression guard:
+      // the old coding editor crashed at this point when its FormFields
+      // mounted without a FormProvider). The search popover is modal, so the
+      // rest of the page is aria-hidden until it closes.
+      await page.keyboard.press("Escape");
       await expect(
         page.getByRole("textbox", { name: "Question Title" }),
       ).toBeVisible();
+    });
+
+    await test.step("Select a code from the observation valueset", async () => {
+      await selectFromValueSet(page, searchTrigger, { search: "heart" });
+      // Codes come straight from the system observation valueset, so the
+      // bound state is auto-verified: header summary + badge + bound row.
+      await expect(page.getByText("Code Verified")).toBeVisible();
+      await expect(page.getByText(/LOINC: \S+/)).toBeVisible();
+      await expect(
+        page.getByRole("combobox", { name: "Change" }),
+      ).toBeVisible();
+      await expect(page.getByRole("button", { name: "Remove" })).toBeVisible();
     });
   });
 });

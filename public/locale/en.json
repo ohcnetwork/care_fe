@@ -4689,6 +4689,7 @@
   "question": "Question",
   "question_behaviour_subtitle": "Set how this question works and what data it captures.",
   "question_behaviour_title": "Question Behaviour & Data Capture Settings",
+  "question_coding_explainer": "Bind an observation code to link this question's answers to clinical observation records. Codes are picked from the system observation valueset.",
   "question_title": "Question Title",
   "question_titles_required": "Every question needs a title",
   "question_type": "Question Type",

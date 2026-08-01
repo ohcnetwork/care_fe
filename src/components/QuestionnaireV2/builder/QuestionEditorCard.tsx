@@ -1,6 +1,5 @@
-import { Check, MoreVertical, Trash2 } from "lucide-react";
+import { MoreVertical, Trash2 } from "lucide-react";
 import { Dispatch } from "react";
-import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -13,7 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -23,12 +21,10 @@ import {
   NON_REPEATABLE_TYPES,
 } from "@/components/QuestionnaireV2/builder/BehaviourSettingsCard";
 import { BuilderAction } from "@/components/QuestionnaireV2/builder/builderReducer";
+import { QuestionCodingCard } from "@/components/QuestionnaireV2/builder/QuestionCodingCard";
 import { QuestionTypePicker } from "@/components/QuestionnaireV2/builder/QuestionTypePicker";
 import { SubQuestionsList } from "@/components/QuestionnaireV2/builder/SubQuestionsList";
 import { VisibilityConditionsCard } from "@/components/QuestionnaireV2/builder/VisibilityConditionsCard";
-import { CollapsibleSettingsCard } from "@/components/QuestionnaireV2/shared/CollapsibleSettingsCard";
-
-import { CodingEditor } from "@/components/Questionnaire/CodingEditor";
 
 import { Question } from "@/types/questionnaire/question";
 
@@ -37,53 +33,6 @@ interface QuestionEditorCardProps {
   number: string;
   allQuestions: Question[];
   dispatch: Dispatch<BuilderAction>;
-}
-
-interface QuestionCodeFieldProps {
-  question: Question;
-  onChange: (patch: Partial<Question>) => void;
-}
-
-function QuestionCodeField({ question, onChange }: QuestionCodeFieldProps) {
-  const { t } = useTranslation();
-  // CodingEditor requires a react-hook-form instance purely to report field
-  // errors through its API; this form is never submitted, it exists only to
-  // satisfy that prop contract.
-  const form = useForm();
-
-  // Collapsed summary of the attached code ("LOINC: 2028-9" + display text)
-  // so the author can see which code is bound without expanding the card.
-  const code = question.code;
-  const summaryTitle = code?.code
-    ? `${code.system?.toLowerCase().includes("loinc") ? "LOINC" : t("code")}: ${code.code}`
-    : t("coding_details");
-
-  return (
-    <CollapsibleSettingsCard
-      title={summaryTitle}
-      subtitle={code?.display}
-      badge={
-        question.code?.display ? (
-          <Badge variant="green">
-            <Check className="size-3" />
-            {t("code_verified")}
-          </Badge>
-        ) : undefined
-      }
-    >
-      {/* CodingEditor's FormField/FormItem internals read useFormContext(),
-          so the throwaway form must also be mounted as a FormProvider —
-          without it, adding a code crashes on a null form context. */}
-      <Form {...form}>
-        <CodingEditor
-          code={question.code}
-          name="code"
-          form={form}
-          onChange={(code) => onChange({ code })}
-        />
-      </Form>
-    </CollapsibleSettingsCard>
-  );
 }
 
 export function QuestionEditorCard({
@@ -196,7 +145,7 @@ export function QuestionEditorCard({
           <AnswerOptionsEditor question={question} onChange={onChange} />
         )}
 
-        <QuestionCodeField question={question} onChange={onChange} />
+        <QuestionCodingCard question={question} onChange={onChange} />
 
         <BehaviourSettingsCard question={question} onChange={onChange} />
 
