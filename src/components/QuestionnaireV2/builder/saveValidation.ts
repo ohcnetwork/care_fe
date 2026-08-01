@@ -1,9 +1,28 @@
 import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
 
-import { Question } from "@/types/questionnaire/question";
+import { Question, QuestionType } from "@/types/questionnaire/question";
+
+/**
+ * Types the renderer never records a response for: `initializeResponses`
+ * (renderer/store.ts) skips `group` entirely, and `display` gets an entry
+ * whose values `DisplayText` never writes — so `evaluateEnableWhen` sees
+ * "unanswered" forever and a condition targeting one permanently hides its
+ * question with zero feedback. The visibility card excludes them from the
+ * target picker, and the save check below blocks legacy data that already
+ * targets one. Structured questions stay eligible: they DO record values
+ * (StructuredQuestionSlot writes through `updateResponse`), matching the
+ * legacy editor, which offered every non-group question as a target.
+ */
+export const NON_RESPONSE_TYPES: QuestionType[] = ["group", "display"];
+
+/** Tree-wide lookups built once per validation run, for checks that need to
+ *  resolve a condition's target link_id against the rest of the tree. */
+interface SaveCheckContext {
+  typeByLinkId: Map<string, QuestionType>;
+}
 
 interface SaveCheck {
-  predicate: (question: Question) => boolean;
+  predicate: (question: Question, context: SaveCheckContext) => boolean;
   /** i18n key for the toast shown when the predicate matches. */
   messageKey: string;
 }
@@ -47,6 +66,20 @@ const SAVE_CHECKS: SaveCheck[] = [
       question.enable_when?.some((condition) => !condition.question) ?? false,
     messageKey: "condition_target_required",
   },
+  {
+    // A visibility condition targeting a question that never records a
+    // response (see NON_RESPONSE_TYPES) — the picker no longer offers these,
+    // but legacy/imported data can still carry one; it would hide the
+    // question forever, so the save is blocked until it's retargeted.
+    predicate: (question, { typeByLinkId }) =>
+      question.enable_when?.some((condition) => {
+        const targetType = typeByLinkId.get(condition.question);
+        return (
+          targetType !== undefined && NON_RESPONSE_TYPES.includes(targetType)
+        );
+      }) ?? false,
+    messageKey: "condition_target_not_answerable",
+  },
 ];
 
 /** The first question failing any save check, with the message to show —
@@ -54,8 +87,20 @@ const SAVE_CHECKS: SaveCheck[] = [
 export function findFirstInvalidQuestion(
   questions: Question[],
 ): { question: Question; messageKey: string } | undefined {
+  const typeByLinkId = new Map<string, QuestionType>();
+  const walk = (list: Question[]) => {
+    for (const question of list) {
+      typeByLinkId.set(question.link_id, question.type);
+      walk(question.questions ?? []);
+    }
+  };
+  walk(questions);
+  const context: SaveCheckContext = { typeByLinkId };
+
   for (const { predicate, messageKey } of SAVE_CHECKS) {
-    const question = findFirstQuestion(questions, predicate);
+    const question = findFirstQuestion(questions, (candidate) =>
+      predicate(candidate, context),
+    );
     if (question) return { question, messageKey };
   }
   return undefined;

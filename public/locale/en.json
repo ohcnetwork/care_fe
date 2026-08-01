@@ -1394,6 +1394,7 @@
   "condition_operation__equality": "Equals to",
   "condition_operation__has_tag": "Has tag",
   "condition_operation__in_range": "In range",
+  "condition_target_not_answerable": "Visibility conditions can't target group or display questions — pick a question that records an answer",
   "condition_target_required": "Every visibility condition needs a target question",
   "conditional": "Conditional",
   "conditional_discounts_not_applied": "Conditional discounts not applied to total",

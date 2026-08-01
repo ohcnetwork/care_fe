@@ -19,6 +19,7 @@ import {
   collectIds,
   normalizeBooleanConditionAnswer,
 } from "@/components/QuestionnaireV2/builder/builderReducer";
+import { NON_RESPONSE_TYPES } from "@/components/QuestionnaireV2/builder/saveValidation";
 
 import {
   EnableWhen,
@@ -92,8 +93,11 @@ export function VisibilityConditionsCard({
   const enableWhen = question.enable_when ?? [];
   const enableBehavior = question.enable_behavior ?? "all";
   const excludedIds = new Set(collectIds(question));
-  const availableTargets = flattenQuestions(allQuestions).filter(
-    (candidate) => !excludedIds.has(candidate.id),
+  const flatQuestions = flattenQuestions(allQuestions);
+  const availableTargets = flatQuestions.filter(
+    (candidate) =>
+      !excludedIds.has(candidate.id) &&
+      !NON_RESPONSE_TYPES.includes(candidate.type),
   );
 
   const updateConditions = (next: EnableWhen[]) => {
@@ -183,6 +187,16 @@ export function VisibilityConditionsCard({
               (q) => q.link_id === condition.question,
             );
             const operators = operatorsForType(target?.type);
+            // A saved condition (legacy data) may still target a question
+            // the renderer never answers — surface it as invalid instead of
+            // silently keeping a condition that can never match.
+            const invalidTarget = condition.question
+              ? flatQuestions.find(
+                  (q) =>
+                    q.link_id === condition.question &&
+                    NON_RESPONSE_TYPES.includes(q.type),
+                )
+              : undefined;
 
             return (
               <div key={index}>
@@ -226,10 +240,25 @@ export function VisibilityConditionsCard({
                           handleQuestionChange(index, value)
                         }
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={Boolean(invalidTarget)}
+                        >
                           <SelectValue placeholder={t("select")} />
                         </SelectTrigger>
                         <SelectContent>
+                          {/* Keeps the trigger showing the (invalid) saved
+                              target's title instead of a blank; disabled so
+                              it can't be re-picked. */}
+                          {invalidTarget && (
+                            <SelectItem
+                              value={invalidTarget.link_id}
+                              disabled
+                              className="text-red-600"
+                            >
+                              {invalidTarget.text || t("untitled_question")}
+                            </SelectItem>
+                          )}
                           {availableTargets.map((candidate) => (
                             <SelectItem
                               key={candidate.id}
@@ -240,6 +269,11 @@ export function VisibilityConditionsCard({
                           ))}
                         </SelectContent>
                       </Select>
+                      {invalidTarget && (
+                        <p className="text-xs text-red-600">
+                          {t("condition_target_not_answerable")}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-1">

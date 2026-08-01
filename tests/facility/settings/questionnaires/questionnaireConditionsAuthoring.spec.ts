@@ -220,4 +220,103 @@ test.describe("Questionnaire v2 visibility condition authoring", () => {
     await expect(page).toHaveURL(/\/edit$/);
     expect(putRequests).toHaveLength(0);
   });
+
+  test("the target picker never offers group or display questions", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const stamp = Date.now();
+    const groupTitle = `Group section ${stamp}`;
+    const childTitle = `Child answer ${stamp}`;
+    const displayTitle = `Display note ${stamp}`;
+    const dependentTitle = `Dependent ${stamp}`;
+    const nav = page.getByRole("navigation");
+
+    await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 Target Types ${stamp}`,
+    });
+    await importQuestions(page, [
+      {
+        text: groupTitle,
+        type: "group",
+        link_id: "grp",
+        questions: [{ text: childTitle, type: "string", link_id: "child" }],
+      },
+      { text: displayTitle, type: "display", link_id: "note" },
+      { text: dependentTitle, type: "string", link_id: "dependent" },
+    ]);
+
+    await nav.getByRole("button", { name: dependentTitle }).click();
+    await openVisibilityCard(page);
+    await page.getByRole("button", { name: "Add a condition" }).click();
+
+    await conditionGrid(page).getByRole("combobox").nth(0).click();
+    // The group's child records responses, so it is offered...
+    await expect(page.getByRole("option", { name: childTitle })).toBeVisible();
+    // ...but the renderer never records responses for group/display
+    // questions — a condition targeting one can never match, so the picker
+    // must not offer them.
+    await expect(
+      page.getByRole("option", { name: groupTitle }),
+    ).not.toBeVisible();
+    await expect(
+      page.getByRole("option", { name: displayTitle }),
+    ).not.toBeVisible();
+  });
+
+  test("a saved condition targeting a group is flagged and blocks the save", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const stamp = Date.now();
+    const groupTitle = `Group section ${stamp}`;
+    const dependentTitle = `Dependent ${stamp}`;
+    const nav = page.getByRole("navigation");
+    const putRequests = trackQuestionnairePutRequests(page);
+
+    await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 Legacy Target ${stamp}`,
+    });
+    // Legacy/imported data can carry a condition targeting a group — the
+    // picker no longer authors these, so scaffold one through import.
+    await importQuestions(page, [
+      {
+        text: groupTitle,
+        type: "group",
+        link_id: "grp",
+        questions: [
+          { text: `Child ${stamp}`, type: "string", link_id: "child" },
+        ],
+      },
+      {
+        text: dependentTitle,
+        type: "string",
+        link_id: "dependent",
+        enable_when: [{ question: "grp", operator: "equals", answer: "x" }],
+      },
+    ]);
+
+    await test.step("The visibility card surfaces the invalid target", async () => {
+      await nav.getByRole("button", { name: dependentTitle }).click();
+      await openVisibilityCard(page);
+      await expect(
+        page.getByText(
+          "Visibility conditions can't target group or display questions",
+          { exact: false },
+        ),
+      ).toBeVisible();
+    });
+
+    await test.step("Save is blocked until the condition is retargeted", async () => {
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await expectToast(
+        page,
+        "Visibility conditions can't target group or display questions — pick a question that records an answer",
+      );
+      await expect(page).toHaveURL(/\/edit$/);
+      expect(putRequests).toHaveLength(0);
+    });
+  });
 });
