@@ -25,7 +25,7 @@ export function useCanWriteQuestionnaire(scope: QuestionnaireScope): {
   isLoading: boolean;
 } {
   const { hasPermission, userPermissions } = usePermissions();
-  const { facility } = useCurrentFacilitySilently();
+  const { facility, isFacilityLoading } = useCurrentFacilitySilently();
 
   const { canWriteQuestionnaire } = getPermissions(
     hasPermission,
@@ -36,6 +36,9 @@ export function useCanWriteQuestionnaire(scope: QuestionnaireScope): {
 
   return {
     canWrite: canWriteQuestionnaire,
-    isLoading: scope.authContext === "facility" && !facility,
+    // Track the fetch, not data presence — a user who cannot read the
+    // facility (404) would otherwise leave `!facility` true forever and pin
+    // every facility questionnaire page on its loading skeleton.
+    isLoading: scope.authContext === "facility" && isFacilityLoading,
   };
 }
