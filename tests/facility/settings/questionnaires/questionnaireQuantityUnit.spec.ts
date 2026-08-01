@@ -3,6 +3,7 @@ import {
   adminApiHeaders,
   apiBaseUrl,
   createQuestionnaireAndOpenBuilder,
+  pickValuesetFromAutocomplete,
 } from "tests/helper/questionnaireV2";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
@@ -80,15 +81,10 @@ test.describe("Questionnaire v2 quantity default unit round-trip", () => {
     await test.step("Pick the unit value set and a default unit", async () => {
       // The backend rejects quantity questions without answer options or a
       // valueset; the builder authors the valueset (unit-choice source).
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Select a value set" })
-        .click();
-      await page.locator('[data-slot="command-input"]').first().fill("UCUM");
-      await page.getByRole("option", { name: "UCUM Units" }).click();
-      await expect(
-        page.getByRole("combobox").filter({ hasText: "UCUM Units" }),
-      ).toBeVisible();
+      await pickValuesetFromAutocomplete(page, {
+        search: "UCUM",
+        optionName: "UCUM Units",
+      });
 
       await selectFromValueSet(page, builderUnitTrigger, {
         search: "milligram",

@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
+import {
+  createQuestionnaireAndOpenBuilder,
+  pickValuesetFromAutocomplete,
+} from "tests/helper/questionnaireV2";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -69,12 +72,10 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       await expect(
         page.getByRole("button", { name: "Add Option" }),
       ).not.toBeVisible();
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Select a value set" })
-        .click();
-      await page.locator('[data-slot="command-input"]').first().fill("UCUM");
-      await page.getByRole("option", { name: "UCUM Units" }).click();
+      await pickValuesetFromAutocomplete(page, {
+        search: "UCUM",
+        optionName: "UCUM Units",
+      });
       const unitTrigger = page.getByRole("combobox", { name: "Default Unit" });
       await expect(unitTrigger).toBeVisible();
       await selectFromValueSet(page, unitTrigger, { search: "milligram" });

@@ -1,4 +1,4 @@
-import { type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -116,4 +116,29 @@ export async function createQuestionnaireAndOpenBuilder(
   const detailUrl = await createQuestionnaire(page, options);
   await openQuestionBuilder(page);
   return detailUrl;
+}
+
+/**
+ * Picks a valueset in the builder's SelectOrCreateValueset autocomplete.
+ * The search MUST be scoped to the opened popover/dialog — a bare
+ * `[data-slot="command-input"]` first() can resolve to a different cmdk
+ * input on the builder page and leave the list unfiltered (flake).
+ */
+export async function pickValuesetFromAutocomplete(
+  page: Page,
+  { search, optionName }: { search: string; optionName: string },
+): Promise<void> {
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "Select a value set" })
+    .click();
+  const dialog = page.getByRole("dialog").last();
+  const scope = (await dialog.isVisible().catch(() => false))
+    ? dialog
+    : page.locator("[data-radix-popper-content-wrapper]").last();
+  await scope.locator('[data-slot="command-input"]').first().fill(search);
+  await scope.getByRole("option", { name: optionName }).click();
+  await expect(
+    page.getByRole("combobox").filter({ hasText: optionName }),
+  ).toBeVisible();
 }
