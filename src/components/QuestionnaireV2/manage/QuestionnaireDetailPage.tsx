@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check, Copy, Download, Eye } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -90,6 +90,9 @@ export function QuestionnaireDetailPage({
 }) {
   const { t } = useTranslation();
   const [cloneOpen, setCloneOpen] = useState(false);
+  // `?tab=versions` deep-links straight to the Versions tab — it's how the
+  // revision page's Back button returns to the tab it was opened from.
+  const [{ tab }] = useQueryParams();
   const { canWrite, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);
 
@@ -164,7 +167,7 @@ export function QuestionnaireDetailPage({
     <div className="space-y-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Tabs defaultValue="questions">
+          <Tabs defaultValue={tab === "versions" ? "versions" : "questions"}>
             {/* Sticky header band: back + breadcrumb, title row and the tab
                 strip stay pinned while the body scrolls beneath, keeping the
                 primary Save Form action reachable on long questionnaires. */}

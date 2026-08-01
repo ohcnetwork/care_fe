@@ -1,22 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { History } from "lucide-react";
 import { navigate } from "raviger";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
-import { QuestionnaireRenderer } from "@/components/QuestionnaireV2/renderer/QuestionnaireRenderer";
 
 import { cn } from "@/lib/utils";
 
@@ -66,9 +58,6 @@ function TimelineRail({
 
 export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
   const { t } = useTranslation();
-  const [openRevision, setOpenRevision] = useState<QuestionnaireRead | null>(
-    null,
-  );
 
   const { data: revisions, isLoading } = useQuery({
     queryKey: questionnaireKeys.revisions(questionnaire.id),
@@ -87,14 +76,6 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
     (a, b) => revisionOf(b) - revisionOf(a),
   );
   const totalRevisions = revisions?.count ?? pastRevisions.length;
-
-  const { data: revisionDetail, isLoading: isRevisionLoading } = useQuery({
-    queryKey: questionnaireKeys.revisionDetail(openRevision?.id),
-    queryFn: query(questionnaireApi.get, {
-      pathParams: { id: openRevision?.id ?? "" },
-    }),
-    enabled: !!openRevision,
-  });
 
   /** `{username} · {relative time}`; a bare username reads as attribution
    *  ("Last edited by …") while the backend doesn't return modified_date. */
@@ -210,11 +191,17 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
                       )}
                     </div>
                     <div className="flex shrink-0 gap-2">
+                      {/* Full-page readonly viewer (QuestionnaireRevisionPage)
+                          — a dialog can't fit the renderer's tree-nav layout. */}
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setOpenRevision(revision)}
+                        onClick={() =>
+                          navigate(
+                            `${scope.basePath}/${questionnaire.id}/versions/${revision.id}`,
+                          )
+                        }
                       >
                         {t("open")}
                       </Button>
@@ -235,32 +222,6 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
           )}
         </div>
       )}
-
-      <Dialog
-        open={!!openRevision}
-        onOpenChange={(next) => {
-          if (!next) setOpenRevision(null);
-        }}
-      >
-        <DialogContent className="max-h-[85vh] max-w-4xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {openRevision?.title}{" "}
-              <span className="text-gray-500">
-                {formatRevision(openRevision?.internal_revision)}
-              </span>
-            </DialogTitle>
-          </DialogHeader>
-          {isRevisionLoading || !revisionDetail ? (
-            <FormSkeleton rows={6} />
-          ) : (
-            <QuestionnaireRenderer
-              questionnaire={revisionDetail}
-              mode="readonly"
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

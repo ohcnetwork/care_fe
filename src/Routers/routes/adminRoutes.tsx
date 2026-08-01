@@ -4,6 +4,7 @@ import { QuestionnaireBuilderPage } from "@/components/QuestionnaireV2/builder/Q
 import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
 import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
 import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
+import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import { ValueSetList } from "@/components/ValueSet/ValueSetList";
 
@@ -36,6 +37,14 @@ const AdminRoutes: AppRoutes = {
   // reason — otherwise "edit" would be captured as an :id.
   "/admin/questionnaires/:id/edit": ({ id }) => (
     <QuestionnaireBuilderPage scope={INSTANCE_SCOPE} id={id} />
+  ),
+  // Registered before "/admin/questionnaires/:id" like the routes above.
+  "/admin/questionnaires/:id/versions/:revisionId": ({ id, revisionId }) => (
+    <QuestionnaireRevisionPage
+      scope={INSTANCE_SCOPE}
+      id={id}
+      revisionId={revisionId}
+    />
   ),
   "/admin/questionnaires/:id": ({ id }) => (
     <QuestionnaireDetailPage scope={INSTANCE_SCOPE} id={id} />

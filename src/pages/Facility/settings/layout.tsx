@@ -5,6 +5,7 @@ import { QuestionnaireBuilderPage } from "@/components/QuestionnaireV2/builder/Q
 import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
 import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
 import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
+import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage";
 
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
@@ -286,6 +287,24 @@ const getRoutes = (facilityId: string) => ({
         basePath: `/facility/${facilityId}/settings/questionnaires`,
       }}
       id={id}
+    />
+  ),
+  // Registered before "/questionnaires/:id" like the routes above.
+  "/questionnaires/:id/versions/:revisionId": ({
+    id,
+    revisionId,
+  }: {
+    id: string;
+    revisionId: string;
+  }) => (
+    <QuestionnaireRevisionPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+      id={id}
+      revisionId={revisionId}
     />
   ),
   "/questionnaires/:id": ({ id }: { id: string }) => (
