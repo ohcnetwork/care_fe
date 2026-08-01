@@ -61,12 +61,20 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     await test.step("Author a quantity question and bind a UCUM unit", async () => {
       await addQuestion(page, quantityTitle);
       await pickType(page, "quantity");
-      // The backend rejects quantity questions without answer options or a
-      // valueset, so give it two dose options (mirrors the fixture shape).
-      for (const value of ["250", "500"]) {
-        await page.getByRole("button", { name: "Add Option" }).click();
-        await page.getByRole("row").last().getByRole("textbox").fill(value);
-      }
+      // Quantity is valueset-only (legacy contract): no Custom Options mode,
+      // the valueset is the unit-choice source.
+      await expect(
+        page.getByRole("radio", { name: "Custom Options" }),
+      ).not.toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Add Option" }),
+      ).not.toBeVisible();
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "Select a value set" })
+        .click();
+      await page.locator('[data-slot="command-input"]').first().fill("UCUM");
+      await page.getByRole("option", { name: "UCUM Units" }).click();
       const unitTrigger = page.getByRole("combobox", { name: "Default Unit" });
       await expect(unitTrigger).toBeVisible();
       await selectFromValueSet(page, unitTrigger, { search: "milligram" });

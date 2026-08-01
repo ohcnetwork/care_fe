@@ -63,15 +63,33 @@ test.describe("Questionnaire v2 quantity default unit round-trip", () => {
     });
     let pickedDisplay = "";
 
-    await test.step("Author a quantity question and set a default unit", async () => {
+    await test.step("Quantity is valueset-only: no Custom Options mode", async () => {
       await addQuestion(page, questionTitle);
       await pickType(page, "quantity");
+      // Legacy contract: the old editor never offered custom options for
+      // quantity — the v2 builder must not either.
+      await expect(page.getByText("Unit Options")).toBeVisible();
+      await expect(
+        page.getByRole("radio", { name: "Custom Options" }),
+      ).not.toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Add Option" }),
+      ).not.toBeVisible();
+    });
+
+    await test.step("Pick the unit value set and a default unit", async () => {
       // The backend rejects quantity questions without answer options or a
-      // valueset, so give it two dose options (mirrors the fixture shape).
-      for (const value of ["250", "500"]) {
-        await page.getByRole("button", { name: "Add Option" }).click();
-        await page.getByRole("row").last().getByRole("textbox").fill(value);
-      }
+      // valueset; the builder authors the valueset (unit-choice source).
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "Select a value set" })
+        .click();
+      await page.locator('[data-slot="command-input"]').first().fill("UCUM");
+      await page.getByRole("option", { name: "UCUM Units" }).click();
+      await expect(
+        page.getByRole("combobox").filter({ hasText: "UCUM Units" }),
+      ).toBeVisible();
+
       await selectFromValueSet(page, builderUnitTrigger, {
         search: "milligram",
       });
@@ -105,6 +123,8 @@ test.describe("Questionnaire v2 quantity default unit round-trip", () => {
           text: string;
           unit?: { system: string; code: string; display: string };
           answer_unit?: unknown;
+          answer_value_set?: { slug?: string; external_id?: string };
+          answer_option?: unknown[];
         }[];
       };
       const question = data.questions.find((q) => q.text === questionTitle);
@@ -115,6 +135,12 @@ test.describe("Questionnaire v2 quantity default unit round-trip", () => {
       // The backend Question spec has no answer_unit field — it must never
       // reappear in reads (the FE default-unit logic reads `unit` only).
       expect(question?.answer_unit).toBeUndefined();
+      // Valueset-only contract: the valueset persisted, no custom options.
+      expect(
+        question?.answer_value_set?.slug ??
+          question?.answer_value_set?.external_id,
+      ).toBeTruthy();
+      expect(question?.answer_option ?? []).toHaveLength(0);
     });
 
     await test.step("Preview reads the reloaded state: unit picker defaults to it", async () => {
