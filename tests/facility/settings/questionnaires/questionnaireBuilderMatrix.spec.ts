@@ -268,6 +268,33 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     });
   });
 
+  test("display question renders as plain text without an input", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const stamp = Date.now();
+    const displayText = `Read this instruction ${stamp}`;
+
+    await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 Display ${stamp}`,
+    });
+    await addQuestion(page, displayText);
+    await pickType(page, "display");
+
+    await page.getByRole("button", { name: "Save Changes" }).click();
+    await expectToast(page, "Questionnaire updated successfully");
+
+    await page.getByRole("button", { name: "Preview" }).click();
+    // The text renders (label + display paragraph) with no input control
+    // and no note affordance.
+    await expect(page.getByText(displayText).first()).toBeVisible();
+    await expect(page.getByRole("textbox")).not.toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Add note" }),
+    ).not.toBeVisible();
+  });
+
   test("required flag renders an asterisk; repeats hides for boolean and clears on type change", async ({
     page,
   }) => {
