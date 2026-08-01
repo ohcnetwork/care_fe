@@ -291,11 +291,16 @@ export function AnswerOptionsEditor({
 
       {question.type === "quantity" && (
         <div className="space-y-1.5">
-          <Label>{t("unit")}</Label>
+          <Label>{t("default_unit")}</Label>
+          <p className="text-sm text-gray-500">{t("default_unit_hint")}</p>
+          {/* Writes `question.unit` — the one unit field the backend
+              persists (`answer_unit` is dropped by the Question spec) and
+              the renderer's pre-selected default. */}
           <ValueSetSelect
             system="system-ucum-units"
             value={question.unit}
             onSelect={(code) => onChange({ unit: code })}
+            aria-label={t("default_unit")}
           />
         </div>
       )}

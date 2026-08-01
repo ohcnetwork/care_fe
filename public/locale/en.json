@@ -1757,6 +1757,8 @@
   "default_format": "Default Format",
   "default_interpretation": "Fallback",
   "default_interpretation_description": "Catch-all rule applied when a value does not match any configured range. Useful for highlighting out-of-range values.",
+  "default_unit": "Default Unit",
+  "default_unit_hint": "Pre-selected unit for this question. People filling the form can pick a different unit for their answer.",
   "default_value": "Serial Number",
   "default_value_help": "You can use a template string to auto-generate serial numbers.",
   "default_value_title": "Default pattern for this identifier type",
