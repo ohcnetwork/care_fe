@@ -12,7 +12,15 @@ export type BuilderAction =
   | { type: "reset"; questions: Question[]; keepSelectedId?: string | null }
   | { type: "replaceAll"; questions: Question[] }
   | { type: "select"; id: string | null }
-  | { type: "addQuestion"; parentId: string | null; index?: number }
+  | {
+      type: "addQuestion";
+      parentId: string | null;
+      index?: number;
+      /** Fields overriding `newQuestion()` defaults — the studio's "Add
+       *  section" passes `{ type: "group" }` so the group lands atomically. */
+      template?: Partial<Question>;
+    }
+  | { type: "duplicateQuestion"; id: string }
   | { type: "updateQuestion"; id: string; patch: Partial<Question> }
   | { type: "removeQuestions"; ids: string[] }
   | { type: "moveQuestion"; id: string; direction: "up" | "down" }
@@ -109,6 +117,49 @@ export function migrateLegacyBooleanEnableWhen(
 }
 
 /**
+ * Deep copy of one question subtree with fresh ids and link_ids for the
+ * studio's Duplicate action. Differs from `regenerateQuestionIds`
+ * deliberately: enable_when targets INSIDE the subtree remap to the copies,
+ * while targets OUTSIDE it are preserved verbatim — the duplicate should
+ * keep the same visibility rules as its source, not silently drop them.
+ */
+function cloneSubtree(question: Question): Question {
+  const freshLinkId = () => `Q-${crypto.randomUUID().slice(0, 8)}`;
+
+  const linkIdMap = new Map<string, string>();
+  const mapLinkIds = (q: Question) => {
+    if (q.link_id && !linkIdMap.has(q.link_id)) {
+      linkIdMap.set(q.link_id, freshLinkId());
+    }
+    (q.questions ?? []).forEach(mapLinkIds);
+  };
+  mapLinkIds(question);
+
+  // Same preorder as mapLinkIds — the occurrence that claimed the map entry
+  // is the first one seen, mirroring regenerateQuestionIds' duplicate
+  // handling.
+  const seen = new Set<string>();
+  const walk = (q: Question): Question => {
+    const mapped =
+      q.link_id && !seen.has(q.link_id) ? linkIdMap.get(q.link_id) : undefined;
+    if (q.link_id) seen.add(q.link_id);
+    return {
+      ...q,
+      id: crypto.randomUUID(),
+      link_id: mapped ?? freshLinkId(),
+      enable_when: q.enable_when?.map((condition) =>
+        linkIdMap.has(condition.question)
+          ? { ...condition, question: linkIdMap.get(condition.question)! }
+          : condition,
+      ),
+      questions: (q.questions ?? []).map(walk),
+    };
+  };
+  const copy = walk(question);
+  return copy.text ? { ...copy, text: `${copy.text} (copy)` } : copy;
+}
+
+/**
  * Resolves `ids` against `questions` and unions in every descendant id of
  * each match, so callers can reason about whole subtrees rather than just
  * the literal ids provided. Ids that cannot be found are skipped.
@@ -174,13 +225,25 @@ export function builderReducer(
       return { ...state, selectedId: action.id };
 
     case "addQuestion": {
-      const question = newQuestion();
+      const question = { ...newQuestion(), ...action.template };
       const questions = mapTree(state.questions, (list, parentId) => {
         if (parentId !== action.parentId) return list;
         const index = action.index ?? list.length;
         return [...list.slice(0, index), question, ...list.slice(index)];
       });
       return { questions, selectedId: question.id, dirty: true };
+    }
+
+    case "duplicateQuestion": {
+      const source = findQuestion(state.questions, action.id);
+      if (!source) return state;
+      const copy = cloneSubtree(source);
+      const questions = mapTree(state.questions, (list) => {
+        const index = list.findIndex((q) => q.id === action.id);
+        if (index === -1) return list;
+        return [...list.slice(0, index + 1), copy, ...list.slice(index + 1)];
+      });
+      return { questions, selectedId: copy.id, dirty: true };
     }
 
     case "updateQuestion": {

@@ -1,5 +1,3 @@
-import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
-
 import { Question, QuestionType } from "@/types/questionnaire/question";
 
 /**
@@ -82,11 +80,18 @@ const SAVE_CHECKS: SaveCheck[] = [
   },
 ];
 
-/** The first question failing any save check, with the message to show —
- *  or undefined when the tree is saveable. */
-export function findFirstInvalidQuestion(
-  questions: Question[],
-): { question: Question; messageKey: string } | undefined {
+export interface SaveIssue {
+  question: Question;
+  messageKey: string;
+}
+
+/**
+ * Every save-blocking issue in the tree, check-major (all matches of rule 1,
+ * then rule 2, …) with one issue per question (its first failing rule). The
+ * studio's issues popover renders the whole list; `findFirstInvalidQuestion`
+ * is element 0, so the save-toast contract is unchanged.
+ */
+export function findInvalidQuestions(questions: Question[]): SaveIssue[] {
   const typeByLinkId = new Map<string, QuestionType>();
   const walk = (list: Question[]) => {
     for (const question of list) {
@@ -97,11 +102,27 @@ export function findFirstInvalidQuestion(
   walk(questions);
   const context: SaveCheckContext = { typeByLinkId };
 
+  const issues: SaveIssue[] = [];
+  const flagged = new Set<string>();
   for (const { predicate, messageKey } of SAVE_CHECKS) {
-    const question = findFirstQuestion(questions, (candidate) =>
-      predicate(candidate, context),
-    );
-    if (question) return { question, messageKey };
+    const collect = (list: Question[]) => {
+      for (const question of list) {
+        if (!flagged.has(question.id) && predicate(question, context)) {
+          flagged.add(question.id);
+          issues.push({ question, messageKey });
+        }
+        collect(question.questions ?? []);
+      }
+    };
+    collect(questions);
   }
-  return undefined;
+  return issues;
+}
+
+/** The first question failing any save check, with the message to show —
+ *  or undefined when the tree is saveable. */
+export function findFirstInvalidQuestion(
+  questions: Question[],
+): SaveIssue | undefined {
+  return findInvalidQuestions(questions)[0];
 }

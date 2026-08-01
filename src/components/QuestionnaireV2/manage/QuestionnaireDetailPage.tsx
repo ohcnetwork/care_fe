@@ -28,7 +28,6 @@ import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWri
 
 import {
   QUESTIONNAIRE_STATUS_COLORS,
-  QuestionnaireRead,
   QuestionnaireScope,
   formatRevision,
 } from "@/types/questionnaire/questionnaire";
@@ -36,6 +35,7 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
 
 import { buildUpdateBody } from "@/components/QuestionnaireV2/shared/buildUpdateBody";
+import { downloadQuestionnaireJson } from "@/components/QuestionnaireV2/shared/downloadQuestionnaireJson";
 import { BasicInformationCard } from "./BasicInformationCard";
 import { CloneQuestionnaireDialog } from "./CloneQuestionnaireDialog";
 import { FormPropertiesSidebar } from "./FormPropertiesSidebar";
@@ -56,29 +56,6 @@ function moveElement<T>(list: T[], from: number, to: number): T[] {
   const [moved] = next.splice(from, 1);
   next.splice(to, 0, moved);
   return next;
-}
-
-/**
- * Serializes only the questionnaire *definition* — the same writable field
- * set `buildUpdateBody` selects (slug, version, code, questions, title,
- * description, status, subject_type) plus the id — via a data-URI +
- * programmatic `<a download>` click, so downloaded files stay compatible
- * with the import flow on either version. Never serialize the raw API
- * response here: it carries audit user objects (`created_by`/`updated_by`)
- * that must not leave the app in an export file.
- */
-function downloadQuestionnaireJson(questionnaire: QuestionnaireRead) {
-  const definition = {
-    id: questionnaire.id,
-    ...buildUpdateBody(questionnaire, {}),
-  };
-  const dataStr = JSON.stringify(definition, null, 2);
-  const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
-
-  const linkElement = document.createElement("a");
-  linkElement.setAttribute("href", dataUri);
-  linkElement.setAttribute("download", `${questionnaire.slug}.json`);
-  linkElement.click();
 }
 
 export function QuestionnaireDetailPage({
