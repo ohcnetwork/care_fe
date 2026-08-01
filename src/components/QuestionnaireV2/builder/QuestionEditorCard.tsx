@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { AnswerOptionsEditor } from "@/components/QuestionnaireV2/builder/AnswerOptionsEditor";
 import {
   BehaviourSettingsCard,
@@ -27,6 +28,13 @@ import { SubQuestionsList } from "@/components/QuestionnaireV2/builder/SubQuesti
 import { VisibilityConditionsCard } from "@/components/QuestionnaireV2/builder/VisibilityConditionsCard";
 
 import { Question } from "@/types/questionnaire/question";
+
+/** Types with a question-level unit, per the legacy editor's UNIT_TYPES
+ *  (quantity/choice/decimal/integer). Quantity configures its unit inside
+ *  the AnswerOptionsEditor (default among the unit choices); the rest get
+ *  the plain unit row below — the unit shows next to the question label in
+ *  fill mode (`({code})`, legacy QuestionLabel behavior). */
+const UNIT_ROW_TYPES: Question["type"][] = ["integer", "decimal", "choice"];
 
 interface QuestionEditorCardProps {
   question: Question;
@@ -143,6 +151,20 @@ export function QuestionEditorCard({
 
         {(question.type === "choice" || question.type === "quantity") && (
           <AnswerOptionsEditor question={question} onChange={onChange} />
+        )}
+
+        {UNIT_ROW_TYPES.includes(question.type) && (
+          <div className="space-y-1.5">
+            <Label>{t("unit")}</Label>
+            <p className="text-sm text-gray-500">{t("unit_hint")}</p>
+            <ValueSetSelect
+              system="system-ucum-units"
+              value={question.unit}
+              onSelect={(code) => onChange({ unit: code })}
+              aria-label={t("unit")}
+              placeholder={t("add_unit")}
+            />
+          </div>
         )}
 
         <QuestionCodingCard question={question} onChange={onChange} />

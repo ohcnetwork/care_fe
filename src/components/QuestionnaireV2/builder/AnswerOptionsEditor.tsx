@@ -32,6 +32,7 @@ import {
 import { SelectOrCreateValueset } from "@/components/Questionnaire/SelectOrCreateValueset";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
+import { useValueSetExpansion } from "@/components/QuestionnaireV2/shared/useValueSetExpansion";
 
 import { AnswerOption, Question } from "@/types/questionnaire/question";
 
@@ -41,6 +42,77 @@ interface AnswerOptionsEditorProps {
 }
 
 type Mode = "custom" | "valueset";
+
+/**
+ * Quantity answer configuration is valueset-ONLY (legacy contract: the old
+ * editor never offered custom options for quantity — the Custom/ValueSet
+ * switcher rendered only for choice). The valueset is the unit-choice
+ * source; a bounded expansion is previewed here as the same chips the
+ * renderer shows, and `question.unit` is the pre-selected default.
+ */
+function QuantityUnitsEditor({ question, onChange }: AnswerOptionsEditorProps) {
+  const { t } = useTranslation();
+  const { boundedCodes } = useValueSetExpansion(question.answer_value_set);
+
+  return (
+    <div className="space-y-3 rounded-lg bg-gray-50 p-4">
+      <div>
+        <h4 className="text-sm font-semibold text-gray-900">
+          {t("unit_options")}
+        </h4>
+        <p className="text-sm text-gray-500">{t("unit_options_hint")}</p>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>{t("select_a_value_set")}</Label>
+        <SelectOrCreateValueset
+          value={question.answer_value_set}
+          onValueSetChange={(vs) =>
+            // Actively clears answer_option: grandfathered custom-option
+            // quantity data migrates to the valueset on the next edit.
+            onChange({ answer_value_set: vs, answer_option: undefined })
+          }
+        />
+      </div>
+
+      {boundedCodes && (
+        <div className="space-y-1.5">
+          <p className="text-sm text-gray-500">{t("unit_options_preview")}</p>
+          <div
+            role="radiogroup"
+            aria-label={t("unit_options_preview")}
+            className="flex flex-wrap gap-2"
+          >
+            {boundedCodes.map((code) => (
+              <ChoiceChip
+                key={code.code}
+                control="radio"
+                label={code.display || code.code}
+                checked={question.unit?.code === code.code}
+                disabled
+                onCheckedChange={() => {}}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-1.5">
+        <Label>{t("default_unit")}</Label>
+        <p className="text-sm text-gray-500">{t("default_unit_hint")}</p>
+        {/* Writes `question.unit` — the one unit field the backend
+            persists (`answer_unit` is dropped by the Question spec) and
+            the renderer's pre-selected default. */}
+        <ValueSetSelect
+          system="system-ucum-units"
+          value={question.unit}
+          onSelect={(code) => onChange({ unit: code })}
+          aria-label={t("default_unit")}
+        />
+      </div>
+    </div>
+  );
+}
 
 export function AnswerOptionsEditor({
   question,
@@ -57,7 +129,11 @@ export function AnswerOptionsEditor({
     mode: Mode;
   } | null>(null);
 
-  if (question.type !== "choice" && question.type !== "quantity") {
+  if (question.type === "quantity") {
+    return <QuantityUnitsEditor question={question} onChange={onChange} />;
+  }
+
+  if (question.type !== "choice") {
     return null;
   }
 
@@ -285,22 +361,6 @@ export function AnswerOptionsEditor({
             onValueSetChange={(vs) =>
               onChange({ answer_value_set: vs, answer_option: undefined })
             }
-          />
-        </div>
-      )}
-
-      {question.type === "quantity" && (
-        <div className="space-y-1.5">
-          <Label>{t("default_unit")}</Label>
-          <p className="text-sm text-gray-500">{t("default_unit_hint")}</p>
-          {/* Writes `question.unit` — the one unit field the backend
-              persists (`answer_unit` is dropped by the Question spec) and
-              the renderer's pre-selected default. */}
-          <ValueSetSelect
-            system="system-ucum-units"
-            value={question.unit}
-            onSelect={(code) => onChange({ unit: code })}
-            aria-label={t("default_unit")}
           />
         </div>
       )}

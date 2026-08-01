@@ -27,6 +27,18 @@ const SAVE_CHECKS: SaveCheck[] = [
     messageKey: "group_needs_subquestion",
   },
   {
+    // The backend rejects quantity questions carrying neither answer_option
+    // nor answer_value_set (Question spec validate_choice_and_group_questions),
+    // so surface a clear client-side error instead of a raw 400. The builder
+    // only authors the valueset (legacy contract: quantity was never
+    // custom-options), but grandfathered answer_option data still passes.
+    predicate: (question) =>
+      question.type === "quantity" &&
+      !question.answer_value_set &&
+      (question.answer_option?.length ?? 0) === 0,
+    messageKey: "quantity_needs_valueset",
+  },
+  {
     // A visibility condition with no target question selected. Persisting
     // such a condition would hide the question forever in fill mode (both
     // evaluators resolve link_id "" to "no response" → false), so save is
