@@ -48,15 +48,6 @@ import { QuestionOverviewList } from "./QuestionOverviewList";
 import { useUpdateQuestionnaire } from "./useUpdateQuestionnaire";
 import { VersionsTab } from "./VersionsTab";
 
-/**
- * Serializes only the questionnaire *definition* — the same writable field
- * set `buildUpdateBody` selects (slug, version, code, questions, title,
- * description, status, subject_type) plus the id — via a data-URI +
- * programmatic `<a download>` click, so downloaded files stay compatible
- * with the import flow on either version. Never serialize the raw API
- * response here: it carries audit user objects (`created_by`/`updated_by`)
- * that must not leave the app in an export file.
- */
 /** Move (not swap): removes the element at `from` and reinserts it at `to`,
  *  so drag-and-drop across several rows shifts the in-between rows instead
  *  of exchanging the two endpoints. */
@@ -67,6 +58,15 @@ function moveElement<T>(list: T[], from: number, to: number): T[] {
   return next;
 }
 
+/**
+ * Serializes only the questionnaire *definition* — the same writable field
+ * set `buildUpdateBody` selects (slug, version, code, questions, title,
+ * description, status, subject_type) plus the id — via a data-URI +
+ * programmatic `<a download>` click, so downloaded files stay compatible
+ * with the import flow on either version. Never serialize the raw API
+ * response here: it carries audit user objects (`created_by`/`updated_by`)
+ * that must not leave the app in an export file.
+ */
 function downloadQuestionnaireJson(questionnaire: QuestionnaireRead) {
   const definition = {
     id: questionnaire.id,
