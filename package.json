@@ -190,7 +190,7 @@
     "@esbuild/linux-arm64": "latest",
     "@esbuild/linux-x64": "latest",
     "@rollup/rollup-linux-arm64-gnu": "4.60",
-    "@rollup/rollup-linux-x64-gnu": "4.60"
+    "@rollup/rollup-linux-x64-gnu": "4.62"
   },
   "browserslist": {
     "production": [
