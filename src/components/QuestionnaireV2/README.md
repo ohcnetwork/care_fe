@@ -13,16 +13,36 @@ reuses (see Legacy imports below); the renderer here currently ships
 - `manage/` — list, create, detail, versions, clone; shared form schema
   (`questionnaireFormSchema.ts`) and the save mutation
   (`useUpdateQuestionnaire.ts`).
-- `builder/` — question editor shell. `builderReducer.ts` is the single
-  source of edit state (a `Question[]` tree + selection + dirty flag);
-  every edit flows through `dispatch`. Save-time rules live in
-  `saveValidation.ts`.
-- `renderer/` — display engine. Per-instance jotai store (`store.ts`),
-  primitive inputs via `questionTypeRegistry.tsx`, structured questions via
-  `structured/registry.tsx` adapters over the legacy QuestionTypes.
+- `builder/` — the previous question-editor shell plus the model layer the
+  studio still runs on: `builderReducer.ts` is the single source of edit
+  state (a `Question[]` tree + selection + dirty flag); every edit flows
+  through `dispatch`. Save-time rules live in `saveValidation.ts`. The old
+  page shell (`QuestionnaireBuilderPage`) is unmounted — the routes now
+  mount `studio/` — and is scheduled for removal after review; the editor
+  cards (type picker, options, behaviour, visibility, coding,
+  sub-questions) live on as the studio's inspector internals.
+- `studio/` — the WYSIWYG builder mounted at `{basePath}/:id/edit`:
+  left outline, live canvas (rendered by `form/`), right inspector. May
+  import from `builder/` (model + cards), `manage/` (metadata form
+  pieces), `shared/` and `form/`.
+- `form/` — the full renderer (`QuestionnaireFormRenderer`): the whole
+  questionnaire on one scroll, live-synced per-instance store (edits merge
+  into responses instead of wiping them), a chrome/decoration seam for the
+  studio canvas, and the fill-mode seams (`validation.ts`, mode union).
+  Reuses the engine pieces of `renderer/` (store atoms, inputs,
+  registries, sanitizer) without touching them.
+- `renderer/` — the previous paginated display shell. Its engine files
+  (`store.ts`, `inputs/`, `questionTypeRegistry.tsx`,
+  `sanitizeStylingClasses.ts`, `structured/registry.tsx`) are shared with
+  `form/`; its shell files (`QuestionnaireRenderer`, `QuestionField`,
+  `QuestionGroupCard`, `TopLevelCard`, `RendererFooter`,
+  `RendererContext`, `NoteAffordance`, `StructuredQuestionSlot`) still
+  power the detail/revision pages and are scheduled for replacement by
+  `form/` after review, at which point the engine files relocate.
 - `shared/` — presentation primitives and the pure tree utilities
-  (`questionTree.ts`), plus `buildUpdateBody.ts`. `manage/` and `builder/`
-  depend on `shared/`, never on each other.
+  (`questionTree.ts`), plus `buildUpdateBody.ts` and
+  `downloadQuestionnaireJson.ts`. `manage/` and `builder/` depend on
+  `shared/`, never on each other.
 - `queryKeys.ts` — the only place TanStack Query keys are built; keys
   constructed elsewhere silently opt out of invalidation.
 
@@ -37,8 +57,12 @@ Pages never read route params. The router injects a `QuestionnaireScope`
 
 ## Renderer
 
-Public surface: import `QuestionnaireRenderer` and `renderer/types` only.
-The store, context and registries are internal.
+Public surface: import `QuestionnaireRenderer` and `renderer/types` only
+(legacy shell), or `form/FormCanvas` (`QuestionnaireFormRenderer` /
+`QuestionnaireFormCanvas`), `form/FormContext` and `form/types` for the
+full renderer. The store, context and registries are internal — `form/` is
+the one sanctioned second consumer of `renderer/`'s engine files, pending
+their relocation when the old shell is removed.
 
 `QuestionnaireRendererProvider` creates one jotai store per instance,
 seeded at creation (never observed empty) and re-seeded only when the

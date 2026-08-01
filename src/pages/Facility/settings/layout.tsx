@@ -1,11 +1,11 @@
 import { useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { QuestionnaireBuilderPage } from "@/components/QuestionnaireV2/builder/QuestionnaireBuilderPage";
 import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
 import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
 import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
 import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage";
+import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
 
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
@@ -280,7 +280,7 @@ const getRoutes = (facilityId: string) => ({
   // Must be registered before "/questionnaires/:id" for the same reason —
   // otherwise "edit" would be captured as an :id.
   "/questionnaires/:id/edit": ({ id }: { id: string }) => (
-    <QuestionnaireBuilderPage
+    <QuestionnaireStudioPage
       scope={{
         authContext: "facility",
         facilityId,

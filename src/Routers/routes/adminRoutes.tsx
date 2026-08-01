@@ -1,10 +1,10 @@
 import { navigate } from "raviger";
 
-import { QuestionnaireBuilderPage } from "@/components/QuestionnaireV2/builder/QuestionnaireBuilderPage";
 import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
 import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
 import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
 import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage";
+import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import { ValueSetList } from "@/components/ValueSet/ValueSetList";
 
@@ -36,7 +36,7 @@ const AdminRoutes: AppRoutes = {
   // Must be registered before "/admin/questionnaires/:id" for the same
   // reason — otherwise "edit" would be captured as an :id.
   "/admin/questionnaires/:id/edit": ({ id }) => (
-    <QuestionnaireBuilderPage scope={INSTANCE_SCOPE} id={id} />
+    <QuestionnaireStudioPage scope={INSTANCE_SCOPE} id={id} />
   ),
   // Registered before "/admin/questionnaires/:id" like the routes above.
   "/admin/questionnaires/:id/versions/:revisionId": ({ id, revisionId }) => (
