@@ -18,7 +18,8 @@ export const SLUG_MAX_LENGTH = 25;
  * The `title`/`slug`/`description`/`status` validation shared by the three
  * questionnaire identity forms: the detail page uses it as-is, the create
  * page `.extend`s it with `subject_type`, and the clone dialog `.pick`s
- * title+slug.
+ * title+slug. Building it allocates fresh Zod objects, so consumers wrap
+ * the call (plus any `.extend`/`.pick`) in `useMemo(..., [t])`.
  */
 export function questionnaireBasicSchema(t: TFunction) {
   const characterCountMessage = t("character_count_validation", {

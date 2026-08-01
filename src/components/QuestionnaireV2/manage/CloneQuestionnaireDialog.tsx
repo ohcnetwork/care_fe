@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -81,10 +81,10 @@ export function CloneQuestionnaireDialog({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const cloneSchema = questionnaireBasicSchema(t).pick({
-    title: true,
-    slug: true,
-  });
+  const cloneSchema = useMemo(
+    () => questionnaireBasicSchema(t).pick({ title: true, slug: true }),
+    [t],
+  );
 
   const form = useForm<CloneFormValues>({
     resolver: zodResolver(cloneSchema),

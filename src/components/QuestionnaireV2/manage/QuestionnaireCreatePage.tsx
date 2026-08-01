@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check } from "lucide-react";
 import { navigate, useNavigationPrompt } from "raviger";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -57,9 +57,13 @@ export function QuestionnaireCreatePage({
 
   const subjectTypeOptions = SUBJECT_TYPES_FOR_CONTEXT[scope.authContext];
 
-  const createSchema = questionnaireBasicSchema(t).extend({
-    subject_type: z.enum(SUBJECT_TYPES),
-  });
+  const createSchema = useMemo(
+    () =>
+      questionnaireBasicSchema(t).extend({
+        subject_type: z.enum(SUBJECT_TYPES),
+      }),
+    [t],
+  );
 
   const form = useForm<CreateFormValues>({
     resolver: zodResolver(createSchema),

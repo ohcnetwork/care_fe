@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check, Copy, Download, Eye } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -105,8 +105,10 @@ export function QuestionnaireDetailPage({
     queryFn: query(questionnaireApi.get, { pathParams: { id } }),
   });
 
+  const detailSchema = useMemo(() => questionnaireBasicSchema(t), [t]);
+
   const form = useForm<DetailFormValues>({
-    resolver: zodResolver(questionnaireBasicSchema(t)),
+    resolver: zodResolver(detailSchema),
     values: questionnaire
       ? {
           title: questionnaire.title,
