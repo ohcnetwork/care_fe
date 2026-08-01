@@ -42,23 +42,36 @@ test.describe("Questionnaire v2 versions depth (e2e-versioned fixture)", () => {
       await expect(panel.getByText("v1", { exact: true })).toBeVisible();
     });
 
-    await test.step("Revision 2 dialog renders its snapshot read-only", async () => {
-      await page.getByRole("button", { name: "Open" }).first().click();
-      const dialog = page.getByRole("dialog");
-      await expect(dialog).toBeVisible();
-      await expect(dialog.getByText("Observation note (v2)")).toBeVisible();
+    await test.step("Revision 2 opens as a full-page read-only viewer", async () => {
+      await panel.getByRole("button", { name: "Open" }).first().click();
+      await page.waitForURL(/\/versions\/[0-9a-f-]+$/);
+      await expect(page.getByText("Past revision")).toBeVisible();
+      await expect(page.getByText("Observation note (v2)")).toBeVisible();
       // Readonly renderer: the input is disabled, not just display-only.
-      await expect(dialog.getByPlaceholder("Enter details")).toBeDisabled();
-      await page.keyboard.press("Escape");
-      await expect(dialog).not.toBeVisible();
+      await expect(page.getByPlaceholder("Enter details")).toBeDisabled();
     });
 
-    await test.step("Revision 1 dialog shows the older snapshot", async () => {
-      await page.getByRole("button", { name: "Open" }).last().click();
-      const dialog = page.getByRole("dialog");
-      await expect(dialog).toBeVisible();
-      await expect(dialog.getByText("Observation note (v1)")).toBeVisible();
-      await expect(dialog.getByPlaceholder("Enter details")).toBeDisabled();
+    await test.step("Back returns to the Versions tab", async () => {
+      await page.getByRole("button", { name: "Back" }).click();
+      await page.waitForURL(/\?tab=versions$/);
+      await expect(page.getByRole("tab", { name: "Versions" })).toHaveAttribute(
+        "data-state",
+        "active",
+      );
+      await expect(
+        page.getByRole("heading", { name: "Version history" }),
+      ).toBeVisible();
+    });
+
+    await test.step("Revision 1 shows the older snapshot full-page", async () => {
+      await page
+        .getByRole("tabpanel")
+        .getByRole("button", { name: "Open" })
+        .last()
+        .click();
+      await page.waitForURL(/\/versions\/[0-9a-f-]+$/);
+      await expect(page.getByText("Observation note (v1)")).toBeVisible();
+      await expect(page.getByPlaceholder("Enter details")).toBeDisabled();
     });
   });
 });
