@@ -3,7 +3,6 @@ import { Dispatch } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -75,23 +74,17 @@ export function QuestionEditorCard({
   return (
     <Card>
       <CardContent className="space-y-4 p-4">
-        <div className="flex items-start justify-between gap-2 border-b border-gray-100 pb-3">
-          {/* Column stack: ordinal + title on line 1, the type badge on line
-              2 — so long titles truncate instead of wrapping the kebab. */}
-          <div className="flex min-w-0 items-start gap-2">
-            <span className="text-sm text-gray-500">{number}</span>
-            <div className="flex min-w-0 flex-col items-start gap-1">
-              <span className="max-w-full truncate text-sm font-semibold text-gray-900">
-                {question.text || (
-                  <span className="italic text-gray-400">
-                    {t("untitled_question")}
-                  </span>
-                )}
-              </span>
-              <Badge variant="secondary">
-                {t("question_type")}: {t(`question_type__${question.type}`)}
-              </Badge>
-            </div>
+        {/* Typeform-style header (owner-directed divergence from the Figma
+            header strip): the old ordinal+title+type-badge strip duplicated
+            the Title/Type fields below it, so the fields themselves lead —
+            type picker first, kebab aligned with it top-right. */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="w-full sm:max-w-xs">
+            <QuestionTypePicker
+              value={question.type}
+              structuredType={question.structured_type}
+              onChange={handleTypeChange}
+            />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -119,25 +112,28 @@ export function QuestionEditorCard({
           </DropdownMenu>
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor={`question-title-${question.id}`}>
-            {t("question_title")}
-          </Label>
-          <Input
-            id={`question-title-${question.id}`}
-            value={question.text}
-            placeholder={t("enter_question_title")}
-            onChange={(e) => onChange({ text: e.target.value })}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label>{t("question_type")}</Label>
-          <QuestionTypePicker
-            value={question.type}
-            structuredType={question.structured_type}
-            onChange={handleTypeChange}
-          />
+        {/* Roomy title row: small ordinal prefix, then a large borderless
+            input — the underline appears on focus. The label stays for
+            a11y/tests ("Question Title" textbox) but is visually hidden. */}
+        <div className="flex items-baseline gap-2">
+          <span className="shrink-0 text-sm font-medium text-gray-400">
+            {number}
+          </span>
+          <div className="min-w-0 flex-1">
+            <Label
+              htmlFor={`question-title-${question.id}`}
+              className="sr-only"
+            >
+              {t("question_title")}
+            </Label>
+            <Input
+              id={`question-title-${question.id}`}
+              value={question.text}
+              placeholder={t("enter_question_title")}
+              onChange={(e) => onChange({ text: e.target.value })}
+              className="h-auto rounded-none border-0 border-b border-transparent px-0 py-1.5 text-lg font-medium shadow-none focus:border-gray-900 focus:ring-0 focus-visible:border-gray-900 hover:border-gray-200 placeholder:text-gray-300 md:text-xl"
+            />
+          </div>
         </div>
 
         <div className="space-y-1.5">

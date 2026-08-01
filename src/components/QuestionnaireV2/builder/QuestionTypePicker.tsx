@@ -165,6 +165,10 @@ export function QuestionTypePicker({
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          // Named for a11y — the editor card shows no visible label for the
+          // picker (the control is self-describing), so without this the
+          // combobox would be named by its current value alone.
+          aria-label={t("question_type")}
           className="w-full justify-between gap-2 px-2 font-normal"
         >
           <span className="flex min-w-0 items-center gap-2">
