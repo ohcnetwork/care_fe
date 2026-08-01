@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -70,12 +71,17 @@ function QuestionCodeField({ question, onChange }: QuestionCodeFieldProps) {
         ) : undefined
       }
     >
-      <CodingEditor
-        code={question.code}
-        name="code"
-        form={form}
-        onChange={(code) => onChange({ code })}
-      />
+      {/* CodingEditor's FormField/FormItem internals read useFormContext(),
+          so the throwaway form must also be mounted as a FormProvider —
+          without it, adding a code crashes on a null form context. */}
+      <Form {...form}>
+        <CodingEditor
+          code={question.code}
+          name="code"
+          form={form}
+          onChange={(code) => onChange({ code })}
+        />
+      </Form>
     </CollapsibleSettingsCard>
   );
 }
