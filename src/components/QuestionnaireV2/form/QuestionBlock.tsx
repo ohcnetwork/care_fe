@@ -120,7 +120,11 @@ export function QuestionBlock(props: QuestionBlockProps) {
   };
 
   return wrap(
+    // data-question-id is the renderer's stable per-question DOM anchor —
+    // hosts scroll to it (outline selection, future scroll-to-error) and
+    // tests scope input assertions with it.
     <div
+      data-question-id={question.id}
       className={cn(
         "space-y-1.5",
         depth <= 1 && "rounded-lg border border-gray-200 bg-white p-3.5",

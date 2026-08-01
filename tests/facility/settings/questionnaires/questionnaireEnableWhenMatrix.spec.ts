@@ -3,6 +3,7 @@ import {
   KITCHEN_SINK_FACILITY_SLUG,
   createQuestionnaireAndOpenBuilder,
   getQuestionnaireIdBySlug,
+  questionBlock,
 } from "tests/helper/questionnaireV2";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -48,19 +49,25 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
 
     await test.step("Pain score 8 reveals only the greater-than dependent", async () => {
       await jumpTo(page, "Pain score (0-10)");
-      await page.getByRole("spinbutton").fill("8");
+      await questionBlock(page, "Pain score (0-10)")
+        .getByRole("spinbutton")
+        .fill("8");
       await expect(navRow(page, "Severe pain follow-up")).toBeVisible();
       await expect(navRow(page, "Low pain follow-up")).not.toBeVisible();
     });
 
     await test.step("Pain score 2 swaps to the less-than dependent", async () => {
-      await page.getByRole("spinbutton").fill("2");
+      await questionBlock(page, "Pain score (0-10)")
+        .getByRole("spinbutton")
+        .fill("2");
       await expect(navRow(page, "Low pain follow-up")).toBeVisible();
       await expect(navRow(page, "Severe pain follow-up")).not.toBeVisible();
     });
 
     await test.step("Clearing the score hides both again", async () => {
-      await page.getByRole("spinbutton").fill("");
+      await questionBlock(page, "Pain score (0-10)")
+        .getByRole("spinbutton")
+        .fill("");
       await expect(navRow(page, "Severe pain follow-up")).not.toBeVisible();
       await expect(navRow(page, "Low pain follow-up")).not.toBeVisible();
     });
@@ -72,12 +79,16 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
     await expect(navRow(page, "Fever details")).not.toBeVisible();
 
     await test.step("Typing the matching answer reveals the dependent", async () => {
-      await page.getByPlaceholder("Enter details").fill("fever");
+      await questionBlock(page, "Primary symptom")
+        .getByPlaceholder("Enter details")
+        .fill("fever");
       await expect(navRow(page, "Fever details")).toBeVisible();
     });
 
     await test.step("A non-matching answer hides it again", async () => {
-      await page.getByPlaceholder("Enter details").fill("cough");
+      await questionBlock(page, "Primary symptom")
+        .getByPlaceholder("Enter details")
+        .fill("cough");
       await expect(navRow(page, "Fever details")).not.toBeVisible();
     });
   });
@@ -92,12 +103,16 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
 
     await test.step("Only the numeric condition matching is enough", async () => {
       await jumpTo(page, "Pain score (0-10)");
-      await page.getByRole("spinbutton").fill("6");
+      await questionBlock(page, "Pain score (0-10)")
+        .getByRole("spinbutton")
+        .fill("6");
       await expect(navRow(page, "Any-behavior follow-up")).toBeVisible();
     });
 
     await test.step("Clearing it hides the dependent again", async () => {
-      await page.getByRole("spinbutton").fill("");
+      await questionBlock(page, "Pain score (0-10)")
+        .getByRole("spinbutton")
+        .fill("");
       await expect(navRow(page, "Any-behavior follow-up")).not.toBeVisible();
     });
 
@@ -136,7 +151,9 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
     await test.step("The protected question stays in the nav while disabled", async () => {
       await expect(navRow(page, "Protected note")).toBeVisible();
       await jumpTo(page, "Protected note");
-      await expect(page.getByPlaceholder("Enter details")).toBeDisabled();
+      await expect(
+        questionBlock(page, "Protected note").getByPlaceholder("Enter details"),
+      ).toBeDisabled();
     });
 
     await test.step("Meeting the condition unlocks the input", async () => {

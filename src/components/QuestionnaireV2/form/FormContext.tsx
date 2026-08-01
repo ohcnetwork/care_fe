@@ -7,6 +7,11 @@ import {
   responsesAtom,
 } from "@/components/QuestionnaireV2/renderer/store";
 
+// Live-store hooks hosts may need (the studio outline drops
+// enable_when-hidden rows in preview). Re-exported here so consumers stay
+// on form/'s public surface — the engine reach-in is this module's alone.
+export { useHiddenQuestionIds } from "@/components/QuestionnaireV2/renderer/store";
+
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
@@ -36,8 +41,13 @@ export function useFormRenderer(): FormContextValue {
   return context;
 }
 
-/** `id → "type:structured_type"` for every non-group question — the key that
- *  decides whether an in-progress answer survives a live tree update. */
+/**
+ * `id → signature` for every non-group question — the key that decides
+ * whether an in-progress answer survives a live tree update. Includes the
+ * answer options (value + default flag) so editing them re-seeds that
+ * question's entry: a changed `initial_selected` reaches the preview, and a
+ * recorded answer can't point at an option that no longer exists.
+ */
 function questionSignatures(questions: Question[]): Map<string, string> {
   const signatures = new Map<string, string>();
   const walk = (list: Question[]) => {
@@ -46,9 +56,12 @@ function questionSignatures(questions: Question[]): Map<string, string> {
         walk(question.questions ?? []);
         continue;
       }
+      const options = (question.answer_option ?? [])
+        .map((option) => `${option.value}=${option.initial_selected ? 1 : 0}`)
+        .join("|");
       signatures.set(
         question.id,
-        `${question.type}:${question.structured_type ?? ""}`,
+        `${question.type}:${question.structured_type ?? ""}:${options}`,
       );
     }
   };

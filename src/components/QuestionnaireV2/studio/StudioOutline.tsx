@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 import { BuilderAction } from "@/components/QuestionnaireV2/builder/builderReducer";
-import { useHiddenQuestionIds } from "@/components/QuestionnaireV2/renderer/store";
+import { useHiddenQuestionIds } from "@/components/QuestionnaireV2/form/FormContext";
 import { QuestionTreeNav } from "@/components/QuestionnaireV2/shared/QuestionTreeNav";
 
 import { Question } from "@/types/questionnaire/question";
@@ -43,6 +43,7 @@ export function StudioOutline({
 }: StudioOutlineProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
+  const filtering = query.trim().length > 0;
 
   const logicHiddenIds = useHiddenQuestionIds();
   const queryHiddenIds = searchHiddenIds(questions, query);
@@ -50,10 +51,13 @@ export function StudioOutline({
     ? queryHiddenIds
     : new Set([...logicHiddenIds, ...queryHiddenIds]);
 
+  // Judged against the query filter alone — in preview a top-level question
+  // hidden by enable_when must not make a matching search read as "no
+  // matches".
   const noMatches =
-    query.trim().length > 0 &&
+    filtering &&
     questions.length > 0 &&
-    questions.every((question) => hiddenIds.has(question.id));
+    questions.every((question) => queryHiddenIds.has(question.id));
 
   return (
     <div className="flex flex-col gap-2">
@@ -88,68 +92,72 @@ export function StudioOutline({
         </button>
       )}
 
-      {noMatches ? (
+      {noMatches && (
         <p className="px-3 py-6 text-center text-sm text-gray-500">
           {t("no_question_matches_search")}
         </p>
-      ) : (
-        <QuestionTreeNav
-          questions={questions}
-          activeId={formSelected ? null : selectedId}
-          onSelect={onSelectQuestion}
-          hiddenIds={hiddenIds}
-          renderSeparator={
-            editing
-              ? (afterIndex) => (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      dispatch({
-                        type: "addQuestion",
-                        parentId: null,
-                        index: afterIndex + 1,
-                      })
-                    }
-                    aria-label={t("add_new_question")}
-                    className="absolute left-1/2 top-1/2 flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400 shadow-sm hover:border-primary-300 hover:text-primary-700"
-                  >
-                    <Plus className="size-3.5" />
-                  </button>
-                )
-              : undefined
-          }
-          footer={
-            editing ? (
-              <div className="mt-1 space-y-1 border-t border-gray-100 pt-2">
-                <Button
+      )}
+      {/* The nav stays mounted through a no-match search so the footer's
+          add affordances remain reachable (rows are all hidden anyway). */}
+      <QuestionTreeNav
+        questions={questions}
+        activeId={formSelected ? null : selectedId}
+        onSelect={onSelectQuestion}
+        hiddenIds={hiddenIds}
+        renderSeparator={
+          // Hidden while a search filter is active: the separator index is
+          // positional in the FILTERED row list, so an insert-at-index
+          // would land somewhere else in the real tree.
+          editing && !filtering
+            ? (afterIndex) => (
+                <button
                   type="button"
-                  variant="link"
-                  className="w-full justify-start px-3 underline"
-                  onClick={() =>
-                    dispatch({ type: "addQuestion", parentId: null })
-                  }
-                >
-                  {t("add_new_question")}
-                </Button>
-                <Button
-                  type="button"
-                  variant="link"
-                  className="w-full justify-start px-3 text-gray-600 underline"
                   onClick={() =>
                     dispatch({
                       type: "addQuestion",
                       parentId: null,
-                      template: { type: "group" },
+                      index: afterIndex + 1,
                     })
                   }
+                  aria-label={t("add_new_question")}
+                  className="absolute left-1/2 top-1/2 flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400 shadow-sm hover:border-primary-300 hover:text-primary-700"
                 >
-                  {t("add_section")}
-                </Button>
-              </div>
-            ) : undefined
-          }
-        />
-      )}
+                  <Plus className="size-3.5" />
+                </button>
+              )
+            : undefined
+        }
+        footer={
+          editing ? (
+            <div className="mt-1 space-y-1 border-t border-gray-100 pt-2">
+              <Button
+                type="button"
+                variant="link"
+                className="w-full justify-start px-3 underline"
+                onClick={() =>
+                  dispatch({ type: "addQuestion", parentId: null })
+                }
+              >
+                {t("add_new_question")}
+              </Button>
+              <Button
+                type="button"
+                variant="link"
+                className="w-full justify-start px-3 text-gray-600 underline"
+                onClick={() =>
+                  dispatch({
+                    type: "addQuestion",
+                    parentId: null,
+                    template: { type: "group" },
+                  })
+                }
+              >
+                {t("add_section")}
+              </Button>
+            </div>
+          ) : undefined
+        }
+      />
     </div>
   );
 }

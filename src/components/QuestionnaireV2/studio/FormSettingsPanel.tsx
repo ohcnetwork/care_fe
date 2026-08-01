@@ -25,6 +25,9 @@ export interface FormSettingsPanelProps {
    *  tree by the page's Save Changes (one full-body PUT). */
   form: UseFormReturn<DetailFormValues>;
   canWrite: boolean;
+  /** Composes the current DRAFT (unsaved questions + metadata) — the JSON
+   *  export must match what the author is looking at, not the last save. */
+  exportQuestionnaire: () => QuestionnaireRead;
 }
 
 /**
@@ -40,6 +43,7 @@ export function FormSettingsPanel({
   questionnaire,
   form,
   canWrite,
+  exportQuestionnaire,
 }: FormSettingsPanelProps) {
   const { t } = useTranslation();
   const [cloneOpen, setCloneOpen] = useState(false);
@@ -78,7 +82,7 @@ export function FormSettingsPanel({
           )}
           <LabeledActionButton
             label={t("download_the_form")}
-            onClick={() => downloadQuestionnaireJson(questionnaire)}
+            onClick={() => downloadQuestionnaireJson(exportQuestionnaire())}
           >
             <Download className="size-4" />
             {t("download_json")}

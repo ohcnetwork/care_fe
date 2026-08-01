@@ -142,3 +142,23 @@ export async function pickValuesetFromAutocomplete(
     page.getByRole("combobox").filter({ hasText: optionName }),
   ).toBeVisible();
 }
+
+/**
+ * The canvas block for one question on the one-scroll form renderer,
+ * anchored on the `data-question-id` attribute the renderer stamps and the
+ * question's label text. The whole questionnaire renders on one scroll, so
+ * bare role queries (`spinbutton`, `Add note`, `textarea`) match every
+ * question at once — scope them through this instead. `.last()` picks the
+ * innermost matching block when the label sits inside a section (ancestor
+ * blocks match `has:` too).
+ */
+export function questionBlock(page: Page, label: string) {
+  return page
+    .locator("[data-question-id]")
+    .filter({
+      has: page.locator(
+        `xpath=.//label[contains(normalize-space(.), ${JSON.stringify(label)})]`,
+      ),
+    })
+    .last();
+}

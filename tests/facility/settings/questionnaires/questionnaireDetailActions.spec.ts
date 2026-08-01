@@ -142,7 +142,7 @@ test.describe("Questionnaire v2 detail page actions", () => {
 
     // The builder opened straight into the renderer, not the editor.
     await expect(page.getByRole("navigation")).toBeVisible();
-    await expect(page.getByPlaceholder("Enter details")).toBeVisible();
+    await expect(page.getByPlaceholder("Enter details").first()).toBeVisible();
     await expect(
       page.getByRole("textbox", { name: "Question Title" }),
     ).not.toBeVisible();

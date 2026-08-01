@@ -47,9 +47,28 @@ function StudioQuestionShell({
   const { t } = useTranslation();
   const studio = useStudioCanvas();
 
-  // Preview mode renders the plain form; deep nesting (inside nested
-  // groups) is edited from the outline/inspector, not decorated in place.
-  if (!studio.editing || depth >= 2) return <>{children}</>;
+  const hiddenBadge = (
+    <span className="pointer-events-none absolute -top-2.5 right-3 z-10 flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+      <EyeOff className="size-3" />
+      {t("hidden_by_conditions")}
+    </span>
+  );
+
+  // Preview mode renders the plain form.
+  if (!studio.editing) return <>{children}</>;
+
+  // Deep nesting (inside nested groups) is edited from the
+  // outline/inspector, not decorated in place — but the logic-hidden cue
+  // still applies, or a revealed deep question would look like a normal one.
+  if (depth >= 2) {
+    if (!hiddenByLogic) return <>{children}</>;
+    return (
+      <div className="relative">
+        {hiddenBadge}
+        {children}
+      </div>
+    );
+  }
 
   const selected = studio.selectedId === question.id;
 
@@ -84,7 +103,6 @@ function StudioQuestionShell({
     // is the click target; keyboard selection goes through the outline tree,
     // which lists every question as a real button.
     <div
-      data-qid={question.id}
       onClick={(event) => {
         event.stopPropagation();
         studio.onSelectQuestion(question.id);
@@ -144,12 +162,7 @@ function StudioQuestionShell({
           </div>
         </>
       )}
-      {hiddenByLogic && (
-        <span className="pointer-events-none absolute -top-2.5 right-3 z-10 flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
-          <EyeOff className="size-3" />
-          {t("hidden_by_conditions")}
-        </span>
-      )}
+      {hiddenByLogic && hiddenBadge}
       {children}
     </div>
   );
@@ -203,8 +216,10 @@ export function StudioCanvas({
 }: StudioCanvasProps) {
   useEffect(() => {
     if (!scrollRequest) return;
+    // data-question-id is stamped by the form renderer itself, so this
+    // works in both the decorated edit canvas and the plain preview.
     document
-      .querySelector(`[data-qid="${CSS.escape(scrollRequest.id)}"]`)
+      .querySelector(`[data-question-id="${CSS.escape(scrollRequest.id)}"]`)
       ?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [scrollRequest]);
 

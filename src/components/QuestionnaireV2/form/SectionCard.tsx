@@ -9,6 +9,7 @@ import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/renderer/sa
 import type { Question } from "@/types/questionnaire/question";
 
 import { useFormChrome } from "./chrome";
+import { useFormRenderer } from "./FormContext";
 import { QuestionBlock } from "./QuestionBlock";
 
 /**
@@ -34,7 +35,14 @@ export function SectionCard({
   number?: string;
 }) {
   const { t } = useTranslation();
+  const { inert } = useFormRenderer();
   const { AppendZone } = useFormChrome();
+
+  // On the edit canvas the inert wrapper already neutralizes the inputs;
+  // keeping the fieldset natively disabled there would also disable the
+  // selection chrome's toolbar buttons rendered inside it for child
+  // question cards of a read_only or logic-disabled group.
+  const fieldsetDisabled = disabled && !inert;
   const children = question.questions ?? [];
   const leafChildCount = children.filter(
     (child) => child.type !== "group",
@@ -66,6 +74,7 @@ export function SectionCard({
   if (depth === 0) {
     return (
       <section
+        data-question-id={question.id}
         className={cn(
           "rounded-xl border border-gray-200 bg-gray-50 p-3.5",
           decorationClasses,
@@ -91,7 +100,7 @@ export function SectionCard({
           </p>
         )}
         <fieldset
-          disabled={disabled}
+          disabled={fieldsetDisabled}
           className={cn(
             "border-0 p-0",
             containerClasses ? cn("gap-3", containerClasses) : "space-y-3",
@@ -108,6 +117,7 @@ export function SectionCard({
   // strip with a lighter inset body panel beneath it.
   return (
     <div
+      data-question-id={question.id}
       className={cn(
         "overflow-hidden rounded-md border border-gray-200 bg-gray-200/60",
         decorationClasses,
@@ -118,7 +128,7 @@ export function SectionCard({
         {question.text}
       </h4>
       <fieldset
-        disabled={disabled}
+        disabled={fieldsetDisabled}
         className={cn(
           "m-1 gap-4 rounded border-0 bg-gray-50 p-2",
           containerClasses ??

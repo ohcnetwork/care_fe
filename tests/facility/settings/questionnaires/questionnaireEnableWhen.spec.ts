@@ -77,22 +77,18 @@ test.describe("Questionnaire v2 enable_when visibility", () => {
       // needs either to confirm the trigger question is on screen.
       await expect(page.getByText(triggerTitle).first()).toBeVisible();
 
-      const nextButton = page.getByRole("button", { name: "Next" });
-      await expect(nextButton).toBeDisabled();
+      // The whole form renders on one scroll — a hidden dependent simply
+      // isn't on the page (no pagination to walk).
       await expect(page.getByText(dependentTitle)).not.toBeVisible();
     });
 
     await test.step("Answering No keeps the dependent question hidden", async () => {
       await page.getByRole("radio", { name: "No", exact: true }).click();
-      await expect(page.getByRole("button", { name: "Next" })).toBeDisabled();
       await expect(page.getByText(dependentTitle)).not.toBeVisible();
     });
 
     await test.step("Answering Yes reveals the dependent question", async () => {
       await page.getByRole("radio", { name: "Yes", exact: true }).click();
-      const nextButton = page.getByRole("button", { name: "Next" });
-      await expect(nextButton).toBeEnabled();
-      await nextButton.click();
       await expect(page.getByText(dependentTitle).first()).toBeVisible();
     });
   });

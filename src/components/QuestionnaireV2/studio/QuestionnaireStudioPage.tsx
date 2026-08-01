@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useEffect, useMemo, useReducer, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -154,15 +154,40 @@ export function QuestionnaireStudioPage({
   const { canWrite, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);
 
+  // Creating or importing questions selects them in the reducer — the
+  // inspector must follow, or it would stay on Form settings showing
+  // nothing about the question that just appeared.
+  const studioDispatch: typeof dispatch = (action) => {
+    if (
+      action.type === "addQuestion" ||
+      action.type === "duplicateQuestion" ||
+      action.type === "replaceAll"
+    ) {
+      setInspectorTarget("question");
+    }
+    dispatch(action);
+  };
+
   // Live draft for the canvas: a fresh identity per edit is exactly what
   // drives the form provider's live sync (it merges responses rather than
-  // wiping them, so this is safe on every keystroke).
+  // wiping them, so this is safe on every keystroke). Title/description
+  // ride along from the metadata form so the canvas header is as realtime
+  // as the questions.
+  const [metaTitle, metaDescription] = useWatch({
+    control: form.control,
+    name: ["title", "description"],
+  });
   const draft = useMemo(
     () =>
       questionnaire
-        ? { ...questionnaire, questions: state.questions }
+        ? {
+            ...questionnaire,
+            title: metaTitle || questionnaire.title,
+            description: metaDescription ?? questionnaire.description,
+            questions: state.questions,
+          }
         : undefined,
-    [questionnaire, state.questions],
+    [questionnaire, state.questions, metaTitle, metaDescription],
   );
 
   const issues = useMemo(
@@ -313,27 +338,44 @@ export function QuestionnaireStudioPage({
             phone user who drills into a nested sub-question has no way back
             to the parent or its siblings. */}
         {editing && state.questions.length > 0 && (
-          <div className="pt-4 md:hidden">
-            <Select
-              value={state.selectedId ?? undefined}
-              onValueChange={(selectedId) => {
-                dispatch({ type: "select", id: selectedId });
-                setInspectorTarget("question");
-              }}
+          <div className="flex items-center gap-2 pt-4 md:hidden">
+            <div className="min-w-0 flex-1">
+              <Select
+                value={state.selectedId ?? undefined}
+                onValueChange={(selectedId) => {
+                  dispatch({ type: "select", id: selectedId });
+                  setInspectorTarget("question");
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t("select_question")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {numberQuestions(state.questions).flatMap((item) =>
+                    [item, ...item.children].map(({ question, number }) => (
+                      <SelectItem key={question.id} value={question.id}>
+                        {number} {question.text || t("untitled_question")}
+                      </SelectItem>
+                    )),
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+            {/* Below md the outline (and its add affordances) is hidden and
+                the canvas with its append zones only exists at lg — this is
+                the one add-question path on a phone. */}
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="shrink-0"
+              aria-label={t("add_new_question")}
+              onClick={() =>
+                studioDispatch({ type: "addQuestion", parentId: null })
+              }
             >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={t("select_question")} />
-              </SelectTrigger>
-              <SelectContent>
-                {numberQuestions(state.questions).flatMap((item) =>
-                  [item, ...item.children].map(({ question, number }) => (
-                    <SelectItem key={question.id} value={question.id}>
-                      {number} {question.text || t("untitled_question")}
-                    </SelectItem>
-                  )),
-                )}
-              </SelectContent>
-            </Select>
+              <Plus className="size-4" />
+            </Button>
           </div>
         )}
 
@@ -346,7 +388,7 @@ export function QuestionnaireStudioPage({
               formSelected={editing && formSelected}
               onSelectForm={() => setInspectorTarget("form")}
               onSelectQuestion={revealQuestion}
-              dispatch={dispatch}
+              dispatch={studioDispatch}
             />
           </div>
 
@@ -361,6 +403,11 @@ export function QuestionnaireStudioPage({
                   questionnaire={questionnaire}
                   form={form}
                   canWrite={canWrite}
+                  exportQuestionnaire={() => ({
+                    ...questionnaire,
+                    ...form.getValues(),
+                    questions: state.questions,
+                  })}
                 />
               ) : (
                 <QuestionEditorCard
@@ -381,18 +428,21 @@ export function QuestionnaireStudioPage({
           >
             <StudioCanvas
               editing={editing}
-              selectedId={state.selectedId}
+              // Cleared while Form settings is the inspector target so the
+              // ring/toolbar don't advertise a question as "editing" that
+              // the inspector no longer shows.
+              selectedId={editing && formSelected ? null : state.selectedId}
               onSelectQuestion={(questionId) => {
                 dispatch({ type: "select", id: questionId });
                 setInspectorTarget("question");
               }}
-              dispatch={dispatch}
+              dispatch={studioDispatch}
               scrollRequest={scrollRequest}
               emptyState={
                 editing ? (
                   <BuilderEmptyState
                     onAddFirst={() =>
-                      dispatch({ type: "addQuestion", parentId: null })
+                      studioDispatch({ type: "addQuestion", parentId: null })
                     }
                     onImport={canWrite ? () => setImportOpen(true) : undefined}
                   />
@@ -409,8 +459,7 @@ export function QuestionnaireStudioPage({
           open={importOpen}
           onOpenChange={setImportOpen}
           onImport={(questions) => {
-            dispatch({ type: "replaceAll", questions });
-            setInspectorTarget("question");
+            studioDispatch({ type: "replaceAll", questions });
             toast.success(t("questionnaire_imported_successfully"));
           }}
         />

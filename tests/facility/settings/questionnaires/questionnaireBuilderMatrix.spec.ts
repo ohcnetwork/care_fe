@@ -3,6 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   createQuestionnaireAndOpenBuilder,
   pickValuesetFromAutocomplete,
+  questionBlock,
 } from "tests/helper/questionnaireV2";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
@@ -292,9 +293,12 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
 
     await page.getByRole("button", { name: "Preview" }).click();
     // The text renders (label + display paragraph) with no input control
-    // and no note affordance.
+    // and no note affordance — scoped to the question block because the
+    // outline's search box is also a textbox on the one-scroll canvas.
     await expect(page.getByText(displayText).first()).toBeVisible();
-    await expect(page.getByRole("textbox")).not.toBeVisible();
+    await expect(
+      questionBlock(page, displayText).getByRole("textbox"),
+    ).not.toBeVisible();
     await expect(
       page.getByRole("button", { name: "Add note" }),
     ).not.toBeVisible();

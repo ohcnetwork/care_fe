@@ -4,6 +4,7 @@ import {
   apiBaseUrl,
   createQuestionnaireAndOpenBuilder,
   getQuestionnaireIdBySlug,
+  questionBlock,
 } from "tests/helper/questionnaireV2";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
@@ -76,17 +77,19 @@ test.describe("Questionnaire v2 unit semantics", () => {
 
     await test.step("Integer question shows its unit next to the label", async () => {
       await jumpTo(page, "Resting heart rate");
+      const integerBlock = questionBlock(page, "Resting heart rate");
       await expect(
-        page.locator("label").filter({ hasText: "Resting heart rate" }),
+        integerBlock.locator("label").filter({ hasText: "Resting heart rate" }),
       ).toBeVisible();
-      await expect(page.getByText("(/min)")).toBeVisible();
-      await expect(page.getByRole("spinbutton")).toBeVisible();
+      await expect(integerBlock.getByText("(/min)")).toBeVisible();
+      await expect(integerBlock.getByRole("spinbutton")).toBeVisible();
     });
 
     await test.step("Decimal question shows its unit next to the label", async () => {
       await jumpTo(page, "Body temperature");
-      await expect(page.getByText("(Cel)")).toBeVisible();
-      await expect(page.getByRole("spinbutton")).toBeVisible();
+      const decimalBlock = questionBlock(page, "Body temperature");
+      await expect(decimalBlock.getByText("(Cel)")).toBeVisible();
+      await expect(decimalBlock.getByRole("spinbutton")).toBeVisible();
     });
 
     await test.step("Quantity renders every unit of the bounded valueset as chips", async () => {
@@ -110,7 +113,9 @@ test.describe("Questionnaire v2 unit semantics", () => {
     });
 
     await test.step("Picking a chip writes the unit; the value sticks", async () => {
-      await page.getByRole("spinbutton").fill("250");
+      await questionBlock(page, "Dose given")
+        .getByRole("spinbutton")
+        .fill("250");
       await page.getByRole("radio", { name: "gram", exact: true }).click();
       await expect(
         page.getByRole("radio", { name: "gram", exact: true }),
@@ -118,7 +123,9 @@ test.describe("Questionnaire v2 unit semantics", () => {
       await expect(
         page.getByRole("radio", { name: "milligram", exact: true }),
       ).toHaveAttribute("aria-checked", "false");
-      await expect(page.getByRole("spinbutton")).toHaveValue("250");
+      await expect(
+        questionBlock(page, "Dose given").getByRole("spinbutton"),
+      ).toHaveValue("250");
     });
   });
 

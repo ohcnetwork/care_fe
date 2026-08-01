@@ -33,7 +33,8 @@ test.describe("Questionnaire v2 builder", () => {
 
     await test.step("Preview renders the question", async () => {
       await page.getByRole("button", { name: "Preview" }).click();
-      await expect(page.getByText(questionTitle)).toBeVisible();
+      // The title renders in the outline row and as the field label.
+      await expect(page.getByText(questionTitle).first()).toBeVisible();
       await expect(page.getByPlaceholder("Enter details")).toBeVisible();
     });
   });
