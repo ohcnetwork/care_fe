@@ -13,9 +13,16 @@ function generateAdminLinks(
 ): NavigationLink[] {
   const baseUrl = "/admin";
   const links: NavigationLink[] = [
+    // Two questionnaire editors ship while v2 reaches parity — the legacy
+    // entry is explicitly labeled so the near-identical URLs stay tellable.
     {
-      name: t("questionnaire_one"),
+      name: t("questionnaires_legacy"),
       url: `${baseUrl}/questionnaire`,
+      icon: <CareIcon icon="d-book-open" />,
+    },
+    {
+      name: t("questionnaire_other"),
+      url: `${baseUrl}/questionnaires`,
       icon: <CareIcon icon="d-book-open" />,
     },
     {

@@ -97,7 +97,8 @@ export const QuantityQuestion = memo(function QuantityQuestion({
           <Label htmlFor={`${question.id}-coding`}>Type</Label>
           <div className="w-full sm:w-[200px]">
             <ValueSetSelect
-              system={question.answer_value_set}
+              system={question.answer_value_set.slug ?? ""}
+              valuesetId={question.answer_value_set.external_id}
               value={currentCoding}
               onSelect={handleCodingChange}
             />

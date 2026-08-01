@@ -2,6 +2,10 @@ import { navigate } from "raviger";
 
 import QuestionnaireEditor from "@/components/Questionnaire/QuestionnaireEditor";
 import { QuestionnaireList } from "@/components/Questionnaire/QuestionnaireList";
+import { QuestionnaireBuilderPage } from "@/components/QuestionnaireV2/builder/QuestionnaireBuilderPage";
+import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
+import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
+import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import { ValueSetList } from "@/components/ValueSet/ValueSetList";
 
@@ -16,17 +20,36 @@ import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 
+const INSTANCE_SCOPE = {
+  authContext: "instance",
+  basePath: "/admin/questionnaires",
+} as const;
+
 const AdminRoutes: AppRoutes = {
   "/admin/questionnaire": () => <QuestionnaireList />,
   "/admin/questionnaire/create": () => <QuestionnaireEditor />,
-  "/admin/questionnaire/:slug/edit": ({ slug }) => (
-    <QuestionnaireEditor slug={slug} />
+  "/admin/questionnaire/:id/edit": ({ id }) => <QuestionnaireEditor id={id} />,
+  "/admin/questionnaires": () => (
+    <QuestionnaireListPage scope={INSTANCE_SCOPE} />
+  ),
+  // Must be registered before "/admin/questionnaires/:id" — raviger matches
+  // routes in object order, and "new" would otherwise be captured as an :id.
+  "/admin/questionnaires/new": () => (
+    <QuestionnaireCreatePage scope={INSTANCE_SCOPE} />
+  ),
+  // Must be registered before "/admin/questionnaires/:id" for the same
+  // reason — otherwise "edit" would be captured as an :id.
+  "/admin/questionnaires/:id/edit": ({ id }) => (
+    <QuestionnaireBuilderPage scope={INSTANCE_SCOPE} id={id} />
+  ),
+  "/admin/questionnaires/:id": ({ id }) => (
+    <QuestionnaireDetailPage scope={INSTANCE_SCOPE} id={id} />
   ),
   "/admin/valuesets": () => <ValueSetList />,
   "/admin/valuesets/create": () => (
     <ValueSetEditor onSuccess={() => navigate(`/admin/valuesets`)} />
   ),
-  "/admin/valuesets/:slug/edit": ({ slug }) => <ValueSetEditor slug={slug} />,
+  "/admin/valuesets/:id/edit": ({ id }) => <ValueSetEditor id={id} />,
   "/admin/patient_identifier_config": () => <PatientIdentifierConfigList />,
   "/admin/patient_identifier_config/new": () => <PatientIdentifierConfigForm />,
   "/admin/patient_identifier_config/:id": ({ id }) => (

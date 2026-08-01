@@ -40,7 +40,7 @@ interface QuestionnairePropertiesProps {
     field: K,
     value: QuestionnaireRead[K],
   ) => void;
-  slug?: string;
+  id?: string;
   organizations?: OrganizationResponse;
   organizationSelection: {
     selectedOrgs: Organization[];
@@ -94,6 +94,8 @@ function StatusSelector({
   );
 }
 
+const SUBJECT_TYPES: SubjectType[] = ["patient", "encounter"];
+
 function SubjectTypeSelector({
   value,
   onChange,
@@ -111,27 +113,24 @@ function SubjectTypeSelector({
         onValueChange={onChange}
         className="flex w-fit items-center gap-0 border border-gray-300 divide-x rounded-md bg-white [&>div:has([data-state=checked])]:bg-primary-200"
       >
-        {[
-          { value: "patient", label: "patient" },
-          { value: "encounter", label: "encounter" },
-        ].map((type) => (
+        {SUBJECT_TYPES.map((subjectType) => (
           <div
-            key={type.value}
+            key={subjectType}
             className={cn(
               "flex items-center px-2 py-1",
-              type.value === "patient" && "rounded-l-md",
-              type.value === "encounter" && "rounded-r-md",
+              subjectType === "patient" && "rounded-l-md",
+              subjectType === "encounter" && "rounded-r-md",
             )}
           >
             <RadioGroupItem
-              value={type.value}
-              id={`subject-type-${type.value}`}
+              value={subjectType}
+              id={`subject-type-${subjectType}`}
             />
             <Label
-              htmlFor={`subject-type-${type.value}`}
+              htmlFor={`subject-type-${subjectType}`}
               className="text-sm mx-1 font-normal text-gray-950"
             >
-              {t(type.label)}
+              {t(subjectType)}
             </Label>
           </div>
         ))}
@@ -141,17 +140,17 @@ function SubjectTypeSelector({
 }
 
 function OrganizationSelector({
-  slug,
+  id,
   organizations,
   selection,
 }: {
-  slug?: string;
+  id?: string;
   organizations?: OrganizationResponse;
   selection: QuestionnairePropertiesProps["organizationSelection"];
 }) {
   const { t } = useTranslation();
 
-  if (slug) {
+  if (id) {
     return (
       <>
         <div className="flex flex-wrap gap-2 mb-2">
@@ -170,7 +169,7 @@ function OrganizationSelector({
           )}
         </div>
         <ManageQuestionnaireOrganizationsSheet
-          questionnaireSlug={slug}
+          questionnaireId={id}
           trigger={
             <Button variant="outline" className="w-full justify-start">
               <Building className="mr-2 size-4" />
@@ -231,7 +230,7 @@ function OrganizationSelector({
 export function QuestionnaireProperties({
   form,
   updateQuestionnaireField,
-  slug,
+  id,
   organizations,
   organizationSelection,
 }: QuestionnairePropertiesProps) {
@@ -260,12 +259,12 @@ export function QuestionnaireProperties({
             {t("organizations")} <span className="text-red-500">*</span>
           </Label>
           <OrganizationSelector
-            slug={slug}
+            id={id}
             organizations={organizations}
             selection={organizationSelection}
           />
         </div>
-        {slug && (
+        {id && (
           <CloneQuestionnaireSheet
             form={form}
             trigger={

@@ -159,7 +159,7 @@ const RenderCard = ({
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      navigate(`/admin/valuesets/${valueset.slug}/edit`)
+                      navigate(`/admin/valuesets/${valueset.id}/edit`)
                     }
                     className="hover:bg-primary/5"
                   >
@@ -270,7 +270,7 @@ const RenderTable = ({
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      navigate(`/admin/valuesets/${valueset.slug}/edit`)
+                      navigate(`/admin/valuesets/${valueset.id}/edit`)
                     }
                   >
                     {valueset.is_system_defined ? (

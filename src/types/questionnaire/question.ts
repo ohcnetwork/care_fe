@@ -1,24 +1,34 @@
 import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
 
 import { Code } from "@/types/base/code/code";
+import { ValueSetConfig } from "@/types/valueSet/valueSet";
 
-export type QuestionType =
-  | "group"
-  | "display"
-  | "boolean"
-  | "decimal"
-  | "integer"
-  | "date"
-  | "dateTime"
-  | "time"
-  | "string"
-  | "text"
-  | "url"
-  | "choice"
-  | "quantity"
-  | "structured";
+/** Runtime source of truth for `QuestionType` — validation (e.g. the builder
+ *  import flow) checks membership against this array. */
+export const QUESTION_TYPES = [
+  "group",
+  "display",
+  "boolean",
+  "decimal",
+  "integer",
+  "date",
+  "dateTime",
+  "time",
+  "string",
+  "text",
+  "url",
+  "choice",
+  "quantity",
+  "structured",
+] as const;
 
-export const SUPPORTED_QUESTION_TYPES = [
+export type QuestionType = (typeof QUESTION_TYPES)[number];
+
+export const SUPPORTED_QUESTION_TYPES: {
+  name: string;
+  value: QuestionType;
+  description: string;
+}[] = [
   {
     name: "Group",
     value: "group",
@@ -156,7 +166,7 @@ export interface Question {
   max_length?: number;
   answer_constraint?: string;
   answer_option?: AnswerOption[];
-  answer_value_set?: string;
+  answer_value_set?: ValueSetConfig;
   answer_unit?: Code;
   is_observation?: boolean;
   unit?: Code;

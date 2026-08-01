@@ -40,7 +40,7 @@ import organizationApi from "@/types/organization/organizationApi";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface Props {
-  questionnaireSlug: string;
+  questionnaireId: string;
   trigger?: React.ReactNode;
 }
 
@@ -79,6 +79,9 @@ export function OrgSelector({
 
   const triggerButton = (
     <Button
+      // OrgSelector renders inside host <form>s (e.g. the questionnaire
+      // detail page) — an untyped button there would submit the form.
+      type="button"
       variant="outline"
       className={cn(
         "w-full justify-start text-left font-normal",
@@ -174,7 +177,7 @@ export function OrgSelector({
 }
 
 export default function ManageQuestionnaireOrganizationsSheet({
-  questionnaireSlug,
+  questionnaireId,
   trigger,
 }: Props) {
   const queryClient = useQueryClient();
@@ -187,9 +190,9 @@ export default function ManageQuestionnaireOrganizationsSheet({
   const isMobile = useBreakpoints({ default: true, sm: false });
 
   const { data: organizations, isLoading } = useQuery({
-    queryKey: ["questionnaire", questionnaireSlug, "organizations"],
+    queryKey: ["questionnaire", questionnaireId, "organizations"],
     queryFn: query(questionnaireApi.getOrganizations, {
-      pathParams: { slug: questionnaireSlug },
+      pathParams: { id: questionnaireId },
     }),
     enabled: open,
   });
@@ -208,11 +211,11 @@ export default function ManageQuestionnaireOrganizationsSheet({
 
   const { mutate: setOrganizations, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.setOrganizations, {
-      pathParams: { slug: questionnaireSlug },
+      pathParams: { id: questionnaireId },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["questionnaire", questionnaireSlug, "organizations"],
+        queryKey: ["questionnaire", questionnaireId, "organizations"],
       });
       toast.success(t("organizations_updated_successfully"));
       setOpen(false);

@@ -103,12 +103,12 @@ const consultationRoutes: AppRoutes = {
       />
     ),
 
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":
-    ({ facilityId, encounterId, slug, patientId }) => (
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId":
+    ({ facilityId, encounterId, questionnaireId, patientId }) => (
       <EncounterQuestionnaire
         facilityId={facilityId}
         encounterId={encounterId}
-        questionnaireSlug={slug}
+        questionnaireId={questionnaireId}
         patientId={patientId}
         subjectType="encounter"
       />
@@ -138,7 +138,7 @@ const consultationRoutes: AppRoutes = {
     <EncounterQuestionnaire
       facilityId={facilityId}
       patientId={patientId}
-      questionnaireSlug="encounter"
+      questionnaireId="encounter"
       subjectType="encounter"
     />
   ),

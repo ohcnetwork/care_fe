@@ -113,7 +113,7 @@ import ValueSetSelect from "./ValueSetSelect";
 import { scrollToQuestion } from "./utils";
 
 interface QuestionnaireEditorProps {
-  slug?: string;
+  id?: string;
 }
 interface Organization {
   id: string;
@@ -244,9 +244,7 @@ function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
   return null;
 }
 
-export default function QuestionnaireEditor({
-  slug,
-}: QuestionnaireEditorProps) {
+export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
@@ -321,19 +319,19 @@ export default function QuestionnaireEditor({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["questionnaireDetail", slug],
+    queryKey: ["questionnaireDetail", id],
     queryFn: query(questionnaireApi.get, {
-      pathParams: { slug: slug! },
+      pathParams: { id: id! },
     }),
-    enabled: !!slug,
+    enabled: !!id,
   });
 
   const { data: organizations } = useQuery({
-    queryKey: ["questionnaire", slug, "organizations"],
+    queryKey: ["questionnaire", id, "organizations"],
     queryFn: query(questionnaireApi.getOrganizations, {
-      pathParams: { slug: slug! },
+      pathParams: { id: id! },
     }),
-    enabled: !!slug,
+    enabled: !!id,
   });
 
   const {
@@ -356,9 +354,9 @@ export default function QuestionnaireEditor({
     onSuccess: (data: QuestionnaireRead) => {
       toast.success(t("questionnaire_created_successfully"));
       queryClient.invalidateQueries({
-        queryKey: ["questionnaireDetail", data.slug],
+        queryKey: ["questionnaireDetail", data.id],
       });
-      navigate(`/admin/questionnaire/${data.slug}/edit`);
+      navigate(`/admin/questionnaire/${data.id}/edit`);
     },
     onError: (error) =>
       handleOnErrors(error, t("failed_to_create_questionnaire")),
@@ -366,14 +364,14 @@ export default function QuestionnaireEditor({
 
   const { mutate: updateQuestionnaire, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.update, {
-      pathParams: { slug: slug! },
+      pathParams: { id: id! },
       silent: true,
     }),
     onSuccess: (data: QuestionnaireRead) => {
       toast.success(t("questionnaire_updated_successfully"));
-      navigate(`/admin/questionnaire/${data.slug}/edit`);
+      navigate(`/admin/questionnaire/${data.id}/edit`);
       queryClient.invalidateQueries({
-        queryKey: ["questionnaireDetail", data.slug],
+        queryKey: ["questionnaireDetail", data.id],
       });
     },
     onError: (error) =>
@@ -434,7 +432,7 @@ export default function QuestionnaireEditor({
 
   const [questionnaire, setQuestionnaire] = useState<QuestionnaireRead | null>(
     () => {
-      if (!slug) {
+      if (!id) {
         return {
           id: "",
           title: "",
@@ -544,7 +542,7 @@ export default function QuestionnaireEditor({
     }, 100);
   };
 
-  if (slug && isLoading) return <Loading />;
+  if (id && isLoading) return <Loading />;
 
   if (error) {
     return (
@@ -608,7 +606,7 @@ export default function QuestionnaireEditor({
   };
 
   const validateOrganizations = (): boolean => {
-    if (slug) {
+    if (id) {
       if (!organizations?.results || organizations.results.length === 0) {
         setOrgError(t("organization_selection_required"));
         return false;
@@ -719,7 +717,7 @@ export default function QuestionnaireEditor({
       return;
     }
 
-    if (slug) {
+    if (id) {
       updateQuestionnaire({
         ...form.getValues(),
         version: String(questionnaire.version), //TODO: remove when backend is fixed
@@ -874,7 +872,7 @@ export default function QuestionnaireEditor({
       <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">
-            {slug
+            {id
               ? t("edit") + " " + form.watch("title")
               : t("create_questionnaire")}
           </h1>
@@ -889,13 +887,13 @@ export default function QuestionnaireEditor({
           >
             {t("cancel")}
           </Button>
-          {slug && (
+          {id && (
             <Button variant="outline" onClick={handleDownload}>
               <CareIcon icon="l-import" className="mr-1 size-4" />
               {t("download")}
             </Button>
           )}
-          {!slug && (
+          {!id && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" disabled={isCreating || isUpdating}>
@@ -921,7 +919,7 @@ export default function QuestionnaireEditor({
             disabled={!isDirty || isCreating || isUpdating}
           >
             <CareIcon icon="l-save" className="mr-2 size-4" />
-            {slug ? t("save") : t("create")}
+            {id ? t("save") : t("create")}
           </Button>
         </div>
       </div>
@@ -1013,7 +1011,7 @@ export default function QuestionnaireEditor({
                 <QuestionnaireProperties
                   form={form}
                   updateQuestionnaireField={updateQuestionnaireField}
-                  slug={slug}
+                  id={id}
                   organizations={organizations}
                   organizationSelection={{
                     selectedOrgs: selectedOrgs,
@@ -1258,7 +1256,7 @@ export default function QuestionnaireEditor({
               <QuestionnaireProperties
                 form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
-                slug={slug}
+                id={id}
                 organizations={organizations}
                 organizationSelection={{
                   selectedOrgs: selectedOrgs,
@@ -1295,7 +1293,7 @@ export default function QuestionnaireEditor({
             </CardHeader>
             <CardContent>
               <QuestionnaireForm
-                questionnaireSlug={slug}
+                questionnaireId={id}
                 patientId="preview"
                 subjectType={form.watch("subject_type")}
                 encounterId="preview"
@@ -2544,7 +2542,8 @@ function QuestionEditor({
                         onValueChange={(val: string) =>
                           updateField(
                             "answer_value_set",
-                            val === "custom" ? undefined : "valueset",
+                            // Empty config marks "valueset mode, none picked yet".
+                            val === "custom" ? undefined : {},
                             {
                               answer_option: [],
                             },
@@ -2777,11 +2776,7 @@ function QuestionEditor({
                       onValueSetChange={(val) =>
                         updateField("answer_value_set", val)
                       }
-                      value={
-                        question.answer_value_set === "valueset"
-                          ? ""
-                          : (question.answer_value_set ?? "")
-                      }
+                      value={question.answer_value_set}
                     />
                   </CardContent>
                 )}

@@ -71,7 +71,7 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
       silent: true,
     }),
     onSuccess: async (data: QuestionnaireRead) => {
-      navigate(`/admin/questionnaire/${data.slug}/edit`);
+      navigate(`/admin/questionnaire/${data.id}/edit`);
       setOpen(false);
     },
     onError: (error) => {

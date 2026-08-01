@@ -1,6 +1,10 @@
 import { useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { QuestionnaireBuilderPage } from "@/components/QuestionnaireV2/builder/QuestionnaireBuilderPage";
+import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
+import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
+import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
 
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
@@ -250,6 +254,49 @@ const getRoutes = (facilityId: string) => ({
   "/tag_config": () => <TagConfigList facilityId={facilityId} />,
   "/tag_config/:tagId": ({ tagId }: { tagId: string }) => (
     <TagConfigView facilityId={facilityId} tagId={tagId} />
+  ),
+  // NOTE: keep "/questionnaires" registered before the catch-all "*" route.
+  "/questionnaires": () => (
+    <QuestionnaireListPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+    />
+  ),
+  // Must be registered before "/questionnaires/:id" — raviger matches routes
+  // in object order, and "new" would otherwise be captured as an :id.
+  "/questionnaires/new": () => (
+    <QuestionnaireCreatePage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+    />
+  ),
+  // Must be registered before "/questionnaires/:id" for the same reason —
+  // otherwise "edit" would be captured as an :id.
+  "/questionnaires/:id/edit": ({ id }: { id: string }) => (
+    <QuestionnaireBuilderPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+      id={id}
+    />
+  ),
+  "/questionnaires/:id": ({ id }: { id: string }) => (
+    <QuestionnaireDetailPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+      id={id}
+    />
   ),
   "*": () => <ErrorPage />,
 });

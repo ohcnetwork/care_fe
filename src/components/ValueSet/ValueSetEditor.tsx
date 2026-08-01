@@ -18,7 +18,7 @@ import query from "@/Utils/request/query";
 import { ValueSetForm } from "./ValueSetForm";
 
 interface ValueSetEditorProps {
-  slug?: string; // If provided, we're editing an existing valueset
+  id?: string; // If provided, we're editing an existing valueset
   onSuccess?: (data: ValueSetRead) => void;
 }
 
@@ -38,16 +38,16 @@ function normalizeValueSetPayload(data: ValueSetBase): ValueSetBase {
   };
 }
 
-export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
+export function ValueSetEditor({ id, onSuccess }: ValueSetEditorProps) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   // Fetch existing valueset if we're editing
   const { data: existingValueset, isLoading } = useQuery({
-    queryKey: ["valueset", slug],
+    queryKey: ["valueset", id],
     queryFn: query(valueSetApi.get, {
-      pathParams: { slug: slug! },
+      pathParams: { id: id! },
     }),
-    enabled: !!slug,
+    enabled: !!id,
   });
 
   // Create mutation
@@ -63,11 +63,11 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: mutate(valueSetApi.update, {
-      pathParams: { slug: slug! },
+      pathParams: { id: id! },
     }),
     onSuccess: (data: ValueSetRead) => {
       toast.success(t("valueset_updated"));
-      queryClient.removeQueries({ queryKey: ["valueset", slug] });
+      queryClient.removeQueries({ queryKey: ["valueset", id] });
       onSuccess?.(data);
       navigate(`/admin/valuesets`);
     },
@@ -76,14 +76,18 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
   const handleSubmit = (data: ValueSetBase) => {
     const payload = normalizeValueSetPayload(data);
 
-    if (slug && existingValueset) {
+    if (id && existingValueset) {
       const updateData: ValueSetUpdate = {
         ...payload,
         id: existingValueset.id,
       };
       updateMutation.mutate(updateData);
     } else {
-      const createData: ValueSetCreate = payload;
+      const createData: ValueSetCreate = {
+        ...payload,
+        auth_context: "instance",
+        inherited: false,
+      };
       createMutation.mutate(createData);
     }
   };
@@ -91,14 +95,14 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">
-        {slug
+        {id
           ? existingValueset?.is_system_defined
             ? t("preview_value_set")
             : t("edit_value_set")
           : t("create_new_value_set")}
       </h1>
 
-      {slug && isLoading ? (
+      {id && isLoading ? (
         <FormSkeleton rows={10} />
       ) : (
         <ValueSetForm
