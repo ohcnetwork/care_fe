@@ -96,21 +96,15 @@ const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (
       <QuestionnaireFillPage
-        facilityId={facilityId}
-        encounterId={encounterId}
-        patientId={patientId}
-        subjectType="encounter"
+        subject={{ type: "encounter", facilityId, patientId, encounterId }}
       />
     ),
 
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId":
     ({ facilityId, encounterId, questionnaireId, patientId }) => (
       <QuestionnaireFillPage
-        facilityId={facilityId}
-        encounterId={encounterId}
+        subject={{ type: "encounter", facilityId, patientId, encounterId }}
         questionnaireId={questionnaireId}
-        patientId={patientId}
-        subjectType="encounter"
       />
     ),
 
@@ -131,15 +125,15 @@ const consultationRoutes: AppRoutes = {
       );
     return acc;
   }, {}),
+  // Encounter CREATION: there is no encounter yet, so the subject is the
+  // patient; the fixed "encounter" questionnaire is what makes one.
   "/facility/:facilityId/patient/:patientId/consultation": ({
     facilityId,
     patientId,
   }) => (
     <QuestionnaireFillPage
-      facilityId={facilityId}
-      patientId={patientId}
+      subject={{ type: "patient", facilityId, patientId }}
       questionnaireId="encounter"
-      subjectType="encounter"
     />
   ),
   "/facility/:facilityId/patient/:patientId/questionnaire": ({
@@ -147,9 +141,7 @@ const consultationRoutes: AppRoutes = {
     patientId,
   }) => (
     <QuestionnaireFillPage
-      facilityId={facilityId}
-      patientId={patientId}
-      subjectType="patient"
+      subject={{ type: "patient", facilityId, patientId }}
     />
   ),
   // The patient-subject picker needs an id route to land on — the legacy
@@ -161,23 +153,20 @@ const consultationRoutes: AppRoutes = {
     questionnaireId,
   }) => (
     <QuestionnaireFillPage
-      facilityId={facilityId}
-      patientId={patientId}
+      subject={{ type: "patient", facilityId, patientId }}
       questionnaireId={questionnaireId}
-      subjectType="patient"
     />
   ),
   "/patient/:patientId/questionnaire": ({ patientId }) => (
-    <QuestionnaireFillPage patientId={patientId} subjectType="patient" />
+    <QuestionnaireFillPage subject={{ type: "patient", patientId }} />
   ),
   "/patient/:patientId/questionnaire/:questionnaireId": ({
     patientId,
     questionnaireId,
   }) => (
     <QuestionnaireFillPage
-      patientId={patientId}
+      subject={{ type: "patient", patientId }}
       questionnaireId={questionnaireId}
-      subjectType="patient"
     />
   ),
 };

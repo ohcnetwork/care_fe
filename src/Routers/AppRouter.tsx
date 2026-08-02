@@ -55,6 +55,8 @@ const PATHS_WITHOUT_SIDEBAR = [
   /^\/facility\/[^/]+\/patient\/[^/]+\/questionnaire(\/[^/]+)?$/,
   /^\/facility\/[^/]+\/patient\/[^/]+\/consultation$/,
   /^\/patient\/[^/]+\/questionnaire(\/[^/]+)?$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/questionnaire(\/[^/]+)?$/,
+  /^\/facility\/[^/]+\/settings\/devices\/[^/]+\/questionnaire(\/[^/]+)?$/,
   // Questionnaire studio (fullscreen builder) routes
   /^\/facility\/[^/]+\/settings\/questionnaires\/[^/]+\/edit$/,
   /^\/admin\/questionnaires\/[^/]+\/edit$/,

@@ -2681,6 +2681,7 @@
   "fill_draft_resume_prompt": "You have an unsaved entry from {{time}}. Resume where you left off?",
   "fill_draft_structured_skipped": "Structured answers (medications, symptoms, files…) aren't covered by local drafts — please re-check those sections.",
   "fill_my_details": "Fill My Details",
+  "fill_questionnaire": "Fill questionnaire",
   "filler_order": "Filler Order",
   "filter": "Filter",
   "filter_bed_availability_by_ward_and_status": "Filter bed availability by ward and status",

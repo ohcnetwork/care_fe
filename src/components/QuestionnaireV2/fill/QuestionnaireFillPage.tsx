@@ -47,46 +47,46 @@ import {
 } from "./draft/fillDraftStore";
 import { useFillSessionAutosave } from "./draft/useFillAutosave";
 import type { FillFormEntry } from "./formSession";
+import type { FillSubject } from "./subject";
+import {
+  exitTargetOf,
+  isPatientBound,
+  rendererSubjectOf,
+  subjectKeyOf,
+} from "./subject";
 import { useSubmitFillSession } from "./submit/useSubmitQuestionnaire";
 
 interface FillPageProps {
-  facilityId?: string;
-  patientId: string;
-  encounterId?: string;
+  /** What this fill is FOR — the union carries exactly the ids the
+   *  mounting route can supply (see `fill/subject.ts`). */
+  subject: FillSubject;
   questionnaireId?: string;
-  subjectType?: string;
-}
-
-function exitTargetFor({
-  facilityId,
-  patientId,
-  encounterId,
-}: FillPageProps): string {
-  if (encounterId && facilityId) {
-    return `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`;
-  }
-  if (facilityId) {
-    return `/facility/${facilityId}/patient/${patientId}/updates`;
-  }
-  return `/patient/${patientId}/updates`;
 }
 
 /**
- * The v2 fill experience — the encounter/patient questionnaire data-entry
- * page (successor to EncounterQuestionnaire + the legacy
- * QuestionnaireForm). Two tabs per the reference: the questionnaire
- * canvas (with local autosave) and the patient's clinical history.
+ * The v2 fill experience — the questionnaire data-entry page (successor to
+ * EncounterQuestionnaire + the legacy QuestionnaireForm). Patient-bound
+ * subjects get two tabs per the reference: the questionnaire canvas (with
+ * local autosave) and the patient's clinical history; resource subjects
+ * (location/device/facility) get the canvas alone, since none of the
+ * clinical context exists for them.
  *
  * A session may hold SEVERAL questionnaires (the legacy "add another form
  * to this submission" capability): each gets its own provider and store,
  * the host keeps the registry, and autosave/submit operate on the list.
  */
-export default function QuestionnaireFillPage(props: FillPageProps) {
+export default function QuestionnaireFillPage({
+  subject,
+  questionnaireId,
+}: FillPageProps) {
   const { t } = useTranslation();
-  const { facilityId, patientId, encounterId, questionnaireId, subjectType } =
-    props;
-  const [{ continue_draft: continueDraftId }] = useQueryParams();
+  const [{ continue_draft: continueDraftParam }] = useQueryParams();
   const user = useAuthUser();
+
+  const patientBound = isPatientBound(subject) ? subject : undefined;
+  // Server drafts are patient/encounter records — a resource subject can
+  // only have local drafts, so the query param is ignored there.
+  const continueDraftId = patientBound ? continueDraftParam : undefined;
 
   useEffect(() => {
     sweepExpiredFillDrafts();
@@ -108,20 +108,27 @@ export default function QuestionnaireFillPage(props: FillPageProps) {
     enabled: !!questionnaireId && !fixedQuestionnaire,
   });
 
+  const encounterId =
+    subject.type === "encounter" ? subject.encounterId : undefined;
   const { data: encounter, isLoading: isEncounterLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId ?? "" },
-      queryParams: { facility: facilityId ?? "" },
+      queryParams: {
+        facility: subject.type === "encounter" ? subject.facilityId : "",
+      },
     }),
     enabled: !!encounterId,
   });
 
-  // Patient-subject fills have no encounter to borrow the patient from.
+  // Patient-subject fills have no encounter to borrow the patient from;
+  // resource subjects have no patient at all.
   const { data: fetchedPatient } = useQuery({
-    queryKey: ["patient", patientId],
-    queryFn: query(patientApi.get, { pathParams: { id: patientId } }),
-    enabled: !encounterId,
+    queryKey: ["patient", patientBound?.patientId],
+    queryFn: query(patientApi.get, {
+      pathParams: { id: patientBound?.patientId ?? "" },
+    }),
+    enabled: subject.type === "patient",
   });
 
   const { data: serverDraft, isFetching: isServerDraftLoading } = useQuery({
@@ -165,7 +172,7 @@ export default function QuestionnaireFillPage(props: FillPageProps) {
   const scope: FillDraftScope | undefined = questionnaire
     ? {
         userId: user.id,
-        subjectKey: encounterId ?? patientId,
+        subjectKey: subjectKeyOf(subject),
         entryQuestionnaireId: questionnaire.id,
       }
     : undefined;
@@ -185,7 +192,7 @@ export default function QuestionnaireFillPage(props: FillPageProps) {
     [scopeKey, continueDraftId],
   );
 
-  const exitTarget = exitTargetFor(props);
+  const exitTarget = exitTargetOf(subject);
 
   if (!questionnaireId) {
     return (
@@ -194,7 +201,10 @@ export default function QuestionnaireFillPage(props: FillPageProps) {
           <h2 className="text-lg font-semibold text-gray-900">
             {t("select_questionnaire_to_fill")}
           </h2>
-          <QuestionnaireSearch subjectType={subjectType} />
+          {/* Default onSelect navigates to `questionnaire/{id}` relative to
+              the current path, which lands on this mount's :questionnaireId
+              route for every subject. */}
+          <QuestionnaireSearch subjectType={subject.type} />
         </div>
       </FillShell>
     );
@@ -243,10 +253,7 @@ export default function QuestionnaireFillPage(props: FillPageProps) {
       questionnaire={questionnaire}
       patient={patient}
       encounter={encounter}
-      facilityId={facilityId}
-      patientId={patientId}
-      encounterId={encounterId}
-      subjectType={subjectType}
+      subject={subject}
       scope={scope}
       localDraft={localDraft}
       serverDraftResponses={
@@ -295,10 +302,7 @@ interface FillPageBodyProps {
   questionnaire: QuestionnaireRead;
   patient?: PatientRead;
   encounter?: EncounterRead;
-  facilityId?: string;
-  patientId: string;
-  encounterId?: string;
-  subjectType?: string;
+  subject: FillSubject;
   scope: FillDraftScope | undefined;
   localDraft: LoadedFillDraft | undefined;
   /** Resumed server draft, seeded into the primary form at creation. */
@@ -311,10 +315,7 @@ function FillPageBody({
   questionnaire,
   patient,
   encounter,
-  facilityId,
-  patientId,
-  encounterId,
-  subjectType,
+  subject,
   scope,
   localDraft,
   serverDraftResponses,
@@ -415,9 +416,14 @@ function FillPageBody({
   // section into it (it must render inside that form's provider).
   const [outlineHost, setOutlineHost] = useState<HTMLElement | null>(null);
 
-  const subject = useMemo(
-    () => ({ patientId, encounterId, facilityId }),
-    [patientId, encounterId, facilityId],
+  // The renderer's flat subject view. Memoized on its PRIMITIVES: the
+  // union arrives as a fresh object literal from the route element on
+  // every render, so keying on the object itself would never hit.
+  const { patientId, encounterId, facilityId, resourceId } =
+    rendererSubjectOf(subject);
+  const rendererSubject = useMemo(
+    () => ({ patientId, encounterId, facilityId, resourceId }),
+    [patientId, encounterId, facilityId, resourceId],
   );
 
   // Local autosave stands down while resuming a SERVER draft — the server
@@ -460,19 +466,33 @@ function FillPageBody({
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="flex shrink-0 items-center justify-between gap-2 px-4 pt-3 md:px-6">
-          <TabsList>
-            <TabsTrigger value="questionnaire">
+          {/* The clinical history tab exists only where there IS a patient
+              — a location/device/facility fill gets the plain title in the
+              same slot, draft badge included. */}
+          {patientId ? (
+            <TabsList>
+              <TabsTrigger value="questionnaire">
+                {t("questionnaire_one")}
+                {autosave.dirty && (
+                  <Badge className="ml-2 bg-indigo-100 text-indigo-900">
+                    {t("draft")}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="history">
+                {t("patient_clinical_history")}
+              </TabsTrigger>
+            </TabsList>
+          ) : (
+            <div className="flex items-center gap-2 py-1.5 text-sm font-medium text-gray-900">
               {t("questionnaire_one")}
               {autosave.dirty && (
-                <Badge className="ml-2 bg-indigo-100 text-indigo-900">
+                <Badge className="bg-indigo-100 text-indigo-900">
                   {t("draft")}
                 </Badge>
               )}
-            </TabsTrigger>
-            <TabsTrigger value="history">
-              {t("patient_clinical_history")}
-            </TabsTrigger>
-          </TabsList>
+            </div>
+          )}
           <Button
             type="button"
             variant="outline"
@@ -525,7 +545,7 @@ function FillPageBody({
                   <FillFormSection
                     key={form.key}
                     form={form}
-                    subject={subject}
+                    subject={rendererSubject}
                     outlineHost={outlineHost}
                     outlineLabel={
                       forms.length > 1 ? form.questionnaire.title : undefined
@@ -539,7 +559,7 @@ function FillPageBody({
                 {!continueDraftId && (
                   <div className="mx-auto flex w-full max-w-3xl justify-center">
                     <QuestionnaireSearch
-                      subjectType={subjectType}
+                      subjectType={subject.type}
                       onSelect={(selected) => addQuestionnaire(selected)}
                       // The default trigger is a `role="combobox"` button,
                       // and combobox takes no name from its contents — it
@@ -563,15 +583,20 @@ function FillPageBody({
           </div>
         </TabsContent>
 
-        <TabsContent
-          value="history"
-          forceMount={historyMounted || undefined}
-          className="mt-3 min-h-0 flex-1 overflow-y-auto px-4 pb-6 data-[state=inactive]:hidden md:px-6"
-        >
-          {historyMounted && (
-            <ClinicalHistoryTab patientId={patientId} facilityId={facilityId} />
-          )}
-        </TabsContent>
+        {patientId && (
+          <TabsContent
+            value="history"
+            forceMount={historyMounted || undefined}
+            className="mt-3 min-h-0 flex-1 overflow-y-auto px-4 pb-6 data-[state=inactive]:hidden md:px-6"
+          >
+            {historyMounted && (
+              <ClinicalHistoryTab
+                patientId={patientId}
+                facilityId={facilityId}
+              />
+            )}
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

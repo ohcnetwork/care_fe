@@ -8,6 +8,13 @@ import {
 } from "@/components/QuestionnaireV2/structured/registry";
 import type { StructuredBatchEntry } from "@/components/QuestionnaireV2/structured/types";
 
+import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
+import {
+  isPatientBound,
+  rendererSubjectOf,
+  subjectResourceId,
+} from "@/components/QuestionnaireV2/fill/subject";
+
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
@@ -17,11 +24,7 @@ import { serializeResponseValues } from "./serializeValues";
 export interface ComposeBatchArgs {
   questionnaire: QuestionnaireRead;
   responses: Record<string, QuestionnaireResponse>;
-  subject: {
-    patientId?: string;
-    encounterId?: string;
-    facilityId?: string;
-  };
+  subject: FillSubject;
   /** Resuming a server draft — appends the completion PUT. */
   continueDraftId?: string;
 }
@@ -30,8 +33,11 @@ export interface ComposeBatchArgs {
  * Assemble the one-batch submission (legacy handleSubmit semantics, from
  * the v2 store): structured answers become raw domain-API requests via
  * each type's `buildRequests` (patient-bound fills only — the legacy
- * gate), plain answers POST to `/questionnaire/{id}/submit/`, and a
- * resumed server draft gets its completion PUT. Only questions currently
+ * gate), plain answers POST to `/questionnaire/{id}/submit/` for
+ * patient-bound subjects and `/questionnaire/{id}/submit_resource/` for
+ * resource subjects (location/device/facility, which have no patient to
+ * record against), and a resumed server draft gets its completion PUT
+ * (patient-bound only). Only questions currently
  * enabled by enable_when contribute — same resolution rendering uses.
  *
  * Pure with respect to UI state: everything it needs arrives as
@@ -49,7 +55,10 @@ export async function composeBatch({
   subject,
   continueDraftId,
 }: ComposeBatchArgs): Promise<StructuredBatchEntry[]> {
-  const { patientId, encounterId, facilityId } = subject;
+  // Narrowed once, up front: the structured leg and the draft PUT both
+  // need the patient ids, and a closure cannot carry the narrowing.
+  const patientBound = isPatientBound(subject) ? subject : undefined;
+  const renderCtx = rendererSubjectOf(subject);
   const linkIndex = buildLinkIndex(questionnaire.questions);
   const isEnabled = (question: Question) =>
     isQuestionEnabledInState(question, responses, linkIndex);
@@ -70,15 +79,15 @@ export async function composeBatch({
 
       if (question.type === "structured" && question.structured_type) {
         // The whole structured leg only runs for a patient-bound fill.
-        if (!patientId) continue;
+        if (!patientBound) continue;
         const type = question.structured_type;
         const data = structuredDataOf(type, response);
         if (data.length === 0) continue;
         structuredWork.push(
           structuredDefinitionFor(type).buildRequests(data, {
-            patientId,
-            encounterId,
-            facilityId,
+            patientId: patientBound.patientId,
+            encounterId: renderCtx.encounterId,
+            facilityId: renderCtx.facilityId,
             questionId: question.id,
           }),
         );
@@ -102,26 +111,40 @@ export async function composeBatch({
   }
 
   if (answeredLeaves.length > 0) {
-    requests.push({
-      url: `/api/v1/questionnaire/${questionnaire.id}/submit/`,
-      method: "POST",
-      reference_id: questionnaire.id,
-      body: {
-        resource_id: encounterId ? encounterId : patientId,
-        encounter: encounterId,
-        patient: patientId,
-        results: answeredLeaves.map((response) => ({
-          question_id: response.question_id,
-          values: serializeResponseValues(response.values),
-          note: response.note,
-          body_site: response.body_site,
-          method: response.method,
-        })),
-      },
-    });
+    const results = answeredLeaves.map((response) => ({
+      question_id: response.question_id,
+      values: serializeResponseValues(response.values),
+      note: response.note,
+      body_site: response.body_site,
+      method: response.method,
+    }));
+    requests.push(
+      patientBound
+        ? {
+            url: `/api/v1/questionnaire/${questionnaire.id}/submit/`,
+            method: "POST",
+            reference_id: questionnaire.id,
+            body: {
+              resource_id: subjectResourceId(patientBound),
+              encounter: renderCtx.encounterId,
+              patient: patientBound.patientId,
+              results,
+            },
+          }
+        : {
+            // Resource subjects have neither patient nor encounter — the
+            // backend records the response against `resource_id` alone.
+            url: `/api/v1/questionnaire/${questionnaire.id}/submit_resource/`,
+            method: "POST",
+            reference_id: questionnaire.id,
+            body: { resource_id: subjectResourceId(subject), results },
+          },
+    );
   }
 
-  if (continueDraftId) {
+  // Server drafts are patient/encounter form_submission records — there is
+  // no resource-subject equivalent to complete.
+  if (continueDraftId && patientBound) {
     // Shape-compatible with the legacy draft dump: restore reads
     // response_dump.questionnaireResponses.{questionnaire,responses}.
     requests.push({
@@ -129,8 +152,8 @@ export async function composeBatch({
       method: "PUT",
       reference_id: `form_submission_${continueDraftId}`,
       body: {
-        patient: patientId,
-        encounter: encounterId,
+        patient: patientBound.patientId,
+        encounter: renderCtx.encounterId,
         status: "submitted",
         response_dump: {
           questionnaireResponses: {

@@ -11,6 +11,7 @@ import {
 
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
+import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
 
 import batchApi from "@/types/base/batch/batchApi";
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -22,17 +23,11 @@ import type { ServerValidationError } from "./mapBatchErrors";
 import { mapBatchErrors } from "./mapBatchErrors";
 import { collectStructuredErrors } from "./validateStructured";
 
-export interface SubmitSubject {
-  patientId?: string;
-  encounterId?: string;
-  facilityId?: string;
-}
-
 interface UseSubmitFillSessionArgs {
   /** Every questionnaire in the session, primary first. */
   forms: FillFormEntry[];
   getStore: (key: string) => FormStore | undefined;
-  subject: SubmitSubject;
+  subject: FillSubject;
   continueDraftId?: string;
   onSuccess: () => void;
 }

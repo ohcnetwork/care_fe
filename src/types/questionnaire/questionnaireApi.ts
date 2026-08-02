@@ -63,6 +63,24 @@ export default {
       }>;
     }>(),
   },
+  /** Resource subjects (location/device/facility) — no patient, no
+   *  encounter. `care/emr/resources/questionnaire_response/resource_spec.py:
+   *  ResourceQuestionnaireSubmitRequest`. */
+  submitResource: {
+    path: "/api/v1/questionnaire/{id}/submit_resource/",
+    method: HttpMethod.POST,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{
+      resource_id: string;
+      results: Array<{
+        question_id: string;
+        values: unknown[];
+        note?: string;
+        body_site?: string;
+        method?: string;
+      }>;
+    }>(),
+  },
   createV2: {
     path: "/api/v1/questionnaire/",
     method: HttpMethod.POST,
