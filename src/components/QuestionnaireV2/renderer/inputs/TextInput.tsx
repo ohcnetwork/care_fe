@@ -42,7 +42,6 @@ export function TextInput({
     maxLength: question.max_length,
     // Merges the field's own border into the note zone's left border —
     // see QuestionField's outer wrapper for the other half of this pairing.
-    className: "rounded-r-none border-r-0",
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       handleChange(e.target.value),
   };

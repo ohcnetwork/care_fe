@@ -82,13 +82,6 @@ export function QuestionBlock(props: QuestionBlockProps) {
   const inputId = `question-input-${question.id}`;
   const labelId = `question-label-${question.id}`;
 
-  // Chip groups (boolean/choice-with-options) sit directly on the card
-  // background — wrapping them in a full-width bordered box would read as an
-  // empty text input next to the chips.
-  const isChipInput =
-    question.type === "boolean" ||
-    (question.type === "choice" && !!question.answer_option?.length);
-
   // Repeats → one input per value entry (legacy QuestionInput's per-index
   // rendering). Choice handles repeats itself (multi-select chips),
   // structured questions manage their own arrays, and display has no values
@@ -171,13 +164,7 @@ export function QuestionBlock(props: QuestionBlockProps) {
           <div className="space-y-2">
             {Array.from({ length: entryCount }, (_, index) => (
               <div key={index} className="flex items-center gap-2">
-                <div
-                  className={cn(
-                    "min-w-0 flex-1",
-                    !isChipInput &&
-                      "overflow-hidden rounded-md border border-gray-200 bg-white",
-                  )}
-                >
+                <div className="min-w-0 flex-1">
                   <InputComponent
                     question={question}
                     disabled={effectiveDisabled}
@@ -212,17 +199,14 @@ export function QuestionBlock(props: QuestionBlockProps) {
                 <Plus className="size-4" />
                 {t("add_another")}
               </Button>
-              <NoteControl questionId={question.id} variant="standalone" />
+              <NoteControl questionId={question.id} />
             </div>
           </div>
         ) : (
-          <div
-            className={cn(
-              "flex items-stretch",
-              !isChipInput &&
-                "overflow-hidden rounded-md border border-gray-200 bg-white",
-            )}
-          >
+          // Single-border model (reference design): each control keeps its
+          // own border; the note affordance sits behind a slim divider
+          // instead of sharing a second outer frame.
+          <div className="flex items-stretch gap-0.5">
             <div className="min-w-0 flex-1">
               {InputComponent ? (
                 <InputComponent
@@ -238,10 +222,7 @@ export function QuestionBlock(props: QuestionBlockProps) {
               )}
             </div>
             {question.type !== "display" && (
-              <NoteControl
-                questionId={question.id}
-                variant={isChipInput ? "standalone" : "merged"}
-              />
+              <NoteControl questionId={question.id} />
             )}
           </div>
         )}

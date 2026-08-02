@@ -37,9 +37,9 @@ export function TimeInput({
       id={inputId}
       type="time"
       value={value}
-      // rounded-r-none/border-r-0 merge the field's own border into the note
+      // Own full border — the note affordance is a detached icon now.
       // zone's left border — see QuestionField's outer wrapper.
-      className="h-9 rounded-r-none border-r-0 text-sm sm:text-base"
+      className="h-9 text-sm sm:text-base"
       onChange={handleChange}
       disabled={disabled}
     />

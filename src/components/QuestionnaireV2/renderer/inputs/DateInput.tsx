@@ -37,7 +37,7 @@ export function DateInput({
       value={value}
       onChange={handleChange}
       disabled={disabled}
-      buttonClassName="border-r-0 rounded-r-none border-gray-300 shadow-none"
+      buttonClassName="border-gray-300 shadow-none"
     />
   );
 }

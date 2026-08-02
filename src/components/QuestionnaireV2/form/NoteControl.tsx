@@ -12,20 +12,10 @@ import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store
 
 import { useFormRenderer } from "./FormContext";
 
-/** Per-question note popover — same variants and semantics as the old
- *  renderer's NoteAffordance, re-hosted on the form context. */
-export function NoteControl({
-  questionId,
-  variant = "merged",
-}: {
-  questionId: string;
-  /**
-   * "merged": shares the input's bordered frame, separated by a full-height
-   * left rule. "standalone" (chip rows): free-standing rounded button pushed
-   * to the far right behind a short vertical rule.
-   */
-  variant?: "merged" | "standalone";
-}) {
+/** Per-question note popover — the reference design's affordance: a slim
+ *  vertical rule and a free-standing icon button beside the input, never a
+ *  shared frame (that read as a second border around the control). */
+export function NoteControl({ questionId }: { questionId: string }) {
   const { t } = useTranslation();
   const { mode } = useFormRenderer();
   const [response, updateResponse] = useQuestionResponse(questionId);
@@ -39,32 +29,19 @@ export function NoteControl({
 
   return (
     <Popover>
-      {variant === "standalone" ? (
-        <div className="ml-auto flex shrink-0 items-center gap-2 self-center">
-          <span aria-hidden className="h-6 w-px bg-gray-200" />
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              aria-label={t("add_note")}
-              className="relative flex size-10 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-            >
-              <NotebookPen className="size-4" />
-              {noteDot}
-            </button>
-          </PopoverTrigger>
-        </div>
-      ) : (
+      <div className="ml-auto flex shrink-0 items-center gap-1.5 self-center pl-1.5">
+        <span aria-hidden className="h-6 w-px bg-gray-200" />
         <PopoverTrigger asChild>
           <button
             type="button"
             aria-label={t("add_note")}
-            className="relative flex h-10 w-10 shrink-0 items-center justify-center border-l border-gray-200 text-gray-400 hover:text-gray-600"
+            className="relative flex size-9 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600"
           >
             <NotebookPen className="size-4" />
             {noteDot}
           </button>
         </PopoverTrigger>
-      )}
+      </div>
       <PopoverContent align="end" className="w-72">
         <Textarea
           value={response.note ?? ""}

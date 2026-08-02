@@ -130,7 +130,7 @@ export function QuantityInput({
           disabled={disabled}
           aria-label={t("unit")}
           placeholder={t("unit")}
-          className="h-auto justify-between truncate rounded-none border-r-0 border-gray-300 font-normal shadow-none"
+          className="h-auto justify-between truncate rounded-l-none border-gray-300 font-normal shadow-none"
         />
       </div>
     </div>
