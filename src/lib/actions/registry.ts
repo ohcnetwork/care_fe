@@ -71,7 +71,9 @@ function scopeMatches(
 }
 
 /** The descriptors a caller in this scope may use — what crosses the
- *  federation boundary. Never leaks `run`, `schema` or `scope`. */
+ *  federation boundary. Never leaks `run`, `schema` or `scope`, and copies
+ *  the parameter map on the way out: what a plugin receives is its own to
+ *  hold, and mutating it must not reach the registered definition. */
 export function listActions(scope: ActionScope): ActionDescriptor[] {
   const descriptors: ActionDescriptor[] = [];
   for (const definition of actions.values()) {
@@ -79,7 +81,12 @@ export function listActions(scope: ActionScope): ActionDescriptor[] {
     descriptors.push({
       id: definition.id,
       description: definition.description,
-      parameters: definition.parameters,
+      parameters: Object.fromEntries(
+        Object.entries(definition.parameters).map(([name, parameter]) => [
+          name,
+          { ...parameter },
+        ]),
+      ),
     });
   }
   return descriptors;
@@ -97,29 +104,53 @@ export async function invokeAction(
   scope: ActionScope,
 ): Promise<ActionRunResult> {
   const definition = actions.get(id);
-  if (!definition) return { ok: false, error: `Unknown action: ${id}` };
+  if (!definition) {
+    audit(id, scope, "unknown-action");
+    return { ok: false, error: `Unknown action: ${id}` };
+  }
   if (!scopeMatches(definition.scope, scope)) {
+    audit(id, scope, "scope-rejected");
     return { ok: false, error: `Action ${id} is not available in this scope` };
   }
   const parsed = definition.schema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: `Invalid input: ${parsed.error.message}` };
+    audit(id, scope, "schema-rejected");
+    // Issue-by-issue rather than `ZodError.message` (a JSON dump): the
+    // reader is a model correcting its own call.
+    const problems = parsed.error.issues
+      .map((issue) => {
+        const path = issue.path.join(".");
+        return path ? `${path}: ${issue.message}` : issue.message;
+      })
+      .join("; ");
+    return { ok: false, error: `Invalid input: ${problems}` };
   }
-  // Audit stub. Every agent-driven write to clinical state is meant to be
-  // recorded server-side; that endpoint (`POST /api/v1/action_audit/`) is a
-  // deferred follow-up on the plugin-action-registry decision. Until it
-  // exists this is the one place that has to change — and it logs the
-  // action and its scope only, never the values, so a console transcript
-  // carries no record content.
-  console.debug("[actions] invoke", { id, scope });
+  audit(id, scope, "invoked");
   try {
-    return await definition.run(parsed.data);
+    const result = await definition.run(parsed.data);
+    audit(id, scope, result.ok ? "ok" : "failed");
+    return result;
   } catch (error) {
+    audit(id, scope, "threw");
     return {
       ok: false,
       error: error instanceof Error ? error.message : String(error),
     };
   }
+}
+
+/**
+ * Audit stub — every attempt, accepted or rejected, with its outcome.
+ * Agent-driven writes to clinical state are meant to be recorded
+ * server-side; that endpoint (`POST /api/v1/action_audit/`) is a deferred
+ * follow-up on the plugin-action-registry decision, and this is the one
+ * place that has to change when it lands.
+ *
+ * It records the action, the scope and the outcome — never the input or
+ * the result — so a console transcript carries no record content.
+ */
+function audit(id: string, scope: ActionScope, outcome: string) {
+  console.debug("[actions]", outcome, { id, scope });
 }
 
 export function subscribeToActions(listener: () => void): () => void {

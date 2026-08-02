@@ -28,11 +28,17 @@ import {
 } from "@/lib/actions";
 
 import {
+  buildLinkIndex,
+  clearQuestionErrorsInState,
   entryHasContent,
+  isQuestionEnabledInState,
   responsesAtom,
 } from "@/components/QuestionnaireV2/renderer/store";
 
-import type { ResponseValue } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
 import type { FormStore } from "./StoreRegistrar";
@@ -60,6 +66,10 @@ type ListFormsInput = z.infer<typeof listFormsSchema>;
 
 type CoercionResult =
   { ok: true; value: ResponseValue } | { ok: false; error: string };
+
+/** 24-hour "HH:mm", optionally with seconds — what `<input type="time">`
+ *  (and therefore `TimeInput`) round-trips. */
+const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 
 /** Question types an action may write. Everything else — groups, display
  *  blocks, structured questions (which carry request payloads, not
@@ -115,6 +125,20 @@ function coerceResponseValue(
         : { ok: true, value: { type: "dateTime", value } };
     }
 
+    case "time": {
+      // `TimeInput` writes exactly what `<input type="time">` produces, so
+      // the stored shape is the raw "HH:mm" (optionally with seconds)
+      // string — anything else renders empty in the field.
+      const value = String(raw).trim();
+      if (!TIME_PATTERN.test(value)) {
+        return {
+          ok: false,
+          error: `"${value}" is not a time for question "${question.link_id}" (expected 24-hour HH:mm)`,
+        };
+      }
+      return { ok: true, value: { type: "time", value } };
+    }
+
     default:
       return {
         ok: false,
@@ -146,6 +170,17 @@ function coerceChoice(
   const text = String(raw);
   const options = question.answer_option;
   if (!options?.length) {
+    // A value-set-backed choice renders through `ValueSetSelect`, which
+    // reads `values[0].coding` — an uncoded string would show the
+    // clinician an EMPTY field while `forms.list` called it answered and
+    // submit carried no code. Only a coded answer is a real answer here,
+    // and this action has no parameter for one.
+    if (question.answer_value_set) {
+      return {
+        ok: false,
+        error: `Question "${question.link_id}" requires a coded value from a value set; free text is not accepted`,
+      };
+    }
     return { ok: true, value: { type: "string", value: text } };
   }
   const option =
@@ -173,16 +208,32 @@ function coerceChoice(
   };
 }
 
-function findQuestionByLinkId(
+/** The question and every ancestor above it. The ancestors matter because
+ *  `composeBatch` skips a disabled group WITHOUT descending into it — a
+ *  child of a hidden group never reaches the server either, however
+ *  enabled the child's own conditions are. */
+function findQuestionPath(
   questions: Question[],
   linkId: string,
-): Question | undefined {
+): Question[] | undefined {
   for (const question of questions) {
-    if (question.link_id === linkId) return question;
-    const nested = findQuestionByLinkId(question.questions ?? [], linkId);
-    if (nested) return nested;
+    if (question.link_id === linkId) return [question];
+    const nested = findQuestionPath(question.questions ?? [], linkId);
+    if (nested) return [question, ...nested];
   }
   return undefined;
+}
+
+/** Whether this question would take part in a submission right now — the
+ *  same predicate `composeBatch` and `form/validation` apply. */
+function isPathEnabled(
+  path: Question[],
+  responses: Record<string, QuestionnaireResponse>,
+  linkIndex: Record<string, string>,
+): boolean {
+  return path.every((question) =>
+    isQuestionEnabledInState(question, responses, linkIndex),
+  );
 }
 
 /**
@@ -208,16 +259,14 @@ export function applySetResponse(
     };
   }
 
-  const question = findQuestionByLinkId(
-    form.questionnaire.questions,
-    input.link_id,
-  );
-  if (!question) {
+  const path = findQuestionPath(form.questionnaire.questions, input.link_id);
+  if (!path) {
     return {
       ok: false,
       error: `No question with link id "${input.link_id}" in "${form.questionnaire.title}"`,
     };
   }
+  const question = path[path.length - 1];
   if (
     question.type === "group" ||
     question.type === "display" ||
@@ -239,13 +288,6 @@ export function applySetResponse(
     };
   }
 
-  const values: ResponseValue[] = [];
-  for (const raw of input.values) {
-    const coerced = coerceResponseValue(question, raw);
-    if (!coerced.ok) return coerced;
-    values.push(coerced.value);
-  }
-
   const store = getStore(form.key);
   if (!store) {
     return {
@@ -264,6 +306,24 @@ export function applySetResponse(
       error: `Question "${input.link_id}" is not part of the open form any more`,
     };
   }
+  if (
+    !isPathEnabled(path, previous, buildLinkIndex(form.questionnaire.questions))
+  ) {
+    // Accepting the write would look like success and then vanish at
+    // submit — `composeBatch` drops disabled questions.
+    return {
+      ok: false,
+      error: `Question "${input.link_id}" is currently disabled by its enable_when conditions and would not be submitted; answer the question it depends on first`,
+    };
+  }
+
+  const values: ResponseValue[] = [];
+  for (const raw of input.values) {
+    const coerced = coerceResponseValue(question, raw);
+    if (!coerced.ok) return coerced;
+    values.push(coerced.value);
+  }
+
   store.set(responsesAtom, {
     ...previous,
     [question.id]: {
@@ -272,6 +332,10 @@ export function applySetResponse(
       ...(input.note !== undefined && { note: input.note }),
     },
   });
+  // The store's clear-on-edit invariant (`useQuestionResponse` does this
+  // for a human edit): a corrected answer must drop the validation error
+  // that flagged the old one, or the clinician sees a stale complaint.
+  clearQuestionErrorsInState(store.get, store.set, question.id);
   return { ok: true };
 }
 
@@ -282,6 +346,10 @@ interface FormQuestionSummary {
   required: boolean;
   options?: string[];
   answered: boolean;
+  /** False while the question's (or an ancestor's) enable_when conditions
+   *  are unmet — it is not on the clinician's canvas and a write to it
+   *  would be rejected. */
+  enabled: boolean;
 }
 
 /** Apply one `questionnaire.forms.list` call — the agent's map of the
@@ -294,9 +362,16 @@ export function listFormsSummary(
     ok: true,
     data: forms.map((form) => {
       const responses = getStore(form.key)?.get(responsesAtom) ?? {};
+      const linkIndex = buildLinkIndex(form.questionnaire.questions);
       const questions: FormQuestionSummary[] = [];
-      const walk = (list: Question[]) => {
+      // `ancestorsEnabled` rides down the walk for the same reason
+      // `composeBatch` stops descending: a hidden group hides its whole
+      // subtree, whatever the children's own conditions say.
+      const walk = (list: Question[], ancestorsEnabled: boolean) => {
         for (const question of list) {
+          const enabled =
+            ancestorsEnabled &&
+            isQuestionEnabledInState(question, responses, linkIndex);
           if (question.type !== "group") {
             const options = question.answer_option?.map(
               (option) => option.value,
@@ -308,12 +383,13 @@ export function listFormsSummary(
               required: !!question.required,
               ...(options?.length ? { options } : {}),
               answered: !!responses[question.id]?.values.some(entryHasContent),
+              enabled,
             });
           }
-          walk(question.questions ?? []);
+          walk(question.questions ?? [], enabled);
         }
       };
-      walk(form.questionnaire.questions);
+      walk(form.questionnaire.questions, true);
       return {
         questionnaire_id: form.key,
         title: form.questionnaire.title,
@@ -390,7 +466,7 @@ export function useFillActions({
       return {
         id: "questionnaire.forms.list",
         description:
-          "List the questionnaires open in this fill session and their questions, with each question's link id, type, options and whether it is already answered.",
+          "List the questionnaires open in this fill session and their questions, with each question's link id, type, options, whether it is already answered, and whether it is currently enabled (a disabled question is off the canvas and cannot be set).",
         parameters: {},
         schema: listFormsSchema,
         scope,
