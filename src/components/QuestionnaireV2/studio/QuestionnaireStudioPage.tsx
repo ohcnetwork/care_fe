@@ -323,8 +323,13 @@ export function QuestionnaireStudioPage({
       revealHidden={editing}
       inert={editing}
     >
-      <div className="flex flex-col">
-        <div className="sticky top-0 z-30 bg-white">
+      {/* Fullscreen shell (the route opts out of the app sidebar in
+          AppRouter's PATHS_WITHOUT_SIDEBAR): the reference design's
+          viewport-filling frame — fixed top bar, three independently
+          scrolling columns. z-40 keeps portals (dialogs, popovers, toasts
+          at z-50) above it. */}
+      <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-white">
+        <div className="shrink-0">
           <StudioTopBar
             questionnaire={questionnaire}
             questions={state.questions}
@@ -348,7 +353,7 @@ export function QuestionnaireStudioPage({
             phone user who drills into a nested sub-question has no way back
             to the parent or its siblings. */}
         {editing && state.questions.length > 0 && (
-          <div className="flex items-center gap-2 pt-4 md:hidden">
+          <div className="flex shrink-0 items-center gap-2 border-b border-gray-200 px-3 py-2 md:hidden">
             <div className="min-w-0 flex-1">
               <Select
                 value={state.selectedId ?? undefined}
@@ -389,8 +394,8 @@ export function QuestionnaireStudioPage({
           </div>
         )}
 
-        <div className="flex flex-col gap-4 pt-4 md:flex-row md:items-start">
-          <div className="order-1 hidden w-72 shrink-0 md:sticky md:top-20 md:block md:max-h-[calc(100vh-6rem)] md:overflow-y-auto">
+        <div className="flex min-h-0 flex-1">
+          <div className="order-1 hidden w-72 shrink-0 overflow-y-auto border-r border-gray-200 p-3 md:block">
             <StudioOutline
               questions={state.questions}
               editing={editing}
@@ -407,7 +412,7 @@ export function QuestionnaireStudioPage({
               flex order-*): the type picker stays the first combobox on the
               editor surface regardless of what the canvas renders. */}
           {editing && (
-            <div className="order-2 w-full min-w-0 space-y-4 md:w-[400px] md:shrink-0 lg:order-3 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pb-4">
+            <div className="order-2 w-full min-w-0 space-y-4 overflow-y-auto p-3 md:flex-1 lg:order-3 lg:w-[400px] lg:flex-none lg:border-l lg:border-gray-200">
               {formSelected ? (
                 <FormSettingsPanel
                   scope={scope}
@@ -438,7 +443,7 @@ export function QuestionnaireStudioPage({
 
           <div
             className={cn(
-              "min-w-0 flex-1 lg:order-2",
+              "min-w-0 flex-1 overflow-y-auto px-4 py-5 lg:order-2 lg:px-8",
               editing && "hidden lg:block",
             )}
           >

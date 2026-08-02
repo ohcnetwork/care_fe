@@ -58,7 +58,7 @@ export function StudioTopBar({
   const [issuesOpen, setIssuesOpen] = useState(false);
 
   return (
-    <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white px-1 py-3">
+    <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white px-4 py-2.5">
       <Button
         type="button"
         variant="outline"
