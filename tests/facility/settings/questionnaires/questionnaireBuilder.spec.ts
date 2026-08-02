@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
+import {
+  createQuestionnaireAndOpenBuilder,
+  questionBlock,
+} from "tests/helper/questionnaireV2";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -33,8 +36,11 @@ test.describe("Questionnaire v2 builder", () => {
 
     await test.step("Preview renders the question", async () => {
       await page.getByRole("button", { name: "Preview" }).click();
-      // The title renders in the outline row and as the field label.
-      await expect(page.getByText(questionTitle).first()).toBeVisible();
+      // Assert the CANVAS label specifically (the outline row also carries
+      // the title — a bare .first() could pass on the outline alone).
+      await expect(
+        questionBlock(page, questionTitle).locator("label"),
+      ).toBeVisible();
       await expect(page.getByPlaceholder("Enter details")).toBeVisible();
     });
   });

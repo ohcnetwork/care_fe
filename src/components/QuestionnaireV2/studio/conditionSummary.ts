@@ -2,21 +2,26 @@ import type { TFunction } from "i18next";
 
 import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
-function flatten(questions: Question[]): Question[] {
-  return questions.flatMap((question) => [
-    question,
-    ...flatten(question.questions ?? []),
-  ]);
+/** link_id → question, built ONCE per summary call — ruleText runs per
+ *  rule per block on every canvas render, so it must not re-walk the tree. */
+function questionsByLinkId(questions: Question[]): Map<string, Question> {
+  const index = new Map<string, Question>();
+  const walk = (list: Question[]) => {
+    for (const question of list) {
+      if (!index.has(question.link_id)) index.set(question.link_id, question);
+      walk(question.questions ?? []);
+    }
+  };
+  walk(questions);
+  return index;
 }
 
 function ruleText(
   condition: EnableWhen,
-  allQuestions: Question[],
+  targets: Map<string, Question>,
   t: TFunction,
 ): string {
-  const target = flatten(allQuestions).find(
-    (candidate) => candidate.link_id === condition.question,
-  );
+  const target = targets.get(condition.question);
   const questionText =
     target?.text || target?.link_id || condition.question || "?";
   if (condition.operator === "exists") {
@@ -41,7 +46,9 @@ export function shortConditionSummary(
   const rules = question.enable_when ?? [];
   if (rules.length === 0) return null;
   if (rules.length === 1) {
-    return t("shown_when", { summary: ruleText(rules[0], allQuestions, t) });
+    return t("shown_when", {
+      summary: ruleText(rules[0], questionsByLinkId(allQuestions), t),
+    });
   }
   return t("shown_when_n_rules", { count: rules.length });
 }
@@ -57,11 +64,12 @@ export function plainWordsSummary(
 ): string {
   const rules = question.enable_when ?? [];
   if (rules.length === 0) return t("plain_words_always");
+  const targets = questionsByLinkId(allQuestions);
   const joiner =
     question.enable_behavior === "any"
       ? ` ${t("or").toLowerCase()} `
       : ` ${t("and").toLowerCase()} `;
   return t("plain_words_shown_when", {
-    summary: rules.map((rule) => ruleText(rule, allQuestions, t)).join(joiner),
+    summary: rules.map((rule) => ruleText(rule, targets, t)).join(joiner),
   });
 }

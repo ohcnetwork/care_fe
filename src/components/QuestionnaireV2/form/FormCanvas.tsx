@@ -2,9 +2,9 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { useVisibleTopLevelIndices } from "@/components/QuestionnaireV2/renderer/store";
+import { useHasVisibleTopLevelQuestions } from "@/components/QuestionnaireV2/renderer/store";
+import { countLeafQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
-import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 import { FormChrome, FormChromeProvider, useFormChrome } from "./chrome";
@@ -12,16 +12,8 @@ import { QuestionnaireFormProvider, useFormRenderer } from "./FormContext";
 import { QuestionBlock } from "./QuestionBlock";
 import type { FormMode, RendererSubject } from "./types";
 
-export interface QuestionnaireFormRendererProps {
-  questionnaire: QuestionnaireRead;
-  mode: FormMode;
-  subject?: RendererSubject;
-  /** Builder edit canvas: render enable_when-hidden questions too. */
-  revealHidden?: boolean;
-  /** Builder edit canvas: inputs visible but non-interactive. */
-  inert?: boolean;
-  /** Decoration seam — see chrome.tsx. */
-  chrome?: FormChrome;
+/** Presentation slots shared by every canvas entry point. */
+export interface CanvasSlots {
   /** Replaces the default "no questions" text (the studio passes its
    *  add-first/import affordances). */
   emptyState?: React.ReactNode;
@@ -34,16 +26,16 @@ export interface QuestionnaireFormRendererProps {
   className?: string;
 }
 
-function countLeafQuestions(questions: Question[]): number {
-  let count = 0;
-  const walk = (list: Question[]) => {
-    for (const question of list) {
-      if (question.type === "group") walk(question.questions ?? []);
-      else count += 1;
-    }
-  };
-  walk(questions);
-  return count;
+export interface QuestionnaireFormRendererProps extends CanvasSlots {
+  questionnaire: QuestionnaireRead;
+  mode: FormMode;
+  subject?: RendererSubject;
+  /** Builder edit canvas: render enable_when-hidden questions too. */
+  revealHidden?: boolean;
+  /** Builder edit canvas: inputs visible but non-interactive. */
+  inert?: boolean;
+  /** Decoration seam — see chrome.tsx. */
+  chrome?: FormChrome;
 }
 
 /**
@@ -95,13 +87,7 @@ export function QuestionnaireFormCanvas({
   hideHeader,
   headerHint,
   className,
-}: {
-  chrome?: FormChrome;
-  emptyState?: React.ReactNode;
-  hideHeader?: boolean;
-  headerHint?: React.ReactNode;
-  className?: string;
-}) {
+}: CanvasSlots & { chrome?: FormChrome }) {
   return (
     <FormChromeProvider chrome={chrome}>
       <CanvasBody
@@ -119,16 +105,11 @@ function CanvasBody({
   hideHeader,
   headerHint,
   className,
-}: {
-  emptyState?: React.ReactNode;
-  hideHeader?: boolean;
-  headerHint?: React.ReactNode;
-  className?: string;
-}) {
+}: CanvasSlots) {
   const { t } = useTranslation();
   const { questionnaire, revealHidden } = useFormRenderer();
   const { AppendZone } = useFormChrome();
-  const visibleIndices = useVisibleTopLevelIndices();
+  const hasVisibleQuestions = useHasVisibleTopLevelQuestions();
   const questions = questionnaire.questions;
 
   const sectionCount = questions.filter(
@@ -176,7 +157,7 @@ function CanvasBody({
   // Every top-level question hidden by enable_when: explain the empty form
   // instead of a blank canvas. The edit canvas (`revealHidden`) never hits
   // this — hidden questions render there with a logic badge.
-  if (!revealHidden && visibleIndices.length === 0) {
+  if (!revealHidden && !hasVisibleQuestions) {
     return (
       <div className={cn("mx-auto w-full max-w-3xl", className)}>
         {header}

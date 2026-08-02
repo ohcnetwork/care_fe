@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -44,6 +45,7 @@ export function BehaviourToggles({
   onChange,
 }: BehaviourTogglesProps) {
   const { t } = useTranslation();
+  const idBase = useId();
 
   const flags = FLAGS.filter(
     (flag) =>
@@ -60,15 +62,25 @@ export function BehaviourToggles({
             type="button"
             role="checkbox"
             aria-checked={checked}
-            aria-label={t(flag.labelKey)}
+            // labelledby/describedby (not aria-label) so the visible title
+            // stays the accessible name — `checkbox "Required"` in specs —
+            // while the explanatory hint remains announced as description.
+            aria-labelledby={`${idBase}-${flag.key}-label`}
+            aria-describedby={`${idBase}-${flag.key}-hint`}
             onClick={() => onChange({ [flag.key]: !checked })}
             className="flex w-full items-center gap-3 py-2.5 text-left"
           >
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-gray-900">
+              <span
+                id={`${idBase}-${flag.key}-label`}
+                className="block text-sm font-semibold text-gray-900"
+              >
                 {t(flag.labelKey)}
               </span>
-              <span className="block text-xs text-gray-500">
+              <span
+                id={`${idBase}-${flag.key}-hint`}
+                className="block text-xs text-gray-500"
+              >
                 {t(flag.hintKey)}
               </span>
             </span>

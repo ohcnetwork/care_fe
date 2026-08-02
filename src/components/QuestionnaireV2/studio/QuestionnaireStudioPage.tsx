@@ -329,7 +329,7 @@ export function QuestionnaireStudioPage({
           scrolling columns. z-40 keeps portals (dialogs, popovers, toasts
           at z-50) above it. */}
       <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-white">
-        <div className="shrink-0">
+        <header className="shrink-0">
           <StudioTopBar
             questionnaire={questionnaire}
             questions={state.questions}
@@ -347,7 +347,7 @@ export function QuestionnaireStudioPage({
             onDiscard={handleDiscard}
             backPath={backPath}
           />
-        </div>
+        </header>
 
         {/* Mobile fallback for the outline (hidden below md) — without it a
             phone user who drills into a nested sub-question has no way back
@@ -395,7 +395,7 @@ export function QuestionnaireStudioPage({
         )}
 
         <div className="flex min-h-0 flex-1">
-          <div className="order-1 hidden w-72 shrink-0 overflow-y-auto border-r border-gray-200 p-3 md:block">
+          <aside className="order-1 hidden w-72 shrink-0 overflow-y-auto border-r border-gray-200 p-3 md:block">
             <StudioOutline
               questions={state.questions}
               editing={editing}
@@ -406,13 +406,13 @@ export function QuestionnaireStudioPage({
               onSelectQuestion={revealQuestion}
               dispatch={studioDispatch}
             />
-          </div>
+          </aside>
 
           {/* The inspector sits BEFORE the canvas in DOM (visual order via
               flex order-*): the type picker stays the first combobox on the
               editor surface regardless of what the canvas renders. */}
           {editing && (
-            <div className="order-2 w-full min-w-0 space-y-4 overflow-y-auto p-3 md:flex-1 lg:order-3 lg:w-[400px] lg:flex-none lg:border-l lg:border-gray-200">
+            <aside className="order-2 w-full min-w-0 space-y-4 overflow-y-auto p-3 md:flex-1 lg:order-3 lg:w-[400px] lg:flex-none lg:border-l lg:border-gray-200">
               {formSelected ? (
                 <FormSettingsPanel
                   scope={scope}
@@ -435,13 +435,17 @@ export function QuestionnaireStudioPage({
                   question={selectedQuestion}
                   number={selectedNumber}
                   allQuestions={state.questions}
-                  dispatch={dispatch}
+                  dispatch={studioDispatch}
                 />
               )}
-            </div>
+            </aside>
           )}
 
-          <div
+          {/* A labeled region (not <main> — the app shell already provides
+              the page's main landmark, and nested mains are invalid). Also
+              the stable scope tests use to address the canvas append zone. */}
+          <section
+            aria-label={t("form_canvas")}
             className={cn(
               "min-w-0 flex-1 overflow-y-auto px-4 py-5 lg:order-2 lg:px-8",
               editing && "hidden lg:block",
@@ -473,7 +477,7 @@ export function QuestionnaireStudioPage({
                 ) : undefined
               }
             />
-          </div>
+          </section>
         </div>
       </div>
 

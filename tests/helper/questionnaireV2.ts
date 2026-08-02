@@ -144,21 +144,61 @@ export async function pickValuesetFromAutocomplete(
 }
 
 /**
- * The canvas block for one question on the one-scroll form renderer,
+ * The canvas block for one LEAF question on the one-scroll form renderer,
  * anchored on the `data-question-id` attribute the renderer stamps and the
- * question's label text. The whole questionnaire renders on one scroll, so
- * bare role queries (`spinbutton`, `Add note`, `textarea`) match every
- * question at once — scope them through this instead. `.last()` picks the
- * innermost matching block when the label sits inside a section (ancestor
- * blocks match `has:` too).
+ * question's exact label text. The whole questionnaire renders on one
+ * scroll, so bare role queries (`spinbutton`, `Add note`, `textarea`) match
+ * every question at once — scope them through this instead.
+ *
+ * Leaf blocks only (the `hasNot` filter drops enclosing section cards,
+ * which would also satisfy `has:` through their children) and exact label
+ * matching, so strict mode stays armed: two questions sharing a label fail
+ * loudly instead of silently resolving to whichever renders last. Assert
+ * the block visible (or use `expectQuestionBlock`) before building any
+ * negative assertion on it — a zero-match locator passes `.not.` checks
+ * vacuously.
  */
 export function questionBlock(page: Page, label: string) {
   return page
     .locator("[data-question-id]")
+    .filter({ hasNot: page.locator("[data-question-id]") })
     .filter({
       has: page.locator(
-        `xpath=.//label[contains(normalize-space(.), ${JSON.stringify(label)})]`,
+        `xpath=.//label[normalize-space(.)=${JSON.stringify(label)}]`,
       ),
-    })
-    .last();
+    });
+}
+
+/** questionBlock + a count assertion — use before any `.not.` assertion,
+ *  where a zero-match locator would otherwise pass vacuously. */
+export async function expectQuestionBlock(page: Page, label: string) {
+  const block = questionBlock(page, label);
+  await expect(block).toHaveCount(1);
+  return block;
+}
+
+/**
+ * Appends a top-level question and types its title. On an empty form the
+ * canvas shows "Add First Question"; once questions exist, several controls
+ * carry the "Add new question" name (outline separators and footer, the
+ * canvas append zone, the mobile button) — the canvas zone is addressed via
+ * the labeled "Form canvas" region instead of a DOM-order-dependent
+ * `.last()`.
+ */
+export async function addTopLevelQuestion(
+  page: Page,
+  title: string,
+): Promise<void> {
+  const addFirst = page.getByRole("button", { name: "Add First Question" });
+  if (await addFirst.isVisible().catch(() => false)) {
+    await addFirst.click();
+  } else {
+    await page
+      .getByRole("region", { name: "Form canvas" })
+      .getByRole("button", { name: "Add new question" })
+      .click();
+  }
+  await page
+    .getByRole("textbox", { name: "Question Title" })
+    .pressSequentially(title);
 }

@@ -1,4 +1,7 @@
-import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
+import {
+  findFirstQuestion,
+  regenerateQuestionIds,
+} from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { EnableWhen, Question } from "@/types/questionnaire/question";
 
@@ -117,45 +120,16 @@ export function migrateLegacyBooleanEnableWhen(
 }
 
 /**
- * Deep copy of one question subtree with fresh ids and link_ids for the
- * studio's Duplicate action. Differs from `regenerateQuestionIds`
- * deliberately: enable_when targets INSIDE the subtree remap to the copies,
- * while targets OUTSIDE it are preserved verbatim — the duplicate should
- * keep the same visibility rules as its source, not silently drop them.
+ * Deep copy of one question subtree for the studio's Duplicate action:
+ * fresh ids/link_ids via the shared regeneration walk, with enable_when
+ * targets INSIDE the subtree remapped to the copies and targets OUTSIDE it
+ * preserved verbatim (`unmappedConditions: "keep"`) — the duplicate keeps
+ * the same visibility rules as its source.
  */
 function cloneSubtree(question: Question): Question {
-  const freshLinkId = () => `Q-${crypto.randomUUID().slice(0, 8)}`;
-
-  const linkIdMap = new Map<string, string>();
-  const mapLinkIds = (q: Question) => {
-    if (q.link_id && !linkIdMap.has(q.link_id)) {
-      linkIdMap.set(q.link_id, freshLinkId());
-    }
-    (q.questions ?? []).forEach(mapLinkIds);
-  };
-  mapLinkIds(question);
-
-  // Same preorder as mapLinkIds — the occurrence that claimed the map entry
-  // is the first one seen, mirroring regenerateQuestionIds' duplicate
-  // handling.
-  const seen = new Set<string>();
-  const walk = (q: Question): Question => {
-    const mapped =
-      q.link_id && !seen.has(q.link_id) ? linkIdMap.get(q.link_id) : undefined;
-    if (q.link_id) seen.add(q.link_id);
-    return {
-      ...q,
-      id: crypto.randomUUID(),
-      link_id: mapped ?? freshLinkId(),
-      enable_when: q.enable_when?.map((condition) =>
-        linkIdMap.has(condition.question)
-          ? { ...condition, question: linkIdMap.get(condition.question)! }
-          : condition,
-      ),
-      questions: (q.questions ?? []).map(walk),
-    };
-  };
-  const copy = walk(question);
+  const copy = regenerateQuestionIds([question], {
+    unmappedConditions: "keep",
+  })[0];
   return copy.text ? { ...copy, text: `${copy.text} (copy)` } : copy;
 }
 

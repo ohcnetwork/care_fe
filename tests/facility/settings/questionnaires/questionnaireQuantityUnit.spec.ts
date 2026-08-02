@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
+  addTopLevelQuestion,
   adminApiHeaders,
   apiBaseUrl,
   createQuestionnaireAndOpenBuilder,
@@ -18,19 +19,6 @@ test.use({ storageState: "tests/.auth/user.json" });
  * the post-save assertions run against a full page reload (fresh GET, no
  * client cache) plus a direct API read.
  */
-
-/** Adds a top-level question via the sticky-bar button and titles it. */
-async function addQuestion(page: Page, title: string): Promise<void> {
-  const addFirst = page.getByRole("button", { name: "Add First Question" });
-  if (await addFirst.isVisible().catch(() => false)) {
-    await addFirst.click();
-  } else {
-    await page.getByRole("button", { name: "Add new question" }).last().click();
-  }
-  await page
-    .getByRole("textbox", { name: "Question Title" })
-    .pressSequentially(title);
-}
 
 /** Picks a question type by its cmdk data-value token (see builder matrix).
  *  Filters the list first — the unfiltered popover can overflow the
@@ -65,7 +53,7 @@ test.describe("Questionnaire v2 quantity default unit round-trip", () => {
     let pickedDisplay = "";
 
     await test.step("Quantity is valueset-only: no Custom Options mode", async () => {
-      await addQuestion(page, questionTitle);
+      await addTopLevelQuestion(page, questionTitle);
       await pickType(page, "quantity");
       // Legacy contract: the old editor never offered custom options for
       // quantity — the v2 builder must not either.

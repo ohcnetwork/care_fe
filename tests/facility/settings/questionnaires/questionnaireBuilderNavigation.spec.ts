@@ -83,7 +83,19 @@ test.describe("Questionnaire v2 builder navigation", () => {
       ).toContainText("3.");
     });
 
+    await test.step("The duplicate persists through save and reload", async () => {
+      // Pins cloneSubtree's id/link_id regeneration server-side: a copy
+      // reusing the source's ids would be rejected or collapse on save.
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await expectToast(page, "Questionnaire updated successfully");
+      await page.reload();
+      await expect(
+        nav.getByRole("button", { name: `${titles[1]} (copy)` }),
+      ).toContainText("3.");
+    });
+
     await test.step("Delete removes the copy via the toolbar", async () => {
+      await questionBlock(page, `${titles[1]} (copy)`).locator("label").click();
       await page.getByRole("button", { name: "Delete question" }).click();
       await expect(
         nav.getByRole("button", { name: `${titles[1]} (copy)` }),

@@ -81,6 +81,20 @@ export function findQuestionNumber(
   return undefined;
 }
 
+/** Questions that record answers (everything except `group` containers),
+ *  at any depth — the count surfaces in canvas/outline "N questions" lines. */
+export function countLeafQuestions(questions: Question[]): number {
+  let count = 0;
+  const walk = (list: Question[]) => {
+    for (const question of list) {
+      if (question.type === "group") walk(question.questions ?? []);
+      else count += 1;
+    }
+  };
+  walk(questions);
+  return count;
+}
+
 /**
  * Deep-clones a question tree with fresh `id`s and `link_id`s (used by clone
  * and import, where reusing the source's ids would collide with the
@@ -98,8 +112,19 @@ export function findQuestionNumber(
  * references still resolve deterministically); every other occurrence —
  * duplicate or missing — gets its own fresh link_id, instead of collapsing
  * all of them onto one shared regenerated id.
+ *
+ * `unmappedConditions` picks what happens to a condition whose target is not
+ * in the map: "drop" (default) for clone/import into a NEW questionnaire,
+ * where the target will never exist; "keep" for in-questionnaire duplication
+ * (the studio's Duplicate action), where a condition pointing outside the
+ * copied subtree still references a live sibling and must survive verbatim.
  */
-export function regenerateQuestionIds(questions: Question[]): Question[] {
+export function regenerateQuestionIds(
+  questions: Question[],
+  {
+    unmappedConditions = "drop",
+  }: { unmappedConditions?: "drop" | "keep" } = {},
+): Question[] {
   const freshLinkId = () => `Q-${crypto.randomUUID().slice(0, 8)}`;
 
   const linkIdMap = new Map<string, string>();
@@ -116,12 +141,18 @@ export function regenerateQuestionIds(questions: Question[]): Question[] {
   const remapEnableWhen = (
     enableWhen: EnableWhen[] | undefined,
   ): EnableWhen[] | undefined =>
-    enableWhen
-      ?.filter((condition) => linkIdMap.has(condition.question))
-      .map((condition) => ({
-        ...condition,
-        question: linkIdMap.get(condition.question)!,
-      }));
+    unmappedConditions === "keep"
+      ? enableWhen?.map((condition) =>
+          linkIdMap.has(condition.question)
+            ? { ...condition, question: linkIdMap.get(condition.question)! }
+            : condition,
+        )
+      : enableWhen
+          ?.filter((condition) => linkIdMap.has(condition.question))
+          .map((condition) => ({
+            ...condition,
+            question: linkIdMap.get(condition.question)!,
+          }));
 
   // Same DFS preorder as mapLinkIds, so the occurrence that claimed the map
   // entry is also the first one seen here.

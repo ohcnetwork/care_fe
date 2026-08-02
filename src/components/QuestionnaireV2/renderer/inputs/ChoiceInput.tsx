@@ -18,6 +18,7 @@ const INLINE_CHOICE_MAX = 5;
 export function ChoiceInput({
   question,
   disabled,
+  inputId,
   labelId,
 }: RendererInputProps) {
   const { t } = useTranslation();
@@ -33,6 +34,13 @@ export function ChoiceInput({
     if (dropdown) {
       // Same value shapes as the chip paths below, so enable_when and
       // submission are indifferent to which control rendered.
+      // Self-referencing aria-labelledby: the question label first, then the
+      // trigger itself, so screen readers announce both the question and the
+      // currently selected option (a bare labelId would silence the value).
+      const labelling = {
+        id: inputId,
+        "aria-labelledby": `${labelId} ${inputId}`,
+      };
       if (question.repeats) {
         return (
           <MultiSelect
@@ -47,11 +55,13 @@ export function ChoiceInput({
             options={dropdownOptions}
             placeholder={t("select_an_option")}
             disabled={disabled}
+            {...labelling}
           />
         );
       }
       return (
         <Autocomplete
+          {...labelling}
           value={response?.values[0]?.value?.toString() ?? ""}
           onChange={(value) =>
             updateResponse({ values: [{ type: "string", value }] })
@@ -127,6 +137,7 @@ export function ChoiceInput({
   if (question.answer_value_set) {
     return (
       <ValueSetSelect
+        aria-labelledby={labelId}
         system={question.answer_value_set.slug ?? ""}
         valuesetId={question.answer_value_set.external_id}
         value={response?.values[0]?.coding ?? null}

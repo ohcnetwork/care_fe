@@ -23,6 +23,9 @@ export interface QuestionTreeNavProps {
   /** Decorative per-row trailing icons (the studio's logic/issue cues) —
    *  rendered aria-hidden so row accessible names stay number + title. */
   rowAdornment?: (question: Question) => React.ReactNode;
+  /** Accessible name for the `nav` landmark when the consumer renders its
+   *  own visible heading instead of passing `title`. Supply one of the two. */
+  ariaLabel?: string;
 }
 
 export function QuestionTreeNav({
@@ -34,6 +37,7 @@ export function QuestionTreeNav({
   renderSeparator,
   hiddenIds,
   rowAdornment,
+  ariaLabel,
 }: QuestionTreeNavProps) {
   const { t } = useTranslation();
   const items = numberQuestions(questions).filter(
@@ -46,6 +50,7 @@ export function QuestionTreeNav({
       <button
         key={item.question.id}
         type="button"
+        aria-current={activeId === item.question.id ? "true" : undefined}
         onClick={() => onSelect(item.question.id)}
         className={cn(
           "relative flex w-full items-start gap-1 rounded-md px-3 py-2 text-left text-sm",
@@ -90,7 +95,7 @@ export function QuestionTreeNav({
   };
 
   return (
-    <nav aria-label={title} className="w-full space-y-1">
+    <nav aria-label={ariaLabel ?? title} className="w-full space-y-1">
       {title && (
         <h3 className="px-3 py-2 text-sm font-semibold text-gray-900">
           {title}

@@ -165,6 +165,11 @@ export function QuestionInspector({
                 value={question.text}
                 placeholder={t("enter_question_title")}
                 onChange={(e) => onChange({ text: e.target.value })}
+                // The inspector remounts per selection (keyed by question in
+                // the page) — focusing the title keeps keyboard flow intact
+                // after canvas clicks and after delete/duplicate, where the
+                // acted-on element unmounts and focus would fall to <body>.
+                autoFocus
               />
             </div>
 

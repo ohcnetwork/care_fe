@@ -1,6 +1,9 @@
 import type { TFunction } from "i18next";
 
-import { evaluateEnableWhen } from "@/components/QuestionnaireV2/renderer/store";
+import {
+  buildLinkIndex,
+  isQuestionEnabledInState,
+} from "@/components/QuestionnaireV2/renderer/store";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -23,32 +26,12 @@ export function collectRequiredErrors(
   responses: Record<string, QuestionnaireResponse>,
   t: TFunction,
 ): QuestionValidationError[] {
-  const linkIndex: Record<string, string> = {};
-  const indexLinks = (list: Question[]) => {
-    for (const question of list) {
-      linkIndex[question.link_id] = question.id;
-      indexLinks(question.questions ?? []);
-    }
-  };
-  indexLinks(questions);
-
-  const isEnabled = (question: Question): boolean => {
-    if (!question.enable_when?.length) return true;
-    const results = question.enable_when.map((condition) =>
-      evaluateEnableWhen(
-        condition,
-        responses[linkIndex[condition.question] ?? ""],
-      ),
-    );
-    return question.enable_behavior === "any"
-      ? results.some(Boolean)
-      : results.every(Boolean);
-  };
+  const linkIndex = buildLinkIndex(questions);
 
   const errors: QuestionValidationError[] = [];
   const walk = (list: Question[]) => {
     for (const question of list) {
-      if (!isEnabled(question)) continue;
+      if (!isQuestionEnabledInState(question, responses, linkIndex)) continue;
       if (question.type === "group") {
         walk(question.questions ?? []);
         continue;

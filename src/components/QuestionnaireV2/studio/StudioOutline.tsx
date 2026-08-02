@@ -127,6 +127,7 @@ export function StudioOutline({
           add affordances remain reachable (rows are all hidden anyway). */}
       <QuestionTreeNav
         questions={questions}
+        ariaLabel={t("structure")}
         activeId={formSelected ? null : selectedId}
         onSelect={onSelectQuestion}
         hiddenIds={hiddenIds}

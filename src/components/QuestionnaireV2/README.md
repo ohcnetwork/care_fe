@@ -29,16 +29,20 @@ reuses (see Legacy imports below); the renderer here currently ships
   questionnaire on one scroll, live-synced per-instance store (edits merge
   into responses instead of wiping them), a chrome/decoration seam for the
   studio canvas, and the fill-mode seams (`validation.ts`, mode union).
-  Reuses the engine pieces of `renderer/` (store atoms, inputs,
-  registries, sanitizer) without touching them.
+  Shares the engine pieces of `renderer/` (store atoms, inputs,
+  registries, sanitizer); the inputs are co-owned — they are
+  host-layout-free (each control carries its own full border) and serve
+  only `form/` in practice now.
 - `renderer/` — the previous paginated display shell. Its engine files
   (`store.ts`, `inputs/`, `questionTypeRegistry.tsx`,
   `sanitizeStylingClasses.ts`, `structured/registry.tsx`) are shared with
   `form/`; its shell files (`QuestionnaireRenderer`, `QuestionField`,
   `QuestionGroupCard`, `TopLevelCard`, `RendererFooter`,
-  `RendererContext`, `NoteAffordance`, `StructuredQuestionSlot`) still
-  power the detail/revision pages and are scheduled for replacement by
-  `form/` after review, at which point the engine files relocate.
+  `RendererContext`, `NoteAffordance`, `StructuredQuestionSlot`) have no
+  mounted consumer left — the revision page now renders through `form/` —
+  and only the (equally unmounted) old builder page still imports them.
+  Both go in the post-review deletion, at which point the engine files
+  relocate out of `renderer/`.
 - `shared/` — presentation primitives and the pure tree utilities
   (`questionTree.ts`), plus `buildUpdateBody.ts` and
   `downloadQuestionnaireJson.ts`. `manage/` and `builder/` depend on
@@ -58,11 +62,12 @@ Pages never read route params. The router injects a `QuestionnaireScope`
 ## Renderer
 
 Public surface: import `QuestionnaireRenderer` and `renderer/types` only
-(legacy shell), or `form/FormCanvas` (`QuestionnaireFormRenderer` /
-`QuestionnaireFormCanvas`), `form/FormContext` and `form/types` for the
-full renderer. The store, context and registries are internal — `form/` is
-the one sanctioned second consumer of `renderer/`'s engine files, pending
-their relocation when the old shell is removed.
+(legacy shell), or — for the full renderer — `form/FormCanvas`
+(`QuestionnaireFormRenderer` / `QuestionnaireFormCanvas`),
+`form/FormContext`, `form/chrome` (the decoration seam the studio canvas
+implements) and `form/types`. The store, context and registries are
+internal — `form/` is the one sanctioned second consumer of `renderer/`'s
+engine files, pending their relocation when the old shell is removed.
 
 `QuestionnaireRendererProvider` creates one jotai store per instance,
 seeded at creation (never observed empty) and re-seeded only when the
@@ -92,6 +97,10 @@ export file.
   JSON booleans (`normalizeBooleanConditionAnswer` in `builderReducer.ts`;
   builder load migrates legacy true/false via
   `migrateLegacyBooleanEnableWhen`).
+- enable_when resolution goes through `isQuestionEnabledInState`
+  (`renderer/store.ts`) — never re-derive it from `evaluateEnableWhen`;
+  the required-field pass in `form/validation.ts` consumes the same
+  helper, so exactly one resolution exists.
 - `styling_metadata.classes` decorates the question's outer container;
   `styling_metadata.containerClasses` lays out a group's sub-question
   container (the builder's layout presets write it). Both are applied only

@@ -87,21 +87,11 @@ const accountId = getAccountId();
 
 ```typescript
 // Facility pages
-`/facility/${facilityId}/overview`
-`/facility/${facilityId}/settings/locations`
-`/facility/${facilityId}/settings/departments`
-`/facility/${facilityId}/settings/devices`
-`/facility/${facilityId}/settings/services`
-`/facility/${facilityId}/users`
-
+`/facility/${facilityId}/overview``/facility/${facilityId}/settings/locations``/facility/${facilityId}/settings/departments``/facility/${facilityId}/settings/devices``/facility/${facilityId}/settings/services``/facility/${facilityId}/users`
 // Patient pages
-`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}`
-`/facility/${facilityId}/patient/${patientId}/profile`
-`/facility/${facilityId}/encounters`
-
+`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}``/facility/${facilityId}/patient/${patientId}/profile``/facility/${facilityId}/encounters`
 // Admin pages
-`/admin/questionnaires`
-`/admin/valueset`
+`/admin/questionnaires``/admin/valueset`;
 ```
 
 ## Data Generation

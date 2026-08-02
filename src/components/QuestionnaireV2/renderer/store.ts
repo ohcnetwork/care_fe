@@ -23,18 +23,24 @@ export const responsesAtom = atom<Record<string, QuestionnaireResponse>>({});
 export const errorsAtom = atom<QuestionValidationError[]>([]);
 export const activeGroupIndexAtom = atom(0);
 
-/** link_id → question_id, for enable_when lookups. */
-export const questionIdByLinkIdAtom = atom((get) => {
-  const questionnaire = get(questionnaireAtom);
+/** link_id → question_id for enable_when lookups — pure so non-atom
+ *  consumers (form/validation.ts) share the exact same resolution. */
+export function buildLinkIndex(questions: Question[]): Record<string, string> {
   const index: Record<string, string> = {};
-  const walk = (questions: Question[]) => {
-    for (const question of questions) {
+  const walk = (list: Question[]) => {
+    for (const question of list) {
       index[question.link_id] = question.id;
       if (question.questions) walk(question.questions);
     }
   };
-  if (questionnaire) walk(questionnaire.questions);
+  walk(questions);
   return index;
+}
+
+/** link_id → question_id, for enable_when lookups. */
+export const questionIdByLinkIdAtom = atom((get) => {
+  const questionnaire = get(questionnaireAtom);
+  return questionnaire ? buildLinkIndex(questionnaire.questions) : {};
 });
 
 /** Flatten the tree into one response per non-group question, seeding
@@ -165,9 +171,11 @@ export function useQuestionResponse(questionId: string) {
   return useAtom(responseAtom);
 }
 
-/** Shared enable_when resolution — extracted (unchanged semantics) so both
- *  useQuestionEnabled and the pagination hook below evaluate identically. */
-function isQuestionEnabledInState(
+/** Shared enable_when resolution — extracted (unchanged semantics) so every
+ *  consumer (useQuestionEnabled, the visibility hooks below, and
+ *  form/validation.ts) evaluates identically. Exported so the fill path
+ *  never re-derives it from evaluateEnableWhen. */
+export function isQuestionEnabledInState(
   question: Question,
   responses: Record<string, QuestionnaireResponse>,
   linkIndex: Record<string, string>,
@@ -265,6 +273,31 @@ export function useHiddenQuestionIds(): Set<string> {
     [],
   );
   return useAtomValue(hiddenIdsAtom);
+}
+
+/**
+ * Whether any top-level question is currently on the canvas. Boolean (not
+ * the index array) so the value is Object.is-stable across answer edits —
+ * the one-scroll canvas body subscribes to this, and answering a question
+ * must not re-render every block.
+ */
+export function useHasVisibleTopLevelQuestions(): boolean {
+  const hasVisibleAtom = useMemo(
+    () =>
+      atom((get) => {
+        const questionnaire = get(questionnaireAtom);
+        if (!questionnaire) return false;
+        const responses = get(responsesAtom);
+        const linkIndex = get(questionIdByLinkIdAtom);
+        return questionnaire.questions.some(
+          (question) =>
+            question.disabled_display === "protected" ||
+            isQuestionEnabledInState(question, responses, linkIndex),
+        );
+      }),
+    [],
+  );
+  return useAtomValue(hasVisibleAtom);
 }
 
 export function useQuestionErrors(questionId: string) {

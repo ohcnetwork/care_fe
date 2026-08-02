@@ -152,7 +152,10 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
       await expect(navRow(page, "Protected note")).toBeVisible();
       await jumpTo(page, "Protected note");
       await expect(
-        questionBlock(page, "Protected note").getByPlaceholder("Enter details"),
+        questionBlock(
+          page,
+          "Protected note (visible but locked when disabled)",
+        ).getByPlaceholder("Enter details"),
       ).toBeDisabled();
     });
 
@@ -161,7 +164,10 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
       await page.getByRole("radio", { name: "Yes", exact: true }).click();
       await jumpTo(page, "Protected note");
       await expect(
-        questionBlock(page, "Protected note").getByPlaceholder("Enter details"),
+        questionBlock(
+          page,
+          "Protected note (visible but locked when disabled)",
+        ).getByPlaceholder("Enter details"),
       ).toBeEnabled();
     });
   });

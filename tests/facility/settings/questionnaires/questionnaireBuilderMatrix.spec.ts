@@ -1,29 +1,15 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 import {
+  addTopLevelQuestion,
   createQuestionnaireAndOpenBuilder,
+  expectQuestionBlock,
   pickValuesetFromAutocomplete,
-  questionBlock,
 } from "tests/helper/questionnaireV2";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
-
-/** Adds a top-level question via the sticky-bar button and titles it. */
-async function addQuestion(page: Page, title: string): Promise<void> {
-  const addFirst = page.getByRole("button", { name: "Add First Question" });
-  if (await addFirst.isVisible().catch(() => false)) {
-    await addFirst.click();
-  } else {
-    // Two "Add new question" buttons render once a question exists (tree
-    // nav footer + sticky bar) — the sticky bar one is last.
-    await page.getByRole("button", { name: "Add new question" }).last().click();
-  }
-  await page
-    .getByRole("textbox", { name: "Question Title" })
-    .pressSequentially(title);
-}
 
 /**
  * Picks a question type for the currently-selected question by its type
@@ -56,12 +42,12 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     });
 
     await test.step("Author a date question", async () => {
-      await addQuestion(page, dateTitle);
+      await addTopLevelQuestion(page, dateTitle);
       await pickType(page, "date");
     });
 
     await test.step("Author a quantity question and bind a UCUM unit", async () => {
-      await addQuestion(page, quantityTitle);
+      await addTopLevelQuestion(page, quantityTitle);
       await pickType(page, "quantity");
       // Quantity is valueset-only (legacy contract): no Custom Options mode,
       // the valueset is the unit-choice source.
@@ -82,7 +68,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     });
 
     await test.step("Author a group with one sub-question", async () => {
-      await addQuestion(page, groupTitle);
+      await addTopLevelQuestion(page, groupTitle);
       await pickType(page, "group");
       await page.getByRole("button", { name: "Add Sub-Question" }).click();
       await page
@@ -137,7 +123,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Coding Actions ${Date.now()}`,
     });
-    await addQuestion(page, faker.lorem.words(3));
+    await addTopLevelQuestion(page, faker.lorem.words(3));
 
     const searchTrigger = page.getByRole("combobox", {
       name: "Search for observation codes",
@@ -180,7 +166,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Options ${Date.now()}`,
     });
-    await addQuestion(page, faker.lorem.words(3));
+    await addTopLevelQuestion(page, faker.lorem.words(3));
     await pickType(page, "choice");
 
     const rows = page.getByRole("row");
@@ -232,7 +218,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Valueset Choice ${Date.now()}`,
     });
-    await addQuestion(page, `Unit choice ${Date.now()}`);
+    await addTopLevelQuestion(page, `Unit choice ${Date.now()}`);
     await pickType(page, "choice");
 
     await test.step("Switch the options editor to Value Set mode", async () => {
@@ -278,20 +264,22 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Display ${stamp}`,
     });
-    await addQuestion(page, displayText);
+    await addTopLevelQuestion(page, displayText);
     await pickType(page, "display");
 
     await page.getByRole("button", { name: "Save Changes" }).click();
     await expectToast(page, "Questionnaire updated successfully");
 
     await page.getByRole("button", { name: "Preview" }).click();
-    // The text renders (label + display paragraph) with no input control
-    // and no note affordance — scoped to the question block because the
-    // outline's search box is also a textbox on the one-scroll canvas.
-    await expect(page.getByText(displayText).first()).toBeVisible();
-    await expect(
-      questionBlock(page, displayText).getByRole("textbox"),
-    ).not.toBeVisible();
+    // Anchor the block first — questionBlock() resolves to zero elements
+    // silently, so a bare negative assertion would pass with the question
+    // missing entirely. Then: no input control inside the block, no note
+    // affordance anywhere (single-question form, page level is stronger).
+    const block = await expectQuestionBlock(page, displayText);
+    // The text renders twice inside the block by design (label + display
+    // paragraph) — assert the label node specifically.
+    await expect(block.locator("label")).toBeVisible();
+    await expect(block.getByRole("textbox")).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "Add note" }),
     ).not.toBeVisible();
@@ -307,7 +295,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Flags ${Date.now()}`,
     });
-    await addQuestion(page, questionTitle);
+    await addTopLevelQuestion(page, questionTitle);
 
     const repeatable = page.getByRole("checkbox", { name: "Repeatable" });
 

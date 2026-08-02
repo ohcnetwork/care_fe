@@ -13,7 +13,7 @@ import {
 
 import { EditPreviewToggle } from "@/components/QuestionnaireV2/builder/EditPreviewToggle";
 import { SaveIssue } from "@/components/QuestionnaireV2/builder/saveValidation";
-import { findQuestionNumber } from "@/components/QuestionnaireV2/shared/questionTree";
+import { numberQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { Question } from "@/types/questionnaire/question";
 import {
@@ -36,6 +36,60 @@ export interface StudioTopBarProps {
   onSave: () => void;
   onDiscard: () => void;
   backPath: string;
+}
+
+function IssuesList({
+  issues,
+  questions,
+  onSelect,
+}: {
+  issues: SaveIssue[];
+  questions: Question[];
+  onSelect: (questionId: string) => void;
+}) {
+  const { t } = useTranslation();
+  // One numbering pass for the whole list — findQuestionNumber would walk
+  // the tree once per issue.
+  const numbers = new Map(
+    numberQuestions(questions).flatMap((item) =>
+      [item, ...item.children].map(({ question, number }) => [
+        question.id,
+        number,
+      ]),
+    ),
+  );
+
+  return (
+    <>
+      <p className="px-2.5 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wide text-gray-400">
+        {t("before_you_save")}
+      </p>
+      <div className="max-h-72 overflow-y-auto">
+        {issues.map(({ question, messageKey }) => (
+          <button
+            key={question.id}
+            type="button"
+            onClick={() => onSelect(question.id)}
+            className="flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left hover:bg-gray-50"
+          >
+            <TriangleAlert
+              aria-hidden
+              className="mt-0.5 size-3.5 shrink-0 text-amber-600"
+            />
+            <span className="min-w-0">
+              <span className="block text-sm font-medium text-gray-900">
+                {t(messageKey)}
+              </span>
+              <span className="block truncate text-xs text-gray-500">
+                {numbers.get(question.id)}{" "}
+                {question.text || t("untitled_question")}
+              </span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </>
+  );
 }
 
 /** The studio header strip: back, identity, save-blocking issues, the
@@ -101,36 +155,17 @@ export function StudioTopBar({
               </Button>
             </PopoverTrigger>
             <PopoverContent align="end" className="w-80 p-1.5">
-              <p className="px-2.5 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wide text-gray-400">
-                {t("before_you_save")}
-              </p>
-              <div className="max-h-72 overflow-y-auto">
-                {issues.map(({ question, messageKey }) => (
-                  <button
-                    key={question.id}
-                    type="button"
-                    onClick={() => {
-                      setIssuesOpen(false);
-                      onSelectIssue(question.id);
-                    }}
-                    className="flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left hover:bg-gray-50"
-                  >
-                    <TriangleAlert
-                      aria-hidden
-                      className="mt-0.5 size-3.5 shrink-0 text-amber-600"
-                    />
-                    <span className="min-w-0">
-                      <span className="block text-sm font-medium text-gray-900">
-                        {t(messageKey)}
-                      </span>
-                      <span className="block truncate text-xs text-gray-500">
-                        {findQuestionNumber(questions, question.id)}{" "}
-                        {question.text || t("untitled_question")}
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </div>
+              {/* A component (not inline .map) so the per-issue numbering
+                  work only runs while the popover is actually mounted —
+                  inline children would be built on every top-bar render. */}
+              <IssuesList
+                issues={issues}
+                questions={questions}
+                onSelect={(questionId) => {
+                  setIssuesOpen(false);
+                  onSelectIssue(questionId);
+                }}
+              />
             </PopoverContent>
           </Popover>
         )}

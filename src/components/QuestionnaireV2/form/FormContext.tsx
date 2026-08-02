@@ -43,10 +43,14 @@ export function useFormRenderer(): FormContextValue {
 
 /**
  * `id → signature` for every non-group question — the key that decides
- * whether an in-progress answer survives a live tree update. Includes the
- * answer options (value + default flag) so editing them re-seeds that
- * question's entry: a changed `initial_selected` reaches the preview, and a
- * recorded answer can't point at an option that no longer exists.
+ * whether an in-progress answer survives a live tree update. Participates:
+ * type/structured_type (a differently-shaped value must not linger),
+ * answer options (value + default flag — a changed `initial_selected` must
+ * reach the preview, and a recorded answer can't point at a removed
+ * option), `repeats` (turning it off collapses rendering to `values[0]`
+ * while enable_when and required validation still scan every entry — extra
+ * entries would be invisible but live), and the answer value set (swapping
+ * sets would leave the old set's `coding` recorded).
  */
 function questionSignatures(questions: Question[]): Map<string, string> {
   const signatures = new Map<string, string>();
@@ -59,9 +63,12 @@ function questionSignatures(questions: Question[]): Map<string, string> {
       const options = (question.answer_option ?? [])
         .map((option) => `${option.value}=${option.initial_selected ? 1 : 0}`)
         .join("|");
+      const valueSet = question.answer_value_set
+        ? `${question.answer_value_set.slug ?? ""}/${question.answer_value_set.external_id ?? ""}`
+        : "";
       signatures.set(
         question.id,
-        `${question.type}:${question.structured_type ?? ""}:${options}`,
+        `${question.type}:${question.structured_type ?? ""}:${question.repeats ? 1 : 0}:${valueSet}:${options}`,
       );
     }
   };
@@ -88,10 +95,17 @@ export function syncResponses(
   const merged: Record<string, QuestionnaireResponse> = {};
   for (const [id, seeded] of Object.entries(fresh)) {
     const existing = previous[id];
+    if (!existing || previousSignatures.get(id) !== nextSignatures.get(id)) {
+      merged[id] = seeded;
+      continue;
+    }
+    // Preserve object identity when nothing about the entry changed, so
+    // each useQuestionResponse derived atom keeps its Jotai bail-out —
+    // a title keystroke in the builder must not re-render every block.
     merged[id] =
-      existing && previousSignatures.get(id) === nextSignatures.get(id)
-        ? { ...existing, link_id: seeded.link_id }
-        : seeded;
+      existing.link_id === seeded.link_id
+        ? existing
+        : { ...existing, link_id: seeded.link_id };
   }
   return merged;
 }
@@ -128,6 +142,14 @@ export function QuestionnaireFormProvider({
   const previousRef = useRef(questionnaire);
   useEffect(() => {
     if (previousRef.current === questionnaire) return;
+    // Metadata-only drafts (Form-settings title/description ride along in
+    // the studio draft) leave the question tree referentially identical —
+    // re-point the questionnaire atom, skip the response merge entirely.
+    if (previousRef.current.questions === questionnaire.questions) {
+      previousRef.current = questionnaire;
+      store.set(questionnaireAtom, questionnaire);
+      return;
+    }
     const previousSignatures = questionSignatures(
       previousRef.current.questions,
     );

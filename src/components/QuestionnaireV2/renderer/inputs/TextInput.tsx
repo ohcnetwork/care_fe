@@ -40,8 +40,6 @@ export function TextInput({
     disabled,
     placeholder: t("enter_details"),
     maxLength: question.max_length,
-    // Merges the field's own border into the note zone's left border —
-    // see QuestionField's outer wrapper for the other half of this pairing.
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       handleChange(e.target.value),
   };

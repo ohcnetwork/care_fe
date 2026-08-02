@@ -60,5 +60,17 @@ test.describe("Questionnaire v2 mobile layout", () => {
         page.getByRole("textbox", { name: "Question Title" }),
       ).toHaveValue("Is the patient stable?");
     });
+
+    await test.step("The mobile add button is the phone's one add path", async () => {
+      // Outline (with its add affordances) is hidden below md and the
+      // canvas append zones only exist at lg — this button is it.
+      await page.getByRole("button", { name: "Add new question" }).click();
+      await expect(
+        page.getByRole("textbox", { name: "Question Title" }),
+      ).toHaveValue("");
+      await expect(
+        page.getByRole("combobox").filter({ hasText: "Untitled Question" }),
+      ).toBeVisible();
+    });
   });
 });

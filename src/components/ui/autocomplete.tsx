@@ -56,6 +56,8 @@ interface AutocompleteProps {
   ref?: React.RefCallback<HTMLButtonElement | null>;
 
   "aria-invalid"?: boolean;
+  id?: string;
+  "aria-labelledby"?: string;
   shortcutId?: string;
 }
 
@@ -200,6 +202,8 @@ export default function Autocomplete({
           <DrawerTrigger asChild>
             <Button
               aria-invalid={props["aria-invalid"]}
+              id={props.id}
+              aria-labelledby={props["aria-labelledby"]}
               title={
                 value
                   ? freeInput
@@ -269,6 +273,8 @@ export default function Autocomplete({
             variant="outline"
             role="combobox"
             aria-invalid={props["aria-invalid"]}
+            id={props.id}
+            aria-labelledby={props["aria-labelledby"]}
             aria-expanded={open}
             className={cn(
               "w-full justify-between",
