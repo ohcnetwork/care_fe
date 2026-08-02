@@ -7,8 +7,8 @@ import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
-import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
+import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
+import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
 /** Ported from the legacy ChoiceQuestion: past this many options the inline
  *  chips give way to a searchable dropdown (`length > 5 ? "dropdown" :

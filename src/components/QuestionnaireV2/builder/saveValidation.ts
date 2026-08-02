@@ -10,7 +10,7 @@ import { Question, QuestionType } from "@/types/questionnaire/question";
  * question with zero feedback. The visibility card excludes them from the
  * target picker, and the save check below blocks legacy data that already
  * targets one. Structured questions stay eligible: they DO record values
- * (StructuredQuestionSlot writes through `updateResponse`), matching the
+ * (StructuredSlot writes through `updateResponse`), matching the
  * legacy editor, which offered every non-group question as a target.
  */
 export const NON_RESPONSE_TYPES: QuestionType[] = ["group", "display"];

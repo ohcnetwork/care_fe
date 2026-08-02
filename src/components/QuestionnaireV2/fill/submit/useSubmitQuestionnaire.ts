@@ -3,11 +3,11 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { collectRequiredErrors } from "@/components/QuestionnaireV2/form/validation";
 import {
   errorsAtom,
   responsesAtom,
-} from "@/components/QuestionnaireV2/renderer/store";
+} from "@/components/QuestionnaireV2/form/engine/store";
+import { collectRequiredErrors } from "@/components/QuestionnaireV2/form/validation";
 
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";

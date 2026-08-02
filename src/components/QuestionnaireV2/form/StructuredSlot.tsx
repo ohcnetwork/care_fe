@@ -7,7 +7,7 @@ import {
   useClearQuestionErrors,
   useQuestionErrors,
   useQuestionResponse,
-} from "@/components/QuestionnaireV2/renderer/store";
+} from "@/components/QuestionnaireV2/form/engine/store";
 import {
   getStructuredTypesVersion,
   subscribeToStructuredTypes,

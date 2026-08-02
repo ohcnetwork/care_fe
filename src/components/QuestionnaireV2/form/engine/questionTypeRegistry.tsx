@@ -20,7 +20,7 @@ export interface RendererInputProps {
   /** DOM id of the question label, for aria-labelledby on grouped controls. */
   labelId: string;
   /**
-   * Index into `response.values` this input edits — QuestionField renders
+   * Index into `response.values` this input edits — QuestionBlock renders
    * one input per entry for repeating questions. Absent → single-entry mode:
    * the input keeps its exact legacy read/replace semantics on `values[0]`.
    */

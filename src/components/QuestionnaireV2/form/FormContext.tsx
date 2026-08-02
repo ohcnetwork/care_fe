@@ -5,7 +5,7 @@ import {
   initializeResponses,
   questionnaireAtom,
   responsesAtom,
-} from "@/components/QuestionnaireV2/renderer/store";
+} from "@/components/QuestionnaireV2/form/engine/store";
 
 // Live-store hooks hosts may need (the studio outline drops
 // enable_when-hidden rows in preview; the fill outline adds completion
@@ -14,7 +14,7 @@ import {
 export {
   useAnsweredQuestionIds,
   useHiddenQuestionIds,
-} from "@/components/QuestionnaireV2/renderer/store";
+} from "@/components/QuestionnaireV2/form/engine/store";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";

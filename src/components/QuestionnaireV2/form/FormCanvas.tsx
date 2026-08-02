@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { useHasVisibleTopLevelQuestions } from "@/components/QuestionnaireV2/renderer/store";
+import { useHasVisibleTopLevelQuestions } from "@/components/QuestionnaireV2/form/engine/store";
 import { countLeafQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -43,10 +43,10 @@ export interface QuestionnaireFormRendererProps extends CanvasSlots {
 }
 
 /**
- * The full renderer: the whole questionnaire on one scroll — top-level
- * groups as section cards, everything live against the per-instance store.
- * This is the module the builder canvas, preview and (next phase) the fill
- * flow all mount; the old paginated renderer stays untouched until removal.
+ * The renderer: the whole questionnaire on one scroll — top-level groups
+ * as section cards, everything live against the per-instance store. The
+ * studio canvas, the read-only previews and the fill flow all mount this
+ * one module; there is no second renderer.
  */
 export function QuestionnaireFormRenderer({
   questionnaire,

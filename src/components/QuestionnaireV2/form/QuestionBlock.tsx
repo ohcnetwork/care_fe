@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
 
-import { emptyEntry } from "@/components/QuestionnaireV2/renderer/inputs/withEntryAt";
-import { QUESTION_TYPE_COMPONENTS } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
-import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/renderer/sanitizeStylingClasses";
+import { emptyEntry } from "@/components/QuestionnaireV2/form/engine/inputs/withEntryAt";
+import { QUESTION_TYPE_COMPONENTS } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
+import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/form/engine/sanitizeStylingClasses";
 import {
   useQuestionEnabled,
   useQuestionErrors,
   useQuestionResponse,
-} from "@/components/QuestionnaireV2/renderer/store";
+} from "@/components/QuestionnaireV2/form/engine/store";
 
 import type { Question } from "@/types/questionnaire/question";
 

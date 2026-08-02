@@ -1,4 +1,4 @@
-import type { RendererSubject } from "@/components/QuestionnaireV2/renderer/types";
+import type { RendererSubject } from "@/components/QuestionnaireV2/form/engine/types";
 
 /**
  * The full renderer's modes. `preview` is interactive without persistence

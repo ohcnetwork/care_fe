@@ -1,7 +1,7 @@
 import {
   entryHasContent,
   initializeResponses,
-} from "@/components/QuestionnaireV2/renderer/store";
+} from "@/components/QuestionnaireV2/form/engine/store";
 import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";

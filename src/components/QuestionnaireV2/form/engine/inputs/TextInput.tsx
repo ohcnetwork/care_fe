@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
-import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
+import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
+import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
 import { withEntryAt } from "./withEntryAt";
 

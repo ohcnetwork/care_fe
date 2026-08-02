@@ -33,7 +33,7 @@ import {
   entryHasContent,
   isQuestionEnabledInState,
   responsesAtom,
-} from "@/components/QuestionnaireV2/renderer/store";
+} from "@/components/QuestionnaireV2/form/engine/store";
 
 import type {
   QuestionnaireResponse,

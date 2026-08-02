@@ -4,7 +4,7 @@ import {
   buildLinkIndex,
   entryHasContent,
   isQuestionEnabledInState,
-} from "@/components/QuestionnaireV2/renderer/store";
+} from "@/components/QuestionnaireV2/form/engine/store";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";

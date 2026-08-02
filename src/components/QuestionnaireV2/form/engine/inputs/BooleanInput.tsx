@@ -2,8 +2,8 @@ import { useTranslation } from "react-i18next";
 
 import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 
-import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
-import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
+import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
+import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
 import { withEntryAt } from "./withEntryAt";
 

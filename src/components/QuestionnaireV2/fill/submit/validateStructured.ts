@@ -3,7 +3,7 @@ import type { TFunction } from "i18next";
 import {
   buildLinkIndex,
   isQuestionEnabledInState,
-} from "@/components/QuestionnaireV2/renderer/store";
+} from "@/components/QuestionnaireV2/form/engine/store";
 import {
   resolveStructuredType,
   structuredDataAny,

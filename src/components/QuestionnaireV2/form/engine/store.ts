@@ -1,7 +1,9 @@
 /**
- * Renderer state scope: `responsesAtom` is the per-instance working state.
- * In preview it stays local; in fill mode the host reads it for submission
- * and autosave. `errorsAtom` is written by the fill submit path
+ * The form engine's state scope — one Jotai store per mounted form,
+ * created by `form/FormContext`'s provider. `responsesAtom` is the
+ * per-instance working state: in preview it stays local; in fill mode the
+ * host reads it for submission and autosave. `errorsAtom` is written by
+ * the fill submit path
  * (`fill/submit/useSubmitFillSession`) with client validation failures
  * and mapped server errors; editing a question's response clears that
  * question's entries (the write path below), so stale errors never outlive
@@ -22,7 +24,6 @@ import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 export const questionnaireAtom = atom<QuestionnaireRead | null>(null);
 export const responsesAtom = atom<Record<string, QuestionnaireResponse>>({});
 export const errorsAtom = atom<QuestionValidationError[]>([]);
-export const activeGroupIndexAtom = atom(0);
 
 /** link_id → question_id for enable_when lookups — pure so non-atom
  *  consumers (form/validation.ts) share the exact same resolution. */
@@ -38,8 +39,9 @@ export function buildLinkIndex(questions: Question[]): Record<string, string> {
   return index;
 }
 
-/** link_id → question_id, for enable_when lookups. */
-export const questionIdByLinkIdAtom = atom((get) => {
+/** link_id → question_id, for enable_when lookups. Internal: consumers
+ *  outside the engine call `buildLinkIndex` on the tree they hold. */
+const questionIdByLinkIdAtom = atom((get) => {
   const questionnaire = get(questionnaireAtom);
   return questionnaire ? buildLinkIndex(questionnaire.questions) : {};
 });
@@ -87,8 +89,9 @@ function normalizeValue(value: unknown): unknown {
   return value;
 }
 
-/** Direct port of QuestionGroup.isQuestionEnabled's `checkCondition`
- *  (src/components/Questionnaire/QuestionTypes/QuestionGroup.tsx:37-103),
+/** Direct port of `checkCondition` from the legacy QuestionGroup's
+ *  isQuestionEnabled (deleted with that stack; see git history for
+ *  `src/components/Questionnaire/QuestionTypes/QuestionGroup.tsx`),
  *  operating on (enableWhen, response) instead of
  *  (enableWhen, questionnaireResponses). Preserves faithfully:
  *  - the unanswered-dependency short-circuit (no recorded values → false,
@@ -240,44 +243,10 @@ export function useQuestionEnabled(question: Question): boolean {
 }
 
 /**
- * Indices of top-level questions that should take part in pagination.
- *
- * The legacy renderer showed the whole questionnaire in one scroll page, so
- * an enable_when-hidden question simply didn't appear — the paginated v2
- * renderer must skip those indices rather than serve blank pages.
- * `disabled_display: "protected"` questions stay included because
- * QuestionField still renders them (greyed) when disabled.
- */
-export function useVisibleTopLevelIndices(): number[] {
-  const visibleIndicesAtom = useMemo(
-    () =>
-      atom((get) => {
-        const questionnaire = get(questionnaireAtom);
-        if (!questionnaire) return [];
-        const responses = get(responsesAtom);
-        const linkIndex = get(questionIdByLinkIdAtom);
-        const indices: number[] = [];
-        questionnaire.questions.forEach((question, index) => {
-          if (
-            question.disabled_display === "protected" ||
-            isQuestionEnabledInState(question, responses, linkIndex)
-          ) {
-            indices.push(index);
-          }
-        });
-        return indices;
-      }),
-    [],
-  );
-  return useAtomValue(visibleIndicesAtom);
-}
-
-/**
  * Ids of every question in the tree (any depth) currently hidden by its
  * enable_when conditions — i.e. disabled and not `disabled_display:
- * "protected"` (protected questions still render, greyed). The tree nav
- * uses this to drop rows for questions that don't exist on the page,
- * including nested children the top-level-only pagination set misses.
+ * "protected"` (protected questions still render, greyed). The tree navs
+ * use this to drop rows for questions that aren't on the canvas.
  */
 export function useHiddenQuestionIds(): Set<string> {
   const hiddenIdsAtom = useMemo(

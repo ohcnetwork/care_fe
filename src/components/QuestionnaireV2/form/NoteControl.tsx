@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 
-import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
+import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
 import { useFormRenderer } from "./FormContext";
 

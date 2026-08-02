@@ -7,8 +7,8 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { Code } from "@/types/base/code/code";
 import { ResponseValue } from "@/types/questionnaire/form";
 
-import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
-import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
+import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
+import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { useValueSetExpansion } from "@/components/QuestionnaireV2/shared/useValueSetExpansion";
 
@@ -66,7 +66,7 @@ export function QuantityInput({
     writeEntry({ type: "quantity", value, unit: newUnit, coding });
   };
 
-  // Merged-row treatment (see QuestionField's bordered wrapper): each control
+  // Merged-row treatment (see QuestionBlock's single-border model): each control
   // keeps its own left/top/bottom border and drops the right edge, so the
   // next zone's left border is the single separator — same pairing DateInput
   // and NumberInput use against the note affordance. Widths live on wrapper
