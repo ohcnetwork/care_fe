@@ -1,3 +1,5 @@
+import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
+
 import { Question, QuestionType } from "@/types/questionnaire/question";
 
 /**
@@ -54,6 +56,17 @@ const SAVE_CHECKS: SaveCheck[] = [
       !question.answer_value_set &&
       (question.answer_option?.length ?? 0) === 0,
     messageKey: "quantity_needs_valueset",
+  },
+  {
+    // A structured question whose type resolves to nothing — neither core
+    // nor a registered plugin. Saving it would persist a question no fill
+    // session can render or submit, so the studio blocks it (the type
+    // reappears the moment its plugin is enabled again).
+    predicate: (question) =>
+      question.type === "structured" &&
+      !!question.structured_type &&
+      !resolveStructuredType(question.structured_type),
+    messageKey: "structured_type_unknown",
   },
   {
     // A visibility condition with no target question selected. Persisting

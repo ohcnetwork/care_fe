@@ -2,7 +2,7 @@ import {
   entryHasContent,
   initializeResponses,
 } from "@/components/QuestionnaireV2/renderer/store";
-import { STRUCTURED_TYPE_REGISTRY } from "@/components/QuestionnaireV2/structured/registry";
+import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
@@ -75,8 +75,12 @@ function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
   let structuredSkipped = false;
   for (const [id, response] of Object.entries(responses)) {
     if (response.structured_type) {
-      const policy = STRUCTURED_TYPE_REGISTRY[response.structured_type];
-      if (policy.draftPolicy === "exclude") {
+      const resolved = resolveStructuredType(response.structured_type);
+      // An unresolvable type (its plugin isn't loaded) is treated as
+      // "exclude": nothing here knows whether its values are serializable,
+      // and a restore would hand them to a component that may never come
+      // back.
+      if (!resolved || resolved.draftPolicy === "exclude") {
         if (response.values.some(entryHasContent)) structuredSkipped = true;
         continue;
       }

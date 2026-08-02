@@ -25,3 +25,29 @@ export const STRUCTURED_QUESTION_TYPES = [
 ] as const;
 
 export type StructuredQuestionType = (typeof STRUCTURED_QUESTION_TYPES)[number];
+
+/**
+ * A structured type contributed at runtime by a federation plugin. Always
+ * namespaced `{plugin_slug}.{type_name}` — bare names stay reserved for
+ * core, so a plugin can never shadow a built-in type. Enforced at
+ * registration (`structured/pluginRegistry.ts`); the template literal here
+ * only documents the shape to the type system.
+ */
+export type PluginStructuredTypeName = `${string}.${string}`;
+
+/**
+ * What a `structured_type` field may hold: a core type or a plugin one.
+ * Keeping the core union as a member means a `switch`/`===` on a core
+ * literal still narrows — the template-literal member never swallows it.
+ */
+export type StructuredTypeValue =
+  StructuredQuestionType | PluginStructuredTypeName;
+
+/** Narrows a `structured_type` back to a core member — the guard anything
+ *  keyed on the closed core union (a total `Record`, a core-only handler
+ *  map) needs now that the field also admits plugin ids. */
+export function isCoreStructuredType(
+  value: string,
+): value is StructuredQuestionType {
+  return (STRUCTURED_QUESTION_TYPES as readonly string[]).includes(value);
+}

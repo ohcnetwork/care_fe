@@ -9,6 +9,7 @@ import { STRUCTURED_REGISTRY } from "@/components/QuestionnaireV2/renderer/struc
 
 import type { ResponseValue } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
+import { isCoreStructuredType } from "@/types/questionnaire/structured";
 
 export function StructuredQuestionSlot({
   question,
@@ -22,9 +23,12 @@ export function StructuredQuestionSlot({
   const [response, updateResponse] = useQuestionResponse(question.id);
   const errors = useQuestionErrors(question.id);
 
-  const entry = question.structured_type
-    ? STRUCTURED_REGISTRY[question.structured_type]
-    : undefined;
+  // This paginated shell predates the plugin registry (form/StructuredSlot
+  // is the live path) — it only ever renders core types.
+  const entry =
+    question.structured_type && isCoreStructuredType(question.structured_type)
+      ? STRUCTURED_REGISTRY[question.structured_type]
+      : undefined;
   if (!entry || !response) return null;
 
   const missing = entry.requires.filter((key) => !subject[key]);

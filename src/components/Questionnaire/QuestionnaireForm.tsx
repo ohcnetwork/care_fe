@@ -42,6 +42,7 @@ import {
 } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { isCoreStructuredType } from "@/types/questionnaire/structured";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 import BackButton from "@/components/Common/BackButton";
@@ -834,15 +835,18 @@ export function QuestionnaireForm({
 
       formsWithValidation.forEach((form) => {
         form.responses.forEach((response) => {
-          if (response.structured_type) {
+          // The legacy handler map only covers core types; a plugin type
+          // never reaches this stack (plugin structured types are a v2
+          // fill feature).
+          if (
+            response.structured_type &&
+            isCoreStructuredType(response.structured_type)
+          ) {
+            const structuredType = response.structured_type;
             const structuredData = response.values?.[0]?.value;
             if (Array.isArray(structuredData) && structuredData.length > 0) {
               structuredPromises.push(
-                getStructuredRequests(
-                  response.structured_type,
-                  structuredData,
-                  context,
-                ),
+                getStructuredRequests(structuredType, structuredData, context),
               );
             }
           }

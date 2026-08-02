@@ -8,7 +8,7 @@ import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { ServiceRequestApplyActivityDefinitionForm } from "@/types/emr/serviceRequest/serviceRequest";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { FileUploadQuestion } from "@/types/files/file";
-import { StructuredQuestionType } from "@/types/questionnaire/structured";
+import { StructuredTypeValue } from "@/types/questionnaire/structured";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 /**
@@ -43,7 +43,7 @@ export type ResponseValue =
 
 export interface QuestionnaireResponse {
   question_id: string;
-  structured_type: StructuredQuestionType | null;
+  structured_type: StructuredTypeValue | null;
   link_id: string;
   values: ResponseValue[];
   note?: string;

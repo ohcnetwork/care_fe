@@ -151,7 +151,8 @@ needs a registry/allowlist entry here, not an ad-hoc reach-in.
    picker and import validation derive from it.
 2. Write `structured/definitions/<type>.tsx`: the input component
    (native, or a typed adapter over an existing widget), `requires`,
-   optional `validate`, `buildRequests` (unique `reference_id` via
+   `subjects` (which questionnaire subject types may carry it), optional
+   `validate`, `buildRequests` (unique `reference_id` via
    `structuredReferenceId`), and an honest `draftPolicy` — `"serialize"`
    only when the values are pure user input that can safely round-trip
    through a local draft.
@@ -160,6 +161,21 @@ needs a registry/allowlist entry here, not an ad-hoc reach-in.
    (`structured/types.ts`) plus the `ResponseValue` variant
    (`src/types/questionnaire/form.ts`).
 4. Add i18n (`structured_type__*`) and backend support.
+
+Plugins contribute types the same way but at runtime: a manifest's
+`structuredQuestionTypes` (`PluginStructuredTypeDefinition`,
+`structured/pluginRegistry.ts`) are registered by `PluginEngine`, and reach
+the picker, preview, fill, validation and submit through the one resolver
+— `resolveStructuredType`. Their ids MUST be namespaced
+`{plugin_slug}.{type_name}` (bare names are core's, enforced at
+registration), their labels are plain manifest strings (plugins own their
+i18n), and their entries are opaque to the host (`unknown[]`) — the
+plugin's own component, `validate` and `buildRequests` are the only code
+that reads them. A questionnaire referencing a type this deployment
+doesn't have degrades instead of breaking: fill shows a "requires a
+plugin" notice, compose skips it, validation blocks only when the question
+is required, drafts exclude it (and say so), and the studio refuses to
+save it.
 
 ## Adding a question type
 

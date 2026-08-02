@@ -2,19 +2,18 @@ import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
-
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
+import type { StructuredTypeValue } from "@/types/questionnaire/structured";
 
 import { QuestionGroup } from "./QuestionTypes/QuestionGroup";
 
 // Questions that should be rendered full width
-const FULL_WIDTH_QUESTION_TYPES: StructuredQuestionType[] = [
+const FULL_WIDTH_QUESTION_TYPES: StructuredTypeValue[] = [
   "medication_request",
   "medication_statement",
   "diagnosis",

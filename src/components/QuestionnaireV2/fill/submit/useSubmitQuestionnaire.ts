@@ -138,7 +138,7 @@ export function useSubmitFillSession({
       const responses = store.get(responsesAtom);
       const clientErrors: QuestionValidationError[] = [
         ...collectRequiredErrors(form.questionnaire.questions, responses, t),
-        ...collectStructuredErrors(form.questionnaire, responses),
+        ...collectStructuredErrors(form.questionnaire, responses, t),
       ];
       store.set(errorsAtom, clientErrors);
       if (clientErrors.length > 0 && !firstError) {

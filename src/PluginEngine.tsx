@@ -15,6 +15,7 @@ import React, { Suspense, useEffect, useMemo, useRef } from "react";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
+import { registerPluginStructuredType } from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import { addOverride } from "@/lib/override";
 import { PlugConfig, PlugConfigMeta } from "@/types/plugConfig";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
@@ -116,7 +117,7 @@ export default function PluginEngine({
     window.__CARE_PLUGIN_RUNTIME__ = deepFreeze({ meta: pluginMeta });
   }, [pluginMeta]);
 
-  // Register plugin overrides
+  // Register plugin overrides and structured question types
   const overrideCleanupRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
@@ -126,9 +127,9 @@ export default function PluginEngine({
 
     // Register new overrides from all loaded plugins
     for (const plugin of pluginsQuery) {
-      if (plugin.isLoading || !plugin.overrides) continue;
+      if (plugin.isLoading) continue;
 
-      for (const override of plugin.overrides) {
+      for (const override of plugin.overrides ?? []) {
         const cleanup = addOverride(override.component, {
           component: override.replacement,
           condition: override.condition,
@@ -137,6 +138,22 @@ export default function PluginEngine({
             override.description ?? `Override from plugin: ${plugin.plugin}`,
         });
         overrideCleanupRef.current.push(cleanup);
+      }
+
+      // Structured question types the plugin contributes. Registration
+      // throws on a non-namespaced id — one malformed definition is logged
+      // and skipped, never fatal to the app.
+      for (const definition of plugin.structuredQuestionTypes ?? []) {
+        try {
+          overrideCleanupRef.current.push(
+            registerPluginStructuredType(definition),
+          );
+        } catch (error) {
+          console.error(
+            `Invalid structured type from plugin ${plugin.plugin}`,
+            error,
+          );
+        }
       }
     }
 

@@ -3,8 +3,8 @@ import {
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/renderer/store";
 import {
-  structuredDataOf,
-  structuredDefinitionFor,
+  resolveStructuredType,
+  structuredDataAny,
 } from "@/components/QuestionnaireV2/structured/registry";
 import type { StructuredBatchEntry } from "@/components/QuestionnaireV2/structured/types";
 
@@ -80,15 +80,22 @@ export async function composeBatch({
       if (question.type === "structured" && question.structured_type) {
         // The whole structured leg only runs for a patient-bound fill.
         if (!patientBound) continue;
-        const type = question.structured_type;
-        const definition = structuredDefinitionFor(type);
+        // The recorded entries must belong to this question's type — the
+        // guard `structuredDataOf` used to carry, kept now that the data
+        // read is untyped.
+        if (response.structured_type !== question.structured_type) continue;
+        const definition = resolveStructuredType(question.structured_type);
+        // A type this deployment doesn't have (plugin disabled) has no
+        // endpoint to post to — skip it; validateStructured is what tells
+        // the clinician, and only when the question was required.
+        if (!definition) continue;
         // A type authored onto a questionnaire whose subject_type it
         // doesn't declare (legacy data — the studio picker now prevents
         // this going forward) never reaches the domain API.
         if (!definition.subjects.includes(questionnaire.subject_type)) {
           continue;
         }
-        const data = structuredDataOf(type, response);
+        const data = structuredDataAny(response);
         if (data.length === 0) continue;
         structuredWork.push(
           definition.buildRequests(data, {
