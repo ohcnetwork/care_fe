@@ -2,7 +2,7 @@
  * Renderer state scope: `responsesAtom` is the per-instance working state.
  * In preview it stays local; in fill mode the host reads it for submission
  * and autosave. `errorsAtom` is written by the fill submit path
- * (`fill/submit/useSubmitQuestionnaire`) with client validation failures
+ * (`fill/submit/useSubmitFillSession`) with client validation failures
  * and mapped server errors; editing a question's response clears that
  * question's entries (the write path below), so stale errors never outlive
  * the answer they flagged.

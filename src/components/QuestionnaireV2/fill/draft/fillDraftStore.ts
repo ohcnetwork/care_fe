@@ -1,42 +1,55 @@
-import { entryHasContent } from "@/components/QuestionnaireV2/renderer/store";
+import {
+  entryHasContent,
+  initializeResponses,
+} from "@/components/QuestionnaireV2/renderer/store";
 import { STRUCTURED_TYPE_REGISTRY } from "@/components/QuestionnaireV2/structured/registry";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type { Question } from "@/types/questionnaire/question";
+import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 import { FILL_DRAFT_PREFIX, isFillDraftExpired } from "./fillDraftCache";
 
 /**
  * Local fill drafts — the crash/reload safety net. Draft data lives in
  * localStorage only under this prefix, scoped per user + subject +
- * questionnaire, TTL-bounded, and swept on login, logout and app update —
- * every eviction hook is deliberate; a new session boundary must join the
- * sweep list.
+ * entry questionnaire, TTL-bounded, and swept on login, logout and app
+ * update — every eviction hook is deliberate; a new session boundary must
+ * join the sweep list.
+ *
+ * One key holds the WHOLE fill session: the route-mounted questionnaire
+ * plus every questionnaire added to the same submission.
  */
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 export interface FillDraftScope {
   userId: string;
   /** encounterId when encounter-bound, else patientId. */
   subjectKey: string;
+  /** The route-mounted questionnaire's id — the session key. */
+  entryQuestionnaireId: string;
+}
+
+export interface DraftFormSnapshot {
   questionnaireId: string;
-  /** `QuestionnaireRead.version` — a version bump invalidates the draft
+  /** `QuestionnaireRead.version` — a version bump invalidates this form
    *  (the read spec exposes no modified_date yet). */
   questionnaireVersion: string;
+  responses: Record<string, QuestionnaireResponse>;
+  structuredSkipped: boolean;
 }
 
 interface StoredFillDraft {
   schemaVersion: number;
   savedAt: string;
   userId: string;
-  questionnaireId: string;
-  questionnaireVersion: string;
   subjectKey: string;
-  responses: Record<string, QuestionnaireResponse>;
-  structuredSkipped: boolean;
+  entryQuestionnaireId: string;
+  forms: DraftFormSnapshot[];
 }
 
 export interface LoadedFillDraft {
-  responses: Record<string, QuestionnaireResponse>;
+  forms: DraftFormSnapshot[];
   savedAt: string;
   /** True when the saved session had structured answers the draft could
    *  not carry (draftPolicy "exclude") — the restore bar says so. */
@@ -44,7 +57,7 @@ export interface LoadedFillDraft {
 }
 
 function draftKey(scope: FillDraftScope): string {
-  return `${FILL_DRAFT_PREFIX}${scope.userId}--${scope.subjectKey}--${scope.questionnaireId}`;
+  return `${FILL_DRAFT_PREFIX}${scope.userId}--${scope.subjectKey}--${scope.entryQuestionnaireId}`;
 }
 
 /**
@@ -73,17 +86,49 @@ function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
   return { safe, structuredSkipped };
 }
 
-/** Persist the working state; an all-empty state removes the key instead
- *  (never store empty drafts — FiltersCache's clean() convention). */
+/** The creation-time merge rule, shared by resume paths: draft entries
+ *  overlay the fresh seed only when the question still exists with the
+ *  same structured_type. */
+export function mergeDraftIntoSeed(
+  questions: Question[],
+  draft: Record<string, QuestionnaireResponse>,
+): Record<string, QuestionnaireResponse> {
+  const seeded = initializeResponses(questions);
+  for (const [id, response] of Object.entries(draft)) {
+    const fresh = seeded[id];
+    if (fresh && fresh.structured_type === response.structured_type) {
+      seeded[id] = { ...response, link_id: fresh.link_id };
+    }
+  }
+  return seeded;
+}
+
+/** Persist the working state of every form in the session; an all-empty
+ *  session removes the key instead (never store empty drafts —
+ *  FiltersCache's clean() convention). */
 export function saveFillDraft(
   scope: FillDraftScope,
-  responses: Record<string, QuestionnaireResponse>,
+  forms: Array<{
+    questionnaire: QuestionnaireRead;
+    responses: Record<string, QuestionnaireResponse>;
+  }>,
 ): void {
-  const { safe, structuredSkipped } = partitionForDraft(responses);
-  const hasContent = Object.values(safe).some(
-    (response) => response.values.some(entryHasContent) || response.note,
-  );
-  if (!hasContent && !structuredSkipped) {
+  const snapshots: DraftFormSnapshot[] = [];
+  let anyContent = false;
+  for (const form of forms) {
+    const { safe, structuredSkipped } = partitionForDraft(form.responses);
+    const hasContent = Object.values(safe).some(
+      (response) => response.values.some(entryHasContent) || response.note,
+    );
+    if (hasContent || structuredSkipped) anyContent = true;
+    snapshots.push({
+      questionnaireId: form.questionnaire.id,
+      questionnaireVersion: String(form.questionnaire.version),
+      responses: safe,
+      structuredSkipped,
+    });
+  }
+  if (!anyContent) {
     clearFillDraft(scope);
     return;
   }
@@ -91,11 +136,9 @@ export function saveFillDraft(
     schemaVersion: SCHEMA_VERSION,
     savedAt: new Date().toISOString(),
     userId: scope.userId,
-    questionnaireId: scope.questionnaireId,
-    questionnaireVersion: scope.questionnaireVersion,
     subjectKey: scope.subjectKey,
-    responses: safe,
-    structuredSkipped,
+    entryQuestionnaireId: scope.entryQuestionnaireId,
+    forms: snapshots,
   };
   try {
     localStorage.setItem(draftKey(scope), JSON.stringify(draft));
@@ -128,33 +171,42 @@ export function reviveDraftResponses(
   return responses;
 }
 
-/** Load the draft for this exact scope; anything mismatched, expired or
- *  corrupt is removed and reported absent. */
+/** Load the draft session for this exact scope; anything mismatched,
+ *  expired or corrupt is removed and reported absent. Only the PRIMARY
+ *  form's version is checked here — added forms are version-checked when
+ *  the host re-fetches them on resume. v1 drafts fail the schemaVersion
+ *  check and are removed; that is the whole migration. */
 export function loadFillDraft(
   scope: FillDraftScope,
+  primaryVersion: string,
 ): LoadedFillDraft | undefined {
   const key = draftKey(scope);
   const raw = localStorage.getItem(key);
   if (!raw) return undefined;
   try {
     const draft = JSON.parse(raw) as StoredFillDraft;
+    const primary = draft.forms?.find(
+      (form) => form.questionnaireId === scope.entryQuestionnaireId,
+    );
     if (
       draft.schemaVersion !== SCHEMA_VERSION ||
       draft.userId !== scope.userId ||
       draft.subjectKey !== scope.subjectKey ||
-      draft.questionnaireId !== scope.questionnaireId ||
-      draft.questionnaireVersion !== scope.questionnaireVersion ||
+      draft.entryQuestionnaireId !== scope.entryQuestionnaireId ||
       isFillDraftExpired(draft.savedAt) ||
-      typeof draft.responses !== "object" ||
-      draft.responses === null
+      !primary ||
+      primary.questionnaireVersion !== primaryVersion
     ) {
       localStorage.removeItem(key);
       return undefined;
     }
+    for (const form of draft.forms) {
+      form.responses = reviveDraftResponses(form.responses);
+    }
     return {
-      responses: reviveDraftResponses(draft.responses),
+      forms: draft.forms,
       savedAt: draft.savedAt,
-      structuredSkipped: draft.structuredSkipped === true,
+      structuredSkipped: draft.forms.some((form) => form.structuredSkipped),
     };
   } catch {
     localStorage.removeItem(key);

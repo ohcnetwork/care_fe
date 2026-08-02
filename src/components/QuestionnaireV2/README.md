@@ -38,16 +38,22 @@ QuestionTypes components live on, adapted behind `structured/`.
   only `form/` in practice now.
 - `fill/` — the fill experience mounted on the encounter/patient
   questionnaire routes (fullscreen shell, two tabs: form canvas + embedded
-  clinical history). `submit/` is the errorsAtom writer: pure
-  `composeBatch` (structured requests from the registry + the
-  questionnaire submit POST + server-draft completion) behind
-  `useSubmitQuestionnaire`, with reference_id-keyed error mapping.
-  `draft/` is the local autosave layer: per-user/subject/questionnaire
-  localStorage drafts (`fillDraftStore`), debounced writes with
-  pagehide/unmount flush (`useFillAutosave`), and the dependency-free
-  sweep module (`fillDraftCache`) that login/signOut/app-update import —
-  drafts must never outlive the session that wrote them, so any new
-  session boundary must call `clearQuestionnaireFillDrafts()`.
+  clinical history). A session may hold SEVERAL questionnaires: the
+  route-mounted one plus any added to the same submission. Each is a
+  `FillFormEntry` (`formSession.ts`) rendered by `FillFormSection` with
+  its own provider/store, handed up to the host by `StoreRegistrar` — the
+  host↔engine surface is that one callback. `submit/` is the errorsAtom
+  writer: pure `composeBatch` (structured requests from the registry + the
+  questionnaire submit POST + server-draft completion) run per form into
+  ONE batch behind `useSubmitFillSession`, with reference_id-keyed error
+  mapping routed back to the owning form's store. `draft/` is the local
+  autosave layer: one localStorage entry per user/subject/entry
+  questionnaire covering every form of the session (`fillDraftStore`,
+  schema v2), debounced writes with pagehide/unmount flush
+  (`useFillSessionAutosave`), and the dependency-free sweep module
+  (`fillDraftCache`) that login/signOut/app-update import — drafts must
+  never outlive the session that wrote them, so any new session boundary
+  must call `clearQuestionnaireFillDrafts()`.
 - `structured/` — the one registration point for structured question
   types. `StructuredTypeDefinition` colocates component (typed adapter
   over the legacy QuestionTypes UI), context `requires`, submit-time

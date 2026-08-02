@@ -1,8 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, X } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Plus, X } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,6 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "@/components/Questionnaire/data/StructuredFormData";
 
-import { QuestionnaireFormProvider } from "@/components/QuestionnaireV2/form/FormContext";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -30,15 +30,24 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import { ClinicalHistoryTab } from "./ClinicalHistoryTab";
 import { DraftRestoreBar } from "./DraftRestoreBar";
-import { FillCanvas } from "./FillCanvas";
+import { FillFormSection } from "./FillFormSection";
 import { FillHeader } from "./FillHeader";
-import { FillOutline } from "./FillOutline";
 import { ServerErrorsPanel } from "./ServerErrorsPanel";
+import type { FormStore } from "./StoreRegistrar";
 import { sweepExpiredFillDrafts } from "./draft/fillDraftCache";
-import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
-import { loadFillDraft, reviveDraftResponses } from "./draft/fillDraftStore";
-import { useFillAutosave } from "./draft/useFillAutosave";
-import { useSubmitQuestionnaire } from "./submit/useSubmitQuestionnaire";
+import type {
+  DraftFormSnapshot,
+  FillDraftScope,
+  LoadedFillDraft,
+} from "./draft/fillDraftStore";
+import {
+  loadFillDraft,
+  mergeDraftIntoSeed,
+  reviveDraftResponses,
+} from "./draft/fillDraftStore";
+import { useFillSessionAutosave } from "./draft/useFillAutosave";
+import type { FillFormEntry } from "./formSession";
+import { useSubmitFillSession } from "./submit/useSubmitQuestionnaire";
 
 interface FillPageProps {
   facilityId?: string;
@@ -66,9 +75,11 @@ function exitTargetFor({
  * The v2 fill experience — the encounter/patient questionnaire data-entry
  * page (successor to EncounterQuestionnaire + the legacy
  * QuestionnaireForm). Two tabs per the reference: the questionnaire
- * canvas (with local autosave) and the patient's clinical history. The
- * host owns the form provider so submit and autosave share the one
- * instance store.
+ * canvas (with local autosave) and the patient's clinical history.
+ *
+ * A session may hold SEVERAL questionnaires (the legacy "add another form
+ * to this submission" capability): each gets its own provider and store,
+ * the host keeps the registry, and autosave/submit operate on the list.
  */
 export default function QuestionnaireFillPage(props: FillPageProps) {
   const { t } = useTranslation();
@@ -151,24 +162,25 @@ export default function QuestionnaireFillPage(props: FillPageProps) {
     };
   }, [continueDraftId, serverDraft, questionnaire]);
 
-  const scope: FillDraftScope | undefined =
-    questionnaire && user
-      ? {
-          userId: user.id,
-          subjectKey: encounterId ?? patientId,
-          questionnaireId: questionnaire.id,
-          questionnaireVersion: String(questionnaire.version),
-        }
-      : undefined;
+  const scope: FillDraftScope | undefined = questionnaire
+    ? {
+        userId: user.id,
+        subjectKey: encounterId ?? patientId,
+        entryQuestionnaireId: questionnaire.id,
+      }
+    : undefined;
 
-  // Loaded once per (user, subject, questionnaire@version) — reruns of this
+  // Loaded once per (user, subject, entry questionnaire) — reruns of this
   // memo after autosave writes don't happen because the deps are stable.
+  // The primary form's version gates the whole session draft.
   const scopeKey = scope
-    ? `${scope.userId}--${scope.subjectKey}--${scope.questionnaireId}--${scope.questionnaireVersion}`
+    ? `${scope.userId}--${scope.subjectKey}--${scope.entryQuestionnaireId}`
     : undefined;
   const localDraft = useMemo<LoadedFillDraft | undefined>(
     () =>
-      scopeKey && scope && !continueDraftId ? loadFillDraft(scope) : undefined,
+      scopeKey && scope && questionnaire && !continueDraftId
+        ? loadFillDraft(scope, String(questionnaire.version))
+        : undefined,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [scopeKey, continueDraftId],
   );
@@ -227,29 +239,24 @@ export default function QuestionnaireFillPage(props: FillPageProps) {
   }
 
   return (
-    <QuestionnaireFormProvider
+    <FillPageBody
       questionnaire={questionnaire}
-      mode="fill"
-      subject={{ patientId, encounterId, facilityId }}
-      initialResponses={
+      patient={patient}
+      encounter={encounter}
+      facilityId={facilityId}
+      patientId={patientId}
+      encounterId={encounterId}
+      subjectType={subjectType}
+      scope={scope}
+      localDraft={localDraft}
+      serverDraftResponses={
         serverDraftState && !serverDraftState.mismatch
           ? serverDraftState.responses
           : undefined
       }
-    >
-      <FillPageBody
-        questionnaire={questionnaire}
-        patient={patient}
-        encounter={encounter}
-        facilityId={facilityId}
-        patientId={patientId}
-        encounterId={encounterId}
-        scope={scope}
-        localDraft={localDraft}
-        continueDraftId={continueDraftId}
-        exitTarget={exitTarget}
-      />
-    </QuestionnaireFormProvider>
+      continueDraftId={continueDraftId}
+      exitTarget={exitTarget}
+    />
   );
 }
 
@@ -291,8 +298,11 @@ interface FillPageBodyProps {
   facilityId?: string;
   patientId: string;
   encounterId?: string;
+  subjectType?: string;
   scope: FillDraftScope | undefined;
   localDraft: LoadedFillDraft | undefined;
+  /** Resumed server draft, seeded into the primary form at creation. */
+  serverDraftResponses?: Record<string, QuestionnaireResponse>;
   continueDraftId?: string;
   exitTarget: string;
 }
@@ -304,12 +314,15 @@ function FillPageBody({
   facilityId,
   patientId,
   encounterId,
+  subjectType,
   scope,
   localDraft,
+  serverDraftResponses,
   continueDraftId,
   exitTarget,
 }: FillPageBodyProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [tab, setTab] = useState<"questionnaire" | "history">("questionnaire");
   // History mounts on first activation and stays mounted after (hidden) —
   // eager mounting would fire its queries and leak its text into the DOM
@@ -317,16 +330,111 @@ function FillPageBody({
   // adapted structured widgets that keep local state.
   const [historyMounted, setHistoryMounted] = useState(false);
 
+  // The session: the route-mounted questionnaire plus anything added to
+  // the same submission. Each entry owns one provider and one store.
+  const [forms, setForms] = useState<FillFormEntry[]>(() => [
+    {
+      key: questionnaire.id,
+      questionnaire,
+      isPrimary: true,
+      initialResponses: serverDraftResponses,
+    },
+  ]);
+  const storesRef = useRef(new Map<string, FormStore>());
+  const [storesVersion, setStoresVersion] = useState(0);
+  const handleStore = useCallback((key: string, store: FormStore | null) => {
+    if (store) storesRef.current.set(key, store);
+    else storesRef.current.delete(key);
+    setStoresVersion((version) => version + 1);
+  }, []);
+  const getStore = useCallback((key: string) => storesRef.current.get(key), []);
+
+  const addQuestionnaire = useCallback(
+    (
+      added: QuestionnaireRead,
+      initialResponses?: Record<string, QuestionnaireResponse>,
+    ) => {
+      setForms((previous) =>
+        previous.some((form) => form.key === added.id)
+          ? previous
+          : [
+              ...previous,
+              {
+                key: added.id,
+                questionnaire: added,
+                isPrimary: false,
+                initialResponses,
+              },
+            ],
+      );
+    },
+    [],
+  );
+  const removeForm = useCallback((key: string) => {
+    setForms((previous) =>
+      previous.filter((form) => form.key !== key || form.isPrimary),
+    );
+  }, []);
+
+  /** Resume for the non-primary snapshots: re-fetch each questionnaire,
+   *  drop the ones whose version moved on (their answers can no longer be
+   *  trusted onto the new tree), and seed the rest. */
+  const onResumeAddedForms = useCallback(
+    (snapshots: DraftFormSnapshot[]) => {
+      void (async () => {
+        for (const snapshot of snapshots) {
+          try {
+            const fetched = await queryClient.fetchQuery({
+              queryKey: questionnaireKeys.detail(snapshot.questionnaireId),
+              queryFn: query(questionnaireApi.get, {
+                pathParams: { id: snapshot.questionnaireId },
+              }),
+            });
+            if (String(fetched.version) !== snapshot.questionnaireVersion) {
+              toast.warning(
+                t("fill_draft_form_dropped", { title: fetched.title }),
+              );
+              continue;
+            }
+            addQuestionnaire(
+              fetched,
+              mergeDraftIntoSeed(fetched.questions, snapshot.responses),
+            );
+          } catch {
+            toast.warning(
+              t("fill_draft_form_dropped", { title: snapshot.questionnaireId }),
+            );
+          }
+        }
+      })();
+    },
+    [queryClient, addQuestionnaire, t],
+  );
+
+  // The outline lives in one shared aside; each form portals its own
+  // section into it (it must render inside that form's provider).
+  const [outlineHost, setOutlineHost] = useState<HTMLElement | null>(null);
+
+  const subject = useMemo(
+    () => ({ patientId, encounterId, facilityId }),
+    [patientId, encounterId, facilityId],
+  );
+
   // Local autosave stands down while resuming a SERVER draft — the server
   // copy is authoritative there and keeps its own lifecycle.
-  const autosave = useFillAutosave({
+  const autosave = useFillSessionAutosave({
     scope: continueDraftId ? undefined : scope,
+    forms,
+    getStore,
+    storesVersion,
     restoredDraft: localDraft,
+    onResumeAddedForms,
   });
 
-  const { submit, isPending, serverErrors } = useSubmitQuestionnaire({
-    questionnaire,
-    subject: { patientId, encounterId, facilityId },
+  const { submit, isPending, serverErrors } = useSubmitFillSession({
+    forms,
+    getStore,
+    subject,
     continueDraftId,
     onSuccess: () => {
       // Order matters: finishDraft flushes the pristine state before the
@@ -396,12 +504,13 @@ function FillPageBody({
               canSubmit
             />
             <div className="flex min-h-0 flex-1">
-              <aside className="hidden w-72 shrink-0 overflow-y-auto border-r border-gray-200 p-3 lg:block">
-                <FillOutline />
-              </aside>
+              <aside
+                ref={setOutlineHost}
+                className="hidden w-72 shrink-0 overflow-y-auto border-r border-gray-200 p-3 lg:block"
+              />
               <section
                 aria-label={t("form_canvas")}
-                className="min-w-0 flex-1 overflow-y-auto px-4 py-5 md:px-8"
+                className="min-w-0 flex-1 space-y-6 overflow-y-auto px-4 py-5 md:px-8"
               >
                 {autosave.restoredDraft && (
                   <DraftRestoreBar
@@ -412,7 +521,40 @@ function FillPageBody({
                   />
                 )}
                 <ServerErrorsPanel errors={serverErrors} />
-                <FillCanvas />
+                {forms.map((form) => (
+                  <FillFormSection
+                    key={form.key}
+                    form={form}
+                    subject={subject}
+                    outlineHost={outlineHost}
+                    onStore={handleStore}
+                    onRemove={forms.length > 1 ? removeForm : undefined}
+                  />
+                ))}
+                {/* A resumed SERVER draft is one questionnaire's
+                    submission by construction — no adding to it. */}
+                {!continueDraftId && (
+                  <div className="mx-auto flex w-full max-w-3xl justify-center">
+                    <QuestionnaireSearch
+                      subjectType={subjectType}
+                      onSelect={(selected) => addQuestionnaire(selected)}
+                      // The default trigger is a `role="combobox"` button,
+                      // and combobox takes no name from its contents — it
+                      // would reach screen readers unnamed. This one is a
+                      // plain button, so its label IS its name.
+                      trigger={
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="border-primary-600 text-primary-800"
+                        >
+                          <Plus className="size-4" />
+                          {t("add_questionnaire")}
+                        </Button>
+                      }
+                    />
+                  </div>
+                )}
               </section>
             </div>
           </div>

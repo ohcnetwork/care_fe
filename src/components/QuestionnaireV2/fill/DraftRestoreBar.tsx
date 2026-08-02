@@ -11,9 +11,10 @@ import type { LoadedFillDraft } from "./draft/fillDraftStore";
  * Shown once per session when the page detects a local draft: prompts the
  * clinician to consciously accept or discard the stale-looking data
  * instead of silently seeding the form. Says when the draft was saved,
- * whether structured answers couldn't ride along, and offers Resume
- * (apply the draft) or Discard (delete it) — X only hides the prompt and
- * keeps the stored draft for the next visit.
+ * how many questionnaires beyond the route-mounted one it would bring
+ * back, whether structured answers couldn't ride along, and offers
+ * Resume (apply the draft) or Discard (delete it) — X only hides the
+ * prompt and keeps the stored draft for the next visit.
  */
 export function DraftRestoreBar({
   draft,
@@ -36,6 +37,13 @@ export function DraftRestoreBar({
             time: formatDateTime(draft.savedAt, "DD MMM YYYY, hh:mm A"),
           })}
         </p>
+        {draft.forms.length > 1 && (
+          <p className="text-amber-800">
+            {t("fill_draft_includes_added_forms", {
+              count: draft.forms.length - 1,
+            })}
+          </p>
+        )}
         {draft.structuredSkipped && (
           <p className="text-amber-800">{t("fill_draft_structured_skipped")}</p>
         )}
