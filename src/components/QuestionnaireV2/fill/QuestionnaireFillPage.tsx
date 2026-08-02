@@ -311,6 +311,11 @@ function FillPageBody({
 }: FillPageBodyProps) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<"questionnaire" | "history">("questionnaire");
+  // History mounts on first activation and stays mounted after (hidden) —
+  // eager mounting would fire its queries and leak its text into the DOM
+  // for sessions that never open it, while unmount-on-switch would blank
+  // adapted structured widgets that keep local state.
+  const [historyMounted, setHistoryMounted] = useState(false);
 
   // Local autosave stands down while resuming a SERVER draft — the server
   // copy is authoritative there and keeps its own lifecycle.
@@ -324,7 +329,9 @@ function FillPageBody({
     subject: { patientId, encounterId, facilityId },
     continueDraftId,
     onSuccess: () => {
-      autosave.clearDraft();
+      // Order matters: finishDraft flushes the pristine state before the
+      // redirect so useNavigationPrompt doesn't block it.
+      autosave.finishDraft();
       navigate(exitTarget);
     },
   });
@@ -338,7 +345,10 @@ function FillPageBody({
     <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-gray-100">
       <Tabs
         value={tab}
-        onValueChange={(value) => setTab(value as typeof tab)}
+        onValueChange={(value) => {
+          if (value === "history") setHistoryMounted(true);
+          setTab(value as typeof tab);
+        }}
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="flex shrink-0 items-center justify-between gap-2 px-4 pt-3 md:px-6">
@@ -366,9 +376,10 @@ function FillPageBody({
           </Button>
         </div>
 
-        {/* Both panels stay mounted (forceMount + hidden): some adapted
-            structured widgets keep local state they never rehydrate from
-            the response — an unmount on tab switch would blank them. */}
+        {/* The form panel stays mounted across switches (forceMount +
+            hidden): some adapted structured widgets keep local state they
+            never rehydrate from the response — an unmount would blank
+            them. */}
         <TabsContent
           value="questionnaire"
           forceMount
@@ -408,10 +419,12 @@ function FillPageBody({
 
         <TabsContent
           value="history"
-          forceMount
+          forceMount={historyMounted || undefined}
           className="mt-3 min-h-0 flex-1 overflow-y-auto px-4 pb-6 data-[state=inactive]:hidden md:px-6"
         >
-          <ClinicalHistoryTab patientId={patientId} facilityId={facilityId} />
+          {historyMounted && (
+            <ClinicalHistoryTab patientId={patientId} facilityId={facilityId} />
+          )}
         </TabsContent>
       </Tabs>
     </div>

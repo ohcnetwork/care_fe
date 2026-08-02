@@ -1,5 +1,6 @@
 import { useStore } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 import {
   initializeResponses,
@@ -39,6 +40,9 @@ export function useFillAutosave({ scope, restoredDraft }: UseFillAutosaveArgs) {
   // The subscription effect reads these without re-subscribing.
   const scopeRef = useRef(scope);
   scopeRef.current = scope;
+  // Set on successful submit: the draft served its purpose, so neither the
+  // pending debounce nor the unmount/pagehide flush may re-save it.
+  const finishedRef = useRef(false);
 
   const scopeKey = scope
     ? `${scope.userId}--${scope.subjectKey}--${scope.questionnaireId}--${scope.questionnaireVersion}`
@@ -53,16 +57,21 @@ export function useFillAutosave({ scope, restoredDraft }: UseFillAutosaveArgs) {
       clearTimeout(timer);
       timer = undefined;
       const current = scopeRef.current;
-      if (current) saveFillDraft(current, store.get(responsesAtom));
+      if (current && !finishedRef.current) {
+        saveFillDraft(current, store.get(responsesAtom));
+      }
     };
 
     const unsubscribe = store.sub(responsesAtom, () => {
+      if (finishedRef.current) return;
       setDirty(true);
       clearTimeout(timer);
       timer = setTimeout(() => {
         timer = undefined;
         const current = scopeRef.current;
-        if (current) saveFillDraft(current, store.get(responsesAtom));
+        if (current && !finishedRef.current) {
+          saveFillDraft(current, store.get(responsesAtom));
+        }
       }, AUTOSAVE_DEBOUNCE_MS);
     });
 
@@ -75,9 +84,19 @@ export function useFillAutosave({ scope, restoredDraft }: UseFillAutosaveArgs) {
     };
   }, [store, scopeKey]);
 
-  const clearDraft = useCallback(() => {
+  /** Successful submit: drop the stored draft, stop all further saves,
+   *  and clear the dirty flag SYNCHRONOUSLY (flushSync) — the success
+   *  handler navigates right after this, and `useNavigationPrompt` must
+   *  already see a pristine page or it blocks the redirect (the same
+   *  reason the legacy form flushSync'd `setIsDirty(false)`). */
+  const finishDraft = useCallback(() => {
+    finishedRef.current = true;
     const current = scopeRef.current;
     if (current) clearFillDraft(current);
+    flushSync(() => {
+      setDirty(false);
+      setRestoreDismissed(true);
+    });
   }, []);
 
   const discardRestoredDraft = useCallback(() => {
@@ -97,6 +116,6 @@ export function useFillAutosave({ scope, restoredDraft }: UseFillAutosaveArgs) {
     discardRestoredDraft,
     dismissRestoreBar,
     /** For the submit-success path: the draft served its purpose. */
-    clearDraft,
+    finishDraft,
   };
 }

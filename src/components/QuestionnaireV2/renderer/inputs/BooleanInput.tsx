@@ -21,14 +21,19 @@ export function BooleanInput({
   const value = entry?.type === "boolean" ? entry.value : undefined;
 
   const handleChange = (next: boolean) => {
+    // Legacy RadioInput contract: re-clicking the selected option CLEARS a
+    // non-required boolean (enable_when `exists` sources depend on this).
+    const clearing = value === next && !question.required;
     if (valueIndex === undefined) {
-      updateResponse({ values: [{ type: "boolean", value: next }] });
+      updateResponse({
+        values: clearing ? [] : [{ type: "boolean", value: next }],
+      });
       return;
     }
     updateResponse({
       values: withEntryAt(response?.values, valueIndex, {
         type: "boolean",
-        value: next,
+        value: clearing ? undefined : next,
       }),
     });
   };

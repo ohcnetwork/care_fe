@@ -11,6 +11,7 @@ import {
   verifyLabelledValues,
   verifySubmittedValues,
 } from "tests/helper/questionnaire";
+import { questionBlock } from "tests/helper/questionnaireV2";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -35,9 +36,7 @@ test.describe("Enable When — Boolean Operators", () => {
     await page.goto(
       `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
     );
-    await expect(
-      page.getByText("Has Allergies", { exact: true }),
-    ).toBeVisible();
+    await expect(questionBlock(page, "Has Allergies")).toBeVisible();
   });
 
   // ──────────────────────────────────────────────

@@ -9,6 +9,7 @@ import {
   submitForm,
   verifySubmittedValues,
 } from "tests/helper/questionnaire";
+import { questionBlock } from "tests/helper/questionnaireV2";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -39,7 +40,7 @@ test.describe("Enable When — String Operators", () => {
     await page.goto(
       `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
     );
-    await expect(page.getByText("Patient Name", { exact: true })).toBeVisible();
+    await expect(questionBlock(page, "Patient Name")).toBeVisible();
   });
 
   // ──────────────────────────────────────────────
