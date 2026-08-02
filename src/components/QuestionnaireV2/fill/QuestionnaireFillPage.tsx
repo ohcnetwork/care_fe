@@ -25,7 +25,10 @@ import type { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
-import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
+import type {
+  QuestionnaireRead,
+  SubjectType,
+} from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import { ClinicalHistoryTab } from "./ClinicalHistoryTab";
@@ -61,6 +64,11 @@ interface FillPageProps {
    *  mounting route can supply (see `fill/subject.ts`). */
   subject: FillSubject;
   questionnaireId?: string;
+  /** What the questionnaire pickers filter on, when that differs from the
+   *  subject's own type. Only the encounter-CREATION mount needs it: its
+   *  subject is the patient (no encounter exists yet), but the forms it
+   *  offers alongside are the encounter's. Defaults to `subject.type`. */
+  pickerSubjectType?: SubjectType;
 }
 
 /**
@@ -78,6 +86,7 @@ interface FillPageProps {
 export default function QuestionnaireFillPage({
   subject,
   questionnaireId,
+  pickerSubjectType = subject.type,
 }: FillPageProps) {
   const { t } = useTranslation();
   const [{ continue_draft: continueDraftParam }] = useQueryParams();
@@ -204,7 +213,7 @@ export default function QuestionnaireFillPage({
           {/* Default onSelect navigates to `questionnaire/{id}` relative to
               the current path, which lands on this mount's :questionnaireId
               route for every subject. */}
-          <QuestionnaireSearch subjectType={subject.type} />
+          <QuestionnaireSearch subjectType={pickerSubjectType} />
         </div>
       </FillShell>
     );
@@ -254,6 +263,7 @@ export default function QuestionnaireFillPage({
       patient={patient}
       encounter={encounter}
       subject={subject}
+      pickerSubjectType={pickerSubjectType}
       scope={scope}
       localDraft={localDraft}
       serverDraftResponses={
@@ -303,6 +313,7 @@ interface FillPageBodyProps {
   patient?: PatientRead;
   encounter?: EncounterRead;
   subject: FillSubject;
+  pickerSubjectType: SubjectType;
   scope: FillDraftScope | undefined;
   localDraft: LoadedFillDraft | undefined;
   /** Resumed server draft, seeded into the primary form at creation. */
@@ -316,6 +327,7 @@ function FillPageBody({
   patient,
   encounter,
   subject,
+  pickerSubjectType,
   scope,
   localDraft,
   serverDraftResponses,
@@ -559,7 +571,7 @@ function FillPageBody({
                 {!continueDraftId && (
                   <div className="mx-auto flex w-full max-w-3xl justify-center">
                     <QuestionnaireSearch
-                      subjectType={subject.type}
+                      subjectType={pickerSubjectType}
                       onSelect={(selected) => addQuestionnaire(selected)}
                       // The default trigger is a `role="combobox"` button,
                       // and combobox takes no name from its contents — it

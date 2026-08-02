@@ -125,7 +125,7 @@ export async function composeBatch({
             method: "POST",
             reference_id: questionnaire.id,
             body: {
-              resource_id: subjectResourceId(patientBound),
+              resource_id: subjectResourceId(subject),
               encounter: renderCtx.encounterId,
               patient: patientBound.patientId,
               results,

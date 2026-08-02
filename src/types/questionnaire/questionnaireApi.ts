@@ -65,7 +65,9 @@ export default {
   },
   /** Resource subjects (location/device/facility) — no patient, no
    *  encounter. `care/emr/resources/questionnaire_response/resource_spec.py:
-   *  ResourceQuestionnaireSubmitRequest`. */
+   *  ResourceQuestionnaireSubmitRequest`.
+   *  Documentation/type parity only — composeBatch builds this URL for the
+   *  batch endpoint by hand. */
   submitResource: {
     path: "/api/v1/questionnaire/{id}/submit_resource/",
     method: HttpMethod.POST,

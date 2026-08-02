@@ -125,8 +125,10 @@ const consultationRoutes: AppRoutes = {
       );
     return acc;
   }, {}),
-  // Encounter CREATION: there is no encounter yet, so the subject is the
-  // patient; the fixed "encounter" questionnaire is what makes one.
+  // Encounter CREATION: there is no encounter yet, so the SUBJECT is the
+  // patient (that is what the submission records against); the fixed
+  // "encounter" questionnaire is what makes one. The picker keeps offering
+  // encounter-subject forms, as it did before the subject union landed.
   "/facility/:facilityId/patient/:patientId/consultation": ({
     facilityId,
     patientId,
@@ -134,6 +136,7 @@ const consultationRoutes: AppRoutes = {
     <QuestionnaireFillPage
       subject={{ type: "patient", facilityId, patientId }}
       questionnaireId="encounter"
+      pickerSubjectType="encounter"
     />
   ),
   "/facility/:facilityId/patient/:patientId/questionnaire": ({

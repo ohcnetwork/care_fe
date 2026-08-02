@@ -1,13 +1,17 @@
 import { faker } from "@faker-js/faker";
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
-import { questionBlock } from "tests/helper/questionnaireV2";
+import {
+  getQuestionnaireIdBySlug,
+  questionBlock,
+} from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 /** Backend E2E fixture: subject_type "location", one string question. */
+const LOCATION_QUESTIONNAIRE_SLUG = "e2e-subject-location";
 const LOCATION_QUESTIONNAIRE_TITLE = "E2E Location Questionnaire";
 /** An encounter-subject fixture — must NOT be offered on a location fill. */
 const ENCOUNTER_QUESTIONNAIRE_TITLE = "Respiratory Status";
@@ -44,9 +48,16 @@ async function createAndOpenLocation(
 
 test.describe("Location questionnaire fill", () => {
   let facilityId: string;
+  let questionnaireId: string;
 
-  test.beforeEach(() => {
+  test.beforeEach(async () => {
     facilityId = getFacilityId();
+    // Resolve the fixture BEFORE driving any UI: a missing fixture then
+    // fails with the helper's "reload backend E2E fixtures" error instead
+    // of an inscrutable empty picker.
+    questionnaireId = await getQuestionnaireIdBySlug(
+      LOCATION_QUESTIONNAIRE_SLUG,
+    );
   });
 
   test("fills and submits a location-subject questionnaire via submit_resource", async ({
@@ -68,15 +79,28 @@ test.describe("Location questionnaire fill", () => {
     await test.step("the picker is scoped to location-subject questionnaires", async () => {
       await page.getByRole("combobox").click();
       const search = page.getByPlaceholder("Search Forms");
+
+      // Positive control FIRST: this picker session can find things, and
+      // the location-subject fixture is one of them.
+      await search.fill(LOCATION_QUESTIONNAIRE_TITLE);
+      await expect(
+        page.getByRole("option", { name: LOCATION_QUESTIONNAIRE_TITLE }),
+      ).toBeVisible();
+
+      // Only now is an empty result meaningful: an encounter-subject
+      // questionnaire is filtered out by subject_type, not by a dead picker.
       await search.fill(ENCOUNTER_QUESTIONNAIRE_TITLE);
+      await expect(
+        page.getByRole("option", { name: ENCOUNTER_QUESTIONNAIRE_TITLE }),
+      ).toHaveCount(0);
       await expect(page.getByText("No Results Found")).toBeVisible();
 
-      await search.fill("E2E Location");
+      await search.fill(LOCATION_QUESTIONNAIRE_TITLE);
       await page
         .getByRole("option", { name: LOCATION_QUESTIONNAIRE_TITLE })
         .click();
       await page.waitForURL(
-        new RegExp(`/locations/${location.id}/questionnaire/[0-9a-f-]+$`),
+        `**/facility/${facilityId}/locations/${location.id}/questionnaire/${questionnaireId}`,
       );
     });
 
@@ -104,7 +128,9 @@ test.describe("Location questionnaire fill", () => {
         requests: { url: string; body: { resource_id: string } }[];
       };
       expect(body.requests).toHaveLength(1);
-      expect(body.requests[0].url).toContain("/submit_resource/");
+      expect(body.requests[0].url).toContain(
+        `/api/v1/questionnaire/${questionnaireId}/submit_resource/`,
+      );
       expect(body.requests[0].body.resource_id).toBe(location.id);
       // Resource subjects carry no patient/encounter on the submission.
       expect(body.requests[0].body).not.toHaveProperty("patient");
@@ -123,23 +149,22 @@ test.describe("Location questionnaire fill", () => {
   }) => {
     const location = await createAndOpenLocation(page, facilityId);
     await page.goto(
-      `/facility/${facilityId}/locations/${location.id}/questionnaire`,
+      `/facility/${facilityId}/locations/${location.id}/questionnaire/${questionnaireId}`,
     );
-    await page.getByRole("combobox").click();
-    await page.getByPlaceholder("Search Forms").fill("E2E Location");
-    await page
-      .getByRole("option", { name: LOCATION_QUESTIONNAIRE_TITLE })
-      .click();
     await expect(questionBlock(page, "Notes")).toBeVisible();
 
-    // Nothing answered — the batch never leaves the page.
+    // Counted from before the click, so nothing can slip past unobserved.
     let batchCalls = 0;
     page.on("request", (request) => {
       if (request.url().includes("/api/v1/batch_requests/")) batchCalls += 1;
     });
     await page.getByRole("button", { name: "Save Changes" }).click();
     await expectToast(page, /Nothing to submit yet/);
+
+    // A negative assertion read at toast time proves nothing — let the page
+    // go quiet first, so a late request would still be counted.
+    await page.waitForLoadState("networkidle");
     expect(batchCalls).toBe(0);
-    expect(page.url()).toContain("/questionnaire/");
+    expect(page.url()).toContain(`/questionnaire/${questionnaireId}`);
   });
 });
