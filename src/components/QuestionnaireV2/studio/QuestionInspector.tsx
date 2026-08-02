@@ -28,6 +28,7 @@ import { QuestionTypePicker } from "@/components/QuestionnaireV2/builder/Questio
 import { SubQuestionsList } from "@/components/QuestionnaireV2/builder/SubQuestionsList";
 import { VisibilityConditionsCard } from "@/components/QuestionnaireV2/builder/VisibilityConditionsCard";
 import { QuestionTypeBadge } from "@/components/QuestionnaireV2/shared/QuestionTypeBadge";
+import { BehaviourToggles } from "./BehaviourToggles";
 
 import { Question } from "@/types/questionnaire/question";
 
@@ -147,43 +148,53 @@ export function QuestionInspector({
           </TabsList>
 
           <TabsContent value="question" className="space-y-4 p-4">
-            <div className="w-full">
+            {/* Reference field order: question text, helper text, answer
+                type. The visible label keeps the accessible name every spec
+                relies on ("Question Title"); the type picker stays the
+                first combobox even though it now sits third — the two
+                fields above it are plain textboxes. */}
+            <div className="space-y-1.5">
+              <Label
+                htmlFor={`question-title-${question.id}`}
+                className="text-xs font-medium text-gray-600"
+              >
+                {t("question_title")}
+              </Label>
+              <Input
+                id={`question-title-${question.id}`}
+                value={question.text}
+                placeholder={t("enter_question_title")}
+                onChange={(e) => onChange({ text: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label
+                htmlFor={`question-helper-${question.id}`}
+                className="text-xs font-medium text-gray-600"
+              >
+                {t("helper_text")}
+                <span className="font-normal text-gray-400">
+                  {" "}
+                  · {t("helper_text_hint")}
+                </span>
+              </Label>
+              <Input
+                id={`question-helper-${question.id}`}
+                value={question.description ?? ""}
+                placeholder={t("helper_text_placeholder")}
+                onChange={(e) => onChange({ description: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="block text-xs font-medium text-gray-600">
+                {t("answer_type")}
+              </span>
               <QuestionTypePicker
                 value={question.type}
                 structuredType={question.structured_type}
                 onChange={handleTypeChange}
-              />
-            </div>
-
-            {/* The label stays for a11y/tests ("Question Title" textbox)
-                but is visually hidden; the underline appears on focus. */}
-            <div className="flex items-baseline gap-2">
-              <span className="shrink-0 text-sm font-medium text-gray-400">
-                {number}
-              </span>
-              <div className="min-w-0 flex-1">
-                <Label
-                  htmlFor={`question-title-${question.id}`}
-                  className="sr-only"
-                >
-                  {t("question_title")}
-                </Label>
-                <Input
-                  id={`question-title-${question.id}`}
-                  value={question.text}
-                  placeholder={t("enter_question_title")}
-                  onChange={(e) => onChange({ text: e.target.value })}
-                  className="h-auto rounded-none border-0 border-b border-transparent px-0 py-1.5 text-lg font-medium shadow-none focus:border-gray-900 focus:ring-0 focus-visible:border-gray-900 hover:border-gray-200 placeholder:text-gray-300"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>{t("description")}</Label>
-              <Input
-                value={question.description ?? ""}
-                placeholder={t("type_description")}
-                onChange={(e) => onChange({ description: e.target.value })}
               />
             </div>
 
@@ -205,16 +216,8 @@ export function QuestionInspector({
               </div>
             )}
 
-            <div className="border-t border-gray-100 pt-4">
-              <p className="mb-2 text-xs font-medium text-gray-500">
-                {t("behaviour")}
-              </p>
-              <BehaviourSettingsCard
-                question={question}
-                onChange={onChange}
-                bare
-                sections={["behaviour"]}
-              />
+            <div className="border-t border-gray-100 pt-1">
+              <BehaviourToggles question={question} onChange={onChange} />
             </div>
 
             {question.type === "group" && (

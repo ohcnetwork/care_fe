@@ -246,16 +246,13 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     });
 
     await test.step("Pick an existing valueset", async () => {
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Select a value set" })
-        .click();
-      const search = page.locator('[data-slot="command-input"]').first();
-      await search.fill("UCUM");
-      await page.getByRole("option", { name: "UCUM Units" }).click();
-      await expect(
-        page.getByRole("combobox").filter({ hasText: "UCUM Units" }),
-      ).toBeVisible();
+      // Scoped through the shared helper — a page-level
+      // [data-slot="command-input"].first() can race the type picker's
+      // closing popover portal (the documented flake).
+      await pickValuesetFromAutocomplete(page, {
+        search: "UCUM",
+        optionName: "UCUM Units",
+      });
     });
 
     await test.step("Save and preview renders a valueset search input", async () => {

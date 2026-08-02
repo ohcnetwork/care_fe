@@ -135,11 +135,28 @@ export function QuestionTypePicker({
           // picker (the control is self-describing), so without this the
           // combobox would be named by its current value alone.
           aria-label={t("question_type")}
-          className="w-full justify-between gap-2 px-2 font-normal"
+          className="h-auto w-full justify-between gap-2 px-2 py-1.5 font-normal"
         >
-          <span className="flex min-w-0 items-center gap-2">
+          <span className="flex min-w-0 items-center gap-2.5 text-left">
             <TypeIconTile type={value} />
-            <span className="truncate">{t(`question_type__${value}`)}</span>
+            <span className="flex min-w-0 flex-col">
+              <span className="truncate text-sm font-semibold text-gray-900">
+                {value === "structured" && structuredType
+                  ? t(`structured_type__${structuredType}`)
+                  : t(`question_type__${value}`)}
+              </span>
+              {/* The reference trigger carries the type's hint line so the
+                  picker reads as a described choice, not a bare value. */}
+              <span className="truncate text-xs text-gray-500">
+                {value === "structured" && structuredType
+                  ? t("question_type__structured")
+                  : t(
+                      SUPPORTED_QUESTION_TYPES.find(
+                        (entry) => entry.value === value,
+                      )?.description ?? "",
+                    )}
+              </span>
+            </span>
           </span>
           <ChevronDown className="size-4 shrink-0 opacity-50" />
         </Button>
