@@ -50,6 +50,7 @@ import {
   reviveDraftResponses,
 } from "./draft/fillDraftStore";
 import { useFillSessionAutosave } from "./draft/useFillAutosave";
+import { useSaveServerDraft } from "./draft/useSaveServerDraft";
 import type { FillFormEntry } from "./formSession";
 import type { FillSubject } from "./subject";
 import {
@@ -464,6 +465,20 @@ function FillPageBody({
     },
   });
 
+  // The deliberate server draft (feature-flagged). Same exit as a
+  // submission: the server copy supersedes the local autosave one, so
+  // finishDraft drops it and flushes the page pristine before we navigate.
+  const serverDraftSave = useSaveServerDraft({
+    forms,
+    getStore,
+    subject,
+    continueDraftId,
+    onSaved: () => {
+      autosave.finishDraft();
+      navigate(exitTarget);
+    },
+  });
+
   useNavigationPrompt(
     autosave.dirty && !import.meta.env.DEV,
     t("unsaved_changes"),
@@ -541,6 +556,12 @@ function FillPageBody({
               onSubmit={() => void submit()}
               isSubmitting={isPending}
               canSubmit
+              onSaveDraft={
+                serverDraftSave.canSaveDraft
+                  ? serverDraftSave.saveDraft
+                  : undefined
+              }
+              isSavingDraft={serverDraftSave.isSavingDraft}
             />
             <div className="flex min-h-0 flex-1">
               <aside

@@ -36,6 +36,10 @@ interface FillHeaderProps {
   onSubmit: () => void;
   isSubmitting: boolean;
   canSubmit: boolean;
+  /** Provided only when this session may be saved as a SERVER draft (see
+   *  `draft/useSaveServerDraft`); absent → the affordance is not offered. */
+  onSaveDraft?: () => void;
+  isSavingDraft?: boolean;
 }
 
 /**
@@ -53,6 +57,8 @@ export function FillHeader({
   onSubmit,
   isSubmitting,
   canSubmit,
+  onSaveDraft,
+  isSavingDraft = false,
 }: FillHeaderProps) {
   const { t } = useTranslation();
 
@@ -160,10 +166,20 @@ export function FillHeader({
           >
             {t("cancel")}
           </Button>
+          {onSaveDraft && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onSaveDraft}
+              disabled={isSubmitting || isSavingDraft}
+            >
+              {t("save_as_draft")}
+            </Button>
+          )}
           <Button
             type="button"
             onClick={onSubmit}
-            disabled={isSubmitting || !canSubmit}
+            disabled={isSubmitting || isSavingDraft || !canSubmit}
             className="border border-emerald-900/80 bg-gradient-to-b from-emerald-700 to-emerald-800 text-white shadow-sm hover:from-emerald-800 hover:to-emerald-900"
           >
             <Check className="size-4" />

@@ -60,7 +60,13 @@ questions, that is the bug.
   (`useFillSessionAutosave`), and the dependency-free sweep module
   (`fillDraftCache`) that login/signOut/app-update import — drafts must
   never outlive the session that wrote them, so any new session boundary
-  must call `clearQuestionnaireFillDrafts()`.
+  must call `clearQuestionnaireFillDrafts()`. Two kinds of draft coexist
+  and must not be confused: that local one is the crash safety net, while
+  `useSaveServerDraft` is the deliberate "Save as draft" — a
+  `form_submission` record (feature flag `enableQuestionnaireDraft`,
+  patient-bound + single-form + structured-free, the legacy conditions)
+  that ends the session, survives the device, and is what the encounter
+  overview's drafts card lists and `?continue_draft=` resumes.
 - `structured/` — the one registration point for structured question
   types. `StructuredTypeDefinition` colocates component (typed adapter
   over the legacy QuestionTypes UI), context `requires`, submit-time
