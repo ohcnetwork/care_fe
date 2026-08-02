@@ -184,7 +184,10 @@ export function QuestionOverviewList({
                     </span>
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-2 pl-6">
-                    <QuestionTypeBadge type={question.type} />
+                    <QuestionTypeBadge
+                      type={question.type}
+                      structuredType={question.structured_type}
+                    />
                     {subQuestions.length > 0 && (
                       <>
                         <Badge variant="secondary">

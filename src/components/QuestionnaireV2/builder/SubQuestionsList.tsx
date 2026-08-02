@@ -156,7 +156,10 @@ export function SubQuestionsList({
                 )}
               </button>
               <div className="flex shrink-0 gap-1">
-                <QuestionTypeBadge type={child.type} />
+                <QuestionTypeBadge
+                  type={child.type}
+                  structuredType={child.structured_type}
+                />
                 {child.required && (
                   <Badge variant="secondary">{t("required")}</Badge>
                 )}

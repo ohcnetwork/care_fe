@@ -93,13 +93,20 @@ export function QuestionTypePicker({
 
   const renderTypeRow = (entry: (typeof SUPPORTED_QUESTION_TYPES)[number]) => {
     const type = entry.value;
+    // The Structured row names the ACTIVE structured type — without it the
+    // only way to see which one is selected is drilling into the sub-list.
+    const activeStructured =
+      type === "structured" && value === "structured" && structuredType
+        ? t(`structured_type__${structuredType}`)
+        : undefined;
     return (
       <CommandItem
         key={type}
         value={type}
         // Let the search box match what the user actually sees (the
-        // translated label), not just the internal type token.
-        keywords={[t(`question_type__${type}`)]}
+        // translated label and, for Structured, its active sub-type), not
+        // just the internal type token.
+        keywords={[t(`question_type__${type}`), activeStructured ?? ""]}
         onSelect={() => handleSelectType(type)}
         className="items-start gap-3 py-2"
       >
@@ -108,8 +115,13 @@ export function QuestionTypePicker({
           <span className="font-bold text-gray-900">
             {t(`question_type__${type}`)}
           </span>
-          <span className="truncate text-xs italic text-gray-500">
-            {t(entry.description)}
+          <span
+            className={cn(
+              "truncate text-xs italic text-gray-500",
+              activeStructured && "not-italic font-medium text-indigo-700",
+            )}
+          >
+            {activeStructured ?? t(entry.description)}
           </span>
         </span>
         {value === type && <Check className="ml-auto size-4 shrink-0" />}

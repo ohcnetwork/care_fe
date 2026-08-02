@@ -102,7 +102,10 @@ export function QuestionInspector({
               </span>
             )}
           </span>
-          <QuestionTypeBadge type={question.type} />
+          <QuestionTypeBadge
+            type={question.type}
+            structuredType={question.structured_type}
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

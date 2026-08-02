@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 
 import { cn } from "@/lib/utils";
 
+import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
+
 import { QuestionType } from "@/types/questionnaire/question";
 
 const TYPE_CLASSES: Partial<Record<QuestionType, string>> = {
@@ -19,7 +21,15 @@ const TYPE_CLASSES: Partial<Record<QuestionType, string>> = {
   structured: "bg-indigo-100 text-indigo-800",
 };
 
-export function QuestionTypeBadge({ type }: { type: QuestionType }) {
+export function QuestionTypeBadge({
+  type,
+  structuredType,
+}: {
+  type: QuestionType;
+  /** Names the concrete structured type ("Medication Request") instead of
+   *  the generic "Structured" when the question carries one. */
+  structuredType?: StructuredQuestionType;
+}) {
   const { t } = useTranslation();
   return (
     <Badge
@@ -29,7 +39,9 @@ export function QuestionTypeBadge({ type }: { type: QuestionType }) {
         TYPE_CLASSES[type] ?? "bg-gray-100 text-gray-700",
       )}
     >
-      {t(`question_type__${type}`)}
+      {type === "structured" && structuredType
+        ? t(`structured_type__${structuredType}`)
+        : t(`question_type__${type}`)}
     </Badge>
   );
 }
