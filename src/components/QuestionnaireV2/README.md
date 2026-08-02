@@ -3,45 +3,52 @@
 Management, authoring, rendering and filling for questionnaires. Authoring
 mounts at `/admin/questionnaires` and
 `/facility/{id}/settings/questionnaires`; the fill experience mounts on the
-encounter/patient questionnaire routes (`ConsultationRoutes.tsx`). It is
-the successor to the legacy questionnaire UI in
-`src/components/Questionnaire` — the legacy fill stack
-(`QuestionnaireForm`, `EncounterQuestionnaire`, `QuestionInput`) is now
-route-orphaned and scheduled for deletion after review; its structured
-QuestionTypes components live on, adapted behind `structured/`.
+encounter/patient questionnaire routes (`ConsultationRoutes.tsx`). It
+replaced the legacy questionnaire UI in `src/components/Questionnaire`:
+the legacy fill stack (`QuestionnaireForm`, `EncounterQuestionnaire`,
+`QuestionRenderer`, `QuestionInput` and the simple input components) is
+deleted. What survives there is the allowlist below — chiefly the
+structured `QuestionTypes/*` components, adapted behind `structured/`.
+
+There is exactly ONE renderer (`form/`) and one engine
+(`form/engine/`). If you find yourself writing a second display path for
+questions, that is the bug.
 
 ## Directory map
 
 - `manage/` — list, create, detail, versions, clone; shared form schema
   (`questionnaireFormSchema.ts`) and the save mutation
   (`useUpdateQuestionnaire.ts`).
-- `builder/` — the previous question-editor shell plus the model layer the
-  studio still runs on: `builderReducer.ts` is the single source of edit
-  state (a `Question[]` tree + selection + dirty flag); every edit flows
-  through `dispatch`. Save-time rules live in `saveValidation.ts`. The old
-  page shell (`QuestionnaireBuilderPage`) is unmounted — the routes now
-  mount `studio/` — and is scheduled for removal after review; the editor
-  cards (type picker, options, behaviour, visibility, coding,
-  sub-questions) live on as the studio's inspector internals.
+- `builder/` — the edit model the studio runs on: `builderReducer.ts` is
+  the single source of edit state (a `Question[]` tree + selection + dirty
+  flag); every edit flows through `dispatch`. Save-time rules live in
+  `saveValidation.ts`. The editor cards (type picker, options, behaviour,
+  visibility, coding, sub-questions) are the studio's inspector internals;
+  the old page shell is gone (the routes mount `studio/`).
 - `studio/` — the WYSIWYG builder mounted at `{basePath}/:id/edit`:
   left outline, live canvas (rendered by `form/`), right inspector. May
   import from `builder/` (model + cards), `manage/` (metadata form
   pieces), `shared/` and `form/`.
-- `form/` — the full renderer (`QuestionnaireFormRenderer`): the whole
+- `form/` — the renderer (`QuestionnaireFormRenderer`): the whole
   questionnaire on one scroll, live-synced per-instance store (edits merge
   into responses instead of wiping them), a chrome/decoration seam for the
   studio canvas and the fill page's width policy, and the fill seams
   (`validation.ts`, mode union, creation-time `initialResponses`).
-  Shares the engine pieces of `renderer/` (store atoms, inputs,
-  registries, sanitizer); the inputs are co-owned — they are
-  host-layout-free (each control carries its own full border) and serve
-  only `form/` in practice now.
-- `fill/` — the fill experience mounted on the encounter/patient
+  - `form/engine/` — the headless half every host shares: the jotai store
+    and enable_when resolution (`store.ts`), the type→component map
+    (`questionTypeRegistry.tsx`), the inputs (`inputs/`, host-layout-free
+    — each control carries its own full border), the class sanitizer
+    (`sanitizeStylingClasses.ts`) and `RendererSubject` (`types.ts`).
+    Nothing here renders layout; `form/` and `fill/` are its consumers.
+- `fill/` — the fill experience mounted on the encounter/patient/resource
   questionnaire routes (fullscreen shell, two tabs: form canvas + embedded
-  clinical history). A session may hold SEVERAL questionnaires: the
-  route-mounted one plus any added to the same submission. Each is a
-  `FillFormEntry` (`formSession.ts`) rendered by `FillFormSection` with
-  its own provider/store, handed up to the host by `StoreRegistrar` — the
+  clinical history). What it is filling FOR is `subject.ts`'s `FillSubject`
+  union (encounter/patient/location/device…); `rendererSubjectOf` flattens
+  it into the engine's `RendererSubject` and `subjectKeyOf` scopes drafts.
+  A session may hold SEVERAL questionnaires: the route-mounted one plus any
+  added to the same submission. Each is a `FillFormEntry`
+  (`formSession.ts`) rendered by `FillFormSection` with its own
+  provider/store, handed up to the host by `StoreRegistrar` — the
   host↔engine surface is that one callback. `submit/` is the errorsAtom
   writer: pure `composeBatch` (structured requests from the registry + the
   questionnaire submit POST + server-draft completion) run per form into
@@ -60,16 +67,6 @@ QuestionTypes components live on, adapted behind `structured/`.
   `validate`, `buildRequests` and `draftPolicy`; `registry.ts` is total
   and key-correlated over `StructuredQuestionType`, so a new union member
   refuses to compile until its definition exists.
-- `renderer/` — the previous paginated display shell. Its engine files
-  (`store.ts`, `inputs/`, `questionTypeRegistry.tsx`,
-  `sanitizeStylingClasses.ts`, `structured/registry.tsx`) are shared with
-  `form/`; its shell files (`QuestionnaireRenderer`, `QuestionField`,
-  `QuestionGroupCard`, `TopLevelCard`, `RendererFooter`,
-  `RendererContext`, `NoteAffordance`, `StructuredQuestionSlot`) have no
-  mounted consumer left — the revision page now renders through `form/` —
-  and only the (equally unmounted) old builder page still imports them.
-  Both go in the post-review deletion, at which point the engine files
-  relocate out of `renderer/`.
 - `shared/` — presentation primitives and the pure tree utilities
   (`questionTree.ts`), plus `buildUpdateBody.ts` and
   `downloadQuestionnaireJson.ts`. `manage/` and `builder/` depend on
@@ -88,20 +85,21 @@ Pages never read route params. The router injects a `QuestionnaireScope`
 
 ## Renderer
 
-Public surface: import `QuestionnaireRenderer` and `renderer/types` only
-(legacy shell), or — for the full renderer — `form/FormCanvas`
-(`QuestionnaireFormRenderer` / `QuestionnaireFormCanvas`),
-`form/FormContext`, `form/chrome` (the decoration seam the studio canvas
-implements) and `form/types`. The store, context and registries are
-internal — `form/` is the one sanctioned second consumer of `renderer/`'s
-engine files, pending their relocation when the old shell is removed.
+Public surface: `form/FormCanvas` (`QuestionnaireFormRenderer` /
+`QuestionnaireFormCanvas`), `form/FormContext` (the provider plus the
+live-store hooks it re-exports), `form/chrome` (the decoration seam the
+studio canvas implements) and `form/types`. `form/engine/` is internal:
+hosts outside `form/` and `fill/` must not reach into the store or the
+registries — if you need something from them, re-export it through
+`form/FormContext` so the surface stays one module wide.
 
-`QuestionnaireRendererProvider` creates one jotai store per instance,
-seeded at creation (never observed empty) and re-seeded only when the
-questionnaire identity changes. React context carries the immutable mount
-config (mode/subject/questionnaire identity); the atoms are the reactive
-copy selectors read. `responsesAtom` is local-only and `errorsAtom` has no
-writer until the fill/submit path lands (see the header of `store.ts`).
+`QuestionnaireFormProvider` creates one jotai store per instance, seeded
+at creation (never observed empty, `initialResponses` applied there) and
+live-merged — not re-seeded — when the questionnaire identity changes, so
+in-progress answers survive an edit in the studio. React context carries
+the immutable mount config (mode/subject/questionnaire); the atoms are the
+reactive copy selectors read. `errorsAtom`'s only writer is
+`fill/submit/` (see the header of `form/engine/store.ts`).
 
 Updates are full-body PUTs composed by `shared/buildUpdateBody.ts` from the
 cached detail entry — `useUpdateQuestionnaire` writes `setQueryData` before
@@ -112,8 +110,8 @@ export file.
 
 ## Frozen contracts — do not "fix"
 
-- `evaluateEnableWhen` (`renderer/store.ts`) is a behavior-exact port of the
-  legacy `QuestionGroup.isQuestionEnabled`: unanswered dependency → false
+- `evaluateEnableWhen` (`form/engine/store.ts`) is a behavior-exact port
+  of the legacy `QuestionGroup.isQuestionEnabled`: unanswered dependency → false
   for every operator; comparison runs over ALL of the dependent question's
   values; `normalizeValue` (booleans → "Yes"/"No", numbers → strings) is
   applied unconditionally before any operator. The only deliberate addition:
@@ -125,7 +123,7 @@ export file.
   builder load migrates legacy true/false via
   `migrateLegacyBooleanEnableWhen`).
 - enable_when resolution goes through `isQuestionEnabledInState`
-  (`renderer/store.ts`) — never re-derive it from `evaluateEnableWhen`;
+  (`form/engine/store.ts`) — never re-derive it from `evaluateEnableWhen`;
   the required-field pass in `form/validation.ts` consumes the same
   helper, so exactly one resolution exists.
 - `styling_metadata.classes` decorates the question's outer container;
@@ -139,10 +137,14 @@ export file.
 v2 may import from `src/components/Questionnaire` only: `ValueSetSelect`,
 `SelectOrCreateValueset`, `data/StructuredFormData` (fixed
 pseudo-questionnaires), `QuestionnaireSearch` (the fill picker state), the
-`QuestionTypes/*` structured components (exclusively via
+`QuestionTypes/*` structured components — exclusively via
 `structured/definitions/*`, whose typed adapters replaced the renderer's
-old "one permitted `any`"), and `OrgSelector`. A new legacy dependency
-needs a registry/allowlist entry here, not an ad-hoc reach-in.
+old "one permitted `any`" — and `OrgSelector`. Everything else in that
+directory (`QuestionLabel`, `FieldError`, `EntitySelectionDrawer`,
+`ValueSetSearchContent`, the response-template sheets) exists only because
+those structured components use it; nothing in v2 may import it directly.
+A new legacy dependency needs an allowlist entry here, not an ad-hoc
+reach-in.
 
 ## Adding a structured question type
 
@@ -185,12 +187,12 @@ save it.
 2. Give the type an icon in `shared/questionTypeIcons.ts`
    (`QUESTION_TYPE_ICONS` is a total record — it will not compile without
    one). The picker's tiles and the tree nav's row icons both render it.
-3. Implement a renderer input (`renderer/inputs/`) implementing
+3. Implement an engine input (`form/engine/inputs/`) implementing
    `RendererInputProps`; read the response via a discriminant check on
    `values[valueIndex ?? 0].type` (no casts), write positionally through
    `withEntryAt` when `valueIndex` is set (repeats renders one input per
-   entry), and register it in `questionTypeRegistry.tsx`. Structured
-   sub-types register in `structured/registry.tsx` instead.
+   entry), and register it in `form/engine/questionTypeRegistry.tsx`.
+   Structured sub-types register in `structured/registry.ts` instead.
 4. Add i18n keys (`question_type__*`, description) to
    `public/locale/en.json`.
 
@@ -209,6 +211,9 @@ save it.
 
 ## Tests
 
-Playwright: `tests/facility/settings/questionnaires/` and
-`tests/admin/questionnaires/` (shared helpers in
-`tests/helper/questionnaireV2.ts`).
+Playwright — authoring: `tests/facility/settings/questionnaires/` and
+`tests/admin/questionnaires/`. Fill:
+`tests/facility/patient/encounter/fill/` (page, validation, autosave,
+multi-form), `tests/facility/patient/encounter/structuredQuestions/`, and
+`tests/facility/{location,device}Questionnaire.spec.ts` for the
+resource-subject mounts. Shared helpers: `tests/helper/questionnaireV2.ts`.
