@@ -26,12 +26,17 @@ export function FillFormSection({
   form,
   subject,
   outlineHost,
+  outlineLabel,
   onStore,
   onRemove,
 }: {
   form: FillFormEntry;
   subject: RendererSubject;
   outlineHost: HTMLElement | null;
+  /** Accessible name for this form's outline landmark. The host passes
+   *  the questionnaire title once a session holds more than one form, so
+   *  the stacked navs stay distinguishable. */
+  outlineLabel?: string;
   onStore: (key: string, store: FormStore | null) => void;
   onRemove?: (key: string) => void;
 }) {
@@ -50,7 +55,7 @@ export function FillFormSection({
             <p className="mb-1 truncate px-2 text-xs font-semibold uppercase text-gray-500">
               {form.questionnaire.title}
             </p>
-            <FillOutline />
+            <FillOutline ariaLabel={outlineLabel} />
           </div>,
           outlineHost,
         )}

@@ -14,8 +14,14 @@ import { QuestionTreeNav } from "@/components/QuestionnaireV2/shared/QuestionTre
  * ones a dot — and enable_when-hidden rows dropped, exactly like the
  * canvas. Selecting a row scrolls its block into view via the renderer's
  * `data-question-id` anchors.
+ *
+ * `ariaLabel` names the nav landmark: a multi-questionnaire session
+ * renders one outline per form into the same aside, and repeating the
+ * generic name would leave a screen reader with several
+ * indistinguishable "Questions" landmarks — the host passes each form's
+ * title there instead.
  */
-export function FillOutline() {
+export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
   const { t } = useTranslation();
   const { questionnaire } = useFormRenderer();
   const hiddenIds = useHiddenQuestionIds();
@@ -23,7 +29,7 @@ export function FillOutline() {
 
   return (
     <QuestionTreeNav
-      ariaLabel={t("questions")}
+      ariaLabel={ariaLabel ?? t("questions")}
       questions={questionnaire.questions}
       activeId={null}
       hiddenIds={hiddenIds}

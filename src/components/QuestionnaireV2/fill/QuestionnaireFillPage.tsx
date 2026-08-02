@@ -527,6 +527,9 @@ function FillPageBody({
                     form={form}
                     subject={subject}
                     outlineHost={outlineHost}
+                    outlineLabel={
+                      forms.length > 1 ? form.questionnaire.title : undefined
+                    }
                     onStore={handleStore}
                     onRemove={forms.length > 1 ? removeForm : undefined}
                   />

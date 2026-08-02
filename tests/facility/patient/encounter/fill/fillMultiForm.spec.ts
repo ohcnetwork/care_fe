@@ -39,6 +39,23 @@ async function addQuestionnaire(page: Page, title: RegExp) {
   await page.getByRole("option", { name: title }).click();
 }
 
+/**
+ * How many forms the ONE persisted session draft currently holds.
+ * Inspected directly because React flushes passive effects after the DOM
+ * commit — a DOM-only assertion can win the race against the autosave
+ * write, and these specs are precisely about what reaches storage.
+ */
+async function draftFormCount(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const key = Object.keys(localStorage).find((entry) =>
+      entry.startsWith("care_qn_fill_draft--"),
+    );
+    const raw = key ? localStorage.getItem(key) : null;
+    if (!raw) return 0;
+    return (JSON.parse(raw) as { forms?: unknown[] }).forms?.length ?? 0;
+  });
+}
+
 test.describe("Fill page multi-questionnaire sessions", () => {
   let fillUrl: string;
   let primaryId: string;
@@ -133,6 +150,130 @@ test.describe("Fill page multi-questionnaire sessions", () => {
         "textbox",
       ),
     ).toHaveValue(noteB);
+  });
+
+  test("Resume re-persists the whole session, so leaving without typing keeps both forms", async ({
+    page,
+  }) => {
+    const noteA = `A-${faker.string.alphanumeric(10)}`;
+    const noteB = `B-${faker.string.alphanumeric(10)}`;
+
+    await questionBlock(page, "Note on Bilateral Air Entry")
+      .getByRole("textbox")
+      .fill(noteA);
+    await addQuestionnaire(page, ADDED_TITLE);
+    await questionBlock(page, "Any Suggestions for Improvement")
+      .getByRole("textbox")
+      .fill(noteB);
+
+    await page.reload();
+    await expect(
+      questionBlock(page, "Is bilateral air entry present?"),
+    ).toBeVisible();
+    await page.getByRole("button", { name: /resume/i }).click();
+    await expect(page.locator("[data-form-key]")).toHaveCount(2);
+
+    // Resuming re-adds the drafted forms asynchronously, so the draft has
+    // to be re-persisted once they register — otherwise the stored
+    // session silently shrinks back to the primary form.
+    await expect.poll(() => draftFormCount(page)).toBe(2);
+
+    // Leave WITHOUT typing anything after Resume.
+    await page.reload();
+    await expect(
+      questionBlock(page, "Is bilateral air entry present?"),
+    ).toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+    await expect(
+      page.getByText("Includes 1 added questionnaire."),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: /resume/i }).click();
+    await expect(page.locator("[data-form-key]")).toHaveCount(2);
+    await expect(
+      questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox"),
+    ).toHaveValue(noteA);
+    await expect(
+      questionBlock(page, "Any Suggestions for Improvement").getByRole(
+        "textbox",
+      ),
+    ).toHaveValue(noteB);
+  });
+
+  test("removing an added form drops it from the persisted draft", async ({
+    page,
+  }) => {
+    const noteA = `A-${faker.string.alphanumeric(10)}`;
+    const noteB = `B-${faker.string.alphanumeric(10)}`;
+
+    await questionBlock(page, "Note on Bilateral Air Entry")
+      .getByRole("textbox")
+      .fill(noteA);
+    await addQuestionnaire(page, ADDED_TITLE);
+    await questionBlock(page, "Any Suggestions for Improvement")
+      .getByRole("textbox")
+      .fill(noteB);
+
+    // Wait until the added form's answers are actually SAVED, so the
+    // removal below has no pending debounce to ride on — the flush would
+    // otherwise mask a removal that never reaches storage on its own.
+    await expect.poll(() => draftFormCount(page)).toBe(2);
+
+    const addedForm = page.locator(`[data-form-key="${addedId}"]`);
+    await addedForm.getByRole("button", { name: "Remove" }).click();
+    await expect(page.locator("[data-form-key]")).toHaveCount(1);
+
+    // The removal must reach the stored draft, not just the page.
+    await expect.poll(() => draftFormCount(page)).toBe(1);
+    await page.reload();
+    await expect(
+      questionBlock(page, "Is bilateral air entry present?"),
+    ).toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+    await expect(page.getByText("Includes 1 added questionnaire.")).toHaveCount(
+      0,
+    );
+
+    await page.getByRole("button", { name: /resume/i }).click();
+    await expect(page.locator("[data-form-key]")).toHaveCount(1);
+    await expect(
+      questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox"),
+    ).toHaveValue(noteA);
+  });
+
+  test("emptying the session while the restore prompt is un-acted keeps the draft", async ({
+    page,
+  }) => {
+    const noteA = `A-${faker.string.alphanumeric(10)}`;
+    const noteB = `B-${faker.string.alphanumeric(10)}`;
+
+    await questionBlock(page, "Note on Bilateral Air Entry")
+      .getByRole("textbox")
+      .fill(noteA);
+    await page.reload();
+    await expect(
+      questionBlock(page, "Is bilateral air entry present?"),
+    ).toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+
+    // Work in an added form WITHOUT answering the prompt, then drop it —
+    // the session goes empty while the stored draft is still the
+    // clinician's to accept or discard, so it must survive.
+    await addQuestionnaire(page, ADDED_TITLE);
+    await questionBlock(page, "Any Suggestions for Improvement")
+      .getByRole("textbox")
+      .fill(noteB);
+    await page
+      .locator(`[data-form-key="${addedId}"]`)
+      .getByRole("button", { name: "Remove" })
+      .click();
+    await expect(page.locator("[data-form-key]")).toHaveCount(1);
+
+    await page.reload();
+    await expect(
+      questionBlock(page, "Is bilateral air entry present?"),
+    ).toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
   });
 
   test("remove affordance drops a non-primary form", async ({ page }) => {

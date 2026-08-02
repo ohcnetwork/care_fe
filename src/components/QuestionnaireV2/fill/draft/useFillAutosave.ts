@@ -9,16 +9,15 @@ import {
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
 
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
-import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
-
 import type {
   DraftFormSnapshot,
   FillDraftScope,
+  FillSessionFormState,
   LoadedFillDraft,
 } from "./fillDraftStore";
 import {
   clearFillDraft,
+  fillSessionHasDraftContent,
   mergeDraftIntoSeed,
   saveFillDraft,
 } from "./fillDraftStore";
@@ -72,6 +71,10 @@ export function useFillSessionAutosave({
   // handler well after mount.
   const restoredDraftRef = useRef(restoredDraft);
   restoredDraftRef.current = restoredDraft;
+  // A detected draft the clinician has neither resumed nor discarded is
+  // still theirs to decide about — see persistNow.
+  const restorePendingRef = useRef(false);
+  restorePendingRef.current = !!restoredDraft && !restoreDismissed;
 
   const scopeKey = scope
     ? `${scope.userId}--${scope.subjectKey}--${scope.entryQuestionnaireId}`
@@ -79,11 +82,8 @@ export function useFillSessionAutosave({
 
   /** One snapshot per REGISTERED form — a form whose section hasn't
    *  mounted yet simply doesn't contribute. */
-  const snapshotAll = useCallback((): Array<{
-    questionnaire: QuestionnaireRead;
-    responses: Record<string, QuestionnaireResponse>;
-  }> => {
-    const snapshots = [];
+  const snapshotAll = useCallback((): FillSessionFormState[] => {
+    const snapshots: FillSessionFormState[] = [];
     for (const form of forms) {
       const store = getStore(form.key);
       if (!store) continue;
@@ -95,22 +95,48 @@ export function useFillSessionAutosave({
     return snapshots;
   }, [forms, getStore]);
 
+  /**
+   * Write the whole session to its one draft entry. Never runs after a
+   * successful submit. While the restore prompt is still un-acted an
+   * EMPTY session is a no-op instead of a save: `saveFillDraft` clears the
+   * key when nothing has content, so removing the added form that held the
+   * only answers would otherwise delete the stored draft before the
+   * clinician ever answered the prompt.
+   */
+  const persistNow = useCallback(() => {
+    const current = scopeRef.current;
+    if (!current || finishedRef.current) return;
+    const snapshots = snapshotAll();
+    if (restorePendingRef.current && !fillSessionHasDraftContent(snapshots)) {
+      return;
+    }
+    saveFillDraft(current, snapshots);
+  }, [snapshotAll]);
+
+  /**
+   * The session SHAPE changed (a form was added or removed) or a store
+   * (un)registered — persist now. The debounce cannot cover this: on an
+   * update React runs the previous effect's cleanup BEFORE the new
+   * sections' StoreRegistrars register, so that flush would write a
+   * snapshot missing the just-added forms and silently shrink the stored
+   * draft (the Resume path re-adds drafted forms exactly this way).
+   * Gated on `dirty`, because an untouched session is empty and an empty
+   * save takes `saveFillDraft`'s clear-on-empty branch.
+   */
+  useEffect(() => {
+    if (!scopeKey || !dirty) return;
+    persistNow();
+  }, [scopeKey, dirty, storesVersion, persistNow]);
+
   useEffect(() => {
     if (!scopeKey) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
-
-    const save = () => {
-      const current = scopeRef.current;
-      if (current && !finishedRef.current) {
-        saveFillDraft(current, snapshotAll());
-      }
-    };
 
     const flush = () => {
       if (timer === undefined) return;
       clearTimeout(timer);
       timer = undefined;
-      save();
+      persistNow();
     };
 
     // One shared debounce across every form of the session — the draft is
@@ -125,7 +151,7 @@ export function useFillSessionAutosave({
           clearTimeout(timer);
           timer = setTimeout(() => {
             timer = undefined;
-            save();
+            persistNow();
           }, AUTOSAVE_DEBOUNCE_MS);
         }),
       ];
@@ -139,7 +165,7 @@ export function useFillSessionAutosave({
       for (const unsubscribe of unsubscribers) unsubscribe();
     };
     // storesVersion re-runs the subscription when a form (un)registers.
-  }, [scopeKey, storesVersion, forms, getStore, snapshotAll]);
+  }, [scopeKey, storesVersion, forms, getStore, persistNow]);
 
   /** Successful submit: drop the stored draft, stop all further saves,
    *  and clear the dirty flag SYNCHRONOUSLY (flushSync) — the success

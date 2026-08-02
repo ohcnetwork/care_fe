@@ -103,16 +103,17 @@ export function mergeDraftIntoSeed(
   return seeded;
 }
 
-/** Persist the working state of every form in the session; an all-empty
- *  session removes the key instead (never store empty drafts —
- *  FiltersCache's clean() convention). */
-export function saveFillDraft(
-  scope: FillDraftScope,
-  forms: Array<{
-    questionnaire: QuestionnaireRead;
-    responses: Record<string, QuestionnaireResponse>;
-  }>,
-): void {
+/** The live working state of one form, as the fill host reads it out of
+ *  that form's store. */
+export interface FillSessionFormState {
+  questionnaire: QuestionnaireRead;
+  responses: Record<string, QuestionnaireResponse>;
+}
+
+function snapshotSession(forms: FillSessionFormState[]): {
+  snapshots: DraftFormSnapshot[];
+  anyContent: boolean;
+} {
   const snapshots: DraftFormSnapshot[] = [];
   let anyContent = false;
   for (const form of forms) {
@@ -128,6 +129,27 @@ export function saveFillDraft(
       structuredSkipped,
     });
   }
+  return { snapshots, anyContent };
+}
+
+/** Would this session write a draft, or is it empty enough that
+ *  `saveFillDraft` would CLEAR the stored one instead? Callers that must
+ *  not destroy a draft the clinician hasn't accepted or discarded yet
+ *  check this before saving. */
+export function fillSessionHasDraftContent(
+  forms: FillSessionFormState[],
+): boolean {
+  return snapshotSession(forms).anyContent;
+}
+
+/** Persist the working state of every form in the session; an all-empty
+ *  session removes the key instead (never store empty drafts —
+ *  FiltersCache's clean() convention). */
+export function saveFillDraft(
+  scope: FillDraftScope,
+  forms: FillSessionFormState[],
+): void {
+  const { snapshots, anyContent } = snapshotSession(forms);
   if (!anyContent) {
     clearFillDraft(scope);
     return;
