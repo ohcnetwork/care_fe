@@ -6,11 +6,11 @@ import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { FILL_DRAFT_PREFIX, isFillDraftExpired } from "./fillDraftCache";
 
 /**
- * Local fill drafts — the crash/reload safety net. Patient data lives in
- * localStorage ONLY under this prefix, scoped per user + subject +
- * questionnaire, TTL-bounded, and swept on login, logout and app update
- * (this repo otherwise keeps patient data out of localStorage — every
- * eviction hook is deliberate, not hygiene theater).
+ * Local fill drafts — the crash/reload safety net. Draft data lives in
+ * localStorage only under this prefix, scoped per user + subject +
+ * questionnaire, TTL-bounded, and swept on login, logout and app update —
+ * every eviction hook is deliberate; a new session boundary must join the
+ * sweep list.
  */
 const SCHEMA_VERSION = 1;
 

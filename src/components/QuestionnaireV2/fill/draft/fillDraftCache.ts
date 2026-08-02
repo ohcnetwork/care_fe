@@ -13,7 +13,7 @@ export function isFillDraftExpired(savedAt: string): boolean {
   return isNaN(saved) || Date.now() - saved > TTL_MS;
 }
 
-/** Prefix sweep — registered at login, logout and app update so patient
+/** Prefix sweep — registered at login, logout and app update so draft
  *  data never outlives the session that wrote it. */
 export function clearQuestionnaireFillDrafts(): void {
   for (const key of Object.keys(localStorage)) {

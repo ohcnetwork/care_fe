@@ -46,8 +46,8 @@ QuestionTypes components live on, adapted behind `structured/`.
   localStorage drafts (`fillDraftStore`), debounced writes with
   pagehide/unmount flush (`useFillAutosave`), and the dependency-free
   sweep module (`fillDraftCache`) that login/signOut/app-update import —
-  patient data must never outlive the session, so any new session
-  boundary must call `clearQuestionnaireFillDrafts()`.
+  drafts must never outlive the session that wrote them, so any new
+  session boundary must call `clearQuestionnaireFillDrafts()`.
 - `structured/` — the one registration point for structured question
   types. `StructuredTypeDefinition` colocates component (typed adapter
   over the legacy QuestionTypes UI), context `requires`, submit-time
