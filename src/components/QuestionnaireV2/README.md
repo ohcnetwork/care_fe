@@ -1,12 +1,14 @@
 # Questionnaire v2
 
-Management, authoring and rendering for questionnaires, mounted at
-`/admin/questionnaires` and `/facility/{id}/settings/questionnaires`. It is
-the successor to the legacy questionnaire management UI that used to live in
-`src/components/Questionnaire` (removed). That directory still provides the
-fill-flow renderer (`QuestionnaireForm`, `QuestionTypes/*`, etc.), which v2
-reuses (see Legacy imports below); the renderer here currently ships
-`preview` and `readonly` modes only.
+Management, authoring, rendering and filling for questionnaires. Authoring
+mounts at `/admin/questionnaires` and
+`/facility/{id}/settings/questionnaires`; the fill experience mounts on the
+encounter/patient questionnaire routes (`ConsultationRoutes.tsx`). It is
+the successor to the legacy questionnaire UI in
+`src/components/Questionnaire` — the legacy fill stack
+(`QuestionnaireForm`, `EncounterQuestionnaire`, `QuestionInput`) is now
+route-orphaned and scheduled for deletion after review; its structured
+QuestionTypes components live on, adapted behind `structured/`.
 
 ## Directory map
 
@@ -28,11 +30,30 @@ reuses (see Legacy imports below); the renderer here currently ships
 - `form/` — the full renderer (`QuestionnaireFormRenderer`): the whole
   questionnaire on one scroll, live-synced per-instance store (edits merge
   into responses instead of wiping them), a chrome/decoration seam for the
-  studio canvas, and the fill-mode seams (`validation.ts`, mode union).
+  studio canvas and the fill page's width policy, and the fill seams
+  (`validation.ts`, mode union, creation-time `initialResponses`).
   Shares the engine pieces of `renderer/` (store atoms, inputs,
   registries, sanitizer); the inputs are co-owned — they are
   host-layout-free (each control carries its own full border) and serve
   only `form/` in practice now.
+- `fill/` — the fill experience mounted on the encounter/patient
+  questionnaire routes (fullscreen shell, two tabs: form canvas + embedded
+  clinical history). `submit/` is the errorsAtom writer: pure
+  `composeBatch` (structured requests from the registry + the
+  questionnaire submit POST + server-draft completion) behind
+  `useSubmitQuestionnaire`, with reference_id-keyed error mapping.
+  `draft/` is the local autosave layer: per-user/subject/questionnaire
+  localStorage drafts (`fillDraftStore`), debounced writes with
+  pagehide/unmount flush (`useFillAutosave`), and the dependency-free
+  sweep module (`fillDraftCache`) that login/signOut/app-update import —
+  patient data must never outlive the session, so any new session
+  boundary must call `clearQuestionnaireFillDrafts()`.
+- `structured/` — the one registration point for structured question
+  types. `StructuredTypeDefinition` colocates component (typed adapter
+  over the legacy QuestionTypes UI), context `requires`, submit-time
+  `validate`, `buildRequests` and `draftPolicy`; `registry.ts` is total
+  and key-correlated over `StructuredQuestionType`, so a new union member
+  refuses to compile until its definition exists.
 - `renderer/` — the previous paginated display shell. Its engine files
   (`store.ts`, `inputs/`, `questionTypeRegistry.tsx`,
   `sanitizeStylingClasses.ts`, `structured/registry.tsx`) are shared with
@@ -110,11 +131,29 @@ export file.
 ## Legacy imports (allowlist)
 
 v2 may import from `src/components/Questionnaire` only: `ValueSetSelect`,
-`SelectOrCreateValueset`, `data/StructuredFormData`, the
+`SelectOrCreateValueset`, `data/StructuredFormData` (fixed
+pseudo-questionnaires), `QuestionnaireSearch` (the fill picker state), the
 `QuestionTypes/*` structured components (exclusively via
-`renderer/structured/registry.tsx`, which also owns the one permitted `any`
-in the renderer), and `OrgSelector`. A new legacy dependency needs a
-registry/allowlist entry here, not an ad-hoc reach-in.
+`structured/definitions/*`, whose typed adapters replaced the renderer's
+old "one permitted `any`"), and `OrgSelector`. A new legacy dependency
+needs a registry/allowlist entry here, not an ad-hoc reach-in.
+
+## Adding a structured question type
+
+1. Add the value to `STRUCTURED_QUESTION_TYPES`
+   (`src/types/questionnaire/structured.ts`) — the union, the builder's
+   picker and import validation derive from it.
+2. Write `structured/definitions/<type>.tsx`: the input component
+   (native, or a typed adapter over an existing widget), `requires`,
+   optional `validate`, `buildRequests` (unique `reference_id` via
+   `structuredReferenceId`), and an honest `draftPolicy` — `"serialize"`
+   only when the values are pure user input that can safely round-trip
+   through a local draft.
+3. Register it in `structured/registry.ts` (the total record will not
+   compile without it) and add the type's entry to `StructuredDataMap`
+   (`structured/types.ts`) plus the `ResponseValue` variant
+   (`src/types/questionnaire/form.ts`).
+4. Add i18n (`structured_type__*`) and backend support.
 
 ## Adding a question type
 

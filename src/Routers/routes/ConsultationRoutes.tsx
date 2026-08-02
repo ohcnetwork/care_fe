@@ -2,7 +2,7 @@ import { PrintAllQuestionnaireResponses } from "@/components/Facility/Consultati
 import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import { PrintMedicationAdministration } from "@/components/Medicine/MedicationAdministration/PrintMedicationAdministration";
-import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
+import QuestionnaireFillPage from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
@@ -95,7 +95,7 @@ const consultationRoutes: AppRoutes = {
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (
-      <EncounterQuestionnaire
+      <QuestionnaireFillPage
         facilityId={facilityId}
         encounterId={encounterId}
         patientId={patientId}
@@ -105,7 +105,7 @@ const consultationRoutes: AppRoutes = {
 
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId":
     ({ facilityId, encounterId, questionnaireId, patientId }) => (
-      <EncounterQuestionnaire
+      <QuestionnaireFillPage
         facilityId={facilityId}
         encounterId={encounterId}
         questionnaireId={questionnaireId}
@@ -135,7 +135,7 @@ const consultationRoutes: AppRoutes = {
     facilityId,
     patientId,
   }) => (
-    <EncounterQuestionnaire
+    <QuestionnaireFillPage
       facilityId={facilityId}
       patientId={patientId}
       questionnaireId="encounter"
@@ -146,14 +146,39 @@ const consultationRoutes: AppRoutes = {
     facilityId,
     patientId,
   }) => (
-    <EncounterQuestionnaire
+    <QuestionnaireFillPage
       facilityId={facilityId}
       patientId={patientId}
       subjectType="patient"
     />
   ),
+  // The patient-subject picker needs an id route to land on — the legacy
+  // form appended picked questionnaires in-session instead of navigating,
+  // so these two shapes are new alongside the v2 single-questionnaire fill.
+  "/facility/:facilityId/patient/:patientId/questionnaire/:questionnaireId": ({
+    facilityId,
+    patientId,
+    questionnaireId,
+  }) => (
+    <QuestionnaireFillPage
+      facilityId={facilityId}
+      patientId={patientId}
+      questionnaireId={questionnaireId}
+      subjectType="patient"
+    />
+  ),
   "/patient/:patientId/questionnaire": ({ patientId }) => (
-    <EncounterQuestionnaire patientId={patientId} subjectType="patient" />
+    <QuestionnaireFillPage patientId={patientId} subjectType="patient" />
+  ),
+  "/patient/:patientId/questionnaire/:questionnaireId": ({
+    patientId,
+    questionnaireId,
+  }) => (
+    <QuestionnaireFillPage
+      patientId={patientId}
+      questionnaireId={questionnaireId}
+      subjectType="patient"
+    />
   ),
 };
 
