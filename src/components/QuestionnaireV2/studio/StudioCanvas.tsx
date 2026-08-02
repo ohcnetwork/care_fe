@@ -8,7 +8,7 @@ import {
   Trash2,
   TriangleAlert,
 } from "lucide-react";
-import { Dispatch, createContext, useContext, useEffect } from "react";
+import { Dispatch, createContext, useContext, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -22,15 +22,16 @@ import { QuestionnaireFormCanvas } from "@/components/QuestionnaireV2/form/FormC
 
 import { Question } from "@/types/questionnaire/question";
 
-import { shortConditionSummary } from "./conditionSummary";
+import { questionsByLinkId, shortConditionSummary } from "./conditionSummary";
 
 interface StudioCanvasContextValue {
   editing: boolean;
   selectedId: string | null;
   onSelectQuestion: (id: string) => void;
   dispatch: Dispatch<BuilderAction>;
-  /** The full draft tree — resolves enable_when targets for logic chips. */
-  questions: Question[];
+  /** link_id → question, one build per tree change — the logic chips
+   *  resolve enable_when targets from it, per block, on every render. */
+  conditionTargets: ReadonlyMap<string, Question>;
   /** question id → save-rule i18n key, from findInvalidQuestions. */
   issueKeysByQuestionId: ReadonlyMap<string, string>;
 }
@@ -215,7 +216,11 @@ function StudioQuestionAnnotation({ question }: { question: Question }) {
   const studio = useStudioCanvas();
   if (!studio.editing) return null;
 
-  const logicSummary = shortConditionSummary(question, studio.questions, t);
+  const logicSummary = shortConditionSummary(
+    question,
+    studio.conditionTargets,
+    t,
+  );
   const issueKey = studio.issueKeysByQuestionId.get(question.id);
   if (!logicSummary && !issueKey) return null;
 
@@ -270,6 +275,11 @@ export function StudioCanvas({
   emptyState,
   headerHint,
 }: StudioCanvasProps) {
+  const conditionTargets = useMemo(
+    () => questionsByLinkId(questions),
+    [questions],
+  );
+
   useEffect(() => {
     if (!scrollRequest) return;
     // data-question-id is stamped by the form renderer itself, so this
@@ -286,7 +296,7 @@ export function StudioCanvas({
         selectedId,
         onSelectQuestion,
         dispatch,
-        questions,
+        conditionTargets,
         issueKeysByQuestionId,
       }}
     >

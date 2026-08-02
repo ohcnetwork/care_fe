@@ -70,7 +70,8 @@ test.describe("Questionnaire v2 choice answer options", () => {
     });
 
     await test.step("Detail overview shows the Choice type badge", async () => {
-      await page.getByRole("button", { name: "Back" }).click();
+      // The studio's Back is a real link (middle-click / new-tab support).
+      await page.getByRole("link", { name: "Back" }).click();
       await page.waitForURL(/\/settings\/questionnaires\/[0-9a-f-]+$/);
 
       await expect(page.getByText(questionTitle)).toBeVisible();

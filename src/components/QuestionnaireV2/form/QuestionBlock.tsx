@@ -41,13 +41,9 @@ export interface QuestionBlockProps {
  */
 export function QuestionBlock(props: QuestionBlockProps) {
   const { question, depth, number } = props;
-  const { t } = useTranslation();
-  const { mode, revealHidden, inert } = useFormRenderer();
-  const { QuestionShell, QuestionAnnotation } = useFormChrome();
+  const { mode, revealHidden } = useFormRenderer();
+  const { QuestionShell } = useFormChrome();
   const enabled = useQuestionEnabled(question);
-  const errors = useQuestionErrors(question.id);
-  // Only read for repeating questions (groups have no response entry).
-  const [response, updateResponse] = useQuestionResponse(question.id);
 
   const hiddenByLogic = !enabled && question.disabled_display !== "protected";
   if (hiddenByLogic && !revealHidden) return null;
@@ -74,6 +70,39 @@ export function QuestionBlock(props: QuestionBlockProps) {
       />,
     );
   }
+
+  return wrap(
+    <LeafBlock
+      question={question}
+      depth={depth}
+      number={number}
+      effectiveDisabled={effectiveDisabled}
+    />,
+  );
+}
+
+/**
+ * The non-group body — a separate component so the response and error
+ * store subscriptions only exist for questions that actually record
+ * answers (groups returned above without ever mounting them).
+ */
+function LeafBlock({
+  question,
+  depth,
+  number,
+  effectiveDisabled,
+}: {
+  question: Question;
+  depth: number;
+  number?: string;
+  effectiveDisabled: boolean;
+}) {
+  const { t } = useTranslation();
+  const { inert } = useFormRenderer();
+  const { QuestionAnnotation } = useFormChrome();
+  const errors = useQuestionErrors(question.id);
+  // Only written by repeating questions; read for entry counts.
+  const [response, updateResponse] = useQuestionResponse(question.id);
 
   const InputComponent = QUESTION_TYPE_COMPONENTS[question.type];
   // Programmatic label association: text-like inputs take `id={inputId}` for
@@ -112,7 +141,7 @@ export function QuestionBlock(props: QuestionBlockProps) {
     });
   };
 
-  return wrap(
+  return (
     // data-question-id is the renderer's stable per-question DOM anchor —
     // hosts scroll to it (outline selection, future scroll-to-error) and
     // tests scope input assertions with it.
@@ -232,6 +261,6 @@ export function QuestionBlock(props: QuestionBlockProps) {
           {error.msg ?? error.error}
         </p>
       ))}
-    </div>,
+    </div>
   );
 }

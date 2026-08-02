@@ -96,7 +96,8 @@ test.describe("Questionnaire v2 import and clone", () => {
     });
 
     await test.step("Clone the questionnaire from its detail page", async () => {
-      await page.getByRole("button", { name: "Back" }).click();
+      // The studio's Back is a real link (middle-click / new-tab support).
+      await page.getByRole("link", { name: "Back" }).click();
       await page.waitForURL(/\/settings\/questionnaires\/[0-9a-f-]+$/);
 
       await page.getByRole("button", { name: "Clone Questionnaire" }).click();

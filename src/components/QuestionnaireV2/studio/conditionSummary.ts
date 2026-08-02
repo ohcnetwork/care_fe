@@ -2,9 +2,12 @@ import type { TFunction } from "i18next";
 
 import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
-/** link_id → question, built ONCE per summary call — ruleText runs per
- *  rule per block on every canvas render, so it must not re-walk the tree. */
-function questionsByLinkId(questions: Question[]): Map<string, Question> {
+/** link_id → question. Hosts build this ONCE per render pass (the canvas
+ *  annotation renders per block, so an internal per-call build would still
+ *  walk the tree once per question) and hand it to the summary helpers. */
+export function questionsByLinkId(
+  questions: Question[],
+): Map<string, Question> {
   const index = new Map<string, Question>();
   const walk = (list: Question[]) => {
     for (const question of list) {
@@ -18,7 +21,7 @@ function questionsByLinkId(questions: Question[]): Map<string, Question> {
 
 function ruleText(
   condition: EnableWhen,
-  targets: Map<string, Question>,
+  targets: ReadonlyMap<string, Question>,
   t: TFunction,
 ): string {
   const target = targets.get(condition.question);
@@ -40,15 +43,13 @@ function ruleText(
  */
 export function shortConditionSummary(
   question: Question,
-  allQuestions: Question[],
+  targets: ReadonlyMap<string, Question>,
   t: TFunction,
 ): string | null {
   const rules = question.enable_when ?? [];
   if (rules.length === 0) return null;
   if (rules.length === 1) {
-    return t("shown_when", {
-      summary: ruleText(rules[0], questionsByLinkId(allQuestions), t),
-    });
+    return t("shown_when", { summary: ruleText(rules[0], targets, t) });
   }
   return t("shown_when_n_rules", { count: rules.length });
 }
@@ -59,12 +60,11 @@ export function shortConditionSummary(
  */
 export function plainWordsSummary(
   question: Question,
-  allQuestions: Question[],
+  targets: ReadonlyMap<string, Question>,
   t: TFunction,
 ): string {
   const rules = question.enable_when ?? [];
   if (rules.length === 0) return t("plain_words_always");
-  const targets = questionsByLinkId(allQuestions);
   const joiner =
     question.enable_behavior === "any"
       ? ` ${t("or").toLowerCase()} `

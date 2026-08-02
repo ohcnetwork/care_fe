@@ -32,7 +32,7 @@ import { BehaviourToggles } from "./BehaviourToggles";
 
 import { Question } from "@/types/questionnaire/question";
 
-import { plainWordsSummary } from "./conditionSummary";
+import { plainWordsSummary, questionsByLinkId } from "./conditionSummary";
 
 /** Types with a question-level unit, per the legacy editor's UNIT_TYPES —
  *  quantity configures its unit inside AnswerOptionsEditor; these get the
@@ -247,7 +247,11 @@ export function QuestionInspector({
                 {t("in_plain_words")}
               </p>
               <p className="text-sm leading-relaxed text-gray-800">
-                {plainWordsSummary(question, allQuestions, t)}
+                {plainWordsSummary(
+                  question,
+                  questionsByLinkId(allQuestions),
+                  t,
+                )}
               </p>
             </div>
           </TabsContent>
