@@ -49,6 +49,7 @@ import otpApi from "@/types/otp/otpApi";
 import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 import { invalidateAllPaymentReconcilationLocationCaches } from "@/atoms/paymentReconcilationLocationAtom";
 import { clearQueuePractitionerCache } from "@/atoms/queuePractitionerAtom";
+import { clearQuestionnaireFillDrafts } from "@/components/QuestionnaireV2/fill/draft/fillDraftCache";
 import { AuthHero } from "./AuthHero";
 
 interface OtpLoginData {
@@ -249,6 +250,7 @@ const Login = (props: LoginProps) => {
     invalidateAllPaymentReconcilationLocationCaches();
     clearQueuePractitionerCache();
     clearQueryPersistenceCache();
+    clearQuestionnaireFillDrafts();
     try {
       await signIn(validated);
     } catch (error) {

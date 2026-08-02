@@ -5,6 +5,7 @@ import { navigate, usePath } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 
 import Loading from "@/components/Common/Loading";
+import { clearQuestionnaireFillDrafts } from "@/components/QuestionnaireV2/fill/draft/fillDraftCache";
 
 import { AuthUserContext } from "@/hooks/useAuthUser";
 
@@ -163,6 +164,7 @@ export default function AuthUserProvider({
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
+    clearQuestionnaireFillDrafts();
     setAccessToken(null);
     setPatientToken(null);
 
