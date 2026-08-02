@@ -26,6 +26,7 @@ export const allergyIntoleranceDefinition: StructuredTypeDefinition<"allergy_int
     type: "allergy_intolerance",
     component: AllergyIntoleranceInput,
     requires: ["patientId", "encounterId"],
+    subjects: ["encounter"],
     draftPolicy: "exclude",
     buildRequests: async (
       allergies,

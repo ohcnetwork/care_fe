@@ -271,6 +271,7 @@ export function QuestionnaireBuilderPage({
                 question={selectedQuestion}
                 number={selectedNumber}
                 allQuestions={state.questions}
+                subjectType={questionnaire.subject_type}
                 dispatch={dispatch}
               />
             ) : (

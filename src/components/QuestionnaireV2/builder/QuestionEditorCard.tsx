@@ -27,6 +27,7 @@ import { SubQuestionsList } from "@/components/QuestionnaireV2/builder/SubQuesti
 import { VisibilityConditionsCard } from "@/components/QuestionnaireV2/builder/VisibilityConditionsCard";
 
 import { Question } from "@/types/questionnaire/question";
+import { SubjectType } from "@/types/questionnaire/questionnaire";
 
 /** Types with a question-level unit, per the legacy editor's UNIT_TYPES
  *  (quantity/choice/decimal/integer). Quantity configures its unit inside
@@ -39,6 +40,7 @@ interface QuestionEditorCardProps {
   question: Question;
   number: string;
   allQuestions: Question[];
+  subjectType: SubjectType;
   dispatch: Dispatch<BuilderAction>;
 }
 
@@ -46,6 +48,7 @@ export function QuestionEditorCard({
   question,
   number,
   allQuestions,
+  subjectType,
   dispatch,
 }: QuestionEditorCardProps) {
   const { t } = useTranslation();
@@ -83,6 +86,7 @@ export function QuestionEditorCard({
             <QuestionTypePicker
               value={question.type}
               structuredType={question.structured_type}
+              subjectType={subjectType}
               onChange={handleTypeChange}
             />
           </div>

@@ -49,6 +49,17 @@ export function StructuredSlot({
     : undefined;
   if (!definition || !response) return null;
 
+  if (!definition.subjects.includes(questionnaire.subject_type)) {
+    return (
+      <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
+        {t("structured_type_subject_mismatch", {
+          type: t(`structured_type__${question.structured_type}`),
+          subject: questionnaire.subject_type,
+        })}
+      </div>
+    );
+  }
+
   const missing = definition.requires.filter((key) => !subject[key]);
   if (missing.length > 0) {
     return (

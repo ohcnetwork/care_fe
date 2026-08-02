@@ -29,6 +29,7 @@ export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
   type: "appointment",
   component: AppointmentInput,
   requires: ["facilityId"],
+  subjects: ["patient", "encounter"],
   draftPolicy: "exclude",
   validate: (appointments, questionId, required) =>
     validateAppointmentQuestion(appointments[0], questionId, required),

@@ -5996,6 +5996,7 @@
   "structured_type__service_request": "Service Request",
   "structured_type__symptom": "Symptoms",
   "structured_type__time_of_death": "Time of Death",
+  "structured_type_subject_mismatch": "{{type}} questions can't be used on a {{subject}} questionnaire.",
   "style_list": "List",
   "style_text": "Text",
   "styling": "Styling",

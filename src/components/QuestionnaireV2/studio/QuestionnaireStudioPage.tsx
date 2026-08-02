@@ -435,6 +435,7 @@ export function QuestionnaireStudioPage({
                   question={selectedQuestion}
                   number={selectedNumber}
                   allQuestions={state.questions}
+                  subjectType={questionnaire.subject_type}
                   dispatch={studioDispatch}
                 />
               )}

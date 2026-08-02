@@ -26,6 +26,7 @@ export const symptomDefinition: StructuredTypeDefinition<"symptom"> = {
   type: "symptom",
   component: SymptomInput,
   requires: ["patientId", "encounterId"],
+  subjects: ["encounter"],
   draftPolicy: "exclude",
   buildRequests: async (symptoms, { patientId, encounterId, questionId }) => {
     if (!encounterId || symptoms.length === 0) return [];

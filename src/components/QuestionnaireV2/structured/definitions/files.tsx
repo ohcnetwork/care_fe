@@ -31,6 +31,7 @@ export const filesDefinition: StructuredTypeDefinition<"files"> = {
   type: "files",
   component: FilesInput,
   requires: ["encounterId", "facilityId"],
+  subjects: ["encounter"],
   // Raw `File` objects cannot round-trip through JSON — hard exclude.
   draftPolicy: "exclude",
   validate: (files, questionId) =>

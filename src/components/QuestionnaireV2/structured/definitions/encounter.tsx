@@ -33,6 +33,7 @@ export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
   type: "encounter",
   component: EncounterInput,
   requires: ["encounterId", "facilityId"],
+  subjects: ["encounter"],
   draftPolicy: "exclude",
   validate: (encounters, questionId) =>
     validateEncounterQuestion(encounters[0], questionId),

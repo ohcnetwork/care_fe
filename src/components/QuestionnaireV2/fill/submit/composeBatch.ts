@@ -81,10 +81,17 @@ export async function composeBatch({
         // The whole structured leg only runs for a patient-bound fill.
         if (!patientBound) continue;
         const type = question.structured_type;
+        const definition = structuredDefinitionFor(type);
+        // A type authored onto a questionnaire whose subject_type it
+        // doesn't declare (legacy data — the studio picker now prevents
+        // this going forward) never reaches the domain API.
+        if (!definition.subjects.includes(questionnaire.subject_type)) {
+          continue;
+        }
         const data = structuredDataOf(type, response);
         if (data.length === 0) continue;
         structuredWork.push(
-          structuredDefinitionFor(type).buildRequests(data, {
+          definition.buildRequests(data, {
             patientId: patientBound.patientId,
             encounterId: renderCtx.encounterId,
             facilityId: renderCtx.facilityId,

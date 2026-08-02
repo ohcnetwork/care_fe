@@ -24,6 +24,7 @@ export const timeOfDeathDefinition: StructuredTypeDefinition<"time_of_death"> =
     type: "time_of_death",
     component: TimeOfDeathInput,
     requires: [],
+    subjects: ["patient", "encounter"],
     draftPolicy: "exclude",
     buildRequests: async (timeOfDeaths, { patientId, questionId }) =>
       timeOfDeaths.map((deceasedDatetime) => ({

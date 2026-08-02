@@ -26,6 +26,7 @@ export const diagnosisDefinition: StructuredTypeDefinition<"diagnosis"> = {
   type: "diagnosis",
   component: DiagnosisInput,
   requires: ["patientId", "encounterId"],
+  subjects: ["encounter"],
   draftPolicy: "exclude",
   buildRequests: async (diagnoses, { patientId, encounterId, questionId }) => {
     // Only edited rows submit — prefetched server rows ride along in the

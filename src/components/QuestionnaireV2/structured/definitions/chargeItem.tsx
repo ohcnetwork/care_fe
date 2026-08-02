@@ -27,6 +27,7 @@ export const chargeItemDefinition: StructuredTypeDefinition<"charge_item"> = {
   type: "charge_item",
   component: ChargeItemInput,
   requires: ["encounterId", "facilityId"],
+  subjects: ["encounter"],
   draftPolicy: "exclude",
   buildRequests: async (chargeItems, { facilityId, questionId }) => {
     if (chargeItems.length === 0) return [];

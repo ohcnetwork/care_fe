@@ -6,6 +6,7 @@ import type {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
+import type { SubjectType } from "@/types/questionnaire/questionnaire";
 import type { StructuredQuestionType } from "@/types/questionnaire/structured";
 
 import type { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
@@ -107,6 +108,9 @@ export interface StructuredTypeDefinition<
   type: K;
   component: ComponentType<StructuredInputProps>;
   requires: readonly StructuredContextKey[];
+  /** Questionnaire subject types this structured type may appear on —
+   *  gates the studio's picker and the fill renderer. */
+  subjects: readonly SubjectType[];
   /**
    * `"serialize"` — values are plain user input, safe to store in a local
    * draft and restore later.

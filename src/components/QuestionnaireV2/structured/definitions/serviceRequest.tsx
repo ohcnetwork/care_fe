@@ -29,6 +29,7 @@ export const serviceRequestDefinition: StructuredTypeDefinition<"service_request
     type: "service_request",
     component: ServiceRequestInput,
     requires: ["encounterId", "facilityId"],
+    subjects: ["encounter"],
     draftPolicy: "exclude",
     // No validate: the exported legacy validateServiceRequestQuestion
     // expects flat ServiceRequestReadSpec fields, but the recorded data is

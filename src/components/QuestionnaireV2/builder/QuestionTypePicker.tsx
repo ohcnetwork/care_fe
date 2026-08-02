@@ -24,12 +24,14 @@ import {
   StructuredQuestionType,
 } from "@/components/Questionnaire/data/StructuredFormData";
 import { QUESTION_TYPE_ICONS } from "@/components/QuestionnaireV2/shared/questionTypeIcons";
+import { structuredDefinitionFor } from "@/components/QuestionnaireV2/structured/registry";
 
 import {
   Question,
   QuestionType,
   SUPPORTED_QUESTION_TYPES,
 } from "@/types/questionnaire/question";
+import { SubjectType } from "@/types/questionnaire/questionnaire";
 
 const FREQUENTLY_USED: QuestionType[] = [
   "group",
@@ -55,12 +57,17 @@ function TypeIconTile({ type }: { type: QuestionType }) {
 interface QuestionTypePickerProps {
   value: QuestionType;
   structuredType?: StructuredQuestionType;
+  /** The questionnaire being edited's subject type — gates which structured
+   *  tiles appear (a device/location questionnaire can't offer a patient-
+   *  bound type like Allergies). */
+  subjectType: SubjectType;
   onChange: (patch: Partial<Question>) => void;
 }
 
 export function QuestionTypePicker({
   value,
   structuredType,
+  subjectType,
   onChange,
 }: QuestionTypePickerProps) {
   const { t } = useTranslation();
@@ -72,6 +79,12 @@ export function QuestionTypePicker({
   );
   const otherTypes = SUPPORTED_QUESTION_TYPES.filter(
     (entry) => !FREQUENTLY_USED.includes(entry.value),
+  );
+  // Only structured types declared for this questionnaire's subject_type —
+  // an out-of-subject type shows nowhere in the picker, not as a disabled
+  // tile (it can never be authored onto this questionnaire).
+  const availableStructuredQuestions = STRUCTURED_QUESTIONS.filter((entry) =>
+    structuredDefinitionFor(entry.value).subjects.includes(subjectType),
   );
 
   const handleSelectType = (type: QuestionType) => {
@@ -210,7 +223,7 @@ export function QuestionTypePicker({
             <CommandList className="max-h-[60vh]">
               <CommandEmpty>{t("no_results_found")}</CommandEmpty>
               <CommandGroup>
-                {STRUCTURED_QUESTIONS.map((entry) => (
+                {availableStructuredQuestions.map((entry) => (
                   <CommandItem
                     key={entry.value}
                     value={entry.value}

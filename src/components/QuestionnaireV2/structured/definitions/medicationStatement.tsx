@@ -31,6 +31,7 @@ export const medicationStatementDefinition: StructuredTypeDefinition<"medication
     type: "medication_statement",
     component: MedicationStatementInput,
     requires: ["patientId", "encounterId"],
+    subjects: ["encounter"],
     draftPolicy: "exclude",
     validate: (medications, questionId) =>
       validateMedicationStatementQuestion(medications, questionId),

@@ -31,6 +31,7 @@ import { QuestionTypeBadge } from "@/components/QuestionnaireV2/shared/QuestionT
 import { BehaviourToggles } from "./BehaviourToggles";
 
 import { Question } from "@/types/questionnaire/question";
+import { SubjectType } from "@/types/questionnaire/questionnaire";
 
 import { plainWordsSummary, questionsByLinkId } from "./conditionSummary";
 
@@ -46,6 +47,7 @@ interface QuestionInspectorProps {
   question: Question;
   number: string;
   allQuestions: Question[];
+  subjectType: SubjectType;
   dispatch: Dispatch<BuilderAction>;
 }
 
@@ -61,6 +63,7 @@ export function QuestionInspector({
   question,
   number,
   allQuestions,
+  subjectType,
   dispatch,
 }: QuestionInspectorProps) {
   const { t } = useTranslation();
@@ -202,6 +205,7 @@ export function QuestionInspector({
               <QuestionTypePicker
                 value={question.type}
                 structuredType={question.structured_type}
+                subjectType={subjectType}
                 onChange={handleTypeChange}
               />
             </div>
