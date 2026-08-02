@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { QuestionnaireFormRenderer } from "@/components/QuestionnaireV2/form/FormCanvas";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
-import { QuestionnaireRenderer } from "@/components/QuestionnaireV2/renderer/QuestionnaireRenderer";
 
 import {
   QuestionnaireScope,
@@ -22,10 +22,9 @@ import { relativeTime } from "@/Utils/utils";
 
 /**
  * Full-page read-only viewer for a single past revision, mounted at
- * `{basePath}/{id}/versions/{revisionId}`. Replaces the old cramped dialog
- * so the whole snapshot renders with the renderer's normal layout (tree nav
- * + paginated content) and users can actually read the old form before
- * deciding what to do with it.
+ * `{basePath}/{id}/versions/{revisionId}`. Renders the snapshot through the
+ * full renderer — the whole form on one scroll — so users can actually
+ * read the old form before deciding what to do with it.
  *
  * `id` is the head questionnaire (owns the Versions tab we came from);
  * `revisionId` is the archived row — revisions are full questionnaire rows,
@@ -129,7 +128,13 @@ export function QuestionnaireRevisionPage({
         )}
       </div>
 
-      <QuestionnaireRenderer questionnaire={revision} mode="readonly" />
+      {/* The page renders its own title strip above — hideHeader avoids
+          repeating it. */}
+      <QuestionnaireFormRenderer
+        questionnaire={revision}
+        mode="readonly"
+        hideHeader
+      />
     </div>
   );
 }

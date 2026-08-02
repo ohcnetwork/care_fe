@@ -20,6 +20,7 @@ import {
   QUESTIONNAIRE_STATUS_COLORS,
   QuestionnaireRead,
   formatRevision,
+  revisionOf,
 } from "@/types/questionnaire/questionnaire";
 
 export interface StudioTopBarProps {
@@ -153,6 +154,13 @@ export function StudioTopBar({
             >
               <Check className="size-4" />
               {t("save_changes")}
+              {/* The backend snapshots a new revision on every save — show
+                  the version this save will create (reference: "Publish
+                  v9"). Appended, so the accessible name still starts with
+                  "Save Changes". */}
+              <span className="rounded bg-white/25 px-1.5 py-0.5 font-mono text-[10px] font-bold">
+                {`v${revisionOf(questionnaire) + 1}`}
+              </span>
             </Button>
           </>
         )}

@@ -1,3 +1,8 @@
+import { useTranslation } from "react-i18next";
+
+import Autocomplete from "@/components/ui/autocomplete";
+import { MultiSelect } from "@/components/ui/multi-select";
+
 import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -5,14 +10,58 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { RendererInputProps } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/renderer/store";
 
+/** Ported from the legacy ChoiceQuestion: past this many options the inline
+ *  chips give way to a searchable dropdown (`length > 5 ? "dropdown" :
+ *  "radio"`) — a 20-option list as chips is unscannable and unanswerable. */
+const INLINE_CHOICE_MAX = 5;
+
 export function ChoiceInput({
   question,
   disabled,
   labelId,
 }: RendererInputProps) {
+  const { t } = useTranslation();
   const [response, updateResponse] = useQuestionResponse(question.id);
 
   if (question.answer_option?.length) {
+    const dropdown = question.answer_option.length > INLINE_CHOICE_MAX;
+    const dropdownOptions = question.answer_option.map((option) => ({
+      label: option.display ?? option.value,
+      value: option.value.toString(),
+    }));
+
+    if (dropdown) {
+      // Same value shapes as the chip paths below, so enable_when and
+      // submission are indifferent to which control rendered.
+      if (question.repeats) {
+        return (
+          <MultiSelect
+            value={(response?.values ?? []).map(
+              (entry) => entry.value?.toString() ?? "",
+            )}
+            onValueChange={(selected) =>
+              updateResponse({
+                values: selected.map((value) => ({ type: "string", value })),
+              })
+            }
+            options={dropdownOptions}
+            placeholder={t("select_an_option")}
+            disabled={disabled}
+          />
+        );
+      }
+      return (
+        <Autocomplete
+          value={response?.values[0]?.value?.toString() ?? ""}
+          onChange={(value) =>
+            updateResponse({ values: [{ type: "string", value }] })
+          }
+          options={dropdownOptions}
+          placeholder={t("select_an_option")}
+          disabled={disabled}
+        />
+      );
+    }
     // Repeats → multi-select: same chips, checkbox semantics. Data shape
     // matches the legacy ChoiceQuestion's MultiSelect exactly — one
     // `{ type: "string", value }` entry per selected option, toggling off

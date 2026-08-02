@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
+import {
+  createQuestionnaireAndOpenBuilder,
+  questionBlock,
+} from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -75,6 +78,53 @@ test.describe("Questionnaire v2 choice answer options", () => {
 
       await expect(page.getByText(questionTitle)).toBeVisible();
       await expect(page.getByText("Choice", { exact: true })).toBeVisible();
+    });
+  });
+
+  test("more than five options switch the preview from chips to a dropdown", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const stamp = Date.now();
+    const questionTitle = `Long list ${stamp}`;
+    const optionValues = Array.from(
+      { length: 6 },
+      (_, index) => `opt-${index + 1}-${stamp}`,
+    );
+
+    await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 LongChoice ${stamp}`,
+    });
+
+    await test.step("Author a choice question with six options", async () => {
+      await page.getByRole("button", { name: "Add First Question" }).click();
+      await page
+        .getByRole("textbox", { name: "Question Title" })
+        .pressSequentially(questionTitle);
+      await page.getByRole("combobox").click();
+      await page.getByRole("option", { name: "Choice" }).click();
+
+      for (const value of optionValues) {
+        await page.getByRole("button", { name: "Add Option" }).click();
+        const rows = page.getByRole("row");
+        await rows.last().getByRole("textbox").fill(value);
+      }
+    });
+
+    await test.step("Preview renders a searchable dropdown, not radio chips", async () => {
+      await page.getByRole("button", { name: "Preview" }).click();
+      // Ported legacy behavior: past five options the chips give way to a
+      // dropdown (legacy ChoiceQuestion's selectType threshold).
+      await expect(
+        page.getByRole("radio", { name: optionValues[0] }),
+      ).not.toBeVisible();
+      const block = questionBlock(page, questionTitle);
+      const trigger = block.getByRole("combobox");
+      await expect(trigger).toBeVisible();
+      await trigger.click();
+      await page.getByRole("option", { name: optionValues[3] }).click();
+      await expect(trigger).toContainText(optionValues[3]);
     });
   });
 });
