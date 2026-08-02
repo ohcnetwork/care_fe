@@ -1,4 +1,5 @@
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
+import type { StructuredQuestionType } from "@/types/questionnaire/structured";
 
 const encounterQuestionnaire: QuestionnaireRead = {
   id: "encounter",
@@ -209,7 +210,7 @@ const appointment_questionnaire: QuestionnaireRead = {
   ],
 };
 
-export const STRUCTURED_QUESTIONS = [
+const structuredQuestionEntries = [
   {
     value: "allergy_intolerance",
     label: "Allergy Intolerance",
@@ -259,6 +260,14 @@ export const STRUCTURED_QUESTIONS = [
   },
 ] as const;
 
+/** Typed against the canonical union so a value here that isn't a real
+ *  `StructuredQuestionType` (or a typo) fails to compile. */
+export const STRUCTURED_QUESTIONS: readonly {
+  value: StructuredQuestionType;
+  label: string;
+  questionnaire: QuestionnaireRead;
+}[] = structuredQuestionEntries;
+
 export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireRead> =
   STRUCTURED_QUESTIONS.reduce(
     (acc, question) => {
@@ -270,8 +279,7 @@ export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireRead> =
     {} as Record<string, QuestionnaireRead>,
   );
 
-export type StructuredQuestionType =
-  (typeof STRUCTURED_QUESTIONS)[number]["value"];
+export type { StructuredQuestionType } from "@/types/questionnaire/structured";
 
 export function filterStructuredQuestionnaireSlugs(slug?: string) {
   return slug &&
