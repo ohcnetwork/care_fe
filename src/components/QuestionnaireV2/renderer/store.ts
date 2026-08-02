@@ -1,12 +1,13 @@
 /**
- * Renderer state scope: the renderer currently ships preview/read-only modes
- * only (`RendererMode`), so `responsesAtom` is local working state with no
- * submission consumer yet, and `errorsAtom` has readers (QuestionField,
- * StructuredQuestionSlot) but no writer — validation errors cannot appear
- * until the fill/submit path lands, which will add the writer, a `"fill"`
- * mode and a real `clearError`. Neither is broken; they are the seams the
- * submit flow plugs into.
+ * Renderer state scope: `responsesAtom` is the per-instance working state.
+ * In preview it stays local; in fill mode the host reads it for submission
+ * and autosave. `errorsAtom` is written by the fill submit path
+ * (`fill/submit/useSubmitQuestionnaire`) with client validation failures
+ * and mapped server errors; editing a question's response clears that
+ * question's entries (the write path below), so stale errors never outlive
+ * the answer they flagged.
  */
+import type { Getter, Setter } from "jotai";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { useMemo } from "react";
 
@@ -151,6 +152,34 @@ export function evaluateEnableWhen(
   }
 }
 
+/** Drop one question's entries from `errorsAtom` — shared by the response
+ *  write path (edit clears the flag) and the structured slot's
+ *  `clearError` prop. No-ops when the question has no errors so
+ *  subscribers don't re-render on unrelated edits. */
+export function clearQuestionErrorsInState(
+  get: Getter,
+  set: Setter,
+  questionId: string,
+) {
+  const errors = get(errorsAtom);
+  if (!errors.some((error) => error.question_id === questionId)) return;
+  set(
+    errorsAtom,
+    errors.filter((error) => error.question_id !== questionId),
+  );
+}
+
+export function useClearQuestionErrors(questionId: string) {
+  const clearAtom = useMemo(
+    () =>
+      atom(null, (get, set) =>
+        clearQuestionErrorsInState(get, set, questionId),
+      ),
+    [questionId],
+  );
+  return useAtom(clearAtom)[1];
+}
+
 export function useQuestionResponse(questionId: string) {
   const responseAtom = useMemo(
     () =>
@@ -164,6 +193,9 @@ export function useQuestionResponse(questionId: string) {
             ...previous,
             [questionId]: { ...current, ...update },
           });
+          // An edit supersedes any validation error recorded against this
+          // question (client or server) — clear just its entries.
+          clearQuestionErrorsInState(get, set, questionId);
         },
       ),
     [questionId],
@@ -298,6 +330,37 @@ export function useHasVisibleTopLevelQuestions(): boolean {
     [],
   );
   return useAtomValue(hasVisibleAtom);
+}
+
+/** Whether one recorded entry carries an actual answer — non-empty
+ *  scalar, or a non-empty array (structured/repeat values). Mirrors the
+ *  required-check semantics in form/validation.ts plus the legacy
+ *  array-emptiness rule. */
+function entryHasContent(entry: ResponseValue): boolean {
+  if (entry.value === undefined || entry.value === null || entry.value === "")
+    return false;
+  return !Array.isArray(entry.value) || entry.value.length > 0;
+}
+
+/**
+ * Ids of every question with at least one recorded answer — the fill
+ * outline's completion icons subscribe to this. Derived per render of the
+ * consuming component only (one subscriber: the outline), so the fresh
+ * Set identity per responses change is fine.
+ */
+export function useAnsweredQuestionIds(): Set<string> {
+  const answeredAtom = useMemo(
+    () =>
+      atom((get) => {
+        const answered = new Set<string>();
+        for (const [id, response] of Object.entries(get(responsesAtom))) {
+          if (response.values.some(entryHasContent)) answered.add(id);
+        }
+        return answered;
+      }),
+    [],
+  );
+  return useAtomValue(answeredAtom);
 }
 
 export function useQuestionErrors(questionId: string) {

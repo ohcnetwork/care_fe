@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
+  useClearQuestionErrors,
   useQuestionErrors,
   useQuestionResponse,
 } from "@/components/QuestionnaireV2/renderer/store";
@@ -35,6 +36,7 @@ export function StructuredSlot({
   const { mode, subject, questionnaire } = useFormRenderer();
   const [response, updateResponse] = useQuestionResponse(question.id);
   const errors = useQuestionErrors(question.id);
+  const clearErrors = useClearQuestionErrors(question.id);
 
   const handleChange = useCallback(
     (values: ResponseValue[], note?: string) =>
@@ -71,7 +73,7 @@ export function StructuredSlot({
       onChange={handleChange}
       disabled={disabled}
       errors={errors}
-      clearError={() => {}}
+      clearError={clearErrors}
       patientId={subject.patientId}
       encounterId={subject.encounterId}
       facilityId={subject.facilityId}

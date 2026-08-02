@@ -116,6 +116,15 @@ interface ProviderProps {
   subject?: RendererSubject;
   revealHidden?: boolean;
   inert?: boolean;
+  /**
+   * Creation-time seed overrides (a restored fill draft). Applied once,
+   * merged over `initializeResponses` so the store is never observed
+   * unseeded; entries only take effect when the question id still exists
+   * with the same structured_type (the fill host already gates restores
+   * on questionnaire id + version, this is defense in depth). Changing
+   * the prop after mount has no effect by design.
+   */
+  initialResponses?: Record<string, QuestionnaireResponse>;
   children: React.ReactNode;
 }
 
@@ -125,14 +134,24 @@ export function QuestionnaireFormProvider({
   subject = {},
   revealHidden = false,
   inert = false,
+  initialResponses,
   children,
 }: ProviderProps) {
   // useState (not useMemo) so the store is created exactly once per instance
   // and never observed unseeded (same rationale as the old provider).
   const [store] = useState(() => {
     const seeded = createStore();
+    const responses = initializeResponses(questionnaire.questions);
+    if (initialResponses) {
+      for (const [id, entry] of Object.entries(initialResponses)) {
+        const base = responses[id];
+        if (base && base.structured_type === entry.structured_type) {
+          responses[id] = { ...entry, question_id: id, link_id: base.link_id };
+        }
+      }
+    }
     seeded.set(questionnaireAtom, questionnaire);
-    seeded.set(responsesAtom, initializeResponses(questionnaire.questions));
+    seeded.set(responsesAtom, responses);
     return seeded;
   });
 
