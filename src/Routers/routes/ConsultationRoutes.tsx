@@ -125,10 +125,12 @@ const consultationRoutes: AppRoutes = {
       );
     return acc;
   }, {}),
-  // Encounter CREATION: there is no encounter yet, so the SUBJECT is the
-  // patient (that is what the submission records against); the fixed
-  // "encounter" questionnaire is what makes one. The picker keeps offering
-  // encounter-subject forms, as it did before the subject union landed.
+  // Legacy pre-encounter URL, kept so old links resolve. Nothing in the app
+  // links here any more — encounters are created by CreateEncounterForm, not
+  // by this questionnaire — so the SUBJECT is the patient and the fixed
+  // "encounter" question reports that it needs an encounter in scope. The
+  // picker keeps offering encounter-subject forms, as it did before the
+  // subject union landed.
   "/facility/:facilityId/patient/:patientId/consultation": ({
     facilityId,
     patientId,
