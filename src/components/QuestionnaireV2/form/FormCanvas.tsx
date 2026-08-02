@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useHasVisibleTopLevelQuestions } from "@/components/QuestionnaireV2/renderer/store";
 import { countLeafQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
+import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 import { FormChrome, FormChromeProvider, useFormChrome } from "./chrome";
@@ -34,6 +35,9 @@ export interface QuestionnaireFormRendererProps extends CanvasSlots {
   revealHidden?: boolean;
   /** Builder edit canvas: inputs visible but non-interactive. */
   inert?: boolean;
+  /** Creation-time seed overrides (a restored draft) — forwarded verbatim
+   *  to the provider, which applies them once. See FormContext. */
+  initialResponses?: Record<string, QuestionnaireResponse>;
   /** Decoration seam — see chrome.tsx. */
   chrome?: FormChrome;
 }
@@ -50,6 +54,7 @@ export function QuestionnaireFormRenderer({
   subject,
   revealHidden,
   inert,
+  initialResponses,
   chrome = {},
   emptyState,
   hideHeader,
@@ -63,6 +68,7 @@ export function QuestionnaireFormRenderer({
       subject={subject}
       revealHidden={revealHidden}
       inert={inert}
+      initialResponses={initialResponses}
     >
       <FormChromeProvider chrome={chrome}>
         <CanvasBody

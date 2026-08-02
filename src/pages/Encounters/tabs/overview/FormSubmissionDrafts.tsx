@@ -8,11 +8,11 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { QuestionRenderer } from "@/components/Questionnaire/QuestionRenderer";
+import { reviveDraftResponses } from "@/components/QuestionnaireV2/fill/draft/fillDraftStore";
+import { QuestionnaireFormRenderer } from "@/components/QuestionnaireV2/form/FormCanvas";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
-import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -26,6 +26,22 @@ interface FormSubmissionDraftsProps {
 interface DraftQuestionnaireResponse {
   questionnaire: QuestionnaireRead;
   responses: QuestionnaireResponse[];
+}
+
+/**
+ * The dump stores responses as an array; the renderer seeds from a
+ * `question_id → response` record. JSON round-tripping flattened Dates to
+ * strings, so revive them the same way the `?continue_draft=` restore path
+ * does.
+ */
+function draftResponsesRecord(
+  responses: QuestionnaireResponse[],
+): Record<string, QuestionnaireResponse> {
+  const record: Record<string, QuestionnaireResponse> = {};
+  for (const response of responses) {
+    record[response.question_id] = response;
+  }
+  return reviveDraftResponses(record);
 }
 
 export function FormSubmissionDrafts({
@@ -119,16 +135,12 @@ export function FormSubmissionDrafts({
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4">
-                <QuestionRenderer
-                  facilityId={facilityId}
-                  encounterId={encounterId}
-                  questions={questions as Question[]}
-                  responses={responses}
-                  patientId={patientId}
-                  onResponseChange={() => {}}
-                  errors={[]}
-                  clearError={() => {}}
-                  disabled
+                <QuestionnaireFormRenderer
+                  questionnaire={questionnaire}
+                  mode="readonly"
+                  subject={{ facilityId, patientId, encounterId }}
+                  initialResponses={draftResponsesRecord(responses)}
+                  hideHeader
                 />
               </CardContent>
             </Card>
