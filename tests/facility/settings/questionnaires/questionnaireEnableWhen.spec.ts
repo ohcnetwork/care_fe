@@ -47,9 +47,7 @@ test.describe("Questionnaire v2 enable_when visibility", () => {
     });
 
     await test.step("Add a visibility condition: trigger equals Yes", async () => {
-      await page
-        .getByRole("button", { name: "Question Visibility Conditions" })
-        .click();
+      await page.getByRole("tab", { name: "Logic" }).click();
       await page.getByRole("button", { name: "Add a condition" }).click();
 
       const conditionRow = page.locator('div[class*="sm:grid-cols-2"]');

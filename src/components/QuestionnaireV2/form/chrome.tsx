@@ -31,6 +31,10 @@ export interface FormChrome {
    *  after the top-level list (`parentId` = null) — the "add question
    *  here" affordance. */
   AppendZone?: ComponentType<{ parentId: string | null }>;
+  /** Rendered in-flow inside each block, between the label/description and
+   *  the input area (and under a section header) — the studio's logic and
+   *  issue chips. */
+  QuestionAnnotation?: ComponentType<{ question: Question }>;
 }
 
 const ChromeContext = createContext<FormChrome>({});

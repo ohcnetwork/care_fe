@@ -10,8 +10,6 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-const BEHAVIOUR_CARD_NAME = "Question Behaviour & Data Capture Settings";
-
 /** Adds a top-level question via the sticky-bar button and titles it. */
 async function addQuestion(page: Page, title: string): Promise<void> {
   const addFirst = page.getByRole("button", { name: "Add First Question" });
@@ -146,9 +144,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     });
 
     await test.step("Bind a code", async () => {
-      await page
-        .getByRole("button", { name: "Coding Details", exact: true })
-        .click();
+      await page.getByRole("tab", { name: "Coding" }).click();
       await selectFromValueSet(page, searchTrigger, { search: "heart" });
       await expect(page.getByText("Code Verified")).toBeVisible();
     });
@@ -319,11 +315,13 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     const repeatable = page.getByRole("checkbox", { name: "Repeatable" });
 
     await test.step("Mark Required and Repeatable", async () => {
-      await page.getByRole("button", { name: BEHAVIOUR_CARD_NAME }).click();
+      // Behaviour chips render inline on the inspector's Question tab.
       await page.getByRole("checkbox", { name: "Required" }).click();
       await repeatable.click();
       await expect(repeatable).toHaveAttribute("aria-checked", "true");
-      await expect(page.getByText("Configured • 2")).toBeVisible();
+      await expect(
+        page.getByRole("checkbox", { name: "Required" }),
+      ).toHaveAttribute("aria-checked", "true");
     });
 
     await test.step("Boolean never offers Repeats — and clears the flag", async () => {
@@ -336,7 +334,6 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       await pickType(page, "string");
       await expect(repeatable).toBeVisible();
       await expect(repeatable).toHaveAttribute("aria-checked", "false");
-      await expect(page.getByText("Configured • 1")).toBeVisible();
     });
 
     await test.step("Preview shows the required asterisk", async () => {

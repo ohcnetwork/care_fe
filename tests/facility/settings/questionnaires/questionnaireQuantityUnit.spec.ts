@@ -69,7 +69,9 @@ test.describe("Questionnaire v2 quantity default unit round-trip", () => {
       await pickType(page, "quantity");
       // Legacy contract: the old editor never offered custom options for
       // quantity — the v2 builder must not either.
-      await expect(page.getByText("Unit Options")).toBeVisible();
+      // Also matched by the canvas error chip ("…pick one under Unit
+      // Options") until a valueset is chosen.
+      await expect(page.getByText("Unit Options").first()).toBeVisible();
       await expect(
         page.getByRole("radio", { name: "Custom Options" }),
       ).not.toBeVisible();

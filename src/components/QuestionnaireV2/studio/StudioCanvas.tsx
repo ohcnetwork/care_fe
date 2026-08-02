@@ -1,4 +1,13 @@
-import { ArrowDown, ArrowUp, Copy, EyeOff, Plus, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Copy,
+  EyeOff,
+  Plus,
+  Split,
+  Trash2,
+  TriangleAlert,
+} from "lucide-react";
 import { Dispatch, createContext, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,11 +20,19 @@ import {
 } from "@/components/QuestionnaireV2/form/chrome";
 import { QuestionnaireFormCanvas } from "@/components/QuestionnaireV2/form/FormCanvas";
 
+import { Question } from "@/types/questionnaire/question";
+
+import { shortConditionSummary } from "./conditionSummary";
+
 interface StudioCanvasContextValue {
   editing: boolean;
   selectedId: string | null;
   onSelectQuestion: (id: string) => void;
   dispatch: Dispatch<BuilderAction>;
+  /** The full draft tree — resolves enable_when targets for logic chips. */
+  questions: Question[];
+  /** question id → save-rule i18n key, from findInvalidQuestions. */
+  issueKeysByQuestionId: ReadonlyMap<string, string>;
 }
 
 const StudioCanvasContext = createContext<StudioCanvasContextValue | null>(
@@ -188,9 +205,42 @@ function StudioAppendZone({ parentId }: { parentId: string | null }) {
   );
 }
 
+/**
+ * In-flow chips under a question's label on the edit canvas: the
+ * conditional-logic summary (reference design's "Shown when …" chip) and
+ * any save-blocking issue for that question.
+ */
+function StudioQuestionAnnotation({ question }: { question: Question }) {
+  const { t } = useTranslation();
+  const studio = useStudioCanvas();
+  if (!studio.editing) return null;
+
+  const logicSummary = shortConditionSummary(question, studio.questions, t);
+  const issueKey = studio.issueKeysByQuestionId.get(question.id);
+  if (!logicSummary && !issueKey) return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 pl-2.5">
+      {logicSummary && (
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">
+          <Split aria-hidden className="size-3 shrink-0" />
+          {logicSummary}
+        </span>
+      )}
+      {issueKey && (
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700">
+          <TriangleAlert aria-hidden className="size-3 shrink-0" />
+          {t(issueKey)}
+        </span>
+      )}
+    </div>
+  );
+}
+
 const STUDIO_CHROME: FormChrome = {
   QuestionShell: StudioQuestionShell,
   AppendZone: StudioAppendZone,
+  QuestionAnnotation: StudioQuestionAnnotation,
 };
 
 export interface StudioCanvasProps {
@@ -198,10 +248,13 @@ export interface StudioCanvasProps {
   selectedId: string | null;
   onSelectQuestion: (id: string) => void;
   dispatch: Dispatch<BuilderAction>;
+  questions: Question[];
+  issueKeysByQuestionId: ReadonlyMap<string, string>;
   /** Bumped by outline/issue selection to scroll the question into view —
    *  canvas clicks don't scroll (the question is already on screen). */
   scrollRequest: { id: string; nonce: number } | null;
   emptyState?: React.ReactNode;
+  headerHint?: React.ReactNode;
 }
 
 /** The center pane: the live form canvas with studio chrome. Must render
@@ -211,8 +264,11 @@ export function StudioCanvas({
   selectedId,
   onSelectQuestion,
   dispatch,
+  questions,
+  issueKeysByQuestionId,
   scrollRequest,
   emptyState,
+  headerHint,
 }: StudioCanvasProps) {
   useEffect(() => {
     if (!scrollRequest) return;
@@ -225,11 +281,19 @@ export function StudioCanvas({
 
   return (
     <StudioCanvasContext.Provider
-      value={{ editing, selectedId, onSelectQuestion, dispatch }}
+      value={{
+        editing,
+        selectedId,
+        onSelectQuestion,
+        dispatch,
+        questions,
+        issueKeysByQuestionId,
+      }}
     >
       <QuestionnaireFormCanvas
         chrome={STUDIO_CHROME}
         emptyState={emptyState}
+        headerHint={headerHint}
         // The edit canvas needs breathing room for the floating toolbar and
         // ring offsets.
         className={cn(editing && "px-1 pt-2")}

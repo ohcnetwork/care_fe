@@ -27,7 +27,7 @@ import {
   findQuestion,
 } from "@/components/QuestionnaireV2/builder/builderReducer";
 import { ImportQuestionsDialog } from "@/components/QuestionnaireV2/builder/ImportQuestionsDialog";
-import { QuestionEditorCard } from "@/components/QuestionnaireV2/builder/QuestionEditorCard";
+
 import {
   findFirstInvalidQuestion,
   findInvalidQuestions,
@@ -54,6 +54,7 @@ import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 
 import { FormSettingsPanel } from "./FormSettingsPanel";
+import { QuestionInspector } from "./QuestionInspector";
 import { StudioCanvas } from "./StudioCanvas";
 import { StudioOutline } from "./StudioOutline";
 import { StudioTopBar } from "./StudioTopBar";
@@ -193,6 +194,15 @@ export function QuestionnaireStudioPage({
   const issues = useMemo(
     () => findInvalidQuestions(state.questions),
     [state.questions],
+  );
+  // First failing rule per question — powers the outline warning icons and
+  // the canvas error chips alongside the top bar's popover.
+  const issueKeysByQuestionId = useMemo(
+    () =>
+      new Map(
+        issues.map(({ question, messageKey }) => [question.id, messageKey]),
+      ),
+    [issues],
   );
 
   const { mutate: save, isPending } = useUpdateQuestionnaire(id, (updated) => {
@@ -386,6 +396,7 @@ export function QuestionnaireStudioPage({
               editing={editing}
               selectedId={state.selectedId}
               formSelected={editing && formSelected}
+              issueKeysByQuestionId={issueKeysByQuestionId}
               onSelectForm={() => setInspectorTarget("form")}
               onSelectQuestion={revealQuestion}
               dispatch={studioDispatch}
@@ -410,7 +421,12 @@ export function QuestionnaireStudioPage({
                   })}
                 />
               ) : (
-                <QuestionEditorCard
+                <QuestionInspector
+                  // Keyed by question so the inspector re-anchors on the
+                  // Question tab per selection — keeps the "Question Title"
+                  // textbox visible when save validation or an issue click
+                  // selects a question programmatically.
+                  key={selectedQuestion.id}
                   question={selectedQuestion}
                   number={selectedNumber}
                   allQuestions={state.questions}
@@ -437,7 +453,10 @@ export function QuestionnaireStudioPage({
                 setInspectorTarget("question");
               }}
               dispatch={studioDispatch}
+              questions={state.questions}
+              issueKeysByQuestionId={issueKeysByQuestionId}
               scrollRequest={scrollRequest}
+              headerHint={editing ? t("click_any_question_to_edit") : undefined}
               emptyState={
                 editing ? (
                   <BuilderEmptyState

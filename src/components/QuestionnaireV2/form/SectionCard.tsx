@@ -36,7 +36,7 @@ export function SectionCard({
 }) {
   const { t } = useTranslation();
   const { inert } = useFormRenderer();
-  const { AppendZone } = useFormChrome();
+  const { AppendZone, QuestionAnnotation } = useFormChrome();
 
   // On the edit canvas the inert wrapper already neutralizes the inputs;
   // keeping the fieldset natively disabled there would also disable the
@@ -98,6 +98,11 @@ export function SectionCard({
           <p className="-mt-1 mb-3 text-xs text-gray-500">
             {question.description}
           </p>
+        )}
+        {QuestionAnnotation && (
+          <div className="mb-3">
+            <QuestionAnnotation question={question} />
+          </div>
         )}
         <fieldset
           disabled={fieldsetDisabled}

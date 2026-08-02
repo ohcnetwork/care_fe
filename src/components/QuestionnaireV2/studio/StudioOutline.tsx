@@ -1,4 +1,4 @@
-import { Plus, Search, Settings2 } from "lucide-react";
+import { Plus, Search, Settings2, Split, TriangleAlert } from "lucide-react";
 import { Dispatch, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,11 +15,25 @@ import { Question } from "@/types/questionnaire/question";
 
 import { searchHiddenIds } from "./outlineSearch";
 
+function countLeafQuestions(questions: Question[]): number {
+  let count = 0;
+  const walk = (list: Question[]) => {
+    for (const question of list) {
+      if (question.type === "group") walk(question.questions ?? []);
+      else count += 1;
+    }
+  };
+  walk(questions);
+  return count;
+}
+
 export interface StudioOutlineProps {
   questions: Question[];
   editing: boolean;
   selectedId: string | null;
   formSelected: boolean;
+  /** question id → save-rule i18n key — rows get a warning cue. */
+  issueKeysByQuestionId: ReadonlyMap<string, string>;
   onSelectForm: () => void;
   onSelectQuestion: (id: string) => void;
   dispatch: Dispatch<BuilderAction>;
@@ -37,6 +51,7 @@ export function StudioOutline({
   editing,
   selectedId,
   formSelected,
+  issueKeysByQuestionId,
   onSelectForm,
   onSelectQuestion,
   dispatch,
@@ -92,6 +107,17 @@ export function StudioOutline({
         </button>
       )}
 
+      {questions.length > 0 && (
+        <div className="flex items-baseline justify-between px-3 pt-1">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400">
+            {t("structure")}
+          </span>
+          <span className="text-[11px] text-gray-400">
+            {t("n_questions", { count: countLeafQuestions(questions) })}
+          </span>
+        </div>
+      )}
+
       {noMatches && (
         <p className="px-3 py-6 text-center text-sm text-gray-500">
           {t("no_question_matches_search")}
@@ -104,6 +130,16 @@ export function StudioOutline({
         activeId={formSelected ? null : selectedId}
         onSelect={onSelectQuestion}
         hiddenIds={hiddenIds}
+        rowAdornment={(question) => (
+          <>
+            {(question.enable_when?.length ?? 0) > 0 && (
+              <Split className="size-3 text-amber-600" />
+            )}
+            {editing && issueKeysByQuestionId.has(question.id) && (
+              <TriangleAlert className="size-3 text-red-500" />
+            )}
+          </>
+        )}
         renderSeparator={
           // Hidden while a search filter is active: the separator index is
           // positional in the FILTERED row list, so an insert-at-index

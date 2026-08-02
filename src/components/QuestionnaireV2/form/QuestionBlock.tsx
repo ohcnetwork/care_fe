@@ -43,7 +43,7 @@ export function QuestionBlock(props: QuestionBlockProps) {
   const { question, depth, number } = props;
   const { t } = useTranslation();
   const { mode, revealHidden, inert } = useFormRenderer();
-  const { QuestionShell } = useFormChrome();
+  const { QuestionShell, QuestionAnnotation } = useFormChrome();
   const enabled = useQuestionEnabled(question);
   const errors = useQuestionErrors(question.id);
   // Only read for repeating questions (groups have no response entry).
@@ -160,6 +160,7 @@ export function QuestionBlock(props: QuestionBlockProps) {
       {question.description && (
         <p className="pl-2.5 text-xs text-gray-500">{question.description}</p>
       )}
+      {QuestionAnnotation && <QuestionAnnotation question={question} />}
       {/* The interactive area: inert on the builder's edit canvas so clicks
           fall through to the selection chrome and none of these controls
           surface in the a11y tree. */}

@@ -28,6 +28,9 @@ export interface QuestionnaireFormRendererProps {
   /** Hide the questionnaire title/description header (hosts that already
    *  show them elsewhere). */
   hideHeader?: boolean;
+  /** Right-aligned hint next to the header (the studio's "click any
+   *  question to edit it"). */
+  headerHint?: React.ReactNode;
   className?: string;
 }
 
@@ -58,6 +61,7 @@ export function QuestionnaireFormRenderer({
   chrome = {},
   emptyState,
   hideHeader,
+  headerHint,
   className,
 }: QuestionnaireFormRendererProps) {
   return (
@@ -72,6 +76,7 @@ export function QuestionnaireFormRenderer({
         <CanvasBody
           emptyState={emptyState}
           hideHeader={hideHeader}
+          headerHint={headerHint}
           className={className}
         />
       </FormChromeProvider>
@@ -88,11 +93,13 @@ export function QuestionnaireFormCanvas({
   chrome = {},
   emptyState,
   hideHeader,
+  headerHint,
   className,
 }: {
   chrome?: FormChrome;
   emptyState?: React.ReactNode;
   hideHeader?: boolean;
+  headerHint?: React.ReactNode;
   className?: string;
 }) {
   return (
@@ -100,6 +107,7 @@ export function QuestionnaireFormCanvas({
       <CanvasBody
         emptyState={emptyState}
         hideHeader={hideHeader}
+        headerHint={headerHint}
         className={className}
       />
     </FormChromeProvider>
@@ -109,10 +117,12 @@ export function QuestionnaireFormCanvas({
 function CanvasBody({
   emptyState,
   hideHeader,
+  headerHint,
   className,
 }: {
   emptyState?: React.ReactNode;
   hideHeader?: boolean;
+  headerHint?: React.ReactNode;
   className?: string;
 }) {
   const { t } = useTranslation();
@@ -121,18 +131,31 @@ function CanvasBody({
   const visibleIndices = useVisibleTopLevelIndices();
   const questions = questionnaire.questions;
 
+  const sectionCount = questions.filter(
+    (question) => question.type === "group",
+  ).length;
+  const countLine = [
+    sectionCount > 0 && t("n_sections", { count: sectionCount }),
+    t("n_questions", { count: countLeafQuestions(questions) }),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   const header = !hideHeader && (
-    <div className="space-y-1 pb-4">
-      <h2 className="text-lg font-semibold tracking-tight text-gray-900">
-        {questionnaire.title}
-      </h2>
-      {questionnaire.description && (
-        <p className="text-sm text-gray-500">{questionnaire.description}</p>
-      )}
-      {questions.length > 0 && (
-        <p className="text-xs text-gray-400">
-          {t("n_questions", { count: countLeafQuestions(questions) })}
-        </p>
+    <div className="flex items-baseline justify-between gap-3 pb-4">
+      <div className="min-w-0 space-y-1">
+        <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+          {questionnaire.title}
+        </h2>
+        {questionnaire.description && (
+          <p className="text-sm text-gray-500">{questionnaire.description}</p>
+        )}
+        {questions.length > 0 && (
+          <p className="text-xs text-gray-400">{countLine}</p>
+        )}
+      </div>
+      {headerHint && (
+        <div className="shrink-0 text-xs text-gray-400">{headerHint}</div>
       )}
     </div>
   );

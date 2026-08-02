@@ -20,6 +20,9 @@ export interface QuestionTreeNavProps {
    *  only) — skipped entirely, matching the legacy renderer where hidden
    *  questions simply don't appear. Numbering stays stable across hides. */
   hiddenIds?: Set<string>;
+  /** Decorative per-row trailing icons (the studio's logic/issue cues) —
+   *  rendered aria-hidden so row accessible names stay number + title. */
+  rowAdornment?: (question: Question) => React.ReactNode;
 }
 
 export function QuestionTreeNav({
@@ -30,6 +33,7 @@ export function QuestionTreeNav({
   footer,
   renderSeparator,
   hiddenIds,
+  rowAdornment,
 }: QuestionTreeNavProps) {
   const { t } = useTranslation();
   const items = numberQuestions(questions).filter(
@@ -63,13 +67,21 @@ export function QuestionTreeNav({
         >
           <TypeIcon className="size-3" />
         </span>
-        <span className="min-w-0">
+        <span className="min-w-0 flex-1">
           {item.question.text || (
             <span className="italic text-gray-400">
               {t("untitled_question")}
             </span>
           )}
         </span>
+        {rowAdornment && (
+          <span
+            aria-hidden
+            className="mr-1 flex shrink-0 items-center gap-1 self-center"
+          >
+            {rowAdornment(item.question)}
+          </span>
+        )}
         {activeId === item.question.id && (
           <span className="absolute right-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-gray-900" />
         )}

@@ -6,8 +6,6 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-const BEHAVIOUR_CARD_NAME = "Question Behaviour & Data Capture Settings";
-
 test.describe("Questionnaire v2 repeats", () => {
   test("choice question with Repeats becomes multi-select chips in preview", async ({
     page,
@@ -42,9 +40,7 @@ test.describe("Questionnaire v2 repeats", () => {
       await rows.nth(1).getByRole("textbox").fill(optionAValue);
       await rows.nth(2).getByRole("textbox").fill(optionBValue);
 
-      // The behaviour card is collapsed by default; its toggle button takes
-      // the card title as accessible name.
-      await page.getByRole("button", { name: BEHAVIOUR_CARD_NAME }).click();
+      // Behaviour chips render inline on the inspector's Question tab.
       await page.getByRole("checkbox", { name: "Repeatable" }).click();
       await expect(
         page.getByRole("checkbox", { name: "Repeatable" }),
@@ -104,7 +100,6 @@ test.describe("Questionnaire v2 repeats", () => {
         .getByRole("textbox", { name: "Question Title" })
         .pressSequentially(questionTitle);
 
-      await page.getByRole("button", { name: BEHAVIOUR_CARD_NAME }).click();
       await page.getByRole("checkbox", { name: "Repeatable" }).click();
     });
 
