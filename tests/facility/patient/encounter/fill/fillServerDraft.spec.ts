@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { type Page, expect, test } from "@playwright/test";
 import {
   getQuestionnaireIdBySlug,
   questionBlock,
@@ -11,37 +11,77 @@ import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-// "Save as draft" writes a form_submission record and is feature-flagged
-// (REACT_ENABLE_QUESTIONNAIRE_DRAFT), inlined into the bundle at build
-// time — a build without it has no button to click.
-const draftEnabled = process.env.REACT_ENABLE_QUESTIONNAIRE_DRAFT === "true";
+/**
+ * "Save as draft" writes a `form_submission` record and is feature-flagged
+ * by `REACT_ENABLE_QUESTIONNAIRE_DRAFT`, which Vite INLINES at build time.
+ * The test process's env therefore says nothing about the app under test —
+ * so this spec asks the served bundle instead (is the button there?) and
+ * only skips when the built app genuinely lacks the feature.
+ *
+ * The env var is still read, as an expectation: if it is set, a missing
+ * button is drift or a regression and fails loudly rather than skipping.
+ *
+ * CI COVERAGE: this spec skips unless the app is BUILT with
+ * `REACT_ENABLE_QUESTIONNAIRE_DRAFT=true` — set it on the build step (and,
+ * to catch drift, on the test step too).
+ */
+const flagRequested = process.env.REACT_ENABLE_QUESTIONNAIRE_DRAFT === "true";
+
+const SAVE_DRAFT = "Save as Draft";
+
+/** Open the fill page and settle the flag question against reality. */
+async function openFillPage(page: Page, fillUrl: string) {
+  await page.goto(fillUrl);
+  const airEntry = questionBlock(page, "Is bilateral air entry present?");
+  await expect(airEntry).toBeVisible();
+  // The page is healthy — its primary action rendered. Anything missing
+  // beyond this point is about the feature, not about a broken mount.
+  await expect(
+    page.getByRole("button", { name: "Save Changes" }),
+  ).toBeVisible();
+
+  const saveDraft = page.getByRole("button", { name: SAVE_DRAFT });
+  if (!(await saveDraft.isVisible())) {
+    if (flagRequested) {
+      throw new Error(
+        `REACT_ENABLE_QUESTIONNAIRE_DRAFT=true but the served app renders no "${SAVE_DRAFT}" button — ` +
+          "the bundle was built without the flag, or the availability gate regressed.",
+      );
+    }
+    test.skip(true, "the built app has questionnaire server drafts disabled");
+  }
+  return { airEntry, saveDraft };
+}
+
+/** The draft id the overview card's Continue action deep-links to. */
+function draftIdFromUrl(url: string): string {
+  const id = new URL(url).searchParams.get("continue_draft");
+  expect(id, "continue_draft missing from the resumed URL").toBeTruthy();
+  return id as string;
+}
 
 test.describe("Fill page server draft", () => {
-  test.skip(
-    !draftEnabled,
-    "REACT_ENABLE_QUESTIONNAIRE_DRAFT is off in this build",
-  );
-
-  test("Save as draft lists on the encounter overview, previews readonly, and Continue resumes it", async ({
+  test("saved draft lists on the overview, previews readonly, resumes, and re-saves onto the same record", async ({
     page,
   }) => {
+    test.slow();
     const questionnaireId = await getQuestionnaireIdBySlug(
       "respiratory_status-v3",
     );
     const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
     const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}`;
     const note = faker.lorem.sentence();
+    const editedNote = faker.lorem.sentence();
 
-    await page.goto(fillUrl);
-    const airEntry = questionBlock(page, "Is bilateral air entry present?");
-    await expect(airEntry).toBeVisible();
+    const { airEntry, saveDraft } = await openFillPage(page, fillUrl);
+    const noteBox = () =>
+      questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox");
 
     await airEntry.getByRole("radio", { name: "yes", exact: true }).click();
-    await questionBlock(page, "Note on Bilateral Air Entry")
-      .getByRole("textbox")
-      .fill(note);
+    await noteBox().fill(note);
 
-    await page.getByRole("button", { name: "Save as Draft" }).click();
+    // POST branch — no draft to continue yet.
+    await saveDraft.click();
     await expectToast(page, "Draft saved successfully");
     await page.waitForURL(/\/updates$/);
 
@@ -51,20 +91,15 @@ test.describe("Fill page server draft", () => {
     await expect(
       page.getByRole("heading", { name: "Draft Forms" }),
     ).toBeVisible();
-    const previewNote = questionBlock(
-      page,
-      "Note on Bilateral Air Entry",
-    ).getByRole("textbox");
-    await expect(previewNote).toHaveValue(note);
-    await expect(previewNote).toBeDisabled();
+    await expect(noteBox()).toHaveValue(note);
+    await expect(noteBox()).toBeDisabled();
 
     // Continue deep-links back with ?continue_draft= and the server copy
     // seeds the store.
     await page.getByRole("button", { name: "Continue", exact: true }).click();
     await page.waitForURL(/continue_draft=/);
-    await expect(
-      questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox"),
-    ).toHaveValue(note);
+    const draftId = draftIdFromUrl(page.url());
+    await expect(noteBox()).toHaveValue(note);
     await expect(
       questionBlock(page, "Is bilateral air entry present?").getByRole(
         "radio",
@@ -74,6 +109,22 @@ test.describe("Fill page server draft", () => {
         },
       ),
     ).toHaveAttribute("aria-checked", "true");
+
+    // PUT branch — saving a resumed draft updates that record instead of
+    // creating a second one.
+    await noteBox().fill(editedNote);
+    await page.getByRole("button", { name: SAVE_DRAFT }).click();
+    await expectToast(page, "Draft saved successfully");
+    await page.waitForURL(/\/updates$/);
+    await expect(
+      page.getByRole("button", { name: "Continue", exact: true }),
+    ).toHaveCount(1);
+    await expect(noteBox()).toHaveValue(editedNote);
+
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await page.waitForURL(/continue_draft=/);
+    expect(draftIdFromUrl(page.url())).toBe(draftId);
+    await expect(noteBox()).toHaveValue(editedNote);
 
     // Submitting a resumed draft completes that same record, so the card
     // empties out again.

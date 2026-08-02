@@ -4,7 +4,7 @@ import { Question, QuestionType } from "@/types/questionnaire/question";
 
 /**
  * Types the renderer never records a response for: `initializeResponses`
- * (renderer/store.ts) skips `group` entirely, and `display` gets an entry
+ * (`form/engine/store.ts`) skips `group` entirely, and `display` gets an entry
  * whose values `DisplayText` never writes — so `evaluateEnableWhen` sees
  * "unanswered" forever and a condition targeting one permanently hides its
  * question with zero feedback. The visibility card excludes them from the

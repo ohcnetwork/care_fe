@@ -11,11 +11,10 @@ import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
 /**
- * The fill-mode validation seam the old renderer documented but never
- * implemented (`errorsAtom` had readers and no writer). Pure function so the
- * future fill host can run it at submit time and write the result into
- * `errorsAtom`; server-side errors merge through the same
- * `QuestionValidationError` shape.
+ * The fill-mode validation seam. Pure function: `fill/submit/` runs it per
+ * form at submit time and writes the result into that form's `errorsAtom`;
+ * server-side errors merge back through the same `QuestionValidationError`
+ * shape.
  *
  * Mirrors the legacy QuestionnaireForm required check: only questions that
  * are currently enabled (same enable_when evaluation as rendering) and

@@ -33,12 +33,18 @@ interface DraftQuestionnaireResponse {
  * `question_id → response` record. JSON round-tripping flattened Dates to
  * strings, so revive them the same way the `?continue_draft=` restore path
  * does.
+ *
+ * The clone is load-bearing: `reviveDraftResponses` rewrites entries IN
+ * PLACE, and these objects belong to the TanStack Query cache — the same
+ * `submission` this component spreads back into the discard PUT. Without
+ * it, rendering the preview would silently rewrite the dump we later send
+ * (dates re-serialized, unparseable ones dropped).
  */
 function draftResponsesRecord(
   responses: QuestionnaireResponse[],
 ): Record<string, QuestionnaireResponse> {
   const record: Record<string, QuestionnaireResponse> = {};
-  for (const response of responses) {
+  for (const response of structuredClone(responses)) {
     record[response.question_id] = response;
   }
   return reviveDraftResponses(record);
@@ -98,7 +104,14 @@ export function FormSubmissionDrafts({
           const questions = questionnaire?.questions;
           const responses = questionnaireResponses?.responses;
 
-          if (!questionnaire || !questions || !responses) {
+          // `response_dump` is an untyped blob written by whoever saved the
+          // draft (this app, a plugin, an older release) — shape-check it
+          // instead of trusting the cast above.
+          if (
+            !questionnaire ||
+            !Array.isArray(questions) ||
+            !Array.isArray(responses)
+          ) {
             return null;
           }
 
@@ -135,7 +148,14 @@ export function FormSubmissionDrafts({
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4">
+                {/* `initialResponses` seeds the renderer's store once, at
+                    creation — by design, so a live questionnaire edit can't
+                    wipe in-progress answers. A re-saved draft therefore
+                    needs a NEW store, which the timestamped key forces;
+                    without it this preview would keep showing the answers
+                    it first mounted with. */}
                 <QuestionnaireFormRenderer
+                  key={`${submission.id}-${submission.modified_date ?? submission.created_date}`}
                   questionnaire={questionnaire}
                   mode="readonly"
                   subject={{ facilityId, patientId, encounterId }}

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Check, DropletIcon } from "lucide-react";
+import { Check, DropletIcon, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { AllergyIcon } from "@/CAREUI/icons/CustomIcons";
@@ -173,6 +173,7 @@ export function FillHeader({
               onClick={onSaveDraft}
               disabled={isSubmitting || isSavingDraft}
             >
+              {isSavingDraft && <Loader2 className="size-4 animate-spin" />}
               {t("save_as_draft")}
             </Button>
           )}

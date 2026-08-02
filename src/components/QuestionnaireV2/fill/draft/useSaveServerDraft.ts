@@ -10,7 +10,6 @@ import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
 import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
-import { isPatientBound } from "@/components/QuestionnaireV2/fill/subject";
 
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 import type { Question } from "@/types/questionnaire/question";
@@ -48,10 +47,14 @@ function hasStructuredQuestion(questions: Question[]): boolean {
  * ends the session.
  *
  * The legacy availability rules are preserved exactly, because the dump's
- * shape is what constrains them:
+ * shape and the way drafts are FOUND again are what constrain them:
  * - feature-flagged (`enableQuestionnaireDraft`);
- * - patient-bound subjects only — the record carries `patient` (and
- *   `encounter`), which a location/device fill has nothing to put in;
+ * - encounter subjects only. Not merely "patient-bound": the sole listing
+ *   of server drafts is the encounter overview's card, which filters
+ *   `form_submission` by `encounter`. A patient-mount draft would POST
+ *   without one, so nothing could ever surface it — and saving also drops
+ *   the local autosave copy, so that draft would be unreachable, not just
+ *   inconvenient. Legacy only ever mounted this encounter-bound;
  * - a single form per session — `response_dump.questionnaireResponses` is
  *   ONE `{questionnaire, responses}` pair, so a multi-form session cannot
  *   be represented without silently dropping forms;
@@ -73,17 +76,15 @@ export function useSaveServerDraft({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const patientBound = isPatientBound(subject) ? subject : undefined;
-  const encounterId =
-    subject.type === "encounter" ? subject.encounterId : undefined;
+  const encounterBound = subject.type === "encounter" ? subject : undefined;
   const primary = forms.find((form) => form.isPrimary);
 
   const canSaveDraft = useMemo(() => {
     if (!careConfig.enableQuestionnaireDraft) return false;
-    if (!patientBound || !primary) return false;
+    if (!encounterBound || !primary) return false;
     if (forms.length !== 1) return false;
     return !hasStructuredQuestion(primary.questionnaire.questions);
-  }, [patientBound, primary, forms.length]);
+  }, [encounterBound, primary, forms.length]);
 
   const handleSaved = useCallback(() => {
     if (continueDraftId) {
@@ -116,7 +117,7 @@ export function useSaveServerDraft({
   });
 
   const saveDraft = useCallback(() => {
-    if (!canSaveDraft || !primary || !patientBound) return;
+    if (!canSaveDraft || !primary || !encounterBound) return;
     const store = getStore(primary.key);
     if (!store) return;
 
@@ -135,19 +136,18 @@ export function useSaveServerDraft({
       return;
     }
     createDraft({
-      patient: patientBound.patientId,
+      patient: encounterBound.patientId,
       questionnaire: primary.questionnaire.slug,
-      encounter: encounterId,
+      encounter: encounterBound.encounterId,
       status: "draft",
       response_dump,
     });
   }, [
     canSaveDraft,
     primary,
-    patientBound,
+    encounterBound,
     getStore,
     continueDraftId,
-    encounterId,
     createDraft,
     updateDraft,
   ]);

@@ -181,7 +181,9 @@ export function reviveDraftResponses(
   responses: Record<string, QuestionnaireResponse>,
 ): Record<string, QuestionnaireResponse> {
   for (const response of Object.values(responses)) {
-    for (const entry of response.values) {
+    // Server dumps are untyped blobs — a `values`-less entry is possible
+    // and must not throw the whole encounter overview.
+    for (const entry of response.values ?? []) {
       // Fresh from JSON.parse the declared Date is actually a string —
       // read through `unknown` at this one boundary.
       const raw = (entry as { value?: unknown }).value;
