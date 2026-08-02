@@ -8,9 +8,13 @@ import {
 } from "@/components/QuestionnaireV2/renderer/store";
 
 // Live-store hooks hosts may need (the studio outline drops
-// enable_when-hidden rows in preview). Re-exported here so consumers stay
-// on form/'s public surface — the engine reach-in is this module's alone.
-export { useHiddenQuestionIds } from "@/components/QuestionnaireV2/renderer/store";
+// enable_when-hidden rows in preview; the fill outline adds completion
+// icons). Re-exported here so consumers stay on form/'s public surface —
+// the engine reach-in is this module's alone.
+export {
+  useAnsweredQuestionIds,
+  useHiddenQuestionIds,
+} from "@/components/QuestionnaireV2/renderer/store";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";

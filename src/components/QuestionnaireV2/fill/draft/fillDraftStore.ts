@@ -105,8 +105,10 @@ export function saveFillDraft(
 }
 
 /** JSON round-trips Dates to ISO strings; date/dateTime entries revive to
- *  Date objects so the inputs' discriminant checks keep working. */
-function reviveDateValues(
+ *  Date objects so the inputs' discriminant checks keep working. Exported
+ *  for the server-draft (`?continue_draft=`) restore path, whose dump went
+ *  through the same JSON flattening. */
+export function reviveDraftResponses(
   responses: Record<string, QuestionnaireResponse>,
 ): Record<string, QuestionnaireResponse> {
   for (const response of Object.values(responses)) {
@@ -150,7 +152,7 @@ export function loadFillDraft(
       return undefined;
     }
     return {
-      responses: reviveDateValues(draft.responses),
+      responses: reviveDraftResponses(draft.responses),
       savedAt: draft.savedAt,
       structuredSkipped: draft.structuredSkipped === true,
     };
