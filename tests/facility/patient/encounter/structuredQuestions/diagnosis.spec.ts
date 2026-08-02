@@ -66,7 +66,7 @@ async function addDiagnosis(page: Page, severity?: string) {
   if (severity) {
     await diagnosisRow.getByRole("cell").nth(3).click();
     await page.getByRole("option", { name: severity }).click();
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
   }
 }
 
@@ -108,7 +108,7 @@ test.describe("Diagnosis", () => {
     await diagnosisRow.getByRole("cell").nth(4).click();
     await page.getByRole("option", { name: verification, exact: true }).click();
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -146,7 +146,7 @@ test.describe("Diagnosis", () => {
     await page
       .getByRole("option", { name: diagnosisName, exact: true })
       .click();
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),

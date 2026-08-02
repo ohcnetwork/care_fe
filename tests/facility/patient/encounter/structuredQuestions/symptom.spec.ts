@@ -91,7 +91,7 @@ test.describe("Symptom Questionnaire", () => {
     await symptomRow.getByRole("cell").nth(4).click();
     await page.getByRole("option", { name: verification, exact: true }).click();
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -125,7 +125,7 @@ test.describe("Symptom Questionnaire", () => {
       .click();
     await page.getByPlaceholder(/Add (another )?Symptom/i).fill(symptomName);
     await page.getByRole("option", { name: symptomName, exact: true }).click();
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
