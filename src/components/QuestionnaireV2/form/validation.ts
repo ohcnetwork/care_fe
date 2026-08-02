@@ -2,6 +2,7 @@ import type { TFunction } from "i18next";
 
 import {
   buildLinkIndex,
+  entryHasContent,
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/renderer/store";
 
@@ -38,11 +39,13 @@ export function collectRequiredErrors(
       }
       if (question.type === "display" || !question.required) continue;
       const values = responses[question.id]?.values ?? [];
+      // Legacy contract: an entry answers the question when it has real
+      // content (non-empty scalar / non-empty array), OR carries a coding
+      // or unit without a value (value-set selections, unit-only
+      // quantities) — QuestionnaireForm.tsx's hasValue/hasCoding/hasUnit.
       const answered = values.some(
         (entry) =>
-          entry.value !== undefined &&
-          entry.value !== null &&
-          entry.value !== "",
+          entryHasContent(entry) || entry.coding != null || entry.unit != null,
       );
       if (!answered) {
         errors.push({

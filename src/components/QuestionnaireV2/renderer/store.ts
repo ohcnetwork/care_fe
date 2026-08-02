@@ -333,10 +333,10 @@ export function useHasVisibleTopLevelQuestions(): boolean {
 }
 
 /** Whether one recorded entry carries an actual answer — non-empty
- *  scalar, or a non-empty array (structured/repeat values). Mirrors the
- *  required-check semantics in form/validation.ts plus the legacy
- *  array-emptiness rule. */
-function entryHasContent(entry: ResponseValue): boolean {
+ *  scalar, or a non-empty array (structured/repeat values). Shared with
+ *  form/validation.ts so the required check and the outline's completion
+ *  icons agree on what "answered" means. */
+export function entryHasContent(entry: ResponseValue): boolean {
   if (entry.value === undefined || entry.value === null || entry.value === "")
     return false;
   return !Array.isArray(entry.value) || entry.value.length > 0;

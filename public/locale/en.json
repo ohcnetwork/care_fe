@@ -1044,8 +1044,8 @@
   "blood_group": "Blood Group",
   "blood_group_is_required": "Blood group is required",
   "blood_pressure_error": {
-    "missing": "Field is required. Either specify both or clear both.",
     "exceed": "Value cannot exceed 250 mmHg.",
+    "missing": "Field is required. Either specify both or clear both.",
     "systolic_less_than_diastolic": "Systolic must be greater than diastolic."
   },
   "blood_pressure_systolic_diastolic": "Blood Pressure (Systolic + Diastolic)",
@@ -3673,6 +3673,7 @@
   "no_allergies_recorded": "No allergies recorded",
   "no_allergies_recorded_description": "No Allergies have been recorded",
   "no_alternative_names_added": "No alternative names added",
+  "no_answers_to_submit": "Nothing to submit yet — answer at least one question",
   "no_appointments": "No appointments found",
   "no_appointments_found_for_today": "No matching appointment found for today. Redirecting to Patient Home...",
   "no_apps_found": "No apps found",
