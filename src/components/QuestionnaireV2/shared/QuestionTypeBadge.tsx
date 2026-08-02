@@ -1,9 +1,14 @@
+import { useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 
 import { cn } from "@/lib/utils";
 
+import {
+  getStructuredTypesVersion,
+  subscribeToStructuredTypes,
+} from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import { structuredTypeLabel } from "@/components/QuestionnaireV2/structured/registry";
 
 import { QuestionType } from "@/types/questionnaire/question";
@@ -32,6 +37,14 @@ export function QuestionTypeBadge({
   structuredType?: StructuredTypeValue;
 }) {
   const { t } = useTranslation();
+  // A plugin type's label only exists once its manifest has registered —
+  // without this the badge would keep printing the raw id for the rest of
+  // the page's life.
+  useSyncExternalStore(
+    subscribeToStructuredTypes,
+    getStructuredTypesVersion,
+    getStructuredTypesVersion,
+  );
   return (
     <Badge
       variant="secondary"

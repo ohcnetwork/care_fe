@@ -39,6 +39,7 @@ import {
 } from "@/types/questionnaire/question";
 import { SubjectType } from "@/types/questionnaire/questionnaire";
 import type { StructuredTypeValue } from "@/types/questionnaire/structured";
+import { isPluginStructuredTypeName } from "@/types/questionnaire/structured";
 
 const FREQUENTLY_USED: QuestionType[] = [
   "group",
@@ -115,14 +116,22 @@ export function QuestionTypePicker({
       value: entry.value,
       label: t(`structured_type__${entry.value}`),
     })),
-    ...listPluginStructuredTypes()
-      .filter((definition) => definition.subjects.includes(subjectType))
-      .map((definition) => ({
-        value: definition.type as StructuredTypeValue,
-        // Plugins own their i18n — the manifest label is final text.
-        label: definition.label,
-        icon: definition.icon ?? Puzzle,
-      })),
+    ...listPluginStructuredTypes().flatMap((definition) =>
+      definition.subjects.includes(subjectType) &&
+      // Registration already enforced the namespace; the guard is what
+      // carries that fact into the type system (the definition's `type` is
+      // a plain string).
+      isPluginStructuredTypeName(definition.type)
+        ? [
+            {
+              value: definition.type,
+              // Plugins own their i18n — the manifest label is final text.
+              label: definition.label,
+              icon: definition.icon ?? Puzzle,
+            },
+          ]
+        : [],
+    ),
   ];
 
   const handleSelectType = (type: QuestionType) => {

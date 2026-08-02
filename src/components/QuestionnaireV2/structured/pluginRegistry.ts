@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { SubjectType } from "@/types/questionnaire/questionnaire";
+import { PLUGIN_STRUCTURED_TYPE_PATTERN } from "@/types/questionnaire/structured";
 
 import type {
   StructuredBatchEntry,
@@ -44,13 +45,6 @@ export interface PluginStructuredTypeDefinition {
 }
 
 /**
- * Namespacing is the whole isolation story: a plugin type is always
- * `{plugin_slug}.{type_name}`, so it can never collide with a core type
- * (which are bare) nor with another plugin's.
- */
-const PLUGIN_TYPE_PATTERN = /^[a-z0-9_]+\.[a-z0-9_]+$/;
-
-/**
  * Module-level store — same mechanics as `lib/override/registry.ts`: a Map
  * keyed by type, a version counter and a listener set so React views can
  * `useSyncExternalStore` on it, and a cleanup closure per registration that
@@ -68,13 +62,23 @@ function notify() {
 
 /** Register a plugin structured type; returns its cleanup closure.
  *  Throws on a non-namespaced id — PluginEngine catches and logs, so one
- *  bad definition never takes the app down. */
+ *  bad definition never takes the app down. Namespacing is the whole
+ *  isolation story: `{plugin_slug}.{type_name}` can collide with neither a
+ *  core type (those are bare) nor another plugin's. */
 export function registerPluginStructuredType(
   definition: PluginStructuredTypeDefinition,
 ): () => void {
-  if (!PLUGIN_TYPE_PATTERN.test(definition.type)) {
+  if (!PLUGIN_STRUCTURED_TYPE_PATTERN.test(definition.type)) {
     throw new Error(
       `Plugin structured type "${definition.type}" must be namespaced "{plugin_slug}.{type_name}"`,
+    );
+  }
+  if (pluginTypes.has(definition.type)) {
+    // Last-wins (the effect re-registers on every manifest change), but a
+    // genuine duplicate — two plugins claiming one id, or one plugin
+    // listing it twice — would otherwise be invisible.
+    console.warn(
+      `Structured type "${definition.type}" is already registered; the new definition replaces it`,
     );
   }
   pluginTypes.set(definition.type, definition);

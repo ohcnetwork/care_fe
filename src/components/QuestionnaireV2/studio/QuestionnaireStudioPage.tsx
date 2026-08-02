@@ -1,7 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Plus } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import { useEffect, useMemo, useReducer, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -45,6 +51,10 @@ import {
   findTopLevelIndex,
   numberQuestions,
 } from "@/components/QuestionnaireV2/shared/questionTree";
+import {
+  getStructuredTypesVersion,
+  subscribeToStructuredTypes,
+} from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import { QuestionnaireScope } from "@/types/questionnaire/questionnaire";
@@ -191,10 +201,24 @@ export function QuestionnaireStudioPage({
     [questionnaire, state.questions, metaTitle, metaDescription],
   );
 
-  const issues = useMemo(
-    () => findInvalidQuestions(state.questions),
-    [state.questions],
+  // The unknown-structured-type rule reads the plugin registry, which fills
+  // in only after the federation manifests resolve — later than the first
+  // render of a cold-loaded questionnaire. Without re-running on that, a
+  // plugin-typed question would show false "Unknown structured type"
+  // warnings (outline icons, canvas chips, issues popover) until an edit
+  // happened to invalidate the memo.
+  const structuredTypesVersion = useSyncExternalStore(
+    subscribeToStructuredTypes,
+    getStructuredTypesVersion,
+    getStructuredTypesVersion,
   );
+  const issues = useMemo(() => {
+    // Referenced so the dependency is a real read, not one exhaustive-deps
+    // would call spurious: the registry lookup happens inside
+    // `findInvalidQuestions`, where the rule cannot see it.
+    void structuredTypesVersion;
+    return findInvalidQuestions(state.questions);
+  }, [state.questions, structuredTypesVersion]);
   // First failing rule per question — powers the outline warning icons and
   // the canvas error chips alongside the top bar's popover.
   const issueKeysByQuestionId = useMemo(
