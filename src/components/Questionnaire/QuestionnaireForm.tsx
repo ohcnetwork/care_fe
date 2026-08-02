@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
-import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
@@ -1189,12 +1188,6 @@ export function QuestionnaireForm({
             />
           </>
         )}
-
-        <PLUGIN_Component
-          __name="Scribe"
-          formState={questionnaireForms}
-          setFormState={setQuestionnaireForms}
-        />
 
         <DebugPreview
           data={questionnaireForms}

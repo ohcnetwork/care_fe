@@ -18,6 +18,7 @@ import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -58,6 +59,7 @@ import {
   subjectKeyOf,
 } from "./subject";
 import { useSubmitFillSession } from "./submit/useSubmitQuestionnaire";
+import { useFillActions } from "./useFillActions";
 
 interface FillPageProps {
   /** What this fill is FOR — the union carries exactly the ids the
@@ -467,6 +469,11 @@ function FillPageBody({
     t("unsaved_changes"),
   );
 
+  // What a federated agent (Scribe) may do to this session, and the one
+  // validated path for doing it. Nothing is registered for a session with
+  // no patient in scope, so those mounts hand the plugin an empty list.
+  const { descriptors, invoke } = useFillActions({ subject, forms, getStore });
+
   return (
     <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-gray-100">
       <Tabs
@@ -590,6 +597,12 @@ function FillPageBody({
                     />
                   </div>
                 )}
+                {/* Renders nothing unless a plugin provides Scribe. */}
+                <PLUGIN_Component
+                  __name="Scribe"
+                  actions={descriptors}
+                  invoke={invoke}
+                />
               </section>
             </div>
           </div>
