@@ -12,7 +12,7 @@ import { getPatientId } from "tests/support/patientId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Fill page local autosave", () => {
-  test("answers survive a reload, discard resets, submit clears the draft", async ({
+  test("reload prompts to resume, Resume applies the draft, submit clears it", async ({
     page,
   }) => {
     const questionnaireId = await getQuestionnaireIdBySlug(
@@ -24,47 +24,49 @@ test.describe("Fill page local autosave", () => {
     await page.goto(fillUrl);
     const airEntry = questionBlock(page, "Is bilateral air entry present?");
     await expect(airEntry).toBeVisible();
+    const textInput = questionBlock(
+      page,
+      "Note on Bilateral Air Entry",
+    ).getByRole("textbox");
 
-    // No draft yet — no Draft chip on the tab, no restore bar.
+    // No draft yet — no Draft chip on the tab, no prompt.
     await expect(
       page.getByRole("tab", { name: /Questionnaire/ }),
     ).not.toContainText("Draft");
 
     await airEntry.getByRole("radio", { name: "yes", exact: true }).click();
-    await questionBlock(page, "Note on Bilateral Air Entry")
-      .getByRole("textbox")
-      .fill(note);
+    await textInput.fill(note);
 
     // Any edit marks the session as a draft.
     await expect(
       page.getByRole("tab", { name: /Questionnaire/ }),
     ).toContainText("Draft");
 
-    // Reload — the pagehide flush persists the pending debounce, and the
-    // fresh mount restores silently with the restore bar.
+    // Reload — the pagehide flush persists the pending debounce, but the
+    // fresh mount must NOT silently seed the store: it prompts instead.
     await page.reload();
-    await expect(page.getByText(/Restored your unsaved answers/)).toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+    await expect(textInput).toHaveValue("");
     await expect(
-      questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox"),
-    ).toHaveValue(note);
+      questionBlock(page, "Is bilateral air entry present?").getByRole(
+        "radio",
+        { name: "yes", exact: true },
+      ),
+    ).toHaveAttribute("aria-checked", "false");
+
+    // Resume applies the draft into the live store.
+    await page.getByRole("button", { name: /resume/i }).click();
+    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(textInput).toHaveValue(note);
     await expect(
       questionBlock(page, "Is bilateral air entry present?").getByRole(
         "radio",
         { name: "yes", exact: true },
       ),
     ).toHaveAttribute("aria-checked", "true");
-
-    // Discard: pristine form, bar and chip gone.
-    await page.getByRole("button", { name: "Discard", exact: true }).click();
-    await expect(
-      page.getByText(/Restored your unsaved answers/),
-    ).not.toBeVisible();
-    await expect(
-      questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox"),
-    ).toHaveValue("");
     await expect(
       page.getByRole("tab", { name: /Questionnaire/ }),
-    ).not.toContainText("Draft");
+    ).toContainText("Draft");
 
     // Fill the required questions and submit — success clears the draft.
     await questionBlock(page, "Is bilateral air entry present?")
@@ -82,8 +84,49 @@ test.describe("Fill page local autosave", () => {
     await expect(
       questionBlock(page, "Is bilateral air entry present?"),
     ).toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+  });
+
+  test("Discard deletes the draft, a later reload shows no prompt", async ({
+    page,
+  }) => {
+    const questionnaireId = await getQuestionnaireIdBySlug(
+      "respiratory_status-v3",
+    );
+    const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
+    const note = faker.lorem.sentence();
+
+    await page.goto(fillUrl);
+    const airEntry = questionBlock(page, "Is bilateral air entry present?");
+    await expect(airEntry).toBeVisible();
+    const textInput = questionBlock(
+      page,
+      "Note on Bilateral Air Entry",
+    ).getByRole("textbox");
+
+    await airEntry.getByRole("radio", { name: "yes", exact: true }).click();
+    await textInput.fill(note);
     await expect(
-      page.getByText(/Restored your unsaved answers/),
-    ).not.toBeVisible();
+      page.getByRole("tab", { name: /Questionnaire/ }),
+    ).toContainText("Draft");
+
+    await page.reload();
+    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+    await expect(textInput).toHaveValue("");
+
+    // Discard: prompt gone, form stays pristine, chip gone.
+    await page.getByRole("button", { name: "Discard", exact: true }).click();
+    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(textInput).toHaveValue("");
+    await expect(
+      page.getByRole("tab", { name: /Questionnaire/ }),
+    ).not.toContainText("Draft");
+
+    // The draft was deleted, not merely dismissed — a later reload has
+    // nothing left to prompt about.
+    await page.reload();
+    await expect(airEntry).toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(textInput).toHaveValue("");
   });
 });

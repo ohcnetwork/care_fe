@@ -43,6 +43,10 @@ export function useFillAutosave({ scope, restoredDraft }: UseFillAutosaveArgs) {
   // Set on successful submit: the draft served its purpose, so neither the
   // pending debounce nor the unmount/pagehide flush may re-save it.
   const finishedRef = useRef(false);
+  // Read by resumeRestoredDraft, which only ever fires from an event
+  // handler well after mount.
+  const restoredDraftRef = useRef(restoredDraft);
+  restoredDraftRef.current = restoredDraft;
 
   const scopeKey = scope
     ? `${scope.userId}--${scope.subjectKey}--${scope.questionnaireId}--${scope.questionnaireVersion}`
@@ -109,12 +113,33 @@ export function useFillAutosave({ scope, restoredDraft }: UseFillAutosaveArgs) {
 
   const dismissRestoreBar = useCallback(() => setRestoreDismissed(true), []);
 
+  /** Apply the restored draft into the live store — the prompt bar's
+   *  Resume affordance. Overlay is gated on the question still existing
+   *  with the same structured_type (same rule as the provider's
+   *  creation-time initialResponses merge). */
+  const resumeRestoredDraft = useCallback(() => {
+    const draft = restoredDraftRef.current;
+    if (!draft) return;
+    const seeded = initializeResponses(questionnaire.questions);
+    for (const [id, response] of Object.entries(draft.responses)) {
+      const fresh = seeded[id];
+      if (fresh && fresh.structured_type === response.structured_type) {
+        seeded[id] = { ...response, link_id: fresh.link_id };
+      }
+    }
+    store.set(responsesAtom, seeded);
+    setDirty(true);
+    setRestoreDismissed(true);
+  }, [store, questionnaire]);
+
   return {
-    /** Any edit since mount (or a restored draft) — drives the Draft chip. */
-    dirty: dirty || (!!restoredDraft && !restoreDismissed),
+    /** Any edit since mount — drives the Draft chip. A merely-detected
+     *  draft is NOT dirty; the chip lights only after Resume or an edit. */
+    dirty,
     restoredDraft: restoreDismissed ? undefined : restoredDraft,
     discardRestoredDraft,
     dismissRestoreBar,
+    resumeRestoredDraft,
     /** For the submit-success path: the draft served its purpose. */
     finishDraft,
   };

@@ -2675,7 +2675,7 @@
   "filed_by": "filed by",
   "files": "Files",
   "fill_color": "Fill Color",
-  "fill_draft_restored": "Restored your unsaved answers from {{time}}",
+  "fill_draft_resume_prompt": "You have an unsaved entry from {{time}}. Resume where you left off?",
   "fill_draft_structured_skipped": "Structured answers (medications, symptoms, files…) aren't covered by local drafts — please re-check those sections.",
   "fill_my_details": "Fill My Details",
   "filler_order": "Filler Order",

@@ -234,7 +234,7 @@ export default function QuestionnaireFillPage(props: FillPageProps) {
       initialResponses={
         serverDraftState && !serverDraftState.mismatch
           ? serverDraftState.responses
-          : localDraft?.responses
+          : undefined
       }
     >
       <FillPageBody
@@ -406,6 +406,7 @@ function FillPageBody({
                 {autosave.restoredDraft && (
                   <DraftRestoreBar
                     draft={autosave.restoredDraft}
+                    onResume={autosave.resumeRestoredDraft}
                     onDiscard={autosave.discardRestoredDraft}
                     onDismiss={autosave.dismissRestoreBar}
                   />
