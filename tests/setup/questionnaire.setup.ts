@@ -56,22 +56,39 @@ test("ensure enable-when questionnaire exists", async () => {
   };
 
   // Resolve the slug via the list endpoint (client-side match).
-  const listRes = await fetch(
-    `${apiUrl}/api/v1/questionnaire/?title=${encodeURIComponent(
-      fixture.title,
-    )}&limit=100`,
-    { headers },
-  );
-  if (!listRes.ok) {
-    const errorText = await listRes.text();
-    throw new Error(
-      `Failed to list questionnaires: ${listRes.status} — ${errorText}`,
+  const limit = 100;
+  let offset = 0;
+  let existing: { id: string; slug: string; version?: string } | undefined;
+
+  while (true) {
+    const listRes = await fetch(
+      `${apiUrl}/api/v1/questionnaire/?title=${encodeURIComponent(
+        fixture.title,
+      )}&limit=${limit}&offset=${offset}`,
+      { headers },
     );
+    if (!listRes.ok) {
+      const errorText = await listRes.text();
+      throw new Error(
+        `Failed to list questionnaires: ${listRes.status} — ${errorText}`,
+      );
+    }
+    const listData = (await listRes.json()) as {
+      results: { id: string; slug: string; version?: string }[];
+    };
+    existing = listData.results.find((entry) => entry.slug === slug);
+
+    if (existing) {
+      break;
+    }
+
+    // If we got fewer results than the limit, we've reached the end
+    if (listData.results.length < limit) {
+      break;
+    }
+
+    offset += limit;
   }
-  const listData = (await listRes.json()) as {
-    results: { id: string; slug: string; version?: string }[];
-  };
-  const existing = listData.results.find((entry) => entry.slug === slug);
 
   if (existing) {
     if (existing.version === fixture.version) {
