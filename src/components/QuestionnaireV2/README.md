@@ -156,7 +156,7 @@ pseudo-questionnaires), `QuestionnaireSearch` (the fill picker state), the
 `QuestionTypes/*` structured components — exclusively via
 `structured/definitions/*`, whose typed adapters replaced the renderer's
 old "one permitted `any`" — and `OrgSelector`. Everything else in that
-directory (`QuestionLabel`, `FieldError`, `EntitySelectionDrawer`,
+directory (`FieldError`, `EntitySelectionDrawer`,
 `ValueSetSearchContent`, the response-template sheets) exists only because
 those structured components use it; nothing in v2 may import it directly.
 A new legacy dependency needs an allowlist entry here, not an ad-hoc
