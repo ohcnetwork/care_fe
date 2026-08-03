@@ -19,6 +19,40 @@ import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 export interface RequiredCheckContext {
   questionnaire: QuestionnaireRead;
   subject: RendererSubject;
+  /** Question ids whose structured slot threw and is now showing the error
+   *  boundary's notice (`structuredRenderFailedAtom`). */
+  renderFailed: ReadonlySet<string>;
+}
+
+/**
+ * Can this structured question be ANSWERED on this mount? False whenever
+ * `StructuredSlot` is showing a notice instead of an input — a subject the
+ * type doesn't declare, a context id the mount can't supply, or a
+ * component that threw during render.
+ *
+ * PARITY REQUIREMENT: the first two cases come from
+ * `resolveStructuredSlotState`, the shared predicate the slot itself
+ * renders from; the third from the store the slot's error boundary writes.
+ * Both submit-time validators call this, so all three degradations behave
+ * identically. Requiring a question with no input deadlocks the whole form
+ * on data `composeBatch` drops anyway.
+ *
+ * An UNKNOWN type is deliberately not exempt: `collectStructuredErrors`
+ * blocks a required question whose plugin is missing, so the clinician is
+ * never told a form submitted complete when it did not.
+ */
+export function structuredQuestionIsAnswerable(
+  structuredType: string,
+  questionId: string,
+  context: RequiredCheckContext,
+): boolean {
+  if (context.renderFailed.has(questionId)) return false;
+  const state = resolveStructuredSlotState(
+    structuredType,
+    context.questionnaire.subject_type,
+    context.subject,
+  );
+  return state.kind !== "subject_mismatch" && state.kind !== "missing_context";
 }
 
 /**
@@ -49,25 +83,18 @@ export function collectRequiredErrors(
         continue;
       }
       if (question.type === "display" || !question.required) continue;
-      // A structured question whose slot shows a placeholder instead of an
-      // input (subject mismatch, or the mount can't supply an id the type
-      // `requires`) cannot be answered — and `composeBatch` drops its data
-      // anyway. Requiring it deadlocks the whole form. Same predicate
-      // `StructuredSlot` renders from; see `StructuredSlotState`'s parity
-      // note. An unknown type is NOT exempt: `collectStructuredErrors`
-      // deliberately blocks a required question whose plugin is missing.
-      if (question.structured_type) {
-        const state = resolveStructuredSlotState(
+      // A structured question showing a notice instead of an input cannot
+      // be answered, so it must not be required-blocked — see
+      // `structuredQuestionIsAnswerable`.
+      if (
+        question.structured_type &&
+        !structuredQuestionIsAnswerable(
           question.structured_type,
-          context.questionnaire.subject_type,
-          context.subject,
-        );
-        if (
-          state.kind === "subject_mismatch" ||
-          state.kind === "missing_context"
-        ) {
-          continue;
-        }
+          question.id,
+          context,
+        )
+      ) {
+        continue;
       }
       const values = responses[question.id]?.values ?? [];
       // Legacy contract: an entry answers the question when it has real

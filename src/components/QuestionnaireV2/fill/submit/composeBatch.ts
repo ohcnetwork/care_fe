@@ -67,6 +67,13 @@ export interface ComposeBatchArgs {
   questionnaire: QuestionnaireRead;
   responses: Record<string, QuestionnaireResponse>;
   subject: FillSubject;
+  /** Question ids whose structured slot threw and shows the error
+   *  boundary's notice (`structuredRenderFailedAtom`). The validators skip
+   *  these on the premise that their data never submits — this is the
+   *  compose half of that bargain. Without it, rows recorded BEFORE the
+   *  component broke would post to the domain APIs with their type's
+   *  `validate` never run, from a section the UI presents as inert. */
+  renderFailed?: ReadonlySet<string>;
   /** Resuming a server draft — appends the completion PUT. */
   continueDraftId?: string;
 }
@@ -104,6 +111,7 @@ export async function composeBatch({
   questionnaire,
   responses,
   subject,
+  renderFailed,
   continueDraftId,
 }: ComposeBatchArgs): Promise<StructuredBatchEntry[]> {
   // Narrowed once, up front: the structured leg and the draft PUT both
@@ -129,6 +137,11 @@ export async function composeBatch({
       if (!response) continue;
 
       if (question.type === "structured" && question.structured_type) {
+        // The slot's component threw — the clinician sees a notice, not
+        // their data, and validateStructured skipped this question's
+        // `validate` for the same reason. What the UI shows as inert must
+        // not submit behind its back.
+        if (renderFailed?.has(question.id)) continue;
         // The recorded entries must belong to this question's type — the
         // guard `structuredDataOf` used to carry, kept now that the data
         // read is untyped.
@@ -165,11 +178,14 @@ export async function composeBatch({
         continue;
       }
 
-      if (
-        response.values.length > 0 &&
-        response.values[0]?.value !== "" &&
-        !response.structured_type
-      ) {
+      // Every plain leaf goes through serialization; the content decision
+      // is `serializeResponseValues`' alone (its filter keeps value-,
+      // coding- and unit-carrying entries). Gating here on values[0]
+      // dropped a repeats answer wholesale when its FIRST row was cleared
+      // in place — later rows silently never submitted, while the
+      // required check (which scans every entry) reported the question
+      // answered.
+      if (!response.structured_type) {
         answeredLeaves.push(response);
       }
     }

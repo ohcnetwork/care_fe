@@ -22,11 +22,12 @@ import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
  * ones alike). Same disabled-subtree skip as composeBatch/validation.ts.
  *
  * A question whose slot cannot show an input is skipped — subject
- * mismatch, or a mount that can't supply an id the type `requires`. The
- * clinician has no way to answer those, and composeBatch drops their data
- * regardless, so validating them would only block submission on data that
- * never submits. The predicate is the one `StructuredSlot` renders from;
- * see `StructuredSlotState`'s parity note.
+ * mismatch, a mount that can't supply an id the type `requires`, or a
+ * component that threw and left the error boundary's notice in its place.
+ * The clinician has no way to answer any of those, and composeBatch drops
+ * their data regardless, so validating them would only block submission on
+ * data that never submits. Shares one predicate with `collectRequiredErrors`
+ * — see `structuredQuestionIsAnswerable`'s parity note.
  *
  * A type this deployment doesn't have blocks the submit only when the
  * question is required: an optional question whose plugin is disabled is
@@ -38,6 +39,7 @@ export function collectStructuredErrors(
   questionnaire: QuestionnaireRead,
   responses: Record<string, QuestionnaireResponse>,
   subject: RendererSubject,
+  renderFailed: ReadonlySet<string>,
   t: TFunction,
 ): QuestionValidationError[] {
   const linkIndex = buildLinkIndex(questionnaire.questions);
@@ -54,6 +56,9 @@ export function collectStructuredErrors(
         continue;
       }
       const type = question.structured_type;
+      // The slot's component threw — the notice is on screen, not an
+      // input, so there is nothing here to validate.
+      if (renderFailed.has(question.id)) continue;
       const state = resolveStructuredSlotState(
         type,
         questionnaire.subject_type,

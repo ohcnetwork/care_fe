@@ -25,6 +25,59 @@ export const questionnaireAtom = atom<QuestionnaireRead | null>(null);
 export const responsesAtom = atom<Record<string, QuestionnaireResponse>>({});
 export const errorsAtom = atom<QuestionValidationError[]>([]);
 
+/**
+ * Question ids whose structured slot THREW during render and are now
+ * showing the error boundary's notice instead of an input.
+ *
+ * Submit-time enforcement reads this alongside the subject-mismatch and
+ * missing-context cases: all three mean "this question has no input on
+ * screen", and requiring an unanswerable question makes the entire form —
+ * every other answer included — permanently unsubmittable. Lives in the
+ * store because the boundary that discovers it and the validators that
+ * must respect it never meet in the component tree.
+ */
+export const structuredRenderFailedAtom = atom<ReadonlySet<string>>(
+  new Set<string>(),
+);
+
+/** Record a structured slot's render failure. Idempotent: re-entering the
+ *  boundary for a question already marked keeps the same Set identity, so
+ *  it cannot loop a subscriber. */
+export function useMarkStructuredRenderFailed(questionId: string) {
+  const markAtom = useMemo(
+    () =>
+      atom(null, (get, set) => {
+        const failed = get(structuredRenderFailedAtom);
+        if (failed.has(questionId)) return;
+        set(structuredRenderFailedAtom, new Set(failed).add(questionId));
+      }),
+    [questionId],
+  );
+  return useAtom(markAtom)[1];
+}
+
+/** Clear a question's render-failed mark — the recovery half of the pair
+ *  above. A slot unmounts and remounts whenever enable_when toggles it (or
+ *  an ancestor group), and the fresh boundary may well render fine; the
+ *  mark must not outlive the notice it described, or a LIVE required input
+ *  would stay exempt from validation for the rest of the session.
+ *  Idempotent the same way: clearing an unmarked question keeps the Set
+ *  identity. */
+export function useClearStructuredRenderFailed(questionId: string) {
+  const clearAtom = useMemo(
+    () =>
+      atom(null, (get, set) => {
+        const failed = get(structuredRenderFailedAtom);
+        if (!failed.has(questionId)) return;
+        const next = new Set(failed);
+        next.delete(questionId);
+        set(structuredRenderFailedAtom, next);
+      }),
+    [questionId],
+  );
+  return useAtom(clearAtom)[1];
+}
+
 /** link_id → question_id for enable_when lookups — pure so non-atom
  *  consumers (form/validation.ts) share the exact same resolution. */
 export function buildLinkIndex(questions: Question[]): Record<string, string> {
