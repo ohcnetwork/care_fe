@@ -37,7 +37,10 @@ export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
     appointments,
     { patientId, facilityId, questionId },
   ) => {
-    if (appointments.length === 0) return [];
+    // `subjects` is patient/encounter, so a patient is always in scope
+    // here — narrowed rather than asserted (the context type is optional
+    // for plugin types that declare a resource subject).
+    if (!patientId || appointments.length === 0) return [];
     const { note, slot_id, tags } = appointments[0];
     return [
       {

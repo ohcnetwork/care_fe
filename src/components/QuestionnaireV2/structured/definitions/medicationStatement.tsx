@@ -39,7 +39,10 @@ export const medicationStatementDefinition: StructuredTypeDefinition<"medication
       medications,
       { patientId, encounterId, questionId },
     ) => {
-      if (medications.length === 0) return [];
+      // `subjects` is encounter-only, so a patient is always in scope here
+      // — narrowed rather than asserted (the context type is optional for
+      // plugin types that declare a resource subject).
+      if (!patientId || medications.length === 0) return [];
       return [
         {
           url: `/api/v1/patient/${patientId}/medication/statement/upsert/`,

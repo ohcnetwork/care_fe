@@ -26,9 +26,9 @@ import type { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 export type StructuredContextKey = "patientId" | "encounterId" | "facilityId";
 
 /** What the UI edits per type — one entry of `values[0].value`'s array.
- *  (`time_of_death` stores plain strings.) Mirrors the legacy map in
- *  `components/Questionnaire/structured/types.ts`, which dies with the
- *  legacy fill stack. */
+ *  (`time_of_death` stores plain strings.) The sole such map: the legacy
+ *  one in `components/Questionnaire/structured/` went with the legacy fill
+ *  stack that was its only consumer. */
 export interface StructuredDataMap {
   allergy_intolerance: AllergyIntoleranceRequest;
   medication_request: MedicationRequestCreate;
@@ -54,13 +54,21 @@ export interface StructuredBatchEntry {
   body: unknown;
 }
 
-/** Context `buildRequests` composes URLs/bodies from. `patientId` is
- *  required because the whole structured leg of submission only runs for
- *  a patient-bound fill (legacy gate). `questionId` keys `reference_id`
- *  so server errors map back to the exact question instance — two
- *  questions of the same structured type no longer collide. */
+/** Context `buildRequests` composes URLs/bodies from.
+ *
+ *  `patientId` is GUARANTEED present for a type whose `subjects` are
+ *  patient and/or encounter — which is every core type, so core
+ *  definitions only need a one-line guard to narrow it. It is optional
+ *  because a PLUGIN type may declare a resource subject
+ *  (location/device/facility): the studio lets it be authored there and
+ *  the slot renders it, so its `buildRequests` must be reachable on a
+ *  mount that has no patient at all.
+ *
+ *  `questionId` keys `reference_id` so server errors map back to the exact
+ *  question instance — two questions of the same structured type no longer
+ *  collide. */
 export interface StructuredRequestContext {
-  patientId: string;
+  patientId?: string;
   encounterId?: string;
   facilityId?: string;
   questionId: string;

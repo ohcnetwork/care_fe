@@ -142,6 +142,49 @@ export function resolveStructuredType(
   return plugin ? { ...plugin, source: "plugin" } : undefined;
 }
 
+/** Subject ids available on the mount, as `StructuredSlot` reads them. */
+type StructuredSubjectContext = Partial<Record<StructuredContextKey, string>>;
+
+/**
+ * Why a structured question's slot is (or is not) showing an input.
+ *
+ * PARITY REQUIREMENT: `StructuredSlot` renders from this and submit-time
+ * enforcement (`form/validation.ts`, `fill/submit/validateStructured.ts`)
+ * skips from it, so the two can never disagree. They must not: a required
+ * structured question whose slot shows a placeholder instead of an input
+ * cannot be answered, and blocking the submit on it makes the whole form —
+ * every other answer included — permanently unsubmittable, on a question
+ * whose data `composeBatch` drops anyway.
+ */
+export type StructuredSlotState =
+  | { kind: "ready"; definition: ResolvedStructuredType }
+  /** This deployment has no such type (its plugin isn't loaded). */
+  | { kind: "unknown_type" }
+  /** The type doesn't declare this questionnaire's `subject_type`. */
+  | { kind: "subject_mismatch"; definition: ResolvedStructuredType }
+  /** The mount can't supply an id the type `requires`. */
+  | {
+      kind: "missing_context";
+      definition: ResolvedStructuredType;
+      missing: StructuredContextKey[];
+    };
+
+export function resolveStructuredSlotState(
+  structuredType: string,
+  questionnaireSubjectType: SubjectType,
+  subject: StructuredSubjectContext,
+): StructuredSlotState {
+  const definition = resolveStructuredType(structuredType);
+  if (!definition) return { kind: "unknown_type" };
+  if (!definition.subjects.includes(questionnaireSubjectType)) {
+    return { kind: "subject_mismatch", definition };
+  }
+  const missing = definition.requires.filter((key) => !subject[key]);
+  if (missing.length > 0)
+    return { kind: "missing_context", definition, missing };
+  return { kind: "ready", definition };
+}
+
 /**
  * What to call a structured type in the UI. Core types read their i18n key;
  * plugin types carry a plain label from their manifest (plugins own their

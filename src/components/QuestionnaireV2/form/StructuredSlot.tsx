@@ -1,6 +1,7 @@
 import { Suspense, useCallback, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import {
@@ -13,7 +14,7 @@ import {
   subscribeToStructuredTypes,
 } from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import {
-  resolveStructuredType,
+  resolveStructuredSlotState,
   structuredTypeLabel,
 } from "@/components/QuestionnaireV2/structured/registry";
 
@@ -62,14 +63,22 @@ export function StructuredSlot({
     [updateResponse],
   );
 
-  const definition = question.structured_type
-    ? resolveStructuredType(question.structured_type)
+  // The same resolution submit-time enforcement runs — see
+  // `StructuredSlotState`'s parity note. Whatever this returns other than
+  // "ready" renders a notice, not an input, so the question cannot be
+  // answered and must not be required-blocked either.
+  const state = question.structured_type
+    ? resolveStructuredSlotState(
+        question.structured_type,
+        questionnaire.subject_type,
+        subject,
+      )
     : undefined;
 
   // A type this deployment doesn't have (plugin disabled or removed after
   // the questionnaire was authored) — say so instead of rendering nothing,
   // which would read as an empty question.
-  if (question.structured_type && !definition) {
+  if (state?.kind === "unknown_type") {
     return (
       <div className="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
         {t("structured_type_plugin_missing", {
@@ -78,29 +87,33 @@ export function StructuredSlot({
       </div>
     );
   }
-  if (!definition || !response) return null;
+  if (!state || !response) return null;
 
+  const { definition } = state;
   const label = structuredTypeLabel(definition.type, t);
 
-  if (!definition.subjects.includes(questionnaire.subject_type)) {
+  if (state.kind === "subject_mismatch") {
     return (
       <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
         {t("structured_type_subject_mismatch", {
           type: label,
-          subject: questionnaire.subject_type,
+          // The raw enum reads as jargon in a clinician-facing notice; the
+          // studio's own subject picker labels these the same way.
+          subject: t(questionnaire.subject_type),
         })}
       </div>
     );
   }
 
-  const missing = definition.requires.filter((key) => !subject[key]);
-  if (missing.length > 0) {
+  if (state.kind === "missing_context") {
     return (
       <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
         <p className="font-medium text-gray-700">{label}</p>
         <p>
           {t("structured_question_requires_context", {
-            contexts: missing.map((key) => t(`context__${key}`)).join(", "),
+            contexts: state.missing
+              .map((key) => t(`context__${key}`))
+              .join(", "),
           })}
         </p>
       </div>
@@ -109,26 +122,43 @@ export function StructuredSlot({
 
   const Component = definition.component;
   return (
-    // Plugin components arrive through React.lazy — the boundary keeps a
-    // still-loading remote from suspending the whole form.
-    <Suspense fallback={<FormSkeleton rows={2} />}>
-      <Component
-        question={question}
-        response={response}
-        onChange={handleChange}
-        disabled={disabled}
-        errors={errors}
-        clearError={clearErrors}
-        patientId={subject.patientId}
-        encounterId={subject.encounterId}
-        facilityId={subject.facilityId}
-        {...(mode === "fill"
-          ? {
-              questionnaireId: questionnaire.id,
-              questionnaireSlug: questionnaire.slug,
-            }
-          : {})}
-      />
-    </Suspense>
+    // Every other structured failure mode on this page degrades in place
+    // (missing type → amber notice, subject mismatch → gray notice, thrown
+    // validate/buildRequests → question-scoped error). A render throw was
+    // the one that didn't: it unwound to the router's page boundary and
+    // replaced the whole fill session — every other form, every answer
+    // already typed — with the generic error screen. Contain it here, in
+    // the same dashed notice the other degradations use.
+    <PluginErrorBoundary
+      pluginName={definition.type}
+      fallback={
+        <div className="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
+          <p className="font-medium">{label}</p>
+          <p>{t("structured_question_render_failed")}</p>
+        </div>
+      }
+    >
+      {/* Plugin components arrive through React.lazy — the boundary keeps
+          a still-loading remote from suspending the whole form. */}
+      <Suspense fallback={<FormSkeleton rows={2} />}>
+        <Component
+          question={question}
+          response={response}
+          onChange={handleChange}
+          disabled={disabled}
+          errors={errors}
+          clearError={clearErrors}
+          patientId={subject.patientId}
+          encounterId={subject.encounterId}
+          facilityId={subject.facilityId}
+          {...(mode === "fill"
+            ? {
+                questionnaireId: questionnaire.id,
+                questionnaireSlug: questionnaire.slug,
+              }
+            : {})}
+        />
+      </Suspense>
+    </PluginErrorBoundary>
   );
 }

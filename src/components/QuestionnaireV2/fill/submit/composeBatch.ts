@@ -2,11 +2,15 @@ import {
   buildLinkIndex,
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
+import type { ResolvedStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 import {
   resolveStructuredType,
   structuredDataAny,
 } from "@/components/QuestionnaireV2/structured/registry";
-import type { StructuredBatchEntry } from "@/components/QuestionnaireV2/structured/types";
+import type {
+  StructuredBatchEntry,
+  StructuredRequestContext,
+} from "@/components/QuestionnaireV2/structured/types";
 
 import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
 import {
@@ -21,6 +25,44 @@ import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 import { serializeResponseValues } from "./serializeValues";
 
+/**
+ * A structured type's `buildRequests` threw or rejected.
+ *
+ * `buildRequests` is third-party code for plugin types, and the submit
+ * callback is fired as `void submit()` — an unguarded rejection travelled
+ * through `Promise.all` and became an unhandled promise rejection, turning
+ * Save Changes into a silent no-op that blocked EVERY form in the session
+ * with no toast, no panel and no batch. The host catches this and pins the
+ * failure to the question that produced it, exactly as `invokeAction`
+ * contains a thrown plugin action.
+ */
+export class StructuredBuildError extends Error {
+  readonly questionId: string;
+
+  constructor(questionId: string, cause: unknown) {
+    super(`buildRequests failed for structured question ${questionId}`, {
+      cause,
+    });
+    this.name = "StructuredBuildError";
+    this.questionId = questionId;
+  }
+}
+
+/** `definition.buildRequests` behind the containment boundary — a
+ *  synchronous throw and a rejected promise both become one
+ *  `StructuredBuildError`. */
+async function buildStructuredRequests(
+  definition: ResolvedStructuredType,
+  data: unknown[],
+  context: StructuredRequestContext,
+): Promise<StructuredBatchEntry[]> {
+  try {
+    return await definition.buildRequests(data, context);
+  } catch (error) {
+    throw new StructuredBuildError(context.questionId, error);
+  }
+}
+
 export interface ComposeBatchArgs {
   questionnaire: QuestionnaireRead;
   responses: Record<string, QuestionnaireResponse>;
@@ -32,22 +74,31 @@ export interface ComposeBatchArgs {
 /**
  * Assemble the one-batch submission (legacy handleSubmit semantics, from
  * the v2 store): structured answers become raw domain-API requests via
- * each type's `buildRequests` (patient-bound fills only — the legacy
- * gate), plain answers POST to `/questionnaire/{id}/submit/` for
- * patient-bound subjects and `/questionnaire/{id}/submit_resource/` for
- * resource subjects (location/device/facility, which have no patient to
- * record against), and a resumed server draft gets its completion PUT
- * (patient-bound only). Only questions currently
- * enabled by enable_when contribute — same resolution rendering uses.
+ * each type's `buildRequests` (core types are patient-bound by
+ * construction — the legacy gate; plugin types may declare a resource
+ * subject and run there too), plain answers POST to
+ * `/questionnaire/{id}/submit/` for patient-bound subjects and
+ * `/questionnaire/{id}/submit_resource/` for resource subjects
+ * (location/device/facility, which have no patient to record against),
+ * and a resumed server draft gets its completion PUT (patient-bound
+ * only). Only questions currently enabled by enable_when contribute —
+ * same resolution rendering uses.
  *
  * Pure with respect to UI state: everything it needs arrives as
  * arguments, so it is directly exercisable without mounting anything.
  *
- * One deliberate divergence from legacy: the walk skips the entire
- * subtree of a disabled group (the renderer never shows those questions),
- * while legacy re-checked only each leaf's own conditions and could
- * submit answers recorded under a since-disabled group. What you see is
- * what submits.
+ * Two deliberate divergences from legacy, both in service of "what you see
+ * is what submits":
+ * 1. The walk skips the entire subtree of a disabled group (the renderer
+ *    never shows those questions), while legacy re-checked only each
+ *    leaf's own conditions and could submit answers recorded under a
+ *    since-disabled group.
+ * 2. `isEnabled` applies to STRUCTURED leaves too. Legacy checked nothing
+ *    at submit time for structured questions — it iterated the recorded
+ *    responses directly — so data entered while a structured question was
+ *    enabled still submitted after its OWN enable_when later turned false.
+ *    Here it does not: flipping the controlling answer takes the section
+ *    off the canvas and out of the batch together.
  */
 export async function composeBatch({
   questionnaire,
@@ -78,8 +129,6 @@ export async function composeBatch({
       if (!response) continue;
 
       if (question.type === "structured" && question.structured_type) {
-        // The whole structured leg only runs for a patient-bound fill.
-        if (!patientBound) continue;
         // The recorded entries must belong to this question's type — the
         // guard `structuredDataOf` used to carry, kept now that the data
         // read is untyped.
@@ -95,11 +144,19 @@ export async function composeBatch({
         if (!definition.subjects.includes(questionnaire.subject_type)) {
           continue;
         }
+        // Core types are patient-bound by construction (every core
+        // `subjects` list is patient and/or encounter, and every core
+        // request hangs off a patient id) — that is the legacy gate. A
+        // PLUGIN type may declare a resource subject; the studio offers it
+        // there, the slot renders it and validateStructured runs its
+        // validate, so dropping its requests here would render, validate
+        // and then silently discard the clinician's data.
+        if (!patientBound && definition.source !== "plugin") continue;
         const data = structuredDataAny(response);
         if (data.length === 0) continue;
         structuredWork.push(
-          definition.buildRequests(data, {
-            patientId: patientBound.patientId,
+          buildStructuredRequests(definition, data, {
+            patientId: patientBound?.patientId,
             encounterId: renderCtx.encounterId,
             facilityId: renderCtx.facilityId,
             questionId: question.id,
@@ -124,14 +181,21 @@ export async function composeBatch({
     requests.push(...entries);
   }
 
-  if (answeredLeaves.length > 0) {
-    const results = answeredLeaves.map((response) => ({
+  const results = answeredLeaves
+    .map((response) => ({
       question_id: response.question_id,
       values: serializeResponseValues(response.values),
       note: response.note,
       body_site: response.body_site,
       method: response.method,
-    }));
+    }))
+    // Every entry turned out content-free (a repeats row cleared in place
+    // leaves `value: undefined` at its index) — there is nothing to record
+    // for this question, and an empty `values` is a server error rather
+    // than an omission.
+    .filter((result) => result.values.length > 0);
+
+  if (results.length > 0) {
     requests.push(
       patientBound
         ? {

@@ -45,7 +45,10 @@ export const medicationRequestDefinition: StructuredTypeDefinition<"medication_r
       // Only modified rows submit (`dirty`); new rows get a prescription
       // shell with a generated alternate identifier.
       const dirtyMedications = medications.filter((m) => m.dirty);
-      if (dirtyMedications.length === 0) return [];
+      // `subjects` is encounter-only, so a patient is always in scope here
+      // — narrowed rather than asserted (the context type is optional for
+      // plugin types that declare a resource subject).
+      if (!patientId || dirtyMedications.length === 0) return [];
       const prescriptionIdentifier = `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
       return [
         {

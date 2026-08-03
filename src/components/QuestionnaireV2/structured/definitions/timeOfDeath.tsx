@@ -26,13 +26,18 @@ export const timeOfDeathDefinition: StructuredTypeDefinition<"time_of_death"> =
     requires: [],
     subjects: ["patient", "encounter"],
     draftPolicy: "exclude",
-    buildRequests: async (timeOfDeaths, { patientId, questionId }) =>
-      timeOfDeaths.map((deceasedDatetime) => ({
+    buildRequests: async (timeOfDeaths, { patientId, questionId }) => {
+      // `subjects` is patient/encounter, so a patient is always in scope
+      // here — narrowed rather than asserted (the context type is optional
+      // for plugin types that declare a resource subject).
+      if (!patientId) return [];
+      return timeOfDeaths.map((deceasedDatetime) => ({
         url: `/api/v1/patient/${patientId}/`,
         method: "PUT" as const,
         body: {
           deceased_datetime: deceasedDatetime,
         },
         reference_id: structuredReferenceId("time_of_death", questionId),
-      })),
+      }));
+    },
   };

@@ -32,7 +32,10 @@ export const diagnosisDefinition: StructuredTypeDefinition<"diagnosis"> = {
     // Only edited rows submit — prefetched server rows ride along in the
     // response values and must not re-upsert untouched.
     const dirty = diagnoses.filter((diagnosis) => diagnosis.dirty);
-    if (!encounterId || dirty.length === 0) return [];
+    // `subjects` is encounter-only, so a patient is always in scope here —
+    // narrowed rather than asserted (the context type is optional for
+    // plugin types that declare a resource subject).
+    if (!patientId || !encounterId || dirty.length === 0) return [];
     return [
       {
         url: `/api/v1/patient/${patientId}/diagnosis/upsert/`,

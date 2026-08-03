@@ -5,9 +5,11 @@ import {
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import {
-  resolveStructuredType,
+  resolveStructuredSlotState,
   structuredDataAny,
 } from "@/components/QuestionnaireV2/structured/registry";
+
+import type { RendererSubject } from "@/components/QuestionnaireV2/form/types";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -18,9 +20,13 @@ import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
  * Submit-time structured validation: each enabled structured question runs
  * its type's `validate` from the resolver (core definitions and plugin
  * ones alike). Same disabled-subtree skip as composeBatch/validation.ts.
- * Types not declared for the questionnaire's `subject_type` are skipped —
- * they can't reach the domain API (composeBatch drops them too), so
- * validating them would only block submission on data that never submits.
+ *
+ * A question whose slot cannot show an input is skipped — subject
+ * mismatch, or a mount that can't supply an id the type `requires`. The
+ * clinician has no way to answer those, and composeBatch drops their data
+ * regardless, so validating them would only block submission on data that
+ * never submits. The predicate is the one `StructuredSlot` renders from;
+ * see `StructuredSlotState`'s parity note.
  *
  * A type this deployment doesn't have blocks the submit only when the
  * question is required: an optional question whose plugin is disabled is
@@ -31,6 +37,7 @@ import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 export function collectStructuredErrors(
   questionnaire: QuestionnaireRead,
   responses: Record<string, QuestionnaireResponse>,
+  subject: RendererSubject,
   t: TFunction,
 ): QuestionValidationError[] {
   const linkIndex = buildLinkIndex(questionnaire.questions);
@@ -47,8 +54,12 @@ export function collectStructuredErrors(
         continue;
       }
       const type = question.structured_type;
-      const definition = resolveStructuredType(type);
-      if (!definition) {
+      const state = resolveStructuredSlotState(
+        type,
+        questionnaire.subject_type,
+        subject,
+      );
+      if (state.kind === "unknown_type") {
         if (question.required) {
           errors.push({
             question_id: question.id,
@@ -57,7 +68,8 @@ export function collectStructuredErrors(
         }
         continue;
       }
-      if (!definition.subjects.includes(questionnaire.subject_type)) continue;
+      if (state.kind !== "ready") continue;
+      const definition = state.definition;
       if (!definition.validate) continue;
       const response = responses[question.id];
       // The recorded entries must belong to this question's type — the
@@ -66,9 +78,26 @@ export function collectStructuredErrors(
       if (response?.structured_type !== type) continue;
       const data = structuredDataAny(response);
       if (data.length === 0) continue;
-      errors.push(
-        ...definition.validate(data, question.id, question.required ?? false),
-      );
+      try {
+        errors.push(
+          ...definition.validate(data, question.id, question.required ?? false),
+        );
+      } catch (error) {
+        // Plugin code runs here. An escaping throw used to propagate out of
+        // `submit()` (invoked as `void submit()`), so Save Changes became a
+        // silent no-op for the WHOLE session — no toast, no panel, no
+        // batch. Contain it the way `invokeAction` contains a thrown plugin
+        // action: one question-scoped error the clinician can see and act
+        // on, and the submit aborts through the normal validation path.
+        console.error(
+          `Structured type "${type}" threw while validating question ${question.id}`,
+          error,
+        );
+        errors.push({
+          question_id: question.id,
+          error: t("structured_question_validate_failed"),
+        });
+      }
     }
   };
   walk(questionnaire.questions);

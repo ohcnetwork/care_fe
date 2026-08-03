@@ -256,8 +256,11 @@ function LeafBlock({
           </div>
         )}
       </div>
+      {/* role="alert" so a validation failure is ANNOUNCED, not only
+          drawn: client-side validation writes these straight into the
+          store with no other live region anywhere on the fill page. */}
       {errors.map((error, i) => (
-        <p key={i} className="text-sm text-red-600">
+        <p key={i} role="alert" className="text-sm text-red-600">
           {error.msg ?? error.error}
         </p>
       ))}
