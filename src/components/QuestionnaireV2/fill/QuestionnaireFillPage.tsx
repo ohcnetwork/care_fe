@@ -689,11 +689,24 @@ function FillPageBody({
     onResumeAddedForms,
   });
 
+  // Titles of forms the draft is still carrying that never made it back
+  // into a live store — a resume whose re-fetch failed, still sitting in
+  // `retainedSnapshots` (see the state above). Passed to the submit hook
+  // so it can refuse to submit (and clear the draft) out from under them.
+  const blockedFormLabels = useMemo(
+    () =>
+      retainedSnapshots.map(
+        (snapshot) => snapshot.title ?? snapshot.questionnaireId,
+      ),
+    [retainedSnapshots],
+  );
+
   const { submit, isPending, serverErrors } = useSubmitFillSession({
     forms,
     getStore,
     subject,
     continueDraftId,
+    blockedFormLabels,
     onSuccess: () => {
       // Order matters: finishDraft flushes the pristine state before the
       // redirect so useNavigationPrompt doesn't block it.

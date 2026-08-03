@@ -4,7 +4,7 @@ import {
 } from "@/components/QuestionnaireV2/form/engine/store";
 import type { ResolvedStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 import {
-  resolveStructuredType,
+  resolveStructuredSlotState,
   structuredDataAny,
 } from "@/components/QuestionnaireV2/structured/registry";
 import type {
@@ -146,24 +146,33 @@ export async function composeBatch({
         // guard `structuredDataOf` used to carry, kept now that the data
         // read is untyped.
         if (response.structured_type !== question.structured_type) continue;
-        const definition = resolveStructuredType(question.structured_type);
-        // A type this deployment doesn't have (plugin disabled) has no
-        // endpoint to post to — skip it; validateStructured is what tells
-        // the clinician, and only when the question was required.
-        if (!definition) continue;
-        // A type authored onto a questionnaire whose subject_type it
-        // doesn't declare (legacy data — the studio picker now prevents
-        // this going forward) never reaches the domain API.
-        if (!definition.subjects.includes(questionnaire.subject_type)) {
-          continue;
-        }
+        // The same slot-state predicate the renderer (`StructuredSlot`) and
+        // both submit-time validators (`form/validation.ts`,
+        // `fill/submit/validateStructured.ts`) read — `unknown_type`
+        // (plugin disabled), `subject_mismatch` (a type authored onto a
+        // questionnaire whose subject_type it doesn't declare — legacy
+        // data; the studio picker now prevents this going forward), and
+        // `missing_context` all skip here. The last is the fix: draft-
+        // restored data under a slot whose required context id the mount
+        // can't supply used to reach `buildRequests` with an undefined
+        // patient/encounter/facility id.
+        const state = resolveStructuredSlotState(
+          question.structured_type,
+          questionnaire.subject_type,
+          renderCtx,
+        );
+        if (state.kind !== "ready") continue;
+        const definition = state.definition;
         // Core types are patient-bound by construction (every core
         // `subjects` list is patient and/or encounter, and every core
         // request hangs off a patient id) — that is the legacy gate. A
         // PLUGIN type may declare a resource subject; the studio offers it
         // there, the slot renders it and validateStructured runs its
         // validate, so dropping its requests here would render, validate
-        // and then silently discard the clinician's data.
+        // and then silently discard the clinician's data. Slot state
+        // alone doesn't encode this distinction — it reads the
+        // QUESTIONNAIRE's declared subject_type, not the session's
+        // runtime subject — so the explicit gate stays on top of it.
         if (!patientBound && definition.source !== "plugin") continue;
         const data = structuredDataAny(response);
         if (data.length === 0) continue;
@@ -223,6 +232,13 @@ export async function composeBatch({
               encounter: renderCtx.encounterId,
               patient: patientBound.patientId,
               results,
+              // Links this submission to the resumed server draft so the
+              // backend's duplicate-submission guard (keyed off
+              // `form_submission`) catches a second tab completing the
+              // same draft concurrently. The completion PUT below still
+              // runs alongside this — the backend doesn't flip the
+              // draft's status server-side yet.
+              ...(continueDraftId ? { form_submission: continueDraftId } : {}),
             },
           }
         : {
