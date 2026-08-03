@@ -130,8 +130,8 @@ export interface TokenSlot {
       name: string;
     };
   };
-  start_datetime: string; // timezone naive datetime
-  end_datetime: string; // timezone naive datetime
+  start_datetime: string; // ISO 8601 datetime with timezone offset
+  end_datetime: string; // ISO 8601 datetime with timezone offset
   allocated: number;
 }
 

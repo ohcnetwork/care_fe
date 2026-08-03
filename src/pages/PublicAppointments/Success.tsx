@@ -14,34 +14,10 @@ import { AppointmentTokenPass } from "@/components/Patient/AppointmentTokenPass"
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
+import { buildAppointmentCalendarFile } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import {
-  PublicAppointment,
-  formatScheduleResourceName,
-} from "@/types/scheduling/schedule";
+import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import { renderTokenNumber } from "@/types/tokens/token/token";
-
-/** Local (floating) ICS timestamp — slot datetimes are timezone naive. */
-const icsStamp = (value: string) => dayjs(value).format("YYYYMMDDTHHmmss");
-
-function buildCalendarFile(appointment: PublicAppointment, title: string) {
-  const lines = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//care//appointment//EN",
-    "BEGIN:VEVENT",
-    `UID:${appointment.id}`,
-    `DTSTART:${icsStamp(appointment.token_slot.start_datetime)}`,
-    `DTEND:${icsStamp(appointment.token_slot.end_datetime)}`,
-    `SUMMARY:${title}`,
-    `LOCATION:${appointment.facility.name}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ];
-  return `data:text/calendar;charset=utf-8,${encodeURIComponent(
-    lines.join("\r\n"),
-  )}`;
-}
 
 export function AppointmentSuccess(props: { appointmentId: string }) {
   const { appointmentId } = props;
@@ -140,7 +116,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
           <div className="grid grid-cols-2 gap-2.5">
             <Button variant="outline" className="h-11" asChild>
               <a
-                href={buildCalendarFile(appointment, summaryTitle)}
+                href={buildAppointmentCalendarFile(appointment, summaryTitle)}
                 download={`appointment-${appointment.id}.ics`}
               >
                 <CalendarPlus className="size-4" />

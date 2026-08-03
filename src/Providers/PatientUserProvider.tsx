@@ -78,13 +78,15 @@ export default function PatientUserProvider({ children }: Props) {
     }
   }, [tokenData]);
 
-  // Likewise, they are all scoped to a profile: a number with none linked yet
-  // can only go to the picker, which offers registration. The screens that
-  // create that first profile are the exception.
+  const isAppointmentRegistrationPath =
+    /^\/facility\/[^/]+\/appointments\/[^/]+\/patient-registration$/.test(
+      path || "",
+    );
+
   const isProfileSetupPath =
     path === "/patient/select-profile" ||
     path === "/patient/add-profile" ||
-    !!path?.endsWith("/patient-registration");
+    isAppointmentRegistrationPath;
 
   useEffect(() => {
     if (

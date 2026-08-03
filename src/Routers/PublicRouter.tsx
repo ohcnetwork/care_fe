@@ -64,7 +64,6 @@ export default function PublicRouter() {
   const routeResult = useRoutes(routes);
   const path = usePath();
 
-  // A signed-out visitor deep-linking int
   const isPatientPath =
     !!path && path.startsWith("/patient") && path !== "/patient/login";
 
