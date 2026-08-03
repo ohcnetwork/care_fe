@@ -128,12 +128,17 @@ export file.
 
 - `evaluateEnableWhen` (`form/engine/store.ts`) is a behavior-exact port
   of the legacy `QuestionGroup.isQuestionEnabled`: unanswered dependency → false
-  for every operator; comparison runs over ALL of the dependent question's
-  values; `normalizeValue` (booleans → "Yes"/"No", numbers → strings) is
-  applied unconditionally before any operator. The only deliberate addition:
-  literal-boolean condition _answers_ (legacy-corrupt data that could never
-  match) pass through the same normalization in equals/not_equals; string
-  answers compare byte-identically to the legacy port.
+  for every operator EXCEPT `exists`, which — to match the backend — evaluates
+  before that short-circuit and honors `answer: false` (an `exists:false`
+  dependent must enable precisely when the controller has no value; this is
+  a deliberate divergence from the legacy port, not a bug); comparison runs
+  over ALL of the dependent question's values; `normalizeValue` (booleans →
+  "Yes"/"No", numbers → strings) is applied unconditionally before any
+  operator other than `exists`, which reads raw values directly. The only
+  other deliberate addition: literal-boolean condition _answers_
+  (legacy-corrupt data that could never match) pass through the same
+  normalization in equals/not_equals; string answers compare byte-identically
+  to the legacy port.
 - Boolean enable_when conditions persist the strings `"Yes"`/`"No"`, never
   JSON booleans (`normalizeBooleanConditionAnswer` in `builderReducer.ts`;
   builder load migrates legacy true/false via

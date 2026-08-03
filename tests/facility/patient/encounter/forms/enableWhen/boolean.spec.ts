@@ -37,6 +37,12 @@ test.describe("Enable When — Boolean Operators", () => {
       `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
     );
     await expect(questionBlock(page, "Has Allergies")).toBeVisible();
+
+    // "Self-Pay Reason" (exists.spec.ts) is required whenever "Insurance
+    // Provider" is unanswered — none of this file's tests touch that field,
+    // so it would otherwise become a visible, required, empty question and
+    // every submission below would fail validation.
+    await fillStringField(page, "Insurance Provider", "N/A");
   });
 
   // ──────────────────────────────────────────────

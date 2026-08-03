@@ -147,28 +147,39 @@ function normalizeValue(value: unknown): unknown {
  *  `src/components/Questionnaire/QuestionTypes/QuestionGroup.tsx`),
  *  operating on (enableWhen, response) instead of
  *  (enableWhen, questionnaireResponses). Preserves faithfully:
- *  - the unanswered-dependency short-circuit (no recorded values → false,
- *    for every operator, before any comparison runs)
+ *  - the unanswered-dependency short-circuit (no recorded values → false)
+ *    for every operator EXCEPT `exists`, which — matching the backend —
+ *    evaluates even when the controller is unanswered, since an
+ *    `exists:false` dependent must enable precisely then
  *  - evaluating against ALL of the dependent question's values (not just
  *    the first), via `.some()` / `.includes()` over the normalized values
- *  - normalizeValue being applied unconditionally before every operator */
+ *  - normalizeValue being applied unconditionally before every operator
+ *    other than `exists`, which only asks whether real content was
+ *    recorded and so reads the raw values directly */
 export function evaluateEnableWhen(
   enableWhen: EnableWhen,
   response: QuestionnaireResponse | undefined,
 ): boolean {
   const dependentValues = response?.values;
 
-  if (!dependentValues || dependentValues.length === 0) return false;
+  // "exists" must evaluate even when the controller is unanswered: the
+  // backend enables an exists:false dependent precisely when the controller
+  // has no value. "" is treated as not-existing because serialization drops
+  // content-free entries, so the backend never sees them.
+  if (enableWhen.operator === "exists") {
+    const has =
+      !!dependentValues &&
+      dependentValues.some(
+        (v) => v.value !== undefined && v.value !== null && v.value !== "",
+      );
+    return enableWhen.answer === false ? !has : has;
+  }
+
+  if (!dependentValues || dependentValues.length === 0) return false; // existing short-circuit, all other operators
 
   const normalizedAnswers = dependentValues.map((v) => normalizeValue(v.value));
 
   switch (enableWhen.operator) {
-    case "exists":
-      return (
-        normalizedAnswers.length > 0 &&
-        normalizedAnswers.some((v) => v !== "" && v !== null && v !== undefined)
-      );
-
     case "equals":
       // enableWhen.answer is boolean | string here (EnableWhenBoolean |
       // EnableWhenString). Legacy questionnaires store JSON true/false while
