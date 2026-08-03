@@ -64,9 +64,13 @@ questions, that is the bug.
   and must not be confused: that local one is the crash safety net, while
   `useSaveServerDraft` is the deliberate "Save as draft" — a
   `form_submission` record (feature flag `enableQuestionnaireDraft`,
-  patient-bound + single-form + structured-free, the legacy conditions)
-  that ends the session, survives the device, and is what the encounter
-  overview's drafts card lists and `?continue_draft=` resumes.
+  ENCOUNTER-subject + single-form + structured-free) that ends the
+  session, survives the device, and is what the encounter overview's
+  drafts card lists and `?continue_draft=` resumes. Encounter-only is a
+  deliberate narrowing, not a straight port: that card is the sole listing
+  of server drafts and it filters `form_submission` by `encounter`, so a
+  patient-mount draft — which legacy did allow — POSTs without one and
+  becomes an unreachable orphan.
 - `structured/` — the one registration point for structured question
   types. `StructuredTypeDefinition` colocates component (typed adapter
   over the legacy QuestionTypes UI), context `requires`, submit-time
@@ -175,8 +179,11 @@ Plugins contribute types the same way but at runtime: a manifest's
 `structured/pluginRegistry.ts`) are registered by `PluginEngine`, and reach
 the picker, preview, fill, validation and submit through the one resolver
 — `resolveStructuredType`. Their ids MUST be namespaced
-`{plugin_slug}.{type_name}` (bare names are core's, enforced at
-registration), their labels are plain manifest strings (plugins own their
+`{plugin_slug}.{type_name}` (bare names are core's), and the `{plugin_slug}`
+half must be the registering plugin's OWN slug — both are enforced at
+registration, a malformed id by throwing and a foreign namespace by
+logging and skipping that one definition. Their labels are plain manifest
+strings (plugins own their
 i18n), and their entries are opaque to the host (`unknown[]`) — the
 plugin's own component, `validate` and `buildRequests` are the only code
 that reads them. A questionnaire referencing a type this deployment

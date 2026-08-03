@@ -46,15 +46,17 @@ function hasStructuredQuestion(questions: Question[]): boolean {
  * writes localStorage only: this one is explicit, survives the browser, and
  * ends the session.
  *
- * The legacy availability rules are preserved exactly, because the dump's
- * shape and the way drafts are FOUND again are what constrain them:
+ * The availability rules follow from the dump's shape and from the way
+ * drafts are FOUND again:
  * - feature-flagged (`enableQuestionnaireDraft`);
- * - encounter subjects only. Not merely "patient-bound": the sole listing
- *   of server drafts is the encounter overview's card, which filters
- *   `form_submission` by `encounter`. A patient-mount draft would POST
- *   without one, so nothing could ever surface it — and saving also drops
- *   the local autosave copy, so that draft would be unreachable, not just
- *   inconvenient. Legacy only ever mounted this encounter-bound;
+ * - encounter subjects only. This one is a DELIBERATE NARROWING of legacy,
+ *   not a port of it: legacy offered "Save as draft" on its patient mount
+ *   too, and those saves produced orphaned records. The sole listing of
+ *   server drafts is the encounter overview's card, which filters
+ *   `form_submission` by `encounter`; a patient-mount draft POSTs without
+ *   one, so nothing can ever surface it — and saving also drops the local
+ *   autosave copy, making that draft unreachable rather than merely
+ *   inconvenient. Widening this back needs a listing surface first;
  * - a single form per session — `response_dump.questionnaireResponses` is
  *   ONE `{questionnaire, responses}` pair, so a multi-form session cannot
  *   be represented without silently dropping forms;
