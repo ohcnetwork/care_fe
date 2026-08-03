@@ -22,6 +22,17 @@ import {
 
 const AUTOSAVE_DEBOUNCE_MS = 1500;
 
+/** The draft-safe signature for ONE form — the same shape `safeSessionSignature`
+ *  would produce for this form inside the whole-session array, just scoped to
+ *  a single-element input. Reusing it (rather than duplicating the
+ *  partitioning rule) keeps the per-form fingerprint byte-for-byte what the
+ *  old whole-session recompute would have contributed for this form. */
+function formSignature(form: FillFormEntry, store: FormStore): string {
+  return safeSessionSignature([
+    { questionnaire: form.questionnaire, responses: store.get(responsesAtom) },
+  ]);
+}
+
 interface UseFillSessionAutosaveArgs {
   /** This session's draft key — undefined only before the questionnaire
    *  loads. Supplied even in modes that never WRITE a local draft: a
@@ -168,9 +179,35 @@ export function useFillSessionAutosave({
       persistNow();
     };
 
+    // Per-form signature cache, keyed by form.key. A keystroke only ever
+    // changes the ONE store that fired, so only that form needs to
+    // re-serialize; the session signature is the cached join of every
+    // registered form's part, in session order.
+    //
+    // Rebuilt from scratch on every (re)run of this effect — a form
+    // add/remove or a store (un)registration bumps `storesVersion`, which
+    // is a dependency below — by iterating the CURRENT `forms`/`getStore`.
+    // A form no longer in that iteration simply never gets an entry, so a
+    // removed form's stale signature can never survive into the join and
+    // pin dirty tracking on a value nothing can reproduce anymore.
+    const formSignatures = new Map<string, string>();
+    for (const form of forms) {
+      const store = getStore(form.key);
+      if (!store) continue;
+      formSignatures.set(form.key, formSignature(form, store));
+    }
+    const joinSignatures = () => {
+      const parts: string[] = [];
+      for (const form of forms) {
+        const part = formSignatures.get(form.key);
+        if (part !== undefined) parts.push(part);
+      }
+      return JSON.stringify(parts);
+    };
+
     // Whatever is already in the stores is the baseline, not an edit —
     // this is where the structured widgets' prefetched server rows sit.
-    safeSignatureRef.current = safeSessionSignature(snapshotAll());
+    safeSignatureRef.current = joinSignatures();
 
     // One shared debounce across every form of the session — the draft is
     // one localStorage entry, so one timer is all it can honour.
@@ -185,9 +222,16 @@ export function useFillSessionAutosave({
           // into the store from mount effects; treating those writes as
           // edits marked untouched clinical forms dirty and persisted a
           // phantom draft over the clinician's real one.
-          const signature = safeSessionSignature(snapshotAll());
-          if (signature === safeSignatureRef.current) return;
-          safeSignatureRef.current = signature;
+          //
+          // Only THIS form's part is re-serialized — the fired store is
+          // the only one that could have changed — and the session
+          // signature is the join of every form's cached part, so the
+          // comparison below decides exactly what the old whole-session
+          // recompute would have decided.
+          const signature = formSignature(form, store);
+          if (formSignatures.get(form.key) === signature) return;
+          formSignatures.set(form.key, signature);
+          safeSignatureRef.current = joinSignatures();
           setDirty(true);
           clearTimeout(timer);
           timer = setTimeout(() => {
@@ -206,7 +250,7 @@ export function useFillSessionAutosave({
       for (const unsubscribe of unsubscribers) unsubscribe();
     };
     // storesVersion re-runs the subscription when a form (un)registers.
-  }, [storesVersion, forms, getStore, persistNow, snapshotAll]);
+  }, [storesVersion, forms, getStore, persistNow]);
 
   /** Successful submit: drop the stored draft, stop all further saves,
    *  and clear the dirty flag SYNCHRONOUSLY (flushSync) — the success

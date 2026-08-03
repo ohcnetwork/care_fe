@@ -56,6 +56,44 @@ async function draftFormCount(page: Page): Promise<number> {
   });
 }
 
+/**
+ * The first non-empty string answer the persisted draft holds for ONE
+ * form, read straight from storage. Unlike `draftFormCount`, this reads
+ * past a `pagehide` flush (which persists whatever the live store holds
+ * regardless of the debounced autosave's own change-detection) — it is
+ * only ever satisfied by the DEBOUNCED write itself, which is what makes
+ * it useful for pinning that a keystroke actually got recognised as an
+ * edit rather than merely riding along on a reload's flush.
+ */
+async function draftFormNoteText(
+  page: Page,
+  questionnaireId: string,
+): Promise<string | undefined> {
+  return page.evaluate((qId) => {
+    const key = Object.keys(localStorage).find((entry) =>
+      entry.startsWith("care_qn_fill_draft--"),
+    );
+    const raw = key ? localStorage.getItem(key) : null;
+    if (!raw) return undefined;
+    const draft = JSON.parse(raw) as {
+      forms?: {
+        questionnaireId: string;
+        responses: Record<string, { values?: { value?: unknown }[] }>;
+      }[];
+    };
+    const form = draft.forms?.find((f) => f.questionnaireId === qId);
+    if (!form) return undefined;
+    for (const response of Object.values(form.responses ?? {})) {
+      for (const value of response.values ?? []) {
+        if (typeof value.value === "string" && value.value.length > 0) {
+          return value.value;
+        }
+      }
+    }
+    return undefined;
+  }, questionnaireId);
+}
+
 test.describe("Fill page multi-questionnaire sessions", () => {
   let fillUrl: string;
   let primaryId: string;
@@ -258,6 +296,49 @@ test.describe("Fill page multi-questionnaire sessions", () => {
     await expect(
       questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox"),
     ).toHaveValue(noteA);
+  });
+
+  test("re-adding a removed form and retyping its old answer still autosaves it", async ({
+    page,
+  }) => {
+    // The autosave subscription now caches a per-form signature (keyed by
+    // form key) instead of re-serializing the whole session on every
+    // keystroke — see useFillAutosave.ts. A removed form's cache entry
+    // must not survive: re-adding the SAME questionnaire (same form key,
+    // a brand-new empty store) and retyping its EXACT old answer would,
+    // under a stale cache, compare equal to the leftover signature and
+    // silently skip the debounced write. `draftFormNoteText` reads past a
+    // pagehide flush (which would persist regardless, masking the bug),
+    // so it only passes if the keystroke was genuinely recognised as an
+    // edit and reached storage on its own.
+    const noteB = `B-${faker.string.alphanumeric(10)}`;
+
+    await addQuestionnaire(page, ADDED_TITLE);
+    const addedNote = questionBlock(
+      page,
+      "Any Suggestions for Improvement",
+    ).getByRole("textbox");
+    await addedNote.fill(noteB);
+    await expect.poll(() => draftFormCount(page)).toBe(2);
+
+    const addedForm = page.locator(`[data-form-key="${addedId}"]`);
+    await addedForm.getByRole("button", { name: "Remove" }).click();
+    await expect(page.locator("[data-form-key]")).toHaveCount(1);
+    await expect.poll(() => draftFormCount(page)).toBe(1);
+
+    // Re-add the same questionnaire — it mounts empty.
+    await addQuestionnaire(page, ADDED_TITLE);
+    const reAddedNote = questionBlock(
+      page,
+      "Any Suggestions for Improvement",
+    ).getByRole("textbox");
+    await expect(reAddedNote).toHaveValue("");
+
+    // Retype the exact text the removed form used to hold.
+    await reAddedNote.fill(noteB);
+    await expect
+      .poll(() => draftFormNoteText(page, addedId), { timeout: 5000 })
+      .toBe(noteB);
   });
 
   test("nothing this session does reaches storage while the restore prompt is un-acted", async ({

@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Plus } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import {
+  useDeferredValue,
   useEffect,
   useMemo,
   useReducer,
@@ -235,13 +236,23 @@ export function QuestionnaireStudioPage({
     getStructuredTypesVersion,
     getStructuredTypesVersion,
   );
+  // `findInvalidQuestions` walks the whole question tree with every save
+  // rule on every render — a full DFS + per-rule scans on EACH keystroke,
+  // since `state.questions` gets a fresh identity per dispatch. Deferring
+  // the input lets typing stay unblocked while this recompute lags a tick
+  // behind; it feeds only the issues POPOVER/outline warnings display, not
+  // Save's gating — `handleSave` below calls `findFirstInvalidQuestion`
+  // directly on the live (non-deferred) `state.questions`, so a click
+  // always blocks on the CURRENT tree even while this memo is still
+  // catching up.
+  const deferredQuestions = useDeferredValue(state.questions);
   const issues = useMemo(() => {
     // Referenced so the dependency is a real read, not one exhaustive-deps
     // would call spurious: the registry lookup happens inside
     // `findInvalidQuestions`, where the rule cannot see it.
     void structuredTypesVersion;
-    return findInvalidQuestions(state.questions);
-  }, [state.questions, structuredTypesVersion]);
+    return findInvalidQuestions(deferredQuestions);
+  }, [deferredQuestions, structuredTypesVersion]);
   // First failing rule per question — powers the outline warning icons and
   // the canvas error chips alongside the top bar's popover.
   const issueKeysByQuestionId = useMemo(
