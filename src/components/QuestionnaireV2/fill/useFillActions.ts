@@ -48,11 +48,35 @@ import { isPatientBound } from "./subject";
 
 type GetStore = (key: string) => FormStore | undefined;
 
+/**
+ * Size bounds on what an agent may write. `applySetResponse`'s only count
+ * check is `values.length > 1 && !question.repeats`, so a repeats question
+ * would otherwise accept an unbounded array — a looping or prompt-injected
+ * agent could ask for 50,000 entries, the store would take them, the block
+ * would render one input each, and the autosave layer would try to
+ * serialize the multi-MB result into localStorage on every debounce (the
+ * quota failure is swallowed, so the crash-safety draft would silently
+ * stop covering the session). No clinical repeat runs to three digits, and
+ * no free-text answer to five.
+ */
+const MAX_RESPONSE_ENTRIES = 100;
+const MAX_RESPONSE_TEXT_LENGTH = 10_000;
+const MAX_LINK_ID_LENGTH = 256;
+const MAX_NOTE_LENGTH = 10_000;
+
 const setResponseSchema = z.object({
-  questionnaire_id: z.string().optional(),
-  link_id: z.string(),
-  values: z.array(z.union([z.string(), z.number(), z.boolean()])),
-  note: z.string().optional(),
+  questionnaire_id: z.string().max(MAX_LINK_ID_LENGTH).optional(),
+  link_id: z.string().max(MAX_LINK_ID_LENGTH),
+  values: z
+    .array(
+      z.union([
+        z.string().max(MAX_RESPONSE_TEXT_LENGTH),
+        z.number(),
+        z.boolean(),
+      ]),
+    )
+    .max(MAX_RESPONSE_ENTRIES),
+  note: z.string().max(MAX_NOTE_LENGTH).optional(),
 });
 
 export type SetResponseInput = z.infer<typeof setResponseSchema>;

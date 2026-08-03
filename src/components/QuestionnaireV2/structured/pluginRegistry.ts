@@ -60,18 +60,37 @@ function notify() {
   listeners.forEach((listener) => listener());
 }
 
+/** Registration by a plugin that does not own the namespace is refused,
+ *  not thrown: one plugin listing a stray id must not stop the rest of its
+ *  definitions (or anyone else's) from registering. */
+const noopCleanup = () => {};
+
 /** Register a plugin structured type; returns its cleanup closure.
  *  Throws on a non-namespaced id — PluginEngine catches and logs, so one
- *  bad definition never takes the app down. Namespacing is the whole
- *  isolation story: `{plugin_slug}.{type_name}` can collide with neither a
- *  core type (those are bare) nor another plugin's. */
+ *  bad definition never takes the app down.
+ *
+ *  Namespacing is the whole isolation story: `{plugin_slug}.{type_name}`
+ *  can collide with neither a core type (those are bare) nor another
+ *  plugin's — which holds only if the slug half is VERIFIED, so
+ *  `ownerSlug` is checked against it here. Without that check, plugin B
+ *  listing `plugin_a.assessment` (a copied sample, or malice) would take
+ *  over questionnaires authored against plugin A's type depending on
+ *  manifest load order, with no user-visible signal. */
 export function registerPluginStructuredType(
   definition: PluginStructuredTypeDefinition,
+  ownerSlug: string,
 ): () => void {
   if (!PLUGIN_STRUCTURED_TYPE_PATTERN.test(definition.type)) {
     throw new Error(
       `Plugin structured type "${definition.type}" must be namespaced "{plugin_slug}.{type_name}"`,
     );
+  }
+  const namespace = definition.type.slice(0, definition.type.indexOf("."));
+  if (namespace !== ownerSlug) {
+    console.error(
+      `Plugin "${ownerSlug}" tried to register structured type "${definition.type}", which belongs to the "${namespace}" namespace; skipping it`,
+    );
+    return noopCleanup;
   }
   if (pluginTypes.has(definition.type)) {
     // Last-wins (the effect re-registers on every manifest change), but a

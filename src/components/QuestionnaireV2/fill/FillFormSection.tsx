@@ -75,6 +75,15 @@ export function FillFormSection({
               type="button"
               variant="ghost"
               size="sm"
+              // The button sits ABOVE its own form's header, so in reading
+              // order it follows the PREVIOUS form's last question — a
+              // session with two added forms would otherwise expose two
+              // buttons both named just "Remove", and activating the wrong
+              // one drops that questionnaire and its answers from the
+              // session and from the persisted draft.
+              aria-label={t("remove_questionnaire", {
+                title: form.questionnaire.title,
+              })}
               onClick={() => onRemove(form.key)}
             >
               <Trash2 className="size-4" />

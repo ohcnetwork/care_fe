@@ -142,11 +142,14 @@ export default function PluginEngine({
 
       // Structured question types the plugin contributes. Registration
       // throws on a non-namespaced id — one malformed definition is logged
-      // and skipped, never fatal to the app.
+      // and skipped, never fatal to the app. The registering plugin's slug
+      // goes in so the registry can verify the `{plugin_slug}.` half of the
+      // id actually belongs to it: namespacing is the isolation guarantee,
+      // and it is only a guarantee if someone checks.
       for (const definition of plugin.structuredQuestionTypes ?? []) {
         try {
           overrideCleanupRef.current.push(
-            registerPluginStructuredType(definition),
+            registerPluginStructuredType(definition, plugin.plugin),
           );
         } catch (error) {
           console.error(
