@@ -33,6 +33,7 @@ import {
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
 import FilterHeader from "./filterHeader";
+import FilterMenuItem from "./utils/FilterMenuItem";
 import {
   COLOR_PALETTE,
   FilterConfig,
@@ -86,7 +87,7 @@ function TreeViewItem({
 
   return (
     <div>
-      <DropdownMenuItem
+      <FilterMenuItem
         disabled={isRootLevel && allChildrenSelected}
         onSelect={(e) => {
           e.preventDefault();
@@ -126,7 +127,7 @@ function TreeViewItem({
             />
           )}
         </div>
-      </DropdownMenuItem>
+      </FilterMenuItem>
       {expanded && isRootLevel && (
         <div>
           {children?.results?.map((childTag: TagConfig) => {
@@ -254,7 +255,7 @@ function TagFilterDropdown({
                   {t("selected_tags")}
                 </div>
                 {filteredSelectedTags.map((tag, index) => (
-                  <DropdownMenuItem
+                  <FilterMenuItem
                     key={tag.id}
                     onSelect={(e) => {
                       e.preventDefault();
@@ -291,7 +292,7 @@ function TagFilterDropdown({
                         <span className="truncate">{tag.display}</span>
                       </span>
                     </div>
-                  </DropdownMenuItem>
+                  </FilterMenuItem>
                 ))}
                 <DropdownMenuSeparator />
               </>
@@ -344,7 +345,7 @@ function TagFilterDropdown({
               {t("other_tags")}
             </div>
             {nonSelectedRootLevelTags.map((tag, index) => (
-              <DropdownMenuItem
+              <FilterMenuItem
                 key={tag.id}
                 onSelect={(e) => {
                   e.preventDefault();
@@ -372,7 +373,7 @@ function TagFilterDropdown({
                     <span className="truncate">{tag.display}</span>
                   </span>
                 </div>
-              </DropdownMenuItem>
+              </FilterMenuItem>
             ))}
           </>
         )}

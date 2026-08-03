@@ -7,10 +7,7 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 import { cn } from "@/lib/utils";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 
 import query from "@/Utils/request/query";
@@ -19,6 +16,7 @@ import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrgani
 
 import { Button } from "@/components/ui/button";
 import FilterHeader from "./filterHeader";
+import FilterMenuItem from "./utils/FilterMenuItem";
 import { COLOR_PALETTE, FilterConfig, FilterDateRange } from "./utils/Utils";
 
 const getColorForOrg = (id: string) => {
@@ -64,7 +62,7 @@ function TreeViewItem({
 
   return (
     <div>
-      <DropdownMenuItem
+      <FilterMenuItem
         onSelect={(e) => {
           e.preventDefault();
           onOrgToggle(org);
@@ -97,7 +95,7 @@ function TreeViewItem({
             </Button>
           )}
         </div>
-      </DropdownMenuItem>
+      </FilterMenuItem>
       {expanded && hasChildren && (
         <div>
           {children?.results?.map((childOrg: FacilityOrganizationRead) => (
@@ -197,7 +195,7 @@ function DepartmentFilterDropdown({
                   {t("selected_departments")}
                 </div>
                 {filteredSelectedOrgs.map((org) => (
-                  <DropdownMenuItem
+                  <FilterMenuItem
                     key={org.id}
                     onSelect={(e) => {
                       e.preventDefault();
@@ -227,7 +225,7 @@ function DepartmentFilterDropdown({
                         )}
                       </div>
                     </div>
-                  </DropdownMenuItem>
+                  </FilterMenuItem>
                 ))}
                 <DropdownMenuSeparator />
               </>
@@ -251,7 +249,7 @@ function DepartmentFilterDropdown({
                   facilityId={facilityId}
                 />
               ) : (
-                <DropdownMenuItem
+                <FilterMenuItem
                   key={org.id}
                   onSelect={(e) => {
                     e.preventDefault();
@@ -283,7 +281,7 @@ function DepartmentFilterDropdown({
                         )}
                     </div>
                   </div>
-                </DropdownMenuItem>
+                </FilterMenuItem>
               ),
             )}
           </>

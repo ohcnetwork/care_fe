@@ -13,7 +13,6 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -35,6 +34,7 @@ import {
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 
 import FilterHeader from "./filterHeader";
+import FilterMenuItem from "./utils/FilterMenuItem";
 import { FilterConfig, FilterMode, FilterValues } from "./utils/Utils";
 
 interface CategoryBreadcrumb {
@@ -304,7 +304,7 @@ function ActivityDefinitionFilterDropdown({
               {t("selected")}
             </div>
             {selectedDefinitions.map((def) => (
-              <DropdownMenuItem
+              <FilterMenuItem
                 key={def.id}
                 onSelect={(e) => {
                   e.preventDefault();
@@ -327,7 +327,7 @@ function ActivityDefinitionFilterDropdown({
                     </span>
                   )}
                 </div>
-              </DropdownMenuItem>
+              </FilterMenuItem>
             ))}
             <div className="border-b my-2" />
           </>
@@ -349,7 +349,7 @@ function ActivityDefinitionFilterDropdown({
               {currentParent ? t("subcategories") : t("categories")}
             </div>
             {categories.map((category) => (
-              <DropdownMenuItem
+              <FilterMenuItem
                 key={category.id}
                 onSelect={(e) => {
                   e.preventDefault();
@@ -362,7 +362,7 @@ function ActivityDefinitionFilterDropdown({
                   <span className="text-sm">{category.title}</span>
                 </div>
                 <ChevronRight className="size-4 text-gray-400" />
-              </DropdownMenuItem>
+              </FilterMenuItem>
             ))}
             {definitions.length > 0 && <div className="border-b my-2" />}
           </>
@@ -383,7 +383,7 @@ function ActivityDefinitionFilterDropdown({
               .map((definition) => {
                 const displayPath = getDisplayPath(definition);
                 return (
-                  <DropdownMenuItem
+                  <FilterMenuItem
                     key={definition.id}
                     onSelect={(e) => {
                       e.preventDefault();
@@ -403,7 +403,7 @@ function ActivityDefinitionFilterDropdown({
                         </span>
                       )}
                     </div>
-                  </DropdownMenuItem>
+                  </FilterMenuItem>
                 );
               })}
           </>

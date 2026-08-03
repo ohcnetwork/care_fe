@@ -6,17 +6,15 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import FilterRenderer from "./filterRenderer";
 import { SelectedFilterBar } from "./selectedFilterBar";
+import FilterMenuItem from "./utils/FilterMenuItem";
 import NavigationHelper from "./utils/navigation-helper";
 import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
+import useResponsiveFilterMenu, {
+  FilterMenuContent,
+} from "./utils/useResponsiveFilterMenu";
 import { FilterState, FilterValues } from "./utils/Utils";
 
 interface MultiFilterProps {
@@ -53,6 +51,7 @@ export default function MultiFilter({
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
   const { t } = useTranslation();
+  const { Root, Trigger } = useResponsiveFilterMenu();
 
   const activeFiltersCount = Object.values(selectedFilters).reduce(
     (sum, filterState) => {
@@ -122,8 +121,8 @@ export default function MultiFilter({
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
+      <Root open={open} onOpenChange={setOpen}>
+        <Trigger asChild>
           <Button
             variant="outline"
             className={cn(
@@ -136,10 +135,11 @@ export default function MultiFilter({
             <ListFilter className="h-3 w-3" />
             <span className="truncate">{placeholder}</span>
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="w-[calc(100vw)] max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
+        </Trigger>
+        <FilterMenuContent
+          titleKey="filters"
           align={align}
+          className="sm:max-w-xs"
         >
           {activeFilter ? (
             <FilterRenderer
@@ -156,8 +156,8 @@ export default function MultiFilter({
               setActiveFilter={setActiveFilter}
             />
           )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </FilterMenuContent>
+      </Root>
       {Object.entries(selectedFilters).map(([key, _]) => {
         const filterState = selectedFilters[key];
         if (
@@ -244,7 +244,7 @@ function FilterList({
       {Object.values(selectedFilters).map(({ filter }, index) => {
         const selected = selectedFilters[filter.key]?.selected as string[];
         return (
-          <DropdownMenuItem
+          <FilterMenuItem
             key={filter.key}
             ref={index === focusItemIndex ? setFocusItemRef : null}
             onSelect={(e) => {
@@ -266,7 +266,7 @@ function FilterList({
               )}
               <ChevronRight className="h-4 w-4" />
             </div>
-          </DropdownMenuItem>
+          </FilterMenuItem>
         );
       })}
       <NavigationHelper isActiveFilter={false} />

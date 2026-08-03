@@ -10,15 +10,13 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import FilterHeader from "./filterHeader";
+import FilterMenuItem from "./utils/FilterMenuItem";
 import NavigationHelper from "./utils/navigation-helper";
 import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
+import useResponsiveFilterMenu, {
+  FilterMenuContent,
+} from "./utils/useResponsiveFilterMenu";
 import {
   DateFilterMeta,
   DateRangeOption,
@@ -187,7 +185,7 @@ function DateRangeOptions({
       {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
       <div className="flex flex-col gap-1 p-2 max-h-[30vh] overflow-y-auto">
         {options.map((option, index) => (
-          <DropdownMenuItem
+          <FilterMenuItem
             key={index}
             ref={index === focusItemIndex ? setFocusItemRef : null}
             onFocus={() => setFocusItemIndex(index)}
@@ -203,9 +201,9 @@ function DateRangeOptions({
             {option.count
               ? t(option.label, { count: option.count })
               : t(option.label)}
-          </DropdownMenuItem>
+          </FilterMenuItem>
         ))}
-        <DropdownMenuItem
+        <FilterMenuItem
           ref={options.length === focusItemIndex ? setFocusItemRef : null}
           className={cn(
             "w-full justify-between px-3 font-medium text-sm text-gray-950",
@@ -219,7 +217,7 @@ function DateRangeOptions({
         >
           {t("custom_date_range")}
           <ChevronRight className="h-4 w-4" />
-        </DropdownMenuItem>
+        </FilterMenuItem>
       </div>
       <NavigationHelper isActiveFilter={true} />
     </>
@@ -328,6 +326,7 @@ export const SelectedDateBadge = ({
   onFilterChange: (filterKey: string, values: FilterValues) => void;
 }) => {
   const { t } = useTranslation();
+  const { Root, Trigger } = useResponsiveFilterMenu();
   const hasValidFrom = !!selected.from && isValid(selected.from);
   const hasValidTo = !!selected.to && isValid(selected.to);
   if (!hasValidFrom && !hasValidTo) return <></>;
@@ -350,8 +349,8 @@ export const SelectedDateBadge = ({
   );
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild className="text-sm underline cursor-pointer">
+    <Root>
+      <Trigger asChild className="text-sm underline cursor-pointer">
         {isRangeSelected ? (
           <span>
             {t(isRangeSelected.label, { count: isRangeSelected?.count })}
@@ -374,19 +373,15 @@ export const SelectedDateBadge = ({
         ) : (
           <></>
         )}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        sideOffset={15}
-        className="w-[320px] p-0"
-      >
+      </Trigger>
+      <FilterMenuContent titleKey={filter.label} className="w-[320px]">
         <RenderDateFilter
           filter={filter}
           selected={selected}
           onFilterChange={onFilterChange}
           defaultView="custom"
         />
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </FilterMenuContent>
+    </Root>
   );
 };

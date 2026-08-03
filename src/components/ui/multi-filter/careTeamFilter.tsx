@@ -6,7 +6,6 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 
 import query from "@/Utils/request/query";
@@ -16,6 +15,7 @@ import facilityApi from "@/types/facility/facilityApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import FilterHeader from "./filterHeader";
+import FilterMenuItem from "./utils/FilterMenuItem";
 import { FilterConfig, FilterDateRange } from "./utils/Utils";
 
 function CareTeamFilterDropdown({
@@ -103,7 +103,7 @@ function CareTeamFilterDropdown({
               {t("selected")}
             </div>
             {selectedUsers.map((user) => (
-              <DropdownMenuItem
+              <FilterMenuItem
                 key={user.id}
                 onSelect={(e) => {
                   e.preventDefault();
@@ -132,7 +132,7 @@ function CareTeamFilterDropdown({
                     </span>
                   </div>
                 </div>
-              </DropdownMenuItem>
+              </FilterMenuItem>
             ))}
             <div className="my-2 border-t border-gray-200" />
           </>
@@ -146,7 +146,7 @@ function CareTeamFilterDropdown({
               <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
                 {t("quick_select")}
               </div>
-              <DropdownMenuItem
+              <FilterMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
                   handleUserToggle(currentUserInList);
@@ -162,7 +162,7 @@ function CareTeamFilterDropdown({
                   />
                   <span className="text-sm font-medium">{t("mine")}</span>
                 </div>
-              </DropdownMenuItem>
+              </FilterMenuItem>
               <div className="my-2 border-t border-gray-200" />
             </>
           )}
@@ -176,7 +176,7 @@ function CareTeamFilterDropdown({
             {sortedNonSelectedUsers
               .filter((u) => search || u.id !== currentUser.id)
               .map((user) => (
-                <DropdownMenuItem
+                <FilterMenuItem
                   key={user.id}
                   onSelect={(e) => {
                     e.preventDefault();
@@ -202,7 +202,7 @@ function CareTeamFilterDropdown({
                       </span>
                     </div>
                   </div>
-                </DropdownMenuItem>
+                </FilterMenuItem>
               ))}
           </>
         )}
