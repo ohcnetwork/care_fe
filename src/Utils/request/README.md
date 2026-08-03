@@ -178,3 +178,75 @@ function UpdatePatient({ patientId }: { patientId: string }) {
   return <PatientForm onSubmit={handleSubmit} />;
 }
 ```
+
+### Send atomic batch requests with `mutate.atomic`
+
+Use `mutate.atomic` to send more than one request as one atomic batch
+request. The server runs all of the requests together. The batch is atomic:
+if one request fails, the server stops all of the requests. Then no request
+in the batch changes the data.
+
+Give `mutate.atomic` an array of request objects. Each request object has
+these properties:
+
+- `api`: the API route to call.
+- `pathParams`: the path parameters for the route. This property is optional.
+- `body`: the data to send in the request.
+- `referenceId`: a unique name for the request.
+
+```tsx
+import { useMutation } from "@tanstack/react-query";
+
+import { BatchRequestObject } from "@/Utils/request/batch";
+import mutate from "@/Utils/request/mutate";
+
+function DispenseMedications({ patientId }: { patientId: string }) {
+  const { mutate: dispense, isPending } = useMutation({
+    mutationFn: mutate.atomic(),
+    onSuccess: (response) => {
+      // The response has one result for each request in the batch.
+      // Each result has the reference_id, the status_code, and the data.
+      toast.success("The medications are dispensed.");
+    },
+  });
+
+  const handleDispense = () => {
+    const requests: BatchRequestObject[] = [
+      {
+        api: medicationDispenseApi.create,
+        body: dispenseData,
+        referenceId: "dispense_1",
+      },
+      {
+        api: prescriptionApi.upsert,
+        pathParams: { patientId },
+        body: { datapoints },
+        referenceId: "prescription_completion",
+      },
+    ];
+
+    dispense(requests);
+  };
+
+  return (
+    <Button onClick={handleDispense} disabled={isPending}>
+      Dispense
+    </Button>
+  );
+}
+```
+
+On success, the response contains a `results` array. The array has one
+result for each request. Each result contains the `reference_id`, the
+`status_code`, and the `data`.
+
+On failure, `mutate.atomic` shows an error for each request that failed. It
+does not show an error for the other requests in the batch. The mutation
+goes to the error state. Add an `onError` function if you must do more steps
+after a failure.
+
+To stop the error notifications, set the `silent` option:
+
+```tsx
+mutationFn: mutate.atomic({ silent: true });
+```

@@ -14,7 +14,6 @@ import {
 } from "@/pages/Facility/services/pharmacy/types";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
-import batchApi from "@/types/base/batch/batchApi";
 import {
   calculateTotalPriceWithQuantity,
   MonetaryComponentType,
@@ -39,6 +38,7 @@ import {
   MedicationDispenseCreate,
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
+import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
   ACTIVE_MEDICATION_STATUSES,
   computeMedicationDispenseQuantity,
@@ -56,6 +56,7 @@ import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { isGreaterThan, isZero, round, roundWhole } from "@/Utils/decimal";
 import { isLotAllowedForDispensing } from "@/Utils/inventory";
+import { BatchRequestObject } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
@@ -460,8 +461,8 @@ export function useMedicationBill({
 
   // Dispense mutation
   const { mutate: dispense, isPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: (response: unknown) => {
+    mutationFn: mutate.atomic(),
+    onSuccess: (response) => {
       toast.success(t("medications_billed_and_prescriptions_completed"));
 
       // Invalidate appropriate queries
@@ -507,31 +508,6 @@ export function useMedicationBill({
         });
       } else {
         onDispenseSuccess?.(newDispenseOrderId);
-      }
-    },
-    onError: (error) => {
-      try {
-        const errorData = error.cause as {
-          results?: {
-            data?: { detail?: string; errors?: { msg: string }[] };
-          }[];
-        };
-
-        const errorMessages = errorData?.results
-          ?.flatMap(
-            (result) =>
-              result?.data?.errors?.map((err) => err.msg) ||
-              (result?.data?.detail ? [result.data.detail] : []),
-          )
-          .filter(Boolean);
-
-        if (errorMessages?.length) {
-          errorMessages.forEach((msg) => toast.error(msg));
-        } else {
-          toast.error(t("error_dispensing_medications"));
-        }
-      } catch {
-        toast.error(t("error_dispensing_medications"));
       }
     },
   });
@@ -652,12 +628,7 @@ export function useMedicationBill({
     }
 
     // Build dispense requests
-    const requests: {
-      url: string;
-      method: string;
-      reference_id: string;
-      body: unknown;
-    }[] = [];
+    const requests: BatchRequestObject[] = [];
     const defaultEncounterId = prescriptionId
       ? prescription?.encounter?.id
       : (allMedicationsResponse?.results[0]?.encounter ?? encounterId);
@@ -713,10 +684,9 @@ export function useMedicationBill({
         }
 
         requests.push({
-          url: `/api/v1/medication/dispense/`,
-          method: "POST",
-          reference_id: `dispense_${item.reference_id}_lot_${lot.selectedInventoryId}`,
+          api: medicationDispenseApi.create,
           body: dispenseData,
+          referenceId: `dispense_${item.reference_id}_lot_${lot.selectedInventoryId}`,
         });
       });
     });
@@ -741,9 +711,9 @@ export function useMedicationBill({
 
     if (prescriptionIds.size > 0) {
       requests.push({
-        url: `/api/v1/patient/${patientId}/medication/prescription/upsert/`,
-        method: "POST",
-        reference_id: "prescription_completion_upsert",
+        api: prescriptionApi.upsert,
+        pathParams: { patientId },
+        referenceId: "prescription_completion_upsert",
         body: {
           datapoints: Array.from(prescriptionIds).map((pId) => ({
             id: pId,
@@ -753,7 +723,7 @@ export function useMedicationBill({
       });
     }
 
-    dispense({ requests });
+    dispense(requests);
   };
 
   const handleRemoveMedication = (
