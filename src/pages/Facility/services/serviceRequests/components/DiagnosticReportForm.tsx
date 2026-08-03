@@ -60,8 +60,8 @@ import {
 } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import {
-  ObservationDefinitionComponentSpec,
-  ObservationDefinitionReadSpec,
+  ObservationDefinitionComponent,
+  ObservationDefinitionRead,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenRead, SpecimenStatus } from "@/types/emr/specimen/specimen";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
@@ -80,7 +80,7 @@ interface DiagnosticReportFormProps {
   patientId: string;
   facilityId: string;
   serviceRequestId: string;
-  observationDefinitions: ObservationDefinitionReadSpec[];
+  observationDefinitions: ObservationDefinitionRead[];
   diagnosticReports: DiagnosticReportRead[];
   activityDefinition?: {
     diagnostic_report_codes?: Code[];
@@ -594,8 +594,8 @@ export function DiagnosticReportForm({
             const components: ObservationComponent[] = [];
 
             if (hasComponents && observationDefinition) {
-              observationDefinition.component.forEach(
-                (componentDef: ObservationDefinitionComponentSpec) => {
+              observationDefinition.component?.forEach(
+                (componentDef: ObservationDefinitionComponent) => {
                   const componentCode = componentDef.code.code;
                   const componentData = obsData.components[componentCode];
 
@@ -706,7 +706,7 @@ export function DiagnosticReportForm({
 
   // Helper to render component inputs for multi-component observations like blood pressure
   function renderComponentInputs(
-    definition: ObservationDefinitionReadSpec,
+    definition: ObservationDefinitionRead,
     observationData: ObservationValue,
     index: number,
   ) {

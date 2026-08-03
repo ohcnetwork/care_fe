@@ -1,0 +1,6 @@
+tmp/
+settings.local.json
+metadata/
+logs/
+redactors/local/
+current_session

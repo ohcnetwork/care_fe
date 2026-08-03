@@ -22,7 +22,7 @@ import {
   ObservationRead,
   ObservationReferenceRange,
 } from "@/types/emr/observation/observation";
-import { BaseObservationDefinitionSpec } from "@/types/emr/observationDefinition/observationDefinition";
+import { BaseObservationDefinition } from "@/types/emr/observationDefinition/observationDefinition";
 
 interface DiagnosticReportResultsTableProps {
   observations: ObservationRead[];
@@ -130,10 +130,10 @@ export function DiagnosticReportResultsTable({
 
   const renderObservationComponents = (
     components: ObservationComponent[],
-    observationDefinition: BaseObservationDefinitionSpec,
+    observationDefinition: BaseObservationDefinition,
   ) => {
     return components.map((component, index) => {
-      const componentQualifiedRange = observationDefinition.component.find(
+      const componentQualifiedRange = observationDefinition?.component?.find(
         (c) => c.code?.code === component.code?.code,
       )?.qualified_ranges;
       const highlight = component.interpretation?.highlight ?? false;
