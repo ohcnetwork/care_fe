@@ -63,7 +63,11 @@ export function QuantityInput({
   };
 
   const handleUnitChange = (newUnit: Code) => {
-    writeEntry({ type: "quantity", value, unit: newUnit, coding });
+    // The picked unit IS the coded answer for a valueset-backed quantity —
+    // the backend validates `value.coding` against the question's
+    // `answer_value_set`, and a missing `coding` fails server-side. `unit`
+    // and `coding` must carry the same code.
+    writeEntry({ type: "quantity", value, unit: newUnit, coding: newUnit });
   };
 
   // Merged-row treatment (see QuestionBlock's single-border model): each control
