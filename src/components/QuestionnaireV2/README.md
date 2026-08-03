@@ -64,9 +64,14 @@ questions, that is the bug.
   questionnaire covering every form of the session (`fillDraftStore`,
   schema v2), debounced writes with pagehide/unmount flush
   (`useFillSessionAutosave`), and the dependency-free sweep module
-  (`fillDraftCache`) that login/signOut/app-update import — drafts must
-  never outlive the session that wrote them, so any new session boundary
-  must call `clearQuestionnaireFillDrafts()`. Two kinds of draft coexist
+  (`fillDraftCache`) that the auth provider and the app-update path
+  import — an OTHER user's login clears every OTHER-user draft
+  (`clearOtherUsersFillDrafts`, keyed off the just-authenticated user's id;
+  the same user's own draft survives re-login on purpose), signOut and an
+  app update clear everything (`clearQuestionnaireFillDrafts`), and expired
+  drafts are swept at boot regardless of auth outcome
+  (`sweepExpiredFillDrafts`) — a new session boundary must join this list.
+  Two kinds of draft coexist
   and must not be confused: that local one is the crash safety net, while
   `useSaveServerDraft` is the deliberate "Save as draft" — a
   `form_submission` record (feature flag `enableQuestionnaireDraft`,

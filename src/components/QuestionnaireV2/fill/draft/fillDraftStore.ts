@@ -12,10 +12,13 @@ import { FILL_DRAFT_PREFIX, isFillDraftExpired } from "./fillDraftCache";
 
 /**
  * Local fill drafts — the crash/reload safety net. Draft data lives in
- * localStorage only under this prefix, scoped per user + subject +
- * entry questionnaire, TTL-bounded, and swept on login, logout and app
- * update — every eviction hook is deliberate; a new session boundary must
- * join the sweep list.
+ * localStorage only under this prefix, scoped per user + subject + entry
+ * questionnaire, TTL-bounded, and swept on an OTHER user's login, on
+ * signOut and on app update — every eviction hook is deliberate; a new
+ * session boundary must join the sweep list. Expired drafts are swept at
+ * boot regardless of auth outcome. A user's OWN drafts deliberately
+ * survive their own re-login — that is the crash/session-expiry recovery
+ * this layer exists for, not a bug (see `fillDraftCache.ts`).
  *
  * One key holds the WHOLE fill session: the route-mounted questionnaire
  * plus every questionnaire added to the same submission.

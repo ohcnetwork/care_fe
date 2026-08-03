@@ -7,29 +7,41 @@ import { expect, test } from "@playwright/test";
  * - A draft sitting at the login form (e.g. left behind by a session
  *   expiry) must survive a mistyped password — it is recoverable work,
  *   not something a failed login attempt should destroy.
- * - It is only cleared once credentials are ACCEPTED (the JWT sign-in
- *   success branch in `AuthUserProvider.tsx`), never before.
+ * - Credentials being ACCEPTED clears every OTHER user's draft
+ *   (`clearOtherUsersFillDrafts`, wired into the JWT sign-in success branch
+ *   in `AuthUserProvider.tsx`) — a shared machine gets a clean slate for a
+ *   different account — but the just-authenticated user's OWN draft
+ *   survives: that is the crash/session-expiry recovery this feature
+ *   exists for, not something re-login should destroy.
  * - The boot-time sweep (`sweepExpiredFillDrafts`) only removes EXPIRED
- *   drafts, so a fresh draft seeded right before the app mounts must
- *   still be there after boot — the eventual disappearance in this test
- *   is attributable to the post-auth clear, not the sweep.
+ *   drafts, so fresh drafts seeded right before the app mounts must still
+ *   be there after boot — the eventual disappearance of the OTHER-user
+ *   draft is attributable to the post-auth clear, not the sweep.
  *
  * Matches the shape `fillDraftStore.ts` writes to localStorage — see
- * `draftKey()` and `StoredFillDraft` there.
+ * `draftKey()` / `StoredFillDraft` there — and the userId-prefix parsing
+ * `clearOtherUsersFillDrafts` does in `fillDraftCache.ts`.
  */
 const FILL_DRAFT_PREFIX = "care_qn_fill_draft--";
-// The scope's userId is arbitrary and unrelated to the account that logs
-// in below: the post-auth clear is a prefix sweep over every
-// `care_qn_fill_draft--*` key, not a per-user lookup.
-const DRAFT_KEY = `${FILL_DRAFT_PREFIX}some-other-user--some-patient--some-questionnaire`;
+// src/common/constants.tsx LocalStorageKeys — tests can't import "@/*"
+// (tests/tsconfig.json's "paths" only maps "tests/*", it doesn't inherit
+// the app's aliases), so the raw key strings are duplicated here.
+const ACCESS_TOKEN_KEY = "care_access_token";
+const REFRESH_TOKEN_KEY = "care_refresh_token";
 
-function buildSeededDraft() {
+const OTHER_USER_DRAFT_KEY = `${FILL_DRAFT_PREFIX}some-other-user--some-patient--some-questionnaire`;
+
+function draftKeyFor(userId: string): string {
+  return `${FILL_DRAFT_PREFIX}${userId}--some-patient--some-questionnaire`;
+}
+
+function buildSeededDraft(userId: string) {
   return {
     schemaVersion: 2,
     // Fresh timestamp — well inside the 24h TTL — so the boot sweep must
     // not treat this as expired.
     savedAt: new Date().toISOString(),
-    userId: "some-other-user",
+    userId,
     subjectKey: "some-patient",
     entryQuestionnaireId: "some-questionnaire",
     forms: [
@@ -45,29 +57,79 @@ function buildSeededDraft() {
 }
 
 test.describe("Fill draft lifecycle at the login form", () => {
-  test("survives a failed login and is cleared only after a successful one", async ({
+  // One test, deliberately sequential: discovering the real admin user id
+  // (needed to seed a same-user draft correctly) requires an ordinary
+  // login first, so the id-discovery phase and the actual scenario under
+  // test cannot be split into independent `test()` blocks without either
+  // re-authenticating twice or hardcoding a backend-specific id. A single
+  // test keeps that dependency explicit instead of hiding it behind
+  // Playwright's test-level parallelism.
+  test("an other-user draft is cleared on successful login; a failed login and the same user's own draft both survive", async ({
     page,
   }) => {
-    const draft = buildSeededDraft();
+    // --- Phase 0: discover the real authenticated user id -----------------
+    // `clearOtherUsersFillDrafts` is keyed off `CurrentUserRead.id` (the
+    // same value `QuestionnaireFillPage` uses as `FillDraftScope.userId`),
+    // not the JWT's own `user_id` claim — the two are not guaranteed to be
+    // the same value, so this test reads it straight from the app's own
+    // `getcurrentuser` response rather than assume a token-decoding shortcut.
+    await page.goto("/login");
+    const currentUserResponsePromise = page.waitForResponse(
+      (res) => res.url().includes("/getcurrentuser/") && res.ok(),
+    );
+    await page.getByRole("textbox", { name: /username/i }).fill("admin");
+    await page.getByLabel(/password/i).fill("admin");
+    await page.getByRole("button", { name: /login/i }).click();
+    const currentUserResponse = await currentUserResponsePromise;
+    const { id: adminUserId } = (await currentUserResponse.json()) as {
+      id: string;
+    };
+    expect(adminUserId).toBeTruthy();
+    await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
 
-    // Seed the draft before any app script runs, so the boot-time sweep
-    // effect in AuthUserProvider actually runs over this key.
-    await page.addInitScript(
-      ({ key, value }) => {
-        localStorage.setItem(key, JSON.stringify(value));
+    // Drop back to a logged-out /login without going through the sign-out
+    // UI: signOut() does a full, unconditional draft clear (unchanged by
+    // this feature and not what this test is about), and this test hasn't
+    // seeded anything yet for it to destroy. Directly clearing the tokens
+    // is equivalent from the boot sweep's/clear's perspective — both only
+    // ever read localStorage, never React/query state.
+    await page.evaluate(
+      ({ accessKey, refreshKey }) => {
+        localStorage.removeItem(accessKey);
+        localStorage.removeItem(refreshKey);
       },
-      { key: DRAFT_KEY, value: draft },
+      { accessKey: ACCESS_TOKEN_KEY, refreshKey: REFRESH_TOKEN_KEY },
+    );
+
+    // --- Phase 1: seed one OTHER-user draft and one SAME-user draft -------
+    const sameUserDraftKey = draftKeyFor(adminUserId);
+    await page.addInitScript(
+      ({ otherKey, otherValue, sameKey, sameValue }) => {
+        localStorage.setItem(otherKey, JSON.stringify(otherValue));
+        localStorage.setItem(sameKey, JSON.stringify(sameValue));
+      },
+      {
+        otherKey: OTHER_USER_DRAFT_KEY,
+        otherValue: buildSeededDraft("some-other-user"),
+        sameKey: sameUserDraftKey,
+        sameValue: buildSeededDraft(adminUserId),
+      },
     );
 
     await page.goto("/login");
 
     // Sanity: the boot sweep ran (AuthUserProvider mounts on every route)
-    // and left the fresh draft alone.
+    // and left both fresh drafts alone.
     await expect
-      .poll(() => page.evaluate((key) => localStorage.getItem(key), DRAFT_KEY))
+      .poll(() =>
+        page.evaluate((key) => localStorage.getItem(key), OTHER_USER_DRAFT_KEY),
+      )
       .not.toBeNull();
+    expect(
+      await page.evaluate((key) => localStorage.getItem(key), sameUserDraftKey),
+    ).not.toBeNull();
 
-    // Attempt login with a mistyped password.
+    // --- Phase 2: a mistyped password must not touch either draft --------
     await page.getByRole("textbox", { name: /username/i }).fill("admin");
     await page.getByLabel(/password/i).fill("wrongpassword");
     await page.getByRole("button", { name: /login/i }).click();
@@ -75,20 +137,34 @@ test.describe("Fill draft lifecycle at the login form", () => {
       timeout: 10000,
     });
 
-    // The failed attempt must not have touched the draft.
     expect(
-      await page.evaluate((key) => localStorage.getItem(key), DRAFT_KEY),
+      await page.evaluate(
+        (key) => localStorage.getItem(key),
+        OTHER_USER_DRAFT_KEY,
+      ),
+    ).not.toBeNull();
+    expect(
+      await page.evaluate((key) => localStorage.getItem(key), sameUserDraftKey),
     ).not.toBeNull();
 
-    // Now sign in with the correct password.
+    // --- Phase 3: sign in correctly as the SAME user (admin) -------------
     await page.getByLabel(/password/i).fill("admin");
     await page.getByRole("button", { name: /login/i }).click();
     await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
     await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();
 
-    // Credentials were accepted — the post-auth clear removed the draft.
+    // The OTHER user's draft is gone — cleared as soon as credentials were
+    // accepted.
+    await expect
+      .poll(() =>
+        page.evaluate((key) => localStorage.getItem(key), OTHER_USER_DRAFT_KEY),
+      )
+      .toBeNull();
+
+    // The SAME user's own draft survived re-login — recovering it is the
+    // whole point of the local draft layer.
     expect(
-      await page.evaluate((key) => localStorage.getItem(key), DRAFT_KEY),
-    ).toBeNull();
+      await page.evaluate((key) => localStorage.getItem(key), sameUserDraftKey),
+    ).not.toBeNull();
   });
 });

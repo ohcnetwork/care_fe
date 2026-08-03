@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import Loading from "@/components/Common/Loading";
 import {
+  clearOtherUsersFillDrafts,
   clearQuestionnaireFillDrafts,
   sweepExpiredFillDrafts,
 } from "@/components/QuestionnaireV2/fill/draft/fillDraftCache";
@@ -15,7 +16,7 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 import { LocalStorageKeys } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import query, { callApi } from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
 import {
   JwtTokenObtainPair,
@@ -91,11 +92,13 @@ export default function AuthUserProvider({
 
   useEffect(() => {
     if (tokenRefreshQuery.isError) {
+      // Tokens only — this query has retry:false, so a single transient
+      // network blip trips this branch. Clearing drafts here would
+      // destroy exactly the recovery scenario this feature exists for
+      // (a phone call blocking the network mid-refresh); signOut() is the
+      // deliberate, user-initiated place drafts get wiped on session end.
       localStorage.removeItem(LocalStorageKeys.accessToken);
       localStorage.removeItem(LocalStorageKeys.refreshToken);
-      // The session is dead — leaving clinical draft text behind on what
-      // may be a shared machine is the same exposure signOut() closes.
-      clearQuestionnaireFillDrafts();
       return;
     }
 
@@ -105,6 +108,25 @@ export default function AuthUserProvider({
       localStorage.setItem(LocalStorageKeys.refreshToken, refresh);
     }
   }, [tokenRefreshQuery.data, tokenRefreshQuery.isError]);
+
+  // The freshly-issued tokens are in localStorage by the time this runs,
+  // but the `user` in scope here is still last render's (possibly none) —
+  // fetch the identity behind the NEW tokens directly rather than wait on
+  // the query hook's next render, so the draft clear below can be scoped
+  // to this exact account at the earliest point it is known, strictly
+  // after credentials were accepted.
+  const clearOtherUsersDrafts = useCallback(async () => {
+    try {
+      const currentUser = await callApi(userApi.currentUser, {
+        silent: true,
+      });
+      clearOtherUsersFillDrafts(currentUser.id);
+    } catch {
+      // Best-effort — an identity lookup failing here must not block
+      // sign-in. Worst case a different user's stale draft lingers until
+      // the next successful login or the boot-time expiry sweep.
+    }
+  }, []);
 
   const { mutateAsync: signIn, isPending: isAuthenticating } = useMutation({
     mutationFn: mutate(authApi.login),
@@ -128,10 +150,12 @@ export default function AuthUserProvider({
         setAccessToken(data.access);
         localStorage.setItem(LocalStorageKeys.accessToken, data.access);
         localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
-        // Credentials are accepted — any draft left at the login form
-        // (e.g. from a session expiry) belongs to whoever is signing in
-        // now, not necessarily this account. Clear only now, never before.
-        clearQuestionnaireFillDrafts();
+        // Credentials are accepted — a draft left at the login form by a
+        // DIFFERENT account (e.g. a session expiry on a shared machine)
+        // must not survive into this session. A draft belonging to the
+        // account that just signed in is the recovery case this feature
+        // exists for, so it must survive.
+        await clearOtherUsersDrafts();
 
         await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
         if (path === "/" || path === "/login") {
@@ -152,7 +176,7 @@ export default function AuthUserProvider({
       // Same rule as the direct JWT success branch above — the 2FA step
       // just completed, so this is the first point credentials are fully
       // accepted.
-      clearQuestionnaireFillDrafts();
+      await clearOtherUsersDrafts();
 
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       navigate(getRedirectOr("/"));
