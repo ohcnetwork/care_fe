@@ -19,22 +19,6 @@ import {
   PublicAppointment,
 } from "@/types/scheduling/schedule";
 
-/**
- * The OTP portal endpoints return records for every patient linked to the
- * signed-in number, so every list must be narrowed to the active profile.
- *
- * Prescriptions and diagnostic reports are scoped server-side via the `patient`
- * query param — their list payloads carry no patient reference, so filtering
- * client-side is not possible. Appointments carry a `patient` and are filtered
- * locally.
- *
- * Status filtering is server-side too, so a list only ever holds the rows the
- * screen is showing; the statuses are part of the query key so switching a
- * filter refetches instead of slicing a cached superset.
- *
- * The selected patient id is part of every query key: without it React Query
- * serves one patient's cached records to another after a switch.
- */
 function useAuthHeaders() {
   const { tokenData } = usePatientContext();
   return {
@@ -67,9 +51,6 @@ function usePortalInfiniteList<TItem>({
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey,
-      // Silent: deployments whose backend predates the portal endpoints would
-      // otherwise toast "Not Found" on every screen that shows a record
-      // summary. The empty state covers it.
       queryFn: ({ pageParam, signal }) =>
         query(route, {
           headers,
@@ -106,7 +87,7 @@ export function usePatientAppointments() {
   const { token, phoneNumber, headers } = useAuthHeaders();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["appointment", phoneNumber, selectedPatient?.id],
+    queryKey: ["appointment", phoneNumber],
     queryFn: query(PublicAppointmentApi.getAppointments, { headers }),
     enabled: !!token,
   });
@@ -146,8 +127,6 @@ export function usePatientPrescriptions({
 } = {}) {
   const { selectedPatient } = usePatientContext();
   const { token, phoneNumber } = useAuthHeaders();
-  // The backend's multi-select filters read a comma separated list, not
-  // repeated query params.
   const statusParam = status?.join(",");
 
   const { items, ...pagination } = usePortalInfiniteList({

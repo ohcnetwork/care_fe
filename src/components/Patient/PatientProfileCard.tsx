@@ -42,11 +42,6 @@ export function patientInitials(name: string): string {
   );
 }
 
-/**
- * Portal avatar. Unlike `Avatar` the tint is semantic rather than hashed: the
- * patient you are viewing is primary-filled, everyone else is neutral, so the
- * colour alone tells you whose records are on screen.
- */
 export function PatientAvatar({
   name,
   active,
@@ -74,7 +69,6 @@ interface PatientProfileCardProps {
   patient: PublicPatientRead;
   selected: boolean;
   onSelect: (patient: PublicPatientRead) => void;
-  /** Replaces the meta line, e.g. with a contextual hint in the switcher. */
   subtitle?: React.ReactNode;
 }
 
@@ -111,8 +105,6 @@ export function PatientProfileCard({
           {subtitle ?? patientMetaLine(patient, t)}
         </span>
       </div>
-      {/* Only the selected row carries a mark — an empty ring on the others
-          reads as an unchecked radio the user is meant to fill in. */}
       {selected && (
         <span className="flex size-5.5 shrink-0 items-center justify-center rounded-full bg-primary-700 text-white">
           <Check className="size-3.5" strokeWidth={3.2} />

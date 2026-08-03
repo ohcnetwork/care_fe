@@ -59,10 +59,6 @@ function abbreviateName(name: string): string {
 
 interface PatientAppShellProps {
   children: React.ReactNode;
-  /**
-   * Omit on the home screen to get the large "Viewing <patient>" chip.
-   * Provide it elsewhere to get a page title alongside a compact chip.
-   */
   title?: string;
   /** Renders a back affordance instead of the tab bar's implicit navigation. */
   backTo?: string;
@@ -170,7 +166,7 @@ export function PatientAppShell({
             key={tab.key}
             href={tab.href}
             className={cn(
-              "flex flex-col items-center justify-center gap-1 py-1 transition-colors",
+              "flex flex-col items-center justify-center gap-1 transition-colors",
               isActive
                 ? "text-primary-700"
                 : "text-gray-400 hover:text-gray-600",
@@ -192,9 +188,9 @@ export function PatientAppShell({
     </>
   );
 
-  // Desktop navigation: a persistent left rail replaces the mobile bottom bar.
+  // Desktop navigation
   const sideNav = (
-    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-gray-200 bg-white px-3 py-4 lg:flex">
+    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-gray-200 bg-white px-3 py-2 lg:flex">
       <Link
         href="/patient/home"
         aria-label={t("care")}
@@ -234,8 +230,7 @@ export function PatientAppShell({
     </aside>
   );
 
-  // Mobile is a centred card; desktop drops the card chrome for a left rail
-  // plus a flush content column.
+  // Mobile is a centred card
   return (
     <PatientShellContext.Provider
       value={{ openSwitcher: () => setSwitcherOpen(true), canSwitch }}
@@ -282,9 +277,6 @@ export function PatientAppShell({
               {headerTabs}
             </header>
 
-            {/* Switching patient moves the whole app's data scope, so the
-              confirmation is announced. The region stays mounted — screen
-              readers can miss one inserted together with its content. */}
             <div role="status" aria-live="polite">
               {switchedTo && (
                 <div className="mx-4 mt-3 flex items-center gap-2.5 rounded-xl border border-primary-200 bg-primary-50 px-3.5 py-2.5">
@@ -306,7 +298,7 @@ export function PatientAppShell({
             {!hideTabs && (
               <nav
                 aria-label={t("patient_shell__navigation")}
-                className="sticky bottom-0 grid shrink-0 grid-cols-4 border-t border-gray-200 bg-white px-2.5 pb-6 pt-2.5 sm:rounded-b-3xl sm:pb-2 lg:hidden"
+                className="sticky bottom-0 grid shrink-0 grid-cols-4 border-t border-gray-200 bg-white px-2.5 pb-4 pt-2.5 sm:rounded-b-3xl sm:pb-2 lg:hidden"
               >
                 {tabBar}
               </nav>

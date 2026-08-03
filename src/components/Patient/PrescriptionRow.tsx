@@ -25,9 +25,6 @@ export const PRESCRIPTION_TONES = {
 /**
  * One prescription in a list — shared by the records hub and the home preview
  * so the same record does not describe itself two different ways.
- *
- * The list payload carries no medicines (those arrive with the detail request),
- * so the row identifies a prescription by who wrote it, when, and where.
  */
 export function PrescriptionRow({
   prescription,

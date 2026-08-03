@@ -17,6 +17,7 @@ import {
 } from "@/components/Patient/CancelAppointmentButton";
 import { PatientAppShell } from "@/components/Patient/PatientAppShell";
 import { PatientBadge } from "@/components/Patient/PatientBadge";
+import { VISIT_STATUS_TONES } from "@/components/Patient/VisitCard";
 
 import {
   usePatientAppointments,
@@ -31,7 +32,6 @@ import {
 } from "@/types/scheduling/schedule";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 
-import { VISIT_STATUS_TONES } from "./PatientVisits";
 import { reportTitle } from "./records/reportUtils";
 
 /** primary-100 / primary-800 — the portal's own circle, not a random pastel. */

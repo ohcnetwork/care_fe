@@ -17,7 +17,7 @@ import mutate from "@/Utils/request/mutate";
 const extractOtpErrorMessage = (error: unknown, fallback: string) => {
   const cause = (error as { cause?: unknown })?.cause;
 
-  // Backend validation errors: { errors: [{ msg: "..." | { otp: "..." } }] }
+  // Backend validation errors
   const errors = (cause as { errors?: unknown })?.errors;
   if (Array.isArray(errors)) {
     for (const item of errors) {
@@ -44,9 +44,6 @@ const extractOtpErrorMessage = (error: unknown, fallback: string) => {
 /**
  * Drives the phone-number → OTP login used by both the dedicated patient
  * login screen and the patient tab on `/login`.
- *
- * The number of OTP digits comes from `careConfig.otpLength` so it tracks the
- * backend's `OTP_LENGTH` setting rather than being hardcoded per call site.
  */
 export function usePatientOtpLogin({
   redirectTo = "/patient/select-profile",
@@ -130,11 +127,6 @@ export function usePatientOtpLogin({
     verifyOtpRequest({ phone_number: phone, otp });
   }, [otp, phone, verifyOtpRequest]);
 
-  /**
-   * Returns to a pristine login screen. Everything is cleared, including the
-   * number itself — a partial reset that keeps the previous E.164 value around
-   * is what made "Change" flaky, and re-entering the number is the point.
-   */
   const restartLogin = useCallback(() => {
     setIsOtpSent(false);
     setPhone("");

@@ -78,7 +78,7 @@ export function PatientSwitcherSheet({
           className="mt-4 flex items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-dashed border-gray-300 p-3.5 text-sm font-semibold text-primary-700 hover:border-primary-700 hover:bg-primary-50"
         >
           <Plus className="size-4" strokeWidth={2.2} />
-          {t("patient_switcher__link_another")}
+          {t("patient_select__add_family_member")}
         </Link>
       </SheetContent>
     </Sheet>
