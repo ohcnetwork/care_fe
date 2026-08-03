@@ -306,7 +306,10 @@ export function useSubmitFillSession({
     // 400 after everything was already typed in.
     if (requests.length > MAX_BATCH_REQUESTS) {
       toast.error(
-        t("questionnaire_batch_too_large", { count: requests.length }),
+        t("questionnaire_batch_too_large", {
+          count: requests.length,
+          max: MAX_BATCH_REQUESTS,
+        }),
       );
       return;
     }

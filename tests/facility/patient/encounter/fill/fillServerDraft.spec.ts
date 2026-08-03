@@ -247,4 +247,71 @@ test.describe("Fill page server draft", () => {
       page.getByRole("button", { name: "Save Changes" }),
     ).toHaveCount(0);
   });
+
+  // P1-9: shares this describe's encounter and drafts card, so it rides the
+  // same serial guarantee as the tests above rather than racing them from a
+  // separate file/worker.
+  test("P1-9: submitting a resumed draft links the batch's /submit/ body to it via form_submission", async ({
+    page,
+  }) => {
+    test.slow();
+    const questionnaireId = await getQuestionnaireIdBySlug(
+      "respiratory_status-v3",
+    );
+    const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
+    const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}`;
+
+    const { saveDraft } = await openFillPage(page, fillUrl);
+
+    // A bare draft is enough to resume from — its content isn't the point
+    // of this case, only that a form_submission id exists to link to.
+    await saveDraft.click();
+    await expectToast(page, "Draft saved successfully");
+    await page.waitForURL(/\/updates$/);
+
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await page.waitForURL(/continue_draft=/);
+    const draftId = draftIdFromUrl(page.url());
+
+    // Satisfy required fields so the submit clears client validation and
+    // actually reaches the batch compose this case is pinning.
+    await questionBlock(page, "Is bilateral air entry present?")
+      .getByRole("radio", { name: "no", exact: true })
+      .click();
+    await questionBlock(page, "Select Modality")
+      .getByRole("radio", { name: "invasive", exact: true })
+      .click();
+
+    const batchRequest = page.waitForRequest(
+      (request) =>
+        request.url().includes("/api/v1/batch_requests/") &&
+        request.method() === "POST",
+    );
+    await page.getByRole("button", { name: "Save Changes" }).click();
+
+    const body = JSON.parse((await batchRequest).postData() ?? "{}") as {
+      requests: {
+        url: string;
+        body: { form_submission?: string };
+      }[];
+    };
+    const submit = body.requests.find((request) =>
+      request.url.includes(`/questionnaire/${questionnaireId}/submit/`),
+    );
+    // This is the P1-9 fix: without it the submit sub-request has no
+    // `form_submission`, and the backend's duplicate-submission guard
+    // (which keys off that field) never engages for a resumed draft.
+    expect(
+      submit?.body.form_submission,
+      "submit sub-request must link the resumed draft via form_submission",
+    ).toBe(draftId);
+
+    // End to end: the server took it, and the draft's record completed —
+    // same cleanup contract every test in this describe leaves behind.
+    await expectToast(page, "Questionnaire submitted successfully");
+    await page.waitForURL(/\/updates$/);
+    await expect(
+      page.getByRole("heading", { name: "Draft Forms" }),
+    ).not.toBeVisible();
+  });
 });

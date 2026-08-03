@@ -4778,7 +4778,7 @@
   "questionnaire": "Questionnaire",
   "questionnaire_allergy_intolerance_no_encounter": "Allergy Intolerances cannot be recorded without an active encounter",
   "questionnaire_appointment_no_encounter": "Appointment cannot be recorded without an active encounter",
-  "questionnaire_batch_too_large": "This submission has {{count}} operations; the server accepts at most 20 in one save. Remove some files or split the forms.",
+  "questionnaire_batch_too_large": "This submission has {{count}} operations; the server accepts at most {{max}} in one save. Remove some files or split the forms.",
   "questionnaire_charge_item_no_encounter": "Charge Items cannot be recorded without an active encounter",
   "questionnaire_cloned_successfully": "Questionnaire cloned successfully",
   "questionnaire_created_successfully": "Questionnaire created successfully!",
