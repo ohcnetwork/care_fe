@@ -2,13 +2,7 @@ import { entryHasContent } from "@/components/QuestionnaireV2/form/engine/store"
 
 import { dateQueryString } from "@/Utils/utils";
 import type { ResponseValue } from "@/types/questionnaire/form";
-
-/** One serialized answer entry of the questionnaire submit payload. */
-export interface SubmitValue {
-  value?: string;
-  unit?: ResponseValue["unit"];
-  coding?: ResponseValue["coding"];
-}
+import type { SubmitResultValue } from "@/types/questionnaire/questionnaireApi";
 
 /** `<input type="time">` emits bare "HH:mm" — no seconds, and no `step`
  *  attribute would change that for whole minutes. */
@@ -32,7 +26,7 @@ const BARE_HH_MM = /^([01]\d|2[0-3]):[0-5]\d$/;
  */
 export function serializeResponseValues(
   values: ResponseValue[],
-): SubmitValue[] {
+): SubmitResultValue[] {
   const answered = values.filter(
     (entry) =>
       entryHasContent(entry) || entry.coding != null || entry.unit != null,
