@@ -86,8 +86,9 @@ export function StructuredSlot({
 
   // The same resolution submit-time enforcement runs — see
   // `StructuredSlotState`'s parity note. Whatever this returns other than
-  // "ready" renders a notice, not an input, so the question cannot be
-  // answered and must not be required-blocked either.
+  // "ready" renders a notice, not an input: the question cannot be
+  // answered here, but a REQUIRED one still hard-blocks the submit by name
+  // (`collectStructuredErrors`) — this slot no longer waives it.
   const state = question.structured_type
     ? resolveStructuredSlotState(
         question.structured_type,
@@ -152,9 +153,12 @@ export function StructuredSlot({
     // the same dashed notice the other degradations use.
     <PluginErrorBoundary
       pluginName={definition.type}
-      // Once the notice is showing there is no input to answer, so
-      // submit-time enforcement must stop requiring one — same reasoning
-      // as the subject-mismatch and missing-context skips.
+      // Once the notice is showing there is no input to answer — same as
+      // the subject-mismatch and missing-context notices above. A REQUIRED
+      // question still hard-blocks the submit by name for this reason
+      // (`collectStructuredErrors`); marking it here only tells that
+      // validator (and `collectRequiredErrors`, staying out of the way)
+      // which slots are in this state.
       onError={markRenderFailed}
       // `resolveStructuredType` hands back a stable reference per
       // registration (see its memoization) — a new one only when a plugin

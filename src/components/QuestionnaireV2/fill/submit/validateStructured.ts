@@ -17,22 +17,33 @@ import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 /**
- * Submit-time structured validation: each enabled structured question runs
- * its type's `validate` from the resolver (core definitions and plugin
- * ones alike). Same disabled-subtree skip as composeBatch/validation.ts.
+ * Submit-time structured validation, and the ONE place that decides
+ * whether a broken structured slot blocks the submit.
  *
- * A question whose slot cannot show an input is skipped — subject
- * mismatch, a mount that can't supply an id the type `requires`, or a
- * component that threw and left the error boundary's notice in its place.
- * The clinician has no way to answer any of those, and composeBatch drops
- * their data regardless, so validating them would only block submission on
- * data that never submits. Shares one predicate with `collectRequiredErrors`
- * — see `structuredQuestionIsAnswerable`'s parity note.
+ * Every enabled structured question resolves the same slot state
+ * `StructuredSlot` renders from (plus the render-failed set its error
+ * boundary writes) — the shared resolver documented on
+ * `StructuredSlotState`. Whatever that comes back with other than `ready`
+ * means the clinician has no input to answer: an unknown/disabled type, a
+ * subject the type doesn't declare, a context id this mount can't supply,
+ * or a component that threw. `composeBatch` drops that question's data
+ * regardless of what's recorded, so the fork here is stark:
+ *   - REQUIRED — the section is unusable but was supposed to be answered.
+ *     Fail-open here would submit the rest of the form and quietly leave
+ *     that section out, with a success toast telling the clinician nothing
+ *     was wrong. So this hard-blocks, one error, naming the question by
+ *     its own text (`structured_section_unavailable_required`) — the
+ *     clinician learns exactly which section and that saving is impossible
+ *     until it loads.
+ *   - not required — the section was always optional; skipping it here
+ *     matches `composeBatch` exactly, and `StructuredSlot`'s notice tells
+ *     the clinician its entries won't be submitted.
+ * `collectRequiredErrors` stays out of this decision entirely (it just
+ * avoids double-erroring the same question — see its comment), so this is
+ * the one and only source of a broken-slot error.
  *
- * A type this deployment doesn't have blocks the submit only when the
- * question is required: an optional question whose plugin is disabled is
- * simply unanswerable, while a required one must not submit silently
- * incomplete. `t` is threaded in the same way `collectRequiredErrors`
+ * A `ready` question still runs its type's `validate` (core and plugin
+ * definitions alike). `t` is threaded the same way `collectRequiredErrors`
  * takes it — errors carry finished message text, not keys.
  */
 export function collectStructuredErrors(
@@ -56,24 +67,27 @@ export function collectStructuredErrors(
         continue;
       }
       const type = question.structured_type;
-      // The slot's component threw — the notice is on screen, not an
-      // input, so there is nothing here to validate.
-      if (renderFailed.has(question.id)) continue;
-      const state = resolveStructuredSlotState(
-        type,
-        questionnaire.subject_type,
-        subject,
-      );
-      if (state.kind === "unknown_type") {
+      // The component threw (error boundary's own store) OR the resolver
+      // says anything but `ready` — unknown/disabled type, subject
+      // mismatch, missing context. Either way the slot shows a notice, not
+      // an input: a required question in this state hard-blocks, named; a
+      // non-required one is simply skipped, same as `composeBatch`. Skip
+      // resolving state at all once render already failed — there is
+      // nothing left to read a `ready` definition from.
+      const state = renderFailed.has(question.id)
+        ? undefined
+        : resolveStructuredSlotState(type, questionnaire.subject_type, subject);
+      if (!state || state.kind !== "ready") {
         if (question.required) {
           errors.push({
             question_id: question.id,
-            error: t("structured_type_plugin_missing", { type }),
+            error: t("structured_section_unavailable_required", {
+              label: question.text,
+            }),
           });
         }
         continue;
       }
-      if (state.kind !== "ready") continue;
       const definition = state.definition;
       if (!definition.validate) continue;
       const response = responses[question.id];

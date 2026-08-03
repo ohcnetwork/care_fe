@@ -173,13 +173,27 @@ type StructuredSubjectContext = Partial<Record<StructuredContextKey, string>>;
 /**
  * Why a structured question's slot is (or is not) showing an input.
  *
- * PARITY REQUIREMENT: `StructuredSlot` renders from this and submit-time
- * enforcement (`form/validation.ts`, `fill/submit/validateStructured.ts`)
- * skips from it, so the two can never disagree. They must not: a required
- * structured question whose slot shows a placeholder instead of an input
- * cannot be answered, and blocking the submit on it makes the whole form —
- * every other answer included — permanently unsubmittable, on a question
- * whose data `composeBatch` drops anyway.
+ * PARITY REQUIREMENT: `StructuredSlot` renders from this, `composeBatch`
+ * skips any non-`ready` state from it, and both submit-time validators
+ * (`form/validation.ts`'s `structuredQuestionIsAnswerable`,
+ * `fill/submit/validateStructured.ts`'s `collectStructuredErrors`) resolve
+ * the very same state before deciding anything. One resolver, four
+ * consumers — what the clinician sees on screen, what data actually
+ * reaches the domain APIs, and what the submit button allows can never
+ * drift apart.
+ *
+ * THE INVARIANT (reversed from this module's original fail-open design): a
+ * slot showing a notice instead of an input is either
+ *   - non-required — submittable as a no-op. The question is simply
+ *     skipped, exactly like `composeBatch`, and its notice tells the
+ *     clinician its entries will not be submitted; or
+ *   - required — named in a blocking `QuestionValidationError`
+ *     (`structured_section_unavailable_required`) that stops the WHOLE
+ *     submit until the slot resolves.
+ * Never silently dropped: fail-open (a required question with no input
+ * quietly waived, its section vanishing behind a success toast) is what
+ * this reverses. A broken required slot deadlocking the *save* is the
+ * correct outcome now — the wrong data was submitting complete before.
  */
 export type StructuredSlotState =
   | { kind: "ready"; definition: ResolvedStructuredType }

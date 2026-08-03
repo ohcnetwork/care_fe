@@ -25,21 +25,21 @@ export interface RequiredCheckContext {
 }
 
 /**
- * Can this structured question be ANSWERED on this mount? False whenever
- * `StructuredSlot` is showing a notice instead of an input — a subject the
- * type doesn't declare, a context id the mount can't supply, or a
- * component that threw during render.
+ * Can this structured question be ANSWERED on this mount right now? False
+ * whenever `StructuredSlot` is showing a notice instead of an input — an
+ * unknown/disabled type, a subject the type doesn't declare, a context id
+ * the mount can't supply, or a component that threw during render.
  *
- * PARITY REQUIREMENT: the first two cases come from
- * `resolveStructuredSlotState`, the shared predicate the slot itself
- * renders from; the third from the store the slot's error boundary writes.
- * Both submit-time validators call this, so all three degradations behave
- * identically. Requiring a question with no input deadlocks the whole form
- * on data `composeBatch` drops anyway.
- *
- * An UNKNOWN type is deliberately not exempt: `collectStructuredErrors`
- * blocks a required question whose plugin is missing, so the clinician is
- * never told a form submitted complete when it did not.
+ * This does NOT decide whether the question is required-blocked — it only
+ * tells `collectRequiredErrors` when to stay out of the way. A broken
+ * slot's actual required-error (named, specific to the failure) is
+ * `collectStructuredErrors`' job alone, for every one of these states
+ * alike (see its docstring); letting the generic check here ALSO fire
+ * would stack a second, vaguer "this field is required" under the same
+ * question. `renderFailed` and the other three states come from the same
+ * two sources `StructuredSlot` itself reads (`resolveStructuredSlotState`
+ * and the error boundary's store), so this and the specific validator can
+ * never disagree about which slots are broken.
  */
 export function structuredQuestionIsAnswerable(
   structuredType: string,
@@ -52,7 +52,7 @@ export function structuredQuestionIsAnswerable(
     context.questionnaire.subject_type,
     context.subject,
   );
-  return state.kind !== "subject_mismatch" && state.kind !== "missing_context";
+  return state.kind === "ready";
 }
 
 /**
@@ -83,9 +83,13 @@ export function collectRequiredErrors(
         continue;
       }
       if (question.type === "display" || !question.required) continue;
-      // A structured question showing a notice instead of an input cannot
-      // be answered, so it must not be required-blocked — see
-      // `structuredQuestionIsAnswerable`.
+      // A structured question whose slot is showing a notice instead of an
+      // input is NOT waived here — it still blocks the submit — but the
+      // specific, named error for it is `collectStructuredErrors`' job
+      // (same resolver, every non-ready state, see its docstring). Staying
+      // out of the way here is what keeps a broken required question from
+      // ALSO surfacing a generic "this field is required" alongside the
+      // real message.
       if (
         question.structured_type &&
         !structuredQuestionIsAnswerable(
