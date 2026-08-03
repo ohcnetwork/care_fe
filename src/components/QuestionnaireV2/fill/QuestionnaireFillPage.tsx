@@ -457,9 +457,20 @@ function FillPageBody({
     );
   }, []);
 
+  // Snapshots a Resume could not re-fetch. They stay in the persisted
+  // draft (see `saveFillDraft`'s `retained`) — the two ways a resume can
+  // fail are NOT the same: a version bump means the answers can no longer
+  // be trusted onto the new tree and dropping them is correct, while a
+  // network error means try again later, and destroying the clinician's
+  // only copy over it is not.
+  const [retainedSnapshots, setRetainedSnapshots] = useState<
+    DraftFormSnapshot[]
+  >([]);
+
   /** Resume for the non-primary snapshots: re-fetch each questionnaire,
    *  drop the ones whose version moved on (their answers can no longer be
-   *  trusted onto the new tree), and seed the rest. */
+   *  trusted onto the new tree), seed the rest, and keep the ones that
+   *  could not be fetched at all in the draft. */
   const onResumeAddedForms = useCallback(
     (snapshots: DraftFormSnapshot[]) => {
       void (async () => {
@@ -482,11 +493,21 @@ function FillPageBody({
               mergeDraftIntoSeed(fetched.questions, snapshot.responses),
             );
           } catch {
-            // The snapshot's stored title is the only human name left when
-            // the questionnaire can no longer be fetched; drafts written
-            // before that field existed fall back to the id.
+            // Transient by assumption: the app's query default is
+            // retry:false, so one network blip lands here. The snapshot
+            // keeps its place in the stored draft instead of being erased
+            // by the next persist. The snapshot's stored title is the only
+            // human name left when the questionnaire cannot be fetched;
+            // drafts written before that field existed fall back to the id.
+            setRetainedSnapshots((previous) =>
+              previous.some(
+                (entry) => entry.questionnaireId === snapshot.questionnaireId,
+              )
+                ? previous
+                : [...previous, snapshot],
+            );
             toast.warning(
-              t("fill_draft_form_dropped", {
+              t("fill_draft_form_unavailable", {
                 title: snapshot.title ?? snapshot.questionnaireId,
               }),
             );
@@ -523,6 +544,7 @@ function FillPageBody({
     getStore,
     storesVersion,
     restoredDraft: localDraft,
+    retainedSnapshots,
     onResumeAddedForms,
   });
 

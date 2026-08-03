@@ -43,6 +43,10 @@ interface UseFillSessionAutosaveArgs {
   storesVersion: number;
   /** The draft this page instance detected, if any. */
   restoredDraft: LoadedFillDraft | undefined;
+  /** Snapshots the host could not turn back into live forms (a resume
+   *  whose re-fetch failed). They stay in the persisted draft so a
+   *  transient error cannot destroy their answers. */
+  retainedSnapshots?: DraftFormSnapshot[];
   /** Resume path for forms beyond the primary: the host re-adds them
    *  (fetch by id, version-check, seed via initialResponses). */
   onResumeAddedForms: (snapshots: DraftFormSnapshot[]) => void;
@@ -67,6 +71,7 @@ export function useFillSessionAutosave({
   getStore,
   storesVersion,
   restoredDraft,
+  retainedSnapshots,
   onResumeAddedForms,
 }: UseFillSessionAutosaveArgs) {
   const [dirty, setDirty] = useState(false);
@@ -77,6 +82,8 @@ export function useFillSessionAutosave({
   scopeRef.current = scope;
   const persistRef = useRef(persistLocally);
   persistRef.current = persistLocally;
+  const retainedRef = useRef(retainedSnapshots);
+  retainedRef.current = retainedSnapshots;
   // Set on successful submit: the draft served its purpose, so neither the
   // pending debounce nor the unmount/pagehide flush may re-save it.
   const finishedRef = useRef(false);
@@ -125,7 +132,7 @@ export function useFillSessionAutosave({
     const current = scopeRef.current;
     if (!current || !persistRef.current || finishedRef.current) return;
     if (restorePendingRef.current) return;
-    saveFillDraft(current, snapshotAll());
+    saveFillDraft(current, snapshotAll(), retainedRef.current);
   }, [snapshotAll]);
 
   /**
@@ -141,7 +148,14 @@ export function useFillSessionAutosave({
   useEffect(() => {
     if (!scopeKey || !persistLocally || !dirty) return;
     persistNow();
-  }, [scopeKey, persistLocally, dirty, storesVersion, persistNow]);
+  }, [
+    scopeKey,
+    persistLocally,
+    dirty,
+    storesVersion,
+    retainedSnapshots,
+    persistNow,
+  ]);
 
   // Not gated on `scopeKey`/`persistLocally`: dirty tracking is what arms
   // the unsaved-changes prompt and the Draft chip, and a session resuming

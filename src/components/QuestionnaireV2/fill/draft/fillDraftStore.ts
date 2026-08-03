@@ -213,9 +213,24 @@ export function safeSessionSignature(forms: FillSessionFormState[]): string {
 export function saveFillDraft(
   scope: FillDraftScope,
   forms: FillSessionFormState[],
+  /** Snapshots that belong to this draft but are NOT in the live session:
+   *  a resume whose re-fetch of an added questionnaire failed. They ride
+   *  through verbatim, because the alternative is that one transient
+   *  network error during Resume silently and permanently deletes that
+   *  form's drafted answers. */
+  retained: DraftFormSnapshot[] = [],
 ): void {
   const { snapshots, anyContent } = snapshotSession(forms);
-  if (!anyContent) {
+  const live = new Set(snapshots.map((snapshot) => snapshot.questionnaireId));
+  const carried = retained.filter(
+    (snapshot) => !live.has(snapshot.questionnaireId),
+  );
+  const carriedContent = carried.some((snapshot) =>
+    Object.values(snapshot.responses).some(
+      (response) => response.values.some(entryHasContent) || response.note,
+    ),
+  );
+  if (!anyContent && !carriedContent) {
     clearFillDraft(scope);
     return;
   }
@@ -225,7 +240,7 @@ export function saveFillDraft(
     userId: scope.userId,
     subjectKey: scope.subjectKey,
     entryQuestionnaireId: scope.entryQuestionnaireId,
-    forms: snapshots,
+    forms: [...snapshots, ...carried],
   };
   try {
     localStorage.setItem(draftKey(scope), JSON.stringify(draft));
