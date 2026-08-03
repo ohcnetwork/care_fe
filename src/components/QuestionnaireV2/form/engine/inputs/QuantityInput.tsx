@@ -31,13 +31,20 @@ export function QuantityInput({
   // empty instead of leaking a wrong-typed value into the input.
   const entry = response?.values[valueIndex ?? 0];
   const value = entry?.type === "quantity" ? entry.value : undefined;
-  const coding = entry?.coding;
   // Per-answer unit: a unit picked on THIS entry wins; the author's
   // `question.unit` is only the pre-selected default. The backend persists
   // `unit` alone (`answer_unit` is silently dropped by the Question spec),
   // so the default must never be read from `answer_unit`.
   const pickedUnit = entry?.type === "quantity" ? entry.unit : undefined;
   const unit = pickedUnit ?? question.unit;
+  // Invariant: the submitted `coding` always mirrors `unit` above unless
+  // the entry already carries its own explicit coding (set together with a
+  // picked unit by handleUnitChange). Without this fallback, an entry that
+  // never touched the unit picker (default unit accepted, only the value
+  // typed) would submit `coding: undefined` — the same backend 500 as an
+  // explicit pick with the fix missing, just via the untouched-default path
+  // instead.
+  const coding = entry?.coding ?? unit;
 
   // The question's unit valueset (owner-directed v2 semantics: for quantity,
   // `answer_value_set` IS the unit-choice source). A bounded expansion
