@@ -11,7 +11,6 @@ import FileUploadDropdown from "@/components/Files/FileUploadDropdown";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import {
   BACKEND_ALLOWED_EXTENSIONS,
   FileCategory,
@@ -153,7 +152,6 @@ export function FilesQuestion(props: FilesQuestionProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <QuestionLabel question={props.question} />
       {values.map((value, index) => (
         <div key={index} className="flex items-stretch gap-2">
           <Input

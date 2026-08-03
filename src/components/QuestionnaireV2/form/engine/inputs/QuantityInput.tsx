@@ -82,6 +82,7 @@ export function QuantityInput({
           type="number"
           inputMode="decimal"
           pattern="[0-9]*[.]?[0-9]*"
+          aria-required={question.required || undefined}
           value={value?.toString() ?? ""}
           onChange={(e) => handleValueChange(e.target.value)}
           step="0.01"
@@ -115,6 +116,7 @@ export function QuantityInput({
         type="number"
         inputMode="decimal"
         pattern="[0-9]*[.]?[0-9]*"
+        aria-required={question.required || undefined}
         value={value?.toString() ?? ""}
         onChange={(e) => handleValueChange(e.target.value)}
         step="0.01"

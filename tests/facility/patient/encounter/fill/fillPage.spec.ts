@@ -31,8 +31,12 @@ test.describe("Fill page shell", () => {
     // Fill routes opt out of the app sidebar (fullscreen shell).
     await expect(page.locator('[data-sidebar="sidebar"]')).toHaveCount(0);
 
-    // The ≥lg outline lists the questions with the shared tree nav;
-    // selecting a row scrolls its block into view.
+    // The ≥lg outline is an overlay (per the reference): a tick rail on
+    // the canvas' left edge, the panel floats over the canvas on demand.
+    // Selecting a row scrolls its block into view.
+    const toggle = page.getByRole("button", { name: "Questions outline" });
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await toggle.click();
     const outline = page.getByRole("navigation", { name: "Questions" });
     await expect(outline).toBeVisible();
     await outline.getByRole("button", { name: /FiO2/ }).click();
@@ -114,6 +118,54 @@ test.describe("Fill page value serialization", () => {
     expect(submittedValues).toContain("14:30:00");
 
     // End to end: the server took it.
+    await expectToast(page, "Questionnaire submitted successfully");
+    await page.waitForURL(/\/updates$/);
+  });
+
+  test("a repeats answer whose first row was cleared in place still submits its later rows", async ({
+    page,
+  }) => {
+    // Clearing a repeats row writes `value: undefined` at that index. The
+    // compose gate used to look only at values[0], dropping the WHOLE
+    // answer — later rows silently never submitted while the required
+    // check (which scans every entry) reported the question answered.
+    const questionnaireId = await getQuestionnaireIdBySlug(
+      KITCHEN_SINK_FACILITY_SLUG,
+    );
+    await page.goto(
+      `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`,
+    );
+
+    const block = questionBlock(page, "Medications taken (repeats)");
+    await block.scrollIntoViewIfNeeded();
+    await block.getByRole("textbox").first().fill("Paracetamol");
+    await block.getByRole("button", { name: "Add another" }).click();
+    await block.getByRole("textbox").nth(1).fill("Ibuprofen");
+    // Clear the FIRST row in place — the second must still submit.
+    await block.getByRole("textbox").first().fill("");
+
+    const batchRequest = page.waitForRequest(
+      (request) =>
+        request.url().includes("/api/v1/batch_requests/") &&
+        request.method() === "POST",
+    );
+    await page.getByRole("button", { name: "Save Changes" }).click();
+
+    const body = JSON.parse((await batchRequest).postData() ?? "{}") as {
+      requests: {
+        url: string;
+        body: { results?: { values: { value?: string }[] }[] };
+      }[];
+    };
+    const submit = body.requests.find((request) =>
+      request.url.includes(`/questionnaire/${questionnaireId}/submit/`),
+    );
+    const submittedValues = (submit?.body.results ?? []).flatMap((result) =>
+      result.values.map((value) => value.value),
+    );
+    expect(submittedValues).toContain("Ibuprofen");
+    expect(submittedValues).not.toContain("Paracetamol");
+
     await expectToast(page, "Questionnaire submitted successfully");
     await page.waitForURL(/\/updates$/);
   });

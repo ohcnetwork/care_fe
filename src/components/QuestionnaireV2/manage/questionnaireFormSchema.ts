@@ -12,7 +12,7 @@ import {
  * clone dialog's `-copy` suffix clamp, so a bound change lands everywhere.
  */
 export const SLUG_MIN_LENGTH = 5;
-export const SLUG_MAX_LENGTH = 25;
+export const SLUG_MAX_LENGTH = 50;
 
 /**
  * The `title`/`slug`/`description`/`status` validation shared by the three

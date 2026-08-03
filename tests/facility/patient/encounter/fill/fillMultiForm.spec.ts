@@ -375,4 +375,49 @@ test.describe("Fill page multi-questionnaire sessions", () => {
     await expect(page.getByText(noteA)).toBeVisible();
     await expect(page.getByText(noteB)).toHaveCount(0);
   });
+
+  test("Resume applies a drafted added form even after it was re-added by hand", async ({
+    page,
+  }) => {
+    // The collision case: the clinician re-adds the drafted questionnaire
+    // from the picker BEFORE pressing Resume. addQuestionnaire dedupes by
+    // key, so Resume used to drop the snapshot silently — and the next
+    // persist erased those answers from the stored draft for good. Resume
+    // now merges the snapshot into the already-mounted form, the same
+    // overlay rule the primary form uses.
+    const noteB = `B-${faker.string.alphanumeric(10)}`;
+
+    await questionBlock(page, "Note on Bilateral Air Entry")
+      .getByRole("textbox")
+      .fill(`A-${faker.string.alphanumeric(10)}`);
+    await addQuestionnaire(page, ADDED_TITLE);
+    await questionBlock(page, "Any Suggestions for Improvement")
+      .getByRole("textbox")
+      .fill(noteB);
+    await expect.poll(() => draftFormCount(page)).toBe(2);
+
+    await page.reload();
+    await expect(
+      questionBlock(page, "Is bilateral air entry present?"),
+    ).toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+
+    // Re-add form B by hand while the prompt is still up — it mounts
+    // empty.
+    await addQuestionnaire(page, ADDED_TITLE);
+    await expect(page.locator("[data-form-key]")).toHaveCount(2);
+    await expect(
+      questionBlock(page, "Any Suggestions for Improvement").getByRole(
+        "textbox",
+      ),
+    ).toHaveValue("");
+
+    // Resume must land the drafted answers in the already-open form.
+    await page.getByRole("button", { name: /resume/i }).click();
+    await expect(
+      questionBlock(page, "Any Suggestions for Improvement").getByRole(
+        "textbox",
+      ),
+    ).toHaveValue(noteB);
+  });
 });

@@ -42,6 +42,7 @@ export function BooleanInput({
     <div
       role="radiogroup"
       aria-labelledby={labelId}
+      aria-required={question.required || undefined}
       className="flex flex-wrap gap-3"
     >
       <ChoiceChip

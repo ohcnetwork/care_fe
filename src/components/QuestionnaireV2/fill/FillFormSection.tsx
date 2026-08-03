@@ -12,20 +12,22 @@ import type { RendererSubject } from "@/components/QuestionnaireV2/form/types";
 
 import { FillCanvas } from "./FillCanvas";
 import { FillOutline } from "./FillOutline";
+import { FillOutlineRail } from "./FillOutlineRail";
 import type { FormStore } from "./StoreRegistrar";
 import { StoreRegistrar } from "./StoreRegistrar";
 import type { FillFormEntry } from "./formSession";
 
 /**
  * One questionnaire of the session: its own provider (one store), its
- * canvas block in the shared scroll, and its outline section PORTALED
- * into the shared aside — the outline must live inside this provider to
- * read this form's store.
+ * canvas block in the shared scroll, and its outline pieces PORTALED
+ * into the overlay's shared hosts (panel rows + rail ticks) — they must
+ * live inside this provider to read this form's store.
  */
 export function FillFormSection({
   form,
   subject,
   outlineHost,
+  railHost,
   outlineLabel,
   onStore,
   onRemove,
@@ -33,6 +35,7 @@ export function FillFormSection({
   form: FillFormEntry;
   subject: RendererSubject;
   outlineHost: HTMLElement | null;
+  railHost: HTMLElement | null;
   /** Accessible name for this form's outline landmark. The host passes
    *  the questionnaire title once a session holds more than one form, so
    *  the stacked navs stay distinguishable. */
@@ -51,14 +54,15 @@ export function FillFormSection({
       <StoreRegistrar formKey={form.key} onStore={onStore} />
       {outlineHost &&
         createPortal(
-          <div className="mb-4">
-            <p className="mb-1 truncate px-2 text-xs font-semibold uppercase text-gray-500">
+          <div className="flex flex-col gap-3">
+            <p className="truncate pl-2 text-base font-semibold text-gray-950">
               {form.questionnaire.title}
             </p>
             <FillOutline ariaLabel={outlineLabel} />
           </div>,
           outlineHost,
         )}
+      {railHost && createPortal(<FillOutlineRail />, railHost)}
       {/* The divider keys off `isPrimary`, not `:first-child` — the
           restore bar and the error panel share this scroll, so DOM
           position is not a reliable "first form" signal. */}

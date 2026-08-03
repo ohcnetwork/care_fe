@@ -10,6 +10,7 @@ import { withEntryAt } from "./withEntryAt";
 export function DateInput({
   question,
   disabled,
+  labelId,
   valueIndex,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
@@ -33,11 +34,21 @@ export function DateInput({
   };
 
   return (
-    <CombinedDatePicker
-      value={value}
-      onChange={handleChange}
-      disabled={disabled}
-      buttonClassName="border-gray-300 shadow-none"
-    />
+    // The picker's trigger button takes no id/aria props (ui/ primitives
+    // stay unmodified), so the question association rides on a named
+    // group — without it every date question announces as an identical
+    // bare "Pick a date" stop.
+    <div
+      role="group"
+      aria-labelledby={labelId}
+      aria-required={question.required || undefined}
+    >
+      <CombinedDatePicker
+        value={value}
+        onChange={handleChange}
+        disabled={disabled}
+        buttonClassName="border-gray-300 shadow-none"
+      />
+    </div>
   );
 }
