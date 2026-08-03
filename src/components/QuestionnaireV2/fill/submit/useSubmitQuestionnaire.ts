@@ -358,5 +358,15 @@ export function useSubmitFillSession({
     }
   }, [runSubmit, isPending, t]);
 
-  return { submit, isPending: isPending || isComposing, serverErrors };
+  return {
+    submit,
+    isPending: isPending || isComposing,
+    // Exposed separately (rather than only folded into `isPending` above)
+    // so a consumer that needs the tri-state distinction — composing the
+    // batch vs. the request actually in flight — can derive it without
+    // reaching into this hook's internals. Nothing here changes: the
+    // combined `isPending` a caller was already reading is untouched.
+    isComposing,
+    serverErrors,
+  };
 }

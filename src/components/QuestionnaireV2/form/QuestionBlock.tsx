@@ -41,14 +41,14 @@ export interface QuestionBlockProps {
  */
 export function QuestionBlock(props: QuestionBlockProps) {
   const { question, depth, number } = props;
-  const { mode, revealHidden } = useFormRenderer();
+  const { mode, revealHidden, frozen } = useFormRenderer();
   const { QuestionShell } = useFormChrome();
   const enabled = useQuestionEnabled(question);
 
   const hiddenByLogic = !enabled && question.disabled_display !== "protected";
   if (hiddenByLogic && !revealHidden) return null;
 
-  const disabled = mode === "readonly" || question.read_only === true;
+  const disabled = mode === "readonly" || question.read_only === true || frozen;
   const effectiveDisabled = disabled || !enabled;
 
   const wrap = (children: React.ReactNode) =>

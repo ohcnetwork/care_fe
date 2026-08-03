@@ -31,6 +31,7 @@ export function FillFormSection({
   outlineLabel,
   onStore,
   onRemove,
+  frozen = false,
 }: {
   form: FillFormEntry;
   subject: RendererSubject;
@@ -42,6 +43,11 @@ export function FillFormSection({
   outlineLabel?: string;
   onStore: (key: string, store: FormStore | null) => void;
   onRemove?: (key: string) => void;
+  /** The session is mid-submit — forwarded into this form's renderer
+   *  context (freezes every question) and disables the Remove affordance
+   *  below, so a click during flight can't drop a form the in-flight
+   *  batch already accounts for. */
+  frozen?: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -50,6 +56,7 @@ export function FillFormSection({
       mode="fill"
       subject={subject}
       initialResponses={form.initialResponses}
+      frozen={frozen}
     >
       <StoreRegistrar formKey={form.key} onStore={onStore} />
       {outlineHost &&
@@ -88,6 +95,7 @@ export function FillFormSection({
               aria-label={t("remove_questionnaire", {
                 title: form.questionnaire.title,
               })}
+              disabled={frozen}
               onClick={() => onRemove(form.key)}
             >
               <Trash2 className="size-4" />

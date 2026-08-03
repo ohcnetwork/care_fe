@@ -31,6 +31,12 @@ interface FormContextValue {
   /** Render inputs visually but non-interactive and out of the a11y tree
    *  (builder edit canvas — clicks land on the selection chrome instead). */
   inert: boolean;
+  /** The whole session is mid-submit (composing the batch or the request
+   *  itself in flight) — every question in this form freezes read-only so
+   *  an edit typed during that window can never diverge from the payload
+   *  already being sent. False everywhere but the fill flow's submit
+   *  window; every other mount (studio, preview) never sets it. */
+  frozen: boolean;
 }
 
 const FormContext = createContext<FormContextValue | null>(null);
@@ -120,6 +126,9 @@ interface ProviderProps {
   subject?: RendererSubject;
   revealHidden?: boolean;
   inert?: boolean;
+  /** See `FormContextValue.frozen`. Defaults false — only the fill host's
+   *  submit window ever sets it. */
+  frozen?: boolean;
   /**
    * Creation-time seed overrides (a restored fill draft). Applied once,
    * merged over `initializeResponses` so the store is never observed
@@ -138,6 +147,7 @@ export function QuestionnaireFormProvider({
   subject = {},
   revealHidden = false,
   inert = false,
+  frozen = false,
   initialResponses,
   children,
 }: ProviderProps) {
@@ -190,7 +200,7 @@ export function QuestionnaireFormProvider({
 
   return (
     <FormContext.Provider
-      value={{ mode, subject, questionnaire, revealHidden, inert }}
+      value={{ mode, subject, questionnaire, revealHidden, inert, frozen }}
     >
       <JotaiProvider store={store}>{children}</JotaiProvider>
     </FormContext.Provider>

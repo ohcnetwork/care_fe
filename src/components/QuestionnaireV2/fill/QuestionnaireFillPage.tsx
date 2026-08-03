@@ -1,9 +1,8 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +13,6 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "@/components/Questionnaire/data/StructuredFormData";
 
-import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -44,20 +42,10 @@ import {
 import { ServerErrorsPanel } from "./ServerErrorsPanel";
 import type { FormStore } from "./StoreRegistrar";
 import { sweepExpiredFillDrafts } from "./draft/fillDraftCache";
-import type {
-  DraftFormSnapshot,
-  FillDraftScope,
-  LoadedFillDraft,
-} from "./draft/fillDraftStore";
-import {
-  loadFillDraft,
-  mergeDraftIntoSeed,
-  preserveExcludedStructured,
-  reviveDraftResponses,
-} from "./draft/fillDraftStore";
+import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
+import { loadFillDraft, reviveDraftResponses } from "./draft/fillDraftStore";
 import { useFillSessionAutosave } from "./draft/useFillAutosave";
 import { useSaveServerDraft } from "./draft/useSaveServerDraft";
-import type { FillFormEntry } from "./formSession";
 import type { FillSubject } from "./subject";
 import {
   exitTargetOf,
@@ -67,6 +55,7 @@ import {
 } from "./subject";
 import { useSubmitFillSession } from "./submit/useSubmitQuestionnaire";
 import { useFillActions } from "./useFillActions";
+import { useFillSessionForms } from "./useFillSessionForms";
 
 interface FillPageProps {
   /** What this fill is FOR — the union carries exactly the ids the
@@ -493,7 +482,6 @@ function FillPageBody({
   exitTarget,
 }: FillPageBodyProps) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const [tab, setTab] = useState<"questionnaire" | "history">("questionnaire");
   // History mounts on first activation and stays mounted after (hidden) —
   // eager mounting would fire its queries and leak its text into the DOM
@@ -501,16 +489,6 @@ function FillPageBody({
   // adapted structured widgets that keep local state.
   const [historyMounted, setHistoryMounted] = useState(false);
 
-  // The session: the route-mounted questionnaire plus anything added to
-  // the same submission. Each entry owns one provider and one store.
-  const [forms, setForms] = useState<FillFormEntry[]>(() => [
-    {
-      key: questionnaire.id,
-      questionnaire,
-      isPrimary: true,
-      initialResponses: serverDraftResponses,
-    },
-  ]);
   const storesRef = useRef(new Map<string, FormStore>());
   const [storesVersion, setStoresVersion] = useState(0);
   const handleStore = useCallback((key: string, store: FormStore | null) => {
@@ -520,182 +498,20 @@ function FillPageBody({
   }, []);
   const getStore = useCallback((key: string) => storesRef.current.get(key), []);
 
-  const addQuestionnaire = useCallback(
-    (
-      added: QuestionnaireRead,
-      initialResponses?: Record<string, QuestionnaireResponse>,
-    ) => {
-      setForms((previous) =>
-        previous.some((form) => form.key === added.id)
-          ? previous
-          : [
-              ...previous,
-              {
-                key: added.id,
-                questionnaire: added,
-                isPrimary: false,
-                initialResponses,
-              },
-            ],
-      );
-    },
-    [],
-  );
-  const removeForm = useCallback((key: string) => {
-    setForms((previous) =>
-      previous.filter((form) => form.key !== key || form.isPrimary),
-    );
-  }, []);
-
-  // Snapshots that belong to the draft but are not (yet) live forms. They
-  // stay in the persisted draft (see `saveFillDraft`'s `retained`) — the
-  // ways a resume can fail are NOT the same: a version bump means the
-  // answers can no longer be trusted onto the new tree and dropping them
-  // is correct, while a network error means try again later, and
-  // destroying the clinician's only copy over it is not.
-  const [retainedSnapshots, setRetainedSnapshots] = useState<
-    DraftFormSnapshot[]
-  >([]);
-  const dropRetainedSnapshot = useCallback((questionnaireId: string) => {
-    setRetainedSnapshots((previous) =>
-      previous.filter((entry) => entry.questionnaireId !== questionnaireId),
-    );
-  }, []);
-
-  // Read by resume callbacks that must see the CURRENT session without
-  // re-creating themselves per forms change. Effect-synced, which is
-  // enough: every reader is an event-handler-initiated async path that
-  // runs strictly after the commit that changed `forms`.
-  const formsRef = useRef(forms);
-  useEffect(() => {
-    formsRef.current = forms;
-  }, [forms]);
-
-  /** Resume for the non-primary snapshots. Every snapshot is RETAINED
-   *  first — during the re-fetch window it is neither a live form nor
-   *  retained otherwise, and a persist fired in that window (a keystroke
-   *  in the primary) would silently drop it from the stored draft; a
-   *  close/crash then makes the loss permanent. From that safe baseline
-   *  each snapshot either becomes a live form (fetched, version intact,
-   *  seeded — or merged into the SAME questionnaire if the clinician
-   *  already added it by hand), is deliberately dropped (version moved
-   *  on: the answers can no longer be trusted onto the new tree), or
-   *  stays retained (fetch failed — try again later). */
-  const onResumeAddedForms = useCallback(
-    (snapshots: DraftFormSnapshot[]) => {
-      setRetainedSnapshots((previous) => {
-        const seen = new Set(previous.map((entry) => entry.questionnaireId));
-        return [
-          ...previous,
-          ...snapshots.filter(
-            (snapshot) => !seen.has(snapshot.questionnaireId),
-          ),
-        ];
-      });
-      void (async () => {
-        for (const snapshot of snapshots) {
-          // Already in the session (the clinician added it by hand before
-          // pressing Resume): apply the snapshot to the live store the
-          // same way the primary form's resume overlay does — dropping it
-          // silently would erase the drafted answers from the stored
-          // draft on the very next persist.
-          const existing = formsRef.current.find(
-            (form) => form.key === snapshot.questionnaireId,
-          );
-          if (existing) {
-            if (
-              String(existing.questionnaire.version) !==
-              snapshot.questionnaireVersion
-            ) {
-              dropRetainedSnapshot(snapshot.questionnaireId);
-              toast.warning(
-                t("fill_draft_form_dropped", {
-                  title: existing.questionnaire.title,
-                }),
-              );
-              continue;
-            }
-            const store = getStore(existing.key);
-            if (store) {
-              store.set(
-                responsesAtom,
-                preserveExcludedStructured(
-                  store.get(responsesAtom),
-                  mergeDraftIntoSeed(
-                    existing.questionnaire.questions,
-                    snapshot.responses,
-                  ),
-                ),
-              );
-            }
-            dropRetainedSnapshot(snapshot.questionnaireId);
-            continue;
-          }
-          try {
-            const fetched = await queryClient.fetchQuery({
-              queryKey: questionnaireKeys.detail(snapshot.questionnaireId),
-              queryFn: query(questionnaireApi.get, {
-                pathParams: { id: snapshot.questionnaireId },
-              }),
-            });
-            if (String(fetched.version) !== snapshot.questionnaireVersion) {
-              dropRetainedSnapshot(snapshot.questionnaireId);
-              toast.warning(
-                t("fill_draft_form_dropped", { title: fetched.title }),
-              );
-              continue;
-            }
-            addQuestionnaire(
-              fetched,
-              mergeDraftIntoSeed(fetched.questions, snapshot.responses),
-            );
-            dropRetainedSnapshot(snapshot.questionnaireId);
-          } catch {
-            // Transient by assumption: the app's query default is
-            // retry:false, so one network blip lands here. The snapshot
-            // keeps its place in the stored draft instead of being erased
-            // by the next persist. The snapshot's stored title is the only
-            // human name left when the questionnaire cannot be fetched;
-            // drafts written before that field existed fall back to the id.
-            toast.warning(
-              t("fill_draft_form_unavailable", {
-                title: snapshot.title ?? snapshot.questionnaireId,
-              }),
-            );
-          }
-        }
-      })();
-    },
-    [queryClient, addQuestionnaire, getStore, dropRetainedSnapshot, t],
-  );
-
-  /** The in-session picker's add. When the picked questionnaire matches a
-   *  RETAINED snapshot (its resume re-fetch failed earlier), that snapshot
-   *  IS the drafted form — seed from it instead of mounting empty, which
-   *  would displace the snapshot from the stored draft on the next
-   *  persist. A version drift drops it with the same toast as resume. */
-  const addQuestionnaireFromPicker = useCallback(
-    (selected: QuestionnaireRead) => {
-      const snapshot = retainedSnapshots.find(
-        (entry) => entry.questionnaireId === selected.id,
-      );
-      if (!snapshot) {
-        addQuestionnaire(selected);
-        return;
-      }
-      dropRetainedSnapshot(selected.id);
-      if (String(selected.version) !== snapshot.questionnaireVersion) {
-        toast.warning(t("fill_draft_form_dropped", { title: selected.title }));
-        addQuestionnaire(selected);
-        return;
-      }
-      addQuestionnaire(
-        selected,
-        mergeDraftIntoSeed(selected.questions, snapshot.responses),
-      );
-    },
-    [retainedSnapshots, addQuestionnaire, dropRetainedSnapshot, t],
-  );
+  // The session: the route-mounted questionnaire plus anything added to
+  // the same submission (add/remove, retained-draft-snapshot bookkeeping,
+  // the async resume-added-forms path) — see useFillSessionForms.ts.
+  const {
+    forms,
+    removeForm,
+    retainedSnapshots,
+    onResumeAddedForms,
+    addQuestionnaireFromPicker,
+  } = useFillSessionForms({
+    questionnaire,
+    serverDraftResponses,
+    getStore,
+  });
 
   // The outline lives in one shared overlay (panel rows + rail ticks);
   // each form portals its own pieces into the two hosts (they must render
@@ -743,19 +559,39 @@ function FillPageBody({
     [retainedSnapshots],
   );
 
-  const { submit, isPending, serverErrors } = useSubmitFillSession({
-    forms,
-    getStore,
-    subject,
-    continueDraftId,
-    blockedFormLabels,
-    onSuccess: () => {
-      // Order matters: finishDraft flushes the pristine state before the
-      // redirect so useNavigationPrompt doesn't block it.
-      autosave.finishDraft();
-      navigate(exitTarget);
+  const { submit, isPending, isComposing, serverErrors } = useSubmitFillSession(
+    {
+      forms,
+      getStore,
+      subject,
+      continueDraftId,
+      blockedFormLabels,
+      onSuccess: () => {
+        // Order matters: finishDraft flushes the pristine state before the
+        // redirect so useNavigationPrompt doesn't block it.
+        autosave.finishDraft();
+        navigate(exitTarget);
+      },
     },
-  });
+  );
+
+  // P1-4: the fill session stays fully editable during an in-flight
+  // submit unless every input-bearing surface reads this. "composing"
+  // covers the click-to-mutate gap (client validation + batch compose,
+  // both synchronous-ish but real work) and "submitting" the request
+  // itself; either one means an edit typed right now would diverge from
+  // the payload already built/sent. `isPending` here is the hook's own
+  // OR of the two (see useSubmitQuestionnaire.ts), so `frozen` is exactly
+  // the old submit-in-flight condition — this is a naming/clarity change,
+  // not new behavior. Releases the moment the mutation settles (success
+  // navigates away; an error just flips isPending back to false), so a
+  // failed submit leaves the form editable again for a retry.
+  const sessionPhase: "editing" | "composing" | "submitting" = isComposing
+    ? "composing"
+    : isPending
+      ? "submitting"
+      : "editing";
+  const frozen = sessionPhase !== "editing";
 
   // The deliberate server draft (feature-flagged). Same exit as a
   // submission: the server copy supersedes the local autosave one, so
@@ -882,6 +718,7 @@ function FillPageBody({
                       }
                       onStore={handleStore}
                       onRemove={forms.length > 1 ? removeForm : undefined}
+                      frozen={frozen}
                     />
                   ))}
                   {/* A resumed SERVER draft is one questionnaire's
@@ -900,6 +737,7 @@ function FillPageBody({
                             type="button"
                             variant="outline"
                             className="border-primary-600 text-primary-800"
+                            disabled={frozen}
                           >
                             <Plus className="size-4" />
                             {t("add_questionnaire")}
