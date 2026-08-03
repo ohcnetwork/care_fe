@@ -35,6 +35,11 @@ export interface DraftFormSnapshot {
   /** `QuestionnaireRead.version` — a version bump invalidates this form
    *  (the read spec exposes no modified_date yet). */
   questionnaireVersion: string;
+  /** The questionnaire's title as it read when the draft was written —
+   *  the only human name available when a resume can no longer FETCH the
+   *  questionnaire. Optional because v2 drafts written before this field
+   *  existed are still valid; every reader must fall back. */
+  title?: string;
   responses: Record<string, QuestionnaireResponse>;
   structuredSkipped: boolean;
 }
@@ -90,6 +95,44 @@ function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
   return { safe, structuredSkipped };
 }
 
+/** Is this response one the draft deliberately leaves behind? Mirrors
+ *  `partitionForDraft`'s rule, including its treatment of an unresolvable
+ *  type as "exclude". */
+function isDraftExcluded(response: QuestionnaireResponse): boolean {
+  if (!response.structured_type) return false;
+  const resolved = resolveStructuredType(response.structured_type);
+  return !resolved || resolved.draftPolicy === "exclude";
+}
+
+/**
+ * Overlay the draft-excluded structured entries a store already holds onto
+ * a record that is about to REPLACE it.
+ *
+ * Resume and Discard both swap a form's whole responses record. Structured
+ * types with `draftPolicy: "exclude"` are by definition not in the draft,
+ * and the adapted widgets seed them once from a server prefetch in a mount
+ * effect that never re-runs — so a plain replacement blanks the patient's
+ * existing allergies/medications/diagnoses on screen, and re-entering them
+ * upserts DUPLICATE clinical records. The live values are the only copy;
+ * they carry across untouched.
+ */
+export function preserveExcludedStructured(
+  current: Record<string, QuestionnaireResponse>,
+  next: Record<string, QuestionnaireResponse>,
+): Record<string, QuestionnaireResponse> {
+  const merged = { ...next };
+  for (const [id, response] of Object.entries(current)) {
+    if (!isDraftExcluded(response)) continue;
+    const fresh = merged[id];
+    // Same guard the draft overlay uses: only where the question still
+    // exists with the same structured_type.
+    if (fresh && fresh.structured_type === response.structured_type) {
+      merged[id] = response;
+    }
+  }
+  return merged;
+}
+
 /** The creation-time merge rule, shared by resume paths: draft entries
  *  overlay the fresh seed only when the question still exists with the
  *  same structured_type. */
@@ -125,10 +168,17 @@ function snapshotSession(forms: FillSessionFormState[]): {
     const hasContent = Object.values(safe).some(
       (response) => response.values.some(entryHasContent) || response.note,
     );
-    if (hasContent || structuredSkipped) anyContent = true;
+    // `structuredSkipped` ANNOTATES a draft (the restore bar warns about
+    // it); it never creates one on its own. Adapted structured widgets
+    // seed prefetched server rows into the store in mount effects, so
+    // counting the flag as content wrote a phantom draft for a session the
+    // clinician never touched — and let that phantom overwrite a real
+    // stored draft on the very next visit.
+    if (hasContent) anyContent = true;
     snapshots.push({
       questionnaireId: form.questionnaire.id,
       questionnaireVersion: String(form.questionnaire.version),
+      title: form.questionnaire.title,
       responses: safe,
       structuredSkipped,
     });
@@ -136,19 +186,30 @@ function snapshotSession(forms: FillSessionFormState[]): {
   return { snapshots, anyContent };
 }
 
-/** Would this session write a draft, or is it empty enough that
- *  `saveFillDraft` would CLEAR the stored one instead? Callers that must
- *  not destroy a draft the clinician hasn't accepted or discarded yet
- *  check this before saving. */
-export function fillSessionHasDraftContent(
-  forms: FillSessionFormState[],
-): boolean {
-  return snapshotSession(forms).anyContent;
+/**
+ * A stable fingerprint of everything a draft WOULD store for this session:
+ * the draft-safe partition of every form's responses.
+ *
+ * Autosave compares it against the last value it saw, so a structured
+ * widget writing its prefetched server rows (draftPolicy "exclude" — never
+ * part of a draft) cannot register as a clinician edit. Without this the
+ * mere act of opening a clinical form lit the Draft chip, armed the
+ * unsaved-changes prompt and persisted a draft nobody asked for.
+ */
+export function safeSessionSignature(forms: FillSessionFormState[]): string {
+  return JSON.stringify(
+    forms.map((form) => [
+      form.questionnaire.id,
+      partitionForDraft(form.responses).safe,
+    ]),
+  );
 }
 
-/** Persist the working state of every form in the session; an all-empty
- *  session removes the key instead (never store empty drafts —
- *  FiltersCache's clean() convention). */
+/** Persist the working state of every form in the session. A session with
+ *  no draft-SAFE content removes the key instead (never store empty
+ *  drafts — FiltersCache's clean() convention); draft-excluded structured
+ *  answers alone are not content, only an annotation on a draft some
+ *  plain answer already earned. */
 export function saveFillDraft(
   scope: FillDraftScope,
   forms: FillSessionFormState[],

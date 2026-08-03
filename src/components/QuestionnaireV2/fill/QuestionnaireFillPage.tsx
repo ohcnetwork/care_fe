@@ -143,7 +143,11 @@ export default function QuestionnaireFillPage({
     enabled: subject.type === "patient",
   });
 
-  const { data: serverDraft, isFetching: isServerDraftLoading } = useQuery({
+  const {
+    data: serverDraft,
+    isFetching: isServerDraftLoading,
+    isError: isServerDraftError,
+  } = useQuery({
     queryKey: ["formSubmission", continueDraftId],
     queryFn: query(formSubmissionApi.get, {
       pathParams: { external_id: continueDraftId ?? "" },
@@ -215,8 +219,27 @@ export default function QuestionnaireFillPage({
           </h2>
           {/* Default onSelect navigates to `questionnaire/{id}` relative to
               the current path, which lands on this mount's :questionnaireId
-              route for every subject. */}
-          <QuestionnaireSearch subjectType={pickerSubjectType} />
+              route for every subject. The trigger is supplied rather than
+              defaulted for the same reason the in-session picker's is: a
+              `role="combobox"` takes no accessible name from its contents,
+              so the only control on this screen would reach screen readers
+              unnamed. The role stays (this IS the picker), the name comes
+              from aria-label. */}
+          <QuestionnaireSearch
+            subjectType={pickerSubjectType}
+            trigger={
+              <Button
+                type="button"
+                variant="outline"
+                role="combobox"
+                aria-label={t("select_questionnaire_to_fill")}
+                className="w-full border border-primary-600 text-primary-800"
+              >
+                <Plus className="size-4" />
+                {t("add_forms")}
+              </Button>
+            }
+          />
         </div>
       </FillShell>
     );
@@ -232,31 +255,29 @@ export default function QuestionnaireFillPage({
 
   if (isQuestionnaireError || !questionnaire) {
     return (
-      <div className="space-y-4 p-6">
-        <Alert variant="destructive">
-          <AlertTitle>{t("error")}</AlertTitle>
-          <AlertDescription>{t("no_data_found")}</AlertDescription>
-        </Alert>
-        <Button variant="outline" onClick={() => navigate(exitTarget)}>
-          <ArrowLeft className="size-4" />
-          {t("back")}
-        </Button>
-      </div>
+      <FillErrorPage message={t("no_data_found")} exitTarget={exitTarget} />
+    );
+  }
+
+  // The draft record could not be READ (404, permissions, a network
+  // hiccup — the app's query default is retry:false). Mounting the form
+  // anyway would show a blank questionnaire with no explanation, invite a
+  // full re-type into a page whose local autosave is deliberately off, and
+  // then compose a completion PUT for a draft that was never loaded — one
+  // failed sub-request rolls the whole atomic batch back, so the URL
+  // becomes an un-submittable dead end. Legacy showed an error page here.
+  if (isServerDraftError) {
+    return (
+      <FillErrorPage message={t("draft_load_failed")} exitTarget={exitTarget} />
     );
   }
 
   if (serverDraftState?.mismatch) {
     return (
-      <div className="space-y-4 p-6">
-        <Alert variant="destructive">
-          <AlertTitle>{t("error")}</AlertTitle>
-          <AlertDescription>{t("draft_not_recoverable")}</AlertDescription>
-        </Alert>
-        <Button variant="outline" onClick={() => navigate(exitTarget)}>
-          <ArrowLeft className="size-4" />
-          {t("back")}
-        </Button>
-      </div>
+      <FillErrorPage
+        message={t("draft_not_recoverable")}
+        exitTarget={exitTarget}
+      />
     );
   }
 
@@ -277,6 +298,50 @@ export default function QuestionnaireFillPage({
       continueDraftId={continueDraftId}
       exitTarget={exitTarget}
     />
+  );
+}
+
+/** The canvas title and its unsaved-work badge. One fragment shared by the
+ *  two header branches (tab strip where a patient gives us a clinical
+ *  history tab, plain label otherwise) so the chip can never drift out of
+ *  one of them. */
+function QuestionnaireTitleWithDraftBadge({ dirty }: { dirty: boolean }) {
+  const { t } = useTranslation();
+  return (
+    <>
+      {t("questionnaire_one")}
+      {dirty && (
+        <Badge className="ml-2 bg-indigo-100 text-indigo-900">
+          {t("draft")}
+        </Badge>
+      )}
+    </>
+  );
+}
+
+/** The one dead-end state of this page: an alert plus the way back. Every
+ *  branch that refuses to mount a form uses it, so "we could not open this"
+ *  always reads the same and always announces (the ui Alert is
+ *  role="alert"). */
+function FillErrorPage({
+  message,
+  exitTarget,
+}: {
+  message: string;
+  exitTarget: string;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="space-y-4 p-6">
+      <Alert variant="destructive">
+        <AlertTitle>{t("error")}</AlertTitle>
+        <AlertDescription>{message}</AlertDescription>
+      </Alert>
+      <Button variant="outline" onClick={() => navigate(exitTarget)}>
+        <ArrowLeft className="size-4" />
+        {t("back")}
+      </Button>
+    </div>
   );
 }
 
@@ -417,8 +482,13 @@ function FillPageBody({
               mergeDraftIntoSeed(fetched.questions, snapshot.responses),
             );
           } catch {
+            // The snapshot's stored title is the only human name left when
+            // the questionnaire can no longer be fetched; drafts written
+            // before that field existed fall back to the id.
             toast.warning(
-              t("fill_draft_form_dropped", { title: snapshot.questionnaireId }),
+              t("fill_draft_form_dropped", {
+                title: snapshot.title ?? snapshot.questionnaireId,
+              }),
             );
           }
         }
@@ -441,10 +511,14 @@ function FillPageBody({
     [patientId, encounterId, facilityId, resourceId],
   );
 
-  // Local autosave stands down while resuming a SERVER draft — the server
-  // copy is authoritative there and keeps its own lifecycle.
+  // Local autosave PERSISTENCE stands down while resuming a SERVER draft —
+  // the server copy is authoritative there and keeps its own lifecycle.
+  // The scope still goes in: dirty tracking guards navigation either way,
+  // and a successful submit must clear any sibling local draft filed under
+  // the same key by an earlier plain session.
   const autosave = useFillSessionAutosave({
-    scope: continueDraftId ? undefined : scope,
+    scope,
+    persistLocally: !continueDraftId,
     forms,
     getStore,
     storesVersion,
@@ -506,25 +580,15 @@ function FillPageBody({
           {patientId ? (
             <TabsList>
               <TabsTrigger value="questionnaire">
-                {t("questionnaire_one")}
-                {autosave.dirty && (
-                  <Badge className="ml-2 bg-indigo-100 text-indigo-900">
-                    {t("draft")}
-                  </Badge>
-                )}
+                <QuestionnaireTitleWithDraftBadge dirty={autosave.dirty} />
               </TabsTrigger>
               <TabsTrigger value="history">
                 {t("patient_clinical_history")}
               </TabsTrigger>
             </TabsList>
           ) : (
-            <div className="flex items-center gap-2 py-1.5 text-sm font-medium text-gray-900">
-              {t("questionnaire_one")}
-              {autosave.dirty && (
-                <Badge className="bg-indigo-100 text-indigo-900">
-                  {t("draft")}
-                </Badge>
-              )}
+            <div className="flex items-center py-1.5 text-sm font-medium text-gray-900">
+              <QuestionnaireTitleWithDraftBadge dirty={autosave.dirty} />
             </div>
           )}
           <Button

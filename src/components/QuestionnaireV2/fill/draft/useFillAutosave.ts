@@ -17,16 +17,25 @@ import type {
 } from "./fillDraftStore";
 import {
   clearFillDraft,
-  fillSessionHasDraftContent,
   mergeDraftIntoSeed,
+  preserveExcludedStructured,
+  safeSessionSignature,
   saveFillDraft,
 } from "./fillDraftStore";
 
 const AUTOSAVE_DEBOUNCE_MS = 1500;
 
 interface UseFillSessionAutosaveArgs {
-  /** undefined disables autosave (no scope / resuming a server draft). */
+  /** This session's draft key — undefined only before the questionnaire
+   *  loads. Supplied even in modes that never WRITE a local draft: a
+   *  successful submit must still clear a sibling draft stored under the
+   *  same key by an earlier plain session. */
   scope: FillDraftScope | undefined;
+  /** false while resuming a SERVER draft: the server copy is authoritative
+   *  there, so nothing persists locally. Dirty tracking stays on either
+   *  way — the unsaved-changes prompt and the Draft chip are about the
+   *  clinician's un-submitted edits, not about where the bytes live. */
+  persistLocally?: boolean;
   /** Every questionnaire in the session, primary first. */
   forms: FillFormEntry[];
   getStore: (key: string) => FormStore | undefined;
@@ -46,12 +55,14 @@ interface UseFillSessionAutosaveArgs {
  * flushes on pagehide/unmount so quick closes keep the last keystrokes,
  * and exposes the state the chrome renders (Draft chip, restore bar).
  *
- * `discardRestoredDraft` clears the stored draft AND resets every form's
- * working state to a pristine seed — the restore bar's one destructive
- * affordance.
+ * `discardRestoredDraft` clears the stored draft AND resets the forms that
+ * draft covered back to a pristine seed — the restore bar's one
+ * destructive affordance, deliberately scoped so it cannot reach a form
+ * the clinician added after the prompt appeared.
  */
 export function useFillSessionAutosave({
   scope,
+  persistLocally = true,
   forms,
   getStore,
   storesVersion,
@@ -64,6 +75,8 @@ export function useFillSessionAutosave({
   // The subscription effect reads these without re-subscribing.
   const scopeRef = useRef(scope);
   scopeRef.current = scope;
+  const persistRef = useRef(persistLocally);
+  persistRef.current = persistLocally;
   // Set on successful submit: the draft served its purpose, so neither the
   // pending debounce nor the unmount/pagehide flush may re-save it.
   const finishedRef = useRef(false);
@@ -75,6 +88,9 @@ export function useFillSessionAutosave({
   // still theirs to decide about — see persistNow.
   const restorePendingRef = useRef(false);
   restorePendingRef.current = !!restoredDraft && !restoreDismissed;
+  /** Fingerprint of the draft-safe state the last settled write saw — the
+   *  baseline the edit detector compares against. */
+  const safeSignatureRef = useRef<string | undefined>(undefined);
 
   const scopeKey = scope
     ? `${scope.userId}--${scope.subjectKey}--${scope.entryQuestionnaireId}`
@@ -97,20 +113,19 @@ export function useFillSessionAutosave({
 
   /**
    * Write the whole session to its one draft entry. Never runs after a
-   * successful submit. While the restore prompt is still un-acted an
-   * EMPTY session is a no-op instead of a save: `saveFillDraft` clears the
-   * key when nothing has content, so removing the added form that held the
-   * only answers would otherwise delete the stored draft before the
-   * clinician ever answered the prompt.
+   * successful submit, and never while `persistLocally` is off.
+   *
+   * While the restore prompt is still un-acted NOTHING persists: the
+   * stored draft is the clinician's to accept or discard, and any write
+   * from this session would either overwrite it (a structured prefetch, a
+   * keystroke) or — via `saveFillDraft`'s clear-on-empty branch — delete
+   * it outright.
    */
   const persistNow = useCallback(() => {
     const current = scopeRef.current;
-    if (!current || finishedRef.current) return;
-    const snapshots = snapshotAll();
-    if (restorePendingRef.current && !fillSessionHasDraftContent(snapshots)) {
-      return;
-    }
-    saveFillDraft(current, snapshots);
+    if (!current || !persistRef.current || finishedRef.current) return;
+    if (restorePendingRef.current) return;
+    saveFillDraft(current, snapshotAll());
   }, [snapshotAll]);
 
   /**
@@ -124,12 +139,15 @@ export function useFillSessionAutosave({
    * save takes `saveFillDraft`'s clear-on-empty branch.
    */
   useEffect(() => {
-    if (!scopeKey || !dirty) return;
+    if (!scopeKey || !persistLocally || !dirty) return;
     persistNow();
-  }, [scopeKey, dirty, storesVersion, persistNow]);
+  }, [scopeKey, persistLocally, dirty, storesVersion, persistNow]);
 
+  // Not gated on `scopeKey`/`persistLocally`: dirty tracking is what arms
+  // the unsaved-changes prompt and the Draft chip, and a session resuming
+  // a SERVER draft needs both even though it writes no local draft.
+  // `persistNow` is the thing that stands down, not the subscription.
   useEffect(() => {
-    if (!scopeKey) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
 
     const flush = () => {
@@ -139,6 +157,10 @@ export function useFillSessionAutosave({
       persistNow();
     };
 
+    // Whatever is already in the stores is the baseline, not an edit —
+    // this is where the structured widgets' prefetched server rows sit.
+    safeSignatureRef.current = safeSessionSignature(snapshotAll());
+
     // One shared debounce across every form of the session — the draft is
     // one localStorage entry, so one timer is all it can honour.
     const unsubscribers = forms.flatMap((form) => {
@@ -147,6 +169,14 @@ export function useFillSessionAutosave({
       return [
         store.sub(responsesAtom, () => {
           if (finishedRef.current) return;
+          // An edit is a change to the DRAFT-SAFE partition. Structured
+          // types with draftPolicy "exclude" write prefetched server rows
+          // into the store from mount effects; treating those writes as
+          // edits marked untouched clinical forms dirty and persisted a
+          // phantom draft over the clinician's real one.
+          const signature = safeSessionSignature(snapshotAll());
+          if (signature === safeSignatureRef.current) return;
+          safeSignatureRef.current = signature;
           setDirty(true);
           clearTimeout(timer);
           timer = setTimeout(() => {
@@ -165,13 +195,18 @@ export function useFillSessionAutosave({
       for (const unsubscribe of unsubscribers) unsubscribe();
     };
     // storesVersion re-runs the subscription when a form (un)registers.
-  }, [scopeKey, storesVersion, forms, getStore, persistNow]);
+  }, [storesVersion, forms, getStore, persistNow, snapshotAll]);
 
   /** Successful submit: drop the stored draft, stop all further saves,
    *  and clear the dirty flag SYNCHRONOUSLY (flushSync) — the success
    *  handler navigates right after this, and `useNavigationPrompt` must
    *  already see a pristine page or it blocks the redirect (the same
-   *  reason the legacy form flushSync'd `setIsDirty(false)`). */
+   *  reason the legacy form flushSync'd `setIsDirty(false)`).
+   *
+   *  The clear runs off `scope`, not off whether this session PERSISTED
+   *  locally: a server-draft session shares its key with the plain mount,
+   *  and a local draft left behind there would prompt Resume with answers
+   *  this submit already filed. */
   const finishDraft = useCallback(() => {
     finishedRef.current = true;
     const current = scopeRef.current;
@@ -185,10 +220,27 @@ export function useFillSessionAutosave({
   const discardRestoredDraft = useCallback(() => {
     const current = scopeRef.current;
     if (current) clearFillDraft(current);
+    // Only the forms the DISCARDED DRAFT covered go back to a pristine
+    // seed. "Add questionnaire" is not gated on the prompt, so a
+    // clinician can add a form and type real answers into it while the
+    // stale-draft banner is still up — resetting that form too would
+    // silently destroy work they just did, on a button that promises only
+    // to drop an old draft.
+    const covered = new Set(
+      restoredDraftRef.current?.forms.map(
+        (snapshot) => snapshot.questionnaireId,
+      ) ?? [],
+    );
     for (const form of forms) {
-      getStore(form.key)?.set(
+      if (!covered.has(form.key)) continue;
+      const store = getStore(form.key);
+      if (!store) continue;
+      store.set(
         responsesAtom,
-        initializeResponses(form.questionnaire.questions),
+        preserveExcludedStructured(
+          store.get(responsesAtom),
+          initializeResponses(form.questionnaire.questions),
+        ),
       );
     }
     setDirty(false);
@@ -208,13 +260,19 @@ export function useFillSessionAutosave({
     const addedSnapshots: DraftFormSnapshot[] = [];
     for (const snapshot of draft.forms) {
       if (primary && snapshot.questionnaireId === primary.key) {
-        getStore(primary.key)?.set(
-          responsesAtom,
-          mergeDraftIntoSeed(
-            primary.questionnaire.questions,
-            snapshot.responses,
-          ),
-        );
+        const store = getStore(primary.key);
+        if (store) {
+          store.set(
+            responsesAtom,
+            preserveExcludedStructured(
+              store.get(responsesAtom),
+              mergeDraftIntoSeed(
+                primary.questionnaire.questions,
+                snapshot.responses,
+              ),
+            ),
+          );
+        }
         continue;
       }
       addedSnapshots.push(snapshot);
