@@ -5,7 +5,10 @@ import { navigate, usePath } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 
 import Loading from "@/components/Common/Loading";
-import { clearQuestionnaireFillDrafts } from "@/components/QuestionnaireV2/fill/draft/fillDraftCache";
+import {
+  clearQuestionnaireFillDrafts,
+  sweepExpiredFillDrafts,
+} from "@/components/QuestionnaireV2/fill/draft/fillDraftCache";
 
 import { AuthUserContext } from "@/hooks/useAuthUser";
 
@@ -66,6 +69,14 @@ export default function AuthUserProvider({
   useEffect(() => {
     setUser(user);
   }, [user, setUser]);
+
+  // Boot-time housekeeping — drop any fill drafts that outlived their TTL,
+  // regardless of which user (or logged-out session) wrote them. Fresh
+  // drafts (e.g. one saved from the login form) are left alone.
+  useEffect(() => {
+    sweepExpiredFillDrafts();
+  }, []);
+
   const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
 
   const tokenRefreshQuery = useQuery({
@@ -82,6 +93,9 @@ export default function AuthUserProvider({
     if (tokenRefreshQuery.isError) {
       localStorage.removeItem(LocalStorageKeys.accessToken);
       localStorage.removeItem(LocalStorageKeys.refreshToken);
+      // The session is dead — leaving clinical draft text behind on what
+      // may be a shared machine is the same exposure signOut() closes.
+      clearQuestionnaireFillDrafts();
       return;
     }
 
@@ -114,6 +128,10 @@ export default function AuthUserProvider({
         setAccessToken(data.access);
         localStorage.setItem(LocalStorageKeys.accessToken, data.access);
         localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
+        // Credentials are accepted — any draft left at the login form
+        // (e.g. from a session expiry) belongs to whoever is signing in
+        // now, not necessarily this account. Clear only now, never before.
+        clearQuestionnaireFillDrafts();
 
         await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
         if (path === "/" || path === "/login") {
@@ -131,6 +149,10 @@ export default function AuthUserProvider({
       setAccessToken(data.access);
       localStorage.setItem(LocalStorageKeys.accessToken, data.access);
       localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
+      // Same rule as the direct JWT success branch above — the 2FA step
+      // just completed, so this is the first point credentials are fully
+      // accepted.
+      clearQuestionnaireFillDrafts();
 
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       navigate(getRedirectOr("/"));
