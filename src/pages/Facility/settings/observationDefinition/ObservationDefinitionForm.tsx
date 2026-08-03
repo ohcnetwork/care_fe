@@ -55,11 +55,11 @@ import {
 } from "@/types/base/qualifiedRange/qualifiedRange";
 import { slugValueSchema } from "@/types/base/slug/schema";
 import {
-  OBSERVATION_DEFINITION_CATEGORY,
-  type ObservationDefinitionCreateSpec,
-  type ObservationDefinitionReadSpec,
+  ObservationDefinitionCategory,
+  ObservationDefinitionCreate,
+  ObservationDefinitionRead,
   ObservationDefinitionStatus,
-  ObservationDefinitionUpdateSpec,
+  ObservationDefinitionUpdate,
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
@@ -67,6 +67,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 import { generateSlugValue } from "@/Utils/slug";
+import { valuesOf } from "@/Utils/utils";
 import { ObservationInterpretation } from "./components/ObservationInterpretation";
 
 export default function ObservationDefinitionForm({
@@ -86,7 +87,7 @@ export default function ObservationDefinitionForm({
 
   const { data: existingData, isFetching } = useQuery({
     queryKey: ["observationDefinitions", observationSlug],
-    queryFn: query(observationDefinitionApi.retrieveObservationDefinition, {
+    queryFn: query(observationDefinitionApi.get, {
       pathParams: {
         observationSlug: observationSlug!,
       },
@@ -134,7 +135,7 @@ function ObservationDefinitionFormContent({
 }: {
   facilityId: string;
   observationSlug?: string;
-  existingData?: ObservationDefinitionReadSpec;
+  existingData?: ObservationDefinitionRead;
   onSuccess?: () => void;
   onCancel?: () => void;
 }) {
@@ -146,20 +147,21 @@ function ObservationDefinitionFormContent({
       slug_value: slugValueSchema(),
       description: z.string().min(1, t("field_required")),
       status: z.enum(ObservationDefinitionStatus),
-      category: z.enum(
-        OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]],
-      ),
+      category: z.enum(ObservationDefinitionCategory),
       permitted_data_type: z.enum(QuestionType),
       code: CodeSchema,
       body_site: CodeSchema.nullable(),
       method: CodeSchema.nullable(),
-      permitted_unit: CodeSchema.nullable(),
+      permitted_unit: CodeSchema.optional(),
       component: z
         .array(
           z.object({
-            code: CodeSchema,
+            code: CodeSchema.refine(
+              (val) => val.code && val.system && val.display,
+              { message: t("required") },
+            ),
             permitted_data_type: z.enum(QuestionType),
-            permitted_unit: CodeSchema.nullable(),
+            permitted_unit: CodeSchema.optional(),
             qualified_ranges: qualifiedRangeSchema.default([]),
           }),
         )
@@ -208,11 +210,11 @@ function ObservationDefinitionFormContent({
             code: existingData.code,
             body_site: existingData.body_site || null,
             method: existingData.method || null,
-            permitted_unit: existingData.permitted_unit || null,
+            permitted_unit: existingData.permitted_unit ?? undefined,
             component:
               existingData.component?.map((c) => ({
                 ...c,
-                permitted_unit: c.permitted_unit || null,
+                permitted_unit: c.permitted_unit ?? undefined,
                 qualified_ranges:
                   c.qualified_ranges?.map((range, index) => ({
                     ...range,
@@ -248,11 +250,10 @@ function ObservationDefinitionFormContent({
               })) || [],
           }
         : {
-            status: ObservationDefinitionStatus.active,
+            status: ObservationDefinitionStatus.ACTIVE,
             component: [],
             body_site: null,
             method: null,
-            permitted_unit: null,
           },
   });
 
@@ -292,7 +293,7 @@ function ObservationDefinitionFormContent({
 
   const { mutate: createObservationDefinition, isPending: isCreating } =
     useMutation({
-      mutationFn: mutate(observationDefinitionApi.createObservationDefinition),
+      mutationFn: mutate(observationDefinitionApi.create),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["observationDefinitions"] });
         toast.success(t("observation_definition_created"));
@@ -302,13 +303,13 @@ function ObservationDefinitionFormContent({
 
   const { mutate: updateObservationDefinition, isPending: isUpdating } =
     useMutation({
-      mutationFn: mutate(observationDefinitionApi.updateObservationDefinition, {
+      mutationFn: mutate(observationDefinitionApi.update, {
         pathParams: { observationSlug: observationSlug || "" },
         queryParams: {
           facility: facilityId,
         },
       }),
-      onSuccess: (observationDefinition: ObservationDefinitionReadSpec) => {
+      onSuccess: (observationDefinition: ObservationDefinitionRead) => {
         queryClient.invalidateQueries({ queryKey: ["observationDefinitions"] });
         toast.success(t("observation_definition_updated"));
         navigate(
@@ -344,15 +345,15 @@ function ObservationDefinitionFormContent({
       component: data.component?.map((c) => ({
         ...c,
         qualified_ranges: removeConditionType(c.qualified_ranges || []),
-        permitted_unit: c.permitted_unit || null,
+        permitted_unit: c.permitted_unit ?? undefined,
       })),
     };
     if (isEditMode && observationSlug) {
-      updateObservationDefinition(cleanData as ObservationDefinitionUpdateSpec);
+      updateObservationDefinition(cleanData as ObservationDefinitionUpdate);
     } else {
-      const payload: ObservationDefinitionCreateSpec = {
+      const payload: ObservationDefinitionCreate = {
         ...cleanData,
-        facility: facilityId as string,
+        facility: facilityId,
       };
       createObservationDefinition(payload);
     }
@@ -510,7 +511,7 @@ function ObservationDefinitionFormContent({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.values(ObservationDefinitionStatus).map(
+                            {valuesOf(ObservationDefinitionStatus).map(
                               (status) => (
                                 <SelectItem key={status} value={status}>
                                   {t(status)}
@@ -540,11 +541,13 @@ function ObservationDefinitionFormContent({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {OBSERVATION_DEFINITION_CATEGORY.map((category) => (
-                              <SelectItem key={category} value={category}>
-                                {t(category)}
-                              </SelectItem>
-                            ))}
+                            {valuesOf(ObservationDefinitionCategory).map(
+                              (category) => (
+                                <SelectItem key={category} value={category}>
+                                  {t(category)}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -771,7 +774,6 @@ function ObservationDefinitionFormContent({
                         appendComponent({
                           code: { code: "", display: "", system: "" },
                           permitted_data_type: QuestionType.quantity,
-                          permitted_unit: null,
                           qualified_ranges: [],
                         });
                       }}
@@ -942,7 +944,6 @@ function ObservationDefinitionFormContent({
                         appendComponent({
                           code: { code: "", display: "", system: "" },
                           permitted_data_type: QuestionType.quantity,
-                          permitted_unit: null,
                           qualified_ranges: [],
                         });
                       }}
