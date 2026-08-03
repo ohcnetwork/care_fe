@@ -61,6 +61,12 @@ function draftIdFromUrl(url: string): string {
 }
 
 test.describe("Fill page server draft", () => {
+  // Serial: these tests share ONE encounter, and the overview's drafts card
+  // lists every open `form_submission` on it. Run in parallel they see each
+  // other's Continue buttons; each test here leaves the card empty when it
+  // finishes, so serialising is enough to keep them independent.
+  test.describe.configure({ mode: "serial" });
+
   test("saved draft lists on the overview, previews readonly, resumes, and re-saves onto the same record", async ({
     page,
   }) => {
@@ -128,6 +134,61 @@ test.describe("Fill page server draft", () => {
 
     // Submitting a resumed draft completes that same record, so the card
     // empties out again.
+    await questionBlock(page, "Is bilateral air entry present?")
+      .getByRole("radio", { name: "no", exact: true })
+      .click();
+    await questionBlock(page, "Select Modality")
+      .getByRole("radio", { name: "invasive", exact: true })
+      .click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
+    await expectToast(page, "Questionnaire submitted successfully");
+    await page.waitForURL(/\/updates$/);
+    await expect(
+      page.getByRole("heading", { name: "Draft Forms" }),
+    ).not.toBeVisible();
+  });
+
+  test("editing a resumed server draft marks the session dirty and guards navigation", async ({
+    page,
+  }) => {
+    test.slow();
+    const questionnaireId = await getQuestionnaireIdBySlug(
+      "respiratory_status-v3",
+    );
+    const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
+    const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}`;
+    const note = faker.lorem.sentence();
+    const editedNote = faker.lorem.sentence();
+
+    const { saveDraft } = await openFillPage(page, fillUrl);
+    const noteBox = () =>
+      questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox");
+
+    await noteBox().fill(note);
+    await saveDraft.click();
+    await expectToast(page, "Draft saved successfully");
+    await page.waitForURL(/\/updates$/);
+
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await page.waitForURL(/continue_draft=/);
+    await expect(noteBox()).toHaveValue(note);
+
+    // Resuming is not itself an edit — nothing unsaved yet.
+    await expect(
+      page.getByRole("tab", { name: /Questionnaire/ }),
+    ).not.toContainText("Draft");
+
+    // Editing is. This mode deliberately writes no local draft (the server
+    // copy is authoritative), which is exactly why the unsaved-changes
+    // guard matters here: it is the only thing standing between the
+    // clinician's edits and an unwarned navigation away.
+    await noteBox().fill(editedNote);
+    await expect(
+      page.getByRole("tab", { name: /Questionnaire/ }),
+    ).toContainText("Draft");
+
+    // Complete the record so the drafts card is empty again for whatever
+    // runs next (see the serial note on this describe).
     await questionBlock(page, "Is bilateral air entry present?")
       .getByRole("radio", { name: "no", exact: true })
       .click();

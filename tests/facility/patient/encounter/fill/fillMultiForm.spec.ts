@@ -104,8 +104,27 @@ test.describe("Fill page multi-questionnaire sessions", () => {
       questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox"),
     ).toHaveValue(noteA);
 
-    // One Save Changes submits both forms in a single batch.
+    // One Save Changes submits both forms in ONE batch. Asserted at the
+    // network layer, not just by both notes turning up on /updates: two
+    // separate batch calls also render green, while losing the
+    // cross-form all-or-nothing semantics the one batch exists for.
+    const batchRequest = page.waitForRequest(
+      (request) =>
+        request.url().includes("/api/v1/batch_requests/") &&
+        request.method() === "POST",
+    );
     await page.getByRole("button", { name: "Save Changes" }).click();
+
+    const body = JSON.parse((await batchRequest).postData() ?? "{}") as {
+      requests: { url: string }[];
+    };
+    const submitUrls = body.requests
+      .map((request) => request.url)
+      .filter((url) => url.includes("/submit/"));
+    expect(submitUrls).toHaveLength(2);
+    expect(submitUrls).toContain(`/api/v1/questionnaire/${primaryId}/submit/`);
+    expect(submitUrls).toContain(`/api/v1/questionnaire/${addedId}/submit/`);
+
     await expectToast(page, "Questionnaire submitted successfully");
     await page.waitForURL(/\/updates$/);
 
@@ -241,7 +260,7 @@ test.describe("Fill page multi-questionnaire sessions", () => {
     ).toHaveValue(noteA);
   });
 
-  test("emptying the session while the restore prompt is un-acted keeps the draft", async ({
+  test("nothing this session does reaches storage while the restore prompt is un-acted", async ({
     page,
   }) => {
     const noteA = `A-${faker.string.alphanumeric(10)}`;
@@ -256,13 +275,18 @@ test.describe("Fill page multi-questionnaire sessions", () => {
     ).toBeVisible();
     await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
 
-    // Work in an added form WITHOUT answering the prompt, then drop it —
-    // the session goes empty while the stored draft is still the
-    // clinician's to accept or discard, so it must survive.
+    // Work in an added form WITHOUT answering the prompt, then drop it.
+    // The stored draft is the clinician's to accept or discard until they
+    // say so, so neither the typing (which would overwrite it) nor the
+    // emptying (which would take saveFillDraft's clear-on-empty branch)
+    // may touch it.
     await addQuestionnaire(page, ADDED_TITLE);
     await questionBlock(page, "Any Suggestions for Improvement")
       .getByRole("textbox")
       .fill(noteB);
+    // Longer than the autosave debounce: if typing could reach storage,
+    // it already would have.
+    await expect.poll(() => draftFormCount(page), { timeout: 5000 }).toBe(1);
     await page
       .locator(`[data-form-key="${addedId}"]`)
       .getByRole("button", { name: "Remove" })
@@ -274,6 +298,50 @@ test.describe("Fill page multi-questionnaire sessions", () => {
       questionBlock(page, "Is bilateral air entry present?"),
     ).toBeVisible();
     await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+    // And it is still the ORIGINAL draft: resuming brings noteA back and
+    // nothing from the un-acted session.
+    await page.getByRole("button", { name: /resume/i }).click();
+    await expect(
+      questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox"),
+    ).toHaveValue(noteA);
+    await expect(page.locator("[data-form-key]")).toHaveCount(1);
+  });
+
+  test("Discard drops the drafted form only, never a form added since the prompt", async ({
+    page,
+  }) => {
+    const noteA = `A-${faker.string.alphanumeric(10)}`;
+    const noteB = `B-${faker.string.alphanumeric(10)}`;
+
+    await questionBlock(page, "Note on Bilateral Air Entry")
+      .getByRole("textbox")
+      .fill(noteA);
+    await expect.poll(() => draftFormCount(page)).toBe(1);
+
+    await page.reload();
+    await expect(
+      questionBlock(page, "Is bilateral air entry present?"),
+    ).toBeVisible();
+    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+
+    // Add a questionnaire and type real answers into it while the
+    // stale-draft banner is still up — "Add questionnaire" is not gated on
+    // the prompt, so this is a plain sequence of two shipped features.
+    await addQuestionnaire(page, ADDED_TITLE);
+    const addedAnswer = questionBlock(
+      page,
+      "Any Suggestions for Improvement",
+    ).getByRole("textbox");
+    await addedAnswer.fill(noteB);
+
+    // Discard means "drop that old draft", not "wipe what I just typed".
+    await page.getByRole("button", { name: "Discard", exact: true }).click();
+    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(addedAnswer).toHaveValue(noteB);
+    // The drafted (primary) form IS reset — that is what Discard promises.
+    await expect(
+      questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox"),
+    ).toHaveValue("");
   });
 
   test("remove affordance drops a non-primary form", async ({ page }) => {
