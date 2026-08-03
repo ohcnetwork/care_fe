@@ -97,7 +97,17 @@ export default function PluginEngine({
           return { ...config, isLoading: true as const };
         }
 
-        return { ...config, isLoading: false as const, ...data! };
+        // `data` is the remote's OWN manifest — untrusted. `slug` spreads
+        // in AFTER `...data!` so nothing the manifest declares (a stray
+        // `slug` field, or reusing `plugin.plugin`) can shadow the
+        // backend-issued `config.slug` this query was actually fetched
+        // for. That's the identity namespace ownership checks rely on.
+        return {
+          ...config,
+          isLoading: false as const,
+          ...data!,
+          slug: config.slug,
+        };
       }),
   });
 
@@ -145,11 +155,14 @@ export default function PluginEngine({
       // and skipped, never fatal to the app. The registering plugin's slug
       // goes in so the registry can verify the `{plugin_slug}.` half of the
       // id actually belongs to it: namespacing is the isolation guarantee,
-      // and it is only a guarantee if someone checks.
+      // and it is only a guarantee if someone checks. `plugin.slug` is the
+      // trusted, backend-issued identity (see the combine above) — never
+      // `plugin.plugin`, which is a field the remote manifest declares
+      // about itself and could spoof another plugin's namespace with.
       for (const definition of plugin.structuredQuestionTypes ?? []) {
         try {
           overrideCleanupRef.current.push(
-            registerPluginStructuredType(definition, plugin.plugin),
+            registerPluginStructuredType(definition, plugin.slug),
           );
         } catch (error) {
           console.error(

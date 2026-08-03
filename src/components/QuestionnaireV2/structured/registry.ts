@@ -7,6 +7,7 @@ import type { SubjectType } from "@/types/questionnaire/questionnaire";
 import type { StructuredQuestionType } from "@/types/questionnaire/structured";
 import { isCoreStructuredType } from "@/types/questionnaire/structured";
 
+import type { PluginStructuredTypeDefinition } from "./pluginRegistry";
 import { getPluginStructuredType } from "./pluginRegistry";
 
 import { allergyIntoleranceDefinition } from "./definitions/allergyIntolerance";
@@ -118,6 +119,21 @@ export interface ResolvedStructuredType {
   icon?: ComponentType<{ className?: string }>;
 }
 
+// Caches for the wrapped view `resolveStructuredType` returns below, keyed
+// on the underlying registration — so a caller keying off the returned
+// object (`PluginErrorBoundary`'s `resetKey`, via `StructuredSlot`) sees a
+// stable identity across calls that resolve the *same* registration, and a
+// new one only when the registration itself changes (a plugin re-registering
+// the type). Without this, the `{...definition, source}` spread below would
+// mint a fresh object on every call — including every unrelated re-render —
+// and a resetKey wired to it would reset on every render, not just on a real
+// re-register.
+const coreResolvedCache = new Map<string, ResolvedStructuredType>();
+const pluginResolvedCache = new WeakMap<
+  PluginStructuredTypeDefinition,
+  ResolvedStructuredType
+>();
+
 /**
  * The single lookup for a `structured_type` string: core first (bare names
  * are reserved for it), then the plugin registry. `undefined` means the
@@ -130,16 +146,25 @@ export function resolveStructuredType(
   type: string,
 ): ResolvedStructuredType | undefined {
   if (isCoreStructuredType(type)) {
+    const cached = coreResolvedCache.get(type);
+    if (cached) return cached;
     const definition = STRUCTURED_TYPE_REGISTRY[type];
     // Widening DataTypeFor<K>[] → unknown[] — the one sanctioned cast at
     // this boundary (key-correlation already guaranteed the pairing).
-    return {
+    const resolved = {
       ...definition,
       source: "core",
     } as unknown as ResolvedStructuredType;
+    coreResolvedCache.set(type, resolved);
+    return resolved;
   }
   const plugin = getPluginStructuredType(type);
-  return plugin ? { ...plugin, source: "plugin" } : undefined;
+  if (!plugin) return undefined;
+  const cached = pluginResolvedCache.get(plugin);
+  if (cached) return cached;
+  const resolved: ResolvedStructuredType = { ...plugin, source: "plugin" };
+  pluginResolvedCache.set(plugin, resolved);
+  return resolved;
 }
 
 /** Subject ids available on the mount, as `StructuredSlot` reads them. */

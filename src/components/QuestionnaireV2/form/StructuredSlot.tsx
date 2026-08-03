@@ -156,6 +156,12 @@ export function StructuredSlot({
       // submit-time enforcement must stop requiring one — same reasoning
       // as the subject-mismatch and missing-context skips.
       onError={markRenderFailed}
+      // `resolveStructuredType` hands back a stable reference per
+      // registration (see its memoization) — a new one only when a plugin
+      // re-registers this type, which is exactly the moment a previously
+      // thrown component deserves a fresh mount instead of a permanent
+      // notice.
+      resetKey={definition}
       fallback={
         <div className="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
           <p className="font-medium">{label}</p>
