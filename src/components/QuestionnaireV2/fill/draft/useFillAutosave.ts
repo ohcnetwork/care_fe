@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
-import {
-  initializeResponses,
-  responsesAtom,
-} from "@/components/QuestionnaireV2/form/engine/store";
+import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
 
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
@@ -59,10 +56,10 @@ interface UseFillSessionAutosaveArgs {
  * flushes on pagehide/unmount so quick closes keep the last keystrokes,
  * and exposes the state the chrome renders (Draft chip, restore bar).
  *
- * `discardRestoredDraft` clears the stored draft AND resets the forms that
- * draft covered back to a pristine seed — the restore bar's one
- * destructive affordance, deliberately scoped so it cannot reach a form
- * the clinician added after the prompt appeared.
+ * `discardRestoredDraft` clears the stored draft and nothing else — what
+ * is on screen is this session's own work (a draft only reaches the
+ * stores through Resume), so the affordance destroys exactly the bytes
+ * it names.
  */
 export function useFillSessionAutosave({
   scope,
@@ -234,32 +231,23 @@ export function useFillSessionAutosave({
   const discardRestoredDraft = useCallback(() => {
     const current = scopeRef.current;
     if (current) clearFillDraft(current);
-    // Only the forms the DISCARDED DRAFT covered go back to a pristine
-    // seed. "Add questionnaire" is not gated on the prompt, so a
-    // clinician can add a form and type real answers into it while the
-    // stale-draft banner is still up — resetting that form too would
-    // silently destroy work they just did, on a button that promises only
-    // to drop an old draft.
-    const covered = new Set(
-      restoredDraftRef.current?.forms.map(
-        (snapshot) => snapshot.questionnaireId,
-      ) ?? [],
-    );
-    for (const form of forms) {
-      if (!covered.has(form.key)) continue;
-      const store = getStore(form.key);
-      if (!store) continue;
-      store.set(
-        responsesAtom,
-        preserveExcludedStructured(
-          store.get(responsesAtom),
-          initializeResponses(form.questionnaire.questions),
-        ),
-      );
-    }
-    setDirty(false);
+    // Discard drops the STORED draft — never what is on screen. The draft
+    // only ever reaches the stores through Resume, so while the bar shows
+    // they hold nothing but this session's own work: prefetched clinical
+    // rows and whatever the clinician typed while ignoring the prompt.
+    // Resetting them (as this once did) destroyed exactly the
+    // un-persisted work the prompt gate was protecting.
+    //
+    // Persistence was standing down while the prompt was pending — flip
+    // the gate synchronously (the ref recomputes only on the next render)
+    // and write now, so anything typed in the meantime becomes a fresh
+    // draft of its own instead of living un-persisted until the next
+    // keystroke. An untouched session hits saveFillDraft's clear-on-empty
+    // branch, which is a no-op on the already-cleared key.
+    restorePendingRef.current = false;
     setRestoreDismissed(true);
-  }, [forms, getStore]);
+    persistNow();
+  }, [persistNow]);
 
   const dismissRestoreBar = useCallback(() => setRestoreDismissed(true), []);
 

@@ -1,14 +1,21 @@
 import React from "react";
 
+interface PluginErrorBoundaryProps {
+  children: React.ReactNode;
+  pluginName: string;
+  fallback?: React.ReactNode;
+  /** Notified once the boundary has caught. Callers that must react to the
+   *  failure elsewhere in the app use it — the questionnaire fill page
+   *  records the question so submit-time validation stops requiring an
+   *  input that is no longer on screen. */
+  onError?: (error: Error) => void;
+}
+
 export class PluginErrorBoundary extends React.Component<
-  { children: React.ReactNode; pluginName: string; fallback?: React.ReactNode },
+  PluginErrorBoundaryProps,
   { hasError: boolean }
 > {
-  constructor(props: {
-    children: React.ReactNode;
-    pluginName: string;
-    fallback?: React.ReactNode;
-  }) {
+  constructor(props: PluginErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
@@ -23,6 +30,7 @@ export class PluginErrorBoundary extends React.Component<
       error,
       errorInfo,
     );
+    this.props.onError?.(error);
   }
 
   render() {

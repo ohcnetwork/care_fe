@@ -70,7 +70,6 @@ import {
 } from "@/types/questionnaire/validation";
 
 import { PaginatedResponse } from "@/Utils/request/types";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { FieldError } from "./FieldError";
 
 interface MedicationStatementQuestionProps {
@@ -322,8 +321,7 @@ export function MedicationStatementQuestion({
         variant="destructive"
       />
 
-      <div className="flex justify-between items-center flex-wrap">
-        <QuestionLabel question={question} />
+      <div className="flex flex-wrap items-center justify-end">
         <HistoricalRecordSelector<
           MedicationRequestRead | MedicationStatementRead
         >

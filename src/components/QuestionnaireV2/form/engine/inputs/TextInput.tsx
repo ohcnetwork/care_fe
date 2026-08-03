@@ -38,6 +38,7 @@ export function TextInput({
     id: inputId,
     value,
     disabled,
+    "aria-required": question.required || undefined,
     placeholder: t("enter_details"),
     maxLength: question.max_length,
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>

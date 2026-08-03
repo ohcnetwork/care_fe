@@ -46,7 +46,6 @@ import {
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -349,7 +348,6 @@ export function DiagnosisQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
-  question,
 }: DiagnosisQuestionProps) {
   const { t } = useTranslation();
 
@@ -546,8 +544,7 @@ export function DiagnosisQuestion({
         sortedDiagnoses.length > 0 ? "md:max-w-fit" : "max-w-4xl",
       )}
     >
-      <div className="flex justify-between items-center flex-wrap">
-        <QuestionLabel question={question} />
+      <div className="flex flex-wrap items-center justify-end">
         <HistoricalRecordSelector<DiagnosisRequest>
           title={t("past_diagnoses")}
           structuredTypes={[

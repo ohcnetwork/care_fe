@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useSyncExternalStore } from "react";
+import { Suspense, useCallback, useEffect, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
@@ -6,6 +6,8 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import {
   useClearQuestionErrors,
+  useClearStructuredRenderFailed,
+  useMarkStructuredRenderFailed,
   useQuestionErrors,
   useQuestionResponse,
 } from "@/components/QuestionnaireV2/form/engine/store";
@@ -22,6 +24,24 @@ import type { ResponseValue } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
 import { useFormRenderer } from "./FormContext";
+
+/**
+ * Clears the question's render-failed mark when it mounts. Rendered INSIDE
+ * the error boundary, beside the structured component: if the component
+ * throws during the mounting render, the whole subtree — this probe
+ * included — is discarded before effects run, so the clear only ever fires
+ * for a commit whose input actually made it to the screen. That placement
+ * is what makes the mark track reality across an unmount/remount cycle
+ * (enable_when toggling the question): a recovered slot un-exempts itself,
+ * a still-broken one re-marks via the boundary's onError.
+ */
+function ClearRenderFailedOnMount({ questionId }: { questionId: string }) {
+  const clearRenderFailed = useClearStructuredRenderFailed(questionId);
+  useEffect(() => {
+    clearRenderFailed();
+  }, [clearRenderFailed]);
+  return null;
+}
 
 /**
  * Structured questions render through `resolveStructuredType` — core types
@@ -56,6 +76,7 @@ export function StructuredSlot({
   const [response, updateResponse] = useQuestionResponse(question.id);
   const errors = useQuestionErrors(question.id);
   const clearErrors = useClearQuestionErrors(question.id);
+  const markRenderFailed = useMarkStructuredRenderFailed(question.id);
 
   const handleChange = useCallback(
     (values: ResponseValue[], note?: string) =>
@@ -131,6 +152,10 @@ export function StructuredSlot({
     // the same dashed notice the other degradations use.
     <PluginErrorBoundary
       pluginName={definition.type}
+      // Once the notice is showing there is no input to answer, so
+      // submit-time enforcement must stop requiring one — same reasoning
+      // as the subject-mismatch and missing-context skips.
+      onError={markRenderFailed}
       fallback={
         <div className="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
           <p className="font-medium">{label}</p>
@@ -138,6 +163,7 @@ export function StructuredSlot({
         </div>
       }
     >
+      <ClearRenderFailedOnMount questionId={question.id} />
       {/* Plugin components arrive through React.lazy — the boundary keeps
           a still-loading remote from suspending the whole form. */}
       <Suspense fallback={<FormSkeleton rows={2} />}>

@@ -14,6 +14,7 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "@/components/Questionnaire/data/StructuredFormData";
 
+import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -36,6 +37,10 @@ import { ClinicalHistoryTab } from "./ClinicalHistoryTab";
 import { DraftRestoreBar } from "./DraftRestoreBar";
 import { FillFormSection } from "./FillFormSection";
 import { FillHeader } from "./FillHeader";
+import {
+  FillOutlineNavProvider,
+  FillOutlineOverlay,
+} from "./FillOutlineOverlay";
 import { ServerErrorsPanel } from "./ServerErrorsPanel";
 import type { FormStore } from "./StoreRegistrar";
 import { sweepExpiredFillDrafts } from "./draft/fillDraftCache";
@@ -47,6 +52,7 @@ import type {
 import {
   loadFillDraft,
   mergeDraftIntoSeed,
+  preserveExcludedStructured,
   reviveDraftResponses,
 } from "./draft/fillDraftStore";
 import { useFillSessionAutosave } from "./draft/useFillAutosave";
@@ -122,7 +128,11 @@ export default function QuestionnaireFillPage({
 
   const encounterId =
     subject.type === "encounter" ? subject.encounterId : undefined;
-  const { data: encounter, isLoading: isEncounterLoading } = useQuery({
+  const {
+    data: encounter,
+    isLoading: isEncounterLoading,
+    isError: isEncounterError,
+  } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId ?? "" },
@@ -135,7 +145,7 @@ export default function QuestionnaireFillPage({
 
   // Patient-subject fills have no encounter to borrow the patient from;
   // resource subjects have no patient at all.
-  const { data: fetchedPatient } = useQuery({
+  const { data: fetchedPatient, isError: isPatientError } = useQuery({
     queryKey: ["patient", patientBound?.patientId],
     queryFn: query(patientApi.get, {
       pathParams: { id: patientBound?.patientId ?? "" },
@@ -145,7 +155,11 @@ export default function QuestionnaireFillPage({
 
   const {
     data: serverDraft,
-    isFetching: isServerDraftLoading,
+    // isLoading, NOT isFetching: a background refetch (window focus, cache
+    // invalidation) flips isFetching while data is still present, and the
+    // skeleton branch below would unmount the whole session — every form
+    // store and every answer typed since resume — mid-edit.
+    isLoading: isServerDraftLoading,
     isError: isServerDraftError,
   } = useQuery({
     queryKey: ["formSubmission", continueDraftId],
@@ -163,6 +177,13 @@ export default function QuestionnaireFillPage({
   // guard.
   const serverDraftState = useMemo(() => {
     if (!continueDraftId || !serverDraft || !questionnaire) return undefined;
+    // Only an open draft resumes. A record already submitted (or marked
+    // entered-in-error) re-opening as editable would let one submission
+    // file twice — the overview's drafts card filters these out, but the
+    // URL is shareable and outlives that filter.
+    if (serverDraft.status !== "draft") {
+      return { mismatch: true as const };
+    }
     const dump = serverDraft.response_dump as
       | {
           questionnaireResponses?: {
@@ -250,12 +271,35 @@ export default function QuestionnaireFillPage({
     (encounterId && isEncounterLoading) ||
     (continueDraftId && isServerDraftLoading)
   ) {
-    return <FormSkeleton rows={10} />;
+    // Same fullscreen shell the loaded page uses, so the layout doesn't
+    // jump shells when data lands — and the close affordance exists even
+    // while loading.
+    return (
+      <FillShell onClose={() => navigate(exitTarget)}>
+        <div className="min-h-0 flex-1 overflow-hidden px-6 py-4">
+          <FormSkeleton rows={10} />
+        </div>
+      </FillShell>
+    );
   }
 
   if (isQuestionnaireError || !questionnaire) {
     return (
       <FillErrorPage message={t("no_data_found")} exitTarget={exitTarget} />
+    );
+  }
+
+  // The clinical context could not be LOADED (the app's query default is
+  // retry:false, so one blip lands here). Mounting the form anyway would
+  // show a headerless page with no patient identity, blood group or
+  // allergy badges — safety-relevant context — while the clinician types
+  // clinical data into it.
+  if ((encounterId && isEncounterError) || isPatientError) {
+    return (
+      <FillErrorPage
+        message={t("fill_context_load_failed")}
+        exitTarget={exitTarget}
+      />
     );
   }
 
@@ -359,12 +403,16 @@ function FillShell({
   const { t } = useTranslation();
   return (
     <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-gray-100">
+      {/* min-w-0 + overflow on the strip: a long questionnaire title (or
+          the two tabs) scrolls within its own row on narrow screens
+          instead of pushing the close button off-viewport. */}
       <div className="flex shrink-0 items-center justify-between gap-2 px-4 pt-3 md:px-6">
-        {tabs ?? <div />}
+        <div className="min-w-0 flex-1 overflow-x-auto">{tabs ?? <div />}</div>
         <Button
           type="button"
           variant="outline"
           size="icon"
+          className="shrink-0"
           aria-label={t("close")}
           onClick={onClose}
         >
@@ -457,24 +505,90 @@ function FillPageBody({
     );
   }, []);
 
-  // Snapshots a Resume could not re-fetch. They stay in the persisted
-  // draft (see `saveFillDraft`'s `retained`) — the two ways a resume can
-  // fail are NOT the same: a version bump means the answers can no longer
-  // be trusted onto the new tree and dropping them is correct, while a
-  // network error means try again later, and destroying the clinician's
-  // only copy over it is not.
+  // Snapshots that belong to the draft but are not (yet) live forms. They
+  // stay in the persisted draft (see `saveFillDraft`'s `retained`) — the
+  // ways a resume can fail are NOT the same: a version bump means the
+  // answers can no longer be trusted onto the new tree and dropping them
+  // is correct, while a network error means try again later, and
+  // destroying the clinician's only copy over it is not.
   const [retainedSnapshots, setRetainedSnapshots] = useState<
     DraftFormSnapshot[]
   >([]);
+  const dropRetainedSnapshot = useCallback((questionnaireId: string) => {
+    setRetainedSnapshots((previous) =>
+      previous.filter((entry) => entry.questionnaireId !== questionnaireId),
+    );
+  }, []);
 
-  /** Resume for the non-primary snapshots: re-fetch each questionnaire,
-   *  drop the ones whose version moved on (their answers can no longer be
-   *  trusted onto the new tree), seed the rest, and keep the ones that
-   *  could not be fetched at all in the draft. */
+  // Read by resume callbacks that must see the CURRENT session without
+  // re-creating themselves per forms change. Effect-synced, which is
+  // enough: every reader is an event-handler-initiated async path that
+  // runs strictly after the commit that changed `forms`.
+  const formsRef = useRef(forms);
+  useEffect(() => {
+    formsRef.current = forms;
+  }, [forms]);
+
+  /** Resume for the non-primary snapshots. Every snapshot is RETAINED
+   *  first — during the re-fetch window it is neither a live form nor
+   *  retained otherwise, and a persist fired in that window (a keystroke
+   *  in the primary) would silently drop it from the stored draft; a
+   *  close/crash then makes the loss permanent. From that safe baseline
+   *  each snapshot either becomes a live form (fetched, version intact,
+   *  seeded — or merged into the SAME questionnaire if the clinician
+   *  already added it by hand), is deliberately dropped (version moved
+   *  on: the answers can no longer be trusted onto the new tree), or
+   *  stays retained (fetch failed — try again later). */
   const onResumeAddedForms = useCallback(
     (snapshots: DraftFormSnapshot[]) => {
+      setRetainedSnapshots((previous) => {
+        const seen = new Set(previous.map((entry) => entry.questionnaireId));
+        return [
+          ...previous,
+          ...snapshots.filter(
+            (snapshot) => !seen.has(snapshot.questionnaireId),
+          ),
+        ];
+      });
       void (async () => {
         for (const snapshot of snapshots) {
+          // Already in the session (the clinician added it by hand before
+          // pressing Resume): apply the snapshot to the live store the
+          // same way the primary form's resume overlay does — dropping it
+          // silently would erase the drafted answers from the stored
+          // draft on the very next persist.
+          const existing = formsRef.current.find(
+            (form) => form.key === snapshot.questionnaireId,
+          );
+          if (existing) {
+            if (
+              String(existing.questionnaire.version) !==
+              snapshot.questionnaireVersion
+            ) {
+              dropRetainedSnapshot(snapshot.questionnaireId);
+              toast.warning(
+                t("fill_draft_form_dropped", {
+                  title: existing.questionnaire.title,
+                }),
+              );
+              continue;
+            }
+            const store = getStore(existing.key);
+            if (store) {
+              store.set(
+                responsesAtom,
+                preserveExcludedStructured(
+                  store.get(responsesAtom),
+                  mergeDraftIntoSeed(
+                    existing.questionnaire.questions,
+                    snapshot.responses,
+                  ),
+                ),
+              );
+            }
+            dropRetainedSnapshot(snapshot.questionnaireId);
+            continue;
+          }
           try {
             const fetched = await queryClient.fetchQuery({
               queryKey: questionnaireKeys.detail(snapshot.questionnaireId),
@@ -483,6 +597,7 @@ function FillPageBody({
               }),
             });
             if (String(fetched.version) !== snapshot.questionnaireVersion) {
+              dropRetainedSnapshot(snapshot.questionnaireId);
               toast.warning(
                 t("fill_draft_form_dropped", { title: fetched.title }),
               );
@@ -492,6 +607,7 @@ function FillPageBody({
               fetched,
               mergeDraftIntoSeed(fetched.questions, snapshot.responses),
             );
+            dropRetainedSnapshot(snapshot.questionnaireId);
           } catch {
             // Transient by assumption: the app's query default is
             // retry:false, so one network blip lands here. The snapshot
@@ -499,13 +615,6 @@ function FillPageBody({
             // by the next persist. The snapshot's stored title is the only
             // human name left when the questionnaire cannot be fetched;
             // drafts written before that field existed fall back to the id.
-            setRetainedSnapshots((previous) =>
-              previous.some(
-                (entry) => entry.questionnaireId === snapshot.questionnaireId,
-              )
-                ? previous
-                : [...previous, snapshot],
-            );
             toast.warning(
               t("fill_draft_form_unavailable", {
                 title: snapshot.title ?? snapshot.questionnaireId,
@@ -515,12 +624,44 @@ function FillPageBody({
         }
       })();
     },
-    [queryClient, addQuestionnaire, t],
+    [queryClient, addQuestionnaire, getStore, dropRetainedSnapshot, t],
   );
 
-  // The outline lives in one shared aside; each form portals its own
-  // section into it (it must render inside that form's provider).
+  /** The in-session picker's add. When the picked questionnaire matches a
+   *  RETAINED snapshot (its resume re-fetch failed earlier), that snapshot
+   *  IS the drafted form — seed from it instead of mounting empty, which
+   *  would displace the snapshot from the stored draft on the next
+   *  persist. A version drift drops it with the same toast as resume. */
+  const addQuestionnaireFromPicker = useCallback(
+    (selected: QuestionnaireRead) => {
+      const snapshot = retainedSnapshots.find(
+        (entry) => entry.questionnaireId === selected.id,
+      );
+      if (!snapshot) {
+        addQuestionnaire(selected);
+        return;
+      }
+      dropRetainedSnapshot(selected.id);
+      if (String(selected.version) !== snapshot.questionnaireVersion) {
+        toast.warning(t("fill_draft_form_dropped", { title: selected.title }));
+        addQuestionnaire(selected);
+        return;
+      }
+      addQuestionnaire(
+        selected,
+        mergeDraftIntoSeed(selected.questions, snapshot.responses),
+      );
+    },
+    [retainedSnapshots, addQuestionnaire, dropRetainedSnapshot, t],
+  );
+
+  // The outline lives in one shared overlay (panel rows + rail ticks);
+  // each form portals its own pieces into the two hosts (they must render
+  // inside that form's provider). The scroll container feeds the
+  // overlay's scroll-spy.
   const [outlineHost, setOutlineHost] = useState<HTMLElement | null>(null);
+  const [railHost, setRailHost] = useState<HTMLElement | null>(null);
+  const [scrollHost, setScrollHost] = useState<HTMLElement | null>(null);
 
   // The renderer's flat subject view. Memoized on its PRIMITIVES: the
   // union arrives as a fresh object literal from the route element on
@@ -598,25 +739,30 @@ function FillPageBody({
         <div className="flex shrink-0 items-center justify-between gap-2 px-4 pt-3 md:px-6">
           {/* The clinical history tab exists only where there IS a patient
               — a location/device/facility fill gets the plain title in the
-              same slot, draft badge included. */}
-          {patientId ? (
-            <TabsList>
-              <TabsTrigger value="questionnaire">
+              same slot, draft badge included. min-w-0 + overflow keeps the
+              strip scrolling within its row on narrow screens instead of
+              pushing the close button off-viewport. */}
+          <div className="min-w-0 flex-1 overflow-x-auto">
+            {patientId ? (
+              <TabsList>
+                <TabsTrigger value="questionnaire">
+                  <QuestionnaireTitleWithDraftBadge dirty={autosave.dirty} />
+                </TabsTrigger>
+                <TabsTrigger value="history">
+                  {t("patient_clinical_history")}
+                </TabsTrigger>
+              </TabsList>
+            ) : (
+              <div className="flex items-center py-1.5 text-sm font-medium text-gray-900">
                 <QuestionnaireTitleWithDraftBadge dirty={autosave.dirty} />
-              </TabsTrigger>
-              <TabsTrigger value="history">
-                {t("patient_clinical_history")}
-              </TabsTrigger>
-            </TabsList>
-          ) : (
-            <div className="flex items-center py-1.5 text-sm font-medium text-gray-900">
-              <QuestionnaireTitleWithDraftBadge dirty={autosave.dirty} />
-            </div>
-          )}
+              </div>
+            )}
+          </div>
           <Button
             type="button"
             variant="outline"
             size="icon"
+            className="shrink-0"
             aria-label={t("close")}
             onClick={() => navigate(exitTarget)}
           >
@@ -649,69 +795,73 @@ function FillPageBody({
               }
               isSavingDraft={serverDraftSave.isSavingDraft}
             />
-            <div className="flex min-h-0 flex-1">
-              <aside
-                ref={setOutlineHost}
-                className="hidden w-72 shrink-0 overflow-y-auto border-r border-gray-200 p-3 lg:block"
-              />
-              <section
-                aria-label={t("form_canvas")}
-                className="min-w-0 flex-1 space-y-6 overflow-y-auto px-4 py-5 md:px-8"
-              >
-                {autosave.restoredDraft && (
-                  <DraftRestoreBar
-                    draft={autosave.restoredDraft}
-                    onResume={autosave.resumeRestoredDraft}
-                    onDiscard={autosave.discardRestoredDraft}
-                    onDismiss={autosave.dismissRestoreBar}
-                  />
-                )}
-                <ServerErrorsPanel errors={serverErrors} />
-                {forms.map((form) => (
-                  <FillFormSection
-                    key={form.key}
-                    form={form}
-                    subject={rendererSubject}
-                    outlineHost={outlineHost}
-                    outlineLabel={
-                      forms.length > 1 ? form.questionnaire.title : undefined
-                    }
-                    onStore={handleStore}
-                    onRemove={forms.length > 1 ? removeForm : undefined}
-                  />
-                ))}
-                {/* A resumed SERVER draft is one questionnaire's
-                    submission by construction — no adding to it. */}
-                {!continueDraftId && (
-                  <div className="mx-auto flex w-full max-w-3xl justify-center">
-                    <QuestionnaireSearch
-                      subjectType={pickerSubjectType}
-                      onSelect={(selected) => addQuestionnaire(selected)}
-                      // The default trigger is a `role="combobox"` button,
-                      // and combobox takes no name from its contents — it
-                      // would reach screen readers unnamed. This one is a
-                      // plain button, so its label IS its name.
-                      trigger={
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="border-primary-600 text-primary-800"
-                        >
-                          <Plus className="size-4" />
-                          {t("add_questionnaire")}
-                        </Button>
-                      }
-                    />
-                  </div>
-                )}
-                {/* Renders nothing unless a plugin provides Scribe. */}
-                <PLUGIN_Component
-                  __name="Scribe"
-                  actions={descriptors}
-                  invoke={invoke}
+            <FillOutlineNavProvider scrollContainer={scrollHost}>
+              <div className="relative flex min-h-0 flex-1">
+                <FillOutlineOverlay
+                  onPanelHost={setOutlineHost}
+                  onRailHost={setRailHost}
                 />
-              </section>
-            </div>
+                <section
+                  ref={setScrollHost}
+                  aria-label={t("form_canvas")}
+                  className="min-w-0 flex-1 space-y-6 overflow-y-auto px-4 py-5 md:px-8"
+                >
+                  {autosave.restoredDraft && (
+                    <DraftRestoreBar
+                      draft={autosave.restoredDraft}
+                      onResume={autosave.resumeRestoredDraft}
+                      onDiscard={autosave.discardRestoredDraft}
+                      onDismiss={autosave.dismissRestoreBar}
+                    />
+                  )}
+                  <ServerErrorsPanel errors={serverErrors} />
+                  {forms.map((form) => (
+                    <FillFormSection
+                      key={form.key}
+                      form={form}
+                      subject={rendererSubject}
+                      outlineHost={outlineHost}
+                      railHost={railHost}
+                      outlineLabel={
+                        forms.length > 1 ? form.questionnaire.title : undefined
+                      }
+                      onStore={handleStore}
+                      onRemove={forms.length > 1 ? removeForm : undefined}
+                    />
+                  ))}
+                  {/* A resumed SERVER draft is one questionnaire's
+                    submission by construction — no adding to it. */}
+                  {!continueDraftId && (
+                    <div className="mx-auto flex w-full max-w-3xl justify-center">
+                      <QuestionnaireSearch
+                        subjectType={pickerSubjectType}
+                        onSelect={addQuestionnaireFromPicker}
+                        // The default trigger is a `role="combobox"` button,
+                        // and combobox takes no name from its contents — it
+                        // would reach screen readers unnamed. This one is a
+                        // plain button, so its label IS its name.
+                        trigger={
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="border-primary-600 text-primary-800"
+                          >
+                            <Plus className="size-4" />
+                            {t("add_questionnaire")}
+                          </Button>
+                        }
+                      />
+                    </div>
+                  )}
+                  {/* Renders nothing unless a plugin provides Scribe. */}
+                  <PLUGIN_Component
+                    __name="Scribe"
+                    actions={descriptors}
+                    invoke={invoke}
+                  />
+                </section>
+              </div>
+            </FillOutlineNavProvider>
           </div>
         </TabsContent>
 

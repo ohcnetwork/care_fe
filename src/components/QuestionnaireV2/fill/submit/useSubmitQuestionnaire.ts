@@ -1,11 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import {
   errorsAtom,
   responsesAtom,
+  structuredRenderFailedAtom,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import { collectRequiredErrors } from "@/components/QuestionnaireV2/form/validation";
 
@@ -52,7 +53,12 @@ function scrollToQuestion(questionId: string) {
       `[data-question-id="${questionId}"]`,
     );
     if (!block) return;
-    block.scrollIntoView({ block: "center", behavior: "smooth" });
+    block.scrollIntoView({
+      block: "center",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+    });
     const input = document.getElementById(`question-input-${questionId}`);
     if (input) {
       input.focus({ preventScroll: true });
@@ -148,35 +154,53 @@ export function useSubmitFillSession({
     },
   });
 
-  const submit = useCallback(async () => {
+  const runSubmit = useCallback(async () => {
     // 1) Validate every form against its own store; the first failure
     //    anywhere in the session decides where we scroll. The renderer's
-    //    flat subject view goes in so the required check can tell a
-    //    structured question that HAS an input from one showing a
-    //    placeholder (see form/validation.ts).
+    //    flat subject view and the form's render-failed set go in so the
+    //    required check can tell a structured question that HAS an input
+    //    from one showing a notice (see form/validation.ts).
     const rendererSubject = rendererSubjectOf(subject);
     let firstError: { formKey: string; questionId: string } | undefined;
     for (const form of forms) {
       const store = getStore(form.key);
       if (!store) continue;
       const responses = store.get(responsesAtom);
+      const renderFailed = store.get(structuredRenderFailedAtom);
       const clientErrors: QuestionValidationError[] = [
         ...collectRequiredErrors(form.questionnaire.questions, responses, t, {
           questionnaire: form.questionnaire,
           subject: rendererSubject,
+          renderFailed,
         }),
         ...collectStructuredErrors(
           form.questionnaire,
           responses,
           rendererSubject,
+          renderFailed,
           t,
         ),
       ];
       store.set(errorsAtom, clientErrors);
       if (clientErrors.length > 0 && !firstError) {
+        // "First" in the clinician's reading order, not in validator
+        // order — the array concatenates every required failure before
+        // any structured one, so its head can sit far below an earlier
+        // failing question on screen.
+        const failing = new Set(clientErrors.map((error) => error.question_id));
+        const inTreeOrder = (questions: Question[]): string | undefined => {
+          for (const question of questions) {
+            if (failing.has(question.id)) return question.id;
+            const found = inTreeOrder(question.questions ?? []);
+            if (found) return found;
+          }
+          return undefined;
+        };
         firstError = {
           formKey: form.key,
-          questionId: clientErrors[0].question_id,
+          questionId:
+            inTreeOrder(form.questionnaire.questions) ??
+            clientErrors[0].question_id,
         };
       }
     }
@@ -205,6 +229,7 @@ export function useSubmitFillSession({
               questionnaire: form.questionnaire,
               responses: store.get(responsesAtom),
               subject,
+              renderFailed: store.get(structuredRenderFailedAtom),
               continueDraftId: form.isPrimary ? continueDraftId : undefined,
             });
           }),
@@ -240,5 +265,39 @@ export function useSubmitFillSession({
     submitBatch({ requests });
   }, [forms, getStore, subject, continueDraftId, submitBatch, t]);
 
-  return { submit, isPending, serverErrors };
+  // Compose runs BEFORE the mutation starts, and structured
+  // `buildRequests` are async — during that window the mutation's
+  // isPending is still false, so a second click would validate and
+  // compose a second identical batch. The ref closes the window
+  // synchronously (state alone leaves the same-tick gap); the state twin
+  // keeps the button disabled for the same span.
+  const composingRef = useRef(false);
+  const [isComposing, setIsComposing] = useState(false);
+
+  /**
+   * The one entry point, and the outermost containment boundary. The page
+   * fires this as `onSubmit={() => void submit()}`, so ANY escaping
+   * rejection — a plugin component's getter, a malformed store record, a
+   * future call added inside `runSubmit` — would become an unhandled
+   * promise rejection and turn Save Changes into a silent no-op. Failing
+   * loudly is the floor: the clinician always learns the submission did
+   * not happen, and the original error still reaches the console for the
+   * developer.
+   */
+  const submit = useCallback(async () => {
+    if (composingRef.current || isPending) return;
+    composingRef.current = true;
+    setIsComposing(true);
+    try {
+      await runSubmit();
+    } catch (error) {
+      console.error("Questionnaire submission failed unexpectedly", error);
+      toast.error(t("questionnaire_submission_failed"));
+    } finally {
+      composingRef.current = false;
+      setIsComposing(false);
+    }
+  }, [runSubmit, isPending, t]);
+
+  return { submit, isPending: isPending || isComposing, serverErrors };
 }

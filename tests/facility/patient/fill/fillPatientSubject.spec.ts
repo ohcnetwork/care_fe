@@ -27,7 +27,11 @@ test.describe("Patient-subject questionnaire fill", () => {
     test.slow();
     const facilityId = getFacilityId();
     const patientId = getPatientId();
-    const title = `QV2 Patient Subject ${Date.now()}`;
+    // The auto-slug truncates at 25 chars, so the unique part must sit
+    // INSIDE that window — `QV2 Patient Subject ${Date.now()}` sheared to
+    // "qv2-patient-subject-17857" and collided with the record a previous
+    // run left in the DB snapshot (the backend 500s on a duplicate slug).
+    const title = `QV2 PtSubj ${faker.string.alphanumeric(10)}`;
     const questionTitle = `Note ${faker.string.alphanumeric(6)}`;
     const answer = `Pt-${faker.string.alphanumeric(10)}`;
 

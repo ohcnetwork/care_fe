@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { type Page, expect, test } from "@playwright/test";
 import {
+  adminApiHeaders,
+  apiBaseUrl,
   getQuestionnaireIdBySlug,
   questionBlock,
 } from "tests/helper/questionnaireV2";
@@ -201,5 +203,48 @@ test.describe("Fill page server draft", () => {
     await expect(
       page.getByRole("heading", { name: "Draft Forms" }),
     ).not.toBeVisible();
+  });
+
+  test("a form_submission that is no longer a draft refuses to resume", async ({
+    page,
+  }) => {
+    // Not gated on the Save-as-Draft flag: the record is created straight
+    // through the API, and the ?continue_draft= resume path always exists.
+    // A SUBMITTED record re-opening as an editable draft would let one
+    // submission file twice — the URL is shareable and outlives the
+    // overview card's own status filter.
+    const questionnaireId = await getQuestionnaireIdBySlug(
+      "respiratory_status-v3",
+    );
+    const response = await fetch(`${apiBaseUrl()}/api/v1/form_submission/`, {
+      method: "POST",
+      headers: adminApiHeaders(),
+      body: JSON.stringify({
+        // The create serializer resolves the questionnaire by SLUG.
+        questionnaire: "respiratory_status-v3",
+        patient: getPatientId(),
+        encounter: getEncounterId(),
+        status: "submitted",
+        response_dump: {
+          questionnaireResponses: {
+            questionnaire: { id: questionnaireId },
+            responses: [],
+            errors: [],
+          },
+        },
+      }),
+    });
+    expect(response.ok, "fixture form_submission POST failed").toBe(true);
+    const submission = (await response.json()) as { id: string };
+
+    await page.goto(
+      `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}?continue_draft=${submission.id}`,
+    );
+
+    // The dead-end error page, not an editable form.
+    await expect(page.getByText("Draft cannot be recovered")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Save Changes" }),
+    ).toHaveCount(0);
   });
 });
