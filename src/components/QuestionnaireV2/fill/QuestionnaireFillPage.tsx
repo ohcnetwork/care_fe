@@ -289,6 +289,29 @@ export default function QuestionnaireFillPage({
     );
   }
 
+  // The fetched questionnaire was authored for a subject family this mount
+  // cannot supply (e.g. a location/device/facility questionnaire id pasted
+  // into a patient route). Mounting anyway would let the clinician fill the
+  // entire form before the backend rejects it at Save (400, atomic batch
+  // rollback) with no clue why. Patient-bound mounts (patient + encounter
+  // routes) share one family — a patient-subject questionnaire can be filled
+  // from an encounter route and vice versa, same as the legacy
+  // pre-encounter "consultation" route proves by mounting an
+  // encounter-subject fixed questionnaire on a patient subject — so only
+  // resource mounts (location/device/facility) require an exact match.
+  const subjectTypeMismatch = patientBound
+    ? questionnaire.subject_type !== "patient" &&
+      questionnaire.subject_type !== "encounter"
+    : questionnaire.subject_type !== subject.type;
+  if (subjectTypeMismatch) {
+    return (
+      <FillErrorPage
+        message={t("fill_subject_type_mismatch")}
+        exitTarget={exitTarget}
+      />
+    );
+  }
+
   // The clinical context could not be LOADED (the app's query default is
   // retry:false, so one blip lands here). Mounting the form anyway would
   // show a headerless page with no patient identity, blood group or
@@ -320,6 +343,25 @@ export default function QuestionnaireFillPage({
     return (
       <FillErrorPage
         message={t("draft_not_recoverable")}
+        exitTarget={exitTarget}
+      />
+    );
+  }
+
+  // The route's patientId and encounterId disagree on whose encounter this
+  // is (a hand-edited or stale URL) — mounting would show patient B's
+  // identity banner and clinical history beside patient A's structured
+  // widget context. Only checked once the encounter query has actually
+  // resolved (the loading/error branches above already accounted for
+  // "still loading" and "failed to load").
+  if (
+    subject.type === "encounter" &&
+    encounter &&
+    encounter.patient.id !== subject.patientId
+  ) {
+    return (
+      <FillErrorPage
+        message={t("fill_patient_encounter_mismatch")}
         exitTarget={exitTarget}
       />
     );
