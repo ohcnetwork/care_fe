@@ -119,8 +119,18 @@ function LeafBlock({
   // like every other repeating input. Structured questions manage their own
   // arrays, and display has no values to repeat — those keep the
   // single-input path.
+  //
+  // Mirrors ChoiceInput's OWN branch order, not just "has a valueset":
+  // ChoiceInput checks `answer_option?.length` first and only falls
+  // through to the valueset branch when that's empty, so a legacy/imported
+  // question carrying BOTH fields still renders (and writes) through the
+  // answer_option control. Gating on `!answer_value_set` here instead would
+  // send that same question through the per-index path while ChoiceInput
+  // keeps ignoring `valueIndex` in its answer_option branch — every entry
+  // rendering the identical whole-array-replacing multi-select, which is
+  // worse than the pre-fix behavior this is supposed to correct.
   const isSelfManagedChoice =
-    question.type === "choice" && !question.answer_value_set;
+    question.type === "choice" && !!question.answer_option?.length;
 
   const isMultiEntry =
     !!InputComponent &&

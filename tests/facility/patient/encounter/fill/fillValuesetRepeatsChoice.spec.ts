@@ -40,6 +40,13 @@ test.describe("Fill page: repeats + value-set-backed choice", () => {
     const stamp = Date.now();
     const questionTitle = `Unit given ${stamp}`;
     let questionnaireId = "";
+    // Captured from the trigger's own rendered text after each pick, not
+    // assumed from the search term — the search can resolve its top hit to
+    // a compound unit (e.g. "milligram per deciliter") rather than the
+    // bare term, and asserting against a hardcoded literal would then fail
+    // even though the fix under test worked correctly.
+    let entryOneDisplay = "";
+    let entryTwoDisplay = "";
 
     await test.step("Author a repeats choice question bound to a value set", async () => {
       const detailUrl = await createQuestionnaireAndOpenBuilder(page, {
@@ -72,17 +79,28 @@ test.describe("Fill page: repeats + value-set-backed choice", () => {
 
       const entryOneTrigger = block.getByRole("combobox").first();
       await selectFromValueSet(page, entryOneTrigger, { search: "milligram" });
-      await expect(entryOneTrigger).toContainText("milligram");
+      // Same convention as questionnaireQuantityUnit.spec.ts: the trigger's
+      // rendered text is the picked code's display, first line only (in
+      // case the button ever carries a second line of hint text).
+      entryOneDisplay =
+        (await entryOneTrigger.innerText()).split("\n")[0]?.trim() ?? "";
+      expect(entryOneDisplay).not.toBe("");
 
       await block.getByRole("button", { name: "Add Another" }).click();
       const entryTwoTrigger = block.getByRole("combobox").nth(1);
       await selectFromValueSet(page, entryTwoTrigger, { search: "kilogram" });
-      await expect(entryTwoTrigger).toContainText("kilogram");
+      entryTwoDisplay =
+        (await entryTwoTrigger.innerText()).split("\n")[0]?.trim() ?? "";
+      expect(entryTwoDisplay).not.toBe("");
+      // The two searches must have resolved to different codes, or the
+      // "each entry keeps its own value" assertions below would pass
+      // vacuously even with the pre-fix bug still present.
+      expect(entryTwoDisplay).not.toBe(entryOneDisplay);
 
       // Adding/filling entry 2 must not have overwritten entry 1 (the bug:
       // both entries shared the same `values[0]` write).
-      await expect(entryOneTrigger).toContainText("milligram");
-      await expect(entryTwoTrigger).toContainText("kilogram");
+      await expect(entryOneTrigger).toContainText(entryOneDisplay);
+      await expect(entryTwoTrigger).toContainText(entryTwoDisplay);
     });
 
     await test.step("Both entries submit in the batch", async () => {
@@ -110,8 +128,8 @@ test.describe("Fill page: repeats + value-set-backed choice", () => {
       const submittedDisplays = (submit?.body.results ?? []).flatMap((result) =>
         result.values.map((value) => value.coding?.display),
       );
-      expect(submittedDisplays).toContain("milligram");
-      expect(submittedDisplays).toContain("kilogram");
+      expect(submittedDisplays).toContain(entryOneDisplay);
+      expect(submittedDisplays).toContain(entryTwoDisplay);
 
       await expectToast(page, "Questionnaire submitted successfully");
       await page.waitForURL(/\/updates$/);
