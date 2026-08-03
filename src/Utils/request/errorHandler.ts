@@ -2,7 +2,9 @@ import { t } from "i18next";
 import { navigate } from "raviger";
 import { toast } from "sonner";
 
+import { BatchRequestResult } from "@/types/base/batch/batch";
 import * as Notifications from "@/Utils/Notifications";
+import { isBatchResult } from "@/Utils/request/batch";
 import { HTTPError, StructuredError } from "@/Utils/request/types";
 
 export function handleHttpError(error: Error) {
@@ -18,12 +20,30 @@ export function handleHttpError(error: Error) {
 
   const cause = error.cause;
 
-  if (isNotFound(error)) {
+  // Batch responses carry a result per sub-request. Only the failed ones
+  // should be surfaced; the succeeded ones must not toast a generic error.
+  if (isBatchResult(cause)) {
+    handleBatchErrors(cause.results);
+    return;
+  }
+
+  handleErrorCause(error.status, cause);
+}
+
+function handleBatchErrors(results: BatchRequestResult[]) {
+  for (const result of results) {
+    if (result.status_code < 400) continue;
+    handleErrorCause(result.status_code, result.data as HTTPError["cause"]);
+  }
+}
+
+function handleErrorCause(status: number, cause: HTTPError["cause"]) {
+  if (isNotFound(status)) {
     toast.error((cause?.detail as string) || t("not_found"));
     return;
   }
 
-  if (contentTooLarge(error)) {
+  if (contentTooLarge(status)) {
     toast.error(t("file_too_large"));
     return;
   }
@@ -33,7 +53,7 @@ export function handleHttpError(error: Error) {
     return;
   }
 
-  if (isBadRequest(error)) {
+  if (isBadRequest(status)) {
     if (Array.isArray(cause)) {
       let handled = false;
       for (const obj of cause) {
@@ -80,16 +100,16 @@ function handleSessionExpired() {
   }
 }
 
-function isBadRequest(error: HTTPError) {
-  return error.status === 400 || error.status === 406;
+function isBadRequest(status: number) {
+  return status === 400 || status === 406;
 }
 
-function isNotFound(error: HTTPError) {
-  return error.status === 404;
+function isNotFound(status: number) {
+  return status === 404;
 }
 
-function contentTooLarge(error: HTTPError) {
-  return error.status === 413;
+function contentTooLarge(status: number) {
+  return status === 413;
 }
 
 type PydanticError = {
