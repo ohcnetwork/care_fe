@@ -141,6 +141,50 @@ test.describe("Fill page local autosave", () => {
     await expect(textInput).toHaveValue("");
   });
 
+  test("Discard drops only the STORED draft — answers typed while the prompt was pending survive it", async ({
+    page,
+  }) => {
+    // Persistence stands down while the restore prompt is unanswered, so
+    // work typed in the meantime exists nowhere but the live store.
+    // Discard used to reset the covered forms to a pristine seed, which
+    // destroyed exactly that un-persisted work on a button that only
+    // promises to drop an old draft.
+    const questionnaireId = await getQuestionnaireIdBySlug(
+      "respiratory_status-v3",
+    );
+    const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
+    const staleNote = faker.lorem.sentence();
+    const freshNote = `fresh-${faker.string.alphanumeric(10)}`;
+
+    await page.goto(fillUrl);
+    const textInput = questionBlock(
+      page,
+      "Note on Bilateral Air Entry",
+    ).getByRole("textbox");
+    await textInput.fill(staleNote);
+    await expect(
+      page.getByRole("tab", { name: /Questionnaire/ }),
+    ).toContainText("Draft");
+
+    await page.reload();
+    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+
+    // Ignore the prompt and type fresh work.
+    await textInput.fill(freshNote);
+
+    await page.getByRole("button", { name: "Discard", exact: true }).click();
+    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    // The fresh work is still on screen…
+    await expect(textInput).toHaveValue(freshNote);
+
+    // …and Discard re-armed persistence immediately, so the fresh work is
+    // itself recoverable: the old draft is gone, the new one restores it.
+    await page.reload();
+    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+    await page.getByRole("button", { name: /resume/i }).click();
+    await expect(textInput).toHaveValue(freshNote);
+  });
+
   test("an untouched clinical form writes no draft, however much it prefetches", async ({
     page,
   }) => {
