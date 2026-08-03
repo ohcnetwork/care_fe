@@ -99,13 +99,21 @@ export function StructuredSlot({
 
   // A type this deployment doesn't have (plugin disabled or removed after
   // the questionnaire was authored) — say so instead of rendering nothing,
-  // which would read as an empty question.
+  // which would read as an empty question. The notice's closing sentence
+  // must not contradict `collectStructuredErrors`' blocking error below
+  // it: a non-required slot promises its entries are skipped, a required
+  // one says the opposite — the form can't be saved until this loads —
+  // so each notice key has a `_required` twin instead of one sentence
+  // trying to cover both outcomes.
   if (state?.kind === "unknown_type") {
     return (
       <div className="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
-        {t("structured_type_plugin_missing", {
-          type: question.structured_type,
-        })}
+        {t(
+          question.required
+            ? "structured_type_plugin_missing_required"
+            : "structured_type_plugin_missing",
+          { type: question.structured_type },
+        )}
       </div>
     );
   }
@@ -117,12 +125,17 @@ export function StructuredSlot({
   if (state.kind === "subject_mismatch") {
     return (
       <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
-        {t("structured_type_subject_mismatch", {
-          type: label,
-          // The raw enum reads as jargon in a clinician-facing notice; the
-          // studio's own subject picker labels these the same way.
-          subject: t(questionnaire.subject_type),
-        })}
+        {t(
+          question.required
+            ? "structured_type_subject_mismatch_required"
+            : "structured_type_subject_mismatch",
+          {
+            type: label,
+            // The raw enum reads as jargon in a clinician-facing notice;
+            // the studio's own subject picker labels these the same way.
+            subject: t(questionnaire.subject_type),
+          },
+        )}
       </div>
     );
   }
@@ -132,11 +145,16 @@ export function StructuredSlot({
       <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
         <p className="font-medium text-gray-700">{label}</p>
         <p>
-          {t("structured_question_requires_context", {
-            contexts: state.missing
-              .map((key) => t(`context__${key}`))
-              .join(", "),
-          })}
+          {t(
+            question.required
+              ? "structured_question_requires_context_required"
+              : "structured_question_requires_context",
+            {
+              contexts: state.missing
+                .map((key) => t(`context__${key}`))
+                .join(", "),
+            },
+          )}
         </p>
       </div>
     );
@@ -169,7 +187,13 @@ export function StructuredSlot({
       fallback={
         <div className="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
           <p className="font-medium">{label}</p>
-          <p>{t("structured_question_render_failed")}</p>
+          <p>
+            {t(
+              question.required
+                ? "structured_question_render_failed_required"
+                : "structured_question_render_failed",
+            )}
+          </p>
         </div>
       }
     >

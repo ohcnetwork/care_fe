@@ -124,9 +124,15 @@ test.describe("P1-13: hard-block validation for broken structured slots", () => 
     await expect(
       page.getByRole("button", { name: "Save Changes" }),
     ).toBeVisible();
-    // The plugin-missing notice is still on screen — it no longer waives
-    // the required check underneath it (see the blocking error below).
-    await expect(structuredBlock.getByText(/isn't enabled/)).toBeVisible();
+    // The plugin-missing notice branches on `required`: this variant must
+    // NOT promise the entries are simply skipped (that would contradict
+    // the blocking error asserted below) — it says the section is
+    // required and saving is blocked until it loads.
+    await expect(
+      structuredBlock.getByText(
+        "This section is required — the form can't be saved until it's available.",
+      ),
+    ).toBeVisible();
 
     await questionBlock(page, STRING_LABEL)
       .getByRole("textbox")
@@ -163,6 +169,16 @@ test.describe("P1-13: hard-block validation for broken structured slots", () => 
 
     const structuredBlock = questionBlock(page, STRUCTURED_LABEL);
     await expect(structuredBlock).toBeVisible();
+    // The non-required variant of the plugin-missing notice — the actual
+    // behavior this commit adds on this path. Task 7 already made
+    // composeBatch skip an unknown_type question regardless of `required`,
+    // so without this assertion the case below would pass unchanged on
+    // pre-fix code and prove nothing about the notice-copy change.
+    await expect(
+      structuredBlock.getByText(
+        "Entries in this section will not be submitted.",
+      ),
+    ).toBeVisible();
 
     await questionBlock(page, STRING_LABEL)
       .getByRole("textbox")

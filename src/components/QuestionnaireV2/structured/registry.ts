@@ -178,9 +178,22 @@ type StructuredSubjectContext = Partial<Record<StructuredContextKey, string>>;
  * (`form/validation.ts`'s `structuredQuestionIsAnswerable`,
  * `fill/submit/validateStructured.ts`'s `collectStructuredErrors`) resolve
  * the very same state before deciding anything. One resolver, four
- * consumers — what the clinician sees on screen, what data actually
- * reaches the domain APIs, and what the submit button allows can never
- * drift apart.
+ * consumers — what the clinician sees on screen and what the submit
+ * button allows can never drift apart.
+ *
+ * ONE DOCUMENTED EXCEPTION on the compose side: `composeBatch` drops a
+ * "ready" CORE type's requests anyway when the session's runtime subject
+ * isn't patient-bound (`!patientBound && definition.source !== "plugin"`,
+ * `composeBatch.ts` ~166-176) — core types are patient-bound by
+ * construction, but "ready" only reads the QUESTIONNAIRE's declared
+ * `subject_type`, not the session's actual runtime subject, so that one
+ * divergence needs its own gate on top of this resolver. Neither
+ * validator mirrors it (a "ready" core type on a patient/encounter
+ * questionnaire is always patient-bound in practice, so the gap is inert
+ * today), which means "ready" is necessary but not always sufficient for
+ * `composeBatch` to actually submit a core type's data — plugin types are
+ * unaffected, since the studio only offers them a resource subject to
+ * begin with.
  *
  * THE INVARIANT (reversed from this module's original fail-open design): a
  * slot showing a notice instead of an input is either
