@@ -40,6 +40,7 @@ export function NumberInput({
     <Input
       id={inputId}
       type="number"
+      aria-required={question.required || undefined}
       inputMode={question.type === "decimal" ? "decimal" : "numeric"}
       pattern="[0-9]*[.]?[0-9]*"
       value={value?.toString() ?? ""}

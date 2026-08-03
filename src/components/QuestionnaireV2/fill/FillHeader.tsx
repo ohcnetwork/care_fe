@@ -157,7 +157,7 @@ export function FillHeader({
             </div>
           )}
         </div>
-        <div className="flex shrink-0 items-center justify-end gap-3">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
           <Button
             type="button"
             variant="ghost"
@@ -181,9 +181,13 @@ export function FillHeader({
             type="button"
             onClick={onSubmit}
             disabled={isSubmitting || isSavingDraft || !canSubmit}
-            className="border border-emerald-900/80 bg-gradient-to-b from-emerald-700 to-emerald-800 text-white shadow-sm hover:from-emerald-800 hover:to-emerald-900"
+            className="border border-primary-900/80 bg-gradient-to-b from-primary-700 to-primary-800 text-white shadow-sm hover:from-primary-800 hover:to-primary-900"
           >
-            <Check className="size-4" />
+            {isSubmitting ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Check className="size-4" />
+            )}
             {t("save_changes")}
           </Button>
         </div>

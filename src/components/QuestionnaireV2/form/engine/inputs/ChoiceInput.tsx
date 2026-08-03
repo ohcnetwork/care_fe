@@ -40,6 +40,7 @@ export function ChoiceInput({
       const labelling = {
         id: inputId,
         "aria-labelledby": `${labelId} ${inputId}`,
+        "aria-required": question.required || undefined,
       };
       if (question.repeats) {
         return (
@@ -86,6 +87,7 @@ export function ChoiceInput({
         <div
           role="group"
           aria-labelledby={labelId}
+          aria-required={question.required || undefined}
           className="flex flex-wrap gap-3"
         >
           {question.answer_option.map((option) => (
@@ -114,6 +116,7 @@ export function ChoiceInput({
       <div
         role="radiogroup"
         aria-labelledby={labelId}
+        aria-required={question.required || undefined}
         className="flex flex-wrap gap-3"
       >
         {question.answer_option.map((option) => (

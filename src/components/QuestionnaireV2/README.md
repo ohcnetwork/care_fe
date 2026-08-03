@@ -42,7 +42,13 @@ questions, that is the bug.
     Nothing here renders layout; `form/` and `fill/` are its consumers.
 - `fill/` — the fill experience mounted on the encounter/patient/resource
   questionnaire routes (fullscreen shell, two tabs: form canvas + embedded
-  clinical history). What it is filling FOR is `subject.ts`'s `FillSubject`
+  clinical history). The outline is an OVERLAY, not a column
+  (`FillOutlineOverlay`): a slim tick rail on the canvas' left edge opens
+  the panel over the full-width canvas on hover/focus/click; scroll-spy
+  (`useFillOutlineNav`) tracks the block topping the viewport. Each form
+  portals its rows (`FillOutline`) and ticks (`FillOutlineRail`) into the
+  overlay's hosts — they must render inside that form's provider. What it
+  is filling FOR is `subject.ts`'s `FillSubject`
   union (encounter/patient/location/device…); `rendererSubjectOf` flattens
   it into the engine's `RendererSubject` and `subjectKeyOf` scopes drafts.
   A session may hold SEVERAL questionnaires: the route-mounted one plus any
@@ -227,6 +233,7 @@ save it.
 Playwright — authoring: `tests/facility/settings/questionnaires/` and
 `tests/admin/questionnaires/`. Fill:
 `tests/facility/patient/encounter/fill/` (page, validation, autosave,
-multi-form), `tests/facility/patient/encounter/structuredQuestions/`, and
+multi-form, server drafts, outline overlay),
+`tests/facility/patient/encounter/structuredQuestions/`, and
 `tests/facility/{location,device}Questionnaire.spec.ts` for the
 resource-subject mounts. Shared helpers: `tests/helper/questionnaireV2.ts`.

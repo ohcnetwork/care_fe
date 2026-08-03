@@ -17,6 +17,7 @@ function formatTime(date: Date | undefined) {
 export function DateTimeQuestionInput({
   question,
   disabled,
+  labelId,
   valueIndex,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
@@ -60,7 +61,15 @@ export function DateTimeQuestionInput({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2">
+    // Named group for the same reason as DateInput: the picker trigger
+    // takes no id/aria props, and the bare time input would otherwise
+    // reach screen readers nameless.
+    <div
+      role="group"
+      aria-labelledby={labelId}
+      aria-required={question.required || undefined}
+      className="flex flex-col sm:flex-row gap-2"
+    >
       <DatePicker
         date={value}
         onChange={handleDateChange}
@@ -69,7 +78,8 @@ export function DateTimeQuestionInput({
       />
       <Input
         type="time"
-        className="h-9 text-sm sm:w-[150px] sm:text-base"
+        aria-labelledby={labelId}
+        className="h-9 sm:w-[150px]"
         value={formatTime(value)}
         onChange={handleTimeChange}
         disabled={disabled || !value}

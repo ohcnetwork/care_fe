@@ -33,11 +33,14 @@ export function TimeInput({
   };
 
   return (
+    // No text-size override: the base Input's 16px-on-phones scale is
+    // deliberate (a smaller font makes iOS zoom the page on focus).
     <Input
       id={inputId}
       type="time"
+      aria-required={question.required || undefined}
       value={value}
-      className="h-9 text-sm sm:text-base"
+      className="h-9"
       onChange={handleChange}
       disabled={disabled}
     />

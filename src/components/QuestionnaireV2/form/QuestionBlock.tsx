@@ -171,7 +171,13 @@ function LeafBlock({
         >
           {question.text}
         </label>
-        {question.required && <span className="text-red-500">*</span>}
+        {/* Visual-only: the programmatic required state is aria-required
+            on the input itself (every engine input sets it). */}
+        {question.required && (
+          <span aria-hidden className="text-red-500">
+            *
+          </span>
+        )}
         {/* Question-level unit, any type (legacy QuestionLabel contract):
             integer/decimal/choice have no answer-time unit picker, so this
             suffix is their only unit display. */}
