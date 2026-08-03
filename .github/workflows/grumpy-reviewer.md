@@ -33,10 +33,6 @@ if: ${{ github.repository == 'ohcnetwork/care_fe' }}
 # Actions GITHUB_TOKEN, and gh-aw injects the needed write scopes into the
 # separate safe-output jobs while this agent job stays read-only.
 permissions: read-all
-# No local clone is needed: the agent reads the PR diff and changed files through
-# the GitHub API. Disabling checkout removes the "pwn request" attack surface that
-# comes from checking out untrusted fork code under pull_request_target.
-checkout: false
 imports:
   - .github/agents/grumpy-reviewer.agent.md
 tools:
