@@ -21,11 +21,18 @@ export function DraftRestoreBar({
   onResume,
   onDiscard,
   onDismiss,
+  frozen = false,
 }: {
   draft: LoadedFillDraft;
   onResume: () => void;
   onDiscard: () => void;
   onDismiss: () => void;
+  /** The session is mid-submit — Resume mutates stores and appends forms
+   *  the in-flight batch was never composed with, and Discard clears the
+   *  draft a successful submit is about to clear anyway (or shouldn't, on
+   *  a failure); both gate on the same freeze as the rest of the canvas.
+   *  Dismiss stays live — it only hides the prompt, no session mutation. */
+  frozen?: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -48,10 +55,16 @@ export function DraftRestoreBar({
           <p className="text-amber-800">{t("fill_draft_structured_skipped")}</p>
         )}
       </div>
-      <Button type="button" size="sm" onClick={onResume}>
+      <Button type="button" size="sm" onClick={onResume} disabled={frozen}>
         {t("resume")}
       </Button>
-      <Button type="button" variant="outline" size="sm" onClick={onDiscard}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={onDiscard}
+        disabled={frozen}
+      >
         {t("discard")}
       </Button>
       <Button

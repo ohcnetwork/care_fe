@@ -122,15 +122,30 @@ test.describe("P1-4: submit freeze", () => {
     await noteInput.fill(note);
 
     const addedForm = page.locator(`[data-form-key="${addedId}"]`);
-    const removeButton = addedForm.getByRole("button", { name: "Remove" });
+    // Substring "Remove" also matches a repeating question's per-entry
+    // remove button elsewhere on the canvas — anchor on the form-level
+    // affordance's real accessible name (`remove_questionnaire`: "Remove
+    // {{title}}"), not the bare word.
+    const removeButton = addedForm.getByRole("button", {
+      name: /^Remove Feedback/,
+    });
     const addPickerButton = page.getByRole("button", {
       name: "Add questionnaire",
+    });
+    // The note popover's trigger — a second input-bearing control on the
+    // SAME question as `noteInput` that reads only `mode` before this fix,
+    // so a note typed during flight was silently discarded on success
+    // (notes ARE submitted — composeBatch reads them off the click-time
+    // snapshot same as the answer itself).
+    const noteButton = questionBlock(page, NOTE_LABEL).getByRole("button", {
+      name: "Add note",
     });
 
     // Sanity: nothing is disabled before Save Changes is pressed.
     await expect(noteInput).toBeEnabled();
     await expect(removeButton).toBeEnabled();
     await expect(addPickerButton).toBeEnabled();
+    await expect(noteButton).toBeEnabled();
 
     const intercepted = await interceptBatchWithDelay(page);
     await page.getByRole("button", { name: "Save Changes" }).click();
@@ -140,6 +155,12 @@ test.describe("P1-4: submit freeze", () => {
     await expect(noteInput).toBeDisabled();
     await expect(removeButton).toBeDisabled();
     await expect(addPickerButton).toBeDisabled();
+    await expect(noteButton).toBeDisabled();
+    // The disabled trigger means the note popover — and its textarea —
+    // is unreachable at all: force a click past Playwright's actionability
+    // guard and confirm the textarea never appears.
+    await noteButton.click({ force: true });
+    await expect(page.getByPlaceholder("Add note")).toHaveCount(0);
     // The freeze means there is no way to type over it — confirmed by the
     // disabled assertions above — but the value itself must also still
     // read back exactly what was there at click time, not reset to blank
@@ -170,7 +191,12 @@ test.describe("P1-4: submit freeze", () => {
     await noteInput.fill(note);
 
     const addedForm = page.locator(`[data-form-key="${addedId}"]`);
-    const removeButton = addedForm.getByRole("button", { name: "Remove" });
+    const removeButton = addedForm.getByRole("button", {
+      name: /^Remove Feedback/,
+    });
+    const noteButton = questionBlock(page, NOTE_LABEL).getByRole("button", {
+      name: "Add note",
+    });
 
     await interceptBatchWithDelay(page, { fail: true });
     await page.getByRole("button", { name: "Save Changes" }).click();
@@ -178,6 +204,7 @@ test.describe("P1-4: submit freeze", () => {
     // Frozen while the (doomed) request is in flight.
     await expect(noteInput).toBeDisabled();
     await expect(removeButton).toBeDisabled();
+    await expect(noteButton).toBeDisabled();
 
     await expectToast(page, "Failed to submit questionnaire");
 
@@ -185,6 +212,7 @@ test.describe("P1-4: submit freeze", () => {
     // something and try again, rather than being stuck on a dead form.
     await expect(noteInput).toBeEnabled();
     await expect(removeButton).toBeEnabled();
+    await expect(noteButton).toBeEnabled();
     await noteInput.fill(`${note}-retry`);
     await expect(noteInput).toHaveValue(`${note}-retry`);
   });

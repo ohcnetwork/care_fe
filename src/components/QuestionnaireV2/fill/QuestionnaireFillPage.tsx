@@ -703,6 +703,7 @@ function FillPageBody({
                       onResume={autosave.resumeRestoredDraft}
                       onDiscard={autosave.discardRestoredDraft}
                       onDismiss={autosave.dismissRestoreBar}
+                      frozen={frozen}
                     />
                   )}
                   <ServerErrorsPanel errors={serverErrors} />

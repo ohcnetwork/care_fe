@@ -18,7 +18,7 @@ import { useFormRenderer } from "./FormContext";
  *  shared frame (that read as a second border around the control). */
 export function NoteControl({ questionId }: { questionId: string }) {
   const { t } = useTranslation();
-  const { mode } = useFormRenderer();
+  const { mode, frozen } = useFormRenderer();
   const noteStateId = useId();
   const [response, updateResponse] = useQuestionResponse(questionId);
 
@@ -46,6 +46,7 @@ export function NoteControl({ questionId }: { questionId: string }) {
             type="button"
             aria-label={mode === "readonly" ? t("note") : t("add_note")}
             aria-describedby={response.note ? noteStateId : undefined}
+            disabled={frozen}
             className="relative flex size-9 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600"
           >
             <NotebookPen className="size-4" />
@@ -57,6 +58,7 @@ export function NoteControl({ questionId }: { questionId: string }) {
         <Textarea
           value={response.note ?? ""}
           readOnly={mode === "readonly"}
+          disabled={frozen}
           placeholder={t("add_note")}
           onChange={(e) => updateResponse({ note: e.target.value })}
         />
