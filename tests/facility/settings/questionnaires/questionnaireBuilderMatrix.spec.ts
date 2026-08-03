@@ -331,4 +331,68 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       await expect(page.locator("span.text-red-500")).toBeVisible();
     });
   });
+
+  test("switching a structured question to string clears its type-specific fields from the save payload", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const stamp = Date.now();
+    const questionTitle = `Symptom entry ${stamp}`;
+    const typeTrigger = page.getByRole("combobox", { name: "Question Type" });
+
+    await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 Type Residue ${stamp}`,
+    });
+    await addTopLevelQuestion(page, questionTitle);
+
+    await test.step("Author it as a structured Symptoms question", async () => {
+      await pickType(page, "structured");
+      // Picking a bare "Structured" tile only opens its sub-list (see
+      // QuestionTypePicker.handleSelectType) — the actual type patch fires
+      // from the structured sub-type tile, still inside the same popover.
+      await page
+        .locator('[data-slot="command-item"][data-value="symptom"]')
+        .click();
+      await expect(typeTrigger).toContainText("Symptoms");
+    });
+
+    await test.step("Switch the type to String", async () => {
+      await pickType(page, "string");
+      await expect(typeTrigger).toContainText("String");
+    });
+
+    await test.step("Save; the PUT payload carries no structured-type residue", async () => {
+      // A stale `structured_type` on a non-structured question would route
+      // fill-time answers into the structured compose path, which then
+      // never submits (P2-4) — assert on the actual outgoing payload
+      // rather than the UI, which wouldn't catch a field the picker no
+      // longer shows an editor for.
+      const putRequest = page.waitForRequest(
+        (request) =>
+          request.url().includes("/api/v1/questionnaire/") &&
+          request.method() === "PUT",
+      );
+      await page.getByRole("button", { name: "Save Changes" }).click();
+
+      const body = JSON.parse((await putRequest).postData() ?? "{}") as {
+        questions: {
+          text: string;
+          type: string;
+          structured_type?: unknown;
+          answer_option?: unknown;
+          answer_value_set?: unknown;
+          unit?: unknown;
+        }[];
+      };
+      const question = body.questions.find((q) => q.text === questionTitle);
+      expect(question?.type).toBe("string");
+      expect(question?.structured_type).toBeUndefined();
+      expect(question?.answer_option).toBeUndefined();
+      expect(question?.answer_value_set).toBeUndefined();
+      expect(question?.unit).toBeUndefined();
+
+      await expectToast(page, "Questionnaire updated successfully");
+    });
+  });
 });

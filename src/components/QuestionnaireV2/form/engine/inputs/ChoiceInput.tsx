@@ -10,6 +10,8 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
+import { withEntryAt } from "./withEntryAt";
+
 /** Ported from the legacy ChoiceQuestion: past this many options the inline
  *  chips give way to a searchable dropdown (`length > 5 ? "dropdown" :
  *  "radio"`) — a 20-option list as chips is unscannable and unanswerable. */
@@ -20,6 +22,7 @@ export function ChoiceInput({
   disabled,
   inputId,
   labelId,
+  valueIndex,
 }: RendererInputProps) {
   const { t } = useTranslation();
   const [response, updateResponse] = useQuestionResponse(question.id);
@@ -138,17 +141,32 @@ export function ChoiceInput({
   }
 
   if (question.answer_value_set) {
+    // Same read/write convention as the other multi-entry inputs
+    // (TextInput/NumberInput): absent `valueIndex` keeps the exact
+    // single-entry read/replace semantics on `values[0]`; a repeats
+    // question supplies an index and writes go through `withEntryAt` so
+    // sibling entries keep their positions instead of the whole array
+    // being replaced.
+    const entry = response?.values[valueIndex ?? 0];
     return (
       <ValueSetSelect
         aria-labelledby={labelId}
         system={question.answer_value_set.slug ?? ""}
         valuesetId={question.answer_value_set.external_id}
-        value={response?.values[0]?.coding ?? null}
-        onSelect={(code) =>
+        value={entry?.coding ?? null}
+        onSelect={(code) => {
+          const nextEntry = {
+            type: "string" as const,
+            value: code.display,
+            coding: code,
+          };
           updateResponse({
-            values: [{ type: "string", value: code.display, coding: code }],
-          })
-        }
+            values:
+              valueIndex === undefined
+                ? [nextEntry]
+                : withEntryAt(response?.values, valueIndex, nextEntry),
+          });
+        }}
         disabled={disabled}
       />
     );

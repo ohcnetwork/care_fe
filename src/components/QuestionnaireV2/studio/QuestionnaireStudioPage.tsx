@@ -5,6 +5,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -101,7 +102,19 @@ export function QuestionnaireStudioPage({
     queryFn: query(questionnaireApi.get, { pathParams: { id } }),
   });
 
-  const [state, dispatch] = useReducer(builderReducer, INITIAL_STATE);
+  const [state, reactDispatch] = useReducer(builderReducer, INITIAL_STATE);
+
+  // Bumped by every dispatch, tracked here (not derived from `state`) so
+  // the save mutation's `onSaved` callback can tell, at response time,
+  // whether any edit landed while the PUT was in flight — `state` itself
+  // would already reflect that edit either way, giving onSaved no way to
+  // distinguish "nothing changed since the save" from "the user kept
+  // typing". See `handleSave`/`onSaved` below.
+  const dispatchSeqRef = useRef(0);
+  const dispatch: typeof reactDispatch = (action) => {
+    dispatchSeqRef.current += 1;
+    reactDispatch(action);
+  };
 
   useEffect(() => {
     // Skip while the user has unsaved edits (`state.dirty`) — otherwise a
@@ -229,7 +242,22 @@ export function QuestionnaireStudioPage({
     [issues],
   );
 
+  // Snapshot of `dispatchSeqRef` taken the instant the save PUT is fired
+  // (see `handleSave`) — compared against the live ref in `onSaved` below.
+  const saveDispatchSeqRef = useRef(0);
+
   const { mutate: save, isPending } = useUpdateQuestionnaire(id, (updated) => {
+    // A reducer dispatch landed while this PUT was in flight (the author
+    // kept editing — e.g. typing in the title, or a question change) —
+    // `state` is now ahead of what `updated` reflects, so resetting to it
+    // would silently discard those in-flight edits. Skip the reset and
+    // leave the editor dirty so the next Save persists them; the cache
+    // write in useUpdateQuestionnaire's onSuccess (setQueryData) already
+    // ran before this callback, so metadata read straight from the query
+    // cache — the revision badge and the Save button's next-version chip,
+    // both driven by the `questionnaire` prop, not `state` — updates
+    // regardless.
+    if (dispatchSeqRef.current !== saveDispatchSeqRef.current) return;
     dispatch({
       type: "reset",
       questions: updated.questions,
@@ -268,7 +296,11 @@ export function QuestionnaireStudioPage({
     }
 
     form.handleSubmit(
-      (meta) =>
+      (meta) => {
+        // Snapshot right before the PUT fires (mutate() starts the request
+        // synchronously) — any dispatch after this point is an in-flight
+        // edit `onSaved` must not clobber.
+        saveDispatchSeqRef.current = dispatchSeqRef.current;
         save(
           buildUpdateBody(questionnaire, {
             questions: state.questions,
@@ -277,7 +309,8 @@ export function QuestionnaireStudioPage({
             description: meta.description,
             status: meta.status,
           }),
-        ),
+        );
+      },
       () => {
         // Metadata invalid (e.g. slug out of bounds) — surface the fields.
         setView("edit");

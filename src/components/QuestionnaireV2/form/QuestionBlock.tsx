@@ -112,15 +112,22 @@ function LeafBlock({
   const labelId = `question-label-${question.id}`;
 
   // Repeats → one input per value entry (legacy QuestionInput's per-index
-  // rendering). Choice handles repeats itself (multi-select chips),
-  // structured questions manage their own arrays, and display has no values
-  // to repeat — those keep the single-input path.
+  // rendering). A fixed-option (`answer_option`) choice handles repeats
+  // itself (multi-select chips/dropdown render every selected value at
+  // once); a valueset-backed choice (`answer_value_set`) has no such
+  // built-in multi-value control, so it drives this shared per-index path
+  // like every other repeating input. Structured questions manage their own
+  // arrays, and display has no values to repeat — those keep the
+  // single-input path.
+  const isSelfManagedChoice =
+    question.type === "choice" && !question.answer_value_set;
+
   const isMultiEntry =
     !!InputComponent &&
     question.repeats === true &&
     question.type !== "structured" &&
-    question.type !== "choice" &&
-    question.type !== "display";
+    question.type !== "display" &&
+    !isSelfManagedChoice;
 
   const entryCount = Math.max(response?.values.length ?? 0, 1);
   const canRemoveEntries = (response?.values.length ?? 0) > 1;

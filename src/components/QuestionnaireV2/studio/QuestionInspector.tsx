@@ -40,6 +40,12 @@ import { plainWordsSummary, questionsByLinkId } from "./conditionSummary";
  *  plain unit row (shown as a `({code})` label suffix in the renderer). */
 const UNIT_ROW_TYPES: Question["type"][] = ["integer", "decimal", "choice"];
 
+/** Every type that keeps a question-level `unit` — the plain-row types
+ *  above plus quantity, whose AnswerOptionsEditor sets `unit` as the
+ *  picked valueset's default. Used by `handleTypeChange` to decide when a
+ *  unit must be cleared on a type switch. */
+const UNIT_BEARING_TYPES: Question["type"][] = [...UNIT_ROW_TYPES, "quantity"];
+
 const TAB_TRIGGER_CLASSES =
   "rounded-none border-b-3 border-transparent bg-transparent px-2.5 py-2 text-sm font-semibold text-gray-600 shadow-none data-[state=active]:border-b-primary-700 data-[state=active]:bg-transparent data-[state=active]:text-primary-800 data-[state=active]:shadow-none";
 
@@ -87,6 +93,31 @@ export function QuestionInspector({
     const nextType = patch.type ?? question.type;
     if (question.repeats && NON_REPEATABLE_TYPES.includes(nextType)) {
       patch = { ...patch, repeats: false };
+    }
+    // The reducer shallow-merges patches, so an explicit `undefined` here
+    // clears a field the new type no longer supports — otherwise it lingers
+    // on the question data with no editor UI left to see or clear it. A
+    // `structured_type` left behind after switching away from Structured is
+    // the sharp one: the renderer's QuestionBlock branches on
+    // `question.type === "structured"` for DISPLAY, but the fill-time
+    // structured plumbing (StructuredSlot/composeBatch) keys off
+    // `structured_type` too, and a stale value there has caused answers to
+    // silently route into the wrong path. `patch.type === "structured"`
+    // always arrives bundled with its own `structured_type` (the type
+    // picker's structured step sets both together), so this never clobbers
+    // an intentional selection.
+    if (nextType !== "structured") {
+      patch = { ...patch, structured_type: undefined };
+    }
+    if (nextType !== "choice") {
+      patch = {
+        ...patch,
+        answer_option: undefined,
+        answer_value_set: undefined,
+      };
+    }
+    if (!UNIT_BEARING_TYPES.includes(nextType)) {
+      patch = { ...patch, unit: undefined };
     }
     onChange(patch);
   };
