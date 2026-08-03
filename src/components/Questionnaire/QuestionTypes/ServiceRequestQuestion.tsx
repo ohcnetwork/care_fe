@@ -38,7 +38,6 @@ import { add } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { getBasePrice } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
@@ -409,7 +408,6 @@ export function ServiceRequestQuestion({
   encounterId,
   errors,
   questionnaireSlug,
-  question,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
   const currentUser = useAuthUser() as CurrentUserRead;
@@ -915,7 +913,6 @@ export function ServiceRequestQuestion({
 
   return (
     <div className="space-y-4">
-      <QuestionLabel question={question} />
       <AddToTemplateDialog
         open={!!serviceRequestToAddToTemplate}
         onOpenChange={(open) => {
