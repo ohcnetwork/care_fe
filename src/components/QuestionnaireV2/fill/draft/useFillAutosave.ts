@@ -103,9 +103,6 @@ export function useFillSessionAutosave({
   // still theirs to decide about — see persistNow.
   const restorePendingRef = useRef(false);
   restorePendingRef.current = !!restoredDraft && !restoreDismissed;
-  /** Fingerprint of the draft-safe state the last settled write saw — the
-   *  baseline the edit detector compares against. */
-  const safeSignatureRef = useRef<string | undefined>(undefined);
 
   const scopeKey = scope
     ? `${scope.userId}--${scope.subjectKey}--${scope.entryQuestionnaireId}`
@@ -180,34 +177,27 @@ export function useFillSessionAutosave({
     };
 
     // Per-form signature cache, keyed by form.key. A keystroke only ever
-    // changes the ONE store that fired, so only that form needs to
-    // re-serialize; the session signature is the cached join of every
-    // registered form's part, in session order.
+    // changes the ONE store that fired, so comparing just that form's own
+    // cached entry is sufficient — no other form's signature could have
+    // changed, so there is nothing to gain from joining them into a
+    // session-wide value.
     //
     // Rebuilt from scratch on every (re)run of this effect — a form
     // add/remove or a store (un)registration bumps `storesVersion`, which
     // is a dependency below — by iterating the CURRENT `forms`/`getStore`.
     // A form no longer in that iteration simply never gets an entry, so a
-    // removed form's stale signature can never survive into the join and
-    // pin dirty tracking on a value nothing can reproduce anymore.
+    // removed form's stale signature can never survive to be compared
+    // against again.
+    //
+    // Whatever is already in the stores when this is built is the
+    // baseline, not an edit — this is where the structured widgets'
+    // prefetched server rows sit.
     const formSignatures = new Map<string, string>();
     for (const form of forms) {
       const store = getStore(form.key);
       if (!store) continue;
       formSignatures.set(form.key, formSignature(form, store));
     }
-    const joinSignatures = () => {
-      const parts: string[] = [];
-      for (const form of forms) {
-        const part = formSignatures.get(form.key);
-        if (part !== undefined) parts.push(part);
-      }
-      return JSON.stringify(parts);
-    };
-
-    // Whatever is already in the stores is the baseline, not an edit —
-    // this is where the structured widgets' prefetched server rows sit.
-    safeSignatureRef.current = joinSignatures();
 
     // One shared debounce across every form of the session — the draft is
     // one localStorage entry, so one timer is all it can honour.
@@ -224,14 +214,12 @@ export function useFillSessionAutosave({
           // phantom draft over the clinician's real one.
           //
           // Only THIS form's part is re-serialized — the fired store is
-          // the only one that could have changed — and the session
-          // signature is the join of every form's cached part, so the
-          // comparison below decides exactly what the old whole-session
-          // recompute would have decided.
+          // the only one that could have changed — so comparing it
+          // against this form's own cached entry decides exactly what
+          // the old whole-session recompute would have decided.
           const signature = formSignature(form, store);
           if (formSignatures.get(form.key) === signature) return;
           formSignatures.set(form.key, signature);
-          safeSignatureRef.current = joinSignatures();
           setDirty(true);
           clearTimeout(timer);
           timer = setTimeout(() => {

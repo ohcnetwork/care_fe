@@ -311,8 +311,16 @@ test.describe("Fill page multi-questionnaire sessions", () => {
     // pagehide flush (which would persist regardless, masking the bug),
     // so it only passes if the keystroke was genuinely recognised as an
     // edit and reached storage on its own.
+    const noteA = `A-${faker.string.alphanumeric(10)}`;
     const noteB = `B-${faker.string.alphanumeric(10)}`;
 
+    // The primary form must hold content too — otherwise removing form B
+    // leaves an empty session, `saveFillDraft` takes its clear-on-empty
+    // branch, and the draft key disappears entirely (mirrors the
+    // pre-existing "removing an added form" test above).
+    await questionBlock(page, "Note on Bilateral Air Entry")
+      .getByRole("textbox")
+      .fill(noteA);
     await addQuestionnaire(page, ADDED_TITLE);
     const addedNote = questionBlock(
       page,
