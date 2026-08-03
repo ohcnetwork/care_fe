@@ -11,7 +11,6 @@ import {
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import { formatPatientAge } from "@/Utils/utils";
 
-// Plugin-extended instance — the portal formats every date through it.
 import dayjs from "@/Utils/dayjs";
 
 function Field({
@@ -96,8 +95,6 @@ export function AppointmentTokenPass({
             </span>
           </div>
         ) : (
-          // No token issued yet — the booking reference is what the counter can
-          // still look the appointment up by.
           <div className="flex flex-col items-end">
             <span className="whitespace-nowrap text-xs text-gray-500">
               {t("patient_booking__booking_reference")}

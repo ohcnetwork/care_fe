@@ -17,7 +17,6 @@ import {
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 
-/** Cancelling only makes sense while the appointment is still live. */
 export function isAppointmentCancellable(
   appointment: PublicAppointment,
 ): boolean {
@@ -27,10 +26,8 @@ export function isAppointmentCancellable(
 interface CancelAppointmentButtonProps {
   appointment: PublicAppointment;
   size?: React.ComponentProps<typeof Button>["size"];
-  /** Lets a call site quieten the trigger where other actions lead. */
   variant?: React.ComponentProps<typeof Button>["variant"];
   className?: string;
-  /** Called after a successful cancellation, e.g. to navigate away. */
   onCancelled?: () => void;
 }
 

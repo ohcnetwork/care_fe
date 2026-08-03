@@ -3,7 +3,6 @@ import {
   Activity,
   CalendarDays,
   CalendarPlus,
-  ChevronRight,
   FileText,
   Info,
 } from "lucide-react";
@@ -13,10 +12,11 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { DiagnosticReportRow } from "@/components/Patient/DiagnosticReportRow";
 import { PatientAppShell } from "@/components/Patient/PatientAppShell";
-import { PatientBadge } from "@/components/Patient/PatientBadge";
 import { patientMetaLine } from "@/components/Patient/PatientProfileCard";
 import { PrescriptionRow } from "@/components/Patient/PrescriptionRow";
+import { VisitCard } from "@/components/Patient/VisitCard";
 
 import {
   READY_REPORT_STATUSES,
@@ -26,20 +26,6 @@ import {
 } from "@/hooks/usePatientPortalData";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import { formatSlotTimeRange } from "@/pages/Appointments/utils";
-import { PrescritionList } from "@/types/emr/prescription/prescription";
-import {
-  PublicAppointment,
-  formatScheduleResourceName,
-} from "@/types/scheduling/schedule";
-import { renderTokenNumber } from "@/types/tokens/token/token";
-
-import { reportFlagSummary, reportTitle } from "./records/reportUtils";
-
-/**
- * Four tiles share a 390px row, so each label has to hold one line — the full
- * destination names ("Diagnostic Reports") wrap to three and triple the tile.
- */
 const QUICK_ACTIONS = [
   {
     key: "book_appointment",
@@ -66,88 +52,6 @@ const QUICK_ACTIONS = [
     icon: CalendarDays,
   },
 ] as const;
-
-/**
- * Reschedule and cancel are deliberately absent: the home card is a glance, and
- * both actions want the full appointment in front of you. They live on the
- * visit screen this card opens.
- */
-function UpcomingAppointmentCard({
-  appointment,
-}: {
-  appointment: PublicAppointment;
-}) {
-  const { t } = useTranslation();
-  const start = dayjs(appointment.token_slot.start_datetime);
-
-  return (
-    <Link
-      href={`/patient/visits/${appointment.id}`}
-      className="flex flex-col gap-3 rounded-2xl border border-primary-200 bg-linear-to-r from-primary-100/50 to-transparent p-4 hover:border-primary-700"
-    >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-widest text-primary-700">
-          {t("patient_home__upcoming_appointment")}
-        </span>
-        {/* Long statuses ("In Consultation") push the pills onto their own
-            line rather than breaking the eyebrow label mid-word. */}
-        <div className="flex items-center gap-1.5">
-          <PatientBadge tone="neutral">{t(appointment.status)}</PatientBadge>
-          {appointment.token && (
-            <PatientBadge tone="solid">
-              {t("token")} {renderTokenNumber(appointment.token)}
-            </PatientBadge>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-start gap-3">
-        <div className="w-13 shrink-0 rounded-xl border border-primary-200 bg-white py-1.5 text-center">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-primary-700">
-            {start.format("ddd")}
-          </div>
-          <div className="text-xl font-bold leading-tight text-gray-900">
-            {start.format("DD")}
-          </div>
-          <div className="text-[10px] text-gray-500">{start.format("MMM")}</div>
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate font-bold text-gray-900">
-            {formatScheduleResourceName(appointment)}
-          </span>
-          <span className="truncate text-sm text-gray-600">
-            {appointment.token_slot.availability.name} ·{" "}
-            {formatSlotTimeRange(appointment.token_slot)}
-          </span>
-          <span className="truncate text-sm text-gray-600">
-            {appointment.facility.name}
-          </span>
-        </div>
-        <ChevronRight className="mt-0.5 size-4.5 shrink-0 text-primary-700" />
-      </div>
-    </Link>
-  );
-}
-
-/**
- * The section lists prescriptions, not the medicines inside them: a
- * prescription is the thing the patient was handed and the thing "See all"
- * opens, and flattening several of them into one medicine list left no way to
- * tell which visit a medicine came from.
- */
-function RecentPrescriptionsPreview({
-  prescriptions,
-}: {
-  prescriptions: PrescritionList[];
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      {prescriptions.map((prescription) => (
-        <PrescriptionRow key={prescription.id} prescription={prescription} />
-      ))}
-    </div>
-  );
-}
 
 function SectionHeader({ title, href }: { title: string; href: string }) {
   const { t } = useTranslation();
@@ -190,16 +94,12 @@ function PatientPortalIndex() {
 
   const firstName = selectedPatient?.name.split(" ")[0] ?? "";
 
-  // Greeting the account holder by name only makes sense on their own profile:
-  // after a switch the home has to identify whose records are on screen.
-  // Nothing in the payload flags the account holder, so fall back to the same
-  // assumption `PatientUserProvider` makes for the default selection.
   const isOwnProfile =
     !patients?.length || selectedPatient?.id === patients[0]?.id;
 
   return (
     <PatientAppShell>
-      <div className="flex flex-col gap-3 px-[18px] pb-2 pt-[18px]">
+      <div className="flex flex-col gap-3 px-4.5 pb-2 pt-4.5">
         <div>
           <h2 className="mb-0.5 text-[22px] font-bold tracking-tight text-gray-900">
             {isOwnProfile
@@ -225,7 +125,7 @@ function PatientPortalIndex() {
         ) : hasNothingRecorded ? (
           <>
             <div className="flex flex-col items-center gap-3 rounded-2xl border-[1.5px] border-dashed border-gray-300 bg-white px-5 py-7 text-center">
-              <span className="flex size-[62px] items-center justify-center rounded-[20px] bg-gray-100">
+              <span className="flex size-15.5 items-center justify-center rounded-[20px] bg-gray-100">
                 <CalendarDays
                   className="size-7 text-gray-400"
                   strokeWidth={1.6}
@@ -248,7 +148,7 @@ function PatientPortalIndex() {
 
             <div className="flex items-center gap-3 rounded-[13px] bg-gray-100 p-[13px]">
               <Info
-                className="size-[18px] shrink-0 text-gray-600"
+                className="size-4.5 shrink-0 text-gray-600"
                 strokeWidth={1.9}
               />
               <span className="text-xs leading-snug text-gray-600">
@@ -259,7 +159,11 @@ function PatientPortalIndex() {
         ) : (
           <>
             {nextAppointment && (
-              <UpcomingAppointmentCard appointment={nextAppointment} />
+              <VisitCard
+                variant="upcoming"
+                appointment={nextAppointment}
+                eyebrow={t("patient_home__upcoming_appointment")}
+              />
             )}
 
             <div className="grid grid-cols-4 gap-2">
@@ -289,9 +193,12 @@ function PatientPortalIndex() {
                   title={t("patient_home__recent_prescriptions")}
                   href="/patient/records?tab=prescriptions"
                 />
-                <RecentPrescriptionsPreview
-                  prescriptions={prescriptions.slice(0, 3)}
-                />
+                {prescriptions.slice(0, 2).map((prescription) => (
+                  <PrescriptionRow
+                    key={prescription.id}
+                    prescription={prescription}
+                  />
+                ))}
               </div>
             )}
 
@@ -301,42 +208,9 @@ function PatientPortalIndex() {
                   title={t("patient_home__recent_reports")}
                   href="/patient/records?tab=reports"
                 />
-                {readyReports.slice(0, 2).map((report) => {
-                  const flags = reportFlagSummary(report);
-                  return (
-                    <Link
-                      key={report.id}
-                      href={`/patient/records/reports/${report.id}`}
-                      className="flex items-center gap-3 rounded-[13px] border border-gray-200 bg-white px-[13px] py-3 hover:border-gray-300"
-                    >
-                      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <span className="truncate text-sm font-semibold text-gray-900">
-                          {reportTitle(report, t)}
-                        </span>
-                        <span className="truncate text-xs text-gray-600">
-                          {[
-                            dayjs(report.created_date).format("DD MMM YYYY"),
-                            report.encounter?.facility?.name,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </span>
-                      </div>
-                      {flags > 0 ? (
-                        <PatientBadge tone="warning">
-                          {t("patient_records__flagged_count", {
-                            count: flags,
-                          })}
-                        </PatientBadge>
-                      ) : (
-                        <PatientBadge tone="success">
-                          {t("normal")}
-                        </PatientBadge>
-                      )}
-                      <ChevronRight className="size-4 shrink-0 text-gray-400" />
-                    </Link>
-                  );
-                })}
+                {readyReports.slice(0, 2).map((report) => (
+                  <DiagnosticReportRow key={report.id} report={report} />
+                ))}
               </div>
             )}
           </>

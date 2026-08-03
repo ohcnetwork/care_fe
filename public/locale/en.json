@@ -4397,7 +4397,6 @@
   "patient_summary": "Patient Summary",
   "patient_switcher__description": "Appointments, prescriptions and reports all follow the patient you pick.",
   "patient_switcher__heading": "Switch patient",
-  "patient_switcher__link_another": "Link another patient",
   "patient_tags": "Patient Tags",
   "patient_transfer_birth_match_note": "Note: Year of birth must match the patient to process the transfer request.",
   "patient_update_error": "Could not update patient",

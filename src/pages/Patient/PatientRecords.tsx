@@ -1,5 +1,4 @@
-import dayjs from "dayjs";
-import { ChevronRight, Clock, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,12 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { InfiniteScrollSentinel } from "@/components/Common/InfiniteScrollSentinel";
+import { DiagnosticReportRow } from "@/components/Patient/DiagnosticReportRow";
 import {
   PatientAppShell,
   PatientHeaderTabs,
   usePatientShell,
 } from "@/components/Patient/PatientAppShell";
-import { PatientBadge } from "@/components/Patient/PatientBadge";
 import { PrescriptionRow } from "@/components/Patient/PrescriptionRow";
 
 import {
@@ -27,12 +26,6 @@ import {
   usePatientPrescriptions,
 } from "@/hooks/usePatientPortalData";
 import { usePatientContext } from "@/hooks/usePatientUser";
-
-import {
-  reportFlagSummary,
-  reportIcon,
-  reportTitle,
-} from "./records/reportUtils";
 
 type RecordsTab = "prescriptions" | "reports";
 type PrescriptionFilter = "active" | "past";
@@ -47,8 +40,6 @@ function FilterChip({
   onClick: () => void;
   children: React.ReactNode;
 }) {
-  // The hit area stays 44px while the pill itself is the design's 27px; the
-  // negative margin keeps the taller box from opening a gap above the list.
   return (
     <button
       type="button"
@@ -150,7 +141,7 @@ export default function PatientRecords() {
         ? READY_REPORT_STATUSES
         : reportFilter === "processing"
           ? PROCESSING_REPORT_STATUSES
-          : undefined,
+          : [...READY_REPORT_STATUSES, ...PROCESSING_REPORT_STATUSES],
     enabled: activeTab === "reports",
   });
 
@@ -255,85 +246,9 @@ export default function PatientRecords() {
               <Skeleton className="h-20 w-full rounded-2xl" />
             ) : reports.length ? (
               <>
-                {reports.map((report) => {
-                  const isReady = READY_REPORT_STATUSES.includes(report.status);
-                  const flags = reportFlagSummary(report);
-                  const Icon = isReady ? reportIcon(report) : Clock;
-                  const className = cn(
-                    "flex items-center gap-3 rounded-2xl border bg-white p-4",
-                    !isReady
-                      ? "border-dashed border-gray-300 bg-gray-50"
-                      : cn(
-                          "hover:border-gray-300",
-                          flags > 0 ? "border-warning-200" : "border-gray-200",
-                        ),
-                  );
-                  const row = (
-                    <>
-                      <span
-                        className={cn(
-                          "flex size-10.5 shrink-0 items-center justify-center rounded-xl",
-                          isReady ? "bg-gray-100" : "bg-white",
-                        )}
-                      >
-                        <Icon
-                          className={cn(
-                            "size-5",
-                            isReady ? "text-gray-900" : "text-gray-400",
-                          )}
-                          strokeWidth={isReady ? 1.8 : 1.9}
-                        />
-                      </span>
-                      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <span className="truncate font-bold text-gray-900">
-                          {reportTitle(report, t)}
-                        </span>
-                        <span className="truncate text-xs text-gray-600">
-                          {dayjs(report.created_date).format("DD MMM YYYY")}
-                          {report.encounter?.facility?.name &&
-                            ` · ${report.encounter.facility.name}`}
-                        </span>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1.5">
-                        {!isReady ? (
-                          <PatientBadge tone="info">
-                            {t("patient_records__processing")}
-                          </PatientBadge>
-                        ) : flags > 0 ? (
-                          <PatientBadge tone="warning">
-                            {t("patient_records__flagged_count", {
-                              count: flags,
-                            })}
-                          </PatientBadge>
-                        ) : (
-                          <PatientBadge tone="success">
-                            {t("normal")}
-                          </PatientBadge>
-                        )}
-                        {isReady && (
-                          <ChevronRight
-                            className="size-4 text-gray-600"
-                            strokeWidth={2.1}
-                          />
-                        )}
-                      </div>
-                    </>
-                  );
-
-                  return isReady ? (
-                    <Link
-                      key={report.id}
-                      href={`/patient/records/reports/${report.id}`}
-                      className={className}
-                    >
-                      {row}
-                    </Link>
-                  ) : (
-                    <div key={report.id} className={className}>
-                      {row}
-                    </div>
-                  );
-                })}
+                {reports.map((report) => (
+                  <DiagnosticReportRow key={report.id} report={report} />
+                ))}
                 <InfiniteScrollSentinel {...reportPages} />
               </>
             ) : (
