@@ -6,25 +6,40 @@ import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
-
-import mutate from "@/Utils/request/mutate";
 import {
   LoginByOtpRequest,
   LoginByOtpResponse,
-  OtpError,
-  OtpValidationError,
   TokenData,
 } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
+import mutate from "@/Utils/request/mutate";
 
-interface UsePatientOtpLoginOptions {
-  /**
-   * Where to send the patient once the OTP is verified. Defaults to the
-   * profile picker, which forwards on to the home screen when only one
-   * profile is linked to the number.
-   */
-  redirectTo?: string;
-}
+const extractOtpErrorMessage = (error: unknown, fallback: string) => {
+  const cause = (error as { cause?: unknown })?.cause;
+
+  // Backend validation errors: { errors: [{ msg: "..." | { otp: "..." } }] }
+  const errors = (cause as { errors?: unknown })?.errors;
+  if (Array.isArray(errors)) {
+    for (const item of errors) {
+      const msg = (item as { msg?: unknown })?.msg;
+      if (typeof msg === "string") {
+        return msg;
+      }
+      if (msg && typeof msg === "object") {
+        const firstValue = Object.values(msg).find(
+          (value) => typeof value === "string",
+        );
+        if (firstValue) {
+          return firstValue as string;
+        }
+      }
+    }
+  }
+
+  // Fallback to the raw error message the request layer produced.
+  const message = (error as { message?: unknown })?.message;
+  return typeof message === "string" && message ? message : fallback;
+};
 
 /**
  * Drives the phone-number → OTP login used by both the dedicated patient
@@ -35,7 +50,7 @@ interface UsePatientOtpLoginOptions {
  */
 export function usePatientOtpLogin({
   redirectTo = "/patient/select-profile",
-}: UsePatientOtpLoginOptions = {}) {
+}: { redirectTo?: string } = {}) {
   const { t } = useTranslation();
   const { patientLogin } = useAuthContext();
   const { otpLength, resendOtpTimeout } = careConfig;
@@ -68,12 +83,7 @@ export function usePatientOtpLogin({
       toast.success(t("send_otp_success"));
     },
     onError: (error: unknown) => {
-      const errors = (error as { data?: unknown })?.data;
-      if (Array.isArray(errors) && errors.length > 0) {
-        setPhoneError((errors[0] as OtpError).msg);
-      } else {
-        setPhoneError("send_otp_error");
-      }
+      setPhoneError(extractOtpErrorMessage(error, "send_otp_error"));
     },
   });
 
@@ -98,21 +108,7 @@ export function usePatientOtpLogin({
       patientLogin(tokenData, redirectTo);
     },
     onError: (error: unknown) => {
-      const { cause, message: rawMessage } = (error ?? {}) as {
-        cause?: { errors?: OtpValidationError[] };
-        message?: string;
-      };
-
-      let message = "invalid_otp";
-      if (Array.isArray(cause?.errors) && cause.errors.length > 0) {
-        const validationError = cause.errors.find((candidate) => candidate.otp);
-        if (validationError?.otp) {
-          message = validationError.otp;
-        }
-      } else if (rawMessage) {
-        message = rawMessage;
-      }
-      setOtpError(message);
+      setOtpError(extractOtpErrorMessage(error, "invalid_otp"));
     },
   });
 
