@@ -5,20 +5,17 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
-import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName, formatPatientAge } from "@/Utils/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import "@/lib/pdfWorker";
-import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { Document, Page } from "react-pdf";
 
 // TODO: Replace with PDFViewer or extract this to a component
@@ -86,14 +83,12 @@ function ImageRenderer({
     </div>
   );
 }
-export const DiagnosticReportPreview = ({
+export const DiagnosticReportPrintPreview = ({
   diagnosticReports,
   isLoading,
-  serviceRequest,
 }: {
   diagnosticReports: DiagnosticReportRead[];
   isLoading: boolean;
-  serviceRequest: ServiceRequestReadSpec;
 }) => {
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
@@ -106,18 +101,21 @@ export const DiagnosticReportPreview = ({
     );
   }
 
+  const diagnosticReportDetail = diagnosticReports[0];
+
   const diagnosticReportLength = diagnosticReports.length;
 
   return (
     <div className="flex justify-center items-center">
       <PrintPreview
-        title={`${t("diagnostic_report", { count: diagnosticReportLength })} - ${serviceRequest?.title || t("diagnostic_report", { count: diagnosticReportLength })}`}
+        title={`${t("diagnostic_report", { count: diagnosticReportLength })} - ${diagnosticReportDetail?.service_request?.title || t("diagnostic_report", { count: diagnosticReportLength })}`}
         facility={facility}
         templateSlug={PrintTemplateType.diagnostic_report}
       >
         <div>
           <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
-            {serviceRequest?.title || t("diagnostic_report", { count: 1 })}
+            {diagnosticReportDetail?.service_request?.title ||
+              t("diagnostic_report", { count: 1 })}
           </h2>
 
           {/* Patient Details */}
@@ -126,12 +124,13 @@ export const DiagnosticReportPreview = ({
               <span className="text-gray-600">{t("patient")}</span>
               <span className="text-gray-600">:</span>
               <span className="font-semibold ml-2 wrap-break-word">
-                {serviceRequest.encounter.patient.name}
+                {diagnosticReportDetail?.encounter.patient.name}
               </span>
             </div>
-            {serviceRequest.encounter.patient &&
-              "instance_identifiers" in serviceRequest.encounter.patient &&
-              serviceRequest.encounter.patient.instance_identifiers
+            {diagnosticReportDetail?.encounter.patient &&
+              "instance_identifiers" in
+                diagnosticReportDetail.encounter.patient &&
+              diagnosticReportDetail.encounter.patient.instance_identifiers
                 .filter(
                   ({ config }) =>
                     config.config.use === PatientIdentifierUse.official,
@@ -156,10 +155,20 @@ export const DiagnosticReportPreview = ({
               </span>
               <span className="text-gray-600">:</span>
               <span className="font-semibold ml-2">
-                {formatPatientAge(serviceRequest.encounter.patient, true)} /
-                <span className="capitalize ml-1">
-                  {t(`GENDER__${serviceRequest.encounter.patient.gender}`)}
-                </span>
+                {diagnosticReportDetail?.encounter.patient && (
+                  <>
+                    {formatPatientAge(
+                      diagnosticReportDetail.encounter.patient,
+                      true,
+                    )}{" "}
+                    /
+                    <span className="capitalize ml-1">
+                      {t(
+                        `GENDER__${diagnosticReportDetail.encounter.patient.gender}`,
+                      )}
+                    </span>
+                  </>
+                )}
               </span>
             </div>
           </div>
@@ -182,67 +191,41 @@ const DiagnosticReportPreviewItem = ({
 }) => {
   const { t } = useTranslation();
   // Query to fetch files for the diagnostic report
-  const { data: files = { results: [], count: 0 } } = useQuery<
-    PaginatedResponse<FileReadMinimal>
-  >({
+  const { data: files = { results: [], count: 0 } } = useQuery({
     queryKey: ["files", "diagnostic_report", report?.id],
-    queryFn: query(fileApi.list, {
+    queryFn: query.paginated(fileApi.list, {
       queryParams: {
         file_type: "diagnostic_report",
         associating_id: report?.id,
-        limit: 100,
-        offset: 0,
       },
     }),
     enabled: !!report?.id,
   });
 
-  // Function to get signed URL for a file
-  const getFileUrl = async (file: FileReadMinimal) => {
-    if (!file.id || !report?.id) return null;
+  // Fetch a signed URL for each file via parallel queries.
+  const filesWithId = files.results.filter((file) => file.id);
 
-    try {
-      const data = await query(fileApi.get, {
+  const fileUrlQueries = useQueries({
+    queries: filesWithId.map((file) => ({
+      queryKey: ["diagnostic_report_file_url", report?.id, file.id],
+      queryFn: query(fileApi.get, {
         queryParams: {
           file_type: "diagnostic_report",
-          associating_id: report.id,
+          associating_id: report?.id,
         },
-        pathParams: { fileId: file.id },
-      })({} as any);
+        pathParams: { fileId: file.id! },
+      }),
+      enabled: !!report?.id && !!file.id,
+    })),
+  });
 
-      return data?.read_signed_url as string;
-    } catch (error) {
-      console.error("Error fetching signed URL:", error);
-      return null;
+  const fileUrls: Record<string, string> = {};
+  filesWithId.forEach((file, index) => {
+    const url = fileUrlQueries[index]?.data?.read_signed_url;
+    if (file.id && url) {
+      fileUrls[file.id] = url;
     }
-  };
-
-  // Store file URLs
-  const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
-
-  // Fetch signed URLs for all files
-  useEffect(() => {
-    if (!files.results.length) return;
-
-    const fetchAllUrls = async () => {
-      const entries = await Promise.all(
-        files.results
-          .filter((file) => file.id)
-          .map(async (file) => [file.id!, await getFileUrl(file)] as const),
-      );
-
-      const urls: Record<string, string> = {};
-      for (const [id, url] of entries) {
-        if (url) {
-          urls[id] = url;
-        }
-      }
-
-      setFileUrls(urls);
-    };
-
-    fetchAllUrls();
-  }, [files.results, report?.id]);
+  });
 
   if (!report) {
     return (
@@ -264,14 +247,7 @@ const DiagnosticReportPreviewItem = ({
   const imageFiles = files.results.filter((file) => {
     if (!file.id || !fileUrls[file.id] || !file.extension || file.is_archived)
       return false;
-    const ext = file.extension.toLowerCase();
-    return (
-      ext.endsWith("jpg") ||
-      ext.endsWith("jpeg") ||
-      ext.endsWith("png") ||
-      ext.endsWith("gif") ||
-      ext.endsWith("webp")
-    );
+    return /(jpg|jpeg|png|gif|webp)$/i.test(file.extension);
   });
 
   return (
@@ -291,8 +267,7 @@ const DiagnosticReportPreviewItem = ({
             <span className="text-gray-600">{t("report_date")}</span>
             <span className="text-gray-600">:</span>
             <span className="font-semibold ml-2">
-              {report.created_date &&
-                format(new Date(report.created_date), "dd-MM-yyyy")}
+              {report.created_date && format(report.created_date, "dd-MM-yyyy")}
             </span>
           </div>
           <div className="grid grid-cols-[6rem_auto_1fr] items-center">

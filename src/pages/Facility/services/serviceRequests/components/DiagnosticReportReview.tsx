@@ -31,7 +31,6 @@ import { FileListTable } from "@/components/Files/FileListTable";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import {
   DropdownMenu,
@@ -50,7 +49,6 @@ import {
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
-import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 import { format } from "date-fns";
 
@@ -128,7 +126,7 @@ function DiagnosticReportReviewItem({
   });
 
   const { data: files = { results: [], count: 0 }, isFetched: isFilesFetched } =
-    useQuery<PaginatedResponse<FileReadMinimal>>({
+    useQuery({
       queryKey: ["files", "diagnostic_report", report.id],
       queryFn: query(fileApi.list, {
         queryParams: {
@@ -370,7 +368,7 @@ function DiagnosticReportReviewItem({
                   <Button variant="outline" className="gap-2" asChild>
                     <Link
                       basePath="/"
-                      href={`/facility/${facilityId}/patient/${patientId}/service_request/${serviceRequestId}/diagnostic_report/${report.id}/print`}
+                      href={`/facility/${facilityId}/patient/${patientId}/diagnostic_reports/${report.id}/print`}
                       className="flex items-center gap-2"
                     >
                       <Printer className="size-4" />

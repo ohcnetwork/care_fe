@@ -92,7 +92,7 @@ export default function DiagnosticReportView({
         {report.service_request?.id && (
           <Button variant="outline" asChild>
             <Link
-              href={`/facility/${facilityId}/patient/${report.encounter.patient.id}/service_request/${report.service_request.id}/diagnostic_report/${diagnosticReportId}/print`}
+              href={`/facility/${facilityId}/patient/${report.encounter.patient.id}/diagnostic_reports/${diagnosticReportId}/print`}
               className="flex items-center gap-2"
             >
               <Printer className="size-4 mr-2" />
