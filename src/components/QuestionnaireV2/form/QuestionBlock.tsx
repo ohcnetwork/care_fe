@@ -150,6 +150,14 @@ export function QuestionBlock(props: QuestionBlockProps) {
  * `field_key` fallback for anything a server error keys on that no column
  * claims (e.g. `medication`, which this type's identity column names
  * `"medicine"` instead).
+ *
+ * `service_request` IS listed — same reasoning again:
+ * `ServiceRequestEditor.tsx` renders through `StructuredList`, none of its
+ * columns set `ownsErrorDisplay`, and this type's own client `validate`
+ * (`requiredServiceRequestFieldMisses`, row-scoped) renders inline through
+ * exactly that mechanism — `priority`/`category` bind to real columns,
+ * while `title`/`status`/`intent`/`code` hit the shell's own
+ * unmatched-`field_key` fallback instead of vanishing.
  */
 const STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS = new Set<string>([
   "allergy_intolerance",
@@ -159,6 +167,7 @@ const STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS = new Set<string>([
   "files",
   "medication_request",
   "medication_statement",
+  "service_request",
   "symptom",
 ]);
 

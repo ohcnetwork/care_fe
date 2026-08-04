@@ -1,53 +1,39 @@
-import { ServiceRequestQuestion } from "@/components/Questionnaire/QuestionTypes/ServiceRequestQuestion";
+import { t } from "i18next";
 
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
-import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { useLegacyResponseCallback } from "./adapt";
+import { ServiceRequestEditor } from "@/components/QuestionnaireV2/structured/types/serviceRequest/ServiceRequestEditor";
+import {
+  requiredServiceRequestFieldMisses,
+  toRequests,
+} from "@/components/QuestionnaireV2/structured/types/serviceRequest/model";
 
-function ServiceRequestInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.encounterId || !props.facilityId) return null;
-  return (
-    <ServiceRequestQuestion
-      encounterId={props.encounterId}
-      facilityId={props.facilityId}
-      question={props.question}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      disabled={props.disabled}
-      errors={props.errors}
-      questionnaireSlug={props.questionnaireSlug}
-    />
-  );
-}
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 
 export const serviceRequestDefinition: StructuredTypeDefinition<"service_request"> =
   {
     type: "service_request",
-    component: ServiceRequestInput,
+    component: ServiceRequestEditor,
     requires: ["encounterId", "facilityId"],
     subjects: ["encounter"],
-    draftPolicy: "exclude",
-    contract: 1,
-    // No validate: the exported legacy validateServiceRequestQuestion
-    // expects flat ServiceRequestReadSpec fields, but the recorded data is
-    // ServiceRequestApplyActivityDefinitionForm with those fields nested
-    // under `service_request` — wiring it would fail every submission.
-    // (That mismatch is also why the legacy form never wired it.)
-    buildRequests: async (serviceRequests, { facilityId, questionId }) =>
-      serviceRequests.map((serviceRequest) => ({
-        url: `/api/v1/facility/${facilityId}/service_request/apply_activity_definition/`,
-        method: "POST" as const,
-        body: {
-          ...serviceRequest,
-          service_request: {
-            ...serviceRequest.service_request,
-            requester: serviceRequest.service_request.requester.id,
-          },
-        },
-        reference_id: structuredReferenceId("service_request", questionId),
+    // D2: a service-request row is plain, JSON-serializable data (the wire
+    // fields plus the activity-definition display object, itself plain
+    // data) — no `Date`/`File`/class instance — so it round-trips through a
+    // draft exactly. Mirrors `charge_item`'s identical reasoning.
+    draftPolicy: "serialize",
+    contract: 2,
+    toRequests,
+    // i18n boundary: `model.ts`'s `requiredServiceRequestFieldMisses` is the
+    // pure, row-scoped decision (imports no i18next); this is the only
+    // place it becomes a translated, row_id-keyed `QuestionValidationError`
+    // — mirrors `charge_item`'s identical split. See that function's own
+    // doc comment for why this is wired (a "correct" version of legacy's
+    // never-wired `validateServiceRequestQuestion`) despite today's UI
+    // having no path that can actually leave a required field blank.
+    validate: (_projection, edits, questionId) =>
+      requiredServiceRequestFieldMisses(edits).map((miss) => ({
+        question_id: questionId,
+        field_key: miss.fieldKey,
+        row_id: miss.rowId,
+        error: t("field_required"),
+        required: true,
       })),
   };

@@ -18,16 +18,17 @@ import type { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import type { EncounterEdit } from "@/types/emr/encounter/encounter";
 import type { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
 import type { MedicationStatementRequest } from "@/types/emr/medicationStatement";
-import type { ServiceRequestApplyActivityDefinitionForm } from "@/types/emr/serviceRequest/serviceRequest";
 import type { SymptomRequest } from "@/types/emr/symptom/symptom";
 import type { FileUploadQuestion } from "@/types/files/file";
 import type { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
-// Type-only: `structured/types/chargeItem/model.ts` imports
-// `structuredReferenceId` (a value) back from THIS file. The cycle resolves
-// because this direction is `import type` only — do not add a value import
-// in either direction (N6/Task 5 brief).
+// Type-only: `structured/types/chargeItem/model.ts` (and, identically,
+// `structured/types/serviceRequest/model.ts`) imports `structuredReferenceId`
+// (a value) back from THIS file. The cycle resolves because this direction
+// is `import type` only — do not add a value import in either direction
+// (N6/Task 5 brief).
 import type { ChargeItemRow } from "@/components/QuestionnaireV2/structured/types/chargeItem/model";
+import type { ServiceRequestRow } from "@/components/QuestionnaireV2/structured/types/serviceRequest/model";
 
 /** Subject ids a structured type needs before it can render at all —
  *  `StructuredSlot` shows the "requires context" placeholder when the
@@ -51,7 +52,12 @@ export interface StructuredDataMap {
    *  (`structured/core/types.ts:15,41,69`); see `TimeOfDeathRow`'s own doc
    *  comment (`@/types/questionnaire/structuredRows`) for the full reason. */
   time_of_death: TimeOfDeathRow;
-  service_request: ServiceRequestApplyActivityDefinitionForm;
+  /** `ServiceRequestRow` (`structured/types/serviceRequest/model.ts`)
+   *  requires the picked activity-definition display object — every
+   *  v2-edited row carries one, since the editor only ever creates a row
+   *  from a direct pick or a resolved template. Same reasoning as
+   *  `ChargeItemRow`, below. */
+  service_request: ServiceRequestRow;
   /** `ChargeItemRow` (`structured/types/chargeItem/model.ts`) requires the
    *  definition display object the `ResponseValue`/`ChargeItemQuestionRow`
    *  arm keeps optional — every v2-edited row carries one, since the
