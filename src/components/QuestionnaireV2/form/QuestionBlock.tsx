@@ -115,12 +115,39 @@ export function QuestionBlock(props: QuestionBlockProps) {
  * for anything none of those columns claims (e.g. a server error keyed on
  * `code`, which this type's columns intentionally name `substance`
  * instead). Omitting it here would double-print any such error.
+ *
+ * `symptom` IS listed — identical reasoning to `allergy_intolerance`:
+ * `SymptomEditor.tsx` renders through `StructuredList` too (none of its six
+ * columns set `ownsErrorDisplay`), plus the same unmatched-`field_key`
+ * fallback for a server error keyed on a name none of those columns claims
+ * (e.g. `code`, which this type's identity column names `"code"` too, but
+ * `onset`/`onset.onset_datetime` would not match the `"onset"` column key
+ * either way it's keyed).
+ *
+ * `diagnosis` IS listed — same reasoning again: `DiagnosisEditor.tsx`
+ * renders through `StructuredList`, none of its six columns set
+ * `ownsErrorDisplay`, and the identity column's key (`"diagnosis"`, the
+ * code's display text) intentionally does NOT match the wire field
+ * `code` — a server error keyed on `code` hits the unmatched-`field_key`
+ * fallback, not silence.
+ *
+ * `medication_statement` IS listed — same reasoning again:
+ * `MedicationStatementEditor.tsx` renders through `StructuredList`, none of
+ * its seven columns set `ownsErrorDisplay`, and this type's own client
+ * `validate` (`dosage_text`/`effective_period`, row-scoped) renders inline
+ * through exactly that mechanism — plus the shell's own unmatched-
+ * `field_key` fallback for anything a server error keys on that no column
+ * claims (e.g. `medication`, which this type's identity column names
+ * `"medicine"` instead).
  */
 const STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS = new Set<string>([
   "allergy_intolerance",
   "appointment",
   "charge_item",
+  "diagnosis",
   "files",
+  "medication_statement",
+  "symptom",
 ]);
 
 /**
