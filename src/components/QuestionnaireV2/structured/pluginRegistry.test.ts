@@ -5,14 +5,24 @@ import {
   getPluginStructuredType,
   registerPluginStructuredType,
   type PluginStructuredTypeDefinition,
+  type PluginStructuredTypeDefinitionV1,
 } from "./pluginRegistry";
 
 // ponytail: every registration in this file needs a full definition, so a
 // tiny factory keeps each test's `type`/component identity the only thing
-// that varies.
+// that varies. Always produces a v1 arm (`contract` absent) — every case
+// in this file exercises registration/lookup mechanics that are identical
+// across contracts, so there is no need for a v2 fixture here.
+//
+// `overrides` is deliberately typed against the V1 arm alone, not the
+// `PluginStructuredTypeDefinition` union: `Partial` distributes over a
+// union (`Partial<V1> | Partial<V2>`), which would let the spread below
+// synthesize a shape whose `contract` reads as `2 | undefined` — not
+// assignable to either arm's `contract` — even though this factory is
+// value-level always v1.
 function makeDefinition(
   type: string,
-  overrides: Partial<PluginStructuredTypeDefinition> = {},
+  overrides: Partial<PluginStructuredTypeDefinitionV1> = {},
 ): PluginStructuredTypeDefinition {
   return {
     type,

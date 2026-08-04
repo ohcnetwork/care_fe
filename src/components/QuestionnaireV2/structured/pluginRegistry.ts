@@ -2,26 +2,26 @@ import type { ComponentType } from "react";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { SubjectType } from "@/types/questionnaire/questionnaire";
-import { PLUGIN_STRUCTURED_TYPE_PATTERN } from "@/types/questionnaire/structured";
+import {
+  PLUGIN_STRUCTURED_TYPE_PATTERN,
+  type StructuredEditRecord,
+} from "@/types/questionnaire/structured";
 
 import type {
   StructuredBatchEntry,
   StructuredContextKey,
+  StructuredDraftPolicy,
   StructuredInputProps,
   StructuredRequestContext,
 } from "./types";
 
 /**
- * What a federation plugin contributes to make a structured question type
- * of its own. The same contract as a core `StructuredTypeDefinition`, minus
- * the compile-time key correlation core enjoys: a plugin's data shape is
- * opaque to the host, so its entries arrive as `unknown[]` and the plugin's
- * own component/validate/buildRequests are the only code that reads them.
- *
- * Plugins own their i18n — `label` is a plain display string from the
- * manifest, never an i18n key the host resolves.
+ * Everything a federation plugin's structured type shares across both
+ * contracts — the same base fields core's `StructuredTypeDefinitionBase`
+ * carries, plus the plugin-only display metadata core sources from i18n
+ * instead.
  */
-export interface PluginStructuredTypeDefinition {
+interface PluginStructuredTypeDefinitionBase {
   /** Namespaced `{plugin_slug}.{type_name}` — bare names are reserved for core. */
   type: string;
   component: ComponentType<StructuredInputProps>;
@@ -29,10 +29,28 @@ export interface PluginStructuredTypeDefinition {
   /** Questionnaire subject types this type may be authored onto — same
    *  gate core types declare (picker, fill renderer, compose, validate). */
   subjects: readonly SubjectType[];
-  draftPolicy: "serialize" | "exclude";
+  draftPolicy: StructuredDraftPolicy;
   /** Display label (plugins own their i18n; plain string fallback). */
   label: string;
   icon?: ComponentType<{ className?: string }>;
+}
+
+/**
+ * A plugin type on the LEGACY contract. `contract` is OPTIONAL here and
+ * REQUIRED on core's `StructuredTypeDefinitionV1` for a deliberate reason:
+ * `PluginStructuredTypeDefinition` is a published extension point
+ * (`src/pluginTypes.ts`'s `structuredQuestionTypes`) consumed by
+ * separately-built federation remotes, so a newly required field would
+ * break every plugin already in the field the moment the host ships this
+ * change. Absent means 1 — the host normalizes it exactly once, in
+ * `resolveStructuredType` (`registry.ts`, via `./contract`'s
+ * `isV2Definition`/`normalizeContract`), so no consumer re-derives that
+ * rule. At runtime an absent `contract` is `!== 2`, so it lands on the v1
+ * path — fail-safe, because a v1 plugin mistaken for v2 would have its
+ * untouched rows silently dropped from the batch.
+ */
+export interface PluginStructuredTypeDefinitionV1 extends PluginStructuredTypeDefinitionBase {
+  contract?: 1;
   validate?: (
     data: unknown[],
     questionId: string,
@@ -43,6 +61,41 @@ export interface PluginStructuredTypeDefinition {
     context: StructuredRequestContext,
   ) => Promise<StructuredBatchEntry[]>;
 }
+
+/**
+ * A plugin type on contract v2. Rows are opaque to the host, so the edit
+ * log arrives type-erased (`StructuredEditRecord`, i.e.
+ * `StructuredEdit<unknown>`) — the plugin's own `toRequests` is the only
+ * code that interprets a `patch`.
+ */
+export interface PluginStructuredTypeDefinitionV2 extends PluginStructuredTypeDefinitionBase {
+  contract: 2;
+  validate?: (
+    projection: readonly unknown[],
+    edits: readonly StructuredEditRecord[],
+    questionId: string,
+    required: boolean,
+  ) => QuestionValidationError[];
+  toRequests: (
+    edits: readonly StructuredEditRecord[],
+    context: StructuredRequestContext,
+  ) => Promise<StructuredBatchEntry[]>;
+}
+
+/**
+ * What a federation plugin contributes to make a structured question type
+ * of its own. The same contract as a core `StructuredTypeDefinition`, minus
+ * the compile-time key correlation core enjoys: a plugin's data shape is
+ * opaque to the host, so its entries arrive as `unknown[]`/
+ * `StructuredEditRecord[]` and the plugin's own
+ * component/validate/buildRequests-or-toRequests are the only code that
+ * reads them.
+ *
+ * Plugins own their i18n — `label` is a plain display string from the
+ * manifest, never an i18n key the host resolves.
+ */
+export type PluginStructuredTypeDefinition =
+  PluginStructuredTypeDefinitionV1 | PluginStructuredTypeDefinitionV2;
 
 /**
  * Module-level store — same mechanics as `lib/override/registry.ts`: a Map

@@ -34,6 +34,7 @@ export const filesDefinition: StructuredTypeDefinition<"files"> = {
   subjects: ["encounter"],
   // Raw `File` objects cannot round-trip through JSON — hard exclude.
   draftPolicy: "exclude",
+  contract: 1,
   validate: (files, questionId) =>
     validateFileUploadQuestion(files, questionId),
   buildRequests: async (files, { encounterId, questionId }) =>

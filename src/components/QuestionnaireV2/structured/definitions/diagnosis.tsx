@@ -28,6 +28,7 @@ export const diagnosisDefinition: StructuredTypeDefinition<"diagnosis"> = {
   requires: ["patientId", "encounterId"],
   subjects: ["encounter"],
   draftPolicy: "exclude",
+  contract: 1,
   buildRequests: async (diagnoses, { patientId, encounterId, questionId }) => {
     // Only edited rows submit — prefetched server rows ride along in the
     // response values and must not re-upsert untouched.

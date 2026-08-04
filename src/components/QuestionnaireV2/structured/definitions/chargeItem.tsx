@@ -29,6 +29,7 @@ export const chargeItemDefinition: StructuredTypeDefinition<"charge_item"> = {
   requires: ["encounterId", "facilityId"],
   subjects: ["encounter"],
   draftPolicy: "exclude",
+  contract: 1,
   buildRequests: async (chargeItems, { facilityId, questionId }) => {
     if (chargeItems.length === 0) return [];
     return [

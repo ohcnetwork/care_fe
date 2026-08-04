@@ -74,13 +74,25 @@ export class StructuredBuildError extends Error {
 
 /** `definition.buildRequests` behind the containment boundary — a
  *  synchronous throw and a rejected promise both become one
- *  `StructuredBuildError`. */
+ *  `StructuredBuildError`.
+ *
+ *  TEMPORARY CONTRACT-V2 STUB (Task 6 compile-compat, pending Task 8):
+ *  `ResolvedStructuredType` is now a `contract`-discriminated union
+ *  (`structured/registry.ts`) and its v2 arm has no `buildRequests` at
+ *  all, so an unguarded call no longer type-checks. No core or plugin
+ *  registration is contract 2 yet (every one of the eleven core
+ *  definitions is `contract: 1` in Phase 1), so the branch below is
+ *  unreachable today — it exists only to keep this file compiling against
+ *  the union. Task 8 ("the shim forks", design annex `p1-shim.md` §c.1)
+ *  replaces it with the real leg: `definition.toRequests(structuredEditsOf(response),
+ *  context)`. The v1 path below is byte-identical to the pre-Task-6 call. */
 async function buildStructuredRequests(
   definition: ResolvedStructuredType,
   data: unknown[],
   context: StructuredRequestContext,
 ): Promise<StructuredBatchEntry[]> {
   try {
+    if (definition.contract === 2) return [];
     return await definition.buildRequests(data, context);
   } catch (error) {
     throw new StructuredBuildError(context.questionId, error);

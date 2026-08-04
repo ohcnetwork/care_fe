@@ -28,6 +28,7 @@ export const allergyIntoleranceDefinition: StructuredTypeDefinition<"allergy_int
     requires: ["patientId", "encounterId"],
     subjects: ["encounter"],
     draftPolicy: "exclude",
+    contract: 1,
     buildRequests: async (
       allergies,
       { patientId, encounterId, questionId },

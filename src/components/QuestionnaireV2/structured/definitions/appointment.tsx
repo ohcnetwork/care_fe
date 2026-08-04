@@ -31,6 +31,7 @@ export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
   requires: ["facilityId"],
   subjects: ["patient", "encounter"],
   draftPolicy: "exclude",
+  contract: 1,
   validate: (appointments, questionId, required) =>
     validateAppointmentQuestion(appointments[0], questionId, required),
   buildRequests: async (

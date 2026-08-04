@@ -97,6 +97,15 @@ export function collectStructuredErrors(
       if (response?.structured_type !== type) continue;
       const data = structuredDataAny(response);
       if (data.length === 0) continue;
+      // TEMPORARY CONTRACT-V2 STUB (Task 6 compile-compat, pending Task
+      // 8): `definition.validate` now has an incompatible signature on
+      // the v2 arm (projection + edits, not just data) — `resolved` is a
+      // `contract`-discriminated union (`structured/registry.ts`), and no
+      // core or plugin registration is contract 2 yet, so this is
+      // unreachable today. Task 8 (design annex `p1-shim.md` §c.2) wires
+      // the real two-argument call. The v1 path below is byte-identical
+      // to the pre-Task-6 call.
+      if (definition.contract === 2) continue;
       try {
         errors.push(
           ...definition.validate(data, question.id, question.required ?? false),

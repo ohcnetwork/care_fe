@@ -28,6 +28,7 @@ export const symptomDefinition: StructuredTypeDefinition<"symptom"> = {
   requires: ["patientId", "encounterId"],
   subjects: ["encounter"],
   draftPolicy: "exclude",
+  contract: 1,
   buildRequests: async (symptoms, { patientId, encounterId, questionId }) => {
     // `subjects` is encounter-only, so a patient is always in scope here —
     // narrowed rather than asserted (the context type is optional for

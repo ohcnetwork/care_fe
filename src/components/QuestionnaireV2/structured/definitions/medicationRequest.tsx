@@ -36,6 +36,7 @@ export const medicationRequestDefinition: StructuredTypeDefinition<"medication_r
     requires: ["patientId", "encounterId"],
     subjects: ["encounter"],
     draftPolicy: "exclude",
+    contract: 1,
     validate: (medications, questionId) =>
       validateMedicationRequestQuestion(medications, questionId),
     buildRequests: async (

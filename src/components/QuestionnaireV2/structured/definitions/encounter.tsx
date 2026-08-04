@@ -35,6 +35,7 @@ export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
   requires: ["encounterId", "facilityId"],
   subjects: ["encounter"],
   draftPolicy: "exclude",
+  contract: 1,
   validate: (encounters, questionId) =>
     validateEncounterQuestion(encounters[0], questionId),
   buildRequests: async (

@@ -31,6 +31,7 @@ export const serviceRequestDefinition: StructuredTypeDefinition<"service_request
     requires: ["encounterId", "facilityId"],
     subjects: ["encounter"],
     draftPolicy: "exclude",
+    contract: 1,
     // No validate: the exported legacy validateServiceRequestQuestion
     // expects flat ServiceRequestReadSpec fields, but the recorded data is
     // ServiceRequestApplyActivityDefinitionForm with those fields nested
