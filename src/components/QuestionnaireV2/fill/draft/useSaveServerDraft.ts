@@ -1,22 +1,25 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import careConfig from "@careConfig";
 
 import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
-import { isV2Definition } from "@/components/QuestionnaireV2/structured/contract";
+import {
+  getStructuredTypesVersion,
+  subscribeToStructuredTypes,
+} from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
 import { draftResponseForStorage } from "@/components/QuestionnaireV2/fill/draft/fillDraftStore";
+import { unsupportedDraftStructuredTypes } from "@/components/QuestionnaireV2/fill/draft/unsupportedDraftStructuredTypes";
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
 import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
 
 import type { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
-import type { Question } from "@/types/questionnaire/question";
 import mutate from "@/Utils/request/mutate";
 
 interface UseSaveServerDraftArgs {
@@ -30,45 +33,6 @@ interface UseSaveServerDraftArgs {
   /** The server copy is now authoritative: the host drops the local
    *  autosave draft, flushes pristine and leaves the page. */
   onSaved: () => void;
-}
-
-/**
- * The structured questions in this tree that a SERVER draft cannot
- * faithfully carry, by `structured_type`.
- *
- * Contract v1 conflates prefetched server rows with user input in
- * `values[0].value`, so a dump restores stale clinical rows and can
- * re-upsert data edited elsewhere — the same reason `draftPolicy:
- * "exclude"` exists for the local draft, and the reason the original gate
- * refused ANY structured question. Contract v2 dumps the EDIT LOG, which
- * is user intent alone and re-projects onto a freshly fetched baseline, so
- * it lifts that refusal — except where the values cannot round-trip at all
- * (`draftPolicy: "exclude"` — `files`), and except for a type this
- * deployment cannot resolve, whose contract is simply unknown.
- */
-function unsupportedDraftStructuredTypes(questions: Question[]): string[] {
-  const blocking: string[] = [];
-  const walk = (list: Question[]) => {
-    for (const question of list) {
-      if (question.type === "group") {
-        walk(question.questions ?? []);
-        continue;
-      }
-      if (question.type !== "structured" || !question.structured_type) {
-        continue;
-      }
-      const resolved = resolveStructuredType(question.structured_type);
-      if (
-        !resolved ||
-        !isV2Definition(resolved) ||
-        resolved.draftPolicy === "exclude"
-      ) {
-        blocking.push(question.structured_type);
-      }
-    }
-  };
-  walk(questions);
-  return blocking;
 }
 
 /**
@@ -118,15 +82,32 @@ export function useSaveServerDraft({
   const encounterBound = subject.type === "encounter" ? subject : undefined;
   const primary = forms.find((form) => form.isPrimary);
 
+  // `unsupportedDraftStructuredTypes` calls `resolveStructuredType`, whose
+  // answer for a plugin-authored question changes when that plugin's
+  // remote registers or unregisters its type — subscribing (same pattern
+  // as `QuestionTypePicker.tsx`'s `useSyncExternalStore` over this same
+  // registry) means `canSaveDraft` recomputes when that happens, instead
+  // of caching a stale answer for the lifetime of this hook. Inert in
+  // Phase 1 (every resolution outcome — v1, unresolved, or excluded —
+  // blocks either way), but load-bearing from Phase 2 on, once a v2 type
+  // can register mid-session and actually change the answer.
+  const structuredTypesVersion = useSyncExternalStore(
+    subscribeToStructuredTypes,
+    getStructuredTypesVersion,
+    getStructuredTypesVersion,
+  );
+
   const canSaveDraft = useMemo(() => {
     if (!careConfig.enableQuestionnaireDraft) return false;
     if (!encounterBound || !primary) return false;
     if (forms.length !== 1) return false;
     return (
-      unsupportedDraftStructuredTypes(primary.questionnaire.questions)
-        .length === 0
+      unsupportedDraftStructuredTypes(
+        primary.questionnaire.questions,
+        resolveStructuredType,
+      ).length === 0
     );
-  }, [encounterBound, primary, forms.length]);
+  }, [encounterBound, primary, forms.length, structuredTypesVersion]);
 
   const handleSaved = useCallback(
     (saved: FormSubmissionRead) => {

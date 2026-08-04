@@ -86,11 +86,19 @@ test("a v2 and a v1 registration under the same owner coexist", () => {
   const v1 = makeDefinition("plugin_h.v1_widget");
   const v2 = makeV2Definition("plugin_h.v2_widget");
 
-  registerPluginStructuredType(v2, "plugin_h");
-  registerPluginStructuredType(v1, "plugin_h");
+  const cleanupV2 = registerPluginStructuredType(v2, "plugin_h");
+  const cleanupV1 = registerPluginStructuredType(v1, "plugin_h");
 
   assert.equal(getPluginStructuredType("plugin_h.v2_widget"), v2);
   assert.equal(getPluginStructuredType("plugin_h.v1_widget"), v1);
+
+  // Leave no module-state residue behind — the old (refused) behavior left
+  // the map empty for this type entirely, and other tests in this file
+  // rely on the module-level registry being otherwise pristine.
+  cleanupV1();
+  cleanupV2();
+  assert.equal(getPluginStructuredType("plugin_h.v1_widget"), undefined);
+  assert.equal(getPluginStructuredType("plugin_h.v2_widget"), undefined);
 });
 
 // ---------------------------------------------------------------------------
