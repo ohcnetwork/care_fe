@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import type { SymptomRequest } from "@/types/emr/symptom/symptom";
 
 import { resolveChanges } from "./changes";
+import { applyEditToLog } from "./editLog";
 import type { EditLog, RowEdit, RowId, SoftDeleteDescriptor } from "./types";
 
 /**
@@ -31,6 +32,12 @@ function remove<TRow extends object>(rowId: RowId, patch: TRow): RowEdit<TRow> {
   return { rowId, op: "remove", patch };
 }
 
+function baselineOf(
+  entries: ReadonlyArray<readonly [RowId, TestRow]>,
+): ReadonlyMap<RowId, TestRow> {
+  return new Map(entries);
+}
+
 // Realistic row fixture, per the task brief's soft-delete case — see
 // src/types/emr/symptom/symptom.ts. Mirrors projectRows.test.ts's helper.
 function makeSymptomRow(
@@ -54,6 +61,17 @@ function makeSymptomRow(
 describe("resolveChanges — edit log resolved into create/update/remove sets", () => {
   it("P1-14 PIN: an empty log resolves to three empty sets — a clinician who never touched the section sends zero requests for it", () => {
     const result = resolveChanges<TestRow>([], {});
+
+    assert.deepEqual(result, { creates: [], updates: [], removes: [] });
+  });
+
+  it("P1-14 EXTENDED: a non-empty baseline with an empty log ALSO resolves to three empty sets — existence of server data alone must never manufacture a request", () => {
+    const baseline = baselineOf([
+      ["r1", row("r1", "real")],
+      ["r2", row("r2", "also real")],
+    ]);
+
+    const result = resolveChanges<TestRow>([], { baseline });
 
     assert.deepEqual(result, { creates: [], updates: [], removes: [] });
   });
@@ -133,25 +151,141 @@ describe("resolveChanges — edit log resolved into create/update/remove sets", 
     );
   });
 
-  it("JUDGMENT CALL: a remove for a rowId that never touched the server still lands in removes — resolveChanges has no baseline to re-derive server existence from, so it trusts the log's op", () => {
-    // In production `editLog.ts` annihilates an add-then-remove pair before
-    // it ever reaches a well-formed log (`editLog.test.ts`'s "ANNIHILATES"
-    // case) — a genuinely client-only row's remove never survives to reach
-    // this function via the real reducer. Unlike `projectRows` (which
-    // receives a `baseline` array and so CAN and does drop this shape),
-    // `resolveChanges`'s signature carries no baseline map at all: it has
-    // no way to tell "never existed server-side" apart from "existed and
-    // was removed," and does not pretend to. Every `remove` op the log
-    // hands it is reported, unconditionally — trusting the invariant the
-    // reducer already guarantees, rather than re-deriving it here with
-    // information this layer was deliberately not given.
-    const log: EditLog<TestRow> = [
-      remove("client-only-uuid", row("client-only-uuid", "never existed")),
-    ];
+  describe("options.baseline — orphan-drop rule (mirrors projectRows' orphan rule)", () => {
+    it("an update targeting a rowId absent from a supplied baseline is dropped entirely — not sent, not reported", () => {
+      const baseline = baselineOf([["other", row("other", "survives")]]);
+      const log: EditLog<TestRow> = [
+        update("vanished-1", row("vanished-1", "stale restored intent")),
+      ];
+
+      const result = resolveChanges(log, { baseline });
+
+      assert.deepEqual(result.updates, []);
+    });
+
+    it("a remove targeting a rowId absent from a supplied baseline is dropped entirely — no soft-delete body, no bare rowId either", () => {
+      const baseline = baselineOf([["r1", row("r1", "real")]]);
+      const log: EditLog<TestRow> = [
+        remove("ghost", row("ghost", "never existed")),
+      ];
+      const softDelete: SoftDeleteDescriptor<TestRow> = {
+        patch: {},
+        isDeleted: () => false,
+      };
+
+      const result = resolveChanges(log, { baseline, softDelete });
+
+      assert.deepEqual(result.removes, []);
+    });
+
+    it("an add is NEVER treated as an orphan, even though its rowId is (correctly) absent from baseline — an add is inherently a row baseline doesn't have yet", () => {
+      const baseline = baselineOf([["r1", row("r1", "real")]]);
+      const log: EditLog<TestRow> = [add("new-1", row("new-1", "fresh"))];
+
+      const result = resolveChanges(log, { baseline });
+
+      assert.deepEqual(result.creates, [row("new-1", "fresh")]);
+    });
+
+    it("JUDGMENT CALL / documented fallback: with NO baseline supplied at all, an update or remove for any rowId is trusted and dispatched — resolveChanges cannot check what it isn't given", () => {
+      const log: EditLog<TestRow> = [
+        update("mystery", row("mystery", "restored intent")),
+      ];
+
+      const result = resolveChanges(log, {});
+
+      assert.deepEqual(result.updates, [row("mystery", "restored intent")]);
+    });
+  });
+
+  describe("REGRESSION (review finding 1) — a remove for a row that never touched the server must not reach the wire as a phantom soft-delete create", () => {
+    it("the exact executed sequence: add(client-only) -> remove (annihilates) -> remove (appends fresh) still drops out of removes once a complete baseline is supplied", () => {
+      // Reproduces editLog.ts's own "FIX (post-review)" note on
+      // `coalesceOntoRemove`: annihilation erases a rowId's LOG HISTORY,
+      // not its existence — a second `remove` for the same rowId reaches
+      // `appendFresh`, which appends unconditionally (it never consults
+      // baseline for a `remove`). So a rowId that never reached the
+      // server CAN surface in a well-formed log with `op: "remove"`.
+      const baseline = baselineOf([["someone-else", row("someone-else", "x")]]);
+      const clientOnlyId = "client-only-uuid";
+
+      const afterAdd = applyEditToLog(
+        [],
+        add(clientOnlyId, row(clientOnlyId, "v1")),
+        { baseline },
+      );
+      const afterFirstRemove = applyEditToLog(
+        afterAdd,
+        remove(clientOnlyId, row(clientOnlyId, "v1")),
+        { baseline },
+      );
+      assert.deepEqual(afterFirstRemove, []); // annihilated — sanity check
+
+      const log = applyEditToLog(
+        afterFirstRemove,
+        remove(clientOnlyId, row(clientOnlyId, "v2")),
+        { baseline },
+      );
+      // Sanity check: the reducer really did append a fresh `remove` for a
+      // rowId `baseline` never had — this is the false-invariant shape.
+      assert.deepEqual(log, [remove(clientOnlyId, row(clientOnlyId, "v2"))]);
+
+      const softDelete: SoftDeleteDescriptor<TestRow> = {
+        patch: { label: "entered-in-error-marker" },
+        isDeleted: (r) => r.label === "entered-in-error-marker",
+      };
+
+      const result = resolveChanges(log, { baseline, softDelete });
+
+      // Dropped as an orphan — NOT a soft-delete body with a client-only
+      // patch and no server id, which would silently create a phantom
+      // entered-in-error row against an upsert-that-may-create endpoint.
+      assert.deepEqual(result.removes, []);
+      assert.deepEqual(result.creates, []);
+      assert.deepEqual(result.updates, []);
+    });
+  });
+
+  describe("REGRESSION (review finding 2) — last-write-wins per rowId before dispatching", () => {
+    it("two `add` entries for the same rowId (a malformed restored draft — each record passes isStructuredEditRecord independently) resolve to ONE create, holding the LAST patch", () => {
+      const log: EditLog<TestRow> = [
+        add("dup", row("dup", "first")),
+        add("dup", row("dup", "second")),
+      ];
+
+      const result = resolveChanges(log, {});
+
+      assert.deepEqual(result.creates, [row("dup", "second")]);
+    });
+
+    it("a stale `add` followed later by an `update` for the same rowId resolves via the LAST entry's op — dispatched as an update, not a create; position follows FIRST appearance", () => {
+      const log: EditLog<TestRow> = [
+        add("dup", row("dup", "stale-add")),
+        update("other", row("other", "unrelated")),
+        update("dup", row("dup", "fresh-update")),
+      ];
+
+      const result = resolveChanges(log, {});
+
+      assert.deepEqual(result.creates, []); // reclassified by the last write
+      assert.deepEqual(result.updates, [
+        row("dup", "fresh-update"), // "dup" first appears at index 0...
+        row("other", "unrelated"), // ...before "other" at index 1
+      ]);
+    });
+  });
+
+  it("an edit with an unrecognized op is silently dropped from every set — not reachable via a validated draft (isStructuredEditRecord already rejects an unknown op string), but documented and pinned regardless", () => {
+    const bogus = {
+      rowId: "x",
+      op: "archive",
+      patch: row("x", "bogus"),
+    } as unknown as RowEdit<TestRow>;
+    const log: EditLog<TestRow> = [bogus];
 
     const result = resolveChanges(log, {});
 
-    assert.deepEqual(result.removes, [{ rowId: "client-only-uuid" }]);
+    assert.deepEqual(result, { creates: [], updates: [], removes: [] });
   });
 
   it("purity — the log/edits and the softDelete descriptor's patch are never mutated; the soft-delete body is a fresh object, not an alias of either source", () => {
@@ -176,6 +310,20 @@ describe("resolveChanges — edit log resolved into create/update/remove sets", 
     assert.notEqual(result.removes[0].row, lastKnown);
     assert.notEqual(result.removes[0].row, softDeletePatch);
     assert.deepEqual(log, logSnapshot);
+  });
+
+  it("creates/updates alias the log's own patch object by reference — no cloning", () => {
+    const addPatch = row("new-1", "fresh");
+    const updatePatch = row("r1", "changed");
+    const log: EditLog<TestRow> = [
+      add("new-1", addPatch),
+      update("r1", updatePatch),
+    ];
+
+    const result = resolveChanges(log, {});
+
+    assert.equal(result.creates[0], addPatch);
+    assert.equal(result.updates[0], updatePatch);
   });
 
   it("does not mutate the input log with a mixed op sequence — returns fresh arrays for every set", () => {
