@@ -245,17 +245,24 @@ describe("deepEqualJson — decided edge cases (documented, not left undefined)"
 });
 
 describe("RowEdit / StructuredEditInput — vocabulary parity with Task 1 (compile-time)", () => {
+  // Two fields, deliberately — a single-field ExampleRow makes "the
+  // complete row" and "a Partial of it" the same type, so a regression
+  // back to `patch: Partial<TRow>` on `update` (the annex's original,
+  // incorrect shape, and the actual mode review round 1 missed) would
+  // type-check anyway and this suite would not catch it.
+  interface ExampleRow {
+    a: string;
+    b: number;
+  }
+
   it("EditLog<TRow> is assignable to `readonly StructuredEditRecord[]` — StructuredEditInput is genuinely the erasure of StructuredEditInputFor<TRow>", () => {
-    interface ExampleRow {
-      a: string;
-    }
     // Canonical shape per src/types/questionnaire/structured.ts:99-106:
     // `rowId` camelCase, `patch` is the COMPLETE row for every op,
     // including `remove`.
     const rowEdit: RowEdit<ExampleRow> = {
       rowId: "row-1",
       op: "update",
-      patch: { a: "x" },
+      patch: { a: "x", b: 1 },
     };
     const editLog: EditLog<ExampleRow> = [rowEdit];
     // If this assignment stops type-checking under `tsc --noEmit`,
@@ -266,5 +273,21 @@ describe("RowEdit / StructuredEditInput — vocabulary parity with Task 1 (compi
     assert.equal(erased.length, 1);
     assert.equal(erased[0].rowId, "row-1");
     assert.equal(erased[0].op, "update");
+  });
+
+  it("rejects a `patch` that carries only SOME of the row's fields on `update` — patch must be the complete row, never Partial<TRow>", () => {
+    // `patch` must be the COMPLETE row for every op, never `Partial<TRow>`.
+    // If `RowEdit`'s `update` variant ever reverts to accepting a partial
+    // patch, the `@ts-expect-error` directive right below stops matching a
+    // real error, and an unused `@ts-expect-error` is itself a `tsc
+    // --noEmit` error — that is what makes this test self-guarding rather
+    // than merely descriptive.
+    const incompletePatch: RowEdit<ExampleRow> = {
+      rowId: "row-2",
+      op: "update",
+      // @ts-expect-error — missing required field `b`.
+      patch: { a: "x" },
+    };
+    assert.equal(incompletePatch.op, "update");
   });
 });

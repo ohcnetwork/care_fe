@@ -67,7 +67,15 @@ export interface ProjectedRow<TRow extends object> {
  * select can already set it back — `SymptomQuestion.tsx:595-601`).
  */
 export interface SoftDeleteDescriptor<TRow extends object> {
-  /** Written onto the row when `removeRow` hits a baseline row. */
+  /**
+   * Written onto the row when `removeRow` hits a baseline row — just the
+   * marker fields (e.g. `{ verification_status: "entered_in_error" }`), on
+   * top of the row's existing values. Deliberately `Partial<TRow>`, unlike
+   * `RowEdit.patch` (above), which must be the row's COMPLETE content:
+   * this `patch` is merged onto an already-known baseline row by the
+   * reducer before it ever becomes a `RowEdit`, so it only needs to carry
+   * what changes, not the whole row.
+   */
   patch: Partial<TRow>;
   /** Does the row already carry the marker? */
   isDeleted: (row: TRow) => boolean;
