@@ -773,6 +773,8 @@
   "appointment_rescheduled": "Appointment has been rescheduled!",
   "appointment_rescheduled_successfully": "Appointment rescheduled successfully",
   "appointment_slot": "Appointment Slot",
+  "appointment_slot_required": "Select an appointment slot before saving",
+  "appointment_slot_selected": "Appointment slot selected",
   "appointment_time": "Appointment Time",
   "appointment_type": "Appointment Type",
   "appointments": "Appointments",

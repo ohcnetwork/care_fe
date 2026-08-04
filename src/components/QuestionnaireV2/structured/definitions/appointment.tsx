@@ -1,28 +1,20 @@
+import { t } from "i18next";
+
+import { SINGLETON_ROW_ID } from "@/components/QuestionnaireV2/structured/core/rowIds";
+import { AppointmentEditor } from "@/components/QuestionnaireV2/structured/types/appointment/AppointmentEditor";
 import {
-  AppointmentQuestion,
-  validateAppointmentQuestion,
-} from "@/components/Questionnaire/QuestionTypes/AppointmentQuestion";
+  needsSlot,
+  toRequests,
+} from "@/components/QuestionnaireV2/structured/types/appointment/model";
 
 import type {
   StructuredInputProps,
   StructuredTypeDefinition,
 } from "@/components/QuestionnaireV2/structured/types";
-import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { useLegacyResponseCallback } from "./adapt";
 
 function AppointmentInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
   if (!props.facilityId) return null;
-  return (
-    <AppointmentQuestion
-      question={props.question}
-      facilityId={props.facilityId}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      disabled={props.disabled}
-      errors={props.errors}
-    />
-  );
+  return <AppointmentEditor {...props} />;
 }
 
 export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
@@ -30,30 +22,22 @@ export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
   component: AppointmentInput,
   requires: ["facilityId"],
   subjects: ["patient", "encounter"],
-  draftPolicy: "exclude",
-  contract: 1,
-  validate: (appointments, questionId, required) =>
-    validateAppointmentQuestion(appointments[0], questionId, required),
-  buildRequests: async (
-    appointments,
-    { patientId, facilityId, questionId },
-  ) => {
-    // `subjects` is patient/encounter, so a patient is always in scope
-    // here — narrowed rather than asserted (the context type is optional
-    // for plugin types that declare a resource subject).
-    if (!patientId || appointments.length === 0) return [];
-    const { note, slot_id, tags } = appointments[0];
-    return [
-      {
-        url: `/api/v1/facility/${facilityId}/slots/${slot_id}/create_appointment/`,
-        method: "POST",
-        body: {
-          note,
-          patient: patientId,
-          tags,
-        },
-        reference_id: structuredReferenceId("appointment", questionId),
-      },
-    ];
-  },
+  // D2. The row is three JSON-safe fields; nothing here is prefetched.
+  draftPolicy: "serialize",
+  contract: 2,
+  toRequests,
+  // The i18n boundary: model.ts's pure needsSlot decision becomes a
+  // translated, row-scoped error here — model.ts must not import i18next.
+  validate: (projection, edits, questionId, required) =>
+    needsSlot(projection, edits, required)
+      ? [
+          {
+            question_id: questionId,
+            field_key: "slot_id",
+            row_id: SINGLETON_ROW_ID,
+            error: t("appointment_slot_required"),
+            required: true,
+          },
+        ]
+      : [],
 };

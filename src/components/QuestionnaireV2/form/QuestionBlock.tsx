@@ -158,6 +158,15 @@ function LeafBlock({
     });
   };
 
+  // A structured question renders its own field-bound errors inline (beside
+  // the control that owns them, via StructuredFieldError); the block-level
+  // list below is only for section-level structured errors (no field_key)
+  // and every error of a non-structured question.
+  const blockErrors =
+    question.type === "structured"
+      ? errors.filter((error) => !error.field_key)
+      : errors;
+
   return (
     // data-question-id is the renderer's stable per-question DOM anchor —
     // hosts scroll to it (outline selection, future scroll-to-error) and
@@ -281,8 +290,15 @@ function LeafBlock({
       </div>
       {/* role="alert" so a validation failure is ANNOUNCED, not only
           drawn: client-side validation writes these straight into the
-          store with no other live region anywhere on the fill page. */}
-      {errors.map((error, i) => (
+          store with no other live region anywhere on the fill page.
+          A structured question's field-bound errors are rendered inline,
+          beside their control, by StructuredFieldError; printing them here
+          as well showed every message twice. SECTION-level structured
+          errors carry no field_key (structured_section_unavailable_required,
+          structured_question_validate_failed) and must stay — they are the
+          hard-block messages. Non-structured questions are untouched, which
+          is what keeps `fillValidation.spec.ts:33-40,47-54` green. */}
+      {blockErrors.map((error, i) => (
         <p key={i} role="alert" className="text-sm text-red-600">
           {error.msg ?? error.error}
         </p>
