@@ -136,3 +136,58 @@ export function isStructuredEditRecord(
     STRUCTURED_EDIT_OPS.includes(candidate.op)
   );
 }
+
+/**
+ * The ingestion-boundary gate for a raw, untrusted edit log (master plan
+ * "Carry-forwards out of Phase 1" item 1). Drops malformed entries (per
+ * {@link isStructuredEditRecord}) and — the carry-forward's actual
+ * subject — collapses a **duplicate `rowId`** to its LAST entry's content,
+ * kept at its FIRST entry's position.
+ *
+ * WHY THIS EXISTS. `structured/core/changes.ts`'s `resolveChanges`
+ * dispatches a rowId at its FIRST log position (content resolved from a
+ * last-write-wins map); `structured/core/projectRows.ts`'s added-rows loop
+ * instead surfaces a rowId at the position of whichever entry the SAME
+ * last-write map happens to hold (its LAST occurrence in a duplicated log),
+ * because it walks `log` directly rather than a pre-deduplicated view. For
+ * a log with at most one entry per `rowId` — the only shape
+ * `editLog.ts`'s `applyEditToLog` can ever build — first and last
+ * occurrence are the same position, so the two loops always agree. They
+ * stop agreeing only for a log with more than one entry sharing a `rowId`,
+ * which is reachable exclusively through an untrusted source (a
+ * hand-edited `localStorage` draft, a server dump written by an older
+ * build) — never through the reducer (`structured/types/appointment/
+ * model.test.ts`'s former "KNOWN GAP" case, now closed, pins exactly this:
+ * a doubly-malformed log made `projectRows` and `resolveChanges` pick two
+ * different rows).
+ *
+ * Reconciling the two loops' internal ORDERING rules would mean touching
+ * two independently reviewed, heavily hardened modules to handle a shape
+ * neither can legitimately produce on its own. The honest fix is upstream
+ * of both: never hand either loop a log with more than one entry per
+ * `rowId` in the first place. This function is that gate. Call it wherever
+ * an untrusted log enters either path — `structured/core/
+ * useStructuredRows.ts`'s `edits` derivation (feeds `projectRows`) and
+ * `fill/submit/composeStructured.ts`'s `structuredEditsOf` (feeds
+ * `resolveChanges`, via `toRequests`) both do — so a doubly-malformed
+ * input is reduced to a well-formed one (at most one entry per `rowId`)
+ * before either loop ever sees it, and the two loops' historical
+ * disagreement becomes unreachable through any real ingestion path.
+ *
+ * Order preserved is Map insertion order: re-`set`ting an existing key
+ * updates its value without moving its position, so a duplicated rowId's
+ * surviving entry sits at its FIRST occurrence — matching
+ * `resolveChanges`' own dispatch position by construction, not by
+ * coincidence.
+ */
+export function sanitizeStructuredEditLog(
+  raw: unknown,
+): StructuredEditRecord[] {
+  if (!Array.isArray(raw)) return [];
+  const byRowId = new Map<string, StructuredEditRecord>();
+  for (const entry of raw) {
+    if (!isStructuredEditRecord(entry)) continue;
+    byRowId.set(entry.rowId, entry);
+  }
+  return [...byRowId.values()];
+}

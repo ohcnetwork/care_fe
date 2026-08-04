@@ -10,6 +10,7 @@ import type {
   EditLog,
 } from "@/components/QuestionnaireV2/structured/core/types";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
+import { sanitizeStructuredEditLog } from "@/types/questionnaire/structured";
 
 import type { AppointmentRow } from "./model";
 import {
@@ -317,25 +318,17 @@ describe("appointment model", () => {
       );
     });
 
-    it("KNOWN GAP (doubly-malformed log only): a duplicate entry for one rowId can make projectValues and toRequests pick DIFFERENT rows — reachable only via a log applyEditToLog itself can never produce", async () => {
-      // The SINGLETON COLLAPSE case above (two distinct rowIds, each
-      // appearing ONCE) happens to agree because `resolveChanges` and
-      // `projectRows` both land on the same position for a log with at
-      // most one entry per rowId. This case does NOT have that shape —
-      // rowId "a" appears TWICE — and is pinned here precisely because it
-      // does NOT agree, per review: `resolveChanges` dispatches "a" at its
-      // FIRST occurrence (index 0) but resolves its CONTENT from the
-      // last-write-wins map (`aLast`), while `projectRows`' add loop
-      // pushes "a" at its LAST occurrence (index 2) — so `rows[0]` is "b"'s
-      // entry (pushed at index 1, before "a"'s last occurrence at index 2)
-      // while `resolveChanges().creates[0]` is "a"'s LATEST content. Two
-      // different rows, honestly reproduced rather than silently agreeing
-      // by accident. `resolveSingletonRow`'s doc comment states the
-      // guarantee is scoped to exclude this exact shape, and why it's
-      // unreachable from any log `applyEditToLog` builds incrementally
-      // (its own one-entry-per-rowId invariant) or `pruneOrphanEdits`
-      // leaves behind (removes entries, never duplicates one) — only a
-      // hand-crafted/doubly-corrupted draft can produce it.
+    it("CLOSED GAP (formerly KNOWN GAP): fed RAW, a doubly-malformed log still makes projectRows and resolveChanges (via toRequests) pick DIFFERENT rows...", async () => {
+      // ...which is exactly why neither loop is the fix. `resolveChanges`
+      // dispatches "a" at its FIRST occurrence (index 0) but resolves its
+      // CONTENT from the last-write-wins map (`aLast`), while `projectRows`'
+      // add loop pushes "a" at its LAST occurrence (index 2) — so `rows[0]`
+      // is "b"'s entry (pushed at index 1, before "a"'s last occurrence at
+      // index 2) while `resolveChanges().creates[0]` is "a"'s LATEST
+      // content. This part of the test is UNCHANGED from the original
+      // "KNOWN GAP" case — it still demonstrates the raw disagreement,
+      // because `projectRows`/`resolveChanges` themselves were deliberately
+      // left untouched by the fix (see the next case).
       const aFirst = row({ note: "a-first", slot_id: "sA1" });
       const bOnly = row({ note: "b-only", slot_id: "sB" });
       const aLast = row({ note: "a-last", slot_id: "sA2" });
@@ -353,6 +346,55 @@ describe("appointment model", () => {
         (projected[0] as { type: "appointment"; value: AppointmentRow[] })
           .value[0],
         bOnly,
+      );
+      assert.equal(
+        requests[0]?.url,
+        "/api/v1/facility/fac-1/slots/sA2/create_appointment/",
+      );
+      assert.deepEqual(requests[0]?.body, {
+        note: "a-last",
+        patient: CTX.patientId,
+        tags: aLast.tags,
+      });
+    });
+
+    it("CLOSED GAP: once the SAME doubly-malformed log passes through sanitizeStructuredEditLog (the real ingestion boundary), projectRows and toRequests AGREE", async () => {
+      // Master plan "Carry-forwards out of Phase 1" item 1's actual fix:
+      // `structured/core/useStructuredRows.ts`'s `edits` derivation and
+      // `fill/submit/composeStructured.ts`'s `structuredEditsOf` both run
+      // `response.edits` through `sanitizeStructuredEditLog`
+      // (`types/questionnaire/structured.ts`) before it ever reaches
+      // `projectRows`/`resolveChanges` — so through any REAL app pathway,
+      // the raw log the previous case feeds directly to those two
+      // functions can never arrive un-deduplicated in the first place.
+      // Sanitizing collapses rowId "a" to ONE entry — last content
+      // (`aLast`), first position — which is exactly what makes the two
+      // loops land on the SAME row: `projectRows`' add loop has nothing
+      // left to disagree about once each rowId appears at most once, and
+      // `resolveChanges` was already resolving "a"'s content this way.
+      const aFirst = row({ note: "a-first", slot_id: "sA1" });
+      const bOnly = row({ note: "b-only", slot_id: "sB" });
+      const aLast = row({ note: "a-last", slot_id: "sA2" });
+      const raw: StructuredEdit<AppointmentRow>[] = [
+        { rowId: "a", op: "add", patch: aFirst },
+        { rowId: "b", op: "add", patch: bOnly },
+        { rowId: "a", op: "add", patch: aLast },
+      ];
+
+      const sanitized = sanitizeStructuredEditLog(
+        raw,
+      ) as EditLog<AppointmentRow>;
+
+      const rows = projectRows([], sanitized, {});
+      const projected = projectValues(rows.map((entry) => entry.row));
+      const requests = await toRequests(sanitized, CTX);
+
+      // Both sides now agree: "a"'s LAST content, in BOTH the projection's
+      // first row and the first compiled request.
+      assert.deepEqual(
+        (projected[0] as { type: "appointment"; value: AppointmentRow[] })
+          .value[0],
+        aLast,
       );
       assert.equal(
         requests[0]?.url,

@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
+import {
+  useQuestionResponse,
+  useSetQuestionProjection,
+} from "@/components/QuestionnaireV2/form/engine/store";
 import type { StructuredEditRecord } from "@/types/questionnaire/structured";
+import { sanitizeStructuredEditLog } from "@/types/questionnaire/structured";
 
 import { deepEqualJson } from "./deepEqual";
 import { findDuplicateCandidates } from "./duplicates";
@@ -10,7 +14,12 @@ import {
   toBaselineMap,
   type ApplyEditOptions,
 } from "./editLog";
-import { findOrphanRowIds, projectRows, pruneOrphanEdits } from "./projectRows";
+import {
+  findOrphanRowIds,
+  projectRows,
+  pruneOrphanEdits,
+  truncateToSingletonRow,
+} from "./projectRows";
 import { newRowId, SINGLETON_ROW_ID } from "./rowIds";
 import {
   decideInitialEditsSeed,
@@ -51,22 +60,26 @@ import type {
  * always the complete row, no `StructuredRowEdit`/`edits.ts`). Deliberate
  * departures from the annex's draft, beyond vocabulary:
  *
- *  1. **No new `form/engine/store.ts` export.** The annex's §10 body adds a
- *     `useSetQuestionProjection` atom (a projection-only write that
- *     deliberately skips `clearQuestionErrorsInState`, so a background
- *     baseline refetch cannot wipe a submit-time error). This task's
- *     territory is `structured/core/*` only; `form/engine/store.ts` is out
- *     of bounds. Both this hook's writes therefore go through the existing
- *     `useQuestionResponse` setter, which DOES clear the question's errors
- *     on every write — including the passive baseline-driven refresh
- *     effect below. Documented here as a known, deliberate deviation
- *     (recorded by review as a plan carry-forward, not this task's to
- *     close): a refetch arriving while a submit error is showing will
- *     clear it. Every real type's baseline query is expected to have
- *     settled long before a submit error could exist, so the window this
- *     affects is narrow — but a future task revisiting
- *     `form/engine/store.ts` should reintroduce the annex's split write if
- *     this proves to matter in practice.
+ *  1. **CARRY-FORWARD CLOSED (final push, Batch E item 5b).** The original
+ *     Task 7 draft of this file deliberately deviated from the annex here:
+ *     its §10 body adds a `useSetQuestionProjection` atom (a
+ *     projection-only write that skips `clearQuestionErrorsInState`, so a
+ *     background baseline refetch cannot wipe a submit-time error), but
+ *     Task 7's territory was `structured/core/*` only — `form/engine/
+ *     store.ts` was out of bounds, so both this hook's writes went through
+ *     the existing `useQuestionResponse` setter, which DOES clear the
+ *     question's errors on every write, including the passive
+ *     baseline-driven refresh effect below. That gap is now closed:
+ *     `useSetQuestionProjection` (`form/engine/store.ts`) is the
+ *     projection-only setter the annex called for, and the passive refresh
+ *     effect below writes through IT instead of `updateResponse` — a
+ *     background refetch can no longer clear a showing server error while
+ *     the offending value is still on screen. Every MUTATOR-driven write
+ *     (`commit`, called from `applyEdit`/`addRow`/`updateRow`/`removeRow`/
+ *     `setRow`/`clearRow`/the orphan-prune effect/the initial-edits seed)
+ *     still goes through `updateResponse` deliberately — those are real
+ *     user (or seed) intent and clearing this question's prior errors on
+ *     an actual edit is correct, same as every other question type.
  *  2. **The passive refresh effect below compares `values` structurally
  *     (`deepEqualJson`) against the response's OWN current `values`** —
  *     not a `lastWritten` ref, and not by reference — for two reasons
@@ -95,6 +108,37 @@ import type {
  *     `useState`) BEFORE `commit(pruneOrphanEdits(baseline, edits))` drops
  *     it from `edits` — no annex equivalent, since the annex predates
  *     `findOrphanRowIds` entirely.
+ *  5. **`edits` is read through `sanitizeStructuredEditLog`** (`types/
+ *     questionnaire/structured.ts`), not a bare cast of `response?.edits`
+ *     (CARRY-FORWARD CLOSED, final push, Batch E item 5a). A restored
+ *     draft's log is validated per-entry (`isStructuredEditRecord`) but
+ *     never de-duplicated by `rowId` before reaching this hook, while
+ *     `fill/submit/composeStructured.ts`'s `structuredEditsOf` — the submit
+ *     path's reader of the SAME `response.edits` field — already ran the
+ *     identical sanitization. A doubly-malformed log (two entries sharing
+ *     one `rowId`) fed unsanitized to `projectRows` could therefore show a
+ *     different row than a sanitized log would submit
+ *     (`structured/types/appointment/model.test.ts`'s former "KNOWN GAP"
+ *     case, now closed). Routing this hook's own read through the same
+ *     gate means both `projectRows` (display) and `resolveChanges` (submit,
+ *     via `structuredEditsOf`) always start from an IDENTICAL, already
+ *     well-formed log — the disagreement becomes unreachable by
+ *     construction rather than by reconciling the two loops' internal
+ *     ordering rules (see `sanitizeStructuredEditLog`'s own doc comment).
+ *  6. **`mode: "single"` truncates `values`/the committed log to at most
+ *     `rows[0]`'s rowId** (CARRY-FORWARD CLOSED, final push, Batch E item
+ *     5c) via `commit`'s call to `projectRows.ts`'s
+ *     `truncateToSingletonRow`. Previously `commit` wrote whatever log a
+ *     mutator (or the `initialEdits` seed) constructed verbatim, even
+ *     though `SingleRowController.row` only ever shows `rows[0]` — a
+ *     singleton that legitimately accumulates a second rowId (e.g. an
+ *     `initialEdits` seed recorded under `singletonRowId` before a
+ *     REAL baseline row, keyed by its own different id, resolves) would
+ *     silently SUBMIT two rows while the clinician only ever saw one.
+ *     Unreachable for every type shipped so far (each singleton's baseline
+ *     rowId and `singletonRowId` option already agree), but closed by
+ *     construction rather than left as a latent trap for the next one. See
+ *     `truncateToSingletonRow`'s own doc comment for the full argument.
  *
  * CAVEAT for every mutator (`applyEdit`/`addRow`/`addRows`/`updateRow`/
  * `removeRow`/`setRow`/`clearRow`/`resetEdits`): each reads `edits` from
@@ -319,9 +363,18 @@ export function useStructuredRows<
   } = options;
 
   const [response, updateResponse] = useQuestionResponse(questionId);
+  // Projection-only write — see this file's doc comment, item 1 (CARRY-
+  // FORWARD CLOSED): used by the passive baseline-refresh effect below so a
+  // background refetch cannot clear this question's showing errors.
+  const setProjection = useSetQuestionProjection(questionId);
 
+  // Sanitized at the read boundary (item 5, this file's doc comment) — the
+  // SAME gate `fill/submit/composeStructured.ts`'s `structuredEditsOf` runs
+  // `response.edits` through for the submit path, so `projectRows` (below)
+  // and `resolveChanges` (submit, via that other reader) always start from
+  // an identical, already well-formed log.
   const edits = useMemo<EditLog<TRow>>(
-    () => (response?.edits ?? []) as EditLog<TRow>,
+    () => sanitizeStructuredEditLog(response?.edits) as EditLog<TRow>,
     [response?.edits],
   );
 
@@ -363,16 +416,29 @@ export function useStructuredRows<
 
   // The one write that carries intent. `values` and `edits` land in a
   // single atom write so no consumer ever sees them disagree.
+  //
+  // SINGLETON TRUNCATION (this file's doc comment, item 6 — CARRY-FORWARD
+  // CLOSED): for `mode: "single"`, `nextEdits` is run through
+  // `truncateToSingletonRow` before anything derives from it, so `values`
+  // and the persisted `edits` can never carry a second rowId that
+  // `SingleRowController.row` (always `rows[0]`) never showed the
+  // clinician in the first place. A no-op for every log with 0 or 1
+  // rowIds (every real singleton today), by that function's own
+  // reference-equality return contract.
   const commit = useCallback(
     (nextEdits: EditLog<TRow>) => {
-      const nextRows = projectRows(baseline, nextEdits, projectOpts);
+      const effectiveEdits =
+        mode === "single"
+          ? truncateToSingletonRow(baseline, nextEdits, projectOpts)
+          : nextEdits;
+      const nextRows = projectRows(baseline, effectiveEdits, projectOpts);
       const nextValues = projectValues(nextRows.map((entry) => entry.row));
       updateResponse({
         values: nextValues,
-        edits: nextEdits as unknown as StructuredEditRecord[],
+        edits: effectiveEdits as unknown as StructuredEditRecord[],
       });
     },
-    [baseline, projectOpts, projectValues, updateResponse],
+    [baseline, projectOpts, projectValues, mode, updateResponse],
   );
 
   // Baseline moved (first load, refetch, invalidation): refresh the
@@ -384,11 +450,14 @@ export function useStructuredRows<
   // and an `enable_when` remount whose `response.values` already matches
   // the freshly computed projection is likewise a no-op — neither writes
   // again, so neither clears this question's errors. See this file's doc
-  // comment, item 2, for the two review findings this fixes.
+  // comment, item 2, for the two review findings this fixes. Writes
+  // through `setProjection` (item 1, CARRY-FORWARD CLOSED), not
+  // `updateResponse` — this is a PASSIVE mirror of baseline movement, not
+  // user intent, so it must not clear this question's showing errors.
   useEffect(() => {
     if (deepEqualJson(response?.values, values)) return;
-    updateResponse({ values });
-  }, [response?.values, values, updateResponse]);
+    setProjection(values);
+  }, [response?.values, values, setProjection]);
 
   // PHASE 2 CARRY-FORWARD FIX (master plan "Carry-forwards out of Phase 1"
   // item 1 — owner: Phase 2, before the first v2 type ships): a rowId

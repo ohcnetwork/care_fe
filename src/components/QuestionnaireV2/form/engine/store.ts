@@ -270,6 +270,52 @@ export function useQuestionResponse(questionId: string) {
   return useAtom(responseAtom);
 }
 
+/**
+ * A projection-only write for a structured question's `values` mirror —
+ * deliberately skips {@link clearQuestionErrorsInState}, unlike
+ * {@link useQuestionResponse}'s setter.
+ *
+ * WHY THIS EXISTS (master plan "Carry-forwards out of Phase 1" item 2 /
+ * design annex `docs/superpowers/specs/annexes/p1-state-core.md` §10).
+ * `structured/core/useStructuredRows.ts` writes this question's response
+ * from two different kinds of event: a MUTATOR (`applyEdit`/`addRow`/
+ * `updateRow`/`removeRow`/`setRow`/`clearRow`, the orphan-prune effect, the
+ * `initialEdits` seed) records real intent — clearing this question's
+ * prior errors on that write is correct, same as every other question
+ * type, and those all go through `useQuestionResponse`'s setter
+ * unchanged. But `useStructuredRows` ALSO mirrors `baseline + edits` into
+ * `values` on every baseline movement (first load, refetch, cache
+ * invalidation) via a passive effect that records no new intent at all —
+ * before this setter existed, that effect had no choice but to reuse
+ * `useQuestionResponse`'s setter too, so a background refetch landing
+ * while a submit-time server error was showing on this question would
+ * silently clear that error while the offending value stayed on screen
+ * unchanged, letting the clinician believe the problem was resolved. This
+ * setter is the fix: a PASSIVE projection refresh writes `values` alone
+ * and leaves `errorsAtom` untouched, so only genuine user (or seed) intent
+ * ever clears a question's errors.
+ *
+ * Scoped to `values` alone (never `edits`) on purpose — nothing that only
+ * mirrors baseline movement should ever be able to touch the edit log,
+ * which is the one thing drafts persist and submit reads.
+ */
+export function useSetQuestionProjection(questionId: string) {
+  const setAtom = useMemo(
+    () =>
+      atom(null, (get, set, values: ResponseValue[]) => {
+        const previous = get(responsesAtom);
+        const current = previous[questionId];
+        if (!current) return;
+        set(responsesAtom, {
+          ...previous,
+          [questionId]: { ...current, values },
+        });
+      }),
+    [questionId],
+  );
+  return useAtom(setAtom)[1];
+}
+
 /** Shared enable_when resolution — extracted (unchanged semantics) so every
  *  consumer (useQuestionEnabled, the visibility hooks below, and
  *  form/validation.ts) evaluates identically. Exported so the fill path

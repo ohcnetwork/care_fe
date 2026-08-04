@@ -400,3 +400,77 @@ export function pruneOrphanEdits<TRow extends object>(
   const orphanSet = new Set(orphanRowIds);
   return log.filter((edit) => !orphanSet.has(edit.rowId));
 }
+
+/**
+ * Restricts an edit log to at most the ONE rowId {@link projectRows} would
+ * show as `rows[0]` for the SAME `(baseline, log)` pair — master plan
+ * "Carry-forwards out of Phase 1" item 3 ("`mode: 'single'` at-most-one-row
+ * truncation").
+ *
+ * WHY THIS EXISTS. `useStructuredRows`'s singleton mode
+ * (`SingleRowController.row`) only ever shows `rows[0]` to the clinician —
+ * `mode === "single"` callers never render a second row. But nothing
+ * upstream of this function stopped the edit log ITSELF from holding a
+ * second, different rowId: `useStructuredRows`'s `initialEdits` seed (e.g.
+ * `encounter`'s `?toDischarge`) writes under `singletonRowId` (defaulting
+ * to `SINGLETON_ROW_ID`), and an `add` edit is never treated as an orphan
+ * regardless of `baseline` (`findOrphanRowIds`'s predicate excludes `add`
+ * unconditionally) — so if a REAL baseline row for the same singleton
+ * question ever resolves under its OWN, different rowId (its server id,
+ * not `singletonRowId`) while that seeded `add` is still in the log, the
+ * two rowIds coexist forever: `rows` (this module's `projectRows`) would
+ * carry both, `rows[0]` (whichever `projectRows`' baseline-first ordering
+ * picks) is the only one the clinician ever sees, but a caller that writes
+ * `edits`/`values` from EVERY projected row — not just `rows[0]` — would
+ * silently submit BOTH rows on Save. This function is the fix: it names
+ * the single rowId that belongs in a singleton's committed state, so a
+ * caller (`useStructuredRows`'s `commit`) can filter the log down to it
+ * before persisting, instead of trusting every mutator/seed to only ever
+ * touch one rowId on its own.
+ *
+ * UNREACHABLE FOR EVERY TYPE SHIPPED SO FAR — closed by construction
+ * anyway, not left as a latent trap for the next singleton. Every
+ * singleton today either has no real baseline at all (`appointment`,
+ * `time_of_death` — `createSeed`-only, baseline permanently `[]`, so
+ * `singletonRowId` never collides with anything) or keys its baseline row
+ * with the SAME id `singletonRowId` is set to (`encounter`, keyed by its
+ * own id, passed explicitly as `singletonRowId`) — so `rows` never
+ * legitimately holds more than one entry for any real singleton today.
+ *
+ * Keeps whichever rowId {@link projectRows} would show FIRST — baseline
+ * rows before added rows, per that function's own step 1/2 ordering — so
+ * this function's notion of "the one row" is defined in terms of the exact
+ * same projection the clinician sees, not a second, independent rule that
+ * could disagree with it.
+ *
+ * Pure and total: never mutates `baseline` or `log`; returns the SAME
+ * `log` reference when there is nothing to drop (0 or 1 entries already,
+ * or every entry already shares the kept rowId) so a caller can skip a
+ * write when the result is reference-equal to its input — same convention
+ * as {@link pruneOrphanEdits}.
+ */
+export function truncateToSingletonRow<TRow extends object>(
+  baseline: readonly BaselineRow<TRow>[] | undefined,
+  log: EditLog<TRow>,
+  options: ProjectRowsOptions<TRow> = {},
+): EditLog<TRow> {
+  if (log.length === 0) return log;
+  // Deliberately checks the FULL PROJECTION's row count, not `log.length`
+  // — a baseline can contribute rows the log never mentions at all (the
+  // exact bug shape this function exists for: a real baseline row under
+  // its own id, plus a single seeded `add` under a DIFFERENT id, is a
+  // one-entry log that still projects TWO rows).
+  const rows = projectRows(baseline, log, options);
+  if (rows.length <= 1) return log; // nothing to truncate
+  const keepRowId = rows[0]?.rowId;
+  // No row projects at all (e.g. every entry is an orphan against a known
+  // baseline) — nothing to keep, but also nothing this function should
+  // invent an opinion about; leave `log` untouched for whatever else
+  // (orphan pruning) already handles that case. Unreachable alongside
+  // `rows.length > 1` in practice (a non-empty `rows` always has a
+  // `rows[0]`) — kept as a defensive, honest `undefined` check rather than
+  // a non-null assertion.
+  if (keepRowId === undefined) return log;
+  const truncated = log.filter((edit) => edit.rowId === keepRowId);
+  return truncated.length === log.length ? log : truncated;
+}

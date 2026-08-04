@@ -1,6 +1,6 @@
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { StructuredEditRecord } from "@/types/questionnaire/structured";
-import { isStructuredEditRecord } from "@/types/questionnaire/structured";
+import { sanitizeStructuredEditLog } from "@/types/questionnaire/structured";
 
 import type {
   StructuredBatchEntry,
@@ -19,7 +19,15 @@ import type {
  * dropped rather than thrown on, and duplicates collapse to the last one
  * per `rowId`: the "at most one edit per rowId" invariant every differ
  * relies on to decide POST-vs-PUT, and a hand-edited draft must not be
- * able to make one row emit two conflicting requests.
+ * able to make one row emit two conflicting requests. That sanitization is
+ * `sanitizeStructuredEditLog` (`types/questionnaire/structured.ts`) — the
+ * SAME ingestion-boundary gate `structured/core/useStructuredRows.ts` runs
+ * its own `response.edits` through, so a doubly-malformed log is reduced to
+ * a well-formed one (at most one entry per `rowId`, in FIRST-occurrence
+ * order) before EITHER the projection (`projectRows`) or the submit
+ * compiler (`resolveChanges`, via `toRequests` below) ever sees it — see
+ * that function's doc comment for the full "why this must happen upstream
+ * of both" argument (master plan "Carry-forwards out of Phase 1" item 1).
  *
  * DIVERGENCE FROM THE DESIGN ANNEX (`docs/superpowers/specs/annexes/
  * p1-shim.md` §a.7): the annex places this function in
@@ -38,14 +46,7 @@ import type {
 export function structuredEditsOf(
   response: QuestionnaireResponse | undefined,
 ): StructuredEditRecord[] {
-  const raw = response?.edits;
-  if (!Array.isArray(raw)) return [];
-  const byRowId = new Map<string, StructuredEditRecord>();
-  for (const entry of raw) {
-    if (!isStructuredEditRecord(entry)) continue;
-    byRowId.set(entry.rowId, entry);
-  }
-  return [...byRowId.values()];
+  return sanitizeStructuredEditLog(response?.edits);
 }
 
 /**
