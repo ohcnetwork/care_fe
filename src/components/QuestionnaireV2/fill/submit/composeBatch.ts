@@ -2,6 +2,7 @@ import {
   buildLinkIndex,
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
+import { isV2Definition } from "@/components/QuestionnaireV2/structured/contract";
 import type { ResolvedStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 import {
   resolveStructuredSlotState,
@@ -27,6 +28,10 @@ import type {
   SubmitResult,
 } from "@/types/questionnaire/questionnaireApi";
 
+import {
+  composeStructuredV2Requests,
+  structuredEditsOf,
+} from "./composeStructured";
 import { serializeResponseValues } from "./serializeValues";
 
 /** Body of the completion PUT for a resumed server draft
@@ -72,28 +77,27 @@ export class StructuredBuildError extends Error {
   }
 }
 
-/** `definition.buildRequests` behind the containment boundary — a
+/** `definition.buildRequests` (v1) / `definition.toRequests` (v2, via
+ *  `composeStructuredV2Requests`) behind the containment boundary — a
  *  synchronous throw and a rejected promise both become one
- *  `StructuredBuildError`.
- *
- *  TEMPORARY CONTRACT-V2 STUB (Task 6 compile-compat, pending Task 8):
- *  `ResolvedStructuredType` is now a `contract`-discriminated union
- *  (`structured/registry.ts`) and its v2 arm has no `buildRequests` at
- *  all, so an unguarded call no longer type-checks. No core or plugin
- *  registration is contract 2 yet (every one of the eleven core
- *  definitions is `contract: 1` in Phase 1), so the branch below is
- *  unreachable today — it exists only to keep this file compiling against
- *  the union. Task 8 ("the shim forks", design annex `p1-shim.md` §c.1)
- *  replaces it with the real leg: `definition.toRequests(structuredEditsOf(response),
- *  context)`. The v1 path below is byte-identical to the pre-Task-6 call. */
+ *  `StructuredBuildError`, pinned to the question that produced it. */
 async function buildStructuredRequests(
   definition: ResolvedStructuredType,
-  data: unknown[],
+  response: QuestionnaireResponse,
   context: StructuredRequestContext,
 ): Promise<StructuredBatchEntry[]> {
   try {
-    if (definition.contract === 2) return [];
-    return await definition.buildRequests(data, context);
+    if (isV2Definition(definition)) {
+      // Contract v2: only what the clinician CHANGED. The projection —
+      // the patient's existing rows — is display state and never reaches
+      // a domain endpoint, so an untouched section cannot re-upsert
+      // anything (P1-14, structurally, for every v2 type at once).
+      return await composeStructuredV2Requests(definition, response, context);
+    }
+    // Contract v1: the whole recorded array, dirty-row filtering left to
+    // the type (`definitions/diagnosis.tsx`). Byte-identical to the
+    // pre-shim call.
+    return await definition.buildRequests(structuredDataAny(response), context);
   } catch (error) {
     throw new StructuredBuildError(context.questionId, error);
   }
@@ -210,10 +214,17 @@ export async function composeBatch({
         // QUESTIONNAIRE's declared subject_type, not the session's
         // runtime subject — so the explicit gate stays on top of it.
         if (!patientBound && definition.source !== "plugin") continue;
-        const data = structuredDataAny(response);
-        if (data.length === 0) continue;
+        // v1 asks "is anything recorded", v2 asks "did anything change".
+        // Same short-circuit shape, opposite meaning — and for v2 that
+        // one difference is the whole P1-14 fix: a section displaying
+        // twelve prefetched rows and holding no edits contributes zero
+        // requests, before any type code runs.
+        const hasWork = isV2Definition(definition)
+          ? structuredEditsOf(response).length > 0
+          : structuredDataAny(response).length > 0;
+        if (!hasWork) continue;
         structuredWork.push(
-          buildStructuredRequests(definition, data, {
+          buildStructuredRequests(definition, response, {
             patientId: patientBound?.patientId,
             encounterId: renderCtx.encounterId,
             facilityId: renderCtx.facilityId,

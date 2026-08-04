@@ -2,6 +2,7 @@ import {
   entryHasContent,
   initializeResponses,
 } from "@/components/QuestionnaireV2/form/engine/store";
+import { isV2Definition } from "@/components/QuestionnaireV2/structured/contract";
 import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -69,11 +70,41 @@ function draftKey(scope: FillDraftScope): string {
 }
 
 /**
+ * One response as a draft stores it.
+ *
+ * A contract-v2 structured question keeps its EDIT LOG and drops its
+ * PROJECTION: those rows are the query layer's copy of the server's data,
+ * which a draft has no business persisting and every business
+ * re-fetching. Persisting them is what made `draftPolicy: "exclude"` a
+ * blanket policy in the first place — restoring stale clinical rows and
+ * re-upserting them could clobber edits made elsewhere. Edits are small,
+ * JSON-safe and meaningful without the baseline (each carries its whole
+ * row, per the canonical edit vocabulary), so a restore re-fetches the
+ * rows and re-projects the log on top.
+ *
+ * Everything else — plain answers, v1 structured values — is stored
+ * verbatim (same object reference), which is what keeps the v1 path
+ * byte-identical: this function is a no-op for every response that isn't a
+ * resolved contract-v2 structured question.
+ */
+export function draftResponseForStorage(
+  response: QuestionnaireResponse,
+): QuestionnaireResponse {
+  if (!response.structured_type) return response;
+  const resolved = resolveStructuredType(response.structured_type);
+  if (!resolved || !isV2Definition(resolved)) return response;
+  return { ...response, values: [] };
+}
+
+/**
  * Split responses into draft-safe entries and skipped structured content.
  * Types with `draftPolicy: "exclude"` (every adapted legacy type: their
  * values conflate prefetched server rows with user input, and `files`
  * holds raw File objects) never enter the draft — restoring stale
  * clinical rows and re-upserting them could clobber edits made elsewhere.
+ * A "safe" entry still goes through `draftResponseForStorage`, which
+ * strips a contract-v2 structured question's projection down to its edit
+ * log before it is stored.
  */
 function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
   safe: Record<string, QuestionnaireResponse>;
@@ -87,15 +118,37 @@ function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
       // An unresolvable type (its plugin isn't loaded) is treated as
       // "exclude": nothing here knows whether its values are serializable,
       // and a restore would hand them to a component that may never come
-      // back.
+      // back. Under contract v2 `files` is the only legitimate "exclude"
+      // (raw `File` objects); under v1 every type is excluded because its
+      // values conflate prefetched server rows with user input.
       if (!resolved || resolved.draftPolicy === "exclude") {
         if (response.values.some(entryHasContent)) structuredSkipped = true;
         continue;
       }
     }
-    safe[id] = response;
+    safe[id] = draftResponseForStorage(response);
   }
   return { safe, structuredSkipped };
+}
+
+/**
+ * Does this stored response hold anything a draft exists to preserve?
+ *
+ * Plain answers and notes as before — plus, for a contract-v2 structured
+ * question, the EDIT LOG, because `partitionForDraft` deliberately
+ * stripped its `values`. Without this clause a section full of pending
+ * clinical edits would read as empty, `saveFillDraft` would take its
+ * clear-on-empty branch and the draft would be DELETED instead of written
+ * (P1-3, inverted). Baseline rows still do not count as content: they were
+ * never in the stored copy. Byte-identical to the pre-shim inline check
+ * for v1 (`edits` is always absent there).
+ */
+export function draftResponseHasContent(
+  response: QuestionnaireResponse,
+): boolean {
+  if (response.values.some(entryHasContent)) return true;
+  if ((response.edits?.length ?? 0) > 0) return true;
+  return !!response.note;
 }
 
 /** Is this response one the draft deliberately leaves behind? Mirrors
@@ -168,9 +221,7 @@ function snapshotSession(forms: FillSessionFormState[]): {
   let anyContent = false;
   for (const form of forms) {
     const { safe, structuredSkipped } = partitionForDraft(form.responses);
-    const hasContent = Object.values(safe).some(
-      (response) => response.values.some(entryHasContent) || response.note,
-    );
+    const hasContent = Object.values(safe).some(draftResponseHasContent);
     // `structuredSkipped` ANNOTATES a draft (the restore bar warns about
     // it); it never creates one on its own. Adapted structured widgets
     // seed prefetched server rows into the store in mount effects, so
@@ -198,6 +249,15 @@ function snapshotSession(forms: FillSessionFormState[]): {
  * part of a draft) cannot register as a clinician edit. Without this the
  * mere act of opening a clinical form lit the Draft chip, armed the
  * unsaved-changes prompt and persisted a draft nobody asked for.
+ *
+ * v1 structured types stay out of the signature entirely (excluded by
+ * `partitionForDraft`, per `draftPolicy`). Contract-v2 types are IN it, but
+ * as their edit log with the projection stripped
+ * (`draftResponseForStorage`) — so a baseline refetch (which only ever
+ * rewrites `values`) is invisible to this fingerprint, and a clinician's
+ * edit (which rewrites `edits`) is visible. The exclusion above is no
+ * longer the only mechanism that keeps a passive refresh from registering
+ * as a change.
  */
 export function safeSessionSignature(forms: FillSessionFormState[]): string {
   return JSON.stringify(
@@ -229,9 +289,7 @@ export function saveFillDraft(
     (snapshot) => !live.has(snapshot.questionnaireId),
   );
   const carriedContent = carried.some((snapshot) =>
-    Object.values(snapshot.responses).some(
-      (response) => response.values.some(entryHasContent) || response.note,
-    ),
+    Object.values(snapshot.responses).some(draftResponseHasContent),
   );
   if (!anyContent && !carriedContent) {
     clearFillDraft(scope);

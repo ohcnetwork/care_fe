@@ -6,7 +6,10 @@ import { toast } from "sonner";
 import careConfig from "@careConfig";
 
 import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
+import { isV2Definition } from "@/components/QuestionnaireV2/structured/contract";
+import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
+import { draftResponseForStorage } from "@/components/QuestionnaireV2/fill/draft/fillDraftStore";
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
 import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
@@ -29,14 +32,43 @@ interface UseSaveServerDraftArgs {
   onSaved: () => void;
 }
 
-/** Does any question in the tree record a structured resource? */
-function hasStructuredQuestion(questions: Question[]): boolean {
-  return questions.some(
-    (question) =>
-      question.type === "structured" ||
-      (question.type === "group" &&
-        hasStructuredQuestion(question.questions ?? [])),
-  );
+/**
+ * The structured questions in this tree that a SERVER draft cannot
+ * faithfully carry, by `structured_type`.
+ *
+ * Contract v1 conflates prefetched server rows with user input in
+ * `values[0].value`, so a dump restores stale clinical rows and can
+ * re-upsert data edited elsewhere — the same reason `draftPolicy:
+ * "exclude"` exists for the local draft, and the reason the original gate
+ * refused ANY structured question. Contract v2 dumps the EDIT LOG, which
+ * is user intent alone and re-projects onto a freshly fetched baseline, so
+ * it lifts that refusal — except where the values cannot round-trip at all
+ * (`draftPolicy: "exclude"` — `files`), and except for a type this
+ * deployment cannot resolve, whose contract is simply unknown.
+ */
+function unsupportedDraftStructuredTypes(questions: Question[]): string[] {
+  const blocking: string[] = [];
+  const walk = (list: Question[]) => {
+    for (const question of list) {
+      if (question.type === "group") {
+        walk(question.questions ?? []);
+        continue;
+      }
+      if (question.type !== "structured" || !question.structured_type) {
+        continue;
+      }
+      const resolved = resolveStructuredType(question.structured_type);
+      if (
+        !resolved ||
+        !isV2Definition(resolved) ||
+        resolved.draftPolicy === "exclude"
+      ) {
+        blocking.push(question.structured_type);
+      }
+    }
+  };
+  walk(questions);
+  return blocking;
 }
 
 /**
@@ -61,10 +93,14 @@ function hasStructuredQuestion(questions: Question[]): boolean {
  * - a single form per session — `response_dump.questionnaireResponses` is
  *   ONE `{questionnaire, responses}` pair, so a multi-form session cannot
  *   be represented without silently dropping forms;
- * - no structured question anywhere in the tree — structured values
- *   conflate prefetched server rows with user input, so restoring them
- *   later could re-upsert clinical data edited elsewhere (the same reason
- *   `draftPolicy: "exclude"` exists for the local draft).
+ * - no structured question this deployment cannot dump faithfully
+ *   (`unsupportedDraftStructuredTypes`): a contract-v1 type conflates
+ *   prefetched server rows with user input, so restoring its dump later
+ *   could re-upsert clinical data edited elsewhere (the same reason
+ *   `draftPolicy: "exclude"` exists for the local draft) — contract v2
+ *   dumps the edit log alone and re-projects onto a fresh baseline, so it
+ *   lifts that restriction, except for `files` (`draftPolicy: "exclude"`
+ *   under both contracts) and a type this deployment cannot resolve.
  *
  * Resuming a server draft and saving it again IS allowed: that PUTs the
  * same id, which is how a draft gets iterated across sessions.
@@ -86,7 +122,10 @@ export function useSaveServerDraft({
     if (!careConfig.enableQuestionnaireDraft) return false;
     if (!encounterBound || !primary) return false;
     if (forms.length !== 1) return false;
-    return !hasStructuredQuestion(primary.questionnaire.questions);
+    return (
+      unsupportedDraftStructuredTypes(primary.questionnaire.questions)
+        .length === 0
+    );
   }, [encounterBound, primary, forms.length]);
 
   const handleSaved = useCallback(
@@ -153,7 +192,9 @@ export function useSaveServerDraft({
     const response_dump = {
       questionnaireResponses: {
         questionnaire: primary.questionnaire,
-        responses: Object.values(store.get(responsesAtom)),
+        responses: Object.values(store.get(responsesAtom)).map(
+          draftResponseForStorage,
+        ),
         errors: [],
       },
     };

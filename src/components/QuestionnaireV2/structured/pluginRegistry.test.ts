@@ -60,40 +60,36 @@ function makeV2Definition(type: string): PluginStructuredTypeDefinitionV2 {
 }
 
 // ---------------------------------------------------------------------------
-// PHASE-1 GATE: a contract-v2 plugin definition is refused, the same shape
-// of refusal as the ownership check below (console.error + a no-op
-// cleanup) — no core or plugin fork for v2 exists yet in
-// composeBatch.ts/validateStructured.ts (those files' "TEMPORARY
-// CONTRACT-V2 STUB" comments), so letting a v2 type register would resolve
-// fine via `resolveStructuredType` and then silently contribute nothing to
-// the submit batch while skipping its own validation — exactly the
-// fail-open `StructuredSlotState`'s doc comment forbids. Refusing routes it
-// through the existing, correct degradation instead: `unknown_type`, a
-// visible notice, and a hard block if the question is required. See
-// `registerPluginStructuredType`'s doc comment for what lifts this gate.
+// PHASE-1 GATE — LIFTED (Task 8). Registration used to refuse any
+// `contract: 2` definition outright (see `registerPluginStructuredType`'s
+// doc comment for why, and for why removing it is now safe):
+// `composeBatch.ts`/`validateStructured.ts` genuinely fork on
+// `definition.contract` as of this task, so a registered v2 type's data no
+// longer vanishes silently. A v2 definition now registers exactly like a
+// v1 one. The end-to-end proof that its `toRequests` actually reaches the
+// submit batch lives in `fill/submit/composeStructured.test.ts` (this file
+// deliberately stays light on imports — see the "stable across repeated
+// calls" test's comment above for why `registry.ts` is out of bounds
+// here).
 // ---------------------------------------------------------------------------
 
-test("a contract-v2 plugin definition is refused for the Phase-1 lifetime", () => {
+test("a contract-v2 plugin definition registers successfully — the Phase-1 gate no longer refuses it", () => {
   const definition = makeV2Definition("plugin_g.v2_widget");
   const cleanup = registerPluginStructuredType(definition, "plugin_g");
 
-  // Refused: nothing registers under this type, so `resolveStructuredType`
-  // reports `unknown_type` for it rather than a false "ready" v2 slot whose
-  // rows would silently never reach the submit batch.
+  assert.equal(getPluginStructuredType("plugin_g.v2_widget"), definition);
+  cleanup();
   assert.equal(getPluginStructuredType("plugin_g.v2_widget"), undefined);
-  // Same contract as the ownership refusal below: the cleanup is a
-  // harmless no-op.
-  assert.doesNotThrow(() => cleanup());
 });
 
-test("a contract-v2 refusal does not affect a v1 registration under the same owner", () => {
+test("a v2 and a v1 registration under the same owner coexist", () => {
   const v1 = makeDefinition("plugin_h.v1_widget");
   const v2 = makeV2Definition("plugin_h.v2_widget");
 
   registerPluginStructuredType(v2, "plugin_h");
   registerPluginStructuredType(v1, "plugin_h");
 
-  assert.equal(getPluginStructuredType("plugin_h.v2_widget"), undefined);
+  assert.equal(getPluginStructuredType("plugin_h.v2_widget"), v2);
   assert.equal(getPluginStructuredType("plugin_h.v1_widget"), v1);
 });
 

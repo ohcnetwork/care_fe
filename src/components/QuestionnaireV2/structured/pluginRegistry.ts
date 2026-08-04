@@ -130,8 +130,11 @@ const noopCleanup = () => {};
  *  over questionnaires authored against plugin A's type depending on
  *  manifest load order, with no user-visible signal.
  *
- *  A `contract: 2` definition is also refused (PHASE-1 GATE — see the
- *  comment above the check). */
+ *  A `contract: 2` definition registers exactly like a v1 one — Task 8
+ *  wired the real fork in `composeBatch.ts`/`validateStructured.ts`, so a
+ *  registered v2 type's `toRequests`/`validate` genuinely runs; see this
+ *  function's PHASE-1 GATE removal note below for why that used to not be
+ *  true. */
 export function registerPluginStructuredType(
   definition: PluginStructuredTypeDefinition,
   ownerSlug: string,
@@ -148,28 +151,22 @@ export function registerPluginStructuredType(
     );
     return noopCleanup;
   }
-  // PHASE-1 GATE. `resolveStructuredType` would happily resolve a v2
-  // plugin definition honestly (it just normalizes/passes `contract`
-  // through), but `composeBatch`'s and `validateStructured`'s v2 branches
-  // are TEMPORARY compile-only stubs today (`contract === 2` → no
-  // request, no validate, no error — see those files' "TEMPORARY
-  // CONTRACT-V2 STUB" comments) because the real fork is Task 8's job, not
-  // yet wired. Letting a v2 plugin register would resolve fine, then
-  // silently contribute nothing to the submit batch while skipping its
-  // own validation — the exact fail-open `StructuredSlotState`'s doc
-  // comment forbids ("Never silently dropped"), for a REQUIRED question
-  // with recorded rows the clinician believes were saved. Refusing the
-  // registration instead routes it through the existing, correct
-  // degradation: the type resolves as `unknown_type`, the slot shows a
-  // visible notice, and a required question hard-blocks the submit. Lift
-  // this once Task 8 lands the real v2 fork (or, if this shim outlives
-  // that, no later than Phase 5, when v2 becomes the only contract).
-  if (definition.contract === 2) {
-    console.error(
-      `Plugin structured type "${definition.type}" declares contract v2, which this host does not support yet; skipping it`,
-    );
-    return noopCleanup;
-  }
+  // PHASE-1 GATE — REMOVED (Task 8). This used to refuse any `contract: 2`
+  // registration outright: `resolveStructuredType` would have resolved a
+  // v2 plugin definition honestly, but `composeBatch`'s and
+  // `validateStructured`'s v2 branches were TEMPORARY compile-only stubs
+  // (`contract === 2` → no request, no validate, no error), so letting a
+  // v2 plugin register would have resolved fine, then silently contributed
+  // nothing to the submit batch while skipping its own validation — the
+  // exact fail-open `StructuredSlotState`'s doc comment forbids ("Never
+  // silently dropped"), for a REQUIRED question with recorded rows the
+  // clinician believes were saved. Now that `composeBatch.ts` and
+  // `validateStructured.ts` genuinely fork on `definition.contract`
+  // (`fill/submit/composeStructured.ts`'s `composeStructuredV2Requests` is
+  // the real `toRequests` leg), a registered v2 type's data reaches the
+  // batch like any v1 type's — removing the gate no longer reopens the
+  // silent-drop hole it existed to close. See
+  // `fill/submit/composeStructured.test.ts`'s end-to-end regression test.
   if (pluginTypes.has(definition.type)) {
     // Last-wins (the effect re-registers on every manifest change), but a
     // genuine duplicate — two plugins claiming one id, or one plugin

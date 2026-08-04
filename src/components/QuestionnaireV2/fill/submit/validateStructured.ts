@@ -4,11 +4,13 @@ import {
   buildLinkIndex,
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
+import { isV2Definition } from "@/components/QuestionnaireV2/structured/contract";
 import {
   resolveStructuredSlotState,
   structuredDataAny,
 } from "@/components/QuestionnaireV2/structured/registry";
 
+import { structuredEditsOf } from "@/components/QuestionnaireV2/fill/submit/composeStructured";
 import type { RendererSubject } from "@/components/QuestionnaireV2/form/types";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -95,20 +97,28 @@ export function collectStructuredErrors(
       // guard `structuredDataOf` used to carry, kept now that the data
       // read is untyped.
       if (response?.structured_type !== type) continue;
-      const data = structuredDataAny(response);
-      if (data.length === 0) continue;
-      // TEMPORARY CONTRACT-V2 STUB (Task 6 compile-compat, pending Task
-      // 8): `definition.validate` now has an incompatible signature on
-      // the v2 arm (projection + edits, not just data) — `resolved` is a
-      // `contract`-discriminated union (`structured/registry.ts`), and no
-      // core or plugin registration is contract 2 yet, so this is
-      // unreachable today. Task 8 (design annex `p1-shim.md` §c.2) wires
-      // the real two-argument call. The v1 path below is byte-identical
-      // to the pre-Task-6 call.
-      if (definition.contract === 2) continue;
+      const required = question.required ?? false;
+      const projection = structuredDataAny(response);
+      // v1's `edits` is always empty here — this arm never had one, so the
+      // guard below reduces to the pre-shim `projection.length === 0`
+      // check exactly.
+      const edits = isV2Definition(definition)
+        ? structuredEditsOf(response)
+        : [];
+      // v1: nothing recorded, nothing to validate — the pre-shim guard,
+      //     unchanged.
+      // v2: nothing recorded AND nothing changed. The two halves answer
+      //     different questions (spec §5), so neither may gate the other:
+      //     a NON-empty projection with an empty log still runs (a
+      //     required section satisfied by rows the server already had); a
+      //     non-empty log with an empty projection still runs (the
+      //     clinician removed every row).
+      if (projection.length === 0 && edits.length === 0) continue;
       try {
         errors.push(
-          ...definition.validate(data, question.id, question.required ?? false),
+          ...(isV2Definition(definition)
+            ? definition.validate(projection, edits, question.id, required)
+            : definition.validate(projection, question.id, required)),
         );
       } catch (error) {
         // Plugin code runs here. An escaping throw used to propagate out of
