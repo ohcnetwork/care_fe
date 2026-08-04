@@ -3,6 +3,13 @@ name: care-review
 description: >
   CARE frontend review lenses — intent/legibility, approach/simplicity, and UI/UX — applied to a
   pull request diff. Reviews for whether the change is legible and proportionate, not just correct.
+# ⚠️ THIS FIELD DOES NOT SANDBOX THE AGENT. Verified against the compiled lock (2026-08-04):
+# gh-aw invokes the Copilot CLI with `--allow-all-tools --allow-all-paths` and NO
+# `--available-tools`/`--excluded-tools`/`--deny-tool`. The agent really does have `bash`,
+# `create`, `edit` and `web_fetch` at runtime, whatever this list says. It is kept because it may
+# still gate MCP-provided tools (untested), but read it as a declaration of intent, not a boundary.
+# The actual containment is: (1) only the trusted BASE branch is checked out — never the PR head,
+# (2) writes can only leave via safe-outputs, applied by separate permission-scoped jobs.
 tools:
   - read
   - search

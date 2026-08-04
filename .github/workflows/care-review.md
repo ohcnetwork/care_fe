@@ -17,8 +17,16 @@ on:
   workflow_dispatch:
   # Review community/fork PRs too. `pull_request_target` runs in base-repo context so the Copilot
   # engine credentials exist for fork PRs; the default role gate would skip external contributors.
-  # Safe because the agent job is read-only and can only emit structured safe-outputs, which
-  # separate permission-scoped jobs apply.
+  #
+  # Why this is still safe, stated in full so it needn't be triangulated from the Security section:
+  # the agent is NOT sandboxed at the tool layer — gh-aw compiles the CLI with --allow-all-tools
+  # --allow-all-paths, so it has bash, write and network. Containment comes from two other things:
+  #   1. `checkout:` below pins the checkout to the trusted base — a fork's code is never on disk,
+  #      so a hostile PR has no way to get its own code executed.
+  #   2. Safe-outputs are the only write channel, applied by separate permission-scoped jobs; the
+  #      agent job itself holds no write permission on the repo.
+  # An untrusted contributor can therefore influence what the review *says*, but not run their code
+  # here and not write to the repository.
   roles: all
 # Upstream only — forks lack the Copilot credentials and would fail loudly on every fork PR.
 # Draft PRs are excluded HERE rather than in the prompt: a prompt-level skip still spins up the
@@ -81,6 +89,12 @@ safe-outputs:
   # summons it.
   add-comment:
     max: 1
+  # Skipping is the NORMAL outcome here — lockfile-only diffs, empty deltas, past the round cap.
+  # gh-aw's default (`report-as-issue: true`) files every one of those into a "No-Op Runs" tracking
+  # issue, which on a busy repo turns routine quiet behaviour into a stream of noise and trains
+  # people to ignore that issue. The run log already records why we skipped.
+  noop:
+    report-as-issue: false
   missing-tool:
     create-issue: true
 ---
