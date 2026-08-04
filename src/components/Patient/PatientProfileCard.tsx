@@ -9,9 +9,6 @@ import {
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
 
-/**
- * `34 yrs · Female · O+`, dropping the blood group when it is not recorded.
- */
 export function patientMetaLine(
   patient: PublicPatientRead,
   t: (key: string) => string,
@@ -29,7 +26,6 @@ export function patientMetaLine(
   return parts.join(" · ");
 }
 
-/** Monogram for a patient circle; splits on spaces so any script works. */
 export function patientInitials(name: string): string {
   return (
     name

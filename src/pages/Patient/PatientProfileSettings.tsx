@@ -17,11 +17,6 @@ import { useAppVersion } from "@/hooks/useAppVersion";
 import { useAuthContext } from "@/hooks/useAuthUser";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-/**
- * The account is the mobile number; each patient is a profile under it. This
- * screen shows that relationship and lets the patient switch which profile is
- * active, add another, change language, or sign out.
- */
 export default function PatientProfileSettings() {
   const { t } = useTranslation();
   const { signOut } = useAuthContext();
@@ -34,17 +29,12 @@ export default function PatientProfileSettings() {
     tokenData,
   } = usePatientContext();
 
-  // Nothing flags the owner, so it is the profile registered against the
-  // number this session signed in with — falling back to the first profile
-  // when the stored number is formatted differently.
   const owner =
     patients?.find(
       (patient) => patient.phone_number === tokenData?.phoneNumber,
     ) ?? patients?.[0];
 
   const footerNote = [
-    // The build id is a UUID — show enough of it to quote to support without
-    // running a 36-character string across the footer.
     versionInfo?.version && `v${versionInfo.version.slice(0, 8)}`,
     careConfig.customDescription,
   ]
@@ -120,8 +110,6 @@ export default function PatientProfileSettings() {
           </Link>
         </div>
 
-        {/* A settings row, not a form field: the label owns the row and the
-            selector reads as the value on its right. */}
         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
           <div className="flex min-h-11 items-center gap-3 px-4 py-2.5">
             <Languages
@@ -131,7 +119,7 @@ export default function PatientProfileSettings() {
             <span className="flex-1 text-sm text-gray-900">
               {t("language")}
             </span>
-            <div className="shrink-0 [&_[data-slot=select-trigger]]:border-0 [&_[data-slot=select-trigger]]:bg-transparent [&_[data-slot=select-trigger]]:px-0 [&_[data-slot=select-trigger]]:text-xs [&_[data-slot=select-trigger]]:font-medium [&_[data-slot=select-trigger]]:text-gray-600 [&_[data-slot=select-trigger]]:shadow-none [&_[data-slot=select-trigger]]:data-[size=default]:h-11">
+            <div className="shrink-0  **:data-[slot=select-trigger]:border-0 **:data-[slot=select-trigger]:shadow-none">
               <LanguageSelector />
             </div>
           </div>

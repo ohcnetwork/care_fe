@@ -1,8 +1,10 @@
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { CalendarDays } from "lucide-react";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import {
@@ -15,7 +17,6 @@ import { usePatientAppointments } from "@/hooks/usePatientPortalData";
 
 // Plugin-extended instance — `fromNow()` needs dayjs/plugin/relativeTime.
 import dayjs from "@/Utils/dayjs";
-
 import { PublicAppointment } from "@/types/scheduling/schedule";
 
 type VisitsTab = "upcoming" | "history";
@@ -53,8 +54,14 @@ export default function PatientVisits() {
           value={tab}
           onChange={setTab}
           tabs={[
-            { key: "upcoming", label: `${t("upcoming")} · ${upcoming.length}` },
-            { key: "history", label: `${t("history")} · ${history.length}` },
+            {
+              key: "upcoming",
+              label: `${t("upcoming")}${!isLoading ? ` · ${upcoming.length}` : " ···"}`,
+            },
+            {
+              key: "history",
+              label: `${t("history")}${!isLoading ? ` · ${history.length}` : " ···"}`,
+            },
           ]}
         />
       }
@@ -73,9 +80,22 @@ export default function PatientVisits() {
             ))
           ) : (
             <EmptyState
-              icon={<CalendarDays className="size-6 text-primary-700" />}
+              icon={
+                <CalendarDays
+                  className="size-7 text-gray-500 mx-3"
+                  strokeWidth={1.6}
+                />
+              }
               title={t("no_appointments")}
               description={t("patient_visits__no_upcoming_description")}
+              className="gap-3 rounded-2xl border-gray-300 px-5 py-7 shadow-none"
+              action={
+                <Button className="w-full" asChild>
+                  <Link href="/nearby_facilities">
+                    {t("patient_home__book_first_appointment")}
+                  </Link>
+                </Button>
+              }
             />
           )
         ) : history.length ? (
@@ -97,8 +117,22 @@ export default function PatientVisits() {
           ))
         ) : (
           <EmptyState
-            icon={<CalendarDays className="size-6 text-primary-700" />}
-            title={t("patient_visits__no_history")}
+            icon={
+              <CalendarDays
+                className="size-7 text-gray-500 mx-3"
+                strokeWidth={1.6}
+              />
+            }
+            title={t("no_appointments")}
+            description={t("patient_visits__no_upcoming_description")}
+            className="gap-3 rounded-2xl border-gray-300 px-5 py-7 shadow-none"
+            action={
+              <Button className="w-full" asChild>
+                <Link href="/nearby_facilities">
+                  {t("patient_home__book_first_appointment")}
+                </Link>
+              </Button>
+            }
           />
         )}
       </div>
