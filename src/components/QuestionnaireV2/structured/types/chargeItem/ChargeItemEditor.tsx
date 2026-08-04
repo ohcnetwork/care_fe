@@ -54,6 +54,7 @@ function ChargeItemPrice({
 }: {
   definition: ChargeItemDefinitionRead;
 }) {
+  const { t } = useTranslation();
   const priceComponents = definition.price_components ?? [];
   return (
     <div className="space-y-1">
@@ -63,7 +64,10 @@ function ChargeItemPrice({
         </span>
         {priceComponents.length > 0 && (
           <Popover>
-            <PopoverTrigger>
+            {/* REVIEW FIX (Task 6, minor): a bare icon inside a Radix
+                trigger with no `asChild` renders Radix's own default
+                button — which had no accessible name at all. */}
+            <PopoverTrigger aria-label={t("price_breakdown")}>
               <InfoIcon className="h-4 w-4 cursor-pointer text-gray-700" />
             </PopoverTrigger>
             <PopoverContent
@@ -107,6 +111,11 @@ export function ChargeItemEditor({
         key: "item",
         header: t("item"),
         width: "minmax(12rem, 1fr)",
+        // REVIEW FIX (Task 6, minor): the mobile collapsed card's chrome
+        // button already shows this same title via `rowTitle`. Without
+        // this, the expanded card repeated it a second time as an "Item"
+        // field.
+        mobileHidden: true,
         render: ({ row }) => row.row.charge_item_definition_object.title,
       },
       {

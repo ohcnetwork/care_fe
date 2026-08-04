@@ -47,6 +47,23 @@ interface Props {
   isServiceAccount?: boolean;
   trigger?: React.ReactNode;
   onClear?: () => void;
+  /**
+   * Accessible name for the built-in trigger button. Ignored when a custom
+   * `trigger` is supplied — that node owns its own name.
+   *
+   * REVIEW FIX (QuestionnaireV2 StructuredList, Task 6 Important 3): this
+   * component previously declared no `aria-label` prop and never spread
+   * unknown props onto its trigger, so a caller passing `aria-label` (a
+   * hyphenated attribute — TypeScript's excess-property check does not
+   * flag it on a JSX element for a custom component the way it would a
+   * plain object literal) compiled cleanly but the value reached nowhere:
+   * silently dropped, not even a runtime warning. `StructuredList`'s naming
+   * contract requires every control in a cell to carry `aria-label` (the
+   * visible caption is `lg:hidden`), and `ChargeItemEditor`'s performer
+   * column is a real, confirmed instance — verified live, the rendered
+   * `role="combobox"` had no accessible name until this fix.
+   */
+  "aria-label"?: string;
 }
 
 const PAGE_LIMIT = 50;
@@ -161,6 +178,7 @@ export default function UserSelector({
   isServiceAccount = false,
   trigger,
   onClear,
+  "aria-label": ariaLabel,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -225,6 +243,7 @@ export default function UserSelector({
         type="button"
         variant="outline"
         role="combobox"
+        aria-label={ariaLabel}
         className="min-w-60 w-full justify-start"
         disabled={disabled}
         onKeyDown={(e) => {
