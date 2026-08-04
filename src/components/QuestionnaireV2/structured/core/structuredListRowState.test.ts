@@ -3,7 +3,11 @@ import { describe, it } from "node:test";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 
-import { resolveRowExpanded, rowHasBoundError } from "./structuredListRowState";
+import {
+  resolveRowExpanded,
+  rowHasBoundError,
+  unmatchedRowErrorFieldKeys,
+} from "./structuredListRowState";
 
 const err = (
   over: Partial<QuestionValidationError> = {},
@@ -100,6 +104,113 @@ describe("rowHasBoundError", () => {
         { questionId: "q-1", rowId: "row-3", rowIndex: 2 },
       ),
       true,
+    );
+  });
+
+  it("an UNMATCHED field_key (no column owns it) still counts — the Task-4 Critical class one validator key away", () => {
+    // Reproduces allergy/symptom/diagnosis's shared `note` field: it lives
+    // at `placement: "row"`, which has no column of its own in Phase 2/3.
+    assert.equal(
+      rowHasBoundError(
+        [{ key: "quantity" }],
+        [err({ row_id: "row-1", field_key: "note" })],
+        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+      ),
+      true,
+    );
+  });
+});
+
+describe("unmatchedRowErrorFieldKeys", () => {
+  it("no errors => []", () => {
+    assert.deepEqual(
+      unmatchedRowErrorFieldKeys([{ key: "quantity" }], [], {
+        questionId: "q-1",
+        rowId: "row-1",
+        rowIndex: 0,
+      }),
+      [],
+    );
+  });
+
+  it("an error whose field_key a column already owns is NOT unmatched", () => {
+    assert.deepEqual(
+      unmatchedRowErrorFieldKeys(
+        [{ key: "quantity" }],
+        [err({ row_id: "row-1", field_key: "quantity" })],
+        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+      ),
+      [],
+    );
+  });
+
+  it("an error whose field_key NO column owns, bound to this row, IS unmatched", () => {
+    assert.deepEqual(
+      unmatchedRowErrorFieldKeys(
+        [{ key: "quantity" }],
+        [err({ row_id: "row-1", field_key: "note" })],
+        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+      ),
+      ["note"],
+    );
+  });
+
+  it("an unmatched field_key bound to a DIFFERENT row is excluded", () => {
+    assert.deepEqual(
+      unmatchedRowErrorFieldKeys(
+        [{ key: "quantity" }],
+        [err({ row_id: "row-2", field_key: "note" })],
+        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+      ),
+      [],
+    );
+  });
+
+  it("an unmatched field_key for a DIFFERENT question is excluded", () => {
+    assert.deepEqual(
+      unmatchedRowErrorFieldKeys(
+        [{ key: "quantity" }],
+        [err({ row_id: "row-1", field_key: "note", question_id: "q-2" })],
+        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+      ),
+      [],
+    );
+  });
+
+  it("multiple distinct unmatched keys are all returned, deduplicated", () => {
+    assert.deepEqual(
+      unmatchedRowErrorFieldKeys(
+        [{ key: "quantity" }],
+        [
+          err({ row_id: "row-1", field_key: "note" }),
+          err({ row_id: "row-1", field_key: "note" }),
+          err({ row_id: "row-1", field_key: "reason" }),
+        ],
+        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+      ).sort(),
+      ["note", "reason"],
+    );
+  });
+
+  it("respects a column's errorFieldKeys override — a sub-key it owns is NOT unmatched", () => {
+    assert.deepEqual(
+      unmatchedRowErrorFieldKeys(
+        [{ key: "dosage", errorFieldKeys: ["dose_0", "dose_1"] }],
+        [err({ row_id: "row-1", field_key: "dose_1" })],
+        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+      ),
+      [],
+    );
+  });
+
+  it("a v1-shim index-only unmatched error still matches by rowIndex", () => {
+    assert.deepEqual(
+      unmatchedRowErrorFieldKeys(
+        [{ key: "quantity" }],
+        [err({ row_id: undefined, index: 2, field_key: "note" })],
+        { questionId: "q-1", rowId: "row-3", rowIndex: 2 },
+      ),
+      ["note"],
     );
   });
 });

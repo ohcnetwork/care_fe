@@ -21,7 +21,11 @@ import type { QuestionValidationError } from "@/types/questionnaire/batch";
 
 import { StructuredFieldError } from "./StructuredFieldError";
 import { selectStructuredFieldErrors } from "./structuredFieldErrors";
-import { resolveRowExpanded, rowHasBoundError } from "./structuredListRowState";
+import {
+  resolveRowExpanded,
+  rowHasBoundError,
+  unmatchedRowErrorFieldKeys,
+} from "./structuredListRowState";
 import { gridTemplateColumns } from "./structuredListTracks";
 import type { ProjectedRow, RowId } from "./types";
 
@@ -374,6 +378,18 @@ function StructuredListRow<TRow extends object>({
     rowIndex,
   });
   const isExpanded = resolveRowExpanded(expanded, hasError);
+  // REVIEW FIX (Task 6, Important — same review round as Critical 1 above).
+  // A `field_key` no column declares (allergy/symptom/diagnosis's shared
+  // `note`, which lives at `placement: "row"` — no column of its own) used
+  // to render NOWHERE: not in any cell, and no longer at the block level
+  // either now that `QuestionBlock`'s allow-list suppresses it there for
+  // every allow-listed type. `rowHasBoundError` already counts these (so
+  // the row force-expands); this is where they actually get PRINTED.
+  const unmatchedFieldKeys = unmatchedRowErrorFieldKeys(columns, errors, {
+    questionId,
+    rowId: row.rowId,
+    rowIndex,
+  });
 
   return (
     <div
@@ -394,7 +410,14 @@ function StructuredListRow<TRow extends object>({
           aria-expanded={isExpanded}
           aria-controls={bodyId}
           onClick={toggleExpanded}
-          className="flex w-full items-center justify-between gap-2 rounded-lg bg-gray-50 p-2 text-left active:bg-gray-100"
+          // REVIEW FIX (Task 6, minor): while `hasError` pins the row open,
+          // this toggle was a live control that visibly did nothing — three
+          // activations, no state change, `aria-expanded` stuck at "true",
+          // with no explanation for a screen-reader user. Disabling it
+          // while pinned is the honest signal: there is currently no
+          // collapse action to perform.
+          disabled={hasError}
+          className="flex w-full items-center justify-between gap-2 rounded-lg bg-gray-50 p-2 text-left active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-70"
         >
           <span className="min-w-0 break-words text-base text-gray-950">
             {rowTitle(row)}
@@ -516,6 +539,34 @@ function StructuredListRow<TRow extends object>({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* Unmatched-error fallback. role="none" — like the mobile chrome
+            above, this must never inject a phantom `role="cell"`, and
+            `lg:col-span-full` spans it across every desktop track instead
+            of claiming one of its own (it isn't a column, so it never
+            entered `gridTemplateColumns`'s count). One `StructuredFieldError`
+            per distinct unmatched key — unlike a single cell's "first
+            error wins" slot, a `note`-shaped field left off Phase 2/3's
+            column set could coincide with a SECOND undeclared key, and
+            losing either silently would be exactly the bug this fixes. */}
+        {unmatchedFieldKeys.length > 0 && (
+          <div
+            role="none"
+            className="space-y-1 px-1 pb-2 lg:col-span-full lg:px-2"
+          >
+            {unmatchedFieldKeys.map((fieldKey) => (
+              <StructuredFieldError
+                key={fieldKey}
+                id={`${questionId}--${row.rowId}--${fieldKey}--error`}
+                questionId={questionId}
+                rowId={row.rowId}
+                rowIndex={rowIndex}
+                fieldKeys={[fieldKey]}
+                errors={errors}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
