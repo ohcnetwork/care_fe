@@ -29,6 +29,9 @@ export const PatientUserContext = createContext<PatientUserContextType | null>(
   null,
 );
 
+const APPOINTMENT_REGISTRATION_PATH_REGEX =
+  /^\/facility\/[^/]+\/appointments\/[^/]+\/patient-registration$/;
+
 interface Props {
   children: React.ReactNode;
 }
@@ -78,15 +81,10 @@ export default function PatientUserProvider({ children }: Props) {
     }
   }, [tokenData]);
 
-  const isAppointmentRegistrationPath =
-    /^\/facility\/[^/]+\/appointments\/[^/]+\/patient-registration$/.test(
-      path || "",
-    );
-
   const isProfileSetupPath =
     path === "/patient/select-profile" ||
     path === "/patient/add-profile" ||
-    isAppointmentRegistrationPath;
+    APPOINTMENT_REGISTRATION_PATH_REGEX.test(path || "");
 
   useEffect(() => {
     if (

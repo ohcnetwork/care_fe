@@ -1,15 +1,10 @@
 import dayjs from "dayjs";
-import {
-  Activity,
-  CalendarDays,
-  CalendarPlus,
-  FileText,
-  Info,
-} from "lucide-react";
+import { Activity, CalendarDays, CalendarPlus, FileText } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { DiagnosticReportRow } from "@/components/Patient/DiagnosticReportRow";
@@ -58,7 +53,6 @@ function SectionHeader({ title, href }: { title: string; href: string }) {
   return (
     <div className="flex items-baseline justify-between">
       <span className="text-base font-bold text-gray-900">{title}</span>
-      {/* The negative margin keeps the 44px hit area without inflating the row. */}
       <Link
         href={href}
         className="-my-3 flex min-h-11 items-center text-sm font-semibold text-primary-700"
@@ -124,37 +118,26 @@ function PatientPortalIndex() {
           </>
         ) : hasNothingRecorded ? (
           <>
-            <div className="flex flex-col items-center gap-3 rounded-2xl border-[1.5px] border-dashed border-gray-300 bg-white px-5 py-7 text-center">
-              <span className="flex size-15.5 items-center justify-center rounded-[20px] bg-gray-100">
+            <EmptyState
+              className="gap-3 rounded-2xl border-gray-300 px-3 py-7 shadow-none"
+              icon={
                 <CalendarDays
-                  className="size-7 text-gray-400"
+                  className="size-7 text-gray-500 mx-3"
                   strokeWidth={1.6}
                 />
-              </span>
-              <div>
-                <span className="block text-lg font-bold text-gray-900">
-                  {t("patient_home__empty_heading")}
-                </span>
-                <span className="mt-1 block text-sm leading-normal text-gray-600">
-                  {t("patient_home__empty_description", { name: firstName })}
-                </span>
-              </div>
-              <Button className="mt-1 w-full" asChild>
-                <Link href="/nearby_facilities">
-                  {t("patient_home__book_first_appointment")}
-                </Link>
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-3 rounded-[13px] bg-gray-100 p-[13px]">
-              <Info
-                className="size-4.5 shrink-0 text-gray-600"
-                strokeWidth={1.9}
-              />
-              <span className="text-xs leading-snug text-gray-600">
-                {t("patient_home__records_digitisation_note")}
-              </span>
-            </div>
+              }
+              title={t("patient_home__empty_heading")}
+              description={t("patient_home__empty_description", {
+                name: firstName,
+              })}
+              action={
+                <Button className="w-full" asChild>
+                  <Link href="/nearby_facilities">
+                    {t("patient_home__book_first_appointment")}
+                  </Link>
+                </Button>
+              }
+            />
           </>
         ) : (
           <>

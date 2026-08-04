@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { InfiniteScrollSentinel } from "@/components/Common/InfiniteScrollSentinel";
@@ -13,10 +13,10 @@ import { DiagnosticReportRow } from "@/components/Patient/DiagnosticReportRow";
 import {
   PatientAppShell,
   PatientHeaderTabs,
-  usePatientShell,
 } from "@/components/Patient/PatientAppShell";
 import { PrescriptionRow } from "@/components/Patient/PrescriptionRow";
 
+import { Button } from "@/components/ui/button";
 import {
   ACTIVE_PRESCRIPTION_STATUSES,
   PAST_PRESCRIPTION_STATUSES,
@@ -61,53 +61,6 @@ function FilterChip({
   );
 }
 
-/**
- * The portal's full-height empty panel. The shared `EmptyState` card reads as a
- * short box pinned to the top of the page; these screens have nothing else on
- * them, so the panel centres and offers the two ways forward.
- */
-function RecordsEmptyState({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  const { t } = useTranslation();
-  const { patients } = usePatientContext();
-  const { openSwitcher, canSwitch } = usePatientShell();
-
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3.5 p-8 text-center max-w-md mx-auto">
-      <span className="flex size-18 items-center justify-center rounded-[22px] bg-gray-100">
-        <FileText className="size-8 text-gray-400" strokeWidth={1.6} />
-      </span>
-      <div>
-        <h3 className="mb-1.5 text-lg font-bold text-gray-900">{title}</h3>
-        <p className="text-pretty text-sm leading-normal text-gray-600">
-          {description}
-        </p>
-      </div>
-      <div className="mt-1.5 flex w-full flex-col gap-2.5">
-        <Button asChild className="min-h-11 w-full">
-          <Link href="/nearby_facilities">
-            {t("patient_records__book_first_appointment")}
-          </Link>
-        </Button>
-        {(patients?.length ?? 0) > 1 && canSwitch && (
-          <Button
-            variant="ghost"
-            className="min-h-11 w-full"
-            onClick={openSwitcher}
-          >
-            {t("patient_records__switch_patient")}
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function PatientRecords() {
   const { t } = useTranslation();
   const { selectedPatient } = usePatientContext();
@@ -148,8 +101,6 @@ export default function PatientRecords() {
   const setTab = (next: RecordsTab) =>
     setQueryParams({ tab: next }, { replace: true });
 
-  // The empty states address the patient by name, so fall back to the generic
-  // headings rather than greeting a blank.
   const firstName = selectedPatient?.name.trim().split(/\s+/)[0];
 
   return (
@@ -204,7 +155,13 @@ export default function PatientRecords() {
                 <InfiniteScrollSentinel {...prescriptionPages} />
               </>
             ) : (
-              <RecordsEmptyState
+              <EmptyState
+                icon={
+                  <FileText
+                    className="size-7 text-gray-500 mx-3"
+                    strokeWidth={1.6}
+                  />
+                }
                 title={
                   firstName
                     ? t("patient_records__no_prescriptions_for_name", {
@@ -213,6 +170,14 @@ export default function PatientRecords() {
                     : t("no_medications_found")
                 }
                 description={t("patient_records__no_prescriptions_description")}
+                className="gap-3 rounded-2xl border-gray-300 px-5 py-7 shadow-none"
+                action={
+                  <Button className="w-full" asChild>
+                    <Link href="/nearby_facilities">
+                      {t("patient_home__book_first_appointment")}
+                    </Link>
+                  </Button>
+                }
               />
             )}
           </>
@@ -252,7 +217,14 @@ export default function PatientRecords() {
                 <InfiniteScrollSentinel {...reportPages} />
               </>
             ) : (
-              <RecordsEmptyState
+              <EmptyState
+                className="gap-3 rounded-2xl border-gray-300 px-5 py-7 shadow-none"
+                icon={
+                  <FileText
+                    className="size-7 text-gray-500 mx-3"
+                    strokeWidth={1.6}
+                  />
+                }
                 title={
                   firstName
                     ? t("patient_records__no_reports_for_name", {
@@ -261,6 +233,13 @@ export default function PatientRecords() {
                     : t("patient_records__no_reports")
                 }
                 description={t("patient_records__no_reports_description")}
+                action={
+                  <Button className="w-full" asChild>
+                    <Link href="/nearby_facilities">
+                      {t("patient_home__book_first_appointment")}
+                    </Link>
+                  </Button>
+                }
               />
             )}
           </>

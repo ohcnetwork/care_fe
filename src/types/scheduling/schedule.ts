@@ -293,10 +293,6 @@ export interface AppointmentRescheduleRequest {
   tags: string[];
 }
 
-export const getUserFromLocalStorage = (): UserReadMinimal => {
-  return JSON.parse(localStorage.getItem("user") ?? "{}");
-};
-
 export const storeUserInLocalStorage = (user: UserReadMinimal) => {
   localStorage.setItem("user", JSON.stringify(user));
 };

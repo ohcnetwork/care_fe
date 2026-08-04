@@ -28,15 +28,6 @@ function Field({
   );
 }
 
-/**
- * The appointment pass a patient shows at the counter — the portal's own take
- * on the staff-side token card, built from the fields the OTP appointment
- * payload actually carries.
- *
- * The QR encodes the patient id as plain text, which is what
- * `PatientIDScanDialog` and the staff token cards already speak, so a counter
- * scanner resolves this straight to the patient.
- */
 export function AppointmentTokenPass({
   appointment,
   className,

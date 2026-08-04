@@ -203,6 +203,7 @@ export default function PrescriptionDetail({ id }: { id: string }) {
               <EmptyState
                 icon={<Pill className="size-6 text-primary-700" />}
                 title={t("no_medications_found")}
+                className="gap-3 rounded-2xl border-gray-300 px-5 py-7 shadow-none"
               />
             )}
 

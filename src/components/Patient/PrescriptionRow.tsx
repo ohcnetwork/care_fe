@@ -22,10 +22,6 @@ export const PRESCRIPTION_TONES = {
   cancelled: "danger",
 } as const satisfies Record<PrescriptionStatus, PatientBadgeTone>;
 
-/**
- * One prescription in a list — shared by the records hub and the home preview
- * so the same record does not describe itself two different ways.
- */
 export function PrescriptionRow({
   prescription,
   className,

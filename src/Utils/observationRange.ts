@@ -72,11 +72,6 @@ export function isObservationFlagged(result: ObservationResult): boolean {
   return !!interpretation && !NORMAL_INTERPRETATION.test(interpretation);
 }
 
-export function observationValueLabel(result: ObservationResult): string {
-  const value = result.value?.value ?? result.value?.coding?.display;
-  return value ? String(value) : "-";
-}
-
 /**
  * Renders a min/max pair the way lab reports do: "12 - 20", "> 12", "< 20",
  * or "" when neither bound is present. Shared so every reference-range

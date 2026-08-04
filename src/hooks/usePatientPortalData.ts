@@ -145,7 +145,7 @@ export function usePatientPrescriptions({
 }
 
 /** A report is readable by the patient once the lab has finalised it. */
-const READY_REPORT_STATUSES = [
+export const READY_REPORT_STATUSES = [
   DiagnosticReportStatus.final,
   DiagnosticReportStatus.modified,
 ];
@@ -234,5 +234,3 @@ export function usePatientEncounterRecords(encounter?: string) {
     reportPages,
   };
 }
-
-export { READY_REPORT_STATUSES };

@@ -2,7 +2,6 @@ import { Activity, FileText, type LucideIcon, SquarePlus } from "lucide-react";
 
 import { isObservationFlagged } from "@/Utils/observationRange";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
-import { ObservationRead } from "@/types/emr/observation/observation";
 
 type Translate = (key: string) => string;
 
@@ -19,11 +18,7 @@ export function reportTitle(
   );
 }
 
-/**
- * Glyph for the report's icon tile. The modality is spelled differently by
- * every source in the chain, so match on a substring of whichever one answers
- * first and fall back to the neutral document.
- */
+/** Glyph for the report's icon tile */
 export function reportIcon(report: DiagnosticReportRead): LucideIcon {
   const modality = (
     report.service_request?.activity_definition?.classification ||
@@ -39,17 +34,6 @@ export function reportIcon(report: DiagnosticReportRead): LucideIcon {
     return Activity;
   }
   return FileText;
-}
-
-export function observationLabel(
-  observation: ObservationRead,
-  t: Translate,
-): string {
-  return (
-    observation.main_code?.display ||
-    observation.alternate_coding?.text ||
-    t("observation")
-  );
 }
 
 export function reportFlagSummary(report: DiagnosticReportRead): number {
