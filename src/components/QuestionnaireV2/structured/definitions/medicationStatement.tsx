@@ -1,65 +1,56 @@
+import { t } from "i18next";
+
+import { MedicationStatementEditor } from "@/components/QuestionnaireV2/structured/types/medicationStatement/MedicationStatementEditor";
 import {
-  MedicationStatementQuestion,
-  validateMedicationStatementQuestion,
-} from "@/components/Questionnaire/QuestionTypes/MedicationStatementQuestion";
+  medicationStatementValidationIssues,
+  toRequests,
+} from "@/components/QuestionnaireV2/structured/types/medicationStatement/model";
 
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
-import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { useLegacyResponseCallback } from "./adapt";
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 
-function MedicationStatementInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.patientId || !props.encounterId) return null;
-  return (
-    <MedicationStatementQuestion
-      patientId={props.patientId}
-      encounterId={props.encounterId}
-      question={props.question}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      disabled={props.disabled}
-      errors={props.errors}
-    />
-  );
-}
+/**
+ * i18n boundary: `model.ts`'s `medicationStatementValidationIssues` is the
+ * pure, row-scoped decision (imports no i18next); this is the only place
+ * its three reasons become translated, row_id-keyed `QuestionValidationError`s.
+ * Message/field_key pairing mirrors the legacy validator stack exactly
+ * (`types/questionnaire/validation.ts`'s `validateFields`, as
+ * `MedicationStatementQuestion.tsx`'s `MEDICATION_STATEMENT_FIELDS` used
+ * it): a missing dosage is `t("field_required")` (the generic
+ * required-field message `validateFields` falls back to for a field with no
+ * explicit `validate`), a missing period start is `t("start_date_required")`,
+ * and an inverted range is `t("end_date_after_start")`.
+ */
+const REASON_MESSAGE: Record<
+  ReturnType<typeof medicationStatementValidationIssues>[number]["reason"],
+  () => string
+> = {
+  missing_dosage: () => t("field_required"),
+  missing_period_start: () => t("start_date_required"),
+  invalid_period_range: () => t("end_date_after_start"),
+};
 
 export const medicationStatementDefinition: StructuredTypeDefinition<"medication_statement"> =
   {
     type: "medication_statement",
-    component: MedicationStatementInput,
+    component: MedicationStatementEditor,
     requires: ["patientId", "encounterId"],
     subjects: ["encounter"],
-    draftPolicy: "exclude",
-    contract: 1,
-    validate: (medications, questionId) =>
-      validateMedicationStatementQuestion(medications, questionId),
-    buildRequests: async (
-      medications,
-      { patientId, encounterId, questionId },
-    ) => {
-      // `subjects` is encounter-only, so a patient is always in scope here
-      // — narrowed rather than asserted (the context type is optional for
-      // plugin types that declare a resource subject).
-      if (!patientId || medications.length === 0) return [];
-      return [
-        {
-          url: `/api/v1/patient/${patientId}/medication/statement/upsert/`,
-          method: "POST",
-          body: {
-            datapoints: medications.map((medication) => ({
-              ...medication,
-              encounter: encounterId,
-              patient: patientId,
-            })),
-          },
-          reference_id: structuredReferenceId(
-            "medication_statement",
-            questionId,
-          ),
-        },
-      ];
-    },
+    // D2: every structured type becomes draftable except `files` (D6). A
+    // medication statement row is plain, JSON-serializable data (Code,
+    // strings, an optional Period of two strings) — no `Date`, `File`, or
+    // class instance — so it round-trips through a draft exactly. Legacy
+    // excluded this type wholesale because its `values[0].value` conflated
+    // prefetched server rows with user input; contract v2's edit log is the
+    // fix.
+    draftPolicy: "serialize",
+    contract: 2,
+    toRequests,
+    validate: (_projection, edits, questionId) =>
+      medicationStatementValidationIssues(edits).map((issue) => ({
+        question_id: questionId,
+        field_key: issue.fieldKey,
+        row_id: issue.rowId,
+        error: REASON_MESSAGE[issue.reason](),
+        required: true,
+      })),
   };
