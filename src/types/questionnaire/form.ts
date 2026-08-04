@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
+import { ChargeItemQuestionRow } from "@/types/billing/chargeItem/chargeItem";
 import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
@@ -49,7 +49,14 @@ export type ResponseValue =
   | RV<"time_of_death", string[] | TimeOfDeathRow[]>
   | RV<"files", FileUploadQuestion[]>
   | RV<"time", string | undefined>
-  | RV<"charge_item", ApplyChargeItemDefinitionRequest[]>
+  // `ChargeItemQuestionRow` widens `ApplyChargeItemDefinitionRequest` with
+  // two OPTIONAL display objects (`structured/types/chargeItem/model.ts`'s
+  // `ChargeItemRow` requires the definition one; this arm keeps both
+  // optional because the legacy widget writes rows with neither) — every
+  // plain `ApplyChargeItemDefinitionRequest[]` the legacy widget writes
+  // stays assignable here without a union, so this arm needed no widening
+  // syntax the way `time_of_death`'s did.
+  | RV<"charge_item", ChargeItemQuestionRow[]>
   | RV<"service_request", ServiceRequestApplyActivityDefinitionForm[]>;
 
 export interface QuestionnaireResponse {

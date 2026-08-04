@@ -4,7 +4,10 @@ import {
   MonetaryComponent,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
-import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import {
+  ChargeItemDefinitionBase,
+  ChargeItemDefinitionRead,
+} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -87,6 +90,26 @@ export interface ApplyChargeItemDefinitionRequest {
 
 export interface ApplyMultipleChargeItemDefinitionRequest {
   requests: ApplyChargeItemDefinitionRequest[];
+}
+
+/**
+ * A charge item as the questionnaire's structured question holds it: the
+ * wire request plus the two objects the table renders from — the
+ * definition's title and price components, and the chosen performer.
+ *
+ * They live ON the row so a restored draft can repaint the table without
+ * refetching either, which is what makes the section genuinely
+ * response-backed (today `ChargeItemQuestion.tsx` keeps them in a
+ * component `useState` that no reload can restore).
+ *
+ * Both are OPTIONAL here even though the v2 editor always sets the
+ * definition object: this is the type `ResponseValue` names, and the legacy
+ * widget writes rows with neither. Phase 5 makes
+ * `charge_item_definition_object` required with the widget's deletion.
+ */
+export interface ChargeItemQuestionRow extends ApplyChargeItemDefinitionRequest {
+  charge_item_definition_object?: ChargeItemDefinitionRead;
+  performer_actor_object?: UserReadMinimal;
 }
 
 export interface ChargeItemUpdate extends Omit<
