@@ -171,11 +171,11 @@ export function getExtensionProps(
  */
 function createNamespacedValidationSchema(
   processedExtensions: ProcessedExtension[],
-): z.ZodType<Record<string, unknown>> {
+): z.ZodType<Record<string, unknown>, Record<string, unknown>> {
   // Build a schema for each extension's fields
   const extensionSchemas: Record<
     string,
-    z.ZodType<Record<string, unknown>>
+    z.ZodType<Record<string, unknown>, Record<string, unknown>>
   > = {};
 
   for (const {
@@ -193,11 +193,11 @@ function createNamespacedValidationSchema(
 
   // If no extensions have fields, return a simple record schema
   if (Object.keys(extensionSchemas).length === 0) {
-    return z.record(z.unknown());
+    return z.record(z.string(), z.unknown());
   }
 
   // Create a schema that validates each extension's data independently
-  return z.record(z.unknown()).superRefine((data, ctx) => {
+  return z.record(z.string(), z.unknown()).superRefine((data, ctx) => {
     if (!data || typeof data !== "object") return;
 
     for (const [extName, extSchema] of Object.entries(extensionSchemas)) {
@@ -268,6 +268,9 @@ interface UseExtensionsReturn {
   ) => Record<string, unknown>;
 }
 
+/**
+ * @public
+ */
 export function useExtensions<TForm extends FieldValues>({
   schema,
   form,
@@ -331,20 +334,28 @@ export function useExtensions<TForm extends FieldValues>({
 // ============================================================================
 // Zod Schema Helper
 // ============================================================================
-
+/**
+ * @public
+ */
 export function withExtensions<T extends z.ZodObject<z.ZodRawShape>>(
   baseSchema: T,
   extensionSchema: JSONSchema2020 | undefined,
   context?: ExtensionContext,
 ): z.ZodObject<
-  T["shape"] & { extensions: z.ZodOptional<z.ZodType<Record<string, unknown>>> }
+  T["shape"] & {
+    extensions: z.ZodOptional<
+      z.ZodType<Record<string, unknown>, Record<string, unknown>>
+    >;
+  }
 > {
   const { validation } = getExtensionProps(extensionSchema, context);
   return baseSchema.extend({
     extensions: validation.optional(),
   }) as z.ZodObject<
     T["shape"] & {
-      extensions: z.ZodOptional<z.ZodType<Record<string, unknown>>>;
+      extensions: z.ZodOptional<
+        z.ZodType<Record<string, unknown>, Record<string, unknown>>
+      >;
     }
   >;
 }
@@ -538,5 +549,4 @@ export function useEntityExtensions<TForm extends FieldValues>({
 // Exports
 // ============================================================================
 
-export default useExtensions;
 export { ExtensionEntityType, useExtensionSchemas };

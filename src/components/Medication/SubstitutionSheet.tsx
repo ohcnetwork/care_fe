@@ -70,8 +70,8 @@ const substitutionSchema = z.object({
   substitutedProductKnowledge: z.any().refine((val) => val?.slug, {
     message: "Product selection is required",
   }),
-  type: z.nativeEnum(SubstitutionType),
-  reason: z.nativeEnum(SubstitutionReason),
+  type: z.enum(SubstitutionType),
+  reason: z.enum(SubstitutionReason),
 });
 
 type SubstitutionFormValues = z.infer<typeof substitutionSchema>;
