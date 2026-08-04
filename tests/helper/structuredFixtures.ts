@@ -30,8 +30,10 @@ import { getPatientId } from "tests/support/patientId";
  *    patient-subject. It is not: `select subject_type from
  *    emr_questionnaire where slug = 'e2e-structured-time_of_death'` returns
  *    `encounter`, same as every other `e2e-structured-*` row. There is
- *    currently NO patient-subject fixture questionnaire in the backend
- *    inventory at all — see `patientFixtureUrl`'s doc comment below.
+ *    currently no patient-subject STRUCTURED fixture — see
+ *    `patientFixtureUrl`'s doc comment below for the precise claim (a
+ *    patient-subject questionnaire fixture, `e2e-subject-patient`, DOES
+ *    exist — it just has no structured question on it).
  */
 export interface StructuredFixture {
   slug: string;
@@ -43,15 +45,25 @@ export interface StructuredFixture {
 }
 
 /**
- * The six single-question fixtures (`q-note` + one `q-structured`
- * question) that fit `StructuredFixture`'s one-type-per-fixture shape:
- * the five simple ports (`2026-08-04-phase2-ports-simple.md`) plus
- * `unknown`, the missing-plugin degradation fixture. `kitchen_sink` (seven
- * questions, five structured types) and `patient_subject` (no such backend
- * fixture exists) do NOT fit this shape — see `KITCHEN_SINK_FIXTURE` below
- * and `patientFixtureUrl`'s doc comment respectively. The task brief's
- * "Produces" line names both as keys of this record; this is the recorded,
- * evidence-based divergence from that line, not an oversight.
+ * The single-question fixtures (`q-note` + one `q-structured` question)
+ * that fit `StructuredFixture`'s one-type-per-fixture shape: the five
+ * simple ports (`2026-08-04-phase2-ports-simple.md`), `unknown`, the
+ * missing-plugin degradation fixture, and — per code review — every
+ * `-required`/`-optional` sibling of those six that actually exists on the
+ * backend, so the required/optional matrix Phase 2 needs isn't sitting
+ * under an unmapped slug nobody can find without re-running the same
+ * `psql` query this file exists to replace. `charge_item` has no
+ * `-required` sibling in the fixture set (verified — only
+ * `e2e-structured-charge_item` exists) so none is added for it; adding one
+ * here would be inventing backend data, the exact failure mode Step 3
+ * warns against.
+ *
+ * `kitchen_sink` (seven questions, five structured types) and
+ * `patient_subject` (no patient-subject STRUCTURED fixture exists — see
+ * `patientFixtureUrl`'s doc comment) do NOT fit this shape — see
+ * `KITCHEN_SINK_FIXTURE` below. The task brief's "Produces" line names
+ * both as keys of this record; this is the recorded, evidence-based
+ * divergence from that line, not an oversight.
  */
 export const STRUCTURED_FIXTURES = {
   time_of_death: {
@@ -61,6 +73,13 @@ export const STRUCTURED_FIXTURES = {
     required: false,
     subjectType: "encounter",
   },
+  time_of_death_required: {
+    slug: "e2e-structured-time_of_death-required",
+    label: "Time of Death section",
+    linkId: "q-structured",
+    required: true,
+    subjectType: "encounter",
+  },
   appointment: {
     slug: "e2e-structured-appointment",
     label: "Appointment section",
@@ -68,6 +87,15 @@ export const STRUCTURED_FIXTURES = {
     required: false,
     subjectType: "encounter",
   },
+  appointment_required: {
+    slug: "e2e-structured-appointment-required",
+    label: "Appointment section",
+    linkId: "q-structured",
+    required: true,
+    subjectType: "encounter",
+  },
+  /** No `-required` sibling exists in the fixture set — see this
+   *  constant's own doc comment above. */
   charge_item: {
     slug: "e2e-structured-charge_item",
     label: "Charge Item section",
@@ -82,6 +110,13 @@ export const STRUCTURED_FIXTURES = {
     required: false,
     subjectType: "encounter",
   },
+  encounter_required: {
+    slug: "e2e-structured-encounter-required",
+    label: "Encounter section",
+    linkId: "q-structured",
+    required: true,
+    subjectType: "encounter",
+  },
   files: {
     slug: "e2e-structured-files",
     label: "Files section",
@@ -89,16 +124,33 @@ export const STRUCTURED_FIXTURES = {
     required: false,
     subjectType: "encounter",
   },
+  files_required: {
+    slug: "e2e-structured-files-required",
+    label: "Files section",
+    linkId: "q-structured",
+    required: true,
+    subjectType: "encounter",
+  },
   /** `structured_type: "x_e2e.missing"` — no plugin registers it, so the
    *  slot renders the "requires a plugin that isn't enabled" degradation
    *  notice on every mount. `required: true` (verified) — the negative
    *  case this fixture exists for is rendering, not submission, but the
-   *  flag is recorded accurately regardless. */
+   *  flag is recorded accurately regardless. Note the INVERTED naming vs.
+   *  every other type here: the base slug is the REQUIRED one; the
+   *  optional variant is the one carrying the `-optional` suffix — that is
+   *  how the backend fixture script actually named these two, not a typo. */
   unknown: {
     slug: "e2e-structured-unknown",
     label: "Missing Plugin Section",
     linkId: "q-structured",
     required: true,
+    subjectType: "encounter",
+  },
+  unknown_optional: {
+    slug: "e2e-structured-unknown-optional",
+    label: "Missing Plugin Section",
+    linkId: "q-structured",
+    required: false,
     subjectType: "encounter",
   },
 } as const satisfies Record<string, StructuredFixture>;
@@ -142,16 +194,23 @@ export function structuredFixtureUrl(questionnaireId: string): string {
 }
 
 /**
- * Patient-subject fill URL, for whenever a patient-subject fixture
- * questionnaire exists to point it at.
+ * Patient-subject fill URL, for whenever a patient-subject STRUCTURED
+ * fixture questionnaire exists to point it at.
  *
- * NONE DOES TODAY: every `e2e-structured-*` row in the backend inventory
- * (Task 1 Step 3) — including `time_of_death`, which the task brief's draft
- * assumed was the patient-subject case — is `subject_type: "encounter"`.
- * `fillPatientSubject.spec.ts`'s live authoring of a patient-subject
- * questionnaire therefore has NOT moved onto a backend fixture; this
- * function is kept, unused, for whichever later task adds one
- * backend-side, rather than deleted and re-invented.
+ * PRECISE CLAIM (corrected by code review — the original draft of this
+ * comment over-broadened it): every `e2e-structured-*` row in the backend
+ * inventory (Task 1 Step 3) — including `time_of_death`, which the task
+ * brief's draft assumed was the patient-subject case — is `subject_type:
+ * "encounter"`. A patient-subject questionnaire fixture DOES exist
+ * (`e2e-subject-patient`, `select slug, subject_type from
+ * emr_questionnaire where slug = 'e2e-subject-patient'` → `patient`), but
+ * it carries only two plain (`q-note`/`q-detail`) questions — no
+ * structured question at all, so it is not something this file's
+ * `StructuredFixture` shape has any use for. Whether that fixture is
+ * suitable for whatever `fillPatientSubject.spec.ts` needs is a question
+ * for whoever next touches that spec, not asserted here. This function is
+ * kept, unused, for whichever later task adds a patient-subject
+ * STRUCTURED fixture backend-side, rather than deleted and re-invented.
  */
 export function patientFixtureUrl(questionnaireId: string): string {
   return `/facility/${getFacilityId()}/patient/${getPatientId()}/questionnaire/${questionnaireId}`;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 import type { StructuredEditRecord } from "@/types/questionnaire/structured";
@@ -87,11 +87,13 @@ import type {
  *     computed by `projectRows.ts`'s `findOrphanRowIds` — spec amendment
  *     A1 / task-7-brief.md obligation 2. The annex predates this
  *     obligation and has no equivalent field.
- *  4. **A passive effect prunes confirmed orphans out of `edits`** (Phase 2
- *     carry-forward fix, see that effect's own doc comment below for the
- *     full argument): once `baseline` is a known array and `orphanRowIds`
- *     is non-empty, `commit(pruneOrphanEdits(baseline, edits))` runs
- *     unconditionally — no annex equivalent, since the annex predates
+ *  4. **A passive effect prunes confirmed orphans out of `edits`, into
+ *     `droppedEdits`** (Phase 2 carry-forward fix, see that effect's own
+ *     doc comment below for the full argument): once `baseline` is a known
+ *     array and `orphanRowIds` is non-empty, every matching entry is
+ *     appended to `droppedEdits` (`StructuredRowsBase.droppedEdits`, a
+ *     `useState`) BEFORE `commit(pruneOrphanEdits(baseline, edits))` drops
+ *     it from `edits` — no annex equivalent, since the annex predates
  *     `findOrphanRowIds` entirely.
  *
  * CAVEAT for every mutator (`applyEdit`/`addRow`/`addRows`/`updateRow`/
@@ -203,10 +205,37 @@ export interface StructuredRowsBase<TRow extends object> {
   /** Derived, never stored: `edits.length > 0`. */
   isDirty: boolean;
   /** Restored edits whose baseline row has vanished server-side (spec
-   *  amendment A1) — a later restore-notice UI names these; this hook only
-   *  exposes the channel. Computed by `projectRows.ts`'s
-   *  `findOrphanRowIds`, over the same `(baseline, edits)` `rows` is. */
+   *  amendment A1), computed live from `(baseline, edits)` by
+   *  `projectRows.ts`'s `findOrphanRowIds`.
+   *
+   *  SELF-CLEARS — READ THIS BEFORE BUILDING A NOTICE ON IT. The passive
+   *  prune effect below (Phase 2 carry-forward fix) excises every rowId
+   *  this reports from `edits` as soon as it detects them — same render
+   *  pass baseline resolves, or the next one — so this is non-empty for at
+   *  most one render per detected orphan and is EMPTY AGAIN immediately
+   *  after. It is NOT a durable "N restored edits could not be applied"
+   *  count. A restore-notice UI (spec amendment A1, owner Phase 5) must
+   *  read {@link StructuredRowsBase.droppedEdits} instead — the mount-
+   *  lifetime-durable record of the same rowIds, WITH their `patch` — for
+   *  anything that needs to outlive that single render. */
   orphanRowIds: readonly RowId[];
+  /** Every edit ever pruned as a confirmed orphan THIS MOUNT, in the order
+   *  encountered, accumulated across every prune the passive effect below
+   *  runs. This is what spec amendment A1's restore notice (Phase 5) is
+   *  meant to read: unlike `orphanRowIds` (which self-clears the moment the
+   *  prune it names has happened), this retains each dropped edit's full
+   *  `patch` — the only surviving copy of what the clinician actually
+   *  typed, since the prune removes it from `edits` and a subsequent
+   *  autosave would otherwise carry that removal straight into the stored
+   *  draft with nothing left to name.
+   *
+   *  DURABILITY SCOPE: mount-lifetime only. A remount (an `enable_when`
+   *  toggle hiding then re-showing this question, navigating away and
+   *  back) resets this to `[]`, same as any other `useState`. Persisting
+   *  dropped edits so a notice survives a full page reload is Phase 5's
+   *  scope, not this hook's — it would need its own storage (e.g. folded
+   *  into the draft dump), not an in-memory list. */
+  droppedEdits: EditLog<TRow>;
   /** The raw seam — the assistant's `applyStructuredEdit` path (a later
    *  phase) and any caller needing to record an edit `useStructuredRows`
    *  doesn't otherwise expose a mutator for. */
@@ -374,17 +403,26 @@ export function useStructuredRows<
   // resulting `commit` drops exactly those rowIds from `edits`, which
   // recomputes `orphanRowIds` to `[]` on the next render.
   //
-  // KNOWN TRADE-OFF for spec amendment A1's restore notice (carry-forward
-  // item 2, owner Phase 5): `orphanRowIds` still fires true for one render
-  // at the moment an orphan is detected (this effect runs after paint,
-  // per React's effect timing), but this prune then clears it. A
-  // persistent "N restored edits could not be applied" banner cannot just
-  // read `orphanRowIds` continuously — Phase 5 needs to capture the
-  // rowIds at the moment they appear (e.g. into its own state) rather
-  // than assume this array stays non-empty. The channel itself is not
-  // regressed — it still accurately reflects `(baseline, edits)` on every
-  // render — it is just no longer a durable record once this effect has
-  // had a chance to run.
+  // POST-REVIEW FIX — the prune must not destroy the only record of what
+  // it removed. The first version of this effect called
+  // `commit(pruneOrphanEdits(baseline, edits))` and nothing else: that
+  // deletes spec amendment A1's data at the exact moment it becomes
+  // knowable, in memory AND on disk (`commit` → `updateResponse` →
+  // whatever persists `response.edits` into a local/server draft), and
+  // does it after exactly ONE render — before any remount, before any
+  // autosave, before a later phase's restore-notice UI could ever read it.
+  // `droppedEdits` (`useState` below) is the fix: every rowId `edits`
+  // filtered against `orphanSet` (computed once, reused for both) is
+  // appended there BEFORE `commit` removes it from `edits` — same
+  // convergence shape as the prune itself (see below), just also
+  // accumulating instead of only filtering. This is what makes the A1
+  // restore notice actually buildable later without every v2 editor (all
+  // eleven of them) separately racing to capture `orphanRowIds` in the one
+  // render window before this effect clears it.
+  //
+  // `droppedEdits` is mount-lifetime durable, not session-durable — see
+  // its own doc comment on `StructuredRowsBase` for that boundary and why
+  // crossing it is explicitly left to Phase 5.
   //
   // Deliberately NOT gated on `disabled` (unlike every mutator below):
   // `disabled` (P1-4's submit freeze) exists to block NEW user intent from
@@ -394,8 +432,14 @@ export function useStructuredRows<
   // baseline resolves, the prune never runs, the orphan reaches submit
   // anyway); in the ordinary timeline baseline resolves long before a
   // clinician reaches Save, so this has already run by then regardless.
+  const [droppedEdits, setDroppedEdits] = useState<EditLog<TRow>>([]);
   useEffect(() => {
     if (orphanRowIds.length === 0) return;
+    const orphanSet = new Set(orphanRowIds);
+    setDroppedEdits((previous) => [
+      ...previous,
+      ...edits.filter((edit) => orphanSet.has(edit.rowId)),
+    ]);
     commit(pruneOrphanEdits(baseline, edits));
   }, [orphanRowIds, baseline, edits, commit]);
 
@@ -556,6 +600,7 @@ export function useStructuredRows<
     edits,
     isDirty: edits.length > 0,
     orphanRowIds,
+    droppedEdits,
     applyEdit,
     resetEdits,
   };

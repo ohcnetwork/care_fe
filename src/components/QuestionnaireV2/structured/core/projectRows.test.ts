@@ -569,13 +569,13 @@ describe("projectRows — baseline+edits projection", () => {
       const baseline: BaselineRow<TestRow>[] = [
         { rowId: "survives", row: row("survives", "still here") },
       ];
-      // "survives" appears twice — the SECOND entry (a `remove`) is what a
-      // real, deduped log (`applyEditToLog`'s one-entry-per-rowId
-      // invariant) would resolve it to; written pre-resolved here rather
-      // than relying on `pruneOrphanEdits` to do that resolution itself
+      // "survives" appears once, as a `remove` — the shape a real, deduped
+      // log (`applyEditToLog`'s one-entry-per-rowId invariant) would
+      // already have resolved it to had the clinician updated then removed
+      // it in the same session, written pre-resolved here rather than
+      // relying on `pruneOrphanEdits` to do that resolution itself
       // (`findOrphanRowIds` already does, via its own last-write-wins map —
-      // this test only needs to prove PRUNING, not resolution, so the
-      // input is the already-resolved shape).
+      // this test only needs to prove PRUNING, not resolution).
       const deduped: EditLog<TestRow> = [
         update("vanished-update", row("vanished-update", "stale intent")),
         remove("vanished-remove", row("vanished-remove", "stale intent")),
@@ -633,6 +633,14 @@ describe("projectRows — baseline+edits projection", () => {
         Object.freeze(update("vanished", row("vanished", "stale"))),
         Object.freeze(update("survives", row("survives", "edited"))),
       ]);
+      // `Object.freeze` would make a mutation attempt throw synchronously
+      // (strict-mode ESM), but that alone only proves "didn't throw" — not
+      // "didn't change". Snapshot BEFORE the call and assert equality
+      // AFTER, the same pattern `projectRows`' own "Diagnosis bug" purity
+      // case above uses, so this test has a real, asserted claim rather
+      // than an implicit one resting on the frozen inputs alone.
+      const baselineSnapshot = structuredClone(baseline);
+      const logSnapshot = structuredClone(log);
 
       const result = pruneOrphanEdits(baseline, log);
 
@@ -640,6 +648,8 @@ describe("projectRows — baseline+edits projection", () => {
         result.map((e) => e.rowId),
         ["survives"],
       );
+      assert.deepEqual(baseline, baselineSnapshot);
+      assert.deepEqual(log, logSnapshot);
     });
 
     it("REGRESSION shape: the exact carry-forward scenario — a restored draft's `update` for a rowId the NOW-resolved baseline confirms gone, with no other action taken, must not survive to what would reach toRequests", () => {

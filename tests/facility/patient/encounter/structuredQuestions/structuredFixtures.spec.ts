@@ -58,15 +58,31 @@ test.describe("Structured fixture questionnaires — slug/label/type agreement",
       await page.goto(structuredFixtureUrl(questionnaireId));
 
       const block = questionBlock(page, fixture.label);
-      await expect(block).toHaveCount(1);
+      await expect(block).toBeVisible();
 
-      const blockText = (await block.innerText()).trim();
-      for (const notice of DEGRADATION_NOTICES) {
-        expect(
-          notice.test(blockText),
-          `"${key}" (${fixture.slug}) unexpectedly showed a degradation notice matching ${notice}`,
-        ).toBe(false);
-      }
+      await test.step("no degradation notice — the real input mounted", async () => {
+        // Auto-retrying, NOT a one-shot `innerText()` snapshot: the
+        // structured slot mounts lazily, so a notice that renders a tick
+        // after the block first appears would be invisible to a single
+        // synchronous read taken right after `toBeVisible()` resolves —
+        // exactly the failure mode that would let this assertion pass
+        // vacuously while the type-registration half of the pin is broken.
+        for (const notice of DEGRADATION_NOTICES) {
+          await expect(block.getByText(notice)).toHaveCount(0);
+        }
+        // The widget put SOMETHING interactive on screen. Waiting on this
+        // also settles the lazy/suspense mount before treating the checks
+        // above as final. `:visible` matters: a hidden file input behind a
+        // styled trigger (`files`) would otherwise satisfy a bare `input`
+        // locator without the widget having actually finished mounting.
+        await expect(
+          block
+            .locator(
+              "button:visible, input:visible, textarea:visible, [role='combobox']:visible",
+            )
+            .first(),
+        ).toBeVisible();
+      });
     });
   }
 });
