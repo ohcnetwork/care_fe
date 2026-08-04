@@ -42,6 +42,15 @@ describe("time_of_death model", () => {
     );
   });
 
+  it("REGRESSION (post-review): a blank row projects as unanswered, matching the differ", () => {
+    // Before the fix, this projected as ONE answered entry while
+    // toRequests sent nothing for the same row — entryHasContent read
+    // true, the outline tick lit, required validation passed, and Save
+    // silently recorded no time of death. projectValues and toRequests
+    // must agree on "empty" via the same isEmptyRow.
+    assert.deepEqual(projectValues([{ deceased_datetime: "" }]), []);
+  });
+
   it("P1-14: an empty edit log produces ZERO requests", async () => {
     assert.deepEqual(await toRequests([], CTX), []);
   });
@@ -73,5 +82,28 @@ describe("time_of_death model", () => {
       }),
       [],
     );
+  });
+
+  it("REGRESSION (post-review): a malformed log with two rowIds collapses to the LAST row — never two PUTs to one endpoint", async () => {
+    const edits: StructuredEdit<TimeOfDeathRow>[] = [
+      {
+        rowId: "a",
+        op: "add",
+        patch: { deceased_datetime: "2026-08-04T10:00:00+05:30" },
+      },
+      {
+        rowId: "b",
+        op: "add",
+        patch: { deceased_datetime: "2026-08-05T09:00:00+05:30" },
+      },
+    ];
+    assert.deepEqual(await toRequests(edits, CTX), [
+      {
+        url: "/api/v1/patient/pat-1/",
+        method: "PUT",
+        body: { deceased_datetime: "2026-08-05T09:00:00+05:30" },
+        reference_id: "structured:time_of_death:q-1",
+      },
+    ]);
   });
 });

@@ -16,7 +16,12 @@
  * projected or soft-deleted by `useStructuredRows`.
  */
 export interface TimeOfDeathRow {
-  /** ISO-8601 with offset, exactly what `DateTimeInput` emits
-   *  (`components/Common/DateTimeInput.tsx:42`, `toISOWithTimezone`). */
+  /** ISO-8601 UTC — `Date.toISOString()`'s own format, always a trailing
+   *  `Z`, never a numeric offset — exactly what `DateTimeInput` emits
+   *  (`components/Common/DateTimeInput.tsx:6-11`, `toISOWithTimezone`,
+   *  despite that helper's name). An offset string (e.g. `+05:30`) is a
+   *  perfectly valid ISO-8601 `deceased_datetime` value too — the field
+   *  itself doesn't require UTC — this doc comment is only pinning what
+   *  THIS INPUT specifically produces. */
   deceased_datetime: string;
 }
