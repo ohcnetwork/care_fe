@@ -790,17 +790,17 @@ export function DeliveryOrderShow({
                 </Button>
               )}
 
-              {deliveryOrder.status === DeliveryOrderStatus.pending &&
+              {deliveryOrder.status !== DeliveryOrderStatus.pending &&
                 isRequester && (
                   <>
                     <Button
                       onClick={handleConfirmUpdateStock}
                       className="h-10"
-                      disabled={
-                        isUpdating ||
-                        isUpsertingDeliveries ||
-                        selectedDeliveries.length === 0
-                      }
+                      // disabled={
+                      //   isUpdating ||
+                      //   isUpsertingDeliveries ||
+                      //   selectedDeliveries.length === 0
+                      // }
                     >
                       {isUpsertingDeliveries
                         ? t("updating")
@@ -859,7 +859,7 @@ export function DeliveryOrderShow({
                     <SupplyDeliveryTable
                       deliveries={supplyDeliveries.results}
                       showCheckbox={
-                        deliveryOrder.status === DeliveryOrderStatus.pending &&
+                        deliveryOrder.status !== DeliveryOrderStatus.pending &&
                         isRequester
                       }
                       autoSelectOnMount={
