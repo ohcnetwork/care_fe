@@ -11,6 +11,7 @@ import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSessio
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
 import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
 
+import type { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 import type { Question } from "@/types/questionnaire/question";
 import mutate from "@/Utils/request/mutate";
@@ -88,17 +89,41 @@ export function useSaveServerDraft({
     return !hasStructuredQuestion(primary.questionnaire.questions);
   }, [encounterBound, primary, forms.length]);
 
-  const handleSaved = useCallback(() => {
-    if (continueDraftId) {
-      queryClient.invalidateQueries({
-        queryKey: ["formSubmission", continueDraftId],
-      });
-    }
-    // The encounter overview's drafts card lists these.
-    queryClient.invalidateQueries({ queryKey: ["formSubmissions"] });
-    toast.success(t("draft_saved_successfully"));
-    onSaved();
-  }, [continueDraftId, queryClient, t, onSaved]);
+  const handleSaved = useCallback(
+    (saved: FormSubmissionRead) => {
+      if (continueDraftId) {
+        // Write the PUT's response straight into the cache instead of
+        // invalidating and hoping a refetch lands: `saved` is a
+        // `FormSubmissionRead`, the exact shape `formSubmissionApi.get`
+        // caches at this same key, so this is provably a fresh, correctly
+        // shaped replacement — not a guess.
+        //
+        // The cancel-with-revert trap this avoids: `query()` forwards the
+        // query's AbortSignal to `fetch` (Utils/request/query.ts), and
+        // `onSaved` below navigates away in this same tick. If we instead
+        // called `invalidateQueries`, the resulting refetch would still be
+        // in flight when this component's observer unmounts on navigate —
+        // React Query v5 cancels that fetch and REVERTS the cache to
+        // whatever was there before (the pre-PUT dump), not the fresh
+        // record, and not even a "stale" marker that would force a real
+        // refetch next time. A later re-resume of this draft gates on
+        // `isLoading` (present in cache => not loading) and seeds the form
+        // ONCE from that stale cache, so the just-saved edits would
+        // silently vanish on re-entry. Replacing the cache entry directly
+        // sidesteps the refetch entirely.
+        queryClient.setQueryData(["formSubmission", continueDraftId], saved);
+      }
+      // The encounter overview's drafts card lists these. This is a
+      // DIFFERENT query key (`["formSubmissions", encounterId]`, a list) —
+      // it isn't affected by the trap above because that card doesn't
+      // navigate away when it invalidates itself (discarding a draft keeps
+      // the overview mounted), so its own refetch is never cancelled.
+      queryClient.invalidateQueries({ queryKey: ["formSubmissions"] });
+      toast.success(t("draft_saved_successfully"));
+      onSaved();
+    },
+    [continueDraftId, queryClient, t, onSaved],
+  );
 
   const handleFailed = useCallback(() => {
     toast.error(t("draft_save_failed"));

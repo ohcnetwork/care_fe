@@ -35,7 +35,21 @@ async function answerPrimaryRequired(page: Page) {
  *  takes no name from its contents). */
 async function addQuestionnaire(page: Page, title: RegExp) {
   await page.getByRole("button", { name: "Add questionnaire" }).click();
-  await page.getByPlaceholder("Search Forms").fill("Feedback");
+  const search = page.getByPlaceholder("Search Forms");
+  // The picker's search box is an uncontrolled cmdk input: the component
+  // only resets its OWN `search` state on reopen (see
+  // QuestionnaireSearch.tsx's handleOpenChange), not the input's DOM value.
+  // On a SECOND open within one page session, that DOM value can already
+  // read "Feedback" (left over from the first open) — `fill()` on an
+  // already-matching value doesn't reliably re-fire the input event React
+  // listens on, so `onValueChange` never runs, the debounced questionnaire
+  // list never re-queries, and the option never renders. Clear first, then
+  // type it out key-by-key so a real event fires on every keystroke
+  // regardless of the starting value, and gate on the option actually
+  // existing before clicking it.
+  await search.fill("");
+  await search.pressSequentially("Feedback");
+  await expect(page.getByRole("option", { name: title })).toBeVisible();
   await page.getByRole("option", { name: title }).click();
 }
 
