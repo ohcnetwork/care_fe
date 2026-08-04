@@ -128,7 +128,10 @@ const noopCleanup = () => {};
  *  `ownerSlug` is checked against it here. Without that check, plugin B
  *  listing `plugin_a.assessment` (a copied sample, or malice) would take
  *  over questionnaires authored against plugin A's type depending on
- *  manifest load order, with no user-visible signal. */
+ *  manifest load order, with no user-visible signal.
+ *
+ *  A `contract: 2` definition is also refused (PHASE-1 GATE — see the
+ *  comment above the check). */
 export function registerPluginStructuredType(
   definition: PluginStructuredTypeDefinition,
   ownerSlug: string,
@@ -142,6 +145,28 @@ export function registerPluginStructuredType(
   if (namespace !== ownerSlug) {
     console.error(
       `Plugin "${ownerSlug}" tried to register structured type "${definition.type}", which belongs to the "${namespace}" namespace; skipping it`,
+    );
+    return noopCleanup;
+  }
+  // PHASE-1 GATE. `resolveStructuredType` would happily resolve a v2
+  // plugin definition honestly (it just normalizes/passes `contract`
+  // through), but `composeBatch`'s and `validateStructured`'s v2 branches
+  // are TEMPORARY compile-only stubs today (`contract === 2` → no
+  // request, no validate, no error — see those files' "TEMPORARY
+  // CONTRACT-V2 STUB" comments) because the real fork is Task 8's job, not
+  // yet wired. Letting a v2 plugin register would resolve fine, then
+  // silently contribute nothing to the submit batch while skipping its
+  // own validation — the exact fail-open `StructuredSlotState`'s doc
+  // comment forbids ("Never silently dropped"), for a REQUIRED question
+  // with recorded rows the clinician believes were saved. Refusing the
+  // registration instead routes it through the existing, correct
+  // degradation: the type resolves as `unknown_type`, the slot shows a
+  // visible notice, and a required question hard-blocks the submit. Lift
+  // this once Task 8 lands the real v2 fork (or, if this shim outlives
+  // that, no later than Phase 5, when v2 becomes the only contract).
+  if (definition.contract === 2) {
+    console.error(
+      `Plugin structured type "${definition.type}" declares contract v2, which this host does not support yet; skipping it`,
     );
     return noopCleanup;
   }

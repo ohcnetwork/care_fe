@@ -80,3 +80,30 @@ describe("isV2Definition — narrows a contract-discriminated union to its v2 ar
     assert.equal(isV2Definition(pluginV2), true);
   });
 });
+
+describe("normalizeContract and isV2Definition agree on 'absent means 1'", () => {
+  // `normalizeContract` has no production call site today:
+  // `resolveStructuredType`'s plugin branch (structured/registry.ts)
+  // writes the literal `contract: 1` directly once `isV2Definition`'s
+  // negation has already narrowed the plugin to its v1 arm, rather than
+  // calling `normalizeContract(plugin.contract)` (see that call site's
+  // comment — a direct call there loses the literal-`1` narrowing
+  // `ResolvedStructuredTypeV1.contract` needs without a widening cast).
+  // That leaves TWO independent expressions of the same rule: this
+  // function's body, and the `isV2Definition(...) ? ... : ...` branch at
+  // the call site. Nothing forces them to stay in agreement — a future
+  // edit to either could silently diverge from the other without any
+  // production code path noticing. Pinning them against each other here,
+  // for every value `contract` can actually take, is the only thing that
+  // would catch that.
+  const contractValues: (1 | 2 | undefined)[] = [undefined, 1, 2];
+
+  for (const contract of contractValues) {
+    it(`agree for contract = ${String(contract)}`, () => {
+      const definition: { contract?: 1 | 2 } = { contract };
+      const viaDiscriminant = isV2Definition(definition) ? 2 : 1;
+
+      assert.equal(normalizeContract(contract), viaDiscriminant);
+    });
+  }
+});

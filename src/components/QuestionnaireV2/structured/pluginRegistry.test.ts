@@ -6,6 +6,7 @@ import {
   registerPluginStructuredType,
   type PluginStructuredTypeDefinition,
   type PluginStructuredTypeDefinitionV1,
+  type PluginStructuredTypeDefinitionV2,
 } from "./pluginRegistry";
 
 // ponytail: every registration in this file needs a full definition, so a
@@ -38,6 +39,63 @@ function makeDefinition(
     ...overrides,
   };
 }
+
+// A v2 fixture, honestly typed as `PluginStructuredTypeDefinitionV2` — the
+// shape a real Phase-2+ remote would ship. Deliberately a SEPARATE small
+// factory rather than folded into `makeDefinition` (which stays v1-only):
+// a shared `overrides` parameter spanning both arms would reintroduce the
+// exact `Partial<union>` distribution problem `makeDefinition`'s own
+// comment documents.
+function makeV2Definition(type: string): PluginStructuredTypeDefinitionV2 {
+  return {
+    type,
+    component: (() => null) as PluginStructuredTypeDefinitionV2["component"],
+    requires: [],
+    subjects: ["encounter"],
+    draftPolicy: "serialize",
+    label: type,
+    contract: 2,
+    toRequests: async () => [],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// PHASE-1 GATE: a contract-v2 plugin definition is refused, the same shape
+// of refusal as the ownership check below (console.error + a no-op
+// cleanup) — no core or plugin fork for v2 exists yet in
+// composeBatch.ts/validateStructured.ts (those files' "TEMPORARY
+// CONTRACT-V2 STUB" comments), so letting a v2 type register would resolve
+// fine via `resolveStructuredType` and then silently contribute nothing to
+// the submit batch while skipping its own validation — exactly the
+// fail-open `StructuredSlotState`'s doc comment forbids. Refusing routes it
+// through the existing, correct degradation instead: `unknown_type`, a
+// visible notice, and a hard block if the question is required. See
+// `registerPluginStructuredType`'s doc comment for what lifts this gate.
+// ---------------------------------------------------------------------------
+
+test("a contract-v2 plugin definition is refused for the Phase-1 lifetime", () => {
+  const definition = makeV2Definition("plugin_g.v2_widget");
+  const cleanup = registerPluginStructuredType(definition, "plugin_g");
+
+  // Refused: nothing registers under this type, so `resolveStructuredType`
+  // reports `unknown_type` for it rather than a false "ready" v2 slot whose
+  // rows would silently never reach the submit batch.
+  assert.equal(getPluginStructuredType("plugin_g.v2_widget"), undefined);
+  // Same contract as the ownership refusal below: the cleanup is a
+  // harmless no-op.
+  assert.doesNotThrow(() => cleanup());
+});
+
+test("a contract-v2 refusal does not affect a v1 registration under the same owner", () => {
+  const v1 = makeDefinition("plugin_h.v1_widget");
+  const v2 = makeV2Definition("plugin_h.v2_widget");
+
+  registerPluginStructuredType(v2, "plugin_h");
+  registerPluginStructuredType(v1, "plugin_h");
+
+  assert.equal(getPluginStructuredType("plugin_h.v2_widget"), undefined);
+  assert.equal(getPluginStructuredType("plugin_h.v1_widget"), v1);
+});
 
 // ---------------------------------------------------------------------------
 // Ownership refusal (P2-8: the namespace half of the type id must match the
