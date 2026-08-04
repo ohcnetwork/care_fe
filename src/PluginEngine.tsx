@@ -15,6 +15,7 @@ import React, { Suspense, useEffect, useMemo, useRef } from "react";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
+import { registerFormAssistant } from "@/components/QuestionnaireV2/fill/assistant/formAssistantRegistry";
 import { registerPluginStructuredType } from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import { addOverride } from "@/lib/override";
 import { PlugConfig, PlugConfigMeta } from "@/types/plugConfig";
@@ -170,6 +171,18 @@ export default function PluginEngine({
             error,
           );
         }
+      }
+
+      // The `formAssistant` extension point — registered the same way
+      // `structuredQuestionTypes` is (its own dedicated registry, not
+      // `SupportedPluginComponents`/`PLUGIN_Component`), and under the
+      // same trusted `plugin.slug` this loop already uses above — never
+      // `plugin.plugin`, the manifest's own self-declared name a remote
+      // fully controls.
+      if (plugin.formAssistant) {
+        overrideCleanupRef.current.push(
+          registerFormAssistant(plugin.formAssistant, plugin.slug),
+        );
       }
     }
 

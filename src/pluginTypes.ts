@@ -1,7 +1,7 @@
 import { FilesTabsProps } from "@/components/Files/FilesTab";
+import type { FormAssistantDefinition } from "@/components/QuestionnaireV2/fill/assistant/formAssistantRegistry";
 import type { PluginStructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
-import type { ActionDescriptor, ActionRunResult } from "@/lib/actions";
 import type { OverrideCondition } from "@/lib/override";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
@@ -21,20 +21,6 @@ import { AppRoutes } from "./Routers/AppRouter";
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserReadMinimal;
-}>;
-
-/**
- * The agent contract. Scribe no longer receives a page's raw state and its
- * setter: it receives the actions the host is currently offering in this
- * scope, and one callback to invoke them. The host validates every call
- * (`lib/actions`), so a plugin can neither write a shape the page does not
- * expect nor reach a record outside the open session.
- *
- * Changing this shape requires a lockstep update in `care_scribe`.
- */
-export type ScribeComponentType = React.FC<{
-  actions: ActionDescriptor[];
-  invoke: (actionId: string, input: unknown) => Promise<ActionRunResult>;
 }>;
 
 export type PatientHomeActionsComponentType = React.FC<{
@@ -140,7 +126,6 @@ export type DeliveryOrderActionsComponentType = React.FC<{
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
-  Scribe: ScribeComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;
   PatientInfoCardQuickActions: PatientInfoCardQuickActionsComponentType;
   EncounterActions: EncounterActionsComponentType;
@@ -232,6 +217,31 @@ export type PluginManifest = {
    *  appear in the studio's type picker, render in preview and fill,
    *  validate at submit, and build their own batch requests. */
   structuredQuestionTypes?: readonly PluginStructuredTypeDefinition[];
+  /**
+   * The agent capability (replaces the old Scribe-specific `Scribe`
+   * component + `src/lib/actions/` registry). Registered "the same way
+   * `structuredQuestionTypes` is"
+   * (`components/QuestionnaireV2/fill/assistant/formAssistantRegistry.ts`):
+   * `PluginEngine` registers it under the CONFIGURED plugin slug
+   * (`config.slug`, the trusted, backend-issued identity), never this
+   * manifest's own self-declared `plugin` field — a remote's manifest is
+   * attacker-controllable, and `plugin` is exactly the field it declares
+   * about itself.
+   *
+   * The registered component receives a session-scoped
+   * `FillAssistantHandle` (`fill/assistant/types.ts`) — `listForms`,
+   * `listQuestions`, `getValue`/`setValue`, `applyStructuredEdit`,
+   * `subscribe` — constructed fresh per mounted fill session, never
+   * looked up from a module global. Every write goes through one
+   * validated choke point (`fill/assistant/coercion.ts` for plain values,
+   * `structuredEditValidation.ts`'s zod row schema check for structured
+   * ones) before it becomes an ordinary pending edit — reviewable,
+   * revertible, and, per spec amendment A2, unaudited: nothing persists
+   * until the clinician presses Save.
+   *
+   * Changing this shape requires a lockstep update in `care_scribe`.
+   */
+  formAssistant?: FormAssistantDefinition;
 };
 
 export type PluginManifestWithMeta = PluginManifest & {

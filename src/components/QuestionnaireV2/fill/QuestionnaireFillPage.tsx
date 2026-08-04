@@ -17,7 +17,6 @@ import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -41,6 +40,8 @@ import {
 } from "./FillOutlineOverlay";
 import { ServerErrorsPanel } from "./ServerErrorsPanel";
 import type { FormStore } from "./StoreRegistrar";
+import { FormAssistantSlot } from "./assistant/FormAssistantSlot";
+import { useFillAssistantSession } from "./assistant/useFillAssistantSession";
 import { sweepExpiredFillDrafts } from "./draft/fillDraftCache";
 import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
 import { loadFillDraft, reviveDraftResponses } from "./draft/fillDraftStore";
@@ -54,7 +55,6 @@ import {
   subjectKeyOf,
 } from "./subject";
 import { useSubmitFillSession } from "./submit/useSubmitQuestionnaire";
-import { useFillActions } from "./useFillActions";
 import { useFillSessionForms } from "./useFillSessionForms";
 
 interface FillPageProps {
@@ -612,10 +612,16 @@ function FillPageBody({
     t("unsaved_changes"),
   );
 
-  // What a federated agent (Scribe) may do to this session, and the one
-  // validated path for doing it. Nothing is registered for a session with
-  // no patient in scope, so those mounts hand the plugin an empty list.
-  const { descriptors, invoke } = useFillActions({ subject, forms, getStore });
+  // The assistant capability's session-scoped handle — replaces the old
+  // Scribe-specific `useFillActions`/`src/lib/actions` registry. Built
+  // fresh for THIS mount (never looked up from a module global), so two
+  // fill sessions mounted at once get two independent handles.
+  const assistantHandle = useFillAssistantSession({
+    subject,
+    forms,
+    getStore,
+    storesVersion,
+  });
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-gray-100">
@@ -747,12 +753,9 @@ function FillPageBody({
                       />
                     </div>
                   )}
-                  {/* Renders nothing unless a plugin provides Scribe. */}
-                  <PLUGIN_Component
-                    __name="Scribe"
-                    actions={descriptors}
-                    invoke={invoke}
-                  />
+                  {/* Renders nothing unless a plugin registers a
+                      `formAssistant`. */}
+                  <FormAssistantSlot handle={assistantHandle} />
                 </section>
               </div>
             </FillOutlineNavProvider>
