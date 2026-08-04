@@ -72,7 +72,10 @@ export function EditDiscountMonetarySheet({
               updateComponent({
                 discount_monetary_components: updatedComponents,
                 discount_codes: facility.discount_codes,
-                discount_configuration: facility.discount_configuration,
+                discount_configuration:
+                  facility.discount_configuration?.max_applicable != null
+                    ? facility.discount_configuration
+                    : null,
               });
             }}
           />
