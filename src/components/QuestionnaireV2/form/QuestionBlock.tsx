@@ -111,6 +111,7 @@ export function QuestionBlock(props: QuestionBlockProps) {
 const STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS = new Set<string>([
   "appointment",
   "charge_item",
+  "files",
 ]);
 
 /**
@@ -194,15 +195,19 @@ function LeafBlock({
   // the control that owns them, via StructuredFieldError) ONLY if its
   // editor actually consumes the primitive — REVIEW FIX (CRITICAL): the
   // first version of this filter fired for `question.type === "structured"`
-  // unconditionally, which silently deleted `files`' ONLY error display.
-  // `FileQuestion` (`QuestionTypes/FileQuestion.tsx:37`) reads
-  // `errors` and never renders them itself — the block-level list here was
-  // its sole display — and `validateFileUploadQuestion` produces field-keyed
-  // errors on the NORMAL path (every uploaded file is seeded with
-  // `name: ""`, `FileQuestion.tsx:141`, so an unnamed upload trips it).
+  // unconditionally, which silently deleted the ONLY error display of a type
+  // that accepts an `errors` prop and never renders it. The legacy
+  // `FileQuestion` was exactly that shape, and its validator fires on the
+  // NORMAL path (every upload is seeded with an empty name), so an unnamed
+  // upload hard-blocked Save with no visible reason anywhere.
+  //
   // Gated explicitly (`STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS`, above) on
-  // the types whose editor renders `StructuredFieldError` itself, so this
-  // never again strips a message with nowhere else to show.
+  // the types whose editor renders `StructuredFieldError` itself — directly,
+  // or through `StructuredList`, which renders it per cell for the column
+  // whose `errorFieldKeys` match. **A type joins that set in the same commit
+  // that wires the primitive, never before**: listed-but-unwired deletes the
+  // message, unlisted-but-wired merely double-prints it. Both were shipped
+  // once each in this phase and caught in review.
   const blockErrors =
     question.type === "structured" &&
     question.structured_type &&
