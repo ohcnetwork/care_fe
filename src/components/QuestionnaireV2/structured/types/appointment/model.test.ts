@@ -112,6 +112,29 @@ describe("appointment model", () => {
       assert.deepEqual(await toRequests([partial], CTX), []);
     });
 
+    it("PROJECTION AND SUBMIT AGREE: the request body is built from exactly the row the projection shows", async () => {
+      const filled = row({
+        note: "follow-up",
+        slot_id: "slot-9",
+        tags: ["t1", "t2"],
+      });
+      const projected = projectValues([filled]);
+      const requests = await toRequests(
+        [{ rowId: SINGLETON_ROW_ID, op: "add", patch: filled }],
+        CTX,
+      );
+      assert.equal(projected.length, 1);
+      assert.equal(requests.length, 1);
+      const projectedRow = (
+        projected[0] as { type: "appointment"; value: AppointmentRow[] }
+      ).value[0];
+      assert.deepEqual(requests[0].body, {
+        note: projectedRow.note,
+        patient: CTX.patientId,
+        tags: projectedRow.tags,
+      });
+    });
+
     it("sends nothing without a facility in context", async () => {
       const filled = add({ note: "follow-up", slot_id: "slot-9" });
       assert.deepEqual(
