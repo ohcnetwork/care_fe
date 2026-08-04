@@ -1,55 +1,21 @@
-import { DiagnosisQuestion } from "@/components/Questionnaire/QuestionTypes/DiagnosisQuestion";
+import { DiagnosisEditor } from "@/components/QuestionnaireV2/structured/types/diagnosis/DiagnosisEditor";
+import { toRequests } from "@/components/QuestionnaireV2/structured/types/diagnosis/model";
 
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
-import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { sanitizeNote, useLegacyResponseCallback } from "./adapt";
-
-function DiagnosisInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.patientId || !props.encounterId) return null;
-  return (
-    <DiagnosisQuestion
-      patientId={props.patientId}
-      encounterId={props.encounterId}
-      question={props.question}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      disabled={props.disabled}
-    />
-  );
-}
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 
 export const diagnosisDefinition: StructuredTypeDefinition<"diagnosis"> = {
   type: "diagnosis",
-  component: DiagnosisInput,
+  component: DiagnosisEditor,
   requires: ["patientId", "encounterId"],
   subjects: ["encounter"],
-  draftPolicy: "exclude",
-  contract: 1,
-  buildRequests: async (diagnoses, { patientId, encounterId, questionId }) => {
-    // Only edited rows submit — prefetched server rows ride along in the
-    // response values and must not re-upsert untouched.
-    const dirty = diagnoses.filter((diagnosis) => diagnosis.dirty);
-    // `subjects` is encounter-only, so a patient is always in scope here —
-    // narrowed rather than asserted (the context type is optional for
-    // plugin types that declare a resource subject).
-    if (!patientId || !encounterId || dirty.length === 0) return [];
-    return [
-      {
-        url: `/api/v1/patient/${patientId}/diagnosis/upsert/`,
-        method: "POST",
-        body: {
-          datapoints: dirty.map((diagnosis) => ({
-            ...diagnosis,
-            note: sanitizeNote(diagnosis.note),
-            encounter: encounterId,
-          })),
-        },
-        reference_id: structuredReferenceId("diagnosis", questionId),
-      },
-    ];
-  },
+  // D2: every structured type becomes draftable except `files` (D6). A
+  // diagnosis row is plain, JSON-serializable data (a `Code`, a handful of
+  // enum strings, an optional onset date/note) — no `Date`, `File`, or class
+  // instance — so it round-trips through a draft exactly. The legacy
+  // blanket "exclude" was a property of the conflated value array
+  // (prefetched server rows mixed with user input, `dirty`-tracked by hand),
+  // not of this type's data.
+  draftPolicy: "serialize",
+  contract: 2,
+  toRequests,
 };
