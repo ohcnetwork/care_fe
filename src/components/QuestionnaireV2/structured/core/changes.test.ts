@@ -5,6 +5,7 @@ import type { SymptomRequest } from "@/types/emr/symptom/symptom";
 
 import { resolveChanges } from "./changes";
 import { applyEditToLog } from "./editLog";
+import { SINGLETON_ROW_ID } from "./rowIds";
 import type { EditLog, RowEdit, RowId, SoftDeleteDescriptor } from "./types";
 
 /**
@@ -273,6 +274,84 @@ describe("resolveChanges — edit log resolved into create/update/remove sets", 
         row("other", "unrelated"), // ...before "other" at index 1
       ]);
     });
+  });
+
+  describe("REGRESSION (review finding 3) — an `add` colliding with a rowId the baseline already has must reclassify to `updates`, not duplicate-create", () => {
+    it("the exact executed sequence: add() while baseline is still loading (undefined, per the BASELINE COMPLETENESS CONTRACT), then a later edit once baseline has resolved — coalesceOntoAdd never revisits baseline, so the log entry stays `op: add` even though the row already exists server-side; resolveChanges must still route it to `updates`", () => {
+      // Reproduces the reviewer's exact scenario for a singleton type
+      // (`encounter`): a clinician starts filling the singleton while its
+      // baseline query is still in flight (Task 7 is required to pass
+      // `undefined`, never `[]`, during that window), so the FIRST edit
+      // for SINGLETON_ROW_ID is recorded as `add`. `coalesceOntoAdd`
+      // (editLog.ts:120-134) is the one coalescing arm that never consults
+      // `baseline` at all — unlike the `update`/`remove` arms — so once
+      // the baseline query resolves and a later edit lands for the SAME
+      // rowId, the entry is still `op: "add"`, forever, even though the
+      // server already has this row.
+      const draftedWhileLoading = row(SINGLETON_ROW_ID, "drafted offline");
+      const afterAdd = applyEditToLog(
+        [],
+        add(SINGLETON_ROW_ID, draftedWhileLoading),
+      ); // no baseline option at all — the mandated "still loading" shape
+
+      const baseline = baselineOf([
+        [SINGLETON_ROW_ID, row(SINGLETON_ROW_ID, "server already has this")],
+      ]);
+      const editedAfterBaselineResolved = row(
+        SINGLETON_ROW_ID,
+        "drafted offline, then edited",
+      );
+      const log = applyEditToLog(
+        afterAdd,
+        update(SINGLETON_ROW_ID, editedAfterBaselineResolved),
+        { baseline },
+      );
+
+      // Sanity check: the reducer really did leave this entry as `add`,
+      // colliding with a rowId `baseline` now has — the false-invariant
+      // shape this fix closes.
+      assert.deepEqual(log, [
+        add(SINGLETON_ROW_ID, editedAfterBaselineResolved),
+      ]);
+
+      const result = resolveChanges(log, { baseline });
+
+      // NOT a duplicate create — reclassified to updates, carrying the
+      // add's patch verbatim (see ResolvedChanges.updates' doc comment on
+      // why that is safe specifically for a URL-keyed singleton endpoint).
+      assert.deepEqual(result.creates, []);
+      assert.deepEqual(result.updates, [editedAfterBaselineResolved]);
+      assert.deepEqual(result.removes, []);
+    });
+  });
+
+  it("COMBINED: last-write-wins, the orphan-drop rule, and the op switch all interact correctly in one log — orphan status is decided by the RESOLVED (last-write) op, not the rowId's first-seen op", () => {
+    // "resurrected": first seen as a `remove`, later re-added as an
+    // `update` — baseline HAS this rowId, so the resolved `update` is not
+    // an orphan and lands in `updates` with the LAST patch.
+    // "ghost": first seen as an `add` (which the orphan check always
+    // exempts), later superseded by a `remove` — baseline LACKS this
+    // rowId. If orphan status were (incorrectly) decided from the first
+    // entry's op ("add"), this would wrongly bypass the check and emit a
+    // bare-rowId remove for a row that was never on the server. Deciding
+    // it from the RESOLVED op ("remove") correctly drops it instead.
+    const baseline = baselineOf([
+      ["resurrected", row("resurrected", "server-existing")],
+    ]);
+    const log: EditLog<TestRow> = [
+      remove("resurrected", row("resurrected", "removed-first")),
+      add("ghost", row("ghost", "added-first")),
+      update("resurrected", row("resurrected", "restored-then-edited")),
+      remove("ghost", row("ghost", "removed-after")),
+    ];
+
+    const result = resolveChanges(log, { baseline });
+
+    assert.deepEqual(result.updates, [
+      row("resurrected", "restored-then-edited"),
+    ]);
+    assert.deepEqual(result.removes, []); // "ghost" dropped as an orphan
+    assert.deepEqual(result.creates, []);
   });
 
   it("an edit with an unrecognized op is silently dropped from every set — not reachable via a validated draft (isStructuredEditRecord already rejects an unknown op string), but documented and pinned regardless", () => {

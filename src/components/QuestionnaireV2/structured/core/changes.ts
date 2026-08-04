@@ -42,11 +42,29 @@ export interface ResolvedChanges<TRow extends object> {
    *  the same way): nothing downstream is expected to mutate a resolved
    *  row, so aliasing costs nothing and avoids a needless copy. Contrast
    *  `ResolvedRemove.row`, which — when present — is always a fresh merge
-   *  and cannot alias either of its two source objects. */
+   *  and cannot alias either of its two source objects.
+   *
+   *  EXCLUDES an `add` whose `rowId` a supplied `options.baseline` already
+   *  has — that one is reclassified into `updates` instead. See
+   *  `resolveChanges`'s "POST-REVIEW FIX — an `add` colliding with
+   *  baseline" doc paragraph. */
   creates: readonly TRow[];
   /** Existing rows to update, in log order. Each is the complete row as it
    *  now reads (baseline row with the clinician's fields applied) — same
-   *  reasoning and the same aliasing note as `creates`. */
+   *  reasoning and the same aliasing note as `creates`.
+   *
+   *  ALSO INCLUDES an `add` edit reclassified because its `rowId` collided
+   *  with a supplied `options.baseline` entry (see the doc paragraph
+   *  referenced above) — in that case the pushed row is the add's `patch`
+   *  **verbatim**, which may lack the server `id` field a genuine update
+   *  row would carry (the row was never given one client-side, since it
+   *  started life as a fresh add). Safe for the singleton types where this
+   *  collision is reachable today (`encounter`, keyed by
+   *  `SINGLETON_ROW_ID`) because their endpoints are URL-keyed — the
+   *  server resolves identity from the URL, not a body field — but that is
+   *  a per-endpoint fact this function does not itself guarantee for
+   *  every future caller; a `toRequests` for a non-URL-keyed type would
+   *  need to re-verify it. */
   updates: readonly TRow[];
   /** Rows to remove, in log order. See {@link ResolvedRemove}. */
   removes: readonly ResolvedRemove<TRow>[];
@@ -205,6 +223,50 @@ export interface ResolveChangesOptions<TRow extends object> {
  * and last appearance are the same position, so this is invisible in the
  * normal path — it only changes behavior for an already-malformed input.
  * Tested in `changes.test.ts`'s "REGRESSION (review finding 2)" cases.
+ *
+ * POST-REVIEW FIX — an `add` colliding with a rowId the baseline already
+ * has is reclassified as an `update`. Reachable NOT via a malformed log,
+ * but via the ordinary, MANDATED shape of the BASELINE COMPLETENESS
+ * CONTRACT: Task 7 passes `baseline: undefined` while the query is still
+ * loading, and an `add` recorded during that window (e.g. `encounter`,
+ * the singleton keyed by `SINGLETON_ROW_ID`, before its baseline fetch has
+ * resolved) is never revisited once the real baseline arrives —
+ * `coalesceOntoAdd` (`editLog.ts:120-134`), the "existing entry is `add`"
+ * coalescing arm, is the one branch Task 3's `resolveOpAgainstBaseline`
+ * fix did NOT touch: unlike the `update`/`remove` arms, it never consults
+ * `baseline` at all, so a later `update` for the same rowId just replaces
+ * the patch and stays `op: "add"` forever, even after the baseline query
+ * resolves and the row turns out to already exist server-side. This is
+ * the differ-side twin of `projectRows`' own "singleton-draft-outrun-by-
+ * baseline" judgment call (`projectRows.ts:132-142`) for the identical
+ * collision — `resolveChanges` is the only layer left holding a fresh
+ * `baseline` at submit time, since the reducer already committed to `add`.
+ *
+ * The old behavior dispatched this `add`'s patch straight to `creates` —
+ * asking the server to CREATE a row it already has. `editLog.ts`'s own
+ * doc comment on `resolveOpAgainstBaseline` (lines 249-253) names this the
+ * WORSE of the two possible mistakes: a wrongly emitted `add` "would
+ * instead silently create a duplicate clinical row... data corruption,
+ * not a rejected request" (the wrongly-emitted-`update` case at least
+ * 404s loudly). The created row also carries no server `id` to match an
+ * upsert against, compounding it.
+ *
+ * Fixed per the review's simulated patch: `(baseline?.has(rowId) ?
+ * updates : creates).push(resolved.patch)` — when a baseline IS supplied
+ * and it has this rowId, the add's patch is pushed to `updates` instead of
+ * `creates`; otherwise (no baseline, or baseline genuinely lacks the
+ * rowId — the ordinary "this really is a new row" case) it stays a
+ * create, unchanged. Every shipped add-related test in this file passes
+ * either no baseline or a non-colliding one, so this is additive, not
+ * behavior-changing, for all of them. STATED, not assumed (per review
+ * obligation (a)): the row landing in `updates` this way is the add's
+ * `patch` **verbatim** and may lack the server `id` field a genuine
+ * update row would carry — see {@link ResolvedChanges.updates}'s doc
+ * comment for why that is specifically safe for `encounter` (URL-keyed
+ * endpoint) and not a general guarantee for every future caller. Pinned
+ * with a REDUCER-DRIVEN test (`applyEditToLog`, not a hand-built log) in
+ * `changes.test.ts`'s "REGRESSION (review finding 3)" case, using
+ * `SINGLETON_ROW_ID`.
  */
 export function resolveChanges<TRow extends object>(
   log: EditLog<TRow>,
@@ -235,7 +297,12 @@ export function resolveChanges<TRow extends object>(
 
     switch (resolved.op) {
       case "add":
-        creates.push(resolved.patch);
+        // Reclassified to `updates` when `baseline` already has this
+        // rowId — see the "POST-REVIEW FIX — an `add` colliding with a
+        // rowId the baseline already has" doc paragraph above.
+        (baseline?.has(resolved.rowId) ? updates : creates).push(
+          resolved.patch,
+        );
         break;
       case "update":
         updates.push(resolved.patch);
