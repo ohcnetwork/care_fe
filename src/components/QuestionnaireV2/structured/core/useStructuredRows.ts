@@ -510,6 +510,71 @@ export function useStructuredRows<
   // `initialEdits` finally does (`"seed"`) — otherwise a seed constructed
   // from baseline data that resolves after mount (every real seed under the
   // canonical full-row vocabulary) is silently dropped forever.
+  //
+  // THE ACTUAL WRITE IS DEFERRED ONE MICROTASK — fixes a real product
+  // defect Phase 2 Task 10's Playwright matrix pinned with `test.fail()`
+  // (`encounterStructured.spec.ts`, "?toDischarge=true seeds a dirty,
+  // discharged row on mount"): the seed landed in the edit log, but
+  // dirty-tracking (`fill/draft/useFillAutosave.ts`'s subscription effect,
+  // an ANCESTOR — `QuestionnaireFillPage.tsx` mounts it well above this
+  // hook's caller) never saw it, so the "Draft" chip never lit and Cancel
+  // navigated away with no unsaved-changes warning after a pre-seeded
+  // discharge — silently losing a real, already-timestamped edit
+  // (`period.end` is stamped at seed time).
+  //
+  // VERIFIED BY EXECUTION, not assumed: instrumented both this effect and
+  // the autosave subscription effect with `console.log(performance.now())`
+  // and ran the Playwright spec. The trace showed the seed's `commit(...)`
+  // landing (t=571.5ms) strictly BEFORE the autosave effect's very FIRST
+  // baseline snapshot (t=573.1ms) — not merely before some LATER
+  // comparison. `store.sub(responsesAtom, ...)` was never even invoked for
+  // this write; the subscription simply didn't exist yet when the write
+  // happened. This is React's own invariant: effects fire bottom-up
+  // (child before parent) on mount, and `useStructuredRows` is always
+  // called from a component strictly BELOW whatever establishes the
+  // fill session's dirty subscription. No ordinary same-frame `useEffect`
+  // placement can flip that — the fix has to make the write happen
+  // strictly AFTER the CURRENT synchronous effect-flush pass (which
+  // includes every ancestor effect due to run this pass) has completed.
+  //
+  // `queueMicrotask` does exactly that: React's post-commit effect flush
+  // (child effects, then parent effects, including any effect-triggered
+  // re-renders it resolves synchronously before yielding) runs as ONE
+  // continuous synchronous JavaScript call; a microtask queued partway
+  // through cannot preempt it and can only run once that whole call stack
+  // unwinds — strictly after every ancestor's effect this pass, whatever
+  // depth it's at. Microtasks also drain before the browser's next paint,
+  // so the row still reads "Discharged" from the very first frame — no
+  // visual flash of the pre-seed status. `seeded.current` is still
+  // flipped SYNCHRONOUSLY inside the effect body (immediately, not after
+  // the microtask), so the one-shot latch and its StrictMode
+  // double-invoke safety are unaffected — only the ACTUAL WRITE moves
+  // later, not the decision to seed.
+  //
+  // NO cleanup function returned — POST-REVIEW FIX, caught by this hook's
+  // own jsdom+StrictMode test
+  // (`useStructuredRows.initialEditsSeedTiming.test.ts`), the same
+  // harness style `useStructuredRows.orphanPrune.test.ts` established
+  // specifically to catch this class of bug. A first draft returned `() =>
+  // { cancelled = true; }` to guard the vanishingly small window between
+  // scheduling the microtask and it draining (e.g. an unmount in between).
+  // That guard is exactly what StrictMode's dev-only double-invoke
+  // (mount → cleanup → mount, run synchronously, well before any
+  // microtask can drain) triggers on every ordinary mount: pass 1 sets
+  // `seeded.current = true` and schedules the commit; StrictMode's
+  // simulated "unmount" immediately calls the cleanup, marking that
+  // schedule cancelled; pass 2 sees `seeded.current` already true and
+  // schedules nothing new — so the seed NEVER commits, permanently, under
+  // StrictMode (which `src/index.tsx` wraps the whole app in,
+  // unconditionally, dev and prod alike — only the double-INVOKE
+  // behavior itself is dev-only). The original (pre-defer) code had no
+  // such failure mode because it had no cleanup at all: its synchronous
+  // `commit(next)` call in pass 1 was never undone by pass 2's harmless
+  // no-op. Omitting the cleanup here restores that same property — the
+  // scheduled microtask always runs, exactly once, regardless of how many
+  // times StrictMode re-invokes the effect body, because `seeded.current`
+  // (not a cleanup-driven cancellation) is what prevents a SECOND
+  // schedule.
   const seeded = useRef(false);
   useEffect(() => {
     if (seeded.current) return;
@@ -521,7 +586,7 @@ export function useStructuredRows<
     for (const edit of initialEdits) {
       next = applyEditToLog(next, edit, applyOpts);
     }
-    commit(next);
+    queueMicrotask(() => commit(next));
   }, [initialEdits, edits, applyOpts, commit]);
 
   const applyEdit = useCallback(

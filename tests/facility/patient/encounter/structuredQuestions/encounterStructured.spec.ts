@@ -291,36 +291,26 @@ test.describe("Structured question: encounter", () => {
   test("?toDischarge=true seeds a dirty, discharged row on mount", async ({
     page,
   }) => {
-    // PRODUCT DEFECT — found writing this spec, not weakened around.
-    // `EncounterEditorBody`'s own doc comment
-    // (`structured/types/encounter/EncounterEditor.tsx`) claims the
-    // `?toDischarge=true` seed "correctly makes the section dirty and
-    // correctly produces a PUT." The row IS seeded correctly (the status
-    // control below genuinely reads "Discharged"), but dirty-tracking never
-    // sees it: `useStructuredRows.ts`'s one-shot seed effect (~line 514)
-    // calls `commit(...)` from a CHILD component's `useEffect`, while
+    // PRODUCT DEFECT, FOUND AND FIXED. `useStructuredRows.ts`'s one-shot
+    // `initialEdits` seed effect used to call `commit(...)` synchronously
+    // from a CHILD component's `useEffect`, while
     // `useFillSessionAutosave.ts`'s subscription effect (an ANCESTOR,
-    // `QuestionnaireFillPage.tsx`) sets up its `store.sub(...)` listener
-    // and snapshots its baseline `formSignatures` in a SEPARATE effect.
-    // React fires child effects before parent effects on mount, so the
-    // seeded discharge is already applied by the time the parent's
-    // baseline snapshot is taken — the write happens before any listener
-    // exists to see it as a CHANGE. Verified two ways: no "Draft" chip
-    // appears, and clicking the header's Cancel (`navigate(exitTarget)`,
-    // which raviger's `useNavigationPrompt` gates on exactly this dirty
-    // flag) navigates straight through with no confirm dialog at all.
-    // Consequence: a clinician who opens this URL, sees Discharged already
-    // selected, and navigates away without clicking Save Changes loses the
-    // discharge intent with no warning — the exact silent-loss failure
-    // mode this seed was supposed to have fixed over the legacy smuggled
-    // seed. `test.fail()` pins this honestly: it should start failing
-    // (i.e. this test starts PASSING for real) the day that ordering race
-    // is fixed, at which point this annotation should be deleted.
-    test.fail(
-      true,
-      "?toDischarge=true's seed is invisible to dirty-tracking (child-before-parent effect ordering race) — see comment above",
-    );
-
+    // mounted by `QuestionnaireFillPage.tsx`) captures its baseline
+    // `formSignatures` and subscribes in a SEPARATE effect. React fires
+    // child effects before parent effects on mount, so the seeded
+    // discharge landed before any listener existed to see it as a CHANGE —
+    // no "Draft" chip, and Cancel navigated away with no unsaved-changes
+    // warning after a pre-seeded discharge. Confirmed by instrumented
+    // trace (both effects logging `performance.now()`): the seed's
+    // `commit` landed strictly before the ancestor's first subscription
+    // attempt, every run. Fixed by deferring the seed's actual `commit`
+    // call one microtask (`useStructuredRows.ts`'s seed effect) — a
+    // microtask can't preempt React's synchronous post-commit effect
+    // flush, so it always lands after every ancestor effect due this pass,
+    // and still resolves before the next paint (no visual flash). Pinned
+    // at the unit level too:
+    // `useStructuredRows.initialEditsSeedTiming.test.ts`. This test is
+    // no longer `test.fail()` — it is a real, passing pin.
     const questionnaireId = await getQuestionnaireIdBySlug(fixture.slug);
     await page.goto(
       `${structuredFixtureUrl(questionnaireId)}?toDischarge=true`,
