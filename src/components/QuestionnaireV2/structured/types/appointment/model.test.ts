@@ -2,9 +2,13 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { applyEditToLog } from "@/components/QuestionnaireV2/structured/core/editLog";
+import { projectRows } from "@/components/QuestionnaireV2/structured/core/projectRows";
 import { SINGLETON_ROW_ID } from "@/components/QuestionnaireV2/structured/core/rowIds";
 import { resolveSetRow } from "@/components/QuestionnaireV2/structured/core/rowMutations";
-import type { EditLog } from "@/components/QuestionnaireV2/structured/core/types";
+import type {
+  BaselineRow,
+  EditLog,
+} from "@/components/QuestionnaireV2/structured/core/types";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
 import type { AppointmentRow } from "./model";
@@ -41,27 +45,38 @@ const add = (
  * Drives the REAL reducer seam (`resolveSetRow` + `applyEditToLog`) through
  * a sequence of `setRow(patch)` calls, the way `useStructuredRows`'s own
  * `setRow` callback does (`useStructuredRows.ts:583-609`) — not a
- * hand-built `StructuredEdit` literal. `baseline: new Map()` matches what
- * Task 4 wires for this type (`useStructuredRows.ts`'s own doc comment on
- * `StructuredRowsOptions.baseline` names `appointment` explicitly as a
+ * hand-built `StructuredEdit` literal. `baseline: []`/`new Map()` matches
+ * what Task 4 wires for this type (`useStructuredRows.ts`'s own doc comment
+ * on `StructuredRowsOptions.baseline` names `appointment` explicitly as a
  * type whose baseline is always `[]`, never `undefined`).
+ *
+ * READS THE CURRENT ROW THROUGH THE REAL `projectRows` (review finding),
+ * not `log[0]` directly: the hook's own `setRow` callback consults
+ * `rows[0]` (`rows = projectRows(baseline, edits, projectOpts)` —
+ * `useStructuredRows.ts:341-344,586`), not the raw edit log. Equivalent to
+ * indexing `log[0]` for every sequence this helper actually drives (a
+ * well-formed, single-rowId log has its one entry at both positions), but
+ * would diverge on a corrupted or orphan-leading log — exactly the
+ * territory the rest of this file cares about — so this reads through the
+ * same function the hook does, not a shortcut that happens to match today.
  */
 function simulateSetRowSequence(
   patches: readonly Partial<AppointmentRow>[],
 ): EditLog<AppointmentRow> {
   let log: EditLog<AppointmentRow> = [];
-  const baseline = new Map<string, AppointmentRow>();
+  const baselineArray: readonly BaselineRow<AppointmentRow>[] = [];
+  const baselineMap = new Map<string, AppointmentRow>();
   for (const patch of patches) {
-    const current = log[0];
+    const current = projectRows(baselineArray, log, {})[0];
     const edit = resolveSetRow<AppointmentRow>({
-      currentRow: current?.patch,
+      currentRow: current?.row,
       currentRowId: current?.rowId,
       patch,
       createSeed,
       singletonRowId: SINGLETON_ROW_ID,
       questionId: CTX.questionId,
     });
-    log = applyEditToLog(log, edit, { baseline, isEmptyRow });
+    log = applyEditToLog(log, edit, { baseline: baselineMap, isEmptyRow });
   }
   return log;
 }
@@ -300,6 +315,54 @@ describe("appointment model", () => {
           .value[0],
         first,
       );
+    });
+
+    it("KNOWN GAP (doubly-malformed log only): a duplicate entry for one rowId can make projectValues and toRequests pick DIFFERENT rows — reachable only via a log applyEditToLog itself can never produce", async () => {
+      // The SINGLETON COLLAPSE case above (two distinct rowIds, each
+      // appearing ONCE) happens to agree because `resolveChanges` and
+      // `projectRows` both land on the same position for a log with at
+      // most one entry per rowId. This case does NOT have that shape —
+      // rowId "a" appears TWICE — and is pinned here precisely because it
+      // does NOT agree, per review: `resolveChanges` dispatches "a" at its
+      // FIRST occurrence (index 0) but resolves its CONTENT from the
+      // last-write-wins map (`aLast`), while `projectRows`' add loop
+      // pushes "a" at its LAST occurrence (index 2) — so `rows[0]` is "b"'s
+      // entry (pushed at index 1, before "a"'s last occurrence at index 2)
+      // while `resolveChanges().creates[0]` is "a"'s LATEST content. Two
+      // different rows, honestly reproduced rather than silently agreeing
+      // by accident. `resolveSingletonRow`'s doc comment states the
+      // guarantee is scoped to exclude this exact shape, and why it's
+      // unreachable from any log `applyEditToLog` builds incrementally
+      // (its own one-entry-per-rowId invariant) or `pruneOrphanEdits`
+      // leaves behind (removes entries, never duplicates one) — only a
+      // hand-crafted/doubly-corrupted draft can produce it.
+      const aFirst = row({ note: "a-first", slot_id: "sA1" });
+      const bOnly = row({ note: "b-only", slot_id: "sB" });
+      const aLast = row({ note: "a-last", slot_id: "sA2" });
+      const edits: StructuredEdit<AppointmentRow>[] = [
+        { rowId: "a", op: "add", patch: aFirst },
+        { rowId: "b", op: "add", patch: bOnly },
+        { rowId: "a", op: "add", patch: aLast },
+      ];
+
+      const rows = projectRows([], edits, {});
+      const projected = projectValues(rows.map((entry) => entry.row));
+      const requests = await toRequests(edits, CTX);
+
+      assert.deepEqual(
+        (projected[0] as { type: "appointment"; value: AppointmentRow[] })
+          .value[0],
+        bOnly,
+      );
+      assert.equal(
+        requests[0]?.url,
+        "/api/v1/facility/fac-1/slots/sA2/create_appointment/",
+      );
+      assert.deepEqual(requests[0]?.body, {
+        note: "a-last",
+        patient: CTX.patientId,
+        tags: aLast.tags,
+      });
     });
 
     it("sends nothing without a facility in context", async () => {

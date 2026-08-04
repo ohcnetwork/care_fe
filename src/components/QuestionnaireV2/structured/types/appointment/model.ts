@@ -157,12 +157,37 @@ export function createSeed(): AppointmentRow {
  * orphan rule — which, given the identical `baseline` (the empty Map
  * here, `toBaselineMap([])` there), means `resolveChanges(edits,
  * {baseline}).creates` and `projectRows([], edits, {}).map(r => r.row)`
- * necessarily agree on both WHICH rowIds survive and in what ORDER they
- * appear (first occurrence in `edits`/`log`). Taking `creates[0]` here is
- * therefore exactly `rows[0]` there, by construction — not by hoping
- * position 0 happens to be the "real" singleton. A corrupted log can still
- * make both sides show/send the WRONG row's content; it can no longer make
- * them show/send TWO DIFFERENT rows'.
+ * agree on both WHICH rowIds survive and in what ORDER they appear —
+ * PROVIDED the log has AT MOST ONE ENTRY PER ROWID, which is every log
+ * `applyEditToLog` produces (its own core invariant, `editLog.ts`'s own
+ * doc comment) and every log surviving `pruneOrphanEdits`. Taking
+ * `creates[0]` here is then exactly `rows[0]` there, by construction — not
+ * by hoping position 0 happens to be the "real" singleton.
+ *
+ * SCOPE OF THE GUARANTEE — CORRECTED (review, round 3). An earlier version
+ * of this comment claimed the two agree on order UNCONDITIONALLY ("first
+ * occurrence in edits/log"). FALSE, and the two functions do not even
+ * agree with EACH OTHER on which occurrence they use once a rowId repeats:
+ * `resolveChanges` dispatches each rowId's entry at its FIRST occurrence
+ * (`changes.ts`'s `dispatched` set) but resolves its CONTENT from the
+ * last-write-wins map, while `projectRows`' add loop pushes at the LAST
+ * occurrence (`editByRowId.get(edit.rowId) !== edit` skips every entry
+ * that ISN'T the last one for that rowId) — `changes.ts`'s own doc comment
+ * names this exact divergence in its "POST-REVIEW FIX — last-write-wins
+ * per rowId" paragraph. A DOUBLY malformed log — two distinct rowIds AND a
+ * duplicate entry for one of them — can put a different rowId's single
+ * entry BETWEEN the duplicate's first and last occurrence, so `creates[0]`
+ * and `rows[0]` end up naming two DIFFERENT rowIds' content. Executed:
+ * `model.test.ts`'s "KNOWN GAP" case. Outside this function's guarantee,
+ * on purpose: `applyEditToLog`'s one-entry-per-rowId invariant makes a
+ * duplicate entry for one rowId unreachable from any log it builds
+ * incrementally, and `pruneOrphanEdits` only ever REMOVES entries, never
+ * duplicates one — so reaching this shape needs a log built OUTSIDE both
+ * (a hand-crafted or doubly-corrupted draft), which is a strictly rarer
+ * precondition than the ordinary "two distinct rowIds" corruption this
+ * function otherwise defends against. See the task report for whether the
+ * underlying `changes.ts`/`projectRows.ts` first-vs-last divergence should
+ * be reconciled in core or stays a documented, carried-forward gap.
  */
 function resolveSingletonRow(
   edits: readonly StructuredEdit<AppointmentRow>[],
