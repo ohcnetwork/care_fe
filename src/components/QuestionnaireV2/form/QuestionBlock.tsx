@@ -89,10 +89,28 @@ export function QuestionBlock(props: QuestionBlockProps) {
  * deliberately-maintained set rather than "every structured question":
  * a type added to contract v2 does not get inline field errors until its
  * OWN commit wires `StructuredFieldError` and adds itself here.
+ *
+ * REVIEW FIX: `time_of_death` does NOT belong here — its editor
+ * (`TimeOfDeathEditor.tsx`) renders no `StructuredFieldError` (verified:
+ * zero references) and its definition has no `validate` at all, so it
+ * never produces a `field_key`-bound error today. Listing it anyway would
+ * be inert now but pre-arm the exact CRITICAL this set exists to prevent:
+ * the first `field_key`-bearing error that type ever sees (a future
+ * client validator, or a positional server error) would vanish with
+ * nowhere to show it. Re-add it in the commit that actually wires the
+ * primitive for that type.
+ *
+ * `charge_item` IS listed — verified, not assumed: `ChargeItemEditor.tsx`
+ * renders through `StructuredList` (`core/StructuredList.tsx`), which
+ * renders `<StructuredFieldError>` per cell itself (`:411`) via the same
+ * `selectStructuredFieldErrors` match this file's own filter uses. Its
+ * `quantity` column's error (`required: true`, no `ownsErrorDisplay`)
+ * therefore already renders inline — omitting it from this set was the
+ * double-print in reverse.
  */
 const STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS = new Set<string>([
   "appointment",
-  "time_of_death",
+  "charge_item",
 ]);
 
 /**
@@ -177,7 +195,7 @@ function LeafBlock({
   // editor actually consumes the primitive — REVIEW FIX (CRITICAL): the
   // first version of this filter fired for `question.type === "structured"`
   // unconditionally, which silently deleted `files`' ONLY error display.
-  // `FileQuestion` (`QuestionTypes/FileUpload/FileQuestion.tsx:37`) reads
+  // `FileQuestion` (`QuestionTypes/FileQuestion.tsx:37`) reads
   // `errors` and never renders them itself — the block-level list here was
   // its sole display — and `validateFileUploadQuestion` produces field-keyed
   // errors on the NORMAL path (every uploaded file is seeded with
