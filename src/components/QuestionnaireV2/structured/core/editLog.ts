@@ -3,17 +3,11 @@ import type { EditLog, RowEdit, RowId } from "./types";
 
 /**
  * Options for {@link applyEditToLog}. Signature per task-3-brief.md /
- * annex `p1-state-core.md` §6, translated: the annex's draft
- * `ApplyEditOptions` also carries an `isEmptyRow` hook for annihilating an
- * added-then-emptied row (`AppointmentQuestion.tsx:144-153`-style,
- * annex §6's `add`+`update` cell — NOT §7, which never mentions it; §7 is
- * `removeRow`'s three-outcome dispatch, a different concern). It is
- * omitted here as a CARRY-FORWARD, not because it belongs elsewhere: the
- * plan wires it from `useStructuredRows` (Task 7,
- * `2026-08-04-phase1-core-kit.md` line 217 — "`isEmptyRow` annihilates an
- * emptied added row"), which means this file WILL be reopened to accept
- * and act on it. Not listed among task-3's required coalescing rules, so
- * deferred rather than guessed at now. See task-3-report.md for the note.
+ * annex `p1-state-core.md` §6, translated. `isEmptyRow` was originally
+ * deferred here as a CARRY-FORWARD (see task-3-report.md) and is now wired
+ * by Task 7 (`2026-08-04-phase1-core-kit.md` line 217 — "`isEmptyRow`
+ * annihilates an emptied added row") — see {@link coalesceOntoAdd} for
+ * exactly which cell it applies to.
  */
 export interface ApplyEditOptions<TRow extends object> {
   /**
@@ -27,6 +21,17 @@ export interface ApplyEditOptions<TRow extends object> {
    * an add, and an add was never on the server to revert to.
    */
   baseline?: ReadonlyMap<RowId, TRow>;
+  /**
+   * An ADDED row that satisfies this after an `update` replaces its patch
+   * is annihilated — the row never reached the server, so clearing it back
+   * to nothing is indistinguishable from never having added it at all.
+   * Reproduces `AppointmentQuestion.tsx:144-153` (clearing note+slot+tags
+   * writes `[]`) without a special case in the editor. Scoped to exactly
+   * the annex §6 "existing `add`, incoming `update`" cell — NOT an
+   * assistant re-`add` (`coalesceOntoAdd`'s other branch), which is a
+   * fresh, deliberate creation, not a "clearing" event.
+   */
+  isEmptyRow?: (row: TRow) => boolean;
 }
 
 /**
@@ -50,7 +55,7 @@ export interface ApplyEditOptions<TRow extends object> {
  * | existing  | incoming `add`         | incoming `update`         | incoming `remove` |
  * |-----------|-------------------------|----------------------------|--------------------|
  * | *(none)*  | append `add`            | append `update`; drop if patch canonicalizes to baseline | append `remove` |
- * | `add`     | replace patch, stays `add` | replace patch, stays `add` | **annihilate** (row never reached the server) |
+ * | `add`     | replace patch, stays `add` | replace patch, stays `add`; **annihilate instead if `isEmptyRow(patch)`** | **annihilate** (row never reached the server) |
  * | `update`  | **resolved against `baseline`** — `add` if the rowId provably isn't in it, else replace patch and stay `update` | replace patch, canonicalize against baseline, **drop if reverted** | replace with `remove` |
  * | `remove`  | **resolved against `baseline`** — `add` if the rowId provably isn't in it, else `update` (restore-and-patch) | same resolution as the `add` column | keep `remove` (idempotent) |
  *
@@ -66,7 +71,7 @@ export function applyEditToLog<TRow extends object>(
   edit: RowEdit<TRow>,
   options: ApplyEditOptions<TRow> = {},
 ): EditLog<TRow> {
-  const { baseline } = options;
+  const { baseline, isEmptyRow } = options;
   const index = log.findIndex((entry) => entry.rowId === edit.rowId);
 
   if (index === -1) {
@@ -74,7 +79,7 @@ export function applyEditToLog<TRow extends object>(
   }
 
   const existing = log[index];
-  const resolved = coalesce(existing, edit, baseline);
+  const resolved = coalesce(existing, edit, baseline, isEmptyRow);
 
   if (resolved === null) {
     // Annihilated (add→remove) — drop the slot, preserving the relative
@@ -106,10 +111,11 @@ function coalesce<TRow extends object>(
   existing: RowEdit<TRow>,
   incoming: RowEdit<TRow>,
   baseline: ReadonlyMap<RowId, TRow> | undefined,
+  isEmptyRow: ((row: TRow) => boolean) | undefined,
 ): RowEdit<TRow> | null {
   switch (existing.op) {
     case "add":
-      return coalesceOntoAdd(existing, incoming);
+      return coalesceOntoAdd(existing, incoming, isEmptyRow);
     case "update":
       return coalesceOntoUpdate(existing, incoming, baseline);
     case "remove":
@@ -120,6 +126,7 @@ function coalesce<TRow extends object>(
 function coalesceOntoAdd<TRow extends object>(
   existing: RowEdit<TRow>,
   incoming: RowEdit<TRow>,
+  isEmptyRow: ((row: TRow) => boolean) | undefined,
 ): RowEdit<TRow> | null {
   if (incoming.op === "remove") {
     // The row never reached the server — there is nothing to tell it
@@ -130,6 +137,17 @@ function coalesceOntoAdd<TRow extends object>(
   // row still hasn't been created server-side, so it stays an `add`.
   // `patch` is always the complete row under the canonical vocabulary, so
   // this is a full replace, never a field-level merge.
+  //
+  // isEmptyRow WIRING (Task 7, carry-forward from Task 3): scoped to the
+  // `update` column only — an assistant re-`add` is a fresh, deliberate
+  // creation and is never annihilated by content, even if that content
+  // happens to be empty. An `update` replacing an added row's content with
+  // something the type calls empty is the "clear it back out" gesture
+  // (`AppointmentQuestion.tsx:144-153`): the row never reached the server,
+  // so annihilating it is indistinguishable from never having added it.
+  if (incoming.op === "update" && isEmptyRow?.(incoming.patch)) {
+    return null;
+  }
   return { rowId: existing.rowId, op: "add", patch: incoming.patch };
 }
 

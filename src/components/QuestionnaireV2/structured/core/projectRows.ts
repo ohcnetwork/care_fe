@@ -10,8 +10,8 @@ import type {
 /**
  * Options for {@link projectRows}. Signature per `task-4-brief.md` /
  * `2026-08-04-phase1-core-kit.md:162` (the plan's own binding "Produces"
- * line) — not `annexes/p1-state-core.md` §5's draft. Two deliberate
- * narrowings from the annex, both intentional here, not oversights:
+ * line) — not `annexes/p1-state-core.md` §5's draft. Deliberate narrowings
+ * from the annex, intentional here, not oversights:
  *
  *  - No `single` flag. The annex's `single?: boolean` truncates the
  *    result to at most one row for a singleton type. Nothing in Tasks
@@ -21,14 +21,22 @@ import type {
  *    (`SINGLETON_ROW_ID`, `core/rowIds.ts`) enforced by never having more
  *    than one entry share that id — not something this function needs to
  *    truncate for.
- *  - No `orphanRowIds` in the return. The annex wraps the result in a
- *    `Projection<TRow>` (`{ rows, orphanRowIds }`) so a caller can surface
- *    a "this row no longer exists" notice (deferred to a later phase per
- *    the annex's own note). The plan's signature returns
- *    `ProjectedRow<TRow>[]` directly — no wrapper, no orphan channel. See
- *    the doc comment on the drop-silently behavior below for what that
- *    means functionally; `task-4-report.md` records this as a translation
- *    decision, not a gap.
+ *  - No `orphanRowIds` bundled into this function's OWN return. The annex
+ *    wraps the result in a `Projection<TRow>` (`{ rows, orphanRowIds }`);
+ *    the plan's signature returns `ProjectedRow<TRow>[]` directly instead —
+ *    `task-4-report.md` records this as a translation decision. Task 7
+ *    (spec amendment A1) needs the channel after all, so it is exposed as
+ *    the SEPARATE, sibling function {@link findOrphanRowIds} below, over
+ *    the same `(baseline, log)` inputs, rather than reshaping this
+ *    function's return and rippling a wrapper type through every existing
+ *    call site and test.
+ *
+ * `baseline` itself is `readonly BaselineRow<TRow>[] | undefined` — the
+ * BASELINE COMPLETENESS CONTRACT's two legal states (the complete fetched
+ * server-row set, or "not yet known"), never a partial array standing in
+ * for "loading". See step 3 of the function doc comment below for what
+ * `undefined` unlocks, and `findOrphanRowIds`, which reads the identical
+ * signal.
  */
 export interface ProjectRowsOptions<TRow extends object> {
   /**
@@ -141,23 +149,20 @@ export interface ProjectRowsOptions<TRow extends object> {
  *    rule (step 1 above) already does for exactly this rowId — this skip
  *    is what keeps step 2 from then ALSO rendering it.
  *
- * 3. **Everything else is dropped, silently.** An edit whose `rowId` is
- *    in neither the baseline nor emitted as an add above — an `update` or
- *    `remove` targeting a rowId the (complete) baseline does not contain
- *    — is the annex's §5 "orphan": intent about a row that no longer
- *    exists, typically a restored draft whose server row vanished between
- *    sessions. The annex reports these via a separate `orphanRowIds`
- *    channel on its `Projection<TRow>` wrapper; this task's binding
- *    signature returns `ProjectedRow<TRow>[]` directly, with no such
- *    channel (see `ProjectRowsOptions`'s doc comment). So here an orphan
- *    is simply never added to `rows` — nothing renders it, nothing
- *    crashes on it, and it does not resurrect merely by calling this
- *    function again with the same log: resurrection would require an
- *    edit that actually matches a real baseline row or a real `add`.
- *    (Surfacing a visible "this entry could not be restored" notice from
- *    the dropped rowIds, per the annex's Phase-5 intent, is left to
- *    whichever later task re-adds that channel — not silently designed
- *    around here.)
+ * 3. **When `baseline` is a known array, everything else is dropped,
+ *    silently** (see the separate `undefined` case below this step in the
+ *    implementation, for the loading/errored state). An edit whose `rowId`
+ *    is in neither the baseline nor emitted as an add above — an `update`
+ *    or `remove` targeting a rowId the (complete) baseline does not
+ *    contain — is the annex's §5 "orphan": intent about a row that no
+ *    longer exists, typically a restored draft whose server row vanished
+ *    between sessions. It is simply never added to `rows` — nothing
+ *    renders it here, nothing crashes on it, and it does not resurrect
+ *    merely by calling this function again with the same log: resurrection
+ *    would require an edit that actually matches a real baseline row or a
+ *    real `add`. {@link findOrphanRowIds} is the sibling function that
+ *    NAMES these rowIds instead of just omitting them, for spec amendment
+ *    A1's restore notice (Task 7).
  *
  * 4. **`displayOrder`**, applied last, via `Array.prototype.sort` (stable
  *    since ES2019/Node's baseline), so rows the comparator treats as
@@ -166,7 +171,7 @@ export interface ProjectRowsOptions<TRow extends object> {
  *    throughout.
  */
 export function projectRows<TRow extends object>(
-  baseline: readonly BaselineRow<TRow>[],
+  baseline: readonly BaselineRow<TRow>[] | undefined,
   log: EditLog<TRow>,
   options: ProjectRowsOptions<TRow> = {},
 ): ProjectedRow<TRow>[] {
@@ -175,12 +180,20 @@ export function projectRows<TRow extends object>(
   const editByRowId = new Map<RowId, RowEdit<TRow>>();
   for (const edit of log) editByRowId.set(edit.rowId, edit);
 
-  const baselineRowIds = new Set<RowId>(baseline.map((entry) => entry.rowId));
+  // `undefined` is the BASELINE COMPLETENESS CONTRACT's "not yet known"
+  // signal (the query is loading or errored) — see the function doc
+  // comment's step 3 for what that unlocks below. `baselineRows` is the
+  // ordinary array either way; only the ORIGINAL `baseline` parameter
+  // (still `| undefined` at this point) is what step 3 branches on.
+  const baselineRows = baseline ?? [];
+  const baselineRowIds = new Set<RowId>(
+    baselineRows.map((entry) => entry.rowId),
+  );
 
   const rows: ProjectedRow<TRow>[] = [];
 
   // 1. Baseline, in the order the query layer returned it.
-  for (const entry of baseline) {
+  for (const entry of baselineRows) {
     const edit = editByRowId.get(entry.rowId);
     if (edit?.op === "remove") continue; // hard removal — see doc comment
 
@@ -229,8 +242,43 @@ export function projectRows<TRow extends object>(
     });
   }
 
-  // 3. Every other edit (an orphan) is simply never added above — no
-  //    further action needed here. See the function doc comment.
+  // 3. BASELINE COMPLETENESS CONTRACT (Task 7, task-7-brief.md obligation
+  //    1 — the `f321cb379` hazard). When `baseline` is `undefined` — the
+  //    query is still loading or errored, NOT "the server confirmed zero
+  //    rows" — an unmatched non-`add` edit is not a confirmed orphan; it is
+  //    simply unresolved. Render it directly from its own patch (already
+  //    the complete row under the canonical vocabulary) instead of
+  //    silently dropping it, so a restored draft's pending `update` stays
+  //    visible during the loading window rather than vanishing from
+  //    display while still being a live part of the log (and therefore
+  //    still submitted once the baseline resolves). `add` edits are
+  //    excluded here because step 2 above already emitted every one of
+  //    them unconditionally (`baselineRowIds` is empty when `baseline` is
+  //    `undefined`); a `remove` has nothing to render (there is no content
+  //    to show for "delete a row we don't yet know exists"). `origin` is
+  //    `"baseline"`, not `"added"`, so a row doesn't visually flip
+  //    treatment the instant the real baseline arrives and confirms it.
+  //    When `baseline` IS a known array (however empty), this block never
+  //    runs and the ordinary orphan-drop rule (silently never added) is
+  //    unchanged — see {@link findOrphanRowIds} for the matching predicate
+  //    that names these to the clinician instead of just hiding them, and
+  //    the module's Global Constraint note ("PROJECTION AND SUBMIT MUST
+  //    AGREE") for why this mirrors `resolveChanges`' identical
+  //    undefined-baseline conservatism.
+  if (baseline === undefined) {
+    for (const edit of log) {
+      if (editByRowId.get(edit.rowId) !== edit) continue;
+      if (edit.op !== "update") continue;
+
+      rows.push({
+        rowId: edit.rowId,
+        row: edit.patch,
+        origin: "baseline",
+        edited: true,
+        softDeleted: softDelete?.isDeleted(edit.patch) ?? false,
+      });
+    }
+  }
 
   // 4. Display sort — output only.
   if (displayOrder) {
@@ -238,4 +286,60 @@ export function projectRows<TRow extends object>(
   }
 
   return rows;
+}
+
+/**
+ * Names the rowIds {@link projectRows} silently drops from its projection —
+ * spec amendment A1: a restored edit whose baseline row has vanished
+ * server-side must be LISTED to the clinician, not just disappear. Task 7
+ * (`task-7-brief.md` obligation 2) exposes this from `useStructuredRows` as
+ * `orphanRowIds`, for a later restore-notice UI to name; this function is
+ * the pure predicate behind that channel, over the identical
+ * `(baseline, log)` inputs `projectRows` itself takes, so the two can never
+ * silently disagree about which edits are showing versus which are orphans.
+ *
+ * `undefined` baseline ("not yet known" — the BASELINE COMPLETENESS
+ * CONTRACT) returns `[]`: unresolved is not the same as confirmed-gone, the
+ * same conservatism `resolveChanges` (`core/changes.ts`) applies to its own
+ * orphan check, and the reason `projectRows`' step 3 renders (rather than
+ * drops) an unmatched `update` while `baseline` is `undefined` — a rowId
+ * this function would otherwise have to call an orphan while the caller's
+ * query is simply still in flight.
+ *
+ * The predicate itself, restated from the task brief: `e.op !== "add" &&
+ * !baselineRowIds.has(e.rowId)`. Deliberately NOT `!renderedIds.has(e.rowId)`
+ * (the naive derivation) — that alternative also flags the clinician's own
+ * intentional `remove`/soft-delete of an added row and every ordinary `add`,
+ * neither of which is a "this row vanished" case at all.
+ *
+ * Resolved through the same last-write-wins map `projectRows` and
+ * `resolveChanges` both use, so a malformed log carrying two entries for one
+ * rowId (a restored draft's per-record validation admits this even though
+ * `applyEditToLog` never produces it) is reported once, not twice.
+ *
+ * Pure and total: never mutates `baseline` or `log`, always returns a fresh
+ * array.
+ */
+export function findOrphanRowIds<TRow extends object>(
+  baseline: readonly BaselineRow<TRow>[] | undefined,
+  log: EditLog<TRow>,
+): readonly RowId[] {
+  if (baseline === undefined) return [];
+  const baselineRowIds = new Set<RowId>(baseline.map((entry) => entry.rowId));
+
+  const editByRowId = new Map<RowId, RowEdit<TRow>>();
+  for (const edit of log) editByRowId.set(edit.rowId, edit);
+
+  const orphanRowIds: RowId[] = [];
+  const seen = new Set<RowId>();
+  for (const edit of log) {
+    if (seen.has(edit.rowId)) continue;
+    seen.add(edit.rowId);
+    // Non-null: this rowId came from `log`, so `editByRowId` has an entry.
+    const resolved = editByRowId.get(edit.rowId) as RowEdit<TRow>;
+    if (resolved.op !== "add" && !baselineRowIds.has(resolved.rowId)) {
+      orphanRowIds.push(resolved.rowId);
+    }
+  }
+  return orphanRowIds;
 }

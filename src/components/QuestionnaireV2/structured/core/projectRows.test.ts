@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import type { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import type { SymptomRequest } from "@/types/emr/symptom/symptom";
 
-import { projectRows } from "./projectRows";
+import { findOrphanRowIds, projectRows } from "./projectRows";
 import { SINGLETON_ROW_ID } from "./rowIds";
 import type {
   BaselineRow,
@@ -412,6 +412,156 @@ describe("projectRows — baseline+edits projection", () => {
     });
 
     assert.equal(result.length, 2);
+  });
+
+  it("BASELINE COMPLETENESS CONTRACT: baseline===undefined (loading/errored) renders a restored `update` instead of silently hiding it — the f321cb379 hazard", () => {
+    // Verified failure shape from task-7-brief.md obligation 1: a restored
+    // draft log `[update("server-1"), add("local-1")]` projected against
+    // `[]` (the WRONG "server confirmed zero rows" signal) renders only
+    // "local-1". Projected against `undefined` (the CORRECT "not yet
+    // known" signal), both must render.
+    const log: EditLog<TestRow> = [
+      update("server-1", row("server-1", "restored update")),
+      add("local-1", row("local-1", "restored add")),
+    ];
+
+    // Order: step 2 (adds) always runs before step 3 (undefined-baseline
+    // presumed rows), so "local-1" (the add) precedes "server-1" (the
+    // presumed update) here — the load-bearing fact is that BOTH appear,
+    // not their relative order.
+    const withUndefinedBaseline = projectRows(undefined, log);
+    assert.deepEqual([...withUndefinedBaseline.map((r) => r.rowId)].sort(), [
+      "local-1",
+      "server-1",
+    ]);
+    const serverRow = withUndefinedBaseline.find((r) => r.rowId === "server-1");
+    assert.equal(serverRow?.origin, "baseline");
+    assert.equal(serverRow?.edited, true);
+
+    // Contrast: the WRONG signal ([]) reproduces the hazard — only the add
+    // survives, exactly the bug this test guards against regressing.
+    const withEmptyBaseline = projectRows([], log);
+    assert.deepEqual(
+      withEmptyBaseline.map((r) => r.rowId),
+      ["local-1"],
+    );
+  });
+
+  it("baseline===undefined: a pending `remove` has nothing to render (no content to show for deleting an unknown row)", () => {
+    const log: EditLog<TestRow> = [remove("ghost", row("ghost", "gone"))];
+
+    const result = projectRows(undefined, log);
+
+    assert.deepEqual(result, []);
+  });
+
+  it("baseline===undefined: an `add` is unaffected — already handled by step 2 regardless of baseline state", () => {
+    const log: EditLog<TestRow> = [add("new-1", row("new-1", "brand new"))];
+
+    const result = projectRows(undefined, log);
+
+    assert.equal(result.length, 1);
+    assert.equal(result[0].origin, "added");
+  });
+
+  it("baseline===undefined: a malformed log with two entries for one rowId resolves via the same last-write map as step 1/2 — no double emission", () => {
+    const log: EditLog<TestRow> = [
+      update("dup", row("dup", "first")),
+      update("dup", row("dup", "second")),
+    ];
+
+    const result = projectRows(undefined, log);
+
+    assert.equal(result.length, 1);
+    assert.deepEqual(result[0].row, row("dup", "second"));
+  });
+
+  it("baseline===undefined: displayOrder still sorts the presumed rows (step 3) alongside adds", () => {
+    const log: EditLog<TestRow> = [
+      update("b", row("b", "B")),
+      add("a", row("a", "A")),
+    ];
+
+    const result = projectRows(undefined, log, {
+      displayOrder: (x, y) => x.label.localeCompare(y.label),
+    });
+
+    assert.deepEqual(
+      result.map((r) => r.rowId),
+      ["a", "b"],
+    );
+  });
+
+  it("findOrphanRowIds: undefined baseline is conservative — never reports an orphan while the baseline query is loading/errored", () => {
+    const log: EditLog<TestRow> = [
+      update("server-1", row("server-1", "x")),
+      remove("server-2", row("server-2", "y")),
+      add("local-1", row("local-1", "z")),
+    ];
+
+    assert.deepEqual(findOrphanRowIds(undefined, log), []);
+  });
+
+  it("findOrphanRowIds: an `update`/`remove` whose rowId the (complete) baseline lacks is an orphan; an `add` never is", () => {
+    const baseline: BaselineRow<TestRow>[] = [
+      { rowId: "survives", row: row("survives", "still here") },
+    ];
+    const log: EditLog<TestRow> = [
+      update("vanished-update", row("vanished-update", "stale intent")),
+      remove("vanished-remove", row("vanished-remove", "stale intent")),
+      add("brand-new", row("brand-new", "genuinely new")),
+      update("survives", row("survives", "edited")),
+    ];
+
+    const orphans = findOrphanRowIds(baseline, log);
+
+    assert.deepEqual([...orphans].sort(), [
+      "vanished-remove",
+      "vanished-update",
+    ]);
+  });
+
+  it("findOrphanRowIds: does NOT flag the clinician's own removal of a row the baseline still has — the naive `!renderedIds.has` derivation would", () => {
+    // The exact case task-7-brief.md obligation 2 calls out: a `remove`
+    // against a rowId baseline DOES have is not shown by projectRows
+    // (hard removal), but it is not an orphan either — the row didn't
+    // vanish server-side, the clinician removed it.
+    const baseline: BaselineRow<TestRow>[] = [
+      { rowId: "r1", row: row("r1", "server value") },
+    ];
+    const log: EditLog<TestRow> = [remove("r1", row("r1", "server value"))];
+
+    assert.deepEqual(findOrphanRowIds(baseline, log), []);
+  });
+
+  it("findOrphanRowIds: an empty (but KNOWN) baseline still reports orphans — only `undefined` suppresses the check", () => {
+    const log: EditLog<TestRow> = [
+      update("gone", row("gone", "restored intent")),
+    ];
+
+    assert.deepEqual(findOrphanRowIds([], log), ["gone"]);
+  });
+
+  it("findOrphanRowIds: a malformed log with two entries for one rowId is reported once, resolved by the last write", () => {
+    const log: EditLog<TestRow> = [
+      update("dup", row("dup", "first")),
+      update("dup", row("dup", "second")),
+    ];
+
+    assert.deepEqual(findOrphanRowIds([], log), ["dup"]);
+  });
+
+  it("findOrphanRowIds: purity — neither baseline nor log is mutated", () => {
+    const baseline = Object.freeze([
+      Object.freeze(baselineEntry("r1", Object.freeze(row("r1", "A")))),
+    ]);
+    const log = Object.freeze([
+      Object.freeze(update("vanished", row("vanished", "x"))),
+    ]);
+
+    const result = findOrphanRowIds(baseline, log);
+
+    assert.deepEqual(result, ["vanished"]);
   });
 
   it("a removed baseline row does not resurrect across a baseline refetch — the edit log, not a cached baseline snapshot, decides visibility", () => {

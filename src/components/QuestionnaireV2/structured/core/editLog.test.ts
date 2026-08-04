@@ -276,6 +276,68 @@ describe("applyEditToLog — one edit per rowId, coalescing rules", () => {
     assert.deepEqual(afterSecond, [update("r1", row("r1", "value"))]);
   });
 
+  it("isEmptyRow ANNIHILATES an added row once an update clears it back to empty (AppointmentQuestion.tsx:144-153-style)", () => {
+    const isEmptyRow = (r: TestRow) => r.note.trim().length === 0;
+
+    const afterAdd = applyEditToLog([], add("r1", row("r1", "some note")), {
+      isEmptyRow,
+    });
+    assert.equal(afterAdd.length, 1);
+
+    const afterClear = applyEditToLog(afterAdd, update("r1", row("r1", "")), {
+      isEmptyRow,
+    });
+
+    assert.deepEqual(afterClear, []);
+  });
+
+  it("isEmptyRow does NOT annihilate while the added row's content is still non-empty", () => {
+    const isEmptyRow = (r: TestRow) => r.note.trim().length === 0;
+
+    const afterAdd = applyEditToLog([], add("r1", row("r1", "some note")), {
+      isEmptyRow,
+    });
+    const afterEdit = applyEditToLog(
+      afterAdd,
+      update("r1", row("r1", "still has content")),
+      { isEmptyRow },
+    );
+
+    // Stays an `add` — coalescing onto an existing `add` never promotes to
+    // `update` (see `coalesceOntoAdd`); only content decides annihilation.
+    assert.deepEqual(afterEdit, [add("r1", row("r1", "still has content"))]);
+  });
+
+  it("isEmptyRow is scoped to the add+update cell ONLY — an assistant re-`add` onto an existing `add` is never annihilated by content", () => {
+    const isEmptyRow = (r: TestRow) => r.note.trim().length === 0;
+
+    const afterAdd = applyEditToLog([], add("r1", row("r1", "some note")), {
+      isEmptyRow,
+    });
+    // A fresh `add` (not an `update`) replacing the patch with empty
+    // content — a deliberate re-creation, not a "clearing" gesture. Must
+    // stay a live `add`, not annihilate.
+    const afterReAdd = applyEditToLog(afterAdd, add("r1", row("r1", "")), {
+      isEmptyRow,
+    });
+
+    assert.deepEqual(afterReAdd, [add("r1", row("r1", ""))]);
+  });
+
+  it("isEmptyRow has no effect on cells other than existing-add: an update onto a baseline row is untouched even when the callback would call it empty", () => {
+    const isEmptyRow = (r: TestRow) => r.note.trim().length === 0;
+    const baseline = baselineOf([["r1", row("r1", "server value")]]);
+
+    const afterEmptyUpdate = applyEditToLog([], update("r1", row("r1", "")), {
+      baseline,
+      isEmptyRow,
+    });
+
+    // Recorded as an ordinary update — isEmptyRow is not consulted for the
+    // *(none)* row of the coalescing table, only the existing-`add` row.
+    assert.deepEqual(afterEmptyUpdate, [update("r1", row("r1", ""))]);
+  });
+
   it("preserves position on coalesce — only genuinely new rowIds append to the end", () => {
     const baseline = baselineOf([["r2", row("r2", "baseline-2")]]);
     const step1 = applyEditToLog([], add("r1", row("r1", "1")));
