@@ -11,6 +11,7 @@ import type {
   StructuredEdit,
   StructuredQuestionType,
 } from "@/types/questionnaire/structured";
+import type { TimeOfDeathRow } from "@/types/questionnaire/structuredRows";
 
 import type { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import type { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
@@ -29,9 +30,8 @@ import type { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 export type StructuredContextKey = "patientId" | "encounterId" | "facilityId";
 
 /** What the UI edits per type — one entry of `values[0].value`'s array.
- *  (`time_of_death` stores plain strings.) The sole such map: the legacy
- *  one in `components/Questionnaire/structured/` went with the legacy fill
- *  stack that was its only consumer. */
+ *  The sole such map: the legacy one in `components/Questionnaire/structured/`
+ *  went with the legacy fill stack that was its only consumer. */
 export interface StructuredDataMap {
   allergy_intolerance: AllergyIntoleranceRequest;
   medication_request: MedicationRequestCreate;
@@ -41,7 +41,11 @@ export interface StructuredDataMap {
   encounter: EncounterEdit;
   appointment: CreateAppointmentQuestion;
   files: FileUploadQuestion;
-  time_of_death: string;
+  /** Widened from a plain `string` to an object row — contract v2's state
+   *  core constrains rows to `TRow extends object`
+   *  (`structured/core/types.ts:15,41,69`); see `TimeOfDeathRow`'s own doc
+   *  comment (`@/types/questionnaire/structuredRows`) for the full reason. */
+  time_of_death: TimeOfDeathRow;
   service_request: ServiceRequestApplyActivityDefinitionForm;
   charge_item: ApplyChargeItemDefinitionRequest;
 }
@@ -180,10 +184,13 @@ export interface StructuredTypeDefinitionV1<
  * already had count), while EDITS answer "is what changed well-formed."
  *
  * No `TRow extends object` constraint here (unlike `core/types.ts`'s
- * `EditLog<TRow extends object>`, the internal differ vocabulary) —
- * `time_of_death`'s current `string` row type-checks as
- * `StructuredEdit<string>` today and could be widened to an object row in
- * a later phase without a contract change.
+ * `EditLog<TRow extends object>`, the internal differ vocabulary): a v2
+ * type's `DataTypeFor<K>` is free to be any shape `StructuredDataMap` names.
+ * In practice every v2 row IS an object — `useStructuredRows` itself
+ * requires `TRow extends object` (`core/types.ts:15,41,69`; N2 in the
+ * Phase 2 plan's Global Constraints), which is why `time_of_death` widened
+ * from a bare `string` to `TimeOfDeathRow` to become this contract's first
+ * member rather than staying a counterexample.
  */
 export interface StructuredTypeDefinitionV2<
   K extends StructuredQuestionType = StructuredQuestionType,

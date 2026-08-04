@@ -12,6 +12,7 @@ import {
   StructuredEditRecord,
   StructuredTypeValue,
 } from "@/types/questionnaire/structured";
+import { TimeOfDeathRow } from "@/types/questionnaire/structuredRows";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 /**
@@ -38,7 +39,14 @@ export type ResponseValue =
   | RV<"diagnosis", DiagnosisRequest[]>
   | RV<"encounter", EncounterEdit[]>
   | RV<"appointment", CreateAppointmentQuestion[]>
-  | RV<"time_of_death", string[]>
+  // Widened for the dual contract: `string[]` is what the legacy
+  // `DeathQuestion` widget writes (`QuestionTypes/DeathQuestion.tsx:32`),
+  // `TimeOfDeathRow[]` is what the v2 projection writes. Both arms are
+  // live until Phase 5 deletes the widget, at which point this narrows to
+  // `TimeOfDeathRow[]` in the deletion commit. Replacing the arm outright
+  // now would break the still-compiled legacy file, which master-plan
+  // sequencing rule 3 forbids touching before Phase 5.
+  | RV<"time_of_death", string[] | TimeOfDeathRow[]>
   | RV<"files", FileUploadQuestion[]>
   | RV<"time", string | undefined>
   | RV<"charge_item", ApplyChargeItemDefinitionRequest[]>
