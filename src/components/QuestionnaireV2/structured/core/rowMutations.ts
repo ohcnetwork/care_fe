@@ -39,7 +39,16 @@ export function mergePatch<TRow extends object>(
   patch: Partial<TRow>,
   normalizePatch?: (row: TRow, patch: Partial<TRow>) => Partial<TRow>,
 ): TRow {
-  const derived = normalizePatch ? normalizePatch(current, patch) : patch;
+  // `?? patch`, not just `normalizePatch ? normalizePatch(...) : patch` —
+  // review finding (post-`c540a5602`): a `normalizePatch` that returns
+  // `undefined`/`null` is type-illegal for a typed caller but reachable
+  // from a plugin definition crossing the `unknown` boundary at runtime.
+  // Without the fallback, `{ ...current, ...undefined }` silently drops
+  // `undefined`'s spread (a no-op) and the clinician's own edit is gone —
+  // exactly the failure mode this whole phase exists to eliminate.
+  // Pinned by `rowMutations.test.ts`'s "normalizePatch returning undefined"
+  // case.
+  const derived = normalizePatch?.(current, patch) ?? patch;
   return { ...current, ...derived } as TRow;
 }
 

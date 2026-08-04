@@ -76,6 +76,39 @@ describe("mergePatch", () => {
     assert.deepEqual(result, { id: "r1", note: "old", status: "derived" });
     assert.notEqual(result.note, "clinician typed this");
   });
+
+  it("REGRESSION (post-c540a5602 review): a normalizePatch that returns undefined falls back to the incoming patch — does NOT silently discard the clinician's edit", () => {
+    // Type-illegal for a typed caller (the signature promises
+    // `Partial<TRow>`), but reachable from a plugin definition crossing
+    // the `unknown` boundary at runtime. Without the `?? patch` fallback,
+    // `{ ...current, ...undefined }` is a no-op spread and the edit is
+    // gone.
+    const current: TestRow = { id: "r1", note: "old" };
+    const normalizePatchReturningUndefined = () =>
+      undefined as unknown as Partial<TestRow>;
+
+    const result = mergePatch(
+      current,
+      { note: "typed" },
+      normalizePatchReturningUndefined,
+    );
+
+    assert.deepEqual(result, { id: "r1", note: "typed" });
+  });
+
+  it("REGRESSION (post-c540a5602 review): a normalizePatch that returns null ALSO falls back to the incoming patch", () => {
+    const current: TestRow = { id: "r1", note: "old" };
+    const normalizePatchReturningNull = () =>
+      null as unknown as Partial<TestRow>;
+
+    const result = mergePatch(
+      current,
+      { note: "typed" },
+      normalizePatchReturningNull,
+    );
+
+    assert.deepEqual(result, { id: "r1", note: "typed" });
+  });
 });
 
 describe("resolveRemoveIntent — annex §7's three-outcome dispatch", () => {
