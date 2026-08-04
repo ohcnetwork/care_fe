@@ -32,7 +32,7 @@ export default function PatientAuthLayout({
               <img
                 src={careConfig.mainLogo?.dark}
                 alt={t("care")}
-                className="h-11 w-auto"
+                className="h-11 w-auto cursor-pointer"
                 onClick={() => navigate("/")}
               />
             </div>
