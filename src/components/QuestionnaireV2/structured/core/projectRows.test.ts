@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import type { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import type { SymptomRequest } from "@/types/emr/symptom/symptom";
 
-import { findOrphanRowIds, projectRows } from "./projectRows";
+import { findOrphanRowIds, projectRows, pruneOrphanEdits } from "./projectRows";
 import { SINGLETON_ROW_ID } from "./rowIds";
 import type {
   BaselineRow,
@@ -562,6 +562,103 @@ describe("projectRows — baseline+edits projection", () => {
     const result = findOrphanRowIds(baseline, log);
 
     assert.deepEqual(result, ["vanished"]);
+  });
+
+  describe("pruneOrphanEdits — PHASE 2 CARRY-FORWARD FIX: a confirmed orphan must never survive into what commit() persists as `edits`", () => {
+    it("drops exactly the rowIds findOrphanRowIds names, keeping everything else (adds, live updates, the clinician's own remove) untouched", () => {
+      const baseline: BaselineRow<TestRow>[] = [
+        { rowId: "survives", row: row("survives", "still here") },
+      ];
+      // "survives" appears twice — the SECOND entry (a `remove`) is what a
+      // real, deduped log (`applyEditToLog`'s one-entry-per-rowId
+      // invariant) would resolve it to; written pre-resolved here rather
+      // than relying on `pruneOrphanEdits` to do that resolution itself
+      // (`findOrphanRowIds` already does, via its own last-write-wins map —
+      // this test only needs to prove PRUNING, not resolution, so the
+      // input is the already-resolved shape).
+      const deduped: EditLog<TestRow> = [
+        update("vanished-update", row("vanished-update", "stale intent")),
+        remove("vanished-remove", row("vanished-remove", "stale intent")),
+        add("brand-new", row("brand-new", "genuinely new")),
+        remove("survives", row("survives", "edited")),
+      ];
+
+      const result = pruneOrphanEdits(baseline, deduped);
+
+      assert.deepEqual(
+        result.map((e) => e.rowId),
+        ["brand-new", "survives"],
+      );
+    });
+
+    it("baseline===undefined: never prunes — unresolved is not confirmed-gone, matching findOrphanRowIds's own conservatism", () => {
+      const log: EditLog<TestRow> = [
+        update("server-1", row("server-1", "restored update")),
+        remove("server-2", row("server-2", "restored remove")),
+        add("local-1", row("local-1", "restored add")),
+      ];
+
+      const result = pruneOrphanEdits(undefined, log);
+
+      assert.equal(result, log); // same reference — nothing to drop
+    });
+
+    it("no orphans: returns the SAME log reference, so a caller can skip a write when the result is unchanged", () => {
+      const baseline: BaselineRow<TestRow>[] = [
+        { rowId: "r1", row: row("r1", "A") },
+      ];
+      const log: EditLog<TestRow> = [update("r1", row("r1", "A-edited"))];
+
+      assert.equal(pruneOrphanEdits(baseline, log), log);
+    });
+
+    it("an `add` is never pruned, even though its rowId is (by definition) absent from baseline", () => {
+      const log: EditLog<TestRow> = [add("new-1", row("new-1", "brand new"))];
+
+      const result = pruneOrphanEdits([], log);
+
+      assert.deepEqual(
+        result.map((e) => e.rowId),
+        ["new-1"],
+      );
+    });
+
+    it("purity — neither baseline nor log is mutated", () => {
+      const baseline = Object.freeze([
+        Object.freeze(
+          baselineEntry("survives", Object.freeze(row("survives", "x"))),
+        ),
+      ]);
+      const log = Object.freeze([
+        Object.freeze(update("vanished", row("vanished", "stale"))),
+        Object.freeze(update("survives", row("survives", "edited"))),
+      ]);
+
+      const result = pruneOrphanEdits(baseline, log);
+
+      assert.deepEqual(
+        result.map((e) => e.rowId),
+        ["survives"],
+      );
+    });
+
+    it("REGRESSION shape: the exact carry-forward scenario — a restored draft's `update` for a rowId the NOW-resolved baseline confirms gone, with no other action taken, must not survive to what would reach toRequests", () => {
+      // Mirrors what useStructuredRows.commit() will do: baseline arrives
+      // (a known, empty array — the server confirms zero rows), pruning
+      // must remove the stale intent entirely so `structuredEditsOf`
+      // (fill/submit/composeStructured.ts) never sees it.
+      const restoredLog: EditLog<TestRow> = [
+        update(
+          "deleted-server-side",
+          row("deleted-server-side", "edited pre-vanish"),
+        ),
+      ];
+
+      const pruned = pruneOrphanEdits([], restoredLog);
+
+      assert.deepEqual(pruned, []);
+      assert.deepEqual(findOrphanRowIds([], pruned), []); // nothing left to name as orphan either
+    });
   });
 
   it("a removed baseline row does not resurrect across a baseline refetch — the edit log, not a cached baseline snapshot, decides visibility", () => {

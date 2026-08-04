@@ -10,7 +10,7 @@ import {
   toBaselineMap,
   type ApplyEditOptions,
 } from "./editLog";
-import { findOrphanRowIds, projectRows } from "./projectRows";
+import { findOrphanRowIds, projectRows, pruneOrphanEdits } from "./projectRows";
 import { newRowId, SINGLETON_ROW_ID } from "./rowIds";
 import {
   decideInitialEditsSeed,
@@ -87,6 +87,12 @@ import type {
  *     computed by `projectRows.ts`'s `findOrphanRowIds` — spec amendment
  *     A1 / task-7-brief.md obligation 2. The annex predates this
  *     obligation and has no equivalent field.
+ *  4. **A passive effect prunes confirmed orphans out of `edits`** (Phase 2
+ *     carry-forward fix, see that effect's own doc comment below for the
+ *     full argument): once `baseline` is a known array and `orphanRowIds`
+ *     is non-empty, `commit(pruneOrphanEdits(baseline, edits))` runs
+ *     unconditionally — no annex equivalent, since the annex predates
+ *     `findOrphanRowIds` entirely.
  *
  * CAVEAT for every mutator (`applyEdit`/`addRow`/`addRows`/`updateRow`/
  * `removeRow`/`setRow`/`clearRow`/`resetEdits`): each reads `edits` from
@@ -346,6 +352,52 @@ export function useStructuredRows<
     if (deepEqualJson(response?.values, values)) return;
     updateResponse({ values });
   }, [response?.values, values, updateResponse]);
+
+  // PHASE 2 CARRY-FORWARD FIX (master plan "Carry-forwards out of Phase 1"
+  // item 1 — owner: Phase 2, before the first v2 type ships): a rowId
+  // `findOrphanRowIds` confirms the (complete, known) baseline no longer
+  // has must never sit in `response.edits` — the ONLY thing
+  // `composeStructuredV2Requests` (`fill/submit/composeStructured.ts`)
+  // reads and forwards, verbatim, to a type's `toRequests`. That compose
+  // seam cannot filter this itself: `toRequests(edits, ctx)` never
+  // receives a baseline, by design (see `pruneOrphanEdits`'s doc comment,
+  // `./projectRows`, for the full "why not at compose" argument and the
+  // evidence behind it). This hook is the one place `baseline` and `edits`
+  // are ever held together, so pruning has to happen here, reactively —
+  // same trigger as the `values`-refresh effect above (baseline moved),
+  // because the realistic failure is passive: a restored draft's edit
+  // targets a row that vanished server-side, baseline resolves and
+  // confirms it, and the clinician never touches this section again
+  // before hitting submit. Guarded on `orphanRowIds` (empty while
+  // `baseline` is `undefined` — loading/errored is not confirmed-gone, so
+  // this never fires during that window) so it converges in one pass: the
+  // resulting `commit` drops exactly those rowIds from `edits`, which
+  // recomputes `orphanRowIds` to `[]` on the next render.
+  //
+  // KNOWN TRADE-OFF for spec amendment A1's restore notice (carry-forward
+  // item 2, owner Phase 5): `orphanRowIds` still fires true for one render
+  // at the moment an orphan is detected (this effect runs after paint,
+  // per React's effect timing), but this prune then clears it. A
+  // persistent "N restored edits could not be applied" banner cannot just
+  // read `orphanRowIds` continuously — Phase 5 needs to capture the
+  // rowIds at the moment they appear (e.g. into its own state) rather
+  // than assume this array stays non-empty. The channel itself is not
+  // regressed — it still accurately reflects `(baseline, edits)` on every
+  // render — it is just no longer a durable record once this effect has
+  // had a chance to run.
+  //
+  // Deliberately NOT gated on `disabled` (unlike every mutator below):
+  // `disabled` (P1-4's submit freeze) exists to block NEW user intent from
+  // being recorded mid-submit, but this effect records none — it only
+  // excises intent the baseline has already proven stale. Gating it would
+  // only reopen the exact race this fix closes (freeze engages the instant
+  // baseline resolves, the prune never runs, the orphan reaches submit
+  // anyway); in the ordinary timeline baseline resolves long before a
+  // clinician reaches Save, so this has already run by then regardless.
+  useEffect(() => {
+    if (orphanRowIds.length === 0) return;
+    commit(pruneOrphanEdits(baseline, edits));
+  }, [orphanRowIds, baseline, edits, commit]);
 
   // Declarative one-shot seed (e.g. encounter's `?toDischarge`). The latch
   // decision itself is `decideInitialEditsSeed` (`rowMutations.ts`) — see

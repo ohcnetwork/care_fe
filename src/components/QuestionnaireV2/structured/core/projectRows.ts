@@ -343,3 +343,60 @@ export function findOrphanRowIds<TRow extends object>(
   }
   return orphanRowIds;
 }
+
+/**
+ * PHASE 2 CARRY-FORWARD FIX (master plan `2026-08-03-structured-wave-
+ * master.md`, "Carry-forwards out of Phase 1" item 1 — owner: Phase 2,
+ * before the first v2 type ships). Drops every {@link findOrphanRowIds}
+ * entry from `log`, so what's left is exactly what `projectRows` would
+ * still render plus whatever it presumes during the loading window — never
+ * intent about a row the (complete, known) baseline has confirmed gone.
+ *
+ * WHY THIS LIVES HERE, NOT AT THE COMPOSE SEAM. The carry-forward's own
+ * wording says "fix it at the compose seam" (`fill/submit/
+ * composeStructured.ts`), on the premise that compose could tell an orphan
+ * apart from a live edit. It cannot, BY DESIGN: `StructuredTypeDefinitionV2
+ * .toRequests(edits, ctx)` (`structured/types.ts`) and the differ it calls,
+ * `resolveChanges` (`core/changes.ts`), never receive a baseline at submit
+ * time — every real `toRequests` in `2026-08-04-phase2-ports-simple.md`
+ * calls `resolveChanges(edits, {})`, no `baseline` option, because
+ * `composeBatch` is a pure function with no query-cache access (`core/
+ * types.ts`'s `RowEdit` doc comment; the whole point of a full-row `patch`
+ * is that a draft restored after a failed baseline fetch still carries
+ * everything a submit needs). `resolveChanges`'s own orphan check
+ * (`ResolveChangesOptions.baseline`) is real and tested, but it is *dead*
+ * on every submit path that exists today — nothing supplies it a baseline
+ * to check against. So "half-solved by resolveChanges" does not hold: nothing
+ * is solved on the submit side, because nothing there ever HOLDS a baseline
+ * to solve it with.
+ *
+ * `useStructuredRows` is the one place `baseline` and `edits` are ever held
+ * together, and it already owns the one write (`commit`) that becomes
+ * `response.edits` — the ONLY thing `structuredEditsOf`/
+ * `composeStructuredV2Requests` ever read. Calling this function from that
+ * write (guarded by `orphanRowIds.length > 0`, mirroring the existing
+ * baseline-driven `values`-refresh effect) is what keeps a stale draft's
+ * confirmed-gone-server-side edit from ever reaching `toRequests` — not a
+ * compose-time filter that has no data to filter with.
+ *
+ * Deliberately NOT the removal path a clinician's own `removeRow` takes: no
+ * `softDelete` marker is written, no request is implied — the entry is
+ * simply excised, exactly as it already visually is (per `projectRows`'
+ * own contract) whenever `baseline` is a known array. `findOrphanRowIds`'s
+ * `undefined`-baseline conservatism ("unresolved is not confirmed-gone")
+ * governs here identically, since this is defined directly in terms of it:
+ * calling this during the loading window is always a no-op.
+ *
+ * Pure and total: never mutates `baseline` or `log`; returns the SAME `log`
+ * reference when there is nothing to drop (no orphans), so a caller can
+ * skip a write when the result is reference-equal to its input.
+ */
+export function pruneOrphanEdits<TRow extends object>(
+  baseline: readonly BaselineRow<TRow>[] | undefined,
+  log: EditLog<TRow>,
+): EditLog<TRow> {
+  const orphanRowIds = findOrphanRowIds(baseline, log);
+  if (orphanRowIds.length === 0) return log;
+  const orphanSet = new Set(orphanRowIds);
+  return log.filter((edit) => !orphanSet.has(edit.rowId));
+}
