@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, Loader2, X } from "lucide-react";
+import { ArrowDownToDot, ArrowUpFromDot, Loader2, Plus, X } from "lucide-react";
 import { Link } from "raviger";
 import type { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,15 @@ import { Label } from "@/components/ui/label";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
 
-import { getPermissions } from "@/common/Permissions";
+import {
+  getPermissions,
+  PERMISSION_CREATE_ORGANIZATION,
+} from "@/common/Permissions";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import ResponsibilityFormDialog from "@/pages/Admin/organizations/components/ResponsibilityFormDialog";
 import {
   Organization,
   OrganizationParent,
@@ -54,7 +58,7 @@ function ConnectionCard({
           {organization.name}
         </p>
         {organization.description && (
-          <p className="truncate text-xs text-gray-500">
+          <p className="truncate text-xs text-gray-700">
             {organization.description}
           </p>
         )}
@@ -69,7 +73,7 @@ function ConnectionCard({
         </Link>
         {canManageOrganization && (
           <>
-            <span className="h-4 w-px bg-gray-300" />
+            <span className="ml-2 h-7 w-px bg-gray-300" />
             <Button
               variant="ghost"
               size="icon"
@@ -93,9 +97,25 @@ function ConnectionCard({
 
 function EmptyHint({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/70 px-4 py-3 text-sm text-gray-500">
+    <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/70 px-4 py-3 text-sm text-gray-700">
       {children}
     </div>
+  );
+}
+
+function DotSeparator() {
+  return (
+    <div
+      className="sm:ml-9 h-4 overflow-hidden"
+      style={{
+        backgroundImage:
+          "radial-gradient(circle, #cbd5e1 0.5px, transparent 1.2px), radial-gradient(circle, #cbd5e1 0.5px, transparent 1.2px)",
+        backgroundSize: "8px 12px, 8px 12px",
+        backgroundPosition: "0px 2px, 4px 8px",
+        backgroundRepeat: "repeat, repeat",
+      }}
+      aria-hidden="true"
+    />
   );
 }
 
@@ -107,6 +127,28 @@ export default function RoleOrganizationConnections({ organization }: Props) {
   const { canManageOrganization } = getPermissions(
     hasPermission,
     organization.permissions,
+  );
+  const canCreateOrganization = hasPermission(PERMISSION_CREATE_ORGANIZATION);
+
+  const noOptionsContent = (
+    <div className="space-y-2 py-1">
+      <p className="text-center text-sm italic text-gray-500">
+        {t("responsibility_none_available")}
+      </p>
+      {canCreateOrganization && (
+        <ResponsibilityFormDialog
+          trigger={
+            <button
+              type="button"
+              className="inline-flex w-full items-center justify-center gap-1.5 text-sm font-semibold text-gray-900 underline underline-offset-2 hover:text-primary-700"
+            >
+              <Plus className="size-3.5" />
+              {t("responsibility_new")}
+            </button>
+          }
+        />
+      )}
+    </div>
   );
 
   const {
@@ -223,11 +265,17 @@ export default function RoleOrganizationConnections({ organization }: Props) {
       <section className="space-y-3">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-primary-100 text-primary-700">
-            <ArrowDown className="size-3.5" />
+            <ArrowDownToDot className="size-3.5" />
           </span>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-gray-900">
-              {t("responsibility_manages_title", { name })}
+              <Trans
+                i18nKey="responsibility_manages_title"
+                values={{ name }}
+                components={{
+                  highlight: <span className="italic text-gray-500" />,
+                }}
+              />
             </h3>
             <p className="text-xs text-gray-500">
               {t("responsibility_manages_subtitle", { name })}
@@ -277,7 +325,7 @@ export default function RoleOrganizationConnections({ organization }: Props) {
                 className="mt-1.5 w-full [&>span]:truncate"
                 placeholder={t("responsibility_manages_placeholder", { name })}
                 inputPlaceholder={t("search")}
-                noOptionsMessage={t("responsibility_none_available")}
+                noOptionsMessage={noOptionsContent}
                 excludeIds={[organization.id, ...managedIds]}
               />
             </div>
@@ -285,17 +333,23 @@ export default function RoleOrganizationConnections({ organization }: Props) {
         </div>
       </section>
 
-      <div className="border-t border-dashed border-gray-200" />
+      <DotSeparator />
 
       {/* Who can manage this one? (managing) */}
       <section className="space-y-3">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-blue-100 text-blue-700">
-            <ArrowUp className="size-3.5" />
+            <ArrowUpFromDot className="size-3.5" />
           </span>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-gray-900">
-              {t("responsibility_managed_by_title", { name })}
+              <Trans
+                i18nKey="responsibility_managed_by_title"
+                values={{ name }}
+                components={{
+                  highlight: <span className="italic text-gray-500" />,
+                }}
+              />
             </h3>
             <p className="text-xs text-gray-500">
               {t("responsibility_managed_by_subtitle", { name })}
@@ -326,7 +380,11 @@ export default function RoleOrganizationConnections({ organization }: Props) {
             ))
           ) : (
             <EmptyHint>
-              {t("responsibility_managed_by_empty", { name })}
+              <Trans
+                i18nKey="responsibility_managed_by_empty"
+                values={{ name }}
+                components={{ bold: <span className="font-semibold" /> }}
+              />
             </EmptyHint>
           )}
 
@@ -344,7 +402,7 @@ export default function RoleOrganizationConnections({ organization }: Props) {
                   name,
                 })}
                 inputPlaceholder={t("search")}
-                noOptionsMessage={t("responsibility_none_available")}
+                noOptionsMessage={noOptionsContent}
                 excludeIds={[organization.id, ...managingIds]}
               />
             </div>

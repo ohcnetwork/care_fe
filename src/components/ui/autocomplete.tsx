@@ -43,7 +43,7 @@ interface AutocompleteProps {
   onSearch?: (value: string) => void;
   placeholder?: string;
   inputPlaceholder?: string;
-  noOptionsMessage?: string;
+  noOptionsMessage?: React.ReactNode;
   disabled?: boolean;
   align?: "start" | "center" | "end";
   className?: string;
