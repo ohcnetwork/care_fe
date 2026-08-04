@@ -5,25 +5,20 @@ import {
   getPluginStructuredType,
   registerPluginStructuredType,
   type PluginStructuredTypeDefinition,
-  type PluginStructuredTypeDefinitionV1,
-  type PluginStructuredTypeDefinitionV2,
 } from "./pluginRegistry";
 
 // ponytail: every registration in this file needs a full definition, so a
 // tiny factory keeps each test's `type`/component identity the only thing
-// that varies. Always produces a v1 arm (`contract` absent) — every case
-// in this file exercises registration/lookup mechanics that are identical
-// across contracts, so there is no need for a v2 fixture here.
-//
-// `overrides` is deliberately typed against the V1 arm alone, not the
-// `PluginStructuredTypeDefinition` union: `Partial` distributes over a
-// union (`Partial<V1> | Partial<V2>`), which would let the spread below
-// synthesize a shape whose `contract` reads as `2 | undefined` — not
-// assignable to either arm's `contract` — even though this factory is
-// value-level always v1.
+// that varies. Every case in this file exercises registration/lookup
+// mechanics, which do not depend on what `toRequests`/`validate` actually
+// do — the end-to-end proof that a registered type's `toRequests` reaches
+// the submit batch lives in `fill/submit/composeStructured.test.ts` (this
+// file deliberately stays light on imports — see the "stable across
+// repeated calls" test's comment below for why `registry.ts` is out of
+// bounds here).
 function makeDefinition(
   type: string,
-  overrides: Partial<PluginStructuredTypeDefinitionV1> = {},
+  overrides: Partial<PluginStructuredTypeDefinition> = {},
 ): PluginStructuredTypeDefinition {
   return {
     type,
@@ -35,70 +30,37 @@ function makeDefinition(
     subjects: ["encounter"],
     draftPolicy: "serialize",
     label: type,
-    buildRequests: async () => [],
+    contract: 2,
+    toRequests: async () => [],
     ...overrides,
   };
 }
 
-// A v2 fixture, honestly typed as `PluginStructuredTypeDefinitionV2` — the
-// shape a real Phase-2+ remote would ship. Deliberately a SEPARATE small
-// factory rather than folded into `makeDefinition` (which stays v1-only):
-// a shared `overrides` parameter spanning both arms would reintroduce the
-// exact `Partial<union>` distribution problem `makeDefinition`'s own
-// comment documents.
-function makeV2Definition(type: string): PluginStructuredTypeDefinitionV2 {
-  return {
-    type,
-    component: (() => null) as PluginStructuredTypeDefinitionV2["component"],
-    requires: [],
-    subjects: ["encounter"],
-    draftPolicy: "serialize",
-    label: type,
-    contract: 2,
-    toRequests: async () => [],
-  };
-}
-
-// ---------------------------------------------------------------------------
-// PHASE-1 GATE — LIFTED (Task 8). Registration used to refuse any
-// `contract: 2` definition outright (see `registerPluginStructuredType`'s
-// doc comment for why, and for why removing it is now safe):
-// `composeBatch.ts`/`validateStructured.ts` genuinely fork on
-// `definition.contract` as of this task, so a registered v2 type's data no
-// longer vanishes silently. A v2 definition now registers exactly like a
-// v1 one. The end-to-end proof that its `toRequests` actually reaches the
-// submit batch lives in `fill/submit/composeStructured.test.ts` (this file
-// deliberately stays light on imports — see the "stable across repeated
-// calls" test's comment above for why `registry.ts` is out of bounds
-// here).
-// ---------------------------------------------------------------------------
-
-test("a contract-v2 plugin definition registers successfully — the Phase-1 gate no longer refuses it", () => {
-  const definition = makeV2Definition("plugin_g.v2_widget");
+test("a plugin structured type definition registers successfully", () => {
+  const definition = makeDefinition("plugin_g.widget");
   const cleanup = registerPluginStructuredType(definition, "plugin_g");
 
-  assert.equal(getPluginStructuredType("plugin_g.v2_widget"), definition);
+  assert.equal(getPluginStructuredType("plugin_g.widget"), definition);
   cleanup();
-  assert.equal(getPluginStructuredType("plugin_g.v2_widget"), undefined);
+  assert.equal(getPluginStructuredType("plugin_g.widget"), undefined);
 });
 
-test("a v2 and a v1 registration under the same owner coexist", () => {
-  const v1 = makeDefinition("plugin_h.v1_widget");
-  const v2 = makeV2Definition("plugin_h.v2_widget");
+test("two registrations under the same owner coexist", () => {
+  const a = makeDefinition("plugin_h.widget_a");
+  const b = makeDefinition("plugin_h.widget_b");
 
-  const cleanupV2 = registerPluginStructuredType(v2, "plugin_h");
-  const cleanupV1 = registerPluginStructuredType(v1, "plugin_h");
+  const cleanupA = registerPluginStructuredType(a, "plugin_h");
+  const cleanupB = registerPluginStructuredType(b, "plugin_h");
 
-  assert.equal(getPluginStructuredType("plugin_h.v2_widget"), v2);
-  assert.equal(getPluginStructuredType("plugin_h.v1_widget"), v1);
+  assert.equal(getPluginStructuredType("plugin_h.widget_a"), a);
+  assert.equal(getPluginStructuredType("plugin_h.widget_b"), b);
 
-  // Leave no module-state residue behind — the old (refused) behavior left
-  // the map empty for this type entirely, and other tests in this file
-  // rely on the module-level registry being otherwise pristine.
-  cleanupV1();
-  cleanupV2();
-  assert.equal(getPluginStructuredType("plugin_h.v1_widget"), undefined);
-  assert.equal(getPluginStructuredType("plugin_h.v2_widget"), undefined);
+  // Leave no module-state residue behind — other tests in this file rely
+  // on the module-level registry being otherwise pristine.
+  cleanupA();
+  cleanupB();
+  assert.equal(getPluginStructuredType("plugin_h.widget_a"), undefined);
+  assert.equal(getPluginStructuredType("plugin_h.widget_b"), undefined);
 });
 
 // ---------------------------------------------------------------------------

@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it, test } from "node:test";
 
-import { isV2Definition } from "@/components/QuestionnaireV2/structured/contract";
 import {
   getPluginStructuredType,
   registerPluginStructuredType,
-  type PluginStructuredTypeDefinitionV2,
+  type PluginStructuredTypeDefinition,
 } from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import type {
   StructuredBatchEntry,
@@ -229,15 +228,15 @@ describe("composeStructuredV2Requests — the v2 compose leg, extracted so it is
   });
 });
 
-test("REGRESSION (Task 6 review / Task 8 gate removal): a registered contract-v2 plugin definition's toRequests reaches the batch end-to-end", async () => {
+test("REGRESSION (Task 6 review / Task 8 gate removal): a registered plugin definition's toRequests reaches the batch end-to-end", async () => {
   const questionId = "q-plugin-1";
   const patch = { note: "clinician entered this" };
   let receivedEdits: readonly StructuredEditRecord[] | undefined;
   let receivedContext: StructuredRequestContext | undefined;
 
-  const definition: PluginStructuredTypeDefinitionV2 = {
+  const definition: PluginStructuredTypeDefinition = {
     type: "plugin_task8.widget",
-    component: (() => null) as PluginStructuredTypeDefinitionV2["component"],
+    component: (() => null) as PluginStructuredTypeDefinition["component"],
     requires: [],
     subjects: ["encounter"],
     draftPolicy: "serialize",
@@ -257,17 +256,15 @@ test("REGRESSION (Task 6 review / Task 8 gate removal): a registered contract-v2
     },
   };
 
-  // The real registration path — Task 8 lifted the Phase-1 gate in
-  // `pluginRegistry.ts` that used to refuse this outright.
+  // The real registration path — the (now fully removed) Phase-1 gate in
+  // `pluginRegistry.ts` used to refuse this outright.
   registerPluginStructuredType(definition, "plugin_task8");
   const registered = getPluginStructuredType("plugin_task8.widget");
-  assert.ok(
-    registered,
-    "the Phase-1 gate must no longer refuse a contract-v2 plugin registration",
-  );
-  assert.ok(
-    isV2Definition(registered),
-    "the registered definition must resolve as contract v2",
+  assert.ok(registered, "the registration must not be refused");
+  assert.equal(
+    registered.contract,
+    2,
+    "the registered definition carries the contract literal",
   );
 
   const response: QuestionnaireResponse = {

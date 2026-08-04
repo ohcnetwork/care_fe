@@ -1,5 +1,4 @@
 import { entryHasContent } from "@/components/QuestionnaireV2/form/engine/store";
-import { isV2Definition } from "@/components/QuestionnaireV2/structured/contract";
 import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -81,7 +80,7 @@ function draftKey(scope: FillDraftScope): string {
 /**
  * One response as a draft stores it.
  *
- * A contract-v2 structured question keeps its EDIT LOG and drops its
+ * A resolved structured question keeps its EDIT LOG and drops its
  * PROJECTION: those rows are the query layer's copy of the server's data,
  * which a draft has no business persisting and every business
  * re-fetching. Persisting them is what made `draftPolicy: "exclude"` a
@@ -91,17 +90,16 @@ function draftKey(scope: FillDraftScope): string {
  * row, per the canonical edit vocabulary), so a restore re-fetches the
  * rows and re-projects the log on top.
  *
- * Everything else — plain answers, v1 structured values — is stored
- * verbatim (same object reference), which is what keeps the v1 path
- * byte-identical: this function is a no-op for every response that isn't a
- * resolved contract-v2 structured question.
+ * Everything else — plain answers, an unresolvable structured type — is
+ * stored verbatim (same object reference): this function is a no-op for
+ * every response that isn't a resolved structured question.
  */
 export function draftResponseForStorage(
   response: QuestionnaireResponse,
 ): QuestionnaireResponse {
   if (!response.structured_type) return response;
   const resolved = resolveStructuredType(response.structured_type);
-  if (!resolved || !isV2Definition(resolved)) return response;
+  if (!resolved) return response;
   return { ...response, values: [] };
 }
 
@@ -127,9 +125,8 @@ function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
       // An unresolvable type (its plugin isn't loaded) is treated as
       // "exclude": nothing here knows whether its values are serializable,
       // and a restore would hand them to a component that may never come
-      // back. Under contract v2 `files` is the only legitimate "exclude"
-      // (raw `File` objects); under v1 every type is excluded because its
-      // values conflate prefetched server rows with user input.
+      // back. `files` is the only legitimate "exclude" among resolvable
+      // types (raw `File` objects cannot round-trip through JSON).
       if (!resolved || resolved.draftPolicy === "exclude") {
         if (response.values.some(entryHasContent)) structuredSkipped = true;
         continue;
@@ -260,9 +257,9 @@ function snapshotSession(forms: FillSessionFormState[]): {
  * mere act of opening a clinical form lit the Draft chip, armed the
  * unsaved-changes prompt and persisted a draft nobody asked for.
  *
- * v1 structured types stay out of the signature entirely (excluded by
- * `partitionForDraft`, per `draftPolicy`). Contract-v2 types are IN it, but
- * as their edit log with the projection stripped
+ * `draftPolicy: "exclude"` types stay out of the signature entirely
+ * (excluded by `partitionForDraft`). Every other structured type is IN it,
+ * but as its edit log with the projection stripped
  * (`draftResponseForStorage`) — so a baseline refetch (which only ever
  * rewrites `values`) is invisible to this fingerprint, and a clinician's
  * edit (which rewrites `edits`) is visible. The exclusion above is no

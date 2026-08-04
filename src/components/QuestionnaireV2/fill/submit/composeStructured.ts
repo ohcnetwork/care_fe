@@ -50,15 +50,15 @@ export function structuredEditsOf(
 }
 
 /**
- * What `composeStructuredV2Requests` needs from a resolved contract-v2
- * structured type — a structural subset of `ResolvedStructuredTypeV2`
- * (`structured/registry.ts`) / `StructuredTypeDefinitionV2`
+ * What `composeStructuredV2Requests` needs from a resolved structured
+ * type — a structural subset of `ResolvedStructuredType`
+ * (`structured/registry.ts`) / `StructuredTypeDefinition`
  * (`structured/types.ts`), duck-typed rather than imported so this module
  * stays import-free of `registry.ts` (see `structuredEditsOf`'s doc
  * comment) and is exercisable under plain `node --test`. Every real
- * contract-v2 definition — core or plugin — satisfies this structurally,
- * so `composeBatch.ts` passes its resolved definition straight through
- * with no cast.
+ * definition — core or plugin — satisfies this structurally, so
+ * `composeBatch.ts` passes its resolved definition straight through with
+ * no cast.
  */
 export interface StructuredV2Compiler {
   toRequests: (

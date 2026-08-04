@@ -16,12 +16,24 @@ import type {
 } from "./types";
 
 /**
- * Everything a federation plugin's structured type shares across both
- * contracts — the same base fields core's `StructuredTypeDefinitionBase`
- * carries, plus the plugin-only display metadata core sources from i18n
- * instead.
+ * What a federation plugin contributes to make a structured question type
+ * of its own. The same contract as a core `StructuredTypeDefinition`
+ * (`./types.ts`), minus the compile-time key correlation core enjoys: a
+ * plugin's data shape is opaque to the host, so its entries arrive as
+ * `unknown[]`/`StructuredEditRecord[]` and the plugin's own
+ * component/validate/toRequests are the only code that reads them.
+ *
+ * `contract: 2` is REQUIRED, matching core: this extension point predates
+ * the legacy-contract removal, but no federation remote has shipped yet
+ * (`src/pluginTypes.ts`'s `structuredQuestionTypes` is a Phase 1-4
+ * addition), so there is no already-published manifest to stay
+ * backward-compatible with. See `StructuredTypeDefinition`'s doc comment
+ * for why the field survives as a version tag rather than a discriminant.
+ *
+ * Plugins own their i18n — `label` is a plain display string from the
+ * manifest, never an i18n key the host resolves.
  */
-interface PluginStructuredTypeDefinitionBase {
+export interface PluginStructuredTypeDefinition {
   /** Namespaced `{plugin_slug}.{type_name}` — bare names are reserved for core. */
   type: string;
   component: ComponentType<StructuredInputProps>;
@@ -33,42 +45,6 @@ interface PluginStructuredTypeDefinitionBase {
   /** Display label (plugins own their i18n; plain string fallback). */
   label: string;
   icon?: ComponentType<{ className?: string }>;
-}
-
-/**
- * A plugin type on the LEGACY contract. `contract` is OPTIONAL here and
- * REQUIRED on core's `StructuredTypeDefinitionV1` for a deliberate reason:
- * `PluginStructuredTypeDefinition` is a published extension point
- * (`src/pluginTypes.ts`'s `structuredQuestionTypes`) consumed by
- * separately-built federation remotes, so a newly required field would
- * break every plugin already in the field the moment the host ships this
- * change. Absent means 1 — the host normalizes it exactly once, in
- * `resolveStructuredType` (`registry.ts`, via `./contract`'s
- * `isV2Definition`/`normalizeContract`), so no consumer re-derives that
- * rule. At runtime an absent `contract` is `!== 2`, so it lands on the v1
- * path — fail-safe, because a v1 plugin mistaken for v2 would have its
- * untouched rows silently dropped from the batch.
- */
-export interface PluginStructuredTypeDefinitionV1 extends PluginStructuredTypeDefinitionBase {
-  contract?: 1;
-  validate?: (
-    data: unknown[],
-    questionId: string,
-    required: boolean,
-  ) => QuestionValidationError[];
-  buildRequests: (
-    data: unknown[],
-    context: StructuredRequestContext,
-  ) => Promise<StructuredBatchEntry[]>;
-}
-
-/**
- * A plugin type on contract v2. Rows are opaque to the host, so the edit
- * log arrives type-erased (`StructuredEditRecord`, i.e.
- * `StructuredEdit<unknown>`) — the plugin's own `toRequests` is the only
- * code that interprets a `patch`.
- */
-export interface PluginStructuredTypeDefinitionV2 extends PluginStructuredTypeDefinitionBase {
   contract: 2;
   validate?: (
     projection: readonly unknown[],
@@ -81,21 +57,6 @@ export interface PluginStructuredTypeDefinitionV2 extends PluginStructuredTypeDe
     context: StructuredRequestContext,
   ) => Promise<StructuredBatchEntry[]>;
 }
-
-/**
- * What a federation plugin contributes to make a structured question type
- * of its own. The same contract as a core `StructuredTypeDefinition`, minus
- * the compile-time key correlation core enjoys: a plugin's data shape is
- * opaque to the host, so its entries arrive as `unknown[]`/
- * `StructuredEditRecord[]` and the plugin's own
- * component/validate/buildRequests-or-toRequests are the only code that
- * reads them.
- *
- * Plugins own their i18n — `label` is a plain display string from the
- * manifest, never an i18n key the host resolves.
- */
-export type PluginStructuredTypeDefinition =
-  PluginStructuredTypeDefinitionV1 | PluginStructuredTypeDefinitionV2;
 
 /**
  * Module-level store — same mechanics as `lib/override/registry.ts`: a Map
@@ -130,11 +91,11 @@ const noopCleanup = () => {};
  *  over questionnaires authored against plugin A's type depending on
  *  manifest load order, with no user-visible signal.
  *
- *  A `contract: 2` definition registers exactly like a v1 one — Task 8
- *  wired the real fork in `composeBatch.ts`/`validateStructured.ts`, so a
- *  registered v2 type's `toRequests`/`validate` genuinely runs; see this
- *  function's PHASE-1 GATE removal note below for why that used to not be
- *  true. */
+ *  Every registration reaches the batch and its own validation — a
+ *  registered type's `toRequests`/`validate` genuinely runs
+ *  (`fill/submit/composeStructured.ts`'s `composeStructuredV2Requests`,
+ *  `fill/submit/validateStructured.ts`); see
+ *  `fill/submit/composeStructured.test.ts`'s end-to-end regression test. */
 export function registerPluginStructuredType(
   definition: PluginStructuredTypeDefinition,
   ownerSlug: string,
@@ -151,22 +112,6 @@ export function registerPluginStructuredType(
     );
     return noopCleanup;
   }
-  // PHASE-1 GATE — REMOVED (Task 8). This used to refuse any `contract: 2`
-  // registration outright: `resolveStructuredType` would have resolved a
-  // v2 plugin definition honestly, but `composeBatch`'s and
-  // `validateStructured`'s v2 branches were TEMPORARY compile-only stubs
-  // (`contract === 2` → no request, no validate, no error), so letting a
-  // v2 plugin register would have resolved fine, then silently contributed
-  // nothing to the submit batch while skipping its own validation — the
-  // exact fail-open `StructuredSlotState`'s doc comment forbids ("Never
-  // silently dropped"), for a REQUIRED question with recorded rows the
-  // clinician believes were saved. Now that `composeBatch.ts` and
-  // `validateStructured.ts` genuinely fork on `definition.contract`
-  // (`fill/submit/composeStructured.ts`'s `composeStructuredV2Requests` is
-  // the real `toRequests` leg), a registered v2 type's data reaches the
-  // batch like any v1 type's — removing the gate no longer reopens the
-  // silent-drop hole it existed to close. See
-  // `fill/submit/composeStructured.test.ts`'s end-to-end regression test.
   if (pluginTypes.has(definition.type)) {
     // Last-wins (the effect re-registers on every manifest change), but a
     // genuine duplicate — two plugins claiming one id, or one plugin

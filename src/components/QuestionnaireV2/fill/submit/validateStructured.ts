@@ -4,7 +4,6 @@ import {
   buildLinkIndex,
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
-import { isV2Definition } from "@/components/QuestionnaireV2/structured/contract";
 import {
   resolveStructuredSlotState,
   structuredDataAny,
@@ -99,26 +98,17 @@ export function collectStructuredErrors(
       if (response?.structured_type !== type) continue;
       const required = question.required ?? false;
       const projection = structuredDataAny(response);
-      // v1's `edits` is always empty here — this arm never had one, so the
-      // guard below reduces to the pre-shim `projection.length === 0`
-      // check exactly.
-      const edits = isV2Definition(definition)
-        ? structuredEditsOf(response)
-        : [];
-      // v1: nothing recorded, nothing to validate — the pre-shim guard,
-      //     unchanged.
-      // v2: nothing recorded AND nothing changed. The two halves answer
-      //     different questions (spec §5), so neither may gate the other:
-      //     a NON-empty projection with an empty log still runs (a
-      //     required section satisfied by rows the server already had); a
-      //     non-empty log with an empty projection still runs (the
-      //     clinician removed every row).
+      const edits = structuredEditsOf(response);
+      // Nothing recorded AND nothing changed. The two halves answer
+      // different questions (spec §5), so neither may gate the other: a
+      // NON-empty projection with an empty log still runs (a required
+      // section satisfied by rows the server already had); a non-empty log
+      // with an empty projection still runs (the clinician removed every
+      // row).
       if (projection.length === 0 && edits.length === 0) continue;
       try {
         errors.push(
-          ...(isV2Definition(definition)
-            ? definition.validate(projection, edits, question.id, required)
-            : definition.validate(projection, question.id, required)),
+          ...definition.validate(projection, edits, question.id, required),
         );
       } catch (error) {
         // Plugin code runs here. An escaping throw used to propagate out of

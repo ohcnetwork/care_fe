@@ -36,17 +36,11 @@ function group(id: string, questions: Question[]): Question {
   return { id, link_id: id, text: id, type: "group", questions };
 }
 
-const v2Serialize: DraftResolvableStructuredType = {
-  contract: 2,
+const serialize: DraftResolvableStructuredType = {
   draftPolicy: "serialize",
 };
-const v2Exclude: DraftResolvableStructuredType = {
-  contract: 2,
+const exclude: DraftResolvableStructuredType = {
   draftPolicy: "exclude",
-};
-const v1: DraftResolvableStructuredType = {
-  contract: 1,
-  draftPolicy: "serialize",
 };
 
 describe("unsupportedDraftStructuredTypes", () => {
@@ -54,7 +48,7 @@ describe("unsupportedDraftStructuredTypes", () => {
     let resolveCalled = false;
     const resolve = () => {
       resolveCalled = true;
-      return v2Serialize;
+      return serialize;
     };
 
     const result = unsupportedDraftStructuredTypes(
@@ -70,26 +64,18 @@ describe("unsupportedDraftStructuredTypes", () => {
     );
   });
 
-  it("a contract-v2 type with draftPolicy serialize does NOT block", () => {
+  it("a type with draftPolicy serialize does NOT block", () => {
     const result = unsupportedDraftStructuredTypes(
       [structuredQuestion("q1", "symptom")],
-      () => v2Serialize,
+      () => serialize,
     );
     assert.deepEqual(result, []);
   });
 
-  it("a contract-v1 type blocks, named by its structured_type", () => {
-    const result = unsupportedDraftStructuredTypes(
-      [structuredQuestion("q1", "diagnosis")],
-      () => v1,
-    );
-    assert.deepEqual(result, ["diagnosis"]);
-  });
-
-  it("a contract-v2 type with draftPolicy exclude (files-style) blocks", () => {
+  it("a type with draftPolicy exclude (files-style) blocks", () => {
     const result = unsupportedDraftStructuredTypes(
       [structuredQuestion("q1", "files")],
-      () => v2Exclude,
+      () => exclude,
     );
     assert.deepEqual(result, ["files"]);
   });
@@ -123,7 +109,8 @@ describe("unsupportedDraftStructuredTypes", () => {
       ]),
       structuredQuestion("q3", undefined),
     ];
-    const resolve = (type: string) => (type === "symptom" ? v2Serialize : v1);
+    const resolve = (type: string) =>
+      type === "symptom" ? serialize : exclude;
 
     const result = unsupportedDraftStructuredTypes(questions, resolve);
 

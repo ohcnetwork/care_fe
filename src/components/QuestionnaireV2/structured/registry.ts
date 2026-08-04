@@ -13,8 +13,6 @@ import { isCoreStructuredType } from "@/types/questionnaire/structured";
 import type { PluginStructuredTypeDefinition } from "./pluginRegistry";
 import { getPluginStructuredType } from "./pluginRegistry";
 
-import { isV2Definition } from "./contract";
-
 import { allergyIntoleranceDefinition } from "./definitions/allergyIntolerance";
 import { appointmentDefinition } from "./definitions/appointment";
 import { chargeItemDefinition } from "./definitions/chargeItem";
@@ -85,7 +83,7 @@ export function structuredDataOf<K extends StructuredQuestionType>(
 /**
  * The same entries, unnarrowed — what resolver consumers read. A plugin's
  * data shape is opaque to the host (only the plugin's own component,
- * `validate` and `buildRequests` interpret it), so there is nothing to
+ * `validate` and `toRequests` interpret it), so there is nothing to
  * narrow to and `unknown[]` is the honest type.
  */
 export function structuredDataAny(
@@ -96,11 +94,20 @@ export function structuredDataAny(
 }
 
 /**
- * Fields every resolved structured type carries regardless of contract or
- * origin (core vs. plugin) — the shared base both `ResolvedStructuredTypeV1`
- * and `ResolvedStructuredTypeV2` extend.
+ * One structured type as every consumer sees it, whether it ships with CARE
+ * or arrives from a plugin at runtime. Rows/edits read as `unknown[]`/
+ * `StructuredEditRecord[]` — core's compile-time key correlation
+ * (`K → Definition<K>`) cannot survive a union with runtime-registered
+ * plugin members, so each definition's own `validate`/`toRequests` is the
+ * only code that interprets them; core's own files still author against
+ * `DataTypeFor<K>`.
+ *
+ * `contract: 2` is a fixed literal every registration carries (core and
+ * plugin alike) — see `StructuredTypeDefinition`'s own doc comment
+ * (`./types.ts`) for why the field survives as a version tag rather than a
+ * discriminant now that the legacy contract is gone.
  */
-interface ResolvedStructuredTypeBase {
+export interface ResolvedStructuredType {
   type: string;
   component: ComponentType<StructuredInputProps>;
   requires: readonly StructuredContextKey[];
@@ -110,30 +117,6 @@ interface ResolvedStructuredTypeBase {
   /** Plugin only — core labels come from `t("structured_type__<type>")`. */
   label?: string;
   icon?: ComponentType<{ className?: string }>;
-}
-
-/** The resolved view of a contract-v1 (legacy) structured type, core or
- *  plugin. Rows read as `unknown[]` — core's compile-time key correlation
- *  (`K → Definition<K>`) cannot survive a union with runtime-registered
- *  plugin members, so each definition's own `validate`/`buildRequests` is
- *  the only code that interprets them; core's own files still author
- *  against `DataTypeFor<K>`. */
-export interface ResolvedStructuredTypeV1 extends ResolvedStructuredTypeBase {
-  contract: 1;
-  validate?: (
-    data: unknown[],
-    questionId: string,
-    required: boolean,
-  ) => QuestionValidationError[];
-  buildRequests: (
-    data: unknown[],
-    context: StructuredRequestContext,
-  ) => Promise<StructuredBatchEntry[]>;
-}
-
-/** The resolved view of a contract-v2 structured type, core or plugin. The
- *  edit log arrives type-erased for the same reason rows do on the v1 arm. */
-export interface ResolvedStructuredTypeV2 extends ResolvedStructuredTypeBase {
   contract: 2;
   validate?: (
     projection: readonly unknown[],
@@ -146,19 +129,6 @@ export interface ResolvedStructuredTypeV2 extends ResolvedStructuredTypeBase {
     context: StructuredRequestContext,
   ) => Promise<StructuredBatchEntry[]>;
 }
-
-/**
- * One structured type as every consumer sees it, whether it ships with CARE
- * or arrives from a plugin at runtime, under either contract. `contract` is
- * REQUIRED on both arms here even though it is OPTIONAL on the plugin v1
- * arm (`PluginStructuredTypeDefinitionV1`): `resolveStructuredType` below
- * normalizes it exactly once (via `./contract`'s `isV2Definition`, the
- * same predicate `normalizeContract` itself is built on), which is what
- * lets every fork site discriminate on a required literal instead of
- * re-deriving "absent means 1".
- */
-export type ResolvedStructuredType =
-  ResolvedStructuredTypeV1 | ResolvedStructuredTypeV2;
 
 // Caches for the wrapped view `resolveStructuredType` returns below, keyed
 // on the underlying registration — so a caller keying off the returned
@@ -191,9 +161,7 @@ export function resolveStructuredType(
     if (cached) return cached;
     const definition = STRUCTURED_TYPE_REGISTRY[type];
     // Widening DataTypeFor<K>[] → unknown[] — the one sanctioned cast at
-    // this boundary (key-correlation already guaranteed the pairing, and
-    // `contract` is REQUIRED on both core arms so the erased view's
-    // discriminant is honest at runtime).
+    // this boundary (key-correlation already guaranteed the pairing).
     const resolved = {
       ...definition,
       source: "core",
@@ -205,24 +173,7 @@ export function resolveStructuredType(
   if (!plugin) return undefined;
   const cached = pluginResolvedCache.get(plugin);
   if (cached) return cached;
-  // A plugin built against a host that predates `contract` ships without
-  // it, and absent must mean 1 — `buildRequests` is the only compiler it
-  // has. Normalizing here (once, behind the same WeakMap that keeps
-  // `PluginErrorBoundary`'s resetKey stable) is what keeps that rule out of
-  // every downstream fork site (composeBatch, validateStructured, the
-  // draft partition and the server-draft gate). The literal `1` below
-  // (rather than a `normalizeContract(plugin.contract)` call) is exactly
-  // what `normalizeContract` itself resolves an absent-or-1 input to —
-  // written directly because `isV2Definition`'s negation has already
-  // narrowed `plugin` to the v1 arm, so the literal type-checks against
-  // `ResolvedStructuredTypeV1.contract` without widening back to `1 | 2`.
-  const resolved: ResolvedStructuredType = isV2Definition(plugin)
-    ? { ...plugin, source: "plugin" }
-    : {
-        ...plugin,
-        contract: 1,
-        source: "plugin",
-      };
+  const resolved: ResolvedStructuredType = { ...plugin, source: "plugin" };
   pluginResolvedCache.set(plugin, resolved);
   return resolved;
 }
