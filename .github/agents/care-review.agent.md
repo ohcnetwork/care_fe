@@ -45,22 +45,16 @@ PR review bot. Apply the *judgment* it describes, not its mechanics:
   lenses were written for. Nothing is missing — the earlier steps were diff-fetching mechanics that
   do not apply to you.
 
-**Three overrides that supersede anything below:**
+**Two overrides that supersede anything below:**
 
-1. **Ignore every "Output" / "Output format" section in the lenses.** Each lens carries an output
-   contract written for a different caller, and they conflict with each other. The workflow file
-   that invoked you defines the only output contract that applies.
-2. **Ignore every reference to a run-directory file** — `decisions.md`, `criteria.md`,
-   `baseline.md`, `declined.md`, `addressed.md`, `verdicts.md`, `<run-dir>/…` — and to a
-   "planner", "Scope Governor", or numbered round. **None of those exist here.** Your only memory
-   is the pull request conversation itself. Where a lens says to check such a file before
-   escalating, instead reason from the code and the PR discussion, and say what you could not
-   confirm.
-3. **Ignore references to "care-loop"** — routing, "blocks the push". There is no care-loop here.
-   Where a lens defines **severity labels**, keep them: `Broken` / `Convention` / `Polish` in
-   the UI/UX lens, and the legibility tiers in Lens 1. Use them to decide what is worth reporting
-   and in what order. (Lens 2 has no severity vocabulary of its own — judge its findings by
-   proportionality instead.)
+1. **Ignore references to run-directory files** (`decisions.md`, `criteria.md`, `declined.md`,
+   `<run-dir>/…`), to a "planner", "Scope Governor", or numbered rounds. None exist here — your
+   only memory is the PR conversation. Where a lens says to check such a file, reason from the code
+   and the PR discussion instead, and say what you could not confirm.
+2. **Ignore "care-loop" routing** ("blocks the push"), but **keep the severity labels**:
+   `Broken` / `Convention` / `Polish` in the UI/UX lens, and Lens 1's legibility tiers. They
+   decide what is worth reporting and in what order. Lens 2 has no severity vocabulary — judge it by
+   proportionality.
 
 ---
 
@@ -283,12 +277,6 @@ Flag only genuine efficiency costs, not principle-based optimizations. Use concr
 - **"No changes warranted" is a valid result.** If the approach is already proportionate, say so
   plainly. Don't manufacture refactors.
 
-## Output
-
-Lead with a one-line verdict: is the approach proportionate, or is there a simpler one? Then each
-suggestion as — what's heavier than it needs to be, the simpler alternative, and the rough
-diff-size delta (should trend negative), with `file:line`. Don't edit until approved.
-
 ---
 
 ## Lens 3 — UI/UX (apply ONLY when the diff touches .tsx)
@@ -409,26 +397,3 @@ Not all multi-step flows are mistakes. Use this decision tree:
 **Polish (design choice, not a bug)**
 - Multi-step consent flow for a regulatory requirement (intended; see decisions.md)
 ```
-
-## Output format
-
-```
-## UX Review — [static | static + live] — <N> surface(s) × <viewports>
-
-### Summary
-<one or two lines: overall verdict>
-
-### Broken  (blocks push in care-loop)
-- [<surface>] [<viewport>] — <description>  (<file:line> if static; screenshot filename if live)
-
-### Convention  (fix this round)
-- <description> — cite: <instruction-file>  (<file:line>)
-
-### Polish  (advisory)
-- <description>
-
-### Sibling surfaces checked
-- <route> — <verdict>
-```
-
-Omit any section that is empty. A result with no `Broken` and no `Convention` findings is a valid clean pass — say so plainly.
