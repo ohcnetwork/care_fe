@@ -113,8 +113,7 @@ export default function EditUserRoleSheet({
     if (open) {
       setSelectedRole(userRole.role);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, userRole.role]);
 
   return (
     <>
