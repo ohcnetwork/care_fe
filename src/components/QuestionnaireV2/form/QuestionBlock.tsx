@@ -107,8 +107,17 @@ export function QuestionBlock(props: QuestionBlockProps) {
  * `quantity` column's error (`required: true`, no `ownsErrorDisplay`)
  * therefore already renders inline — omitting it from this set was the
  * double-print in reverse.
+ *
+ * `allergy_intolerance` IS listed — same reason as `charge_item`:
+ * `AllergyEditor.tsx` renders through `StructuredList`, which renders
+ * `<StructuredFieldError>` per cell for every one of its columns (none set
+ * `ownsErrorDisplay`), plus the shell's own unmatched-`field_key` fallback
+ * for anything none of those columns claims (e.g. a server error keyed on
+ * `code`, which this type's columns intentionally name `substance`
+ * instead). Omitting it here would double-print any such error.
  */
 const STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS = new Set<string>([
+  "allergy_intolerance",
   "appointment",
   "charge_item",
   "files",

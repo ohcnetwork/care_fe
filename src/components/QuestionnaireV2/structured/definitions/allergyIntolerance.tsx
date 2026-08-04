@@ -1,58 +1,22 @@
-import { AllergyQuestion } from "@/components/Questionnaire/QuestionTypes/AllergyQuestion";
+import { AllergyEditor } from "@/components/QuestionnaireV2/structured/types/allergyIntolerance/AllergyEditor";
+import { toRequests } from "@/components/QuestionnaireV2/structured/types/allergyIntolerance/model";
 
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
-import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { sanitizeNote, useLegacyResponseCallback } from "./adapt";
-
-function AllergyIntoleranceInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.patientId) return null; // `requires` gates rendering
-  return (
-    <AllergyQuestion
-      patientId={props.patientId}
-      question={props.question}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      disabled={props.disabled}
-    />
-  );
-}
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 
 export const allergyIntoleranceDefinition: StructuredTypeDefinition<"allergy_intolerance"> =
   {
     type: "allergy_intolerance",
-    component: AllergyIntoleranceInput,
+    component: AllergyEditor,
     requires: ["patientId", "encounterId"],
     subjects: ["encounter"],
-    draftPolicy: "exclude",
-    contract: 1,
-    buildRequests: async (
-      allergies,
-      { patientId, encounterId, questionId },
-    ) => {
-      // `subjects` is encounter-only, so a patient is always in scope here
-      // — narrowed rather than asserted (the context type is optional for
-      // plugin types that declare a resource subject).
-      if (!patientId || !encounterId || allergies.length === 0) return [];
-      return [
-        {
-          url: `/api/v1/patient/${patientId}/allergy_intolerance/upsert/`,
-          method: "POST",
-          body: {
-            datapoints: allergies.map((allergy) => ({
-              ...allergy,
-              note: sanitizeNote(allergy.note),
-              encounter: encounterId,
-            })),
-          },
-          reference_id: structuredReferenceId(
-            "allergy_intolerance",
-            questionId,
-          ),
-        },
-      ];
-    },
+    // D2: every structured type becomes draftable except `files` (D6). An
+    // allergy row is plain, JSON-serializable data (a `Code`, a handful of
+    // enum strings, an optional date/note) — no `Date`, `File`, or class
+    // instance — so it round-trips through a draft exactly. The legacy
+    // blanket "exclude" was a property of the conflated value array
+    // (prefetched server rows mixed with user input, `dirty`-tracked by
+    // hand), not of this type's data.
+    draftPolicy: "serialize",
+    contract: 2,
+    toRequests,
   };

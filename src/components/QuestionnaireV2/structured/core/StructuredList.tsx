@@ -4,7 +4,14 @@ import {
   MoreVertical,
   Trash2,
 } from "lucide-react";
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -28,6 +35,38 @@ import {
 } from "./structuredListRowState";
 import { gridTemplateColumns } from "./structuredListTracks";
 import type { ProjectedRow, RowId } from "./types";
+
+/**
+ * The naming bundle every control inside a cell must carry, spread as a
+ * single unit rather than four hand-copied named attributes.
+ *
+ * WHY THIS EXISTS (Batch A prerequisite — Phase 2 Task 6 review, "IMPORTANT
+ * 3", carried forward as an explicit TODO for Phase 3). `ctx.ariaLabel` on
+ * its own is UNENFORCEABLE: a column author writes
+ * `aria-label={ctx.ariaLabel}` on a custom component (e.g. `UserSelector`,
+ * before its own fix) whose props do not declare `"aria-label"`, and
+ * TypeScript's excess-property check — verified with a standalone `tsc`
+ * probe against this exact shape, not merely asserted — does NOT flag a
+ * hyphenated attribute the way it flags an ordinary unknown prop name. The
+ * value compiles cleanly and is silently dropped at runtime; no ring, no
+ * warning, nothing. The probe holds identically whether the attribute is
+ * passed as a named prop OR spread from an object like this one — spreading
+ * `{...controlProps}` onto a component that doesn't declare these keys is
+ * JUST AS silent. So this bundle does not, by itself, make a future
+ * omission loud — see `auditCellAccessibleName` below for the mechanism
+ * that actually does. What it buys instead: ONE thing to remember and
+ * spread per control (`{...ctx.controlProps}`) instead of four
+ * independently-named attributes a column can partially wire (label but not
+ * id, id but not aria-invalid, ...) without anything short of a runtime
+ * check catching the gap.
+ */
+export interface StructuredControlProps {
+  id: string;
+  "aria-label": string;
+  "aria-required"?: true;
+  "aria-invalid"?: true;
+  "aria-describedby"?: string;
+}
 
 /**
  * Everything `render` needs. Built ONCE per (row, column) by the shell —
@@ -78,6 +117,15 @@ export interface StructuredColumnContext<TRow extends object> {
   /** The errors bound to this cell, already filtered by question + row +
    *  `errorFieldKeys`. Only read by columns that set `ownsErrorDisplay`. */
   errors: readonly QuestionValidationError[];
+  /** `{ id: fieldId, "aria-label": ariaLabel, "aria-required"?,
+   *  "aria-invalid"?, "aria-describedby"? }` — exactly the four fields
+   *  above, bundled. Spread this directly onto the cell's control
+   *  (`<Input {...ctx.controlProps} .../>`, `<RowStatusSelect
+   *  {...ctx.controlProps} .../>`) instead of copying `ariaLabel`/`fieldId`/
+   *  `describedBy`/`invalid` out one at a time — see
+   *  {@link StructuredControlProps}'s doc comment for why this exists and
+   *  what it does and does not guarantee. */
+  controlProps: StructuredControlProps;
 }
 
 /** ONE definition per field. Drives the desktop `columnheader` + `cell`
@@ -391,6 +439,33 @@ function StructuredListRow<TRow extends object>({
     rowIndex,
   });
 
+  // DEV-ONLY accessible-name audit — the loud half of the `ctx.ariaLabel`
+  // contract fix (see `StructuredControlProps`'s doc comment for why a
+  // typed bundle alone cannot make this failure loud: TypeScript's
+  // excess-property check does not catch a hyphenated attribute silently
+  // dropped by a custom component, whether passed as a named prop or
+  // spread from an object). This audits the ACTUAL RENDERED DOM instead —
+  // the one thing that is true regardless of which mechanism, or none, a
+  // column's `render` used. `[data-column="<key>"]` is markup every cell
+  // already carries (below), so this adds no new DOM, only a read of it.
+  // Runs once per render (no dependency array — a broken cell should log on
+  // every render until it's fixed, not just once), body-scoped so it only
+  // ever inspects THIS row's cells, and is a complete no-op outside
+  // development builds.
+  const bodyRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const body = bodyRef.current;
+    if (!body) return;
+    for (const column of columns) {
+      auditCellAccessibleName(body, {
+        questionId,
+        rowId: row.rowId,
+        columnKey: column.key,
+      });
+    }
+  });
+
   return (
     <div
       role="row"
@@ -435,6 +510,7 @@ function StructuredListRow<TRow extends object>({
 
       <div
         id={bodyId}
+        ref={bodyRef}
         role="none"
         className={cn(
           "space-y-3 p-2 lg:contents",
@@ -450,16 +526,27 @@ function StructuredListRow<TRow extends object>({
             fieldKeys,
           });
           const errorId = `${questionId}--${row.rowId}--${column.key}--error`;
+          const ariaLabel = column.ariaLabel ?? column.header;
+          const fieldId = `${questionId}--${row.rowId}--${column.key}`;
+          const describedBy = cellErrors.length > 0 ? errorId : undefined;
+          const invalid = cellErrors.length > 0;
           const context: StructuredColumnContext<TRow> = {
             row,
             update,
             disabled: isDisabled,
             removed: row.softDeleted,
-            ariaLabel: column.ariaLabel ?? column.header,
-            fieldId: `${questionId}--${row.rowId}--${column.key}`,
-            describedBy: cellErrors.length > 0 ? errorId : undefined,
-            invalid: cellErrors.length > 0,
+            ariaLabel,
+            fieldId,
+            describedBy,
+            invalid,
             errors: cellErrors,
+            controlProps: {
+              id: fieldId,
+              "aria-label": ariaLabel,
+              ...(column.required ? { "aria-required": true as const } : {}),
+              ...(invalid ? { "aria-invalid": true as const } : {}),
+              ...(describedBy ? { "aria-describedby": describedBy } : {}),
+            },
           };
           return (
             <div
@@ -570,4 +657,50 @@ function StructuredListRow<TRow extends object>({
       </div>
     </div>
   );
+}
+
+/** Interactive elements a cell's control could plausibly be — anything a
+ *  screen reader would announce as a distinct, actionable widget. A cell
+ *  with none of these (a pure display value, e.g. `charge_item`'s "item"
+ *  column) has nothing to name and is silently skipped below. */
+const INTERACTIVE_SELECTOR =
+  'input, textarea, select, button, [role="combobox"], [role="button"], [contenteditable="true"]';
+
+/**
+ * DEV-ONLY. Warns loudly, via `console.error`, when a structured cell's
+ * control has no accessible name — the enforcement `StructuredControlProps`
+ * itself cannot provide (see that interface's doc comment). Checked against
+ * the real, committed DOM rather than against however the column's `render`
+ * happened to wire its props, so this catches every failure mode: a
+ * forgotten `aria-label`, one spread onto a custom component that doesn't
+ * declare it, a `<label>` with no matching `id`, all the same to a screen
+ * reader and all the same here.
+ *
+ * A cell with no interactive control at all (a pure display column) is not
+ * an error and is not reported — there is nothing in it to name.
+ */
+function auditCellAccessibleName(
+  body: HTMLElement,
+  context: { questionId: string; rowId: RowId; columnKey: string },
+): void {
+  const cell = body.querySelector<HTMLElement>(
+    `[data-column="${context.columnKey}"]`,
+  );
+  if (!cell) return;
+  const control = cell.querySelector<HTMLElement>(INTERACTIVE_SELECTOR);
+  if (!control) return; // pure-display column — nothing to name
+
+  const hasLabelFor =
+    !!control.id &&
+    !!control.ownerDocument.querySelector(`label[for="${control.id}"]`);
+  const named =
+    !!control.getAttribute("aria-label")?.trim() ||
+    !!control.getAttribute("aria-labelledby") ||
+    hasLabelFor;
+
+  if (!named) {
+    console.error(
+      `StructuredList: column "${context.columnKey}" in question "${context.questionId}" (row ${context.rowId}) rendered a control with no accessible name. Spread ctx.controlProps (or set aria-label from ctx.ariaLabel) onto it — the visible caption is lg:hidden, so this is the only name a screen reader gets.`,
+    );
+  }
 }
