@@ -70,10 +70,31 @@ export async function toRequests(
   // Singleton: collapse to AT MOST ONE request. `resolveChanges` dispatches
   // once per distinct `rowId`, and the live reducer only ever uses
   // `SINGLETON_ROW_ID`, but a malformed/restored draft could carry two
-  // different rowIds for this type — take the LAST (log order), never PUT
-  // the same patient endpoint twice in one batch.
-  const row = [...creates, ...updates].at(-1);
-  if (!row || isEmptyRow(row)) return [];
+  // different rowIds for this type — never PUT the same patient endpoint
+  // twice in one batch.
+  //
+  // POST-REVIEW FIX: filter blanks OUT before taking the last entry, not
+  // after. The first cut took `.at(-1)` THEN checked emptiness, so a
+  // two-rowId log whose last entry was blank (e.g. `[add("a", "…"),
+  // add("b", "")]`) reproduced item 1's exact bug in miniature: the
+  // projection shows row `a` as answered (`b`'s blank patch is filtered out
+  // of `projectValues` the same way), while this differ picked `b`, saw it
+  // was empty, and sent nothing — answered on screen, empty on the wire.
+  // Filtering first makes both agree: whatever `projectValues` would show
+  // as the answered row is exactly what this differ sends.
+  //
+  // NOT log order, despite `[...creates, ...updates]` reading like it:
+  // `resolveChanges` groups by SET (every create, in first-appearance
+  // order, then every update, in first-appearance order), so `.at(-1)`
+  // here picks the last UPDATE if any exist, else the last CREATE — not
+  // necessarily the log's final edit. `[update("a"), add("b")]` resolves
+  // to `creates=[b], updates=[a]`, and `.at(-1)` on the concatenation
+  // yields `a`, the log-FIRST entry. Harmless for a well-formed log (one
+  // rowId, hence one set has exactly one entry and the other is empty);
+  // arbitrary-but-deterministic for a malformed multi-rowId one, which is
+  // the only case where this distinction is even visible.
+  const row = [...creates, ...updates].filter((r) => !isEmptyRow(r)).at(-1);
+  if (!row) return [];
   return [
     {
       url: `/api/v1/patient/${patientId}/`,

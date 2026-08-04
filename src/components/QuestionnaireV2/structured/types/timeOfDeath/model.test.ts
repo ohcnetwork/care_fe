@@ -106,4 +106,29 @@ describe("time_of_death model", () => {
       },
     ]);
   });
+
+  it("REGRESSION (post-review): a malformed two-rowId log whose LAST row is blank still sends the answered one, matching the projection", async () => {
+    // The first dedupe cut took `.at(-1)` THEN checked emptiness, so this
+    // exact shape reproduced item 1's bug in miniature: the projection
+    // shows "a" as answered (its blank sibling is filtered out the same
+    // way projectValues filters), while the differ picked "b", saw it was
+    // blank, and sent nothing. Filtering blanks out BEFORE taking the last
+    // entry fixes it: the differ now agrees with what the projection shows.
+    const edits: StructuredEdit<TimeOfDeathRow>[] = [
+      {
+        rowId: "a",
+        op: "add",
+        patch: { deceased_datetime: "2026-08-04T04:30:00.000Z" },
+      },
+      { rowId: "b", op: "add", patch: { deceased_datetime: "" } },
+    ];
+    assert.deepEqual(await toRequests(edits, CTX), [
+      {
+        url: "/api/v1/patient/pat-1/",
+        method: "PUT",
+        body: { deceased_datetime: "2026-08-04T04:30:00.000Z" },
+        reference_id: "structured:time_of_death:q-1",
+      },
+    ]);
+  });
 });
