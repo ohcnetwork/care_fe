@@ -54,6 +54,16 @@
  *    attempt is made to compare their contents structurally: two distinct
  *    instances with identical-looking content are DIFFERENT unless they
  *    are the same reference.
+ *
+ *  - Cyclic inputs are NOT guarded against: a self-referential object
+ *    recurses until the call stack overflows (`RangeError: Maximum call
+ *    stack size exceeded`), unlike `JSON.stringify`, which throws a
+ *    catchable `TypeError: Converting circular structure to JSON`. No
+ *    guard is added on purpose — every row shape in this codebase is a
+ *    plain API request object (built from typed literals, `JSON.parse`,
+ *    or a shallow spread) and cannot become cyclic; a cycle reaching here
+ *    would mean a caller bug, not a legitimate edit-log state, so failing
+ *    loudly beats silently "succeeding" on a truncated comparison.
  */
 export function deepEqualJson(a: unknown, b: unknown): boolean {
   if (a === b) return true;
@@ -71,10 +81,16 @@ export function deepEqualJson(a: unknown, b: unknown): boolean {
 
   if (Array.isArray(a) || Array.isArray(b)) {
     if (!Array.isArray(a) || !Array.isArray(b)) return false;
-    return (
-      a.length === b.length &&
-      a.every((value, index) => deepEqualJson(value, b[index]))
-    );
+    if (a.length !== b.length) return false;
+    // A plain index loop, not `Array.prototype.every` — `every` SKIPS
+    // HOLES in a sparse array (`[, 1].every(cb)` never invokes `cb` for
+    // the missing index 0, so it would report equal to anything there).
+    // Indexing `a[i]`/`b[i]` reads `undefined` for a hole, comparing it
+    // like any other value instead of silently skipping it.
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqualJson(a[i], b[i])) return false;
+    }
+    return true;
   }
 
   if (isPlainObject(a) && isPlainObject(b)) {

@@ -3,8 +3,10 @@ import { describe, it } from "node:test";
 
 import type { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import type { SymptomRequest } from "@/types/emr/symptom/symptom";
+import type { StructuredEditRecord } from "@/types/questionnaire/structured";
 
 import { deepEqualJson } from "./deepEqual";
+import type { EditLog, RowEdit } from "./types";
 
 // Realistic row fixtures — SymptomRequest/DiagnosisRequest are the actual
 // shapes `useStructuredRows` will compare (baseline vs. patched-then-
@@ -80,12 +82,12 @@ describe("deepEqualJson — realistic row shapes", () => {
     // moderate -> mild -> moderate: the row this function must recognize
     // as "no net edit", which is what lets an update collapse out of the
     // log entirely (core/editLog.ts, a later task).
-    const revertedBackToBaseline = makeSymptomRow({ severity: "mild" });
-    const revertedAgain = { ...revertedBackToBaseline, severity: "moderate" };
-    assert.equal(deepEqualJson(baseline, revertedAgain), true);
+    const editedToMild = makeSymptomRow({ severity: "mild" });
+    const revertedToBaseline = { ...editedToMild, severity: "moderate" };
+    assert.equal(deepEqualJson(baseline, revertedToBaseline), true);
   });
 
-  it("distinguishes a DiagnosisRequest whose optional `note` key is entirely absent from one where the same key is explicitly `undefined`", () => {
+  it("treats a DiagnosisRequest's entirely absent `note` key as equal to the same key set explicitly to `undefined`", () => {
     const withAbsentNote = makeDiagnosisRow();
     delete (withAbsentNote as { note?: string }).note;
     const withUndefinedNote = makeDiagnosisRow({ note: undefined });
@@ -148,6 +150,13 @@ describe("deepEqualJson — array order significance", () => {
 
   it("is false when lengths differ", () => {
     assert.equal(deepEqualJson([1, 2], [1, 2, 3]), false);
+  });
+
+  it("does not let a sparse-array hole compare as equal to a real value (Array.prototype.every silently skips holes; a plain index loop does not)", () => {
+    // eslint-disable-next-line no-sparse-arrays -- deliberately constructing a hole
+    const withHole = [, 1];
+    assert.equal(deepEqualJson(withHole, [2, 1]), false);
+    assert.equal(deepEqualJson(withHole, [undefined, 1]), true);
   });
 });
 
@@ -232,5 +241,30 @@ describe("deepEqualJson — decided edge cases (documented, not left undefined)"
     const b = Object.create(null) as Record<string, unknown>;
     b.x = 1;
     assert.equal(deepEqualJson(a, b), true);
+  });
+});
+
+describe("RowEdit / StructuredEditInput — vocabulary parity with Task 1 (compile-time)", () => {
+  it("EditLog<TRow> is assignable to `readonly StructuredEditRecord[]` — StructuredEditInput is genuinely the erasure of StructuredEditInputFor<TRow>", () => {
+    interface ExampleRow {
+      a: string;
+    }
+    // Canonical shape per src/types/questionnaire/structured.ts:99-106:
+    // `rowId` camelCase, `patch` is the COMPLETE row for every op,
+    // including `remove`.
+    const rowEdit: RowEdit<ExampleRow> = {
+      rowId: "row-1",
+      op: "update",
+      patch: { a: "x" },
+    };
+    const editLog: EditLog<ExampleRow> = [rowEdit];
+    // If this assignment stops type-checking under `tsc --noEmit`,
+    // `core/types.ts`'s `RowEdit<TRow>` has drifted from Task 1's shipped
+    // `StructuredEdit<TRow>` again — this line is what enforces the
+    // relationship, not just the doc comment above `StructuredEditInput`.
+    const erased: readonly StructuredEditRecord[] = editLog;
+    assert.equal(erased.length, 1);
+    assert.equal(erased[0].rowId, "row-1");
+    assert.equal(erased[0].op, "update");
   });
 });
