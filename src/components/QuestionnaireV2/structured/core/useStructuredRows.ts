@@ -543,38 +543,80 @@ export function useStructuredRows<
   // continuous synchronous JavaScript call; a microtask queued partway
   // through cannot preempt it and can only run once that whole call stack
   // unwinds — strictly after every ancestor's effect this pass, whatever
-  // depth it's at. Microtasks also drain before the browser's next paint,
-  // so the row still reads "Discharged" from the very first frame — no
-  // visual flash of the pre-seed status. `seeded.current` is still
+  // depth it's at. Microtasks also drain before the browser's next paint —
+  // the row still reads "Discharged" from the first frame, same as before
+  // this fix (the paint-timing itself is unchanged; a DefaultLane update
+  // through React's Scheduler resolves before paint in both the deferred
+  // and the non-deferred case — the fix only changes WHICH pass observes
+  // the write, not when it becomes visible). `seeded.current` is still
   // flipped SYNCHRONOUSLY inside the effect body (immediately, not after
   // the microtask), so the one-shot latch and its StrictMode
   // double-invoke safety are unaffected — only the ACTUAL WRITE moves
   // later, not the decision to seed.
   //
-  // NO cleanup function returned — POST-REVIEW FIX, caught by this hook's
-  // own jsdom+StrictMode test
-  // (`useStructuredRows.initialEditsSeedTiming.test.ts`), the same
-  // harness style `useStructuredRows.orphanPrune.test.ts` established
-  // specifically to catch this class of bug. A first draft returned `() =>
-  // { cancelled = true; }` to guard the vanishingly small window between
-  // scheduling the microtask and it draining (e.g. an unmount in between).
-  // That guard is exactly what StrictMode's dev-only double-invoke
-  // (mount → cleanup → mount, run synchronously, well before any
-  // microtask can drain) triggers on every ordinary mount: pass 1 sets
-  // `seeded.current = true` and schedules the commit; StrictMode's
-  // simulated "unmount" immediately calls the cleanup, marking that
-  // schedule cancelled; pass 2 sees `seeded.current` already true and
-  // schedules nothing new — so the seed NEVER commits, permanently, under
-  // StrictMode (which `src/index.tsx` wraps the whole app in,
-  // unconditionally, dev and prod alike — only the double-INVOKE
-  // behavior itself is dev-only). The original (pre-defer) code had no
-  // such failure mode because it had no cleanup at all: its synchronous
-  // `commit(next)` call in pass 1 was never undone by pass 2's harmless
-  // no-op. Omitting the cleanup here restores that same property — the
-  // scheduled microtask always runs, exactly once, regardless of how many
-  // times StrictMode re-invokes the effect body, because `seeded.current`
-  // (not a cleanup-driven cancellation) is what prevents a SECOND
-  // schedule.
+  // THE SECOND PREMISE THIS FIX RESTS ON, named explicitly rather than
+  // left implicit (post-review): landing after every ancestor effect this
+  // pass is necessary but not sufficient — at the moment the microtask
+  // drains, a LIVE subscription must already exist whose baseline
+  // predates the seed. That holds today because
+  // `fill/draft/useFillAutosave.ts`'s subscription effect resolves each
+  // form's store via `getStore`, which reads through a REF
+  // (`QuestionnaireFillPage.tsx`'s `storesRef` — a `useRef(new Map())`),
+  // not through the `storesVersion` STATE that merely triggers the
+  // effect to re-run. So the very FIRST time that effect runs at all —
+  // same synchronous pass as this one, no render behind — it already sees
+  // the correct, current, durable store object and subscribes to it
+  // immediately; there is no window where zero subscription exists on a
+  // render where this hook's effects have already run. If dirty-tracking
+  // ever subscribed by keying off `storesVersion` state directly (rather
+  // than a ref-backed lookup used to establish an immediately-live
+  // subscription), a deferred write could drain in the gap between two
+  // subscription instances and this bug would return silently — this
+  // fix's correctness is coupled to that detail of the CONSUMER, not
+  // something this hook alone can guarantee.
+  //
+  // LIVENESS GUARD — `alive`, not a cleanup-driven `cancelled` flag.
+  // POST-REVIEW: a first draft of this deferral returned `() => {
+  // cancelled = true; }` directly from THIS effect to guard the
+  // vanishingly small window between scheduling the microtask and it
+  // draining (e.g. a real unmount in between). That guard was ITSELF a
+  // bug this fix's own draft introduced — never a defect in any shipped
+  // build, since the pre-existing (pre-defer) code had no cleanup at all
+  // and therefore no such failure mode. StrictMode's dev-only
+  // double-invoke (mount → cleanup → mount, run synchronously, well
+  // before any microtask can drain) triggered that cleanup on every
+  // ordinary mount: pass 1 sets `seeded.current = true` and schedules the
+  // commit; StrictMode's simulated "unmount" immediately calls the
+  // cleanup, marking that schedule cancelled; pass 2 sees
+  // `seeded.current` already true and schedules nothing new — so the seed
+  // would never have committed, permanently, in dev. Caught before it
+  // shipped by this hook's own jsdom+StrictMode test
+  // (`useStructuredRows.initialEditsSeedTiming.test.ts`, the same harness
+  // style `useStructuredRows.orphanPrune.test.ts` established
+  // specifically to catch this class of bug).
+  //
+  // The real fix keeps a liveness check WITHOUT tying it to this effect's
+  // own cleanup: `alive` is armed by a SEPARATE effect with no dependency
+  // array, so it re-runs (cleanup then body) on every commit, including
+  // both passes of StrictMode's double-invoke. A real, final unmount
+  // leaves only the cleanup's `alive.current = false` with no following
+  // body to re-arm it; StrictMode's simulated one is followed
+  // immediately, in the same synchronous sequence, by pass 2's body
+  // setting `alive.current = true` again — so by the time the microtask
+  // checks it, a StrictMode remount reads `true` (seed proceeds) and a
+  // genuine unmount reads `false` (seed silently skipped, matching
+  // `updateResponse`'s own `if (!current) return` — which does NOT
+  // itself cover this window, since a genuinely unmounted question can
+  // still have a live `current` entry in `responsesAtom` if another
+  // question's editor is still mounted).
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  });
+
   const seeded = useRef(false);
   useEffect(() => {
     if (seeded.current) return;
@@ -586,7 +628,9 @@ export function useStructuredRows<
     for (const edit of initialEdits) {
       next = applyEditToLog(next, edit, applyOpts);
     }
-    queueMicrotask(() => commit(next));
+    queueMicrotask(() => {
+      if (alive.current) commit(next);
+    });
   }, [initialEdits, edits, applyOpts, commit]);
 
   const applyEdit = useCallback(

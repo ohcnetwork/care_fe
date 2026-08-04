@@ -29,6 +29,18 @@
  * the seed at all. After the fix, it fires exactly once, with the seeded
  * content.
  *
+ * THE ASSERTION THAT ACTUALLY PINS THIS, found missing by mutation
+ * testing (post-review): checking only "a notification eventually fired"
+ * is NOT sufficient — reverting the fix stayed green, because
+ * `useStructuredRows.ts`'s unrelated passive `values`-mirror effect also
+ * writes to the store once under StrictMode (a stale-closure
+ * double-invoke artifact) and that write alone satisfies a bare
+ * `notified.length > 0`. The assertion that is actually red on the
+ * reverted build and green only with the fix is that the ancestor's
+ * FIRST baseline snapshot — taken once, at mount, before any
+ * notification — must still read the PRE-seed content (`edits: []`).
+ * See the first test's own comment for the full mutation-testing story.
+ *
  * No test harness for a React hook exists anywhere else in this repo
  * (`test:unit` is plain `node --test`, no jsdom/testing-library
  * dependency), so this file builds the same minimal, disposable one
@@ -78,7 +90,7 @@ import {
   Provider as JotaiProvider,
   type WritableAtom,
 } from "jotai";
-import { act, createElement, StrictMode, useEffect } from "react";
+import { act, createElement, StrictMode, useEffect, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
 import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
@@ -239,13 +251,38 @@ describe("useStructuredRows — initialEdits seed timing vs. an ancestor's dirty
       }
     });
 
-    // THE PIN: at least one "notified" event fired carrying the seeded
-    // edit. Before the fix, `events` contained only ever a single
-    // "baseline" entry (already showing the seeded content — the seed had
-    // already landed by the time this ancestor's effect ran at all) and
-    // NO "notified" entry, because `store.sub`'s callback was never
-    // invoked for that write — proving the ancestor's dirty flag could
-    // never have been set by it.
+    // THE ACTUAL PIN — POST-REVIEW FIX (mutation-tested): the ancestor's
+    // FIRST baseline snapshot must predate the seed, i.e. still read `[]`.
+    // Without this assertion, reverting the fix (`queueMicrotask(() =>
+    // commit(next))` back to a bare `commit(next)`) stayed GREEN: on the
+    // reverted build BOTH baseline snapshots already carry the seeded
+    // edit (the exact defect — the seed landed before the ancestor's
+    // effect ever ran), and the lone "notified" event that satisfied
+    // `notified.length > 0` below came from a DIFFERENT effect entirely —
+    // `useStructuredRows.ts`'s passive `values`-mirror effect
+    // (`:388-391`), which under StrictMode double-invokes with a stale
+    // closure, overwrites `values` back to the pre-seed projection AFTER
+    // the seed's synchronous commit, and the next render re-writes them
+    // — a real store write, just not the one this test is named after.
+    // `notified.at(-1)?.edits` still compared equal because it reads the
+    // CURRENT store content at notification time, not the notification's
+    // own payload, so it couldn't tell the two apart either. Checking the
+    // FIRST baseline is the one assertion that is red on the reverted
+    // build and green only with the fix.
+    assert.deepEqual(
+      harness.events.find((e) => e.kind === "baseline")?.edits,
+      [],
+      "the ancestor's FIRST baseline must predate the seed",
+    );
+
+    // The pin's other half: at least one "notified" event fired carrying
+    // the seeded edit. Before the fix, `events` contained only ever a
+    // single "baseline" entry (already showing the seeded content) and NO
+    // "notified" entry, because `store.sub`'s callback was never invoked
+    // for that write — proving the ancestor's dirty flag could never have
+    // been set by it. Kept alongside the baseline assertion above (not in
+    // place of it) since a fired notification alone is not, on its own,
+    // proof it came from the seed rather than some other effect.
     const notified = harness.events.filter((e) => e.kind === "notified");
     assert.ok(
       notified.length > 0,
@@ -297,5 +334,95 @@ describe("useStructuredRows — initialEdits seed timing vs. an ancestor's dirty
         "see a notification for it",
     );
     assert.deepEqual(harness.store.get(responsesAtom)[questionId].edits, []);
+  });
+
+  it("an unmount that happens INSIDE the deferral window discards the seed instead of writing to a gone question — POST-REVIEW liveness guard", async () => {
+    // Executed repro from review: an ancestor whose OWN mount effect calls
+    // `setShow(false)` unmounts the seeding child SYNCHRONOUSLY, still
+    // inside the deferral window (effect-triggered state updates flush
+    // before React yields to the browser — the same mechanism that lets
+    // `useFillAutosave.ts`'s subscription effect re-run within one
+    // synchronous sequence when `storesVersion` bumps). Without a
+    // liveness guard, the queued microtask still lands and writes `edits`
+    // for a question whose editor no longer exists — which
+    // `composeStructuredV2Requests` would then forward verbatim into a
+    // submit. The `alive` ref (armed by its own always-rerunning effect,
+    // set false only by a cleanup with no following body to re-arm it)
+    // is what `updateResponse`'s own `if (!current) return` does NOT
+    // cover: the question's `responsesAtom` entry is still present (some
+    // OTHER question in the same form is still mounted), so `current` is
+    // truthy — the guard has to be this hook's own liveness check, not a
+    // side effect of the store shape.
+    const questionId = "q-seed-timing-unmount";
+    const seed: QuestionnaireResponse = {
+      question_id: questionId,
+      structured_type: "encounter",
+      link_id: "q-structured",
+      values: [],
+      edits: [],
+    };
+    const store = createStore();
+    store.set(responsesAtom, { [questionId]: seed });
+    const baseline = [
+      { rowId: "row-1", row: { id: "row-1", label: "server" } },
+    ];
+
+    function Child() {
+      useStructuredRows({
+        questionId,
+        mode: "single",
+        baseline,
+        projectValues,
+        initialEdits: [
+          {
+            rowId: "row-1",
+            op: "update" as const,
+            patch: { id: "row-1", label: "DISCHARGED" },
+          },
+        ],
+      });
+      return null;
+    }
+
+    function UnmountingParent() {
+      const [show, setShow] = useState(true);
+      useEffect(() => {
+        setShow(false);
+        // Deliberately empty deps: fires exactly once, on mount — the
+        // "unmount the child right away" shape the repro needs.
+      }, []);
+      return show ? createElement(Child) : null;
+    }
+
+    const container = dom.window.document.createElement("div");
+    dom.window.document.body.appendChild(container);
+    const root: Root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        createElement(
+          StrictMode,
+          null,
+          createElement(
+            JotaiProvider,
+            { store },
+            createElement(UnmountingParent),
+          ),
+        ),
+      );
+      for (let i = 0; i < 10; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+    });
+
+    assert.deepEqual(
+      store.get(responsesAtom)[questionId].edits,
+      [],
+      "the seed must not land for a question whose editor unmounted " +
+        "before the deferred commit could run",
+    );
+
+    root.unmount();
+    container.remove();
   });
 });
