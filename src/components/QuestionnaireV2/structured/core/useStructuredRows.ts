@@ -234,13 +234,21 @@ export interface StructuredRowsBase<TRow extends object> {
    *  back) resets this to `[]`, same as any other `useState`. Persisting
    *  dropped edits so a notice survives a full page reload is Phase 5's
    *  scope, not this hook's — it would need its own storage (e.g. folded
-   *  into the draft dump), not an in-memory list. */
+   *  into the draft dump), not an in-memory list.
+   *
+   *  ALSO CLEARED BY `resetEdits` (Discard): a clinician-initiated "forget
+   *  everything I did this session" wipes this alongside `edits` — see
+   *  `resetEdits`'s own doc comment for the reasoning. A restore-notice UI
+   *  reading this field will see it go back to `[]` the instant the
+   *  clinician discards, same as `edits` does. */
   droppedEdits: EditLog<TRow>;
   /** The raw seam — the assistant's `applyStructuredEdit` path (a later
    *  phase) and any caller needing to record an edit `useStructuredRows`
    *  doesn't otherwise expose a mutator for. */
   applyEdit: (edit: RowEdit<TRow>) => void;
-  /** Drop all intent; the projection collapses back to the baseline. */
+  /** Drop all intent; the projection collapses back to the baseline. Also
+   *  clears `droppedEdits` (see its own doc comment) — a Discard forgets
+   *  the restore-notice record too, not just the live edit log. */
   resetEdits: () => void;
 }
 
@@ -432,14 +440,65 @@ export function useStructuredRows<
   // baseline resolves, the prune never runs, the orphan reaches submit
   // anyway); in the ordinary timeline baseline resolves long before a
   // clinician reaches Save, so this has already run by then regardless.
+  //
+  // POST-REVIEW FIX — StrictMode double-invocation double-counts.
+  // `commit(pruneOrphanEdits(baseline, edits))` is idempotent under
+  // StrictMode's dev-only double-invoke-effects behavior (`src/index.tsx`
+  // renders the whole app in `<StrictMode>`): both invocations read the
+  // SAME `(baseline, edits)` closure and produce the identical pruned
+  // result, so `response.edits` ends up correct regardless of how many
+  // times it runs. The functional `setDroppedEdits` updater was NOT
+  // idempotent the same way: invocation 1 appends the dropped edit to `[]`;
+  // invocation 2 runs before any new render has occurred (so `edits` is
+  // STILL the pre-prune closure) but `previous` inside the updater already
+  // reflects invocation 1's write, and the naive version appended the SAME
+  // edit a second time — `droppedEdits.length` would overcount exactly the
+  // count a Phase 5 notice exists to report correctly. Fixed by skipping
+  // any rowId `previous` already carries, and returning `previous` itself
+  // (not a new array) when nothing new survives that filter, so a second,
+  // idempotent invocation is a true no-op — no state write, no re-render —
+  // not just a same-content one.
   const [droppedEdits, setDroppedEdits] = useState<EditLog<TRow>>([]);
   useEffect(() => {
+    // NOT MERELY AN OPTIMIZATION — this early return is the ONLY thing
+    // standing between an unmemoized `baseline` and an unbounded render
+    // loop. `commit` (below) has no deep-equality bail-out of its own: it
+    // unconditionally calls `updateResponse`, which unconditionally
+    // constructs a fresh response object and writes it — so if this guard
+    // were removed, EVERY render in which `orphanRowIds`'s reference
+    // changed would commit, and every commit is itself a state write that
+    // triggers another render. That is harmless when `baseline` is
+    // memoized (its reference is stable, so `orphanRowIds` only changes
+    // reference when its CONTENT does) — but `baseline` is caller-supplied
+    // (`StructuredRowsOptions.baseline`, typically `data?.results.map(...)`
+    // off a query result) and nothing in this hook enforces that the
+    // caller memoizes it. An unmemoized baseline recomputes to a fresh
+    // array identity on every render regardless of content, which forces
+    // `orphanRowIds`'s own `useMemo` to recompute (and hand back a new
+    // array reference, even when the CONTENT is unchanged, e.g. still
+    // `[]`) on every render too — without this guard, that alone is
+    // sufficient to commit, re-render, and commit again, forever. Executed
+    // proof (POST-REVIEW): a build with this line removed and an
+    // unmemoized, orphan-free baseline produced thousands of React's
+    // "Maximum update depth exceeded" warnings in a run this file's own
+    // "baseline undefined must never prune" case still passed —
+    // `findOrphanRowIds(undefined, …)` trivially returning `[]` makes that
+    // one assertion true whether or not this guard exists, which is why a
+    // SEPARATE case below pins actual write COUNT, not just final content,
+    // specifically for the `baseline === undefined` case this guard's
+    // surrounding comment names; the general unmemoized-non-undefined loop
+    // is documented here rather than reproduced as a permanent automated
+    // test, since deliberately reproducing an unbounded render loop is
+    // itself a hang risk for the suite that runs it.
     if (orphanRowIds.length === 0) return;
     const orphanSet = new Set(orphanRowIds);
-    setDroppedEdits((previous) => [
-      ...previous,
-      ...edits.filter((edit) => orphanSet.has(edit.rowId)),
-    ]);
+    setDroppedEdits((previous) => {
+      const alreadyDropped = new Set(previous.map((edit) => edit.rowId));
+      const additions = edits.filter(
+        (edit) => orphanSet.has(edit.rowId) && !alreadyDropped.has(edit.rowId),
+      );
+      return additions.length === 0 ? previous : [...previous, ...additions];
+    });
     commit(pruneOrphanEdits(baseline, edits));
   }, [orphanRowIds, baseline, edits, commit]);
 
@@ -476,6 +535,17 @@ export function useStructuredRows<
   const resetEdits = useCallback(() => {
     if (disabled) return;
     commit([]);
+    // POST-REVIEW DECISION: a Discard clears `droppedEdits` too, not just
+    // `edits`. "Drop all intent; the projection collapses back to the
+    // baseline" (this function's own doc comment) is a clinician-initiated
+    // "forget everything I did this session" — a restore notice built on
+    // `droppedEdits` naming rows lost from a PRIOR restore would be stale
+    // and confusing the instant the clinician has explicitly abandoned
+    // every pending edit, including whatever survived the prune. If a
+    // later reason emerges to keep it (e.g. Phase 5 wants the notice to
+    // outlive a Discard), that is a deliberate reopening of this decision,
+    // not an oversight — it is cleared here on purpose.
+    setDroppedEdits([]);
   }, [disabled, commit]);
 
   const isDuplicate = useCallback(

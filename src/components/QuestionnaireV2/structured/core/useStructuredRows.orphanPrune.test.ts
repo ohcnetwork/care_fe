@@ -57,7 +57,7 @@ import assert from "node:assert/strict";
 import { after, describe, it } from "node:test";
 
 import { createStore, Provider as JotaiProvider } from "jotai";
-import { act, createElement } from "react";
+import { act, createElement, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
 import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
@@ -117,9 +117,20 @@ function mountHarness(questionId: string, seed: QuestionnaireResponse) {
   dom.window.document.body.appendChild(container);
   const root: Root = createRoot(container);
 
+  // POST-REVIEW: wrapped in `StrictMode` — the app itself renders under it
+  // (`src/index.tsx`), which double-invokes effects in dev to catch
+  // exactly this class of bug (a non-idempotent effect body). The first
+  // version of this harness did NOT use `StrictMode` and could not have
+  // caught the `droppedEdits` double-count the review found — this rig
+  // would have reported green either way, which is the point of adding it
+  // here rather than trusting the earlier, StrictMode-blind version.
   const render = () =>
     root.render(
-      createElement(JotaiProvider, { store }, createElement(Harness)),
+      createElement(
+        StrictMode,
+        null,
+        createElement(JotaiProvider, { store }, createElement(Harness)),
+      ),
     );
 
   return { store, resultRef, baselineRef, root, container, render };
@@ -260,5 +271,122 @@ describe("useStructuredRows — PHASE 2 CARRY-FORWARD FIX wiring: confirmed orph
       liveEdit,
       ownRemove,
     ]);
+  });
+
+  it("resetEdits (Discard) also clears droppedEdits, not just edits — POST-REVIEW decision", async () => {
+    const questionId = "q-orphan-pin-reset";
+    const staleEdit: StructuredEditRecord = {
+      rowId: "vanished",
+      op: "update",
+      patch: { id: "vanished", label: "restored draft intent" },
+    };
+    const seed: QuestionnaireResponse = {
+      question_id: questionId,
+      structured_type: "encounter",
+      link_id: "q-structured",
+      values: [],
+      edits: [staleEdit],
+    };
+
+    const harness = mountHarness(questionId, seed);
+    const { resultRef } = harness;
+    cleanups.push(() => {
+      harness.root.unmount();
+      harness.container.remove();
+    });
+
+    await setBaselineAndFlush(harness, undefined);
+    await setBaselineAndFlush(harness, []); // reveals the orphan, prunes it
+    assert.deepEqual(
+      resultRef.current?.droppedEdits,
+      [staleEdit],
+      "sanity: the orphan was actually captured before Discard",
+    );
+
+    await act(async () => {
+      resultRef.current?.resetEdits();
+      for (let i = 0; i < 10; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+    });
+
+    assert.deepEqual(
+      resultRef.current?.droppedEdits,
+      [],
+      "a Discard forgets the restore-notice record too, per resetEdits's " +
+        "own doc comment — a stale notice naming edits from before an " +
+        "explicit 'forget everything' action would confuse, not inform",
+    );
+    assert.deepEqual(resultRef.current?.edits, []);
+  });
+
+  it("the length===0 guard's second job: no write happens while baseline stays undefined, even when edits's reference churns (an unmemoized-baseline-shaped stress, without risking an actual unbounded loop)", async () => {
+    const questionId = "q-orphan-pin-guard";
+    const staleEdit: StructuredEditRecord = {
+      rowId: "vanished",
+      op: "update",
+      patch: { id: "vanished", label: "restored draft intent" },
+    };
+    const seed: QuestionnaireResponse = {
+      question_id: questionId,
+      structured_type: "encounter",
+      link_id: "q-structured",
+      values: [],
+      edits: [staleEdit],
+    };
+
+    const harness = mountHarness(questionId, seed);
+    const { store } = harness;
+    cleanups.push(() => {
+      harness.root.unmount();
+      harness.container.remove();
+    });
+
+    await setBaselineAndFlush(harness, undefined);
+
+    let writeCount = 0;
+    const unsub = store.sub(responsesAtom, () => {
+      writeCount++;
+    });
+
+    for (let i = 0; i < 3; i++) {
+      // Force `orphanRowIds`'s `useMemo` to recompute to a FRESH (but
+      // still content-`[]`, since baseline is still undefined) array
+      // reference, by giving `edits` a new top-level array identity with
+      // the SAME element — simulating what an unmemoized `baseline` would
+      // do to `orphanRowIds`'s identity on every render, without actually
+      // letting `baseline` itself vary (which is what would risk a real
+      // unbounded render loop). This is what makes the assertion below
+      // NON-vacuous with respect to the guard: `findOrphanRowIds(undefined,
+      // …)` trivially returning `[]` is true whether or not the guard
+      // exists, but a guard-less effect would still fire — and still
+      // `commit` — on every one of these reference changes.
+      const current = store.get(responsesAtom)[questionId];
+      // The manual write itself, OUTSIDE any flush loop, so the counter
+      // reset immediately below excludes ONLY this one seed write and
+      // nothing an effect does afterward (resetting the counter only
+      // AFTER a combined write+flush block would also discard whatever
+      // the effect itself wrote during that same flush — the mistake an
+      // earlier draft of this test made, which is why it passed even with
+      // the guard removed).
+      store.set(responsesAtom, {
+        ...store.get(responsesAtom),
+        [questionId]: { ...current, edits: [...(current.edits ?? [])] },
+      });
+      writeCount = 0;
+      await act(async () => {
+        for (let j = 0; j < 5; j++) {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        }
+      });
+      assert.equal(
+        writeCount,
+        0,
+        `iteration ${i}: baseline is still undefined — no commit should ` +
+          "follow from edits's reference alone changing",
+      );
+    }
+
+    unsub();
   });
 });
