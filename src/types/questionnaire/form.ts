@@ -8,7 +8,10 @@ import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { ServiceRequestApplyActivityDefinitionForm } from "@/types/emr/serviceRequest/serviceRequest";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { FileUploadQuestion } from "@/types/files/file";
-import { StructuredTypeValue } from "@/types/questionnaire/structured";
+import {
+  StructuredEditRecord,
+  StructuredTypeValue,
+} from "@/types/questionnaire/structured";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 /**
@@ -45,7 +48,41 @@ export interface QuestionnaireResponse {
   question_id: string;
   structured_type: StructuredTypeValue | null;
   link_id: string;
+  /**
+   * For a plain question: the recorded answers.
+   * For a CONTRACT-V2 structured question: the PROJECTION
+   * (`baseline + edits`), maintained mechanically by
+   * `structured/core/useStructuredRows` and read by everything that has
+   * always read it — the answered predicate (`entryHasContent`, engine
+   * store :372-376), the fill outline's completion ticks, the required
+   * check (`form/validation.ts:103-112`), readonly/preview renderers and
+   * the server-draft dump. It is DISPLAY state: nothing submits from it
+   * under v2, and drafts strip it.
+   */
   values: ResponseValue[];
+  /**
+   * Contract-v2 structured questions only — what the clinician actually
+   * changed (spec §3). Absent everywhere else, and absent is identical to
+   * empty (`structuredEditsOf`).
+   *
+   * This is the ONLY thing `composeBatch` compiles for a v2 question and
+   * the ONLY structured content a draft persists, which is what makes an
+   * untouched section emit zero requests (P1-14) and a structured-only
+   * change arm the unsaved-changes prompt (P1-3).
+   *
+   * Type-erased (`patch: unknown`) because a row shape is opaque outside
+   * its own type module; `registry.ts` holds the single sanctioned
+   * narrowing back, exactly as it does for `values[0].value`.
+   *
+   * Never sent to the questionnaire submit endpoint: `composeBatch`'s
+   * `results` map (composeBatch.ts:233-240) picks `question_id`, `values`,
+   * `note`, `body_site` and `method` explicitly. It DOES ride into a
+   * resumed draft's completion PUT dump (composeBatch.ts:290-297), where
+   * `response_dump` is a free-form JSON blob
+   * (`types/questionnaire/formSubmission.ts:11`) — harmless, and it makes
+   * the archived record say what was changed as well as what was shown.
+   */
+  edits?: StructuredEditRecord[];
   note?: string;
   taken_at?: string;
   body_site?: Code;

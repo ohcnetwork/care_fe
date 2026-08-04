@@ -66,3 +66,73 @@ export function isPluginStructuredTypeName(
 ): value is PluginStructuredTypeName {
   return PLUGIN_STRUCTURED_TYPE_PATTERN.test(value);
 }
+
+/**
+ * What a clinician DID to a structured section, as opposed to what the
+ * section currently shows.
+ *
+ * The three-way split this belongs to (spec §3): BASELINE is what the
+ * server had — owned by the query layer, never written into the response;
+ * EDITS are user intent, the only thing drafts persist and the only thing
+ * that compiles into requests; PROJECTION is `baseline + edits`, computed
+ * for display and parked in `values[0].value` so every existing reader
+ * (answered predicate, outline ticks, readonly renderers, server-draft
+ * dumps) keeps working untouched.
+ *
+ * `rowId` is stable and client-owned: the SERVER ID for a row that exists
+ * on the server, a uuid for a row the clinician added. It replaces the
+ * index-based row identity the legacy widgets used, which is what made
+ * Diagnosis' sorted display order disagree with its write-back order.
+ *
+ * `patch` is the COMPLETE row, not a field diff, for every op:
+ *   - `add`    — the new row.
+ *   - `update` — the row as it now reads (baseline row with the
+ *                clinician's fields applied).
+ *   - `remove` — the row as it last read before removal, so the differ can
+ *                build an entered-in-error soft-delete body (which for the
+ *                upsert-style endpoints is a whole datapoint, not an id).
+ * Full rows are what let `toRequests(edits, ctx)` be genuinely
+ * self-sufficient: `composeBatch` stays a pure function with no access to
+ * the TanStack cache, and a draft restored after a failed baseline fetch
+ * still carries everything a submit needs.
+ */
+export type StructuredEditOp = "add" | "update" | "remove";
+
+export interface StructuredEdit<TRow> {
+  /** Server id for a row that exists on the server; uuid for an add. */
+  rowId: string;
+  op: StructuredEditOp;
+  patch: TRow;
+}
+
+/**
+ * The type-erased edit, as it is stored on a `QuestionnaireResponse`, in a
+ * local draft and in a server draft's `response_dump`. A row shape is
+ * opaque outside its own type module — the same honesty `unknown[]` buys
+ * `ResolvedStructuredType`'s data reads — so `patch` widens to `unknown`
+ * and the ONE sanctioned narrowing back happens at the registry boundary,
+ * where key-correlation already guarantees the pairing.
+ */
+export type StructuredEditRecord = StructuredEdit<unknown>;
+
+const STRUCTURED_EDIT_OPS: readonly string[] = ["add", "update", "remove"];
+
+/** Is this parsed-JSON value a well-formed edit? Drafts and server dumps
+ *  are untrusted blobs (a hand-edited localStorage entry, a dump written
+ *  by an older build), and a malformed entry reaching a type's differ
+ *  would surface as a batch 400 after everything was typed in. `patch` is
+ *  deliberately NOT checked here — only the type's own zod row schema can
+ *  judge it (spec §6 A2), and `toRequests` already runs inside
+ *  `StructuredBuildError`'s containment boundary. */
+export function isStructuredEditRecord(
+  value: unknown,
+): value is StructuredEditRecord {
+  if (typeof value !== "object" || value === null) return false;
+  const candidate = value as { rowId?: unknown; op?: unknown };
+  return (
+    typeof candidate.rowId === "string" &&
+    candidate.rowId.length > 0 &&
+    typeof candidate.op === "string" &&
+    STRUCTURED_EDIT_OPS.includes(candidate.op)
+  );
+}
