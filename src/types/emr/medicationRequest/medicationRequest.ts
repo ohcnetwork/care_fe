@@ -434,6 +434,15 @@ export type MedicationRequestTemplateSpec = Omit<
 
 export interface MedicationRequestCreate extends MedicationRequest {
   create_prescription?: PrescriptionCreate;
+  /**
+   * Legacy-only. `QuestionTypes/MedicationRequestQuestion.tsx` (the
+   * still-compiled contract-v1 widget) is the only writer left — every
+   * contract-v2 path (`structured/types/medicationRequest/model.ts`)
+   * derives dirtiness from its edit log instead and never sets this field.
+   * Deletion point: the Phase 5 legacy-widget closeout, alongside the
+   * matching field on `DiagnosisRequest` — do not remove one without the
+   * other.
+   */
   dirty?: boolean;
 }
 

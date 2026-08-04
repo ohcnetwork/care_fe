@@ -131,6 +131,17 @@ export function QuestionBlock(props: QuestionBlockProps) {
  * `code` — a server error keyed on `code` hits the unmatched-`field_key`
  * fallback, not silence.
  *
+ * `medication_request` IS listed — `MedicationRequestEditor.tsx` renders
+ * through `StructuredList`; its `dosage`/`frequency`/`duration` columns set
+ * `ownsErrorDisplay` (each renders one `StructuredFieldError` PER dosage
+ * instruction, not one per cell) and every other column relies on the
+ * shell's default per-cell rendering. This type's own client `validate`
+ * (`invalidDosageFieldErrors`, row-scoped, index-suffixed field keys like
+ * `dosage_instruction[0].dose`) renders inline through exactly this
+ * mechanism — plus the shell's own unmatched-`field_key` fallback for a row
+ * whose `dosage_instruction` array is empty (a `field_key` no column
+ * claims).
+ *
  * `medication_statement` IS listed — same reasoning again:
  * `MedicationStatementEditor.tsx` renders through `StructuredList`, none of
  * its seven columns set `ownsErrorDisplay`, and this type's own client
@@ -146,6 +157,7 @@ const STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS = new Set<string>([
   "charge_item",
   "diagnosis",
   "files",
+  "medication_request",
   "medication_statement",
   "symptom",
 ]);
