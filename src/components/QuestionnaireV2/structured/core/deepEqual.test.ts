@@ -44,7 +44,6 @@ function makeDiagnosisRow(
     note: undefined,
     category: "chronic_condition",
     encounter: "encounter-1",
-    dirty: false,
     ...overrides,
   };
 }

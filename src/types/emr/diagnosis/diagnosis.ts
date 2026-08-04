@@ -77,17 +77,6 @@ export interface DiagnosisRequest {
   note?: string;
   category: DiagnosisCategory;
   encounter: string;
-  /**
-   * Optional, not deleted — the contract-v1 dirty-row filter, kept ONLY for
-   * the still-compiled legacy widget (`QuestionTypes/DiagnosisQuestion.tsx`,
-   * five write sites: `:98,319,464,497,531`) and its now-removed
-   * `buildRequests` filter. The contract-v2 port
-   * (`structured/types/diagnosis/model.ts`) derives dirtiness from the edit
-   * log instead and never reads or writes this field. Deleted for real in
-   * the Phase 5 legacy-deletion batch, alongside the widget itself — see
-   * `docs/superpowers/plans/2026-08-05-final-push.md` Batch E item 4.
-   */
-  dirty?: boolean;
   created_by?: UserReadMinimal;
   created_date?: string;
   updated_date?: string;

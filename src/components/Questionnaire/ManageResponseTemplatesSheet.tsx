@@ -84,7 +84,42 @@ import query from "@/Utils/request/query";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
 import { t } from "i18next";
-import { buildMedicationForTemplate } from "./QuestionTypes/MedicationRequestQuestion";
+
+/**
+ * Builds a medication object suitable for storing in a template. Converts
+ * internal representations to template-friendly format.
+ *
+ * Formerly lived in the legacy `QuestionTypes/MedicationRequestQuestion.tsx`
+ * widget; kept here (this component's own local helper) now that the widget
+ * is deleted — `ManageResponseTemplatesSheet` itself is still a live
+ * dependency of the contract-v2 medication_request/service_request editors
+ * (`structured/types/medicationRequest/MedicationRequestEditor.tsx`,
+ * `structured/types/serviceRequest/ServiceRequestEditor.tsx`), so it is not
+ * part of the legacy deletion.
+ */
+function buildMedicationForTemplate(
+  medication: MedicationRequestCreate,
+): Record<string, unknown> {
+  const medicationForTemplate: Record<string, unknown> = {
+    ...medication,
+    requested_product: medication.requested_product_internal?.slug || undefined,
+  };
+
+  // Handle medication field based on whether we have a product slug
+  if (medication.requested_product) {
+    delete medicationForTemplate.medication;
+  } else if (medication.medication?.code) {
+    medicationForTemplate.medication = medication.medication;
+  } else {
+    delete medicationForTemplate.medication;
+  }
+
+  // Remove internal objects that shouldn't be stored in templates
+  delete medicationForTemplate.requested_product_internal;
+  delete medicationForTemplate.id;
+
+  return medicationForTemplate;
+}
 
 function MedicationName({
   medication,

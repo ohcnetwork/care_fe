@@ -434,16 +434,6 @@ export type MedicationRequestTemplateSpec = Omit<
 
 export interface MedicationRequestCreate extends MedicationRequest {
   create_prescription?: PrescriptionCreate;
-  /**
-   * Legacy-only. `QuestionTypes/MedicationRequestQuestion.tsx` (the
-   * still-compiled contract-v1 widget) is the only writer left — every
-   * contract-v2 path (`structured/types/medicationRequest/model.ts`)
-   * derives dirtiness from its edit log instead and never sets this field.
-   * Deletion point: the Phase 5 legacy-widget closeout, alongside the
-   * matching field on `DiagnosisRequest` — do not remove one without the
-   * other.
-   */
-  dirty?: boolean;
 }
 
 export interface MedicationRequestRequest extends Omit<
@@ -968,56 +958,6 @@ export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
   },
 } as const;
 
-/**
- * Attempt to parse a medication string into a single MedicationRequest object.
- *
- * - Handles parentheses in the name (e.g., "Indinavir (as indinavir sulfate) ...")
- * - Handles numeric doses for mg, g, mcg, unit/mL, etc.
- * - Detects route: "oral", "injection", etc.
- * - Detects form: "tablet", "capsule", "solution for injection", "granules sachet", etc.
- *
- * You can extend the dictionaries & regex to cover more cases (IV, subcutaneous, brand names, etc.).
- */
-export function parseMedicationStringToRequest(
-  requester: UserReadMinimal,
-  medication?: Code,
-  productKnowledge?: ProductKnowledgeBase,
-): MedicationRequest {
-  const dosageInstruction: MedicationRequestDosageInstruction = {
-    as_needed_boolean: false,
-  };
-
-  if (productKnowledge?.base_unit) {
-    dosageInstruction.dose_and_rate = {
-      type: "ordered",
-      dose_quantity: {
-        value: "1",
-        unit: productKnowledge.base_unit,
-      },
-    };
-  }
-
-  const medicationRequest: MedicationRequest = {
-    do_not_perform: false,
-    dosage_instruction: [dosageInstruction],
-    ...(medication ? { medication } : {}),
-    ...(productKnowledge
-      ? {
-          requested_product: productKnowledge.id,
-          requested_product_internal: productKnowledge,
-        }
-      : {}),
-    status: "active",
-    intent: "order",
-    priority: "routine",
-    category: "inpatient",
-    authored_on: new Date().toISOString(),
-    requester: requester,
-  };
-
-  return medicationRequest;
-}
-
 export function displayMedicationName(
   medication?:
     MedicationRequest | MedicationRequestRead | MedicationRequestCreate,
@@ -1249,23 +1189,6 @@ export function generateManSuggestions(
 }
 
 /**
- * Count the number of non-zero dose slots in a M-A-N string.
- * This is used to infer the FHIR frequency (doses per day) for
- * non-standard patterns stored as text.
- *
- * "1-1/2-0" → 2 (morning + noon)
- * "1-0-1"   → 2
- * "1-1-1"   → 3
- * "0-0-1"   → 1
- */
-export function countManDosesPerDay(manString: string): number {
-  if (!MAN_FULL_RE.test(manString)) return 1; // fallback
-  const slots = manString.split("-");
-  const nonZero = slots.filter((s) => evalSlot(s) > 0).length;
-  return Math.max(nonZero, 1); // at least 1
-}
-
-/**
  * Sum the actual slot values from a M-A-N string.
  * E.g. "1/2-1-1/2" → 0.5 + 1 + 0.5 = 2
  *      "1-2-3"     → 1 + 2 + 3 = 6
@@ -1280,27 +1203,6 @@ export function sumManSlots(manString: string): number | null {
     total += evalSlot(slot);
   }
   return total > 0 ? total : null;
-}
-
-/**
- * Build a minimal Timing object for a text-only dosage pattern.
- * No `code` is set (since the pattern doesn't map to a standard code).
- * The frequency is inferred from the number of non-zero M-A-N slots.
- */
-export function buildTimingForTextDosage(
-  manText: string,
-  boundsDuration: BoundsDuration,
-): Timing {
-  const freq = countManDosesPerDay(manText);
-  return {
-    repeat: {
-      frequency: freq,
-      period: "1",
-      period_unit: "d",
-      bounds_duration: boundsDuration,
-    },
-    // No `code` -- intentionally omitted for text-only patterns
-  };
 }
 
 /**
