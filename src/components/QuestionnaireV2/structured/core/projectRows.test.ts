@@ -305,6 +305,48 @@ describe("projectRows — baseline+edits projection", () => {
     });
   });
 
+  it("FIX: a malformed log carrying two `add` edits for the same rowId resolves to the LAST one only — loop 2 must agree with loop 1's per-rowId resolution, not double-emit", () => {
+    // Reachable only if Task 3's one-edit-per-rowId invariant is broken
+    // upstream (`applyEditToLog` never produces this on its own — see
+    // `editLog.test.ts`), but a restored draft's per-record
+    // `isStructuredEditRecord` gate validates each entry independently
+    // and would happily accept both. `projectRows` must not compound that
+    // corruption into two rendered rows for one identity.
+    const first = row("dup", "first add");
+    const second = row("dup", "second add");
+    const log: EditLog<TestRow> = [add("dup", first), add("dup", second)];
+
+    const result = projectRows([], log);
+
+    assert.equal(result.length, 1);
+    assert.deepEqual(result[0].row, second);
+  });
+
+  it("FIX: an `add` superseded by a later `update` for the same rowId in a malformed log resolves via the same last-write map loop 1 uses, in both directions", () => {
+    const stale = row("z", "stale add");
+    const fresh = row("z", "fresh update");
+    const log: EditLog<TestRow> = [add("z", stale), update("z", fresh)];
+
+    // Baseline absent "z" — the last edit for "z" is an `update`, and an
+    // `update` against a rowId the baseline doesn't have is the orphan
+    // rule (dropped), not a fallback to the stale `add`.
+    const withoutBaseline = projectRows([], log);
+    assert.deepEqual(
+      withoutBaseline.map((r) => r.rowId),
+      [],
+    );
+
+    // Baseline present "z" — loop 1 resolves via `editByRowId` (last
+    // write wins) and shows FRESH; loop 2 must not ALSO emit STALE as a
+    // second "added" row for the same rowId.
+    const baseline: BaselineRow<TestRow>[] = [
+      { rowId: "z", row: row("z", "original baseline") },
+    ];
+    const withBaseline = projectRows(baseline, log);
+    assert.equal(withBaseline.length, 1);
+    assert.deepEqual(withBaseline[0].row, fresh);
+  });
+
   it("displayOrder sorts the projection only — the Diagnosis bug: baseline and log order must survive projecting untouched", () => {
     const d1 = makeDiagnosisRow({
       id: "d1",
@@ -323,7 +365,15 @@ describe("projectRows — baseline+edits projection", () => {
       { rowId: "d2", row: d2 },
       { rowId: "d3", row: d3 },
     ];
-    const log: EditLog<DiagnosisRequest> = [];
+    // Deliberately NON-EMPTY: an update that moves d3's onset date past
+    // d1's, so the sort key the comparator reads comes from the EDITED
+    // content (`edit.patch`), not the stale baseline value — an empty log
+    // here would prove nothing about the log being left untouched.
+    const d3Updated: DiagnosisRequest = {
+      ...d3,
+      onset: { onset_datetime: "2026-04-01" },
+    };
+    const log: EditLog<DiagnosisRequest> = [update("d3", d3Updated)];
     const baselineSnapshot = structuredClone(baseline);
     const logSnapshot = structuredClone(log);
 
@@ -334,9 +384,11 @@ describe("projectRows — baseline+edits projection", () => {
         ),
     });
 
+    // d2 (01) < d1 (03) < d3-as-edited (04) — d3 moved from the middle to
+    // last, proving the sort used the post-edit onset date.
     assert.deepEqual(
       result.map((r) => r.rowId),
-      ["d2", "d3", "d1"],
+      ["d2", "d1", "d3"],
     );
     // The Diagnosis bug this option exists to retire: the SORTED display
     // order must never be what's written back as the canonical order.

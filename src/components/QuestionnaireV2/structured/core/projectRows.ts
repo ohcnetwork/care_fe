@@ -195,9 +195,28 @@ export function projectRows<TRow extends object>(
     });
   }
 
-  // 2. Adds, in edit-log order. Skips a rowId the baseline loop already
-  //    emitted — see the collision note in the function doc comment.
+  // 2. Adds, in edit-log order. Two guards, in order:
+  //    - `editByRowId.get(edit.rowId) !== edit` skips any entry that a
+  //      LATER entry for the same rowId superseded in the raw `log`
+  //      array. Task 3's `applyEditToLog` guarantees at most one entry
+  //      per rowId, so this never fires against a log it produced — but
+  //      a restored draft's per-record `isStructuredEditRecord` gate
+  //      validates each entry independently and would happily accept two
+  //      malformed entries sharing a rowId. Without this guard,
+  //      `[add("dup", first), add("dup", second)]` would emit TWO
+  //      `ProjectedRow`s both keyed "dup" (this loop has no de-dup of its
+  //      own otherwise), and `[add("z", stale), update("z", fresh)]`
+  //      would show `stale` here while loop 1 (which already reads
+  //      through `editByRowId`, i.e. last-write-wins) would show `fresh`
+  //      for the same rowId if baseline happens to contain it — two
+  //      loops disagreeing about one rowId's content. Resolving both
+  //      loops through the same last-write map keeps them in agreement
+  //      by construction, matching the sibling duplicate guard below.
+  //    - `baselineRowIds.has(edit.rowId)` skips a rowId the baseline loop
+  //      already emitted — see the collision note in the function doc
+  //      comment.
   for (const edit of log) {
+    if (editByRowId.get(edit.rowId) !== edit) continue;
     if (edit.op !== "add") continue;
     if (baselineRowIds.has(edit.rowId)) continue;
 
