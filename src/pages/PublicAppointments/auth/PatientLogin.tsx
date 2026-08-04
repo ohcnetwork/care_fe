@@ -238,6 +238,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
         </Label>
         <PhoneInput
           id="patient-login-phone"
+          name="tel"
           className="h-13 overflow-hidden rounded-lg border border-gray-300 [&_button]:border-0 [&_button]:bg-gray-50 [&_input]:border-0 [&_input]:border-l [&_input]:border-l-gray-300"
           value={phone}
           onChange={updatePhone}
@@ -277,6 +278,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
               checked={hasConsented}
               onCheckedChange={setHasConsented}
               className="mt-0.5 shrink-0 data-[state=checked]:bg-primary-700"
+              disabled={!isPhoneValid}
             />
           </div>
         </div>
