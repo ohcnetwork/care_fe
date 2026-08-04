@@ -9,7 +9,7 @@ import {
   User,
 } from "lucide-react";
 import { Link, navigate, usePath } from "raviger";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -28,8 +28,6 @@ const PatientShellContext = createContext<{
   openSwitcher: () => void;
   canSwitch: boolean;
 }>({ openSwitcher: () => {}, canSwitch: false });
-
-export const usePatientShell = () => useContext(PatientShellContext);
 
 const TABS = [
   { key: "home", href: "/patient/home", icon: Home, label: "home" },
