@@ -88,7 +88,10 @@ import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
 
 // --- Helper function (keep or move to utils) ---
-function formatQuantity(quantity: any): string {
+function formatQuantity(quantity: {
+  string?: string;
+  quantity?: { value: string | number; unit: { display: string } } | null;
+}): string {
   if (!quantity) return "N/A";
   if (quantity.string) return quantity.string;
   if (quantity.quantity?.value && quantity.quantity?.unit?.display) {
@@ -131,7 +134,9 @@ export function SpecimenWorkflowCard({
   // --- Mutations (specific to the collected specimen) ---
   const { mutate: updateProcessing } = useMutation({
     mutationFn: (processingSteps: ProcessingSpec[]) => {
-      if (!collectedSpecimen) return Promise.reject("No specimen to update");
+      if (!collectedSpecimen) {
+        return Promise.reject(new Error("No specimen to update"));
+      }
 
       // Use the imported SpecimenUpdatePayload type
       const payload: SpecimenRead = {
@@ -149,7 +154,7 @@ export function SpecimenWorkflowCard({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(
         `Failed to update processing: ${err.message || "Unknown error"}`,
       );
@@ -161,7 +166,9 @@ export function SpecimenWorkflowCard({
 
   const { mutate: discardSpecimen, isPending: isDiscarding } = useMutation({
     mutationFn: (status: SpecimenStatus) => {
-      if (!collectedSpecimen) return Promise.reject("No specimen to discard");
+      if (!collectedSpecimen) {
+        return Promise.reject(new Error("No specimen to discard"));
+      }
       return mutate(specimenApi.updateSpecimen, {
         pathParams: { facilityId, specimenId: collectedSpecimen.id },
       })({
@@ -175,7 +182,7 @@ export function SpecimenWorkflowCard({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(
         `Failed to discard specimen: ${err.message || "Unknown error"}`,
       );

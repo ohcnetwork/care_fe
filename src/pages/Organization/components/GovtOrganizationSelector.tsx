@@ -122,7 +122,7 @@ export default function GovtOrganizationSelector({
       onChange("");
       return;
     }
-  }, [selectedLevels]);
+  }, [selectedLevels, onChange, required, requiredDepth]);
 
   useEffect(() => {
     if (selected && selected.length > 0) {

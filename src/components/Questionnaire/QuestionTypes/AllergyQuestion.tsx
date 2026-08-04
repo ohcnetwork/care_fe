@@ -595,7 +595,11 @@ export function AllergyQuestion({
         questionnaireResponse.question_id,
       );
     }
-  }, [patientAllergies]);
+  }, [
+    patientAllergies,
+    questionnaireResponse.question_id,
+    updateQuestionnaireResponseCB,
+  ]);
 
   const handleAddAllergy = (code: Code) => {
     const newAllergy = {

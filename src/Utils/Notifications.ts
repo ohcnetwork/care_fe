@@ -19,7 +19,14 @@ const formatKey = (key: string) => {
     .join(" ");
 };
 
-const notifyError = (error: any) => {
+interface ErrorObject {
+  detail?: string;
+  [key: string]: unknown;
+}
+
+type NotifyErrorInput = string | ErrorObject | null | undefined;
+
+export const notifyError = (error: NotifyErrorInput) => {
   let errorMsg = "";
   if (typeof error === "string" || !error) {
     errorMsg =
@@ -43,11 +50,25 @@ const notifyError = (error: any) => {
   toast.error(errorMsg);
 };
 
+export const handleBadRequestErrors = (
+  errs: NotifyErrorInput | NotifyErrorInput[],
+) => {
+  if (Array.isArray(errs)) {
+    errs.forEach((error) => notifyError(error));
+  } else {
+    notifyError(errs);
+  }
+};
+
 /**
  * 400 Bad Request handler
- * @deprecated TODO: add a better error handler
+ * @deprecated Use handleBadRequestErrors instead
  */
-export const BadRequest = ({ errs }: { errs: any }) => {
+export const BadRequest = ({
+  errs,
+}: {
+  errs: NotifyErrorInput | NotifyErrorInput[];
+}) => {
   if (Array.isArray(errs)) {
     errs.forEach((error) => notifyError(error));
   } else {

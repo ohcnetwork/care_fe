@@ -736,7 +736,7 @@ export default function ManageResponseTemplatesSheet({
         templateDetails.template_data?.activity_definition ?? [],
       );
     }
-  }, [templateDetails, editingTemplate, viewMode]);
+  }, [templateDetails, editingTemplate, viewMode, form]);
 
   const handleResetForm = () => {
     form.reset();

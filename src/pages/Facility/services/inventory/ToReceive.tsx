@@ -138,6 +138,11 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
   );
 }
 
+const OUTGOING_ORDERS_STATUSES = [
+  { value: "draft,pending", label: "requested" },
+  { value: "completed,abandoned,entered_in_error", label: "completed" },
+] as const;
+
 function OutgoingOrdersTab({
   facilityId,
   locationId,
@@ -155,10 +160,7 @@ function OutgoingOrdersTab({
     disableCache: true,
   });
 
-  const EFFECTIVE_STATUSES = [
-    { value: "draft,pending", label: "requested" },
-    { value: "completed,abandoned,entered_in_error", label: "completed" },
-  ];
+  const EFFECTIVE_STATUSES = OUTGOING_ORDERS_STATUSES;
 
   const filterConfigs = useMemo(
     () => [
@@ -212,7 +214,7 @@ function OutgoingOrdersTab({
     if (!qParams.status) {
       updateQuery({ status: EFFECTIVE_STATUSES[0].value });
     }
-  }, [qParams.status]);
+  }, [qParams.status, EFFECTIVE_STATUSES, updateQuery]);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["requestOrders", locationId, internal, qParams],
@@ -281,6 +283,11 @@ function OutgoingOrdersTab({
   );
 }
 
+const INCOMING_DELIVERIES_STATUSES = [
+  { value: "pending", label: "in_transit" },
+  { value: "completed", label: "completed" },
+] as const;
+
 function IncomingDeliveriesTab({
   facilityId,
   locationId,
@@ -298,10 +305,7 @@ function IncomingDeliveriesTab({
     disableCache: true,
   });
 
-  const EFFECTIVE_STATUSES = [
-    { value: "pending", label: "in_transit" },
-    { value: "completed", label: "completed" },
-  ];
+  const EFFECTIVE_STATUSES = INCOMING_DELIVERIES_STATUSES;
 
   const filterConfigs = useMemo(
     () => [dateFilter("date", t("date"), longDateRangeOptions)],
@@ -356,7 +360,7 @@ function IncomingDeliveriesTab({
     if (!qParams.status) {
       updateQuery({ status: EFFECTIVE_STATUSES[0].value });
     }
-  }, [qParams.status]);
+  }, [qParams.status, EFFECTIVE_STATUSES, updateQuery]);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["deliveryOrders", locationId, internal, qParams],

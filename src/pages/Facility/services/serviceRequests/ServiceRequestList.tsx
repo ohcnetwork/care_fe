@@ -227,7 +227,7 @@ export default function ServiceRequestList({
       ),
       dateFilter("created_date", t("date"), longDateRangeOptions),
     ],
-    [],
+    [t],
   );
 
   // Handle filter updates

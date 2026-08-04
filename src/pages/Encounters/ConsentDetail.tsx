@@ -91,9 +91,12 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
     }
   }, [fileUpload.files, fileUpload.previewing]);
 
+  const clearFilesRef = useRef(fileUpload.clearFiles);
+  clearFilesRef.current = fileUpload.clearFiles;
+
   useEffect(() => {
     if (!openUploadDialog) {
-      fileUpload.clearFiles();
+      clearFilesRef.current();
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }

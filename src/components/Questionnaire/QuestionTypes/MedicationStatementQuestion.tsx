@@ -187,7 +187,11 @@ export function MedicationStatementQuestion({
         questionnaireResponse.question_id,
       );
     }
-  }, [patientMedications]);
+  }, [
+    patientMedications,
+    questionnaireResponse.question_id,
+    updateQuestionnaireResponseCB,
+  ]);
 
   const handleAddMedication = (medication: Code) => {
     const newMedication = {

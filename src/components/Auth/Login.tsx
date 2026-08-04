@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -88,14 +88,19 @@ const Login = (props: LoginProps) => {
     resendOtpTimeout,
     disablePatientLogin,
   } = careConfig;
-  const initForm: any = {
+  const initForm: {
+    username: string;
+    password: string;
+    "g-recaptcha-response"?: string;
+    [key: string]: string | undefined;
+  } = {
     username: "",
     password: "",
   };
   const { forgot } = props;
   const [params, setQueryParams] = useQueryParams();
   const { mode } = params;
-  const initErr: any = {};
+  const initErr: Record<string, string | null> = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
@@ -134,10 +139,10 @@ const Login = (props: LoginProps) => {
       setOtpError("");
       toast.success(t("send_otp_success"));
     },
-    onError: (error: any) => {
+    onError: (error: Error & { data?: OtpError[] }) => {
       const errors = error?.data || [];
       if (Array.isArray(errors) && errors.length > 0) {
-        const firstError = errors[0] as OtpError;
+        const firstError = errors[0];
         setOtpError(firstError.msg);
       } else {
         setOtpError("send_otp_error");
@@ -166,7 +171,7 @@ const Login = (props: LoginProps) => {
         patientLogin(tokenData, `/patient/home`);
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error & { cause?: { errors?: OtpValidationError[] } }) => {
       let errorMessage = "invalid_otp";
       if (
         error.cause &&
@@ -197,7 +202,7 @@ const Login = (props: LoginProps) => {
     });
 
   // Login form validation
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
     const fieldValue = Object.assign({}, form);
     const errorField = Object.assign({}, errors);
@@ -286,7 +291,7 @@ const Login = (props: LoginProps) => {
     submitForgetPassword(valid);
   };
 
-  const onCaptchaChange = (value: any) => {
+  const onCaptchaChange = (value: string | null) => {
     if (value && isCaptchaEnabled) {
       const formCaptcha = { ...form };
       formCaptcha["g-recaptcha-response"] = value;

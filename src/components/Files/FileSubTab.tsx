@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { t } from "i18next";
 import { SearchIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -148,9 +148,12 @@ export const FilesPage = ({
     }
   }, [fileUpload.files, fileUpload.previewing]);
 
+  const clearFilesRef = useRef(fileUpload.clearFiles);
+  clearFilesRef.current = fileUpload.clearFiles;
+
   useEffect(() => {
     if (!openUploadDialog) {
-      fileUpload.clearFiles();
+      clearFilesRef.current();
     }
   }, [openUploadDialog]);
 

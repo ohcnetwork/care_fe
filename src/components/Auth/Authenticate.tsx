@@ -87,10 +87,10 @@ export const Authenticate = () => {
         code: values.code,
         temp_token,
       });
-    } catch (_err: any) {
-      // Handle specific API error messages
-      if (_err?.response?.data?.detail) {
-        setError(_err.response.data.detail);
+    } catch (_err: unknown) {
+      const err = _err as { response?: { data?: { detail?: string } } };
+      if (err?.response?.data?.detail) {
+        setError(err.response.data.detail);
       }
     }
   });

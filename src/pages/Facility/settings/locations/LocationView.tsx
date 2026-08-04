@@ -117,7 +117,7 @@ export default function LocationView({
     }
   };
 
-  const generateBreadcrumbs = (locationData: any) => {
+  const generateBreadcrumbs = (locationData: LocationRead) => {
     const breadcrumbs = [];
     let current = locationData;
 

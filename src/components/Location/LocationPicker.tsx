@@ -115,7 +115,7 @@ export function LocationPicker({
       setBreadcrumbs([]);
       setCurrentParent(undefined);
     }
-  }, [open]);
+  }, [open, value?.parent]);
 
   const handleLocationSelect = (location: LocationRead) => {
     if (location.has_children) {

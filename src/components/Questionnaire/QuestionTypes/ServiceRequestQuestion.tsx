@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, MoreVerticalIcon, Pencil } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -42,14 +42,17 @@ import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { getBasePrice } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
-  ServiceRequestApplyActivityDefinitionSpec as BaseServiceRequestApplyActivityDefinitionSpec,
   Intent,
   Priority,
+  ServiceRequestApplyActivityDefinitionForm,
   ServiceRequestReadSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
+import {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import {
   ActivityDefinitionTemplateSpec,
@@ -84,25 +87,15 @@ export function buildServiceRequestForTemplate(
   };
 }
 
-// Extend the base type to use UserReadMinimal for requester
-interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
-  BaseServiceRequestApplyActivityDefinitionSpec,
-  "service_request"
-> {
-  service_request: Omit<
-    BaseServiceRequestApplyActivityDefinitionSpec["service_request"],
-    "requester"
-  > & {
-    requester: UserReadMinimal;
-  };
-}
+type ServiceRequestApplyActivityDefinitionSpec =
+  ServiceRequestApplyActivityDefinitionForm;
 
 interface ServiceRequestQuestionProps {
   encounterId: string;
   facilityId: string;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (
-    values: any[],
+    values: ResponseValue[],
     questionId: string,
     note?: string,
   ) => void;
@@ -422,6 +415,9 @@ export function ServiceRequestQuestion({
     (questionnaireResponse.values?.[0]
       ?.value as unknown as ServiceRequestApplyActivityDefinitionSpec[]) || [],
   );
+  const serviceRequestsRef = useRef(serviceRequests);
+  serviceRequestsRef.current = serviceRequests;
+
   const [activityDefinitionsMap, setActivityDefinitionsMap] = useState<
     Record<string, ActivityDefinitionReadSpec>
   >({});
@@ -593,7 +589,12 @@ export function ServiceRequestQuestion({
 
     setServiceRequests(newServiceRequests);
     updateQuestionnaireResponseCB(
-      [{ type: "service_request", value: newServiceRequests }],
+      [
+        {
+          type: "service_request",
+          value: newServiceRequests,
+        },
+      ],
       questionnaireResponse.question_id,
     );
   };
@@ -609,7 +610,12 @@ export function ServiceRequestQuestion({
 
     setServiceRequests(newServiceRequests);
     updateQuestionnaireResponseCB(
-      [{ type: "service_request", value: newServiceRequests }],
+      [
+        {
+          type: "service_request",
+          value: newServiceRequests,
+        },
+      ],
       questionnaireResponse.question_id,
     );
   };
@@ -653,12 +659,13 @@ export function ServiceRequestQuestion({
         encounter: encounterId,
       };
 
-      setServiceRequests([...serviceRequests, newServiceRequest]);
+      const updated = [...serviceRequestsRef.current, newServiceRequest];
+      setServiceRequests(updated);
       updateQuestionnaireResponseCB(
         [
           {
             type: "service_request",
-            value: [...serviceRequests, newServiceRequest],
+            value: updated,
           },
         ],
         questionnaireResponse.question_id,
@@ -674,6 +681,8 @@ export function ServiceRequestQuestion({
     selectedActivityDefinitionData,
     encounterId,
     currentUser,
+    updateQuestionnaireResponseCB,
+    questionnaireResponse.question_id,
   ]);
 
   const handleRemoveServiceRequest = (index: number) => {
@@ -682,7 +691,12 @@ export function ServiceRequestQuestion({
     );
     setServiceRequests(newServiceRequests);
     updateQuestionnaireResponseCB(
-      [{ type: "service_request", value: newServiceRequests }],
+      [
+        {
+          type: "service_request",
+          value: newServiceRequests,
+        },
+      ],
       questionnaireResponse.question_id,
     );
   };
@@ -710,7 +724,12 @@ export function ServiceRequestQuestion({
     setServiceRequests(newServiceRequests);
 
     updateQuestionnaireResponseCB(
-      [{ type: "service_request", value: newServiceRequests }],
+      [
+        {
+          type: "service_request",
+          value: newServiceRequests,
+        },
+      ],
       questionnaireResponse.question_id,
     );
   };
@@ -787,10 +806,19 @@ export function ServiceRequestQuestion({
         encounter: encounterId,
       };
 
-      const newServiceRequests = [...serviceRequests, newServiceRequest];
+      const newServiceRequests = [
+        ...serviceRequestsRef.current,
+        newServiceRequest,
+      ];
+      serviceRequestsRef.current = newServiceRequests;
       setServiceRequests(newServiceRequests);
       updateQuestionnaireResponseCB(
-        [{ type: "service_request", value: newServiceRequests }],
+        [
+          {
+            type: "service_request",
+            value: newServiceRequests,
+          },
+        ],
         questionnaireResponse.question_id,
       );
     } catch {
@@ -884,10 +912,19 @@ export function ServiceRequestQuestion({
         throw new Error("Failed to apply template - no valid service requests");
       }
 
-      const newServiceRequests = [...serviceRequests, ...validServiceRequests];
+      const newServiceRequests = [
+        ...serviceRequestsRef.current,
+        ...validServiceRequests,
+      ];
+      serviceRequestsRef.current = newServiceRequests;
       setServiceRequests(newServiceRequests);
       updateQuestionnaireResponseCB(
-        [{ type: "service_request", value: newServiceRequests }],
+        [
+          {
+            type: "service_request",
+            value: newServiceRequests,
+          },
+        ],
         questionnaireResponse.question_id,
       );
 

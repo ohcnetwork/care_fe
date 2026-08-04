@@ -216,7 +216,7 @@ export default function SearchInput({
     if (selectedOption) {
       setSearchValue(selectedOption.value);
     }
-  }, [selectedOption?.value]);
+  }, [selectedOption]);
 
   const unselectedOptions = safeOptions.filter(
     (option) => option.key !== selectedOption?.key,

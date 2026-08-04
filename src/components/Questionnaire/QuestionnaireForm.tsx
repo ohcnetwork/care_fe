@@ -69,7 +69,7 @@ export interface QuestionnaireFormState {
 interface FormBatchRequest {
   url: string;
   method: string;
-  body: Record<string, any>;
+  body: Record<string, unknown> | object;
   reference_id: string;
 }
 
@@ -766,8 +766,12 @@ export function QuestionnaireForm({
               (Array.isArray(v.value) ? v.value.length > 0 : true),
           );
 
-          const hasProperty = (arr: any[] | undefined, prop: string) =>
-            Array.isArray(arr) && arr.some((item) => item?.[prop] != null);
+          const hasProperty = (
+            arr: ResponseValue[] | undefined,
+            prop: string,
+          ) =>
+            Array.isArray(arr) &&
+            arr.some((item) => item?.[prop as keyof ResponseValue] != null);
 
           const hasCoding = hasProperty(response?.values, "coding");
           const hasUnit = hasProperty(response?.values, "unit");

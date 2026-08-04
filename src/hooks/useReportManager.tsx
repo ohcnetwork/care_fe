@@ -91,15 +91,18 @@ export default function useReportManager({
     enabled: enabled && !!associatingId,
   });
 
-  const retrieveReport = async (reportId: string) => {
-    return queryClient.fetchQuery({
-      queryKey: ["report", reportId],
-      queryFn: () =>
-        query(reportApi.retrieveReport, {
-          pathParams: { id: reportId },
-        })({} as any),
-    });
-  };
+  const retrieveReport = useCallback(
+    async (reportId: string) => {
+      return queryClient.fetchQuery({
+        queryKey: ["report", reportId],
+        queryFn: ({ signal }) =>
+          query(reportApi.retrieveReport, {
+            pathParams: { id: reportId },
+          })({ signal }),
+      });
+    },
+    [queryClient],
+  );
 
   // Get file extension from URL
   const getExtension = (url: string) => {
@@ -135,7 +138,7 @@ export default function useReportManager({
       setDownloadURL(signedUrl);
       setFileUrl(signedUrl);
     },
-    [reportsData?.results],
+    [reportsData?.results, retrieveReport],
   );
 
   // Download file handler

@@ -426,8 +426,8 @@ export function NoteManager({
     if (threadsData?.results.length) {
       if (!selectedThread) setSelectedThread(threadsData.results[0].id);
       const threadTitles = threadsData.results.map((thread) => thread.title);
-      setThreads(
-        threads.filter((template) => !threadTitles.includes(template)),
+      setThreads((prev) =>
+        prev.filter((template) => !threadTitles.includes(template)),
       );
     }
   }, [threadsData, selectedThread]);
@@ -479,7 +479,7 @@ export function NoteManager({
   const recentMessage = useMemo(() => {
     if (commentAdded) return messagesData?.pages[0]?.results[0];
     return messagesData?.pages[messagesData.pages.length - 1]?.results[0];
-  }, [messagesData]);
+  }, [messagesData, commentAdded]);
 
   if (threadsLoading) {
     return <Loading />;

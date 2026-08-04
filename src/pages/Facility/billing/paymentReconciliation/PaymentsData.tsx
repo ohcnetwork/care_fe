@@ -95,7 +95,7 @@ export default function PaymentsData({
 
   useEffect(() => {
     updateQuery({ ordering: "-payment_datetime" });
-  }, []);
+  }, [updateQuery]);
 
   // Resolve created_by_username from URL to user object
   const { data: selectedUser } = useQuery({
@@ -111,13 +111,13 @@ export default function PaymentsData({
       setCreatedBy(selectedUser);
       updateQuery({ created_by: selectedUser.id });
     }
-  }, [selectedUser]);
+  }, [selectedUser, qParams.created_by_username, updateQuery]);
 
   useEffect(() => {
     if (createdBy && !qParams.created_by) {
       setCreatedBy(undefined);
     }
-  }, [qParams.created_by]);
+  }, [qParams.created_by, createdBy]);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["payments", accountId, qParams],

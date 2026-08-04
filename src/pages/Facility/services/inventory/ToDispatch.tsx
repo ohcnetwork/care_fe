@@ -113,6 +113,11 @@ export function ToDispatch({ facilityId, locationId, internal, tab }: Props) {
   );
 }
 
+const INCOMING_ORDERS_STATUSES = [
+  { value: "pending", label: "pending" },
+  { value: "completed", label: "completed" },
+] as const;
+
 function IncomingOrdersTab({
   facilityId,
   locationId,
@@ -130,10 +135,7 @@ function IncomingOrdersTab({
     disableCache: true,
   });
 
-  const EFFECTIVE_STATUSES = [
-    { value: "pending", label: "pending" },
-    { value: "completed", label: "completed" },
-  ];
+  const EFFECTIVE_STATUSES = INCOMING_ORDERS_STATUSES;
 
   const filterConfigs = useMemo(
     () => [
@@ -187,7 +189,7 @@ function IncomingOrdersTab({
     if (!qParams.status) {
       updateQuery({ status: EFFECTIVE_STATUSES[0].value });
     }
-  }, [qParams.status]);
+  }, [qParams.status, EFFECTIVE_STATUSES, updateQuery]);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["requestOrders", locationId, internal, qParams],
@@ -256,6 +258,11 @@ function IncomingOrdersTab({
   );
 }
 
+const OUTGOING_DELIVERIES_STATUSES = [
+  { value: "draft,pending", label: "created" },
+  { value: "completed,abandoned,entered_in_error", label: "completed" },
+] as const;
+
 function OutgoingDeliveriesTab({
   facilityId,
   locationId,
@@ -273,10 +280,7 @@ function OutgoingDeliveriesTab({
     disableCache: true,
   });
 
-  const EFFECTIVE_STATUSES = [
-    { value: "draft,pending", label: "created" },
-    { value: "completed,abandoned,entered_in_error", label: "completed" },
-  ];
+  const EFFECTIVE_STATUSES = OUTGOING_DELIVERIES_STATUSES;
 
   const filterConfigs = useMemo(
     () => [dateFilter("date", t("date"), longDateRangeOptions)],
@@ -331,7 +335,7 @@ function OutgoingDeliveriesTab({
     if (!qParams.status) {
       updateQuery({ status: EFFECTIVE_STATUSES[0].value });
     }
-  }, [qParams.status]);
+  }, [qParams.status, EFFECTIVE_STATUSES, updateQuery]);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["deliveryOrders", locationId, internal, qParams],

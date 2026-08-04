@@ -244,11 +244,14 @@ export default function ConsentFormSheet({
         fileEntries: [],
       });
     }
-  }, [existingConsent]);
+  }, [existingConsent, form, isEdit]);
+
+  const clearFilesRef = useRef(fileUpload.clearFiles);
+  clearFilesRef.current = fileUpload.clearFiles;
 
   useEffect(() => {
     if (!isOpen) {
-      fileUpload.clearFiles();
+      clearFilesRef.current();
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }

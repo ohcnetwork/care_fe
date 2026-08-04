@@ -1,4 +1,4 @@
-import { memo, useEffect } from "react";
+import { memo, useCallback, useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -119,23 +119,27 @@ export const QuestionGroup = memo(function QuestionGroup({
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
-  const clearDependentQuestionResponse = (dependentQuestion: Question) => {
-    const dependentQuestionResponse = questionnaireResponses.find(
-      (v) => v.question_id === dependentQuestion.id,
-    );
-    if (dependentQuestionResponse) {
-      updateQuestionnaireResponseCB([], dependentQuestion.id);
-    }
-    dependentQuestion.questions?.forEach((q) => {
-      clearDependentQuestionResponse(q);
-    });
-  };
+  const clearDependentQuestionResponse = useCallback(
+    (dependentQuestion: Question) => {
+      const clear = (q: Question) => {
+        const qResponse = questionnaireResponses.find(
+          (v) => v.question_id === q.id,
+        );
+        if (qResponse) {
+          updateQuestionnaireResponseCB([], q.id);
+        }
+        q.questions?.forEach(clear);
+      };
+      clear(dependentQuestion);
+    },
+    [questionnaireResponses, updateQuestionnaireResponseCB],
+  );
 
   useEffect(() => {
     if (!isEnabled) {
       clearDependentQuestionResponse(question);
     }
-  }, [isEnabled]);
+  }, [isEnabled, clearDependentQuestionResponse, question]);
 
   if (!isEnabled) {
     return null;

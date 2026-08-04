@@ -10,6 +10,7 @@ import { BadgeInfo } from "lucide-react";
 export interface DisplayField<T> {
   key: keyof T | string;
   label: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   render?: (value: any) => React.ReactNode;
 }
 
@@ -36,7 +37,7 @@ export function RecordItem<T>({
     onToggleSelect(record);
   };
 
-  const recordId = (record as any).id as string;
+  const recordId = (record as { id: string }).id;
   const isExpanded = expandedRecordId === recordId;
   const user = useAuthUser();
 
@@ -69,7 +70,8 @@ export function RecordItem<T>({
               : field.render(value)
             : value?.toString() || "-";
           const isHighlightedUser =
-            field.key === "created_by" && (value as any)?.id === user?.id;
+            field.key === "created_by" &&
+            (value as { id?: string })?.id === user?.id;
 
           return (
             <TableCell

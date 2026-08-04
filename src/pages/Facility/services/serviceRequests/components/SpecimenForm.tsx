@@ -37,6 +37,7 @@ import {
 } from "@/types/emr/specimen/specimen";
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import {
+  type QuantitySpec,
   SPECIMEN_DEFINITION_UNITS_CODES,
   type SpecimenDefinitionRead,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
@@ -134,7 +135,10 @@ export function SpecimenForm({
     setIsScanDialogOpen(false);
   };
 
-  const handleCollectionChange = (field: keyof CollectionSpec, value: any) => {
+  const handleCollectionChange = (
+    field: keyof CollectionSpec,
+    value: CollectionSpec[keyof CollectionSpec],
+  ) => {
     setSpecimenData((prev) => ({
       ...prev,
       specimen: {
@@ -149,10 +153,11 @@ export function SpecimenForm({
     }));
 
     if (field === "quantity") {
+      const quantityValue = value as QuantitySpec | null;
       setErrors((prev) => {
         const newErrors = { ...prev };
-        if (value?.value) delete newErrors.quantityValue;
-        if (value?.unit) delete newErrors.quantityUnit;
+        if (quantityValue?.value) delete newErrors.quantityValue;
+        if (quantityValue?.unit) delete newErrors.quantityUnit;
         return newErrors;
       });
     }
@@ -160,7 +165,7 @@ export function SpecimenForm({
 
   const handleSpecimenChange = (
     field: keyof SpecimenFromDefinitionCreate["specimen"],
-    value: any,
+    value: SpecimenFromDefinitionCreate["specimen"][keyof SpecimenFromDefinitionCreate["specimen"]],
   ) => {
     setSpecimenData((prev) => ({
       ...prev,
@@ -384,12 +389,8 @@ export function SpecimenForm({
                       onChange={(e) =>
                         handleCollectionChange("quantity", {
                           ...(specimenData.specimen.collection?.quantity ?? {}),
-                          value: e.target.value
-                            ? parseFloat(e.target.value)
-                            : null,
-                          unit: specimenData.specimen.collection?.quantity
-                            ?.unit,
-                        })
+                          value: e.target.value,
+                        } as QuantitySpec)
                       }
                       step="any"
                       disabled={disableEdit}
@@ -415,7 +416,7 @@ export function SpecimenForm({
                           handleCollectionChange("quantity", {
                             value:
                               specimenData.specimen.collection?.quantity
-                                ?.value ?? null,
+                                ?.value ?? "",
                             unit: selectedUnit,
                           });
                         }
@@ -492,7 +493,7 @@ export function SpecimenForm({
                     handleCollectionChange("fasting_status_duration", {
                       ...(specimenData.specimen.collection
                         ?.fasting_status_duration ?? {}),
-                      value: e.target.value ? parseFloat(e.target.value) : null,
+                      value: e.target.value,
                       unit: specimenData.specimen.collection
                         ?.fasting_status_duration?.unit ?? {
                         code: "h",

@@ -49,7 +49,7 @@ export function useFieldError(
 }
 
 export function validateFields(
-  value: any,
+  value: Record<string, unknown> | undefined | null,
   questionId: string,
   fields: FieldDefinitions,
   index?: number,

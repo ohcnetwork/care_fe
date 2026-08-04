@@ -1,5 +1,5 @@
 import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -75,7 +75,30 @@ export default function useFilters({
   };
   const removeFilter = (param: string) => removeFilters([param]);
 
+  const initRef = useRef({
+    defaultQueryParams,
+    disableCache,
+    qParams,
+    setQueryParams,
+    updateCache,
+  });
+  initRef.current = {
+    defaultQueryParams,
+    disableCache,
+    qParams,
+    setQueryParams,
+    updateCache,
+  };
+
   useEffect(() => {
+    const {
+      defaultQueryParams,
+      disableCache,
+      qParams,
+      setQueryParams,
+      updateCache,
+    } = initRef.current;
+
     const defaults = Object.fromEntries(
       Object.entries(defaultQueryParams).filter(
         ([key]) => qParams[key] === undefined,

@@ -211,11 +211,16 @@ export function MultiSelect({
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
 
+  const selectedValuesRef = React.useRef(selectedValues);
+  selectedValuesRef.current = selectedValues;
+  const onValueChangeRef = React.useRef(onValueChange);
+  onValueChangeRef.current = onValueChange;
+
   React.useEffect(() => {
     setSelectedValues(value);
   }, [value, open]);
   React.useEffect(() => {
-    if (open == false) onValueChange(selectedValues);
+    if (open == false) onValueChangeRef.current(selectedValuesRef.current);
   }, [open]);
 
   const { t } = useTranslation();

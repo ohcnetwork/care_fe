@@ -6,8 +6,18 @@ import { toast } from "sonner";
 import query from "@/Utils/request/query";
 import specimenApi from "@/types/emr/specimen/specimenApi";
 
+import { SpecimenRead } from "@/types/emr/specimen/specimen";
+
 import GenericQRScanDialog from "./GenericQRScanDialog";
 import { SpecimenIDScanSuccessDialog } from "./SpecimenIDScanSuccessDialog";
+
+interface SpecimenScanResult extends SpecimenRead {
+  external_id?: string;
+  service_request?: {
+    id: string;
+    title?: string;
+  };
+}
 
 interface QRScanDialogProps {
   open: boolean;
@@ -27,7 +37,9 @@ function QRScanDialog({
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [specimenData, setSpecimenData] = useState<any>(null);
+  const [specimenData, setSpecimenData] = useState<SpecimenScanResult | null>(
+    null,
+  );
   const [lastScannedId, setLastScannedId] = useState("");
 
   async function handleScanSuccess(scannedId: string) {

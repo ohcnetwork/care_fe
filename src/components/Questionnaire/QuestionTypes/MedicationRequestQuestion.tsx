@@ -404,7 +404,13 @@ export function MedicationRequestQuestion({
         questionnaireResponse.question_id,
       );
     }
-  }, [patientMedications, prescriptionId]);
+  }, [
+    patientMedications,
+    prescriptionId,
+    currentUser,
+    questionnaireResponse.question_id,
+    updateQuestionnaireResponseCB,
+  ]);
 
   const [expandedMedicationIndex, setExpandedMedicationIndex] = useState<
     number | null

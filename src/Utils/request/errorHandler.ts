@@ -58,7 +58,9 @@ export function handleHttpError(error: Error) {
       return;
     }
 
-    Notifications.BadRequest({ errs });
+    Notifications.handleBadRequestErrors(
+      errs as Parameters<typeof Notifications.handleBadRequestErrors>[0],
+    );
     return;
   }
 
@@ -107,11 +109,10 @@ function isStructuredError(err: HTTPError["cause"]): err is StructuredError {
 function handleStructuredErrors(cause: StructuredError) {
   for (const value of Object.values(cause)) {
     if (Array.isArray(value)) {
-      value.forEach((err: any) => {
+      value.forEach((err: string | Record<string, string>) => {
         if (typeof err === "string") {
           toast.error(err);
         } else if (err && typeof err === "object") {
-          // Handle object errors - extract meaningful error messages
           const errorFields = ["detail", "msg", "error", "message"] as const;
           const errorMessage = errorFields.find(
             (field) => err[field] && typeof err[field] === "string",

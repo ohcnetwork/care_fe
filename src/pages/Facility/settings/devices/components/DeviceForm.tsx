@@ -183,7 +183,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
         setCareType(pluginDevice.type);
       }
     }
-  }, [device, form, qParams.type]);
+  }, [device, form, qParams.type, pluginDevices]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const metadata = values.metadata;

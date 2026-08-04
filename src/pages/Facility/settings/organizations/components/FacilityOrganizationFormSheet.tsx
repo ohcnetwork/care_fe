@@ -104,7 +104,7 @@ export default function FacilityOrganizationFormSheet({
         org_type: org.org_type,
       });
     }
-  }, [isEditMode, org, open]);
+  }, [isEditMode, org, open, form]);
 
   const { mutate: createOrganization, isPending: isCreating } = useMutation({
     mutationFn: mutate(facilityOrganizationApi.create, {

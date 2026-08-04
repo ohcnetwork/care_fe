@@ -9,7 +9,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -68,6 +68,7 @@ import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenD
 import {
   BACKEND_ALLOWED_EXTENSIONS,
   FileReadMinimal,
+  FileType,
 } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 
@@ -190,7 +191,7 @@ export function DiagnosticReportForm({
           queryKey: ["diagnosticReport"],
         });
       },
-      onError: (err: any) => {
+      onError: (err: Error) => {
         toast.error(
           `Failed to create diagnostic report: ${err.message || "Unknown error"}`,
         );
@@ -233,7 +234,7 @@ export function DiagnosticReportForm({
           queryKey: ["diagnosticReport", latestReport?.id],
         });
       },
-      onError: (err: any) => {
+      onError: (err: Error) => {
         toast.error(
           `Failed to save test results: ${err.message || "Unknown error"}`,
         );
@@ -262,7 +263,7 @@ export function DiagnosticReportForm({
 
   // Initialize file upload hook
   const fileUpload = useFileUpload({
-    type: "diagnostic_report" as any,
+    type: FileType.DIAGNOSTIC_REPORT,
     multiple: true,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
@@ -283,9 +284,12 @@ export function DiagnosticReportForm({
     }
   }, [fileUpload.files, fileUpload.previewing, disableEdit]);
 
+  const clearFilesRef = useRef(fileUpload.clearFiles);
+  clearFilesRef.current = fileUpload.clearFiles;
+
   useEffect(() => {
     if (!openUploadDialog) {
-      fileUpload.clearFiles();
+      clearFilesRef.current();
     }
   }, [openUploadDialog]);
 

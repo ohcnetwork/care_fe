@@ -13,7 +13,7 @@ export default function useMultiFilterState(
   );
 
   // Extract initial values from query params
-  const getInitialValues = (): {
+  const getInitialValues = useCallback((): {
     filterValues: Record<string, FilterValues>;
     operationValues: Record<string, string>;
   } => {
@@ -46,7 +46,7 @@ export default function useMultiFilterState(
     });
 
     return { filterValues, operationValues };
-  };
+  }, [queryParams, filters]);
 
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, FilterState>
@@ -117,7 +117,7 @@ export default function useMultiFilterState(
         return newState;
       });
     }
-  }, [queryParams, filters]);
+  }, [queryParams, filters, getInitialValues]);
 
   const handleFilterChange = useCallback(
     (filterKey: string, values: FilterValues) => {

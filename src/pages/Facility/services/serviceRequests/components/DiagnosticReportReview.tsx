@@ -118,7 +118,7 @@ export function DiagnosticReportReview({
           queryKey: ["files"],
         });
       },
-      onError: (err: any) => {
+      onError: (err: Error) => {
         toast.error(
           `Failed to approve diagnostic report: ${err.message || "Unknown error"}`,
         );

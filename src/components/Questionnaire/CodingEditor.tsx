@@ -36,7 +36,7 @@ import mutate from "@/Utils/request/mutate";
 interface CodingEditorProps {
   code?: Code;
   name: string;
-  form: ReturnType<typeof useForm<any>>;
+  form: ReturnType<typeof useForm<Record<string, unknown>>>;
   onChange: (code: Code | undefined) => void;
 }
 

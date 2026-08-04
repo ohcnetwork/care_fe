@@ -251,7 +251,7 @@ export const getDefaultCondition = (metrics: Metrics[]) => {
   const newCondition = {
     metric: metricName,
     operation: firstOperation,
-    value: value as any,
+    value: value as ConditionForm["value"],
     _conditionType: `${metricName}_${firstOperation}`,
   };
   return newCondition as ConditionForm;

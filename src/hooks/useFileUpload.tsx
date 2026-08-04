@@ -4,7 +4,9 @@ import jsPDF from "jspdf";
 import {
   ChangeEvent,
   DetailedHTMLProps,
+  Dispatch,
   InputHTMLAttributes,
+  SetStateAction,
   useEffect,
   useState,
 } from "react";
@@ -123,7 +125,7 @@ export default function useFileUpload(
       return null;
     }
   };
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
     if (!e.target.files?.length) {
       return;
     }
@@ -231,7 +233,7 @@ export default function useFileUpload(
             reject();
           }
         },
-        setProgress as any,
+        setProgress as Dispatch<SetStateAction<number>>,
         () => {
           toast.error(t("file_error__network"));
           setProgress(null);

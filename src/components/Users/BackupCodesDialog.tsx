@@ -53,8 +53,7 @@ export function BackupCodesDialog({
     if (backupCodes.length > 0) {
       const printWindow = window.open("", "", "height=600,width=800");
       if (printWindow) {
-        printWindow.document.write(`
-          <html>
+        printWindow.document.documentElement.innerHTML = `
             <head>
               <title>${t("2FA_backup_code")}</title>
               <style>
@@ -67,8 +66,7 @@ export function BackupCodesDialog({
               <p>${t("keep_code_safe")}</p>
               ${backupCodes.map((code) => `<div class="code">${code}</div>`).join("")}
             </body>
-          </html>
-        `);
+        `;
         printWindow.document.close();
         printWindow.focus();
         printWindow.print();

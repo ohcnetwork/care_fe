@@ -1,5 +1,5 @@
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -43,7 +43,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     },
   });
 
-  const handleStartRecording = async () => {
+  const handleStartRecording = useCallback(async () => {
     if (status === "RECORDING") return;
 
     try {
@@ -57,7 +57,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
       toast.error(t("audio__permission_message"));
       setStatus("PERMISSION_DENIED");
     }
-  };
+  }, [status, startStream, startRecording, timer, t]);
 
   const handleStopRecording = () => {
     if (status !== "RECORDING") return;
@@ -110,7 +110,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     if (autoRecord && show && status === "RECORDING") {
       handleStartRecording();
     }
-  }, [autoRecord, show, status]);
+  }, [autoRecord, show, status, handleStartRecording]);
 
   return (
     <div

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -84,7 +84,13 @@ export function validateEncounterQuestion(
     ["imp", "obsenc", "emer"].includes(value.encounter_class) &&
     !value?.hospitalization?.discharge_disposition
   ) {
-    errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
+    errors.push(
+      ...validateFields(
+        value as unknown as Record<string, unknown>,
+        questionId,
+        ENCOUNTER_FIELDS,
+      ),
+    );
   }
 
   return errors;
@@ -134,6 +140,17 @@ export function EncounterQuestion({
     discharge_summary_advice: null,
   });
 
+  const handleUpdateEncounterRef = useRef<
+    (updates: Partial<EncounterEdit>) => void
+  >(() => {});
+
+  const handleUpdateEncounter = useCallback(
+    (updates: Partial<EncounterEdit>) => {
+      handleUpdateEncounterRef.current(updates);
+    },
+    [],
+  );
+
   useEffect(() => {
     if (
       encounter.status === EncounterStatus.DISCHARGED ||
@@ -158,7 +175,7 @@ export function EncounterQuestion({
         },
       });
     }
-  }, [encounter.status]);
+  }, [encounter.status, encounter.period, handleUpdateEncounter]);
 
   // Transform EncounterRead to EncounterEdit format
   const transformEncounterForUpdate = (
@@ -184,7 +201,7 @@ export function EncounterQuestion({
       }
       handleUpdateEncounter(updates);
     }
-  }, [encounterData]);
+  }, [encounterData, handleUpdateEncounter, toDischarge]);
 
   useEffect(() => {
     const formStateValue = (
@@ -197,7 +214,7 @@ export function EncounterQuestion({
     }
   }, [questionnaireResponse]);
 
-  const handleUpdateEncounter = (updates: Partial<EncounterEdit>) => {
+  handleUpdateEncounterRef.current = (updates: Partial<EncounterEdit>) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
     if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
