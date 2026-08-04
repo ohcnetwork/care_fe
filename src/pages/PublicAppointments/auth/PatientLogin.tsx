@@ -244,8 +244,6 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
           placeholder={t("enter_phone_number")}
           disabled={isSendingOtp}
           autoFocus
-          autoComplete="tel"
-          type="tel"
         />
         {phoneError ? (
           <p className="mt-1.5 text-sm text-red-600">{t(phoneError)}</p>
