@@ -82,6 +82,20 @@ export function QuestionBlock(props: QuestionBlockProps) {
 }
 
 /**
+ * Structured types whose editor renders its own field-bound errors inline
+ * via `StructuredFieldError`, and therefore should NOT have those same
+ * errors printed again in `LeafBlock`'s block-level list. Module scope —
+ * see `LeafBlock`'s `blockErrors` for why this must be an explicit,
+ * deliberately-maintained set rather than "every structured question":
+ * a type added to contract v2 does not get inline field errors until its
+ * OWN commit wires `StructuredFieldError` and adds itself here.
+ */
+const STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS = new Set<string>([
+  "appointment",
+  "time_of_death",
+]);
+
+/**
  * The non-group body — a separate component so the response and error
  * store subscriptions only exist for questions that actually record
  * answers (groups returned above without ever mounting them).
@@ -159,11 +173,22 @@ function LeafBlock({
   };
 
   // A structured question renders its own field-bound errors inline (beside
-  // the control that owns them, via StructuredFieldError); the block-level
-  // list below is only for section-level structured errors (no field_key)
-  // and every error of a non-structured question.
+  // the control that owns them, via StructuredFieldError) ONLY if its
+  // editor actually consumes the primitive — REVIEW FIX (CRITICAL): the
+  // first version of this filter fired for `question.type === "structured"`
+  // unconditionally, which silently deleted `files`' ONLY error display.
+  // `FileQuestion` (`QuestionTypes/FileUpload/FileQuestion.tsx:37`) reads
+  // `errors` and never renders them itself — the block-level list here was
+  // its sole display — and `validateFileUploadQuestion` produces field-keyed
+  // errors on the NORMAL path (every uploaded file is seeded with
+  // `name: ""`, `FileQuestion.tsx:141`, so an unnamed upload trips it).
+  // Gated explicitly (`STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS`, above) on
+  // the types whose editor renders `StructuredFieldError` itself, so this
+  // never again strips a message with nowhere else to show.
   const blockErrors =
-    question.type === "structured"
+    question.type === "structured" &&
+    question.structured_type &&
+    STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS.has(question.structured_type)
       ? errors.filter((error) => !error.field_key)
       : errors;
 
@@ -298,9 +323,14 @@ function LeafBlock({
           structured_question_validate_failed) and must stay — they are the
           hard-block messages. Non-structured questions are untouched, which
           is what keeps `fillValidation.spec.ts:33-40,47-54` green. */}
+      {/* Message resolution order matches `StructuredFieldError` and the
+          legacy `QuestionTypes/FieldError.tsx:30` exactly — `error.error`
+          first, `||` not `??` (an empty-string `error.error` must fall
+          through to `msg`, not render blank). One canonical order across
+          all three sites, not three independent ones. */}
       {blockErrors.map((error, i) => (
         <p key={i} role="alert" className="text-sm text-red-600">
-          {error.msg ?? error.error}
+          {error.error || error.msg || t("field_required")}
         </p>
       ))}
     </div>

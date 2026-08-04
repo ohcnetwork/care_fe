@@ -37,7 +37,13 @@ export function selectStructuredFieldErrors(
 ): QuestionValidationError[] {
   return errors.filter((error) => {
     if (error.question_id !== questionId) return false;
-    if (error.field_key === undefined) return false;
+    // Falsy, not `=== undefined` — aligned with `QuestionBlock.tsx`'s own
+    // "does this error have a field key" check (REVIEW FIX, minor): an
+    // error with `field_key: ""` must read as section-level to BOTH sites,
+    // or it would vanish from the block list (which keeps only fieldless
+    // errors) without ever matching here either (`""` binds no real field
+    // key), disappearing entirely instead of merely being section-level.
+    if (!error.field_key) return false;
     if (!fieldKeys.includes(error.field_key)) return false;
     if (error.row_id !== undefined) return error.row_id === rowId;
     if (error.index !== undefined)

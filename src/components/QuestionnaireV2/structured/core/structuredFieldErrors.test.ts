@@ -135,6 +135,31 @@ describe("selectStructuredFieldErrors", () => {
     );
   });
 
+  it("REVIEW FIX (minor): an empty-string field_key is treated the same as no field_key at all — never matches through this primitive, aligned with QuestionBlock.tsx's own falsy check", () => {
+    const error = err({ field_key: "" });
+    // Neither a section-level query (no rowId/rowIndex)...
+    assert.deepEqual(
+      selectStructuredFieldErrors([error], {
+        questionId: "q-1",
+        fieldKeys: ["slot_id"],
+      }),
+      [],
+    );
+    // ...nor a row-scoped one matches: `""` is not a real field key. This
+    // is what keeps the error from vanishing entirely — QuestionBlock.tsx's
+    // `!error.field_key` filter treats it identically (falsy), so it stays
+    // in the BLOCK-level list precisely because this primitive never
+    // claims it.
+    assert.deepEqual(
+      selectStructuredFieldErrors([error], {
+        questionId: "q-1",
+        rowId: "row-1",
+        fieldKeys: ["slot_id"],
+      }),
+      [],
+    );
+  });
+
   it("order is preserved (the first binding error is what renders)", () => {
     const first = err({ row_id: "row-1", error: "first" });
     const second = err({ row_id: "row-1", error: "second" });

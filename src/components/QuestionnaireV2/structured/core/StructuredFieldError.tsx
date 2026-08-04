@@ -43,10 +43,15 @@ export function StructuredFieldError({
   if (!error) return null;
   return (
     // role="alert" is REQUIRED here: QuestionBlock.tsx's block-level error
-    // list filters field-bound errors out for structured questions
-    // (avoiding the double print), so this is the only place a
-    // field-bound structured error is ever announced. Message resolution
-    // order matches the legacy `QuestionTypes/FieldError.tsx`; the colour
+    // list filters field-bound errors out for the structured types that
+    // render this primitive, so this is the only place THEIR field-bound
+    // errors are ever announced. Message resolution order — `error.error`,
+    // then `error.msg`, then the fallback, joined with `||` not `??` — is
+    // now IDENTICAL (not merely similar) to the legacy
+    // `QuestionTypes/FieldError.tsx:30` and to `QuestionBlock.tsx`'s own
+    // block-level list (REVIEW FIX, minor: the three had drifted to three
+    // different orders/operators, so an `error.error` of `""` rendered
+    // differently depending on which of the three drew it). The colour
     // normalizes to the block list's text-red-600. Only the FIRST binding
     // error renders per slot — the rest stay available through the
     // matcher for the invalid ring.
@@ -55,7 +60,7 @@ export function StructuredFieldError({
       role="alert"
       className={cn("mt-1 text-sm text-red-600", className)}
     >
-      {error.error ?? error.msg ?? t("field_required")}
+      {error.error || error.msg || t("field_required")}
     </p>
   );
 }

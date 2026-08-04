@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { useAtom } from "jotai";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ import {
 import { scheduleServiceTypeAtom } from "@/atoms/scheduleServiceTypeAtom";
 import { StructuredFieldError } from "@/components/QuestionnaireV2/structured/core/StructuredFieldError";
 import { SINGLETON_ROW_ID } from "@/components/QuestionnaireV2/structured/core/rowIds";
+import { selectStructuredFieldErrors } from "@/components/QuestionnaireV2/structured/core/structuredFieldErrors";
 import type { BaselineRow } from "@/components/QuestionnaireV2/structured/core/types";
 import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
 import type { StructuredInputProps } from "@/components/QuestionnaireV2/structured/types";
@@ -80,6 +81,22 @@ function initialResource(
   return { resource: null, resource_type: serviceType };
 }
 
+/** Field-by-field equality over `SlotPickerState` — every field is either a
+ *  primitive or an object this component only ever REPLACES wholesale
+ *  (never mutates in place), so reference equality per field is the
+ *  correct, cheap check. Used by `patch` to bail out (return the SAME
+ *  object) when a merge changes nothing; see `patch`'s doc comment for why
+ *  that bail-out is load-bearing, not an optimization. */
+function slotPickerStateEqual(a: SlotPickerState, b: SlotPickerState): boolean {
+  return (
+    a.open === b.open &&
+    a.date === b.date &&
+    a.resource === b.resource &&
+    a.stagedSlotId === b.stagedSlotId &&
+    a.slotDetail === b.slotDetail
+  );
+}
+
 export function AppointmentEditor({
   question,
   disabled,
@@ -107,8 +124,11 @@ export function AppointmentEditor({
   const [picker, setPicker] = useState<SlotPickerState>(() => ({
     open: false,
     date: new Date(),
-    // The atom is read ONCE, as an initial preference. The legacy effect
-    // that re-derived `selectedResource` whenever the atom changed
+    // The atom is read ONCE, as an initial preference (and, since
+    // `scheduleServiceTypeAtom` sets `getOnInit: true`, this first read
+    // already reflects any persisted value — no hydration race to
+    // reconcile against). The legacy effect that re-derived
+    // `selectedResource` whenever the atom changed
     // (`AppointmentQuestion.tsx:117-123`) is deleted: the atom is written
     // by another page (`BookAppointmentDetails.tsx`) and by other tabs,
     // and a half-filled questionnaire has no business resetting its own
@@ -117,13 +137,65 @@ export function AppointmentEditor({
     stagedSlotId: undefined,
     slotDetail: undefined,
   }));
-  const patch = (next: Partial<SlotPickerState>) =>
-    setPicker((current) => ({ ...current, ...next }));
+
+  /**
+   * REVIEW FIX (CRITICAL — render loop). This used to build a BRAND NEW
+   * object unconditionally (`setPicker((c) => ({...c, ...next}))`), so a
+   * no-op patch (identical content, new reference) still forced a
+   * re-render. Combined with `onSlotSelect`/`onSlotDetailsChange` being
+   * declared as inline arrows in the JSX below (a new function identity
+   * every render), that produced a genuine infinite loop the instant the
+   * slot Sheet opened: `AppointmentSlotPicker`'s own `handleSlotSelect`
+   * (`AppointmentSlotPicker.tsx:71-84`) is `useCallback`'d on
+   * `[onSlotSelect, onSlotDetailsChange, slotsQuery.data]`, and its
+   * auto-select effect (`:129-131`) re-runs whenever `handleSlotSelect`'s
+   * identity changes — which it did, every render, because the inline
+   * arrows never stopped changing identity, because `patch` never stopped
+   * handing back a "new" object. Stabilizing the two callback props alone
+   * (below) would have broken the cycle, but this bail-out is kept too: it
+   * is the right behavior for `patch` independent of that one loop (a
+   * caller re-committing identical content — e.g. the auto-select effect
+   * calling `onSlotSelect(undefined)` again when `stagedSlotId` is already
+   * `undefined` — must not force a render), and it hardens the fix against
+   * any future caller here that reintroduces an unstable callback.
+   */
+  const patch = useCallback((next: Partial<SlotPickerState>) => {
+    setPicker((current) => {
+      const merged = { ...current, ...next };
+      return slotPickerStateEqual(current, merged) ? current : merged;
+    });
+  }, []);
+
+  /** Stable identities — the other half of the render-loop fix above. An
+   *  inline arrow passed as `onSlotDetailsChange`/`onSlotSelect` would be a
+   *  fresh function every render regardless of `patch`'s own stability, so
+   *  these are memoized separately, each depending only on `patch` (itself
+   *  stable via the empty dependency array above). */
+  const handleSlotDetailsChange = useCallback(
+    (slotDetail: TokenSlot) => patch({ slotDetail }),
+    [patch],
+  );
+  const handleSlotSelect = useCallback(
+    (stagedSlotId: string | undefined) => patch({ stagedSlotId }),
+    [patch],
+  );
 
   const tagQueries = useTagConfigs({ ids: row.tags, facilityId });
   const selectedTags = tagQueries
     .map((queryResult) => queryResult.data)
     .filter(Boolean) as TagConfig[];
+
+  // Computed once and reused for the ring, `aria-describedby` AND the
+  // rendered message below — the SAME match `StructuredFieldError` makes
+  // internally, so the three can never disagree with each other. Also
+  // fixes `aria-describedby` dangling at a nonexistent id when there is no
+  // error to show (REVIEW FIX, minor).
+  const [slotError] = selectStructuredFieldErrors(errors, {
+    questionId: question.id,
+    rowId: SINGLETON_ROW_ID,
+    fieldKeys: ["slot_id"],
+  });
+  const slotErrorId = slotError ? `${question.id}--slot--error` : undefined;
 
   return (
     <div className="space-y-4">
@@ -158,11 +230,9 @@ export function AppointmentEditor({
                 "w-full justify-start",
                 // The ring stays; what is new is that the message below it
                 // exists at all.
-                !row.slot_id &&
-                  errors.some((error) => error.field_key === "slot_id") &&
-                  "ring-1 ring-red-500",
+                !row.slot_id && !!slotError && "ring-1 ring-red-500",
               )}
-              aria-describedby={`${question.id}--slot--error`}
+              aria-describedby={slotErrorId}
               disabled={disabled || !picker.resource.resource}
             >
               <SlotTriggerLabel
@@ -190,14 +260,34 @@ export function AppointmentEditor({
                 resourceType={picker.resource.resource_type}
                 selectedDate={picker.date}
                 selectedSlotId={picker.stagedSlotId}
-                onSlotDetailsChange={(slotDetail) => patch({ slotDetail })}
-                onSlotSelect={(stagedSlotId) => patch({ stagedSlotId })}
+                onSlotDetailsChange={handleSlotDetailsChange}
+                onSlotSelect={handleSlotSelect}
               />
               <div className="mt-6 flex justify-end gap-2">
                 <Button
                   variant="outline"
                   onClick={() =>
-                    patch({ open: false, stagedSlotId: undefined })
+                    // REVIEW FIX (IMPORTANT — Cancel desync). Restoring
+                    // only `stagedSlotId` and leaving `slotDetail` alone
+                    // let a staged-then-cancelled slot's detail (date/time)
+                    // go on being displayed against the row's actually
+                    // committed slot: `SlotTriggerLabel` renders `detail`
+                    // whenever `row.slot_id` is truthy, with nothing
+                    // checking that `detail` is even the SAME slot.
+                    // Restore both together — `stagedSlotId` back to the
+                    // committed `row.slot_id`, and `slotDetail` kept only
+                    // if it already describes THAT slot, otherwise cleared
+                    // (falling back to `SlotTriggerLabel`'s honest
+                    // "selected, no detail" state instead of showing a
+                    // different slot's date/time).
+                    patch({
+                      open: false,
+                      stagedSlotId: row.slot_id || undefined,
+                      slotDetail:
+                        picker.slotDetail?.id === row.slot_id
+                          ? picker.slotDetail
+                          : undefined,
+                    })
                   }
                 >
                   {t("cancel")}
@@ -216,7 +306,7 @@ export function AppointmentEditor({
           </SheetContent>
         </Sheet>
         <StructuredFieldError
-          id={`${question.id}--slot--error`}
+          id={slotErrorId}
           questionId={question.id}
           rowId={SINGLETON_ROW_ID}
           fieldKeys={["slot_id"]}
