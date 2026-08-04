@@ -260,18 +260,36 @@ export function makeNormalizePatch({
  * lives there, at the i18n boundary, because this module must not import
  * i18next.
  *
- * WHEN IT CAN ACTUALLY FIRE — read this before wiring it. {@link
- * makeNormalizePatch}'s rule 3 fills the default the instant a row becomes
- * hospitalized+discharged, so no row this session's editor produces can
- * ever fail this predicate (executed in `model.test.ts`). The only rows
- * that can are ones NOBODY EDITED: an untouched server encounter that is
- * already discharged with no disposition, or a draft restored from before
- * this port. Validation is therefore a statement about the SERVER's data,
- * not about the clinician's input — which is honest, but means the
- * definition has to decide whether an untouched section may block Save.
- * That decision belongs to `validate(projection, edits, questionId,
- * required)`, which sees `edits` and this module does not; it is named in
- * this task's report as a seam Task 8 inherits.
+ * WHEN IT CAN ACTUALLY FIRE — read this before wiring it, and do NOT
+ * assume a configured default. CORRECTED (post-Task-8-review, executed):
+ * {@link makeNormalizePatch}'s rule 3 only fills a disposition when
+ * `dischargeDisposition` (`careConfig.defaultDischargeDisposition`) is
+ * itself configured. That config is honestly typed `| undefined`
+ * (`care.config.ts:81-83`, the `REACT_DEFAULT_DISCHARGE_DISPOSITION` env
+ * var is optional) and **this repo's own `.env.local` does not set it**.
+ * On any such deployment, rule 3's `?? dischargeDisposition` leaves the
+ * field UNSET, so a row THIS SESSION'S EDITOR PRODUCES — the ordinary
+ * "Mark for discharge" click, or the `?toDischarge` seed — DOES fail this
+ * predicate. Executed: `makeNormalizePatch({ dischargeDisposition:
+ * undefined })` on a hospitalized row transitioning to `DISCHARGED` yields
+ * `hospitalization.discharge_disposition: undefined`, and
+ * `requiresDischargeDisposition` on that row is `true` (`model.test.ts`,
+ * "the undefined-default deployment" block).
+ *
+ * So the honest statement is: this predicate is LIVE REQUIRED-FIELD
+ * ENFORCEMENT on any deployment with no configured default (including this
+ * one) — the field renders with its placeholder, the clinician must pick
+ * a value, and Save blocks until they do, exactly legacy's behavior. It
+ * degrades to a pure safety net — firing only on a row NOBODY EDITED this
+ * session (an untouched already-broken server encounter, or a pre-port
+ * draft) — only on a deployment where a default IS configured, since only
+ * then does rule 3 guarantee every edited row already carries one.
+ * Validation is therefore a statement about the SERVER's data ANDed with
+ * the deployment's config, not about the clinician's input alone — which
+ * is why the definition has to decide whether an untouched section may
+ * block Save regardless. That decision belongs to `validate(projection,
+ * edits, questionId, required)`, which sees `edits` and this module does
+ * not; it is named in this task's report as a seam Task 8 inherits.
  */
 export function requiresDischargeDisposition(
   row: EncounterRow | undefined,
@@ -285,17 +303,27 @@ export function requiresDischargeDisposition(
 
 /**
  * Task 8's product decision, executed as a pure predicate so the
- * definition's `validate` stays a one-line call — mirrors `appointment`'s
- * `needsSlot` (`structured/types/appointment/model.ts`), which gates its
- * own required-ish error on `edits.length > 0` for the identical reason.
+ * definition's `validate` stays a one-line call.
  *
- * THE DECISION: an untouched section may NOT block Save.
+ * THE DECISION: an untouched section may NOT block Save — `edits.length >
+ * 0` is an unconditional precondition here, checked BEFORE
+ * `requiresDischargeDisposition` at all.
  *
- * Once the `?toDischarge` seed is built through `mergePatch(...,
- * normalizePatch)` (the corrected form — see `EncounterEditorBody`'s own
- * doc comment), {@link requiresDischargeDisposition} can only ever be true
- * for a row NOBODY EDITED this session (this function's own doc comment,
- * above). Blocking Save over server data the clinician never brought into
+ * NOT full parity with `appointment`'s `needsSlot`
+ * (`structured/types/appointment/model.ts:247-257`) — CORRECTED
+ * (post-Task-8-review): `needsSlot` returns `true` unconditionally the
+ * instant `required` is true (`if (required) return true;`), BEFORE it
+ * ever consults `edits`, so a `required` appointment question with no
+ * slot still hard-blocks even on an untouched section. This function has
+ * no such carve-out: `edits.length > 0` gates the error regardless of the
+ * question's own `required` flag. Consequence, stated plainly: a
+ * `required: true` encounter question whose untouched server row is
+ * already discharged-hospitalized-with-no-disposition does NOT hard-block
+ * here, where a literal `needsSlot`-style rule would. That is consistent
+ * with the decision below, just not the parity the two functions'
+ * similar shape might suggest.
+ *
+ * WHY: blocking Save over server data the clinician never brought into
  * this session — possibly on a questionnaire that does not even carry an
  * encounter question they meant to open — would be a new, disruptive
  * coupling this port does not introduce. `toRequests`' own first guard
@@ -304,14 +332,20 @@ export function requiresDischargeDisposition(
  * untouched section has ZERO effect on Save, not merely zero effect on the
  * request body.
  *
- * This is not a loophole for a genuinely broken discharged encounter: the
- * moment the section IS touched (any edit at all — even an unrelated field
- * such as the hospital identifier), `makeNormalizePatch`'s rule 3 fills the
- * default the instant the row is hospitalized+discharged, so the predicate
- * this wraps is then a safety net for a raw `applyEdit`/plugin write
- * bypassing the mutators (the assistant's write path, a later phase)
- * rather than the ordinary editor path — it should essentially never fire
- * in practice, which is the correct shape for a safety net, not a gap.
+ * WHEN THIS ACTUALLY FIRES — CORRECTED (post-Task-8-review, executed).
+ * This is NOT merely a safety net for a raw `applyEdit`/plugin write
+ * bypassing the mutators. {@link requiresDischargeDisposition}'s own doc
+ * comment (above) states the real shape: on ANY deployment with no
+ * configured `careConfig.defaultDischargeDisposition` — including this
+ * repo's own `.env.local` — `makeNormalizePatch`'s rule 3 leaves the
+ * disposition unset even on a row the editor DID produce this session
+ * (the ordinary "Mark for discharge" click, or the `?toDischarge` seed).
+ * On such a deployment this predicate is LIVE required-field enforcement
+ * on the primary discharge entry point — exact legacy parity: the field
+ * renders with its placeholder, the error renders beside it, and the
+ * clinician resolves it before Save proceeds. It is a pure, near-dead
+ * safety net ONLY on a deployment where a default IS configured, since
+ * only then does rule 3 guarantee every touched row already carries one.
  */
 export function blocksSaveForMissingDischargeDisposition(
   row: EncounterRow | undefined,

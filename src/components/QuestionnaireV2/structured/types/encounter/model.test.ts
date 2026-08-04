@@ -567,6 +567,69 @@ describe("encounter blocksSaveForMissingDischargeDisposition — Task 8's produc
   });
 });
 
+describe("encounter — the undefined-default deployment (this repo's own .env.local)", () => {
+  // Every other `makeNormalizePatch` call in this file (the module-level
+  // `normalize` above, and the truth-table describe blocks) is built with
+  // a CONCRETE `dischargeDisposition: "home"`. That is the config only
+  // when `REACT_DEFAULT_DISCHARGE_DISPOSITION` is actually set — this
+  // repo's `.env.local` does not set it, so `careConfig.
+  // defaultDischargeDisposition` is `undefined` there, and the type was
+  // widened (model.ts) to `| undefined` to match. That branch was
+  // previously untested; these two cases close the gap (found by review).
+  const normalizeNoDefault = makeNormalizePatch({
+    dischargeDisposition: undefined,
+    now: () => NOW,
+  });
+
+  it("makeNormalizePatch({ dischargeDisposition: undefined }) leaves a hospitalized DISCHARGED row's disposition UNSET, not defaulted", () => {
+    const row = fixtureRow({
+      encounter_class: "imp",
+      status: EncounterStatus.IN_PROGRESS,
+      hospitalization: {},
+    });
+    const patch = normalizeNoDefault(row, {
+      status: EncounterStatus.DISCHARGED,
+    });
+    assert.equal(
+      (patch.hospitalization as { discharge_disposition?: unknown })
+        .discharge_disposition,
+      undefined,
+    );
+  });
+
+  it("the discharge SEED itself — mergePatch(row, { status: DISCHARGED }, normalizeNoDefault) — reaches requiresDischargeDisposition/blocksSaveForMissingDischargeDisposition as TRUE, not merely a hand-built broken row", () => {
+    // This is the real path: EncounterEditorBody's `?toDischarge` seed is
+    // exactly `mergePatch(toEncounterRow(encounter), { status: DISCHARGED
+    // }, normalizePatch)`. On a deployment with no configured default,
+    // that seed produces a row this SESSION'S EDITOR built — not an
+    // untouched server row — that still fails the disposition predicate,
+    // and the seed is itself a non-empty edit, so the "untouched section"
+    // exemption does not apply: Save blocks on the primary discharge
+    // entry point, exact legacy parity.
+    const baselineRow = fixtureRow({
+      encounter_class: "imp",
+      status: EncounterStatus.IN_PROGRESS,
+      hospitalization: {},
+    });
+    const seedRow = mergePatch(
+      baselineRow,
+      { status: EncounterStatus.DISCHARGED },
+      normalizeNoDefault,
+    );
+    const seedEdit: StructuredEdit<EncounterRow> = update(seedRow);
+    assert.equal(
+      requiresDischargeDisposition(seedRow),
+      true,
+      "the seeded row itself is missing a disposition",
+    );
+    assert.equal(
+      blocksSaveForMissingDischargeDisposition(seedRow, [seedEdit]),
+      true,
+      "and the seed is a real, non-empty edit, so Save blocks",
+    );
+  });
+});
+
 describe("encounter isHospitalizedClass", () => {
   it("splits the six classes the way the hospitalization panel does", () => {
     for (const encounter_class of HOSPITALIZED) {
