@@ -200,7 +200,15 @@ export function makeNormalizePatch({
   dischargeDisposition,
   now = () => new Date().toISOString(),
 }: {
-  dischargeDisposition: EncounterDischargeDisposition;
+  // `| undefined`, matching `careConfig.defaultDischargeDisposition`'s own
+  // honest type (`care.config.ts`'s `REACT_DEFAULT_DISCHARGE_DISPOSITION`
+  // env var is optional) — found integrating Task 8's editor, which passes
+  // the config value straight through. Rule 3's `?? dischargeDisposition`
+  // already degrades correctly when this is `undefined`: the disposition
+  // is left unset, exactly what the legacy mutation rule did when no
+  // default was configured, onto the (itself optional)
+  // `Hospitalization.discharge_disposition` field.
+  dischargeDisposition: EncounterDischargeDisposition | undefined;
   now?: () => string;
 }) {
   return function normalizePatch(
@@ -273,6 +281,43 @@ export function requiresDischargeDisposition(
     isHospitalizedClass(row.encounter_class) &&
     !row.hospitalization?.discharge_disposition
   );
+}
+
+/**
+ * Task 8's product decision, executed as a pure predicate so the
+ * definition's `validate` stays a one-line call — mirrors `appointment`'s
+ * `needsSlot` (`structured/types/appointment/model.ts`), which gates its
+ * own required-ish error on `edits.length > 0` for the identical reason.
+ *
+ * THE DECISION: an untouched section may NOT block Save.
+ *
+ * Once the `?toDischarge` seed is built through `mergePatch(...,
+ * normalizePatch)` (the corrected form — see `EncounterEditorBody`'s own
+ * doc comment), {@link requiresDischargeDisposition} can only ever be true
+ * for a row NOBODY EDITED this session (this function's own doc comment,
+ * above). Blocking Save over server data the clinician never brought into
+ * this session — possibly on a questionnaire that does not even carry an
+ * encounter question they meant to open — would be a new, disruptive
+ * coupling this port does not introduce. `toRequests`' own first guard
+ * already guarantees an untouched section produces ZERO requests (P1-14);
+ * this predicate extends the identical guarantee to validation, so an
+ * untouched section has ZERO effect on Save, not merely zero effect on the
+ * request body.
+ *
+ * This is not a loophole for a genuinely broken discharged encounter: the
+ * moment the section IS touched (any edit at all — even an unrelated field
+ * such as the hospital identifier), `makeNormalizePatch`'s rule 3 fills the
+ * default the instant the row is hospitalized+discharged, so the predicate
+ * this wraps is then a safety net for a raw `applyEdit`/plugin write
+ * bypassing the mutators (the assistant's write path, a later phase)
+ * rather than the ordinary editor path — it should essentially never fire
+ * in practice, which is the correct shape for a safety net, not a gap.
+ */
+export function blocksSaveForMissingDischargeDisposition(
+  row: EncounterRow | undefined,
+  edits: readonly StructuredEdit<EncounterRow>[],
+): boolean {
+  return edits.length > 0 && requiresDischargeDisposition(row);
 }
 
 /**

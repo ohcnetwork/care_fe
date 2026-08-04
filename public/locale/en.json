@@ -2278,6 +2278,7 @@
   "encounter_duration_confirmation": "The duration of this encounter would be",
   "encounter_future_date_restriction": "Future date is only allowed for planned encounters",
   "encounter_id": "Encounter ID",
+  "encounter_load_failed": "This encounter could not be loaded. Try again.",
   "encounter_locations": "Encounter Locations",
   "encounter_manage_organization_description": "Add or remove organizations from this encouter",
   "encounter_marked_as_complete": "Encounter Completed",

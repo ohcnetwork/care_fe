@@ -1,32 +1,19 @@
+import { t } from "i18next";
+
+import { EncounterEditor } from "@/components/QuestionnaireV2/structured/types/encounter/EncounterEditor";
 import {
-  EncounterQuestion,
-  validateEncounterQuestion,
-} from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
+  blocksSaveForMissingDischargeDisposition,
+  toRequests,
+} from "@/components/QuestionnaireV2/structured/types/encounter/model";
 
 import type {
-  StructuredBatchEntry,
   StructuredInputProps,
   StructuredTypeDefinition,
 } from "@/components/QuestionnaireV2/structured/types";
-import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { useLegacyResponseCallback } from "./adapt";
 
 function EncounterInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
   if (!props.encounterId || !props.facilityId) return null;
-  return (
-    <EncounterQuestion
-      question={props.question}
-      encounterId={props.encounterId}
-      facilityId={props.facilityId}
-      patientId={props.patientId}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      disabled={props.disabled}
-      errors={props.errors}
-      clearError={props.clearError}
-    />
-  );
+  return <EncounterEditor {...props} />;
 }
 
 export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
@@ -34,31 +21,33 @@ export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
   component: EncounterInput,
   requires: ["encounterId", "facilityId"],
   subjects: ["encounter"],
-  draftPolicy: "exclude",
-  contract: 1,
-  validate: (encounters, questionId) =>
-    validateEncounterQuestion(encounters[0], questionId),
-  buildRequests: async (
-    encounters,
-    { encounterId, facilityId, questionId },
-  ) => {
-    if (!encounterId) return [];
-    if (!facilityId) {
-      throw new Error("Cannot update an encounter without a facility");
-    }
-    return encounters.map((encounter): StructuredBatchEntry => ({
-      url: `/api/v1/encounter/${encounterId}/`,
-      method: "PUT",
-      body: {
-        status: encounter.status,
-        encounter_class: encounter.encounter_class,
-        period: encounter.period,
-        hospitalization: encounter.hospitalization,
-        priority: encounter.priority,
-        external_identifier: encounter.external_identifier,
-        discharge_summary_advice: encounter.discharge_summary_advice,
-      },
-      reference_id: structuredReferenceId("encounter", questionId),
-    }));
-  },
+  // D2. The row is seven JSON-safe fields, and — unlike v1 — the DRAFT
+  // stores the edit log, not the prefetched encounter, so a restore can no
+  // longer re-PUT a stale server row over someone else's change.
+  draftPolicy: "serialize",
+  contract: 2,
+  toRequests,
+  // PRODUCT DECISION (Task 8, stated explicitly per the brief): an
+  // untouched section may NOT block Save. Once the `?toDischarge` seed is
+  // built through `mergePatch(..., normalizePatch)`,
+  // `requiresDischargeDisposition` (`structured/types/encounter/model.ts`)
+  // can only ever be true for a row nobody edited this session — an
+  // already-invalid server row, or a pre-port draft. Blocking Save over
+  // server data the clinician never touched — possibly on a questionnaire
+  // that doesn't even carry an encounter question they meant to open —
+  // would be a new, disruptive coupling this port does not introduce.
+  // `blocksSaveForMissingDischargeDisposition` encodes exactly that gate
+  // (`edits.length > 0`, mirroring `appointment`'s `needsSlot`); see its
+  // own doc comment in model.ts for the full reasoning.
+  validate: (projection, edits, questionId) =>
+    blocksSaveForMissingDischargeDisposition(projection[0], edits)
+      ? [
+          {
+            question_id: questionId,
+            field_key: "hospitalization.discharge_disposition",
+            error: t("field_required"),
+            required: true,
+          },
+        ]
+      : [],
 };

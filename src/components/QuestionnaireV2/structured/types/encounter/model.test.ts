@@ -17,6 +17,7 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
 
 import type { EncounterRow } from "./model";
 import {
+  blocksSaveForMissingDischargeDisposition,
   isHospitalizedClass,
   makeNormalizePatch,
   projectValues,
@@ -508,6 +509,61 @@ describe("encounter requiresDischargeDisposition", () => {
       );
       assert.equal(requiresDischargeDisposition(merged), false);
     }
+  });
+});
+
+describe("encounter blocksSaveForMissingDischargeDisposition — Task 8's product decision", () => {
+  const brokenRow = fixtureRow({
+    status: EncounterStatus.DISCHARGED,
+    hospitalization: {},
+  });
+
+  it("an UNTOUCHED broken row (empty edit log) does NOT block Save", () => {
+    // The decision itself: P1-14 already guarantees zero requests for an
+    // untouched section; this extends the same guarantee to validation.
+    assert.equal(
+      blocksSaveForMissingDischargeDisposition(brokenRow, []),
+      false,
+    );
+  });
+
+  it("the SAME broken row, once touched (any edit at all), DOES block Save", () => {
+    assert.equal(
+      blocksSaveForMissingDischargeDisposition(brokenRow, [update(brokenRow)]),
+      true,
+    );
+  });
+
+  it("touched but not actually broken (a disposition is set) => false", () => {
+    const fine = fixtureRow({
+      status: EncounterStatus.DISCHARGED,
+      hospitalization: { discharge_disposition: "home" },
+    });
+    assert.equal(
+      blocksSaveForMissingDischargeDisposition(fine, [update(fine)]),
+      false,
+    );
+  });
+
+  it("touched but the row is undefined (no baseline, no edits resolved to a row) => false", () => {
+    assert.equal(
+      blocksSaveForMissingDischargeDisposition(undefined, [update(brokenRow)]),
+      false,
+    );
+  });
+
+  it('an edit touching a DIFFERENT rowId still counts as "touched" here — this predicate does not filter by identity, unlike toRequests', () => {
+    // Documented rather than hidden: this function only asks "is the log
+    // non-empty", the same coarse question `needsSlot` asks of
+    // `appointment`. A corrupted foreign-rowId edit is an existing,
+    // separately-documented anomaly (toRequests' own identity filter); it
+    // is not this predicate's job to re-solve it.
+    assert.equal(
+      blocksSaveForMissingDischargeDisposition(brokenRow, [
+        update(brokenRow, "enc-OTHER"),
+      ]),
+      true,
+    );
   });
 });
 
