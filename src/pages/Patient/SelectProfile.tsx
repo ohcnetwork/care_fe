@@ -13,10 +13,6 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import PatientAuthLayout from "@/pages/PublicAppointments/auth/PatientAuthLayout";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 
-/**
- * Screen shown straight after OTP verification: pick which of the profiles
- * linked to this mobile number the session is for.
- */
 export default function SelectProfile() {
   const { t } = useTranslation();
   const { patients, selectedPatient, setSelectedPatient, isLoadingPatients } =
@@ -52,7 +48,7 @@ export default function SelectProfile() {
         <Skeleton className="mt-3 h-5 w-full" />
         <div className="mt-6 flex flex-col gap-2.5">
           {[...Array(3)].map((_, index) => (
-            <Skeleton key={index} className="h-[76px] w-full rounded-2xl" />
+            <Skeleton key={index} className="h-19 w-full rounded-2xl" />
           ))}
         </div>
       </PatientAuthLayout>
@@ -62,28 +58,30 @@ export default function SelectProfile() {
   // Nothing linked to this number yet — registering is the only way forward.
   if (!patients?.length) {
     return (
-      <PatientAuthLayout className="px-6 pt-9">
-        <h1 className="text-[26px] font-bold leading-tight tracking-tight text-gray-900">
-          {t("patient_select__empty_heading")}
-        </h1>
-        <p className="mt-2.5 text-base leading-relaxed text-gray-600">
-          {t("patient_select__empty_description")}
-        </p>
-        <Button size="lg" className="mt-8 h-12 w-full text-base" asChild>
-          <Link href="/patient/add-profile">
-            {t("patient_select__add_family_member")}
-          </Link>
-        </Button>
+      <PatientAuthLayout>
+        <div className="flex flex-col h-2/3 w-full items-center justify-center text-center px-8">
+          <h1 className="text-3xl font-semibold leading-tight tracking-tight text-gray-900">
+            {t("patient_select__empty_heading")}
+          </h1>
+          <p className="mt-2 text-base leading-relaxed text-gray-600">
+            {t("patient_select__empty_description")}
+          </p>
+          <Button size="lg" className="mt-5 h-12 w-full text-base" asChild>
+            <Link href="/patient/add-profile">
+              {t("patient_select__add_family_member")}
+            </Link>
+          </Button>
+        </div>
       </PatientAuthLayout>
     );
   }
 
   return (
-    <PatientAuthLayout className="px-6 pt-9">
-      <h1 className="text-[26px] font-bold leading-tight tracking-tight text-gray-900">
+    <PatientAuthLayout>
+      <h1 className="text-3xl font-normal leading-tight tracking-tight text-gray-900">
         {t("patient_select__heading")}
       </h1>
-      <p className="mt-2 text-base leading-relaxed text-gray-600">
+      <p className="mt-1 text-sm leading-relaxed text-gray-600">
         {t("patient_select__description", { count: patients.length })}
       </p>
 
@@ -106,16 +104,18 @@ export default function SelectProfile() {
         </Link>
       </div>
 
-      <Button
-        size="lg"
-        className="mt-auto h-12 w-full text-base"
-        disabled={!activePatient}
-        onClick={handleContinue}
-      >
-        {t("patient_select__continue_as", {
-          name: activePatient?.name.split(" ")[0] ?? "",
-        })}
-      </Button>
+      <div className="sticky bottom-0 -mx-6 bg-white px-6 pb-4 pt-5">
+        <Button
+          size="lg"
+          className="h-12 w-full text-base"
+          disabled={!activePatient}
+          onClick={handleContinue}
+        >
+          {t("patient_select__continue_as", {
+            name: activePatient?.name.split(" ")[0] ?? "",
+          })}
+        </Button>
+      </div>
     </PatientAuthLayout>
   );
 }

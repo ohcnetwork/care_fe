@@ -31,6 +31,7 @@ interface ImportMetaEnv {
   readonly REACT_DEFAULT_PAYMENT_TERMS?: string;
   readonly REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB?: string;
   readonly REACT_OTP_LENGTH?: string;
+  readonly REACT_PATIENT_TOKEN_FRESHNESS_MINUTES?: string;
   readonly REACT_PATIENT_SUPPORT_PHONE?: string;
   readonly REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION?: string;
   readonly REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED?: string;

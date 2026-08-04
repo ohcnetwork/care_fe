@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import dayjs from "dayjs";
 import { ChevronDown, LogOut, User } from "lucide-react";
 import { navigate } from "raviger";
@@ -22,7 +23,9 @@ export const LoginHeader = () => {
 
   const isLoggedIn =
     !!patientToken?.token &&
-    dayjs(patientToken.createdAt).isAfter(dayjs().subtract(14, "minutes"));
+    dayjs(patientToken.createdAt).isAfter(
+      dayjs().subtract(careConfig.patientTokenFreshnessMinutes, "minutes"),
+    );
 
   const phone = patientToken?.phoneNumber
     ? formatPhoneNumberIntl(patientToken.phoneNumber) ||

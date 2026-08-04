@@ -35,7 +35,9 @@ export function LandingPage() {
 
   const isLoggedIn =
     !!patientToken?.token &&
-    dayjs(patientToken.createdAt).isAfter(dayjs().subtract(14, "minutes"));
+    dayjs(patientToken.createdAt).isAfter(
+      dayjs().subtract(careConfig.patientTokenFreshnessMinutes, "minutes"),
+    );
   const { data: organizationsResponse } = useQuery({
     queryKey: ["organizations", "level", "1"],
     queryFn: query(organizationApi.getPublicOrganizations, {
