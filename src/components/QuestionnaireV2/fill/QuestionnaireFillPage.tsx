@@ -212,7 +212,7 @@ export default function QuestionnaireFillPage({
   const localDraft = useMemo<LoadedFillDraft | undefined>(
     () =>
       scopeKey && scope && questionnaire && !continueDraftId
-        ? loadFillDraft(scope, String(questionnaire.version))
+        ? loadFillDraft(scope, questionnaire.questions)
         : undefined,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [scopeKey, continueDraftId],
@@ -394,6 +394,48 @@ function QuestionnaireTitleWithDraftBadge({ dirty }: { dirty: boolean }) {
   );
 }
 
+/**
+ * P2-3's "questionnaire was updated — reload" notice. `onReload` is a hard
+ * page reload, deliberately NOT an in-place swap of the mounted session's
+ * `questionnaire` reference — see this file's `questionnaireStale` doc
+ * comment for why a hot-swap would race `FormContext.tsx`'s own live-sync
+ * effect over the same `responsesAtom`. A full reload flushes to the local
+ * draft first (the same `pagehide` handler autosave already installs) and
+ * lets the ordinary mount flow's amendment-A1 merge (`loadFillDraft`) take
+ * it from there.
+ */
+function QuestionnaireUpdatedBanner({
+  onReload,
+  onDismiss,
+  frozen,
+}: {
+  onReload: () => void;
+  onDismiss: () => void;
+  frozen: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="mx-auto mb-4 flex w-full max-w-3xl items-start gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+      <div className="min-w-0 flex-1">
+        <p>{t("fill_questionnaire_updated_banner")}</p>
+      </div>
+      <Button type="button" size="sm" onClick={onReload} disabled={frozen}>
+        {t("fill_questionnaire_reload")}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="size-8"
+        aria-label={t("close")}
+        onClick={onDismiss}
+      >
+        <X className="size-4" />
+      </Button>
+    </div>
+  );
+}
+
 /** The one dead-end state of this page: an alert plus the way back. Every
  *  branch that refuses to mount a form uses it, so "we could not open this"
  *  always reads the same and always announces (the ui Alert is
@@ -512,6 +554,29 @@ function FillPageBody({
     serverDraftResponses,
     getStore,
   });
+
+  // P2-3: the primary form's `questionnaire` is captured ONCE, at session
+  // creation (`useFillSessionForms`' `useState` initializer never re-runs)
+  // — a background refetch of THIS PAGE's own `questionnaire` query (cache
+  // invalidation from a Studio edit landing elsewhere, a window refocus)
+  // updates the `questionnaire` PROP below without ever reaching the
+  // mounted session, which keeps rendering the tree it started with. Same
+  // amendment-A1 merge that backs the draft-restore bar backs this banner
+  // too: RELOADING (not an in-place hot-swap of the rendered tree, which
+  // would race `FormContext.tsx`'s own live-sync effect over the exact
+  // same `responsesAtom`) flushes the in-progress session to its local
+  // draft (the same `pagehide` handler `useFillAutosave.ts` already
+  // installs), then re-mounts fresh — which fetches the now-current
+  // questionnaire and runs `loadFillDraft`'s merge against it, restoring
+  // what fits and naming what doesn't in the very same restore bar. Not
+  // shown while resuming a SERVER draft (`continueDraftId`): that session
+  // never persists locally, so a reload there has nothing to restore FROM.
+  const primaryForm = forms.find((form) => form.isPrimary);
+  const [reloadBannerDismissed, setReloadBannerDismissed] = useState(false);
+  const questionnaireStale =
+    !!primaryForm &&
+    !continueDraftId &&
+    String(primaryForm.questionnaire.version) !== String(questionnaire.version);
 
   // The outline lives in one shared overlay (panel rows + rail ticks);
   // each form portals its own pieces into the two hosts (they must render
@@ -703,6 +768,13 @@ function FillPageBody({
                   aria-label={t("form_canvas")}
                   className="min-w-0 flex-1 space-y-6 overflow-y-auto px-4 py-5 md:px-8"
                 >
+                  {questionnaireStale && !reloadBannerDismissed && (
+                    <QuestionnaireUpdatedBanner
+                      onReload={() => window.location.reload()}
+                      onDismiss={() => setReloadBannerDismissed(true)}
+                      frozen={frozen}
+                    />
+                  )}
                   {autosave.restoredDraft && (
                     <DraftRestoreBar
                       draft={autosave.restoredDraft}

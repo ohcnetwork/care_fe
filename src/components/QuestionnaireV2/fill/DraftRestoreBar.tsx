@@ -5,7 +5,16 @@ import { Button } from "@/components/ui/button";
 
 import { formatDateTime } from "@/Utils/utils";
 
+import type { DraftDropReason } from "./draft/draftMerge";
 import type { LoadedFillDraft } from "./draft/fillDraftStore";
+
+/** i18n key per {@link DraftDropReason} — the short clause the restore
+ *  bar appends after each dropped answer's label. */
+const DROP_REASON_KEY: Record<DraftDropReason, string> = {
+  question_removed: "fill_draft_drop_reason_question_removed",
+  type_changed: "fill_draft_drop_reason_type_changed",
+  option_removed: "fill_draft_drop_reason_option_removed",
+};
 
 /**
  * Shown once per session when the page detects a local draft: prompts the
@@ -15,6 +24,13 @@ import type { LoadedFillDraft } from "./draft/fillDraftStore";
  * back, whether structured answers couldn't ride along, and offers
  * Resume (apply the draft) or Discard (delete it) — X only hides the
  * prompt and keeps the stored draft for the next visit.
+ *
+ * SPEC AMENDMENT A1: `draft.dropped` (precomputed at load time by
+ * `fillDraftStore.ts`'s `loadFillDraft`, against the questionnaire's
+ * CURRENT questions) names every answer the compatibility merge could not
+ * carry over — BEFORE the clinician commits to Resume, not as a surprise
+ * afterward. "Data is either restored or visibly accounted for, never
+ * silently dropped" (spec §5) is what this list exists to satisfy.
  */
 export function DraftRestoreBar({
   draft,
@@ -53,6 +69,20 @@ export function DraftRestoreBar({
         )}
         {draft.structuredSkipped && (
           <p className="text-amber-800">{t("fill_draft_structured_skipped")}</p>
+        )}
+        {draft.dropped.length > 0 && (
+          <div className="text-amber-800">
+            <p>
+              {t("fill_draft_answers_dropped", { count: draft.dropped.length })}
+            </p>
+            <ul className="list-inside list-disc">
+              {draft.dropped.map((entry) => (
+                <li key={entry.questionId}>
+                  {entry.label} — {t(DROP_REASON_KEY[entry.reason])}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
       <Button type="button" size="sm" onClick={onResume} disabled={frozen}>

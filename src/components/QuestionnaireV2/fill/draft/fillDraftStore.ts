@@ -1,7 +1,4 @@
-import {
-  entryHasContent,
-  initializeResponses,
-} from "@/components/QuestionnaireV2/form/engine/store";
+import { entryHasContent } from "@/components/QuestionnaireV2/form/engine/store";
 import { isV2Definition } from "@/components/QuestionnaireV2/structured/contract";
 import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
@@ -9,6 +6,8 @@ import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
+import type { DroppedDraftAnswer } from "./draftMerge";
+import { mergeDraftResponses } from "./draftMerge";
 import { FILL_DRAFT_PREFIX, isFillDraftExpired } from "./fillDraftCache";
 
 /**
@@ -63,6 +62,16 @@ export interface LoadedFillDraft {
   /** True when the saved session had structured answers the draft could
    *  not carry (draftPolicy "exclude") — the restore bar says so. */
   structuredSkipped: boolean;
+  /**
+   * Spec amendment A1's restore notice, precomputed for the PRIMARY form
+   * at LOAD time (before the clinician even decides Resume vs Discard) —
+   * `mergeDraftResponses` run against the questionnaire's CURRENT
+   * questions. Empty when nothing would be lost, including the ordinary
+   * case where the questionnaire never changed at all. Non-primary
+   * (added) forms are merged later, when the host re-fetches them on
+   * resume (`useFillSessionForms.ts`), and are not represented here.
+   */
+  dropped: DroppedDraftAnswer[];
 }
 
 function draftKey(scope: FillDraftScope): string {
@@ -189,21 +198,22 @@ export function preserveExcludedStructured(
   return merged;
 }
 
-/** The creation-time merge rule, shared by resume paths: draft entries
- *  overlay the fresh seed only when the question still exists with the
- *  same structured_type. */
+/**
+ * The creation-time merge rule, shared by resume paths: draft entries
+ * overlay the fresh seed per spec amendment A1's compatibility rules
+ * (`draftMerge.ts`'s `mergeDraftResponses`) — restoring where the question
+ * still exists with a shape-compatible type/option, dropping (and
+ * reporting, via that function's `dropped` list) what does not. A thin,
+ * backward-compatible wrapper for the two call sites
+ * (`useFillSessionForms.ts`) that don't yet surface the drop list;
+ * `useFillAutosave.ts`'s primary-form resume calls `mergeDraftResponses`
+ * directly so it can report drops to the restore bar.
+ */
 export function mergeDraftIntoSeed(
   questions: Question[],
   draft: Record<string, QuestionnaireResponse>,
 ): Record<string, QuestionnaireResponse> {
-  const seeded = initializeResponses(questions);
-  for (const [id, response] of Object.entries(draft)) {
-    const fresh = seeded[id];
-    if (fresh && fresh.structured_type === response.structured_type) {
-      seeded[id] = { ...response, link_id: fresh.link_id };
-    }
-  }
-  return seeded;
+  return mergeDraftResponses(questions, draft).responses;
 }
 
 /** The live working state of one form, as the fill host reads it out of
@@ -336,14 +346,33 @@ export function reviveDraftResponses(
   return responses;
 }
 
-/** Load the draft session for this exact scope; anything mismatched,
- *  expired or corrupt is removed and reported absent. Only the PRIMARY
- *  form's version is checked here — added forms are version-checked when
- *  the host re-fetches them on resume. v1 drafts fail the schemaVersion
- *  check and are removed; that is the whole migration. */
+/**
+ * Load the draft session for this exact scope; anything mismatched,
+ * expired or corrupt is removed and reported absent.
+ *
+ * SPEC AMENDMENT A1 — a primary-form VERSION MISMATCH no longer wholesale-
+ * rejects the draft. Before A1, a bump to the live questionnaire's
+ * `version` (an editor renaming a question, adding one, changing an
+ * option — anything) took this same branch as a genuinely wrong/corrupt
+ * draft: `localStorage.removeItem` plus `undefined`, discarding every
+ * answer on every question. That is exactly the "rejected wholesale"
+ * behavior the amendment replaces with a compatibility-aware MERGE
+ * (`draftMerge.ts`'s `mergeDraftResponses`, run here against the CURRENT
+ * `questions` to precompute the restore bar's notice — see `dropped` on
+ * {@link LoadedFillDraft}). The checks that remain ARE still wholesale-
+ * reject-worthy: they identify a draft that belongs to a different
+ * identity entirely (wrong user/subject/entry questionnaire), is expired,
+ * or fails to parse — not "the same session's questionnaire changed
+ * underneath it". v1 drafts fail the `schemaVersion` check and are
+ * removed; that is the whole migration.
+ *
+ * Only the PRIMARY form's `dropped` notice is computed here — added forms
+ * are merged (and version-checked) when the host re-fetches them on
+ * resume (`useFillSessionForms.ts`'s `onResumeAddedForms`).
+ */
 export function loadFillDraft(
   scope: FillDraftScope,
-  primaryVersion: string,
+  questions: Question[],
 ): LoadedFillDraft | undefined {
   const key = draftKey(scope);
   const raw = localStorage.getItem(key);
@@ -359,8 +388,7 @@ export function loadFillDraft(
       draft.subjectKey !== scope.subjectKey ||
       draft.entryQuestionnaireId !== scope.entryQuestionnaireId ||
       isFillDraftExpired(draft.savedAt) ||
-      !primary ||
-      primary.questionnaireVersion !== primaryVersion
+      !primary
     ) {
       localStorage.removeItem(key);
       return undefined;
@@ -368,10 +396,12 @@ export function loadFillDraft(
     for (const form of draft.forms) {
       form.responses = reviveDraftResponses(form.responses);
     }
+    const { dropped } = mergeDraftResponses(questions, primary.responses);
     return {
       forms: draft.forms,
       savedAt: draft.savedAt,
       structuredSkipped: draft.forms.some((form) => form.structuredSkipped),
+      dropped,
     };
   } catch {
     localStorage.removeItem(key);
