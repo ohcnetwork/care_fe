@@ -67,7 +67,13 @@ export default function DispenseOrderListSelector({
     [data],
   );
 
-  const loadMoreRef = useOnInView<HTMLDivElement>((inView) => {
+  const loadMoreRefMobile = useOnInView<HTMLDivElement>((inView) => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  });
+
+  const loadMoreRefDesktop = useOnInView<HTMLDivElement>((inView) => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
@@ -114,7 +120,7 @@ export default function DispenseOrderListSelector({
           dispenseOrders={dispenseOrders}
           selectedDispenseOrderId={selectedDispenseOrderId}
           onSelectDispenseOrder={onSelectDispenseOrder}
-          loadMoreRef={loadMoreRef}
+          loadMoreRef={loadMoreRefDesktop}
           isFetchingNextPage={isFetchingNextPage}
         />
       </div>
@@ -159,7 +165,7 @@ export default function DispenseOrderListSelector({
                 dispenseOrders={dispenseOrders}
                 selectedDispenseOrderId={selectedDispenseOrderId}
                 onSelectDispenseOrder={handleSelectDispenseOrder}
-                loadMoreRef={loadMoreRef}
+                loadMoreRef={loadMoreRefMobile}
                 isFetchingNextPage={isFetchingNextPage}
               />
             </div>
