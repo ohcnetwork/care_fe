@@ -1,5 +1,31 @@
 import { deepEqualJson } from "./deepEqual";
-import type { EditLog, RowEdit, RowId } from "./types";
+import type { BaselineRow, EditLog, RowEdit, RowId } from "./types";
+
+/**
+ * Builds the reducer's `baseline` map (and `projectRows`' equivalent input)
+ * from the hook's `BaselineRow<TRow>[]` — the literal implementation of the
+ * BASELINE COMPLETENESS CONTRACT's "the complete fetched server-row set, or
+ * `undefined` — never a partial map standing in for 'not yet loaded'" rule
+ * (`2026-08-04-phase1-core-kit.md` Global Constraints, task-7-brief.md
+ * obligation 1). `undefined` in, `undefined` out — never coerced to an
+ * empty `Map`, which {@link ApplyEditOptions.baseline}'s own doc comment
+ * explains would be misread as "this rowId is provably not on the server"
+ * (`resolveOpAgainstBaseline`) instead of "not yet known".
+ *
+ * Extracted here (post-review, `3b41fe4fd`) rather than left as an inline
+ * `useMemo` in `useStructuredRows.ts`: obligation 1's actual TRANSLATION —
+ * "stays `undefined` exactly when the input is" — is itself the kind of
+ * thing this task's own no-branching-logic rule cares about, and the
+ * harness cannot render a hook to test it there.
+ *
+ * Pure and total: never mutates `baseline`.
+ */
+export function toBaselineMap<TRow extends object>(
+  baseline: readonly BaselineRow<TRow>[] | undefined,
+): ReadonlyMap<RowId, TRow> | undefined {
+  if (baseline === undefined) return undefined;
+  return new Map(baseline.map((entry) => [entry.rowId, entry.row] as const));
+}
 
 /**
  * Options for {@link applyEditToLog}. Signature per task-3-brief.md /

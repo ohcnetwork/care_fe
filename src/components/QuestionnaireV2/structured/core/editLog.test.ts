@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { applyEditToLog } from "./editLog";
-import type { EditLog, RowEdit, RowId } from "./types";
+import { applyEditToLog, toBaselineMap } from "./editLog";
+import type { BaselineRow, EditLog, RowEdit, RowId } from "./types";
 
 /**
  * A small, deliberately generic row shape — this reducer is type-agnostic,
@@ -357,5 +357,41 @@ describe("applyEditToLog — one edit per rowId, coalescing rules", () => {
       ["r1", "r2", "r3"],
     );
     assert.deepEqual(step4[1], update("r2", row("r2", "2-edited")));
+  });
+});
+
+describe("toBaselineMap — the BASELINE COMPLETENESS CONTRACT's map-building step", () => {
+  it("undefined stays undefined — the 'not yet known' signal survives the translation", () => {
+    assert.equal(toBaselineMap(undefined), undefined);
+  });
+
+  it("an empty (but KNOWN) array becomes an empty Map, NOT undefined — the two must stay distinguishable", () => {
+    const result = toBaselineMap([]);
+    assert.notEqual(result, undefined);
+    assert.equal(result?.size, 0);
+  });
+
+  it("builds rowId -> row entries from a real baseline array", () => {
+    const baseline: BaselineRow<TestRow>[] = [
+      { rowId: "r1", row: row("r1", "A") },
+      { rowId: "r2", row: row("r2", "B") },
+    ];
+
+    const result = toBaselineMap(baseline);
+
+    assert.equal(result?.size, 2);
+    assert.deepEqual(result?.get("r1"), row("r1", "A"));
+    assert.deepEqual(result?.get("r2"), row("r2", "B"));
+  });
+
+  it("purity — does not mutate the input array or its entries", () => {
+    const baseline = Object.freeze([
+      Object.freeze({ rowId: "r1", row: Object.freeze(row("r1", "A")) }),
+    ]);
+
+    const result = toBaselineMap(baseline);
+
+    assert.equal(result?.size, 1);
+    assert.equal(baseline.length, 1);
   });
 });

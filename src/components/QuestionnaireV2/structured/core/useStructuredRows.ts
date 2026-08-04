@@ -1,14 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
-import type { ResponseValue } from "@/types/questionnaire/form";
 import type { StructuredEditRecord } from "@/types/questionnaire/structured";
 
 import { deepEqualJson } from "./deepEqual";
 import { findDuplicateCandidates } from "./duplicates";
-import { applyEditToLog, type ApplyEditOptions } from "./editLog";
+import {
+  applyEditToLog,
+  toBaselineMap,
+  type ApplyEditOptions,
+} from "./editLog";
 import { findOrphanRowIds, projectRows } from "./projectRows";
 import { newRowId, SINGLETON_ROW_ID } from "./rowIds";
+import {
+  decideInitialEditsSeed,
+  mergePatch,
+  resolveRemoveIntent,
+  resolveSetRow,
+} from "./rowMutations";
 import type {
   BaselineRow,
   EditLog,
@@ -23,23 +32,24 @@ import type {
  * The React wrapper over Tasks 2–5's pure state core. Per the plan's
  * non-negotiable rule (`2026-08-04-phase1-core-kit.md` §3 / task-7-brief.md):
  * **this file contains no branching logic** — every decision (coalesce,
- * canonicalize, project, order, resolve, duplicate-check) is delegated to a
- * pure, `node:test`-covered sibling (`editLog.ts`, `projectRows.ts`,
- * `duplicates.ts`, `rowIds.ts`). What remains here is wiring: reading and
- * writing one question's response through the form store, memoizing the
- * pure functions' inputs/outputs, and picking which of the two controller
- * shapes (`list/single`) to return. The guard clauses below (`if (disabled)
- * return`, the seed/refresh effects' one-shot checks) are precondition
- * checks, not domain decisions — the annex's own §10 reference
- * implementation has the identical shape of clauses and is the one this
- * file translates from.
+ * canonicalize, project, order, resolve, duplicate-check, the mutator
+ * dispatches, the one-shot seed's latch decision) is delegated to a pure,
+ * `node:test`-covered sibling (`editLog.ts`, `projectRows.ts`,
+ * `duplicates.ts`, `rowMutations.ts`, `rowIds.ts`). What remains here is
+ * wiring: reading and writing one question's response through the form
+ * store, memoizing the pure functions' inputs/outputs, and picking which of
+ * the two controller shapes (`list/single`) to return. The guard clauses
+ * below (`if (disabled) return`, the seed/refresh effects' one-shot ref
+ * checks) are precondition checks, not domain decisions — the annex's own
+ * §10 reference implementation has the identical shape of clauses and is
+ * the one this file translates from.
  *
  * Design source: `docs/superpowers/specs/annexes/p1-state-core.md` §10
  * (hook API + reference body), §13 (list type worked example), §14
  * (singleton), §15 (create-only singleton) — translated per the plan's
  * CANONICAL EDIT VOCABULARY table (`rowId` not `row_id`, `patch: TRow`
- * always the complete row, no `StructuredRowEdit`/`edits.ts`). Three
- * deliberate departures from the annex's draft, beyond vocabulary:
+ * always the complete row, no `StructuredRowEdit`/`edits.ts`). Deliberate
+ * departures from the annex's draft, beyond vocabulary:
  *
  *  1. **No new `form/engine/store.ts` export.** The annex's §10 body adds a
  *     `useSetQuestionProjection` atom (a projection-only write that
@@ -49,24 +59,47 @@ import type {
  *     of bounds. Both this hook's writes therefore go through the existing
  *     `useQuestionResponse` setter, which DOES clear the question's errors
  *     on every write — including the passive baseline-driven refresh
- *     effect below. Documented here as a known, deliberate deviation: a
- *     refetch arriving while a submit error is showing will clear it. No
- *     obligation in task-7-brief.md calls this out, and every real type's
- *     baseline query is expected to have settled long before a submit
- *     error could exist, so the window this affects is narrow — but a
- *     future task revisiting `form/engine/store.ts` should reintroduce the
- *     annex's split write if this proves to matter in practice.
+ *     effect below. Documented here as a known, deliberate deviation
+ *     (recorded by review as a plan carry-forward, not this task's to
+ *     close): a refetch arriving while a submit error is showing will
+ *     clear it. Every real type's baseline query is expected to have
+ *     settled long before a submit error could exist, so the window this
+ *     affects is narrow — but a future task revisiting
+ *     `form/engine/store.ts` should reintroduce the annex's split write if
+ *     this proves to matter in practice.
  *  2. **The passive refresh effect below compares `values` structurally
- *     (`deepEqualJson`), not just by reference**, per the annex's own
- *     "Risk — projection write loop" note (§18): a `commit` already writes
- *     `values` once; the following render recomputes an equal-content but
- *     new-reference `values` array, and a reference-only guard would fire
- *     one redundant extra atom write (and error-clear) per edit. The
- *     structural comparison absorbs that instead.
+ *     (`deepEqualJson`) against the response's OWN current `values`** —
+ *     not a `lastWritten` ref, and not by reference — for two reasons
+ *     found by review on `3b41fe4fd`: (a) the annex's own "Risk —
+ *     projection write loop" note (§18): `commit` already writes `values`
+ *     once; the following render recomputes an equal-content but
+ *     new-reference `values` array via the `rows`/`values` memos, and a
+ *     reference-only guard would fire one redundant extra atom write (and
+ *     error-clear) per edit; (b) a ref-based guard that starts `undefined`
+ *     ALWAYS treats the very first run as "changed" regardless of whether
+ *     `response.values` already matches — wiping that question's errors on
+ *     every mount, including an `enable_when` remount where nothing
+ *     actually changed. Comparing against `response?.values` directly
+ *     fixes both: it is the actual current atom content on every render,
+ *     first included, so a no-op mount and a `commit`-driven re-render
+ *     both correctly compare equal and skip the write.
  *  3. **Orphan rowIds are exposed** (`StructuredRowsBase.orphanRowIds`),
  *     computed by `projectRows.ts`'s `findOrphanRowIds` — spec amendment
  *     A1 / task-7-brief.md obligation 2. The annex predates this
  *     obligation and has no equivalent field.
+ *
+ * CAVEAT for every mutator (`applyEdit`/`addRow`/`addRows`/`updateRow`/
+ * `removeRow`/`setRow`/`clearRow`/`resetEdits`): each reads `edits` from
+ * this render's closure. Two mutator calls issued synchronously in the same
+ * event handler (before React re-renders) both read the SAME `edits` value
+ * — the second call's `commit` overwrites the first's, so the first change
+ * is lost. `addRows` is the one mutator that covers this for its own
+ * "known batch" case (adding several rows in one call folds every edit into
+ * one `EditLog` before a single `commit`); a caller needing to combine
+ * heterogeneous operations (e.g. one `updateRow` and one `removeRow`) in a
+ * single handler has no equivalent today and must call `applyEdit` in a
+ * loop over a manually-folded log instead of calling two mutators back to
+ * back.
  */
 
 // ---------------------------------------------------------------------------
@@ -115,6 +148,19 @@ export interface StructuredRowsOptions<TRow extends object> {
    * Domain derivation applied to every patch BEFORE it is recorded — the
    * replacement for `encounter`'s two write-during-effect loops. Pure, so
    * it is unit-testable and cannot loop.
+   *
+   * RETURN CONTRACT (verified by execution — `rowMutations.test.ts`'s
+   * "CONTRACT PIN" case): the returned `Partial<TRow>` REPLACES `patch`
+   * entirely before being spread onto the current row
+   * (`{ ...row, ...normalizePatch(row, patch) }`, see `rowMutations.ts`'s
+   * `mergePatch`) — it is NOT additionally merged with `patch`. A
+   * `normalizePatch` that returns only ITS OWN derived fields and omits
+   * `patch`'s incoming fields silently DROPS the clinician's own edit.
+   * Always start from `{ ...patch, ...derivedFields }` (or return `patch`
+   * unchanged when there is nothing to derive) — never
+   * `{ ...derivedFieldsOnly }` alone. `encounter`'s reference
+   * `normalizePatch` (annex §14) follows this: `const out: Partial<Row> =
+   * { ...patch }; ... return out;`.
    */
   normalizePatch?: (row: TRow, patch: Partial<TRow>) => Partial<TRow>;
 
@@ -237,15 +283,11 @@ export function useStructuredRows<
   );
 
   // BASELINE COMPLETENESS CONTRACT: `baselineMap` stays `undefined` exactly
-  // when `baseline` itself is — never coerced to an empty `Map`, which
-  // `editLog.ts`'s `resolveOpAgainstBaseline` would read as "this rowId is
-  // provably not on the server" instead of "not yet known". See the
-  // `baseline` option's own doc comment above.
+  // when `baseline` itself is — see `editLog.ts`'s `toBaselineMap` (the
+  // tested implementation of this translation) and the `baseline` option's
+  // own doc comment above.
   const baselineMap = useMemo<ReadonlyMap<RowId, TRow> | undefined>(
-    () =>
-      baseline === undefined
-        ? undefined
-        : new Map(baseline.map((entry) => [entry.rowId, entry.row] as const)),
+    () => toBaselineMap(baseline),
     [baseline],
   );
 
@@ -278,12 +320,10 @@ export function useStructuredRows<
 
   // The one write that carries intent. `values` and `edits` land in a
   // single atom write so no consumer ever sees them disagree.
-  const lastWritten = useRef<ResponseValue[] | undefined>(undefined);
   const commit = useCallback(
     (nextEdits: EditLog<TRow>) => {
       const nextRows = projectRows(baseline, nextEdits, projectOpts);
       const nextValues = projectValues(nextRows.map((entry) => entry.row));
-      lastWritten.current = nextValues;
       updateResponse({
         values: nextValues,
         edits: nextEdits as unknown as StructuredEditRecord[],
@@ -293,31 +333,35 @@ export function useStructuredRows<
   );
 
   // Baseline moved (first load, refetch, invalidation): refresh the
-  // DISPLAY mirror only. Never touches `edits`. Structural (not reference)
-  // comparison against `lastWritten` — see this file's doc comment, item 2
-  // — so the redundant re-render `commit` otherwise causes (it computes its
-  // own fresh `nextValues`, distinct by reference from what this effect
-  // recomputes from the resulting `rows` on the next render) settles
-  // without a second, content-identical atom write.
+  // DISPLAY mirror only. Never touches `edits`. Compared structurally
+  // (`deepEqualJson`) against the response's OWN current `values` — not a
+  // `lastWritten` ref — so this is correct on EVERY render including the
+  // first: a `commit`-driven re-render's freshly recomputed `values` is
+  // content-equal (but not reference-equal) to what `commit` already wrote,
+  // and an `enable_when` remount whose `response.values` already matches
+  // the freshly computed projection is likewise a no-op — neither writes
+  // again, so neither clears this question's errors. See this file's doc
+  // comment, item 2, for the two review findings this fixes.
   useEffect(() => {
-    if (
-      lastWritten.current !== undefined &&
-      deepEqualJson(lastWritten.current, values)
-    ) {
-      lastWritten.current = values;
-      return;
-    }
-    lastWritten.current = values;
+    if (deepEqualJson(response?.values, values)) return;
     updateResponse({ values });
-  }, [values, updateResponse]);
+  }, [response?.values, values, updateResponse]);
 
-  // Declarative one-shot seed (e.g. encounter's `?toDischarge`). A restored
-  // draft wins: only applied when the log is still empty.
+  // Declarative one-shot seed (e.g. encounter's `?toDischarge`). The latch
+  // decision itself is `decideInitialEditsSeed` (`rowMutations.ts`) — see
+  // its doc comment for the bug this fixes (post-`3b41fe4fd` review): the
+  // ref must NOT latch while `initialEdits` simply hasn't arrived yet
+  // (`"wait"`), only once the log already has content (`"skip"`) or
+  // `initialEdits` finally does (`"seed"`) — otherwise a seed constructed
+  // from baseline data that resolves after mount (every real seed under the
+  // canonical full-row vocabulary) is silently dropped forever.
   const seeded = useRef(false);
   useEffect(() => {
     if (seeded.current) return;
+    const decision = decideInitialEditsSeed(edits, initialEdits);
+    if (decision === "wait") return;
     seeded.current = true;
-    if (!initialEdits?.length || edits.length > 0) return;
+    if (decision === "skip" || !initialEdits) return;
     let next: EditLog<TRow> = edits;
     for (const edit of initialEdits) {
       next = applyEditToLog(next, edit, applyOpts);
@@ -368,7 +412,11 @@ export function useStructuredRows<
         );
         results.push({ ok: true, rowId });
       }
-      commit(next);
+      // Every candidate was a duplicate (or the batch was empty): `next`
+      // is still the SAME reference as `edits` (no `applyEditToLog` call
+      // ran), so skip the commit entirely — a fully-rejected batch must
+      // not write to the atom or clear this question's errors.
+      if (next !== edits) commit(next);
       return results;
     },
     [disabled, rows, duplicateKey, edits, applyOpts, commit],
@@ -384,12 +432,14 @@ export function useStructuredRows<
       if (disabled) return;
       const current = rows.find((entry) => entry.rowId === rowId)?.row;
       if (!current) return;
-      const derived = normalizePatch?.(current, patch) ?? patch;
-      const merged = { ...current, ...derived } as TRow;
       commit(
         applyEditToLog(
           edits,
-          { rowId, op: "update", patch: merged },
+          {
+            rowId,
+            op: "update",
+            patch: mergePatch(current, patch, normalizePatch),
+          },
           applyOpts,
         ),
       );
@@ -402,29 +452,10 @@ export function useStructuredRows<
       if (disabled) return;
       const entry = rows.find((row) => row.rowId === rowId);
       if (!entry) return;
-      if (entry.origin === "baseline" && softDelete) {
-        // Server row + marker semantics ⇒ an ordinary update carrying the
-        // marker merged onto the row's current content — the row stays on
-        // screen, softDeleted, and un-removing later is just another
-        // update. See `SoftDeleteDescriptor`'s doc comment (`./types`).
-        const merged = { ...entry.row, ...softDelete.patch } as TRow;
-        commit(
-          applyEditToLog(
-            edits,
-            { rowId, op: "update", patch: merged },
-            applyOpts,
-          ),
-        );
-        return;
-      }
-      // Either an added row (annihilated by the reducer — it never reached
-      // the server) or a baseline row of a type with true delete
-      // semantics. `patch` carries the row's last-known content, per the
-      // canonical vocabulary's `remove` contract.
       commit(
         applyEditToLog(
           edits,
-          { rowId, op: "remove", patch: entry.row },
+          resolveRemoveIntent(entry, softDelete),
           applyOpts,
         ),
       );
@@ -436,47 +467,23 @@ export function useStructuredRows<
     (patch: Partial<TRow>) => {
       if (disabled) return;
       const entry = rows[0];
-      if (entry) {
-        // Baseline row present, or an `add` already recorded — either way
-        // an ordinary update; `editLog.ts`'s coalescing keeps it an `add`
-        // if that's what the existing entry already is.
-        const derived = normalizePatch?.(entry.row, patch) ?? patch;
-        const merged = { ...entry.row, ...derived } as TRow;
-        commit(
-          applyEditToLog(
-            edits,
-            { rowId: entry.rowId, op: "update", patch: merged },
-            applyOpts,
-          ),
-        );
-        return;
-      }
-      // No row yet at all: the first-ever creation of a create-only
-      // singleton. `createSeed` is a required precondition for this path —
-      // enforced here, not extracted, since it is a caller-configuration
-      // invariant, not a domain decision over row content.
-      if (!createSeed) {
-        throw new Error(
-          `useStructuredRows(${questionId}): mode:"single" with no baseline row requires createSeed`,
-        );
-      }
-      const seed = createSeed();
-      const derived = normalizePatch?.(seed, patch) ?? patch;
-      const merged = { ...seed, ...derived } as TRow;
-      commit(
-        applyEditToLog(
-          edits,
-          { rowId: singletonRowId, op: "add", patch: merged },
-          applyOpts,
-        ),
-      );
+      const edit = resolveSetRow({
+        currentRow: entry?.row,
+        currentRowId: entry?.rowId,
+        patch,
+        createSeed,
+        singletonRowId,
+        normalizePatch,
+        questionId,
+      });
+      commit(applyEditToLog(edits, edit, applyOpts));
     },
     [
       disabled,
       rows,
-      normalizePatch,
       createSeed,
       singletonRowId,
+      normalizePatch,
       questionId,
       edits,
       applyOpts,
@@ -489,13 +496,9 @@ export function useStructuredRows<
     const entry = rows[0];
     if (!entry) return;
     commit(
-      applyEditToLog(
-        edits,
-        { rowId: entry.rowId, op: "remove", patch: entry.row },
-        applyOpts,
-      ),
+      applyEditToLog(edits, resolveRemoveIntent(entry, softDelete), applyOpts),
     );
-  }, [disabled, rows, edits, applyOpts, commit]);
+  }, [disabled, rows, softDelete, edits, applyOpts, commit]);
 
   const base: StructuredRowsBase<TRow> = {
     edits,
