@@ -104,7 +104,7 @@ describe("applyEditToLog — one edit per rowId, coalescing rules", () => {
     assert.deepEqual(afterRevert, []);
   });
 
-  it("a remove followed by an add on the same rowId is a legal resurrection: ONE update", () => {
+  it("a remove followed by an add on the same rowId is a legal resurrection: ONE update (no baseline supplied — the documented conservative fallback, not a claimed guarantee)", () => {
     const afterRemove = applyEditToLog([], remove("r1", row("r1", "gone")));
     const afterAdd = applyEditToLog(
       afterRemove,
@@ -112,6 +112,107 @@ describe("applyEditToLog — one edit per rowId, coalescing rules", () => {
     );
 
     assert.deepEqual(afterAdd, [update("r1", row("r1", "restored"))]);
+  });
+
+  it("a remove followed by an add resolves by DATA: a rowId provably absent from a supplied baseline resurrects as ADD, not update", () => {
+    // Reproduces the review finding: annihilation erases a rowId's
+    // history from the log, not from existence. `add(u) -> remove(u)`
+    // annihilates (log empty) -- so the "an existing `remove` entry can
+    // only come from a baseline row" assumption is false. A `remove(u)`
+    // that follows appends a FRESH remove via `appendFresh` (which never
+    // consults baseline for a `remove`), and a rowId the server never
+    // had can reach the resurrection decision with an existing `remove`
+    // entry that merely LOOKS baseline-shaped.
+    const baseline = baselineOf([["someone-else", row("someone-else", "x")]]);
+    const afterAdd1 = applyEditToLog([], add("uuid-1", row("uuid-1", "v1")), {
+      baseline,
+    });
+    const afterRemove1 = applyEditToLog(
+      afterAdd1,
+      remove("uuid-1", row("uuid-1", "v1")),
+      { baseline },
+    );
+    assert.deepEqual(afterRemove1, []); // annihilated — history erased
+
+    const afterRemove2 = applyEditToLog(
+      afterRemove1,
+      remove("uuid-1", row("uuid-1", "v2")),
+      { baseline },
+    );
+    assert.deepEqual(afterRemove2, [remove("uuid-1", row("uuid-1", "v2"))]);
+
+    const afterAdd2 = applyEditToLog(
+      afterRemove2,
+      add("uuid-1", row("uuid-1", "v3")),
+      { baseline },
+    );
+
+    // `uuid-1` is provably not in `baseline` — this must resolve to
+    // `add`, never `update` against a server row that doesn't exist.
+    assert.deepEqual(afterAdd2, [add("uuid-1", row("uuid-1", "v3"))]);
+  });
+
+  it("an update stray-landing after an add/remove annihilation, followed by an add, also resolves by DATA (same decision point, reached one hop earlier)", () => {
+    // The same erasure, reached via `update` instead of `remove`: a
+    // debounced field flush (or an assistant edit) queued before the row
+    // was removed, arriving after the annihilation. `appendFresh` has no
+    // way to know the rowId is stale, so it appends the `update` as
+    // fresh. A subsequent `add` must still be judged against `baseline`,
+    // not against the (misleading) fact that the existing entry says
+    // `update`.
+    const baseline = baselineOf([["someone-else", row("someone-else", "x")]]);
+    const afterAdd = applyEditToLog([], add("uuid-2", row("uuid-2", "v1")), {
+      baseline,
+    });
+    const afterRemove = applyEditToLog(
+      afterAdd,
+      remove("uuid-2", row("uuid-2", "v1")),
+      { baseline },
+    );
+    assert.deepEqual(afterRemove, []); // annihilated
+
+    const afterStrayUpdate = applyEditToLog(
+      afterRemove,
+      update("uuid-2", row("uuid-2", "late-flush")),
+      { baseline },
+    );
+    assert.deepEqual(afterStrayUpdate, [
+      update("uuid-2", row("uuid-2", "late-flush")),
+    ]);
+
+    const afterAdd2 = applyEditToLog(
+      afterStrayUpdate,
+      add("uuid-2", row("uuid-2", "v3")),
+      { baseline },
+    );
+
+    assert.deepEqual(afterAdd2, [add("uuid-2", row("uuid-2", "v3"))]);
+  });
+
+  it("an update on a baseline row followed by an add resolves to ONE update — never a duplicate create", () => {
+    // Exact review repro: baseline={server-9}, update(server-9) then
+    // add(server-9) must never become {op:"add"} — that would instruct
+    // the differ to CREATE a row the server already has.
+    const baseline = baselineOf([["server-9", row("server-9", "baseline")]]);
+    const afterUpdate = applyEditToLog(
+      [],
+      update("server-9", row("server-9", "changed")),
+      { baseline },
+    );
+    const afterAdd = applyEditToLog(
+      afterUpdate,
+      add("server-9", row("server-9", "newer")),
+      { baseline },
+    );
+
+    assert.deepEqual(afterAdd, [update("server-9", row("server-9", "newer"))]);
+  });
+
+  it("an update followed by an add with no baseline supplied at all falls back to the conservative update default", () => {
+    const afterUpdate = applyEditToLog([], update("r1", row("r1", "one")));
+    const afterAdd = applyEditToLog(afterUpdate, add("r1", row("r1", "two")));
+
+    assert.deepEqual(afterAdd, [update("r1", row("r1", "two"))]);
   });
 
   it("edits on different rowIds never interact", () => {

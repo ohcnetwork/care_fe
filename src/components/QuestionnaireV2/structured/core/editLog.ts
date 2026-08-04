@@ -4,11 +4,16 @@ import type { EditLog, RowEdit, RowId } from "./types";
 /**
  * Options for {@link applyEditToLog}. Signature per task-3-brief.md /
  * annex `p1-state-core.md` §6, translated: the annex's draft
- * `ApplyEditOptions` also carried an `isEmptyRow` hook for annihilating an
- * added-then-emptied row (`AppointmentQuestion.tsx:144-153`-style). That
- * hook belongs to `removeRow` (annex §7, a later task's concern, not
- * listed among this task's coalescing rules) — it is deliberately not
- * part of this reducer's surface. See task-3-report.md for the full note.
+ * `ApplyEditOptions` also carries an `isEmptyRow` hook for annihilating an
+ * added-then-emptied row (`AppointmentQuestion.tsx:144-153`-style,
+ * annex §6's `add`+`update` cell — NOT §7, which never mentions it; §7 is
+ * `removeRow`'s three-outcome dispatch, a different concern). It is
+ * omitted here as a CARRY-FORWARD, not because it belongs elsewhere: the
+ * plan wires it from `useStructuredRows` (Task 7,
+ * `2026-08-04-phase1-core-kit.md` line 217 — "`isEmptyRow` annihilates an
+ * emptied added row"), which means this file WILL be reopened to accept
+ * and act on it. Not listed among task-3's required coalescing rules, so
+ * deferred rather than guessed at now. See task-3-report.md for the note.
  */
 export interface ApplyEditOptions<TRow extends object> {
   /**
@@ -46,8 +51,15 @@ export interface ApplyEditOptions<TRow extends object> {
  * |-----------|-------------------------|----------------------------|--------------------|
  * | *(none)*  | append `add`            | append `update`; drop if patch canonicalizes to baseline | append `remove` |
  * | `add`     | replace patch, stays `add` | replace patch, stays `add` | **annihilate** (row never reached the server) |
- * | `update`  | replace patch, becomes `add` (dormant/assistant-only) | replace patch, canonicalize against baseline, **drop if reverted** | replace with `remove` |
- * | `remove`  | **resurrect as `update`** (translated — see below) | resurrect as `update` (restore-and-patch) | keep `remove` (idempotent) |
+ * | `update`  | **resolved against `baseline`** — `add` if the rowId provably isn't in it, else replace patch and stay `update` | replace patch, canonicalize against baseline, **drop if reverted** | replace with `remove` |
+ * | `remove`  | **resolved against `baseline`** — `add` if the rowId provably isn't in it, else `update` (restore-and-patch) | same resolution as the `add` column | keep `remove` (idempotent) |
+ *
+ * The `update`/`remove` existing-row cells that read "resolved against
+ * `baseline`" do NOT trust "this entry's existing op" or "the incoming
+ * edit's op" as a proxy for "is this rowId really on the server" — both
+ * are forgeable by annihilation (see `resolveOpAgainstBaseline`'s doc
+ * comment for the exact sequences that forge them). The baseline map is
+ * the only source of truth consulted there.
  */
 export function applyEditToLog<TRow extends object>(
   log: EditLog<TRow>,
@@ -101,7 +113,7 @@ function coalesce<TRow extends object>(
     case "update":
       return coalesceOntoUpdate(existing, incoming, baseline);
     case "remove":
-      return coalesceOntoRemove(existing, incoming);
+      return coalesceOntoRemove(existing, incoming, baseline);
   }
 }
 
@@ -130,12 +142,16 @@ function coalesceOntoUpdate<TRow extends object>(
     return { rowId: existing.rowId, op: "remove", patch: incoming.patch };
   }
   if (incoming.op === "add") {
-    // Dormant / assistant-only path (annex §6): a same-rowId `add` while
-    // an `update` is already pending. No human-driven editor produces
-    // this (a real add always mints a fresh rowId), but the annex names
-    // it, so it is handled rather than left to throw: replace the patch
-    // and keep the entry as `add`, matching the annex's stated cell.
-    return { rowId: existing.rowId, op: "add", patch: incoming.patch };
+    // FIX (post-review): the annex's draft cell for this ("replace patch,
+    // stays `add`") assumed an existing `update` entry always implies a
+    // real baseline row. That assumption doesn't hold — see
+    // `resolveOpAgainstBaseline`'s doc comment — so this is resolved
+    // against the baseline map instead of trusting either op label.
+    // Without the fix: `baseline={server-9}`, `update(server-9)` then
+    // `add(server-9)` produced `{op:"add"}` — an instruction to CREATE a
+    // row the server already has, i.e. a duplicate clinical record.
+    const op = resolveOpAgainstBaseline(existing.rowId, baseline);
+    return { rowId: existing.rowId, op, patch: incoming.patch };
   }
   // incoming is "update": replace the patch (always the complete row —
   // no field-level merge needed), then canonicalize against baseline.
@@ -155,28 +171,93 @@ function coalesceOntoUpdate<TRow extends object>(
 function coalesceOntoRemove<TRow extends object>(
   existing: RowEdit<TRow>,
   incoming: RowEdit<TRow>,
+  baseline: ReadonlyMap<RowId, TRow> | undefined,
 ): RowEdit<TRow> | null {
   if (incoming.op === "remove") {
     // Idempotent — keep the existing remove untouched.
     return existing;
   }
   // incoming is "add" or "update": a legal resurrection of a row that
-  // carried a pending `remove`. A rowId can only reach this state via a
-  // baseline row (an added row's remove is annihilated, never leaving a
-  // `remove` entry — see coalesceOntoAdd), so restoring it is genuinely
-  // an update to an existing server row, never a fresh creation.
+  // carried a pending `remove`.
   //
-  // TRANSLATION FROM THE ANNEX: `p1-state-core.md` §6's table drafts this
-  // cell as "replace with `add`" for an incoming `add`. That was written
-  // against a vocabulary where `add` meant something looser; under the
-  // shipped canonical vocabulary (stable, client-owned `rowId` — server id
-  // for a row that exists on the server, uuid only for a row that never
-  // did) an `add` op on a rowId that just had a `remove` entry cannot
-  // mean "brand new server row" — the rowId is already known. task-3's
-  // brief makes this explicit ("remove → add ... is a legal resurrection:
-  // ONE update"), so both incoming `add` and incoming `update` resolve
-  // to the same single `update` entry here. Noted in task-3-report.md.
-  return { rowId: existing.rowId, op: "update", patch: incoming.patch };
+  // FIX (post-review): this used to assume that reaching this branch at
+  // all PROVES the rowId is a baseline row, reasoning that "an added
+  // row's remove is annihilated, never leaving a `remove` entry — so a
+  // `remove` entry here can only have come from a baseline row". That
+  // invariant is false: annihilation ERASES the rowId's history from the
+  // log, not from existence. `add(u) → remove(u)` (annihilated, log
+  // empty) → `remove(u)` again reaches `appendFresh`, which appends a
+  // brand-new `remove` entry for `u` unconditionally (it never checks
+  // baseline for a `remove`) — so a rowId that never touched the server
+  // can absolutely arrive here with an existing `remove` entry. A
+  // following `add(u)` would then have been "resurrected" as `update`
+  // against a row the server never had. (The same erasure is reachable
+  // via a stray `update(u)` landing after the drop — a debounced field
+  // flush or an assistant edit queued before the removal — which lands
+  // in `coalesceOntoUpdate`'s `add` branch instead; both are fixed the
+  // same way, by `resolveOpAgainstBaseline`.)
+  //
+  // Resolved against the baseline map instead: `add` if the rowId
+  // provably isn't a server row, `update` (restore-and-patch) otherwise.
+  //
+  // TRANSLATION FROM THE ANNEX, still holding: `p1-state-core.md` §6's
+  // table drafts the incoming-`add` cell as "replace with `add`"
+  // unconditionally and the incoming-`update` cell as "replace with
+  // `update`" — two different outcomes for the same resurrection. Under
+  // the shipped canonical vocabulary a stable, already-known `rowId`
+  // makes that op-label distinction meaningless (see task-3-report.md);
+  // both incoming ops now resolve identically, by data.
+  //
+  // NOTED, NOT FIXED — a deliberate asymmetry with `coalesceOntoUpdate`:
+  // when the resolved op is `update` and the incoming patch happens to
+  // deep-equal the baseline row exactly, this still records an `update`
+  // entry rather than dropping it (unlike `update`→`update`, which drops
+  // via `isRevertedToBaseline`). A remove-then-restore-unchanged is not
+  // treated as "never happened" here. Left as-is per review: task-3's
+  // brief only specifies "ONE update" for this cell, no canonicalization
+  // is requested, and the review flagged this as a note-don't-change item
+  // rather than a defect.
+  const op = resolveOpAgainstBaseline(existing.rowId, baseline);
+  return { rowId: existing.rowId, op, patch: incoming.patch };
+}
+
+/**
+ * Decides what a resurrection/re-add op should actually BECOME, based on
+ * whether the rowId is a row the server has — never on which op label the
+ * existing log entry or the incoming edit happens to carry. Both call
+ * sites below turned out to be forgeable if the op label is trusted
+ * instead:
+ *
+ *  - `coalesceOntoRemove` (existing entry is `remove`): reachable for a
+ *    rowId that never touched the server — see the FIX note there for
+ *    the exact `add → remove (annihilated) → remove → add` sequence.
+ *  - `coalesceOntoUpdate`'s `add` branch (existing entry is `update`):
+ *    reachable the same way, one hop earlier — `add(u) → remove(u)`
+ *    (annihilated) → a stray `update(u)` lands (debounced flush /
+ *    assistant edit queued before the removal, arriving after) appends a
+ *    fresh `update` entry via `appendFresh` for a rowId baseline never
+ *    had; a later `add(u)` then reaches this same decision point.
+ *
+ * So neither "the existing entry's op" nor "the incoming edit's op" is a
+ * reliable proxy for "this rowId is on the server" — the baseline map is
+ * the only source of truth consulted here.
+ *
+ * When `baseline` is not supplied at all, there is genuinely no way to
+ * know, and this does NOT claim to: it returns `"update"` as a
+ * documented, conservative fallback — not a guarantee. A wrongly emitted
+ * `update` against a rowId the server doesn't have surfaces as a loud
+ * 404/400 from the differ's request; a wrongly emitted `add` would
+ * instead silently create a duplicate clinical row, the worse failure
+ * mode (data corruption, not a rejected request). Every real caller (via
+ * `useStructuredRows`) supplies the full baseline map, so this branch is
+ * a defensive fallback for a caller that doesn't, not the expected path.
+ */
+function resolveOpAgainstBaseline<TRow extends object>(
+  rowId: RowId,
+  baseline: ReadonlyMap<RowId, TRow> | undefined,
+): "add" | "update" {
+  if (baseline === undefined) return "update";
+  return baseline.has(rowId) ? "update" : "add";
 }
 
 /**
