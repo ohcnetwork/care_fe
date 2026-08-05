@@ -155,7 +155,12 @@ export function useBatchRequest<TError = DefaultError, TContext = unknown>(
           }
 
           // We still need to throw so the caller treats this mutation as failed.
-          throw new HTTPError({ ...error, silent: true });
+          throw new HTTPError({
+            message: "Batch Request Failed",
+            status: error.status,
+            silent: true,
+            cause: error.cause,
+          });
         }
       },
       ...mutationOptions,
