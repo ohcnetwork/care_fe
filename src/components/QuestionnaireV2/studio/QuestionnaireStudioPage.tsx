@@ -59,7 +59,10 @@ import {
 } from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
-import { QuestionnaireScope } from "@/types/questionnaire/questionnaire";
+import {
+  QuestionnaireScope,
+  scopeCreateFields,
+} from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
 
@@ -147,7 +150,7 @@ export function QuestionnaireStudioPage({
 
   const [queryParams, setQueryParams] = useQueryParams();
   const { mode, import: importParam } = queryParams;
-  const [view, setView] = useState<"edit" | "preview">(
+  const [requestedView, setView] = useState<"edit" | "preview">(
     mode === "preview" ? "preview" : "edit",
   );
   const [importOpen, setImportOpen] = useState(importParam === "1");
@@ -174,6 +177,12 @@ export function QuestionnaireStudioPage({
 
   const { canWrite, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);
+
+  // Read-only users get preview only — including on an `/edit` deep link.
+  // The edit surface has nothing to save through (StudioTopBar hides Save and
+  // Discard), so offering it would collect edits that can never be persisted
+  // and then prompt about them on the way out.
+  const view = canWrite ? requestedView : "preview";
 
   // Creating or importing questions selects them in the reducer — the
   // inspector must follow, or it would stay on Form settings showing
@@ -309,6 +318,19 @@ export function QuestionnaireStudioPage({
 
   const backPath = `${scope.basePath}/${id}`;
 
+  // Stable identity — the provider's context value is keyed on it, so an
+  // inline literal would re-render every consumer of the form context on
+  // each keystroke.
+  const rendererSubject = useMemo(
+    () => ({ facilityId: scope.facilityId }),
+    [scope.facilityId],
+  );
+
+  // Valuesets created from the inspector are filed under the mount's own auth
+  // context: instance-context creation is superuser-only, so a facility mount
+  // authoring an instance valueset would 403 for every facility admin.
+  const valueSetContext = useMemo(() => scopeCreateFields(scope), [scope]);
+
   const revealQuestion = (questionId: string) => {
     dispatch({ type: "select", id: questionId });
     setInspectorTarget("question");
@@ -414,7 +436,7 @@ export function QuestionnaireStudioPage({
     <QuestionnaireFormProvider
       questionnaire={draft}
       mode="preview"
-      subject={{ facilityId: scope.facilityId }}
+      subject={rendererSubject}
       revealHidden={editing}
       inert={editing}
     >
@@ -531,6 +553,7 @@ export function QuestionnaireStudioPage({
                   number={selectedNumber}
                   allQuestions={state.questions}
                   subjectType={questionnaire.subject_type}
+                  valueSetContext={valueSetContext}
                   dispatch={studioDispatch}
                 />
               )}

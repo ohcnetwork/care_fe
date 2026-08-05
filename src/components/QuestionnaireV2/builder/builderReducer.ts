@@ -58,8 +58,10 @@ export function collectIds(question: Question): string[] {
 /**
  * Boolean conditions persist the strings "Yes"/"No" — never JSON booleans.
  * Deployed evaluators normalize dependent boolean responses to "Yes"/"No"
- * before comparing, so true/false answers would never match. Lives here so
- * editor display and load-time migration cannot drift.
+ * before comparing, so true/false answers would never match. Applies to
+ * equals/not_equals only; `exists` compares against a literal boolean
+ * (`normalizeExistsConditionAnswer`). Lives here so editor display and
+ * load-time migration cannot drift.
  */
 export function normalizeBooleanConditionAnswer(answer: unknown): "Yes" | "No" {
   if (answer === true || answer === "true" || answer === "Yes") return "Yes";
@@ -67,9 +69,63 @@ export function normalizeBooleanConditionAnswer(answer: unknown): "Yes" | "No" {
 }
 
 /**
- * Repairs boolean enable_when answers (JSON true/false or "true"/"false") to
- * the deployed "Yes"/"No" convention, keyed off the target question's type so
- * string questions that legitimately answer "true" are left alone.
+ * `exists` answers persist as JSON booleans: the renderer enables an
+ * `exists: false` dependent precisely when the controller has no value, and
+ * the backend reaches the same reading only from a literal `false` — a
+ * "No" string normalizes to True there and to "has a value" here, i.e. the
+ * exact opposite of what the author picked.
+ */
+export function normalizeExistsConditionAnswer(answer: unknown): boolean {
+  return (
+    answer !== false && answer !== "false" && answer !== "No" && answer !== "no"
+  );
+}
+
+/**
+ * Builds a condition whose answer matches the shape its operator persists:
+ * `exists` a literal boolean, equals/not_equals a string ("Yes"/"No" once the
+ * target is boolean) and the comparison operators a number. Every operator or
+ * answer edit in the visibility editor routes through here, so a stored answer
+ * can never contradict its operator.
+ */
+export function buildCondition(
+  question: string,
+  operator: EnableWhen["operator"],
+  answer: EnableWhen["answer"],
+): EnableWhen {
+  switch (operator) {
+    case "exists":
+      return {
+        question,
+        operator,
+        answer: normalizeExistsConditionAnswer(answer),
+      };
+    case "equals":
+    case "not_equals":
+      return {
+        question,
+        operator,
+        answer:
+          typeof answer === "boolean"
+            ? normalizeBooleanConditionAnswer(answer)
+            : String(answer),
+      };
+    default:
+      return {
+        question,
+        operator,
+        answer: typeof answer === "number" ? answer : Number(answer) || 0,
+      };
+  }
+}
+
+/**
+ * Repairs enable_when answers to the convention each operator needs:
+ * equals/not_equals JSON true/false (or "true"/"false") become "Yes"/"No",
+ * and `exists` answers written as strings by earlier builder versions become
+ * booleans again. The equals/not_equals repair is keyed off the target
+ * question's type so string questions that legitimately answer "true" are
+ * left alone; `exists` carries no such string, whatever the target type.
  */
 export function migrateLegacyBooleanEnableWhen(
   questions: Question[],
@@ -85,12 +141,38 @@ export function migrateLegacyBooleanEnableWhen(
   };
   indexTypes(questions);
 
-  const needsMigration = (condition: EnableWhen): boolean =>
-    typeByLinkId.get(condition.question) === "boolean" &&
-    (condition.operator === "equals" || condition.operator === "not_equals") &&
-    (typeof condition.answer === "boolean" ||
-      condition.answer === "true" ||
-      condition.answer === "false");
+  const needsMigration = (condition: EnableWhen): boolean => {
+    // Ahead of the target-type guard: an `exists` answer is never a
+    // meaningful string, so these need repairing on non-boolean targets too.
+    if (condition.operator === "exists") {
+      return typeof condition.answer !== "boolean";
+    }
+    if (typeByLinkId.get(condition.question) !== "boolean") return false;
+    return (
+      (condition.operator === "equals" ||
+        condition.operator === "not_equals") &&
+      (typeof condition.answer === "boolean" ||
+        condition.answer === "true" ||
+        condition.answer === "false")
+    );
+  };
+
+  const migrate = (condition: EnableWhen): EnableWhen =>
+    buildCondition(
+      condition.question,
+      condition.operator,
+      // Migration must not change how a stored rule evaluates. Only a literal
+      // `false` ever read as "target is empty" — every legacy `exists` string,
+      // "No" included, already evaluated as "target is answered" in both the
+      // renderer and the backend, so it heals to `true`, not to its own
+      // author-facing reading. Below, `buildCondition` leaves equals/not_equals
+      // strings byte-identical (a string target may legitimately compare to
+      // "true"), so the boolean convention is applied here, where the target
+      // type is known to be boolean.
+      condition.operator === "exists"
+        ? true
+        : normalizeBooleanConditionAnswer(condition.answer),
+    );
 
   return mapTree(questions, (list) =>
     list.map((question) => {
@@ -98,12 +180,7 @@ export function migrateLegacyBooleanEnableWhen(
       return {
         ...question,
         enable_when: question.enable_when.map((condition) =>
-          needsMigration(condition)
-            ? ({
-                ...condition,
-                answer: normalizeBooleanConditionAnswer(condition.answer),
-              } as EnableWhen)
-            : condition,
+          needsMigration(condition) ? migrate(condition) : condition,
         ),
       };
     }),

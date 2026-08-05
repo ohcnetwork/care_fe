@@ -172,10 +172,11 @@ export function StudioTopBar({
           </Popover>
         )}
 
-        <EditPreviewToggle view={view} onChange={onViewChange} />
-
+        {/* Read-only users are pinned to preview by the page — offering the
+            toggle would advertise an edit surface that can never be saved. */}
         {canWrite && (
           <>
+            <EditPreviewToggle view={view} onChange={onViewChange} />
             <Button
               type="button"
               variant="outline"

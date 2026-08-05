@@ -28,7 +28,14 @@ function ruleText(
   const questionText =
     target?.text || target?.link_id || condition.question || "?";
   if (condition.operator === "exists") {
-    return t("condition_rule_answered", { question: questionText });
+    // `exists: false` is the inverse rule — shown only while the target has
+    // no value at all (see `normalizeExistsConditionAnswer`).
+    return t(
+      condition.answer === false
+        ? "condition_rule_not_answered"
+        : "condition_rule_answered",
+      { question: questionText },
+    );
   }
   return t("condition_rule", {
     question: questionText,

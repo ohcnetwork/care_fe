@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
+import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import { cn } from "@/lib/utils";
 
@@ -58,6 +59,7 @@ function TimelineRail({
 
 export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
   const { t } = useTranslation();
+  const { canWrite } = useCanWriteQuestionnaire(scope);
 
   const { data: revisions, isLoading } = useQuery({
     queryKey: questionnaireKeys.revisions(questionnaire.id),
@@ -126,6 +128,8 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
                   )}
                 </div>
                 <div className="flex shrink-0 gap-2">
+                  {/* The studio opens read-only without write permission, so
+                      the entry point says so rather than promising editing. */}
                   <Button
                     type="button"
                     variant="outline"
@@ -134,7 +138,7 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
                       navigate(`${scope.basePath}/${questionnaire.id}/edit`)
                     }
                   >
-                    {t("continue_editing")}
+                    {canWrite ? t("continue_editing") : t("open")}
                   </Button>
                 </div>
               </div>

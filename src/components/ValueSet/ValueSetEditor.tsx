@@ -17,8 +17,19 @@ import query from "@/Utils/request/query";
 
 import { ValueSetForm } from "./ValueSetForm";
 
+/** Who the created valueset belongs to. The backend only lets superusers
+ *  create in the `instance` context, so any mount reachable from a
+ *  facility-scoped surface must pass its own context or every create 403s. */
+export type ValueSetCreateContext = Pick<
+  ValueSetCreate,
+  "auth_context" | "facility" | "facility_organization"
+>;
+
+const INSTANCE_CONTEXT: ValueSetCreateContext = { auth_context: "instance" };
+
 interface ValueSetEditorProps {
   id?: string; // If provided, we're editing an existing valueset
+  createContext?: ValueSetCreateContext;
   onSuccess?: (data: ValueSetRead) => void;
 }
 
@@ -38,7 +49,11 @@ function normalizeValueSetPayload(data: ValueSetBase): ValueSetBase {
   };
 }
 
-export function ValueSetEditor({ id, onSuccess }: ValueSetEditorProps) {
+export function ValueSetEditor({
+  id,
+  createContext = INSTANCE_CONTEXT,
+  onSuccess,
+}: ValueSetEditorProps) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   // Fetch existing valueset if we're editing
@@ -85,7 +100,7 @@ export function ValueSetEditor({ id, onSuccess }: ValueSetEditorProps) {
     } else {
       const createData: ValueSetCreate = {
         ...payload,
-        auth_context: "instance",
+        ...createContext,
         inherited: false,
       };
       createMutation.mutate(createData);

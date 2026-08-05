@@ -33,12 +33,16 @@ import { SelectOrCreateValueset } from "@/components/Questionnaire/SelectOrCreat
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { useValueSetExpansion } from "@/components/QuestionnaireV2/shared/useValueSetExpansion";
+import { ValueSetCreateContext } from "@/components/ValueSet/ValueSetEditor";
 
 import { AnswerOption, Question } from "@/types/questionnaire/question";
 
 interface AnswerOptionsEditorProps {
   question: Question;
   onChange: (patch: Partial<Question>) => void;
+  /** Auth context for valuesets authored inline — the mount's own, never
+   *  instance (see SelectOrCreateValueset). */
+  valueSetContext?: ValueSetCreateContext;
 }
 
 type Mode = "custom" | "valueset";
@@ -48,7 +52,11 @@ type Mode = "custom" | "valueset";
  * unit-choice source; bounded expansions preview as the same chips the
  * renderer shows, and `question.unit` is the pre-selected default.
  */
-function QuantityUnitsEditor({ question, onChange }: AnswerOptionsEditorProps) {
+function QuantityUnitsEditor({
+  question,
+  onChange,
+  valueSetContext,
+}: AnswerOptionsEditorProps) {
   const { t } = useTranslation();
   const { boundedCodes } = useValueSetExpansion(question.answer_value_set);
 
@@ -65,6 +73,7 @@ function QuantityUnitsEditor({ question, onChange }: AnswerOptionsEditorProps) {
         <Label>{t("select_a_value_set")}</Label>
         <SelectOrCreateValueset
           value={question.answer_value_set}
+          createContext={valueSetContext}
           onValueSetChange={(vs) =>
             // Actively clears answer_option: grandfathered custom-option
             // quantity data migrates to the valueset on the next edit.
@@ -113,6 +122,7 @@ function QuantityUnitsEditor({ question, onChange }: AnswerOptionsEditorProps) {
 export function AnswerOptionsEditor({
   question,
   onChange,
+  valueSetContext,
 }: AnswerOptionsEditorProps) {
   const { t } = useTranslation();
   // The valueset tab can be open before a valueset has actually been picked —
@@ -126,7 +136,13 @@ export function AnswerOptionsEditor({
   } | null>(null);
 
   if (question.type === "quantity") {
-    return <QuantityUnitsEditor question={question} onChange={onChange} />;
+    return (
+      <QuantityUnitsEditor
+        question={question}
+        onChange={onChange}
+        valueSetContext={valueSetContext}
+      />
+    );
   }
 
   if (question.type !== "choice") {
@@ -354,6 +370,7 @@ export function AnswerOptionsEditor({
           <Label>{t("select_a_value_set")}</Label>
           <SelectOrCreateValueset
             value={question.answer_value_set}
+            createContext={valueSetContext}
             onValueSetChange={(vs) =>
               onChange({ answer_value_set: vs, answer_option: undefined })
             }
