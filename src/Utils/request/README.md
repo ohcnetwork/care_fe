@@ -192,7 +192,7 @@ body, and a reference ID. Use the reference ID to find the result of each
 request in the response.
 
 ```tsx
-import batchApi from "@/types/base/batch/batchApi";
+import encounterApi from "@/types/emr/encounter/encounterApi";
 import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 
 function CloseEncounter({ encounterId }: { encounterId: string }) {

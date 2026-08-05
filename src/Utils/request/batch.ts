@@ -59,13 +59,15 @@ function isBatchResponse(cause: unknown): cause is BatchRequestResponse {
     cause !== null &&
     "results" in cause &&
     Array.isArray(cause.results) &&
-    cause.results.every(
-      (result) =>
-        typeof result === "object" &&
-        result !== null &&
-        "reference_id" in result &&
-        "status_code" in result,
-    )
+    cause.results.every((result) => {
+      if (typeof result !== "object" || result === null) {
+        return false;
+      }
+      const r = result as Record<string, unknown>;
+      return (
+        typeof r.reference_id === "string" && typeof r.status_code === "number"
+      );
+    })
   );
 }
 
@@ -81,7 +83,7 @@ function isBatchResponse(cause: unknown): cause is BatchRequestResponse {
  */
 function handleBatchSubErrors(results: BatchRequestResult[]) {
   for (const result of results) {
-    if (result.status_code <= 299) {
+    if (200 <= result.status_code && result.status_code < 300) {
       continue;
     }
 
@@ -153,8 +155,7 @@ export function useBatchRequest<TError = DefaultError, TContext = unknown>(
           }
 
           // We still need to throw so the caller treats this mutation as failed.
-          error.silent = true;
-          throw error;
+          throw new HTTPError({ ...error, silent: true });
         }
       },
       ...mutationOptions,
