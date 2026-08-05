@@ -80,38 +80,52 @@ export async function createServiceRequest(
     search: data.activityDefinition,
   });
 
-  const serviceRequestCard = page
-    .locator('[data-slot="collapsible"]')
+  // `StructuredList` renders one shared tree per row — a desktop grid row
+  // AND a mobile collapsible card — rather than the legacy widget's one
+  // `Collapsible` per row (`[data-slot="collapsible"]`). Every row carries
+  // `data-structured-row`; the row's title (here, the activity definition's
+  // display name) still lands somewhere in that row's DOM even when the
+  // desktop grid is what's actually visible, so filtering by it still
+  // resolves the right row. Each field is then reached through the column's
+  // stable `data-column` anchor rather than a structural selector, so a
+  // future column reflow can't silently misdirect these locators.
+  const serviceRequestRow = page
+    .locator('[role="row"][data-structured-row]')
     .filter({ hasText: data.activityDefinition })
     .first();
-  await serviceRequestCard.waitFor({ state: "visible" });
+  await serviceRequestRow.waitFor({ state: "visible" });
 
-  await serviceRequestCard.locator('[data-slot="collapsible-trigger"]').click();
-
-  await serviceRequestCard
-    .getByRole("radio", { name: /routine/i })
-    .waitFor({ state: "visible" });
-
-  await serviceRequestCard.getByRole("radio", { name: data.priority }).check();
+  // Priority is a `Select` (normalized alongside every other column's
+  // control), not the legacy `RadioGroup` — same underlying value, a
+  // different, more compact control.
+  const priorityTrigger = serviceRequestRow
+    .locator('[data-column="priority"]')
+    .getByRole("combobox");
+  await priorityTrigger.waitFor({ state: "visible" });
+  await priorityTrigger.click();
+  // Not `exact: true` — matches the legacy radio-group lookup's own
+  // case-insensitive behavior. `PRIORITIES`'s "Stat" fixture value only
+  // ever matches the rendered option ("STAT", `t("stat")`) case-insensitively.
+  await page.getByRole("option", { name: data.priority }).click();
 
   if (allFields) {
-    const bodySiteSelector = serviceRequestCard
-      .locator('button[role="combobox"]')
-      .filter({ hasText: /body site/i });
+    const bodySiteSelector = serviceRequestRow
+      .locator('[data-column="body_site"]')
+      .getByRole("combobox");
     await bodySiteSelector.waitFor({ state: "visible" });
 
     await selectFromValueSet(page, bodySiteSelector, {
       search: data.bodySite!,
     });
 
-    await serviceRequestCard
+    await serviceRequestRow
+      .locator('[data-column="patient_instruction"]')
       .getByPlaceholder(/enter patient instruction/i)
       .fill(data.patientInstruction!);
 
-    const requestorSelector = serviceRequestCard
-      .locator('button[role="combobox"]')
-      .filter({ has: page.locator("p") })
-      .first();
+    const requestorSelector = serviceRequestRow
+      .locator('[data-column="requester"]')
+      .getByRole("combobox");
     await requestorSelector.waitFor({ state: "visible" });
 
     await selectFromCommand(page, requestorSelector, {
@@ -119,14 +133,17 @@ export async function createServiceRequest(
     });
 
     // Capture the selected requestor's display name after selection
-    const selectedRequestorName = await serviceRequestCard
-      .locator('button[role="combobox"]')
+    const selectedRequestorName = await serviceRequestRow
+      .locator('[data-column="requester"]')
       .locator("p.font-medium.text-gray-900")
       .first()
       .textContent();
     data.requestor = selectedRequestorName?.trim() || data.requestor!;
 
-    await serviceRequestCard.getByPlaceholder(/add note/i).fill(data.notes!);
+    await serviceRequestRow
+      .locator('[data-column="note"]')
+      .getByPlaceholder(/add note/i)
+      .fill(data.notes!);
   }
 
   // Service requests are authored on the v2 fill page — its primary action

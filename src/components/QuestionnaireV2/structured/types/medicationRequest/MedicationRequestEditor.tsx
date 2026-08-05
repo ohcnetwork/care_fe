@@ -36,6 +36,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { DosageFrequencyInput } from "@/components/Medicine/DosageFrequencyInput";
 import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
@@ -56,7 +57,10 @@ import {
   StructuredList,
   type StructuredRowAction,
 } from "@/components/QuestionnaireV2/structured/core/StructuredList";
-import type { BaselineRow } from "@/components/QuestionnaireV2/structured/core/types";
+import type {
+  BaselineRow,
+  RowId,
+} from "@/components/QuestionnaireV2/structured/core/types";
 import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
 import { applyTemplateItems } from "@/components/QuestionnaireV2/structured/shared/responseTemplates/applyTemplateItems";
 import { useAddToTemplate } from "@/components/QuestionnaireV2/structured/shared/responseTemplates/useAddToTemplate";
@@ -692,6 +696,24 @@ export function MedicationRequestEditor({
     disabled,
   });
 
+  // REGRESSION FIX (spec-repair, structuredQuestions/medicationRequest &
+  // medicine/prescription{Create,Edit}.spec.ts): legacy gated every removal
+  // behind `ConfirmActionDialog` (`MedicationRequestQuestion.tsx`'s
+  // `handleRemoveMedication` → `confirmRemoveMedication`) — removing a
+  // prescribed medication is destructive enough (an existing row flips to
+  // `entered_in_error` rather than vanishing) to warrant an "are you sure"
+  // step. That confirmation never made it into this port: `onRemoveRow` was
+  // wired straight to `list.removeRow`, so a single dropdown click silently
+  // removed the row. `medicationStatement/MedicationStatementEditor.tsx`
+  // already carries the correct, ported version of this same pattern
+  // (`pendingRemoveRowId` + `ConfirmActionDialog`) — mirrored here.
+  const [pendingRemoveRowId, setPendingRemoveRowId] = useState<RowId | null>(
+    null,
+  );
+  const pendingRemoveRow = list.rows.find(
+    (row) => row.rowId === pendingRemoveRowId,
+  );
+
   // Response templates — the shared `ResponseTemplates` module
   // (`structured/shared/responseTemplates/`) `service_request` built and
   // published for exactly this second consumer (`.superpowers/sdd/
@@ -1083,6 +1105,23 @@ export function MedicationRequestEditor({
     <div className="space-y-4">
       {addToTemplateDialog}
 
+      <ConfirmActionDialog
+        open={pendingRemoveRowId !== null}
+        onOpenChange={(open) => !open && setPendingRemoveRowId(null)}
+        title={t("remove_medication")}
+        description={t("remove_medication_confirmation", {
+          medication: pendingRemoveRow
+            ? displayMedicationName(pendingRemoveRow.row)
+            : "",
+        })}
+        onConfirm={() => {
+          if (pendingRemoveRowId) list.removeRow(pendingRemoveRowId);
+          setPendingRemoveRowId(null);
+        }}
+        confirmText={t("remove")}
+        variant="destructive"
+      />
+
       <StructuredDroppedRowsNotice
         droppedEdits={list.droppedEdits}
         rowLabel={displayMedicationName}
@@ -1118,6 +1157,20 @@ export function MedicationRequestEditor({
                               )}
                             </div>
                           )}
+                          gap="sm"
+                        />
+                      ) : (
+                        "-"
+                      ),
+                  },
+                  {
+                    key: "dosage_instruction",
+                    label: t("duration"),
+                    render: (instructions) =>
+                      instructions?.length ? (
+                        <DosageInstructionList
+                          instructions={instructions}
+                          renderItem={(di) => formatDuration(di) || "-"}
                           gap="sm"
                         />
                       ) : (
@@ -1274,7 +1327,7 @@ export function MedicationRequestEditor({
         errors={errors}
         disabled={disabled}
         onUpdateRow={list.updateRow}
-        onRemoveRow={list.removeRow}
+        onRemoveRow={(rowId) => setPendingRemoveRowId(rowId)}
         // The row-level "Add to Template" trigger — previously stranded
         // (see this port's own report: `StructuredList`'s row-actions menu
         // had room for exactly Remove). Now rides in the SAME overflow menu

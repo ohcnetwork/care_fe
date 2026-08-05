@@ -172,7 +172,10 @@ test.describe("Medication Request Questionnaire", () => {
     // Select random additional instruction - target only enabled button
     const instruction = faker.helpers.arrayElement(instructionOptions);
 
-    await page.getByTitle("Show Advanced Fields").first().click();
+    await page
+      .getByRole("button", { name: /show advanced fields/i })
+      .first()
+      .click();
     await page
       .locator("button:not([disabled])")
       .filter({ hasText: "No instructions selected" })
@@ -213,12 +216,13 @@ test.describe("Medication Request Questionnaire", () => {
     const intent = faker.helpers.arrayElement(INTENT_OPTIONS);
     await page.getByRole("option", { name: intent, exact: true }).click();
 
-    // Add notes - scroll to the end and target the active notes field
+    // Add notes - scroll to the end and target the active notes field.
+    // The row's accessible name is now the column header ("Note") rather
+    // than the placeholder text — StructuredList's `controlProps` names
+    // every control from `column.header`, not from its placeholder — so
+    // this locates the field by its (still-distinct) placeholder instead.
     const notes = faker.lorem.sentence();
-    await page
-      .getByRole("textbox", { name: "Enter additional notes" })
-      .last()
-      .fill(notes);
+    await page.getByPlaceholder("Enter additional notes").last().fill(notes);
 
     await page.getByRole("button", { name: "Save Changes" }).click();
 

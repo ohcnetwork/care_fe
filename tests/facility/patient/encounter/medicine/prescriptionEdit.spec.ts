@@ -47,7 +47,17 @@ test.describe("Edit Patient Prescription", () => {
       await page.getByRole("tab", { name: "Medication" }).click();
       await page.locator("input[data-slot='command-input']").fill(medicineName);
       await page.getByRole("option", { name: medicineName }).first().click();
-      await expect(page.getByText(medicineName).first()).toBeVisible();
+      // The row's medicine name is rendered twice by StructuredList's dual
+      // desktop/mobile tree — once in the desktop-only identity cell, once
+      // (hidden at this viewport) in the mobile card header. Scope through
+      // `data-column` so the match is the visible desktop cell, not
+      // whichever comes first in DOM order.
+      await expect(
+        page
+          .locator('[data-column="medicine"]')
+          .filter({ hasText: medicineName })
+          .first(),
+      ).toBeVisible();
     });
 
     await test.step("Fill medication details", async () => {
@@ -66,7 +76,10 @@ test.describe("Edit Patient Prescription", () => {
         .click();
 
       // expand
-      await page.getByTitle("Show Advanced Fields").first().click();
+      await page
+        .getByRole("button", { name: /show advanced fields/i })
+        .first()
+        .click();
 
       await page
         .getByRole("button", { name: "No instructions selected" })
@@ -128,10 +141,11 @@ test.describe("Edit Patient Prescription", () => {
     });
 
     await test.step("Remove medication", async () => {
-      await page
-        .getByRole("button", { name: "Medication actions" })
-        .first()
-        .click();
+      // StructuredList's row-actions trigger carries a shared, generic
+      // aria-label ("Row actions") across every structured type — the
+      // legacy widget's per-type "Medication actions" label was dropped as
+      // part of the normalization (StructuredList.tsx's `t("row_actions")`).
+      await page.getByRole("button", { name: "Row actions" }).first().click();
       await page.getByRole("menuitem", { name: "Remove" }).click();
       await page.getByRole("button", { name: "Remove" }).click();
     });
