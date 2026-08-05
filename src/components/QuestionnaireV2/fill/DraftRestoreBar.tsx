@@ -5,16 +5,8 @@ import { Button } from "@/components/ui/button";
 
 import { formatDateTime } from "@/Utils/utils";
 
-import type { DraftDropReason } from "./draft/draftMerge";
+import { DroppedAnswersList } from "./DroppedAnswersList";
 import type { LoadedFillDraft } from "./draft/fillDraftStore";
-
-/** i18n key per {@link DraftDropReason} — the short clause the restore
- *  bar appends after each dropped answer's label. */
-const DROP_REASON_KEY: Record<DraftDropReason, string> = {
-  question_removed: "fill_draft_drop_reason_question_removed",
-  type_changed: "fill_draft_drop_reason_type_changed",
-  option_removed: "fill_draft_drop_reason_option_removed",
-};
 
 /**
  * Prompts the clinician to accept or discard a detected local draft instead
@@ -58,16 +50,7 @@ export function DraftRestoreBar({
         )}
         {draft.dropped.length > 0 && (
           <div className="text-amber-800">
-            <p>
-              {t("fill_draft_answers_dropped", { count: draft.dropped.length })}
-            </p>
-            <ul className="list-inside list-disc">
-              {draft.dropped.map((entry) => (
-                <li key={entry.questionId}>
-                  {entry.label} — {t(DROP_REASON_KEY[entry.reason])}
-                </li>
-              ))}
-            </ul>
+            <DroppedAnswersList dropped={draft.dropped} />
           </div>
         )}
       </div>

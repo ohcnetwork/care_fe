@@ -1,4 +1,4 @@
-import { Plus, X } from "lucide-react";
+import { History, Plus, X } from "lucide-react";
 import { navigate, useNavigationPrompt } from "raviger";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,6 +19,7 @@ import type {
 
 import { ClinicalHistoryTab } from "./ClinicalHistoryTab";
 import { DraftRestoreBar } from "./DraftRestoreBar";
+import { DroppedAnswersList } from "./DroppedAnswersList";
 import { FillFormSection } from "./FillFormSection";
 import { FillHeader } from "./FillHeader";
 import {
@@ -30,6 +31,7 @@ import { ServerErrorsPanel } from "./ServerErrorsPanel";
 import type { FormStore } from "./StoreRegistrar";
 import { FormAssistantSlot } from "./assistant/FormAssistantSlot";
 import { useFillAssistantSession } from "./assistant/useFillAssistantSession";
+import type { DroppedDraftAnswer } from "./draft/draftMerge";
 import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
 import { useFillSessionAutosave } from "./draft/useFillAutosave";
 import { useSaveServerDraft } from "./draft/useSaveServerDraft";
@@ -98,6 +100,40 @@ function QuestionnaireUpdatedBanner({
   );
 }
 
+/**
+ * What a RESUMED SERVER draft lost to questionnaire changes. The local-draft
+ * equivalent lives in the restore bar, which can name the drops before the
+ * clinician accepts; a server draft is seeded at creation with no such gate,
+ * so the same facts arrive as a dismissible notice instead of silence.
+ */
+function ServerDraftDropNotice({
+  dropped,
+  onDismiss,
+}: {
+  dropped: DroppedDraftAnswer[];
+  onDismiss: () => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="mx-auto mb-4 flex w-full max-w-3xl items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      <History aria-hidden className="mt-0.5 size-4 shrink-0" />
+      <div className="min-w-0 flex-1">
+        <DroppedAnswersList dropped={dropped} />
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="size-8"
+        aria-label={t("close")}
+        onClick={onDismiss}
+      >
+        <X className="size-4" />
+      </Button>
+    </div>
+  );
+}
+
 interface FillPageBodyProps {
   questionnaire: QuestionnaireRead;
   patient?: PatientRead;
@@ -108,6 +144,9 @@ interface FillPageBodyProps {
   localDraft: LoadedFillDraft | undefined;
   /** Resumed server draft, seeded into the primary form at creation. */
   serverDraftResponses?: Record<string, QuestionnaireResponse>;
+  /** Answers that resumed draft could not carry onto the current
+   *  questionnaire — surfaced, never dropped silently. */
+  serverDraftDropped?: DroppedDraftAnswer[];
   continueDraftId?: string;
   exitTarget: string;
 }
@@ -127,6 +166,7 @@ export function FillPageBody({
   scope,
   localDraft,
   serverDraftResponses,
+  serverDraftDropped,
   continueDraftId,
   exitTarget,
 }: FillPageBodyProps) {
@@ -137,6 +177,7 @@ export function FillPageBody({
   // for sessions that never open it, while unmount-on-switch would blank
   // adapted structured widgets that keep local state.
   const [historyMounted, setHistoryMounted] = useState(false);
+  const [dropNoticeDismissed, setDropNoticeDismissed] = useState(false);
 
   const storesRef = useRef(new Map<string, FormStore>());
   const [storesVersion, setStoresVersion] = useState(0);
@@ -280,12 +321,15 @@ export function FillPageBody({
 
   // The assistant capability's session-scoped handle. Built fresh for THIS
   // mount (never looked up from a module global), so two fill sessions
-  // mounted at once get two independent handles.
+  // mounted at once get two independent handles. The phase goes in for the
+  // same reason `frozen` goes into every input surface below: the
+  // assistant writes to the same stores and must observe the same freeze.
   const assistantHandle = useFillAssistantSession({
     subject,
     forms,
     getStore,
     storesVersion,
+    phase: sessionPhase,
   });
 
   return (
@@ -362,6 +406,14 @@ export function FillPageBody({
                       frozen={frozen}
                     />
                   )}
+                  {serverDraftDropped &&
+                    serverDraftDropped.length > 0 &&
+                    !dropNoticeDismissed && (
+                      <ServerDraftDropNotice
+                        dropped={serverDraftDropped}
+                        onDismiss={() => setDropNoticeDismissed(true)}
+                      />
+                    )}
                   {autosave.restoredDraft && (
                     <DraftRestoreBar
                       draft={autosave.restoredDraft}

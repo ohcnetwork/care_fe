@@ -1,4 +1,4 @@
-import { entryHasContent } from "@/components/QuestionnaireV2/form/engine/store";
+import { entryIsAnswered } from "@/components/QuestionnaireV2/form/engine/inputs/answeredEntry";
 
 import { dateQueryString } from "@/Utils/utils";
 import type { ResponseValue } from "@/types/questionnaire/form";
@@ -14,16 +14,15 @@ const BARE_HH_MM = /^([01]\d|2[0-3]):[0-5]\d$/;
  * value+unit+coding, coding-only entries send just the coding, and all
  * other answered entries stringify.
  *
- * Content-free entries are dropped rather than stringified; submitting the
- * literal "undefined" would make the backend reject the atomic batch.
+ * Unanswered entries are dropped rather than stringified — `entryIsAnswered`
+ * decides, the same rule the required check passes on, so nothing that
+ * satisfied validation is silently omitted here. Submitting the literal
+ * "undefined" would make the backend reject the atomic batch.
  */
 export function serializeResponseValues(
   values: ResponseValue[],
 ): SubmitResultValue[] {
-  const answered = values.filter(
-    (entry) =>
-      entryHasContent(entry) || entry.coding != null || entry.unit != null,
-  );
+  const answered = values.filter(entryIsAnswered);
   return answered.map((entry) => {
     if (entry.type === "date" && entry.value) {
       const date = new Date(entry.value);

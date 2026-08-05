@@ -13,22 +13,19 @@ import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
 import {
   isPatientBound,
   rendererSubjectOf,
-  subjectResourceId,
 } from "@/components/QuestionnaireV2/fill/subject";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
-import type {
-  QuestionnaireSubmitBody,
-  SubmitResult,
-} from "@/types/questionnaire/questionnaireApi";
+import type { SubmitResult } from "@/types/questionnaire/questionnaireApi";
 
 import {
   composeStructuredV2Requests,
   structuredEditsOf,
 } from "./composeStructured";
 import { serializeResponseValues } from "./serializeValues";
+import { planPlainSubmit } from "./submitTarget";
 
 /** Body of the completion PUT for a resumed server draft. Restore reads
  *  `response_dump.questionnaireResponses.{questionnaire,responses}`.
@@ -45,6 +42,27 @@ interface FormSubmissionCompletionBody {
       errors: never[];
     };
   };
+}
+
+/**
+ * An encounter-subject questionnaire reached submit from a mount that has no
+ * encounter — the patient route, which the fill page admits on purpose.
+ *
+ * The backend requires `encounter` for those, so this batch can never
+ * succeed; thrown instead of composed so the clinician is told which
+ * questionnaire is in the wrong place, before the atomic batch rolls back
+ * everything they typed with a pydantic message that never mentions the URL.
+ */
+export class MissingEncounterError extends Error {
+  readonly questionnaireTitle: string;
+
+  constructor(questionnaireTitle: string) {
+    super(
+      `encounter-subject questionnaire "${questionnaireTitle}" has no encounter to submit against`,
+    );
+    this.name = "MissingEncounterError";
+    this.questionnaireTitle = questionnaireTitle;
+  }
 }
 
 /**
@@ -215,40 +233,29 @@ export async function composeBatch({
     .filter((result) => result.values.length > 0);
 
   if (results.length > 0) {
-    if (patientBound) {
-      const body: QuestionnaireSubmitBody = {
-        resource_id: subjectResourceId(subject),
-        encounter: renderCtx.encounterId,
-        patient: patientBound.patientId,
-        results,
-        // Links this submission to the resumed server draft so the
-        // backend's duplicate-submission guard (keyed off
-        // `form_submission`) catches a second tab completing the same
-        // draft concurrently. The completion PUT below still runs
-        // alongside this — the backend doesn't flip the draft's status
-        // server-side yet.
-        ...(continueDraftId ? { form_submission: continueDraftId } : {}),
-      };
-      requests.push({
-        url: `/api/v1/questionnaire/${questionnaire.id}/submit/`,
-        method: "POST",
-        reference_id: questionnaire.id,
-        body,
-      });
-    } else {
-      // Resource subjects have neither patient nor encounter — the
-      // backend records the response against `resource_id` alone.
-      const body: { resource_id: string; results: SubmitResult[] } = {
-        resource_id: subjectResourceId(subject),
-        results,
-      };
-      requests.push({
-        url: `/api/v1/questionnaire/${questionnaire.id}/submit_resource/`,
-        method: "POST",
-        reference_id: questionnaire.id,
-        body,
-      });
+    // Endpoint and body come from the questionnaire's subject_type, not the
+    // mount — see `planPlainSubmit`. `continueDraftId` links the submission
+    // to the resumed server draft so the backend's duplicate-submission
+    // guard (keyed off `form_submission`) catches a second tab completing
+    // the same draft concurrently; the completion PUT below still runs
+    // alongside it — the backend doesn't flip the draft's status
+    // server-side yet.
+    const plan = planPlainSubmit({
+      questionnaireId: questionnaire.id,
+      subjectType: questionnaire.subject_type,
+      subject,
+      results,
+      continueDraftId,
+    });
+    if (plan.kind === "encounter_required") {
+      throw new MissingEncounterError(questionnaire.title);
     }
+    requests.push({
+      url: plan.url,
+      method: "POST",
+      reference_id: questionnaire.id,
+      body: plan.body,
+    });
   }
 
   // Server drafts are patient/encounter form_submission records — there is

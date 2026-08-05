@@ -2,6 +2,8 @@ import type { Code } from "@/types/base/code/code";
 import type { ResponseValue } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
+import type { PlainValueEntry, PlainValueInput } from "./types";
+
 /**
  * The one choke point every assistant write to a PLAIN (non-structured)
  * question passes through. Deliberately dependency-free (no React, no
@@ -22,8 +24,11 @@ function fail<T>(error: string): CoercionResult<T> {
   return { ok: false, error };
 }
 
-/** What an assistant may supply as one repeat's raw input. */
-export type RawAnswerValue = string | number | boolean;
+/** What an assistant may supply as one repeat's raw input: the handle's
+ *  own write shape, before any question-type coercion. Aliased rather
+ *  than re-spelled so the published contract and the value this module
+ *  can actually coerce cannot drift apart. */
+export type RawAnswerValue = PlainValueInput;
 
 /**
  * Whole numbers only — `Number.isInteger` on the PARSED value, not a
@@ -213,15 +218,46 @@ export const MAX_RESPONSE_ENTRIES = 100;
 export const MAX_RESPONSE_TEXT_LENGTH = 10_000;
 export const MAX_NOTE_LENGTH = 10_000;
 
-export interface SetValueBoundsResult {
-  ok: boolean;
-  error?: string;
+export type SetValueBoundsResult =
+  { ok: true; values: RawAnswerValue[] } | { ok: false; error: string };
+
+/** `NaN` is excluded here rather than at each numeric coercion: it is the
+ *  one number no question type has a meaning for, and `String(NaN)` would
+ *  otherwise reach a string question as the answer "NaN". */
+function isRawAnswerValue(raw: unknown): raw is RawAnswerValue {
+  if (typeof raw === "number") return Number.isFinite(raw);
+  return typeof raw === "string" || typeof raw === "boolean";
 }
 
-/** Checked before per-entry coercion. Pure size/shape bounds only — never
- *  question-type-aware (that is every `coerce*` function above). */
+/** Named without interpolating the value itself — a rejected entry may be
+ *  an object whose `toString` is the caller's own code. */
+function describeRejected(raw: unknown): string {
+  if (raw === null) return "null";
+  if (raw === undefined) return "undefined";
+  if (Array.isArray(raw)) return "a list";
+  if (typeof raw === "number") return "a non-finite number";
+  return `a value of type ${typeof raw}`;
+}
+
+/**
+ * Checked before per-entry coercion. Pure size/shape bounds only — never
+ * question-type-aware (that is every `coerce*` function above).
+ *
+ * Entries are checked POSITIVELY against the scalar forms a `coerce*`
+ * can act on, because a declared parameter type proves nothing about an
+ * untrusted caller's argument: anything outside {@link PlainValueInput} —
+ * `null` (what `getValue`/`listQuestions` hand BACK for an unanswered
+ * repeat, hence the wider {@link PlainValueEntry} accepted here, so a
+ * round-tripping caller is told rather than crashed), `undefined`, an
+ * object, an array, a symbol, `NaN` — has no coercion at all. Rejecting
+ * them here rather
+ * than downstream is what keeps the handle from throwing a `TypeError`
+ * out of `raw.trim()` or recording "null"/"[object Object]" as a clinical
+ * answer. Clearing a question is `values: []`. The narrowed array comes
+ * back on the success arm so the caller never has to cast.
+ */
 export function checkSetValueBounds(
-  values: readonly RawAnswerValue[],
+  values: readonly PlainValueEntry[],
   note: string | undefined,
 ): SetValueBoundsResult {
   if (values.length > MAX_RESPONSE_ENTRIES) {
@@ -230,13 +266,21 @@ export function checkSetValueBounds(
       error: `Too many values (${values.length}); at most ${MAX_RESPONSE_ENTRIES} are accepted`,
     };
   }
+  const raws: RawAnswerValue[] = [];
   for (const raw of values) {
+    if (!isRawAnswerValue(raw)) {
+      return {
+        ok: false,
+        error: `${describeRejected(raw)} is not an answer; pass a string, number or yes/no value, or an empty list of values to clear the question`,
+      };
+    }
     if (typeof raw === "string" && raw.length > MAX_RESPONSE_TEXT_LENGTH) {
       return {
         ok: false,
         error: `A value is too long (max ${MAX_RESPONSE_TEXT_LENGTH} characters)`,
       };
     }
+    raws.push(raw);
   }
   if (note !== undefined && note.length > MAX_NOTE_LENGTH) {
     return {
@@ -244,7 +288,7 @@ export function checkSetValueBounds(
       error: `Note is too long (max ${MAX_NOTE_LENGTH} characters)`,
     };
   }
-  return { ok: true };
+  return { ok: true, values: raws };
 }
 
 /**

@@ -20,7 +20,11 @@ import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { Question } from "@/types/questionnaire/question";
 import mutate from "@/Utils/request/mutate";
 
-import { StructuredBuildError, composeBatch } from "./composeBatch";
+import {
+  MissingEncounterError,
+  StructuredBuildError,
+  composeBatch,
+} from "./composeBatch";
 import type { ServerValidationError } from "./mapBatchErrors";
 import { mapBatchErrors } from "./mapBatchErrors";
 import { collectStructuredErrors } from "./validateStructured";
@@ -270,6 +274,19 @@ export function useSubmitFillSession({
         )
       ).flat();
     } catch (error) {
+      // An encounter-subject questionnaire is being filled from the patient
+      // route — a mount the fill page admits, but one the backend's submit
+      // endpoint cannot serve (it demands an encounter). Blocked here, with
+      // the questionnaire named, so the clinician can reopen it from the
+      // encounter instead of discovering it through an atomic rollback.
+      if (error instanceof MissingEncounterError) {
+        toast.error(
+          t("questionnaire_submit_requires_encounter", {
+            title: error.questionnaireTitle,
+          }),
+        );
+        return;
+      }
       // A structured type's `buildRequests` threw. Pin it to the question
       // that produced it in that question's own store, and fail the way
       // every other submission failure fails — never as a silent no-op.

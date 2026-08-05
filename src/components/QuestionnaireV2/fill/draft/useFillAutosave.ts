@@ -16,18 +16,17 @@ import {
   clearFillDraft,
   mergeDraftIntoSeed,
   preserveExcludedStructured,
-  safeSessionSignature,
   saveFillDraft,
+  sessionEditSignature,
 } from "./fillDraftStore";
 
 const AUTOSAVE_DEBOUNCE_MS = 1500;
 
-/** The draft-safe signature for ONE form — `safeSessionSignature` scoped
- *  to a single-element input, so the per-form fingerprint is exactly what
- *  this form contributes to the whole-session signature (one partitioning
- *  rule, never two). */
+/** The edit signature for ONE form — `sessionEditSignature` scoped to a
+ *  single-element input, so the per-form fingerprint is exactly what this
+ *  form contributes to the whole-session signature (one rule, never two). */
 function formSignature(form: FillFormEntry, store: FormStore): string {
-  return safeSessionSignature([
+  return sessionEditSignature([
     { questionnaire: form.questionnaire, responses: store.get(responsesAtom) },
   ]);
 }
@@ -87,6 +86,11 @@ export function useFillSessionAutosave({
   // Set on successful submit: the draft served its purpose, so neither the
   // pending debounce nor the unmount/pagehide flush may re-save it.
   const finishedRef = useRef(false);
+  // Flipped by the first save that actually writes a draft. Until then this
+  // session has stored nothing, so an empty snapshot of it is not the
+  // clinician emptying their work and must not delete a draft an earlier
+  // session left under the same key — see `saveFillDraft`'s `mayClear`.
+  const storedDraftRef = useRef(false);
   // Read by resumeRestoredDraft, which only ever fires from an event
   // handler well after mount.
   const restoredDraftRef = useRef(restoredDraft);
@@ -121,15 +125,20 @@ export function useFillSessionAutosave({
    *
    * While the restore prompt is still un-acted NOTHING persists: the
    * stored draft is the clinician's to accept or discard, and any write
-   * from this session would either overwrite it (a structured prefetch, a
-   * keystroke) or — via `saveFillDraft`'s clear-on-empty branch — delete
-   * it outright.
+   * from this session would overwrite it (a structured prefetch, a
+   * keystroke).
    */
   const persistNow = useCallback(() => {
     const current = scopeRef.current;
     if (!current || !persistRef.current || finishedRef.current) return;
     if (restorePendingRef.current) return;
-    saveFillDraft(current, snapshotAll(), retainedRef.current);
+    const stored = saveFillDraft(
+      current,
+      snapshotAll(),
+      retainedRef.current,
+      storedDraftRef.current,
+    );
+    if (stored) storedDraftRef.current = true;
   }, [snapshotAll]);
 
   /**
@@ -139,8 +148,8 @@ export function useFillSessionAutosave({
    * sections' StoreRegistrars register, so that flush would write a
    * snapshot missing the just-added forms and silently shrink the stored
    * draft (the Resume path re-adds drafted forms exactly this way).
-   * Gated on `dirty`, because an untouched session is empty and an empty
-   * save takes `saveFillDraft`'s clear-on-empty branch.
+   * Gated on `dirty`, because an untouched session has nothing of the
+   * clinician's to write.
    */
   useEffect(() => {
     if (!scopeKey || !persistLocally || !dirty) return;
@@ -199,11 +208,15 @@ export function useFillSessionAutosave({
       return [
         store.sub(responsesAtom, () => {
           if (finishedRef.current) return;
-          // An edit is a change to the DRAFT-SAFE partition. Structured
-          // types with draftPolicy "exclude" write prefetched server rows
-          // into the store from mount effects; treating those writes as
-          // edits marked untouched clinical forms dirty and persisted a
-          // phantom draft over the clinician's real one.
+          // An edit is a change to the draft-safe partition OR to the edit
+          // log of a draft-EXCLUDED question (files): those answers never
+          // reach the stored draft, but abandoning them is still losing the
+          // clinician's work, so they must arm the prompt and the chip.
+          // What is deliberately NOT an edit is an excluded question's
+          // `values`: structured widgets write prefetched server rows there
+          // from mount effects, and treating those as edits marked
+          // untouched clinical forms dirty and persisted a phantom draft
+          // over the clinician's real one.
           //
           // Only THIS form's part is re-serialized — the fired store is
           // the only one that could have changed — and compared against
@@ -264,8 +277,8 @@ export function useFillSessionAutosave({
     // the gate synchronously (the ref recomputes only on the next render)
     // and write now, so anything typed in the meantime becomes a fresh
     // draft of its own instead of living un-persisted until the next
-    // keystroke. An untouched session hits saveFillDraft's clear-on-empty
-    // branch, which is a no-op on the already-cleared key.
+    // keystroke. An untouched session stores nothing, and the key it would
+    // otherwise clear is already gone.
     restorePendingRef.current = false;
     setRestoreDismissed(true);
     persistNow();

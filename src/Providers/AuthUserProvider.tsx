@@ -192,33 +192,55 @@ export default function AuthUserProvider({
     navigate(redirectUrl);
   };
 
-  const signOut = useCallback(async () => {
-    const accessToken = localStorage.getItem(LocalStorageKeys.accessToken);
-    const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
+  /**
+   * End the session and return to the login form. `clearDrafts` separates a
+   * DELIBERATE sign-out (the user menu's Log out — drafts are session data
+   * and must not outlive it) from the involuntary paths that end a session
+   * without the user asking for it: the session-expired page and the
+   * cross-tab storage listener below, which fires in every OTHER tab off
+   * the token-refresh error branch above (retry:false, so a single network
+   * blip trips it). Wiping there destroys exactly the work fill drafts
+   * exist to recover — a draft left at the login form by an expiry survives
+   * re-login on purpose. Shared-device protection does not depend on this:
+   * `clearOtherUsersFillDrafts` runs at the next successful login and the
+   * TTL sweep at every boot.
+   */
+  const endSession = useCallback(
+    async (clearDrafts: boolean) => {
+      const accessToken = localStorage.getItem(LocalStorageKeys.accessToken);
+      const refreshToken = localStorage.getItem(LocalStorageKeys.refreshToken);
 
-    if (accessToken && refreshToken) {
-      try {
-        await mutate(authApi.logout)({
-          access: accessToken,
-          refresh: refreshToken,
-        });
-      } catch (error) {
-        console.error("Error during logout:", error);
+      if (accessToken && refreshToken) {
+        try {
+          await mutate(authApi.logout)({
+            access: accessToken,
+            refresh: refreshToken,
+          });
+        } catch (error) {
+          console.error("Error during logout:", error);
+        }
       }
-    }
 
-    localStorage.removeItem(LocalStorageKeys.accessToken);
-    localStorage.removeItem(LocalStorageKeys.refreshToken);
-    localStorage.removeItem(LocalStorageKeys.patientTokenKey);
-    clearQuestionnaireFillDrafts();
-    setAccessToken(null);
-    setPatientToken(null);
+      localStorage.removeItem(LocalStorageKeys.accessToken);
+      localStorage.removeItem(LocalStorageKeys.refreshToken);
+      localStorage.removeItem(LocalStorageKeys.patientTokenKey);
+      if (clearDrafts) clearQuestionnaireFillDrafts();
+      setAccessToken(null);
+      setPatientToken(null);
 
-    await queryClient.resetQueries({ queryKey: ["currentUser"] });
+      await queryClient.resetQueries({ queryKey: ["currentUser"] });
 
-    const redirectURL = getRedirectURL();
-    navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");
-  }, [queryClient]);
+      const redirectURL = getRedirectURL();
+      navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");
+    },
+    [queryClient],
+  );
+
+  const signOut = useCallback(() => endSession(true), [endSession]);
+  const endSessionKeepingDrafts = useCallback(
+    () => endSession(false),
+    [endSession],
+  );
 
   // Handles signout from current tab, if signed out from another tab.
   useEffect(() => {
@@ -232,7 +254,11 @@ export default function AuthUserProvider({
           LocalStorageKeys.patientTokenKey,
         ].includes(event.key)
       ) {
-        signOut();
+        // A token key disappearing elsewhere is not proof of intent: the
+        // token-refresh error branch removes the same keys on one transient
+        // failure. The tab that ACTUALLY ran the deliberate sign-out already
+        // cleared the drafts.
+        endSessionKeepingDrafts();
       }
     };
 
@@ -241,7 +267,7 @@ export default function AuthUserProvider({
     return () => {
       removeEventListener("storage", listener);
     };
-  }, [signOut]);
+  }, [endSessionKeepingDrafts]);
 
   if (isLoading) {
     return <Loading />;
@@ -252,6 +278,7 @@ export default function AuthUserProvider({
       value={{
         signIn,
         signOut,
+        endSessionKeepingDrafts,
         verifyMFA,
         isAuthenticating,
         isVerifyingMFA,

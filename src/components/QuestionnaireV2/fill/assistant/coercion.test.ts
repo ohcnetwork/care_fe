@@ -386,4 +386,72 @@ describe("checkSetValueBounds", () => {
     const note = "x".repeat(MAX_NOTE_LENGTH + 1);
     assert.equal(checkSetValueBounds(["a"], note).ok, false);
   });
+
+  it("hands the accepted values back with no nulls left to cast away", () => {
+    const result = checkSetValueBounds(["a", 2, true], undefined);
+    assert.equal(result.ok, true);
+    assert.deepEqual(result.ok && result.values, ["a", 2, true]);
+  });
+
+  it("REJECTS a null entry — getValue emits null for an unanswered repeat, so a round-tripping caller passes it straight back", () => {
+    // Not a throw and not an accepted answer: the numeric coercions would
+    // blow up on `raw.trim()` (escaping the handle as an exception rather
+    // than an { ok: false }), and the string ones would record the literal
+    // text "null" as a clinical answer.
+    const result = checkSetValueBounds([null], undefined);
+    assert.equal(result.ok, false);
+  });
+
+  it("rejects a null mixed in among real values", () => {
+    assert.equal(checkSetValueBounds(["a", null, "b"], undefined).ok, false);
+  });
+
+  it("accepts the empty list — clearing a question is [], never [null]", () => {
+    assert.equal(checkSetValueBounds([], undefined).ok, true);
+  });
+
+  describe("entries the declared type does not actually guarantee", () => {
+    // `PlainValueEntry` is a TypeScript claim about an UNTRUSTED caller's
+    // argument — a federated plugin or the window test bridge is plain JS
+    // and proves nothing. Each of these reaches `coercePlainResponseValue`
+    // if it gets past here: `undefined` throws a TypeError out of the
+    // handle, an object records "[object Object]" as a clinical answer.
+    const rejected: [string, unknown][] = [
+      ["undefined", undefined],
+      ["an object", { a: 1 }],
+      ["an array", ["a"]],
+      ["a symbol", Symbol("x")],
+      ["NaN", Number.NaN],
+      ["Infinity", Number.POSITIVE_INFINITY],
+      ["a function", () => "x"],
+    ];
+    for (const [name, value] of rejected) {
+      it(`rejects ${name}`, () => {
+        const values = [value] as unknown as Parameters<
+          typeof checkSetValueBounds
+        >[0];
+        assert.equal(checkSetValueBounds(values, undefined).ok, false);
+      });
+    }
+
+    it("rejects one bad entry among good ones", () => {
+      const values = ["a", undefined, "b"] as unknown as Parameters<
+        typeof checkSetValueBounds
+      >[0];
+      assert.equal(checkSetValueBounds(values, undefined).ok, false);
+    });
+
+    it("does not put the rejected value's own toString into the error", () => {
+      const hostile = {
+        toString: () => {
+          throw new Error("caller code, running inside the error message");
+        },
+      };
+      const values = [hostile] as unknown as Parameters<
+        typeof checkSetValueBounds
+      >[0];
+      const result = checkSetValueBounds(values, undefined);
+      assert.equal(result.ok, false);
+    });
+  });
 });

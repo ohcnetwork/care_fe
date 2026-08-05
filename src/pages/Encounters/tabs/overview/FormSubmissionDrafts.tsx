@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { reviveDraftResponses } from "@/components/QuestionnaireV2/fill/draft/fillDraftStore";
 import { QuestionnaireFormRenderer } from "@/components/QuestionnaireV2/form/FormCanvas";
+import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
@@ -60,8 +61,16 @@ export function FormSubmissionDrafts({
   const [submissionToDiscard, setSubmissionToDiscard] =
     useState<FormSubmissionRead | null>(null);
 
+  // Stable identity — the renderer's context value is keyed on it, so an
+  // inline literal would re-render every consumer of every preview's form
+  // context on each render of this list.
+  const subject = useMemo(
+    () => ({ facilityId, patientId, encounterId }),
+    [facilityId, patientId, encounterId],
+  );
+
   const { data: formSubmissions } = useQuery({
-    queryKey: ["formSubmissions", encounterId],
+    queryKey: formSubmissionKeys.list(encounterId),
     queryFn: query(formSubmissionApi.list, {
       queryParams: { encounter: encounterId, status: "draft" },
     }),
@@ -81,7 +90,7 @@ export function FormSubmissionDrafts({
     onSuccess: () => {
       toast.success(t("form_submission_discarded"));
       queryClient.invalidateQueries({
-        queryKey: ["formSubmissions", encounterId],
+        queryKey: formSubmissionKeys.list(encounterId),
       });
     },
     onError: () => {
@@ -158,7 +167,7 @@ export function FormSubmissionDrafts({
                   key={`${submission.id}-${submission.modified_date ?? submission.created_date}`}
                   questionnaire={questionnaire}
                   mode="readonly"
-                  subject={{ facilityId, patientId, encounterId }}
+                  subject={subject}
                   initialResponses={draftResponsesRecord(responses)}
                   hideHeader
                 />

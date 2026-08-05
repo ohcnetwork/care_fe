@@ -18,13 +18,21 @@ export interface FormDescriptor {
   isPrimary: boolean;
 }
 
-export type PlainValueEntry = string | number | boolean | null;
+/** One repeat's answer as a caller SETS it. There is no `null` here: an
+ *  answer has no "explicitly blank" form — clearing a question is
+ *  `values: []`. */
+export type PlainValueInput = string | number | boolean;
+
+/** One repeat as the handle hands it BACK. `null` is a repeat the form
+ *  holds no value for; it is a read shape only, and passing it to
+ *  {@link FillAssistantHandle.setValue} is rejected. */
+export type PlainValueEntry = PlainValueInput | null;
 
 export interface PlainValueSummary {
   /** One entry per repeat. Dates/times are already formatted to plain
    *  strings (`date` -> local `YYYY-MM-DD`, `dateTime` -> ISO 8601) — the
-   *  same round-trippable shapes {@link RawAnswerValue} accepts back into
-   *  `setValue`. */
+   *  same round-trippable shapes {@link PlainValueInput} accepts back
+   *  into `setValue`. */
   values: PlainValueEntry[];
   note?: string;
 }
@@ -46,12 +54,17 @@ export interface StructuredQuestionSummary {
    *  not published one, in which case `applyStructuredEdit` rejects
    *  every write to it, fail-closed. */
   rowSchema?: z.ZodType;
-  /** `baseline + edits`, content only — exactly what `response.values[0]
-   *  .value` already holds (`structuredDataAny`). Entries carry no
-   *  `rowId`: a baseline row's identity lives only inside the mounted
-   *  editor's own `useStructuredRows` instance, out of this generic
-   *  handle's reach. */
+  /** `baseline + edits`, content only — a detached copy of what
+   *  `response.values[0].value` holds (`structuredDataAny`). A row already
+   *  on the server carries its own id in that content, and that id is the
+   *  rowId addressing it (see {@link rowIds}); a row added in this session
+   *  has none until it is saved. */
   projection: readonly unknown[];
+  /** The rows `applyStructuredEdit` will accept an `"update"`/`"remove"`
+   *  for: this question's server rows plus every row this session has
+   *  already recorded an edit for. Empty when the question holds nothing
+   *  yet — then only `"add"` applies. */
+  rowIds: readonly string[];
 }
 
 export interface QuestionDescriptor {
@@ -77,17 +90,36 @@ export type AssistantResult<T = undefined> = T extends undefined
   : { ok: true; value: T } | { ok: false; error: string };
 
 export interface ApplyStructuredEditInput {
+  /** A type only accepts the ops its own `toRequests` compiles: a
+   *  question whose section cannot be deleted (`encounter` — its one row
+   *  is the encounter itself, and there is no delete endpoint) rejects
+   *  "remove" rather than recording an edit that empties the section on
+   *  screen and submits nothing. */
   op: StructuredEditOp;
-  /** Required for "update"/"remove" — the rowId of a row the caller
-   *  already knows (returned by a prior "add", read off `edits` in a
-   *  descriptor, or a type-specific convention like the singleton row id
-   *  `"singleton"`). Optional for "add": a fresh id is minted when
-   *  omitted, and it comes back in the result. */
+  /** Required for "update"/"remove", and it must be one of {@link
+   *  StructuredQuestionSummary.rowIds} — a server row (its own `id` in
+   *  the projection) or a row this session already recorded an edit for
+   *  (returned by a prior "add"). Optional for "add": a fresh id is
+   *  minted when omitted, and it comes back in the result.
+   *
+   *  A CREATE-ONLY single-row type (`time_of_death`, `appointment`) has
+   *  no server row to name, so it is written through op "add" with rowId
+   *  `"singleton"` — the fixed id those types use
+   *  (`structured/core/rowIds.ts`), which coalesces onto its own earlier
+   *  entry instead of stacking a second row. `encounter` is single-row
+   *  but NOT create-only: its one row is the encounter itself, addressed
+   *  by the encounter id, and it accepts no other rowId for any op. */
   rowId?: string;
   /** The COMPLETE row — same convention a human edit's `RowEdit.patch`
    *  follows (`structured/core/types.ts`), for every op, `remove`
    *  included. Validated against the type's zod row schema before it
-   *  reaches the log. */
+   *  reaches the log.
+   *
+   *  An "add" must NOT carry the server `id` field its row schema
+   *  declares as optional: that id is sent verbatim in the created
+   *  datapoint and would rewrite whichever record already holds it. Copy
+   *  an existing row by all means — strip its id first, the way the
+   *  editors' own "add from history" gestures do. */
   patch: unknown;
 }
 
@@ -107,11 +139,12 @@ export interface FillAssistantHandle {
   ): AssistantResult<PlainValueSummary>;
   /** Plain (non-structured) questions only — the same validated,
    *  coercion-choke-point path `structured` questions get via {@link
-   *  FillAssistantHandle.applyStructuredEdit}. */
+   *  FillAssistantHandle.applyStructuredEdit}. One entry per repeat; pass
+   *  `values: []` to clear the answer. */
   setValue(
     formKey: string | undefined,
     questionId: string,
-    values: PlainValueEntry[],
+    values: PlainValueInput[],
     note?: string,
   ): AssistantResult;
   /** The same edit-log path a human tap takes

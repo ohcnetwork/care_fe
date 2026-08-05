@@ -1,7 +1,7 @@
 import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import QuestionnaireFillPage from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
+import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
 
 import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
 import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";

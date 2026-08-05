@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import careConfig from "@careConfig";
 
 import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
+import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 import {
   getStructuredTypesVersion,
   subscribeToStructuredTypes,
@@ -71,6 +72,14 @@ export function useSaveServerDraft({
     if (!careConfig.enableQuestionnaireDraft) return false;
     if (!encounterBound || !primary) return false;
     if (forms.length !== 1) return false;
+    // The MOUNT being an encounter is not enough: a patient-subject
+    // questionnaire filled from an encounter route submits without an
+    // `encounter` (see `composeBatch`'s submit target), while the draft
+    // record was created with one — the backend then looks the record up
+    // with `encounter__isnull=True`, 404s, and rolls the whole batch back.
+    // Offering Save as draft there would build a record that can never be
+    // completed.
+    if (primary.questionnaire.subject_type !== "encounter") return false;
     return (
       unsupportedDraftStructuredTypes(
         primary.questionnaire.questions,
@@ -101,14 +110,17 @@ export function useSaveServerDraft({
         // ONCE from that stale cache, so the just-saved edits would
         // silently vanish on re-entry. Replacing the cache entry directly
         // sidesteps the refetch entirely.
-        queryClient.setQueryData(["formSubmission", continueDraftId], saved);
+        queryClient.setQueryData(
+          formSubmissionKeys.detail(continueDraftId),
+          saved,
+        );
       }
-      // The encounter overview's drafts card lists these. This is a
-      // DIFFERENT query key (`["formSubmissions", encounterId]`, a list) —
-      // it isn't affected by the trap above because that card doesn't
-      // navigate away when it invalidates itself (discarding a draft keeps
-      // the overview mounted), so its own refetch is never cancelled.
-      queryClient.invalidateQueries({ queryKey: ["formSubmissions"] });
+      // The encounter overview's drafts card lists these. Only the LIST
+      // subtree is invalidated — the detail key above must stay out of it,
+      // per the trap described there — and that card doesn't navigate away
+      // when it refetches (discarding a draft keeps the overview mounted),
+      // so its own refetch is never cancelled.
+      queryClient.invalidateQueries({ queryKey: formSubmissionKeys.lists() });
       toast.success(t("draft_saved_successfully"));
       onSaved();
     },

@@ -43,9 +43,12 @@ import {
   checkSetValueBounds,
   coercePlainResponseValue,
   formatLocalDate,
-  type RawAnswerValue,
 } from "./coercion";
+import { resolveRowAddressing } from "./rowAddressing";
+import type { FillSessionPhase } from "./sessionPhase";
+import { checkSessionEditable } from "./sessionPhase";
 import {
+  checkStructuredEditTarget,
   rowSchemaOf,
   validateStructuredPatch,
 } from "./structuredEditValidation";
@@ -67,6 +70,7 @@ interface SessionSnapshot {
   subject: FillSubject;
   forms: FillFormEntry[];
   getStore: GetStore;
+  phase: FillSessionPhase;
 }
 
 function ok(): { ok: true } {
@@ -152,13 +156,43 @@ function structuredSummary(
   );
   const definition =
     slotState.kind === "unknown_type" ? undefined : slotState.definition;
+  const projection = detachProjection(structuredDataAny(response));
   return {
     type,
     contract: definition?.contract,
     slotState: slotState.kind,
     rowSchema: rowSchemaOf(definition),
-    projection: structuredDataAny(response),
+    projection,
+    rowIds: resolveRowAddressing({
+      type,
+      projection,
+      pendingEdits: pendingEdits(response),
+      encounterId: subjectContext.encounterId,
+    }).rowIds,
   };
+}
+
+function pendingEdits(
+  response: QuestionnaireResponse | undefined,
+): readonly StructuredEditRecord[] {
+  return response?.edits ?? [];
+}
+
+/** `structuredDataAny` returns the LIVE `values[0].value` array, and its
+ *  rows are the edit log's own patch objects — handing either out by
+ *  reference would let a caller mutate a recorded row without passing the
+ *  `rowSchema` choke point, all the way into the submitted body. Cloned
+ *  row by row so one unclonable row (`files` carries real `File`-bearing
+ *  rows, hence its `"exclude"` draft policy) costs that row alone rather
+ *  than the read — never the live reference, which is the whole point. */
+function detachProjection(rows: unknown[]): readonly unknown[] {
+  return rows.map((row) => {
+    try {
+      return structuredClone(row);
+    } catch {
+      return null;
+    }
+  });
 }
 
 function buildQuestionDescriptors(
@@ -252,15 +286,23 @@ interface WritableQuestion {
 }
 
 /** The gates shared by both write paths (`setValue`,
- *  `applyStructuredEdit`): the question must exist in the resolved form,
- *  not be read-only, have a live store entry and a response slot, and be
- *  enabled — itself and every ancestor — since `composeBatch` would never
- *  submit a disabled question's answer. */
+ *  `applyStructuredEdit`): the session must not be submitting, and the
+ *  question must exist in the resolved form, not be read-only, have a
+ *  live store entry and a response slot, and be enabled — itself and
+ *  every ancestor — since `composeBatch` would never submit a disabled
+ *  question's answer. */
 function resolveWritableQuestion(
   snapshot: SessionSnapshot,
   formKey: string | undefined,
   questionId: string,
 ): AssistantResult<WritableQuestion> {
+  // The submit freeze every human mutator honors through `disabled`.
+  // Once compose has read `responsesAtom` a later write paints on screen
+  // but is absent from the batch already built — and a successful submit
+  // navigates away, taking the acknowledged answer with it.
+  const editable = checkSessionEditable(snapshot.phase);
+  if (!editable.ok) return fail(editable.error);
+
   const form = resolveForm(formKey, snapshot.forms);
   if (!form) return fail(formNotFoundError(formKey));
   const path = findQuestionPath(form.questionnaire.questions, questionId);
@@ -313,12 +355,11 @@ function setValueImpl(
   if (values.length > 1 && !question.repeats) {
     return fail(`Question "${questionId}" takes a single value`);
   }
-  const rawValues = values as RawAnswerValue[];
-  const bounds = checkSetValueBounds(rawValues, note);
-  if (!bounds.ok) return fail(bounds.error ?? "Invalid input");
+  const bounds = checkSetValueBounds(values, note);
+  if (!bounds.ok) return fail(bounds.error);
 
   const coerced: ResponseValue[] = [];
-  for (const raw of rawValues) {
+  for (const raw of bounds.values) {
     const result = coercePlainResponseValue(question, raw);
     if (!result.ok) return fail(result.error);
     coerced.push(result.value);
@@ -364,9 +405,14 @@ function applyStructuredEditImpl(
     );
   }
 
-  if ((edit.op === "update" || edit.op === "remove") && !edit.rowId) {
-    return fail(`rowId is required for op "${edit.op}"`);
-  }
+  const addressing = resolveRowAddressing({
+    type: question.structured_type,
+    projection: structuredDataAny(response),
+    pendingEdits: pendingEdits(response),
+    encounterId: rendererSubjectOf(snapshot.subject).encounterId,
+  });
+  const target = checkStructuredEditTarget(edit, addressing);
+  if (!target.ok) return fail(target.error);
   const rowId = edit.rowId ?? crypto.randomUUID();
 
   const validated = validateStructuredPatch(
@@ -378,10 +424,11 @@ function applyStructuredEditImpl(
   // Same edit-log path a human tap takes: `applyEditToLog` is the exact
   // function every `useStructuredRows` mutator calls. No `baseline` is
   // supplied — this handle lives at the session level, above any single
-  // question's mounted editor, so it cannot see that question's fetched
-  // server rows. Without a baseline, `applyEditToLog` resolves a
-  // resurrection/re-add conservatively to "update" rather than risking a
-  // duplicate-create "add" — see `resolveOpAgainstBaseline`.
+  // question's mounted editor: the projection tells it WHICH rows exist
+  // (`resolveRowAddressing`), never the fetched rows themselves. Without a
+  // baseline, `applyEditToLog` resolves a resurrection/re-add
+  // conservatively to "update" rather than risking a duplicate-create
+  // "add" — see `resolveOpAgainstBaseline`.
   const currentLog = (response.edits ?? []) as EditLog<Record<string, unknown>>;
   const nextEdit: RowEdit<Record<string, unknown>> = {
     rowId,
@@ -459,6 +506,11 @@ export interface UseFillAssistantSessionArgs {
    *  (`QuestionnaireFillPage.tsx`'s `storesRef`), so its identity never
    *  changes on its own. */
   storesVersion: number;
+  /** The session's submit freeze, as the human input surfaces receive it
+   *  (`frozen`). Read at call time off the snapshot ref, which this hook
+   *  rewrites every render — so the gate closes as soon as the phase
+   *  change has rendered, the same commit the inputs disable in. */
+  phase: FillSessionPhase;
 }
 
 /**
@@ -472,9 +524,15 @@ export function useFillAssistantSession({
   forms,
   getStore,
   storesVersion,
+  phase,
 }: UseFillAssistantSessionArgs): FillAssistantHandle {
-  const latestRef = useRef<SessionSnapshot>({ subject, forms, getStore });
-  latestRef.current = { subject, forms, getStore };
+  const latestRef = useRef<SessionSnapshot>({
+    subject,
+    forms,
+    getStore,
+    phase,
+  });
+  latestRef.current = { subject, forms, getStore, phase };
 
   // The `subscribe()` fan-out list — one Set per hook instance (per
   // mounted session), never shared across mounts.

@@ -11,27 +11,27 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "@/components/Questionnaire/data/StructuredFormData";
 
-import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
+import {
+  formSubmissionKeys,
+  questionnaireKeys,
+} from "@/components/QuestionnaireV2/queryKeys";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import query from "@/Utils/request/query";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
-import type { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
-import type {
-  QuestionnaireRead,
-  SubjectType,
-} from "@/types/questionnaire/questionnaire";
+import type { SubjectType } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import { FillPageBody } from "./FillPageBody";
 import { FillShell } from "./FillShell";
 import { sweepExpiredFillDrafts } from "./draft/fillDraftCache";
 import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
-import { loadFillDraft, reviveDraftResponses } from "./draft/fillDraftStore";
+import { loadFillDraft } from "./draft/fillDraftStore";
+import type { ServerDraftState } from "./draft/serverDraft";
+import { parseServerDraft } from "./draft/serverDraft";
 import type { FillSubject } from "./subject";
 import { exitTargetOf, isPatientBound, subjectKeyOf } from "./subject";
 
@@ -47,55 +47,6 @@ interface FillPageProps {
   pickerSubjectType?: SubjectType;
 }
 
-type ServerDraftState =
-  | { mismatch: true }
-  | { mismatch: false; responses: Record<string, QuestionnaireResponse> };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-/**
- * Validate and extract a resumed server draft's responses. The embedded
- * questionnaire id must match the live one. `response_dump` is a free-form JSON blob the server never
- * validates, so its shape is checked at runtime instead of trusted with a
- * cast: a malformed dump lands on the "draft not recoverable" branch here
- * rather than surfacing as crashes deep in the renderer.
- */
-function parseServerDraft(
-  serverDraft: FormSubmissionRead,
-  questionnaire: QuestionnaireRead,
-): ServerDraftState {
-  // Only an open draft resumes. A record already submitted (or marked
-  // entered-in-error) re-opening as editable would let one submission
-  // file twice — the overview's drafts card filters these out, but the
-  // URL is shareable and outlives that filter.
-  if (serverDraft.status !== "draft") {
-    return { mismatch: true };
-  }
-  const dump: unknown = serverDraft.response_dump;
-  const form = isRecord(dump) ? dump.questionnaireResponses : undefined;
-  if (
-    !isRecord(form) ||
-    !isRecord(form.questionnaire) ||
-    form.questionnaire.id !== questionnaire.id ||
-    !Array.isArray(form.responses)
-  ) {
-    return { mismatch: true };
-  }
-  const record: Record<string, QuestionnaireResponse> = {};
-  for (const item of form.responses as unknown[]) {
-    if (!isRecord(item) || typeof item.question_id !== "string") {
-      return { mismatch: true };
-    }
-    // Beyond `question_id` the entry is trusted as a QuestionnaireResponse
-    // this page's own save path wrote; `reviveDraftResponses` defends the
-    // date fields it touches.
-    record[item.question_id] = item as unknown as QuestionnaireResponse;
-  }
-  return { mismatch: false, responses: reviveDraftResponses(record) };
-}
-
 /**
  * Questionnaire data-entry page. Patient-bound subjects get the canvas and
  * clinical-history tabs; resource subjects get the canvas alone.
@@ -106,7 +57,7 @@ function parseServerDraft(
  * This component gates queries, draft loading and refuse-to-mount branches;
  * the loaded session itself is `FillPageBody`.
  */
-export default function QuestionnaireFillPage({
+export function QuestionnaireFillPage({
   subject,
   questionnaireId,
   pickerSubjectType = subject.type,
@@ -176,7 +127,7 @@ export default function QuestionnaireFillPage({
     isLoading: isServerDraftLoading,
     isError: isServerDraftError,
   } = useQuery({
-    queryKey: ["formSubmission", continueDraftId],
+    queryKey: formSubmissionKeys.detail(continueDraftId),
     queryFn: query(formSubmissionApi.get, {
       pathParams: { external_id: continueDraftId ?? "" },
     }),
@@ -355,7 +306,15 @@ export default function QuestionnaireFillPage({
   }
 
   return (
+    // Keyed by session identity: raviger re-renders this route element in
+    // place, and `useFillSessionForms` deliberately captures the primary
+    // questionnaire once at creation. Without the key, navigating from one
+    // fill session straight into another (overview → A → back → B →
+    // history-jump to A) would keep the previous session's forms mounted
+    // under the NEW draft scope, and the next autosave would file one
+    // questionnaire's answers under the other's draft key.
     <FillPageBody
+      key={`${subjectKeyOf(subject)}--${questionnaire.id}--${continueDraftId ?? ""}`}
       questionnaire={questionnaire}
       patient={patient}
       encounter={encounter}
@@ -366,6 +325,11 @@ export default function QuestionnaireFillPage({
       serverDraftResponses={
         serverDraftState && !serverDraftState.mismatch
           ? serverDraftState.responses
+          : undefined
+      }
+      serverDraftDropped={
+        serverDraftState && !serverDraftState.mismatch
+          ? serverDraftState.dropped
           : undefined
       }
       continueDraftId={continueDraftId}
