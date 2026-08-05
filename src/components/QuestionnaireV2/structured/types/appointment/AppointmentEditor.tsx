@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { scheduleServiceTypeAtom } from "@/atoms/scheduleServiceTypeAtom";
+import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import { StructuredFieldError } from "@/components/QuestionnaireV2/structured/core/StructuredFieldError";
 import { SINGLETON_ROW_ID } from "@/components/QuestionnaireV2/structured/core/rowIds";
 import { selectStructuredFieldErrors } from "@/components/QuestionnaireV2/structured/core/structuredFieldErrors";
@@ -199,6 +200,12 @@ export function AppointmentEditor({
 
   return (
     <div className="space-y-4">
+      <StructuredDroppedRowsNotice
+        droppedEdits={single.droppedEdits}
+        rowLabel={(droppedRow) =>
+          droppedRow.note?.trim() || t("structured_type__appointment")
+        }
+      />
       <AppointmentFormSection
         facilityId={facilityId!}
         selectedTags={selectedTags}

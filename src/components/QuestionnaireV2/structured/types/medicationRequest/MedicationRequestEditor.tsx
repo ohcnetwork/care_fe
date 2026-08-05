@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import {
+  BookmarkIcon,
   ChevronsDownUp,
   ChevronsUpDown,
   Pipette,
@@ -43,17 +44,22 @@ import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { formatDuration, formatFrequency } from "@/components/Medicine/utils";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
+import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import { StructuredFieldError } from "@/components/QuestionnaireV2/structured/core/StructuredFieldError";
 import {
   type StructuredColumn,
   type StructuredColumnContext,
   StructuredList,
+  type StructuredRowAction,
 } from "@/components/QuestionnaireV2/structured/core/StructuredList";
 import type { BaselineRow } from "@/components/QuestionnaireV2/structured/core/types";
 import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
+import { applyTemplateItems } from "@/components/QuestionnaireV2/structured/shared/responseTemplates/applyTemplateItems";
+import { useAddToTemplate } from "@/components/QuestionnaireV2/structured/shared/responseTemplates/useAddToTemplate";
 import type { StructuredInputProps } from "@/components/QuestionnaireV2/structured/types";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -71,6 +77,7 @@ import {
   type MedicationRequestDosageInstruction,
   type MedicationRequestIntent,
   type MedicationRequestRead,
+  type MedicationRequestTemplateSpec,
   timingBoundsToRepeat,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
@@ -79,6 +86,8 @@ import medicationStatementApi from "@/types/emr/medicationStatement/medicationSt
 import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import type { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import type { QuestionnaireResponseTemplateReadSpec } from "@/types/questionnaire/questionnaireResponseTemplate";
 import type { UserReadMinimal } from "@/types/user/user";
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
@@ -86,10 +95,12 @@ import { formatName } from "@/Utils/utils";
 
 import { DosageDialog } from "./DosageDialog";
 import {
+  buildMedicationRequestForTemplate,
   dosageInstructionFieldKeys,
   maxDosageInstructionCount,
   MEDICATION_REQUEST_SOFT_DELETE,
   type MedicationRequestRow,
+  medicationRowFromTemplate,
   newMedicationRowFromCode,
   newMedicationRowFromProduct,
   projectValues,
@@ -593,6 +604,54 @@ function ValueSetLoopCell({
 // The editor
 // ---------------------------------------------------------------------------
 
+/**
+ * Resolves a template's stored `MedicationRequestTemplateSpec` into a fresh
+ * row, fetching the product knowledge its `requested_product` SLUG names
+ * (a template never stores the product's UUID — only its slug survives a
+ * product being re-versioned) — the ONE fetch both the row-level
+ * `resolveTemplateMedicationRequest` (`handleAddSingleFromTemplate`) and the
+ * whole-template `handleApplyTemplate` need, mirroring
+ * `resolveTemplateServiceRequest`'s identical split in
+ * `ServiceRequestEditor.tsx` between a pure model-side merge
+ * (`medicationRowFromTemplate`) and this editor-side network fetch.
+ *
+ * A failed/absent product lookup is TOLERATED here, not treated as the
+ * whole item failing (mirrors legacy's `fetchProductAndBuildMedication`,
+ * which `console.warn`s and continues with `productKnowledge: undefined`
+ * rather than rejecting) — `applyTemplateItems`'s own per-item try/catch is
+ * for a `resolve` that THROWS; a medication whose product could not be
+ * looked up still resolves to a row (missing its product, but present),
+ * which is the same degrade legacy already shipped.
+ */
+async function resolveTemplateMedicationRequest(
+  templateMedication: MedicationRequestTemplateSpec,
+  currentUser: UserReadMinimal,
+): Promise<MedicationRequestRow> {
+  const requestedProductSlug =
+    typeof templateMedication.requested_product === "string"
+      ? templateMedication.requested_product
+      : undefined;
+  let productKnowledge: ProductKnowledgeBase | undefined;
+  if (requestedProductSlug) {
+    try {
+      productKnowledge = await query(
+        productKnowledgeApi.retrieveProductKnowledge,
+        { pathParams: { slug: requestedProductSlug } },
+      )({ signal: new AbortController().signal });
+    } catch (error) {
+      console.warn(
+        `Failed to fetch product knowledge for slug: ${requestedProductSlug}`,
+        error,
+      );
+    }
+  }
+  return medicationRowFromTemplate(
+    templateMedication,
+    productKnowledge,
+    currentUser,
+  );
+}
+
 export function MedicationRequestEditor({
   question,
   disabled,
@@ -600,6 +659,7 @@ export function MedicationRequestEditor({
   patientId,
   encounterId,
   facilityId,
+  questionnaireSlug,
 }: StructuredInputProps) {
   const { t } = useTranslation();
   const currentUser = useAuthUser() as UserReadMinimal;
@@ -631,6 +691,68 @@ export function MedicationRequestEditor({
     softDelete: MEDICATION_REQUEST_SOFT_DELETE,
     disabled,
   });
+
+  // Response templates — the shared `ResponseTemplates` module
+  // (`structured/shared/responseTemplates/`) `service_request` built and
+  // published for exactly this second consumer (`.superpowers/sdd/
+  // batchC-servicerequest-report.md`'s CONTRACT section). `itemKey:
+  // "medication_request"` is the fix for this type's own historical
+  // key-name drift (legacy's create-template mutation wrote a literal
+  // `service_request` key into `template_data` — not a valid `TemplateData`
+  // member at all; see `useAddToTemplate.tsx`'s header doc comment) — the
+  // hook computes the correct key from this option instead of a hand-typed
+  // literal at the call site.
+  const { dialog: addToTemplateDialog, openAddToTemplate } =
+    useAddToTemplate<MedicationRequestRow>({
+      questionnaireSlug,
+      facilityId,
+      itemKey: "medication_request",
+      itemType: "medication",
+      toTemplateSpec: buildMedicationRequestForTemplate,
+      itemDisplayName: (row) => displayMedicationName(row),
+      messages: {
+        addedToTemplate: "medication_added_to_template",
+        createdWithItem: "template_created_with_medication",
+      },
+    });
+
+  const handleApplyTemplate = useCallback(
+    async (template: QuestionnaireResponseTemplateReadSpec) => {
+      const rows = await applyTemplateItems(
+        template.template_data?.medication_request,
+        (templateMedication) =>
+          resolveTemplateMedicationRequest(templateMedication, currentUser),
+        template.name,
+        {
+          empty: "template_has_no_medications",
+          allFailed: "failed_to_apply_template",
+          partial: "template_partially_applied",
+          success: "template_applied_medications",
+        },
+      );
+      // ONE `addRows` call, never a loop of `addRow` — two mutator calls in
+      // one synchronous handler would both read the same stale `edits`
+      // snapshot (`useStructuredRows.ts`'s own documented CAVEAT), silently
+      // dropping every row but the last.
+      list.addRows(rows);
+    },
+    [currentUser, list],
+  );
+
+  const handleAddSingleFromTemplate = useCallback(
+    async (templateMedication: MedicationRequestTemplateSpec) => {
+      try {
+        const row = await resolveTemplateMedicationRequest(
+          templateMedication,
+          currentUser,
+        );
+        list.addRow(row);
+      } catch {
+        toast.error(t("failed_to_add_medication"));
+      }
+    },
+    [currentUser, list, t],
+  );
 
   const [showAdvancedFields, setShowAdvancedFields] = useState(false);
   const [newMedicationInSheet, setNewMedicationInSheet] =
@@ -959,6 +1081,13 @@ export function MedicationRequestEditor({
 
   return (
     <div className="space-y-4">
+      {addToTemplateDialog}
+
+      <StructuredDroppedRowsNotice
+        droppedEdits={list.droppedEdits}
+        rowLabel={displayMedicationName}
+      />
+
       {!prescriptionId && (
         <div className="flex flex-wrap items-center justify-end gap-2">
           <HistoricalRecordSelector<
@@ -1090,6 +1219,17 @@ export function MedicationRequestEditor({
             onAddSelected={handleAddHistorical}
             disableAPI={!patientId}
           />
+          {questionnaireSlug && (
+            <ManageResponseTemplatesSheet
+              questionnaireSlug={questionnaireSlug}
+              facilityId={facilityId}
+              onTemplateSelect={handleApplyTemplate}
+              onMedicationSelect={handleAddSingleFromTemplate}
+              disabled={disabled}
+              currentMedications={list.rows.map((row) => row.row)}
+              key_filter="medication_request"
+            />
+          )}
         </div>
       )}
 
@@ -1135,6 +1275,29 @@ export function MedicationRequestEditor({
         disabled={disabled}
         onUpdateRow={list.updateRow}
         onRemoveRow={list.removeRow}
+        // The row-level "Add to Template" trigger — previously stranded
+        // (see this port's own report: `StructuredList`'s row-actions menu
+        // had room for exactly Remove). Now rides in the SAME overflow menu
+        // Remove already occupies, exactly where legacy's
+        // `MedicationRequestGridRow` rendered it (a `DropdownMenuItem` above
+        // a `DropdownMenuSeparator`, above Remove) — `rowActions` (Gap 1's
+        // primitive extension) is what makes that possible without a
+        // dedicated column. Only offered when this fill session has a
+        // questionnaire slug to scope templates to, mirroring legacy's own
+        // `onAddToTemplate={questionnaireSlug ? handleAddToTemplate :
+        // undefined}` gate.
+        rowActions={
+          questionnaireSlug
+            ? (row): StructuredRowAction[] => [
+                {
+                  key: "add_to_template",
+                  label: t("add_to_template"),
+                  icon: BookmarkIcon,
+                  onSelect: () => openAddToTemplate(row.row),
+                },
+              ]
+            : undefined
+        }
         rowTitle={(row) => displayMedicationName(row.row)}
         rowSummary={(row) =>
           row.row.dosage_instruction

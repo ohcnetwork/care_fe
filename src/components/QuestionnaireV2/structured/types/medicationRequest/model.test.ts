@@ -3,22 +3,27 @@ import { describe, it } from "node:test";
 
 import type { Code } from "@/types/base/code/code";
 import type {
+  MedicationRequestDispenseStatus,
   MedicationRequestDosageInstruction,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import type { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 import type { UserReadMinimal } from "@/types/user/user";
 
 import type { MedicationRequestRow } from "./model";
 import {
+  buildMedicationRequestForTemplate,
   dosageInstructionFieldKeys,
   invalidDosageFieldErrors,
   maxDosageInstructionCount,
   MEDICATION_REQUEST_SOFT_DELETE,
+  medicationRowFromTemplate,
   newMedicationRowFromCode,
   newMedicationRowFromProduct,
   projectValues,
+  rowSchema,
   toBaselineRows,
   toMedicationRow,
   toRequests,
@@ -603,5 +608,257 @@ describe("medication_request model", () => {
       // and an untouched row contributes none.
       assert.deepEqual(invalidDosageFieldErrors([]), []);
     });
+  });
+
+  describe("buildMedicationRequestForTemplate", () => {
+    it("a product-based row stores the PRODUCT'S SLUG, not its id, and omits medication", () => {
+      const product = {
+        id: "prod-1",
+        slug: "paracetamol-500mg",
+        name: "Paracetamol 500mg",
+      } as ProductKnowledgeBase;
+      const row = newMedicationRowFromProduct(product, CURRENT_USER);
+      const spec = buildMedicationRequestForTemplate(row);
+      assert.equal(spec.requested_product, "paracetamol-500mg");
+      assert.equal("medication" in spec, false);
+    });
+
+    it("a code-based row keeps medication and omits requested_product", () => {
+      const row = newMedicationRowFromCode(CODE, CURRENT_USER);
+      const spec = buildMedicationRequestForTemplate(row);
+      assert.deepEqual(spec.medication, CODE);
+      assert.equal("requested_product" in spec, false);
+    });
+
+    it("strips every instance-specific field a template must not remember", () => {
+      const row = {
+        ...newMedicationRowFromCode(CODE, CURRENT_USER),
+        id: "med-1",
+        encounter: "enc-1",
+        created_by: CURRENT_USER,
+        dispense_status: "complete" as MedicationRequestDispenseStatus,
+      };
+      const spec = buildMedicationRequestForTemplate(row);
+      for (const key of [
+        "id",
+        "encounter",
+        "requester",
+        "created_by",
+        "dispense_status",
+        "create_prescription",
+        "dirty",
+      ]) {
+        assert.equal(
+          key in spec,
+          false,
+          `${key} must not survive into a template spec`,
+        );
+      }
+    });
+
+    it("carries authored_on along — a backend-required field on the template create serializer, found live (FIELD REQUIRED: template_data.medication_request.0.authored_on)", () => {
+      const row = newMedicationRowFromCode(CODE, CURRENT_USER);
+      const spec = buildMedicationRequestForTemplate(row);
+      assert.equal(spec.authored_on, row.authored_on);
+    });
+
+    it("carries dosage_instruction/status/intent/category/priority/note through unchanged", () => {
+      const row = newMedicationRowFromCode(CODE, CURRENT_USER);
+      row.note = "take with food";
+      const spec = buildMedicationRequestForTemplate(row);
+      assert.equal(spec.status, row.status);
+      assert.equal(spec.intent, row.intent);
+      assert.equal(spec.category, row.category);
+      assert.equal(spec.priority, row.priority);
+      assert.equal(spec.note, "take with food");
+      assert.deepEqual(spec.dosage_instruction, row.dosage_instruction);
+    });
+  });
+
+  describe("medicationRowFromTemplate", () => {
+    it("resolves a code-based template spec into a fresh row: new authored_on, applying clinician as requester, a fresh create_prescription", () => {
+      const spec = buildMedicationRequestForTemplate(
+        newMedicationRowFromCode(CODE, OTHER_USER),
+      );
+      const row = medicationRowFromTemplate(spec, undefined, CURRENT_USER);
+      assert.deepEqual(row.medication, CODE);
+      assert.equal(row.requester, CURRENT_USER);
+      assert.ok(row.create_prescription);
+      assert.equal(row.requested_product, undefined);
+      assert.equal(row.requested_product_internal, undefined);
+      assert.equal("dirty" in row, false);
+    });
+
+    it("resolves a product-based template spec, threading the FETCHED product knowledge onto the row", () => {
+      const product = {
+        id: "prod-2",
+        slug: "amoxicillin-250mg",
+        name: "Amoxicillin 250mg",
+        base_unit: { code: "{tbl}", display: "tablets", system: "u" },
+        product_type: ProductKnowledgeType.medication,
+      } as ProductKnowledgeBase;
+      const spec = buildMedicationRequestForTemplate(
+        newMedicationRowFromProduct(product, OTHER_USER),
+      );
+      assert.equal(spec.requested_product, "amoxicillin-250mg");
+      const row = medicationRowFromTemplate(spec, product, CURRENT_USER);
+      assert.equal(row.requested_product, "prod-2");
+      assert.equal(row.requested_product_internal, product);
+      assert.equal(row.requester, CURRENT_USER);
+    });
+
+    it("a product template resolved with NO product knowledge (fetch failed/absent) still resolves to a row, just without one", () => {
+      const spec = buildMedicationRequestForTemplate(
+        newMedicationRowFromProduct(
+          { id: "prod-3", slug: "some-slug" } as ProductKnowledgeBase,
+          OTHER_USER,
+        ),
+      );
+      const row = medicationRowFromTemplate(spec, undefined, CURRENT_USER);
+      assert.equal(row.requested_product, undefined);
+      assert.equal(row.requested_product_internal, undefined);
+    });
+
+    it("defaults to one PRN-off dosage instruction when the template stored none", () => {
+      const spec = buildMedicationRequestForTemplate(
+        newMedicationRowFromCode(CODE, OTHER_USER),
+      );
+      spec.dosage_instruction = [];
+      const row = medicationRowFromTemplate(spec, undefined, CURRENT_USER);
+      assert.deepEqual(row.dosage_instruction, [{ as_needed_boolean: false }]);
+    });
+
+    it("PROJECTION AND SUBMIT AGREE — a template-resolved row differs onto the wire exactly like a directly picked one", async () => {
+      const spec = buildMedicationRequestForTemplate(
+        newMedicationRowFromCode(CODE, OTHER_USER),
+      );
+      const row = medicationRowFromTemplate(spec, undefined, CURRENT_USER);
+      const edits = [add("m1", row)];
+      assert.deepEqual(projectValues([row]), [
+        { type: "medication_request", value: [row] },
+      ]);
+      const requests = await toRequests(edits, CTX);
+      assert.equal(requests.length, 1);
+      const body = requests[0].body as {
+        datapoints: { medication?: Code }[];
+      };
+      assert.deepEqual(body.datapoints[0].medication, CODE);
+    });
+  });
+});
+
+describe("rowSchema — the assistant write guard (spec A2)", () => {
+  it("accepts a real code-based row", () => {
+    const result = rowSchema.safeParse(
+      newMedicationRowFromCode(CODE, CURRENT_USER),
+    );
+    assert.equal(result.success, true, JSON.stringify(result));
+  });
+
+  it("accepts a real product-based row", () => {
+    const product = {
+      id: "prod-1",
+      slug: "paracetamol-500mg",
+      name: "Paracetamol 500mg",
+      product_type: ProductKnowledgeType.medication,
+    } as ProductKnowledgeBase;
+    const result = rowSchema.safeParse(
+      newMedicationRowFromProduct(product, CURRENT_USER),
+    );
+    assert.equal(result.success, true, JSON.stringify(result));
+  });
+
+  it("accepts a dose-range (taper/titrate) dosage instruction", () => {
+    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
+    row.dosage_instruction = [
+      {
+        as_needed_boolean: false,
+        dose_and_rate: {
+          type: "ordered",
+          dose_range: {
+            low: {
+              value: "1",
+              unit: { code: "{tbl}", display: "tablets", system: "u" },
+            },
+            high: {
+              value: "2",
+              unit: { code: "{tbl}", display: "tablets", system: "u" },
+            },
+          },
+        },
+        timing: {
+          repeat: {
+            frequency: 1,
+            period: "1",
+            period_unit: "d",
+            bounds_duration: { value: "5", unit: "d" },
+          },
+        },
+      },
+    ];
+    const result = rowSchema.safeParse(row);
+    assert.equal(result.success, true, JSON.stringify(result));
+  });
+
+  it("rejects an unknown top-level field", () => {
+    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
+    assert.equal(
+      rowSchema.safeParse({ ...row, extra_field: "hallucinated" }).success,
+      false,
+    );
+  });
+
+  it("rejects the legacy dirty flag — .strict() forces the clean v2 path", () => {
+    const row = {
+      ...newMedicationRowFromCode(CODE, CURRENT_USER),
+      dirty: true,
+    };
+    assert.equal(rowSchema.safeParse(row).success, false);
+  });
+
+  it("rejects an invalid status enum value", () => {
+    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
+    assert.equal(
+      rowSchema.safeParse({ ...row, status: "not_a_real_status" }).success,
+      false,
+    );
+  });
+
+  it("rejects an invalid period_unit inside a dosage instruction's timing", () => {
+    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
+    row.dosage_instruction[0].timing = {
+      repeat: { frequency: 1, period: "1", period_unit: "not_a_unit" as never },
+    };
+    assert.equal(rowSchema.safeParse(row).success, false);
+  });
+
+  it("rejects an unknown field nested inside a dosage instruction", () => {
+    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
+    (row.dosage_instruction[0] as unknown as Record<string, unknown>).made_up =
+      true;
+    assert.equal(rowSchema.safeParse(row).success, false);
+  });
+
+  it("rejects a missing requester", () => {
+    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
+    const { requester: _drop, ...withoutRequester } = row;
+    assert.equal(rowSchema.safeParse(withoutRequester).success, false);
+  });
+
+  it("rejects a malformed authored_on", () => {
+    const row = {
+      ...newMedicationRowFromCode(CODE, CURRENT_USER),
+      authored_on: "",
+    };
+    assert.equal(rowSchema.safeParse(row).success, false);
+  });
+
+  it("rejects a create_prescription with an invalid status", () => {
+    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
+    row.create_prescription = {
+      status: "not_a_real_status" as never,
+      alternate_identifier: "",
+    };
+    assert.equal(rowSchema.safeParse(row).success, false);
   });
 });

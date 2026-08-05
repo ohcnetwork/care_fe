@@ -1,19 +1,27 @@
+import { z } from "zod";
+
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type {
   BaselineRow,
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
+import {
+  displayObjectSchema,
+  isoInstantString,
+  userDisplaySchema,
+} from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
 } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import type { Code } from "@/types/base/code/code";
+import { CodeSchema, type Code } from "@/types/base/code/code";
 import type {
   MedicationRequestCreate,
   MedicationRequestDosageInstruction,
   MedicationRequestRead,
+  MedicationRequestTemplateSpec,
   TimingBoundsError,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
@@ -162,6 +170,189 @@ function freshMedicationRequestShell(
  */
 export type MedicationRequestRow = MedicationRequestCreate;
 
+// ---------------------------------------------------------------------------
+// The assistant write guard (spec §6 A2) — see `timeOfDeath/model.ts`'s
+// `rowSchema` for the full contract this fulfills the same way.
+//
+// Every enum below is HAND-LISTED rather than imported from
+// `@/types/emr/medicationRequest/medicationRequest` as a value — mirrors
+// this file's own `LOCAL_UCUM_TIME_UNITS` above and its doc comment's exact
+// reasoning: that module imports `@/Utils/decimal` (→ `@careConfig` →
+// `import.meta.env`, `undefined` under `node --test`) at ITS OWN module
+// scope, so importing even one unrelated named VALUE from it — not just
+// the specific function that needs Decimal — re-executes that whole
+// import chain and crashes the harness before a single assertion runs.
+// `import type` is unaffected (erased before `tsx` resolves anything), so
+// every TYPE this file already imports from there stays untouched; only
+// enum/const-array VALUES needed new, local copies.
+// ---------------------------------------------------------------------------
+
+const LOCAL_MEDICATION_REQUEST_STATUS = [
+  "active",
+  "on_hold",
+  "draft",
+  "unknown",
+  "ended",
+  "completed",
+  "cancelled",
+  "entered_in_error",
+] as const;
+
+const LOCAL_MEDICATION_REQUEST_STATUS_REASON = [
+  "altchoice",
+  "clarif",
+  "drughigh",
+  "hospadm",
+  "labint",
+  "non_avail",
+  "preg",
+  "salg",
+  "sddi",
+  "sdupther",
+  "sintol",
+  "surg",
+  "washout",
+] as const;
+
+const LOCAL_MEDICATION_REQUEST_INTENT = [
+  "proposal",
+  "plan",
+  "order",
+  "original_order",
+  "reflex_order",
+  "filler_order",
+  "instance_order",
+] as const;
+
+/** `MedicationRequest.category`'s own inline union — never given a runtime
+ *  const array in the source module, so there is nothing "local" about
+ *  this beyond restating the type's own four literals as values. */
+const LOCAL_MEDICATION_CATEGORY = [
+  "inpatient",
+  "outpatient",
+  "community",
+  "discharge",
+] as const;
+
+/** Mirrors `MedicationPriority`'s own four values (that enum lives in the
+ *  poisoned module — see this block's header comment). */
+const LOCAL_MEDICATION_PRIORITY = [
+  "stat",
+  "urgent",
+  "asap",
+  "routine",
+] as const;
+
+/** Mirrors `MedicationRequestDispenseStatus`'s own three values (same
+ *  reason). */
+const LOCAL_MEDICATION_DISPENSE_STATUS = [
+  "complete",
+  "partial",
+  "incomplete",
+] as const;
+
+const dosageQuantitySchema = z
+  .object({ value: z.string(), unit: CodeSchema })
+  .strict();
+const doseRangeSchema = z
+  .object({ low: dosageQuantitySchema, high: dosageQuantitySchema })
+  .strict();
+const boundsDurationSchema = z
+  .object({ value: z.string(), unit: z.enum(LOCAL_UCUM_TIME_UNITS) })
+  .strict();
+const timingRangeSchema = z
+  .object({ low: boundsDurationSchema, high: boundsDurationSchema })
+  .strict();
+/** `PeriodSpec` — a bare `{ start?; end? }`, NOT {@link periodSchema}
+ *  (`rowSchemaPrimitives.ts`): a timing bound's period is entered through
+ *  `DurationInput`, not verified live against the backend's timezone-aware
+ *  requirement the way `medicationStatement`'s `effective_period` was —
+ *  left as plain optional strings rather than asserting a format this port
+ *  never confirmed. */
+const periodSpecSchema = z
+  .object({ start: z.string().optional(), end: z.string().optional() })
+  .strict();
+
+const timingSchema = z
+  .object({
+    repeat: z
+      .object({
+        frequency: z.number(),
+        period: z.string(),
+        period_unit: z.enum(LOCAL_UCUM_TIME_UNITS),
+        bounds_duration: boundsDurationSchema.optional(),
+        bounds_range: timingRangeSchema.optional(),
+        bounds_period: periodSpecSchema.optional(),
+      })
+      .strict(),
+    code: CodeSchema.optional(),
+  })
+  .strict();
+
+const dosageInstructionSchema = z
+  .object({
+    sequence: z.number().optional(),
+    text: z.string().optional(),
+    additional_instruction: z.array(CodeSchema).optional(),
+    patient_instruction: z.string().optional(),
+    timing: timingSchema.optional(),
+    as_needed_boolean: z.boolean(),
+    as_needed_for: CodeSchema.optional(),
+    site: CodeSchema.optional(),
+    route: CodeSchema.optional(),
+    method: CodeSchema.optional(),
+    dose_and_rate: z
+      .object({
+        type: z.enum(["ordered", "calculated"]),
+        dose_quantity: dosageQuantitySchema.optional(),
+        dose_range: doseRangeSchema.optional(),
+      })
+      .strict()
+      .optional(),
+    max_dose_per_period: doseRangeSchema.optional(),
+  })
+  .strict();
+
+/**
+ * `create_prescription` is `PrescriptionCreate` (`@/types/emr/prescription/
+ * prescription`, a module that does NOT import `@/Utils/decimal` — safe to
+ * value-import `PrescriptionStatus` from, and this file already does, just
+ * above). `dirty` is DELIBERATELY absent from this shape: `.strict()`
+ * means an assistant patch still carrying the legacy field (a stale/copied
+ * baseline row) is REJECTED, not silently accepted-and-ignored — matching
+ * `diagnosis/model.ts`'s identical choice for its own retired `dirty` flag.
+ */
+export const rowSchema = z
+  .object({
+    id: z.string().optional(),
+    status: z.enum(LOCAL_MEDICATION_REQUEST_STATUS).optional(),
+    status_reason: z.enum(LOCAL_MEDICATION_REQUEST_STATUS_REASON).optional(),
+    intent: z.enum(LOCAL_MEDICATION_REQUEST_INTENT).optional(),
+    category: z.enum(LOCAL_MEDICATION_CATEGORY).optional(),
+    priority: z.enum(LOCAL_MEDICATION_PRIORITY).optional(),
+    do_not_perform: z.boolean(),
+    medication: CodeSchema.optional(),
+    encounter: z.string().optional(),
+    dosage_instruction: z.array(dosageInstructionSchema),
+    note: z.string().optional(),
+    authored_on: isoInstantString,
+    created_by: userDisplaySchema.optional(),
+    requested_product: z.string().optional(),
+    requested_product_internal: displayObjectSchema(["slug"]).optional(),
+    dispense_status: z.enum(LOCAL_MEDICATION_DISPENSE_STATUS).optional(),
+    requester: userDisplaySchema,
+    create_prescription: z
+      .object({
+        name: z.string().optional(),
+        note: z.string().optional(),
+        status: z.enum(["active", "completed", "cancelled"]),
+        alternate_identifier: z.string(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
 /**
  * The soft-delete contract — P1-14's other half. Legacy split this by hand
  * at `confirmRemoveMedication`: a row WITH a server `id` flips `status` to
@@ -273,6 +464,105 @@ export function newMedicationRowFromProduct(
 
 function sanitizeNote(note: string | undefined): string | undefined {
   return note?.trim() || undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Response templates — the `useAddToTemplate`/`applyTemplateItems` contract
+// ---------------------------------------------------------------------------
+
+/**
+ * A row → the plain data a template stores, mirroring `service_request`'s
+ * own `buildServiceRequestForTemplate` (`structured/types/serviceRequest/
+ * model.ts`) — a clean, EXPLICIT object built field by field, not the
+ * legacy `buildMedicationForTemplate`'s spread-then-delete
+ * `Record<string, unknown>` (`QuestionTypes/MedicationRequestQuestion.tsx`).
+ *
+ * FOUND BY MOUNT-TESTING (not assumed), the identical class of gap
+ * `service_request`'s own port found in `activityDefinitionPrice`: the
+ * declared TS type `MedicationRequestTemplateSpec` (`@/types/emr/
+ * medicationRequest/medicationRequest`) OMITS `authored_on` — but the
+ * backend's template-create serializer REJECTS a `template_data.
+ * medication_request[N]` entry that doesn't carry one ("Field required:
+ * ...medication_request.0.authored_on"), confirmed live against the real
+ * `POST /api/v1/questionnaire_response_template/`. Legacy's own
+ * `buildMedicationForTemplate` never tripped this because it spread the
+ * WHOLE row (`{...medication, ...}`), which always carried the row's real
+ * `authored_on` along for the ride despite the same TS type omitting it
+ * there too — so this is a pre-existing backend requirement the old code
+ * satisfied by accident, not a new one this port introduces. Rather than
+ * write to a `MedicationRequestTemplateSpec` shape known to be short one
+ * required wire field, this widens the return type by exactly that one
+ * field (`& { authored_on: string }`) so the gap is visible in the type,
+ * not hidden behind a cast. The value stored is dead data from the
+ * template's own perspective — {@link medicationRowFromTemplate} always
+ * resets `authored_on` to the applying moment, never reads it back — it
+ * exists purely to satisfy the backend's required-field check.
+ *
+ * PRODUCT VS. CODE, exactly legacy's own branch: a product-based medication
+ * stores its PRODUCT'S SLUG (not this specific request's product id or
+ * `id` — a template must stay resolvable against product knowledge by slug
+ * indefinitely, not a UUID tied to one prior request) in `requested_product`
+ * and omits `medication`; a code-based medication keeps `medication` and
+ * omits `requested_product` entirely — never both, never neither (unless
+ * the row itself has neither, which the UI cannot currently produce).
+ */
+export function buildMedicationRequestForTemplate(
+  row: MedicationRequestRow,
+): MedicationRequestTemplateSpec & { authored_on: string } {
+  return {
+    status: row.status,
+    status_reason: row.status_reason,
+    intent: row.intent,
+    category: row.category,
+    priority: row.priority,
+    do_not_perform: row.do_not_perform,
+    dosage_instruction: row.dosage_instruction,
+    note: row.note,
+    // Backend-required (see doc comment above) — NOT read back by
+    // `medicationRowFromTemplate`, which always stamps a fresh one.
+    authored_on: row.authored_on,
+    ...(row.requested_product_internal
+      ? { requested_product: row.requested_product_internal.slug }
+      : row.medication?.code
+        ? { medication: row.medication }
+        : {}),
+  };
+}
+
+/**
+ * The inverse of {@link buildMedicationRequestForTemplate} — a template's
+ * stored spec plus the product knowledge fetched by its stored SLUG (a
+ * template only ever stores the slug; fetching it is the one caller's job —
+ * `resolveTemplateMedicationRequest` in `MedicationRequestEditor.tsx`,
+ * mirroring `serviceRequestRowFromTemplate`'s identical split between a
+ * pure model-side merge and an editor-side network fetch) → a fresh row.
+ *
+ * Every resolved row is exactly as fresh as one `newMedicationRowFrom{Code,
+ * Product}` creates: `authored_on` reset to now, `requester` always the
+ * applying clinician (a template never stores one), and its OWN empty
+ * `create_prescription` shell — so a template-applied row participates in
+ * the identical shared-prescription-note mechanism
+ * (`MedicationRequestEditor.tsx`'s `handleUpdateNote`, this module's
+ * `toRequests` doc comment) as a directly picked medication, not a special
+ * case of it.
+ */
+export function medicationRowFromTemplate(
+  templateMedication: MedicationRequestTemplateSpec,
+  productKnowledge: ProductKnowledgeBase | undefined,
+  currentUser: UserReadMinimal,
+): MedicationRequestRow {
+  return {
+    ...templateMedication,
+    do_not_perform: templateMedication.do_not_perform ?? false,
+    dosage_instruction: templateMedication.dosage_instruction?.length
+      ? templateMedication.dosage_instruction
+      : [{ as_needed_boolean: false }],
+    authored_on: new Date().toISOString(),
+    requester: currentUser,
+    requested_product: productKnowledge?.id,
+    requested_product_internal: productKnowledge,
+    create_prescription: draftPrescription(),
+  };
 }
 
 /**

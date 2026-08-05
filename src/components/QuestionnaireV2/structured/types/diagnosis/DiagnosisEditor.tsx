@@ -18,6 +18,7 @@ import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector"
 
 import { AddEntityControl } from "@/components/QuestionnaireV2/structured/core/AddEntityControl";
 import { RowStatusSelect } from "@/components/QuestionnaireV2/structured/core/RowStatusSelect";
+import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import {
   StructuredList,
   type StructuredColumn,
@@ -424,6 +425,10 @@ export function DiagnosisEditor({
 
   return (
     <div className="space-y-4">
+      <StructuredDroppedRowsNotice
+        droppedEdits={list.droppedEdits}
+        rowLabel={(row) => row.code.display}
+      />
       <div className="flex flex-wrap items-center justify-end">
         <HistoricalRecordSelector<DiagnosisRow>
           title={t("past_diagnoses")}

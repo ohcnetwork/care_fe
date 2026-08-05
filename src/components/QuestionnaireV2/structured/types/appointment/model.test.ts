@@ -18,6 +18,7 @@ import {
   isEmptyRow,
   needsSlot,
   projectValues,
+  rowSchema,
   toRequests,
 } from "./model";
 
@@ -543,5 +544,49 @@ describe("appointment model", () => {
       ]);
       assert.deepEqual(clearedAfter, []);
     });
+  });
+});
+
+describe("rowSchema — the assistant write guard (spec A2)", () => {
+  it("accepts a real row", () => {
+    assert.equal(
+      rowSchema.safeParse({
+        note: "fever follow-up",
+        slot_id: "slot-1",
+        tags: ["urgent"],
+      }).success,
+      true,
+    );
+  });
+
+  it("accepts a partially-filled row (note only, no slot) — this schema is not the completeness gate", () => {
+    assert.equal(
+      rowSchema.safeParse({ note: "fever follow-up", slot_id: "", tags: [] })
+        .success,
+      true,
+    );
+  });
+
+  it("rejects an unknown field", () => {
+    assert.equal(
+      rowSchema.safeParse({
+        note: "",
+        slot_id: "",
+        tags: [],
+        reason: "hallucinated field",
+      }).success,
+      false,
+    );
+  });
+
+  it("rejects a non-array tags", () => {
+    assert.equal(
+      rowSchema.safeParse({ note: "", slot_id: "", tags: "urgent" }).success,
+      false,
+    );
+  });
+
+  it("rejects a missing field", () => {
+    assert.equal(rowSchema.safeParse({ note: "", slot_id: "" }).success, false);
   });
 });

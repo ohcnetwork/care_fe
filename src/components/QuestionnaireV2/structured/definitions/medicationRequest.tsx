@@ -3,6 +3,7 @@ import { t } from "i18next";
 import { MedicationRequestEditor } from "@/components/QuestionnaireV2/structured/types/medicationRequest/MedicationRequestEditor";
 import {
   invalidDosageFieldErrors,
+  rowSchema,
   toRequests,
 } from "@/components/QuestionnaireV2/structured/types/medicationRequest/model";
 
@@ -23,6 +24,7 @@ export const medicationRequestDefinition: StructuredTypeDefinition<"medication_r
     draftPolicy: "serialize",
     contract: 2,
     toRequests,
+    rowSchema,
     // The i18n boundary: `model.ts`'s pure `invalidDosageFieldErrors`
     // becomes translated, row-scoped errors here — model.ts must not import
     // i18next (the `node --test` harness has none). `row_id` (not `index`)

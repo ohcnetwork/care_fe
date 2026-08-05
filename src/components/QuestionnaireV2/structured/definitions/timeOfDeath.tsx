@@ -1,5 +1,8 @@
 import { TimeOfDeathEditor } from "@/components/QuestionnaireV2/structured/types/timeOfDeath/TimeOfDeathEditor";
-import { toRequests } from "@/components/QuestionnaireV2/structured/types/timeOfDeath/model";
+import {
+  rowSchema,
+  toRequests,
+} from "@/components/QuestionnaireV2/structured/types/timeOfDeath/model";
 
 import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 
@@ -16,4 +19,7 @@ export const timeOfDeathDefinition: StructuredTypeDefinition<"time_of_death"> =
     draftPolicy: "serialize",
     contract: 2,
     toRequests,
+    // Spec §6 A2 — the assistant's row validation guard (`model.ts`'s own
+    // doc comment on `rowSchema` for what it accepts/rejects).
+    rowSchema,
   };

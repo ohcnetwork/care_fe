@@ -18,6 +18,7 @@ import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDe
 import UserSelector from "@/components/Common/UserSelector";
 import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
+import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import {
   StructuredList,
   type StructuredColumn,
@@ -380,6 +381,11 @@ export function ServiceRequestEditor({
   return (
     <div className="space-y-2">
       {addToTemplateDialog}
+
+      <StructuredDroppedRowsNotice
+        droppedEdits={list.droppedEdits}
+        rowLabel={(row) => row.service_request.title}
+      />
 
       <StructuredList
         questionId={question.id}

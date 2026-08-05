@@ -1,12 +1,23 @@
+import { z } from "zod";
+
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
+import {
+  displayObjectSchema,
+  nonEmptyString,
+  userDisplaySchema,
+} from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
 } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
 
-import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
+import { CodeSchema } from "@/types/base/code/code";
+import {
+  ActivityDefinitionReadSpec,
+  Classification,
+} from "@/types/emr/activityDefinition/activityDefinition";
 import {
   Intent,
   Priority,
@@ -40,6 +51,45 @@ import { UserReadMinimal } from "@/types/user/user";
 export type ServiceRequestRow = ServiceRequestApplyActivityDefinitionForm & {
   activity_definition_object: ActivityDefinitionReadSpec;
 };
+
+/**
+ * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
+ * `rowSchema` for the full contract). `activity_definition_object` is
+ * `displayObjectSchema` (passthrough, id/slug/title-keyed only — see that
+ * helper's own doc comment): an assistant would only ever copy this
+ * verbatim from a prior pick (`ResourceDefinitionCategoryPicker`), never
+ * author the full `ActivityDefinitionReadSpec` shape by hand. `requester`
+ * is `userDisplaySchema` for the identical reason. Every OTHER field is
+ * `.strict()`, matching `BaseServiceRequestSpec` exactly (minus `id`, which
+ * this form omits, matching `ServiceRequestApplyActivityDefinitionForm`'s
+ * own `Omit<BaseServiceRequestSpec, "id">`).
+ */
+const serviceRequestSpecSchema = z
+  .object({
+    title: nonEmptyString,
+    status: z.enum(Status),
+    intent: z.enum(Intent),
+    priority: z.enum(Priority),
+    category: z.enum(Classification),
+    do_not_perform: z.boolean(),
+    note: z.string().nullable(),
+    code: CodeSchema,
+    body_site: CodeSchema.nullable(),
+    occurance: z.string().nullable(),
+    patient_instruction: z.string().nullable(),
+    locations: z.array(z.string()),
+    requester: userDisplaySchema,
+  })
+  .strict();
+
+export const rowSchema = z
+  .object({
+    encounter: nonEmptyString,
+    activity_definition: nonEmptyString,
+    service_request: serviceRequestSpecSchema,
+    activity_definition_object: displayObjectSchema(["slug", "title"]),
+  })
+  .strict();
 
 /**
  * A service-request section is a LIST whose rows are born whole the moment

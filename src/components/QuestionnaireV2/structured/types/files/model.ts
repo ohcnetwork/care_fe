@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
 import type {
@@ -8,6 +10,32 @@ import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/t
 import type { FileUploadQuestion } from "@/types/files/file";
 import { FileCategory, FileType } from "@/types/files/file";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
+
+/**
+ * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
+ * `rowSchema` for the full contract). Published for completeness (every
+ * ported type publishes one), but honestly: `file_data: z.instanceof(File)`
+ * means this schema ALWAYS rejects an assistant-authored patch, by
+ * construction, not merely in practice — an assistant write arrives as a
+ * plain JSON `unknown` value (`ApplyStructuredEditInput.patch: unknown`,
+ * `fill/assistant/types.ts`), and a real browser `File` (a live handle to
+ * bytes on disk, produced only by a genuine file-picker interaction) cannot
+ * be reconstructed FROM JSON — this is the exact same round-trip
+ * impossibility `FileUploadRow`'s own doc comment (`draftPolicy:
+ * "exclude"`) documents for why this type cannot be drafted either. `File`
+ * is a Node/browser global; `z.instanceof(File)` works identically under
+ * `node --test` (Node 20+ ships a global `File`) and in the real app.
+ */
+export const rowSchema = z
+  .object({
+    name: z.string(),
+    file_type: z.enum(FileType),
+    file_category: z.enum(FileCategory),
+    associating_id: z.string().min(1),
+    original_name: z.string().min(1),
+    file_data: z.instanceof(File),
+  })
+  .strict();
 
 /**
  * UNCHANGED SHAPE — the whole reason `files` stays `draftPolicy: "exclude"`

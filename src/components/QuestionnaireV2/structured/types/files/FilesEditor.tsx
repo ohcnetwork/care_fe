@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 
 import FileUploadDropdown from "@/components/Files/FileUploadDropdown";
 
+import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import {
   StructuredList,
   type StructuredColumn,
@@ -184,6 +185,10 @@ export function FilesEditor({
 
   return (
     <>
+      <StructuredDroppedRowsNotice
+        droppedEdits={list.droppedEdits}
+        rowLabel={(row) => row.original_name}
+      />
       <StructuredList
         questionId={question.id}
         label={t("structured_type__files")}

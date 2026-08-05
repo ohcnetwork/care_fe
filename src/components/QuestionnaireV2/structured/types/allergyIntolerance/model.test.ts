@@ -15,6 +15,7 @@ import {
   ALLERGY_SOFT_DELETE,
   newAllergyRow,
   projectValues,
+  rowSchema,
   toAllergyRow,
   toBaselineRows,
   toRequests,
@@ -302,5 +303,82 @@ describe("allergy_intolerance model", () => {
       assert.equal(projectedCriticality, "high");
       assert.equal(submittedCriticality, "high");
     });
+  });
+});
+
+describe("rowSchema — the assistant write guard (spec A2)", () => {
+  const code = { code: "9", display: "Shellfish", system: "sys" };
+
+  it("accepts a real row", () => {
+    assert.equal(
+      rowSchema.safeParse(newAllergyRow(code, "enc-1")).success,
+      true,
+    );
+  });
+
+  it("accepts an existing (baseline) row with an id", () => {
+    assert.equal(
+      rowSchema.safeParse({ ...newAllergyRow(code, "enc-1"), id: "a-1" })
+        .success,
+      true,
+    );
+  });
+
+  it("rejects an unknown field", () => {
+    assert.equal(
+      rowSchema.safeParse({
+        ...newAllergyRow(code, "enc-1"),
+        allergen: "hallucinated field",
+      }).success,
+      false,
+    );
+  });
+
+  it("rejects an invalid clinical_status enum value", () => {
+    assert.equal(
+      rowSchema.safeParse({
+        ...newAllergyRow(code, "enc-1"),
+        clinical_status: "not_a_real_status",
+      }).success,
+      false,
+    );
+  });
+
+  it("rejects an invalid criticality value, even though the TS type widens it to string", () => {
+    assert.equal(
+      rowSchema.safeParse({
+        ...newAllergyRow(code, "enc-1"),
+        criticality: "extremely dangerous",
+      }).success,
+      false,
+    );
+  });
+
+  it("rejects a malformed code (missing display)", () => {
+    assert.equal(
+      rowSchema.safeParse({
+        ...newAllergyRow(code, "enc-1"),
+        code: { code: "9", system: "sys" },
+      }).success,
+      false,
+    );
+  });
+
+  it("rejects a malformed last_occurrence date", () => {
+    assert.equal(
+      rowSchema.safeParse({
+        ...newAllergyRow(code, "enc-1"),
+        last_occurrence: "2024-02-31",
+      }).success,
+      false,
+    );
+  });
+
+  it("rejects a missing encounter", () => {
+    const { encounter: _drop, ...withoutEncounter } = newAllergyRow(
+      code,
+      "enc-1",
+    );
+    assert.equal(rowSchema.safeParse(withoutEncounter).success, false);
   });
 });

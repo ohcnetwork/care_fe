@@ -1,5 +1,8 @@
+import { z } from "zod";
+
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
+import { isoInstantString } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
@@ -9,6 +12,26 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
 import type { TimeOfDeathRow } from "@/types/questionnaire/structuredRows";
 
 export type { TimeOfDeathRow };
+
+/**
+ * The runtime guard on an assistant-supplied (or otherwise externally
+ * authored) row — spec §6 A2, `fill/assistant/structuredEditValidation.ts`'s
+ * `rowSchemaOf` contract. `.strict()` so an unrecognized key (a hallucinated
+ * field, a typo) fails `safeParse` rather than being silently stripped.
+ * `deceased_datetime` accepts any real date-time string, not just what
+ * `DateTimeInput` happens to emit today (a trailing `Z`) — the row's own
+ * type (`TimeOfDeathRow`'s doc comment) already documents that an offset
+ * form is equally valid on the wire. An empty string is rejected: `""` is
+ * this type's own "unanswered" marker (`isEmptyRow`, below), and a row that
+ * reaches the edit log via the assistant is asserting an actual death time,
+ * not a deliberately blank one — clearing the section is `single.clearRow()`
+ * (an `op: "remove"`), never an `add`/`update` with a blank patch.
+ */
+export const rowSchema = z
+  .object({
+    deceased_datetime: isoInstantString,
+  })
+  .strict();
 
 /** `mode: "single"` with no baseline needs a complete row to record an
  *  `add` against — `patch` is always the whole row. */

@@ -15,6 +15,7 @@ import {
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import UserSelector from "@/components/Common/UserSelector";
+import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import {
   StructuredList,
   type StructuredColumn,
@@ -177,50 +178,56 @@ export function ChargeItemEditor({
   );
 
   return (
-    <StructuredList
-      questionId={question.id}
-      label={t("structured_type__charge_item")}
-      rows={list.rows}
-      columns={columns}
-      errors={errors}
-      disabled={disabled}
-      onUpdateRow={list.updateRow}
-      onRemoveRow={list.removeRow}
-      rowTitle={(row) => row.row.charge_item_definition_object.title}
-      addControl={
-        <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
-          facilityId={facilityId!}
-          // The picker is a TRIGGER, not a value holder — it never carries
-          // a selection of its own. The legacy component held the pick in
-          // `selectedChargeItemDefinition` and appended the row from a
-          // `useEffect` keyed on it (`ChargeItemQuestion.tsx:211-244`),
-          // then reset the selection inside that SAME effect: a
-          // write-during-effect loop whose dependency array had to list
-          // the response callback to stay correct. Adding the row directly
-          // from `onValueChange` removes both the effect and the second
-          // piece of state.
-          value={undefined}
-          onValueChange={(selected) => {
-            if (!selected || Array.isArray(selected) || !encounterId) return;
-            list.addRow(
-              newChargeItemRow(
-                selected as ChargeItemDefinitionRead,
-                encounterId,
-              ),
-            );
-          }}
-          placeholder={t("select_charge_item_definition")}
-          disabled={disabled}
-          className="w-full"
-          resourceType={ResourceCategoryResourceType.charge_item_definition}
-          listDefinitions={{
-            queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
-            pathParams: { facilityId: facilityId! },
-            queryParams: { status: ChargeItemDefinitionStatus.active },
-          }}
-          translationBaseKey="charge_item_definition"
-        />
-      }
-    />
+    <div className="space-y-2">
+      <StructuredDroppedRowsNotice
+        droppedEdits={list.droppedEdits}
+        rowLabel={(row) => row.charge_item_definition_object.title}
+      />
+      <StructuredList
+        questionId={question.id}
+        label={t("structured_type__charge_item")}
+        rows={list.rows}
+        columns={columns}
+        errors={errors}
+        disabled={disabled}
+        onUpdateRow={list.updateRow}
+        onRemoveRow={list.removeRow}
+        rowTitle={(row) => row.row.charge_item_definition_object.title}
+        addControl={
+          <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
+            facilityId={facilityId!}
+            // The picker is a TRIGGER, not a value holder — it never carries
+            // a selection of its own. The legacy component held the pick in
+            // `selectedChargeItemDefinition` and appended the row from a
+            // `useEffect` keyed on it (`ChargeItemQuestion.tsx:211-244`),
+            // then reset the selection inside that SAME effect: a
+            // write-during-effect loop whose dependency array had to list
+            // the response callback to stay correct. Adding the row directly
+            // from `onValueChange` removes both the effect and the second
+            // piece of state.
+            value={undefined}
+            onValueChange={(selected) => {
+              if (!selected || Array.isArray(selected) || !encounterId) return;
+              list.addRow(
+                newChargeItemRow(
+                  selected as ChargeItemDefinitionRead,
+                  encounterId,
+                ),
+              );
+            }}
+            placeholder={t("select_charge_item_definition")}
+            disabled={disabled}
+            className="w-full"
+            resourceType={ResourceCategoryResourceType.charge_item_definition}
+            listDefinitions={{
+              queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
+              pathParams: { facilityId: facilityId! },
+              queryParams: { status: ChargeItemDefinitionStatus.active },
+            }}
+            translationBaseKey="charge_item_definition"
+          />
+        }
+      />
+    </div>
   );
 }

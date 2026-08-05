@@ -10,6 +10,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ComponentType,
   type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,6 +22,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -170,6 +172,36 @@ export interface StructuredColumn<TRow extends object> {
   render: (context: StructuredColumnContext<TRow>) => ReactNode;
 }
 
+/**
+ * One entry of a row's overflow menu, alongside the shell's own synthesized
+ * Remove item — see `docs/superpowers/specs/annexes/p1-primitives.md` §2
+ * (`StructuredRowAction`), the design this fulfills. Remove itself is never
+ * listed here: it is always shell-owned (`canRemoveRow`/`removeLabel`
+ * below), so a type cannot accidentally duplicate or shadow it.
+ *
+ * Kept independent of `TRow` on purpose — unlike `StructuredColumn.render`,
+ * an action has no per-cell context to receive (no `update`, no
+ * `controlProps`); a type builds its own closures over the specific row
+ * inside the `rowActions` callback below (which DOES receive the row) and
+ * hands back plain, already-bound callbacks here. This is what let
+ * `medication_request`'s "Add to Template" (previously stranded — see that
+ * type's own port report — `StructuredList`'s actions cell had room for
+ * exactly Remove) land as a second row-actions consumer with zero changes
+ * to this interface.
+ */
+export interface StructuredRowAction {
+  /** Stable id — React key only, never rendered. */
+  key: string;
+  /** Already-translated label, e.g. `t("add_to_template")`. */
+  label: ReactNode;
+  icon?: ComponentType<{ className?: string }>;
+  onSelect: () => void;
+  disabled?: boolean;
+  /** Red text, matching the shell's own Remove styling — for an action
+   *  that is itself destructive/irreversible (not merely "not Remove"). */
+  destructive?: boolean;
+}
+
 export interface StructuredListProps<TRow extends object> {
   /** The owning question — namespaces every generated DOM id and scopes
    *  error matching. */
@@ -209,6 +241,14 @@ export interface StructuredListProps<TRow extends object> {
   /** `false` disables the remove affordance. Defaults to
    *  `(row) => !row.softDeleted`. */
   canRemoveRow?: (row: ProjectedRow<TRow>) => boolean;
+  /** Extra per-row overflow-menu items, ABOVE the shell's own Remove item
+   *  (a `DropdownMenuSeparator` is inserted between the two groups
+   *  automatically, only when both are non-empty). Generic on purpose —
+   *  any Phase-3+ type may contribute one or more actions here (e.g.
+   *  `medication_request`/`service_request`'s per-row "Add to template");
+   *  see {@link StructuredRowAction}'s own doc comment. `undefined`/`[]`
+   *  renders exactly the pre-existing Remove-only menu. */
+  rowActions?: (row: ProjectedRow<TRow>) => readonly StructuredRowAction[];
 
   /** Rendered below the grid — the add-entity control. Kept a slot so the
    *  list never depends on the add flow. */
@@ -250,11 +290,13 @@ export function StructuredList<TRow extends object>({
   rowClassName,
   removeLabel,
   canRemoveRow,
+  rowActions,
   addControl,
 }: StructuredListProps<TRow>) {
   // Every column always occupies a track — actions is a fixed 48px track,
-  // always last, always present: Phase 2 has no consumer that opts out of
-  // row removal (`rowActions` beyond remove is Phase 4).
+  // always last, always present: this is the row-actions MENU's track, not
+  // a per-action column, so an arbitrary number of `rowActions` entries
+  // never grows `--structured-cols` or requires a second header cell.
   const trackList = useMemo(
     () => gridTemplateColumns(columns, { actions: true }),
     [columns],
@@ -333,6 +375,7 @@ export function StructuredList<TRow extends object>({
                     rowClassName={rowClassName}
                     removeLabel={removeLabel}
                     canRemoveRow={canRemoveRow}
+                    rowActions={rowActions}
                   />
                 ))}
               </div>
@@ -360,6 +403,7 @@ interface StructuredListRowProps<TRow extends object> {
   rowClassName?: (row: ProjectedRow<TRow>) => string | undefined;
   removeLabel?: (row: ProjectedRow<TRow>) => string;
   canRemoveRow?: (row: ProjectedRow<TRow>) => boolean;
+  rowActions?: (row: ProjectedRow<TRow>) => readonly StructuredRowAction[];
 }
 
 /**
@@ -390,6 +434,7 @@ function StructuredListRow<TRow extends object>({
   rowClassName,
   removeLabel,
   canRemoveRow,
+  rowActions,
 }: StructuredListRowProps<TRow>) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -407,6 +452,13 @@ function StructuredListRow<TRow extends object>({
   const isDisabled = listDisabled || (rowDisabled?.(row) ?? false);
   const canRemove = canRemoveRow?.(row) ?? !row.softDeleted;
   const removeText = removeLabel?.(row) ?? t("remove");
+  // Built fresh every render (not memoized) — deliberately: a type's
+  // `rowActions` closure typically closes over its own per-row state (e.g.
+  // `openAddToTemplate(row.row)`), and this shell has no way to know that
+  // closure's real dependencies. Cheap: a handful of plain objects, not a
+  // hook, so there is no rules-of-hooks concern with it running
+  // conditionally-shaped output on every render.
+  const extraActions = rowActions?.(row) ?? [];
   const bodyId = `${questionId}--${row.rowId}--body`;
 
   // REVIEW FIX (Task 6, Critical 1). Below `lg` the body wrapper — the
@@ -614,6 +666,23 @@ function StructuredListRow<TRow extends object>({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {extraActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <DropdownMenuItem
+                    key={action.key}
+                    onSelect={action.onSelect}
+                    disabled={action.disabled}
+                    className={cn(action.destructive && "text-red-600")}
+                  >
+                    {Icon && <Icon className="mr-2 h-4 w-4" />}
+                    <span>{action.label}</span>
+                  </DropdownMenuItem>
+                );
+              })}
+              {extraActions.length > 0 && canRemove && (
+                <DropdownMenuSeparator />
+              )}
               {canRemove && (
                 <DropdownMenuItem
                   onSelect={handleRemove}

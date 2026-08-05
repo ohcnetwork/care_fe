@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { z } from "zod";
 
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type {
@@ -6,13 +7,18 @@ import type {
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
+import {
+  periodSchema,
+  userDisplaySchema,
+} from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
 } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import type { Code } from "@/types/base/code/code";
+import { CodeSchema, type Code } from "@/types/base/code/code";
 import {
+  MEDICATION_STATEMENT_STATUS,
   MedicationStatementInformationSourceType,
   type MedicationStatementRead,
   type MedicationStatementRequest,
@@ -27,6 +33,32 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
  * /form.ts:37`) are both untouched by this port.
  */
 export type MedicationStatementRow = MedicationStatementRequest;
+
+/**
+ * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
+ * `rowSchema` for the full contract). `dosage_text` accepts an empty
+ * string on purpose (matching `newMedicationStatementRow`'s own `""` seed
+ * and this type's own completeness decision, `isDosageMissing` — a schema
+ * this strict is "is this a plausible row", not "is this row complete
+ * enough to submit"; the latter is `medicationStatementValidationIssues`'
+ * job, below). `effective_period` is {@link periodSchema} — the SAME
+ * timezone-aware-instant shape `periodDateFromInput`'s own doc comment
+ * documents the backend actually requires (a bare date-only string 400s).
+ */
+export const rowSchema = z
+  .object({
+    id: z.string().optional(),
+    status: z.enum(MEDICATION_STATEMENT_STATUS),
+    reason: z.string().optional(),
+    medication: CodeSchema,
+    encounter: z.string().optional(),
+    dosage_text: z.string(),
+    effective_period: periodSchema.optional(),
+    information_source: z.enum(MedicationStatementInformationSourceType),
+    note: z.string().optional(),
+    created_by: userDisplaySchema.optional(),
+  })
+  .strict();
 
 /**
  * The soft-delete contract (P1-14's other half, alongside the zero-upsert

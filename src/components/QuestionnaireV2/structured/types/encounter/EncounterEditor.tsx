@@ -20,6 +20,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
+import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import { StructuredFieldError } from "@/components/QuestionnaireV2/structured/core/StructuredFieldError";
 import { mergePatch } from "@/components/QuestionnaireV2/structured/core/rowMutations";
 import { selectStructuredFieldErrors } from "@/components/QuestionnaireV2/structured/core/structuredFieldErrors";
@@ -208,6 +209,10 @@ function EncounterEditorBody({
 
   return (
     <div className="space-y-6">
+      <StructuredDroppedRowsNotice
+        droppedEdits={single.droppedEdits}
+        rowLabel={() => t("structured_type__encounter")}
+      />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label>{t("encounter_status")}</Label>

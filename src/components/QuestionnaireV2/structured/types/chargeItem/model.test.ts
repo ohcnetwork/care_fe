@@ -11,6 +11,7 @@ import {
   invalidQuantityRowIds,
   newChargeItemRow,
   projectValues,
+  rowSchema,
   stripDisplay,
   toRequests,
 } from "./model";
@@ -313,5 +314,70 @@ describe("charge_item model", () => {
         { type: "charge_item", value: [bad] },
       ]);
     });
+  });
+});
+
+describe("rowSchema — the assistant write guard (spec A2)", () => {
+  it("accepts a real row", () => {
+    assert.equal(rowSchema.safeParse(row()).success, true);
+  });
+
+  it("accepts a row with a performer picked", () => {
+    const withPerformer = row({
+      performer_actor: "user-1",
+      performer_actor_object: {
+        id: "user-1",
+        username: "care-doctor",
+      } as unknown as ChargeItemRow["performer_actor_object"],
+    });
+    assert.equal(rowSchema.safeParse(withPerformer).success, true);
+  });
+
+  it("rejects an unknown top-level field", () => {
+    assert.equal(
+      rowSchema.safeParse({ ...row(), extra_field: "hallucinated" }).success,
+      false,
+    );
+  });
+
+  it("rejects a missing charge_item_definition_object", () => {
+    const { charge_item_definition_object: _drop, ...bad } = row();
+    assert.equal(rowSchema.safeParse(bad).success, false);
+  });
+
+  it("rejects a charge_item_definition_object missing its slug", () => {
+    const bad = row();
+    const { slug: _slug, ...definitionWithoutSlug } =
+      bad.charge_item_definition_object;
+    assert.equal(
+      rowSchema.safeParse({
+        ...bad,
+        charge_item_definition_object: definitionWithoutSlug,
+      }).success,
+      false,
+    );
+  });
+
+  it("passes through extra real fields on the display object", () => {
+    assert.equal(
+      rowSchema.safeParse(row()).success,
+      true,
+      "fixtureDefinition's category/slug_config/tags/etc. must not be rejected",
+    );
+  });
+
+  it("rejects an invalid service_resource enum value", () => {
+    assert.equal(
+      rowSchema.safeParse({ ...row(), service_resource: "not_a_real_value" })
+        .success,
+      false,
+    );
+  });
+
+  it("rejects an empty charge_item_definition", () => {
+    assert.equal(
+      rowSchema.safeParse({ ...row(), charge_item_definition: "" }).success,
+      false,
+    );
   });
 });

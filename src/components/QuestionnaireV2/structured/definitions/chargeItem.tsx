@@ -3,6 +3,7 @@ import { t } from "i18next";
 import { ChargeItemEditor } from "@/components/QuestionnaireV2/structured/types/chargeItem/ChargeItemEditor";
 import {
   invalidQuantityRowIds,
+  rowSchema,
   toRequests,
 } from "@/components/QuestionnaireV2/structured/types/chargeItem/model";
 
@@ -25,6 +26,7 @@ export const chargeItemDefinition: StructuredTypeDefinition<"charge_item"> = {
   draftPolicy: "serialize",
   contract: 2,
   toRequests,
+  rowSchema,
   // i18n boundary: `model.ts`'s `invalidQuantityRowIds` is the pure,
   // row-scoped decision (imports no i18next); this is the only place it
   // becomes a translated, row_id-keyed `QuestionValidationError`.

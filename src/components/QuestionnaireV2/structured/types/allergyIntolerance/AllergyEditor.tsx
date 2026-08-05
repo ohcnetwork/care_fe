@@ -16,6 +16,7 @@ import { CATEGORY_ICONS } from "@/components/Patient/allergy/list";
 
 import { AddEntityControl } from "@/components/QuestionnaireV2/structured/core/AddEntityControl";
 import { RowStatusSelect } from "@/components/QuestionnaireV2/structured/core/RowStatusSelect";
+import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import {
   StructuredList,
   type StructuredColumn,
@@ -411,48 +412,54 @@ export function AllergyEditor({
   const addPlaceholder = t("add_allergy", { count: list.rows.length + 1 });
 
   return (
-    <StructuredList
-      questionId={question.id}
-      label={t("structured_type__allergy_intolerance")}
-      rows={list.rows}
-      columns={columns}
-      errors={errors}
-      disabled={disabled}
-      onUpdateRow={list.updateRow}
-      onRemoveRow={list.removeRow}
-      rowTitle={(row) => row.row.code.display}
-      rowSummary={(row) =>
-        [
-          t(row.row.category),
-          t(row.row.criticality),
-          t(row.row.verification_status),
-        ].join(" · ")
-      }
-      // Mirrors `AllergyQuestion.tsx`'s own disable/dim rules: a row already
-      // marked entered-in-error freezes entirely (matches the default
-      // `canRemoveRow`, `!row.softDeleted`, which already hides Remove for
-      // it); an inactive/resolved row just dims.
-      rowDisabled={(row) => row.softDeleted}
-      rowClassName={(row) =>
-        row.row.clinical_status !== "active" ? "opacity-60" : undefined
-      }
-      addControl={
-        <AddEntityControl<AllergyRow>
-          system="system-allergy-code"
-          entityType="allergy"
-          placeholder={addPlaceholder}
-          disabled={disabled}
-          createRow={(code: Code) => newAllergyRow(code, encounterId!)}
-          onAdd={(row) => list.addRow(row)}
-          renderStagedRow={(staged, updateStaged) => (
-            <StagedAllergyFields
-              row={staged}
-              onUpdate={updateStaged}
-              disabled={disabled}
-            />
-          )}
-        />
-      }
-    />
+    <div className="space-y-2">
+      <StructuredDroppedRowsNotice
+        droppedEdits={list.droppedEdits}
+        rowLabel={(row) => row.code.display}
+      />
+      <StructuredList
+        questionId={question.id}
+        label={t("structured_type__allergy_intolerance")}
+        rows={list.rows}
+        columns={columns}
+        errors={errors}
+        disabled={disabled}
+        onUpdateRow={list.updateRow}
+        onRemoveRow={list.removeRow}
+        rowTitle={(row) => row.row.code.display}
+        rowSummary={(row) =>
+          [
+            t(row.row.category),
+            t(row.row.criticality),
+            t(row.row.verification_status),
+          ].join(" · ")
+        }
+        // Mirrors `AllergyQuestion.tsx`'s own disable/dim rules: a row already
+        // marked entered-in-error freezes entirely (matches the default
+        // `canRemoveRow`, `!row.softDeleted`, which already hides Remove for
+        // it); an inactive/resolved row just dims.
+        rowDisabled={(row) => row.softDeleted}
+        rowClassName={(row) =>
+          row.row.clinical_status !== "active" ? "opacity-60" : undefined
+        }
+        addControl={
+          <AddEntityControl<AllergyRow>
+            system="system-allergy-code"
+            entityType="allergy"
+            placeholder={addPlaceholder}
+            disabled={disabled}
+            createRow={(code: Code) => newAllergyRow(code, encounterId!)}
+            onAdd={(row) => list.addRow(row)}
+            renderStagedRow={(staged, updateStaged) => (
+              <StagedAllergyFields
+                row={staged}
+                onUpdate={updateStaged}
+                disabled={disabled}
+              />
+            )}
+          />
+        }
+      />
+    </div>
   );
 }

@@ -4,6 +4,7 @@ import { SINGLETON_ROW_ID } from "@/components/QuestionnaireV2/structured/core/r
 import { AppointmentEditor } from "@/components/QuestionnaireV2/structured/types/appointment/AppointmentEditor";
 import {
   needsSlot,
+  rowSchema,
   toRequests,
 } from "@/components/QuestionnaireV2/structured/types/appointment/model";
 
@@ -26,6 +27,7 @@ export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
   draftPolicy: "serialize",
   contract: 2,
   toRequests,
+  rowSchema,
   // The i18n boundary: model.ts's pure needsSlot decision becomes a
   // translated, row-scoped error here — model.ts must not import i18next.
   validate: (projection, edits, questionId, required) =>

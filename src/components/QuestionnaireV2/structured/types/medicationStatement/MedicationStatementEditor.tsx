@@ -23,6 +23,7 @@ import { formatDuration, formatFrequency } from "@/components/Medicine/utils";
 
 import { AddEntityControl } from "@/components/QuestionnaireV2/structured/core/AddEntityControl";
 import { RowStatusSelect } from "@/components/QuestionnaireV2/structured/core/RowStatusSelect";
+import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import {
   StructuredList,
   type StructuredColumn,
@@ -470,6 +471,10 @@ export function MedicationStatementEditor({
 
   return (
     <div className="space-y-4">
+      <StructuredDroppedRowsNotice
+        droppedEdits={list.droppedEdits}
+        rowLabel={(row) => row.medication.display}
+      />
       <ConfirmActionDialog
         open={pendingRemoveRowId !== null}
         onOpenChange={(open) => !open && setPendingRemoveRowId(null)}

@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { z } from "zod";
 
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type {
@@ -6,13 +7,22 @@ import type {
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
+import {
+  onsetSchema,
+  userDisplaySchema,
+} from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
 } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import type { Code } from "@/types/base/code/code";
+import { CodeSchema, type Code } from "@/types/base/code/code";
 import type { Symptom, SymptomRequest } from "@/types/emr/symptom/symptom";
+import {
+  SYMPTOM_CLINICAL_STATUS,
+  SYMPTOM_SEVERITY,
+  SYMPTOM_VERIFICATION_STATUS,
+} from "@/types/emr/symptom/symptom";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
 /**
@@ -21,6 +31,36 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
  * is already `SymptomRequest`, so no widening is needed for this port.
  */
 export type SymptomRow = SymptomRequest;
+
+/**
+ * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
+ * `rowSchema` for the full contract). `category` stays a bare non-empty
+ * string, matching `SymptomRequest.category: string`'s own TS type — unlike
+ * `allergy_intolerance`'s `criticality`, there is no fixed runtime enum
+ * this port could check it against (`SYMPTOM_CATEGORY` in this file is a
+ * single hardcoded constant used only by `newSymptomRow`, not an
+ * exhaustive domain list). `recorded_date`/`created_date`/`updated_date`
+ * are read-only housekeeping timestamps this editor never writes back —
+ * left as plain optional strings rather than a strict date check that
+ * would only ever apply to server-authored data this row merely carries.
+ */
+export const rowSchema = z
+  .object({
+    id: z.string().optional(),
+    clinical_status: z.enum(SYMPTOM_CLINICAL_STATUS),
+    verification_status: z.enum(SYMPTOM_VERIFICATION_STATUS),
+    code: CodeSchema,
+    severity: z.enum(SYMPTOM_SEVERITY),
+    onset: onsetSchema.optional(),
+    recorded_date: z.string().optional(),
+    note: z.string().optional(),
+    encounter: z.string().min(1),
+    category: z.string().min(1),
+    created_date: z.string().optional(),
+    updated_date: z.string().optional(),
+    created_by: userDisplaySchema.optional(),
+  })
+  .strict();
 
 /**
  * P1-14's other half for this type — the entered-in-error soft-delete

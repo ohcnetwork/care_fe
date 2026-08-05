@@ -1,7 +1,9 @@
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 import { DateTimeInput } from "@/components/Common/DateTimeInput";
 
+import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import type { BaselineRow } from "@/components/QuestionnaireV2/structured/core/types";
 import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
 import type { StructuredInputProps } from "@/components/QuestionnaireV2/structured/types";
@@ -41,6 +43,7 @@ export function TimeOfDeathEditor({
   question,
   disabled,
 }: StructuredInputProps) {
+  const { t } = useTranslation();
   // No explicit type arguments. `TRow` infers from `projectValues` /
   // `createSeed` / `isEmptyRow`'s own types below, and `Mode` infers from
   // the `mode: "single"` literal in this same call. Supplying `TRow`
@@ -63,6 +66,10 @@ export function TimeOfDeathEditor({
 
   return (
     <div className="space-y-4">
+      <StructuredDroppedRowsNotice
+        droppedEdits={single.droppedEdits}
+        rowLabel={() => t("structured_type__time_of_death")}
+      />
       <DateTimeInput
         // `aria-label`, not a `<label>`: `structuredRendering.spec.ts:85-91`
         // asserts exactly one <label> in the block whose text equals the

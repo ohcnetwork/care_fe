@@ -19,6 +19,7 @@ import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector"
 
 import { AddEntityControl } from "@/components/QuestionnaireV2/structured/core/AddEntityControl";
 import { RowStatusSelect } from "@/components/QuestionnaireV2/structured/core/RowStatusSelect";
+import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import {
   StructuredList,
   type StructuredColumn,
@@ -416,6 +417,10 @@ export function SymptomEditor({
 
   return (
     <div className="space-y-2">
+      <StructuredDroppedRowsNotice
+        droppedEdits={list.droppedEdits}
+        rowLabel={(row) => row.code.display}
+      />
       {/* Kept CONVENTIONAL, not collapsed into a shared helper — this
           port's brief defers the four `HistoricalRecordSelector` configs'
           (allergy/symptom/diagnosis/medication_statement) consolidation to

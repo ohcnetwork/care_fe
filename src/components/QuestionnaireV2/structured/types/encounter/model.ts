@@ -1,14 +1,22 @@
+import { z } from "zod";
+
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type {
   BaselineRow,
   ProjectValues,
 } from "@/components/QuestionnaireV2/structured/core/types";
+import { periodSchema } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
 } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
 import {
+  ENCOUNTER_ADMIT_SOURCE,
+  ENCOUNTER_CLASS,
+  ENCOUNTER_DIET_PREFERENCE,
+  ENCOUNTER_DISCHARGE_DISPOSITION,
+  ENCOUNTER_PRIORITY,
   EncounterStatus,
   type EncounterClass,
   type EncounterDischargeDisposition,
@@ -31,6 +39,39 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
  * request.
  */
 export type EncounterRow = EncounterEdit;
+
+/** `Hospitalization`'s zod mirror — `.strict()`, every field optional,
+ *  matching `Hospitalization`'s own four fields exactly. */
+const hospitalizationSchema = z
+  .object({
+    re_admission: z.boolean().optional(),
+    admit_source: z.enum(ENCOUNTER_ADMIT_SOURCE).optional(),
+    discharge_disposition: z.enum(ENCOUNTER_DISCHARGE_DISPOSITION).optional(),
+    diet_preference: z.enum(ENCOUNTER_DIET_PREFERENCE).optional(),
+  })
+  .strict();
+
+/**
+ * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
+ * `rowSchema` for the full contract). `hospitalization` accepts `null`
+ * (matching `Hospitalization | null | undefined` — `makeNormalizePatch`'s
+ * rule 2 writes `{}`, never `null`, but a restored/hand-edited draft or a
+ * plugin write could carry the server's own `null` for an ambulatory
+ * encounter that never had one). `external_identifier`/
+ * `discharge_summary_advice` are `string | null` on the real type — both
+ * `.nullable()`, not merely `.optional()`.
+ */
+export const rowSchema = z
+  .object({
+    status: z.enum(EncounterStatus),
+    encounter_class: z.enum(ENCOUNTER_CLASS),
+    period: periodSchema,
+    hospitalization: hospitalizationSchema.nullable().optional(),
+    priority: z.enum(ENCOUNTER_PRIORITY),
+    external_identifier: z.string().nullable(),
+    discharge_summary_advice: z.string().nullable(),
+  })
+  .strict();
 
 /** Statuses that END an encounter, and therefore want a `period.end`.
  *  Exactly the five the legacy status effect listed

@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { z } from "zod";
 
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type {
@@ -6,15 +7,25 @@ import type {
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
+import {
+  onsetSchema,
+  userDisplaySchema,
+} from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
 } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import type { Code } from "@/types/base/code/code";
+import { CodeSchema, type Code } from "@/types/base/code/code";
 import type {
   Diagnosis,
   DiagnosisRequest,
+} from "@/types/emr/diagnosis/diagnosis";
+import {
+  DIAGNOSIS_CATEGORY,
+  DIAGNOSIS_CLINICAL_STATUS,
+  DIAGNOSIS_SEVERITY,
+  DIAGNOSIS_VERIFICATION_STATUS,
 } from "@/types/emr/diagnosis/diagnosis";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
@@ -32,6 +43,37 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
  * see this module's own header comment for the full argument.
  */
 export type DiagnosisRow = DiagnosisRequest;
+
+/**
+ * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
+ * `rowSchema` for the full contract). `severity` is `.nullable()`, matching
+ * `DiagnosisRequest.severity: DiagnosisSeverity | null` exactly — unlike
+ * `symptom`'s `severity` (never null on that type). `recorded_date`/
+ * `created_date`/`updated_date` stay plain optional strings — read-only
+ * housekeeping timestamps this editor never writes back, mirroring
+ * `symptom/model.ts`'s identical choice (see that file's own doc comment).
+ * `dirty` is DELIBERATELY absent from this shape: `.strict()` means an
+ * assistant patch that still carries the legacy field (a stale/copied
+ * baseline row) is REJECTED, not silently accepted-and-ignored — consistent
+ * with `toDiagnosisRow`/`newDiagnosisRow` never writing it.
+ */
+export const rowSchema = z
+  .object({
+    id: z.string().optional(),
+    clinical_status: z.enum(DIAGNOSIS_CLINICAL_STATUS),
+    verification_status: z.enum(DIAGNOSIS_VERIFICATION_STATUS),
+    code: CodeSchema,
+    severity: z.enum(DIAGNOSIS_SEVERITY).nullable(),
+    onset: onsetSchema.optional(),
+    recorded_date: z.string().optional(),
+    note: z.string().optional(),
+    category: z.enum(DIAGNOSIS_CATEGORY),
+    encounter: z.string().min(1),
+    created_by: userDisplaySchema.optional(),
+    created_date: z.string().optional(),
+    updated_date: z.string().optional(),
+  })
+  .strict();
 
 /**
  * The soft-delete contract this port exists to land (P1-14's other half —

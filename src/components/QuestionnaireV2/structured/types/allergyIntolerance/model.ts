@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { z } from "zod";
 
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type {
@@ -6,15 +7,21 @@ import type {
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
+import { dateOnlyString } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
 } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import type { Code } from "@/types/base/code/code";
+import { CodeSchema, type Code } from "@/types/base/code/code";
 import type {
   AllergyIntolerance,
   AllergyIntoleranceRequest,
+} from "@/types/emr/allergyIntolerance/allergyIntolerance";
+import {
+  ALLERGY_CATEGORY,
+  ALLERGY_CLINICAL_STATUS,
+  ALLERGY_CRITICALITY,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
@@ -26,6 +33,36 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
  * this port.
  */
 export type AllergyRow = AllergyIntoleranceRequest;
+
+/**
+ * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
+ * `rowSchema` for the full contract). `verification_status` is hand-listed
+ * (the type it guards, `AllergyVerificationStatus`, is a plain string
+ * union with no backing runtime array to read); `criticality` is
+ * `ALLERGY_CRITICALITY`-checked even though `AllergyIntoleranceRequest`
+ * itself widens the field to `string` — every real row is one of those
+ * three values, and a schema this loose would defeat "enums checked" (spec
+ * §6 A2's own wording) for the one field on this row that most needs it.
+ */
+export const rowSchema = z
+  .object({
+    id: z.string().optional(),
+    clinical_status: z.enum(ALLERGY_CLINICAL_STATUS),
+    verification_status: z.enum([
+      "unconfirmed",
+      "confirmed",
+      "refuted",
+      "presumed",
+      "entered_in_error",
+    ]),
+    category: z.enum(ALLERGY_CATEGORY),
+    criticality: z.enum(ALLERGY_CRITICALITY),
+    code: CodeSchema,
+    last_occurrence: dateOnlyString.optional(),
+    note: z.string().optional(),
+    encounter: z.string().min(1),
+  })
+  .strict();
 
 /**
  * The soft-delete contract this port exists to land (P1-14's other half —

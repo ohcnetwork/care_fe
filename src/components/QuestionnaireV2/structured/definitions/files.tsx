@@ -5,6 +5,7 @@ import { readFileAsDataURL } from "@/Utils/utils";
 import { FilesEditor } from "@/components/QuestionnaireV2/structured/types/files/FilesEditor";
 import {
   makeToRequests,
+  rowSchema,
   unnamedFileRowIds,
 } from "@/components/QuestionnaireV2/structured/types/files/model";
 
@@ -62,6 +63,7 @@ export const filesDefinition: StructuredTypeDefinition<"files"> = {
   draftPolicy: "exclude",
   contract: 2,
   toRequests,
+  rowSchema,
   // i18n boundary: `model.ts`'s `unnamedFileRowIds` is the pure, row-scoped
   // decision (imports no i18next); this is the only place it becomes a
   // translated, row_id-keyed `QuestionValidationError`. `field_key: "name"`

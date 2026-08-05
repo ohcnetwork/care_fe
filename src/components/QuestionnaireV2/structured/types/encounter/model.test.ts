@@ -22,6 +22,7 @@ import {
   makeNormalizePatch,
   projectValues,
   requiresDischargeDisposition,
+  rowSchema,
   toBaselineRows,
   toEncounterRow,
   toRequests,
@@ -953,5 +954,77 @@ describe("encounter — the untouched section, through the real reducer", () => 
     });
     assert.equal(merged.hospitalization?.discharge_disposition, "home");
     assert.deepEqual((await toRequests(log, CTX))[0].body, putBody(merged));
+  });
+});
+
+describe("rowSchema — the assistant write guard (spec A2)", () => {
+  it("accepts a real row", () => {
+    assert.equal(rowSchema.safeParse(fixtureRow()).success, true);
+  });
+
+  it("accepts a null hospitalization (an ambulatory encounter's cleared record)", () => {
+    assert.equal(
+      rowSchema.safeParse(fixtureRow({ hospitalization: null })).success,
+      true,
+    );
+  });
+
+  it("accepts null external_identifier/discharge_summary_advice", () => {
+    assert.equal(
+      rowSchema.safeParse(
+        fixtureRow({
+          external_identifier: null,
+          discharge_summary_advice: null,
+        }),
+      ).success,
+      true,
+    );
+  });
+
+  it("rejects an unknown top-level field", () => {
+    assert.equal(
+      rowSchema.safeParse({ ...fixtureRow(), extra_field: "hallucinated" })
+        .success,
+      false,
+    );
+  });
+
+  it("rejects an invalid status enum value", () => {
+    assert.equal(
+      rowSchema.safeParse({ ...fixtureRow(), status: "not_a_real_status" })
+        .success,
+      false,
+    );
+  });
+
+  it("rejects an invalid encounter_class enum value", () => {
+    assert.equal(
+      rowSchema.safeParse({ ...fixtureRow(), encounter_class: "made_up" })
+        .success,
+      false,
+    );
+  });
+
+  it("rejects an unknown key inside hospitalization", () => {
+    assert.equal(
+      rowSchema.safeParse({
+        ...fixtureRow(),
+        hospitalization: { made_up: true },
+      }).success,
+      false,
+    );
+  });
+
+  it("rejects a missing period", () => {
+    const { period: _drop, ...withoutPeriod } = fixtureRow();
+    assert.equal(rowSchema.safeParse(withoutPeriod).success, false);
+  });
+
+  it("rejects a number where external_identifier expects string | null", () => {
+    assert.equal(
+      rowSchema.safeParse({ ...fixtureRow(), external_identifier: 123 })
+        .success,
+      false,
+    );
   });
 });

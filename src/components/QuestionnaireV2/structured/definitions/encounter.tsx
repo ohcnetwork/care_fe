@@ -3,6 +3,7 @@ import { t } from "i18next";
 import { EncounterEditor } from "@/components/QuestionnaireV2/structured/types/encounter/EncounterEditor";
 import {
   blocksSaveForMissingDischargeDisposition,
+  rowSchema,
   toRequests,
 } from "@/components/QuestionnaireV2/structured/types/encounter/model";
 
@@ -27,6 +28,7 @@ export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
   draftPolicy: "serialize",
   contract: 2,
   toRequests,
+  rowSchema,
   // PRODUCT DECISION (Task 8, stated explicitly per the brief): an
   // untouched section may NOT block Save — `edits.length > 0` gates the
   // error regardless of the question's own `required` flag. Blocking Save

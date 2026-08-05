@@ -1,5 +1,8 @@
 import { AllergyEditor } from "@/components/QuestionnaireV2/structured/types/allergyIntolerance/AllergyEditor";
-import { toRequests } from "@/components/QuestionnaireV2/structured/types/allergyIntolerance/model";
+import {
+  rowSchema,
+  toRequests,
+} from "@/components/QuestionnaireV2/structured/types/allergyIntolerance/model";
 
 import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 
@@ -19,4 +22,5 @@ export const allergyIntoleranceDefinition: StructuredTypeDefinition<"allergy_int
     draftPolicy: "serialize",
     contract: 2,
     toRequests,
+    rowSchema,
   };

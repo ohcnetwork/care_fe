@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
 import type {
@@ -12,6 +14,24 @@ import type { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
  *  `appointment` arm of `StructuredDataMap` (`structured/types.ts:42`) is
  *  untouched by this port. */
 export type AppointmentRow = CreateAppointmentQuestion;
+
+/**
+ * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
+ * `rowSchema` for the full contract this fulfills the same way). Deliberately
+ * permissive on `note`/`slot_id` (both may be legitimately blank — see
+ * `isEmptyRow`/`needsSlot` above; a schema's job is "is this a plausible
+ * row shape", not "is this row complete enough to submit", a SEPARATE,
+ * edit-log-aware decision `needsSlot` already owns) — a schema this strict
+ * would reject the exact same partially-filled row a human clinician is
+ * allowed to leave mid-edit.
+ */
+export const rowSchema = z
+  .object({
+    note: z.string(),
+    slot_id: z.string(),
+    tags: z.array(z.string()),
+  })
+  .strict();
 
 /**
  * Is `row.slot_id` a real slot address, not just a truthy string? Review

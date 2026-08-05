@@ -1,5 +1,12 @@
+import { z } from "zod";
+
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
+import {
+  displayObjectSchema,
+  nonEmptyString,
+  userDisplaySchema,
+} from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
@@ -9,6 +16,7 @@ import type {
   ApplyChargeItemDefinitionRequest,
   ChargeItemQuestionRow,
 } from "@/types/billing/chargeItem/chargeItem";
+import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import type { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
@@ -25,6 +33,30 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
 export type ChargeItemRow = ChargeItemQuestionRow & {
   charge_item_definition_object: ChargeItemDefinitionRead;
 };
+
+/**
+ * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
+ * `rowSchema` for the full contract). `charge_item_definition_object`/
+ * `performer_actor_object` are `displayObjectSchema`/`userDisplaySchema`
+ * (passthrough, id-keyed only — see that helper's own doc comment): an
+ * assistant would only ever copy one of these verbatim from a prior pick,
+ * never author the full `ChargeItemDefinitionRead`/`UserReadMinimal` shape
+ * by hand. Every OTHER field is `.strict()`.
+ */
+export const rowSchema = z
+  .object({
+    charge_item_definition: nonEmptyString,
+    quantity: z.string(),
+    encounter: z.string().optional(),
+    patient: z.string().optional(),
+    service_resource: z.enum(ChargeItemServiceResource).optional(),
+    service_resource_id: z.string().optional(),
+    performer_actor: z.string().optional(),
+    account: z.string().optional(),
+    charge_item_definition_object: displayObjectSchema(["slug", "title"]),
+    performer_actor_object: userDisplaySchema.optional(),
+  })
+  .strict();
 
 /**
  * A charge-item section is a LIST, not a singleton, and unlike
