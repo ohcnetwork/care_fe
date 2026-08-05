@@ -169,9 +169,6 @@ function InputComponent({
           "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
           className,
         )}
-        type="tel"
-        inputMode="tel"
-        autoComplete="tel"
         onBeforeInput={handleBeforeInput}
         aria-describedby="phone-input-constraint"
         {...props}

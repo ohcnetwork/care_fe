@@ -92,7 +92,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
         </p>
 
         <form
-          id="patient-login-otp-form"
+          id="patient-otp-form"
           className="mt-9"
           onSubmit={(event) => {
             event.preventDefault();
@@ -167,7 +167,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
 
         <Button
           type="submit"
-          form="patient-login-otp-form"
+          form="patient-otp-form"
           size="lg"
           className="h-12 w-full text-base mt-7"
           disabled={!isOtpComplete || isVerifyingOtp}
@@ -189,7 +189,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
           {isPhoneValid && hasConsented && (
             <Button
               type="submit"
-              form="patient-login-phone-form"
+              form="patient-phone-form"
               size="lg"
               className="h-12 w-full text-base"
               disabled={isSendingOtp}
@@ -220,7 +220,7 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
       </h1>
 
       <form
-        id="patient-login-phone-form"
+        id="patient-phone-form"
         className="mt-8"
         onSubmit={(event) => {
           event.preventDefault();
@@ -231,20 +231,22 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
         }}
       >
         <Label
-          htmlFor="patient-login-phone"
+          htmlFor="patient-phone-number"
           className="mb-2 block text-sm font-medium text-gray-900"
         >
           {t("mobile_number")}
         </Label>
         <PhoneInput
-          id="patient-login-phone"
-          name="tel"
+          id="patient-phone-number"
           className="h-13 overflow-hidden rounded-lg border border-gray-300 [&_button]:border-0 [&_button]:bg-gray-50 [&_input]:border-0 [&_input]:border-l [&_input]:border-l-gray-300"
           value={phone}
           onChange={updatePhone}
           placeholder={t("enter_phone_number")}
           disabled={isSendingOtp}
           autoFocus
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
         />
         {phoneError ? (
           <p className="mt-1.5 text-sm text-red-600">{t(phoneError)}</p>
@@ -268,13 +270,13 @@ export default function PatientLogin({ redirectTo }: PatientLoginProps) {
           )}
           <div className="flex items-start justify-between gap-3">
             <Label
-              htmlFor="patient-login-consent"
+              htmlFor="patient-consent"
               className="cursor-pointer text-sm font-medium leading-snug text-gray-800"
             >
               {t("patient_login__consent")}
             </Label>
             <Switch
-              id="patient-login-consent"
+              id="patient-consent"
               checked={hasConsented}
               onCheckedChange={setHasConsented}
               className="mt-0.5 shrink-0 data-[state=checked]:bg-primary-700"
