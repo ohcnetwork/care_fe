@@ -31,7 +31,7 @@ test.describe("Enable When — Boolean Operators", () => {
     const patientId = getPatientId();
     const encounterId = getEncounterId();
     // The fill route fetches by external_id (slug lookup is not supported).
-    const questionnaireId = getQuestionnaireId();
+    const questionnaireId = await getQuestionnaireId();
 
     await page.goto(
       `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,

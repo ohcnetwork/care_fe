@@ -32,7 +32,7 @@ test.use({ storageState: "tests/.auth/user.json" });
  * could not exist before this port.
  *
  * CATALOG FIXTURES: "Amoxicillin 500mg Capsule", "Paracetamol 500mg
- * Tablet", "Ibuprofen 400mg Tablet" and "Registration Fee" are stable,
+ * Tablet", "Ibuprofen 400mg Tablet" and "Pair of Gloves" are stable,
  * facility-scoped `charge_item_definition` catalog entries the backend E2E
  * fixture script seeds (verified directly against the running DB — Task 1
  * Step 3's own house rule) — the same catalog `chargeItem.spec.ts`'s
@@ -291,13 +291,13 @@ test.describe("Structured question: charge_item", () => {
     const block = questionBlock(page, fixture.label);
     await expect(block).toBeVisible();
 
-    // "Registration Fee" is the one catalog entry unlikely to appear
-    // elsewhere in this test file's own runs; a randomised quantity is the
-    // disambiguator against whatever earlier runs (this file's own
-    // `add`/`edit` tests never submit, but `chargeItem.spec.ts`'s legacy
-    // product-path test and earlier local runs of this very test do) may
-    // have already applied against the same shared fixture encounter.
-    const title = "Registration Fee";
+    // "Pair of Gloves" is the one catalog entry no other charge-item spec
+    // touches; a randomised quantity is the disambiguator against whatever
+    // earlier runs (this file's own `add`/`edit` tests never submit, but
+    // `chargeItem.spec.ts`'s legacy product-path test and earlier local
+    // runs of this very test do) may have already applied against the same
+    // shared fixture encounter.
+    const title = "Pair of Gloves";
     const quantity = String(faker.number.int({ min: 11, max: 89 }));
     await pickChargeItemDefinition(page, block, title);
     await rowByTitle(block, title)

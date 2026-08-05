@@ -1,4 +1,5 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
+import { format, subHours } from "date-fns";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -187,6 +188,34 @@ export function questionBlock(page: Page, label: string) {
         `xpath=.//label[normalize-space(.)=${JSON.stringify(label)}]`,
       ),
     });
+}
+
+/**
+ * The Select/Input control immediately following a `<Label>` whose text
+ * CONTAINS `labelText`, inside a structured question's editor.
+ *
+ * `contains`, not exact, because some labels carry a hardcoded trailing
+ * `*` when their field turns required (e.g. discharge disposition in
+ * `EncounterEditor.tsx`). None of these `<Select>`/`<Label>` pairs uses
+ * `htmlFor`, so `getByLabel` cannot find them — the Radix `<Select>` root
+ * emits no DOM node of its own, so the rendered `<button role="combobox">`
+ * / `<input>` is a true next sibling.
+ */
+export function fieldControl(
+  block: Locator,
+  labelText: string,
+  tag: "button" | "input" = "button",
+): Locator {
+  return block.locator(
+    `xpath=.//label[contains(normalize-space(.), ${JSON.stringify(labelText)})]/following-sibling::${tag}[1]`,
+  );
+}
+
+/** A `datetime-local` value always safely in the past relative to a `max`
+ *  of `format(new Date(), "yyyy-MM-dd'T'HH:mm")`, regardless of when the
+ *  suite runs. */
+export function pastDateTimeLocal(hoursAgo: number): string {
+  return format(subHours(new Date(), hoursAgo), "yyyy-MM-dd'T'HH:mm");
 }
 
 /** questionBlock + a count assertion — use before any `.not.` assertion,

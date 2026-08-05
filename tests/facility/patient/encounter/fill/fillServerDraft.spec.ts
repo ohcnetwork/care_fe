@@ -189,6 +189,17 @@ test.describe("Fill page server draft", () => {
       page.getByRole("tab", { name: /Questionnaire/ }),
     ).toContainText("Draft");
 
+    // …and the prompt actually arms. Dismissing it cancels the navigation,
+    // so the edit is still on screen and still resumable below.
+    let dialogMessage: string | undefined;
+    page.once("dialog", async (dialog) => {
+      dialogMessage = dialog.message();
+      await dialog.dismiss();
+    });
+    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect.poll(() => dialogMessage).toContain("unsaved changes");
+    await expect(noteBox()).toHaveValue(editedNote);
+
     // Complete the record so the drafts card is empty again for whatever
     // runs next (see the serial note on this describe).
     await questionBlock(page, "Is bilateral air entry present?")

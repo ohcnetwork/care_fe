@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { type Locator, type Page, expect, test } from "@playwright/test";
 import { submitForm } from "tests/helper/questionnaire";
 import {
+  fieldControl,
   getQuestionnaireIdBySlug,
   questionBlock,
 } from "tests/helper/questionnaireV2";
@@ -42,24 +43,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 test.describe.configure({ mode: "serial" });
 
 const fixture = STRUCTURED_FIXTURES.encounter;
-
-/** The Select/Input control immediately following a `<Label>` whose text
- *  CONTAINS `labelText` — `contains`, not exact, because the discharge
- *  disposition label carries a hardcoded trailing `*` this deployment
- *  always renders once the discharge fields show
- *  (`EncounterEditor.tsx`). Neither `<Select>`/`<Label>` here uses
- *  `htmlFor`, so `getByLabel` cannot find these — the Radix `<Select>`
- *  root emits no DOM node of its own, so the rendered
- *  `<button role="combobox">`/`<input>` is a true next sibling. */
-function fieldControl(
-  block: Locator,
-  labelText: string,
-  tag: "button" | "input" = "button",
-) {
-  return block.locator(
-    `xpath=.//label[contains(normalize-space(.), ${JSON.stringify(labelText)})]/following-sibling::${tag}[1]`,
-  );
-}
 
 /** Opens a Select trigger and picks the first option whose text differs
  *  from whatever is CURRENTLY shown — correct regardless of the shared

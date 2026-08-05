@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
-import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
+import {
+  fillDraftCount,
+  settleAutosaveDebounce,
+} from "tests/helper/fillDrafts";
 import {
   getQuestionnaireIdBySlug,
   questionBlock,
@@ -11,16 +14,6 @@ import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
-
-/** How many fill-session drafts this origin currently holds. */
-async function fillDraftCount(page: Page): Promise<number> {
-  return page.evaluate(
-    () =>
-      Object.keys(localStorage).filter((key) =>
-        key.startsWith("care_qn_fill_draft--"),
-      ).length,
-  );
-}
 
 test.describe("Fill page local autosave", () => {
   test("reload prompts to resume, Resume applies the draft, submit clears it", async ({
@@ -206,11 +199,14 @@ test.describe("Fill page local autosave", () => {
     await expect(page.getByRole("combobox").first()).toBeVisible();
 
     // Touch nothing. No Draft chip, and nothing in storage after well over
-    // the autosave debounce.
+    // AUTOSAVE_DEBOUNCE_MS — the wait has to be explicit: `expect.poll`
+    // resolves on its first passing evaluation, so polling for an absence
+    // that already holds observes nothing at all.
     await expect(
       page.getByRole("tab", { name: /Questionnaire/ }),
     ).not.toContainText("Draft");
-    await expect.poll(() => fillDraftCount(page), { timeout: 5000 }).toBe(0);
+    await settleAutosaveDebounce(page);
+    expect(await fillDraftCount(page)).toBe(0);
 
     // And the next visit is clean — no prompt to answer, nothing to
     // restore.
@@ -219,6 +215,7 @@ test.describe("Fill page local autosave", () => {
       page.getByRole("button", { name: "Save Changes" }),
     ).toBeVisible();
     await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
-    await expect(await fillDraftCount(page)).toBe(0);
+    await settleAutosaveDebounce(page);
+    expect(await fillDraftCount(page)).toBe(0);
   });
 });

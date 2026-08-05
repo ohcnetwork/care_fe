@@ -1,11 +1,17 @@
 import { faker } from "@faker-js/faker";
-import { type Locator, type Page, expect, test } from "@playwright/test";
-import { format, subHours } from "date-fns";
+import { type Page, expect, test } from "@playwright/test";
+import {
+  fillDraftCount,
+  settleAutosaveDebounce,
+  soleDraftForms,
+} from "tests/helper/fillDrafts";
 import { submitForm } from "tests/helper/questionnaire";
 import {
   adminApiHeaders,
   apiBaseUrl,
+  fieldControl,
   getQuestionnaireIdBySlug,
+  pastDateTimeLocal,
   questionBlock,
 } from "tests/helper/questionnaireV2";
 import {
@@ -30,20 +36,6 @@ test.use({ storageState: "tests/.auth/user.json" });
 const encounterFixture = STRUCTURED_FIXTURES.encounter;
 const timeOfDeathFixture = STRUCTURED_FIXTURES.time_of_death;
 
-/** The Select/Input control immediately following a `<Label>` whose text
- *  CONTAINS `labelText` — mirrors `encounterStructured.spec.ts`'s identical
- *  helper for the same widget (neither `<Select>`/`<Label>` here uses
- *  `htmlFor`, so `getByLabel` cannot find these). */
-function fieldControl(
-  block: Locator,
-  labelText: string,
-  tag: "button" | "input" = "button",
-) {
-  return block.locator(
-    `xpath=.//label[contains(normalize-space(.), ${JSON.stringify(labelText)})]/following-sibling::${tag}[1]`,
-  );
-}
-
 function trackBatchRequests(page: Page): { url: string; body: string }[] {
   const seen: { url: string; body: string }[] = [];
   page.on("request", (request) => {
@@ -55,46 +47,6 @@ function trackBatchRequests(page: Page): { url: string; body: string }[] {
     }
   });
   return seen;
-}
-
-/** How many fill-session drafts this origin currently holds — mirrors
- *  `fillAutosave.spec.ts`'s own private helper. */
-async function fillDraftCount(page: Page): Promise<number> {
-  return page.evaluate(
-    () =>
-      Object.keys(localStorage).filter((key) =>
-        key.startsWith("care_qn_fill_draft--"),
-      ).length,
-  );
-}
-
-/** The stored (single) fill draft's `forms` content this origin holds — the
- *  part that actually reflects clinician edits — or `undefined` if there is
- *  no draft. Deliberately excludes the stored `savedAt` timestamp: a
- *  content-free persist (e.g. one incidentally scheduled around the same
- *  moment as the test's own network toggle, for a reason unrelated to this
- *  invariant) legitimately re-stamps `savedAt` on every write regardless of
- *  whether anything changed — that is `saveFillDraft`'s own, unrelated
- *  contract, not a spurious rewrite this invariant means to catch. What
- *  this invariant actually guards is `forms` (the safe partition +
- *  `structuredSkipped` flag): a background refetch must never rewrite ITS
- *  content. */
-async function soleDraftForms(page: Page): Promise<string | undefined> {
-  return page.evaluate(() => {
-    const key = Object.keys(localStorage).find((k) =>
-      k.startsWith("care_qn_fill_draft--"),
-    );
-    if (!key) return undefined;
-    const raw = localStorage.getItem(key);
-    if (!raw) return undefined;
-    return JSON.stringify((JSON.parse(raw) as { forms: unknown }).forms);
-  });
-}
-
-/** A datetime-local value safely in the past (mirrors
- *  `timeOfDeath.spec.ts`'s identical helper). */
-function pastDateTimeLocal(hoursAgo: number): string {
-  return format(subHours(new Date(), hoursAgo), "yyyy-MM-dd'T'HH:mm");
 }
 
 test.describe("Structured invariant 1: zero upsert for an untouched section", () => {
@@ -116,8 +68,8 @@ test.describe("Structured invariant 1: zero upsert for an untouched section", ()
     const block = questionBlock(page, encounterFixture.label);
     await expect(block).toBeVisible();
     // The prefetch landed — the status combobox only carries a value once
-    // the fetch resolved (mirrors `fillAutosave.spec.ts:206`'s identical
-    // proof for this same fixed pseudo-questionnaire).
+    // the fetch resolved (the same proof `fillAutosave.spec.ts` makes for
+    // this same fixed pseudo-questionnaire).
     const statusTrigger = fieldControl(block, "Encounter Status");
     await expect(statusTrigger).toBeVisible();
     await expect(statusTrigger).not.toHaveText("Select Status");
@@ -261,7 +213,7 @@ test("Structured invariant 2: a background refetch never creates dirty state, ne
   // comparison of the whole stored record: `savedAt` legitimately
   // re-stamps on every persist, content-changing or not — see
   // `soleDraftForms`'s own doc comment.)
-  await page.waitForTimeout(2000);
+  await settleAutosaveDebounce(page);
   const formsAfter = await soleDraftForms(page);
   expect(formsAfter).toBe(formsBefore);
 });

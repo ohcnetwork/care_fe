@@ -2,6 +2,11 @@ import { faker } from "@faker-js/faker";
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
+  draftFormCount,
+  draftFormNoteText,
+  settleAutosaveDebounce,
+} from "tests/helper/fillDrafts";
+import {
   getQuestionnaireIdBySlug,
   questionBlock,
 } from "tests/helper/questionnaireV2";
@@ -51,61 +56,6 @@ async function addQuestionnaire(page: Page, title: RegExp) {
   await search.pressSequentially("Feedback");
   await expect(page.getByRole("option", { name: title })).toBeVisible();
   await page.getByRole("option", { name: title }).click();
-}
-
-/**
- * How many forms the ONE persisted session draft currently holds.
- * Inspected directly because React flushes passive effects after the DOM
- * commit — a DOM-only assertion can win the race against the autosave
- * write, and these specs are precisely about what reaches storage.
- */
-async function draftFormCount(page: Page): Promise<number> {
-  return page.evaluate(() => {
-    const key = Object.keys(localStorage).find((entry) =>
-      entry.startsWith("care_qn_fill_draft--"),
-    );
-    const raw = key ? localStorage.getItem(key) : null;
-    if (!raw) return 0;
-    return (JSON.parse(raw) as { forms?: unknown[] }).forms?.length ?? 0;
-  });
-}
-
-/**
- * The first non-empty string answer the persisted draft holds for ONE
- * form, read straight from storage. Unlike `draftFormCount`, this reads
- * past a `pagehide` flush (which persists whatever the live store holds
- * regardless of the debounced autosave's own change-detection) — it is
- * only ever satisfied by the DEBOUNCED write itself, which is what makes
- * it useful for pinning that a keystroke actually got recognised as an
- * edit rather than merely riding along on a reload's flush.
- */
-async function draftFormNoteText(
-  page: Page,
-  questionnaireId: string,
-): Promise<string | undefined> {
-  return page.evaluate((qId) => {
-    const key = Object.keys(localStorage).find((entry) =>
-      entry.startsWith("care_qn_fill_draft--"),
-    );
-    const raw = key ? localStorage.getItem(key) : null;
-    if (!raw) return undefined;
-    const draft = JSON.parse(raw) as {
-      forms?: {
-        questionnaireId: string;
-        responses: Record<string, { values?: { value?: unknown }[] }>;
-      }[];
-    };
-    const form = draft.forms?.find((f) => f.questionnaireId === qId);
-    if (!form) return undefined;
-    for (const response of Object.values(form.responses ?? {})) {
-      for (const value of response.values ?? []) {
-        if (typeof value.value === "string" && value.value.length > 0) {
-          return value.value;
-        }
-      }
-    }
-    return undefined;
-  }, questionnaireId);
 }
 
 test.describe("Fill page multi-questionnaire sessions", () => {
@@ -387,9 +337,11 @@ test.describe("Fill page multi-questionnaire sessions", () => {
     await questionBlock(page, "Any Suggestions for Improvement")
       .getByRole("textbox")
       .fill(noteB);
-    // Longer than the autosave debounce: if typing could reach storage,
-    // it already would have.
-    await expect.poll(() => draftFormCount(page), { timeout: 5000 }).toBe(1);
+    // Past AUTOSAVE_DEBOUNCE_MS before asserting: the stored draft already
+    // holds exactly the one form, so a poll for that would resolve on its
+    // first evaluation and never see a debounced write on its way in.
+    await settleAutosaveDebounce(page);
+    expect(await draftFormCount(page)).toBe(1);
     await page
       .locator(`[data-form-key="${addedId}"]`)
       .getByRole("button", { name: "Remove" })

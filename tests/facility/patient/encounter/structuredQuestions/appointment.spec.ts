@@ -166,6 +166,12 @@ function trackBatchRequests(page: Page): string[] {
 
 const fixture = STRUCTURED_FIXTURES.appointment;
 
+// Serial on purpose: every test here books a real slot out of the one
+// shared availability this file creates, so running them concurrently
+// exhausts it and the slot sheet's Submit stays disabled with nothing left
+// to pick — a failure about scheduling capacity, not about the widget.
+test.describe.configure({ mode: "serial" });
+
 test.describe("Structured question: appointment", () => {
   test.beforeAll(async () => {
     await ensureAdminAvailability(getFacilityId());

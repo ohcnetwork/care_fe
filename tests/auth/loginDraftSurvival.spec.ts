@@ -31,6 +31,17 @@ const REFRESH_TOKEN_KEY = "care_refresh_token";
 
 const OTHER_USER_DRAFT_KEY = `${FILL_DRAFT_PREFIX}some-other-user--some-patient--some-questionnaire`;
 
+/**
+ * Post-login landing: any URL that is no longer the login page. A
+ * predicate, not a regex — the negative-lookahead idiom (`/(?!.*login)/`)
+ * matches EVERY url (the lookahead succeeds at the end of the string), so
+ * it waits for nothing at all, and this test strips the tokens the moment
+ * the wait returns.
+ */
+function loggedInUrl(url: URL): boolean {
+  return !url.pathname.startsWith("/login");
+}
+
 function draftKeyFor(userId: string): string {
   return `${FILL_DRAFT_PREFIX}${userId}--some-patient--some-questionnaire`;
 }
@@ -84,7 +95,7 @@ test.describe("Fill draft lifecycle at the login form", () => {
       id: string;
     };
     expect(adminUserId).toBeTruthy();
-    await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
+    await page.waitForURL(loggedInUrl, { timeout: 15000 });
 
     // Drop back to a logged-out /login without going through the sign-out
     // UI: signOut() does a full, unconditional draft clear (unchanged by
@@ -149,7 +160,7 @@ test.describe("Fill draft lifecycle at the login form", () => {
     // Sign in correctly as the same user.
     await page.getByLabel(/password/i).fill("admin");
     await page.getByRole("button", { name: /login/i }).click();
-    await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
+    await page.waitForURL(loggedInUrl, { timeout: 15000 });
     await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();
 
     // The OTHER user's draft is gone — cleared as soon as credentials were

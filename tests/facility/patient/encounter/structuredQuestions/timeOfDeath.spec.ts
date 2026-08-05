@@ -1,11 +1,12 @@
 import { faker } from "@faker-js/faker";
-import { type Page, expect, test } from "@playwright/test";
-import { format, subHours } from "date-fns";
+import { expect, test } from "@playwright/test";
+import { fillDraftCount } from "tests/helper/fillDrafts";
 import { submitForm } from "tests/helper/questionnaire";
 import {
   adminApiHeaders,
   apiBaseUrl,
   getQuestionnaireIdBySlug,
+  pastDateTimeLocal,
   questionBlock,
 } from "tests/helper/questionnaireV2";
 import {
@@ -39,24 +40,6 @@ test.use({ storageState: "tests/.auth/user.json" });
  * store/draft and never clicks Save, so it is safe to run against the
  * shared fixture encounter.
  */
-
-/** Mirrors `fillAutosave.spec.ts`'s own private helper — not exported
- *  there, so reproduced here rather than reaching into that file. */
-async function fillDraftCount(page: Page): Promise<number> {
-  return page.evaluate(
-    () =>
-      Object.keys(localStorage).filter((key) =>
-        key.startsWith("care_qn_fill_draft--"),
-      ).length,
-  );
-}
-
-/** A datetime-local value, always safely in the past relative to `max`
- *  (`format(new Date(), "yyyy-MM-dd'T'HH:mm")` on the control) regardless
- *  of when this suite runs. */
-function pastDateTimeLocal(hoursAgo: number): string {
-  return format(subHours(new Date(), hoursAgo), "yyyy-MM-dd'T'HH:mm");
-}
 
 /** Creates a throwaway patient through the same API shape the backend E2E
  *  fixtures use (mirrors `fillMountGuards.spec.ts`'s `createPatient`) — so

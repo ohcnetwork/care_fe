@@ -1,5 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { type Locator, type Page, expect, test } from "@playwright/test";
+import {
+  fillDraftCount,
+  settleAutosaveDebounce,
+} from "tests/helper/fillDrafts";
 import { submitForm } from "tests/helper/questionnaire";
 import {
   getQuestionnaireIdBySlug,
@@ -56,17 +60,6 @@ function tinyFilePayloads(
     mimeType: "text/plain",
     buffer: Buffer.from(`tiny file ${index}`),
   }));
-}
-
-/** How many fill-session drafts this origin currently holds — mirrors
- *  `fillAutosave.spec.ts`'s own private helper. */
-async function fillDraftCount(page: Page): Promise<number> {
-  return page.evaluate(
-    () =>
-      Object.keys(localStorage).filter((key) =>
-        key.startsWith("care_qn_fill_draft--"),
-      ).length,
-  );
 }
 
 function trackBatchRequests(page: Page): string[] {
@@ -238,7 +231,11 @@ test.describe("Structured question: files", () => {
       .setInputFiles(tinyFilePayloads(1));
     await expect(rows(block)).toHaveCount(1);
 
-    await expect.poll(() => fillDraftCount(page), { timeout: 5000 }).toBe(0);
+    // Explicit settle, not a poll: storage is already empty here, so
+    // `expect.poll` would resolve on its first evaluation and never reach
+    // past AUTOSAVE_DEBOUNCE_MS to see a write that was on its way.
+    await settleAutosaveDebounce(page);
+    expect(await fillDraftCount(page)).toBe(0);
   });
 
   test("submit: saves the files as one batch request and they show on the encounter's files tab", async ({

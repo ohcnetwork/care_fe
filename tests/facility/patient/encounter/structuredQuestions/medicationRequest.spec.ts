@@ -31,14 +31,18 @@ const DOSAGE_UNITS = [
 
 const DURATION_UNITS = ["days", "hours", "weeks", "months", "years"];
 
+// The rendered labels, not the wire values: the intent select translates
+// each `MEDICATION_REQUEST_INTENT` member through
+// `medication_request_intent__*`, so these are what the option's accessible
+// name actually is.
 const INTENT_OPTIONS = [
-  "proposal",
-  "plan",
-  "order",
-  "original order",
-  "reflex order",
-  "filler order",
-  "instance order",
+  "Proposal",
+  "Plan",
+  "Order",
+  "Original order",
+  "Reflex order",
+  "Filler order",
+  "Instance order",
 ];
 
 const medicationOptions = [
