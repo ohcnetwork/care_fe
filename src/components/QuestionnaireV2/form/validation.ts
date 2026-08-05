@@ -25,21 +25,9 @@ export interface RequiredCheckContext {
 }
 
 /**
- * Can this structured question be ANSWERED on this mount right now? False
- * whenever `StructuredSlot` is showing a notice instead of an input — an
- * unknown/disabled type, a subject the type doesn't declare, a context id
- * the mount can't supply, or a component that threw during render.
- *
- * This does NOT decide whether the question is required-blocked — it only
- * tells `collectRequiredErrors` when to stay out of the way. A broken
- * slot's actual required-error (named, specific to the failure) is
- * `collectStructuredErrors`' job alone, for every one of these states
- * alike (see its docstring); letting the generic check here ALSO fire
- * would stack a second, vaguer "this field is required" under the same
- * question. `renderFailed` and the other three states come from the same
- * two sources `StructuredSlot` itself reads (`resolveStructuredSlotState`
- * and the error boundary's store), so this and the specific validator can
- * never disagree about which slots are broken.
+ * Whether this structured question can accept an answer on this mount.
+ * Broken slots are handled by structured-specific validation so the generic
+ * required check does not stack a second, vaguer required error.
  */
 export function structuredQuestionIsAnswerable(
   structuredType: string,
@@ -61,10 +49,9 @@ export function structuredQuestionIsAnswerable(
  * server-side errors merge back through the same `QuestionValidationError`
  * shape.
  *
- * Mirrors the legacy QuestionnaireForm required check: only questions that
- * are currently enabled (same enable_when evaluation as rendering) and
- * record answers (not group/display) can be required-invalid; a response
- * counts as answered when any entry has a non-empty value.
+ * Only questions that are currently enabled and record answers can be
+ * required-invalid; a response counts as answered when any entry has a
+ * non-empty value.
  */
 export function collectRequiredErrors(
   questions: Question[],
@@ -101,10 +88,9 @@ export function collectRequiredErrors(
         continue;
       }
       const values = responses[question.id]?.values ?? [];
-      // Legacy contract: an entry answers the question when it has real
-      // content (non-empty scalar / non-empty array), OR carries a coding
-      // or unit without a value (value-set selections, unit-only
-      // quantities) — QuestionnaireForm.tsx's hasValue/hasCoding/hasUnit.
+      // An entry answers the question when it has real content, or carries a
+      // coding or unit without a value (value-set selections, unit-only
+      // quantities).
       const answered = values.some(
         (entry) =>
           entryHasContent(entry) || entry.coding != null || entry.unit != null,

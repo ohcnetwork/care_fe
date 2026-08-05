@@ -10,47 +10,39 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import type { QuestionnaireResponseTemplateReadSpec } from "@/types/questionnaire/questionnaireResponseTemplate";
+import type { MedicationRequestTemplateSpec } from "@/types/emr/medicationRequest/medicationRequest";
+import type {
+  ActivityDefinitionTemplateSpec,
+  QuestionnaireResponseTemplateReadSpec,
+} from "@/types/questionnaire/questionnaireResponseTemplate";
 import { questionnaireResponseTemplateApi } from "@/types/questionnaire/questionnaireResponseTemplateApi";
 
 /**
- * The `ResponseTemplates` module — `service_request` and
- * `medication_request` (`ServiceRequestQuestion.tsx`/
- * `MedicationRequestQuestion.tsx`) each carried a ~250-line forked copy of
- * this exact subsystem: the "add one item to a template" dialog's state,
- * its templates-search query, its two mutations, AND (see
- * `./applyTemplateItems.ts`) the "apply a whole template" fetch loop. They
- * had already drifted — `MedicationRequestQuestion.tsx`'s create-template
- * mutation wrote a `service_request` key into `template_data` (not a valid
- * `TemplateData` member — the real key is `activity_definition`) where
- * `ServiceRequestQuestion.tsx`'s own copy correctly wrote
- * `activity_definition`. This hook is the fix: EVERY `template_data` write
- * goes through the single `itemKey`-driven object builder below, so there
- * is exactly one place either consumer's key could ever drift again.
- *
- * CONTRACT for a second consumer (written for `medication_request` to adopt
- * without reading this file): call `useAddToTemplate` with `itemKey:
- * "medication_request"`, `itemType: "medication"`, a `toTemplateSpec` that
- * turns a `MedicationRequestCreate` into a `MedicationRequestTemplateSpec`
- * (the existing `buildMedicationForTemplate`), an `itemDisplayName`, and the
- * two i18n KEYS `medication_added_to_template`/
- * `template_created_with_medication`. Mount the returned `dialog` once;
- * call `openAddToTemplate(medication)` from wherever the row/form's own
- * "Add to template" affordance lives.
+ * Shared "add one item to a response template" subsystem for service requests
+ * and medication requests. Every `template_data` write derives its key from
+ * `itemKey`; consumers provide row-to-template conversion, display copy, and
+ * toast i18n keys.
  */
 export type ResponseTemplateItemKey =
   "activity_definition" | "medication_request";
 
-export interface UseAddToTemplateOptions<TItem> {
+/** What a template stores per item — `TemplateData`'s two structured
+ *  members' element types. */
+export type ResponseTemplateSpec =
+  ActivityDefinitionTemplateSpec | MedicationRequestTemplateSpec;
+
+export interface UseAddToTemplateOptions<
+  TItem,
+  TSpec extends ResponseTemplateSpec = ResponseTemplateSpec,
+> {
   questionnaireSlug?: string;
   facilityId?: string;
   /** Which `TemplateData` array this type reads/writes. */
   itemKey: ResponseTemplateItemKey;
   /** `AddToTemplateDialog`'s existing discriminant (styling/icon only). */
   itemType: "medication" | "service_request";
-  /** Row → the plain-data shape stored in a template
-   *  (`ActivityDefinitionTemplateSpec` | `MedicationRequestTemplateSpec`). */
-  toTemplateSpec: (item: TItem) => unknown;
+  /** Row → the plain-data shape stored in a template. */
+  toTemplateSpec: (item: TItem) => TSpec;
   /** Row → the dialog's item-preview display name. */
   itemDisplayName: (item: TItem) => string;
   /** Pre-existing i18n KEYS (not translated strings) — each interpolated
@@ -69,18 +61,17 @@ export interface UseAddToTemplateResult<TItem> {
 }
 
 /** `questionnaire` is a real filter only when the slug names an actual
- *  questionnaire — `"service_request"`/`"medication_request"` are the
- *  fixed pseudo-slugs used when either type is filled standalone, outside
- *  any real questionnaire, and a template created there must stay
- *  reusable across every questionnaire, not scoped to a slug that isn't
- *  one. Literal, not `filterStructuredQuestionnaireSlugs` (a different,
- *  broader check the TEMPLATES QUERY below uses instead) — both legacy
- *  create-template mutations already used exactly this literal pair. */
+ *  questionnaire. The fixed pseudo-slugs below mean the type is filled
+ *  standalone, so created templates must stay reusable across questionnaires.
+ *  This literal check is narrower than `filterStructuredQuestionnaireSlugs`. */
 function isFixedPseudoQuestionnaireSlug(slug?: string): boolean {
   return slug === "service_request" || slug === "medication_request";
 }
 
-export function useAddToTemplate<TItem>({
+export function useAddToTemplate<
+  TItem,
+  TSpec extends ResponseTemplateSpec = ResponseTemplateSpec,
+>({
   questionnaireSlug,
   facilityId,
   itemKey,
@@ -88,7 +79,7 @@ export function useAddToTemplate<TItem>({
   toTemplateSpec,
   itemDisplayName,
   messages,
-}: UseAddToTemplateOptions<TItem>): UseAddToTemplateResult<TItem> {
+}: UseAddToTemplateOptions<TItem, TSpec>): UseAddToTemplateResult<TItem> {
   const { t } = useTranslation();
   const currentUser = useAuthUser();
   const queryClient = useQueryClient();
@@ -140,9 +131,8 @@ export function useAddToTemplate<TItem>({
       template: QuestionnaireResponseTemplateReadSpec;
       item: TItem;
     }) => {
-      const existing =
-        (params.template.template_data?.[itemKey] as unknown[] | undefined) ??
-        [];
+      const existing: readonly ResponseTemplateSpec[] =
+        params.template.template_data?.[itemKey] ?? [];
       return mutate(questionnaireResponseTemplateApi.update, {
         pathParams: { id: params.template.id! },
       })({
@@ -166,15 +156,10 @@ export function useAddToTemplate<TItem>({
     onError: () => toast.error(t("failed_to_add_to_template")),
   });
 
-  // THE FIX for the drift this module's own header doc names: BOTH default
-  // arrays are always present, and the computed `[itemKey]` entry — which
-  // always comes LAST, so it always wins the duplicate-key resolution —
-  // is the only one ever filled in. A `medication_request` consumer
-  // passing `itemKey: "medication_request"` gets
-  // `{ activity_definition: [], medication_request: [theSpec] }`; this
-  // type (`itemKey: "activity_definition"`) gets the mirror image. Neither
-  // consumer can misname the OTHER type's key again, because neither ever
-  // writes a literal key at all.
+  // Both default arrays are always present, and the computed `[itemKey]`
+  // entry — always LAST, so it wins duplicate-key resolution — is the only
+  // one ever filled in. Neither consumer ever writes a literal key, so
+  // neither can misname the other type's key.
   const createTemplateMutation = useMutation({
     mutationFn: (params: { name: string; item: TItem }) =>
       mutate(questionnaireResponseTemplateApi.create)({

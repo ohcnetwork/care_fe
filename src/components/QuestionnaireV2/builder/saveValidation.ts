@@ -8,10 +8,9 @@ import { Question, QuestionType } from "@/types/questionnaire/question";
  * whose values `DisplayText` never writes — so `evaluateEnableWhen` sees
  * "unanswered" forever and a condition targeting one permanently hides its
  * question with zero feedback. The visibility card excludes them from the
- * target picker, and the save check below blocks legacy data that already
- * targets one. Structured questions stay eligible: they DO record values
- * (StructuredSlot writes through `updateResponse`), matching the
- * legacy editor, which offered every non-group question as a target.
+ * target picker, and the save check below blocks saved/imported data that
+ * already targets one. Structured questions stay eligible: they DO record
+ * values through `StructuredSlot`.
  */
 export const NON_RESPONSE_TYPES: QuestionType[] = ["group", "display"];
 
@@ -47,10 +46,8 @@ const SAVE_CHECKS: SaveCheck[] = [
   },
   {
     // The backend rejects quantity questions carrying neither answer_option
-    // nor answer_value_set (Question spec validate_choice_and_group_questions),
-    // so surface a clear client-side error instead of a raw 400. The builder
-    // only authors the valueset (legacy contract: quantity was never
-    // custom-options), but grandfathered answer_option data still passes.
+    // nor answer_value_set, so surface a clear client-side error instead of a
+    // raw 400. Grandfathered answer_option data still passes.
     predicate: (question) =>
       question.type === "quantity" &&
       !question.answer_value_set &&
@@ -80,8 +77,8 @@ const SAVE_CHECKS: SaveCheck[] = [
   {
     // A visibility condition targeting a question that never records a
     // response (see NON_RESPONSE_TYPES) — the picker no longer offers these,
-    // but legacy/imported data can still carry one; it would hide the
-    // question forever, so the save is blocked until it's retargeted.
+    // but saved/imported data can still carry one; it would hide the question
+    // forever, so the save is blocked until it's retargeted.
     predicate: (question, { typeByLinkId }) =>
       question.enable_when?.some((condition) => {
         const targetType = typeByLinkId.get(condition.question);

@@ -26,7 +26,7 @@ function projected(
 
 const byCode = (row: TestRow) => row.code;
 
-describe("findDuplicateCandidates — the §8 duplicate guard", () => {
+describe("findDuplicateCandidates — the add-time duplicate guard", () => {
   it("with no duplicateKey configured, nothing is ever flagged", () => {
     const rows = [projected("r1", "R05")];
     const result = findDuplicateCandidates(rows, undefined, [

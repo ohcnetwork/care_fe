@@ -218,11 +218,8 @@ export type PluginManifest = {
    *  validate at submit, and build their own batch requests. */
   structuredQuestionTypes?: readonly PluginStructuredTypeDefinition[];
   /**
-   * The agent capability (replaces the old Scribe-specific `Scribe`
-   * component + `src/lib/actions/` registry). Registered "the same way
-   * `structuredQuestionTypes` is"
-   * (`components/QuestionnaireV2/fill/assistant/formAssistantRegistry.ts`):
-   * `PluginEngine` registers it under the CONFIGURED plugin slug
+   * The agent capability. `PluginEngine` registers it (via
+   * `formAssistantRegistry`) under the CONFIGURED plugin slug
    * (`config.slug`, the trusted, backend-issued identity), never this
    * manifest's own self-declared `plugin` field — a remote's manifest is
    * attacker-controllable, and `plugin` is exactly the field it declares
@@ -233,11 +230,11 @@ export type PluginManifest = {
    * `listQuestions`, `getValue`/`setValue`, `applyStructuredEdit`,
    * `subscribe` — constructed fresh per mounted fill session, never
    * looked up from a module global. Every write goes through one
-   * validated choke point (`fill/assistant/coercion.ts` for plain values,
+   * validated choke point (`coercion.ts` for plain values,
    * `structuredEditValidation.ts`'s zod row schema check for structured
    * ones) before it becomes an ordinary pending edit — reviewable,
-   * revertible, and, per spec amendment A2, unaudited: nothing persists
-   * until the clinician presses Save.
+   * revertible, and unaudited: nothing persists until the clinician
+   * presses Save.
    *
    * Changing this shape requires a lockstep update in `care_scribe`.
    */

@@ -1,18 +1,7 @@
 /**
- * The dependency-free half of the local fill-draft layer: key prefix,
- * expiry rule and the sweeps. signOut, the app-update path and the
- * post-auth-success boundary import THIS module — never `fillDraftStore`,
- * whose registry import would drag every structured component into their
- * chunks.
- *
- * Lifecycle: a fresh login by a DIFFERENT user sweeps every OTHER user's
- * drafts (`clearOtherUsersFillDrafts`) — the just-authenticated user's own
- * drafts survive, since re-login by the same account is the crash/session-
- * expiry recovery this layer exists for. signOut and an app update sweep
- * EVERYTHING (`clearQuestionnaireFillDrafts`) — there is no "same user"
- * exception once a session is deliberately ended. Expired/corrupt drafts,
- * for any user, are swept once at boot regardless of auth outcome
- * (`sweepExpiredFillDrafts`).
+ * Dependency-free local draft cache helpers: key prefix, expiry and sweeps.
+ * Other-user login removes unrelated drafts on shared devices; sign-out and
+ * app update remove all drafts; expired or corrupt entries are swept at boot.
  */
 export const FILL_DRAFT_PREFIX = "care_qn_fill_draft--";
 

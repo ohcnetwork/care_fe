@@ -86,16 +86,8 @@ import FacilityOrganizationSelector from "@/pages/Facility/settings/organization
 import { t } from "i18next";
 
 /**
- * Builds a medication object suitable for storing in a template. Converts
+ * Builds a medication object suitable for storing in a template, converting
  * internal representations to template-friendly format.
- *
- * Formerly lived in the legacy `QuestionTypes/MedicationRequestQuestion.tsx`
- * widget; kept here (this component's own local helper) now that the widget
- * is deleted — `ManageResponseTemplatesSheet` itself is still a live
- * dependency of the contract-v2 medication_request/service_request editors
- * (`structured/types/medicationRequest/MedicationRequestEditor.tsx`,
- * `structured/types/serviceRequest/ServiceRequestEditor.tsx`), so it is not
- * part of the legacy deletion.
  */
 function buildMedicationForTemplate(
   medication: MedicationRequestCreate,

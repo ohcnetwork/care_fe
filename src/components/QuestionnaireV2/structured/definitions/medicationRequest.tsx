@@ -15,12 +15,8 @@ export const medicationRequestDefinition: StructuredTypeDefinition<"medication_r
     component: MedicationRequestEditor,
     requires: ["patientId", "encounterId"],
     subjects: ["encounter"],
-    // D2: a medication request row is plain, JSON-serializable data — no
-    // `File`/`Date`/class instance — so it round-trips through a draft
-    // exactly, matching `diagnosis`/`allergy_intolerance`. The legacy
-    // blanket "exclude" was a property of the conflated value array
-    // (prefetched server rows mixed with user input, `dirty`-tracked by
-    // hand), not of this type's data.
+    // Medication request rows contain only plain JSON-serializable data, so
+    // they can be restored from drafts without losing type information.
     draftPolicy: "serialize",
     contract: 2,
     toRequests,

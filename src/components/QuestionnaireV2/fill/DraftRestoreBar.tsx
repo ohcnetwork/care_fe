@@ -17,20 +17,9 @@ const DROP_REASON_KEY: Record<DraftDropReason, string> = {
 };
 
 /**
- * Shown once per session when the page detects a local draft: prompts the
- * clinician to consciously accept or discard the stale-looking data
- * instead of silently seeding the form. Says when the draft was saved,
- * how many questionnaires beyond the route-mounted one it would bring
- * back, whether structured answers couldn't ride along, and offers
- * Resume (apply the draft) or Discard (delete it) — X only hides the
- * prompt and keeps the stored draft for the next visit.
- *
- * SPEC AMENDMENT A1: `draft.dropped` (precomputed at load time by
- * `fillDraftStore.ts`'s `loadFillDraft`, against the questionnaire's
- * CURRENT questions) names every answer the compatibility merge could not
- * carry over — BEFORE the clinician commits to Resume, not as a surprise
- * afterward. "Data is either restored or visibly accounted for, never
- * silently dropped" (spec §5) is what this list exists to satisfy.
+ * Prompts the clinician to accept or discard a detected local draft instead
+ * of silently seeding the form. Dropped answers are listed before Resume so
+ * drafted data is either restored or visibly accounted for.
  */
 export function DraftRestoreBar({
   draft,
@@ -43,11 +32,8 @@ export function DraftRestoreBar({
   onResume: () => void;
   onDiscard: () => void;
   onDismiss: () => void;
-  /** The session is mid-submit — Resume mutates stores and appends forms
-   *  the in-flight batch was never composed with, and Discard clears the
-   *  draft a successful submit is about to clear anyway (or shouldn't, on
-   *  a failure); both gate on the same freeze as the rest of the canvas.
-   *  Dismiss stays live — it only hides the prompt, no session mutation. */
+  /** Resume and Discard mutate session or draft state, so they share the
+   *  canvas freeze during submit. Dismiss only hides the prompt. */
   frozen?: boolean;
 }) {
   const { t } = useTranslation();

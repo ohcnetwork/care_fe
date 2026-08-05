@@ -138,11 +138,11 @@ describe("allergy_intolerance model", () => {
   });
 
   describe("toRequests", () => {
-    it("P1-14: an empty edit log produces ZERO requests", async () => {
+    it("an empty edit log produces zero requests", async () => {
       assert.deepEqual(await toRequests([], CTX), []);
     });
 
-    it("P1-14: an untouched baseline (several existing allergies, nothing edited) still produces ZERO requests — the whole point of this port", async () => {
+    it("an untouched baseline (several existing allergies, nothing edited) still produces zero requests", async () => {
       // Simulates a real mount: `AllergyEditor` seeds `useStructuredRows`
       // with three fetched allergies as baseline; the clinician submits the
       // form without ever opening this section. `edits` stays `[]`
@@ -151,10 +151,8 @@ describe("allergy_intolerance model", () => {
     });
 
     it("editing ONE of several baseline rows sends ONLY that row — not every prefetched allergy", async () => {
-      // This is P1-14's failure mode made concrete: today's `buildRequests`
-      // maps over the whole projection, so touching row B would resend row
-      // A and row C too — an unrelated concurrent edit to either could be
-      // silently overwritten. The v2 differ only ever sees `edits`.
+      // Touching row B must not resend rows A and C — an unrelated
+      // concurrent edit to either could be silently overwritten.
       const rowB = {
         ...toAllergyRow(serverAllergy({ id: "b" })),
         criticality: "high",
@@ -306,7 +304,7 @@ describe("allergy_intolerance model", () => {
   });
 });
 
-describe("rowSchema — the assistant write guard (spec A2)", () => {
+describe("rowSchema — the assistant write guard", () => {
   const code = { code: "9", display: "Shellfish", system: "sys" };
 
   it("accepts a real row", () => {

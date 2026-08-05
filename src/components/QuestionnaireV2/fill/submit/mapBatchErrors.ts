@@ -30,12 +30,10 @@ const STRUCTURED_REFERENCE_PREFIX = "structured:";
  * server-error panel; failures that identify a question additionally feed
  * `errorsAtom`:
  * - structured entries carry their question id inside the reference_id
- *   (`structured:{type}:{questionId}`) — the legacy scheme (bare type
- *   name) could only ever flag the first question of a type;
+ *   (`structured:{type}:{questionId}`), so repeated structured types map
+ *   to the right question;
  * - the questionnaire submit entry's pydantic errors carry `question_id`
- *   directly (legacy mapped these back by ARRAY POSITION across forms,
- *   which was only correct by accident — reference_id is authoritative
- *   here).
+ *   directly, making reference_id authoritative across forms.
  */
 export function mapBatchErrors(
   results: FailedBatchResult[],

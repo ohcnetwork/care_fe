@@ -11,19 +11,21 @@ import {
   truncateToSingletonRow,
 } from "./projectRows";
 import { SINGLETON_ROW_ID } from "./rowIds";
-import type {
-  BaselineRow,
-  EditLog,
-  RowEdit,
-  RowId,
-  SoftDeleteDescriptor,
-} from "./types";
+import {
+  add,
+  baselineEntry,
+  makeDiagnosisRow,
+  makeSymptomRow,
+  remove,
+  update,
+} from "./testFixtures";
+import type { BaselineRow, EditLog, SoftDeleteDescriptor } from "./types";
 
 /**
  * A small, deliberately generic row shape for the structural cases
- * (position, hiding, collision, purity) — contrast the Symptom/Diagnosis
- * fixtures below, used where the edge case is shape-sensitive (the
- * soft-delete marker field, the Diagnosis onset-sort bug).
+ * (position, hiding, collision, purity) — contrast `testFixtures.ts`'s
+ * Symptom/Diagnosis builders, used where the edge case is shape-sensitive
+ * (the soft-delete marker field, the Diagnosis onset-sort bug).
  */
 interface TestRow {
   id: string;
@@ -32,59 +34,6 @@ interface TestRow {
 
 function row(id: string, label: string): TestRow {
   return { id, label };
-}
-
-function baselineEntry(rowId: RowId, r: TestRow): BaselineRow<TestRow> {
-  return { rowId, row: r };
-}
-
-function add<TRow extends object>(rowId: RowId, patch: TRow): RowEdit<TRow> {
-  return { rowId, op: "add", patch };
-}
-function update<TRow extends object>(rowId: RowId, patch: TRow): RowEdit<TRow> {
-  return { rowId, op: "update", patch };
-}
-function remove<TRow extends object>(rowId: RowId, patch: TRow): RowEdit<TRow> {
-  return { rowId, op: "remove", patch };
-}
-
-// Realistic row fixtures, per the task brief — see
-// src/types/emr/symptom/symptom.ts and src/types/emr/diagnosis/diagnosis.ts.
-// Mirrors the fixture style in `deepEqual.test.ts`.
-function makeSymptomRow(
-  overrides: Partial<SymptomRequest> = {},
-): SymptomRequest {
-  return {
-    id: "symptom-1",
-    clinical_status: "active",
-    verification_status: "confirmed",
-    code: { system: "system-condition-code", code: "R05", display: "Cough" },
-    severity: "moderate",
-    onset: { onset_datetime: "2026-01-01" },
-    recorded_date: "2026-01-01",
-    note: "worse at night",
-    encounter: "encounter-1",
-    category: "problem_list_item",
-    ...overrides,
-  };
-}
-
-function makeDiagnosisRow(
-  overrides: Partial<DiagnosisRequest> = {},
-): DiagnosisRequest {
-  return {
-    id: "diagnosis-1",
-    clinical_status: "active",
-    verification_status: "confirmed",
-    code: { system: "system-condition-code", code: "J45", display: "Asthma" },
-    severity: "mild",
-    onset: { onset_datetime: "2025-06-01" },
-    recorded_date: "2025-06-01",
-    note: undefined,
-    category: "chronic_condition",
-    encounter: "encounter-1",
-    ...overrides,
-  };
 }
 
 describe("projectRows — baseline+edits projection", () => {
@@ -309,9 +258,9 @@ describe("projectRows — baseline+edits projection", () => {
     });
   });
 
-  it("FIX: a malformed log carrying two `add` edits for the same rowId resolves to the LAST one only — loop 2 must agree with loop 1's per-rowId resolution, not double-emit", () => {
-    // Reachable only if Task 3's one-edit-per-rowId invariant is broken
-    // upstream (`applyEditToLog` never produces this on its own — see
+  it("a malformed log carrying two `add` edits for the same rowId resolves to the LAST one only — loop 2 must agree with loop 1's per-rowId resolution, not double-emit", () => {
+    // Reachable only if the one-edit-per-rowId invariant is broken upstream
+    // (`applyEditToLog` never produces this on its own — see
     // `editLog.test.ts`), but a restored draft's per-record
     // `isStructuredEditRecord` gate validates each entry independently
     // and would happily accept both. `projectRows` must not compound that
@@ -326,7 +275,7 @@ describe("projectRows — baseline+edits projection", () => {
     assert.deepEqual(result[0].row, second);
   });
 
-  it("FIX: an `add` superseded by a later `update` for the same rowId in a malformed log resolves via the same last-write map loop 1 uses, in both directions", () => {
+  it("an `add` superseded by a later `update` for the same rowId in a malformed log resolves via the same last-write map loop 1 uses, in both directions", () => {
     const stale = row("z", "stale add");
     const fresh = row("z", "fresh update");
     const log: EditLog<TestRow> = [add("z", stale), update("z", fresh)];
@@ -418,12 +367,11 @@ describe("projectRows — baseline+edits projection", () => {
     assert.equal(result.length, 2);
   });
 
-  it("BASELINE COMPLETENESS CONTRACT: baseline===undefined (loading/errored) renders a restored `update` instead of silently hiding it — the f321cb379 hazard", () => {
-    // Verified failure shape from task-7-brief.md obligation 1: a restored
-    // draft log `[update("server-1"), add("local-1")]` projected against
-    // `[]` (the WRONG "server confirmed zero rows" signal) renders only
-    // "local-1". Projected against `undefined` (the CORRECT "not yet
-    // known" signal), both must render.
+  it("BASELINE COMPLETENESS CONTRACT: baseline===undefined (loading/errored) renders a restored `update` instead of silently hiding it", () => {
+    // A restored draft log `[update("server-1"), add("local-1")]`
+    // projected against `[]` (the WRONG "server confirmed zero rows"
+    // signal) renders only "local-1". Projected against `undefined` (the
+    // CORRECT "not yet known" signal), both must render.
     const log: EditLog<TestRow> = [
       update("server-1", row("server-1", "restored update")),
       add("local-1", row("local-1", "restored add")),
@@ -526,10 +474,10 @@ describe("projectRows — baseline+edits projection", () => {
   });
 
   it("findOrphanRowIds: does NOT flag the clinician's own removal of a row the baseline still has — the naive `!renderedIds.has` derivation would", () => {
-    // The exact case task-7-brief.md obligation 2 calls out: a `remove`
-    // against a rowId baseline DOES have is not shown by projectRows
-    // (hard removal), but it is not an orphan either — the row didn't
-    // vanish server-side, the clinician removed it.
+    // The subtle case: a `remove` against a rowId baseline DOES have is
+    // not shown by projectRows (hard removal), but it is not an orphan
+    // either — the row didn't vanish server-side, the clinician removed
+    // it.
     const baseline: BaselineRow<TestRow>[] = [
       { rowId: "r1", row: row("r1", "server value") },
     ];
@@ -568,7 +516,7 @@ describe("projectRows — baseline+edits projection", () => {
     assert.deepEqual(result, ["vanished"]);
   });
 
-  describe("pruneOrphanEdits — PHASE 2 CARRY-FORWARD FIX: a confirmed orphan must never survive into what commit() persists as `edits`", () => {
+  describe("pruneOrphanEdits — a confirmed orphan must never survive into what commit() persists as `edits`", () => {
     it("drops exactly the rowIds findOrphanRowIds names, keeping everything else (adds, live updates, the clinician's own remove) untouched", () => {
       const baseline: BaselineRow<TestRow>[] = [
         { rowId: "survives", row: row("survives", "still here") },
@@ -656,7 +604,7 @@ describe("projectRows — baseline+edits projection", () => {
       assert.deepEqual(log, logSnapshot);
     });
 
-    it("REGRESSION shape: the exact carry-forward scenario — a restored draft's `update` for a rowId the NOW-resolved baseline confirms gone, with no other action taken, must not survive to what would reach toRequests", () => {
+    it("a restored draft's `update` for a rowId the NOW-resolved baseline confirms gone, with no other action taken, must not survive to what would reach toRequests", () => {
       // Mirrors what useStructuredRows.commit() will do: baseline arrives
       // (a known, empty array — the server confirms zero rows), pruning
       // must remove the stale intent entirely so `structuredEditsOf`
@@ -675,7 +623,7 @@ describe("projectRows — baseline+edits projection", () => {
     });
   });
 
-  describe("truncateToSingletonRow — CARRY-FORWARD FIX (master plan item 3): mode:'single' at-most-one-row truncation", () => {
+  describe("truncateToSingletonRow — mode:'single' at-most-one-row truncation", () => {
     it("0 or 1 entries: returns the SAME log reference untouched", () => {
       const empty: EditLog<TestRow> = [];
       assert.equal(truncateToSingletonRow(undefined, empty), empty);

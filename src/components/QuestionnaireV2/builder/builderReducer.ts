@@ -57,14 +57,9 @@ export function collectIds(question: Question): string[] {
 
 /**
  * Boolean conditions persist the strings "Yes"/"No" — never JSON booleans.
- * Both deployed evaluators (v2 store.evaluateEnableWhen and the legacy
- * QuestionGroup.isQuestionEnabled) normalize the dependent boolean *response*
- * to "Yes"/"No" before comparing, so a boolean (or "true"/"false") answer
- * could never match. Mirrors the legacy editor's migration for older
- * questionnaires that stored true/false ("temp fix for boolean answers in
- * existing questionnaires", QuestionnaireEditor.tsx). Lives here (not in
- * VisibilityConditionsCard) so the editor display path and the load-time
- * migration below can't drift.
+ * Deployed evaluators normalize dependent boolean responses to "Yes"/"No"
+ * before comparing, so true/false answers would never match. Lives here so
+ * editor display and load-time migration cannot drift.
  */
 export function normalizeBooleanConditionAnswer(answer: unknown): "Yes" | "No" {
   if (answer === true || answer === "true" || answer === "Yes") return "Yes";
@@ -72,13 +67,9 @@ export function normalizeBooleanConditionAnswer(answer: unknown): "Yes" | "No" {
 }
 
 /**
- * Repairs legacy boolean enable_when answers (JSON true/false or the strings
- * "true"/"false") to the deployed "Yes"/"No" convention, keyed off the
- * target question's type so string questions that legitimately answer
- * "true" are left alone. Runs on builder load ("reset"); the repair
- * persists with the next save. The renderer store additionally normalizes
- * boolean answers at evaluation time so already-saved questionnaires work
- * without a re-save.
+ * Repairs boolean enable_when answers (JSON true/false or "true"/"false") to
+ * the deployed "Yes"/"No" convention, keyed off the target question's type so
+ * string questions that legitimately answer "true" are left alone.
  */
 export function migrateLegacyBooleanEnableWhen(
   questions: Question[],
@@ -172,8 +163,8 @@ export function builderReducer(
 ): BuilderState {
   switch (action.type) {
     case "reset": {
-      // Legacy boolean conditions are repaired on load; the fix lands with
-      // the next save (state stays clean — dirty: false).
+      // Boolean conditions are repaired on load; the fix lands with the next
+      // save (state stays clean — dirty: false).
       const questions = migrateLegacyBooleanEnableWhen(action.questions);
       return {
         questions,

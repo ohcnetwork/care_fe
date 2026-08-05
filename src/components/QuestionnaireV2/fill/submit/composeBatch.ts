@@ -30,13 +30,10 @@ import {
 } from "./composeStructured";
 import { serializeResponseValues } from "./serializeValues";
 
-/** Body of the completion PUT for a resumed server draft
- *  (`PUT /api/v1/form_submission/{id}/`) — shape-compatible with the
- *  legacy draft dump: restore reads
+/** Body of the completion PUT for a resumed server draft. Restore reads
  *  `response_dump.questionnaireResponses.{questionnaire,responses}`.
  *  `patient`/`encounter` ride along with the status flip; the backend
- *  route's documented type (`FormSubmissionUpdate`) omits them, but this
- *  batch entry is a hand-built request, not a call through that route. */
+ *  route's documented type omits them, but this batch entry is hand-built. */
 interface FormSubmissionCompletionBody {
   patient: string;
   encounter?: string;
@@ -53,13 +50,10 @@ interface FormSubmissionCompletionBody {
 /**
  * A structured type's `toRequests` threw or rejected.
  *
- * `toRequests` is third-party code for plugin types, and the submit
- * callback is fired as `void submit()` — an unguarded rejection travelled
- * through `Promise.all` and became an unhandled promise rejection, turning
- * Save Changes into a silent no-op that blocked EVERY form in the session
- * with no toast, no panel and no batch. The host catches this and pins the
- * failure to the question that produced it, exactly as `invokeAction`
- * contains a thrown plugin action.
+ * `toRequests` is third-party code for plugin types, and submit is fired as
+ * `void submit()`. The host catches failures and pins them to the question
+ * that produced them, preventing an unhandled rejection from turning Save
+ * Changes into a silent no-op.
  */
 export class StructuredBuildError extends Error {
   readonly questionId: string;
@@ -85,8 +79,7 @@ async function buildStructuredRequests(
   try {
     // Only what the clinician CHANGED. The projection — the patient's
     // existing rows — is display state and never reaches a domain
-    // endpoint, so an untouched section cannot re-upsert anything (P1-14,
-    // structurally, for every type at once).
+    // endpoint, so an untouched section cannot re-upsert anything.
     return await composeStructuredV2Requests(definition, response, context);
   } catch (error) {
     throw new StructuredBuildError(context.questionId, error);
@@ -109,33 +102,14 @@ export interface ComposeBatchArgs {
 }
 
 /**
- * Assemble the one-batch submission (legacy handleSubmit semantics, from
- * the v2 store): structured answers become raw domain-API requests via
- * each type's `toRequests` (core types are patient-bound by
- * construction — the legacy gate; plugin types may declare a resource
- * subject and run there too), plain answers POST to
- * `/questionnaire/{id}/submit/` for patient-bound subjects and
- * `/questionnaire/{id}/submit_resource/` for resource subjects
- * (location/device/facility, which have no patient to record against),
- * and a resumed server draft gets its completion PUT (patient-bound
- * only). Only questions currently enabled by enable_when contribute —
- * same resolution rendering uses.
+ * Assemble the one-batch submission. Structured answers become raw
+ * domain-API requests via each type's `toRequests`; plain answers POST to
+ * the patient-bound or resource-subject questionnaire submit endpoint; a
+ * resumed server draft also gets its completion PUT. Only questions
+ * currently enabled by enable_when contribute, including structured leaves,
+ * and a disabled group's subtree is skipped together with its parent.
  *
- * Pure with respect to UI state: everything it needs arrives as
- * arguments, so it is directly exercisable without mounting anything.
- *
- * Two deliberate divergences from legacy, both in service of "what you see
- * is what submits":
- * 1. The walk skips the entire subtree of a disabled group (the renderer
- *    never shows those questions), while legacy re-checked only each
- *    leaf's own conditions and could submit answers recorded under a
- *    since-disabled group.
- * 2. `isEnabled` applies to STRUCTURED leaves too. Legacy checked nothing
- *    at submit time for structured questions — it iterated the recorded
- *    responses directly — so data entered while a structured question was
- *    enabled still submitted after its OWN enable_when later turned false.
- *    Here it does not: flipping the controlling answer takes the section
- *    off the canvas and out of the batch together.
+ * Pure with respect to UI state: everything it needs arrives as arguments.
  */
 export async function composeBatch({
   questionnaire,
@@ -172,20 +146,12 @@ export async function composeBatch({
         // `validate` for the same reason. What the UI shows as inert must
         // not submit behind its back.
         if (renderFailed?.has(question.id)) continue;
-        // The recorded entries must belong to this question's type — the
-        // guard `structuredDataOf` used to carry, kept now that the data
-        // read is untyped.
+        // The recorded entries must belong to this question's type.
         if (response.structured_type !== question.structured_type) continue;
         // The same slot-state predicate the renderer (`StructuredSlot`) and
-        // both submit-time validators (`form/validation.ts`,
-        // `fill/submit/validateStructured.ts`) read — `unknown_type`
-        // (plugin disabled), `subject_mismatch` (a type authored onto a
-        // questionnaire whose subject_type it doesn't declare — legacy
-        // data; the studio picker now prevents this going forward), and
-        // `missing_context` all skip here. The last is the fix: draft-
-        // restored data under a slot whose required context id the mount
-        // can't supply used to reach `toRequests` with an undefined
-        // patient/encounter/facility id.
+        // submit-time validators read. Unknown types, subject mismatches and
+        // missing context all skip here; missing context prevents calling
+        // `toRequests` without the required ids.
         const state = resolveStructuredSlotState(
           question.structured_type,
           questionnaire.subject_type,
@@ -193,21 +159,16 @@ export async function composeBatch({
         );
         if (state.kind !== "ready") continue;
         const definition = state.definition;
-        // Core types are patient-bound by construction (every core
-        // `subjects` list is patient and/or encounter, and every core
-        // request hangs off a patient id) — that is the legacy gate. A
-        // PLUGIN type may declare a resource subject; the studio offers it
-        // there, the slot renders it and validateStructured runs its
-        // validate, so dropping its requests here would render, validate
-        // and then silently discard the clinician's data. Slot state
-        // alone doesn't encode this distinction — it reads the
-        // QUESTIONNAIRE's declared subject_type, not the session's
-        // runtime subject — so the explicit gate stays on top of it.
+        // Core types are patient-bound by construction: every core request
+        // hangs off a patient id. A plugin type may declare a resource
+        // subject; if the slot renders and validates there, its requests
+        // must not be silently discarded. Slot state reads the
+        // questionnaire's subject_type, not the session's runtime subject,
+        // so the explicit runtime gate stays on top of it.
         if (!patientBound && definition.source !== "plugin") continue;
-        // "Did anything change" rather than "is anything recorded" — the
-        // whole P1-14 fix: a section displaying twelve prefetched rows and
-        // holding no edits contributes zero requests, before any type code
-        // runs.
+        // "Did anything change" rather than "is anything recorded": a
+        // section displaying twelve prefetched rows and holding no edits
+        // contributes zero requests, before any type code runs.
         if (structuredEditsOf(response).length === 0) continue;
         structuredWork.push(
           buildStructuredRequests(definition, response, {
@@ -234,7 +195,7 @@ export async function composeBatch({
   };
   walk(questionnaire.questions);
 
-  // Structured requests first — same ordering as the legacy batch.
+  // Structured requests first; domain mutations run before the questionnaire submit.
   for (const entries of await Promise.all(structuredWork)) {
     requests.push(...entries);
   }

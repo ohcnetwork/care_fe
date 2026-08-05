@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
-import { withEntryAt } from "./withEntryAt";
+import { replaceEntryAt } from "./withEntryAt";
 
 export function NumberInput({
   question,
@@ -20,19 +20,13 @@ export function NumberInput({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleared =
       e.target.value === "" || Number.isNaN(e.target.valueAsNumber);
-    if (valueIndex === undefined) {
-      updateResponse({
-        values: cleared
-          ? []
-          : [{ type: "number", value: e.target.valueAsNumber }],
-      });
-      return;
-    }
     updateResponse({
-      values: withEntryAt(response?.values, valueIndex, {
-        type: "number",
-        value: cleared ? undefined : e.target.valueAsNumber,
-      }),
+      values: replaceEntryAt(
+        response?.values,
+        valueIndex,
+        { type: "number", value: cleared ? undefined : e.target.valueAsNumber },
+        cleared,
+      ),
     });
   };
 

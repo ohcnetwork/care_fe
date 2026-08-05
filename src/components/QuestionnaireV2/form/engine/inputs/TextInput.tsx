@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
-import { withEntryAt } from "./withEntryAt";
+import { replaceEntryAt } from "./withEntryAt";
 
 export function TextInput({
   question,
@@ -22,15 +22,13 @@ export function TextInput({
   const value = (entry?.type === "string" ? entry.value : undefined) ?? "";
 
   const handleChange = (next: string) => {
-    if (valueIndex === undefined) {
-      updateResponse({ values: next ? [{ type: "string", value: next }] : [] });
-      return;
-    }
     updateResponse({
-      values: withEntryAt(response?.values, valueIndex, {
-        type: "string",
-        value: next,
-      }),
+      values: replaceEntryAt(
+        response?.values,
+        valueIndex,
+        { type: "string", value: next },
+        !next,
+      ),
     });
   };
 

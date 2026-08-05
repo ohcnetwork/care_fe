@@ -56,10 +56,6 @@ function defaultCloneSlug(slug: string): string {
   return `${base}${COPY_SUFFIX}`;
 }
 
-function defaultCloneTitle(title: string): string {
-  return `${title} (Copy)`;
-}
-
 interface CloneFormValues {
   title: string;
   slug: string;
@@ -89,7 +85,7 @@ export function CloneQuestionnaireDialog({
   const form = useForm<CloneFormValues>({
     resolver: zodResolver(cloneSchema),
     defaultValues: {
-      title: defaultCloneTitle(questionnaire.title),
+      title: t("cloned_questionnaire_title", { title: questionnaire.title }),
       slug: defaultCloneSlug(questionnaire.slug),
     },
   });
@@ -100,7 +96,7 @@ export function CloneQuestionnaireDialog({
   useEffect(() => {
     if (open) {
       form.reset({
-        title: defaultCloneTitle(questionnaire.title),
+        title: t("cloned_questionnaire_title", { title: questionnaire.title }),
         slug: defaultCloneSlug(questionnaire.slug),
       });
     }

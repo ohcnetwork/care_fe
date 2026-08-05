@@ -36,38 +36,11 @@ interface UseSaveServerDraftArgs {
 }
 
 /**
- * The deliberate "Save as draft" — a SERVER draft (`form_submission` with
- * status `draft`), which is what makes a half-finished form reachable from
- * another device and from the encounter overview's drafts card. It is a
- * different thing from `useFillSessionAutosave`, the crash-safety net that
- * writes localStorage only: this one is explicit, survives the browser, and
- * ends the session.
- *
- * The availability rules follow from the dump's shape and from the way
- * drafts are FOUND again:
- * - feature-flagged (`enableQuestionnaireDraft`);
- * - encounter subjects only. This one is a DELIBERATE NARROWING of legacy,
- *   not a port of it: legacy offered "Save as draft" on its patient mount
- *   too, and those saves produced orphaned records. The sole listing of
- *   server drafts is the encounter overview's card, which filters
- *   `form_submission` by `encounter`; a patient-mount draft POSTs without
- *   one, so nothing can ever surface it — and saving also drops the local
- *   autosave copy, making that draft unreachable rather than merely
- *   inconvenient. Widening this back needs a listing surface first;
- * - a single form per session — `response_dump.questionnaireResponses` is
- *   ONE `{questionnaire, responses}` pair, so a multi-form session cannot
- *   be represented without silently dropping forms;
- * - no structured question this deployment cannot dump faithfully
- *   (`unsupportedDraftStructuredTypes`): a contract-v1 type conflates
- *   prefetched server rows with user input, so restoring its dump later
- *   could re-upsert clinical data edited elsewhere (the same reason
- *   `draftPolicy: "exclude"` exists for the local draft) — contract v2
- *   dumps the edit log alone and re-projects onto a fresh baseline, so it
- *   lifts that restriction, except for `files` (`draftPolicy: "exclude"`
- *   under both contracts) and a type this deployment cannot resolve.
- *
- * Resuming a server draft and saving it again IS allowed: that PUTs the
- * same id, which is how a draft gets iterated across sessions.
+ * Explicit Save as draft creates or updates a server `form_submission` draft,
+ * making a half-finished encounter form available from other devices and the
+ * encounter overview. It is available only when feature-enabled, encounter-
+ * bound, single-form, and free of structured types that cannot be dumped
+ * faithfully; saving a resumed server draft updates the same record.
  */
 export function useSaveServerDraft({
   forms,
@@ -85,12 +58,9 @@ export function useSaveServerDraft({
   // `unsupportedDraftStructuredTypes` calls `resolveStructuredType`, whose
   // answer for a plugin-authored question changes when that plugin's
   // remote registers or unregisters its type — subscribing (same pattern
-  // as `QuestionTypePicker.tsx`'s `useSyncExternalStore` over this same
-  // registry) means `canSaveDraft` recomputes when that happens, instead
-  // of caching a stale answer for the lifetime of this hook. Inert in
-  // Phase 1 (every resolution outcome — v1, unresolved, or excluded —
-  // blocks either way), but load-bearing from Phase 2 on, once a v2 type
-  // can register mid-session and actually change the answer.
+  // as `QuestionTypePicker.tsx` over this same registry) recomputes
+  // `canSaveDraft` when that happens, instead of caching a stale answer
+  // for the lifetime of this hook.
   const structuredTypesVersion = useSyncExternalStore(
     subscribeToStructuredTypes,
     getStructuredTypesVersion,

@@ -23,6 +23,7 @@ import {
   toBaselineRows,
   toDiagnosisRow,
   toRequests,
+  toReusedDiagnosisRow,
 } from "./model";
 
 const CTX = {
@@ -210,6 +211,28 @@ describe("diagnosis model", () => {
     });
   });
 
+  describe("toReusedDiagnosisRow", () => {
+    it("strips the server id and re-stamps the current encounter, keeping every other field", () => {
+      const historical = toDiagnosisRow(
+        serverDiagnosis({ id: "old-id", encounter: "enc-0" }),
+      );
+      const reused = toReusedDiagnosisRow(historical, "enc-9");
+      assert.equal(reused.id, undefined);
+      assert.equal(reused.encounter, "enc-9");
+      assert.equal(reused.code, historical.code);
+      assert.equal(reused.severity, historical.severity);
+      assert.equal(reused.note, historical.note);
+    });
+
+    it("defaults a null severity to moderate", () => {
+      const historical = toDiagnosisRow(serverDiagnosis({ severity: null }));
+      assert.equal(
+        toReusedDiagnosisRow(historical, "enc-9").severity,
+        "moderate",
+      );
+    });
+  });
+
   describe("isOnsetFrozen", () => {
     it("freezes onset editing for a baseline (server-known) row", () => {
       assert.equal(isOnsetFrozen("baseline"), true);
@@ -276,11 +299,11 @@ describe("diagnosis model", () => {
   });
 
   describe("toRequests", () => {
-    it("P1-14: an empty edit log produces ZERO requests", async () => {
+    it("an empty edit log produces zero requests", async () => {
       assert.deepEqual(await toRequests([], CTX), []);
     });
 
-    it("P1-14: an untouched baseline (several existing diagnoses, nothing edited) still produces ZERO requests — the whole point of this port", async () => {
+    it("an untouched baseline (several existing diagnoses, nothing edited) still produces zero requests", async () => {
       // Simulates a real mount: `DiagnosisEditor` seeds `useStructuredRows`
       // with three fetched diagnoses as baseline; the clinician submits the
       // form without ever opening this section. `edits` stays `[]`
@@ -483,7 +506,7 @@ describe("diagnosis model", () => {
   });
 });
 
-describe("rowSchema — the assistant write guard (spec A2)", () => {
+describe("rowSchema — the assistant write guard", () => {
   const code = { code: "1", display: "Hypertension", system: "sys" };
 
   it("accepts a real row", () => {
@@ -530,7 +553,7 @@ describe("rowSchema — the assistant write guard (spec A2)", () => {
     );
   });
 
-  it("rejects an invalid severity string (undefined is fine, but a wrong value is not)", () => {
+  it("rejects an invalid severity string", () => {
     assert.equal(
       rowSchema.safeParse({
         ...newDiagnosisRow(code, "enc-1"),

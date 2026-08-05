@@ -67,7 +67,7 @@ interface BatchRequestBody {
  * body so the composed payload can be checked against the click-time
  * value afterward. Never reaches the real backend: `fulfill` answers
  * synthetically either way, and the submit hook's success handler reads
- * nothing off the response body (see useSubmitQuestionnaire.ts), so a
+ * nothing off the response body (see useSubmitFillSession.ts), so a
  * bare 200 is exactly as good as a real batch result for the success case.
  */
 async function interceptBatchWithDelay(

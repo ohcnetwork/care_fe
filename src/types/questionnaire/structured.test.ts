@@ -62,10 +62,9 @@ describe("sanitizeStructuredEditLog", () => {
     assert.deepEqual(sanitizeStructuredEditLog({ rowId: "a" }), []);
   });
 
-  it("THE CARRY-FORWARD FIX: a duplicate rowId collapses to ONE entry — last content, first position", () => {
-    // The exact doubly-malformed shape `appointment/model.test.ts`'s former
-    // "KNOWN GAP" case used to reproduce projectRows/resolveChanges
-    // disagreeing: rowId "a" appears twice, "b" once, in between.
+  it("a duplicate rowId collapses to one entry — last content, first position", () => {
+    // This malformed shape exercises projectRows/resolveChanges agreement:
+    // rowId "a" appears twice, "b" once, in between.
     const aFirst = { rowId: "a", op: "add", patch: { note: "a-first" } };
     const bOnly = { rowId: "b", op: "add", patch: { note: "b-only" } };
     const aLast = { rowId: "a", op: "add", patch: { note: "a-last" } };
@@ -81,7 +80,7 @@ describe("sanitizeStructuredEditLog", () => {
       patch: { note: "a-last" },
     });
     // ... but its POSITION is the FIRST occurrence — ahead of "b", matching
-    // resolveChanges' own dispatch-at-first-occurrence order exactly, so a
+    // resolveChanges' dispatch-at-first-occurrence order, so a
     // caller feeding this sanitized log to projectRows/resolveChanges gets
     // the SAME row in both places.
     assert.deepEqual(sanitized[1], bOnly);

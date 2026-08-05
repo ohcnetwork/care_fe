@@ -50,9 +50,7 @@ export interface QuestionValidationError {
   /** v2 row identity — the stable client rowId (the server id for a
    *  baseline row, a uuid for an added one). Preferred over `index`. */
   row_id?: string;
-  /** v1/server identity — position in `values[0].value`. Kept for the
-   *  dual-contract shim and for backend batch errors, which are
-   *  positional. Removed with the shim in Phase 5. */
+  /** Positional identity in `values[0].value`, used by backend batch errors. */
   index?: number;
   required?: boolean;
 }

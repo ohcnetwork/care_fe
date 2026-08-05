@@ -44,17 +44,9 @@ function ClearRenderFailedOnMount({ questionId }: { questionId: string }) {
 }
 
 /**
- * Structured questions render through `resolveStructuredType` — core types
- * from STRUCTURED_TYPE_REGISTRY, plugin types from the runtime registry,
- * one definition either way carrying the component and its context
- * requirements. Fill-path specifics:
- * - `onChange` is memoized — adapters keep their derived callbacks stable
- *   on top of it (ChargeItemQuestion lists the callback in an effect
- *   dependency array, so a fresh arrow per render is a real loop hazard).
- * - fill mode passes `questionnaireId`/`questionnaireSlug` so
- *   MedicationRequest/ServiceRequest response-template sheets work;
- *   preview deliberately withholds them, keeping template CRUD (real
- *   POSTs) off the builder surface.
+ * Renders core and plugin structured questions from a resolved definition.
+ * `onChange` is memoized for adapter callbacks, and preview withholds
+ * questionnaire ids so template CRUD stays off the builder surface.
  */
 export function StructuredSlot({
   question,

@@ -7,15 +7,14 @@ import {
   type PluginStructuredTypeDefinition,
 } from "./pluginRegistry";
 
-// ponytail: every registration in this file needs a full definition, so a
-// tiny factory keeps each test's `type`/component identity the only thing
-// that varies. Every case in this file exercises registration/lookup
-// mechanics, which do not depend on what `toRequests`/`validate` actually
-// do — the end-to-end proof that a registered type's `toRequests` reaches
-// the submit batch lives in `fill/submit/composeStructured.test.ts` (this
-// file deliberately stays light on imports — see the "stable across
-// repeated calls" test's comment below for why `registry.ts` is out of
-// bounds here).
+// Every registration in this file needs a full definition; this factory
+// keeps each test's `type`/component identity the only thing that varies.
+// Registration/lookup mechanics do not depend on what
+// `toRequests`/`validate` actually do — the end-to-end proof that a
+// registered type's `toRequests` reaches the submit batch lives in
+// `fill/submit/composeStructured.test.ts`. This file deliberately stays
+// light on imports — see the "stable across repeated calls" test's comment
+// below for why `registry.ts` is out of bounds here.
 function makeDefinition(
   type: string,
   overrides: Partial<PluginStructuredTypeDefinition> = {},
@@ -55,8 +54,6 @@ test("two registrations under the same owner coexist", () => {
   assert.equal(getPluginStructuredType("plugin_h.widget_a"), a);
   assert.equal(getPluginStructuredType("plugin_h.widget_b"), b);
 
-  // Leave no module-state residue behind — other tests in this file rely
-  // on the module-level registry being otherwise pristine.
   cleanupA();
   cleanupB();
   assert.equal(getPluginStructuredType("plugin_h.widget_a"), undefined);
@@ -64,9 +61,9 @@ test("two registrations under the same owner coexist", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Ownership refusal (P2-8: the namespace half of the type id must match the
+// Ownership refusal: the namespace half of the type id must match the
 // registering plugin's slug — a plugin cannot register into another's
-// namespace by claiming a different `ownerSlug`).
+// namespace by claiming a different `ownerSlug`.
 // ---------------------------------------------------------------------------
 
 test("registration is refused when ownerSlug does not match the type's namespace", () => {
@@ -95,10 +92,10 @@ test("a non-namespaced type throws regardless of ownerSlug", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Re-register replaces the definition (P2-7's recovery moment: a plugin
-// shipping a fixed component re-registers the same type, and anything
-// keying off the resolved definition's identity — PluginErrorBoundary's
-// resetKey via StructuredSlot — must see that as a change).
+// Re-register replaces the definition: a plugin shipping a fixed component
+// re-registers the same type, and anything keying off the resolved
+// definition's identity — PluginErrorBoundary's resetKey via
+// StructuredSlot — must see that as a change.
 // ---------------------------------------------------------------------------
 
 test("re-registering the same type replaces the stored definition", () => {

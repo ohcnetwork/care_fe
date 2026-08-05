@@ -10,7 +10,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 /**
  * P1-10: the backend's `/api/v1/batch_requests/` endpoint hard-caps the
  * number of sub-requests per call at `MAX_BATCH_REQUESTS` (20 — see
- * `useSubmitQuestionnaire.ts`). Plain answers all share ONE `/submit/`
+ * `useSubmitFillSession.ts`). Plain answers all share ONE `/submit/`
  * request no matter how many questions are answered, so the practical way
  * to cross that cap from the UI is a `files` structured question: each
  * uploaded file becomes its own POST in the batch. This spec pins both

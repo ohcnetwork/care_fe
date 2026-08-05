@@ -110,9 +110,8 @@ const EDITABLE_FIELDS = [
   "discharge_summary_advice",
 ];
 
-/** The exact PUT body `toRequests` must send — the SAME allowlist
- *  `definitions/encounter.tsx:52-60` sends today, restated here so a
- *  widening of the body fails a test rather than sliding through review. */
+/** The exact PUT body `toRequests` must send — restated here so a widening
+ *  of the body fails a test rather than sliding through review. */
 function putBody(row: EncounterRow) {
   return {
     status: row.status,
@@ -159,10 +158,9 @@ describe("encounter model — toEncounterRow / toBaselineRows", () => {
   });
 
   it("keys the single baseline row by the ENCOUNTER id, not SINGLETON_ROW_ID", () => {
-    // `EncounterEdit = EncounterBase` has no `id` of its own
-    // (`types/emr/encounter/encounter.ts:211-219,259`), so the singleton's
-    // identity comes from the route, not the payload — and it must be the
-    // SAME id `toRequests` builds the PUT url from.
+    // `EncounterEdit` has no `id` of its own, so the singleton's identity
+    // comes from the route, not the payload — and it must be the SAME id
+    // `toRequests` builds the PUT url from.
     assert.deepEqual(toBaselineRows(fixtureRead(), ENCOUNTER_ID), [
       { rowId: ENCOUNTER_ID, row: fixtureRow() },
     ]);
@@ -501,7 +499,7 @@ describe("encounter requiresDischargeDisposition", () => {
     // normalizePatch fills the default the moment a row becomes
     // hospitalized+discharged, so the validator can only ever fire on a
     // row nobody has edited (an untouched server row, or a restored
-    // draft) — see the model's doc comment and Task 8's report.
+    // draft) — see the model's doc comment.
     for (const encounter_class of ENCOUNTER_CLASS) {
       const merged = mergePatch(
         fixtureRow({ hospitalization: {} }),
@@ -513,7 +511,7 @@ describe("encounter requiresDischargeDisposition", () => {
   });
 });
 
-describe("encounter blocksSaveForMissingDischargeDisposition — Task 8's product decision", () => {
+describe("encounter blocksSaveForMissingDischargeDisposition", () => {
   const brokenRow = fixtureRow({
     status: EncounterStatus.DISCHARGED,
     hospitalization: {},
@@ -569,14 +567,11 @@ describe("encounter blocksSaveForMissingDischargeDisposition — Task 8's produc
 });
 
 describe("encounter — the undefined-default deployment (this repo's own .env.local)", () => {
-  // Every other `makeNormalizePatch` call in this file (the module-level
-  // `normalize` above, and the truth-table describe blocks) is built with
-  // a CONCRETE `dischargeDisposition: "home"`. That is the config only
-  // when `REACT_DEFAULT_DISCHARGE_DISPOSITION` is actually set — this
-  // repo's `.env.local` does not set it, so `careConfig.
-  // defaultDischargeDisposition` is `undefined` there, and the type was
-  // widened (model.ts) to `| undefined` to match. That branch was
-  // previously untested; these two cases close the gap (found by review).
+  // The other `makeNormalizePatch` calls in this file use a concrete
+  // `dischargeDisposition: "home"`. When
+  // `REACT_DEFAULT_DISCHARGE_DISPOSITION` is unset (as in this repo's
+  // `.env.local`), `careConfig.defaultDischargeDisposition` is
+  // `undefined`; these cases cover that branch.
   const normalizeNoDefault = makeNormalizePatch({
     dischargeDisposition: undefined,
     now: () => NOW,
@@ -676,11 +671,8 @@ describe("encounter projectValues", () => {
 
 describe("encounter toRequests", () => {
   it("P1-14: an empty edit log produces ZERO requests", async () => {
-    // TODAY `definitions/encounter.tsx:49-62` maps over the PROJECTION
-    // unconditionally, so submitting any form carrying an encounter
-    // question PUT the whole encounter back — including a section the
-    // clinician never opened, over whatever another user changed
-    // meanwhile.
+    // An untouched section must never PUT the encounter back over
+    // whatever another user changed meanwhile.
     assert.deepEqual(await toRequests([], CTX), []);
   });
 
@@ -783,8 +775,7 @@ describe("encounter toRequests", () => {
 // ---------------------------------------------------------------------------
 
 /** Runs the projection path and the submit path over the SAME (baseline,
- *  log) inputs, exactly as the reviewers' instruction demands: verify by
- *  RUNNING both modules, not by reading them. */
+ *  log) inputs. */
 async function agreement(
   baseline: readonly BaselineRow<EncounterRow>[] | undefined,
   edits: readonly StructuredEdit<EncounterRow>[],
@@ -857,7 +848,7 @@ describe("encounter — PROJECTION AND SUBMIT MUST AGREE", () => {
   for (const shape of shapes) {
     it(`agrees for ${shape.name}`, async () => {
       const { shown, requests } = await agreement(BASELINE, shape.edits);
-      // Lesson 5: a singleton differ never emits two writes to one URL.
+      // A singleton differ never emits two writes to one URL.
       assert.ok(requests.length <= 1, "at most one request");
       if (shape.submits) {
         assert.equal(requests.length, 1);
@@ -878,10 +869,11 @@ describe("encounter — PROJECTION AND SUBMIT MUST AGREE", () => {
     });
   }
 
-  it("KNOWN GAP: the agreement holds only while the baseline rowId IS the context's encounterId", async () => {
-    // Structurally prevented rather than defended against: Task 8 builds
-    // both from the same `props.encounterId` — `toBaselineRows(encounter,
-    // encounterId)` and `StructuredRequestContext.encounterId`. If they
+  it("the agreement holds only while the baseline rowId is the context's encounterId", async () => {
+    // Structurally prevented rather than defended against: the editor
+    // builds both from the same `props.encounterId` —
+    // `toBaselineRows(encounter, encounterId)` and
+    // `StructuredRequestContext.encounterId`. If they
     // ever diverge, the differ (which keys off the URL identity) goes
     // silent while the projection still shows the edit. Pinned here so the
     // precondition is executed, not merely asserted in a comment.
@@ -957,7 +949,7 @@ describe("encounter — the untouched section, through the real reducer", () => 
   });
 });
 
-describe("rowSchema — the assistant write guard (spec A2)", () => {
+describe("rowSchema — the assistant write guard", () => {
   it("accepts a real row", () => {
     assert.equal(rowSchema.safeParse(fixtureRow()).success, true);
   });

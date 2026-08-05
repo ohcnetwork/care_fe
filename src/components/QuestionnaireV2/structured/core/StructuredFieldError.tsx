@@ -19,10 +19,10 @@ export interface StructuredFieldErrorProps {
 }
 
 /**
- * ONE structured field error display, replacing three legacy mechanisms —
- * see `selectStructuredFieldErrors`' doc comment for the full list. Renders
- * beside its control, inside the same cell/section, so `aria-describedby`
- * and the visual proximity agree.
+ * The single structured field error display — see
+ * `selectStructuredFieldErrors` for the matching rules. Renders beside its
+ * control, inside the same cell/section, so `aria-describedby` and the
+ * visual proximity agree.
  */
 export function StructuredFieldError({
   id,
@@ -45,16 +45,12 @@ export function StructuredFieldError({
     // role="alert" is REQUIRED here: QuestionBlock.tsx's block-level error
     // list filters field-bound errors out for the structured types that
     // render this primitive, so this is the only place THEIR field-bound
-    // errors are ever announced. Message resolution order — `error.error`,
-    // then `error.msg`, then the fallback, joined with `||` not `??` — is
-    // now IDENTICAL (not merely similar) to the legacy
-    // `QuestionTypes/FieldError.tsx:30` and to `QuestionBlock.tsx`'s own
-    // block-level list (REVIEW FIX, minor: the three had drifted to three
-    // different orders/operators, so an `error.error` of `""` rendered
-    // differently depending on which of the three drew it). The colour
-    // normalizes to the block list's text-red-600. Only the FIRST binding
-    // error renders per slot — the rest stay available through the
-    // matcher for the invalid ring.
+    // errors are ever announced. Message resolution — `error.error`, then
+    // `error.msg`, then the fallback, joined with `||` not `??` so an
+    // empty-string message falls through — matches QuestionBlock's own
+    // block-level list exactly. Only the FIRST binding error renders per
+    // slot; the rest stay available through the matcher for the invalid
+    // ring.
     <p
       id={id}
       role="alert"

@@ -3,25 +3,9 @@ import type { ComponentType } from "react";
 import type { FillAssistantHandle } from "./types";
 
 /**
- * The `formAssistant` manifest extension point's registry — registered
- * "the same way `structuredQuestionTypes` is"
- * (`structured/pluginRegistry.ts`): a module-level Map, a version counter
- * plus a listener Set so a React view can `useSyncExternalStore` on it,
- * and a per-registration cleanup closure that only removes the entry it
- * installed (a re-register of the same slug wins, and the superseded
- * cleanup becomes a no-op).
- *
- * Keyed directly by the plugin's slug — unlike `structuredQuestionTypes`
- * (namespaced `{plugin_slug}.{type_name}`, since one plugin can register
- * several types), a plugin contributes at most ONE form assistant, so the
- * slug alone is already the natural, unique key.
- *
- * `PluginEngine.tsx` is the only writer, and it MUST pass the trusted,
- * backend-issued `config.slug` — never `plugin.plugin` (the manifest's own
- * self-declared display name, which an untrusted remote controls). This
- * mirrors `registerPluginStructuredType`'s `ownerSlug` check, minus the
- * namespace-parsing half: there is no separate "type name" to validate
- * against an owner here, since the registry key IS the owner.
+ * Registry for the `formAssistant` manifest extension point. A plugin has at
+ * most one assistant, keyed by its trusted backend-issued slug; re-registering
+ * the same slug replaces the prior definition and makes its cleanup a no-op.
  */
 export interface FormAssistantDefinition {
   component: ComponentType<{ handle: FillAssistantHandle }>;
@@ -55,11 +39,10 @@ export function registerFormAssistant(
   definition: FormAssistantDefinition,
   ownerSlug: string,
 ): () => void {
-  const stored = definition;
-  formAssistants.set(ownerSlug, stored);
+  formAssistants.set(ownerSlug, definition);
   notify();
   return () => {
-    if (formAssistants.get(ownerSlug) === stored) {
+    if (formAssistants.get(ownerSlug) === definition) {
       formAssistants.delete(ownerSlug);
       notify();
     }

@@ -316,7 +316,7 @@ test.describe("Structured question: appointment", () => {
     // A wholly-clean appointment section (no edits survive) plus a blank
     // "Plain note" would leave NOTHING at all to submit, which the submit
     // hook refuses outright before composing any request
-    // (`useSubmitQuestionnaire.ts`'s `requests.length === 0` guard, an
+    // (`useSubmitFillSession.ts`'s `requests.length === 0` guard, an
     // unrelated, session-wide check found while writing this spec — not
     // this section's own zero-upsert behavior). Answering the plain
     // question keeps the OVERALL submit real, so this test actually proves

@@ -12,17 +12,9 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 /**
- * The fill page's outline navigation chrome (≥lg): a slim always-visible
- * rail of per-question tick marks hugging the canvas' left edge, and the
- * full outline panel that floats OVER the canvas on hover/focus/click —
- * per the reference, the outline no longer reserves a fixed column, so
- * the form gets the whole width.
- *
- * This module owns the overlay shell and the shared nav state (active
- * question + scroll command). The rows and ticks themselves are portaled
- * in per form by `FillFormSection` — they must render inside each form's
- * provider to read that form's store — so this component only provides
- * the host elements.
+ * Desktop outline chrome: a rail of tick marks and a hover/focus panel.
+ * It owns scroll-spy, keyboard dismissal, and focus transfer so selecting
+ * a row lands users at the question instead of inside the overlay.
  */
 
 interface FillOutlineNavValue {

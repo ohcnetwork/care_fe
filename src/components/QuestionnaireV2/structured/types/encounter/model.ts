@@ -26,17 +26,10 @@ import {
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
 /**
- * The wire shape is already the row shape, so the `encounter` arm of
- * `StructuredDataMap` (`structured/types.ts`) and the `RV<"encounter",
- * EncounterEdit[]>` arm of `ResponseValue` are both untouched by this port.
- *
- * Note what this type does NOT have: an `id`. `EncounterEdit =
- * EncounterBase` (`types/emr/encounter/encounter.ts:211-219,259`) carries
- * no identity of its own, because the only endpoint that consumes it is
- * URL-keyed (`PUT /api/v1/encounter/{id}/`). That single fact drives three
- * decisions below — {@link toBaselineRows}'s rowId, {@link toRequests}'
- * identity filter, and why an `add` and an `update` compile to the same
- * request.
+ * `EncounterEdit` carries no `id` of its own — the only endpoint that
+ * consumes it is URL-keyed (`PUT /api/v1/encounter/{id}/`). That fact
+ * drives {@link toBaselineRows}'s rowId, {@link toRequests}' identity
+ * filter, and why an `add` and an `update` compile to the same request.
  */
 export type EncounterRow = EncounterEdit;
 
@@ -52,12 +45,9 @@ const hospitalizationSchema = z
   .strict();
 
 /**
- * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
- * `rowSchema` for the full contract). `hospitalization` accepts `null`
- * (matching `Hospitalization | null | undefined` — `makeNormalizePatch`'s
- * rule 2 writes `{}`, never `null`, but a restored/hand-edited draft or a
- * plugin write could carry the server's own `null` for an ambulatory
- * encounter that never had one). `external_identifier`/
+ * Runtime guard on externally authored rows. `hospitalization` accepts
+ * `null`, matching `Hospitalization | null | undefined` — the server holds
+ * `null` for an encounter that never had one. `external_identifier`/
  * `discharge_summary_advice` are `string | null` on the real type — both
  * `.nullable()`, not merely `.optional()`.
  */
@@ -73,9 +63,7 @@ export const rowSchema = z
   })
   .strict();
 
-/** Statuses that END an encounter, and therefore want a `period.end`.
- *  Exactly the five the legacy status effect listed
- *  (`EncounterQuestion.tsx:136-141`). */
+/** Statuses that END an encounter, and therefore want a `period.end`. */
 const TERMINAL_STATUSES: ReadonlySet<EncounterStatus> = new Set([
   EncounterStatus.DISCHARGED,
   EncounterStatus.COMPLETED,
@@ -84,11 +72,11 @@ const TERMINAL_STATUSES: ReadonlySet<EncounterStatus> = new Set([
   EncounterStatus.ENTERED_IN_ERROR,
 ]);
 
-/** Classes with no hospitalization record at all (`EncounterQuestion.tsx:200`). */
+/** Classes with no hospitalization record at all. */
 const AMBULATORY_CLASSES: readonly EncounterClass[] = ["amb", "vr", "hh"];
 
 /** Classes that DO carry one, and therefore need a discharge disposition
- *  once discharged (`EncounterQuestion.tsx:82,205,382`). */
+ *  once discharged. */
 const HOSPITALIZED_CLASSES: readonly EncounterClass[] = [
   "imp",
   "obsenc",
@@ -97,25 +85,18 @@ const HOSPITALIZED_CLASSES: readonly EncounterClass[] = [
 
 /**
  * Does this class carry a hospitalization record? The single authority for
- * the `["imp", "obsenc", "emer"].includes(...)` literal that appears FOUR
- * times in the legacy widget (`EncounterQuestion.tsx:82,205,382` and the
- * disposition panel's own gate) — the editor's hospitalization panel, this
- * module's derivation and its validator must never disagree about which
- * classes have one.
+ * this split — the editor's hospitalization panel, the derivation rules
+ * and the validator must never disagree about which classes have one.
  */
 export function isHospitalizedClass(encounterClass: EncounterClass): boolean {
   return HOSPITALIZED_CLASSES.includes(encounterClass);
 }
 
 /**
- * `EncounterRead` → the seven fields this question actually edits. Exactly
- * `EncounterQuestion.tsx`'s `transformEncounterForUpdate` (`:161-173`),
- * lifted out of the component so it can be tested and so the editor has no
- * reason to keep a second copy. The exact key set is pinned by a test, not
- * merely by this comment: everything else `EncounterRead` carries (the
- * patient, the facility, tags, care team, location history, permissions,
- * the two histories) is display data that must never ride along into a PUT
- * body.
+ * `EncounterRead` → the seven fields this question edits. Everything else
+ * `EncounterRead` carries (patient, facility, tags, care team, histories,
+ * permissions) is display data that must never ride along into a PUT
+ * body; the exact key set is pinned by a test.
  */
 export function toEncounterRow(read: EncounterRead): EncounterRow {
   return {
@@ -130,26 +111,17 @@ export function toEncounterRow(read: EncounterRead): EncounterRow {
 }
 
 /**
- * Exactly one baseline row, keyed by the ENCOUNTER id.
+ * Exactly one baseline row, keyed by the ENCOUNTER id — not
+ * `SINGLETON_ROW_ID`, which `core/rowIds.ts` reserves for create-only
+ * types with no server row. This row's identity is the encounter id in the
+ * PUT URL; keying the baseline by it lets {@link toRequests} decide from
+ * the edit log alone whether an edit is about THIS encounter.
  *
- * WHY NOT `SINGLETON_ROW_ID`. `core/rowIds.ts` reserves that constant for
- * single-row types that have "no server row to key off" — `appointment` and
- * `time_of_death`, both create-only. `encounter` is the opposite case: it
- * EDITS a row the server already has, and that row's identity is the
- * encounter id in the URL. Keying the baseline by it is what lets
- * {@link toRequests} decide, from the edit log alone, whether an edit is
- * about THIS encounter — see its own doc comment.
- *
- * BASELINE HONESTY (BASELINE COMPLETENESS CONTRACT). This function is only
- * ever called with a RESOLVED `EncounterRead`, and therefore always returns
- * the COMPLETE server-row set for this question — one row. While the
- * encounter query is loading or errored there is no read to convert, and
- * the caller must pass `undefined` to the hook, NEVER `[]`: an empty array
- * is a positive claim that the server has no rows, which selects
- * data-creating ops (`changes.ts`'s add-vs-baseline reclassification) and
- * makes `projectRows` drop every restored edit as an orphan. Task 8
- * discharges this by not mounting the hook at all until the query resolves,
- * so `undefined` is never actually observed downstream.
+ * Only ever called with a resolved `EncounterRead`, so the returned set is
+ * complete. While the query is loading or errored the caller must pass
+ * `undefined` to the hook, never `[]` — an empty array claims the server
+ * has no rows, which reclassifies edits as data-creating and makes
+ * `projectRows` drop every restored edit as an orphan.
  */
 export function toBaselineRows(
   read: EncounterRead,
@@ -159,23 +131,15 @@ export function toBaselineRows(
 }
 
 /**
- * SINGLETON COLLAPSE — deliberately `rows[0]`, not `[...rows]`.
+ * Deliberately `rows[0]`, not `[...rows]`: `SingleRowController.row` hands
+ * the editor exactly `rows[0]`, so a corrupted two-rowId log must not
+ * project TWO encounters into `values[0].value` while the editor shows one
+ * and {@link toRequests} PUTs one.
  *
- * `rows` is `useStructuredRows`'s already-projected baseline+edits set, and
- * `SingleRowController.row` hands the editor exactly `rows[0]`. Projecting
- * every entry would mean a corrupted log (two rowIds) writes TWO encounters
- * into `values[0].value` while the editor shows one and {@link toRequests}
- * PUTs one — the content-level disagreement "PROJECTION AND SUBMIT MUST
- * AGREE" forbids, and the same collapse `appointment`'s `projectValues`
- * makes for the same reason.
- *
- * NO `isEmptyRow`, on purpose (Lesson 2 asks for ONE emptiness predicate;
- * here the honest answer is that there is no emptiness to predicate on). An
- * encounter row always has a status, a class, a period and a priority —
- * there is no blank state a clinician can clear it to, no "add" to
- * annihilate, and the section is answered from the moment the server row
- * loads. What makes an untouched section silent is not emptiness but an
- * EMPTY EDIT LOG, which {@link toRequests} checks first.
+ * No `isEmptyRow`: an encounter row always has a status, class, period and
+ * priority — there is no blank state to clear it to. An untouched section
+ * is silent because its EDIT LOG is empty, which {@link toRequests} checks
+ * first.
  */
 export const projectValues: ProjectValues<EncounterRow> = (rows) => {
   const row = rows[0];
@@ -184,71 +148,40 @@ export const projectValues: ProjectValues<EncounterRow> = (rows) => {
 };
 
 /**
- * The encounter's domain derivations, as ONE pure function applied to every
- * patch before it is recorded.
+ * The encounter's domain derivations, one pure function applied to every
+ * patch before it is recorded; a combined class+status edit is evaluated
+ * against the values it is setting.
  *
- * It replaces three things at once:
- *  - `EncounterQuestion.tsx:134-158`, a `useEffect` keyed on
- *    `encounter.status` that called the store writer — an effect writing
- *    the very field it watched;
- *  - `:176-184`, a second effect folding the fetched encounter (and
- *    `?toDischarge`) into the same writer;
- *  - `:197-220`, mutation-time hospitalization rules that read the PREVIOUS
- *    `encounter.encounter_class` (`:205`) rather than the one the patch is
- *    setting.
+ * RETURN CONTRACT (`StructuredRowsOptions.normalizePatch`): the result
+ * REPLACES `patch` before being spread onto the row, so it must start from
+ * `{ ...patch }`. Takes its config rather than importing `@careConfig`
+ * (`care.config.ts` reads `import.meta.env`, absent under `node --test`);
+ * `now` is injectable so period assertions can name a value.
  *
- * Being pure it cannot loop, it is unit-testable without a DOM, and a
- * combined class+status edit is finally evaluated against the values it is
- * SETTING rather than the ones it is replacing. Totality and the one-pass
- * fixpoint are executed for all 9 statuses × 6 classes × 3 hospitalization
- * shapes × 2 period shapes in `model.test.ts`, not asserted here.
+ * Rules, in order:
+ *  1. period.end follows the status — a terminal status with no end gets
+ *     `now()`; an existing end is kept (a clinician-picked date is not
+ *     re-stamped); a non-terminal status clears it, writing nothing when
+ *     there is nothing to clear, so an unrelated edit cannot manufacture a
+ *     period diff.
+ *  2. An ambulatory class clears a POPULATED hospitalization to `{}` —
+ *     never writes `{}` over a server `null`/already-`{}`, which would put
+ *     an untouched field into the PUT body.
+ *  3. A hospitalized class that is DISCHARGED gets a disposition — the one
+ *     set, or the configured default.
  *
- * RETURN CONTRACT (`StructuredRowsOptions.normalizePatch`, and
- * `rowMutations.ts`'s `mergePatch`): the returned object REPLACES `patch`
- * before being spread onto the row, so it must start from `{ ...patch }` —
- * returning only the derived fields would silently drop the clinician's own
- * edit.
- *
- * TAKES ITS CONFIG rather than importing `@careConfig`: `care.config.ts`
- * reads `import.meta.env`, which does not exist under `node --test`. `now`
- * is injectable for the same reason a clock always is — so the period
- * assertions can name a value.
- *
- * THE THREE RULES, in the order they are applied:
- *
- *  1. period.end follows the status. A terminal status with no end gets
- *     `now()`; a terminal status that already has one keeps it (a discharge
- *     date the clinician picked is not re-stamped); a non-terminal status
- *     clears it. A non-terminal status with no end writes nothing at all —
- *     which is what keeps an unrelated edit on a live encounter from
- *     manufacturing a period diff.
- *  2. An ambulatory class has no hospitalization record, so one is cleared
- *     to `{}` — but only if there is something to clear. Writing `{}` over
- *     a server `null` (or an already-`{}`) would put a field the clinician
- *     never touched into the PUT body of an unrelated edit; the legacy code
- *     assigned unconditionally (`:200-202`) because it rebuilt the whole
- *     response value on every keystroke anyway and had no diff to spoil.
- *  3. A hospitalized class that is DISCHARGED gets a discharge disposition
- *     — the one already set, or the configured default.
- *
- * There is no fourth rule. The legacy `else if ("hospitalization" in …)`
- * (`:214-220`) re-pinned `discharge_disposition` to the SERVER's value on
- * every unrelated edit, so a clinician's pick vanished as soon as they
- * typed in another field. Dropped deliberately (D5), pinned by a regression
- * test.
+ * Deliberately NO rule re-pins `discharge_disposition` to the server value
+ * on unrelated edits (that erased the clinician's pick mid-form); pinned
+ * by a regression test.
  */
 export function makeNormalizePatch({
   dischargeDisposition,
   now = () => new Date().toISOString(),
 }: {
-  // `| undefined`, matching `careConfig.defaultDischargeDisposition`'s own
-  // honest type (`care.config.ts`'s `REACT_DEFAULT_DISCHARGE_DISPOSITION`
-  // env var is optional) — found integrating Task 8's editor, which passes
-  // the config value straight through. Rule 3's `?? dischargeDisposition`
-  // already degrades correctly when this is `undefined`: the disposition
-  // is left unset, exactly what the legacy mutation rule did when no
-  // default was configured, onto the (itself optional)
-  // `Hospitalization.discharge_disposition` field.
+  // `| undefined`, matching `careConfig.defaultDischargeDisposition` (the
+  // env var behind it is optional). Rule 3's `??` then leaves the
+  // disposition unset — onto the itself-optional field — exactly the
+  // behavior when no default is configured.
   dischargeDisposition: EncounterDischargeDisposition | undefined;
   now?: () => string;
 }) {
@@ -293,44 +226,18 @@ export function makeNormalizePatch({
 }
 
 /**
- * Is a discharge disposition mandatory right now? Exactly the legacy rule
- * (`validateEncounterQuestion`, `EncounterQuestion.tsx:80-86`): a
- * DISCHARGED encounter of a hospitalized class with no disposition set. The
- * definition (Task 8) turns this into a `QuestionValidationError` on the
- * dotted field key `hospitalization.discharge_disposition`; the message
- * lives there, at the i18n boundary, because this module must not import
- * i18next.
+ * Is a discharge disposition mandatory: a DISCHARGED encounter of a
+ * hospitalized class with no disposition set. The definition turns this
+ * into a `QuestionValidationError` on
+ * `hospitalization.discharge_disposition`; the message lives there, at the
+ * i18n boundary — this module must not import i18next.
  *
- * WHEN IT CAN ACTUALLY FIRE — read this before wiring it, and do NOT
- * assume a configured default. CORRECTED (post-Task-8-review, executed):
- * {@link makeNormalizePatch}'s rule 3 only fills a disposition when
- * `dischargeDisposition` (`careConfig.defaultDischargeDisposition`) is
- * itself configured. That config is honestly typed `| undefined`
- * (`care.config.ts:81-83`, the `REACT_DEFAULT_DISCHARGE_DISPOSITION` env
- * var is optional) and **this repo's own `.env.local` does not set it**.
- * On any such deployment, rule 3's `?? dischargeDisposition` leaves the
- * field UNSET, so a row THIS SESSION'S EDITOR PRODUCES — the ordinary
- * "Mark for discharge" click, or the `?toDischarge` seed — DOES fail this
- * predicate. Executed: `makeNormalizePatch({ dischargeDisposition:
- * undefined })` on a hospitalized row transitioning to `DISCHARGED` yields
- * `hospitalization.discharge_disposition: undefined`, and
- * `requiresDischargeDisposition` on that row is `true` (`model.test.ts`,
- * "the undefined-default deployment" block).
- *
- * So the honest statement is: this predicate is LIVE REQUIRED-FIELD
- * ENFORCEMENT on any deployment with no configured default (including this
- * one) — the field renders with its placeholder, the clinician must pick
- * a value, and Save blocks until they do, exactly legacy's behavior. It
- * degrades to a pure safety net — firing only on a row NOBODY EDITED this
- * session (an untouched already-broken server encounter, or a pre-port
- * draft) — only on a deployment where a default IS configured, since only
- * then does rule 3 guarantee every edited row already carries one.
- * Validation is therefore a statement about the SERVER's data ANDed with
- * the deployment's config, not about the clinician's input alone — which
- * is why the definition has to decide whether an untouched section may
- * block Save regardless. That decision belongs to `validate(projection,
- * edits, questionId, required)`, which sees `edits` and this module does
- * not; it is named in this task's report as a seam Task 8 inherits.
+ * Where `careConfig.defaultDischargeDisposition` is unconfigured,
+ * {@link makeNormalizePatch}'s rule 3 leaves the field unset, so rows this
+ * editor produces ("Mark for discharge", the `?toDischarge` seed) DO fail
+ * this predicate — live required-field enforcement, Save blocks until a
+ * value is picked. Only with a configured default does it degrade to a
+ * safety net for rows nobody edited this session.
  */
 export function requiresDischargeDisposition(
   row: EncounterRow | undefined,
@@ -343,50 +250,14 @@ export function requiresDischargeDisposition(
 }
 
 /**
- * Task 8's product decision, executed as a pure predicate so the
- * definition's `validate` stays a one-line call.
- *
- * THE DECISION: an untouched section may NOT block Save — `edits.length >
- * 0` is an unconditional precondition here, checked BEFORE
- * `requiresDischargeDisposition` at all.
- *
- * NOT full parity with `appointment`'s `needsSlot`
- * (`structured/types/appointment/model.ts:247-257`) — CORRECTED
- * (post-Task-8-review): `needsSlot` returns `true` unconditionally the
- * instant `required` is true (`if (required) return true;`), BEFORE it
- * ever consults `edits`, so a `required` appointment question with no
- * slot still hard-blocks even on an untouched section. This function has
- * no such carve-out: `edits.length > 0` gates the error regardless of the
- * question's own `required` flag. Consequence, stated plainly: a
- * `required: true` encounter question whose untouched server row is
- * already discharged-hospitalized-with-no-disposition does NOT hard-block
- * here, where a literal `needsSlot`-style rule would. That is consistent
- * with the decision below, just not the parity the two functions'
- * similar shape might suggest.
- *
- * WHY: blocking Save over server data the clinician never brought into
- * this session — possibly on a questionnaire that does not even carry an
- * encounter question they meant to open — would be a new, disruptive
- * coupling this port does not introduce. `toRequests`' own first guard
- * already guarantees an untouched section produces ZERO requests (P1-14);
- * this predicate extends the identical guarantee to validation, so an
- * untouched section has ZERO effect on Save, not merely zero effect on the
- * request body.
- *
- * WHEN THIS ACTUALLY FIRES — CORRECTED (post-Task-8-review, executed).
- * This is NOT merely a safety net for a raw `applyEdit`/plugin write
- * bypassing the mutators. {@link requiresDischargeDisposition}'s own doc
- * comment (above) states the real shape: on ANY deployment with no
- * configured `careConfig.defaultDischargeDisposition` — including this
- * repo's own `.env.local` — `makeNormalizePatch`'s rule 3 leaves the
- * disposition unset even on a row the editor DID produce this session
- * (the ordinary "Mark for discharge" click, or the `?toDischarge` seed).
- * On such a deployment this predicate is LIVE required-field enforcement
- * on the primary discharge entry point — exact legacy parity: the field
- * renders with its placeholder, the error renders beside it, and the
- * clinician resolves it before Save proceeds. It is a pure, near-dead
- * safety net ONLY on a deployment where a default IS configured, since
- * only then does rule 3 guarantee every touched row already carries one.
+ * Whether the missing-disposition error may block Save. An untouched
+ * section may NOT: `edits.length > 0` is an unconditional precondition,
+ * regardless of the question's own `required` flag — unlike
+ * `appointment`'s `needsSlot`, which hard-blocks a required question even
+ * untouched. Blocking Save over server data the clinician never brought
+ * into the session would couple validation to untouched server data.
+ * `toRequests`' first guard already guarantees an untouched section produces
+ * zero requests, and this extends the same guarantee to validation.
  */
 export function blocksSaveForMissingDischargeDisposition(
   row: EncounterRow | undefined,
@@ -396,65 +267,29 @@ export function blocksSaveForMissingDischargeDisposition(
 }
 
 /**
- * The edit log → at most one `PUT /api/v1/encounter/{encounterId}/`.
+ * The edit log → at most one `PUT /api/v1/encounter/{encounterId}/`. An
+ * empty log means an empty batch — an untouched section must never PUT the
+ * encounter back over whatever another user changed meanwhile.
  *
- * P1-14, AT ITS SHARPEST — the first guard. TODAY
- * `definitions/encounter.tsx:49-62` maps over the PROJECTION
- * unconditionally, so submitting ANY form carrying an encounter question
- * PUT the whole encounter back — including a section the clinician never
- * opened, over whatever another user changed meanwhile. An empty log now
- * means an empty batch, full stop.
+ * IDENTITY, NOT POSITION — unlike `appointment`'s `resolveSingletonRow`,
+ * which cannot filter by rowId: the encounter's rowId IS the URL this
+ * request is addressed to, and the baseline holds exactly this rowId, so
+ * filtering to `rowId === encounterId` agrees with `projectRows` even
+ * under a duplicate-entry log. A log carrying only a corrupted foreign rowId
+ * sends nothing, matching the untouched row the projection shows.
  *
- * IDENTITY, NOT POSITION — and why this differs from `appointment`.
- * `appointment`'s `resolveSingletonRow` deliberately refuses to filter by
- * rowId, because its projection can only ever fall back to `rows[0]` and an
- * identity filter would make the two sides pick different rows. Encounter
- * is the opposite case, for one concrete reason: its rowId IS the URL this
- * request is addressed to. Filtering to `rowId === encounterId` therefore
- * AGREES with `projectRows` more tightly than position would, because
- * `projectRows` emits baseline rows first, in baseline order
- * (`projectRows.ts`' step 1), and the baseline holds exactly this rowId —
- * so `rows[0]` IS this rowId's content whenever there is any, and is the
- * untouched server row when there is not. Both sides resolve the same rowId
- * through the same last-write-wins rule, so they agree even under a
- * duplicate-entry log, which `appointment` documents as a KNOWN GAP.
+ * `resolveChanges(own, {})` passes no baseline: the encounter's baseline
+ * exists but is not available to a pure differ; `undefined` is the
+ * contract's word for "not known". After the identity filter
+ * `resolveChanges` dedups to at most one entry, so `updates[0] ??
+ * creates[0]` is an exact pick; an `add` recorded while the baseline is
+ * unresolved compiles to the same PUT, safe because the endpoint is
+ * URL-keyed. `removes` is dropped: this question has no delete verb, and
+ * `projectRows` hides a `remove`d baseline row, so an empty projection and
+ * zero requests agree.
  *
- * The shape that makes the difference concrete: a log carrying ONLY a
- * corrupted foreign rowId. Positional resolution (`updates[0] ??
- * creates[0]` over the unfiltered log) would send that foreign row's
- * content to THIS encounter's URL while the projection showed the untouched
- * server row — a write the clinician could not see or cancel. Filtered, it
- * sends nothing, which is exactly what the projection shows. Every shape,
- * including the doubly-corrupted ones, is executed against BOTH modules in
- * `model.test.ts`'s "PROJECTION AND SUBMIT MUST AGREE" block.
- *
- * THE ONE PRECONDITION, stated rather than overclaimed: the agreement holds
- * while the baseline is keyed by the SAME id this context carries. Task 8
- * builds both from `props.encounterId`, so divergence is structurally
- * prevented rather than defended against here; the excluded shape is pinned
- * by the "KNOWN GAP" test.
- *
- * `resolveChanges(own, {})` passes NO baseline — honestly. Unlike
- * `appointment`/`charge_item`, whose baselines are permanently empty (a
- * fact about the type, stated as an empty `Map`), the encounter's baseline
- * genuinely EXISTS and is simply not available here: `composeBatch` is a
- * pure function with no access to the TanStack cache. `undefined` is the
- * contract's word for "not known", which is the true statement.
- *
- * `updates[0] ?? creates[0]`, and why `removes` is dropped (Lesson 4). After
- * the identity filter, `resolveChanges` dedups to AT MOST ONE entry across
- * all three sets, so this is an exact pick, not a preference. An `add` for
- * this rowId is reachable from a draft recorded before the baseline query
- * resolved (`editLog.ts`'s `coalesceOntoAdd` never re-labels); it compiles
- * to the same PUT, which is safe precisely because the endpoint is
- * URL-keyed and cannot create a duplicate — the case
- * `ResolvedChanges.updates`' own doc comment names. `removes` is dropped
- * because an encounter has no delete verb in this question at all: the
- * editor never removes, and `projectRows` hides a `remove`d baseline row,
- * so an empty projection and an empty batch agree.
- *
- * The body stays the SEVEN-FIELD ALLOWLIST `definitions/encounter.tsx:52-60`
- * sends today — deliberately not widened to the whole row.
+ * The body stays the seven-field allowlist — deliberately not widened to
+ * the whole row.
  */
 export async function toRequests(
   edits: readonly StructuredEdit<EncounterRow>[],
@@ -465,11 +300,11 @@ export async function toRequests(
   if (!facilityId) {
     // A mount precondition, not a URL ingredient — `requires:
     // ["encounterId", "facilityId"]` means the question should never have
-    // rendered without one. Kept as the legacy throw (`:45-47`) rather than
-    // a silent `[]` so the failure is loud; `composeBatch` contains it as a
-    // question-scoped `StructuredBuildError`. It is checked AFTER the
-    // empty-log guard on purpose: an untouched section must stay silent
-    // rather than fail the whole submit.
+    // rendered without one. A throw rather than a silent `[]` so the
+    // failure is loud; `composeBatch` contains it as a question-scoped
+    // `StructuredBuildError`. It is checked AFTER the empty-log guard on
+    // purpose: an untouched section must stay silent rather than fail the
+    // whole submit.
     throw new Error("Cannot update an encounter without a facility");
   }
 

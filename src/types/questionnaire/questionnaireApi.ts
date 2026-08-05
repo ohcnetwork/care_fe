@@ -24,8 +24,7 @@ export interface SubmitResultValue {
   coding?: Code;
 }
 
-/** One question's answer(s) in a submit request body — `care/emr/resources/
- *  questionnaire_response/spec.py: QuestionnaireResponseSubmitRequest`. */
+/** One question's answer(s) in a submit request body. */
 export interface SubmitResult {
   question_id: string;
   values: SubmitResultValue[];
@@ -35,11 +34,7 @@ export interface SubmitResult {
   taken_at?: string;
 }
 
-/** Patient/encounter-bound submit body —
- *  `care/emr/resources/questionnaire_response/spec.py:
- *  QuestionnaireSubmitRequest`. Built by `composeBatch` for both a fresh
- *  submission and one linked to a resumed server draft via
- *  `form_submission`. */
+/** Patient/encounter-bound submit body built by `composeBatch`. */
 export interface QuestionnaireSubmitBody {
   resource_id: string;
   patient?: string;

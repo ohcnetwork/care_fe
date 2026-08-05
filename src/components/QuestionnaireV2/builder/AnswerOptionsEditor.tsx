@@ -44,10 +44,8 @@ interface AnswerOptionsEditorProps {
 type Mode = "custom" | "valueset";
 
 /**
- * Quantity answer configuration is valueset-ONLY (legacy contract: the old
- * editor never offered custom options for quantity — the Custom/ValueSet
- * switcher rendered only for choice). The valueset is the unit-choice
- * source; a bounded expansion is previewed here as the same chips the
+ * Quantity answer configuration is valueset-only. The valueset is the
+ * unit-choice source; bounded expansions preview as the same chips the
  * renderer shows, and `question.unit` is the pre-selected default.
  */
 function QuantityUnitsEditor({ question, onChange }: AnswerOptionsEditorProps) {
@@ -100,9 +98,7 @@ function QuantityUnitsEditor({ question, onChange }: AnswerOptionsEditorProps) {
       <div className="space-y-1.5">
         <Label>{t("default_unit")}</Label>
         <p className="text-sm text-gray-500">{t("default_unit_hint")}</p>
-        {/* Writes `question.unit` — the one unit field the backend
-            persists (`answer_unit` is dropped by the Question spec) and
-            the renderer's pre-selected default. */}
+        {/* Writes the persisted default unit used by the renderer. */}
         <ValueSetSelect
           system="system-ucum-units"
           value={question.unit}

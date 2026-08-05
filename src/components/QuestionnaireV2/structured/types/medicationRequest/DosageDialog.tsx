@@ -16,15 +16,9 @@ export interface DosageDialogProps {
 }
 
 /**
- * The taper/titrate dose-range editor — start dose → end dose. Lifted out of
- * `MedicationRequestGridRow`'s render body (legacy defined this component
- * fresh on every row render, `MedicationRequestQuestion.tsx:1576-1661`) into
- * a genuine top-level component: it no longer closes over a row's
- * `handleUpdateDosageInstruction`/`setShowDosageDialog`, it takes plain
- * `onSave`/`onClear` callbacks instead, so its identity (and therefore
- * React's ability to reuse its internal `localDoseRange` state across
- * re-renders of its host) does not depend on which row happened to render it
- * last.
+ * The taper/titrate dose-range editor — start dose → end dose. It takes plain
+ * `onSave`/`onClear` callbacks so its identity and internal `localDoseRange`
+ * state are independent of the row rendering it.
  */
 export function DosageDialog({
   dosageRange,

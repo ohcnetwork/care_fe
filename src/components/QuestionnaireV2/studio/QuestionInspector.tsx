@@ -35,9 +35,8 @@ import { SubjectType } from "@/types/questionnaire/questionnaire";
 
 import { plainWordsSummary, questionsByLinkId } from "./conditionSummary";
 
-/** Types with a question-level unit, per the legacy editor's UNIT_TYPES —
- *  quantity configures its unit inside AnswerOptionsEditor; these get the
- *  plain unit row (shown as a `({code})` label suffix in the renderer). */
+/** Types with a question-level unit row. Quantity configures its default unit
+ *  inside AnswerOptionsEditor. */
 const UNIT_ROW_TYPES: Question["type"][] = ["integer", "decimal", "choice"];
 
 /** Every type that keeps a question-level `unit` — the plain-row types
@@ -87,25 +86,16 @@ export function QuestionInspector({
       toast.error(t("group_type_change_blocked"));
       return;
     }
-    // Mirrors the legacy editor's type-change handling: switching to a type
-    // that never offers Repeats also clears a previously-set flag, so it
-    // can't linger invisibly once the chip disappears.
+    // Switching to a type that never offers Repeats also clears a previously set
+    // flag, so it can't linger invisibly once the chip disappears.
     const nextType = patch.type ?? question.type;
     if (question.repeats && NON_REPEATABLE_TYPES.includes(nextType)) {
       patch = { ...patch, repeats: false };
     }
-    // The reducer shallow-merges patches, so an explicit `undefined` here
-    // clears a field the new type no longer supports — otherwise it lingers
-    // on the question data with no editor UI left to see or clear it. A
-    // `structured_type` left behind after switching away from Structured is
-    // the sharp one: the renderer's QuestionBlock branches on
-    // `question.type === "structured"` for DISPLAY, but the fill-time
-    // structured plumbing (StructuredSlot/composeBatch) keys off
-    // `structured_type` too, and a stale value there has caused answers to
-    // silently route into the wrong path. `patch.type === "structured"`
-    // always arrives bundled with its own `structured_type` (the type
-    // picker's structured step sets both together), so this never clobbers
-    // an intentional selection.
+    // Explicit `undefined` clears fields the new type no longer supports. A
+    // stale `structured_type` can route fill-time structured plumbing down the
+    // wrong path, while structured selections set `type` and `structured_type`
+    // together.
     if (nextType !== "structured") {
       patch = { ...patch, structured_type: undefined };
     }
@@ -185,11 +175,7 @@ export function QuestionInspector({
           </TabsList>
 
           <TabsContent value="question" className="space-y-4 p-4">
-            {/* Reference field order: question text, helper text, answer
-                type. The visible label keeps the accessible name every spec
-                relies on ("Question Title"); the type picker stays the
-                first combobox even though it now sits third — the two
-                fields above it are plain textboxes. */}
+            {/* The visible label keeps "Question Title" as the accessible name. */}
             <div className="space-y-1.5">
               <Label
                 htmlFor={`question-title-${question.id}`}

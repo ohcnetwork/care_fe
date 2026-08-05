@@ -11,6 +11,7 @@ import {
   periodSchema,
   userDisplaySchema,
 } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
+import { sanitizeNote } from "@/components/QuestionnaireV2/structured/shared/sanitizeNote";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
@@ -25,25 +26,16 @@ import {
 } from "@/types/emr/medicationStatement";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
-/**
- * The wire shape is already the row shape — no widening needed, so the
- * `medication_statement` arm of `StructuredDataMap`
- * (`structured/types.ts:43`) and the `RV<"medication_statement",
- * MedicationStatementRequest[]>` arm of `ResponseValue` (`types/questionnaire
- * /form.ts:37`) are both untouched by this port.
- */
+/** The wire shape is already the row shape — no widening needed. */
 export type MedicationStatementRow = MedicationStatementRequest;
 
 /**
- * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
- * `rowSchema` for the full contract). `dosage_text` accepts an empty
- * string on purpose (matching `newMedicationStatementRow`'s own `""` seed
- * and this type's own completeness decision, `isDosageMissing` — a schema
- * this strict is "is this a plausible row", not "is this row complete
- * enough to submit"; the latter is `medicationStatementValidationIssues`'
- * job, below). `effective_period` is {@link periodSchema} — the SAME
- * timezone-aware-instant shape `periodDateFromInput`'s own doc comment
- * documents the backend actually requires (a bare date-only string 400s).
+ * Assistant write guard: "is this a plausible row", not "is this row
+ * complete enough to submit" — completeness is
+ * `medicationStatementValidationIssues`' job. `dosage_text` accepts `""`
+ * (matching `newMedicationStatementRow`'s seed); `effective_period` uses
+ * {@link periodSchema}, whose values are full ISO instants on the wire —
+ * the backend rejects a naive datetime (see `periodDateFromInput`).
  */
 export const rowSchema = z
   .object({
@@ -61,16 +53,10 @@ export const rowSchema = z
   .strict();
 
 /**
- * The soft-delete contract (P1-14's other half, alongside the zero-upsert
- * differ below) — identical shape to `allergy_intolerance`'s
- * `ALLERGY_SOFT_DELETE`. Legacy split this by hand at
- * `MedicationStatementQuestion.tsx`'s `confirmRemoveMedication` (`:259-285`):
- * a row WITH a server `id` flips `status` to `"entered_in_error"` and stays
- * on screen; a row WITHOUT one (never reached the server) is filtered out
- * entirely. `useStructuredRows`'s `removeRow`/`resolveRemoveIntent`
- * (`core/rowMutations.ts`) already implements exactly this dispatch for any
- * type that supplies a `SoftDeleteDescriptor` — no special-cased branch of
- * this port's own is needed on top of it.
+ * A row with a server `id` flips `status` to `"entered_in_error"` and stays
+ * on screen; a row that never reached the server is removed outright.
+ * `useStructuredRows`' `removeRow` implements this dispatch for any type
+ * supplying a `SoftDeleteDescriptor`.
  */
 export const MEDICATION_STATEMENT_SOFT_DELETE: SoftDeleteDescriptor<MedicationStatementRow> =
   {
@@ -78,15 +64,7 @@ export const MEDICATION_STATEMENT_SOFT_DELETE: SoftDeleteDescriptor<MedicationSt
     isDeleted: (row) => row.status === "entered_in_error",
   };
 
-/**
- * `MedicationStatementRead` (the server read shape, with `created_date`/
- * `modified_date`/`created_by`/`updated_by`) → the fields this question
- * actually edits. Lifted out of `MedicationStatementQuestion.tsx`'s implicit
- * read→request coercion (the legacy widget reads straight off
- * `patientMedications.results`, which is already `MedicationStatementRead[]`,
- * and treats it as `MedicationStatementRequest[]` structurally) so the
- * conversion is explicit and testable without a DOM.
- */
+/** Server read shape → the fields this question edits. */
 export function toMedicationStatementRow(
   medication: MedicationStatementRead,
 ): MedicationStatementRow {
@@ -104,16 +82,9 @@ export function toMedicationStatementRow(
 }
 
 /**
- * One baseline row per fetched medication statement, keyed by the SERVER
- * id — a real identity, unlike a create-only singleton's fixed row id, so
- * `removeRow` can tell a baseline row (soft-deletes) from an added one
- * (annihilates) by `origin` alone.
- *
- * BASELINE HONESTY (BASELINE COMPLETENESS CONTRACT). Only ever called with a
- * RESOLVED `medicationStatementApi.list` result, so this always returns the
- * COMPLETE server-row set for this question. While the query is loading or
- * errored there is no read to convert — the caller passes `undefined`, never
- * `[]` (`MedicationStatementEditor.tsx` does exactly this).
+ * One baseline row per fetched medication statement, keyed by the server id.
+ * Callers pass `undefined` (never `[]`) while the list query is loading or
+ * errored — an empty array means "the server confirmed zero medications".
  */
 export function toBaselineRows(
   medications: readonly MedicationStatementRead[],
@@ -125,15 +96,11 @@ export function toBaselineRows(
 }
 
 /**
- * A freshly picked medication, seeded exactly the way
- * `MedicationStatementQuestion.tsx`'s `MEDICATION_STATEMENT_INITIAL_VALUE`
- * does (`:89-101`): `status` starts `"active"`, `information_source`
- * defaults to `PATIENT` (the historically most common entry), `dosage_text`
- * starts blank (required before submit, not before the row can exist —
- * see the validation section below). `encounter` is baked in here, at
- * creation — matching `newAllergyRow`'s reasoning, not the legacy widget's
- * (which only attached it at submit time): a v2 row's `patch` must always
- * be the COMPLETE row.
+ * A freshly picked medication: `status` starts `"active"`,
+ * `information_source` defaults to PATIENT, `dosage_text` starts blank
+ * (required before submit, not before the row can exist). `encounter` is
+ * stamped at creation because a row's `patch` must always be the COMPLETE
+ * row.
  */
 export function newMedicationStatementRow(
   medication: Code,
@@ -149,19 +116,13 @@ export function newMedicationStatementRow(
 }
 
 /**
- * Converts one `MedicationHistory` selection (`HistoricalRecordSelector`'s
- * two source types) into a fresh row. Two distinct shapes, per legacy's own
- * `handleAddHistoricalMedications` (`MedicationStatementQuestion.tsx:224-253`):
- *
- *  - a past PRESCRIPTION (`MedicationRequestRead`) resets to the same
- *    defaults `newMedicationStatementRow` uses, keeping only the medication
- *    and its note — a prescription's dosage/status/period do not carry a
- *    matching statement shape at all;
- *  - a past STATEMENT (`MedicationStatementRead`) keeps everything BUT the
- *    server id (this is a NEW row — legacy's `const { id: _id, ...statement
- *    }` strip, `:238`) and is re-stamped to the CURRENT encounter, matching
- *    every other creation path in this module (`newMedicationStatementRow`,
- *    `toRequests`'s own unconditional re-stamp at submit time).
+ * Converts one `HistoricalRecordSelector` selection into a fresh row:
+ *  - a past PRESCRIPTION resets to the `newMedicationStatementRow` defaults,
+ *    keeping only the medication and note — a prescription's
+ *    dosage/status/period has no matching statement shape;
+ *  - a past STATEMENT keeps everything BUT the server id (this is a new row)
+ *    and is re-stamped to the CURRENT encounter, like every other creation
+ *    path here.
  */
 export function fromHistoricalMedicationRequest(
   record: { medication: Code; note?: string },
@@ -190,62 +151,33 @@ export function fromHistoricalMedicationStatement(
 }
 
 /**
- * A list, not a singleton, and — like `allergy_intolerance` — a row here is
- * born whole the moment `newMedicationStatementRow`/`fromHistorical*`
- * creates it: there is no "half filled" state to reconcile, so there is no
- * separate `isEmptyRow` predicate to keep in sync with a submission filter
- * (Lesson 2, binding "Lessons from the first ports"). A row missing its
- * dosage or period is INVALID, not EMPTY — it stays on screen, projects, and
- * hard-blocks submit via `medicationStatementValidationIssues` below, rather
- * than being silently dropped the way an emptied `appointment` singleton is.
+ * A list whose rows are born whole at creation — there is no "half filled"
+ * state, so no `isEmptyRow` predicate exists to desync from a submission
+ * filter. A row missing its dosage or period is INVALID, not EMPTY: it stays
+ * on screen, projects, and hard-blocks submit via
+ * `medicationStatementValidationIssues`, rather than being silently dropped.
  */
 export const projectValues: ProjectValues<MedicationStatementRow> = (rows) =>
   rows.length === 0 ? [] : [{ type: "medication_statement", value: [...rows] }];
 
-/** Mirrors `definitions/adapt.ts`'s `sanitizeNote` / `allergyIntolerance/
- *  model.ts`'s own copy, reimplemented locally rather than imported: a
- *  `model.ts` must import no React (N1's unit-test-harness constraint), and
- *  `adapt.ts` imports `useCallback`. */
-function sanitizeNote(note: string | undefined): string | undefined {
-  return note?.trim() || undefined;
-}
+/** Local copy of `definitions/adapt.ts`'s `sanitizeNote`: a `model.ts` must
+ *  stay importable by the node:test harness, and `adapt.ts` imports React. */
 
 /**
- * The edit log → at most one POST against the upsert endpoint, carrying
- * every row this session touched.
+ * The edit log → at most one POST against the upsert endpoint, carrying ONLY
+ * rows this session touched: an empty edit log is an empty batch, so
+ * untouched prefetched medications are never re-sent (a concurrent edit to
+ * one can no longer be silently overwritten).
  *
- * P1-14, LANDED FOR REAL. Today `definitions/medicationStatement.tsx`'s old
- * `buildRequests` mapped over the WHOLE projection — every prefetched
- * medication, touched or not — so submitting ANY form carrying a medication
- * statement question re-sent every recorded medication back to the server
- * on every save, including one an unrelated concurrent edit had just
- * changed. An empty edit log now means an empty batch, full stop:
- * `resolveChanges([], ...)` returns three empty sets by construction, and
- * this function returns `[]` before ever touching the network.
+ * `resolveChanges` gets no baseline — the differ takes only the edit log;
+ * the editor's hook prunes edits whose rowId the baseline has dropped before
+ * a submit reaches this function. A `removes` entry always carries `.row`
+ * when a `softDelete` descriptor is supplied, but `ResolvedRemove.row` stays
+ * optional for types with real delete semantics — hence the `flatMap` guard.
  *
- * `resolveChanges(edits, { softDelete: MEDICATION_STATEMENT_SOFT_DELETE })`
- * — NO baseline, matching `allergy_intolerance`'s reasoning: this type's
- * baseline genuinely EXISTS, but `toRequests(edits, ctx)` structurally never
- * receives it (contract v2's differ takes only the edit log). The live hook
- * threads the real baseline through every mutator during editing
- * (`MedicationStatementEditor.tsx`), and its own passive prune effect
- * removes any edit for a rowId the baseline has since proven gone well
- * before a submit ever reaches this function.
- *
- * `creates`/`updates`/`removes` are combined into ONE `datapoints` array,
- * matching the legacy widget's own single-array submit
- * (`definitions/medicationStatement.tsx`'s old body). A `removes` entry
- * always carries `.row` here (a `softDelete` descriptor was supplied), but
- * the type keeps it optional (`ResolvedRemove.row?`) for a type with real
- * delete semantics — the `flatMap` guard is what stays honest to that
- * shared type rather than asserting.
- *
- * `encounter`/`patient` are OVERRIDDEN unconditionally on every submitted
- * row — INHERITED LEGACY BEHAVIOR (`definitions/medicationStatement.tsx`'s
- * old body: `...medication, encounter: encounterId, patient: patientId`),
- * not a new decision made here: a row pulled in via the historical selector
- * can carry a different origin encounter, and every submitted row is
- * re-stamped to the CURRENT one regardless.
+ * `encounter`/`patient` are re-stamped unconditionally on every submitted
+ * row: a row pulled in via the historical selector can carry a different
+ * origin encounter.
  */
 export async function toRequests(
   edits: readonly StructuredEdit<MedicationStatementRow>[],
@@ -279,21 +211,11 @@ export async function toRequests(
 }
 
 // ---------------------------------------------------------------------------
-// effective_period date conversion — the ONE boundary between the native
-// `<input type="date">` the editor uses (required: exactly "yyyy-MM-dd") and
-// the wire format `effective_period.start`/`.end` actually needs.
-//
-// FOUND BY MOUNT-TESTING (not assumed): the backend's `PeriodSpec`
-// (`care/emr/resources/base.py`'s `validate_period`) parses `start`/`end` as
-// `datetime.datetime` and REJECTS a naive one — a bare "2026-08-01" parses
-// to midnight with no offset and 400s with "Start Date must be timezone
-// aware". Legacy's `CombinedDatePicker` sidestepped this by writing
-// `date.toISOString()` (`MedicationStatementQuestion.tsx:912`, always
-// timezone-aware); `allergy_intolerance`'s bare-`"yyyy-MM-dd"` `last_occurrence`
-// precedent does NOT generalize here — that field's backend model accepts a
-// date-only string. Confirmed live: a native date input writing its bare
-// value straight through 400'd on save; converting through
-// `periodDateFromInput` below fixed it, verified by a second live save.
+// effective_period date conversion — the one boundary between the native
+// `<input type="date">` (exactly "yyyy-MM-dd") and the wire format.
+// The backend parses `start`/`end` as datetimes and rejects a
+// naive one ("Start Date must be timezone aware") — a bare "2026-08-01"
+// 400s, so every wire value must be a timezone-aware ISO instant.
 // ---------------------------------------------------------------------------
 
 /** Wire ISO datetime → the bare date the native input can display. `""` for
@@ -303,32 +225,25 @@ export function periodDateForInput(value: string | undefined): string {
 }
 
 /** The native input's bare "yyyy-MM-dd" → a timezone-aware ISO instant
- *  (UTC midnight for that date) the backend's `PeriodSpec` accepts.
+ *  (UTC midnight for that date) the backend accepts.
  *  `undefined` for an empty input (the field was cleared). */
 export function periodDateFromInput(value: string): string | undefined {
   return value ? new Date(value).toISOString() : undefined;
 }
 
 // ---------------------------------------------------------------------------
-// Validation — pure predicates. `model.ts` imports no i18next (matching
-// `appointment/model.ts`'s `needsSlot`): the DEFINITION file
-// (`definitions/medicationStatement.tsx`) is the one and only place a
+// Validation — pure predicates. The definition file is the only place a
 // decision here becomes a translated `QuestionValidationError`.
 // ---------------------------------------------------------------------------
 
-/** The two field_keys this type's client-side validation ever binds to —
- *  exactly `MEDICATION_STATEMENT_FIELDS`'s two keys in the legacy validator
- *  stack this replaces (`validation.ts`'s `FieldDefinitions`,
- *  `MedicationStatementQuestion.tsx:103-128`). */
+/** The two field_keys this type's client-side validation ever binds to. */
 export const MEDICATION_STATEMENT_FIELD_KEYS = {
   DOSAGE: "dosage_text",
   PERIOD: "effective_period",
 } as const;
 
-/** Mirrors `validateMedicationStatementQuestion`'s own skip
- *  (`MedicationStatementQuestion.tsx:136`): a medication already marked
- *  entered-in-error is retracted, not an incomplete answer, so it is exempt
- *  from the dosage/period completeness rules below. */
+/** A medication already marked entered-in-error is retracted, not an
+ *  incomplete answer — exempt from the dosage/period completeness rules. */
 export function needsMedicationValidation(
   row: MedicationStatementRow,
 ): boolean {
@@ -343,11 +258,8 @@ export function isPeriodStartMissing(row: MedicationStatementRow): boolean {
   return !row.effective_period?.start;
 }
 
-/** Mirrors `MEDICATION_STATEMENT_FIELDS.PERIOD.validate`
- *  (`MedicationStatementQuestion.tsx:117-122`): only meaningful once a start
- *  date exists — `isPeriodStartMissing` is the prior, more specific check,
- *  so a caller runs this only when a start IS present (see
- *  `medicationStatementValidationIssues` below). */
+/** Only meaningful once a start date exists — callers check
+ *  `isPeriodStartMissing` first (see `medicationStatementValidationIssues`). */
 export function isPeriodRangeInvalid(row: MedicationStatementRow): boolean {
   const { start, end } = row.effective_period ?? {};
   if (!start || !end) return false;
@@ -364,23 +276,11 @@ export interface MedicationStatementValidationIssue {
 }
 
 /**
- * Row-scoped validation issues, derived from EDITS, not the projection
- * (Global Constraint N5): `validate(projection, edits, questionId, required)`
- * receives the projection as bare rows with no `rowId`, so a `row_id`-keyed
- * error must be derived from `edits`, whose `patch` is the complete row —
- * exactly `charge_item/model.ts`'s `invalidQuantityRowIds` reasoning. This
- * also means an UNTOUCHED baseline row (however incomplete its historical
- * dosage/period data) never hard-blocks a save for a section nobody opened
- * this session — the validation-side twin of P1-14's zero-request
- * guarantee above: only a row the clinician actually touched can gate
- * submit.
- *
- * `edits` here is `structuredEditsOf(response)` (`fill/submit/
- * validateStructured.ts`) — the hook's own committed log, which
- * `applyEditToLog` guarantees carries at most one entry per `rowId` — so no
- * additional last-write-wins resolution is needed here (unlike
- * `resolveChanges`, which also has to defend against an untrusted restored
- * draft's per-record validation admitting duplicates).
+ * Row-scoped issues derive from EDITS, not the projection: the projection
+ * carries no `rowId`, and an untouched baseline row — however incomplete its
+ * historical data — must never hard-block a save for a section nobody opened
+ * this session. The edit log carries at most one entry per `rowId`, so no
+ * last-write-wins resolution is needed here.
  */
 export function medicationStatementValidationIssues(
   edits: readonly StructuredEdit<MedicationStatementRow>[],

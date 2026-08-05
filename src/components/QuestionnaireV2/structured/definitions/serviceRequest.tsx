@@ -15,21 +15,14 @@ export const serviceRequestDefinition: StructuredTypeDefinition<"service_request
     component: ServiceRequestEditor,
     requires: ["encounterId", "facilityId"],
     subjects: ["encounter"],
-    // D2: a service-request row is plain, JSON-serializable data (the wire
-    // fields plus the activity-definition display object, itself plain
-    // data) — no `Date`/`File`/class instance — so it round-trips through a
-    // draft exactly. Mirrors `charge_item`'s identical reasoning.
+    // Service-request rows contain only plain JSON-serializable data, so they
+    // can be restored from drafts without losing type information.
     draftPolicy: "serialize",
     contract: 2,
     toRequests,
     rowSchema,
-    // i18n boundary: `model.ts`'s `requiredServiceRequestFieldMisses` is the
-    // pure, row-scoped decision (imports no i18next); this is the only
-    // place it becomes a translated, row_id-keyed `QuestionValidationError`
-    // — mirrors `charge_item`'s identical split. See that function's own
-    // doc comment for why this is wired (a "correct" version of legacy's
-    // never-wired `validateServiceRequestQuestion`) despite today's UI
-    // having no path that can actually leave a required field blank.
+    // i18n boundary: `requiredServiceRequestFieldMisses` stays pure; this
+    // definition turns its misses into translated, row-scoped errors.
     validate: (_projection, edits, questionId) =>
       requiredServiceRequestFieldMisses(edits).map((miss) => ({
         question_id: questionId,

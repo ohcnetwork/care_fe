@@ -135,7 +135,7 @@ describe("selectStructuredFieldErrors", () => {
     );
   });
 
-  it("REVIEW FIX (minor): an empty-string field_key is treated the same as no field_key at all — never matches through this primitive, aligned with QuestionBlock.tsx's own falsy check", () => {
+  it("an empty-string field_key is treated the same as no field_key at all — never matches through this primitive, aligned with QuestionBlock.tsx's own falsy check", () => {
     const error = err({ field_key: "" });
     // Neither a section-level query (no rowId/rowIndex)...
     assert.deepEqual(

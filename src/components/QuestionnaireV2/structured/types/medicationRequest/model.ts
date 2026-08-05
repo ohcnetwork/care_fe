@@ -11,6 +11,7 @@ import {
   isoInstantString,
   userDisplaySchema,
 } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
+import { sanitizeNote } from "@/components/QuestionnaireV2/structured/shared/sanitizeNote";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
@@ -31,21 +32,10 @@ import type { UserReadMinimal } from "@/types/user/user";
 
 /**
  * `getTimingBounds`/`validateTimingBounds`/`parseMedicationStringToRequest`
- * are re-implemented locally rather than imported as VALUES from
- * `@/types/emr/medicationRequest/medicationRequest` — that module also
- * defines `computeTotalDoseQuantity` et al., which import `@/Utils/decimal`,
- * which imports `@careConfig` at its own top level and reads
- * `import.meta.env` there — `undefined` under `node --test`, the identical
- * hazard `diagnosis/model.ts`'s own doc comment documents for
- * `@/Utils/utils`. Importing a SINGLE named export from a module still
- * executes the WHOLE module's top-level code (ES modules have no
- * per-export laziness), so there is no way to cherry-pick just these three
- * functions from that file without poisoning this one for the test
- * harness. All three are copied here as small, self-contained pure
- * functions with no Decimal dependency of their own — only the (harmless)
- * duplication is new; the app's real `DurationInput.tsx`/legacy widget keep
- * using the original copies unmodified, since neither is ever loaded by
- * `node:test`.
+ * are implemented locally rather than value-imported because the source
+ * module executes a top-level `@careConfig` chain via `@/Utils/decimal`, which
+ * is not safe in the node test harness. Importing one named export still
+ * executes the whole module, so these small pure helpers stay local.
  */
 type TimingRepeat = NonNullable<
   MedicationRequestDosageInstruction["timing"]
@@ -120,11 +110,9 @@ function isPositiveDecimalString(value: string): boolean {
   return Number.isFinite(n) && n > 0;
 }
 
-/** A fresh `MedicationRequest` shell — the ACTUAL behavior of
- *  `parseMedicationStringToRequest` (a misleading name: despite the
- *  docstring, it never parses a string; it builds a default request,
- *  optionally seeded with a picked `Code` and/or `ProductKnowledgeBase`).
- *  Re-implemented locally for the `@careConfig` reason above. */
+/** Builds a fresh default `MedicationRequestCreate`, optionally seeded with
+ *  a picked `Code` and/or `ProductKnowledgeBase`. Local copy for the
+ *  `@careConfig` reason above. */
 function freshMedicationRequestShell(
   requester: UserReadMinimal,
   medication?: Code,
@@ -159,32 +147,17 @@ function freshMedicationRequestShell(
 }
 
 /**
- * The wire shape is already the row shape — no widening needed, matching
- * `diagnosis`/`allergy_intolerance`. `dirty` (still `dirty?: boolean` on
- * `MedicationRequestCreate` — see that type's own doc comment) is the ONE
- * field a v2 row is allowed to carry but must NEVER set: every function
- * below omits it entirely. Dirtiness is derived from the edit log
- * (`resolveChanges`, below) — the legacy widget's hand-maintained flag dies
- * with it in the Phase 5 closeout, alongside the legacy widget that still
- * writes it.
+ * The wire shape is already the row shape — no widening needed. Dirtiness
+ * is never stored on a row; it is derived from the edit log via
+ * `resolveChanges`.
  */
 export type MedicationRequestRow = MedicationRequestCreate;
 
 // ---------------------------------------------------------------------------
-// The assistant write guard (spec §6 A2) — see `timeOfDeath/model.ts`'s
-// `rowSchema` for the full contract this fulfills the same way.
-//
-// Every enum below is HAND-LISTED rather than imported from
-// `@/types/emr/medicationRequest/medicationRequest` as a value — mirrors
-// this file's own `LOCAL_UCUM_TIME_UNITS` above and its doc comment's exact
-// reasoning: that module imports `@/Utils/decimal` (→ `@careConfig` →
-// `import.meta.env`, `undefined` under `node --test`) at ITS OWN module
-// scope, so importing even one unrelated named VALUE from it — not just
-// the specific function that needs Decimal — re-executes that whole
-// import chain and crashes the harness before a single assertion runs.
-// `import type` is unaffected (erased before `tsx` resolves anything), so
-// every TYPE this file already imports from there stays untouched; only
-// enum/const-array VALUES needed new, local copies.
+// Assistant write guard. The enums below are hand-listed, not value-imported
+// from `@/types/emr/medicationRequest/medicationRequest` — same hazard as
+// the header comment above: a value import executes that module's top-level
+// `@careConfig` chain and crashes `node --test`. `import type` stays safe.
 // ---------------------------------------------------------------------------
 
 const LOCAL_MEDICATION_REQUEST_STATUS = [
@@ -263,12 +236,9 @@ const boundsDurationSchema = z
 const timingRangeSchema = z
   .object({ low: boundsDurationSchema, high: boundsDurationSchema })
   .strict();
-/** `PeriodSpec` — a bare `{ start?; end? }`, NOT {@link periodSchema}
- *  (`rowSchemaPrimitives.ts`): a timing bound's period is entered through
- *  `DurationInput`, not verified live against the backend's timezone-aware
- *  requirement the way `medicationStatement`'s `effective_period` was —
- *  left as plain optional strings rather than asserting a format this port
- *  never confirmed. */
+/** A bare `{ start?; end? }`, deliberately NOT `periodSchema`: a timing
+ *  bound's period is entered through `DurationInput`, so no specific
+ *  string format is asserted here. */
 const periodSpecSchema = z
   .object({ start: z.string().optional(), end: z.string().optional() })
   .strict();
@@ -318,9 +288,8 @@ const dosageInstructionSchema = z
  * prescription`, a module that does NOT import `@/Utils/decimal` — safe to
  * value-import `PrescriptionStatus` from, and this file already does, just
  * above). `dirty` is DELIBERATELY absent from this shape: `.strict()`
- * means an assistant patch still carrying the legacy field (a stale/copied
- * baseline row) is REJECTED, not silently accepted-and-ignored — matching
- * `diagnosis/model.ts`'s identical choice for its own retired `dirty` flag.
+ * means a patch still carrying the old `dirty` field is rejected, not silently
+ * accepted and ignored.
  */
 export const rowSchema = z
   .object({
@@ -354,13 +323,10 @@ export const rowSchema = z
   .strict();
 
 /**
- * The soft-delete contract — P1-14's other half. Legacy split this by hand
- * at `confirmRemoveMedication`: a row WITH a server `id` flips `status` to
- * `entered_in_error` and stays on screen; a row WITHOUT one (never reached
- * the server) is simply dropped. `useStructuredRows`'s `removeRow` already
- * implements exactly this dispatch for any type that supplies a
- * `SoftDeleteDescriptor` — configuring this descriptor is the whole fix,
- * mirroring `allergyIntolerance/model.ts`'s `ALLERGY_SOFT_DELETE`.
+ * Soft-delete contract: a baseline row (it has a server `id`) flips
+ * `status` to `entered_in_error` and stays on screen; an added row that
+ * never reached the server is simply dropped. `useStructuredRows`'s
+ * `removeRow` dispatches on this descriptor.
  */
 export const MEDICATION_REQUEST_SOFT_DELETE: SoftDeleteDescriptor<MedicationRequestRow> =
   {
@@ -370,10 +336,7 @@ export const MEDICATION_REQUEST_SOFT_DELETE: SoftDeleteDescriptor<MedicationRequ
 
 /**
  * `MedicationRequestRead` (the server shape) → the row this question edits.
- * Exactly `MedicationRequestQuestion.tsx`'s prescription-scoped effect
- * (`:387-405`), lifted out so it is testable without a DOM and so it never
- * writes `dirty` (the legacy effect wrote `dirty: false`; this omits the
- * key entirely).
+ * Pure so it is testable without a DOM.
  */
 export function toMedicationRow(
   medication: MedicationRequestRead,
@@ -390,13 +353,8 @@ export function toMedicationRow(
 
 /**
  * One baseline row per fetched medication request, keyed by the SERVER id.
- *
- * BASELINE HONESTY (BASELINE COMPLETENESS CONTRACT). Only ever called with a
- * RESOLVED `medicationRequestApi.list` result for the `?prescription=`-scoped
- * case — see `MedicationRequestEditor.tsx`'s `useMedicationBaseline` for the
- * full three-state contract (undefined while loading, `[]` when this
- * question has no prescription to scope to at all, the real rows once
- * resolved).
+ * Only called with a resolved `medicationRequestApi.list` result — the
+ * loading/no-prescription states are handled by `useMedicationBaseline`.
  */
 export function toBaselineRows(
   medications: readonly MedicationRequestRead[],
@@ -408,9 +366,8 @@ export function toBaselineRows(
   }));
 }
 
-/** A single, PRN-off dosage instruction shell — every fresh medication
- *  starts with exactly one, exactly like `parseMedicationStringToRequest`'s
- *  own default. */
+/** An empty `create_prescription` shell; the real `alternate_identifier`
+ *  is stamped per-submission by `toRequests`. */
 function draftPrescription(): MedicationRequestCreate["create_prescription"] {
   return {
     status: PrescriptionStatus.active,
@@ -418,27 +375,22 @@ function draftPrescription(): MedicationRequestCreate["create_prescription"] {
   };
 }
 
-/**
- * A freshly picked medication code (the plain ValueSet path — no product
- * knowledge). Mirrors `MedicationRequestQuestion.tsx`'s `handleAddMedication`.
- */
+/** A fresh row from a picked medication code (the plain ValueSet path — no
+ *  product knowledge). */
 export function newMedicationRowFromCode(
   code: Code,
   currentUser: UserReadMinimal,
 ): MedicationRequestRow {
   return {
     ...freshMedicationRequestShell(currentUser, code),
-    authored_on: new Date().toISOString(),
-    requester: currentUser,
     create_prescription: draftPrescription(),
   };
 }
 
 /**
- * A freshly picked product-knowledge item. Mirrors
- * `MedicationRequestQuestion.tsx`'s `handleAddProductMedication`: a
- * `consumable` product overrides its (only) dosage instruction to PRN,
- * since a consumable is dispensed on demand rather than scheduled.
+ * A fresh row from a picked product-knowledge item. A `consumable` product
+ * overrides its single dosage instruction to PRN — a consumable is
+ * dispensed on demand rather than scheduled.
  */
 export function newMedicationRowFromProduct(
   product: ProductKnowledgeBase,
@@ -456,14 +408,8 @@ export function newMedicationRowFromProduct(
   return {
     ...base,
     dosage_instruction: dosageInstruction,
-    authored_on: new Date().toISOString(),
-    requester: currentUser,
     create_prescription: draftPrescription(),
   };
-}
-
-function sanitizeNote(note: string | undefined): string | undefined {
-  return note?.trim() || undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -471,40 +417,19 @@ function sanitizeNote(note: string | undefined): string | undefined {
 // ---------------------------------------------------------------------------
 
 /**
- * A row → the plain data a template stores, mirroring `service_request`'s
- * own `buildServiceRequestForTemplate` (`structured/types/serviceRequest/
- * model.ts`) — a clean, EXPLICIT object built field by field, not the
- * legacy `buildMedicationForTemplate`'s spread-then-delete
- * `Record<string, unknown>` (`QuestionTypes/MedicationRequestQuestion.tsx`).
+ * A row → the plain data a template stores.
  *
- * FOUND BY MOUNT-TESTING (not assumed), the identical class of gap
- * `service_request`'s own port found in `activityDefinitionPrice`: the
- * declared TS type `MedicationRequestTemplateSpec` (`@/types/emr/
- * medicationRequest/medicationRequest`) OMITS `authored_on` — but the
- * backend's template-create serializer REJECTS a `template_data.
- * medication_request[N]` entry that doesn't carry one ("Field required:
- * ...medication_request.0.authored_on"), confirmed live against the real
- * `POST /api/v1/questionnaire_response_template/`. Legacy's own
- * `buildMedicationForTemplate` never tripped this because it spread the
- * WHOLE row (`{...medication, ...}`), which always carried the row's real
- * `authored_on` along for the ride despite the same TS type omitting it
- * there too — so this is a pre-existing backend requirement the old code
- * satisfied by accident, not a new one this port introduces. Rather than
- * write to a `MedicationRequestTemplateSpec` shape known to be short one
- * required wire field, this widens the return type by exactly that one
- * field (`& { authored_on: string }`) so the gap is visible in the type,
- * not hidden behind a cast. The value stored is dead data from the
- * template's own perspective — {@link medicationRowFromTemplate} always
- * resets `authored_on` to the applying moment, never reads it back — it
- * exists purely to satisfy the backend's required-field check.
+ * `authored_on`: the backend's template-create serializer REQUIRES it even
+ * though `MedicationRequestTemplateSpec` omits it, so the return type is
+ * widened by exactly that field rather than hidden behind a cast. The value
+ * is never read back — {@link medicationRowFromTemplate} always stamps a
+ * fresh one; it exists only to satisfy the required-field check.
  *
- * PRODUCT VS. CODE, exactly legacy's own branch: a product-based medication
- * stores its PRODUCT'S SLUG (not this specific request's product id or
- * `id` — a template must stay resolvable against product knowledge by slug
- * indefinitely, not a UUID tied to one prior request) in `requested_product`
- * and omits `medication`; a code-based medication keeps `medication` and
- * omits `requested_product` entirely — never both, never neither (unless
- * the row itself has neither, which the UI cannot currently produce).
+ * Product vs. code: a product-based medication stores its product's SLUG
+ * (a template must stay resolvable against product knowledge indefinitely,
+ * not via a UUID tied to one prior request) and omits `medication`; a
+ * code-based one keeps `medication` and omits `requested_product` — never
+ * both.
  */
 export function buildMedicationRequestForTemplate(
   row: MedicationRequestRow,
@@ -530,21 +455,11 @@ export function buildMedicationRequestForTemplate(
 }
 
 /**
- * The inverse of {@link buildMedicationRequestForTemplate} — a template's
- * stored spec plus the product knowledge fetched by its stored SLUG (a
- * template only ever stores the slug; fetching it is the one caller's job —
- * `resolveTemplateMedicationRequest` in `MedicationRequestEditor.tsx`,
- * mirroring `serviceRequestRowFromTemplate`'s identical split between a
- * pure model-side merge and an editor-side network fetch) → a fresh row.
- *
- * Every resolved row is exactly as fresh as one `newMedicationRowFrom{Code,
- * Product}` creates: `authored_on` reset to now, `requester` always the
- * applying clinician (a template never stores one), and its OWN empty
- * `create_prescription` shell — so a template-applied row participates in
- * the identical shared-prescription-note mechanism
- * (`MedicationRequestEditor.tsx`'s `handleUpdateNote`, this module's
- * `toRequests` doc comment) as a directly picked medication, not a special
- * case of it.
+ * The inverse of {@link buildMedicationRequestForTemplate}: stored template
+ * data plus product knowledge fetched by slug becomes a fresh row.
+ * `authored_on`, `requester`, and `create_prescription` are reset so applied
+ * templates follow the same prescription-note path as directly picked
+ * medications.
  */
 export function medicationRowFromTemplate(
   templateMedication: MedicationRequestTemplateSpec,
@@ -576,26 +491,16 @@ export const projectValues: ProjectValues<MedicationRequestRow> = (rows) =>
 
 /**
  * The edit log → at most one POST against the upsert endpoint, carrying
- * every medication this session touched (P1-14, landed for real — see
- * `diagnosis/model.ts`'s `toRequests` doc comment for the full argument;
- * identical shape here).
+ * every medication this session touched. An empty edit log produces no
+ * request.
  *
- * PRESCRIPTION IDENTITY. Every genuinely new row (`!row.id` — an `add`, or
- * an `add` reclassified to `updates` by a baseline collision that still
- * carries no server id) gets a freshly generated `alternate_identifier`,
- * computed ONCE per call and shared by every new row in THIS submission —
- * exactly `MedicationRequestQuestion.tsx`'s `handleSaveMedications`
- * (`prescriptionIdentifier`, `:53`): adding two new medications in the same
- * session and saving together groups them under the SAME new prescription,
- * not two. An existing row's own `create_prescription` (there is none —
- * `toMedicationRow` never sets one) is left alone.
+ * PRESCRIPTION IDENTITY: every row without a server id gets the same
+ * `alternate_identifier`, generated once per call — new medications saved
+ * together are grouped under ONE new prescription. Existing rows carry no
+ * `create_prescription`.
  *
- * The whole row is spread into the wire body first, then the few fields the
- * server expects in a different shape are overridden — exactly legacy's own
- * approach (`...medication` first, `requester: medication.requester?.id`
- * last). `dirty` rides along as `undefined` (never set by any function in
- * this module) and drops out of the JSON body on serialize; no explicit
- * strip needed.
+ * The whole row is spread into the wire body first, then the fields the
+ * server expects in a different shape are overridden.
  */
 export async function toRequests(
   edits: readonly StructuredEdit<MedicationRequestRow>[],
@@ -644,16 +549,13 @@ export async function toRequests(
 // ---------------------------------------------------------------------------
 
 /** One invalid slot within one medication's dosage instructions. `fieldKey`
- *  matches legacy's exact wire convention (`dosage_instruction[i].dose`, and
- *  so on) so a future server-side validation error keyed the same way binds
- *  to the identical cell. */
+ *  matches the wire convention (`dosage_instruction[i].dose`, and so on) so a
+ *  server-side validation error keyed the same way binds to the same cell. */
 export interface MedicationRowFieldError {
   rowId: string;
   fieldKey: string;
   /** `"duration"` carries a specific "why it's invalid" reason
-   *  (`TimingBoundsError`); every other kind reads as a plain required
-   *  error — mirrors legacy's `validateMedicationRequestQuestion`'s own
-   *  `field_key?.endsWith(".duration")` branch. */
+   *  (`TimingBoundsError`); every other kind reads as a plain required error. */
   kind: "required" | "duration";
   durationError?: TimingBoundsError;
 }
@@ -678,9 +580,8 @@ function hasValidDose(
 /**
  * A real frequency carries an explicit FHIR timing code, an as-needed flag,
  * or a free-text M-A-N pattern. A bare `timing` is not enough — setting a
- * duration alone auto-creates a `frequency:1` repeat with no code/text,
- * which must not satisfy this. Exactly
- * `MEDICATION_REQUEST_FIELDS.FREQUENCY.validate` from the legacy widget.
+ * duration alone auto-creates a repeat with `frequency` set to `1` and no code/text,
+ * which must not satisfy this.
  */
 function hasValidFrequency(
   instruction: MedicationRequestDosageInstruction,
@@ -704,24 +605,16 @@ function invalidDurationError(
 }
 
 /**
- * The richest validator in the codebase, translated to the edit log: for
- * every EDITED (non-removed, non-`entered_in_error`) medication, checks
- * every one of its dosage instructions' dose/frequency/duration, producing
- * one `MedicationRowFieldError` per invalid slot, index-suffixed exactly
- * like legacy's `field_key`s.
+ * For every edited (non-removed, non-`entered_in_error`) medication, checks
+ * each dosage instruction's dose/frequency/duration, producing one
+ * `MedicationRowFieldError` per invalid slot, index-suffixed to match the
+ * server's `field_key` convention.
  *
- * VALIDATES `edits`, NOT `projection` — deliberately, matching
- * `appointment`/`charge_item`'s N5 constraint: a row-scoped error can only
- * be raised for a row that carries an edit, because the bare projection has
- * no `rowId` to key it to. An untouched baseline medication (never edited
- * this session) was already valid on the server and is not re-validated
- * here — consistent with P1-14's "an untouched section never blocks Save"
- * spirit.
- *
- * A `remove` op and an `entered_in_error` patch are both skipped — mirrors
- * legacy's `if (value.status === "entered_in_error") return errors;` and
- * the chargeItem `invalidQuantityRowIds` precedent ("an edit that resolved
- * to nothing visible must not trip validation").
+ * Validates `edits`, not the projection: a row-scoped error needs a `rowId`,
+ * which only an edit carries. An untouched baseline medication was already
+ * valid on the server and never blocks Save. `remove` ops and
+ * `entered_in_error` patches are skipped — a row on its way out must not
+ * trip validation.
  */
 export function invalidDosageFieldErrors(
   edits: readonly StructuredEdit<MedicationRequestRow>[],

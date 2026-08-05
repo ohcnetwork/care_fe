@@ -1,3 +1,4 @@
+import { dedupeEditsFirstAppearance } from "./editLog";
 import type {
   BaselineRow,
   EditLog,
@@ -8,167 +9,71 @@ import type {
 } from "./types";
 
 /**
- * Options for {@link projectRows}. Signature per `task-4-brief.md` /
- * `2026-08-04-phase1-core-kit.md:162` (the plan's own binding "Produces"
- * line) — not `annexes/p1-state-core.md` §5's draft. Deliberate narrowings
- * from the annex, intentional here, not oversights:
+ * Options for {@link projectRows}. Two deliberate narrowings:
  *
- *  - No `single` flag. The annex's `single?: boolean` truncates the
- *    result to at most one row for a singleton type. Nothing in Tasks
- *    1–3 needs it, no test in this task's required list exercises it, and
- *    the plan's exact signature (line 162) omits it. A singleton type's
- *    "at most one row" invariant is a `rowId` stability property
- *    (`SINGLETON_ROW_ID`, `core/rowIds.ts`) enforced by never having more
- *    than one entry share that id — not something this function needs to
- *    truncate for.
- *  - No `orphanRowIds` bundled into this function's OWN return. The annex
- *    wraps the result in a `Projection<TRow>` (`{ rows, orphanRowIds }`);
- *    the plan's signature returns `ProjectedRow<TRow>[]` directly instead —
- *    `task-4-report.md` records this as a translation decision. Task 7
- *    (spec amendment A1) needs the channel after all, so it is exposed as
- *    the SEPARATE, sibling function {@link findOrphanRowIds} below, over
- *    the same `(baseline, log)` inputs, rather than reshaping this
- *    function's return and rippling a wrapper type through every existing
- *    call site and test.
+ *  - No `single` flag: a singleton's at-most-one-row invariant is a rowId
+ *    stability property (`SINGLETON_ROW_ID`), not a truncation this
+ *    function performs — see {@link truncateToSingletonRow}.
+ *  - No orphan channel bundled into the return: {@link findOrphanRowIds}
+ *    is the sibling function over the same `(baseline, log)` inputs.
  *
- * `baseline` itself is `readonly BaselineRow<TRow>[] | undefined` — the
- * BASELINE COMPLETENESS CONTRACT's two legal states (the complete fetched
- * server-row set, or "not yet known"), never a partial array standing in
- * for "loading". See step 3 of the function doc comment below for what
- * `undefined` unlocks, and `findOrphanRowIds`, which reads the identical
- * signal.
+ * `baseline` is the COMPLETE fetched server-row set, or `undefined` while
+ * unknown — never a partial array standing in for "loading".
  */
 export interface ProjectRowsOptions<TRow extends object> {
   /**
    * How a type marks — instead of deletes — a baseline row's removal.
-   * See `SoftDeleteDescriptor`'s doc comment in `./types` for the full
-   * contract, including why ITS `patch` is `Partial<TRow>` while
-   * `RowEdit.patch` (below) never is — two different things named
-   * `patch` on purpose, per that comment.
+   * See `SoftDeleteDescriptor` in `./types` for the full contract.
    *
    * Read here only via `isDeleted`, to decide `ProjectedRow.softDeleted`
    * for whatever row content is already on screen — a row can be flagged
-   * `softDeleted` because ITS BASELINE data already carries the marker
-   * (a row soft-deleted in an earlier session, now fetched as ordinary
-   * baseline content) just as much as because THIS session's edit added
-   * it. `projectRows` never writes the marker itself: that is
-   * `removeRow`'s job (a later task), which merges `softDelete.patch`
-   * into an `update` edit's patch before it ever reaches this function.
+   * because its baseline data already carries the marker (soft-deleted in
+   * an earlier session) just as much as because this session's edit added
+   * it. `projectRows` never writes the marker itself; that is
+   * `removeRow`'s job.
    */
   softDelete?: SoftDeleteDescriptor<TRow>;
   /**
    * DISPLAY ONLY. Applied as a stable sort over the canonical order
-   * (baseline order, then added rows in edit-log order) computed below.
-   * Nothing downstream reads row order — requests are built from the
-   * edit log (Task 5's differ), identity comes from `rowId` — so sorting
-   * the array this function returns can never reach the edit log, a
+   * (baseline order, then added rows in edit-log order). Nothing
+   * downstream reads row order — requests are built from the edit log,
+   * identity from `rowId` — so this sort can never reach the edit log, a
    * request body, or a rowId.
-   *
-   * This is what lets `diagnosis` sort its display by onset date
-   * (`DiagnosisQuestion.tsx:366-378`) without the SORTED-ARRAY WRITE-BACK
-   * that is the actual bug this option exists to retire: today
-   * `DiagnosisQuestion` sorts its rows by onset and writes the sorted
-   * array back as the persisted order, so a later per-index server
-   * lookup (`:697`) indexes a sorted array against the server's
-   * unsorted response and reads the wrong row. `displayOrder` reorders
-   * only the array `projectRows` returns; the baseline argument and the
-   * edit log it was computed from are asserted unchanged by
-   * `projectRows.test.ts`'s "Diagnosis bug" case.
    */
   displayOrder?: (a: TRow, b: TRow) => number;
 }
 
 /**
  * Computes what the clinician SEES for one structured section: baseline
- * (the complete fetched server-row set, per the BASELINE COMPLETENESS
- * CONTRACT — `2026-08-04-phase1-core-kit.md`'s Global Constraints) plus
- * the pending edit log (Task 3's `applyEditToLog`, which guarantees at
- * most one entry per `rowId`). This is what `values[0].value` carries for
- * every v2 structured question — the answered predicate
- * (`form/engine/store.ts:372-376`'s `entryHasContent`), outline ticks,
+ * (complete fetched server-row set, or `undefined` while unknown) plus
+ * the pending edit log. This is what `values[0].value` carries for every
+ * v2 structured question — the answered predicate, outline ticks,
  * readonly renderers and server-draft dumps all read the array this
- * returns, via `ProjectValues<TRow>` mapping over it.
+ * returns. Pure: never mutates `baseline` or `log`.
  *
- * Pure and total: never mutates `baseline` or `log` (or anything reachable
- * from either) and always returns a fresh array. Design source:
- * `annexes/p1-state-core.md` §5, translated per the plan's CANONICAL EDIT
- * VOCABULARY section — see the per-step comments below for exactly where
- * the annex's draft code is NOT copied verbatim and why.
+ * Steps, in order:
  *
- * Building blocks, in the order they run:
+ * 1. Baseline rows, in the order the query layer returned them — a row's
+ *    position never depends on whether it was edited. An `op: "remove"`
+ *    edit hides the row outright (a marking type's `removeRow` records an
+ *    `update`, never a `remove`, so this branch is a genuine delete). Any
+ *    other matching edit contributes `edit.patch` as the row's content —
+ *    a full REPLACE, never a merge: `patch` is always the complete row.
  *
- * 1. **Baseline rows**, in the order the query layer returned them. A
- *    baseline row's position in the output NEVER depends on whether (or
- *    how) it was edited — see the `displayOrder` doc comment above for
- *    why that invariant matters.
- *    - An edit with `op: "remove"` hides the row outright ("hard
- *      removal") — unconditionally, even if a `softDelete` descriptor is
- *      configured. `remove` always means gone, never greyed out: a type
- *      that marks instead of deletes never actually produces a `remove`
- *      op against a baseline row in the first place (its `removeRow`
- *      merges the descriptor's marker fields into an `update` instead —
- *      see `SoftDeleteDescriptor`'s doc comment) so this branch is a
- *      genuine "delete", used by a type with no soft-delete descriptor
- *      at all, or reached defensively for any log that does carry a
- *      literal `remove` against a baseline row.
- *    - Any other matching edit (`op: "add"` or `"update"` — see the
- *      collision note below for why `"add"` can legitimately reach here)
- *      contributes `edit.patch` as the row's content, a full REPLACE, not
- *      a merge with `entry.row`. Annex §5's draft code does
- *      `{ ...entry.row, ...(edit.patch as Partial<TRow>) }`, correct
- *      under ITS OLD, non-canonical vocabulary where `update`'s patch was
- *      a partial diff. Under the shipped vocabulary (`structured.ts`'s
- *      `StructuredEditOp` doc, restated in the plan's CANONICAL EDIT
- *      VOCABULARY table) `patch` is ALWAYS the complete row — "the row as
- *      it now reads (baseline row with the clinician's fields already
- *      applied)". Merging it over `entry.row` again would not just be
- *      redundant, it would silently paper over a patch that (by caller
- *      bug) omitted a baseline-only field, masking exactly the kind of
- *      mistake this layer should surface. `editLog.ts`'s own coalescing
- *      makes the identical call ("every 'merge' cell in the annex's
- *      table becomes a plain replace here") — this keeps the two pure
- *      modules agreeing on what `patch` means.
+ * 2. Added rows, in edit-log order — stable across a baseline refetch. An
+ *    `add` whose rowId step 1 already emitted is SKIPPED: a restored
+ *    draft can carry an `add` recorded before the server row existed
+ *    while the fresh baseline now has that id — the baseline row wins,
+ *    with the add's patch as its content, rather than one rowId rendering
+ *    as two rows.
  *
- * 2. **Added rows**, in edit-log order — insertion order, stable across a
- *    baseline refetch (a refetch never touches the log). An `op: "add"`
- *    edit whose `rowId` the baseline loop above already emitted is
- *    SKIPPED here rather than pushed a second time. JUDGMENT CALL,
- *    documented and tested (`projectRows.test.ts`'s "singleton-draft-
- *    outrun-by-baseline" case): the annex's draft code has no such guard,
- *    but under the plan's simplified signature there is nothing else to
- *    prevent one `rowId` from rendering as two `ProjectedRow`s if a stale
- *    `add` edit's identity happens to coincide with a rowId the baseline
- *    has since learned about. The realistic path is a single-row type's
- *    fixed `SINGLETON_ROW_ID` (`core/rowIds.ts`): a draft restored from
- *    local storage can carry `{rowId: SINGLETON_ROW_ID, op: "add", ...}`
- *    from before the server row existed, while the freshly fetched
- *    baseline now has an entry for that same id. Treating the collision
- *    as "the baseline row wins, with the add edit's patch as its content"
- *    (rather than "two rows, or crash, or silently drop one arbitrarily")
- *    is what the baseline loop's "any non-remove edit is a full replace"
- *    rule (step 1 above) already does for exactly this rowId — this skip
- *    is what keeps step 2 from then ALSO rendering it.
+ * 3. When `baseline` is a known array, every remaining `update`/`remove`
+ *    is an orphan — intent about a row the complete baseline lacks — and
+ *    is never rendered; {@link findOrphanRowIds} names these. When
+ *    `baseline` is `undefined` (loading/errored), an unmatched `update`
+ *    is unresolved, not orphaned — see step 3 in the implementation.
  *
- * 3. **When `baseline` is a known array, everything else is dropped,
- *    silently** (see the separate `undefined` case below this step in the
- *    implementation, for the loading/errored state). An edit whose `rowId`
- *    is in neither the baseline nor emitted as an add above — an `update`
- *    or `remove` targeting a rowId the (complete) baseline does not
- *    contain — is the annex's §5 "orphan": intent about a row that no
- *    longer exists, typically a restored draft whose server row vanished
- *    between sessions. It is simply never added to `rows` — nothing
- *    renders it here, nothing crashes on it, and it does not resurrect
- *    merely by calling this function again with the same log: resurrection
- *    would require an edit that actually matches a real baseline row or a
- *    real `add`. {@link findOrphanRowIds} is the sibling function that
- *    NAMES these rowIds instead of just omitting them, for spec amendment
- *    A1's restore notice (Task 7).
- *
- * 4. **`displayOrder`**, applied last, via `Array.prototype.sort` (stable
- *    since ES2019/Node's baseline), so rows the comparator treats as
- *    equal keep the canonical order built above. Sorts the freshly built
- *    `rows` array — never `baseline` or `log`, which are read-only
- *    throughout.
+ * 4. `displayOrder`, applied last via a stable sort.
  */
 export function projectRows<TRow extends object>(
   baseline: readonly BaselineRow<TRow>[] | undefined,
@@ -180,11 +85,8 @@ export function projectRows<TRow extends object>(
   const editByRowId = new Map<RowId, RowEdit<TRow>>();
   for (const edit of log) editByRowId.set(edit.rowId, edit);
 
-  // `undefined` is the BASELINE COMPLETENESS CONTRACT's "not yet known"
-  // signal (the query is loading or errored) — see the function doc
-  // comment's step 3 for what that unlocks below. `baselineRows` is the
-  // ordinary array either way; only the ORIGINAL `baseline` parameter
-  // (still `| undefined` at this point) is what step 3 branches on.
+  // `undefined` means "not yet known"; only the ORIGINAL `baseline`
+  // parameter is what step 3 branches on.
   const baselineRows = baseline ?? [];
   const baselineRowIds = new Set<RowId>(
     baselineRows.map((entry) => entry.rowId),
@@ -195,9 +97,9 @@ export function projectRows<TRow extends object>(
   // 1. Baseline, in the order the query layer returned it.
   for (const entry of baselineRows) {
     const edit = editByRowId.get(entry.rowId);
-    if (edit?.op === "remove") continue; // hard removal — see doc comment
+    if (edit?.op === "remove") continue;
 
-    const row = edit ? edit.patch : entry.row; // full replace, never a merge
+    const row = edit ? edit.patch : entry.row;
 
     rows.push({
       rowId: entry.rowId,
@@ -208,26 +110,13 @@ export function projectRows<TRow extends object>(
     });
   }
 
-  // 2. Adds, in edit-log order. Two guards, in order:
-  //    - `editByRowId.get(edit.rowId) !== edit` skips any entry that a
-  //      LATER entry for the same rowId superseded in the raw `log`
-  //      array. Task 3's `applyEditToLog` guarantees at most one entry
-  //      per rowId, so this never fires against a log it produced — but
-  //      a restored draft's per-record `isStructuredEditRecord` gate
-  //      validates each entry independently and would happily accept two
-  //      malformed entries sharing a rowId. Without this guard,
-  //      `[add("dup", first), add("dup", second)]` would emit TWO
-  //      `ProjectedRow`s both keyed "dup" (this loop has no de-dup of its
-  //      own otherwise), and `[add("z", stale), update("z", fresh)]`
-  //      would show `stale` here while loop 1 (which already reads
-  //      through `editByRowId`, i.e. last-write-wins) would show `fresh`
-  //      for the same rowId if baseline happens to contain it — two
-  //      loops disagreeing about one rowId's content. Resolving both
-  //      loops through the same last-write map keeps them in agreement
-  //      by construction, matching the sibling duplicate guard below.
-  //    - `baselineRowIds.has(edit.rowId)` skips a rowId the baseline loop
-  //      already emitted — see the collision note in the function doc
-  //      comment.
+  // 2. Adds, in edit-log order. Two guards:
+  //    - `editByRowId.get(edit.rowId) !== edit` skips an entry a later
+  //      entry for the same rowId superseded (`applyEditToLog` never
+  //      produces duplicates, but a restored draft's per-record
+  //      validation admits them).
+  //    - `baselineRowIds.has(edit.rowId)` skips a rowId loop 1 already
+  //      emitted — see the collision note in the doc comment.
   for (const edit of log) {
     if (editByRowId.get(edit.rowId) !== edit) continue;
     if (edit.op !== "add") continue;
@@ -242,29 +131,13 @@ export function projectRows<TRow extends object>(
     });
   }
 
-  // 3. BASELINE COMPLETENESS CONTRACT (Task 7, task-7-brief.md obligation
-  //    1 — the `f321cb379` hazard). When `baseline` is `undefined` — the
-  //    query is still loading or errored, NOT "the server confirmed zero
-  //    rows" — an unmatched non-`add` edit is not a confirmed orphan; it is
-  //    simply unresolved. Render it directly from its own patch (already
-  //    the complete row under the canonical vocabulary) instead of
-  //    silently dropping it, so a restored draft's pending `update` stays
-  //    visible during the loading window rather than vanishing from
-  //    display while still being a live part of the log (and therefore
-  //    still submitted once the baseline resolves). `add` edits are
-  //    excluded here because step 2 above already emitted every one of
-  //    them unconditionally (`baselineRowIds` is empty when `baseline` is
-  //    `undefined`); a `remove` has nothing to render (there is no content
-  //    to show for "delete a row we don't yet know exists"). `origin` is
-  //    `"baseline"`, not `"added"`, so a row doesn't visually flip
-  //    treatment the instant the real baseline arrives and confirms it.
-  //    When `baseline` IS a known array (however empty), this block never
-  //    runs and the ordinary orphan-drop rule (silently never added) is
-  //    unchanged — see {@link findOrphanRowIds} for the matching predicate
-  //    that names these to the clinician instead of just hiding them, and
-  //    the module's Global Constraint note ("PROJECTION AND SUBMIT MUST
-  //    AGREE") for why this mirrors `resolveChanges`' identical
-  //    undefined-baseline conservatism.
+  // 3. `baseline === undefined` means the query is loading or errored,
+  //    NOT "the server confirmed zero rows" — an unmatched `update` is
+  //    unresolved, not a confirmed orphan. Render it from its own patch
+  //    (already the complete row) so a restored draft stays visible — and
+  //    still submittable — during the loading window. `origin` is
+  //    "baseline" so the row doesn't visually flip when the real baseline
+  //    arrives and confirms it.
   if (baseline === undefined) {
     for (const edit of log) {
       if (editByRowId.get(edit.rowId) !== edit) continue;
@@ -289,36 +162,20 @@ export function projectRows<TRow extends object>(
 }
 
 /**
- * Names the rowIds {@link projectRows} silently drops from its projection —
- * spec amendment A1: a restored edit whose baseline row has vanished
- * server-side must be LISTED to the clinician, not just disappear. Task 7
- * (`task-7-brief.md` obligation 2) exposes this from `useStructuredRows` as
- * `orphanRowIds`, for a later restore-notice UI to name; this function is
- * the pure predicate behind that channel, over the identical
- * `(baseline, log)` inputs `projectRows` itself takes, so the two can never
- * silently disagree about which edits are showing versus which are orphans.
+ * Names the rowIds {@link projectRows} silently drops: a restored edit
+ * whose baseline row vanished server-side must be LISTED to the
+ * clinician, not just disappear. Computed over the identical
+ * `(baseline, log)` inputs `projectRows` takes, so the two can never
+ * disagree about which edits are showing versus orphaned.
  *
- * `undefined` baseline ("not yet known" — the BASELINE COMPLETENESS
- * CONTRACT) returns `[]`: unresolved is not the same as confirmed-gone, the
- * same conservatism `resolveChanges` (`core/changes.ts`) applies to its own
- * orphan check, and the reason `projectRows`' step 3 renders (rather than
- * drops) an unmatched `update` while `baseline` is `undefined` — a rowId
- * this function would otherwise have to call an orphan while the caller's
- * query is simply still in flight.
+ * `undefined` baseline returns `[]`: unresolved is not confirmed-gone.
  *
- * The predicate itself, restated from the task brief: `e.op !== "add" &&
- * !baselineRowIds.has(e.rowId)`. Deliberately NOT `!renderedIds.has(e.rowId)`
- * (the naive derivation) — that alternative also flags the clinician's own
- * intentional `remove`/soft-delete of an added row and every ordinary `add`,
- * neither of which is a "this row vanished" case at all.
+ * The predicate is `op !== "add" && !baselineRowIds.has(rowId)` —
+ * deliberately NOT "not rendered", which would also flag the clinician's
+ * own remove of an added row and every ordinary `add`.
  *
- * Resolved through the same last-write-wins map `projectRows` and
- * `resolveChanges` both use, so a malformed log carrying two entries for one
- * rowId (a restored draft's per-record validation admits this even though
- * `applyEditToLog` never produces it) is reported once, not twice.
- *
- * Pure and total: never mutates `baseline` or `log`, always returns a fresh
- * array.
+ * Pure; duplicates in a malformed log are reported once
+ * ({@link dedupeEditsFirstAppearance}).
  */
 export function findOrphanRowIds<TRow extends object>(
   baseline: readonly BaselineRow<TRow>[] | undefined,
@@ -327,69 +184,32 @@ export function findOrphanRowIds<TRow extends object>(
   if (baseline === undefined) return [];
   const baselineRowIds = new Set<RowId>(baseline.map((entry) => entry.rowId));
 
-  const editByRowId = new Map<RowId, RowEdit<TRow>>();
-  for (const edit of log) editByRowId.set(edit.rowId, edit);
-
   const orphanRowIds: RowId[] = [];
-  const seen = new Set<RowId>();
-  for (const edit of log) {
-    if (seen.has(edit.rowId)) continue;
-    seen.add(edit.rowId);
-    // Non-null: this rowId came from `log`, so `editByRowId` has an entry.
-    const resolved = editByRowId.get(edit.rowId) as RowEdit<TRow>;
-    if (resolved.op !== "add" && !baselineRowIds.has(resolved.rowId)) {
-      orphanRowIds.push(resolved.rowId);
+  for (const edit of dedupeEditsFirstAppearance(log)) {
+    if (edit.op !== "add" && !baselineRowIds.has(edit.rowId)) {
+      orphanRowIds.push(edit.rowId);
     }
   }
   return orphanRowIds;
 }
 
 /**
- * PHASE 2 CARRY-FORWARD FIX (master plan `2026-08-03-structured-wave-
- * master.md`, "Carry-forwards out of Phase 1" item 1 — owner: Phase 2,
- * before the first v2 type ships). Drops every {@link findOrphanRowIds}
- * entry from `log`, so what's left is exactly what `projectRows` would
- * still render plus whatever it presumes during the loading window — never
- * intent about a row the (complete, known) baseline has confirmed gone.
+ * Drops every {@link findOrphanRowIds} entry from `log`: what remains is
+ * exactly what `projectRows` still renders (plus what it presumes during
+ * the loading window) — never intent about a row the complete, known
+ * baseline has confirmed gone.
  *
- * WHY THIS LIVES HERE, NOT AT THE COMPOSE SEAM. The carry-forward's own
- * wording says "fix it at the compose seam" (`fill/submit/
- * composeStructured.ts`), on the premise that compose could tell an orphan
- * apart from a live edit. It cannot, BY DESIGN: `StructuredTypeDefinitionV2
- * .toRequests(edits, ctx)` (`structured/types.ts`) and the differ it calls,
- * `resolveChanges` (`core/changes.ts`), never receive a baseline at submit
- * time — every real `toRequests` in `2026-08-04-phase2-ports-simple.md`
- * calls `resolveChanges(edits, {})`, no `baseline` option, because
- * `composeBatch` is a pure function with no query-cache access (`core/
- * types.ts`'s `RowEdit` doc comment; the whole point of a full-row `patch`
- * is that a draft restored after a failed baseline fetch still carries
- * everything a submit needs). `resolveChanges`'s own orphan check
- * (`ResolveChangesOptions.baseline`) is real and tested, but it is *dead*
- * on every submit path that exists today — nothing supplies it a baseline
- * to check against. So "half-solved by resolveChanges" does not hold: nothing
- * is solved on the submit side, because nothing there ever HOLDS a baseline
- * to solve it with.
+ * This lives at the hook, not the compose/submit seam: `toRequests` and
+ * `resolveChanges` never hold a baseline at submit time, so
+ * `useStructuredRows` — the one place `baseline` and `edits` coexist —
+ * must prune before its `commit` write.
  *
- * `useStructuredRows` is the one place `baseline` and `edits` are ever held
- * together, and it already owns the one write (`commit`) that becomes
- * `response.edits` — the ONLY thing `structuredEditsOf`/
- * `composeStructuredV2Requests` ever read. Calling this function from that
- * write (guarded by `orphanRowIds.length > 0`, mirroring the existing
- * baseline-driven `values`-refresh effect) is what keeps a stale draft's
- * confirmed-gone-server-side edit from ever reaching `toRequests` — not a
- * compose-time filter that has no data to filter with.
+ * Deliberately NOT the clinician's `removeRow` path: no soft-delete
+ * marker is written and no request is implied — the entry is simply
+ * excised. A no-op while `baseline` is `undefined`.
  *
- * Deliberately NOT the removal path a clinician's own `removeRow` takes: no
- * `softDelete` marker is written, no request is implied — the entry is
- * simply excised, exactly as it already visually is (per `projectRows`'
- * own contract) whenever `baseline` is a known array. `findOrphanRowIds`'s
- * `undefined`-baseline conservatism ("unresolved is not confirmed-gone")
- * governs here identically, since this is defined directly in terms of it:
- * calling this during the loading window is always a no-op.
- *
- * Pure and total: never mutates `baseline` or `log`; returns the SAME `log`
- * reference when there is nothing to drop (no orphans), so a caller can
- * skip a write when the result is reference-equal to its input.
+ * Pure; returns the SAME `log` reference when nothing is dropped, so a
+ * caller can skip a write on reference equality.
  */
 export function pruneOrphanEdits<TRow extends object>(
   baseline: readonly BaselineRow<TRow>[] | undefined,
@@ -402,52 +222,22 @@ export function pruneOrphanEdits<TRow extends object>(
 }
 
 /**
- * Restricts an edit log to at most the ONE rowId {@link projectRows} would
- * show as `rows[0]` for the SAME `(baseline, log)` pair — master plan
- * "Carry-forwards out of Phase 1" item 3 ("`mode: 'single'` at-most-one-row
- * truncation").
+ * Restricts an edit log to at most the ONE rowId {@link projectRows}
+ * would show as `rows[0]` for the same `(baseline, log)` pair.
  *
- * WHY THIS EXISTS. `useStructuredRows`'s singleton mode
- * (`SingleRowController.row`) only ever shows `rows[0]` to the clinician —
- * `mode === "single"` callers never render a second row. But nothing
- * upstream of this function stopped the edit log ITSELF from holding a
- * second, different rowId: `useStructuredRows`'s `initialEdits` seed (e.g.
- * `encounter`'s `?toDischarge`) writes under `singletonRowId` (defaulting
- * to `SINGLETON_ROW_ID`), and an `add` edit is never treated as an orphan
- * regardless of `baseline` (`findOrphanRowIds`'s predicate excludes `add`
- * unconditionally) — so if a REAL baseline row for the same singleton
- * question ever resolves under its OWN, different rowId (its server id,
- * not `singletonRowId`) while that seeded `add` is still in the log, the
- * two rowIds coexist forever: `rows` (this module's `projectRows`) would
- * carry both, `rows[0]` (whichever `projectRows`' baseline-first ordering
- * picks) is the only one the clinician ever sees, but a caller that writes
- * `edits`/`values` from EVERY projected row — not just `rows[0]` — would
- * silently submit BOTH rows on Save. This function is the fix: it names
- * the single rowId that belongs in a singleton's committed state, so a
- * caller (`useStructuredRows`'s `commit`) can filter the log down to it
- * before persisting, instead of trusting every mutator/seed to only ever
- * touch one rowId on its own.
+ * Why: singleton mode only ever SHOWS `rows[0]`, but nothing upstream
+ * stops the log from holding a second rowId — an `initialEdits` seed
+ * writes an `add` under `singletonRowId`, an `add` is never an orphan,
+ * and if a real baseline row for the same question resolves under its
+ * OWN server id while that seed is still in the log, the two coexist: a
+ * caller writing `edits` from every projected row would silently submit
+ * BOTH on Save. Keeps whichever rowId `projectRows` shows FIRST, so "the
+ * one row" is defined by the exact projection the clinician sees.
  *
- * UNREACHABLE FOR EVERY TYPE SHIPPED SO FAR — closed by construction
- * anyway, not left as a latent trap for the next singleton. Every
- * singleton today either has no real baseline at all (`appointment`,
- * `time_of_death` — `createSeed`-only, baseline permanently `[]`, so
- * `singletonRowId` never collides with anything) or keys its baseline row
- * with the SAME id `singletonRowId` is set to (`encounter`, keyed by its
- * own id, passed explicitly as `singletonRowId`) — so `rows` never
- * legitimately holds more than one entry for any real singleton today.
+ * Unreachable for every type shipped so far — closed by construction
+ * rather than left as a trap for the next singleton.
  *
- * Keeps whichever rowId {@link projectRows} would show FIRST — baseline
- * rows before added rows, per that function's own step 1/2 ordering — so
- * this function's notion of "the one row" is defined in terms of the exact
- * same projection the clinician sees, not a second, independent rule that
- * could disagree with it.
- *
- * Pure and total: never mutates `baseline` or `log`; returns the SAME
- * `log` reference when there is nothing to drop (0 or 1 entries already,
- * or every entry already shares the kept rowId) so a caller can skip a
- * write when the result is reference-equal to its input — same convention
- * as {@link pruneOrphanEdits}.
+ * Pure; returns the SAME `log` reference when there is nothing to drop.
  */
 export function truncateToSingletonRow<TRow extends object>(
   baseline: readonly BaselineRow<TRow>[] | undefined,
@@ -455,21 +245,15 @@ export function truncateToSingletonRow<TRow extends object>(
   options: ProjectRowsOptions<TRow> = {},
 ): EditLog<TRow> {
   if (log.length === 0) return log;
-  // Deliberately checks the FULL PROJECTION's row count, not `log.length`
-  // — a baseline can contribute rows the log never mentions at all (the
-  // exact bug shape this function exists for: a real baseline row under
-  // its own id, plus a single seeded `add` under a DIFFERENT id, is a
+  // Checks the FULL PROJECTION's row count, not `log.length` — a baseline
+  // can contribute rows the log never mentions (a real baseline row under
+  // its own id, plus a single seeded `add` under a different id, is a
   // one-entry log that still projects TWO rows).
   const rows = projectRows(baseline, log, options);
-  if (rows.length <= 1) return log; // nothing to truncate
+  if (rows.length <= 1) return log;
   const keepRowId = rows[0]?.rowId;
-  // No row projects at all (e.g. every entry is an orphan against a known
-  // baseline) — nothing to keep, but also nothing this function should
-  // invent an opinion about; leave `log` untouched for whatever else
-  // (orphan pruning) already handles that case. Unreachable alongside
-  // `rows.length > 1` in practice (a non-empty `rows` always has a
-  // `rows[0]`) — kept as a defensive, honest `undefined` check rather than
-  // a non-null assertion.
+  // No row projects at all — nothing to keep; leave `log` for orphan
+  // pruning to handle. Defensive: unreachable alongside `rows.length > 1`.
   if (keepRowId === undefined) return log;
   const truncated = log.filter((edit) => edit.rowId === keepRowId);
   return truncated.length === log.length ? log : truncated;

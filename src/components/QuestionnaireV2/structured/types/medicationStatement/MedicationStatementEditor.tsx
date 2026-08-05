@@ -37,7 +37,6 @@ import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/
 import type { StructuredInputProps } from "@/components/QuestionnaireV2/structured/types";
 
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import type { Code } from "@/types/base/code/code";
 import {
@@ -67,11 +66,9 @@ import {
   type MedicationStatementRow,
 } from "./model";
 
-/** Medication statements are prefetched once per (patient, encounter) — no
- *  partial baseline state; while the query is loading or errored the hook
- *  gets `undefined` (BASELINE COMPLETENESS CONTRACT), never `[]`, so a
- *  section mid-fetch is never mistaken for "the server confirmed zero
- *  medications." */
+/** While the list query is loading or errored the hook gets `undefined`,
+ *  never `[]` — a section mid-fetch must not be mistaken for "the server
+ *  confirmed zero medications." */
 function useMedicationStatementBaseline(
   patientId: string | undefined,
   encounterId: string | undefined,
@@ -145,9 +142,7 @@ function InformationSourceSelect({
 }
 
 /** Every status option, already translated — `RowStatusSelect` never
- *  imports i18next itself. Mirrors `medication_status__${value}` exactly,
- *  the same key family `MedicationStatementGridRow`'s own Select used
- *  (`MedicationStatementQuestion.tsx:852`). */
+ *  imports i18next itself. Uses the `medication_status__${value}` key family. */
 function useStatusOptions() {
   const { t } = useTranslation();
   return useMemo(
@@ -220,11 +215,9 @@ function EffectivePeriodFields({
 }
 
 /**
- * Fields for the STAGED (mobile add-flow) row, shared with the desktop
- * `StructuredList` columns only in intent, not in markup — mirrors
- * `allergyIntolerance/AllergyEditor.tsx`'s `StagedAllergyFields`. A staged
- * row is always a fresh `add` (never a server record yet), so none of the
- * `isReadOnly` field-freezing below applies to it.
+ * Fields for the STAGED (mobile add-flow) row. A staged row is always a
+ * fresh `add`, never a server record, so the baseline field-freezing used in
+ * the table columns does not apply here.
  */
 function StagedMedicationFields({
   row,
@@ -369,9 +362,7 @@ export function MedicationStatementEditor({
           <InformationSourceSelect
             value={row.row.information_source}
             onValueChange={(value) => update({ information_source: value })}
-            // isReadOnly: source freezes once the row is a server record —
-            // mirrors `MedicationStatementQuestion.tsx`'s
-            // `isReadOnly = !!medication.id` (:767, :795).
+            // Source freezes once the row is a server record.
             disabled={cellDisabled || row.origin === "baseline"}
             controlProps={controlProps}
           />
@@ -389,9 +380,8 @@ export function MedicationStatementEditor({
             options={statusOptions}
             hiddenForNewRow="entered_in_error"
             isExistingRecord={row.origin === "baseline"}
-            // Status stays editable even on a server record — legacy never
-            // gates this Select on `isReadOnly`, only on the section-level
-            // `disabled`.
+            // Status stays editable even on a server record; only the
+            // section-level `disabled` gates this Select.
             disabled={cellDisabled}
           />
         ),
@@ -579,12 +569,8 @@ export function MedicationStatementEditor({
                 },
               ],
               queryKey: ["medication_requests", patientId ?? ""],
-              queryFn: async (
-                limit: number,
-                offset: number,
-                signal: AbortSignal,
-              ) => {
-                const response = await query(medicationRequestApi.list, {
+              queryFn: (limit: number, offset: number, signal: AbortSignal) =>
+                query(medicationRequestApi.list, {
                   pathParams: { patientId: patientId! },
                   queryParams: {
                     limit,
@@ -592,9 +578,7 @@ export function MedicationStatementEditor({
                     status:
                       "active,on_hold,draft,unknown,ended,completed,cancelled",
                   },
-                })({ signal });
-                return response as PaginatedResponse<MedicationRequestRead>;
-              },
+                })({ signal }),
             },
             {
               type: t("medication_statements"),
@@ -639,12 +623,8 @@ export function MedicationStatementEditor({
                 },
               ],
               queryKey: ["medication_statements", patientId ?? ""],
-              queryFn: async (
-                limit: number,
-                offset: number,
-                signal: AbortSignal,
-              ) => {
-                const response = await query(medicationStatementApi.list, {
+              queryFn: (limit: number, offset: number, signal: AbortSignal) =>
+                query(medicationStatementApi.list, {
                   pathParams: { patientId: patientId! },
                   queryParams: {
                     limit,
@@ -652,9 +632,7 @@ export function MedicationStatementEditor({
                     status:
                       "active,on_hold,completed,stopped,unknown,not_taken,intended",
                   },
-                })({ signal });
-                return response as PaginatedResponse<MedicationStatementRead>;
-              },
+                })({ signal }),
             },
           ]}
           buttonLabel={t("medication_history")}
@@ -693,13 +671,10 @@ export function MedicationStatementEditor({
             .filter(Boolean)
             .join(" · ");
         }}
-        // A row already marked entered-in-error freezes entirely — mirrors
-        // `allergyIntolerance/AllergyEditor.tsx`'s identical rule, which
-        // already covers the legacy widget's own "already error at fetch
-        // time freezes the row" case: `softDeleted` reflects the CURRENT
-        // computed status (baseline patched by this session's edits alike),
-        // so a row reaches this state either via a fresh Remove or via a
-        // historical `entered_in_error` status the server already had.
+        // A row marked entered-in-error freezes entirely. `softDeleted`
+        // reflects the CURRENT computed status (baseline patched by this
+        // session's edits), so this covers both a fresh Remove and a row the
+        // server already had as entered_in_error.
         rowDisabled={(row) => row.softDeleted}
         addControl={
           <AddEntityControl<MedicationStatementRow>

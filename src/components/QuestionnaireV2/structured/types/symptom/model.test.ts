@@ -145,11 +145,17 @@ describe("symptom model", () => {
       assert.equal(symptomDuplicateKey(rowA), symptomDuplicateKey(rowB));
     });
 
+    it("returns undefined for an empty code, excluding the row from duplicate matching", () => {
+      const row = newSymptomRow(
+        { code: "", display: "A", system: "s" },
+        "enc-1",
+      );
+      assert.equal(symptomDuplicateKey(row), undefined);
+    });
+
     it("wired through core/duplicates.ts reproduces the legacy exclusion of entered_in_error rows", () => {
-      // SymptomQuestion.tsx:637-641 — a symptom already marked
-      // entered_in_error no longer blocks a fresh add of the same code.
-      // This is `findDuplicateCandidates` (the real core function), not a
-      // reimplementation.
+      // A symptom already marked entered_in_error no longer blocks a
+      // fresh add of the same code.
       const existing = {
         ...newSymptomRow({ code: "1", display: "A", system: "s" }, "enc-1"),
         verification_status: "entered_in_error" as const,
@@ -210,11 +216,11 @@ describe("symptom model", () => {
   });
 
   describe("toRequests", () => {
-    it("P1-14: an empty edit log produces ZERO requests", async () => {
+    it("an empty edit log produces zero requests", async () => {
       assert.deepEqual(await toRequests([], CTX), []);
     });
 
-    it("P1-14: an untouched baseline (several existing symptoms, nothing edited) still produces ZERO requests — the whole point of this port", async () => {
+    it("an untouched baseline (several existing symptoms, nothing edited) still produces zero requests", async () => {
       // Simulates a real mount: `SymptomEditor` seeds `useStructuredRows`
       // with three fetched symptoms as baseline; the clinician submits the
       // form without ever opening this section. `edits` stays `[]`
@@ -373,7 +379,7 @@ describe("symptom model", () => {
   });
 });
 
-describe("rowSchema — the assistant write guard (spec A2)", () => {
+describe("rowSchema — the assistant write guard", () => {
   const code = { code: "1", display: "Headache", system: "sys" };
 
   it("accepts a real row", () => {

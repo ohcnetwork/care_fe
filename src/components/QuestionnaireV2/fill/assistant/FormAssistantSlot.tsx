@@ -10,19 +10,9 @@ import {
 import type { FillAssistantHandle } from "./types";
 
 /**
- * Renders every currently registered `formAssistant` plugin (Scribe
- * first), handing each the session's handle. Replaces
- * `<PLUGIN_Component __name="Scribe" actions={descriptors} invoke={invoke} />`
- * in `QuestionnaireFillPage.tsx` — `formAssistant` is registered through
- * its own dedicated registry (`formAssistantRegistry.ts`, "the same way
- * `structuredQuestionTypes` is"), not through `SupportedPluginComponents`/
- * `PLUGIN_Component`, so this reads that registry directly instead.
- *
- * Each assistant is wrapped in its own `PluginErrorBoundary` keyed by its
- * TRUSTED registration slug — the same one `PluginEngine.tsx` passed to
- * `registerFormAssistant` (`config.slug`, never `plugin.plugin`) — so one
- * broken plugin's assistant cannot take the fill canvas down with it, and
- * cannot masquerade under another plugin's identity in the error log.
+ * Renders registered `formAssistant` plugins with the session handle. Each
+ * assistant is isolated in its own error boundary keyed by the trusted
+ * backend-issued plugin slug.
  */
 export function FormAssistantSlot({ handle }: { handle: FillAssistantHandle }) {
   useSyncExternalStore(

@@ -1,17 +1,9 @@
 import type { RendererSubject } from "@/components/QuestionnaireV2/form/types";
 
 /**
- * What a fill session is being filled FOR. One member per backend
- * `SubjectType` (`src/types/questionnaire/questionnaire.ts`), each
- * carrying exactly the ids its route can supply — so a mount cannot build
- * a device fill without a device id, and nothing has to defend against
- * "patient id present but meaningless".
- *
- * The patient-bound members (`encounter`, `patient`) are the only ones the
- * clinical legs of the page apply to: structured questions, server drafts,
- * the patient banner and the clinical-history tab. Resource subjects
- * (`location`, `device`, `facility`) submit through the backend's
- * `submit_resource` endpoint, which takes only `{resource_id, results}`.
+ * What a fill session is being filled for. Each subject carries exactly the
+ * ids its route can supply, which keeps rendering, submit routing, draft
+ * scoping and exit navigation typed from the same union.
  */
 export type FillSubject =
   | {

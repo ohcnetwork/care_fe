@@ -83,81 +83,13 @@ export function QuestionBlock(props: QuestionBlockProps) {
 
 /**
  * Structured types whose editor renders its own field-bound errors inline
- * via `StructuredFieldError`, and therefore should NOT have those same
- * errors printed again in `LeafBlock`'s block-level list. Module scope —
- * see `LeafBlock`'s `blockErrors` for why this must be an explicit,
- * deliberately-maintained set rather than "every structured question":
- * a type added to contract v2 does not get inline field errors until its
- * OWN commit wires `StructuredFieldError` and adds itself here.
- *
- * REVIEW FIX: `time_of_death` does NOT belong here — its editor
- * (`TimeOfDeathEditor.tsx`) renders no `StructuredFieldError` (verified:
- * zero references) and its definition has no `validate` at all, so it
- * never produces a `field_key`-bound error today. Listing it anyway would
- * be inert now but pre-arm the exact CRITICAL this set exists to prevent:
- * the first `field_key`-bearing error that type ever sees (a future
- * client validator, or a positional server error) would vanish with
- * nowhere to show it. Re-add it in the commit that actually wires the
- * primitive for that type.
- *
- * `charge_item` IS listed — verified, not assumed: `ChargeItemEditor.tsx`
- * renders through `StructuredList` (`core/StructuredList.tsx`), which
- * renders `<StructuredFieldError>` per cell itself (`:411`) via the same
- * `selectStructuredFieldErrors` match this file's own filter uses. Its
- * `quantity` column's error (`required: true`, no `ownsErrorDisplay`)
- * therefore already renders inline — omitting it from this set was the
- * double-print in reverse.
- *
- * `allergy_intolerance` IS listed — same reason as `charge_item`:
- * `AllergyEditor.tsx` renders through `StructuredList`, which renders
- * `<StructuredFieldError>` per cell for every one of its columns (none set
- * `ownsErrorDisplay`), plus the shell's own unmatched-`field_key` fallback
- * for anything none of those columns claims (e.g. a server error keyed on
- * `code`, which this type's columns intentionally name `substance`
- * instead). Omitting it here would double-print any such error.
- *
- * `symptom` IS listed — identical reasoning to `allergy_intolerance`:
- * `SymptomEditor.tsx` renders through `StructuredList` too (none of its six
- * columns set `ownsErrorDisplay`), plus the same unmatched-`field_key`
- * fallback for a server error keyed on a name none of those columns claims
- * (e.g. `code`, which this type's identity column names `"code"` too, but
- * `onset`/`onset.onset_datetime` would not match the `"onset"` column key
- * either way it's keyed).
- *
- * `diagnosis` IS listed — same reasoning again: `DiagnosisEditor.tsx`
- * renders through `StructuredList`, none of its six columns set
- * `ownsErrorDisplay`, and the identity column's key (`"diagnosis"`, the
- * code's display text) intentionally does NOT match the wire field
- * `code` — a server error keyed on `code` hits the unmatched-`field_key`
- * fallback, not silence.
- *
- * `medication_request` IS listed — `MedicationRequestEditor.tsx` renders
- * through `StructuredList`; its `dosage`/`frequency`/`duration` columns set
- * `ownsErrorDisplay` (each renders one `StructuredFieldError` PER dosage
- * instruction, not one per cell) and every other column relies on the
- * shell's default per-cell rendering. This type's own client `validate`
- * (`invalidDosageFieldErrors`, row-scoped, index-suffixed field keys like
- * `dosage_instruction[0].dose`) renders inline through exactly this
- * mechanism — plus the shell's own unmatched-`field_key` fallback for a row
- * whose `dosage_instruction` array is empty (a `field_key` no column
- * claims).
- *
- * `medication_statement` IS listed — same reasoning again:
- * `MedicationStatementEditor.tsx` renders through `StructuredList`, none of
- * its seven columns set `ownsErrorDisplay`, and this type's own client
- * `validate` (`dosage_text`/`effective_period`, row-scoped) renders inline
- * through exactly that mechanism — plus the shell's own unmatched-
- * `field_key` fallback for anything a server error keys on that no column
- * claims (e.g. `medication`, which this type's identity column names
- * `"medicine"` instead).
- *
- * `service_request` IS listed — same reasoning again:
- * `ServiceRequestEditor.tsx` renders through `StructuredList`, none of its
- * columns set `ownsErrorDisplay`, and this type's own client `validate`
- * (`requiredServiceRequestFieldMisses`, row-scoped) renders inline through
- * exactly that mechanism — `priority`/`category` bind to real columns,
- * while `title`/`status`/`intent`/`code` hit the shell's own
- * unmatched-`field_key` fallback instead of vanishing.
+ * via `StructuredFieldError` — directly, or through `StructuredList`'s
+ * per-cell rendering (plus its unmatched-field_key fallback). For these,
+ * `LeafBlock` prints only errors WITHOUT a `field_key`; every other type
+ * prints all errors. Deliberately an explicit set, not "every structured
+ * question": a type joins in the same commit that wires the primitive.
+ * Listed-but-unwired silently deletes a field error's only display;
+ * wired-but-unlisted merely double-prints it.
  */
 const STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS = new Set<string>([
   "allergy_intolerance",
@@ -201,24 +133,10 @@ function LeafBlock({
   const inputId = `question-input-${question.id}`;
   const labelId = `question-label-${question.id}`;
 
-  // Repeats → one input per value entry (legacy QuestionInput's per-index
-  // rendering). A fixed-option (`answer_option`) choice handles repeats
-  // itself (multi-select chips/dropdown render every selected value at
-  // once); a valueset-backed choice (`answer_value_set`) has no such
-  // built-in multi-value control, so it drives this shared per-index path
-  // like every other repeating input. Structured questions manage their own
-  // arrays, and display has no values to repeat — those keep the
-  // single-input path.
-  //
-  // Mirrors ChoiceInput's OWN branch order, not just "has a valueset":
-  // ChoiceInput checks `answer_option?.length` first and only falls
-  // through to the valueset branch when that's empty, so a legacy/imported
-  // question carrying BOTH fields still renders (and writes) through the
-  // answer_option control. Gating on `!answer_value_set` here instead would
-  // send that same question through the per-index path while ChoiceInput
-  // keeps ignoring `valueIndex` in its answer_option branch — every entry
-  // rendering the identical whole-array-replacing multi-select, which is
-  // worse than the pre-fix behavior this is supposed to correct.
+  // Repeating questions render one input per value entry, except fixed-option
+  // choices, which render every selected value through their own multi-select
+  // control. The branch matches ChoiceInput: `answer_option` wins over
+  // `answer_value_set` when both are present.
   const isSelfManagedChoice =
     question.type === "choice" && !!question.answer_option?.length;
 
@@ -232,9 +150,8 @@ function LeafBlock({
   const entryCount = Math.max(response?.values.length ?? 0, 1);
   const canRemoveEntries = (response?.values.length ?? 0) > 1;
 
-  // Mirrors the legacy handleAddValue: adding from an empty response
-  // materializes the on-screen placeholder entry too, so the new row never
-  // swallows the one the user was looking at.
+  // Adding from an empty response materializes the on-screen placeholder entry
+  // too, so the new row never swallows the one the user was looking at.
   const handleAddEntry = () => {
     const current = response?.values ?? [];
     const next = current.length === 0 ? [emptyEntry()] : [...current];
@@ -248,23 +165,9 @@ function LeafBlock({
     });
   };
 
-  // A structured question renders its own field-bound errors inline (beside
-  // the control that owns them, via StructuredFieldError) ONLY if its
-  // editor actually consumes the primitive — REVIEW FIX (CRITICAL): the
-  // first version of this filter fired for `question.type === "structured"`
-  // unconditionally, which silently deleted the ONLY error display of a type
-  // that accepts an `errors` prop and never renders it. The legacy
-  // `FileQuestion` was exactly that shape, and its validator fires on the
-  // NORMAL path (every upload is seeded with an empty name), so an unnamed
-  // upload hard-blocked Save with no visible reason anywhere.
-  //
-  // Gated explicitly (`STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS`, above) on
-  // the types whose editor renders `StructuredFieldError` itself — directly,
-  // or through `StructuredList`, which renders it per cell for the column
-  // whose `errorFieldKeys` match. **A type joins that set in the same commit
-  // that wires the primitive, never before**: listed-but-unwired deletes the
-  // message, unlisted-but-wired merely double-prints it. Both were shipped
-  // once each in this phase and caught in review.
+  // Structured questions suppress block-level field errors only when their
+  // editor renders `StructuredFieldError` itself. Listed-but-unwired types hide
+  // the only error display; unlisted-but-wired types double-print messages.
   const blockErrors =
     question.type === "structured" &&
     question.structured_type &&
@@ -309,9 +212,7 @@ function LeafBlock({
             *
           </span>
         )}
-        {/* Question-level unit, any type (legacy QuestionLabel contract):
-            integer/decimal/choice have no answer-time unit picker, so this
-            suffix is their only unit display. */}
+        {/* Question-level unit display for types without answer-time unit pickers. */}
         {question.unit?.code && (
           <span className="text-sm text-gray-500">({question.unit.code})</span>
         )}
@@ -393,21 +294,10 @@ function LeafBlock({
           </div>
         )}
       </div>
-      {/* role="alert" so a validation failure is ANNOUNCED, not only
-          drawn: client-side validation writes these straight into the
-          store with no other live region anywhere on the fill page.
-          A structured question's field-bound errors are rendered inline,
-          beside their control, by StructuredFieldError; printing them here
-          as well showed every message twice. SECTION-level structured
-          errors carry no field_key (structured_section_unavailable_required,
-          structured_question_validate_failed) and must stay — they are the
-          hard-block messages. Non-structured questions are untouched, which
-          is what keeps `fillValidation.spec.ts:33-40,47-54` green. */}
-      {/* Message resolution order matches `StructuredFieldError` and the
-          legacy `QuestionTypes/FieldError.tsx:30` exactly — `error.error`
-          first, `||` not `??` (an empty-string `error.error` must fall
-          through to `msg`, not render blank). One canonical order across
-          all three sites, not three independent ones. */}
+      {/* role="alert" announces validation failures; structured field-bound
+          errors render inline while section-level errors stay here. */}
+      {/* Message resolution uses `error.error || error.msg` so empty strings
+          fall through instead of rendering blank. */}
       {blockErrors.map((error, i) => (
         <p key={i} role="alert" className="text-sm text-red-600">
           {error.error || error.msg || t("field_required")}

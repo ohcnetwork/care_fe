@@ -24,25 +24,20 @@ function knownFieldKeys(columns: readonly ErrorProneColumn[]): Set<string> {
  * Distinct `field_key`s, bound to THIS row, that belong to no declared
  * column.
  *
- * REVIEW FIX (Task 6, Important — the Task-4 Critical class recurring one
- * validator key away). A row-scoped error whose `field_key` no column owns
- * used to render NOWHERE: every per-cell check is keyed on
- * `column.errorFieldKeys ?? [column.key]`, so an error for, say, `"note"`
- * on a type with no `note` column (allergy/symptom/diagnosis's shared note
- * field lives at `placement: "row"`, which Phase 2 has no column for) had
- * no home. With `QuestionBlock`'s allow-list now suppressing the same
- * `field_key`-bearing error from the block-level list for every allow-
- * listed type (so it doesn't double-print), the result was total: message
- * deleted from the page, `role="alert"` never rendered, and — since
- * `rowHasBoundError` (below) didn't know about it either — the row stayed
- * collapsible on top of that, reproducing Critical 1 for the one class of
- * error this shell couldn't see.
+ * A row-scoped error whose `field_key` no column owns would otherwise
+ * render NOWHERE: per-cell checks key on `column.errorFieldKeys ??
+ * [column.key]`, and `QuestionBlock`'s allow-list suppresses the same
+ * error from the block-level list — message deleted from the page,
+ * `role="alert"` never rendered, row still collapsible, Save
+ * hard-blocked with no visible reason. This names those keys so a
+ * fallback slot can render them and `rowHasBoundError` can force the row
+ * open.
  *
- * Reuses `selectStructuredFieldErrors` (the SAME matcher every per-cell
- * check and `StructuredFieldError` itself use) to CONFIRM each candidate
- * key is actually bound to this row/question — the candidate scan below
- * only narrows which keys to ask about, it never re-implements row-
- * identity matching itself, so this can't drift from the per-cell checks.
+ * Reuses `selectStructuredFieldErrors` (the same matcher every per-cell
+ * check uses) to CONFIRM each candidate is actually bound to this
+ * row/question — the candidate scan only narrows which keys to ask
+ * about; it never re-implements row-identity matching, so this cannot
+ * drift from the per-cell checks.
  */
 export function unmatchedRowErrorFieldKeys(
   columns: readonly ErrorProneColumn[],
@@ -101,17 +96,12 @@ export function rowHasBoundError(
 }
 
 /**
- * A row carrying a bound error must never be collapsible away below `lg`
- * (Task 6 review, Critical 1): the mobile chrome's body wrapper is the
- * ONLY place that error's message renders — a collapsed row with an error
- * sits in a `display:none` subtree, so its `role="alert"` is never
- * announced, and a hard-blocked Save leaves every row on screen looking
- * clean. `hasError` always wins over the clinician's own collapse toggle;
- * it reverts to honoring the toggle's own state the instant the error
- * clears (e.g. the clinician fixes a DIFFERENT still-invalid row and this
- * one's error resolves as a side effect, or the row is removed and
- * re-added). Pure and separated from `resolveRowExpanded`'s caller so the
- * decision is unit-tested independent of React state.
+ * A row carrying a bound error must never be collapsible away below
+ * `lg`: the mobile body wrapper is the ONLY place the error message
+ * renders, so a collapsed row's `role="alert"` sits in a `display:none`
+ * subtree and is never announced — a hard-blocked Save would leave every
+ * row on screen looking clean. `hasError` wins over the clinician's own
+ * toggle; the toggle regains control the instant the error clears.
  */
 export function resolveRowExpanded(
   toggledExpanded: boolean,

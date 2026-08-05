@@ -1,21 +1,7 @@
 /**
- * The assistant capability's session-scoped handle — replaces
- * `fill/useFillActions.ts` and the module-global registry it read from
- * (`src/lib/actions/`, deleted). See `types.ts` for the full contract and
- * the batch report for the care_scribe handover notes.
- *
- * SESSION-SCOPED, NOT A MODULE GLOBAL. `createHandle` below closes over a
- * `latestRef` that is private to ONE call of this hook — every method
- * reads `latestRef.current` at CALL TIME, so it always sees this mount's
- * current `forms`/`getStore`, never another mount's. Two
- * `QuestionnaireFillPage`s mounted at once each get their own `useRef`,
- * their own closures, their own handle object: nothing here is keyed by a
- * shared Map the way the old `src/lib/actions/registry.ts` was (a single
- * `Map<string, ActionDefinition>` that a second mount's registration would
- * silently overwrite for a shared action id). The only shared state is
- * `windowTestBridge.ts`'s `Map<sessionId, handle>`, which exists
- * specifically to hold MORE THAN ONE handle at a time, keyed by a random
- * id minted per mount — not a last-write-wins slot.
+ * Builds the assistant capability's session-scoped handle. Each hook call has
+ * its own `latestRef`; methods read it at call time so they see the current
+ * forms and stores for this mount, never another mount's state.
  */
 import type { RefObject } from "react";
 import { useCallback, useEffect, useRef } from "react";
@@ -28,6 +14,7 @@ import {
   responsesAtom,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import {
+  projectionResponseValues,
   resolveStructuredSlotState,
   resolveStructuredType,
   structuredDataAny,
@@ -89,11 +76,10 @@ function fail(error: string): { ok: false; error: string } {
   return { ok: false, error };
 }
 
-/** The question and every ancestor above it, found by `link_id` — same
- *  walk (and the same reason: `composeBatch` skips a disabled group
- *  WITHOUT descending, so a hidden group's child never reaches the server
- *  however enabled the child's own conditions are) as the old registry's
- *  `findQuestionPath`. */
+/** The question and every ancestor above it, found by `link_id`. The
+ *  ancestors matter because `composeBatch` skips a disabled group
+ *  WITHOUT descending — a hidden group's child never reaches the server
+ *  however enabled the child's own conditions are. */
 function findQuestionPath(
   questions: Question[],
   linkId: string,
@@ -258,6 +244,51 @@ function noSuchQuestionError(questionId: string, form: FillFormEntry): string {
   return `No question with link id "${questionId}" in "${form.questionnaire.title}"`;
 }
 
+interface WritableQuestion {
+  question: Question;
+  store: FormStore;
+  previous: Record<string, QuestionnaireResponse>;
+  response: QuestionnaireResponse;
+}
+
+/** The gates shared by both write paths (`setValue`,
+ *  `applyStructuredEdit`): the question must exist in the resolved form,
+ *  not be read-only, have a live store entry and a response slot, and be
+ *  enabled — itself and every ancestor — since `composeBatch` would never
+ *  submit a disabled question's answer. */
+function resolveWritableQuestion(
+  snapshot: SessionSnapshot,
+  formKey: string | undefined,
+  questionId: string,
+): AssistantResult<WritableQuestion> {
+  const form = resolveForm(formKey, snapshot.forms);
+  if (!form) return fail(formNotFoundError(formKey));
+  const path = findQuestionPath(form.questionnaire.questions, questionId);
+  if (!path) return fail(noSuchQuestionError(questionId, form));
+  const question = path[path.length - 1];
+
+  if (question.read_only) {
+    return fail(`Question "${questionId}" is read-only`);
+  }
+  const store = snapshot.getStore(form.key);
+  if (!store)
+    return fail(`Form "${form.questionnaire.title}" is not ready yet`);
+  const previous = store.get(responsesAtom);
+  const response = previous[question.id];
+  if (!response) {
+    return fail(
+      `Question "${questionId}" is not part of the open form any more`,
+    );
+  }
+  const linkIndex = buildLinkIndex(form.questionnaire.questions);
+  if (!isPathEnabled(path, previous, linkIndex)) {
+    return fail(
+      `Question "${questionId}" is currently disabled by its enable_when conditions and would not be submitted; answer the question it depends on first`,
+    );
+  }
+  return { ok: true, value: { question, store, previous, response } };
+}
+
 function setValueImpl(
   snapshot: SessionSnapshot,
   formKey: string | undefined,
@@ -265,11 +296,9 @@ function setValueImpl(
   values: PlainValueEntry[],
   note: string | undefined,
 ): AssistantResult {
-  const form = resolveForm(formKey, snapshot.forms);
-  if (!form) return fail(formNotFoundError(formKey));
-  const path = findQuestionPath(form.questionnaire.questions, questionId);
-  if (!path) return fail(noSuchQuestionError(questionId, form));
-  const question = path[path.length - 1];
+  const resolved = resolveWritableQuestion(snapshot, formKey, questionId);
+  if (!resolved.ok) return resolved;
+  const { question, store, previous, response: current } = resolved.value;
 
   if (
     question.type === "group" ||
@@ -281,32 +310,12 @@ function setValueImpl(
       `Question "${questionId}" is a ${question.type} question and cannot be answered with plain values`,
     );
   }
-  if (question.read_only) {
-    return fail(`Question "${questionId}" is read-only`);
-  }
   if (values.length > 1 && !question.repeats) {
     return fail(`Question "${questionId}" takes a single value`);
   }
   const rawValues = values as RawAnswerValue[];
   const bounds = checkSetValueBounds(rawValues, note);
   if (!bounds.ok) return fail(bounds.error ?? "Invalid input");
-
-  const store = snapshot.getStore(form.key);
-  if (!store)
-    return fail(`Form "${form.questionnaire.title}" is not ready yet`);
-  const previous = store.get(responsesAtom);
-  const current = previous[question.id];
-  if (!current) {
-    return fail(
-      `Question "${questionId}" is not part of the open form any more`,
-    );
-  }
-  const linkIndex = buildLinkIndex(form.questionnaire.questions);
-  if (!isPathEnabled(path, previous, linkIndex)) {
-    return fail(
-      `Question "${questionId}" is currently disabled by its enable_when conditions and would not be submitted; answer the question it depends on first`,
-    );
-  }
 
   const coerced: ResponseValue[] = [];
   for (const raw of rawValues) {
@@ -333,34 +342,12 @@ function applyStructuredEditImpl(
   questionId: string,
   edit: ApplyStructuredEditInput,
 ): AssistantResult<{ rowId: string }> {
-  const form = resolveForm(formKey, snapshot.forms);
-  if (!form) return fail(formNotFoundError(formKey));
-  const path = findQuestionPath(form.questionnaire.questions, questionId);
-  if (!path) return fail(noSuchQuestionError(questionId, form));
-  const question = path[path.length - 1];
+  const resolved = resolveWritableQuestion(snapshot, formKey, questionId);
+  if (!resolved.ok) return resolved;
+  const { question, store, previous, response } = resolved.value;
 
   if (question.type !== "structured" || !question.structured_type) {
     return fail(`Question "${questionId}" is not a structured question`);
-  }
-  if (question.read_only) {
-    return fail(`Question "${questionId}" is read-only`);
-  }
-
-  const store = snapshot.getStore(form.key);
-  if (!store)
-    return fail(`Form "${form.questionnaire.title}" is not ready yet`);
-  const previous = store.get(responsesAtom);
-  const response = previous[question.id];
-  if (!response) {
-    return fail(
-      `Question "${questionId}" is not part of the open form any more`,
-    );
-  }
-  const linkIndex = buildLinkIndex(form.questionnaire.questions);
-  if (!isPathEnabled(path, previous, linkIndex)) {
-    return fail(
-      `Question "${questionId}" is currently disabled by its enable_when conditions and would not be submitted; answer the question it depends on first`,
-    );
   }
 
   const definition = resolveStructuredType(question.structured_type);
@@ -368,10 +355,10 @@ function applyStructuredEditImpl(
     return fail(`Unknown structured type "${question.structured_type}"`);
   }
   if (definition.contract !== 2) {
-    // The legacy (v1) contract has no edit log to append to — it reads
-    // and writes the whole `values[0].value` array by hand, keyed by a
-    // `dirty` flag on each entry. Rejecting rather than guessing at a
-    // fake edit-log shape for it.
+    // `contract` is typed as the literal 2, but a runtime-registered
+    // (module-federated) plugin definition is untyped JS at this boundary
+    // — reject anything that doesn't declare the current contract rather
+    // than appending to an edit log the type may not maintain.
     return fail(
       `Structured type "${question.structured_type}" is on the legacy contract and does not accept assistant edits yet`,
     );
@@ -388,16 +375,11 @@ function applyStructuredEditImpl(
   );
   if (!validated.ok) return fail(validated.error);
 
-  // THE SAME EDIT-LOG PATH A HUMAN TAP TAKES: `applyEditToLog` is the
-  // exact function every `useStructuredRows` mutator calls
-  // (`core/editLog.ts`'s own doc comment names this as its intended
-  // caller: "the exact function the assistant's `applyStructuredEdit`
-  // path will call in a later phase"). No `baseline` is supplied — this
-  // handle is constructed at the SESSION level, above any single
-  // structured question's mounted editor, so it has no access to that
-  // question's fetched server rows (only the mounted `useStructuredRows`
-  // instance does). `applyEditToLog`'s own doc comment documents this as
-  // a deliberate, safe fallback: without a baseline it resolves a
+  // Same edit-log path a human tap takes: `applyEditToLog` is the exact
+  // function every `useStructuredRows` mutator calls. No `baseline` is
+  // supplied — this handle lives at the session level, above any single
+  // question's mounted editor, so it cannot see that question's fetched
+  // server rows. Without a baseline, `applyEditToLog` resolves a
   // resurrection/re-add conservatively to "update" rather than risking a
   // duplicate-create "add" — see `resolveOpAgainstBaseline`.
   const currentLog = (response.edits ?? []) as EditLog<Record<string, unknown>>;
@@ -408,23 +390,19 @@ function applyStructuredEditImpl(
   };
   const nextLog = applyEditToLog(currentLog, nextEdit, {});
 
-  // Projection, generically: `projectRows(undefined, log, {})` renders
-  // every add/update patch's own content (no baseline to merge against —
-  // see the doc comment above) exactly the way step 3 of `projectRows`'
-  // own doc comment describes for the "baseline not yet known" window.
-  // This does NOT apply a type's own `isEmptyRow` filter (that predicate
-  // lives in each type's `model.ts`, out of this generic handle's
-  // reach) — see the batch report for the one type (`time_of_death`)
-  // where that is a known, narrow display-only gap.
+  // Projection without a baseline renders every add/update patch's own
+  // content (`projectRows`' "baseline not yet known" behavior). It does
+  // NOT apply the type's own `isEmptyRow` filter — that predicate lives
+  // in each type's `model.ts`, out of this generic handle's reach — so an
+  // all-empty row can appear in the display projection (display-only:
+  // submit derives from `edits`, not from this mirror).
   const projectedRows = projectRows(undefined, nextLog, {}).map(
     (entry) => entry.row,
   );
-  const nextValues: ResponseValue[] =
-    projectedRows.length === 0
-      ? []
-      : ([
-          { type: question.structured_type, value: projectedRows },
-        ] as unknown as ResponseValue[]);
+  const nextValues = projectionResponseValues(
+    question.structured_type,
+    projectedRows,
+  );
 
   store.set(responsesAtom, {
     ...previous,
@@ -484,18 +462,10 @@ export interface UseFillAssistantSessionArgs {
 }
 
 /**
- * Builds this fill session's assistant handle. Session-scoped: the handle
- * object is created once (a `useRef`) and its methods always read the
- * LATEST `forms`/`getStore`/`subject` through a mutable ref updated every
- * render — never a stale closure, and never a module-global lookup.
- *
- * Also wires the internal change-notification fan-out `subscribe()`
- * exposes: one effect subscribes to every currently mounted form's
- * `responsesAtom` (re-subscribing whenever `forms`/`storesVersion`
- * change, so a form added or removed mid-session is picked up), and fans
- * every fire out to whatever listeners `subscribe()` has collected. A
- * human edit, an assistant write, and a baseline-refresh projection
- * update all go through the same atom, so all three notify identically.
+ * Builds the assistant handle and wires change notifications. The handle is
+ * created once and reads latest session state through a ref; subscriptions
+ * follow the mounted form stores so human edits, assistant writes and
+ * projection refreshes notify through the same channel.
  */
 export function useFillAssistantSession({
   subject,

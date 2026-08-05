@@ -78,12 +78,9 @@ const INITIAL_STATE: BuilderState = {
 };
 
 /**
- * The WYSIWYG questionnaire builder: left outline, live canvas rendered by
- * the full renderer (form/), right inspector. Replaces the old
- * QuestionnaireBuilderPage on the same routes and keeps its contracts: all
- * edit state in builderReducer, `?mode=preview` / `?import=1` params, the
- * dirty-guarded re-seed, save through `buildUpdateBody` as one full PUT —
- * now including the questionnaire metadata edited in Form settings.
+ * WYSIWYG questionnaire builder: left outline, live form canvas, and right
+ * inspector. Edit state lives in `builderReducer`; saves use `buildUpdateBody`
+ * as one full PUT including questionnaire metadata from Form settings.
  */
 export function QuestionnaireStudioPage({
   scope,
@@ -105,20 +102,9 @@ export function QuestionnaireStudioPage({
 
   const [state, reactDispatch] = useReducer(builderReducer, INITIAL_STATE);
 
-  // Bumped by every USER-originated dispatch, tracked here (not derived
-  // from `state`) so the save mutation's `onSaved` callback can tell, at
-  // response time, whether any edit landed while the PUT was in flight —
-  // `state` itself would already reflect that edit either way, giving
-  // onSaved no way to distinguish "nothing changed since the save" from
-  // "the user kept typing". See `handleSave`/`onSaved` below.
-  //
-  // Invariant: this counts EDITS only. "reset" is deliberately exempt —
-  // it fires from the initial load, the dirty-guarded background re-seed
-  // effect below, Discard, and this file's own post-save reset, none of
-  // which are a user editing the tree. Counting it would make a
-  // background refetch that resolves mid-flight look like an in-flight
-  // edit, permanently stranding the editor dirty after every save that
-  // happens to race one.
+  // Counts user edits only, letting `onSaved` detect whether anything changed
+  // while the PUT was in flight. Resets are exempt because they come from load,
+  // background re-seed, Discard and post-save synchronization.
   const dispatchSeqRef = useRef(0);
   const dispatch: typeof reactDispatch = (action) => {
     if (action.type !== "reset") {

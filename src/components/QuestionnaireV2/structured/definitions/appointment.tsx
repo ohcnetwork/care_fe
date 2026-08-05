@@ -23,7 +23,7 @@ export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
   component: AppointmentInput,
   requires: ["facilityId"],
   subjects: ["patient", "encounter"],
-  // D2. The row is three JSON-safe fields; nothing here is prefetched.
+  // The row is three JSON-safe fields; nothing here is prefetched.
   draftPolicy: "serialize",
   contract: 2,
   toRequests,

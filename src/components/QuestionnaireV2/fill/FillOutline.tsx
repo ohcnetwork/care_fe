@@ -20,19 +20,9 @@ import type { Question } from "@/types/questionnaire/question";
 import { useFillOutlineNav } from "./FillOutlineOverlay";
 
 /**
- * One form's rows inside the outline overlay panel, per the reference:
- * numbered rows with live completion adornments — answered questions get
- * the double-check, open ones a dot — the question currently in view in
- * indigo with a right-edge bar (scroll-spy via `useFillOutlineNav`), and
- * enable_when-hidden rows dropped, exactly like the canvas. Selecting a
- * row scrolls its block into view via the renderer's `data-question-id`
- * anchors. Group children indent behind a connector line.
- *
- * `ariaLabel` names the nav landmark: a multi-questionnaire session
- * renders one outline per form into the same panel, and repeating the
- * generic name would leave a screen reader with several
- * indistinguishable "Questions" landmarks — the host passes each form's
- * title there instead.
+ * One form's rows inside the outline overlay panel: two levels of rows with
+ * completion adornments and active-state mapping for deeper descendants.
+ * Rows stay mounted only while their question is visible.
  */
 export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
   const { t } = useTranslation();

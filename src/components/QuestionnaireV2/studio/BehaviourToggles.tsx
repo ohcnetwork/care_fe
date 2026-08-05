@@ -62,9 +62,8 @@ export function BehaviourToggles({
             type="button"
             role="checkbox"
             aria-checked={checked}
-            // labelledby/describedby (not aria-label) so the visible title
-            // stays the accessible name — `checkbox "Required"` in specs —
-            // while the explanatory hint remains announced as description.
+            // labelledby/describedby keeps the visible title as the accessible
+            // name while the explanatory hint remains announced as description.
             aria-labelledby={`${idBase}-${flag.key}-label`}
             aria-describedby={`${idBase}-${flag.key}-hint`}
             onClick={() => onChange({ [flag.key]: !checked })}

@@ -1,16 +1,11 @@
-import type { EditLog, RowEdit, RowId, SoftDeleteDescriptor } from "./types";
+import { dedupeEditsFirstAppearance } from "./editLog";
+import type { EditLog, RowId, SoftDeleteDescriptor } from "./types";
 
 /**
  * One row to remove on the server. `rowId` is always present; `row` is
- * present only when a `softDelete` descriptor is supplied to
- * {@link resolveChanges} — see that function's doc comment for exactly
- * what it carries and why.
- *
- * ALIASING NOTE (unlike `creates`/`updates` — see `ResolvedChanges`'s doc
- * comment): `row`, when present, is always a FRESH object — a merge of
- * the edit's `patch` and the descriptor's marker fields, neither of which
- * it can alias. There is no bare-row case to alias in the first place:
- * the only two shapes are "freshly merged" and "absent."
+ * present only when a `softDelete` descriptor was supplied to
+ * {@link resolveChanges}. Unlike `creates`/`updates` entries, `row` is
+ * always a fresh merge — it never aliases the edit's `patch`.
  */
 export interface ResolvedRemove<TRow extends object> {
   rowId: RowId;
@@ -33,38 +28,17 @@ export interface ResolvedRemove<TRow extends object> {
  * `resolveChanges`'s doc comment below for the full contract.
  */
 export interface ResolvedChanges<TRow extends object> {
-  /** New rows, in log order. Each is the complete row to create — under
-   *  the canonical vocabulary an `add` edit's `patch` already IS the row
-   *  (`structured.ts`'s `StructuredEditOp` doc), so there is nothing to
-   *  resolve beyond sorting by op. ALIASING NOTE: this is the edit's own
-   *  `patch` object, by reference — not a clone. Consistent with the rest
-   *  of this pure core (`editLog.ts`'s coalescing reuses `incoming.patch`
-   *  the same way): nothing downstream is expected to mutate a resolved
-   *  row, so aliasing costs nothing and avoids a needless copy. Contrast
-   *  `ResolvedRemove.row`, which — when present — is always a fresh merge
-   *  and cannot alias either of its two source objects.
-   *
-   *  EXCLUDES an `add` whose `rowId` a supplied `options.baseline` already
-   *  has — that one is reclassified into `updates` instead. See
-   *  `resolveChanges`'s "POST-REVIEW FIX — an `add` colliding with
-   *  baseline" doc paragraph. */
+  /** New rows, in log order. An `add` edit's `patch` already IS the
+   *  complete row; pushed by reference, not cloned (nothing downstream
+   *  mutates a resolved row). An `add` whose `rowId` a supplied
+   *  `options.baseline` already has is reclassified into `updates`. */
   creates: readonly TRow[];
-  /** Existing rows to update, in log order. Each is the complete row as it
-   *  now reads (baseline row with the clinician's fields applied) — same
-   *  reasoning and the same aliasing note as `creates`.
-   *
-   *  ALSO INCLUDES an `add` edit reclassified because its `rowId` collided
-   *  with a supplied `options.baseline` entry (see the doc paragraph
-   *  referenced above) — in that case the pushed row is the add's `patch`
-   *  **verbatim**, which may lack the server `id` field a genuine update
-   *  row would carry (the row was never given one client-side, since it
-   *  started life as a fresh add). Safe for the singleton types where this
-   *  collision is reachable today (`encounter`, keyed by
-   *  `SINGLETON_ROW_ID`) because their endpoints are URL-keyed — the
-   *  server resolves identity from the URL, not a body field — but that is
-   *  a per-endpoint fact this function does not itself guarantee for
-   *  every future caller; a `toRequests` for a non-URL-keyed type would
-   *  need to re-verify it. */
+  /** Existing rows to update, in log order — complete rows as they now
+   *  read, by reference. An `add` reclassified here is its `patch`
+   *  verbatim and may lack the server `id` a genuine update row carries —
+   *  safe for URL-keyed endpoints (`encounter`, the only reachable case
+   *  today), but a `toRequests` for a non-URL-keyed type must re-verify.
+   */
   updates: readonly TRow[];
   /** Rows to remove, in log order. See {@link ResolvedRemove}. */
   removes: readonly ResolvedRemove<TRow>[];
@@ -79,194 +53,54 @@ export interface ResolveChangesOptions<TRow extends object> {
    *  not by omission. */
   softDelete?: SoftDeleteDescriptor<TRow>;
   /**
-   * rowId → the unedited server row — the SAME map `applyEditToLog`
-   * (`editLog.ts`) and `projectRows` are given, per the plan's BASELINE
-   * COMPLETENESS CONTRACT (`2026-08-04-phase1-core-kit.md`'s Global
-   * Constraints): **the complete fetched server-row set, or `undefined`
-   * — never a partial map**. A partial map is a caller error, not a
-   * "not yet loaded" signal; Task 7 must pass `undefined`, never `[]`/an
-   * empty map, while the baseline query is loading or errored.
+   * rowId → the unedited server row: the COMPLETE fetched server-row set,
+   * or `undefined` while it is unknown (loading/errored) — never a
+   * partial map.
    *
-   * When supplied, an `update` or `remove` whose `rowId` is absent from
-   * it is an ORPHAN — intent about a row the (complete) baseline does not
-   * contain, typically a restored draft whose server row vanished between
-   * sessions, or (see the POST-REVIEW FIX note on {@link resolveChanges})
-   * a `remove` the reducer appended fresh for a rowId that never reached
-   * the server in the first place. Dropped from the result entirely, not
-   * reported and not dispatched — exactly `projectRows`' orphan rule
-   * (`projectRows.ts:144-160`; an `add` is never treated as an orphan,
-   * matching that same rule, since an add is inherently absent from
-   * baseline by definition).
-   *
-   * When `undefined`, there is genuinely nothing to check an edit's
-   * `rowId` against, and this function does not pretend otherwise: every
-   * edit in the log is trusted and dispatched, undropped, as a
-   * documented, conservative fallback — not a guarantee that no orphan
-   * can reach the wire. This is the same shape of fallback
-   * `resolveOpAgainstBaseline` documents in `editLog.ts` (lines 255-261):
-   * every real caller (`useStructuredRows`, per the BASELINE COMPLETENESS
-   * CONTRACT) supplies the complete map or `undefined`, never omits the
-   * option while intending partial data, so this branch exists for a
-   * caller that doesn't supply it at all, not as the expected path.
+   * When supplied, an `update`/`remove` whose `rowId` it lacks is an
+   * orphan — intent about a row the server no longer has (typically a
+   * restored draft), or a `remove` for a rowId that never reached the
+   * server. Orphans are dropped entirely, matching `projectRows`' orphan
+   * rule; an `add` is never an orphan. When `undefined`, every edit is
+   * trusted and dispatched — a documented, conservative fallback, not a
+   * guarantee that no orphan reaches the wire.
    */
   baseline?: ReadonlyMap<RowId, TRow>;
 }
 
 /**
  * Resolves one edit log into the create/update/remove sets a type's
- * `toRequests(edits, ctx)` sends over the wire. This is the P1-14
- * guarantee — "a clinician who never touched a section sends zero
- * requests for it" — in its purest, most literal form:
- * `resolveChanges([], {})` returns three empty arrays, by construction,
- * regardless of whatever `options.baseline` says exists on the server
- * (a non-empty baseline can never manufacture a request on its own —
- * `changes.test.ts`'s "P1-14 EXTENDED" case). There is no code path here
- * that can emit anything for a rowId the log never mentions; today
- * allergy/symptom/medication-statement's legacy `buildRequests` submits
- * every prefetched row regardless (`definitions/symptom.tsx:41` maps over
- * the WHOLE projection, not the edit log), which is exactly the
- * concurrent-edit clobber this differ exists to retire.
+ * `toRequests(edits, ctx)` sends over the wire. An empty log yields three
+ * empty arrays regardless of `baseline` — a clinician who never touched a
+ * section sends zero requests for it, by construction.
  *
- * Pure and total: never mutates `log`, `options.softDelete`, or
- * `options.baseline` (or anything reachable from any of them), and always
- * returns fresh arrays.
+ * Pure and total: never mutates `log` or `options`; always returns fresh
+ * arrays.
  *
- * WHY THIS SIGNATURE DROPS THE ANNEX'S `rowIdOf` / PROJECTION LOOKUP.
- * `annexes/p1-state-core.md` §11 drafts `resolveChanges(input:
- * StructuredEditInputFor<TRow>, rowIdOf: (row: TRow) => RowId | undefined):
- * RowChange<TRow>[]` — a single flat, op-tagged array, with `update`
- * entries resolved by looking their `rowId` up in `input.projection` via
- * `rowIdOf`. That lookup exists in the annex ONLY because it was drafted
- * against the OLD edit vocabulary, where an `update`'s patch was a
- * `Partial<TRow>` field diff — the full row had to come from somewhere
- * else, hence the projection argument. Under the SHIPPED canonical
- * vocabulary (`structured.ts`'s `StructuredEditOp` doc, restated in the
- * plan's CANONICAL EDIT VOCABULARY table), `patch` is ALWAYS the complete
- * row, for `add` and `update` alike — so the row `resolveChanges` needs is
- * already sitting on the edit itself. No projection, no `rowIdOf`
- * callback, no lookup that could miss: this function's signature is
- * exactly `(log, options) => ResolvedChanges`, per the plan's Task 5
- * "Produces" line (`2026-08-04-phase1-core-kit.md:178`), which is what's
- * implemented here — not the annex's draft, translated per that plan's
- * own reconciliation section. The plan also splits the annex's one
- * flat `RowChange[]` into three named sets (`creates`/`updates`/`removes`)
- * — the commit this ships under is literally "resolve an edit log into
- * create/update/remove sets" — so a type's `toRequests` combines them
- * however its own endpoint shape requires (symptom's single upsert body
- * is `[...creates, ...updates]`; a type with a real delete endpoint routes
- * `removes` there separately).
+ * Op semantics stop here: this realizes the log's add/update/remove
+ * INTENT; whether a given wire call actually creates or updates
+ * server-side is each type's `toRequests` contract (the real endpoints
+ * are upserts that may create instead of failing on an unrecognized id).
  *
- * OP SEMANTICS STOP HERE (binding project constraint). This function
- * realizes the log's `add`/`update`/`remove` INTENT into three sets; it
- * does not decide whether a given wire call will actually create or
- * update server-side. The real endpoints are upserts that may create
- * instead of failing on an unrecognized id (`definitions/symptom.tsx`
- * POSTs whole rows to `/symptom/upsert/`); whatever the wire does with a
- * `creates` or `updates` entry is each type's `toRequests` contract, not
- * asserted here.
+ * A malformed log with duplicate rowIds (never produced by the reducer,
+ * but admitted by a restored draft's per-record validation) is
+ * de-duplicated last-write-wins per rowId and dispatched once, at first
+ * appearance — otherwise `[add("dup", a), add("dup", b)]` would dispatch
+ * two creates for one identity.
  *
- * JUDGMENT CALL — the soft-delete body vs. the bare rowId. `removes`
- * carries `{ rowId, row: {...edit.patch, ...softDelete.patch} }` when
- * `options.softDelete` is supplied (a complete upsert body marking the row
- * entered-in-error — coherent with `SoftDeleteDescriptor.patch` being
- * "just the marker fields... on top of the row's existing values," per
- * its doc comment in `./types`), and `{ rowId }` alone — no `row` key at
- * all — when it is not (nothing but the id is needed for a real
- * delete-by-id call). Both are tested in `changes.test.ts`.
+ * An `add` whose rowId `baseline` already contains is reclassified into
+ * `updates`: the reducer keeps `op: "add"` for edits recorded while the
+ * baseline query was still loading, and emitting a create for a row the
+ * server already has would silently duplicate a clinical record. The
+ * reclassified row is the add's `patch` verbatim — see
+ * {@link ResolvedChanges.updates} for why it may lack a server `id`.
  *
- * POST-REVIEW FIX — a `remove` for a rowId that never touched the server.
- * An earlier version of this function claimed `editLog.ts`'s reducer
- * guarantees a `remove` can only ever reach a well-formed log for a real
- * baseline row ("an added-then-removed row is always annihilated"). That
- * claim is FALSE, and `editLog.ts` itself documents the exact counter-
- * sequence (its `coalesceOntoRemove` doc comment, "FIX (post-review)"
- * paragraph): `add(u)` → `remove(u)` annihilates the pair (log empty,
- * history erased) → a SECOND `remove(u)` then reaches `appendFresh`, which
- * appends a brand-new `remove` entry unconditionally (it never checks
- * `baseline` for a `remove`) — so a rowId that never reached the server
- * CAN appear in a well-formed log with `op: "remove"`. Trusting that op
- * unconditionally (the old behavior) meant that, with a `softDelete`
- * descriptor configured, this function would emit a soft-delete body
- * built from a patch that — because the row was only ever an `add`, never
- * a real server row — carries no server `id`. Posted to an upsert
- * endpoint that may create rather than fail on an unrecognized id, that
- * silently CREATES a brand-new row already marked entered-in-error: the
- * exact duplicate/phantom-record failure Task 3's `resolveOpAgainstBaseline`
- * fix exists to prevent, reintroduced at this last hop. Reproduced via the
- * real reducer in `changes.test.ts`'s "REGRESSION (review finding 1)" case
- * before being fixed.
- *
- * Fixed the same way Task 3 fixed the identical shape of problem: by
- * consulting `options.baseline` instead of trusting a `remove` op's mere
- * presence. See {@link ResolveChangesOptions.baseline}'s doc comment for
- * the full orphan-drop rule and its documented fallback when no baseline
- * is supplied at all.
- *
- * POST-REVIEW FIX — last-write-wins per rowId before dispatching. An
- * earlier version dispatched every entry in `log` independently, with no
- * de-duplication by `rowId`. `applyEditToLog` (`editLog.ts`) guarantees at
- * most one entry per `rowId` for any log IT produces, but a restored
- * draft's per-record `isStructuredEditRecord` gate (`structured.ts`)
- * validates each entry independently and would happily accept two
- * malformed entries sharing a `rowId` — the same shape of corruption
- * `projectRows.ts:175-176`'s `editByRowId` map already defends against.
- * Without de-duplication, `[add("dup", first), add("dup", second)]` would
- * dispatch TWO creates for one identity instead of one. Fixed with the
- * same map `projectRows.ts` uses (`Map<RowId, RowEdit<TRow>>`, built by
- * iterating `log` once and overwriting — the last entry per `rowId`
- * wins), then a single forward pass over `log` that dispatches each
- * `rowId` exactly once, at its FIRST appearance, using the map's
- * (last-written) content: content and the op that decides which set it
- * lands in both follow the LAST entry for that `rowId`; the POSITION in
- * the dispatched order follows the FIRST. For a well-formed log (one
- * entry per `rowId`, the only shape the real reducer ever produces) first
- * and last appearance are the same position, so this is invisible in the
- * normal path — it only changes behavior for an already-malformed input.
- * Tested in `changes.test.ts`'s "REGRESSION (review finding 2)" cases.
- *
- * POST-REVIEW FIX — an `add` colliding with a rowId the baseline already
- * has is reclassified as an `update`. Reachable NOT via a malformed log,
- * but via the ordinary, MANDATED shape of the BASELINE COMPLETENESS
- * CONTRACT: Task 7 passes `baseline: undefined` while the query is still
- * loading, and an `add` recorded during that window (e.g. `encounter`,
- * the singleton keyed by `SINGLETON_ROW_ID`, before its baseline fetch has
- * resolved) is never revisited once the real baseline arrives —
- * `coalesceOntoAdd` (`editLog.ts:120-134`), the "existing entry is `add`"
- * coalescing arm, is the one branch Task 3's `resolveOpAgainstBaseline`
- * fix did NOT touch: unlike the `update`/`remove` arms, it never consults
- * `baseline` at all, so a later `update` for the same rowId just replaces
- * the patch and stays `op: "add"` forever, even after the baseline query
- * resolves and the row turns out to already exist server-side. This is
- * the differ-side twin of `projectRows`' own "singleton-draft-outrun-by-
- * baseline" judgment call (`projectRows.ts:132-142`) for the identical
- * collision — `resolveChanges` is the only layer left holding a fresh
- * `baseline` at submit time, since the reducer already committed to `add`.
- *
- * The old behavior dispatched this `add`'s patch straight to `creates` —
- * asking the server to CREATE a row it already has. `editLog.ts`'s own
- * doc comment on `resolveOpAgainstBaseline` (lines 249-253) names this the
- * WORSE of the two possible mistakes: a wrongly emitted `add` "would
- * instead silently create a duplicate clinical row... data corruption,
- * not a rejected request" (the wrongly-emitted-`update` case at least
- * 404s loudly). The created row also carries no server `id` to match an
- * upsert against, compounding it.
- *
- * Fixed per the review's simulated patch: `(baseline?.has(rowId) ?
- * updates : creates).push(resolved.patch)` — when a baseline IS supplied
- * and it has this rowId, the add's patch is pushed to `updates` instead of
- * `creates`; otherwise (no baseline, or baseline genuinely lacks the
- * rowId — the ordinary "this really is a new row" case) it stays a
- * create, unchanged. Every shipped add-related test in this file passes
- * either no baseline or a non-colliding one, so this is additive, not
- * behavior-changing, for all of them. STATED, not assumed (per review
- * obligation (a)): the row landing in `updates` this way is the add's
- * `patch` **verbatim** and may lack the server `id` field a genuine
- * update row would carry — see {@link ResolvedChanges.updates}'s doc
- * comment for why that is specifically safe for `encounter` (URL-keyed
- * endpoint) and not a general guarantee for every future caller. Pinned
- * with a REDUCER-DRIVEN test (`applyEditToLog`, not a hand-built log) in
- * `changes.test.ts`'s "REGRESSION (review finding 3)" case, using
- * `SINGLETON_ROW_ID`.
+ * A `remove` can name a rowId that never reached the server (add→remove
+ * annihilates the pair and erases its history; a second remove then
+ * appends fresh). With `softDelete` configured, trusting that op would
+ * POST a soft-delete body to an upsert endpoint that CREATES a phantom
+ * row already marked entered-in-error — hence the orphan check against
+ * `baseline`; see {@link ResolveChangesOptions.baseline}.
  */
 export function resolveChanges<TRow extends object>(
   log: EditLog<TRow>,
@@ -274,21 +108,11 @@ export function resolveChanges<TRow extends object>(
 ): ResolvedChanges<TRow> {
   const { softDelete, baseline } = options;
 
-  // Last write wins per rowId — mirrors projectRows.ts:175-176.
-  const editByRowId = new Map<RowId, RowEdit<TRow>>();
-  for (const edit of log) editByRowId.set(edit.rowId, edit);
-
   const creates: TRow[] = [];
   const updates: TRow[] = [];
   const removes: ResolvedRemove<TRow>[] = [];
 
-  const dispatched = new Set<RowId>();
-  for (const edit of log) {
-    if (dispatched.has(edit.rowId)) continue; // resolved at first appearance
-    dispatched.add(edit.rowId);
-    // Non-null: this rowId came from `log`, so `editByRowId` has an entry.
-    const resolved = editByRowId.get(edit.rowId) as RowEdit<TRow>;
-
+  for (const resolved of dedupeEditsFirstAppearance(log)) {
     const isOrphan =
       resolved.op !== "add" &&
       baseline !== undefined &&
@@ -297,9 +121,8 @@ export function resolveChanges<TRow extends object>(
 
     switch (resolved.op) {
       case "add":
-        // Reclassified to `updates` when `baseline` already has this
-        // rowId — see the "POST-REVIEW FIX — an `add` colliding with a
-        // rowId the baseline already has" doc paragraph above.
+        // Baseline already has this rowId — creating it again would
+        // duplicate a server row, so it dispatches as an update.
         (baseline?.has(resolved.rowId) ? updates : creates).push(
           resolved.patch,
         );
@@ -317,12 +140,10 @@ export function resolveChanges<TRow extends object>(
             : { rowId: resolved.rowId },
         );
         break;
-      // No default: an unrecognized op (reachable only via a cast — a
-      // validated draft's isStructuredEditRecord gate already rejects an
-      // unknown op string) is silently dropped from every set. Correct,
-      // not merely unhandled: this function's contract is "dispatch what
-      // the log says," and an op outside the closed vocabulary says
-      // nothing this function can act on. Tested in `changes.test.ts`.
+      // No default: an unrecognized op (reachable only via a cast — draft
+      // validation rejects unknown op strings) is deliberately dropped
+      // from every set. An op outside the closed vocabulary says nothing
+      // this function can act on.
     }
   }
 

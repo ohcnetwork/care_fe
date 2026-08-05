@@ -77,7 +77,7 @@ describe("mergePatch", () => {
     assert.notEqual(result.note, "clinician typed this");
   });
 
-  it("REGRESSION (post-c540a5602 review): a normalizePatch that returns undefined falls back to the incoming patch — does NOT silently discard the clinician's edit", () => {
+  it("a normalizePatch that returns undefined falls back to the incoming patch — does NOT silently discard the clinician's edit", () => {
     // Type-illegal for a typed caller (the signature promises
     // `Partial<TRow>`), but reachable from a plugin definition crossing
     // the `unknown` boundary at runtime. Without the `?? patch` fallback,
@@ -96,7 +96,7 @@ describe("mergePatch", () => {
     assert.deepEqual(result, { id: "r1", note: "typed" });
   });
 
-  it("REGRESSION (post-c540a5602 review): a normalizePatch that returns null ALSO falls back to the incoming patch", () => {
+  it("a normalizePatch that returns null ALSO falls back to the incoming patch", () => {
     const current: TestRow = { id: "r1", note: "old" };
     const normalizePatchReturningNull = () =>
       null as unknown as Partial<TestRow>;
@@ -111,7 +111,7 @@ describe("mergePatch", () => {
   });
 });
 
-describe("resolveRemoveIntent — annex §7's three-outcome dispatch", () => {
+describe("resolveRemoveIntent — three-outcome dispatch", () => {
   it("a baseline row with softDelete configured becomes an ordinary update carrying the merged marker", () => {
     const softDelete: SoftDeleteDescriptor<TestRow> = {
       patch: { status: "entered_in_error" },
@@ -170,7 +170,7 @@ describe("resolveRemoveIntent — annex §7's three-outcome dispatch", () => {
     });
   });
 
-  it("LOADING WINDOW: a presumed row from projectRows' step 3 (baseline===undefined) carries origin:'baseline', so removeRow on it soft-deletes rather than hard-removes — a deliberate divergence from the annex, pinned end-to-end", () => {
+  it("LOADING WINDOW: a presumed row from projectRows' step 3 (baseline===undefined) carries origin:'baseline', so removeRow on it soft-deletes rather than hard-removes — deliberate, pinned end-to-end", () => {
     const softDelete: SoftDeleteDescriptor<TestRow> = {
       patch: { status: "entered_in_error" },
       isDeleted: (r) => r.status === "entered_in_error",
@@ -200,7 +200,7 @@ describe("resolveRemoveIntent — annex §7's three-outcome dispatch", () => {
   });
 });
 
-describe("resolveSetRow — annex §9's three-route dispatch", () => {
+describe("resolveSetRow — three-route dispatch", () => {
   it("a current row present ⇒ an ordinary update against ITS rowId", () => {
     const result = resolveSetRow<TestRow>({
       currentRow: { id: "singleton", note: "old" },
@@ -272,7 +272,7 @@ describe("resolveSetRow — annex §9's three-route dispatch", () => {
   });
 });
 
-describe("decideInitialEditsSeed — the one-shot latch's decision, fixed post-3b41fe4fd", () => {
+describe("decideInitialEditsSeed — the one-shot latch's decision", () => {
   it("edits already has content ⇒ skip, regardless of initialEdits — a restored draft always wins", () => {
     const edits: EditLog<TestRow> = [update("r1", { id: "r1", note: "x" })];
     assert.equal(decideInitialEditsSeed(edits, undefined), "skip");
@@ -282,7 +282,7 @@ describe("decideInitialEditsSeed — the one-shot latch's decision, fixed post-3
     );
   });
 
-  it("edits empty, initialEdits not yet available ⇒ wait — must NOT latch (the bug: the old code latched here forever)", () => {
+  it("edits empty, initialEdits not yet available ⇒ wait — must NOT latch (latching here would drop a late-arriving seed forever)", () => {
     assert.equal(decideInitialEditsSeed([], undefined), "wait");
     assert.equal(decideInitialEditsSeed([], []), "wait");
   });
@@ -294,7 +294,7 @@ describe("decideInitialEditsSeed — the one-shot latch's decision, fixed post-3
     assert.equal(decideInitialEditsSeed([], initialEdits), "seed");
   });
 
-  it("REGRESSION shape: initialEdits arrives on a LATER render than the first (the encounter ?toDischarge case) — must still 'seed' once it does, having correctly 'wait'-ed before", () => {
+  it("initialEdits arrives on a LATER render than the first (the encounter ?toDischarge case) — must still 'seed' once it does, having correctly 'wait'-ed before", () => {
     // First render: baseline hasn't loaded, caller cannot construct the
     // full-row patch yet, so initialEdits is undefined.
     const firstRender = decideInitialEditsSeed([], undefined);

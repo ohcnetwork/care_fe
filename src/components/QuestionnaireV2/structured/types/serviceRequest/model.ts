@@ -31,38 +31,25 @@ import { UserReadMinimal } from "@/types/user/user";
 
 /**
  * What the v2 editor edits. `ServiceRequestApplyActivityDefinitionForm`
- * (`@/types/emr/serviceRequest/serviceRequest`) already widens `requester`
- * to a full `UserReadMinimal` — no local re-widening needed here, unlike
- * `ChargeItemRow`/`AllergyRow`'s own arms of this same decision.
- *
- * `activity_definition_object` is required, added here for the identical
- * reason `ChargeItemRow.charge_item_definition_object` is (see that type's
- * own doc comment, `chargeItem/model.ts`): every row this editor creates —
- * from a direct pick OR a resolved template — carries the full
- * `ActivityDefinitionReadSpec` it was built from, so price/title repaint
- * correctly from a restored draft or a background refetch instead of living
- * only in a component `useState` no reload can restore. That component
- * `useState` — `ServiceRequestQuestion.tsx`'s `activityDefinitionsMap` — is
- * this port's OTHER defect to close (the first is the dual-state
- * `serviceRequests`/`questionnaireResponse.values` pair the port brief
- * names directly): both disappear because `useStructuredRows` becomes the
- * single source of truth and this object rides on the row itself.
+ * already widens `requester` to a full `UserReadMinimal`.
+ * `activity_definition_object` is required: every row is created from a
+ * direct pick or a resolved template, and carrying the full
+ * `ActivityDefinitionReadSpec` on the row lets price/title repaint from a
+ * restored draft or a background refetch instead of living in component
+ * state that drafts cannot restore.
  */
 export type ServiceRequestRow = ServiceRequestApplyActivityDefinitionForm & {
   activity_definition_object: ActivityDefinitionReadSpec;
 };
 
 /**
- * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
- * `rowSchema` for the full contract). `activity_definition_object` is
- * `displayObjectSchema` (passthrough, id/slug/title-keyed only — see that
- * helper's own doc comment): an assistant would only ever copy this
- * verbatim from a prior pick (`ResourceDefinitionCategoryPicker`), never
- * author the full `ActivityDefinitionReadSpec` shape by hand. `requester`
- * is `userDisplaySchema` for the identical reason. Every OTHER field is
- * `.strict()`, matching `BaseServiceRequestSpec` exactly (minus `id`, which
- * this form omits, matching `ServiceRequestApplyActivityDefinitionForm`'s
- * own `Omit<BaseServiceRequestSpec, "id">`).
+ * Assistant write guard. `activity_definition_object` is
+ * `displayObjectSchema` (loose, slug/title-keyed): an assistant only ever
+ * copies it verbatim from a prior pick, never authors the full
+ * `ActivityDefinitionReadSpec` by hand; `requester` is `userDisplaySchema`
+ * for the same reason. Every other field is `.strict()`, matching
+ * `ServiceRequestApplyActivityDefinitionForm`'s `service_request` shape
+ * (`BaseServiceRequestSpec` minus `id`, plus `locations`).
  */
 const serviceRequestSpecSchema = z
   .object({
@@ -92,38 +79,23 @@ export const rowSchema = z
   .strict();
 
 /**
- * A service-request section is a LIST whose rows are born whole the moment
- * `newServiceRequestRow`/`serviceRequestRowFromTemplate` creates one from a
- * picked (or template-resolved) activity definition — identical reasoning
- * to `charge_item`'s own `projectValues` doc comment: there is no "half
- * filled" row shape to reconcile, so no separate `isEmptyRow` predicate
- * exists to desync from a submission filter (Lesson 2, binding "Lessons
- * from the first ports").
+ * A list whose rows are born whole from a picked or template-resolved
+ * activity definition — no "half filled" row shape, so no `isEmptyRow`
+ * predicate exists to desync from a submission filter.
  */
 export const projectValues: ProjectValues<ServiceRequestRow> = (rows) =>
   rows.length === 0 ? [] : [{ type: "service_request", value: [...rows] }];
 
-// `activityDefinitionPrice` (the sum of every linked charge-item
-// definition's base price, mirroring `ServiceRequestQuestion.tsx:229-236`)
-// deliberately does NOT live here. `@/Utils/decimal` (and transitively
-// `@/types/base/monetaryComponent/monetaryComponent`) reads
-// `care.config.ts`, which reads `import.meta.env` — populated by Vite at
-// runtime, but `undefined` under this repo's `node:test` unit harness
-// (`npm run test:unit` is plain `node --import tsx --test`, not Vite). This
-// is a genuine, pre-existing gap in the harness, not something this port
-// introduces — no other `model.ts` in `structured/types/*` imports either
-// module today, and this one must not become the first, or every test
-// importing it (this file's own `model.test.ts` included) crashes before a
-// single assertion runs. Kept instead as a small, UI-adjacent helper in
-// `ServiceRequestEditor.tsx`, which `node:test` never imports.
-//
+// `activityDefinitionPrice` deliberately lives in `ServiceRequestEditor.tsx`,
+// not here: `@/Utils/decimal` reads `care.config.ts`'s `import.meta.env`,
+// which is `undefined` under the plain node:test unit harness — importing it
+// here would crash every test importing this module.
+
 /**
- * A freshly picked activity definition, seeded exactly the way
- * `ServiceRequestQuestion.tsx`'s selection effect did (`:629-668`):
- * `status`/`intent`/`priority` default to active/order/routine,
- * `category`/`code`/`body_site`/`locations` come straight off the
- * definition, and `requester` defaults to the current user (editable
- * afterward via the `requester` column).
+ * A freshly picked activity definition: `status`/`intent`/`priority` default
+ * to active/order/routine, `category`/`code`/`body_site`/`locations` come
+ * off the definition, and `requester` defaults to the current user (editable
+ * via the requester column).
  */
 export function newServiceRequestRow(
   activityDefinition: ActivityDefinitionReadSpec,
@@ -154,17 +126,11 @@ export function newServiceRequestRow(
 }
 
 /**
- * A row resolved from a template's `ActivityDefinitionTemplateSpec` plus
- * the FULL activity definition fetched by its slug (a template only ever
- * stores the slug — see `resolveTemplateServiceRequest` in
- * `ServiceRequestEditor.tsx`, the one caller that does the fetching). Merges
- * the template's own stored field values over the activity definition's
- * current ones, field by field — mirrors
- * `ServiceRequestQuestion.tsx`'s `handleAddSingleServiceRequest` AND
- * `handleApplyTemplate`, which duplicated this exact merge; here it is
- * written once; `requester` is never read off the template (legacy never
- * stored it either — a template's `service_request` shape has no
- * `requester` field) and always resolves to the applying clinician.
+ * A row resolved from a template entry plus the FULL activity definition
+ * fetched by its slug (a template only stores the slug). Template-stored
+ * values win over the definition's current ones, field by field. `requester`
+ * is never read off the template — its shape has no such field — and always
+ * resolves to the applying clinician.
  */
 export function serviceRequestRowFromTemplate(
   templateServiceRequest: ActivityDefinitionTemplateSpec,
@@ -199,16 +165,9 @@ export function serviceRequestRowFromTemplate(
 }
 
 /**
- * The inverse of `serviceRequestRowFromTemplate` — a row → the plain data a
- * template stores, dropping the row's own `encounter`/`activity_definition_
- * object` (instance-specific; re-derived on apply) the same way
- * `ServiceRequestQuestion.tsx`'s exported `buildServiceRequestForTemplate`
- * did. Kept here, not re-derived inline at each of this port's two call
- * sites (the `useAddToTemplate` `toTemplateSpec` option and the "current
- * activity definitions" list handed to `ManageResponseTemplatesSheet`) —
- * legacy itself built this shape TWICE, once via the function and once
- * inlined by hand at the `currentActivityDefinitions` prop
- * (`ServiceRequestQuestion.tsx:1039-1055`); one function, two callers here.
+ * Inverse of `serviceRequestRowFromTemplate`: row → the plain data a
+ * template stores, dropping `encounter`/`activity_definition_object`
+ * (instance-specific; re-derived on apply).
  */
 export function buildServiceRequestForTemplate(
   row: ServiceRequestRow,
@@ -233,13 +192,9 @@ export function buildServiceRequestForTemplate(
 }
 
 /**
- * The ONE strip, mirroring `chargeItem/model.ts`'s `stripDisplay` doc
- * comment: `activity_definition_object` never reaches the wire, and
- * `requester` narrows from the display-carrying `UserReadMinimal` to the
- * plain id the `apply_activity_definition/` endpoint's
- * `ServiceRequestApplyActivityDefinitionSpec` expects. Exported for
- * `model.test.ts` to pin the exact remaining key set, not inferred from
- * this comment.
+ * `activity_definition_object` never reaches the wire, and `requester`
+ * narrows from the display-carrying `UserReadMinimal` to the plain id
+ * `ServiceRequestApplyActivityDefinitionSpec` expects.
  */
 export function stripDisplay(
   row: ServiceRequestRow,
@@ -256,28 +211,15 @@ export function stripDisplay(
 
 /**
  * Service requests are applied via `apply_activity_definition/`, never
- * prefetched or amended in place — there is no server row a v2
- * service-request section could ever have fetched, so (mirrors
- * `chargeItem/model.ts`'s identical reasoning, restated here rather than
- * only cross-referenced per that module's own "state directly" lesson) the
- * baseline this differ resolves against is GENUINELY, PERMANENTLY empty, an
- * explicit `new Map()` rather than the bare `{}` that defaults `baseline`
- * to `undefined` ("still loading or errored"). `updates`/`removes` are
- * never read: an `update` would mean a rowId the server already has, and
- * this create-only endpoint has no verb for that; a `remove` for a rowId
- * that never reached the server carries nothing worth sending (the
- * ordinary add-then-remove path annihilates the pair inside the reducer
- * before it ever reaches a log this function sees).
+ * prefetched or amended in place, so the baseline is genuinely, permanently
+ * empty — an explicit `new Map()`, not the `undefined` that means "still
+ * loading or errored". `updates`/`removes` are never read: this create-only
+ * endpoint has no verb for them, and an add-then-remove pair annihilates
+ * inside the reducer before reaching this function.
  *
- * UNLIKE `charge_item`'s single grouped POST (`{ requests: [...] }`), the
- * `apply_activity_definition/` endpoint takes exactly ONE service request
- * per call — mirrors the legacy v1 `buildRequests`
- * (`definitions/serviceRequest.tsx`'s now-superseded contract-1 arm,
- * `serviceRequests.map((serviceRequest) => ({ url, method, body, ... }))`),
- * so this returns one `StructuredBatchEntry` PER created row, all sharing
- * the same `reference_id` (per-question, not per-row — `composeBatch`
- * dispatches every entry in the returned array as its own request
- * regardless of how many share a reference id).
+ * The endpoint takes exactly ONE service request per call, so this returns
+ * one `StructuredBatchEntry` per created row, all sharing the per-question
+ * `reference_id` (`composeBatch` dispatches each entry as its own request).
  */
 export async function toRequests(
   edits: readonly StructuredEdit<ServiceRequestRow>[],
@@ -294,34 +236,11 @@ export async function toRequests(
 }
 
 /**
- * The exact field set legacy's exported (but never wired —
- * `definitions/serviceRequest.tsx`'s own comment names the reason: the
- * validator expected these fields FLAT while the recorded data nests them
- * under `service_request`) `validateServiceRequestQuestion` checked
- * (`SERVICE_REQUEST_FIELDS`, `ServiceRequestQuestion.tsx:114-139`),
- * corrected to read the real, nested shape.
- *
- * REACHABILITY, STATED HONESTLY (matching Batch A/B's own precedent for
- * allergy/symptom, which shipped with NO client `validate()` at all for the
- * identical reason): every field this checks is populated BY CONSTRUCTION
- * the moment a row is created — `newServiceRequestRow`/
- * `serviceRequestRowFromTemplate` above always fill `title`/`status`/
- * `intent`/`priority`/`category`/`code` from the picked activity definition
- * (never optional there) or its own `||` defaults, and today's UI exposes
- * no control that can clear any of them back to falsy. This predicate is
- * therefore NOT independently forced with a live invalid row in this
- * port's mount session; it is exercised directly by `model.test.ts` (which
- * constructs edits with a blank required field the real UI cannot produce)
- * and, unlike allergy/symptom, IS wired into `validate` — the port brief
- * asks specifically for "a correct one," not for parity with legacy's
- * broken-and-silent original, and a defensive check that could never fire
- * costs nothing to keep wired: it stands ready for a malformed template, a
- * migrated pre-v2 draft, or a future editable title/code field, and its
- * render path is real (`priority`/`category` bind to real columns;
- * `title`/`status`/`intent`/`code` bind to nothing and exercise the
- * `StructuredList` unmatched-`field_key` fallback instead — both paths
- * covered by `model.test.ts` wiring these field keys through the real
- * `StructuredList` matcher, `structuredFieldErrors.ts`).
+ * Every field here is populated by construction: the row factories never
+ * leave them falsy and the UI exposes no control that can clear them. This
+ * check defends against malformed templates, restored drafts, or future
+ * editable fields. `priority`/`category` bind to real columns; the rest
+ * surface via `StructuredList`'s unmatched-`field_key` fallback.
  */
 const REQUIRED_SERVICE_REQUEST_FIELDS = [
   "title",
@@ -340,12 +259,9 @@ export interface RequiredFieldMiss {
   fieldKey: RequiredServiceRequestField;
 }
 
-/** Pure predicate — never touches i18next (mirrors `chargeItem/model.ts`'s
- *  `invalidQuantityRowIds`, "the only place it becomes a translated,
- *  row_id-keyed `QuestionValidationError` is `definitions/
- *  serviceRequest.tsx`"). A `remove` edit is never reported — the row is on
- *  its way out, not something the clinician still needs to fix (same
- *  exclusion `invalidQuantityRowIds` applies). */
+/** Pure predicate — `definitions/serviceRequest.tsx` is the only place a
+ *  miss becomes a translated, row_id-keyed error. A `remove` edit is never
+ *  reported: the row is on its way out, not something left to fix. */
 export function requiredServiceRequestFieldMisses(
   edits: readonly StructuredEdit<ServiceRequestRow>[],
 ): RequiredFieldMiss[] {

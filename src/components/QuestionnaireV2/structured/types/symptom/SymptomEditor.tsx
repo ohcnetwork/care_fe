@@ -56,11 +56,10 @@ import {
   type SymptomRow,
 } from "./model";
 
-/** Symptoms are prefetched per ENCOUNTER (unlike `allergy_intolerance`,
- *  which is patient-wide) — mirrors `SymptomQuestion.tsx`'s own
- *  `patientSymptoms` query (`:668-678`, `encounter: encounterId`). While
- *  the query is loading or errored the hook gets `undefined` (BASELINE
- *  COMPLETENESS CONTRACT), never `[]`. */
+/** Encounter-scoped fetch of the first 100 symptoms — the baseline is
+ *  capped at `limit: 100`, not guaranteed complete (unlike
+ *  `allergy_intolerance`, the fetch is not patient-wide). While the query
+ *  is loading or errored the hook gets `undefined`, never `[]`. */
 function useSymptomBaseline(
   patientId: string | undefined,
   encounterId: string | undefined,
@@ -255,12 +254,6 @@ export function SymptomEditor({
   const verificationOptions = useVerificationStatusOptions();
   const baseline = useSymptomBaseline(patientId, encounterId);
 
-  // No explicit type arguments — `TRow` infers from `projectValues`, `Mode`
-  // defaults to "list" (symptom is a genuine list, like allergy_intolerance).
-  // `duplicateKey: symptomDuplicateKey` is the whole duplicate-code guard —
-  // `core/duplicates.ts`'s `findDuplicateCandidates` does the actual work
-  // (including excluding entered_in_error rows from the seen set); nothing
-  // here re-implements it.
   const list = useStructuredRows({
     questionId: question.id,
     baseline,
@@ -303,16 +296,10 @@ export function SymptomEditor({
                 },
               })
             }
-            // ONSET IS FROZEN ONCE A ROW HAS A SERVER ID (this port's
-            // brief) — `origin === "baseline"` is the `ProjectedRow`
-            // replacement for legacy's `!!symptom.id` check
-            // (`SymptomQuestion.tsx:358,504,575`; `core/types.ts`'s
-            // `ProjectedRow.origin` doc comment names this exact
-            // substitution). A historical symptom reused via
-            // `toReusedSymptomRow` has its id stripped and is genuinely
-            // `origin: "added"`, so its onset stays editable — matching
-            // legacy, which never disabled onset for a row added via
-            // `handleAddHistoricalSymptoms` either.
+            // Onset is frozen once the row is a persisted baseline record.
+            // A historical symptom re-added via `toReusedSymptomRow` has
+            // its id stripped (origin "added"), so its onset stays
+            // editable.
             disabled={cellDisabled || row.origin === "baseline"}
           />
         ),
@@ -381,9 +368,7 @@ export function SymptomEditor({
     count: list.rows.length + 1,
   });
 
-  // `list.addRow` already rejects a duplicate code via the `duplicateKey`
-  // wired above — this only surfaces the same user-visible warning legacy's
-  // `checkForDuplicateSymptom` toasted (`SymptomQuestion.tsx:643`).
+  // Surfaces the `duplicateKey` rejection as a warning toast.
   const handleAdd = useCallback(
     (row: SymptomRow) => {
       const result = list.addRow(row);
@@ -394,12 +379,9 @@ export function SymptomEditor({
     [list, t],
   );
 
-  // Mirrors `handleAddHistoricalSymptoms` (`SymptomQuestion.tsx:772-792`):
-  // every selected historical symptom is re-added as a NEW row
-  // (`toReusedSymptomRow` strips the source's server id), and the SAME
-  // duplicate guard `addRow` uses rejects any that collide with a symptom
-  // already on this list — one toast per rejected duplicate, matching
-  // legacy's per-candidate `checkForDuplicateSymptom` warning exactly.
+  // Each selected historical symptom is re-added as a new row; the same
+  // duplicate guard as `addRow` rejects collisions, one toast per
+  // rejection.
   const handleAddHistorical = useCallback(
     (selected: SymptomRow[]) => {
       if (!encounterId) return;
@@ -421,11 +403,6 @@ export function SymptomEditor({
         droppedEdits={list.droppedEdits}
         rowLabel={(row) => row.code.display}
       />
-      {/* Kept CONVENTIONAL, not collapsed into a shared helper — this
-          port's brief defers the four `HistoricalRecordSelector` configs'
-          (allergy/symptom/diagnosis/medication_statement) consolidation to
-          a later batch. This is `SymptomQuestion.tsx:801-911`'s config,
-          translated field-for-field onto `toSymptomRow`/`SymptomRow`. */}
       <div className="flex flex-wrap items-center justify-end">
         <HistoricalRecordSelector<SymptomRow>
           title={t("past_symptoms")}
@@ -558,26 +535,30 @@ export function SymptomEditor({
             .filter((part): part is string => !!part)
             .join(" · ")
         }
-        // Mirrors legacy's disable rule: an already entered-in-error row
-        // freezes entirely (matches the default `canRemoveRow`,
-        // `!row.softDeleted`, which already hides Remove for it).
+        // An entered-in-error row freezes entirely.
         rowDisabled={(row) => row.softDeleted}
+        // `newSymptomRow` bakes the current encounter into the row and
+        // `toRequests` refuses to submit without one — with no encounter
+        // in context the add control is omitted rather than creating rows
+        // that could never save.
         addControl={
-          <AddEntityControl<SymptomRow>
-            system="system-condition-code"
-            entityType="symptom"
-            placeholder={addSymptomPlaceholder}
-            disabled={disabled}
-            createRow={(code: Code) => newSymptomRow(code, encounterId!)}
-            onAdd={handleAdd}
-            renderStagedRow={(staged, updateStaged) => (
-              <StagedSymptomFields
-                row={staged}
-                onUpdate={updateStaged}
-                disabled={disabled}
-              />
-            )}
-          />
+          encounterId ? (
+            <AddEntityControl<SymptomRow>
+              system="system-condition-code"
+              entityType="symptom"
+              placeholder={addSymptomPlaceholder}
+              disabled={disabled}
+              createRow={(code: Code) => newSymptomRow(code, encounterId)}
+              onAdd={handleAdd}
+              renderStagedRow={(staged, updateStaged) => (
+                <StagedSymptomFields
+                  row={staged}
+                  onUpdate={updateStaged}
+                  disabled={disabled}
+                />
+              )}
+            />
+          ) : undefined
         }
       />
     </div>

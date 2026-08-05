@@ -15,21 +15,19 @@ export interface StructuredFieldErrorMatch {
 
 /**
  * The ONE matcher. Exported separately from the component so
- * `StructuredList` can compute a cell's invalid ring and `aria-describedby`
- * without rendering anything, and so a type module that owns its own error
- * display uses identical semantics. Replaces all three legacy mechanisms:
- * `QuestionTypes/FieldError.tsx` (index-keyed, message), the
- * `useFieldError` ring (`types/questionnaire/validation.ts:25-49`, no
- * message at all), and "nothing".
+ * `StructuredList` can compute a cell's invalid ring and
+ * `aria-describedby` without rendering anything, and so a type module
+ * that owns its own error display uses identical semantics.
  *
- * Row identity, in precedence order — the dual-contract shim's error half:
+ * Row identity, in precedence order:
  *  1. the error carries `row_id`  → it must equal `match.rowId`;
- *  2. else it carries `index`     → it must equal `match.rowIndex`;
- *  3. else (neither)              → it binds ONLY to a section-level slot,
- *     i.e. one with no row identity of its own.
+ *  2. else it carries `index`     → it must equal `match.rowIndex`
+ *     (v1/server errors are index-keyed; this clause and `rowIndex` go
+ *     when those do);
+ *  3. else (neither)              → it binds ONLY to a section-level
+ *     slot, i.e. one with no row identity of its own.
  * Rule 3 in both directions is what stops a section-level slot from
- * swallowing row errors and vice versa. The `index` clause and `rowIndex`
- * go with the shim in Phase 5.
+ * swallowing row errors and vice versa.
  */
 export function selectStructuredFieldErrors(
   errors: readonly QuestionValidationError[],
@@ -38,11 +36,10 @@ export function selectStructuredFieldErrors(
   return errors.filter((error) => {
     if (error.question_id !== questionId) return false;
     // Falsy, not `=== undefined` — aligned with `QuestionBlock.tsx`'s own
-    // "does this error have a field key" check (REVIEW FIX, minor): an
-    // error with `field_key: ""` must read as section-level to BOTH sites,
-    // or it would vanish from the block list (which keeps only fieldless
-    // errors) without ever matching here either (`""` binds no real field
-    // key), disappearing entirely instead of merely being section-level.
+    // "does this error have a field key" check: an error with
+    // `field_key: ""` must read as section-level at BOTH sites, or it
+    // disappears entirely (kept out of the block list yet matching no
+    // real field key here).
     if (!error.field_key) return false;
     if (!fieldKeys.includes(error.field_key)) return false;
     if (error.row_id !== undefined) return error.row_id === rowId;

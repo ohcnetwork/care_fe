@@ -42,23 +42,15 @@ import {
   type AppointmentRow,
 } from "./model";
 
-/** Appointment is create-only — there is no baseline row to prefetch, ever
- *  (`AppointmentQuestion.tsx` only ever read the response). Module scope,
- *  like `projectValues`: a fresh `[]` literal on every render would be a
- *  new baseline identity each time, defeating the hook's own `useMemo` on
- *  it. Passed explicitly (rather than omitted) so the honest complete set
- *  — "the server confirmed zero rows", per the BASELINE COMPLETENESS
- *  CONTRACT — is what the core actually receives, not `undefined` (its
- *  "still loading/errored" signal). See `TimeOfDeathEditor.tsx`'s identical
- *  block for the known orphan-prune trade-off this shares. */
+/** Appointment is create-only — no baseline row exists to prefetch. Module
+ *  scope so the baseline identity is stable; passed explicitly (not
+ *  omitted) so the core receives "the server confirmed zero rows", not
+ *  `undefined` (its still-loading signal). */
 const NO_BASELINE: readonly BaselineRow<AppointmentRow>[] = [];
 
 /**
- * Everything the SLOT PICKER needs and the appointment row does not.
- * One object, not five `useState`s (`AppointmentQuestion.tsx:112,132,134,
- * 135,164`): the five were interdependent — opening the sheet, changing
- * the resource and picking a date all had to agree — and each setter
- * re-rendered independently.
+ * Everything the SLOT PICKER needs and the appointment row does not — one
+ * object because open/date/resource/staged slot must change together.
  */
 interface SlotPickerState {
   open: boolean;
@@ -125,40 +117,25 @@ export function AppointmentEditor({
   const [picker, setPicker] = useState<SlotPickerState>(() => ({
     open: false,
     date: new Date(),
-    // The atom is read ONCE, as an initial preference (and, since
-    // `scheduleServiceTypeAtom` sets `getOnInit: true`, this first read
-    // already reflects any persisted value — no hydration race to
-    // reconcile against). The legacy effect that re-derived
-    // `selectedResource` whenever the atom changed
-    // (`AppointmentQuestion.tsx:117-123`) is deleted: the atom is written
-    // by another page (`BookAppointmentDetails.tsx`) and by other tabs,
-    // and a half-filled questionnaire has no business resetting its own
-    // picker because of either.
+    // The atom is read once as an initial preference; with `getOnInit: true`,
+    // this first read already reflects any persisted value. The atom can be
+    // written by other pages or tabs, and a half-filled questionnaire should
+    // not reset its picker because of either.
     resource: initialResource(serviceType, currentUser),
     stagedSlotId: undefined,
     slotDetail: undefined,
   }));
 
   /**
-   * REVIEW FIX (CRITICAL — render loop). This used to build a BRAND NEW
-   * object unconditionally (`setPicker((c) => ({...c, ...next}))`), so a
-   * no-op patch (identical content, new reference) still forced a
-   * re-render. Combined with `onSlotSelect`/`onSlotDetailsChange` being
-   * declared as inline arrows in the JSX below (a new function identity
-   * every render), that produced a genuine infinite loop the instant the
-   * slot Sheet opened: `AppointmentSlotPicker`'s own `handleSlotSelect`
-   * (`AppointmentSlotPicker.tsx:71-84`) is `useCallback`'d on
-   * `[onSlotSelect, onSlotDetailsChange, slotsQuery.data]`, and its
-   * auto-select effect (`:129-131`) re-runs whenever `handleSlotSelect`'s
-   * identity changes — which it did, every render, because the inline
-   * arrows never stopped changing identity, because `patch` never stopped
-   * handing back a "new" object. Stabilizing the two callback props alone
-   * (below) would have broken the cycle, but this bail-out is kept too: it
-   * is the right behavior for `patch` independent of that one loop (a
-   * caller re-committing identical content — e.g. the auto-select effect
-   * calling `onSlotSelect(undefined)` again when `stagedSlotId` is already
-   * `undefined` — must not force a render), and it hardens the fix against
-   * any future caller here that reintroduces an unstable callback.
+   * Bails out (returns the SAME object) when a merge changes nothing —
+   * load-bearing, not an optimization: `AppointmentSlotPicker`'s
+   * auto-select effect re-runs whenever its `handleSlotSelect` identity
+   * changes, so an unconditional new state object here plus any unstable
+   * callback prop below becomes an infinite render loop the moment the
+   * Sheet opens. The memoized `handleSlotSelect`/`handleSlotDetailsChange`
+   * below are the other half; the bail-out also keeps a no-op save
+   * (e.g. `onSlotSelect(undefined)` when nothing is staged) from forcing a
+   * render.
    */
   const patch = useCallback((next: Partial<SlotPickerState>) => {
     setPicker((current) => {
@@ -184,13 +161,13 @@ export function AppointmentEditor({
   const tagQueries = useTagConfigs({ ids: row.tags, facilityId });
   const selectedTags = tagQueries
     .map((queryResult) => queryResult.data)
-    .filter(Boolean) as TagConfig[];
+    .filter((data): data is TagConfig => data !== undefined);
 
   // Computed once and reused for the ring, `aria-describedby` AND the
   // rendered message below — the SAME match `StructuredFieldError` makes
-  // internally, so the three can never disagree with each other. Also
-  // fixes `aria-describedby` dangling at a nonexistent id when there is no
-  // error to show (REVIEW FIX, minor).
+  // internally, so the three can never disagree with each other, and
+  // `aria-describedby` never dangles at a nonexistent id when there is no
+  // error to show.
   const [slotError] = selectStructuredFieldErrors(errors, {
     questionId: question.id,
     rowId: SINGLETON_ROW_ID,
@@ -235,8 +212,6 @@ export function AppointmentEditor({
               variant="outline"
               className={cn(
                 "w-full justify-start",
-                // The ring stays; what is new is that the message below it
-                // exists at all.
                 !row.slot_id && !!slotError && "ring-1 ring-red-500",
               )}
               aria-describedby={slotErrorId}
@@ -274,19 +249,14 @@ export function AppointmentEditor({
                 <Button
                   variant="outline"
                   onClick={() =>
-                    // REVIEW FIX (IMPORTANT — Cancel desync). Restoring
-                    // only `stagedSlotId` and leaving `slotDetail` alone
-                    // let a staged-then-cancelled slot's detail (date/time)
-                    // go on being displayed against the row's actually
-                    // committed slot: `SlotTriggerLabel` renders `detail`
-                    // whenever `row.slot_id` is truthy, with nothing
-                    // checking that `detail` is even the SAME slot.
-                    // Restore both together — `stagedSlotId` back to the
-                    // committed `row.slot_id`, and `slotDetail` kept only
-                    // if it already describes THAT slot, otherwise cleared
-                    // (falling back to `SlotTriggerLabel`'s honest
-                    // "selected, no detail" state instead of showing a
-                    // different slot's date/time).
+                    // Restore `stagedSlotId` AND `slotDetail` together:
+                    // `SlotTriggerLabel` renders `detail` whenever
+                    // `row.slot_id` is truthy without checking it
+                    // describes the same slot, so a staged-then-cancelled
+                    // slot's detail would keep displaying against the
+                    // committed slot. Keep the detail only if it describes
+                    // the committed slot; otherwise fall back to the
+                    // "selected, no detail" state.
                     patch({
                       open: false,
                       stagedSlotId: row.slot_id || undefined,
@@ -325,17 +295,11 @@ export function AppointmentEditor({
 }
 
 /**
- * The trigger's three honest states. The legacy component had only two
- * (`AppointmentQuestion.tsx:209-243`) and therefore lied about the third:
- * `value.slot_id && selectedSlot` is false after any reload or draft
- * restore, because `selectedSlot` only ever came from the picker's
- * `onSlotDetailsChange` and there is no slot-retrieve endpoint to rehydrate
- * it from (`scheduleApi.slots` has `get_slots_for_day`,
- * `availability_stats` and `create_appointment` — nothing keyed by slot
- * id). So a restored appointment WITH a slot rendered "Select appointment
- * slot", reading as unset. It is now a distinct state.
- * BACKEND HAND-OFF: a slot-retrieve endpoint would let this show the real
- * date and time after a restore.
+ * The trigger's three states. `row.slot_id && detail` is false after any
+ * reload or draft restore because detail only comes from the picker and there
+ * is no slot-retrieve endpoint to rehydrate it by slot id. A row with a slot
+ * but no detail must still read as selected; a slot-retrieve endpoint would
+ * let this show the real date and time after restore.
  */
 function SlotTriggerLabel({
   row,

@@ -39,7 +39,7 @@ const slugCache = new Map<string, string>();
 
 /**
  * Resolves a fixture questionnaire's id from its slug. The detail endpoint
- * looks up by external_id only (ENG-737 dropped slug lookup) and the list
+ * looks up by external_id only (slug lookup is not supported) and the list
  * has no slug filter, so this lists broadly and matches client-side.
  */
 export async function getQuestionnaireIdBySlug(slug: string): Promise<string> {

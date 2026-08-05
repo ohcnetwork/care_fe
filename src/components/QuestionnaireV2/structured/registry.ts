@@ -2,7 +2,10 @@ import type { TFunction } from "i18next";
 import type { ComponentType } from "react";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponseValue,
+} from "@/types/questionnaire/form";
 import type { SubjectType } from "@/types/questionnaire/questionnaire";
 import type {
   StructuredEditRecord,
@@ -25,7 +28,6 @@ import { serviceRequestDefinition } from "./definitions/serviceRequest";
 import { symptomDefinition } from "./definitions/symptom";
 import { timeOfDeathDefinition } from "./definitions/timeOfDeath";
 import type {
-  DataTypeFor,
   StructuredBatchEntry,
   StructuredContextKey,
   StructuredDraftPolicy,
@@ -67,24 +69,10 @@ export function structuredDefinitionFor<K extends StructuredQuestionType>(
 
 /**
  * The recorded entries for a structured question — `values[0].value` is
- * the array that question's own component wrote. The cast is the module's
- * single sanctioned narrowing: the registry's key-correlation guarantees
- * the component that produced the value matches `type`.
- */
-export function structuredDataOf<K extends StructuredQuestionType>(
-  type: K,
-  response: QuestionnaireResponse | undefined,
-): DataTypeFor<K>[] {
-  if (response?.structured_type !== type) return [];
-  const raw = response.values?.[0]?.value;
-  return Array.isArray(raw) ? (raw as DataTypeFor<K>[]) : [];
-}
-
-/**
- * The same entries, unnarrowed — what resolver consumers read. A plugin's
- * data shape is opaque to the host (only the plugin's own component,
- * `validate` and `toRequests` interpret it), so there is nothing to
- * narrow to and `unknown[]` is the honest type.
+ * the array that question's own component wrote — read unnarrowed. A
+ * plugin's data shape is opaque to the host (only the plugin's own
+ * component, `validate` and `toRequests` interpret it), so there is
+ * nothing to narrow to and `unknown[]` is the honest type.
  */
 export function structuredDataAny(
   response: QuestionnaireResponse | undefined,
@@ -94,18 +82,27 @@ export function structuredDataAny(
 }
 
 /**
- * One structured type as every consumer sees it, whether it ships with CARE
- * or arrives from a plugin at runtime. Rows/edits read as `unknown[]`/
- * `StructuredEditRecord[]` — core's compile-time key correlation
- * (`K → Definition<K>`) cannot survive a union with runtime-registered
- * plugin members, so each definition's own `validate`/`toRequests` is the
- * only code that interprets them; core's own files still author against
- * `DataTypeFor<K>`.
- *
- * `contract: 2` is a fixed literal every registration carries (core and
- * plugin alike) — see `StructuredTypeDefinition`'s own doc comment
- * (`./types.ts`) for why the field survives as a version tag rather than a
- * discriminant now that the legacy contract is gone.
+ * The write-side inverse of {@link structuredDataAny}: wraps projected
+ * rows back into the `values` array a structured response stores. The
+ * cast is this module's sanctioned narrowing for a GENERIC writer:
+ * `ResponseValue`'s structured arms are keyed by core type names with
+ * per-type row arrays, but a namespaced plugin type is no union arm at
+ * all and its rows are opaque to the host, so there is nothing honest to
+ * narrow to. Readers recover the rows via {@link structuredDataAny},
+ * which never trusts the arm anyway.
+ */
+export function projectionResponseValues(
+  type: string,
+  rows: readonly unknown[],
+): ResponseValue[] {
+  if (rows.length === 0) return [];
+  return [{ type, value: rows }] as unknown as ResponseValue[];
+}
+
+/**
+ * One structured type as every consumer sees it, whether built in or
+ * registered by a plugin. Rows and edits are type-erased here; each
+ * definition's own validation and request builder interprets them.
  */
 export interface ResolvedStructuredType {
   type: string;
@@ -182,42 +179,11 @@ export function resolveStructuredType(
 type StructuredSubjectContext = Partial<Record<StructuredContextKey, string>>;
 
 /**
- * Why a structured question's slot is (or is not) showing an input.
- *
- * PARITY REQUIREMENT: `StructuredSlot` renders from this, `composeBatch`
- * skips any non-`ready` state from it, and both submit-time validators
- * (`form/validation.ts`'s `structuredQuestionIsAnswerable`,
- * `fill/submit/validateStructured.ts`'s `collectStructuredErrors`) resolve
- * the very same state before deciding anything. One resolver, four
- * consumers — what the clinician sees on screen and what the submit
- * button allows can never drift apart.
- *
- * ONE DOCUMENTED EXCEPTION on the compose side: `composeBatch` drops a
- * "ready" CORE type's requests anyway when the session's runtime subject
- * isn't patient-bound (`!patientBound && definition.source !== "plugin"`,
- * `composeBatch.ts` ~166-176) — core types are patient-bound by
- * construction, but "ready" only reads the QUESTIONNAIRE's declared
- * `subject_type`, not the session's actual runtime subject, so that one
- * divergence needs its own gate on top of this resolver. Neither
- * validator mirrors it (a "ready" core type on a patient/encounter
- * questionnaire is always patient-bound in practice, so the gap is inert
- * today), which means "ready" is necessary but not always sufficient for
- * `composeBatch` to actually submit a core type's data — plugin types are
- * unaffected, since the studio only offers them a resource subject to
- * begin with.
- *
- * THE INVARIANT (reversed from this module's original fail-open design): a
- * slot showing a notice instead of an input is either
- *   - non-required — submittable as a no-op. The question is simply
- *     skipped, exactly like `composeBatch`, and its notice tells the
- *     clinician its entries will not be submitted; or
- *   - required — named in a blocking `QuestionValidationError`
- *     (`structured_section_unavailable_required`) that stops the WHOLE
- *     submit until the slot resolves.
- * Never silently dropped: fail-open (a required question with no input
- * quietly waived, its section vanishing behind a success toast) is what
- * this reverses. A broken required slot deadlocking the *save* is the
- * correct outcome now — the wrong data was submitting complete before.
+ * Why a structured question slot is or is not showing an input. `StructuredSlot`,
+ * batch composition, and submit-time validators all resolve this state so the
+ * UI and submit blocking rules stay aligned. Non-ready required slots produce a
+ * blocking `structured_section_unavailable_required` error; non-required slots
+ * are skipped as no-ops.
  */
 export type StructuredSlotState =
   | { kind: "ready"; definition: ResolvedStructuredType }

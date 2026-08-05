@@ -107,9 +107,9 @@ describe("rowHasBoundError", () => {
     );
   });
 
-  it("an UNMATCHED field_key (no column owns it) still counts — the Task-4 Critical class one validator key away", () => {
+  it("an UNMATCHED field_key (no column owns it) still counts as a bound error", () => {
     // Reproduces allergy/symptom/diagnosis's shared `note` field: it lives
-    // at `placement: "row"`, which has no column of its own in Phase 2/3.
+    // at `placement: "row"`, which has no column of its own.
     assert.equal(
       rowHasBoundError(
         [{ key: "quantity" }],

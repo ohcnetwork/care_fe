@@ -55,26 +55,13 @@ import {
   type ServiceRequestRow,
 } from "./model";
 
-/** Sum of every linked charge-item definition's BASE price — the same
- *  computation `ServiceRequestQuestion.tsx:229-236` ran inline in the
- *  collapsed row header. Deliberately NOT in `model.ts` — see that
- *  module's own comment at this exact boundary: `@/Utils/decimal` reads
- *  `care.config.ts`'s `import.meta.env`, which crashes `model.test.ts`
- *  under this repo's plain-`node:test` unit harness. This file is never
- *  imported by that harness, so it is the safe home for this helper.
- *
- *  `?? []` is NOT defensive filler — verified live (mount session): the
- *  `activity_definition/` LIST endpoint (`listActivityDefinition`, what
- *  `ResourceDefinitionCategoryPicker` actually calls to hand this editor an
- *  `ActivityDefinitionReadSpec`) omits `charge_item_definitions` entirely
- *  for at least one real fixture ("Complete Blood Count (CBC) Panel"),
- *  unlike the single-item RETRIEVE endpoint, even though both share the
- *  same TS response type. Picking that definition threw `Cannot read
- *  properties of undefined (reading 'reduce')` out of `rowSummary`,
- *  tripping `StructuredSlot`'s plugin error boundary and hard-blocking the
- *  whole section ("This section couldn't be displayed... required — the
- *  form can't be saved"). `newServiceRequestRow`/`serviceRequestRowFromTemplate`
- *  never touch this field, so this is the only call site that needed it. */
+/** Sum of every linked charge-item definition's BASE price. Deliberately
+ *  NOT in `model.ts`: `@/Utils/decimal` reads `care.config.ts`'s
+ *  `import.meta.env`, which crashes `model.test.ts` under the plain
+ *  node:test harness. `?? []` is required — the activity_definition LIST
+ *  endpoint omits `charge_item_definitions` for some records even though it
+ *  shares the retrieve endpoint's TS type; without the fallback, rendering
+ *  a picked definition throws and trips the section error boundary. */
 function activityDefinitionPrice(
   activityDefinition: ActivityDefinitionReadSpec,
 ): Decimal {
@@ -85,18 +72,14 @@ function activityDefinitionPrice(
   );
 }
 
-/** Service requests are applied, never prefetched — there is no server row
- *  to convert into a baseline, ever (the legacy widget only ever wrote a
- *  response). Module scope, like `projectValues` — a fresh `[]` literal on
- *  every render would defeat `useStructuredRows`'s own memoization of it.
- *  Mirrors `ChargeItemEditor.tsx`'s `NO_BASELINE`. */
+/** Service requests are applied, never prefetched, so there is no server row
+ *  to convert into a baseline. Module scope, like `projectValues` — a fresh
+ *  `[]` literal on every render would defeat `useStructuredRows`'s own
+ *  memoization of it. */
 const NO_BASELINE: readonly BaselineRow<ServiceRequestRow>[] = [];
 
 /** Fetches the full activity definition a template only stores by slug,
- *  then resolves it into a row. The ONE fetch both `handleApplyTemplate`
- *  and `handleAddSingleFromTemplate` need — legacy duplicated this same
- *  `query(activityDefinitionApi.retrieveActivityDefinition, ...)` call at
- *  both of its call sites. */
+ *  then resolves it into a row. Both template flows share this fetch. */
 async function resolveTemplateServiceRequest(
   templateServiceRequest: ActivityDefinitionTemplateSpec,
   facilityId: string,
@@ -346,14 +329,9 @@ export function ServiceRequestEditor({
       },
     ];
 
-    // The row-level "Add to template" trigger — `StructuredList`'s actions
-    // cell has room for exactly one action (Remove; anything more is
-    // explicitly deferred to Phase 4, per that primitive's own doc
-    // comment), so this rides inside its own narrow, icon-only column
-    // instead. Only offered when this fill session actually has a
-    // questionnaire slug to scope templates to — mirrors legacy's
-    // `onAddToTemplate={questionnaireSlug ? handleAddToTemplate : undefined}`
-    // gate (`ServiceRequestQuestion.tsx:953`).
+    // The row-level "Add to template" trigger rides in its own narrow,
+    // icon-only column. Only offered when the fill session has a
+    // questionnaire slug to scope templates to.
     if (questionnaireSlug) {
       base.push({
         key: "add_to_template",
@@ -422,16 +400,11 @@ export function ServiceRequestEditor({
             <div className="flex-1 min-w-[200px]">
               <ResourceDefinitionCategoryPicker<ActivityDefinitionReadSpec>
                 facilityId={facilityId!}
-                // The picker is a TRIGGER, not a value holder — mirrors
-                // `ChargeItemEditor.tsx`'s identical use. Unlike legacy
-                // (`ServiceRequestQuestion.tsx:614-675`), the picked
-                // `ActivityDefinitionReadSpec` is used DIRECTLY — no
-                // second `retrieveActivityDefinition` fetch, no
-                // `selectedActivityDefinition`/`activityDefinitionsMap`
-                // component state, no selection effect. The list endpoint
-                // (`listDefinitions`, below) already returns the same
-                // `ActivityDefinitionReadSpec` shape the retrieve endpoint
-                // does.
+                // The picker is a TRIGGER, not a value holder. The picked
+                // `ActivityDefinitionReadSpec` is used directly — the list
+                // endpoint returns the same `ActivityDefinitionReadSpec`
+                // the retrieve endpoint does, so no second fetch or
+                // component selection state is needed.
                 value={undefined}
                 onValueChange={(selected) => {
                   if (!selected || Array.isArray(selected) || !encounterId) {

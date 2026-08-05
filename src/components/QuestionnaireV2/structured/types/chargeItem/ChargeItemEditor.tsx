@@ -35,21 +35,16 @@ import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/charge
 import { newChargeItemRow, projectValues, type ChargeItemRow } from "./model";
 
 /** Charge items are applied, never prefetched — there is no server row to
- *  convert into a baseline, ever (the legacy widget only ever wrote a
- *  response, `ChargeItemQuestion.tsx`'s selection effect). Module scope,
- *  like `projectValues`: a fresh `[]` literal on every render would be a
- *  new baseline identity each time, defeating `useStructuredRows`'s own
- *  memoization of it. Passed explicitly rather than omitted so the honest
- *  complete set — "the server confirmed zero rows," per the BASELINE
- *  COMPLETENESS CONTRACT — is what the core actually receives, not
- *  `undefined` (its "still loading/errored" signal). Mirrors
- *  `AppointmentEditor.tsx`'s `NO_BASELINE`. */
+ *  convert into a baseline, ever. Module scope so the baseline keeps one
+ *  identity across renders (a fresh `[]` literal would defeat
+ *  `useStructuredRows`'s memoization). Passed explicitly so the core
+ *  receives the honest complete set — "the server confirmed zero rows", per
+ *  the BASELINE COMPLETENESS CONTRACT — not `undefined`, its "still
+ *  loading/errored" signal. */
 const NO_BASELINE: readonly BaselineRow<ChargeItemRow>[] = [];
 
-/** The `MonetaryDisplay` + price-breakdown `Popover`, lifted verbatim out
- *  of `ChargeItemQuestion.tsx:124-156` (the `ChargeItemForm`'s price cell)
- *  into a local component here — no behaviour change, just relocated
- *  beside its one caller. */
+/** Price cell: the first price component's amount, with a popover breaking
+ *  down all components. */
 function ChargeItemPrice({
   definition,
 }: {
@@ -65,9 +60,8 @@ function ChargeItemPrice({
         </span>
         {priceComponents.length > 0 && (
           <Popover>
-            {/* REVIEW FIX (Task 6, minor): a bare icon inside a Radix
-                trigger with no `asChild` renders Radix's own default
-                button — which had no accessible name at all. */}
+            {/* Without `asChild`, Radix renders its own button around the
+                bare icon — which otherwise has no accessible name. */}
             <PopoverTrigger aria-label={t("price_breakdown")}>
               <InfoIcon className="h-4 w-4 cursor-pointer text-gray-700" />
             </PopoverTrigger>
@@ -94,13 +88,8 @@ export function ChargeItemEditor({
 }: StructuredInputProps) {
   const { t } = useTranslation();
 
-  // No explicit type arguments — `TRow` infers from `projectValues`, `Mode`
-  // defaults to "list" (charge_item is a genuine list, not a singleton).
   const list = useStructuredRows({
     questionId: question.id,
-    // Create-only: charge items are applied, never prefetched. An explicit
-    // empty baseline is the honest complete set for this type, not a
-    // loading stand-in — see NO_BASELINE's own doc comment.
     baseline: NO_BASELINE,
     projectValues,
     disabled,
@@ -112,9 +101,8 @@ export function ChargeItemEditor({
         key: "item",
         header: t("item"),
         width: "minmax(12rem, 1fr)",
-        // REVIEW FIX (Task 6, minor): the mobile collapsed card's chrome
-        // button already shows this same title via `rowTitle`. Without
-        // this, the expanded card repeated it a second time as an "Item"
+        // The collapsed mobile card already shows this title via `rowTitle`;
+        // hidden here so the expanded card doesn't repeat it as an "Item"
         // field.
         mobileHidden: true,
         render: ({ row }) => row.row.charge_item_definition_object.title,
@@ -177,6 +165,10 @@ export function ChargeItemEditor({
     [t, facilityId],
   );
 
+  // Unreachable per the definition's `requires: ["encounterId", "facilityId"]`
+  // — narrowed once here so the JSX below needs no non-null assertions.
+  if (!facilityId || !encounterId) return null;
+
   return (
     <div className="space-y-2">
       <StructuredDroppedRowsNotice
@@ -195,25 +187,15 @@ export function ChargeItemEditor({
         rowTitle={(row) => row.row.charge_item_definition_object.title}
         addControl={
           <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
-            facilityId={facilityId!}
+            facilityId={facilityId}
             // The picker is a TRIGGER, not a value holder — it never carries
-            // a selection of its own. The legacy component held the pick in
-            // `selectedChargeItemDefinition` and appended the row from a
-            // `useEffect` keyed on it (`ChargeItemQuestion.tsx:211-244`),
-            // then reset the selection inside that SAME effect: a
-            // write-during-effect loop whose dependency array had to list
-            // the response callback to stay correct. Adding the row directly
-            // from `onValueChange` removes both the effect and the second
-            // piece of state.
+            // a selection of its own: the row is appended directly from
+            // onValueChange, so no selection state (and no effect to sync it)
+            // exists.
             value={undefined}
             onValueChange={(selected) => {
-              if (!selected || Array.isArray(selected) || !encounterId) return;
-              list.addRow(
-                newChargeItemRow(
-                  selected as ChargeItemDefinitionRead,
-                  encounterId,
-                ),
-              );
+              if (!selected || Array.isArray(selected)) return;
+              list.addRow(newChargeItemRow(selected, encounterId));
             }}
             placeholder={t("select_charge_item_definition")}
             disabled={disabled}
@@ -221,7 +203,7 @@ export function ChargeItemEditor({
             resourceType={ResourceCategoryResourceType.charge_item_definition}
             listDefinitions={{
               queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
-              pathParams: { facilityId: facilityId! },
+              pathParams: { facilityId },
               queryParams: { status: ChargeItemDefinitionStatus.active },
             }}
             translationBaseKey="charge_item_definition"

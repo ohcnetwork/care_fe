@@ -201,23 +201,14 @@ describe("medication_statement model", () => {
   });
 
   describe("toRequests", () => {
-    it("P1-14: an empty edit log produces ZERO requests", async () => {
-      assert.deepEqual(await toRequests([], CTX), []);
-    });
-
-    it("P1-14: an untouched baseline (several existing medications, nothing edited) still produces ZERO requests — the whole point of this port", async () => {
-      // Simulates a real mount: the editor seeds `useStructuredRows` with
-      // three fetched medication statements as baseline; the clinician
-      // submits the form without ever opening this section. `edits` stays
-      // `[]` regardless of how much baseline exists.
+    it("an empty edit log produces zero requests", async () => {
       assert.deepEqual(await toRequests([], CTX), []);
     });
 
     it("editing ONE of several baseline rows sends ONLY that row — not every prefetched medication", async () => {
-      // P1-14's failure mode made concrete: today's `buildRequests` maps
-      // over the whole projection, so touching row B would resend row A and
-      // row C too — an unrelated concurrent edit to either could be
-      // silently overwritten. The v2 differ only ever sees `edits`.
+      // Only the touched row is sent: untouched prefetched medications must
+      // not be re-sent — a concurrent edit to them could be silently
+      // overwritten.
       const rowB = {
         ...toMedicationStatementRow(serverMedication({ id: "b" })),
         dosage_text: "1000mg once daily",
@@ -533,7 +524,7 @@ describe("medication_statement model", () => {
   });
 
   describe("medicationStatementValidationIssues", () => {
-    it("no issues for an empty edit log", () => {
+    it("no issues for an empty edit log — an untouched baseline never gates submit", () => {
       assert.deepEqual(medicationStatementValidationIssues([]), []);
     });
 
@@ -615,38 +606,10 @@ describe("medication_statement model", () => {
         [],
       );
     });
-
-    it("VALIDATION-SIDE P1-14: an untouched baseline row is never validated, however incomplete — only edits gate submit", () => {
-      // A historical record with a missing dosage that the clinician never
-      // opened this session must not hard-block an unrelated submit. Since
-      // `validate` only ever sees `edits` (never the projection) for
-      // row-scoped errors (N5), an empty edit log is trivially issue-free
-      // regardless of how incomplete the (untouched) baseline is.
-      assert.deepEqual(medicationStatementValidationIssues([]), []);
-    });
-
-    it("only the TOUCHED row is validated when several rows exist", () => {
-      const complete = {
-        ...newMedicationStatementRow(
-          { code: "1", display: "A", system: "s" },
-          "enc-1",
-        ),
-        dosage_text: "500mg",
-        effective_period: { start: "2026-01-01", end: "2026-01-10" },
-      };
-      // "incomplete" (an untouched second baseline row, missing dosage and
-      // period) never appears in `edits` at all — only "complete-row" was
-      // touched this session — so it can never surface an issue no matter
-      // how invalid it would be in isolation.
-      const issues = medicationStatementValidationIssues([
-        update("complete-row", complete),
-      ]);
-      assert.deepEqual(issues, []);
-    });
   });
 });
 
-describe("rowSchema — the assistant write guard (spec A2)", () => {
+describe("rowSchema — the assistant write guard", () => {
   const code = { code: "1", display: "Paracetamol", system: "sys" };
 
   it("accepts a real row", () => {

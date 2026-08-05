@@ -48,12 +48,12 @@ const add = (
  * a sequence of `setRow(patch)` calls, the way `useStructuredRows`'s own
  * `setRow` callback does (`useStructuredRows.ts:583-609`) — not a
  * hand-built `StructuredEdit` literal. `baseline: []`/`new Map()` matches
- * what Task 4 wires for this type (`useStructuredRows.ts`'s own doc comment
- * on `StructuredRowsOptions.baseline` names `appointment` explicitly as a
- * type whose baseline is always `[]`, never `undefined`).
+ * what the editor wires for this type (`useStructuredRows.ts`'s own doc
+ * comment on `StructuredRowsOptions.baseline` names `appointment`
+ * explicitly as a type whose baseline is always `[]`, never `undefined`).
  *
- * READS THE CURRENT ROW THROUGH THE REAL `projectRows` (review finding),
- * not `log[0]` directly: the hook's own `setRow` callback consults
+ * READS THE CURRENT ROW THROUGH THE REAL `projectRows`, not `log[0]`
+ * directly: the hook's own `setRow` callback consults
  * `rows[0]` (`rows = projectRows(baseline, edits, projectOpts)` —
  * `useStructuredRows.ts:341-344,586`), not the raw edit log. Equivalent to
  * indexing `log[0]` for every sequence this helper actually drives (a
@@ -112,21 +112,19 @@ describe("appointment model", () => {
     });
 
     it("does NOT project a wholly blank row, even though the array itself is non-empty", () => {
-      // REGRESSION PIN for the defect class Task 2 shipped and is fixing
-      // for time_of_death: a row with content is never annihilated by the
-      // live reducer (editLog.ts's isEmptyRow wiring), but a restored or
+      // A wholly blank row is never produced by the live reducer
+      // (editLog.ts's isEmptyRow wiring annihilates it), but a restored or
       // hand-edited draft can still carry one (isStructuredEditRecord
-      // validates only rowId/op, never patch content). Projecting it
-      // as-is would make entryHasContent (form/engine/store.ts:372-376)
-      // read the section as ANSWERED while toRequests submits nothing —
-      // the exact silent-drop shape this whole phase exists to eliminate.
+      // validates only rowId/op, never patch content). Projecting it as-is
+      // would make entryHasContent read the section as ANSWERED while
+      // toRequests submits nothing — the exact silent-drop shape.
       assert.deepEqual(projectValues([row()]), []);
     });
 
     it("does NOT project a row whose only content is a garbage slot_id string", () => {
-      // hasValidSlot rejects "undefined"/"null" literals (finding #3); a
-      // row that is otherwise blank except for one of these strings is
-      // still, honestly, nothing the clinician typed.
+      // hasValidSlot rejects "undefined"/"null" literals; a row that is
+      // otherwise blank except for one of these strings is still,
+      // honestly, nothing the clinician typed.
       assert.deepEqual(projectValues([row({ slot_id: "undefined" })]), []);
     });
 
@@ -172,9 +170,8 @@ describe("appointment model", () => {
     });
 
     it("treats a garbage 'undefined' slot_id string as NOT a slot, so an otherwise-blank row is still empty", () => {
-      // Shares hasValidSlot with toRequests/needsSlot (finding #3) —
-      // isEmptyRow must not be fooled by the same stringified-missing-id
-      // bug either.
+      // Shares hasValidSlot with toRequests/needsSlot — isEmptyRow must
+      // not be fooled by the same stringified-missing-id bug either.
       assert.equal(isEmptyRow(row({ slot_id: "undefined" })), true);
     });
   });
@@ -201,9 +198,9 @@ describe("appointment model", () => {
     });
 
     it("P1-16: a reason typed but NO slot picked produces ZERO requests", async () => {
-      // Today `definitions/appointment.tsx:47` would interpolate
-      // `undefined` into `/slots/undefined/create_appointment/`; that 404s
-      // and the atomic batch rolls back every other answer in the submit.
+      // Interpolating an unset slot into
+      // `/slots/undefined/create_appointment/` fails server-side, and the
+      // atomic batch rolls back every other answer in the submit.
       const partial = add({ note: "follow-up", slot_id: "" });
       assert.deepEqual(await toRequests([partial], CTX), []);
     });
@@ -214,9 +211,8 @@ describe("appointment model", () => {
     });
 
     it("a slot_id of the literal string 'undefined' produces ZERO requests, not a request to /slots/undefined/", async () => {
-      // Review finding #3, reproduced directly: a caller that stringifies
-      // a missing id (`String(slot?.id)`) hands us a truthy, non-blank
-      // string that is still not an address.
+      // A caller that stringifies a missing id (`String(slot?.id)`) hands
+      // us a truthy, non-blank string that is still not an address.
       const stringified = add({ note: "follow-up", slot_id: "undefined" });
       assert.deepEqual(await toRequests([stringified], CTX), []);
     });
@@ -236,13 +232,10 @@ describe("appointment model", () => {
     });
 
     it("PROJECTION AND SUBMIT AGREE: a note-only row PROJECTS (visible) but does NOT submit (no slot) — needsSlot is what tells the clinician why", async () => {
-      // Rewritten per review finding #5: the original version of this
-      // test handed the SAME row object to both projectValues and
-      // toRequests, which cannot fail for any implementation that reads
-      // `patch` at all — it never exercised the direction that actually
-      // breaks. This one does: content that is visibly answered but
-      // silently unsubmittable is exactly the P1-16 shape, and the third
-      // leg (needsSlot) is what keeps it from being a SILENT drop.
+      // Exercises the direction that actually breaks: content that is
+      // visibly answered but silently unsubmittable is exactly the
+      // no-slot shape, and needsSlot is the leg that keeps it from being
+      // a silent drop.
       const partial = row({ note: "follow-up", tags: ["t1"] });
       const edits = [add({ note: "follow-up", tags: ["t1"] })];
 
@@ -319,17 +312,14 @@ describe("appointment model", () => {
       );
     });
 
-    it("CLOSED GAP (formerly KNOWN GAP): fed RAW, a doubly-malformed log still makes projectRows and resolveChanges (via toRequests) pick DIFFERENT rows...", async () => {
-      // ...which is exactly why neither loop is the fix. `resolveChanges`
-      // dispatches "a" at its FIRST occurrence (index 0) but resolves its
-      // CONTENT from the last-write-wins map (`aLast`), while `projectRows`'
-      // add loop pushes "a" at its LAST occurrence (index 2) — so `rows[0]`
-      // is "b"'s entry (pushed at index 1, before "a"'s last occurrence at
-      // index 2) while `resolveChanges().creates[0]` is "a"'s LATEST
-      // content. This part of the test is UNCHANGED from the original
-      // "KNOWN GAP" case — it still demonstrates the raw disagreement,
-      // because `projectRows`/`resolveChanges` themselves were deliberately
-      // left untouched by the fix (see the next case).
+    it("a RAW doubly-malformed log makes projectRows and toRequests pick DIFFERENT rows", async () => {
+      // `resolveChanges` dispatches "a" at its FIRST occurrence (index 0)
+      // but resolves its CONTENT from the last-write-wins map (`aLast`),
+      // while `projectRows`' add loop pushes "a" at its LAST occurrence
+      // (index 2) — so `rows[0]` is "b"'s entry (pushed at index 1) while
+      // `resolveChanges().creates[0]` is "a"'s latest content. Every real
+      // ingestion path sanitizes first (see the next case), so this shape
+      // never reaches either function through the app.
       const aFirst = row({ note: "a-first", slot_id: "sA1" });
       const bOnly = row({ note: "b-only", slot_id: "sB" });
       const aLast = row({ note: "a-last", slot_id: "sA2" });
@@ -359,20 +349,13 @@ describe("appointment model", () => {
       });
     });
 
-    it("CLOSED GAP: once the SAME doubly-malformed log passes through sanitizeStructuredEditLog (the real ingestion boundary), projectRows and toRequests AGREE", async () => {
-      // Master plan "Carry-forwards out of Phase 1" item 1's actual fix:
-      // `structured/core/useStructuredRows.ts`'s `edits` derivation and
-      // `fill/submit/composeStructured.ts`'s `structuredEditsOf` both run
-      // `response.edits` through `sanitizeStructuredEditLog`
-      // (`types/questionnaire/structured.ts`) before it ever reaches
-      // `projectRows`/`resolveChanges` — so through any REAL app pathway,
-      // the raw log the previous case feeds directly to those two
-      // functions can never arrive un-deduplicated in the first place.
-      // Sanitizing collapses rowId "a" to ONE entry — last content
-      // (`aLast`), first position — which is exactly what makes the two
-      // loops land on the SAME row: `projectRows`' add loop has nothing
-      // left to disagree about once each rowId appears at most once, and
-      // `resolveChanges` was already resolving "a"'s content this way.
+    it("after sanitizeStructuredEditLog (the real ingestion boundary), projectRows and toRequests AGREE on the same log", async () => {
+      // Every real ingestion path — `useStructuredRows`'s `edits`
+      // derivation and `composeStructured.ts`'s `structuredEditsOf` — runs
+      // `response.edits` through `sanitizeStructuredEditLog` before it
+      // ever reaches `projectRows`/`resolveChanges`. Sanitizing collapses
+      // rowId "a" to ONE entry — last content (`aLast`), first position —
+      // after which the two loops have nothing to disagree about.
       const aFirst = row({ note: "a-first", slot_id: "sA1" });
       const bOnly = row({ note: "b-only", slot_id: "sB" });
       const aLast = row({ note: "a-last", slot_id: "sA2" });
@@ -547,7 +530,7 @@ describe("appointment model", () => {
   });
 });
 
-describe("rowSchema — the assistant write guard (spec A2)", () => {
+describe("rowSchema — the assistant write guard", () => {
   it("accepts a real row", () => {
     assert.equal(
       rowSchema.safeParse({

@@ -59,15 +59,14 @@ function buildSeededDraft(userId: string) {
 test.describe("Fill draft lifecycle at the login form", () => {
   // One test, deliberately sequential: discovering the real admin user id
   // (needed to seed a same-user draft correctly) requires an ordinary
-  // login first, so the id-discovery phase and the actual scenario under
-  // test cannot be split into independent `test()` blocks without either
-  // re-authenticating twice or hardcoding a backend-specific id. A single
-  // test keeps that dependency explicit instead of hiding it behind
-  // Playwright's test-level parallelism.
+  // login first, so id discovery and the actual scenario cannot be split
+  // into independent `test()` blocks without either re-authenticating twice
+  // or hardcoding a backend-specific id. A single test keeps that dependency
+  // explicit instead of hiding it behind Playwright's test-level parallelism.
   test("an other-user draft is cleared on successful login; a failed login and the same user's own draft both survive", async ({
     page,
   }) => {
-    // --- Phase 0: discover the real authenticated user id -----------------
+    // Discover the real authenticated user id.
     // `clearOtherUsersFillDrafts` is keyed off `CurrentUserRead.id` (the
     // same value `QuestionnaireFillPage` uses as `FillDraftScope.userId`),
     // not the JWT's own `user_id` claim — the two are not guaranteed to be
@@ -101,7 +100,7 @@ test.describe("Fill draft lifecycle at the login form", () => {
       { accessKey: ACCESS_TOKEN_KEY, refreshKey: REFRESH_TOKEN_KEY },
     );
 
-    // --- Phase 1: seed one OTHER-user draft and one SAME-user draft -------
+    // Seed one other-user draft and one same-user draft.
     const sameUserDraftKey = draftKeyFor(adminUserId);
     await page.addInitScript(
       ({ otherKey, otherValue, sameKey, sameValue }) => {
@@ -129,7 +128,7 @@ test.describe("Fill draft lifecycle at the login form", () => {
       await page.evaluate((key) => localStorage.getItem(key), sameUserDraftKey),
     ).not.toBeNull();
 
-    // --- Phase 2: a mistyped password must not touch either draft --------
+    // A mistyped password must not touch either draft.
     await page.getByRole("textbox", { name: /username/i }).fill("admin");
     await page.getByLabel(/password/i).fill("wrongpassword");
     await page.getByRole("button", { name: /login/i }).click();
@@ -147,7 +146,7 @@ test.describe("Fill draft lifecycle at the login form", () => {
       await page.evaluate((key) => localStorage.getItem(key), sameUserDraftKey),
     ).not.toBeNull();
 
-    // --- Phase 3: sign in correctly as the SAME user (admin) -------------
+    // Sign in correctly as the same user.
     await page.getByLabel(/password/i).fill("admin");
     await page.getByRole("button", { name: /login/i }).click();
     await page.waitForURL(/(?!.*login)/, { timeout: 15000 });

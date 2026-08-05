@@ -37,32 +37,23 @@ export interface AddEntityControlProps<TRow extends object> {
 
 /**
  * Desktop inline `ValueSetSelect` vs. mobile staged `EntitySelectionDrawer`
- * row — the pattern five legacy widgets (allergy, symptom, diagnosis,
- * medication_statement, medication_request) each re-implement around the
- * shared drawer, staging the freshly-picked entity in local `useState` and
- * writing their own confirm handler. `allergy_intolerance` is the first
- * structured-v2 consumer; three more (symptom, diagnosis,
- * medication_statement) adopt this next.
+ * row — the shared add-entity flow for the allergy, symptom, diagnosis and
+ * medication_statement editors.
  *
- * DESKTOP: a selection is added straight away — there is no separate
- * "confirm" step; the row lands in the list already interactive, and every
- * field is editable there (mirrors `AllergyQuestion.tsx`'s
- * `addNewAllergy`).
+ * DESKTOP: a selection is added straight away — no separate confirm step;
+ * the row lands in the list already interactive, every field editable
+ * there.
  *
  * MOBILE: a selection is staged (never committed) until the clinician taps
- * the drawer's own Done button, so a picked-then-abandoned entity (closing
- * the drawer, or picking a different one first) never reaches the list at
- * all. `open` is DERIVED from `staged !== null` — not independent state —
- * so the outer confirm drawer and "is something staged" can never disagree
- * with each other (mirrors `AllergyQuestion.tsx`'s
- * `open={!!newAllergyInSheet}`).
+ * the drawer's own Done button, so a picked-then-abandoned entity never
+ * reaches the list. `open` is DERIVED from `staged !== null` — not
+ * independent state — so the confirm drawer and "is something staged" can
+ * never disagree.
  *
  * `handleConfirm` reads `staged` from the render closure rather than inside
- * `setStaged`'s updater — a functional updater must stay pure, and
- * `onAdd` is a real side effect (it records an edit). Reading the outer
- * `staged` (as the legacy `handleConfirmAllergy` does) is what keeps this
- * safe under StrictMode's dev-only double-invocation of state updaters: an
- * updater-based `onAdd` call would fire twice and add the row twice.
+ * `setStaged`'s updater: a functional updater must stay pure, and `onAdd`
+ * is a real side effect — under StrictMode's dev-only double-invocation an
+ * updater-based `onAdd` would fire twice and add the row twice.
  */
 export function AddEntityControl<TRow extends object>({
   system,

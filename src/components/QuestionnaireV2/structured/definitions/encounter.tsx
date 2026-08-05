@@ -22,36 +22,16 @@ export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
   component: EncounterInput,
   requires: ["encounterId", "facilityId"],
   subjects: ["encounter"],
-  // D2. The row is seven JSON-safe fields, and — unlike v1 — the DRAFT
-  // stores the edit log, not the prefetched encounter, so a restore can no
-  // longer re-PUT a stale server row over someone else's change.
+  // The row is seven JSON-safe fields. Drafts store the edit log, not the
+  // prefetched encounter, so restore cannot re-PUT a stale server row.
   draftPolicy: "serialize",
   contract: 2,
   toRequests,
   rowSchema,
-  // PRODUCT DECISION (Task 8, stated explicitly per the brief): an
-  // untouched section may NOT block Save — `edits.length > 0` gates the
-  // error regardless of the question's own `required` flag. Blocking Save
-  // over server data the clinician never touched — possibly on a
-  // questionnaire that doesn't even carry an encounter question they meant
-  // to open — would be a new, disruptive coupling this port does not
-  // introduce.
-  //
-  // CORRECTED (post-Task-8-review, executed): this is NOT only a
-  // safety net for an untouched row. `requiresDischargeDisposition`
-  // (`structured/types/encounter/model.ts`) is guaranteed satisfied by
-  // every row the editor touches ONLY on a deployment where
-  // `careConfig.defaultDischargeDisposition` is configured. That value is
-  // honestly `| undefined` (`care.config.ts:81-83`) and **this repo's own
-  // `.env.local` does not set it** — on this deployment,
-  // `blocksSaveForMissingDischargeDisposition` fires as LIVE
-  // required-field enforcement on the primary discharge entry point (the
-  // "Mark for discharge" click, or the `?toDischarge` seed), exact legacy
-  // parity: the field renders with its placeholder and the bound error
-  // renders beside it, so the clinician resolves it before Save proceeds.
-  // See `blocksSaveForMissingDischargeDisposition`'s own doc comment in
-  // model.ts for the full reasoning, including where it is NOT full
-  // parity with `appointment`'s `needsSlot`.
+  // An untouched section must not block Save; the error only applies after
+  // the clinician edits the encounter. If no default discharge disposition is
+  // configured, touched discharged inpatient rows require the clinician to
+  // choose one before saving.
   validate: (projection, edits, questionId) =>
     blocksSaveForMissingDischargeDisposition(projection[0], edits)
       ? [

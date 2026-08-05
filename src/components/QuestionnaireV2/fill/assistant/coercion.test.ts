@@ -24,7 +24,7 @@ function question(
   return { link_id: "q1", ...overrides };
 }
 
-describe("coerceInteger — P1-19: whole numbers only", () => {
+describe("coerceInteger — whole numbers only", () => {
   it("accepts a plain integer string", () => {
     const result = coerceInteger("5");
     assert.equal(result.ok, true);
@@ -51,7 +51,7 @@ describe("coerceInteger — P1-19: whole numbers only", () => {
     assert.equal(result.ok && result.value, 5);
   });
 
-  it("rejects a non-integral string — the P1-19 bug", () => {
+  it("rejects a non-integral string", () => {
     const result = coerceInteger("5.5");
     assert.equal(result.ok, false);
   });
@@ -152,7 +152,7 @@ describe("coerceBoolean", () => {
   });
 });
 
-describe("coerceLocalDate — P1-19: strict local YYYY-MM-DD with round-trip validation", () => {
+describe("coerceLocalDate — strict local YYYY-MM-DD with round-trip validation", () => {
   it("parses an ordinary date as a LOCAL midnight, not UTC", () => {
     const result = coerceLocalDate("2024-06-15");
     assert.equal(result.ok, true);
@@ -248,9 +248,14 @@ describe("coerceTime", () => {
 });
 
 describe("coerceChoiceOption", () => {
+  const severeCode = {
+    system: "http://example.org/severity",
+    code: "sev-1",
+    display: "Severe",
+  };
   const options = [
     { value: "mild", display: "Mild" },
-    { value: "severe", display: "Severe", code: { code: "sev-1" } },
+    { value: "severe", display: "Severe", code: severeCode },
   ];
 
   it("matches by exact value", () => {
@@ -263,7 +268,7 @@ describe("coerceChoiceOption", () => {
     const result = coerceChoiceOption("SEVERE", options);
     assert.equal(result.ok, true);
     assert.equal(result.ok && result.value.value, "severe");
-    assert.deepEqual(result.ok && result.value.coding, { code: "sev-1" });
+    assert.deepEqual(result.ok && result.value.coding, severeCode);
   });
 
   it("rejects an option not on the list", () => {
@@ -272,7 +277,7 @@ describe("coerceChoiceOption", () => {
 });
 
 describe("coercePlainResponseValue — the full dispatch", () => {
-  it("rejects a non-integral value for an integer question (P1-19, end to end)", () => {
+  it("rejects a non-integral value for an integer question", () => {
     const result = coercePlainResponseValue(
       question({ type: "integer" }),
       "5.5",
@@ -286,7 +291,7 @@ describe("coercePlainResponseValue — the full dispatch", () => {
     assert.deepEqual(result.ok && result.value, { type: "number", value: 5 });
   });
 
-  it("rejects a rollover date for a date question (P1-19, end to end)", () => {
+  it("rejects a rollover date for a date question", () => {
     const result = coercePlainResponseValue(
       question({ type: "date" }),
       "2024-02-31",
@@ -325,13 +330,15 @@ describe("coercePlainResponseValue — the full dispatch", () => {
   });
 
   it("matches a fixed-option choice and carries its coding", () => {
+    const code = {
+      system: "http://example.org/severity",
+      code: "s1",
+      display: "Severe",
+    };
     const result = coercePlainResponseValue(
       question({
         type: "choice",
-        answer_option: [
-          { value: "mild" },
-          { value: "severe", code: { code: "s1" } as never },
-        ],
+        answer_option: [{ value: "mild" }, { value: "severe", code }],
       }),
       "severe",
     );
@@ -339,7 +346,7 @@ describe("coercePlainResponseValue — the full dispatch", () => {
     assert.deepEqual(result.ok && result.value, {
       type: "string",
       value: "severe",
-      coding: { code: "s1" },
+      coding: code,
     });
   });
 
@@ -351,7 +358,7 @@ describe("coercePlainResponseValue — the full dispatch", () => {
     assert.equal(result.ok, false);
   });
 
-  it("rejects a quantity question (value+unit+coding out of scope, matching the old registry)", () => {
+  it("rejects a quantity question (value+unit+coding out of scope)", () => {
     const result = coercePlainResponseValue(
       question({ type: "quantity" }),
       "5",

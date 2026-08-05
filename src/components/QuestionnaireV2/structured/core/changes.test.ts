@@ -6,13 +6,20 @@ import type { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { resolveChanges } from "./changes";
 import { applyEditToLog } from "./editLog";
 import { SINGLETON_ROW_ID } from "./rowIds";
-import type { EditLog, RowEdit, RowId, SoftDeleteDescriptor } from "./types";
+import {
+  add,
+  baselineOf,
+  makeSymptomRow,
+  remove,
+  update,
+} from "./testFixtures";
+import type { EditLog, RowEdit, SoftDeleteDescriptor } from "./types";
 
 /**
  * A small, deliberately generic row shape for the structural cases (op
- * routing, ordering, purity) — contrast the `SymptomRequest` fixture below,
- * used where the case is shape-sensitive (the soft-delete marker field).
- * Mirrors the fixture style in `editLog.test.ts` / `projectRows.test.ts`.
+ * routing, ordering, purity) — contrast `testFixtures.ts`'s
+ * `makeSymptomRow`, used where the case is shape-sensitive (the
+ * soft-delete marker field).
  */
 interface TestRow {
   id: string;
@@ -23,50 +30,14 @@ function row(id: string, label: string): TestRow {
   return { id, label };
 }
 
-function add<TRow extends object>(rowId: RowId, patch: TRow): RowEdit<TRow> {
-  return { rowId, op: "add", patch };
-}
-function update<TRow extends object>(rowId: RowId, patch: TRow): RowEdit<TRow> {
-  return { rowId, op: "update", patch };
-}
-function remove<TRow extends object>(rowId: RowId, patch: TRow): RowEdit<TRow> {
-  return { rowId, op: "remove", patch };
-}
-
-function baselineOf(
-  entries: ReadonlyArray<readonly [RowId, TestRow]>,
-): ReadonlyMap<RowId, TestRow> {
-  return new Map(entries);
-}
-
-// Realistic row fixture, per the task brief's soft-delete case — see
-// src/types/emr/symptom/symptom.ts. Mirrors projectRows.test.ts's helper.
-function makeSymptomRow(
-  overrides: Partial<SymptomRequest> = {},
-): SymptomRequest {
-  return {
-    id: "symptom-1",
-    clinical_status: "active",
-    verification_status: "confirmed",
-    code: { system: "system-condition-code", code: "R05", display: "Cough" },
-    severity: "moderate",
-    onset: { onset_datetime: "2026-01-01" },
-    recorded_date: "2026-01-01",
-    note: "worse at night",
-    encounter: "encounter-1",
-    category: "problem_list_item",
-    ...overrides,
-  };
-}
-
 describe("resolveChanges — edit log resolved into create/update/remove sets", () => {
-  it("P1-14 PIN: an empty log resolves to three empty sets — a clinician who never touched the section sends zero requests for it", () => {
+  it("an empty log resolves to three empty sets — a clinician who never touched the section sends zero requests for it", () => {
     const result = resolveChanges<TestRow>([], {});
 
     assert.deepEqual(result, { creates: [], updates: [], removes: [] });
   });
 
-  it("P1-14 EXTENDED: a non-empty baseline with an empty log ALSO resolves to three empty sets — existence of server data alone must never manufacture a request", () => {
+  it("a non-empty baseline with an empty log ALSO resolves to three empty sets — existence of server data alone must never manufacture a request", () => {
     const baseline = baselineOf([
       ["r1", row("r1", "real")],
       ["r2", row("r2", "also real")],
@@ -199,14 +170,13 @@ describe("resolveChanges — edit log resolved into create/update/remove sets", 
     });
   });
 
-  describe("REGRESSION (review finding 1) — a remove for a row that never touched the server must not reach the wire as a phantom soft-delete create", () => {
+  describe("a remove for a row that never touched the server must not reach the wire as a phantom soft-delete create", () => {
     it("the exact executed sequence: add(client-only) -> remove (annihilates) -> remove (appends fresh) still drops out of removes once a complete baseline is supplied", () => {
-      // Reproduces editLog.ts's own "FIX (post-review)" note on
-      // `coalesceOntoRemove`: annihilation erases a rowId's LOG HISTORY,
-      // not its existence — a second `remove` for the same rowId reaches
-      // `appendFresh`, which appends unconditionally (it never consults
-      // baseline for a `remove`). So a rowId that never reached the
-      // server CAN surface in a well-formed log with `op: "remove"`.
+      // Annihilation erases a rowId's LOG HISTORY, not its existence: a
+      // second `remove` for the same rowId reaches `appendFresh`, which
+      // appends unconditionally (it never consults baseline for a
+      // `remove`) — so a rowId that never reached the server CAN surface
+      // in a well-formed log with `op: "remove"`.
       const baseline = baselineOf([["someone-else", row("someone-else", "x")]]);
       const clientOnlyId = "client-only-uuid";
 
@@ -247,7 +217,7 @@ describe("resolveChanges — edit log resolved into create/update/remove sets", 
     });
   });
 
-  describe("REGRESSION (review finding 2) — last-write-wins per rowId before dispatching", () => {
+  describe("last-write-wins per rowId before dispatching", () => {
     it("two `add` entries for the same rowId (a malformed restored draft — each record passes isStructuredEditRecord independently) resolve to ONE create, holding the LAST patch", () => {
       const log: EditLog<TestRow> = [
         add("dup", row("dup", "first")),
@@ -276,18 +246,16 @@ describe("resolveChanges — edit log resolved into create/update/remove sets", 
     });
   });
 
-  describe("REGRESSION (review finding 3) — an `add` colliding with a rowId the baseline already has must reclassify to `updates`, not duplicate-create", () => {
+  describe("an `add` colliding with a rowId the baseline already has must reclassify to `updates`, not duplicate-create", () => {
     it("the exact executed sequence: add() while baseline is still loading (undefined, per the BASELINE COMPLETENESS CONTRACT), then a later edit once baseline has resolved — coalesceOntoAdd never revisits baseline, so the log entry stays `op: add` even though the row already exists server-side; resolveChanges must still route it to `updates`", () => {
-      // Reproduces the reviewer's exact scenario for a singleton type
-      // (`encounter`): a clinician starts filling the singleton while its
-      // baseline query is still in flight (Task 7 is required to pass
-      // `undefined`, never `[]`, during that window), so the FIRST edit
-      // for SINGLETON_ROW_ID is recorded as `add`. `coalesceOntoAdd`
-      // (editLog.ts:120-134) is the one coalescing arm that never consults
-      // `baseline` at all — unlike the `update`/`remove` arms — so once
-      // the baseline query resolves and a later edit lands for the SAME
-      // rowId, the entry is still `op: "add"`, forever, even though the
-      // server already has this row.
+      // A singleton (`encounter`) scenario: the clinician starts filling
+      // while the baseline query is in flight (the hook passes `undefined`,
+      // never `[]`, during that window), so the FIRST edit for
+      // SINGLETON_ROW_ID is recorded as `add`. `coalesceOntoAdd` is the one
+      // coalescing arm that never consults `baseline` — unlike the
+      // `update`/`remove` arms — so once the query resolves and a later
+      // edit lands for the SAME rowId, the entry stays `op: "add"` even
+      // though the server already has this row.
       const draftedWhileLoading = row(SINGLETON_ROW_ID, "drafted offline");
       const afterAdd = applyEditToLog(
         [],

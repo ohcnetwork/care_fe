@@ -1,15 +1,12 @@
 import type { EditLog, RowId } from "./types";
 
 /**
- * One dropped row, ready for display. Spec amendment A1's restore notice
- * (`fill/draft/*`, `.superpowers/sdd/closeout1-report.md`) already names a
- * PLAIN answer the compatibility merge could not carry over, computed at
- * load time before the clinician even chooses Resume. A structured row's
- * drop cannot be known that early — it depends on the REFETCHED server
- * baseline, which only resolves once this question's own editor mounts
- * (`useStructuredRows`' `droppedEdits`, populated by its passive
- * orphan-prune effect) — so this is a SEPARATE, later notice, scoped to one
- * question, not a channel into the pre-Resume `DraftRestoreBar`.
+ * One dropped row, ready for display. A structured row's drop depends on
+ * the REFETCHED server baseline, which only resolves once this
+ * question's own editor mounts (`useStructuredRows`' `droppedEdits`) —
+ * so this feeds a separate, per-question notice shown after restore, not
+ * the pre-Resume `DraftRestoreBar`, which can only name plain answers
+ * known at load time.
  */
 export interface DroppedRowLabel {
   rowId: RowId;

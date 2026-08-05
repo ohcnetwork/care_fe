@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
-import { withEntryAt } from "./withEntryAt";
+import { replaceEntryAt } from "./withEntryAt";
 
 export function TimeInput({
   question,
@@ -18,17 +18,13 @@ export function TimeInput({
   const value = (entry?.type === "time" ? entry.value : undefined) ?? "";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (valueIndex === undefined) {
-      updateResponse({
-        values: e.target.value ? [{ type: "time", value: e.target.value }] : [],
-      });
-      return;
-    }
     updateResponse({
-      values: withEntryAt(response?.values, valueIndex, {
-        type: "time",
-        value: e.target.value,
-      }),
+      values: replaceEntryAt(
+        response?.values,
+        valueIndex,
+        { type: "time", value: e.target.value },
+        !e.target.value,
+      ),
     });
   };
 

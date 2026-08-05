@@ -1,57 +1,21 @@
 /**
- * PHASE 2 CARRY-FORWARD FIX — wiring pin, per code review.
+ * Wiring pin for `useStructuredRows`'s passive orphan-prune effect.
  *
  * Every other test in this directory targets a pure sibling; this file is
  * the deliberate exception, because the thing under test IS the wiring:
- * `useStructuredRows`'s passive prune effect is what actually keeps a
- * confirmed-orphan edit out of `response.edits` (the only thing
- * `composeStructuredV2Requests` reads) and out of what `commit` persists to
- * a draft. `pruneOrphanEdits` (`projectRows.test.ts`) proves the FILTER is
- * correct; nothing proved the EFFECT is actually wired to it — delete the
- * effect entirely and every other `test:unit` case stays green. This file
- * is that missing pin.
+ * the passive prune effect is what actually keeps a confirmed-orphan edit
+ * out of `response.edits` (the only thing `composeStructuredV2Requests`
+ * reads) and out of what `commit` persists to a draft. `pruneOrphanEdits`
+ * (`projectRows.test.ts`) proves the FILTER is correct; delete the effect
+ * entirely and every other `test:unit` case stays green. This file is
+ * that missing pin.
  *
- * No test harness for a React hook exists anywhere else in this repo
- * (`test:unit` is plain `node --test`, no jsdom/testing-library
- * dependency), so this file builds a minimal, disposable one from
- * packages already in `package.json` (`jsdom`, `react-dom/client`,
- * `jotai`'s `createStore`) rather than adding a repo-wide dependency for
- * one file. The jsdom globals below are scoped to this process only.
+ * The jsdom bootstrap lives in `jsdomTestEnv.ts`, shared with
+ * `useStructuredRows.initialEditsSeedTiming.test.ts` — the side-effect
+ * import below must stay the FIRST import, before anything that
+ * transitively loads `react-dom`.
  */
-import { JSDOM } from "jsdom";
-
-const dom = new JSDOM("<!doctype html><html><body></body></html>", {
-  url: "http://localhost/",
-});
-
-// `Object.assign` throws on `globalThis.navigator` under Node >= 21 — Node
-// defines its own experimental `navigator` as a getter-only accessor
-// property, which a plain assignment can't overwrite. `defineProperty`
-// replaces the descriptor outright instead of going through `[[Set]]`.
-for (const [key, value] of Object.entries({
-  window: dom.window,
-  document: dom.window.document,
-  navigator: dom.window.navigator,
-  HTMLElement: dom.window.HTMLElement,
-  Node: dom.window.Node,
-  requestAnimationFrame: (cb: FrameRequestCallback) =>
-    setTimeout(() => cb(Date.now()), 0) as unknown as number,
-  cancelAnimationFrame: (id: number) => clearTimeout(id),
-})) {
-  Object.defineProperty(globalThis, key, {
-    value,
-    configurable: true,
-    writable: true,
-  });
-}
-
-// Tells React's `act()` it's allowed to flush effects/renders synchronously
-// instead of warning that "the current testing environment is not
-// configured to support act()" — the flag `react`/`react-dom` check for,
-// not something jsdom or `act` itself infers automatically.
-(
-  globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
-).IS_REACT_ACT_ENVIRONMENT = true;
+import "./jsdomTestEnv";
 
 import assert from "node:assert/strict";
 import { after, describe, it } from "node:test";
@@ -64,6 +28,7 @@ import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { StructuredEditRecord } from "@/types/questionnaire/structured";
 
+import { dom, flushTurns } from "./jsdomTestEnv";
 import type { BaselineRow, ProjectValues } from "./types";
 import {
   useStructuredRows,
@@ -117,13 +82,10 @@ function mountHarness(questionId: string, seed: QuestionnaireResponse) {
   dom.window.document.body.appendChild(container);
   const root: Root = createRoot(container);
 
-  // POST-REVIEW: wrapped in `StrictMode` — the app itself renders under it
-  // (`src/index.tsx`), which double-invokes effects in dev to catch
-  // exactly this class of bug (a non-idempotent effect body). The first
-  // version of this harness did NOT use `StrictMode` and could not have
-  // caught the `droppedEdits` double-count the review found — this rig
-  // would have reported green either way, which is the point of adding it
-  // here rather than trusting the earlier, StrictMode-blind version.
+  // StrictMode, matching the app's own root (`src/index.tsx`): dev's
+  // double-invoke-effects behavior is what catches a non-idempotent
+  // effect body (e.g. a `droppedEdits` double-append) — a
+  // non-StrictMode harness reports green either way.
   const render = () =>
     root.render(
       createElement(
@@ -140,12 +102,7 @@ function mountHarness(questionId: string, seed: QuestionnaireResponse) {
  * Sets the baseline the next render will see, renders, then gives the
  * passive-effect cascade (render → `values`-mirror effect → the prune
  * effect → `commit` → atom write → re-render → both effects settling to
- * no-ops) a few real macrotask turns to finish. A single synchronous
- * `act(() => {...})` was not enough in practice — this hook's two passive
- * effects and jotai's store-driven re-render can land on different
- * flush passes under jsdom/Node's scheduler — so this loops a fixed,
- * generous number of macrotask turns inside one `act(async () => ...)`
- * rather than assuming a single pass converges.
+ * no-ops) a generous number of macrotask turns to finish.
  */
 async function setBaselineAndFlush(
   harness: Pick<ReturnType<typeof mountHarness>, "baselineRef" | "render">,
@@ -154,13 +111,11 @@ async function setBaselineAndFlush(
   harness.baselineRef.current = baseline;
   await act(async () => {
     harness.render();
-    for (let i = 0; i < 10; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    }
+    await flushTurns(10);
   });
 }
 
-describe("useStructuredRows — PHASE 2 CARRY-FORWARD FIX wiring: confirmed orphans are pruned from response.edits and captured in droppedEdits", () => {
+describe("useStructuredRows — confirmed orphans are pruned from response.edits and captured in droppedEdits", () => {
   const cleanups: (() => void)[] = [];
   after(() => {
     for (const cleanup of cleanups) cleanup();
@@ -200,8 +155,8 @@ describe("useStructuredRows — PHASE 2 CARRY-FORWARD FIX wiring: confirmed orph
     assert.deepEqual(resultRef.current?.droppedEdits, []);
 
     // 2. Baseline resolves — a known, empty array: the server confirms
-    //    "vanished" does not exist. This is the exact carry-forward
-    //    scenario: no mutator runs, only baseline moving.
+    //    "vanished" does not exist. This is the exact scenario under test:
+    //    no mutator runs, only baseline moving.
     await setBaselineAndFlush(harness, []);
 
     assert.deepEqual(
@@ -218,7 +173,7 @@ describe("useStructuredRows — PHASE 2 CARRY-FORWARD FIX wiring: confirmed orph
     assert.deepEqual(
       resultRef.current?.droppedEdits,
       [staleEdit],
-      "droppedEdits is the durable record A1's restore notice needs — " +
+      "droppedEdits is the durable record a restore notice needs — " +
         "orphanRowIds alone cannot survive to be read later",
     );
 
@@ -273,7 +228,7 @@ describe("useStructuredRows — PHASE 2 CARRY-FORWARD FIX wiring: confirmed orph
     ]);
   });
 
-  it("resetEdits (Discard) also clears droppedEdits, not just edits — POST-REVIEW decision", async () => {
+  it("resetEdits (Discard) also clears droppedEdits, not just edits", async () => {
     const questionId = "q-orphan-pin-reset";
     const staleEdit: StructuredEditRecord = {
       rowId: "vanished",
@@ -305,9 +260,7 @@ describe("useStructuredRows — PHASE 2 CARRY-FORWARD FIX wiring: confirmed orph
 
     await act(async () => {
       resultRef.current?.resetEdits();
-      for (let i = 0; i < 10; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      }
+      await flushTurns(10);
     });
 
     assert.deepEqual(
@@ -363,21 +316,17 @@ describe("useStructuredRows — PHASE 2 CARRY-FORWARD FIX wiring: confirmed orph
       // `commit` — on every one of these reference changes.
       const current = store.get(responsesAtom)[questionId];
       // The manual write itself, OUTSIDE any flush loop, so the counter
-      // reset immediately below excludes ONLY this one seed write and
-      // nothing an effect does afterward (resetting the counter only
-      // AFTER a combined write+flush block would also discard whatever
-      // the effect itself wrote during that same flush — the mistake an
-      // earlier draft of this test made, which is why it passed even with
-      // the guard removed).
+      // reset immediately below excludes ONLY this one seed write:
+      // resetting only AFTER a combined write+flush block would also
+      // discard whatever the effect itself wrote during that flush,
+      // making the zero-write assertion vacuous.
       store.set(responsesAtom, {
         ...store.get(responsesAtom),
         [questionId]: { ...current, edits: [...(current.edits ?? [])] },
       });
       writeCount = 0;
       await act(async () => {
-        for (let j = 0; j < 5; j++) {
-          await new Promise((resolve) => setTimeout(resolve, 0));
-        }
+        await flushTurns(5);
       });
       assert.equal(
         writeCount,

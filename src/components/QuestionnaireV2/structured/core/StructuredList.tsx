@@ -40,27 +40,15 @@ import type { ProjectedRow, RowId } from "./types";
 
 /**
  * The naming bundle every control inside a cell must carry, spread as a
- * single unit rather than four hand-copied named attributes.
+ * single unit (`{...ctx.controlProps}`) rather than four hand-copied
+ * attributes.
  *
- * WHY THIS EXISTS (Batch A prerequisite — Phase 2 Task 6 review, "IMPORTANT
- * 3", carried forward as an explicit TODO for Phase 3). `ctx.ariaLabel` on
- * its own is UNENFORCEABLE: a column author writes
- * `aria-label={ctx.ariaLabel}` on a custom component (e.g. `UserSelector`,
- * before its own fix) whose props do not declare `"aria-label"`, and
- * TypeScript's excess-property check — verified with a standalone `tsc`
- * probe against this exact shape, not merely asserted — does NOT flag a
- * hyphenated attribute the way it flags an ordinary unknown prop name. The
- * value compiles cleanly and is silently dropped at runtime; no ring, no
- * warning, nothing. The probe holds identically whether the attribute is
- * passed as a named prop OR spread from an object like this one — spreading
- * `{...controlProps}` onto a component that doesn't declare these keys is
- * JUST AS silent. So this bundle does not, by itself, make a future
- * omission loud — see `auditCellAccessibleName` below for the mechanism
- * that actually does. What it buys instead: ONE thing to remember and
- * spread per control (`{...ctx.controlProps}`) instead of four
- * independently-named attributes a column can partially wire (label but not
- * id, id but not aria-invalid, ...) without anything short of a runtime
- * check catching the gap.
+ * TypeScript alone cannot make an omission loud: excess-property checking
+ * does not flag a hyphenated attribute — named or spread — on a component
+ * that doesn't declare it; the value compiles cleanly and is silently
+ * dropped at runtime. The loud half is `auditCellAccessibleName` below.
+ * This bundle just makes it ONE thing to remember per control instead of
+ * four independently wireable attributes.
  */
 export interface StructuredControlProps {
   id: string;
@@ -76,25 +64,13 @@ export interface StructuredControlProps {
  */
 export interface StructuredColumnContext<TRow extends object> {
   row: ProjectedRow<TRow>;
-  /** Record an `update` edit for this row. Built via `useCallback` in
-   *  `StructuredListRow` on `[onUpdateRow, row.rowId]` — never an inline
-   *  arrow, so it stays referentially stable WITHIN a render for as long as
-   *  those two inputs don't change.
-   *
-   *  REVIEW FIX (Task 6, Important 4): this previously claimed to be
-   *  "stable per rowId," full stop. That is false across edits: the
-   *  caller's `onUpdateRow` is normally `useStructuredRows`'s `updateRow`,
-   *  whose own `useCallback` depends on `[disabled, rows, normalizePatch,
-   *  edits, applyOpts, commit]` — `rows`/`edits` change on every keystroke,
-   *  so `updateRow`'s identity (and therefore `update`'s) changes on every
-   *  keystroke too. A column `render` that keys its OWN `useCallback` or
-   *  `useEffect` on `update` will re-run every render regardless — exactly
-   *  the appointment editor's render-loop mechanic (Task 4: an unstable
-   *  callback identity feeding a child's `useCallback`-gated effect).
-   *  `charge_item`'s columns only ever call `update` from a plain
-   *  `onChange`/`onValueChange` handler (never as a hook dependency), which
-   *  is why this port is unaffected — but a future column must not assume
-   *  cross-render stability from this doc comment alone. */
+  /** Record an `update` edit for this row. Built via `useCallback` on
+   *  `[onUpdateRow, row.rowId]`, but NOT stable across edits: the caller's
+   *  `onUpdateRow` (normally `useStructuredRows`'s `updateRow`, whose deps
+   *  include `rows`/`edits`) changes identity on every keystroke, so
+   *  `update` does too. Never key a column's own `useCallback`/`useEffect`
+   *  on it — that is the render-loop mechanic; call it only from plain
+   *  event handlers. */
   update: (patch: Partial<TRow>) => void;
   /** Row-level disabled: the list's `disabled` OR `rowDisabled(row)`. */
   disabled: boolean;
@@ -133,11 +109,9 @@ export interface StructuredColumnContext<TRow extends object> {
 /** ONE definition per field. Drives the desktop `columnheader` + `cell`
  *  AND the mobile caption + stacked field. There is no second definition.
  *
- *  Restricted to the prop surface `charge_item` (this primitive's first
- *  consumer) genuinely needs — `group`/`placement` (advanced fields, full-
- *  span notes rows) are deferred to the phases that earn them
- *  (`p1-primitives.md` §2.1's deferral table); do not add them here without
- *  a real consumer. */
+ *  Restricted to the prop surface current consumers genuinely need —
+ *  `group`/`placement` (advanced fields, full-span notes rows) are
+ *  deliberately absent; do not add them here without a real consumer. */
 export interface StructuredColumn<TRow extends object> {
   /** Stable id. Used for the DOM anchor (`data-column`), the default
    *  `errorFieldKeys` entry, and React keys. */
@@ -174,20 +148,14 @@ export interface StructuredColumn<TRow extends object> {
 
 /**
  * One entry of a row's overflow menu, alongside the shell's own synthesized
- * Remove item — see `docs/superpowers/specs/annexes/p1-primitives.md` §2
- * (`StructuredRowAction`), the design this fulfills. Remove itself is never
- * listed here: it is always shell-owned (`canRemoveRow`/`removeLabel`
- * below), so a type cannot accidentally duplicate or shadow it.
+ * Remove item. Remove itself is never listed here — it is always
+ * shell-owned (`canRemoveRow`/`removeLabel` below), so a type cannot
+ * accidentally duplicate or shadow it.
  *
  * Kept independent of `TRow` on purpose — unlike `StructuredColumn.render`,
  * an action has no per-cell context to receive (no `update`, no
- * `controlProps`); a type builds its own closures over the specific row
- * inside the `rowActions` callback below (which DOES receive the row) and
- * hands back plain, already-bound callbacks here. This is what let
- * `medication_request`'s "Add to Template" (previously stranded — see that
- * type's own port report — `StructuredList`'s actions cell had room for
- * exactly Remove) land as a second row-actions consumer with zero changes
- * to this interface.
+ * `controlProps`); the `rowActions` callback below DOES receive the row and
+ * hands back plain, already-bound callbacks here.
  */
 export interface StructuredRowAction {
   /** Stable id — React key only, never rendered. */
@@ -221,18 +189,12 @@ export interface StructuredListProps<TRow extends object> {
   rowTitle: (row: ProjectedRow<TRow>) => ReactNode;
   /** One-line summary shown on a COLLAPSED mobile card. */
   rowSummary?: (row: ProjectedRow<TRow>) => ReactNode;
-  /** Per-row disable beyond the section-level flag.
-   *
-   *  REVIEW NOTE (Task 6, minor): `rowDisabled` freezes the ENTIRE row,
-   *  including the actions cell (`pointer-events-none` on the row div) —
-   *  there is currently no way to distinguish "freeze the fields" from
-   *  "freeze the fields but still let the clinician act on the row." A
-   *  Phase 3 type that wants `rowDisabled` for a soft-deleted row AND
-   *  wants an "un-remove"/restore affordance on that same row (rather than
-   *  routing restoration through the fields themselves, e.g. a status
-   *  select) cannot reach it through this prop as written — that type
-   *  needs its own decision here, not a silent assumption that this prop
-   *  already covers it. */
+  /** Per-row disable beyond the section-level flag. Freezes the ENTIRE
+   *  row, including the actions cell (`pointer-events-none` on the row
+   *  div) — there is no way to distinguish "freeze the fields" from
+   *  "freeze the fields but still let the clinician act on the row," so a
+   *  type wanting a restore affordance on a disabled row cannot reach it
+   *  through this prop as written. */
   rowDisabled?: (row: ProjectedRow<TRow>) => boolean;
   /** Domain state classes — e.g. `line-through` when resolved. */
   rowClassName?: (row: ProjectedRow<TRow>) => string | undefined;
@@ -244,10 +206,10 @@ export interface StructuredListProps<TRow extends object> {
   /** Extra per-row overflow-menu items, ABOVE the shell's own Remove item
    *  (a `DropdownMenuSeparator` is inserted between the two groups
    *  automatically, only when both are non-empty). Generic on purpose —
-   *  any Phase-3+ type may contribute one or more actions here (e.g.
-   *  `medication_request`/`service_request`'s per-row "Add to template");
-   *  see {@link StructuredRowAction}'s own doc comment. `undefined`/`[]`
-   *  renders exactly the pre-existing Remove-only menu. */
+   *  any type may contribute actions here (e.g. `medication_request`/
+   *  `service_request`'s per-row "Add to template"); see
+   *  {@link StructuredRowAction}'s own doc comment. `undefined`/`[]`
+   *  renders exactly the Remove-only menu. */
   rowActions?: (row: ProjectedRow<TRow>) => readonly StructuredRowAction[];
 
   /** Rendered below the grid — the add-entity control. Kept a slot so the
@@ -257,23 +219,17 @@ export interface StructuredListProps<TRow extends object> {
 
 /**
  * ONE column/field definition per structured type, rendered as BOTH a
- * desktop grid row and a mobile collapsible card from the SAME React tree —
- * see `docs/superpowers/specs/annexes/p1-primitives.md` §2 for the full
- * design and the five hand-rolled dual renders this retires.
+ * desktop grid row and a mobile collapsible card from the SAME React tree.
  *
- * The one breakpoint rule (`p1-primitives.md` §1.2): layout differences are
- * CSS, behaviour differences are JavaScript. This component contains
- * **zero** `useBreakpoints` calls — `lg:`-prefixed Tailwind classes are the
- * only thing that ever switches a cell between "stacked card field" and
- * "grid row cell." The five load-bearing mechanics (one tree per row, the
- * caption-is-the-header, `aria-label` naming, `display:contents` mobile
- * collapse, one horizontal scroller) are exactly Phase 1's design and are
- * NOT re-derived here — see the DOM contract this mirrors, `p1-primitives.md`
- * §2.3.
+ * The one breakpoint rule: layout differences are CSS, behaviour
+ * differences are JavaScript. This component contains **zero**
+ * `useBreakpoints` calls — `lg:`-prefixed Tailwind classes are the only
+ * thing that ever switches a cell between "stacked card field" and "grid
+ * row cell."
  *
- * `grid grid-cols-1 lg:grid-cols-[var(--structured-cols)]` MUST appear as a
- * literal class string (both here and in `StructuredListRow` below) so
- * Tailwind v4's scanner emits it — never templated.
+ * `lg:grid-cols-[var(--structured-cols)]` MUST appear as a literal class
+ * string (both here and in `StructuredListRow` below) so Tailwind v4's
+ * scanner emits it — never templated.
  */
 export function StructuredList<TRow extends object>({
   questionId,
@@ -306,8 +262,7 @@ export function StructuredList<TRow extends object>({
     <div data-structured-list={questionId} className="space-y-2">
       {rows.length > 0 && (
         // The ONLY horizontal scroller. Fixed px tracks must never reach an
-        // element that participates in the canvas width, mirroring
-        // MedicationStatementQuestion.tsx:498-499.
+        // element that participates in the canvas width.
         <div className="w-auto overflow-x-auto">
           <div className="min-w-fit lg:rounded-md lg:border lg:border-gray-200">
             <div
@@ -321,15 +276,14 @@ export function StructuredList<TRow extends object>({
                   role="row"
                   className="grid border-b border-gray-200 bg-gray-50 lg:grid-cols-[var(--structured-cols)]"
                 >
-                  {/* REVIEW (Task 6, minor): this loop's cell count
-                      (columns.length + 1 spacer) MUST always match every
-                      body row's cell count (columns.length + 1 actions,
-                      below) or the desktop grid — one shared
-                      `--structured-cols` track list across header AND body
-                      — misaligns. Never conditionally OMIT a header/body
-                      cell for a column; suppress its CONTENT only
-                      (`headerHidden`/`mobileHidden` both hide text/cells
-                      via CSS, never by skipping the `.map()` entry). */}
+                  {/* This loop's cell count (columns.length + 1 spacer)
+                      MUST always match every body row's (columns.length +
+                      1 actions, below) — header and body share one
+                      `--structured-cols` track list, so a skipped cell
+                      misaligns the desktop grid. Never conditionally OMIT
+                      a header/body cell for a column; suppress its CONTENT
+                      only (`headerHidden`/`mobileHidden` hide via CSS,
+                      never by skipping the `.map()` entry). */}
                   {columns.map((column) => (
                     <div
                       key={column.key}
@@ -408,16 +362,12 @@ interface StructuredListRowProps<TRow extends object> {
 
 /**
  * One row, as its own component — NOT inlined into a `.map()` closure in
- * `StructuredList`. This is what lets `update`/`handleRemove` be genuine,
- * per-row `useCallback`s (stable across re-renders as long as `onUpdateRow`/
- * `onRemoveRow`/`row.rowId` do not change) instead of a fresh arrow
- * function built every render inside a loop — the exact instability class
- * that render-looped the appointment editor (Task 4: an unstable callback
- * identity fed a child's own `useCallback`-gated effect, which combined
- * with a state setter that never bailed out on a no-op merge). Mobile
- * expand/collapse is local, per-row state — `defaultExpandedRowId` (the
- * newest-added-row rule) is deferred to Phase 3, so every row starts
- * collapsed here, EXCEPT when it carries a bound error (below).
+ * `StructuredList` — so `update`/`handleRemove` can be genuine per-row
+ * `useCallback`s (stable while `onUpdateRow`/`onRemoveRow`/`row.rowId` are
+ * unchanged) instead of fresh arrows built every render inside a loop,
+ * which feeds unstable identities into children's hook dependencies.
+ * Mobile expand/collapse is local, per-row state; every row starts
+ * collapsed EXCEPT when it carries a bound error (below).
  */
 function StructuredListRow<TRow extends object>({
   questionId,
@@ -461,49 +411,39 @@ function StructuredListRow<TRow extends object>({
   const extraActions = rowActions?.(row) ?? [];
   const bodyId = `${questionId}--${row.rowId}--body`;
 
-  // REVIEW FIX (Task 6, Critical 1). Below `lg` the body wrapper — the
-  // ONLY place a cell's `StructuredFieldError` renders — collapses to
-  // `display:none` whenever `expanded` is false. A row a blocking
-  // `validate()` error is bound to must never be hideable that way: with
-  // Save hard-blocked (`useSubmitQuestionnaire.ts` aborts the WHOLE submit
-  // on any `QuestionValidationError`) and every row starting collapsed, a
-  // clinician on a tablet saw a bare "Validation failed" toast with no row
-  // indicating why, and the error's `role="alert"` was never announced —
-  // it never left a hidden subtree. `hasError` forces `isExpanded` open
-  // regardless of the toggle, and yields back to the toggle's own value
-  // the moment the error clears.
+  // Below `lg` the body wrapper — the ONLY place a cell's
+  // `StructuredFieldError` renders — is `display:none` while collapsed. A
+  // row a blocking `validate()` error binds to must never be hideable that
+  // way: `useSubmitFillSession` aborts the whole submit on any
+  // `QuestionValidationError`, so a collapsed row would leave only a bare
+  // toast and the error's `role="alert"` would never be announced from a
+  // hidden subtree. `hasError` forces the row open and yields back to the
+  // toggle the moment the error clears.
   const hasError = rowHasBoundError(columns, errors, {
     questionId,
     rowId: row.rowId,
     rowIndex,
   });
   const isExpanded = resolveRowExpanded(expanded, hasError);
-  // REVIEW FIX (Task 6, Important — same review round as Critical 1 above).
-  // A `field_key` no column declares (allergy/symptom/diagnosis's shared
-  // `note`, which lives at `placement: "row"` — no column of its own) used
-  // to render NOWHERE: not in any cell, and no longer at the block level
-  // either now that `QuestionBlock`'s allow-list suppresses it there for
-  // every allow-listed type. `rowHasBoundError` already counts these (so
-  // the row force-expands); this is where they actually get PRINTED.
+  // A `field_key` no column declares (e.g. a shared row-level `note` with
+  // no column of its own) renders in no cell, and not at the block level
+  // either — `QuestionBlock`'s allow-list suppresses it there for these
+  // types. `rowHasBoundError` already counts these (so the row
+  // force-expands); this is where they actually get PRINTED.
   const unmatchedFieldKeys = unmatchedRowErrorFieldKeys(columns, errors, {
     questionId,
     rowId: row.rowId,
     rowIndex,
   });
 
-  // DEV-ONLY accessible-name audit — the loud half of the `ctx.ariaLabel`
-  // contract fix (see `StructuredControlProps`'s doc comment for why a
-  // typed bundle alone cannot make this failure loud: TypeScript's
-  // excess-property check does not catch a hyphenated attribute silently
-  // dropped by a custom component, whether passed as a named prop or
-  // spread from an object). This audits the ACTUAL RENDERED DOM instead —
-  // the one thing that is true regardless of which mechanism, or none, a
-  // column's `render` used. `[data-column="<key>"]` is markup every cell
-  // already carries (below), so this adds no new DOM, only a read of it.
-  // Runs once per render (no dependency array — a broken cell should log on
-  // every render until it's fixed, not just once), body-scoped so it only
-  // ever inspects THIS row's cells, and is a complete no-op outside
-  // development builds.
+  // DEV-ONLY accessible-name audit — the enforcement
+  // `StructuredControlProps` itself cannot provide (see its doc comment).
+  // Audits the ACTUAL RENDERED DOM — true regardless of which mechanism,
+  // or none, a column's `render` used. `[data-column="<key>"]` is markup
+  // every cell already carries, so this adds no new DOM. Runs once per
+  // render (no dependency array — a broken cell should log on every render
+  // until it's fixed), body-scoped so it only inspects THIS row's cells,
+  // and a complete no-op outside development builds.
   const bodyRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -529,20 +469,17 @@ function StructuredListRow<TRow extends object>({
       )}
     >
       {/* Mobile card chrome. role="none" keeps it OUT of the cell index,
-          so getByRole("cell").nth(n) still maps to the declared column
-          order once later types port onto this primitive. */}
+          so getByRole("cell").nth(n) maps to the declared column order. */}
       <div role="none" className="lg:hidden">
         <button
           type="button"
           aria-expanded={isExpanded}
           aria-controls={bodyId}
           onClick={toggleExpanded}
-          // REVIEW FIX (Task 6, minor): while `hasError` pins the row open,
-          // this toggle was a live control that visibly did nothing — three
-          // activations, no state change, `aria-expanded` stuck at "true",
-          // with no explanation for a screen-reader user. Disabling it
-          // while pinned is the honest signal: there is currently no
-          // collapse action to perform.
+          // While `hasError` pins the row open there is no collapse action
+          // to perform — disabling the toggle is the honest signal, instead
+          // of a live control that visibly does nothing with
+          // `aria-expanded` stuck at "true".
           disabled={hasError}
           className="flex w-full items-center justify-between gap-2 rounded-lg bg-gray-50 p-2 text-left active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-70"
         >
@@ -637,16 +574,10 @@ function StructuredListRow<TRow extends object>({
           );
         })}
 
-        {/* Actions cell. REVIEW FIX (Task 6, Important 2): the annex's
-            normative markup (`p1-primitives.md` §2.3) makes this
-            desktop-only (`hidden lg:flex`), which is a real product
-            regression for charge_item specifically — the legacy
-            `<Table>` it replaces rendered this same Remove affordance at
-            EVERY width (`ChargeItemQuestion.tsx:172-190`), horizontally
-            scrollable on a phone. Below `lg` this is now a normal
-            full-width flex row (reachable once the card is expanded, same
-            as every other field); at `lg`+ it reverts to the sticky
-            right-aligned 48px track. */}
+        {/* Actions cell — never desktop-only: Remove must stay reachable
+            at every width. Below `lg` a normal full-width flex row
+            (reachable once the card is expanded, same as every other
+            field); at `lg`+ the sticky right-aligned 48px track. */}
         <div
           role="cell"
           className={cn(
@@ -698,13 +629,12 @@ function StructuredListRow<TRow extends object>({
 
         {/* Unmatched-error fallback. role="none" — like the mobile chrome
             above, this must never inject a phantom `role="cell"`, and
-            `lg:col-span-full` spans it across every desktop track instead
-            of claiming one of its own (it isn't a column, so it never
-            entered `gridTemplateColumns`'s count). One `StructuredFieldError`
-            per distinct unmatched key — unlike a single cell's "first
-            error wins" slot, a `note`-shaped field left off Phase 2/3's
-            column set could coincide with a SECOND undeclared key, and
-            losing either silently would be exactly the bug this fixes. */}
+            `lg:col-span-full` spans every desktop track instead of
+            claiming one (it isn't a column, so it never entered
+            `gridTemplateColumns`'s count). One `StructuredFieldError` per
+            distinct unmatched key — unlike a cell's "first error wins"
+            slot, two undeclared keys can coexist and neither may be lost
+            silently. */}
         {unmatchedFieldKeys.length > 0 && (
           <div
             role="none"

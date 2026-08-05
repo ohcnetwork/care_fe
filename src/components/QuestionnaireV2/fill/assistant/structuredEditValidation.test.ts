@@ -7,10 +7,9 @@ import {
   validateStructuredPatch,
 } from "./structuredEditValidation";
 
-// A synthetic row schema standing in for what a real ported type's
-// `model.ts` will eventually publish (see this module's "HONESTY NOTE" —
-// no shipped type has one yet, so this is deliberately not borrowed from
-// a real type).
+// A synthetic row schema — deliberately not borrowed from a real type's
+// `model.ts`, so these tests pin the choke point's own behavior rather
+// than any one type's schema.
 const testRowSchema = z
   .object({
     severity: z.enum(["mild", "moderate", "severe"]),
@@ -84,7 +83,7 @@ describe("validateStructuredPatch — the structured-write choke point", () => {
   });
 });
 
-describe("rowSchemaOf — duck-typed lookup, forward-compatible with an as-yet-unpublished field", () => {
+describe("rowSchemaOf — duck-typed lookup", () => {
   it("returns undefined for a definition with no rowSchema", () => {
     assert.equal(rowSchemaOf({ type: "allergy_intolerance" }), undefined);
   });

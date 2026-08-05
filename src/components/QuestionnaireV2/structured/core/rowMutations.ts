@@ -8,12 +8,9 @@ import type {
 
 /**
  * The domain decisions behind `useStructuredRows`'s `updateRow`/`setRow`/
- * `removeRow`/`clearRow` mutators and its one-shot `initialEdits` seed,
- * extracted per the task's non-negotiable "no branching logic in the hook"
- * rule (review finding, post-3b41fe4fd) — these were previously inline
- * conditionals in `useStructuredRows.ts` that the harness (no DOM, cannot
- * render a hook) could never reach. Every function below is pure and
- * `node:test`-covered (`rowMutations.test.ts`).
+ * `removeRow`/`clearRow` mutators and its one-shot `initialEdits` seed —
+ * pure functions, so the branching lives outside the hook where it is
+ * unit-testable without a DOM (`rowMutations.test.ts`).
  */
 
 // ---------------------------------------------------------------------------
@@ -21,71 +18,49 @@ import type {
 // ---------------------------------------------------------------------------
 
 /**
- * Merges a partial patch onto a row's current content, running
- * `normalizePatch` first if supplied.
- *
- * CONTRACT (documented at `StructuredRowsOptions.normalizePatch`'s own doc
- * site too): the value `normalizePatch` returns REPLACES `patch` entirely
+ * CONTRACT: the value `normalizePatch` returns REPLACES `patch` entirely
  * here — `{ ...current, ...normalizePatch(current, patch) }` — it does not
- * additionally merge with `patch`. A `normalizePatch` that returns only its
- * own derived fields and omits the incoming `patch`'s fields silently drops
- * the clinician's own edit; it must start from `{ ...patch, ... }` (or
- * return `patch` unchanged when there is nothing to derive). Verified by
- * execution: `rowMutations.test.ts`'s "CONTRACT PIN" case reproduces the
- * drop.
+ * additionally merge with `patch`. A `normalizePatch` that returns only
+ * its own derived fields silently drops the clinician's edit; it must
+ * start from `{ ...patch, ... }` (or return `patch` unchanged).
  */
 export function mergePatch<TRow extends object>(
   current: TRow,
   patch: Partial<TRow>,
   normalizePatch?: (row: TRow, patch: Partial<TRow>) => Partial<TRow>,
 ): TRow {
-  // `?? patch`, not just `normalizePatch ? normalizePatch(...) : patch` —
-  // review finding (post-`c540a5602`): a `normalizePatch` that returns
-  // `undefined`/`null` is type-illegal for a typed caller but reachable
-  // from a plugin definition crossing the `unknown` boundary at runtime.
-  // Without the fallback, `{ ...current, ...undefined }` silently drops
-  // `undefined`'s spread (a no-op) and the clinician's own edit is gone —
-  // exactly the failure mode this whole phase exists to eliminate.
-  // Pinned by `rowMutations.test.ts`'s "normalizePatch returning undefined"
-  // case.
+  // `?? patch`: a `normalizePatch` returning `undefined`/`null` is
+  // type-illegal for typed callers but reachable from a plugin definition
+  // crossing the `unknown` boundary at runtime. Without the fallback,
+  // `{ ...current, ...undefined }` spreads nothing and the clinician's
+  // edit is silently dropped.
   const derived = normalizePatch?.(current, patch) ?? patch;
   return { ...current, ...derived } as TRow;
 }
 
 // ---------------------------------------------------------------------------
-// removeRow / clearRow — annex §7's three-outcome dispatch
+// removeRow / clearRow
 // ---------------------------------------------------------------------------
 
 /**
- * Decides what `removeRow(rowId)` (and, for the singleton's `clearRow`,
- * the equivalent decision over `rows[0]`) actually records — annex §7's
- * "one user-facing affordance, three outcomes", the exact logic duplicated
- * across five legacy editors:
+ * Decides what `removeRow(rowId)` (and the singleton's `clearRow`, over
+ * `rows[0]`) records — one user-facing affordance, two outcomes:
  *
  *  - A baseline row with `softDelete` configured ⇒ an ordinary `update`
- *    carrying the marker merged onto the row's CURRENT content (its
- *    already-edited content if it has one, not the stale server row) — the
- *    row stays on screen, `softDeleted`, and un-removing later is just
- *    another update. See `SoftDeleteDescriptor`'s doc comment (`./types`).
- *  - Anything else (an added row — annihilated by the reducer, since it
- *    never reached the server — or a baseline row of a type with true
- *    delete semantics, or no `softDelete` configured at all) ⇒ `remove`,
- *    carrying the row's last-known content in `patch`, per the canonical
- *    vocabulary's `remove` contract.
+ *    carrying the marker merged onto the row's CURRENT (possibly already
+ *    edited) content — the row stays on screen, `softDeleted`, and
+ *    un-removing later is just another update.
+ *  - Anything else (an added row — annihilated by the reducer, it never
+ *    reached the server — or a type with true delete semantics, or no
+ *    `softDelete` configured) ⇒ `remove`, carrying the row's last-known
+ *    content in `patch`.
  *
- * NOTE — the loading-window divergence from the annex, pinned by test: a
- * `ProjectedRow` synthesized by `projectRows`'s step 3 (`baseline ===
- * undefined`, an unresolved `update` rendered as a presumed row — see
- * `projectRows.ts`) carries `origin: "baseline"`, matching an ordinary
- * fetched baseline row. If `removeRow` fires on such a row while `softDelete`
- * is configured, this function records a soft-delete `update`, not a hard
- * `remove` — the annex's draft (written before the BASELINE COMPLETENESS
- * CONTRACT existed) has no equivalent "presumed row" concept and would have
- * had nothing to consult here. Arguably the more correct outcome (a
+ * Loading-window note: a row synthesized while `baseline` is `undefined`
+ * carries `origin: "baseline"`, so removing it with `softDelete`
+ * configured records a soft-delete `update`, not a hard `remove` — a
  * clinician acting on a row they believe is real shouldn't have their
- * "remove" silently escalate to a hard delete the instant baseline loads
- * and turns out to agree with them) — `rowMutations.test.ts`'s "loading
- * window" case exercises it end-to-end through the real `projectRows`.
+ * remove escalate to a hard delete the instant the baseline loads and
+ * agrees with them.
  */
 export function resolveRemoveIntent<TRow extends object>(
   entry: ProjectedRow<TRow>,
@@ -102,7 +77,7 @@ export function resolveRemoveIntent<TRow extends object>(
 }
 
 // ---------------------------------------------------------------------------
-// setRow — annex §9's three-route dispatch
+// setRow
 // ---------------------------------------------------------------------------
 
 export interface ResolveSetRowInput<TRow extends object> {
@@ -123,19 +98,16 @@ export interface ResolveSetRowInput<TRow extends object> {
 }
 
 /**
- * Decides what `setRow(patch)` records — annex §9:
+ * Decides what `setRow(patch)` records:
  *
  *  1. A row already exists (baseline row present, or an `add` already
- *     recorded) ⇒ an ordinary `update` against ITS rowId. `editLog.ts`'s
- *     own coalescing is what keeps this an `add` if that is what the
- *     existing log entry already is (`coalesceOntoAdd` never re-labels);
- *     this function does not need to know or care which.
- *  2. No row yet at all ⇒ the first-ever creation of a create-only
- *     singleton (`appointment`, `time_of_death`). `createSeed` is a
- *     required precondition for this route — enforced here (a caller
- *     misconfiguration is a hard, immediate throw, not a silently
- *     swallowed no-op), pinned by `rowMutations.test.ts`'s
- *     `assert.throws` case.
+ *     recorded) ⇒ an ordinary `update` against ITS rowId; the reducer's
+ *     coalescing keeps it an `add` when that is what the existing entry
+ *     is — this function needn't know which.
+ *  2. No row yet ⇒ the first-ever creation of a create-only singleton.
+ *     `createSeed` is required here: a missing one is a caller
+ *     misconfiguration and throws immediately rather than silently
+ *     no-oping.
  */
 export function resolveSetRow<TRow extends object>(
   input: ResolveSetRowInput<TRow>,
@@ -176,34 +148,21 @@ export function resolveSetRow<TRow extends object>(
 // ---------------------------------------------------------------------------
 
 /**
- * Decides what `useStructuredRows`'s one-shot `initialEdits` seed effect
- * should do THIS render — the fix for the review finding on `3b41fe4fd`:
- * the effect used to latch (`seeded.current = true`) unconditionally on
- * its very first run, before checking whether `initialEdits` had actually
- * arrived yet. Under the canonical vocabulary `patch` is the COMPLETE row,
- * so a seed that patches a baseline row (e.g. encounter's
- * `?toDischarge=true`, `{ ...toEncounterRow(encounter), status:
- * DISCHARGED }`) cannot be CONSTRUCTED by the caller until the baseline
- * query resolves — `initialEdits` is necessarily `undefined` on the first
- * render. The old effect ran once, saw nothing to seed, latched forever,
- * and the intent was dropped permanently the moment `initialEdits` later
- * became available. (The annex's own draft worked here only because its
- * pre-canonical vocabulary allowed a PARTIAL update patch, constructible
- * with no baseline at all — the translation to the shipped full-row
- * vocabulary is what broke this, not a copying error.)
+ * Decides what the one-shot `initialEdits` seed effect should do THIS
+ * render. Because `patch` is the COMPLETE row, a seed that patches a
+ * baseline row (e.g. encounter's `?toDischarge`) cannot be constructed
+ * until the baseline query resolves — `initialEdits` is necessarily
+ * `undefined` on the first render, so latching unconditionally on the
+ * first run would drop the intent permanently.
  *
  * Three outcomes:
  *  - `"skip"` — `edits` already has content (a restored draft, or any
- *    other prior activity). The seed decision is FINAL: never seed,
- *    regardless of what `initialEdits` does later. "A restored draft
- *    always wins."
- *  - `"wait"` — `edits` is still empty AND `initialEdits` has no content
- *    yet. Do NOT latch — try again on a future render, once
- *    `initialEdits` either arrives or `edits` gains content some other
- *    way.
- *  - `"seed"` — `edits` is empty and `initialEdits` has content: apply it
- *    now, then latch (the caller is responsible for setting the one-shot
- *    ref only on `"skip"`/`"seed"`, never on `"wait"`).
+ *    prior activity). Final: never seed. A restored draft always wins.
+ *  - `"wait"` — `edits` empty AND `initialEdits` has no content yet. Do
+ *    NOT latch; try again on a future render.
+ *  - `"seed"` — `edits` empty, `initialEdits` has content: apply now,
+ *    then latch. (The caller latches only on `"skip"`/`"seed"`, never on
+ *    `"wait"`.)
  */
 export type InitialEditsSeedDecision = "seed" | "wait" | "skip";
 

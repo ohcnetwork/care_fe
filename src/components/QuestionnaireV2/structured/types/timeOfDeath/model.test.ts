@@ -48,12 +48,11 @@ describe("time_of_death model", () => {
     );
   });
 
-  it("REGRESSION (post-review): a blank row projects as unanswered, matching the differ", () => {
-    // Before the fix, this projected as ONE answered entry while
-    // toRequests sent nothing for the same row — entryHasContent read
-    // true, the outline tick lit, required validation passed, and Save
-    // silently recorded no time of death. projectValues and toRequests
-    // must agree on "empty" via the same isEmptyRow.
+  it("a blank row projects as unanswered, matching the differ", () => {
+    // Projecting a blank row as an answered entry would light the outline
+    // tick and pass required validation while toRequests sent nothing —
+    // projectValues and toRequests must agree on "empty" via the same
+    // isEmptyRow.
     assert.deepEqual(projectValues([{ deceased_datetime: "" }]), []);
   });
 
@@ -90,7 +89,7 @@ describe("time_of_death model", () => {
     );
   });
 
-  it("REGRESSION (post-review): a malformed log with two rowIds collapses to the LAST row — never two PUTs to one endpoint", async () => {
+  it("a malformed log with two rowIds collapses to the LAST row — never two PUTs to one endpoint", async () => {
     const edits: StructuredEdit<TimeOfDeathRow>[] = [
       {
         rowId: "a",
@@ -113,13 +112,10 @@ describe("time_of_death model", () => {
     ]);
   });
 
-  it("REGRESSION (post-review): a malformed two-rowId log whose LAST row is blank still sends the answered one, matching the projection", async () => {
-    // The first dedupe cut took `.at(-1)` THEN checked emptiness, so this
-    // exact shape reproduced item 1's bug in miniature: the projection
-    // shows "a" as answered (its blank sibling is filtered out the same
-    // way projectValues filters), while the differ picked "b", saw it was
-    // blank, and sent nothing. Filtering blanks out BEFORE taking the last
-    // entry fixes it: the differ now agrees with what the projection shows.
+  it("a malformed two-rowId log whose LAST row is blank still sends the answered one, matching the projection", async () => {
+    // The projection shows "a" as answered (its blank sibling filters
+    // out); the differ must send "a" too, not pick the blank last entry
+    // and send nothing.
     const edits: StructuredEdit<TimeOfDeathRow>[] = [
       {
         rowId: "a",
@@ -139,7 +135,7 @@ describe("time_of_death model", () => {
   });
 });
 
-describe("rowSchema — the assistant write guard (spec A2)", () => {
+describe("rowSchema — the assistant write guard", () => {
   it("accepts a real row", () => {
     const result = rowSchema.safeParse({
       deceased_datetime: "2026-08-04T10:00:00Z",

@@ -47,10 +47,10 @@ import {
   type AllergyRow,
 } from "./model";
 
-/** Allergies are prefetched once per patient — there is no partial baseline
- *  state; while the query is loading or errored the hook gets `undefined`
- *  (BASELINE COMPLETENESS CONTRACT), never `[]`, so a section mid-fetch is
- *  never mistaken for "the server confirmed zero allergies." */
+/** Patient-scoped fetch of the first 100 allergies — the baseline is
+ *  capped at `limit: 100`, not guaranteed complete. While the query is
+ *  loading or errored the hook gets `undefined`, never `[]`, so a section
+ *  mid-fetch is never mistaken for "the server returned zero allergies." */
 function useAllergyBaseline(
   patientId: string | undefined,
 ): readonly BaselineRow<AllergyRow>[] | undefined {
@@ -78,9 +78,7 @@ function CategorySelect({
   category: AllergyCategory;
   onValueChange: (value: AllergyCategory) => void;
   disabled?: boolean;
-  /** Category becomes immutable once the row is a server record — mirrors
-   *  `AllergyQuestion.tsx`'s `CategorySelect` (`hasId` gating,
-   *  `:100-147`). */
+  /** Category becomes immutable once the row is a server record. */
   hasId: boolean;
   controlProps: StructuredControlProps;
 }) {
@@ -173,14 +171,10 @@ function ClinicalStatusSelect({
   );
 }
 
-/** Every verification-status option, already translated — `RowStatusSelect`
- *  never imports i18next itself. Reuses the plain enum values (`t(value)`)
- *  rather than `ALLERGY_VERIFICATION_STATUS`'s own display map: that map's
- *  values ("Unconfirmed", "Confirmed", ...) are capitalized English with no
- *  matching i18n key of their own — legacy's `t(label)`
- *  (`AllergyQuestion.tsx:206`) was a harmless no-op fallback, not real
- *  translation. `t("unconfirmed")`/`t("confirmed")`/... are real,
- *  already-shipped keys. */
+/** Options pre-translated — `RowStatusSelect` never imports i18next.
+ *  Uses the enum keys (`t(value)`), which are real locale keys;
+ *  `ALLERGY_VERIFICATION_STATUS`'s display labels are untranslated
+ *  English. */
 function useVerificationStatusOptions() {
   const { t } = useTranslation();
   return useMemo(
@@ -293,8 +287,6 @@ export function AllergyEditor({
   const verificationOptions = useVerificationStatusOptions();
   const baseline = useAllergyBaseline(patientId);
 
-  // No explicit type arguments — `TRow` infers from `projectValues`, `Mode`
-  // defaults to "list" (allergy_intolerance is a genuine list).
   const list = useStructuredRows({
     questionId: question.id,
     baseline,
@@ -434,30 +426,34 @@ export function AllergyEditor({
             t(row.row.verification_status),
           ].join(" · ")
         }
-        // Mirrors `AllergyQuestion.tsx`'s own disable/dim rules: a row already
-        // marked entered-in-error freezes entirely (matches the default
-        // `canRemoveRow`, `!row.softDeleted`, which already hides Remove for
-        // it); an inactive/resolved row just dims.
+        // An entered-in-error row freezes entirely; an inactive/resolved
+        // row only dims.
         rowDisabled={(row) => row.softDeleted}
         rowClassName={(row) =>
           row.row.clinical_status !== "active" ? "opacity-60" : undefined
         }
+        // `newAllergyRow` bakes the current encounter into the row and
+        // `toRequests` refuses to submit without one — with no encounter
+        // in context the add control is omitted rather than creating rows
+        // that could never save.
         addControl={
-          <AddEntityControl<AllergyRow>
-            system="system-allergy-code"
-            entityType="allergy"
-            placeholder={addPlaceholder}
-            disabled={disabled}
-            createRow={(code: Code) => newAllergyRow(code, encounterId!)}
-            onAdd={(row) => list.addRow(row)}
-            renderStagedRow={(staged, updateStaged) => (
-              <StagedAllergyFields
-                row={staged}
-                onUpdate={updateStaged}
-                disabled={disabled}
-              />
-            )}
-          />
+          encounterId ? (
+            <AddEntityControl<AllergyRow>
+              system="system-allergy-code"
+              entityType="allergy"
+              placeholder={addPlaceholder}
+              disabled={disabled}
+              createRow={(code: Code) => newAllergyRow(code, encounterId)}
+              onAdd={(row) => list.addRow(row)}
+              renderStagedRow={(staged, updateStaged) => (
+                <StagedAllergyFields
+                  row={staged}
+                  onUpdate={updateStaged}
+                  disabled={disabled}
+                />
+              )}
+            />
+          ) : undefined
         }
       />
     </div>

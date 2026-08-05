@@ -16,22 +16,10 @@ import type {
 } from "./types";
 
 /**
- * What a federation plugin contributes to make a structured question type
- * of its own. The same contract as a core `StructuredTypeDefinition`
- * (`./types.ts`), minus the compile-time key correlation core enjoys: a
- * plugin's data shape is opaque to the host, so its entries arrive as
- * `unknown[]`/`StructuredEditRecord[]` and the plugin's own
- * component/validate/toRequests are the only code that reads them.
- *
- * `contract: 2` is REQUIRED, matching core: this extension point predates
- * the legacy-contract removal, but no federation remote has shipped yet
- * (`src/pluginTypes.ts`'s `structuredQuestionTypes` is a Phase 1-4
- * addition), so there is no already-published manifest to stay
- * backward-compatible with. See `StructuredTypeDefinition`'s doc comment
- * for why the field survives as a version tag rather than a discriminant.
- *
- * Plugins own their i18n — `label` is a plain display string from the
- * manifest, never an i18n key the host resolves.
+ * Federation plugin contribution for a structured question type. Plugin row
+ * shapes are opaque to the host, so the plugin's own component, validation and
+ * request builder are the only code that interprets them. Plugins own i18n:
+ * `label` is a plain display string from the manifest.
  */
 export interface PluginStructuredTypeDefinition {
   /** Namespaced `{plugin_slug}.{type_name}` — bare names are reserved for core. */
@@ -80,22 +68,8 @@ function notify() {
 const noopCleanup = () => {};
 
 /** Register a plugin structured type; returns its cleanup closure.
- *  Throws on a non-namespaced id — PluginEngine catches and logs, so one
- *  bad definition never takes the app down.
- *
- *  Namespacing is the whole isolation story: `{plugin_slug}.{type_name}`
- *  can collide with neither a core type (those are bare) nor another
- *  plugin's — which holds only if the slug half is VERIFIED, so
- *  `ownerSlug` is checked against it here. Without that check, plugin B
- *  listing `plugin_a.assessment` (a copied sample, or malice) would take
- *  over questionnaires authored against plugin A's type depending on
- *  manifest load order, with no user-visible signal.
- *
- *  Every registration reaches the batch and its own validation — a
- *  registered type's `toRequests`/`validate` genuinely runs
- *  (`fill/submit/composeStructured.ts`'s `composeStructuredV2Requests`,
- *  `fill/submit/validateStructured.ts`); see
- *  `fill/submit/composeStructured.test.ts`'s end-to-end regression test. */
+ *  Namespacing prevents collisions with core and other plugin types, so the
+ *  namespace must match the plugin slug that owns the registration. */
 export function registerPluginStructuredType(
   definition: PluginStructuredTypeDefinition,
   ownerSlug: string,

@@ -13,12 +13,8 @@ import { Question } from "@/types/questionnaire/question";
 import { TERMINOLOGY_SYSTEMS } from "@/types/valueSet/valueSet";
 
 /**
- * Mirrors the backend's CARE_OBSERVATION_VALUSET slug
- * (care/emr/resources/observation/valueset.py). `Question.code` is a
- * `ValueSetBoundCoding[CARE_OBSERVATION_VALUSET.slug]`
- * (care/emr/resources/questionnaire/spec.py), so a question code MUST be a
- * member of this valueset — arbitrary manually-typed codes are rejected at
- * save time, which is why this card only offers search-based selection.
+ * Backend observation valueset for `Question.code`; arbitrary manually-typed
+ * codes are rejected at save time, so this card only offers search selection.
  */
 const OBSERVATION_VALUESET_SLUG: ValueSetSystem = "system-observation";
 

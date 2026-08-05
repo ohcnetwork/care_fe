@@ -1,52 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import type { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import type { SymptomRequest } from "@/types/emr/symptom/symptom";
 import type { StructuredEditRecord } from "@/types/questionnaire/structured";
 
 import { deepEqualJson } from "./deepEqual";
-import type { EditLog, RowEdit } from "./types";
-
 // Realistic row fixtures — SymptomRequest/DiagnosisRequest are the actual
 // shapes `useStructuredRows` will compare (baseline vs. patched-then-
-// reverted), not toy objects. See src/types/emr/symptom/symptom.ts and
-// src/types/emr/diagnosis/diagnosis.ts.
-function makeSymptomRow(
-  overrides: Partial<SymptomRequest> = {},
-): SymptomRequest {
-  return {
-    id: "symptom-1",
-    clinical_status: "active",
-    verification_status: "confirmed",
-    code: { system: "system-condition-code", code: "R05", display: "Cough" },
-    severity: "moderate",
-    onset: { onset_datetime: "2026-01-01" },
-    recorded_date: "2026-01-01",
-    note: "worse at night",
-    encounter: "encounter-1",
-    category: "problem_list_item",
-    ...overrides,
-  };
-}
-
-function makeDiagnosisRow(
-  overrides: Partial<DiagnosisRequest> = {},
-): DiagnosisRequest {
-  return {
-    id: "diagnosis-1",
-    clinical_status: "active",
-    verification_status: "confirmed",
-    code: { system: "system-condition-code", code: "J45", display: "Asthma" },
-    severity: "mild",
-    onset: { onset_datetime: "2025-06-01" },
-    recorded_date: "2025-06-01",
-    note: undefined,
-    category: "chronic_condition",
-    encounter: "encounter-1",
-    ...overrides,
-  };
-}
+// reverted), not toy objects.
+import { makeDiagnosisRow, makeSymptomRow } from "./testFixtures";
+import type { EditLog, RowEdit } from "./types";
 
 describe("deepEqualJson — realistic row shapes", () => {
   it("treats a SymptomRequest baseline row as equal to itself reconstructed field-by-field in a different key order", () => {
@@ -80,7 +43,7 @@ describe("deepEqualJson — realistic row shapes", () => {
     const baseline = makeSymptomRow();
     // moderate -> mild -> moderate: the row this function must recognize
     // as "no net edit", which is what lets an update collapse out of the
-    // log entirely (core/editLog.ts, a later task).
+    // log entirely.
     const editedToMild = makeSymptomRow({ severity: "mild" });
     const revertedToBaseline = { ...editedToMild, severity: "moderate" };
     assert.equal(deepEqualJson(baseline, revertedToBaseline), true);
@@ -243,12 +206,11 @@ describe("deepEqualJson — decided edge cases (documented, not left undefined)"
   });
 });
 
-describe("RowEdit / StructuredEditInput — vocabulary parity with Task 1 (compile-time)", () => {
+describe("RowEdit / StructuredEditRecord — erasure parity with the canonical edit vocabulary (compile-time)", () => {
   // Two fields, deliberately — a single-field ExampleRow makes "the
   // complete row" and "a Partial of it" the same type, so a regression
-  // back to `patch: Partial<TRow>` on `update` (the annex's original,
-  // incorrect shape, and the actual mode review round 1 missed) would
-  // type-check anyway and this suite would not catch it.
+  // back to `patch: Partial<TRow>` on `update` would type-check anyway
+  // and this suite would not catch it.
   interface ExampleRow {
     a: string;
     b: number;
@@ -265,9 +227,9 @@ describe("RowEdit / StructuredEditInput — vocabulary parity with Task 1 (compi
     };
     const editLog: EditLog<ExampleRow> = [rowEdit];
     // If this assignment stops type-checking under `tsc --noEmit`,
-    // `core/types.ts`'s `RowEdit<TRow>` has drifted from Task 1's shipped
-    // `StructuredEdit<TRow>` again — this line is what enforces the
-    // relationship, not just the doc comment above `StructuredEditInput`.
+    // `core/types.ts`'s `RowEdit<TRow>` has drifted from the canonical
+    // `StructuredEdit<TRow>` — this line enforces the relationship, not
+    // just the doc comment.
     const erased: readonly StructuredEditRecord[] = editLog;
     assert.equal(erased.length, 1);
     assert.equal(erased[0].rowId, "row-1");

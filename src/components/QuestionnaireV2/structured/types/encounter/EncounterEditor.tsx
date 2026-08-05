@@ -81,9 +81,8 @@ export function EncounterEditor(props: StructuredInputProps) {
 
   if (isLoading) return <FormSkeleton rows={2} />;
   if (isError || !encounter) {
-    // Deliberately NOT "...couldn't be displayed. Reload the page" —
-    // `structuredRendering.spec.ts:38` / `structuredFixtures.spec.ts:45`
-    // assert the ABSENCE of that exact phrase inside a structured block.
+    // Deliberately not "...couldn't be displayed. Reload the page": inside a
+    // structured block, the dropped-row notice should be concise.
     return (
       <p className="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
         {t("encounter_load_failed")}
@@ -110,10 +109,9 @@ function EncounterEditorBody({
     [encounter, encounterId],
   );
 
-  // Referentially stable, per `model.ts`'s own seam note: `makeNormalizePatch`
-  // returns a fresh closure per call, and `useStructuredRows` memoizes on
-  // this value (an unmemoized one would re-seed nothing wrongly, but would
-  // needlessly recompute every mutator's own `useCallback`).
+  // Referentially stable: `makeNormalizePatch` returns a fresh closure per
+  // call, and `useStructuredRows` memoizes on this value (an unmemoized
+  // one would needlessly recompute every mutator's own `useCallback`).
   const normalizePatch = useMemo(
     () =>
       makeNormalizePatch({
@@ -123,26 +121,18 @@ function EncounterEditorBody({
   );
 
   /**
-   * `?toDischarge=true`, explicit at last. The legacy path smuggled this
-   * into the SEED — mutating the transformed server data before ever
-   * writing it (`EncounterQuestion.tsx:179-181`) — so the form arrived
-   * pre-modified with no record anything had changed: invisible to dirty,
-   * to drafts, and to the differ. Here it is an ordinary recorded
-   * `update`, which correctly makes the section dirty and correctly
-   * produces a PUT.
+   * `?toDischarge=true` as an ordinary recorded `update` — visible to
+   * dirty tracking, drafts, and the differ.
    *
-   * Built as `mergePatch(toEncounterRow(encounter), { status: DISCHARGED
-   * }, normalizePatch)` — NOT a bare `{ ...toEncounterRow(encounter),
-   * status: DISCHARGED }`. `initialEdits` bypasses the mutators entirely:
-   * `useStructuredRows` feeds each entry straight to `applyEditToLog`, so
-   * `mergePatch`/`normalizePatch` never run on this path on their own. A
-   * bare spread would ship with `period.end` AND `discharge_disposition`
-   * both undefined — blocking Save and sending a PUT with no discharge
-   * date, on the primary discharge entry point. Running it through the
-   * same normalization every ordinary edit gets closes that gap.
+   * Built via `mergePatch(..., normalizePatch)`, NOT a bare spread with
+   * `status: DISCHARGED`: `initialEdits` bypasses the mutators
+   * (`useStructuredRows` feeds entries straight to `applyEditToLog`), and
+   * a bare spread would ship with `period.end` and
+   * `discharge_disposition` both undefined — blocking Save and sending a
+   * PUT with no discharge date on the primary discharge entry point.
    *
    * A restored draft still wins — the hook seeds only when the log is
-   * empty (`decideInitialEditsSeed`).
+   * empty.
    */
   const initialEdits = useMemo(
     () =>
@@ -166,7 +156,7 @@ function EncounterEditorBody({
   // from the `mode: "single"` literal below. Naming `TRow` explicitly here
   // (`useStructuredRows<EncounterRow>({...})`) suppresses inference for
   // `Mode`, which silently falls back to `"list"` and narrows the return
-  // to `ListRowsController` — no `row`/`setRow` at all (Lesson 1).
+  // to `ListRowsController` — no `row`/`setRow` at all.
   const single = useStructuredRows({
     questionId: question.id,
     mode: "single",
@@ -196,8 +186,7 @@ function EncounterEditorBody({
   const dispositionErrorId = `${question.id}--discharge-disposition--error`;
 
   // The one authority for "does this class carry a hospitalization
-  // record" (Task 7's seam #3) — never re-fork the
-  // `["imp","obsenc","emer"]` literal here.
+  // record" — never re-fork the `["imp","obsenc","emer"]` literal here.
   const hospitalized = isHospitalizedClass(row.encounter_class);
   // Gates the discharge-disposition/date pair. Whenever
   // `requiresDischargeDisposition` can fire (`row.status ===
@@ -298,7 +287,6 @@ function EncounterEditorBody({
         </div>
       </div>
 
-      {/* Mark for discharge button - Show if not already discharged */}
       {row.status !== EncounterStatus.DISCHARGED && (
         <div className="col-span-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
@@ -336,7 +324,6 @@ function EncounterEditorBody({
         </div>
       )}
 
-      {/* Hospitalization Details - Only show for relevant encounter classes */}
       {hospitalized && (
         <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
           <h3 className="text-lg font-semibold break-words">
@@ -389,7 +376,6 @@ function EncounterEditorBody({
               </Select>
             </div>
 
-            {/* Show discharge disposition and date when status is discharged OR has discharge disposition */}
             {showDischargeFields && (
               <>
                 <div className="space-y-2">

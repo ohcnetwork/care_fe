@@ -1,3 +1,4 @@
+import type { Code } from "@/types/base/code/code";
 import type { ResponseValue } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
@@ -5,31 +6,9 @@ import type { Question } from "@/types/questionnaire/question";
  * The one choke point every assistant write to a PLAIN (non-structured)
  * question passes through. Deliberately dependency-free (no React, no
  * `@careConfig`-touching utils, no zod) so `node --test` can exercise it
- * directly — see `coercion.test.ts`. `Question`/`ResponseValue` are
- * `import type` only, so this stays true even though those modules live
- * under `@/types/questionnaire/*` — type-only imports are erased before
- * `tsx` ever resolves a runtime module for them.
- *
- * FIXES P1-19. The registry this replaces (`fill/useFillActions.ts`'s old
- * `coerceResponseValue`) had two bugs:
- *
- *  1. `integer`/`decimal` shared one branch: `Number(raw)` with only a
- *     `NaN` check — `"5.5"` silently became the number `5.5` for a
- *     question the questionnaire declares `integer`. Fixed here by giving
- *     `integer` its own `Number.isInteger` gate ({@link coerceInteger});
- *     `decimal` keeps accepting any finite value ({@link coerceDecimal}).
- *  2. `date`/`dateTime` used `new Date(String(raw))`. For a bare
- *     `"YYYY-MM-DD"` string that is UTC-midnight parsing (ECMA-262's Date
- *     Time String Format) — every timezone west of UTC reads back the
- *     PREVIOUS calendar day. And `new Date("2024-02-31")` does not throw:
- *     `MakeDay` normalizes the overflow to March 2 instead of rejecting a
- *     date that was never real. Fixed here by {@link coerceLocalDate}:
- *     strict `^\d{4}-\d{2}-\d{2}$`, components built with
- *     `Date.prototype.setFullYear` (never the constructor — see that
- *     function's own doc comment for why the constructor's legacy
- *     two-digit-year special case matters here), and a round-trip check
- *     (`getFullYear`/`getMonth`/`getDate` must echo the parsed components
- *     back exactly) that catches the rollover the old code accepted.
+ * directly — see `coercion.test.ts`. `Code`/`Question`/`ResponseValue`
+ * are `import type` only, erased before `tsx` resolves any runtime
+ * module.
  */
 
 export type CoercionResult<T> =
@@ -43,8 +22,7 @@ function fail<T>(error: string): CoercionResult<T> {
   return { ok: false, error };
 }
 
-/** What an assistant may supply as one repeat's raw input — the same
- *  primitive union the old `SetResponseInput.values` accepted. */
+/** What an assistant may supply as one repeat's raw input. */
 export type RawAnswerValue = string | number | boolean;
 
 /**
@@ -94,8 +72,7 @@ export function coerceDecimal(raw: RawAnswerValue): CoercionResult<number> {
 /** `Boolean("false")` is `true` — a silently wrong answer on a clinical
  *  form is exactly what this choke point exists to prevent, so strings
  *  are matched against the words a model actually emits and anything
- *  else is an error. Ported unchanged from the old registry (not a
- *  P1-19 finding). */
+ *  else is an error. */
 export function coerceBoolean(raw: RawAnswerValue): CoercionResult<boolean> {
   if (typeof raw === "boolean") return ok(raw);
   if (typeof raw === "number") return ok(raw !== 0);
@@ -108,21 +85,9 @@ export function coerceBoolean(raw: RawAnswerValue): CoercionResult<boolean> {
 const LOCAL_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 /**
- * Strict `YYYY-MM-DD`, parsed as a LOCAL date (midnight, the clinician's
- * own timezone) — never through the `Date` constructor or `Date.parse`,
- * both of which treat a bare date-only ISO string as UTC. Built with
- * `setFullYear(year, month, day)` rather than `new Date(year, month,
- * day)`: the constructor (and `setYear`) special-case a two-digit year
- * (`0`–`99`) as `1900 + year` — a real hazard here since the regex admits
- * any four digits, including `"0099"` — while `setFullYear`'s three-
- * argument form sets the literal year with no such rewriting.
- *
- * Round-trip validated: the constructed date's own `getFullYear`/
- * `getMonth`/`getDate` must echo the parsed components back exactly.
- * `Date`'s day-of-month arithmetic normalizes an out-of-range day rather
- * than rejecting it (`2024-02-31` silently becomes March 2), so this is
- * what actually catches a rollover instead of just parsing further into
- * the eventual (wrong) `Date` the old code produced.
+ * Strict local `YYYY-MM-DD`. Parsing avoids `Date.parse` because bare ISO
+ * dates are UTC, uses `setFullYear` so two-digit years are not rewritten, and
+ * round-trip checks catch invalid calendar days that `Date` normalizes.
  */
 export function coerceLocalDate(raw: RawAnswerValue): CoercionResult<Date> {
   const text = String(raw).trim();
@@ -147,15 +112,9 @@ export function coerceLocalDate(raw: RawAnswerValue): CoercionResult<Date> {
 }
 
 /**
- * The exact inverse of {@link coerceLocalDate}: local `getFullYear`/
- * `getMonth`/`getDate` back to `YYYY-MM-DD`, so a value this module
- * accepted round-trips through `getValue`/`listQuestions`'s "current
- * projection" unchanged. Deliberately NOT `@/Utils/utils`'s
- * `dateQueryString` (a `dayjs` wrapper that would give the identical
- * answer): that module imports `@careConfig` at its top, which reads
- * `import.meta.env` and is `undefined` outside Vite — the same hazard
- * `structured/types/files/model.ts` documents — and this file is
- * `node --test`-exercised directly (`coercion.test.ts`), no Vite in sight.
+ * The inverse of {@link coerceLocalDate}: local date parts back to
+ * `YYYY-MM-DD`, so accepted values round-trip through the assistant handle.
+ * Kept dependency-free because this module is exercised outside Vite.
  */
 export function formatLocalDate(date: Date): string {
   const year = String(date.getFullYear()).padStart(4, "0");
@@ -205,7 +164,7 @@ export function coerceDateTime(raw: RawAnswerValue): CoercionResult<Date> {
 }
 
 /** 24-hour "HH:mm", optionally with seconds — what `<input type="time">`
- *  (and therefore `TimeInput`) round-trips. Ported unchanged. */
+ *  (and therefore `TimeInput`) round-trips. */
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 
 export function coerceTime(raw: RawAnswerValue): CoercionResult<string> {
@@ -222,13 +181,13 @@ export function coerceTime(raw: RawAnswerValue): CoercionResult<string> {
 export interface ChoiceOptionLike {
   value: string;
   display?: string;
-  code?: unknown;
+  code?: Code;
 }
 
 export function coerceChoiceOption(
   raw: RawAnswerValue,
   options: readonly ChoiceOptionLike[],
-): CoercionResult<{ value: string; coding?: unknown }> {
+): CoercionResult<{ value: string; coding?: Code }> {
   const text = String(raw);
   const option =
     options.find((candidate) => candidate.value === text) ??
@@ -246,12 +205,10 @@ export function coerceChoiceOption(
 }
 
 /** Input bounds every assistant write is checked against before any
- *  per-value coercion runs — ported unchanged from the old registry's
- *  `setResponseSchema`. Not schema validation of a single value; this is
+ *  per-value coercion runs. Not schema validation of a single value —
  *  DoS-shaped hardening against an unbounded array/string from a looping
- *  or prompt-injected caller (`applySetResponse`'s only prior check was
- *  `values.length > 1 && !question.repeats`, which a `repeats` question
- *  had no ceiling on at all). */
+ *  or prompt-injected caller (a `repeats` question otherwise has no
+ *  ceiling at all). */
 export const MAX_RESPONSE_ENTRIES = 100;
 export const MAX_RESPONSE_TEXT_LENGTH = 10_000;
 export const MAX_NOTE_LENGTH = 10_000;
@@ -291,13 +248,11 @@ export function checkSetValueBounds(
 }
 
 /**
- * The top-level dispatch: one `RawAnswerValue` in, one `ResponseValue` out
- * (or a rejection), keyed on the question's declared type — the same
- * shape as the old registry's `coerceResponseValue`, rebuilt on the fixed
- * primitives above. Question types with no unambiguous scalar form
- * (`group`, `display`, `structured`, `quantity`) are rejected rather than
- * guessed at, matching the old code's scope exactly (quantity's
- * value+unit+coding shape is a deliberate carry-forward gap, not new).
+ * Top-level dispatch: one `RawAnswerValue` in, one `ResponseValue` out
+ * (or a rejection), keyed on the question's declared type. Question
+ * types with no unambiguous scalar form (`group`, `display`,
+ * `structured`, `quantity`) are rejected rather than guessed at —
+ * quantity's value+unit+coding shape is deliberately unsupported here.
  */
 export function coercePlainResponseValue(
   question: Pick<
@@ -334,7 +289,7 @@ export function coercePlainResponseValue(
       return ok({
         type: "string",
         value: coerced.value.value,
-        coding: coerced.value.coding as ResponseValue["coding"],
+        coding: coerced.value.coding,
       });
     }
 

@@ -7,9 +7,8 @@ import {
 } from "@/types/questionnaire/questionnaire";
 
 /**
- * Backend slug bounds (QuestionnaireCreateSpec) — shared by the create,
- * detail and clone forms plus the create page's slug auto-generation and the
- * clone dialog's `-copy` suffix clamp, so a bound change lands everywhere.
+ * Backend slug bounds shared by create, detail and clone forms, slug
+ * auto-generation, and the clone dialog's `-copy` suffix clamp.
  */
 export const SLUG_MIN_LENGTH = 5;
 export const SLUG_MAX_LENGTH = 50;

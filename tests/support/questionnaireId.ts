@@ -8,7 +8,7 @@ let cachedId: string | null = null;
 /**
  * Returns the enable-when fixture questionnaire's id saved during setup.
  * The fill-flow routes fetch questionnaires by external_id (slug lookup was
- * removed on ENG-737), so specs must navigate by id.
+ * not supported), so specs must navigate by id.
  * Auto-runs the setup if the meta file is missing or invalid.
  */
 export function getQuestionnaireId(): string {

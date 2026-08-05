@@ -102,7 +102,7 @@ describe("structuredEditsOf — the hardened edit-log reader", () => {
 });
 
 describe("composeStructuredV2Requests — the v2 compose leg, extracted so it is unit-testable", () => {
-  it("P1-14 PIN: an empty edit log produces ZERO batch entries, and toRequests is never even called", async () => {
+  it("an empty edit log produces ZERO batch entries, and toRequests is never even called", async () => {
     let called = false;
     const definition: StructuredV2Compiler = {
       toRequests: async () => {
@@ -132,7 +132,7 @@ describe("composeStructuredV2Requests — the v2 compose leg, extracted so it is
     );
   });
 
-  it("P1-14 PIN (absent edits): a v2 response with no `edits` field at all is the same as an empty log", async () => {
+  it("a response with no `edits` field at all is the same as an empty log", async () => {
     let called = false;
     const definition: StructuredV2Compiler = {
       toRequests: async () => {
@@ -228,7 +228,7 @@ describe("composeStructuredV2Requests — the v2 compose leg, extracted so it is
   });
 });
 
-test("REGRESSION (Task 6 review / Task 8 gate removal): a registered plugin definition's toRequests reaches the batch end-to-end", async () => {
+test("a registered plugin definition's toRequests reaches the batch end-to-end", async () => {
   const questionId = "q-plugin-1";
   const patch = { note: "clinician entered this" };
   let receivedEdits: readonly StructuredEditRecord[] | undefined;
@@ -256,8 +256,7 @@ test("REGRESSION (Task 6 review / Task 8 gate removal): a registered plugin defi
     },
   };
 
-  // The real registration path — the (now fully removed) Phase-1 gate in
-  // `pluginRegistry.ts` used to refuse this outright.
+  // The real registration path, not a hand-built definition.
   registerPluginStructuredType(definition, "plugin_task8");
   const registered = getPluginStructuredType("plugin_task8.widget");
   assert.ok(registered, "the registration must not be refused");

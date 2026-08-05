@@ -44,7 +44,7 @@ const exclude: DraftResolvableStructuredType = {
 };
 
 describe("unsupportedDraftStructuredTypes", () => {
-  it("REGRESSION (review): a structured question with NO structured_type blocks — matches the pre-Task-8 hasStructuredQuestion behavior, which matched on `type` alone", () => {
+  it("a structured question with NO structured_type blocks, and resolve is never called", () => {
     let resolveCalled = false;
     const resolve = () => {
       resolveCalled = true;

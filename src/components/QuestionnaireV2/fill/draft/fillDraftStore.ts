@@ -6,21 +6,13 @@ import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 import type { DroppedDraftAnswer } from "./draftMerge";
-import { mergeDraftResponses } from "./draftMerge";
+import { draftResponseHasContent, mergeDraftResponses } from "./draftMerge";
 import { FILL_DRAFT_PREFIX, isFillDraftExpired } from "./fillDraftCache";
 
 /**
- * Local fill drafts — the crash/reload safety net. Draft data lives in
- * localStorage only under this prefix, scoped per user + subject + entry
- * questionnaire, TTL-bounded, and swept on an OTHER user's login, on
- * signOut and on app update — every eviction hook is deliberate; a new
- * session boundary must join the sweep list. Expired drafts are swept at
- * boot regardless of auth outcome. A user's OWN drafts deliberately
- * survive their own re-login — that is the crash/session-expiry recovery
- * this layer exists for, not a bug (see `fillDraftCache.ts`).
- *
- * One key holds the WHOLE fill session: the route-mounted questionnaire
- * plus every questionnaire added to the same submission.
+ * Local fill drafts are the crash/reload safety net. They are scoped per
+ * user, subject and entry questionnaire, TTL-bounded, and swept on session
+ * boundaries; one key stores the whole fill session.
  */
 const SCHEMA_VERSION = 2;
 
@@ -34,13 +26,10 @@ export interface FillDraftScope {
 
 export interface DraftFormSnapshot {
   questionnaireId: string;
-  /** `QuestionnaireRead.version` — a version bump invalidates this form
-   *  (the read spec exposes no modified_date yet). */
+  /** `QuestionnaireRead.version` — a version bump invalidates this form. */
   questionnaireVersion: string;
-  /** The questionnaire's title as it read when the draft was written —
-   *  the only human name available when a resume can no longer FETCH the
-   *  questionnaire. Optional because v2 drafts written before this field
-   *  existed are still valid; every reader must fall back. */
+  /** The questionnaire title captured with the draft. Optional for older v2
+   *  drafts, so readers must fall back when it is absent. */
   title?: string;
   responses: Record<string, QuestionnaireResponse>;
   structuredSkipped: boolean;
@@ -62,13 +51,9 @@ export interface LoadedFillDraft {
    *  not carry (draftPolicy "exclude") — the restore bar says so. */
   structuredSkipped: boolean;
   /**
-   * Spec amendment A1's restore notice, precomputed for the PRIMARY form
-   * at LOAD time (before the clinician even decides Resume vs Discard) —
-   * `mergeDraftResponses` run against the questionnaire's CURRENT
-   * questions. Empty when nothing would be lost, including the ordinary
-   * case where the questionnaire never changed at all. Non-primary
-   * (added) forms are merged later, when the host re-fetches them on
-   * resume (`useFillSessionForms.ts`), and are not represented here.
+   * Drop notice for the primary form, computed against the questionnaire's
+   * current questions before the clinician chooses Resume or Discard.
+   * Added forms are merged later when the host re-fetches them on resume.
    */
   dropped: DroppedDraftAnswer[];
 }
@@ -78,21 +63,9 @@ function draftKey(scope: FillDraftScope): string {
 }
 
 /**
- * One response as a draft stores it.
- *
- * A resolved structured question keeps its EDIT LOG and drops its
- * PROJECTION: those rows are the query layer's copy of the server's data,
- * which a draft has no business persisting and every business
- * re-fetching. Persisting them is what made `draftPolicy: "exclude"` a
- * blanket policy in the first place — restoring stale clinical rows and
- * re-upserting them could clobber edits made elsewhere. Edits are small,
- * JSON-safe and meaningful without the baseline (each carries its whole
- * row, per the canonical edit vocabulary), so a restore re-fetches the
- * rows and re-projects the log on top.
- *
- * Everything else — plain answers, an unresolvable structured type — is
- * stored verbatim (same object reference): this function is a no-op for
- * every response that isn't a resolved structured question.
+ * Store one response in draft-safe form. Resolved structured questions keep
+ * edit logs and drop projections so stale clinical rows are not re-upserted;
+ * plain answers and unresolved structured responses are stored verbatim.
  */
 export function draftResponseForStorage(
   response: QuestionnaireResponse,
@@ -103,14 +76,24 @@ export function draftResponseForStorage(
   return { ...response, values: [] };
 }
 
+/** Is this response one the draft deliberately leaves behind? An
+ *  unresolvable structured type (its plugin isn't loaded) counts as
+ *  "exclude": nothing here knows whether its values are serializable, and
+ *  a restore would hand them to a component that may never come back.
+ *  `files` is the only legitimate "exclude" among resolvable types (raw
+ *  `File` objects cannot round-trip through JSON). */
+function isDraftExcluded(response: QuestionnaireResponse): boolean {
+  if (!response.structured_type) return false;
+  const resolved = resolveStructuredType(response.structured_type);
+  return !resolved || resolved.draftPolicy === "exclude";
+}
+
 /**
  * Split responses into draft-safe entries and skipped structured content.
- * Types with `draftPolicy: "exclude"` (every adapted legacy type: their
- * values conflate prefetched server rows with user input, and `files`
- * holds raw File objects) never enter the draft — restoring stale
+ * `isDraftExcluded` responses never enter the draft — restoring stale
  * clinical rows and re-upserting them could clobber edits made elsewhere.
  * A "safe" entry still goes through `draftResponseForStorage`, which
- * strips a contract-v2 structured question's projection down to its edit
+ * strips a resolved structured question's projection down to its edit
  * log before it is stored.
  */
 function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
@@ -120,17 +103,9 @@ function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
   const safe: Record<string, QuestionnaireResponse> = {};
   let structuredSkipped = false;
   for (const [id, response] of Object.entries(responses)) {
-    if (response.structured_type) {
-      const resolved = resolveStructuredType(response.structured_type);
-      // An unresolvable type (its plugin isn't loaded) is treated as
-      // "exclude": nothing here knows whether its values are serializable,
-      // and a restore would hand them to a component that may never come
-      // back. `files` is the only legitimate "exclude" among resolvable
-      // types (raw `File` objects cannot round-trip through JSON).
-      if (!resolved || resolved.draftPolicy === "exclude") {
-        if (response.values.some(entryHasContent)) structuredSkipped = true;
-        continue;
-      }
+    if (isDraftExcluded(response)) {
+      if (response.values.some(entryHasContent)) structuredSkipped = true;
+      continue;
     }
     safe[id] = draftResponseForStorage(response);
   }
@@ -138,45 +113,9 @@ function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
 }
 
 /**
- * Does this stored response hold anything a draft exists to preserve?
- *
- * Plain answers and notes as before — plus, for a contract-v2 structured
- * question, the EDIT LOG, because `partitionForDraft` deliberately
- * stripped its `values`. Without this clause a section full of pending
- * clinical edits would read as empty, `saveFillDraft` would take its
- * clear-on-empty branch and the draft would be DELETED instead of written
- * (P1-3, inverted). Baseline rows still do not count as content: they were
- * never in the stored copy. Byte-identical to the pre-shim inline check
- * for v1 (`edits` is always absent there).
- */
-export function draftResponseHasContent(
-  response: QuestionnaireResponse,
-): boolean {
-  if (response.values.some(entryHasContent)) return true;
-  if ((response.edits?.length ?? 0) > 0) return true;
-  return !!response.note;
-}
-
-/** Is this response one the draft deliberately leaves behind? Mirrors
- *  `partitionForDraft`'s rule, including its treatment of an unresolvable
- *  type as "exclude". */
-function isDraftExcluded(response: QuestionnaireResponse): boolean {
-  if (!response.structured_type) return false;
-  const resolved = resolveStructuredType(response.structured_type);
-  return !resolved || resolved.draftPolicy === "exclude";
-}
-
-/**
- * Overlay the draft-excluded structured entries a store already holds onto
- * a record that is about to REPLACE it.
- *
- * Resume and Discard both swap a form's whole responses record. Structured
- * types with `draftPolicy: "exclude"` are by definition not in the draft,
- * and the adapted widgets seed them once from a server prefetch in a mount
- * effect that never re-runs — so a plain replacement blanks the patient's
- * existing allergies/medications/diagnoses on screen, and re-entering them
- * upserts DUPLICATE clinical records. The live values are the only copy;
- * they carry across untouched.
+ * Preserve draft-excluded structured entries across whole-record replacement.
+ * Those values are seeded from server data and cannot round-trip through the
+ * draft, so Resume and Discard must not blank the only live copy on screen.
  */
 export function preserveExcludedStructured(
   current: Record<string, QuestionnaireResponse>,
@@ -196,15 +135,9 @@ export function preserveExcludedStructured(
 }
 
 /**
- * The creation-time merge rule, shared by resume paths: draft entries
- * overlay the fresh seed per spec amendment A1's compatibility rules
- * (`draftMerge.ts`'s `mergeDraftResponses`) — restoring where the question
- * still exists with a shape-compatible type/option, dropping (and
- * reporting, via that function's `dropped` list) what does not. A thin,
- * backward-compatible wrapper for the two call sites
- * (`useFillSessionForms.ts`) that don't yet surface the drop list;
- * `useFillAutosave.ts`'s primary-form resume calls `mergeDraftResponses`
- * directly so it can report drops to the restore bar.
+ * Creation-time merge for resume paths: draft entries overlay the fresh
+ * seed where the current question still accepts their shape and options.
+ * Call sites that do not surface the drop list use this wrapper.
  */
 export function mergeDraftIntoSeed(
   questions: Question[],
@@ -248,23 +181,9 @@ function snapshotSession(forms: FillSessionFormState[]): {
 }
 
 /**
- * A stable fingerprint of everything a draft WOULD store for this session:
- * the draft-safe partition of every form's responses.
- *
- * Autosave compares it against the last value it saw, so a structured
- * widget writing its prefetched server rows (draftPolicy "exclude" — never
- * part of a draft) cannot register as a clinician edit. Without this the
- * mere act of opening a clinical form lit the Draft chip, armed the
- * unsaved-changes prompt and persisted a draft nobody asked for.
- *
- * `draftPolicy: "exclude"` types stay out of the signature entirely
- * (excluded by `partitionForDraft`). Every other structured type is IN it,
- * but as its edit log with the projection stripped
- * (`draftResponseForStorage`) — so a baseline refetch (which only ever
- * rewrites `values`) is invisible to this fingerprint, and a clinician's
- * edit (which rewrites `edits`) is visible. The exclusion above is no
- * longer the only mechanism that keeps a passive refresh from registering
- * as a change.
+ * Stable fingerprint of the draft-safe partition of the whole session.
+ * Autosave uses it to ignore prefetched server rows and baseline projection
+ * refreshes while still noticing clinician edits to draftable data.
  */
 export function safeSessionSignature(forms: FillSessionFormState[]): string {
   return JSON.stringify(
@@ -344,28 +263,9 @@ export function reviveDraftResponses(
 }
 
 /**
- * Load the draft session for this exact scope; anything mismatched,
- * expired or corrupt is removed and reported absent.
- *
- * SPEC AMENDMENT A1 — a primary-form VERSION MISMATCH no longer wholesale-
- * rejects the draft. Before A1, a bump to the live questionnaire's
- * `version` (an editor renaming a question, adding one, changing an
- * option — anything) took this same branch as a genuinely wrong/corrupt
- * draft: `localStorage.removeItem` plus `undefined`, discarding every
- * answer on every question. That is exactly the "rejected wholesale"
- * behavior the amendment replaces with a compatibility-aware MERGE
- * (`draftMerge.ts`'s `mergeDraftResponses`, run here against the CURRENT
- * `questions` to precompute the restore bar's notice — see `dropped` on
- * {@link LoadedFillDraft}). The checks that remain ARE still wholesale-
- * reject-worthy: they identify a draft that belongs to a different
- * identity entirely (wrong user/subject/entry questionnaire), is expired,
- * or fails to parse — not "the same session's questionnaire changed
- * underneath it". v1 drafts fail the `schemaVersion` check and are
- * removed; that is the whole migration.
- *
- * Only the PRIMARY form's `dropped` notice is computed here — added forms
- * are merged (and version-checked) when the host re-fetches them on
- * resume (`useFillSessionForms.ts`'s `onResumeAddedForms`).
+ * Load the draft for this exact scope; mismatched, expired or corrupt entries
+ * are removed. Primary-form version changes go through compatibility merge so
+ * restorable answers survive and dropped answers are named for the restore bar.
  */
 export function loadFillDraft(
   scope: FillDraftScope,

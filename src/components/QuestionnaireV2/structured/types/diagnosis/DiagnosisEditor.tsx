@@ -48,13 +48,14 @@ import {
   projectValues,
   toBaselineRows,
   toDiagnosisRow,
+  toReusedDiagnosisRow,
   type DiagnosisRow,
 } from "./model";
 
-/** Diagnoses are prefetched once per encounter — there is no partial
- *  baseline state; while the query is loading or errored the hook gets
- *  `undefined` (BASELINE COMPLETENESS CONTRACT), never `[]`, so a section
- *  mid-fetch is never mistaken for "the server confirmed zero diagnoses." */
+/** Encounter-scoped fetch of the first 100 diagnoses — the baseline is
+ *  capped at `limit: 100`, not guaranteed complete. While the query is
+ *  loading or errored the hook gets `undefined`, never `[]`, so a section
+ *  mid-fetch is never mistaken for "the server returned zero diagnoses." */
 function useDiagnosisBaseline(
   patientId: string | undefined,
   encounterId: string | undefined,
@@ -158,12 +159,9 @@ function useVerificationStatusOptions() {
 }
 
 /**
- * Fields for the STAGED (mobile add-flow) row — mirrors
- * `DiagnosisQuestion.tsx`'s `DiagnosisDetailsForm`, the confirm step
- * `EntitySelectionDrawer` renders on mobile before a fresh pick is
- * committed. Onset is always editable here: a staged row never carries a
- * server id (`isOnsetFrozen` would always read `false` for it), so the
- * date input has no freeze condition to apply.
+ * Fields for the STAGED (mobile add-flow) row. Onset is always editable
+ * here: a staged row never carries a server id, so the date input has no
+ * freeze condition to apply.
  */
 function StagedDiagnosisFields({
   row,
@@ -259,21 +257,14 @@ export function DiagnosisEditor({
   const verificationOptions = useVerificationStatusOptions();
   const baseline = useDiagnosisBaseline(patientId, encounterId);
 
-  // No explicit type arguments — `TRow` infers from `projectValues`, `Mode`
-  // defaults to "list" (diagnosis is a genuine list).
   const list = useStructuredRows({
     questionId: question.id,
     baseline,
     projectValues,
     softDelete: DIAGNOSIS_SOFT_DELETE,
     duplicateKey: diagnosisDuplicateKey,
-    // DISPLAY-ONLY (this port's headline fix): sorts what the clinician
-    // SEES by onset date, exactly like `DiagnosisQuestion.tsx:366-378` did —
-    // without that legacy code's bug of writing the sorted array back as
-    // the persisted order. `edits`/`baseline` (and therefore `toRequests`,
-    // which reads only `edits`) never see this order; see
-    // `diagnosisDisplayOrder`'s own doc comment (`./model.ts`) for the full
-    // argument and `model.test.ts` for the proof.
+    // Display-only: sorts what the clinician sees by onset date; the edit
+    // log and baseline never see this order (see `diagnosisDisplayOrder`).
     displayOrder: diagnosisDisplayOrder,
     disabled,
   });
@@ -288,28 +279,24 @@ export function DiagnosisEditor({
     [list, t],
   );
 
+  // Each selected historical diagnosis is re-added as a NEW row for this
+  // encounter (`toReusedDiagnosisRow` strips the server id and defaults a
+  // null severity). Duplicate filtering is `list.addRows`' job via
+  // `duplicateKey`; one warning toast covers any rejected duplicates in
+  // the batch.
   const handleAddHistorical = useCallback(
     (selected: DiagnosisRow[]) => {
-      // Strips the server `id` (a historical diagnosis re-added here is a
-      // genuinely NEW row for this encounter — `origin` reads "added", not
-      // "baseline") and defaults severity, exactly like
-      // `DiagnosisQuestion.tsx`'s `handleAddHistoricalDiagnoses` (:514-538).
-      // Duplicate filtering is `list.addRows`' job now (`duplicateKey`,
-      // above) rather than a manual pre-filter — one result per candidate,
-      // so every rejected duplicate still gets its own toast, matching
-      // legacy's per-item `checkForDuplicateDiagnosis` warning.
-      const rows = selected.map(({ id: _id, ...diagnosis }) => ({
-        ...diagnosis,
-        severity: diagnosis.severity ?? ("moderate" as const),
-      }));
-      const results = list.addRows(rows);
+      if (!encounterId) return;
+      const results = list.addRows(
+        selected.map((row) => toReusedDiagnosisRow(row, encounterId)),
+      );
       if (
         results.some((result) => !result.ok && result.reason === "duplicate")
       ) {
         toast.warning(t("diagnosis_already_exist_warning"));
       }
     },
-    [list, t],
+    [list, encounterId, t],
   );
 
   const columns: StructuredColumn<DiagnosisRow>[] = useMemo(
@@ -511,30 +498,31 @@ export function DiagnosisEditor({
             ...(row.row.severity ? [t(row.row.severity)] : []),
           ].join(" · ")
         }
-        // Mirrors `DiagnosisQuestion.tsx`'s own freeze rule: a row already
-        // marked entered-in-error freezes entirely. Reads the CURRENT row's
-        // own status (`row.softDeleted`), not a positional lookup against
-        // the server response — the exact per-index desync
-        // `DiagnosisQuestion.tsx:696-698` had against its own sorted
-        // display, which this primitive's rowId-addressed mutators cannot
-        // reproduce.
+        // An entered-in-error row freezes entirely; reads the row's own
+        // `softDeleted` flag, never a positional lookup.
         rowDisabled={(row) => row.softDeleted}
+        // `newDiagnosisRow` bakes the current encounter into the row and
+        // `toRequests` refuses to submit without one — with no encounter
+        // in context the add control is omitted rather than creating rows
+        // that could never save.
         addControl={
-          <AddEntityControl<DiagnosisRow>
-            system="system-condition-code"
-            entityType="diagnosis"
-            placeholder={addDiagnosisPlaceholder}
-            disabled={disabled}
-            createRow={(code: Code) => newDiagnosisRow(code, encounterId!)}
-            onAdd={handleAdd}
-            renderStagedRow={(staged, updateStaged) => (
-              <StagedDiagnosisFields
-                row={staged}
-                onUpdate={updateStaged}
-                disabled={disabled}
-              />
-            )}
-          />
+          encounterId ? (
+            <AddEntityControl<DiagnosisRow>
+              system="system-condition-code"
+              entityType="diagnosis"
+              placeholder={addDiagnosisPlaceholder}
+              disabled={disabled}
+              createRow={(code: Code) => newDiagnosisRow(code, encounterId)}
+              onAdd={handleAdd}
+              renderStagedRow={(staged, updateStaged) => (
+                <StagedDiagnosisFields
+                  row={staged}
+                  onUpdate={updateStaged}
+                  disabled={disabled}
+                />
+              )}
+            />
+          ) : undefined
         }
       />
     </div>

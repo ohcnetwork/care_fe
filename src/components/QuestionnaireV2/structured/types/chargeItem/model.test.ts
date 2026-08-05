@@ -66,12 +66,9 @@ describe("charge_item model", () => {
 
   describe("stripDisplay", () => {
     it("removes BOTH display objects and nothing else", () => {
-      // This is the exact destructure `ChargeItemQuestion.tsx` writes out
-      // three times (once per mutation path) before every response write;
-      // drifting copies are how a display object reaches the wire. A
-      // "full" row here carries every optional wire field PLUS both
-      // display objects, so the assertion is on the exact remaining key
-      // set, not just "the two known keys are gone."
+      // A "full" row carries every optional wire field PLUS both display
+      // objects, so the assertion is on the exact remaining key set, not
+      // just "the two known keys are gone."
       const full: ChargeItemRow = {
         ...newChargeItemRow(fixtureDefinition(), "enc-1"),
         patient: "pat-1",
@@ -132,7 +129,7 @@ describe("charge_item model", () => {
   });
 
   describe("toRequests", () => {
-    it("P1-14: an empty edit log produces ZERO requests", async () => {
+    it("an empty edit log produces ZERO requests", async () => {
       assert.deepEqual(await toRequests([], CTX), []);
     });
 
@@ -207,15 +204,10 @@ describe("charge_item model", () => {
     });
 
     it("PROJECTION AND SUBMIT AGREE AS A SET under a duplicated-rowId corruption, even though order can differ", async () => {
-      // Unlike appointment's singleton `rows[0]` pick, charge_item submits
-      // EVERY surviving row — there is no single position to disagree
-      // about. A duplicate rowId across the log can still make
-      // `resolveChanges` (dispatches a repeated rowId at its FIRST
+      // A duplicate rowId can make `resolveChanges` (dispatches at FIRST
       // occurrence, content from the last-write-wins map) and `projectRows`
-      // (pushes at the LAST occurrence, per its own doc comment) disagree
-      // on ORDER, but never on CONTENT — both resolve a given rowId's
-      // content from the identical last-write-wins map. Confirmed here
-      // against the REAL functions, not asserted from reasoning alone.
+      // (pushes at LAST occurrence) disagree on ORDER, but never on CONTENT —
+      // both resolve a rowId's content from the same last-write-wins map.
       const rowA1 = newChargeItemRow(
         fixtureDefinition({ slug: "a-first" }),
         "enc-1",
@@ -317,7 +309,7 @@ describe("charge_item model", () => {
   });
 });
 
-describe("rowSchema — the assistant write guard (spec A2)", () => {
+describe("rowSchema — the assistant write guard", () => {
   it("accepts a real row", () => {
     assert.equal(rowSchema.safeParse(row()).success, true);
   });

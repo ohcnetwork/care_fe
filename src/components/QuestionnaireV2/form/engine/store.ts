@@ -100,7 +100,7 @@ const questionIdByLinkIdAtom = atom((get) => {
 });
 
 /** Flatten the tree into one response per non-group question, seeding
- *  initial_selected answer options (mirrors old initializeResponses). */
+ *  initial_selected answer options. */
 export function initializeResponses(
   questions: Question[],
 ): Record<string, QuestionnaireResponse> {
@@ -133,29 +133,25 @@ export function initializeResponses(
   return responses;
 }
 
-/** Mirrors QuestionGroup.isQuestionEnabled's `normalizeValue` (old system):
- *  booleans normalize to "Yes"/"No", numbers stringify, before ANY operator
- *  is applied — matching the old code's unconditional normalization pass. */
+/** Booleans normalize to "Yes"/"No" and numbers stringify before ANY
+ *  operator is applied — matching how recorded response values are
+ *  normalized, so enable_when comparisons can match them. */
 function normalizeValue(value: unknown): unknown {
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (typeof value === "number") return value.toString();
   return value;
 }
 
-/** Direct port of `checkCondition` from the legacy QuestionGroup's
- *  isQuestionEnabled (deleted with that stack; see git history for
- *  `src/components/Questionnaire/QuestionTypes/QuestionGroup.tsx`),
- *  operating on (enableWhen, response) instead of
- *  (enableWhen, questionnaireResponses). Preserves faithfully:
+/** Evaluates one enable_when condition against its controller question's
+ *  response, matching backend semantics:
  *  - the unanswered-dependency short-circuit (no recorded values → false)
- *    for every operator EXCEPT `exists`, which — matching the backend —
- *    evaluates even when the controller is unanswered, since an
+ *    applies to every operator EXCEPT `exists`, which — matching the
+ *    backend — evaluates even when the controller is unanswered, since an
  *    `exists:false` dependent must enable precisely then
- *  - evaluating against ALL of the dependent question's values (not just
- *    the first), via `.some()` / `.includes()` over the normalized values
- *  - normalizeValue being applied unconditionally before every operator
- *    other than `exists`, which only asks whether real content was
- *    recorded and so reads the raw values directly */
+ *  - ALL of the controller's values are considered (`.some()` /
+ *    `.includes()`), not just the first
+ *  - `normalizeValue` is applied before every operator other than
+ *    `exists`, which only asks whether real content was recorded */
 export function evaluateEnableWhen(
   enableWhen: EnableWhen,
   response: QuestionnaireResponse | undefined,
@@ -175,7 +171,7 @@ export function evaluateEnableWhen(
     return enableWhen.answer === false ? !has : has;
   }
 
-  if (!dependentValues || dependentValues.length === 0) return false; // existing short-circuit, all other operators
+  if (!dependentValues || dependentValues.length === 0) return false;
 
   const normalizedAnswers = dependentValues.map((v) => normalizeValue(v.value));
 
@@ -275,29 +271,21 @@ export function useQuestionResponse(questionId: string) {
  * deliberately skips {@link clearQuestionErrorsInState}, unlike
  * {@link useQuestionResponse}'s setter.
  *
- * WHY THIS EXISTS (master plan "Carry-forwards out of Phase 1" item 2 /
- * design annex `docs/superpowers/specs/annexes/p1-state-core.md` §10).
- * `structured/core/useStructuredRows.ts` writes this question's response
- * from two different kinds of event: a MUTATOR (`applyEdit`/`addRow`/
- * `updateRow`/`removeRow`/`setRow`/`clearRow`, the orphan-prune effect, the
- * `initialEdits` seed) records real intent — clearing this question's
- * prior errors on that write is correct, same as every other question
- * type, and those all go through `useQuestionResponse`'s setter
- * unchanged. But `useStructuredRows` ALSO mirrors `baseline + edits` into
- * `values` on every baseline movement (first load, refetch, cache
- * invalidation) via a passive effect that records no new intent at all —
- * before this setter existed, that effect had no choice but to reuse
- * `useQuestionResponse`'s setter too, so a background refetch landing
- * while a submit-time server error was showing on this question would
- * silently clear that error while the offending value stayed on screen
- * unchanged, letting the clinician believe the problem was resolved. This
- * setter is the fix: a PASSIVE projection refresh writes `values` alone
- * and leaves `errorsAtom` untouched, so only genuine user (or seed) intent
- * ever clears a question's errors.
+ * `useStructuredRows` writes a question's response from two kinds of
+ * event. A mutator records real intent — clearing the question's prior
+ * errors on that write is correct, and those writes go through
+ * `useQuestionResponse`'s setter. But it also mirrors `baseline + edits`
+ * into `values` on every baseline movement (first load, refetch, cache
+ * invalidation) via a passive effect that records no new intent; routing
+ * that through the intent setter would let a background refetch silently
+ * clear a showing submit-time server error while the offending value
+ * stayed on screen. This setter writes `values` alone and leaves
+ * `errorsAtom` untouched, so only genuine user (or seed) intent ever
+ * clears a question's errors.
  *
- * Scoped to `values` alone (never `edits`) on purpose — nothing that only
- * mirrors baseline movement should ever be able to touch the edit log,
- * which is the one thing drafts persist and submit reads.
+ * Scoped to `values` (never `edits`) on purpose — a passive mirror of
+ * baseline movement must never touch the edit log, which is the one thing
+ * drafts persist and submit reads.
  */
 export function useSetQuestionProjection(questionId: string) {
   const setAtom = useMemo(

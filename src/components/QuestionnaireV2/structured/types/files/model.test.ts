@@ -147,7 +147,7 @@ describe("files model", () => {
   });
 
   describe("makeToRequests", () => {
-    it("P1-14: an empty edit log produces ZERO requests, and never calls the reader", async () => {
+    it("an empty edit log produces ZERO requests, and never calls the reader", async () => {
       const { readFileAsDataURL, calls } = fakeReader();
       const toRequests = makeToRequests({ readFileAsDataURL });
 
@@ -271,7 +271,7 @@ describe("files model", () => {
   });
 });
 
-describe("rowSchema — the assistant write guard (spec A2)", () => {
+describe("rowSchema — the assistant write guard", () => {
   it("accepts a real row (built with a genuine File instance)", () => {
     assert.equal(
       rowSchema.safeParse(row({ name: "chest-xray" })).success,

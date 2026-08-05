@@ -9,11 +9,8 @@
  */
 
 /**
- * One recorded time of death. Widened from the legacy bare `string`
- * (`components/QuestionnaireV2/structured/types.ts:41`) because the state
- * core constrains rows to `TRow extends object`
- * (`structured/core/types.ts:15,41,69`) — a `string` row cannot be keyed,
- * projected or soft-deleted by `useStructuredRows`.
+ * One recorded time of death. Rows are objects because they must be keyed,
+ * projected and soft-deleted by structured row state.
  */
 export interface TimeOfDeathRow {
   /** ISO-8601 UTC — `Date.toISOString()`'s own format, always a trailing

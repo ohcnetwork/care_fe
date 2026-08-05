@@ -207,7 +207,7 @@ describe("medication_request model", () => {
   });
 
   describe("toRequests", () => {
-    it("P1-14: an empty edit log produces ZERO requests, however many medications are on record", async () => {
+    it("an empty edit log produces ZERO requests, however many medications are on record", async () => {
       const requests = await toRequests([], CTX);
       assert.deepEqual(requests, []);
     });
@@ -311,7 +311,7 @@ describe("medication_request model", () => {
       assert.equal(body.datapoints[0].id, "med-1");
     });
 
-    it("a hard remove (never reached the server) is dropped by resolveChanges' soft-delete arm reclassification — annihilated rows never appear here", async () => {
+    it("a bare remove edit for a row with no server id still submits as a soft-delete (entered_in_error) datapoint", async () => {
       // An add-then-remove pair is annihilated by editLog.ts before this
       // function ever sees it; this pins that a bare `remove` edit for a
       // row with no server id still resolves (soft-delete body), matching
@@ -747,7 +747,7 @@ describe("medication_request model", () => {
   });
 });
 
-describe("rowSchema — the assistant write guard (spec A2)", () => {
+describe("rowSchema — the assistant write guard", () => {
   it("accepts a real code-based row", () => {
     const result = rowSchema.safeParse(
       newMedicationRowFromCode(CODE, CURRENT_USER),

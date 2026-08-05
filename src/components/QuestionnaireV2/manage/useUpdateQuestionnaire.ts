@@ -9,17 +9,9 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
 
 /**
- * The one save mutation for an existing questionnaire (detail page and
- * builder). Owns the cache sequence both surfaces must share:
- *
- * setQueryData BEFORE invalidate — the next save composes its full PUT body
- * (via buildUpdateBody) from the cached detail entry, so the cache must
- * reflect this save immediately; relying on the invalidation refetch alone
- * leaves a stale window (one network round-trip) where a second quick action
- * would silently revert the change that just persisted.
- *
- * `onSaved` runs after the cache work, for surface-local follow-ups (e.g.
- * the builder resets its reducer to the saved questions).
+ * Save mutation for an existing questionnaire. Cache is updated before
+ * invalidation because the next full PUT body is composed from cached detail
+ * data; `onSaved` runs after that cache update for surface-local follow-ups.
  */
 export function useUpdateQuestionnaire(
   id: string,

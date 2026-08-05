@@ -77,9 +77,8 @@ export function FillFormSection({
         data-form-key={form.key}
         className={cn(!form.isPrimary && "border-t border-gray-200 pt-6")}
       >
-        {/* The canvas header already names the questionnaire — legacy
-            parity here is only the drop affordance, and only the added
-            forms get one. */}
+        {/* Only added forms get a remove affordance; the canvas header already
+            names the questionnaire. */}
         {onRemove && !form.isPrimary && (
           <div className="mx-auto mb-2 flex w-full max-w-3xl justify-end">
             <Button

@@ -8,6 +8,7 @@ import type {
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
 import { dateOnlyString } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
+import { sanitizeNote } from "@/components/QuestionnaireV2/structured/shared/sanitizeNote";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
@@ -25,24 +26,14 @@ import {
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
-/**
- * The wire shape is already the row shape — no widening needed, so the
- * `allergy_intolerance` arm of `StructuredDataMap`
- * (`structured/types.ts:41`) and the `RV<"allergy_intolerance",
- * AllergyIntoleranceRequest[]>` arm of `ResponseValue` are both untouched by
- * this port.
- */
+/** The wire request shape doubles as the editable row shape. */
 export type AllergyRow = AllergyIntoleranceRequest;
 
 /**
- * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
- * `rowSchema` for the full contract). `verification_status` is hand-listed
- * (the type it guards, `AllergyVerificationStatus`, is a plain string
- * union with no backing runtime array to read); `criticality` is
- * `ALLERGY_CRITICALITY`-checked even though `AllergyIntoleranceRequest`
- * itself widens the field to `string` — every real row is one of those
- * three values, and a schema this loose would defeat "enums checked" (spec
- * §6 A2's own wording) for the one field on this row that most needs it.
+ * Assistant write guard. `verification_status` values are hand-listed —
+ * `AllergyVerificationStatus` is a plain string union with no runtime
+ * tuple to read. `criticality` is checked against `ALLERGY_CRITICALITY`
+ * even though `AllergyIntoleranceRequest` widens the field to `string`.
  */
 export const rowSchema = z
   .object({
@@ -65,21 +56,11 @@ export const rowSchema = z
   .strict();
 
 /**
- * The soft-delete contract this port exists to land (P1-14's other half —
- * the entered-in-error split, alongside the zero-upsert differ below).
- * Legacy split this by hand at every mutation site
- * (`AllergyQuestion.tsx:625-656`, `handleRemoveAllergy`): a row WITH a
- * server `id` flips `verification_status` to `entered_in_error` and stays
- * on screen; a row WITHOUT one (never reached the server) is simply
- * dropped. `useStructuredRows`'s `removeRow`/`resolveRemoveIntent`
- * (`core/rowMutations.ts`) already implements exactly this dispatch for
- * ANY type that supplies a `SoftDeleteDescriptor` — a baseline row gets an
- * `update` carrying `patch` merged on top of its current content; an added
- * row gets a `remove`, which `editLog.ts`'s `coalesceOntoAdd` annihilates
- * against the row's own still-pending `add` (the row never reached the
- * server, so removing it returns the log to pristine). Configuring this
- * descriptor is the WHOLE fix — no special-cased branch of my own is needed
- * on top of it.
+ * Removing a row that exists on the server flips `verification_status` to
+ * `entered_in_error` and keeps it visible; a row that never reached the
+ * server is dropped outright (its pending `add` is annihilated).
+ * `useStructuredRows` dispatches on this descriptor by row origin — no
+ * type-specific removal branch is needed.
  */
 export const ALLERGY_SOFT_DELETE: SoftDeleteDescriptor<AllergyRow> = {
   patch: { verification_status: "entered_in_error" },
@@ -87,16 +68,10 @@ export const ALLERGY_SOFT_DELETE: SoftDeleteDescriptor<AllergyRow> = {
 };
 
 /**
- * `AllergyIntolerance` (the read shape, with `created_by`/`edited_by`/
- * timestamps) → the seven fields this question actually edits. Exactly
- * `AllergyQuestion.tsx`'s `convertToAllergyRequest` (`:305-321`), lifted out
- * so it is testable without a DOM. `last_occurrence` re-formats from the
- * server's full ISO datetime to a bare date string — `date-fns`'s `format`
- * only (no `@/Utils/utils`/`dateQueryString`: that module imports
- * `@careConfig` at the top, which reads `import.meta.env` and is
- * `undefined` under `node --test` — see `files/model.ts`'s
- * `FileRequestDeps` doc comment for the identical hazard on the identical
- * import).
+ * Read shape → the fields this question edits; `last_occurrence` is cut
+ * down to a bare date. Uses `date-fns` directly — `@/Utils/utils`
+ * transitively reads `import.meta.env` via `@careConfig`, which is
+ * undefined under `node --test`.
  */
 export function toAllergyRow(allergy: AllergyIntolerance): AllergyRow {
   return {
@@ -115,16 +90,10 @@ export function toAllergyRow(allergy: AllergyIntolerance): AllergyRow {
 }
 
 /**
- * One baseline row per fetched allergy, keyed by the SERVER id — a real
- * identity, unlike `appointment`/`time_of_death`'s `SINGLETON_ROW_ID`, so
- * `removeRow` can tell a baseline row (soft-deletes) from an added one
- * (annihilates) by `origin` alone.
- *
- * BASELINE HONESTY (BASELINE COMPLETENESS CONTRACT). Only ever called with a
- * RESOLVED `getAllergy` result, so this always returns the COMPLETE
- * server-row set for this question. While the query is loading or errored
- * there is no read to convert — the caller passes `undefined`, never `[]`
- * (`AllergyEditor.tsx` does exactly this).
+ * Keyed by the server id so `removeRow` distinguishes baseline
+ * (soft-delete) from added (annihilate) rows. Callers pass `undefined`,
+ * never `[]`, while the fetch is unresolved — an empty array asserts the
+ * server returned zero allergies.
  */
 export function toBaselineRows(
   allergies: readonly AllergyIntolerance[],
@@ -136,18 +105,9 @@ export function toBaselineRows(
 }
 
 /**
- * A freshly picked allergy code, seeded exactly the way
- * `AllergyQuestion.tsx`'s `ALLERGY_INITIAL_VALUE` does
- * (`:83-89`/`:598-608`): `clinical_status` starts `"active"`,
- * `verification_status` starts `"confirmed"` (a clinician who just
- * recorded it is asserting it, not merely suspecting it), `category`
- * defaults to `"medication"` (the historically most common entry) and
- * `criticality` to `"low"`. `encounter` is baked in here, at creation —
- * unlike the legacy widget, which only attached it at submit time
- * (`definitions/allergyIntolerance.tsx`'s old `buildRequests`) — because a
- * v2 row's `patch` must always be the COMPLETE row, and
- * `AllergyIntoleranceRequest.encounter` is a required field, not an
- * optional one this differ can paper over later.
+ * New rows default to active/confirmed, category "medication", and criticality
+ * "low". `encounter` is set at creation because a row's `patch` must be the
+ * complete row and the field is required on the wire shape.
  */
 export function newAllergyRow(code: Code, encounterId: string): AllergyRow {
   return {
@@ -160,68 +120,28 @@ export function newAllergyRow(code: Code, encounterId: string): AllergyRow {
   };
 }
 
-/**
- * A list, not a singleton, and — like `charge_item`/`files` — a row here is
- * born whole the moment `newAllergyRow` creates it from a picked code: there
- * is no "half filled" state to reconcile, so there is no separate
- * `isEmptyRow` predicate to keep in sync with a submission filter (Lesson 2,
- * this phase's binding "Lessons from the first ports"). Whatever `rows`
- * holds is exactly what the clinician sees and exactly what `toRequests`
- * below compiles requests for.
- */
+/** Rows are complete from creation — no empty-row filter needed; an
+ *  empty list projects to an unanswered section. */
 export const projectValues: ProjectValues<AllergyRow> = (rows) =>
   rows.length === 0 ? [] : [{ type: "allergy_intolerance", value: [...rows] }];
 
-/** Mirrors `definitions/adapt.ts`'s `sanitizeNote`, reimplemented locally
- *  rather than imported: `adapt.ts` imports `useCallback` from `react`, and
- *  a `model.ts` must import no React (N1's unit-test-harness constraint) —
- *  the same reason every other type's `model.ts` is self-contained rather
- *  than reaching into `definitions/`. */
-function sanitizeNote(note: string | undefined): string | undefined {
-  return note?.trim() || undefined;
-}
+/** Kept local rather than importing `definitions/adapt.ts`'s
+ *  `sanitizeNote`: `model.ts` must stay React-free for `node --test`, and
+ *  adapt.ts imports React. */
 
 /**
- * The edit log → at most one POST against the upsert endpoint, carrying
- * every row this session touched.
+ * Edit log → at most one POST to the upsert endpoint. An empty edit log
+ * yields an empty batch — untouched baseline rows are never re-sent, so a
+ * concurrent edit to an unrelated allergy cannot be overwritten.
  *
- * P1-14, LANDED FOR REAL. Today `definitions/allergyIntolerance.tsx`'s old
- * `buildRequests` mapped over the WHOLE projection — every prefetched
- * allergy, touched or not — so submitting ANY form carrying an allergy
- * question re-sent every allergy back to the server on every save,
- * including one an unrelated concurrent edit had just changed. An empty
- * edit log now means an empty batch, full stop: `resolveChanges([], ...)`
- * returns three empty sets by construction, and this function returns `[]`
- * before ever touching the network.
+ * `resolveChanges` receives no baseline: the differ only sees the edit
+ * log, and the hook's prune effect drops edits for rows the baseline has
+ * proven gone before submit reaches here. A `removes` entry always
+ * carries `.row` when a softDelete descriptor is supplied; the `flatMap`
+ * guard honors the shared optional type instead of asserting.
  *
- * `resolveChanges(edits, { softDelete: ALLERGY_SOFT_DELETE })` — NO
- * baseline, matching `encounter`'s (not `charge_item`'s) reasoning: unlike
- * a create-only type, this type's baseline genuinely EXISTS, but
- * `toRequests(edits, ctx)` structurally never receives it (contract v2's
- * differ takes only the edit log; `composeBatch` is a pure function with no
- * access to the TanStack cache). The live hook already threads the real
- * baseline through every mutator during editing (`AllergyEditor.tsx`), and
- * its own passive prune effect removes any edit for a rowId the baseline
- * has since proven gone well before a submit ever reaches this function —
- * see `useStructuredRows.ts`'s own doc comment on that effect.
- *
- * `creates`/`updates`/`removes` are combined into ONE `datapoints` array,
- * matching the legacy widget's own single-array submit
- * (`definitions/allergyIntolerance.tsx`'s old body). A `removes` entry
- * always carries `.row` here (a `softDelete` descriptor was supplied), but
- * the type keeps it optional (`ResolvedRemove.row?`) for a type with real
- * delete semantics — the `flatMap` guard is what stays honest to that
- * shared type rather than asserting.
- *
- * `encounter: encounterId` OVERRIDES each row's own `encounter` field,
- * unconditionally — INHERITED LEGACY BEHAVIOR, not a new decision made
- * here. The baseline fetch (`allergyIntoleranceApi.getAllergy`) is
- * patient-scoped, not encounter-scoped, so a row can carry a DIFFERENT
- * encounter than the one this session is filling; re-stamping it to the
- * current encounter on every submitted row is exactly what
- * `definitions/allergyIntolerance.tsx`'s old `buildRequests` already did
- * (`...allergy, encounter: encounterId`). Preserved for behavioral parity —
- * fixing it, if it needs fixing, is out of this port's scope.
+ * `encounter: encounterId` overrides each row's own value on purpose: the
+ * baseline fetch is patient-scoped, so a row can carry a different encounter.
  */
 export async function toRequests(
   edits: readonly StructuredEdit<AllergyRow>[],

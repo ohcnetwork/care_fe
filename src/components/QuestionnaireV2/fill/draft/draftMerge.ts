@@ -10,34 +10,24 @@ import type {
 import type { Question, QuestionType } from "@/types/questionnaire/question";
 
 /**
- * Spec amendment A1 (`docs/superpowers/specs/2026-08-03-structured-
- * rearchitecture-design.md` §5) — the compatibility-aware MERGE that
- * replaces wholesale draft rejection on a questionnaire revision mismatch.
- *
- * Today (`fillDraftStore.ts`'s pre-A1 `loadFillDraft`) a stored draft whose
- * primary questionnaire version differs from the live one is discarded in
- * its ENTIRETY — every answer, on every question, gone — the instant a
- * questionnaire author edits so much as one unrelated question's label.
- * A1's ruling: restore what still fits, and NAME what doesn't, never drop
- * silently. This module is the pure decision layer both restore paths
- * (`fillDraftStore.ts`'s primary-form resume and the P2-3 "questionnaire
- * updated — reload" banner) share — see `mergeDraftResponses`'s doc
- * comment for the carry-over rules.
+ * Compatibility-aware draft merge: when the live questionnaire has changed
+ * since a draft was stored, restore every answer that still fits and NAME
+ * what doesn't — never discard the whole draft, never drop silently. Pure
+ * decision layer behind every restore path; see `mergeDraftResponses` for
+ * the compatibility rules.
  */
 
 /** Why one stored answer could not be carried onto the current
  *  questionnaire — the restore bar's notice exists to NAME these, not just
- *  drop the value silently (A1's central requirement). */
+ *  drop the value silently. */
 export type DraftDropReason =
   "question_removed" | "type_changed" | "option_removed";
 
 export interface DroppedDraftAnswer {
   questionId: string;
-  /** Best available label. A question that no longer exists in the fresh
-   *  tree has no `Question` left to read text from — the stored response
-   *  itself carries only `link_id`, so that is this reason's fallback
-   *  name (see the REMOVED-QUESTION LABEL LIMITATION note below). Every
-   *  other reason names the question's live `text`. */
+  /** Best available label: the question's live `text`, except for
+   *  `question_removed`, where no `Question` remains to read text from and
+   *  the stored response's `link_id` is the only name available. */
   label: string;
   reason: DraftDropReason;
 }
@@ -61,19 +51,9 @@ function indexQuestions(questions: Question[]): Map<string, Question> {
 }
 
 /**
- * The `ResponseValue.type` tags a PLAIN (non-structured) question's own
- * `QuestionType` can legitimately write — the mirror image of each input
- * component's own write ((`form/engine/inputs/*`): BooleanInput ->
- * "boolean", NumberInput -> "number" (decimal/integer), DateInput ->
- * "date", DateTimeQuestionInput -> "dateTime", TimeInput -> "time",
- * TextInput/ChoiceInput -> "string", QuantityInput -> "quantity".
- *
- * This is the ONLY signal available for "does the question id still exist
- * with the same type" (spec A1's wording) for a plain question: the stored
- * response never retains the OLD `Question.type` it was answered under,
- * only the shape of the VALUE it wrote. A response whose entries don't fit
- * any bucket the CURRENT question type can produce is treated as a type
- * change. `group`/`display` are absent — neither ever holds a response.
+ * `ResponseValue.type` tags that each plain `QuestionType` can write. Stored
+ * responses keep value shape rather than the original question type, so a
+ * current question can restore only entries whose value tags it can produce.
  */
 const EXPECTED_VALUE_TYPES: Partial<
   Record<QuestionType, ReadonlyArray<ResponseValue["type"]>>
@@ -103,20 +83,13 @@ function valueTypeMatchesQuestion(
 }
 
 /**
- * Choice/quantity "currently-available option" rule (spec A1: "Choice/
- * quantity answers restore only if the stored coding/value still matches
- * a currently-available option").
- *
- * SCOPE, STATED HONESTLY: only verifiable for a FIXED option list known at
- * merge time from the live `Question` — `answer_option` for choice,
- * `unit` (no `answer_value_set`) for quantity. A `answer_value_set`-backed
- * question's real option set lives in a remote valueset this pure,
- * synchronous merge cannot expand — those are restored AS-IS (trusted,
- * not verified) rather than silently blocked from ever restoring. This is
- * a deliberate, documented narrowing, not an oversight: the three mount-
- * verification scenarios the plan calls for (question removed, choice
- * option removed, question type changed) are all the `answer_option`
- * case, which this DOES cover completely.
+ * Choice/quantity answers restore only if the stored value/coding still
+ * matches a currently-available option. Only verifiable for a FIXED
+ * option list known at merge time from the live `Question`
+ * (`answer_option` for choice, `unit` for quantity): an
+ * `answer_value_set`-backed question's real option set lives in a remote
+ * valueset this pure, synchronous merge cannot expand — those restore
+ * as-is (trusted, not verified).
  */
 function choiceValueStillAvailable(
   question: Question,
@@ -163,58 +136,24 @@ function filterAvailableEntries(
   return { kept: values, anyDropped: false };
 }
 
-/** Does this stored response hold anything worth reporting as dropped?
- *  Mirrors `fillDraftStore.ts`'s `draftResponseHasContent` (values, edits,
- *  note) but kept LOCAL rather than imported — importing it would create a
- *  circular dependency (`fillDraftStore.ts` imports `mergeDraftResponses`
- *  from this module). */
-function hasRestorableContent(response: QuestionnaireResponse): boolean {
+/**
+ * Whether a stored response contains draft-worthy data. Structured edit logs
+ * count because projections are stripped before storage; baseline rows do not
+ * count because they were never in the stored copy.
+ */
+export function draftResponseHasContent(
+  response: QuestionnaireResponse,
+): boolean {
   if (response.values.some(entryHasContent)) return true;
   if ((response.edits?.length ?? 0) > 0) return true;
   return !!response.note;
 }
 
 /**
- * The A1 carry-over decision, as a pure function: given the CURRENT
- * questionnaire's questions and a stored draft's responses, returns the
- * merged response map (seeded fresh, then overlaid per the rules below)
- * plus every answer that could not be carried over, with a machine reason
- * the restore bar can translate and label.
- *
- * CARRY-OVER RULES (spec A1):
- *  - The question id no longer exists in the current tree -> DROPPED
- *    (`question_removed`). No live `Question` remains to read a label
- *    from, so the notice falls back to the stored response's `link_id`.
- *  - The question exists but the recorded value's shape doesn't fit what
- *    the CURRENT question type can produce (`EXPECTED_VALUE_TYPES`) ->
- *    DROPPED (`type_changed`), the whole response (not just the mismatched
- *    entries — a type change invalidates the answer's meaning, not just
- *    its encoding).
- *  - A structured question whose `structured_type` differs from what the
- *    draft recorded -> DROPPED (`type_changed`) at this SAME whole-
- *    response level, before `useStructuredRows` (per-`rowId` baseline
- *    reconciliation) ever mounts. A structured question whose type still
- *    matches restores its edit log verbatim — `useStructuredRows`'
- *    existing `droppedEdits` channel (Phase 2) is what then names any
- *    individual row a REFETCHED BASELINE turns out not to have; this
- *    function only decides whether the section applies at all.
- *  - Choice/quantity: entries whose stored value/coding no longer matches
- *    a `answer_option`/fixed-`unit` the current question declares are
- *    filtered out of that ONE response -> reported (`option_removed`);
- *    whatever remains restores. See `filterAvailableEntries`'s doc
- *    comment for the valueset-backed scope limitation.
- *  - Everything else (plain answers whose type still fits, a structured
- *    question whose type still matches, an untouched/empty response)
- *    restores unchanged.
- *
- * A response with nothing worth restoring (`hasRestorableContent` false)
- * is never reported as dropped even when a rule above would otherwise
- * exclude it — there is nothing lost to name.
- *
- * `questions` seeds the base via `initializeResponses` exactly like the
- * pre-A1 `mergeDraftIntoSeed` did, so a question the draft never mentions
- * (added since, or simply unanswered) still gets its normal fresh/initial
- * response.
+ * Merge a stored draft onto the current questionnaire. Removed questions,
+ * incompatible value shapes, changed structured types and unavailable fixed
+ * choice/quantity options are reported with machine reasons; everything still
+ * compatible restores onto a fresh initialized response map.
  */
 export function mergeDraftResponses(
   questions: Question[],
@@ -228,7 +167,7 @@ export function mergeDraftResponses(
     const fresh = byId.get(id);
 
     if (!fresh) {
-      if (hasRestorableContent(response)) {
+      if (draftResponseHasContent(response)) {
         dropped.push({
           questionId: id,
           label: response.link_id || id,
@@ -243,7 +182,7 @@ export function mergeDraftResponses(
     // `useStructuredRows`'s job (droppedEdits), not this function's.
     if (fresh.type === "structured" || response.structured_type) {
       if (fresh.structured_type !== response.structured_type) {
-        if (hasRestorableContent(response)) {
+        if (draftResponseHasContent(response)) {
           dropped.push({
             questionId: id,
             label: fresh.text,
@@ -262,7 +201,7 @@ export function mergeDraftResponses(
       valueTypeMatchesQuestion(fresh, entry),
     );
     if (!shapeCompatible) {
-      if (hasRestorableContent(response)) {
+      if (draftResponseHasContent(response)) {
         dropped.push({
           questionId: id,
           label: fresh.text,

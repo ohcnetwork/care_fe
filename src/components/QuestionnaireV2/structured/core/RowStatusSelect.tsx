@@ -21,18 +21,14 @@ export interface RowStatusSelectProps<TStatus extends string> {
   options: readonly RowStatusOption<TStatus>[];
   /**
    * The one option that only makes sense for a row the server already has
-   * — `entered_in_error` across every one of today's four copies
-   * (`AllergyQuestion.tsx:179-212`, `SymptomQuestion.tsx:150-179`,
-   * `DiagnosisQuestion.tsx:163-198`, `MedicationStatementQuestion.tsx:
-   * 848-855`). Hidden from the list unless {@link isExistingRecord}, so a
-   * brand-new row — one that never reached the server — can never be filed
-   * as already-retracted before it exists.
+   * — `entered_in_error` in every current consumer. Hidden unless
+   * {@link isExistingRecord}, so a brand-new row that never reached the
+   * server can never be filed as already-retracted before it exists.
    */
   hiddenForNewRow: TStatus;
-  /** `origin === "baseline"` (a server row) — NOT `!!row.id` (legacy's own
-   *  check, which happens to coincide for these four types but is the wrong
-   *  thing to generalize from; see `core/types.ts`'s `ProjectedRow.origin`
-   *  doc comment). */
+  /** `origin === "baseline"` (a server row) — NOT `!!row.id`, which
+   *  happens to coincide for current consumers but is the wrong thing to
+   *  generalize from; see `ProjectedRow.origin`. */
   isExistingRecord: boolean;
   disabled?: boolean;
   placeholder?: string;
@@ -53,10 +49,8 @@ export interface RowStatusSelectProps<TStatus extends string> {
 
 /**
  * The status/verification select whose one "already retracted" option is
- * gated on the row already existing server-side — today re-implemented,
- * nearly identically, once per clinical list type (allergy, symptom,
- * diagnosis, medication_statement). `allergy_intolerance` is the first
- * structured-v2 consumer; three more adopt this next.
+ * gated on the row already existing server-side — shared by the allergy,
+ * symptom, diagnosis and medication_statement editors.
  */
 export function RowStatusSelect<TStatus extends string>({
   value,

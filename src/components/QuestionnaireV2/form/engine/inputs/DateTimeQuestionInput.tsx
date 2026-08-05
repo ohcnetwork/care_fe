@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
-import { withEntryAt } from "./withEntryAt";
+import { replaceEntryAt } from "./withEntryAt";
 
 function formatTime(date: Date | undefined) {
   if (!date) return "";
@@ -28,12 +28,8 @@ export function DateTimeQuestionInput({
   const value = entry?.type === "dateTime" ? entry.value : undefined;
 
   const writeValue = (date: Date) => {
-    if (valueIndex === undefined) {
-      updateResponse({ values: [{ type: "dateTime", value: date }] });
-      return;
-    }
     updateResponse({
-      values: withEntryAt(response?.values, valueIndex, {
+      values: replaceEntryAt(response?.values, valueIndex, {
         type: "dateTime",
         value: date,
       }),
@@ -42,22 +38,24 @@ export function DateTimeQuestionInput({
 
   const handleDateChange = (date: Date | undefined) => {
     if (!date) return;
+    const next = new Date(date);
     if (value) {
-      date.setHours(value.getHours());
-      date.setMinutes(value.getMinutes());
+      next.setHours(value.getHours());
+      next.setMinutes(value.getMinutes());
     }
-    writeValue(date);
+    writeValue(next);
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const [hours, minutes] = e.target.value.split(":").map(Number);
     if (isNaN(hours) || isNaN(minutes)) return;
 
-    const date = value || new Date();
-    date.setHours(hours);
-    date.setMinutes(minutes);
+    // Fresh instance — never mutate the stored Date in place.
+    const next = value ? new Date(value) : new Date();
+    next.setHours(hours);
+    next.setMinutes(minutes);
 
-    writeValue(date);
+    writeValue(next);
   };
 
   return (

@@ -3,24 +3,16 @@ import type { z } from "zod";
 import type { StructuredEditOp } from "@/types/questionnaire/structured";
 
 /**
- * The assistant capability's public contract — what `formAssistant`
- * plugins (Scribe first) are handed, and what the `window` test bridge
- * exposes. `care_scribe` (a separate, lockstep-released repo) adopts this
- * shape; see the batch report's "care_scribe handover" section for the
- * migration notes.
- *
- * Every method is addressed by the question's `link_id` — the same
- * external contract the old `fill/useFillActions.ts` registry used
- * (`questionnaire.response.set`'s `link_id` parameter), not the internal
- * server-issued `question.id` uuid. `QuestionDescriptor.id` below IS that
- * `link_id` — whatever a descriptor names as `id` is exactly what you pass
- * back into `getValue`/`setValue`/`applyStructuredEdit`.
+ * Public contract handed to `formAssistant` plugins and the window test
+ * bridge. Methods address questions by `link_id`; `QuestionDescriptor.id`
+ * is the value callers pass back to `getValue`, `setValue`, or
+ * `applyStructuredEdit`.
  */
 
 export interface FormDescriptor {
   /** The questionnaire id — pass this as `formKey` to every other method.
    *  Omitting `formKey` elsewhere defaults to the primary (route-mounted)
-   *  form, mirroring the old registry's default. */
+   *  form. */
   key: string;
   title: string;
   isPrimary: boolean;
@@ -46,21 +38,19 @@ export interface StructuredQuestionSummary {
   type: string;
   /** Absent when the type could not be resolved at all
    *  (`slotState: "unknown_type"`). */
-  contract?: 1 | 2;
-  /** Mirrors `resolveStructuredSlotState`'s discriminant — only "ready"
-   *  questions accept `applyStructuredEdit` (and even then, only on
-   *  contract 2 — see that method's own doc comment). */
+  contract?: 2;
+  /** Mirrors `resolveStructuredSlotState`'s discriminant — "ready" here
+   *  means the same thing it means on screen (`StructuredSlot`). */
   slotState: StructuredSlotStateKind;
-  /** The type's own published row schema (`model.ts`'s "zod row schema
-   *  for A2"). `undefined` when the type has not published one yet — as
-   *  of this writing, EVERY ported type (see the batch report) — in which
-   *  case `applyStructuredEdit` rejects every write to it, fail-closed. */
+  /** The type's own published row schema. `undefined` when the type has
+   *  not published one, in which case `applyStructuredEdit` rejects
+   *  every write to it, fail-closed. */
   rowSchema?: z.ZodType;
   /** `baseline + edits`, content only — exactly what `response.values[0]
    *  .value` already holds (`structuredDataAny`). Entries carry no
-   *  `rowId`: that identity lives only inside the mounted editor's own
-   *  `useStructuredRows` instance, out of this generic handle's reach (see
-   *  the batch report's "current projection has no rowId" limitation). */
+   *  `rowId`: a baseline row's identity lives only inside the mounted
+   *  editor's own `useStructuredRows` instance, out of this generic
+   *  handle's reach. */
   projection: readonly unknown[];
 }
 
@@ -102,13 +92,10 @@ export interface ApplyStructuredEditInput {
 }
 
 /**
- * The session-scoped handle. Constructed once per mounted fill session
- * (`useFillAssistantSession`) and passed down as a prop/argument — never
- * looked up from a module-level registry. Two fill sessions mounted at
- * once (two tabs of one drawer, a Playwright spec driving two independent
- * mounts) get two independent handles whose closures cannot see or
- * clobber each other; only the `window` test bridge (`windowTestBridge.ts`)
- * holds more than one at a time, keyed by a random per-mount session id.
+ * The session-scoped handle. Constructed once per mounted fill session and
+ * passed down directly, never looked up from a module-level registry. Two
+ * simultaneous sessions get independent handles; the window test bridge is
+ * the only holder of multiple handles at once.
  */
 export interface FillAssistantHandle {
   listForms(): FormDescriptor[];
@@ -129,9 +116,7 @@ export interface FillAssistantHandle {
   ): AssistantResult;
   /** The same edit-log path a human tap takes
    *  (`structured/core/editLog.ts`'s `applyEditToLog` — the exact
-   *  function `useStructuredRows`'s own mutators call). Rejects a
-   *  contract-v1 (legacy) structured type outright: those types have no
-   *  edit log to append to. */
+   *  function `useStructuredRows`'s own mutators call). */
   applyStructuredEdit(
     formKey: string | undefined,
     questionId: string,

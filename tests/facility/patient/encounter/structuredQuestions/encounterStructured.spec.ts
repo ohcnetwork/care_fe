@@ -14,22 +14,20 @@ import { expectToast } from "tests/helper/ui";
 test.use({ storageState: "tests/.auth/user.json" });
 
 /**
- * Per-type matrix (spec §10) for `encounter` — Task 10 Step 3: the
- * singleton and the discharge rules. `encounter` is the ONLY Phase-2 type
- * that prefetches a real server row (every other type in this wave is
- * create-only), and its legacy definition PUT the whole encounter back
- * unconditionally on every submit — the zero-upsert pin below is the
- * assertion the legacy definition could never pass.
+ * Encounter exercises singleton and discharge rules. It prefetches a real
+ * server row while the other structured fixtures are create-only, so the
+ * zero-upsert assertion below verifies that an untouched section does not
+ * submit the prefetched encounter.
  *
  * SHARED ENCOUNTER: every test here shares the ONE fixture encounter
- * (`getEncounterId()`), the same one dozens of other specs in this suite
- * read/write. Two tests below (`"edit"`, and Task 12's own positive case in
- * `structuredInvariants.spec.ts`) perform a REAL, PERMANENT PUT against
- * it — status/priority changes, which are safely reversible in the UI
+ * (`getEncounterId()`), the same one dozens of other tests in this suite
+ * read/write. Tests in this file and `structuredInvariants.spec.ts` perform
+ * REAL, PERMANENT PUTs against it — status/priority changes, which are safely
+ * reversible in the UI
  * (unlike `time_of_death`'s one-way deceased flag). Every test picks "a
  * DIFFERENT value than whatever is currently selected" rather than a
  * hardcoded one, so it is correct regardless of what an earlier run or a
- * concurrently-running spec left behind. `mode: "serial"` keeps this
+ * concurrently-running test left behind. `mode: "serial"` keeps this
  * file's own tests from racing each other's edits on that one encounter —
  * the same reason `fillServerDraft.spec.ts` serialises its describe.
  *
@@ -141,7 +139,7 @@ test.describe("Structured question: encounter", () => {
     // question is answered instead, purely so the OVERALL submit has
     // something to send — an entirely untouched session is refused before
     // any batch is even composed
-    // (`useSubmitQuestionnaire.ts`'s `requests.length === 0` guard, a
+    // (`useSubmitFillSession.ts`'s `requests.length === 0` guard, a
     // session-wide check unrelated to this section's own behavior), which
     // would leave nothing here to inspect.
     await questionBlock(page, "Plain note")
@@ -258,7 +256,7 @@ test.describe("Structured question: encounter", () => {
     ).toHaveLength(0);
   });
 
-  test("regression (Task 7): setting a disposition then editing an unrelated field does not reset it", async ({
+  test("setting a disposition then editing an unrelated field does not reset it", async ({
     page,
   }) => {
     const questionnaireId = await getQuestionnaireIdBySlug(fixture.slug);
@@ -277,10 +275,8 @@ test.describe("Structured question: encounter", () => {
     await page.getByRole("option", { name: "Home", exact: true }).click();
     await expect(dispositionTrigger).toHaveText("Home");
 
-    // The unrelated edit Task 7 fixed: legacy re-pinned the disposition to
-    // the SERVER's value (`null`) on every subsequent edit, which snapped
-    // the clinician's pick back to the placeholder the instant they typed
-    // anywhere else.
+    // Editing an unrelated field must not re-pin the disposition to the
+    // server value and reset the clinician's current selection.
     await fieldControl(block, "Hospital Identifier", "input").fill(
       faker.string.alphanumeric(8),
     );
@@ -291,26 +287,10 @@ test.describe("Structured question: encounter", () => {
   test("?toDischarge=true seeds a dirty, discharged row on mount", async ({
     page,
   }) => {
-    // PRODUCT DEFECT, FOUND AND FIXED. `useStructuredRows.ts`'s one-shot
-    // `initialEdits` seed effect used to call `commit(...)` synchronously
-    // from a CHILD component's `useEffect`, while
-    // `useFillSessionAutosave.ts`'s subscription effect (an ANCESTOR,
-    // mounted by `QuestionnaireFillPage.tsx`) captures its baseline
-    // `formSignatures` and subscribes in a SEPARATE effect. React fires
-    // child effects before parent effects on mount, so the seeded
-    // discharge landed before any listener existed to see it as a CHANGE —
-    // no "Draft" chip, and Cancel navigated away with no unsaved-changes
-    // warning after a pre-seeded discharge. Confirmed by instrumented
-    // trace (both effects logging `performance.now()`): the seed's
-    // `commit` landed strictly before the ancestor's first subscription
-    // attempt, every run. Fixed by deferring the seed's actual `commit`
-    // call one microtask (`useStructuredRows.ts`'s seed effect) — a
-    // microtask can't preempt React's synchronous post-commit effect
-    // flush, so it always lands after every ancestor effect due this pass,
-    // and still resolves before the next paint (no visual flash). Pinned
-    // at the unit level too:
-    // `useStructuredRows.initialEditsSeedTiming.test.ts`. This test is
-    // no longer `test.fail()` — it is a real, passing pin.
+    // The seeded discharge must land after autosave subscribes so the mount
+    // produces a visible Draft chip and a cancel-time unsaved-changes warning.
+    // Unit coverage for the effect ordering lives in
+    // `useStructuredRows.initialEditsSeedTiming.test.ts`.
     const questionnaireId = await getQuestionnaireIdBySlug(fixture.slug);
     await page.goto(
       `${structuredFixtureUrl(questionnaireId)}?toDischarge=true`,

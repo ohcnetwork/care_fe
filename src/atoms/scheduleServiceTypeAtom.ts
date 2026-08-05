@@ -7,21 +7,14 @@ import { SchedulableResourceType } from "@/types/scheduling/schedule";
  * Uses localStorage to persist across sessions and logouts
  * Only clears on cache/localStorage clear
  *
- * `getOnInit: true` — REVIEW FIX. Without it, `atomWithStorage` resolves to
- * `initialValue` (Practitioner) on the very FIRST render and only reads
- * `localStorage` in its `onMount`, which runs after mount. Any consumer
- * that reads this atom to seed its OWN first-render state (`AppointmentEditor`'s
- * `useState(() => initialResource(serviceType, currentUser))`,
- * `AppointmentQuestion.tsx`'s identical pattern) captures the pre-hydration
- * default and never sees the real persisted value unless it also runs a
- * reconciling effect after the atom updates. `getOnInit: true` makes
- * `atomWithStorage` read `localStorage` synchronously ONCE, right here,
- * when this module loads and constructs the atom — not per store, per
- * mount, or per consumer. That one read becomes the atom's resolved
- * initial value in the jotai store; every `useAtom(scheduleServiceTypeAtom)`
- * call anywhere thereafter just reads THAT value like any other atom
- * state, so every consumer's first render already reflects the real
- * preference — no race, no reconciling effect required.
+ * `getOnInit: true` is load-bearing: without it, `atomWithStorage`
+ * resolves to `initialValue` (Practitioner) on the first render and only
+ * reads `localStorage` in its `onMount`, so a consumer that seeds its own
+ * first-render state from this atom (e.g. `AppointmentEditor`'s
+ * `useState(() => initialResource(serviceType, currentUser))`) captures
+ * the pre-hydration default. With it, `localStorage` is read synchronously
+ * once when the atom is constructed, so every consumer's first render
+ * already reflects the persisted preference.
  */
 export const SCHEDULE_SERVICE_TYPE_KEY = "care_schedule_service_type";
 

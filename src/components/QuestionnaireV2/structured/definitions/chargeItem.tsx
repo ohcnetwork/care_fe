@@ -14,15 +14,8 @@ export const chargeItemDefinition: StructuredTypeDefinition<"charge_item"> = {
   component: ChargeItemEditor,
   requires: ["encounterId", "facilityId"],
   subjects: ["encounter"],
-  // D2: every structured type becomes draftable except `files` (D6). A
-  // charge-item row is plain, JSON-serializable data (the wire fields plus
-  // the definition/performer display objects, themselves plain data) — no
-  // `Date`, `File`, or class instance — so it round-trips through a draft
-  // exactly. This is also the defect this port fixes: today the display
-  // objects live only in `ChargeItemQuestion.tsx`'s component `useState`,
-  // which no draft restore or reload can repaint; carrying them on the row
-  // itself is what lets a restored draft show title/price again instead of
-  // a bare slug.
+  // Charge-item rows contain only plain JSON-serializable data, including
+  // display objects needed to repaint restored drafts without refetching.
   draftPolicy: "serialize",
   contract: 2,
   toRequests,

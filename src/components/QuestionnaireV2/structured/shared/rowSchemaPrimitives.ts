@@ -1,32 +1,10 @@
 import { z } from "zod";
 
 /**
- * Shared building blocks for every ported type's `rowSchema` (spec §6 A2 —
- * `fill/assistant/structuredEditValidation.ts`'s `rowSchemaOf` contract: a
- * type publishes a zod row schema from its own `model.ts`, `.strict()` so
- * unknown fields are rejected, not silently stripped).
- *
- * Dependency-free by the SAME rule every `model.ts` in this directory
- * already follows (see `medicationRequest/model.ts`'s and
- * `serviceRequest/model.ts`'s own doc comments): no `@careConfig`-touching
- * import, directly or transitively, because `npm run test:unit` is plain
- * `node --import tsx --test`, not Vite — `import.meta.env` is `undefined`
- * there. `zod` itself has no such dependency (confirmed: `@/types/base/
- * code/code.ts` already imports it at module scope for `CodeSchema`, and
- * that module is imported by plenty of `node --test`-covered code today).
- *
- * NOT a re-implementation of `fill/assistant/coercion.ts`'s date coercion —
- * deliberately. That module coerces a PLAIN ANSWER's raw string into a
- * `ResponseValue` for a non-structured question; this module validates a
- * STRUCTURED ROW field that already carries a string in the row's own
- * shape. Sharing logic across the two would reach into `fill/*`, out of
- * this task's territory. The round-trip rigor (build a `Date` from the
- * parsed components, read it back, and require an exact match — never the
- * `Date` CONSTRUCTOR's own two-digit-year rewrite or its habit of
- * normalizing an out-of-range day into the next month) is intentionally the
- * same shape as that module's, because the underlying hazard (`new
- * Date("2024-02-31")` silently becoming March 2) is identical wherever a
- * calendar date string is accepted from outside the type's own UI.
+ * Shared `rowSchema` building blocks. Keep this dependency-free for unit tests,
+ * and use strict schemas so unknown externally authored fields are rejected.
+ * Date-only validation round-trips parsed components to reject impossible
+ * calendar dates like "2024-02-31".
  */
 
 /** A real calendar date, strictly `YYYY-MM-DD` — matches every onset/last-
@@ -74,27 +52,10 @@ export const isoInstantString = z
 export const nonEmptyString = z.string().min(1);
 
 /**
- * A DISPLAY object a row carries alongside the id it actually submits —
- * `UserReadMinimal` (`requester`/`performer_actor_object`), a picked
- * definition (`charge_item_definition_object`/`activity_definition_object`),
- * a product (`requested_product_internal`). Deliberately `.loose()`,
- * not `.strict()`, and this is the one documented exception to the
- * "unknown fields rejected" rule every OTHER field in every `rowSchema`
- * follows: these are large, purely-informational READ shapes (tens of
- * optional fields across nested billing/category/tag types) an assistant
- * would only ever COPY VERBATIM from a prior lookup the host already
- * performed, never author field-by-field from a voice command. Requiring
- * exact strictness here would force this schema to duplicate the FULL
- * shape of `UserReadMinimal`/`ChargeItemDefinitionRead`/
- * `ActivityDefinitionReadSpec` (none of them "shapes worth an assistant
- * hand-typing") for a security property (typo/hallucination rejection)
- * that only matters for fields an author actually TYPES. `id` is required
- * because every real consumer of these objects keys off it (equality
- * checks, the `UserSelector`/definition pickers); the rest of
- * `requiredStringKeys` names whatever ELSE this call site's own row-level
- * code actually reads off the object directly (e.g. a definition's
- * `slug`/`title`) — everything not named is only checked for PRESENCE via
- * `.loose()`, never for an exhaustive key list.
+ * Display objects carried alongside submitted ids are deliberately loose:
+ * they are large read shapes copied from prior lookups, not authored field by
+ * field. `id` and any call-site required string keys are validated; all other
+ * fields are allowed without duplicating full read schemas.
  */
 export function displayObjectSchema(
   extraRequiredStringKeys: readonly string[] = [],

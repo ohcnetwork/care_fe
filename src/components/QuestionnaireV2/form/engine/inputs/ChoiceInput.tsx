@@ -10,11 +10,9 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
-import { withEntryAt } from "./withEntryAt";
+import { replaceEntryAt } from "./withEntryAt";
 
-/** Ported from the legacy ChoiceQuestion: past this many options the inline
- *  chips give way to a searchable dropdown (`length > 5 ? "dropdown" :
- *  "radio"`) — a 20-option list as chips is unscannable and unanswerable. */
+/** Past this many options, inline chips give way to a searchable dropdown. */
 const INLINE_CHOICE_MAX = 5;
 
 export function ChoiceInput({
@@ -76,11 +74,8 @@ export function ChoiceInput({
         />
       );
     }
-    // Repeats → multi-select: same chips, checkbox semantics. Data shape
-    // matches the legacy ChoiceQuestion's MultiSelect exactly — one
-    // `{ type: "string", value }` entry per selected option, toggling off
-    // removes the entry — so enable_when's all-values evaluation and the
-    // eventual submission see the identical array.
+    // Repeats → multi-select: one `{ type: "string", value }` entry per
+    // selected option, and toggling off removes that entry.
     if (question.repeats) {
       const values = response?.values ?? [];
       const isSelected = (optionValue: string) =>
@@ -155,16 +150,12 @@ export function ChoiceInput({
         valuesetId={question.answer_value_set.external_id}
         value={entry?.coding ?? null}
         onSelect={(code) => {
-          const nextEntry = {
-            type: "string" as const,
-            value: code.display,
-            coding: code,
-          };
           updateResponse({
-            values:
-              valueIndex === undefined
-                ? [nextEntry]
-                : withEntryAt(response?.values, valueIndex, nextEntry),
+            values: replaceEntryAt(response?.values, valueIndex, {
+              type: "string",
+              value: code.display,
+              coding: code,
+            }),
           });
         }}
         disabled={disabled}

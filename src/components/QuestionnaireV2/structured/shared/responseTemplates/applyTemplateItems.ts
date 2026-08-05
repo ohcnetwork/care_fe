@@ -23,32 +23,10 @@ export interface ApplyTemplateItemsMessages {
 }
 
 /**
- * Resolves every item a template stores for ONE structured type into a row,
- * tolerating per-item failure — the "apply template" fetch loop
- * `ServiceRequestQuestion.tsx`'s `handleApplyTemplate` and
- * `MedicationRequestQuestion.tsx`'s own copy each hand-rolled, identically
- * shaped (`Promise.all` + null-filter + the same three-way toast
- * choreography) and differing only in what `resolve` fetches — an
- * `ActivityDefinitionReadSpec` by slug for one, product/medication data for
- * the other. This is the ONE place that choreography lives now.
- *
- * THROWS (deliberately, matching both legacy callers) in the two cases
- * `ManageResponseTemplatesSheet.tsx`'s `handleApplyTemplate` — the single
- * shared caller both legacy widgets already route through via
- * `onTemplateSelect` — relies on to skip its own "applied" checkmark
- * animation and clear `applyingTemplateId` through its `catch` block
- * instead: the template has nothing of this type (`items` empty/absent), or
- * every item failed to resolve. A partial success (some, not all, resolved)
- * does NOT throw — it returns the rows that DID resolve, with a warning
- * toast naming the shortfall, exactly like legacy's
- * `template_partially_applied` path.
- *
- * Does not add anything anywhere itself — the caller commits the returned
- * rows via ONE `list.addRows(rows)` call, never a loop of `list.addRow`
- * (two mutator calls issued synchronously in the same handler both read the
- * same stale `edits` snapshot — see `useStructuredRows.ts`'s own doc
- * comment, item under "CAVEAT for every mutator" — so a loop would silently
- * drop every row but the last).
+ * Resolves template items for one structured type into rows, tolerating
+ * per-item failure. Throws when there are no items or all items fail; partial
+ * success returns resolved rows with a warning toast. The caller must commit
+ * rows in one `addRows` call to avoid stale edit snapshots.
  */
 export async function applyTemplateItems<TSpec, TRow>(
   items: readonly TSpec[] | undefined,

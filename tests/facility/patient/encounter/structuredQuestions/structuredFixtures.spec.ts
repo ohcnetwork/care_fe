@@ -12,20 +12,18 @@ import {
 test.use({ storageState: "tests/.auth/user.json" });
 
 /**
- * Pins the backend E2E fixture questionnaires (`bodhi/ENG-737-test-fixtures`
- * on `care`) behind `tests/helper/structuredFixtures.ts`: this is the proof
- * that the fixture's slug resolves, its section renders under its recorded
- * label, and — because it is a CORE type with a real `contract: 1`
- * definition registered — none of the slot's degradation notices show.
- * Every later structured-question spec (Tasks 10-12) assumes this once and
- * locates its block through `STRUCTURED_FIXTURES` instead of re-deriving
- * slugs/labels itself.
+ * Pins the backend E2E fixture questionnaires behind
+ * `tests/helper/structuredFixtures.ts`: this is the proof that the
+ * fixture's slug resolves, its section renders under its recorded label,
+ * and — because it is a core type with a real registered definition —
+ * none of the slot's degradation notices show. Other structured-question
+ * specs assume this once and locate their block through
+ * `STRUCTURED_FIXTURES` instead of re-deriving slugs/labels themselves.
  *
- * Only the five simple-port types (`2026-08-04-phase2-ports-simple.md`)
- * loop here — NOT `unknown`, whose entire point is the OPPOSITE assertion
- * (its slot is EXPECTED to show the "requires a plugin that isn't enabled"
- * notice, since no plugin registers `x_e2e.missing`); a dedicated spec for
- * that negative case belongs to a later task, not this smoke pin.
+ * Only the five simple types loop here — NOT `unknown`, whose entire
+ * point is the OPPOSITE assertion (its slot is EXPECTED to show the
+ * "requires a plugin that isn't enabled" notice, since no plugin
+ * registers `x_e2e.missing`).
  */
 const SIMPLE_FIXTURE_KEYS: StructuredFixtureKey[] = [
   "time_of_death",

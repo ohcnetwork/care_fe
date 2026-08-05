@@ -10,7 +10,7 @@ const META_PATH = path.resolve("tests/.auth/questionnaireMeta.json");
 /**
  * Seeds the legacy enable-when fill-flow fixture questionnaire.
  *
- * The detail endpoint looks up by external_id only (ENG-737 removed slug
+ * The detail endpoint looks up by external_id only (no slug
  * lookup), and the list endpoint has no slug filter — so this resolves the
  * slug client-side from a title-filtered list, creates the questionnaire if
  * missing, updates it in place when the fixture version changed, and saves

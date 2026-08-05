@@ -11,6 +11,7 @@ import {
   onsetSchema,
   userDisplaySchema,
 } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
+import { sanitizeNote } from "@/components/QuestionnaireV2/structured/shared/sanitizeNote";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
@@ -25,24 +26,13 @@ import {
 } from "@/types/emr/symptom/symptom";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
-/**
- * The wire shape is already the row shape — mirrors `allergy_intolerance`'s
- * `AllergyRow`: `symptom` in `StructuredDataMap` (`structured/types.ts:44`)
- * is already `SymptomRequest`, so no widening is needed for this port.
- */
+/** The wire request shape doubles as the editable row shape. */
 export type SymptomRow = SymptomRequest;
 
 /**
- * The assistant write guard (spec §6 A2 — see `timeOfDeath/model.ts`'s
- * `rowSchema` for the full contract). `category` stays a bare non-empty
- * string, matching `SymptomRequest.category: string`'s own TS type — unlike
- * `allergy_intolerance`'s `criticality`, there is no fixed runtime enum
- * this port could check it against (`SYMPTOM_CATEGORY` in this file is a
- * single hardcoded constant used only by `newSymptomRow`, not an
- * exhaustive domain list). `recorded_date`/`created_date`/`updated_date`
- * are read-only housekeeping timestamps this editor never writes back —
- * left as plain optional strings rather than a strict date check that
- * would only ever apply to server-authored data this row merely carries.
+ * Assistant write guard. `category` stays a bare non-empty string — no
+ * exhaustive runtime enum exists for it. Timestamp fields are read-only
+ * pass-through, left as plain optional strings.
  */
 export const rowSchema = z
   .object({
@@ -63,14 +53,10 @@ export const rowSchema = z
   .strict();
 
 /**
- * P1-14's other half for this type — the entered-in-error soft-delete
- * split. Legacy did this by hand at `SymptomQuestion.tsx:736-757`
- * (`handleRemoveSymptom`): a row WITH a server `id` flips
- * `verification_status` to `entered_in_error` and stays visible; a row
- * WITHOUT one is filtered out entirely. `useStructuredRows`'s
- * `removeRow`/`resolveRemoveIntent` already implements exactly this dispatch
- * for any type that supplies this descriptor — nothing type-specific is
- * needed on top of it.
+ * Removing a row that exists on the server flips `verification_status` to
+ * `entered_in_error` and keeps it visible; a row that never reached the
+ * server is dropped outright. `useStructuredRows` dispatches on this
+ * descriptor by row origin.
  */
 export const SYMPTOM_SOFT_DELETE: SoftDeleteDescriptor<SymptomRow> = {
   patch: { verification_status: "entered_in_error" },
@@ -78,15 +64,10 @@ export const SYMPTOM_SOFT_DELETE: SoftDeleteDescriptor<SymptomRow> = {
 };
 
 /**
- * `Symptom` (the read shape) → the row this question edits. Exactly
- * `SymptomQuestion.tsx`'s `convertToSymptomRequest` (`:202-225`), lifted out
- * so it is testable without a DOM. `onset.onset_datetime` re-formats from
- * the server's full ISO datetime to a bare date string — `date-fns`'s
- * `format` only, never `@/Utils/utils`'s `dateQueryString`: that module
- * imports `@careConfig` at its top, which reads `import.meta.env` and is
- * `undefined` under `node --test` (the identical hazard `allergyIntolerance/
- * model.ts`'s doc comment names, and `files/model.ts`'s `FileRequestDeps`
- * before it).
+ * Read shape → the row this question edits; `onset.onset_datetime` is cut
+ * down to a bare date. Uses `date-fns` directly — `@/Utils/utils`
+ * transitively reads `import.meta.env` via `@careConfig`, undefined under
+ * `node --test`.
  */
 export function toSymptomRow(symptom: Symptom): SymptomRow {
   return {
@@ -114,15 +95,9 @@ export function toSymptomRow(symptom: Symptom): SymptomRow {
 }
 
 /**
- * One baseline row per fetched symptom, keyed by the SERVER id — a real
- * identity (unlike `appointment`/`time_of_death`'s `SINGLETON_ROW_ID`), so
- * `removeRow` can tell a baseline row (soft-deletes) from an added one
- * (annihilates) by `origin` alone.
- *
- * BASELINE HONESTY (BASELINE COMPLETENESS CONTRACT). Only ever called with a
- * RESOLVED `listSymptoms` result for THIS encounter — see `SymptomEditor.tsx`'s
- * `useSymptomBaseline`, which passes `undefined` (never `[]`) while the
- * query is loading or errored.
+ * Keyed by the server id so `removeRow` distinguishes baseline
+ * (soft-delete) from added (annihilate) rows. Callers pass `undefined`,
+ * never `[]`, while the fetch is unresolved.
  */
 export function toBaselineRows(
   symptoms: readonly Symptom[],
@@ -133,20 +108,14 @@ export function toBaselineRows(
   }));
 }
 
-/** Every symptom this question records is a `problem_list_item` — legacy
- *  bakes this in too (`SYMPTOM_INITIAL_VALUE.category`, `SymptomQuestion.tsx:94`)
- *  and never exposes a control to change it. */
+/** Every symptom this question records is a `problem_list_item`; no
+ *  control exposes the field. */
 const SYMPTOM_CATEGORY = "problem_list_item";
 
 /**
- * A freshly picked symptom code, seeded exactly the way
- * `SymptomQuestion.tsx`'s `SYMPTOM_INITIAL_VALUE` does (`:89-96`):
- * `clinical_status` starts `"active"`, `verification_status` starts
- * `"confirmed"`, `severity` defaults to `"moderate"`, `onset.onset_datetime`
- * defaults to TODAY (per this port's brief — matches legacy's
- * `dateQueryString(new Date())` seed at `:664`/`:702`/`:727`). `encounter`
- * is baked in here, at creation — unlike legacy, which only attached it at
- * submit time — because a v2 row's `patch` must always be the COMPLETE row.
+ * New rows default to active/confirmed, severity "moderate", and onset today.
+ * `encounter` is set at creation because a row's `patch` must be the complete
+ * row.
  */
 export function newSymptomRow(code: Code, encounterId: string): SymptomRow {
   return {
@@ -160,50 +129,23 @@ export function newSymptomRow(code: Code, encounterId: string): SymptomRow {
   };
 }
 
-/**
- * The duplicate-code guard this port exists to land on `core/duplicates.ts`
- * rather than reimplement: `checkForDuplicateSymptom`
- * (`SymptomQuestion.tsx:628-647`) compared `symptom.code.code === codeValue`
- * against every NON-`entered_in_error` symptom already in the list. Wired as
- * `useStructuredRows`'s `duplicateKey` option, `findDuplicateCandidates`
- * (`core/duplicates.ts`) reproduces both halves of that rule for free: it
- * seeds its seen-set only from non-`softDeleted` rows (the
- * `verification_status !== "entered_in_error"` exclusion, generalized), and
- * checks candidates against it incrementally. No branching of this port's
- * own is needed on top of it — `SymptomEditor.tsx` only has to surface the
- * toast when `addRow`/`addRows` reports a rejection.
- */
+/** Duplicate-guard key for `findDuplicateCandidates`, which already
+ *  excludes soft-deleted (entered_in_error) rows from its seen set. An
+ *  empty code yields `undefined`, excluding the row from matching. */
 export function symptomDuplicateKey(row: SymptomRow): string | undefined {
-  return row.code.code;
+  return row.code.code || undefined;
 }
 
-/**
- * A list, not a singleton — like `allergy_intolerance`, a row here is born
- * whole the moment `newSymptomRow` creates it from a picked code, so there
- * is no separate `isEmptyRow` predicate to keep in sync with a submission
- * filter (Lesson 2). Whatever `rows` holds is exactly what the clinician
- * sees and exactly what `toRequests` below compiles requests for.
- */
+/** Rows are complete from creation — no empty-row filter needed; an
+ *  empty list projects to an unanswered section. */
 export const projectValues: ProjectValues<SymptomRow> = (rows) =>
   rows.length === 0 ? [] : [{ type: "symptom", value: [...rows] }];
 
 /**
- * Reusing a historical symptom (`HistoricalRecordSelector`'s
- * `onAddSelected`) as a NEW row for this encounter. Mirrors
- * `SymptomQuestion.tsx:786`'s `({ id: _id, ...symptom }) => symptom`
- * EXACTLY on the one field that matters for correctness: the source
- * record's server `id` is stripped, because keeping it would make this
- * type's upsert endpoint UPDATE the original historical record in place
- * instead of creating a genuinely new one for this encounter — the same
- * silent-corruption shape `core/changes.ts`'s "an `add` colliding with
- * baseline" doc comment warns about, just reached from the type side
- * instead of the differ side. `encounter` is re-stamped to the CURRENT
- * encounter (a deliberate, harmless improvement over legacy, which left the
- * historical row's own `encounter` field untouched client-side and relied
- * on `toRequests`' unconditional override at submit time — still true
- * here, this just keeps the client-side row honest too). Every other field
- * (severity, clinical/verification status, onset, note, category) carries
- * over unchanged, matching legacy.
+ * Reuses a historical symptom as a NEW row for this encounter: the server
+ * id is stripped — keeping it would make the upsert update the original
+ * record in place — and `encounter` is re-stamped to the current
+ * encounter. Every other field carries over unchanged.
  */
 export function toReusedSymptomRow(
   row: SymptomRow,
@@ -213,53 +155,23 @@ export function toReusedSymptomRow(
   return { ...rest, encounter: encounterId };
 }
 
-/** Mirrors `definitions/adapt.ts`'s `sanitizeNote`, reimplemented locally —
- *  `adapt.ts` imports `useCallback` from `react`, and a `model.ts` must
- *  import no React (N1's unit-test-harness constraint), the same reason
- *  `allergyIntolerance/model.ts` reimplements it too. */
-function sanitizeNote(note: string | undefined): string | undefined {
-  return note?.trim() || undefined;
-}
+/** Kept local rather than importing `definitions/adapt.ts`'s
+ *  `sanitizeNote`: `model.ts` must stay React-free for `node --test`, and
+ *  adapt.ts imports React. */
 
 /**
- * The edit log → at most one POST against the upsert endpoint, carrying
- * every row this session touched.
+ * Edit log → at most one POST to the upsert endpoint. An empty edit log
+ * yields an empty batch — untouched baseline rows are never re-sent, so a
+ * concurrent edit to an unrelated symptom cannot be overwritten.
  *
- * P1-14, LANDED FOR REAL. Today `definitions/symptom.tsx`'s v1
- * `buildRequests` maps over the WHOLE projection — every symptom fetched
- * for this encounter, touched or not — so submitting ANY form carrying a
- * symptom question re-sends every symptom back to the server on every
- * save, including one an unrelated concurrent edit just changed. An empty
- * edit log now means an empty batch, full stop: `resolveChanges([], ...)`
- * returns three empty sets by construction, and this function returns `[]`
- * before ever touching the network.
+ * `resolveChanges` receives no baseline: the differ only sees the edit
+ * log, and the hook's prune effect drops edits for rows the baseline has
+ * proven gone before submit. A `removes` entry always carries `.row` when
+ * a softDelete descriptor is supplied; the `flatMap` guard honors the
+ * shared optional type instead of asserting.
  *
- * `resolveChanges(edits, { softDelete: SYMPTOM_SOFT_DELETE })` — NO
- * baseline, matching `allergy_intolerance`'s (not `charge_item`'s)
- * reasoning: this type's baseline genuinely EXISTS, but `toRequests(edits,
- * ctx)` structurally never receives it — `composeBatch` is a pure function
- * with no access to the TanStack cache. `useStructuredRows` already threads
- * the real baseline through every mutator during editing
- * (`SymptomEditor.tsx`), and its own passive prune effect removes any edit
- * for a rowId the baseline has since proven gone well before a submit ever
- * reaches this function.
- *
- * `creates`/`updates`/`removes` are combined into ONE `datapoints` array,
- * matching legacy's own single-array submit
- * (`definitions/symptom.tsx`'s v1 body). A `removes` entry always carries
- * `.row` here (a `softDelete` descriptor was supplied), but the type keeps
- * it optional (`ResolvedRemove.row?`) for a type with real delete
- * semantics — the `flatMap` guard is what stays honest to that shared type
- * rather than asserting.
- *
- * `encounter: encounterId` OVERRIDES each row's own `encounter` field,
- * unconditionally — INHERITED LEGACY BEHAVIOR (`definitions/symptom.tsx`'s
- * v1 `...symptom, encounter: encounterId`), not a new decision made here.
- * A row can carry a different encounter than the one this session is
- * filling (a historical symptom reused from another encounter,
- * `toReusedSymptomRow` above); re-stamping it to the current encounter on
- * every submitted row preserves behavioral parity — fixing it, if it needs
- * fixing, is out of this port's scope.
+ * `encounter: encounterId` overrides each row's own value on purpose: a reused
+ * historical symptom can carry another encounter.
  */
 export async function toRequests(
   edits: readonly StructuredEdit<SymptomRow>[],

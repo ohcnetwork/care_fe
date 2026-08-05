@@ -4,13 +4,20 @@ import { describe, it } from "node:test";
 import { applyEditToLog } from "@/components/QuestionnaireV2/structured/core/editLog";
 import { projectRows } from "@/components/QuestionnaireV2/structured/core/projectRows";
 import { selectStructuredFieldErrors } from "@/components/QuestionnaireV2/structured/core/structuredFieldErrors";
+import type { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
 import type { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
-import { Classification } from "@/types/emr/activityDefinition/activityDefinition";
+import {
+  Status as ActivityDefinitionStatus,
+  Classification,
+  Kind,
+} from "@/types/emr/activityDefinition/activityDefinition";
 import {
   Intent,
   Priority,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
+import type { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
+import type { LocationRead } from "@/types/location/location";
 import type { ActivityDefinitionTemplateSpec } from "@/types/questionnaire/questionnaireResponseTemplate";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 import type { UserReadMinimal } from "@/types/user/user";
@@ -37,13 +44,16 @@ function fixtureUser(
     username: "care-doctor",
     first_name: "Care",
     last_name: "Doctor",
+    phone_number: "+911234567890",
+    user_type: "doctor",
+    gender: "male",
     last_login: "",
     profile_picture_url: "",
     mfa_enabled: false,
     deleted: false,
     is_service_account: false,
     ...overrides,
-  } as unknown as UserReadMinimal;
+  };
 }
 
 function fixtureActivityDefinition(
@@ -53,13 +63,26 @@ function fixtureActivityDefinition(
     id: "ad-1",
     slug: "cbc-test",
     title: "Complete Blood Count",
+    derived_from_uri: null,
+    status: ActivityDefinitionStatus.active,
+    description: "",
+    usage: "",
     classification: Classification.laboratory,
+    kind: Kind.service_request,
     code: { system: "system-ad", code: "cbc", display: "CBC" },
     body_site: null,
-    locations: [],
+    diagnostic_report_codes: [],
+    slug_config: { slug_value: "cbc-test" },
+    tags: [],
+    specimen_requirements: [],
     charge_item_definitions: [],
+    observation_result_requirements: [],
+    locations: [],
+    // Deep read-only shapes this module never reads — stubbed, not built.
+    category: {} as ResourceCategoryRead,
+    healthcare_service: {} as HealthcareServiceReadSpec,
     ...overrides,
-  } as unknown as ActivityDefinitionReadSpec;
+  };
 }
 
 function fixtureRow(
@@ -90,10 +113,7 @@ describe("service_request model", () => {
         slug: "xray-chest",
         title: "Chest X-Ray",
         classification: Classification.imaging,
-        locations: [
-          { id: "loc-1" },
-          { id: "loc-2" },
-        ] as unknown as ActivityDefinitionReadSpec["locations"],
+        locations: [{ id: "loc-1" }, { id: "loc-2" }] as LocationRead[],
       });
 
       const row = newServiceRequestRow(activityDefinition, "enc-42", requester);
@@ -309,7 +329,7 @@ describe("service_request model", () => {
   // `import.meta.env` crash this avoids under `node:test`).
 
   describe("toRequests", () => {
-    it("P1-14: an empty edit log produces ZERO requests", async () => {
+    it("an empty edit log produces zero requests", async () => {
       assert.deepEqual(await toRequests([], CTX), []);
     });
 
@@ -527,13 +547,6 @@ describe("service_request model", () => {
       // (`selectStructuredFieldErrors`), not a re-implementation — proving
       // this validator's output is genuinely reachable by the shell,
       // regardless of whether today's UI can produce an invalid row.
-      const declaredColumnKeys = [
-        "priority",
-        "body_site",
-        "patient_instruction",
-        "requester",
-        "note",
-      ];
       const misses = requiredServiceRequestFieldMisses([
         add(
           "row-a",
@@ -559,7 +572,6 @@ describe("service_request model", () => {
         fieldKeys: ["priority"],
       });
       assert.equal(priorityMatch.length, 1);
-      assert.ok(declaredColumnKeys.includes("priority"));
 
       const titleMatch = selectStructuredFieldErrors(errors, {
         questionId: "q-1",
@@ -567,12 +579,11 @@ describe("service_request model", () => {
         fieldKeys: ["title"],
       });
       assert.equal(titleMatch.length, 1);
-      assert.ok(!declaredColumnKeys.includes("title"));
     });
   });
 });
 
-describe("rowSchema — the assistant write guard (spec A2)", () => {
+describe("rowSchema — the assistant write guard", () => {
   it("accepts a real row", () => {
     assert.equal(rowSchema.safeParse(fixtureRow()).success, true);
   });

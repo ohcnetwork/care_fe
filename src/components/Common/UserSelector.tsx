@@ -51,17 +51,12 @@ interface Props {
    * Accessible name for the built-in trigger button. Ignored when a custom
    * `trigger` is supplied — that node owns its own name.
    *
-   * REVIEW FIX (QuestionnaireV2 StructuredList, Task 6 Important 3): this
-   * component previously declared no `aria-label` prop and never spread
-   * unknown props onto its trigger, so a caller passing `aria-label` (a
-   * hyphenated attribute — TypeScript's excess-property check does not
-   * flag it on a JSX element for a custom component the way it would a
-   * plain object literal) compiled cleanly but the value reached nowhere:
-   * silently dropped, not even a runtime warning. `StructuredList`'s naming
-   * contract requires every control in a cell to carry `aria-label` (the
-   * visible caption is `lg:hidden`), and `ChargeItemEditor`'s performer
-   * column is a real, confirmed instance — verified live, the rendered
-   * `role="combobox"` had no accessible name until this fix.
+   * Declared explicitly because this component does not spread unknown
+   * props onto its trigger: a caller passing `aria-label` without this
+   * prop compiles cleanly (TypeScript's excess-property check does not
+   * flag a hyphenated attribute on a custom component) but the value is
+   * silently dropped, leaving the rendered combobox with no accessible
+   * name.
    */
   "aria-label"?: string;
 }

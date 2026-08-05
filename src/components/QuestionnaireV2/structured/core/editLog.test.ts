@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { applyEditToLog, toBaselineMap } from "./editLog";
-import type { BaselineRow, EditLog, RowEdit, RowId } from "./types";
+import { add, baselineOf, remove, update } from "./testFixtures";
+import type { BaselineRow, EditLog } from "./types";
 
 /**
  * A small, deliberately generic row shape — this reducer is type-agnostic,
@@ -18,22 +19,6 @@ interface TestRow {
 
 function row(id: string, note: string): TestRow {
   return { id, note };
-}
-
-function add(rowId: RowId, patch: TestRow): RowEdit<TestRow> {
-  return { rowId, op: "add", patch };
-}
-function update(rowId: RowId, patch: TestRow): RowEdit<TestRow> {
-  return { rowId, op: "update", patch };
-}
-function remove(rowId: RowId, patch: TestRow): RowEdit<TestRow> {
-  return { rowId, op: "remove", patch };
-}
-
-function baselineOf(
-  entries: ReadonlyArray<readonly [RowId, TestRow]>,
-): ReadonlyMap<RowId, TestRow> {
-  return new Map(entries);
 }
 
 describe("applyEditToLog — one edit per rowId, coalescing rules", () => {
@@ -115,8 +100,8 @@ describe("applyEditToLog — one edit per rowId, coalescing rules", () => {
   });
 
   it("a remove followed by an add resolves by DATA: a rowId provably absent from a supplied baseline resurrects as ADD, not update", () => {
-    // Reproduces the review finding: annihilation erases a rowId's
-    // history from the log, not from existence. `add(u) -> remove(u)`
+    // Annihilation erases a rowId's history from the log, not from
+    // existence. `add(u) -> remove(u)`
     // annihilates (log empty) -- so the "an existing `remove` entry can
     // only come from a baseline row" assumption is false. A `remove(u)`
     // that follows appends a FRESH remove via `appendFresh` (which never
@@ -190,9 +175,9 @@ describe("applyEditToLog — one edit per rowId, coalescing rules", () => {
   });
 
   it("an update on a baseline row followed by an add resolves to ONE update — never a duplicate create", () => {
-    // Exact review repro: baseline={server-9}, update(server-9) then
-    // add(server-9) must never become {op:"add"} — that would instruct
-    // the differ to CREATE a row the server already has.
+    // baseline={server-9}: update(server-9) then add(server-9) must never
+    // become {op:"add"} — that would instruct the differ to CREATE a row
+    // the server already has.
     const baseline = baselineOf([["server-9", row("server-9", "baseline")]]);
     const afterUpdate = applyEditToLog(
       [],

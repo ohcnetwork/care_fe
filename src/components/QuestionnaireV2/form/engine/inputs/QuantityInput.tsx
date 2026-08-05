@@ -12,11 +12,9 @@ import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/st
 import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { useValueSetExpansion } from "@/components/QuestionnaireV2/shared/useValueSetExpansion";
 
-import { withEntryAt } from "./withEntryAt";
+import { replaceEntryAt } from "./withEntryAt";
 
-/** Same UCUM valueset slug the legacy QuantityQuestion's unit picker
- *  searched (backend: CARE_UCUM_UNITS). Fallback source when the question
- *  has no unit valueset of its own. */
+/** Fallback UCUM valueset when the question has no unit valueset of its own. */
 const UCUM_SYSTEM_SLUG = "system-ucum-units";
 
 export function QuantityInput({
@@ -31,10 +29,8 @@ export function QuantityInput({
   // empty instead of leaking a wrong-typed value into the input.
   const entry = response?.values[valueIndex ?? 0];
   const value = entry?.type === "quantity" ? entry.value : undefined;
-  // Per-answer unit: a unit picked on THIS entry wins; the author's
-  // `question.unit` is only the pre-selected default. The backend persists
-  // `unit` alone (`answer_unit` is silently dropped by the Question spec),
-  // so the default must never be read from `answer_unit`.
+  // Per-answer unit: a unit picked on THIS entry wins; `question.unit` is
+  // only the pre-selected default.
   const pickedUnit = entry?.type === "quantity" ? entry.unit : undefined;
   const unit = pickedUnit ?? question.unit;
   // Invariant: the submitted `coding` always mirrors `unit` above unless
@@ -53,19 +49,14 @@ export function QuantityInput({
   const { boundedCodes } = useValueSetExpansion(question.answer_value_set);
 
   const writeEntry = (next: ResponseValue) => {
-    if (valueIndex === undefined) {
-      updateResponse({ values: [next] });
-      return;
-    }
     updateResponse({
-      values: withEntryAt(response?.values, valueIndex, next),
+      values: replaceEntryAt(response?.values, valueIndex, next),
     });
   };
 
   const handleValueChange = (raw: string) => {
     const numericValue = raw === "" ? undefined : parseFloat(raw);
-    // `unit` (picked ?? default) mirrors the legacy handleValueChange's
-    // `unit: currentUnit` — changing the value never resets a picked unit.
+    // Changing the numeric value never resets a picked or default unit.
     writeEntry({ type: "quantity", value: numericValue, unit, coding });
   };
 

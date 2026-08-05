@@ -27,7 +27,7 @@ test.describe("Enable When — 'exists' operator (answer: false)", () => {
     const facilityId = getFacilityId();
     const patientId = getPatientId();
     const encounterId = getEncounterId();
-    // The fill route fetches by external_id (slug lookup removed on ENG-737).
+    // The fill route fetches by external_id (slug lookup is not supported).
     const questionnaireId = getQuestionnaireId();
 
     await page.goto(

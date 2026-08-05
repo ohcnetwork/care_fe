@@ -69,8 +69,7 @@ function buildEnableWhen(
     return {
       question: targetLinkId,
       operator,
-      // "Yes"/"No" string, matching the legacy editor's storage format (see
-      // normalizeBooleanConditionAnswer above).
+      // Boolean conditions persist "Yes"/"No" strings.
       answer: "No",
     } as EnableWhen;
   }
@@ -194,9 +193,8 @@ export function VisibilityConditionsCard({
             (q) => q.link_id === condition.question,
           );
           const operators = operatorsForType(target?.type);
-          // A saved condition (legacy data) may still target a question
-          // the renderer never answers — surface it as invalid instead of
-          // silently keeping a condition that can never match.
+          // A saved condition may target a question the renderer never
+          // answers; surface it as invalid instead of keeping it silently.
           const invalidTarget = condition.question
             ? flatQuestions.find(
                 (q) =>
@@ -308,8 +306,8 @@ export function VisibilityConditionsCard({
                     <p className="text-xs text-gray-500">{t("answer")}</p>
                     {target?.type === "boolean" ? (
                       <Select
-                        // Tolerates legacy true/false answers on load; any
-                        // change re-writes them as "Yes"/"No".
+                        // Tolerates true/false answers on load; any change
+                        // re-writes them as "Yes"/"No".
                         value={normalizeBooleanConditionAnswer(
                           condition.answer,
                         )}

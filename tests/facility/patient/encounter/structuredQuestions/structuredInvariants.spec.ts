@@ -18,17 +18,13 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 /**
- * Task 12 — the architectural invariants this whole rearchitecture exists
- * to make assertable (spec §10's twelve invariants; `annexes/
- * p1-state-core.md` §17 assigns items 1-3 to the first ported type in
- * Phase 2). These pin the ARCHITECTURE, not one type — a future port that
- * breaks one of these should fail HERE, with a name that says what broke,
- * not silently regress a per-type spec nobody thought to check.
+ * Cross-type structured-question invariants. These tests pin shared behavior,
+ * not one type, so a new structured type that breaks an invariant fails here
+ * with a name that describes the behavior.
  *
- * `encounter` (Invariants 1-2) is the only Phase-2 type that PREFETCHES a
- * real server row — every other type in this wave is create-only — which
- * is exactly why it is the fixture with real teeth for "does a passive
- * server read get mistaken for a clinician edit."
+ * `encounter` prefetches a real server row while the other structured fixtures
+ * are create-only, making it the fixture that verifies passive server reads do
+ * not become clinician edits.
  */
 
 const encounterFixture = STRUCTURED_FIXTURES.encounter;
@@ -128,7 +124,7 @@ test.describe("Structured invariant 1: zero upsert for an untouched section", ()
 
     // Touch NOTHING in the encounter section. Answer the unrelated plain
     // question only, so the overall submit has content to send at all
-    // (`useSubmitQuestionnaire.ts`'s own `requests.length === 0` guard would
+    // (`useSubmitFillSession.ts`'s own `requests.length === 0` guard would
     // otherwise block Save for an unrelated reason and leave nothing here
     // to inspect).
     await questionBlock(page, "Plain note")
@@ -331,7 +327,7 @@ test("Structured invariant 3: a structured-only edit arms the unsaved-changes pr
 /** Resolves a charge item definition catalog entry's real `slug` by exact
  *  title — used to check what the wire actually carries against what the
  *  API says that title's slug is, rather than re-deriving the slugify rule
- *  by hand (which would test this spec's own guess, not the product). */
+ *  by hand. */
 async function chargeItemDefinitionSlug(title: string): Promise<string> {
   const res = await fetch(
     `${apiBaseUrl()}/api/v1/facility/${getFacilityId()}/charge_item_definition/?title=${encodeURIComponent(title)}&limit=10`,

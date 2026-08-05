@@ -15,7 +15,7 @@ export type { TimeOfDeathRow };
 
 /**
  * The runtime guard on an assistant-supplied (or otherwise externally
- * authored) row — spec §6 A2, `fill/assistant/structuredEditValidation.ts`'s
+ * authored) row — `fill/assistant/structuredEditValidation.ts`'s
  * `rowSchemaOf` contract. `.strict()` so an unrecognized key (a hallucinated
  * field, a typo) fails `safeParse` rather than being silently stripped.
  * `deceased_datetime` accepts any real date-time string, not just what
@@ -39,34 +39,19 @@ export function createSeed(): TimeOfDeathRow {
   return { deceased_datetime: "" };
 }
 
-/** The single authority on "empty" for this row shape. `projectValues` and
- *  `toRequests` below both defer to this — see `projectValues`'s doc
- *  comment for the bug that shipped when they each judged emptiness their
- *  own way instead. */
+/** The single authority on "empty" for this row shape — `projectValues`
+ *  and `toRequests` both defer to it so projection and wire agree. */
 export function isEmptyRow(row: TimeOfDeathRow): boolean {
   return !row.deceased_datetime;
 }
 
-/** Module scope — `useStructuredRows` memoizes on this identity, and an
- *  inline arrow would rewrite the projection on every render (annex
- *  `p1-state-core.md` §18, "Risk — projection write loop").
- *
- *  POST-REVIEW FIX — projection and differ must agree on "empty". This
- *  used to project EVERY row regardless of content, while `toRequests`
- *  filtered on `isEmptyRow`. A hand-edited/restored draft carrying
- *  `{deceased_datetime: ""}` (the reducer's own `isEmptyRow` guard only
- *  stops a live `setRow` call from recording that edit — it does not
- *  validate `patch` on an already-stored or restored edit, which is
- *  deliberate: untrusted drafts are never patch-validated, only shape-
- *  validated by `isStructuredEditRecord`) then projected as an ANSWERED
- *  entry — `entryHasContent` reads a non-empty `values[0].value` array and
- *  is true — which lit the outline tick and satisfied required validation,
- *  while `toRequests` silently sent nothing. Filtering here with the SAME
- *  `isEmptyRow` the differ uses makes the two agree by construction: a
- *  blank row is unanswered everywhere, not just on the wire. The editor
- *  renders from `single.row` (`useStructuredRows`'s own projection of
- *  `(baseline, edits)`), never from this function's output, so nothing
- *  user-visible about the live input changes. */
+/** Module scope — `useStructuredRows` memoizes on this identity; an inline
+ *  arrow would rewrite the projection on every render. Filters with the
+ *  SAME `isEmptyRow` the differ uses, so the two agree by construction: a
+ *  blank row (reachable via a restored or externally edited draft — drafts are
+ *  shape-validated, never patch-validated) is unanswered everywhere, not
+ *  just on the wire. Projecting it would light the outline tick and
+ *  satisfy required validation while `toRequests` silently sent nothing. */
 export const projectValues: ProjectValues<TimeOfDeathRow> = (rows) => {
   const answered = rows.filter((row) => !isEmptyRow(row));
   return answered.length === 0
@@ -82,40 +67,19 @@ export async function toRequests(
   // narrowed rather than asserted because the context type is optional for
   // plugin types on a resource subject.
   if (!patientId) return [];
-  // `removes` is intentionally ignored: time_of_death has no soft-delete
-  // marker and no delete endpoint (nothing is passed as `options.softDelete`
-  // above), so a `remove` entry here can only be a malformed/restored
-  // draft's stray edit — the ordinary add-then-clear path in the editor
-  // annihilates the pair in the log before it ever reaches a differ
-  // (`editLog.ts`'s `coalesceOntoRemove`) — and there is no request this
-  // create/update-only PUT endpoint could send for one anyway.
+  // `removes` is ignored: no delete endpoint and no soft-delete marker —
+  // the editor's add-then-clear annihilates in the log, so a surviving
+  // `remove` can only be a malformed draft's stray edit.
   const { creates, updates } = resolveChanges(edits, {});
-  // Singleton: collapse to AT MOST ONE request. `resolveChanges` dispatches
-  // once per distinct `rowId`, and the live reducer only ever uses
-  // `SINGLETON_ROW_ID`, but a malformed/restored draft could carry two
-  // different rowIds for this type — never PUT the same patient endpoint
-  // twice in one batch.
-  //
-  // POST-REVIEW FIX: filter blanks OUT before taking the last entry, not
-  // after. The first cut took `.at(-1)` THEN checked emptiness, so a
-  // two-rowId log whose last entry was blank (e.g. `[add("a", "…"),
-  // add("b", "")]`) reproduced item 1's exact bug in miniature: the
-  // projection shows row `a` as answered (`b`'s blank patch is filtered out
-  // of `projectValues` the same way), while this differ picked `b`, saw it
-  // was empty, and sent nothing — answered on screen, empty on the wire.
-  // Filtering first makes both agree: whatever `projectValues` would show
-  // as the answered row is exactly what this differ sends.
-  //
-  // NOT log order, despite `[...creates, ...updates]` reading like it:
-  // `resolveChanges` groups by SET (every create, in first-appearance
-  // order, then every update, in first-appearance order), so `.at(-1)`
-  // here picks the last UPDATE if any exist, else the last CREATE — not
-  // necessarily the log's final edit. `[update("a"), add("b")]` resolves
-  // to `creates=[b], updates=[a]`, and `.at(-1)` on the concatenation
-  // yields `a`, the log-FIRST entry. Harmless for a well-formed log (one
-  // rowId, hence one set has exactly one entry and the other is empty);
-  // arbitrary-but-deterministic for a malformed multi-rowId one, which is
-  // the only case where this distinction is even visible.
+  // Singleton: collapse to AT MOST ONE request — a malformed draft could
+  // carry two rowIds, and this must never PUT the same patient endpoint
+  // twice in one batch. Blanks are filtered OUT before taking the last
+  // entry so whatever `projectValues` shows as the answered row is exactly
+  // what this differ sends. NOT log order, despite `[...creates,
+  // ...updates]` reading like it: `resolveChanges` groups by set, so
+  // `.at(-1)` picks the last UPDATE if any exist, else the last CREATE —
+  // harmless for a well-formed one-rowId log, arbitrary-but-deterministic
+  // for a malformed one.
   const row = [...creates, ...updates].filter((r) => !isEmptyRow(r)).at(-1);
   if (!row) return [];
   return [

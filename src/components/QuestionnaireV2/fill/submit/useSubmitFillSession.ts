@@ -51,17 +51,9 @@ interface UseSubmitFillSessionArgs {
 }
 
 /**
- * Reveal the first failing question — every block carries the
- * `data-question-id` anchor and every input the `question-input-{id}` one.
- * Deferred a tick so the error render exists before we measure (same
- * reason legacy used setTimeout).
- *
- * Focus moves as well as the scroll: a `scrollIntoView` alone leaves a
- * keyboard or screen-reader user parked on the Save button with no way to
- * find what failed. Where the question has no focusable input of its own
- * (structured sections, unsupported types) the block itself takes focus
- * through a programmatic-only tabindex, so the error text right below it
- * is what gets read.
+ * Reveal the first failing question after its error has rendered. Focus moves
+ * to the input or block as well as scrolling, so keyboard and screen-reader
+ * users land on the error context rather than staying on Save.
  */
 function scrollToQuestion(questionId: string) {
   setTimeout(() => {
@@ -85,6 +77,18 @@ function scrollToQuestion(questionId: string) {
   });
 }
 
+/** `error.cause` off the wire is untyped — accept it as a batch failure
+ *  payload only when it structurally carries a `results` array. */
+function hasBatchResults(
+  cause: unknown,
+): cause is { results: Parameters<typeof mapBatchErrors>[0] } {
+  return (
+    typeof cause === "object" &&
+    cause !== null &&
+    Array.isArray((cause as { results?: unknown }).results)
+  );
+}
+
 /** `questionId → formKey` across the whole session, so a batch failure
  *  lands in the store of the form that owns the question. */
 function buildQuestionOwnerIndex(forms: FillFormEntry[]): Map<string, string> {
@@ -102,17 +106,14 @@ function buildQuestionOwnerIndex(forms: FillFormEntry[]): Map<string, string> {
 }
 
 /**
- * The fill host's submit action — the errorsAtom writer the engine
- * documented since the fill seams landed. Lives outside the form
- * providers and reaches each form's instance store through the host's
- * registry, so one click submits the whole session.
+ * The fill host's submit action. It lives outside the form providers and
+ * reaches each form's instance store through the host registry, so one
+ * click submits the whole session.
  *
- * Flow: client validation (required + structured registry validators)
- * runs per form, writes failures into that form's `errorsAtom` and aborts
- * with a scroll to the first one; otherwise every form composes its
- * requests into ONE batch (legacy semantics — the added questionnaires
- * ride along with the primary), and failures map back per reference_id
- * into the owning form's `errorsAtom` plus the page-level panel.
+ * Flow: client validation runs per form, writes failures into that form's
+ * `errorsAtom` and aborts with a scroll to the first one; otherwise every
+ * form composes its requests into one batch, and failures map back by
+ * reference_id into the owning form's `errorsAtom` plus the page panel.
  */
 export function useSubmitFillSession({
   forms,
@@ -130,7 +131,7 @@ export function useSubmitFillSession({
     // by the global error toast.
     // TODO: migrate to useBatchRequest once it can take pre-built batch
     // entries (these requests carry raw urls) and can opt out of the
-    // global error toast — same blocker the legacy form recorded.
+    // global error toast.
     // eslint-disable-next-line @typescript-eslint/no-deprecated
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
@@ -139,14 +140,9 @@ export function useSubmitFillSession({
       onSuccess();
     },
     onError: (error) => {
-      const errorData = error.cause as
-        | {
-            results?: Parameters<typeof mapBatchErrors>[0];
-          }
-        | undefined;
-      if (errorData?.results) {
+      if (hasBatchResults(error.cause)) {
         const mapped = mapBatchErrors(
-          errorData.results,
+          error.cause.results,
           t("validation_failed"),
         );
         setServerErrors(mapped.serverErrors);

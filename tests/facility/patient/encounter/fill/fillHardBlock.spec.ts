@@ -148,7 +148,7 @@ test.describe("P1-13: hard-block validation for broken structured slots", () => 
     ).toBeVisible();
     // Notice-only slot, no focusable input of its own — the error-scroll
     // fallback focuses the question block itself (see
-    // useSubmitQuestionnaire.ts's scrollToQuestion).
+    // useSubmitFillSession.ts's scrollToQuestion).
     await expect(structuredBlock).toBeFocused();
 
     expect(

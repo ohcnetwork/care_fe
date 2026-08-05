@@ -22,11 +22,10 @@ import {
 
 const AUTOSAVE_DEBOUNCE_MS = 1500;
 
-/** The draft-safe signature for ONE form — the same shape `safeSessionSignature`
- *  would produce for this form inside the whole-session array, just scoped to
- *  a single-element input. Reusing it (rather than duplicating the
- *  partitioning rule) keeps the per-form fingerprint byte-for-byte what the
- *  old whole-session recompute would have contributed for this form. */
+/** The draft-safe signature for ONE form — `safeSessionSignature` scoped
+ *  to a single-element input, so the per-form fingerprint is exactly what
+ *  this form contributes to the whole-session signature (one partitioning
+ *  rule, never two). */
 function formSignature(form: FillFormEntry, store: FormStore): string {
   return safeSessionSignature([
     { questionnaire: form.questionnaire, responses: store.get(responsesAtom) },
@@ -61,16 +60,9 @@ interface UseFillSessionAutosaveArgs {
 }
 
 /**
- * The local autosave engine for a whole fill session. Lives OUTSIDE the
- * form providers: it reaches each form's instance store through the
- * host's registry, subscribes to all of them behind one shared debounce,
- * flushes on pagehide/unmount so quick closes keep the last keystrokes,
- * and exposes the state the chrome renders (Draft chip, restore bar).
- *
- * `discardRestoredDraft` clears the stored draft and nothing else — what
- * is on screen is this session's own work (a draft only reaches the
- * stores through Resume), so the affordance destroys exactly the bytes
- * it names.
+ * Local autosave for a fill session. It subscribes to each registered form
+ * store behind one debounce, flushes on pagehide/unmount, and exposes the
+ * dirty and restore-prompt state rendered by the page chrome.
  */
 export function useFillSessionAutosave({
   scope,
@@ -214,9 +206,8 @@ export function useFillSessionAutosave({
           // phantom draft over the clinician's real one.
           //
           // Only THIS form's part is re-serialized — the fired store is
-          // the only one that could have changed — so comparing it
-          // against this form's own cached entry decides exactly what
-          // the old whole-session recompute would have decided.
+          // the only one that could have changed — and compared against
+          // this form's own cached entry.
           const signature = formSignature(form, store);
           if (formSignatures.get(form.key) === signature) return;
           formSignatures.set(form.key, signature);
@@ -243,8 +234,7 @@ export function useFillSessionAutosave({
   /** Successful submit: drop the stored draft, stop all further saves,
    *  and clear the dirty flag SYNCHRONOUSLY (flushSync) — the success
    *  handler navigates right after this, and `useNavigationPrompt` must
-   *  already see a pristine page or it blocks the redirect (the same
-   *  reason the legacy form flushSync'd `setIsDirty(false)`).
+   *  already see a pristine page or it blocks the redirect.
    *
    *  The clear runs off `scope`, not off whether this session PERSISTED
    *  locally: a server-draft session shares its key with the plain mount,
@@ -267,8 +257,8 @@ export function useFillSessionAutosave({
     // only ever reaches the stores through Resume, so while the bar shows
     // they hold nothing but this session's own work: prefetched clinical
     // rows and whatever the clinician typed while ignoring the prompt.
-    // Resetting them (as this once did) destroyed exactly the
-    // un-persisted work the prompt gate was protecting.
+    // Resetting them would destroy exactly the un-persisted work the
+    // prompt gate protects.
     //
     // Persistence was standing down while the prompt was pending — flip
     // the gate synchronously (the ref recomputes only on the next render)

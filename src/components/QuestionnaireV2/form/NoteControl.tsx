@@ -25,9 +25,8 @@ export function NoteControl({ questionId }: { questionId: string }) {
   if (!response) return null;
   if (mode === "readonly" && !response.note) return null;
 
-  // The amber dot is decorative — the sr-only sibling carries the "a note
-  // exists" state, referenced via aria-describedby so the button's name
-  // stays "Add note" (a spec contract).
+  // The amber dot is decorative; the sr-only sibling carries the "a note
+  // exists" state through aria-describedby without changing the button name.
   const noteIndicator = response.note && (
     <>
       <span className="absolute bottom-2 right-2 size-1.5 rounded-full bg-amber-500" />

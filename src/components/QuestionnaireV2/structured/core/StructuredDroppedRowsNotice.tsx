@@ -6,13 +6,11 @@ import type { EditLog } from "./types";
 
 /**
  * Names every row THIS structured question's `useStructuredRows` dropped
- * this mount because its baseline vanished server-side (spec amendment A1
- * — see `droppedRowsNotice.ts`'s own doc comment for why this is a
- * separate, per-question notice rather than a feed into the pre-Resume
- * `DraftRestoreBar`). Visually mirrors that bar's own amber convention
- * (`fill/DraftRestoreBar.tsx`) so the two read as one family of "here is
- * what could not be carried over" copy, even though they fire at different
- * times for different reasons.
+ * this mount because its baseline vanished server-side. A separate,
+ * per-question notice — not a feed into the pre-Resume `DraftRestoreBar`
+ * (see `droppedRowsNotice.ts`) — but it mirrors that bar's amber
+ * convention (`fill/DraftRestoreBar.tsx`) so the two read as one family of
+ * "here is what could not be carried over" copy.
  *
  * Renders nothing when there is nothing to report — mount this
  * unconditionally in every structured editor; it is a no-op the moment

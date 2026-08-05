@@ -11,13 +11,8 @@ export const diagnosisDefinition: StructuredTypeDefinition<"diagnosis"> = {
   component: DiagnosisEditor,
   requires: ["patientId", "encounterId"],
   subjects: ["encounter"],
-  // D2: every structured type becomes draftable except `files` (D6). A
-  // diagnosis row is plain, JSON-serializable data (a `Code`, a handful of
-  // enum strings, an optional onset date/note) — no `Date`, `File`, or class
-  // instance — so it round-trips through a draft exactly. The legacy
-  // blanket "exclude" was a property of the conflated value array
-  // (prefetched server rows mixed with user input, `dirty`-tracked by hand),
-  // not of this type's data.
+  // Diagnosis rows contain only plain JSON-serializable data, so they can be
+  // restored from drafts without losing type information.
   draftPolicy: "serialize",
   contract: 2,
   toRequests,

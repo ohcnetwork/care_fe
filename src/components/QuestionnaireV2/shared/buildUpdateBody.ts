@@ -5,19 +5,8 @@ import {
 
 /**
  * Builds a full-body update from the fetched questionnaire plus a partial
- * patch, so a PUT never drops fields the current tab doesn't own (e.g.
- * `questions`, `subject_type`, `version`).
- *
- * Only writable `QuestionnaireBase`/`QuestionnaireUpdate` fields are copied
- * from the fetched questionnaire — read-only response fields such as `id`,
- * `auth_context`, `internal_revision`, `created_by`, `updated_by`, and
- * `modified_date` must never be echoed back in the PUT body.
- *
- * `version` is coerced to a string because `QuestionnaireRead.version` is
- * `string | number` (the read endpoint can return a bare number, e.g. `0.1`
- * from fixture data) while the update schema requires a string — without
- * this, saving a title/status/reorder change (which never touches `version`)
- * would still 400.
+ * patch, copying only writable fields. `version` is coerced to a string
+ * because the read endpoint may return a number while updates require string.
  */
 export function buildUpdateBody(
   questionnaire: QuestionnaireRead,

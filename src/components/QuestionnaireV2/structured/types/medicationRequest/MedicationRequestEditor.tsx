@@ -112,21 +112,13 @@ import {
 } from "./model";
 
 /**
- * Three-state baseline, honoring the `?prescription=` gating
- * (`MedicationRequestQuestion.tsx:364-377`'s `enabled: !isPreview &&
- * !!prescriptionId`):
- *
- *  - No `prescriptionId` at all: this question has NOTHING to prefetch —
- *    there is no endpoint call to make, and no "loading" state to honor,
- *    matching `charge_item`/`files`' own no-baseline reasoning (not
- *    `diagnosis`/`allergy`'s "genuinely exists, just not fetched yet").
- *    Returns `[]` immediately, never `undefined` — every medication the
- *    clinician adds in this mode is a genuine `add` against an honestly
- *    empty baseline, not a presumed-baseline row waiting on a fetch that
- *    will never happen.
- *  - `prescriptionId` present, query in flight or errored: `undefined` —
- *    the ordinary BASELINE COMPLETENESS CONTRACT loading window.
- *  - `prescriptionId` present, query resolved: the real converted rows.
+ * Three-state baseline:
+ *  - no `prescriptionId`: nothing to prefetch — returns `[]` immediately,
+ *    never `undefined`, so every added medication is a genuine `add`
+ *    against an honestly empty baseline;
+ *  - `prescriptionId` present, query in flight or errored: `undefined`
+ *    (the ordinary loading window);
+ *  - resolved: the converted rows.
  */
 function useMedicationBaseline(
   patientId: string | undefined,
@@ -170,6 +162,11 @@ function formatDoseRange(range?: {
   return `${round(range.low?.value ?? "0")} → ${round(range.high.value)} ${range.high.unit?.display ?? ""}`;
 }
 
+const isInactiveMedication = (row: MedicationRequestRow) =>
+  (INACTIVE_MEDICATION_STATUSES as readonly string[]).includes(
+    row.status ?? "",
+  );
+
 /** Merges a patch onto ONE dosage instruction by index — the sole mutation
  *  primitive every dose/frequency/duration/instructions/route/site/method
  *  cell below routes through, so "add/remove instruction" and "edit slot N"
@@ -186,9 +183,10 @@ function useUpdateInstruction(
         ),
       });
     },
-    // ctx.update / ctx.row are rebuilt every render (see StructuredList's own
-    // documented caveat on ctx.update's stability) — this callback is cheap
-    // to rebuild each render too, so no stale-closure risk from omitting them.
+    // ctx.update / ctx.row change identity across renders (see
+    // StructuredList's caveat on `update`'s stability); the callback is
+    // cheap to rebuild, so listing them (rather than the whole `ctx` the
+    // rule asks for) is safe.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [ctx.update, ctx.row],
   );
@@ -244,6 +242,22 @@ function DoseCell({
         const fieldKey = `dosage_instruction[${index}].dose`;
         const doseInvalid = ctx.errors.some((e) => e.field_key === fieldKey);
         const doseRange = instruction.dose_and_rate?.dose_range;
+        const dosageDialog = doseRange && (
+          <DosageDialog
+            dosageRange={doseRange}
+            disabled={disabled}
+            onSave={(range) => {
+              updateInstruction(index, {
+                dose_and_rate: { type: "ordered", dose_range: range },
+              });
+              setShowDosageDialog(null);
+            }}
+            onClear={() => {
+              updateInstruction(index, { dose_and_rate: undefined });
+              setShowDosageDialog(null);
+            }}
+          />
+        );
         return (
           <div key={index}>
             {index > 0 && (
@@ -327,20 +341,7 @@ function DoseCell({
                     <div className="w-full" />
                   </PopoverTrigger>
                   <PopoverContent className="w-55 p-4" align="start">
-                    <DosageDialog
-                      dosageRange={doseRange}
-                      disabled={disabled}
-                      onSave={(range) => {
-                        updateInstruction(index, {
-                          dose_and_rate: { type: "ordered", dose_range: range },
-                        });
-                        setShowDosageDialog(null);
-                      }}
-                      onClear={() => {
-                        updateInstruction(index, { dose_and_rate: undefined });
-                        setShowDosageDialog(null);
-                      }}
-                    />
+                    {dosageDialog}
                   </PopoverContent>
                 </Popover>
               ) : (
@@ -350,31 +351,14 @@ function DoseCell({
                     setShowDosageDialog(open ? index : null)
                   }
                 >
-                  <DialogContent>
-                    <DosageDialog
-                      dosageRange={doseRange}
-                      disabled={disabled}
-                      onSave={(range) => {
-                        updateInstruction(index, {
-                          dose_and_rate: { type: "ordered", dose_range: range },
-                        });
-                        setShowDosageDialog(null);
-                      }}
-                      onClear={() => {
-                        updateInstruction(index, { dose_and_rate: undefined });
-                        setShowDosageDialog(null);
-                      }}
-                    />
-                  </DialogContent>
+                  <DialogContent>{dosageDialog}</DialogContent>
                 </Dialog>
               ))}
           </div>
         );
       })}
-      {/* Reachable on BOTH desktop and mobile — legacy's "+" only ever
-          appeared in the (desktop-only) medicine-name column, so a second
-          dosage instruction could never be added from a phone. Placed here,
-          in the always-rendered dosage cell, on purpose. */}
+      {/* Lives in the always-rendered dosage cell so an instruction can be
+          added from mobile too — the medicine-name column is desktop-only. */}
       {!isReadOnly && (
         <button
           type="button"
@@ -514,7 +498,7 @@ function InstructionsCell({
         const current = instruction.additional_instruction ?? [];
         const addInstruction = (code: Code) => {
           if (current.some((item) => item.code === code.code)) {
-            toast.warning(`${code.display} ${t("is_already_selected")}`);
+            toast.warning(t("item_already_selected", { name: code.display }));
             return;
           }
           updateInstruction(index, {
@@ -609,23 +593,14 @@ function ValueSetLoopCell({
 // ---------------------------------------------------------------------------
 
 /**
- * Resolves a template's stored `MedicationRequestTemplateSpec` into a fresh
- * row, fetching the product knowledge its `requested_product` SLUG names
- * (a template never stores the product's UUID — only its slug survives a
- * product being re-versioned) — the ONE fetch both the row-level
- * `resolveTemplateMedicationRequest` (`handleAddSingleFromTemplate`) and the
- * whole-template `handleApplyTemplate` need, mirroring
- * `resolveTemplateServiceRequest`'s identical split in
- * `ServiceRequestEditor.tsx` between a pure model-side merge
- * (`medicationRowFromTemplate`) and this editor-side network fetch.
+ * Resolves a template's stored data into a fresh row, fetching the product
+ * knowledge by its stored SLUG (a template never stores the product UUID —
+ * the slug stays resolvable across product re-versions).
  *
- * A failed/absent product lookup is TOLERATED here, not treated as the
- * whole item failing (mirrors legacy's `fetchProductAndBuildMedication`,
- * which `console.warn`s and continues with `productKnowledge: undefined`
- * rather than rejecting) — `applyTemplateItems`'s own per-item try/catch is
- * for a `resolve` that THROWS; a medication whose product could not be
- * looked up still resolves to a row (missing its product, but present),
- * which is the same degrade legacy already shipped.
+ * A failed/absent product lookup is tolerated, not a per-item failure: the
+ * medication still resolves to a row without its product.
+ * `applyTemplateItems`'s per-item try/catch is only for a `resolve` that
+ * throws.
  */
 async function resolveTemplateMedicationRequest(
   templateMedication: MedicationRequestTemplateSpec,
@@ -696,17 +671,9 @@ export function MedicationRequestEditor({
     disabled,
   });
 
-  // REGRESSION FIX (spec-repair, structuredQuestions/medicationRequest &
-  // medicine/prescription{Create,Edit}.spec.ts): legacy gated every removal
-  // behind `ConfirmActionDialog` (`MedicationRequestQuestion.tsx`'s
-  // `handleRemoveMedication` → `confirmRemoveMedication`) — removing a
-  // prescribed medication is destructive enough (an existing row flips to
-  // `entered_in_error` rather than vanishing) to warrant an "are you sure"
-  // step. That confirmation never made it into this port: `onRemoveRow` was
-  // wired straight to `list.removeRow`, so a single dropdown click silently
-  // removed the row. `medicationStatement/MedicationStatementEditor.tsx`
-  // already carries the correct, ported version of this same pattern
-  // (`pendingRemoveRowId` + `ConfirmActionDialog`) — mirrored here.
+  // Removal is gated behind a confirmation dialog: removing a prescribed
+  // medication is destructive (an existing row flips to `entered_in_error`
+  // rather than vanishing), so a single menu click must not do it silently.
   const [pendingRemoveRowId, setPendingRemoveRowId] = useState<RowId | null>(
     null,
   );
@@ -714,16 +681,8 @@ export function MedicationRequestEditor({
     (row) => row.rowId === pendingRemoveRowId,
   );
 
-  // Response templates — the shared `ResponseTemplates` module
-  // (`structured/shared/responseTemplates/`) `service_request` built and
-  // published for exactly this second consumer (`.superpowers/sdd/
-  // batchC-servicerequest-report.md`'s CONTRACT section). `itemKey:
-  // "medication_request"` is the fix for this type's own historical
-  // key-name drift (legacy's create-template mutation wrote a literal
-  // `service_request` key into `template_data` — not a valid `TemplateData`
-  // member at all; see `useAddToTemplate.tsx`'s header doc comment) — the
-  // hook computes the correct key from this option instead of a hand-typed
-  // literal at the call site.
+  // The hook derives the `template_data` key from `itemKey`, keeping template
+  // storage keys aligned with this structured type.
   const { dialog: addToTemplateDialog, openAddToTemplate } =
     useAddToTemplate<MedicationRequestRow>({
       questionnaireSlug,
@@ -780,50 +739,42 @@ export function MedicationRequestEditor({
   const [newMedicationInSheet, setNewMedicationInSheet] =
     useState<MedicationRequestRow | null>(null);
 
-  const handleAdd = useCallback(
-    (row: MedicationRequestRow) => {
-      const result = list.addRow(row);
-      return result;
-    },
-    [list],
-  );
-
   const handleSelectCode = useCallback(
     (code: Code) => {
       const row = newMedicationRowFromCode(code, currentUser);
-      if (desktopLayout) handleAdd(row);
+      if (desktopLayout) list.addRow(row);
       else setNewMedicationInSheet(row);
     },
-    [desktopLayout, currentUser, handleAdd],
+    [desktopLayout, currentUser, list],
   );
 
   const handleSelectProduct = useCallback(
     (product: ProductKnowledgeBase) => {
       const row = newMedicationRowFromProduct(product, currentUser);
-      if (desktopLayout) handleAdd(row);
+      if (desktopLayout) list.addRow(row);
       else setNewMedicationInSheet(row);
     },
-    [desktopLayout, currentUser, handleAdd],
+    [desktopLayout, currentUser, list],
   );
 
   const handleConfirmSheet = useCallback(() => {
     if (!newMedicationInSheet) return;
-    handleAdd(newMedicationInSheet);
+    list.addRow(newMedicationInSheet);
     setNewMedicationInSheet(null);
-  }, [newMedicationInSheet, handleAdd]);
+  }, [newMedicationInSheet, list]);
 
   const handleAddHistorical = useCallback(
     (selected: (MedicationRequestRead | MedicationStatementRead)[]) => {
       const rows = selected.map((record): MedicationRequestRow => {
         if ("dosage_instruction" in record) {
-          const { id: _id, requested_product, ...rest } = record;
-          const withoutPrescription = { ...rest } as Omit<
-            MedicationRequestRead,
-            "id" | "requested_product" | "prescription"
-          > & { prescription?: unknown };
-          delete withoutPrescription.prescription;
+          const {
+            id: _id,
+            requested_product,
+            prescription: _prescription,
+            ...rest
+          } = record;
           return {
-            ...withoutPrescription,
+            ...rest,
             requested_product: requested_product?.id,
             requested_product_internal: requested_product,
             requester: currentUser,
@@ -835,31 +786,15 @@ export function MedicationRequestEditor({
           note: record.note,
         };
       });
-      const results = list.addRows(rows);
-      // Historical rows are never expected to collide with anything already
-      // on this list (no `duplicateKey` is configured — legacy never
-      // deduplicated medication history either), so every result is added;
-      // this exists only to keep parity with the other historical flows'
-      // shape and to make a future duplicateKey addition a one-line change.
-      void results;
+      list.addRows(rows);
     },
     [currentUser, list],
   );
 
-  // Prescription note. Read from the FIRST added (non-baseline) row — the
-  // same "first new medication" position legacy's own display derivation
-  // used (`medications.find((m) => !m.id)?.create_prescription?.note`).
-  // WRITES go to that SAME single row only — never a loop over every added
-  // row. Looping `list.updateRow` across several rows in one synchronous
-  // handler would read the SAME stale `edits` closure for each call (see
-  // `useStructuredRows.ts`'s own documented CAVEAT: "the second call's
-  // commit overwrites the first's"), silently losing every note but the
-  // last one written. `model.ts`'s `toRequests` does the fan-out instead —
-  // a PURE function with a full, synchronous view of every `creates` entry,
-  // where reading "the first note found" and stamping it onto every new
-  // row in the SAME pass has no such hazard. Net wire behavior is
-  // unchanged; only WHERE the fan-out happens moved from N stateful writes
-  // to one pass inside the differ.
+  // Prescription note. Read from and write to the first added row only. A
+  // synchronous loop of `list.updateRow` calls would reuse the same stale
+  // `edits` closure and lose all but the last write; `toRequests` fans the
+  // first note out to all new rows with a complete view of the edit log.
   const firstAddedRow = list.rows.find((row) => row.origin === "added");
   const prescriptionNote = firstAddedRow?.row.create_prescription?.note ?? "";
   const handleUpdateNote = useCallback(
@@ -904,9 +839,7 @@ export function MedicationRequestEditor({
         width: "minmax(12rem, 1fr)",
         mobileHidden: true,
         render: ({ row }) => {
-          const inactive = INACTIVE_MEDICATION_STATUSES.includes(
-            row.row.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
-          );
+          const inactive = isInactiveMedication(row.row);
           return (
             <span
               className={cn(
@@ -1013,16 +946,13 @@ export function MedicationRequestEditor({
             }
             disabled={cellDisabled || !!row.row.id}
           >
-            <SelectTrigger {...controlProps} className="h-9 text-sm capitalize">
-              <SelectValue
-                className="capitalize"
-                placeholder={t("select_intent")}
-              />
+            <SelectTrigger {...controlProps} className="h-9 text-sm">
+              <SelectValue placeholder={t("select_intent")} />
             </SelectTrigger>
             <SelectContent>
               {MEDICATION_REQUEST_INTENT.map((intent) => (
-                <SelectItem key={intent} value={intent} className="capitalize">
-                  {intent.replace(/_/g, " ")}
+                <SelectItem key={intent} value={intent}>
+                  {t(`medication_request_intent__${intent}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -1034,11 +964,9 @@ export function MedicationRequestEditor({
         header: t("authored_on"),
         width: "11rem",
         // CombinedDatePicker (src/components/ui/) accepts neither `id` nor
-        // `aria-label` — the same protected-primitive gap documented in
-        // batch A for the occurrence/onset date fields; a native date input
-        // is not used here (unlike allergy/diagnosis) because this column
-        // also needs the relative "block future dates" behavior legacy's
-        // `blockDate` already provides, which the primitive owns.
+        // `aria-label`. A native date input is not used here (unlike
+        // allergy/diagnosis) because this column needs the `blockDate`
+        // future-date blocking the primitive owns.
         render: ({ row, update, disabled: cellDisabled }) => (
           <CombinedDatePicker
             value={
@@ -1328,17 +1256,9 @@ export function MedicationRequestEditor({
         disabled={disabled}
         onUpdateRow={list.updateRow}
         onRemoveRow={(rowId) => setPendingRemoveRowId(rowId)}
-        // The row-level "Add to Template" trigger — previously stranded
-        // (see this port's own report: `StructuredList`'s row-actions menu
-        // had room for exactly Remove). Now rides in the SAME overflow menu
-        // Remove already occupies, exactly where legacy's
-        // `MedicationRequestGridRow` rendered it (a `DropdownMenuItem` above
-        // a `DropdownMenuSeparator`, above Remove) — `rowActions` (Gap 1's
-        // primitive extension) is what makes that possible without a
-        // dedicated column. Only offered when this fill session has a
-        // questionnaire slug to scope templates to, mirroring legacy's own
-        // `onAddToTemplate={questionnaireSlug ? handleAddToTemplate :
-        // undefined}` gate.
+        // "Add to Template" shares the overflow menu with Remove. Only
+        // offered when this fill session has a questionnaire slug to scope
+        // templates to.
         rowActions={
           questionnaireSlug
             ? (row): StructuredRowAction[] => [
@@ -1369,11 +1289,7 @@ export function MedicationRequestEditor({
             })
             .join(" | ")
         }
-        rowDisabled={(row) =>
-          INACTIVE_MEDICATION_STATUSES.includes(
-            row.row.status as (typeof INACTIVE_MEDICATION_STATUSES)[number],
-          )
-        }
+        rowDisabled={(row) => isInactiveMedication(row.row)}
         addControl={
           !prescriptionId ? (
             desktopLayout ? (
@@ -1449,12 +1365,9 @@ export function MedicationRequestEditor({
  * REQUIRED slots, so a clinician on a phone can satisfy validation before
  * ever leaving the drawer. Route/site/method/instructions/intent/
  * authored_on/requester stay reachable by expanding the newly-added row in
- * the main list afterward, through the SAME `StructuredList` columns as
- * every other row — deliberately NOT a second copy of the full dosage
- * sub-editor rendered a second time inside the drawer (that would be
- * `DoseCell`/`FrequencyCell`'s entire body, duplicated for a staged, not-yet
- * -committed row). A real simplification versus legacy's fully-editable
- * staged sheet, traded for not maintaining two copies of the dosage editor.
+ * the main list afterward, through the same `StructuredList` columns as every
+ * other row. The drawer intentionally avoids a second copy of the full dosage
+ * sub-editor for a staged, not-yet-committed row.
  */
 function StagedMedicationFields({
   row,

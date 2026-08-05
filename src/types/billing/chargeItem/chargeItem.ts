@@ -98,14 +98,11 @@ export interface ApplyMultipleChargeItemDefinitionRequest {
  * definition's title and price components, and the chosen performer.
  *
  * They live ON the row so a restored draft can repaint the table without
- * refetching either, which is what makes the section genuinely
- * response-backed (today `ChargeItemQuestion.tsx` keeps them in a
- * component `useState` that no reload can restore).
+ * refetching either.
  *
- * Both are OPTIONAL here even though the v2 editor always sets the
- * definition object: this is the type `ResponseValue` names, and the legacy
- * widget writes rows with neither. Phase 5 makes
- * `charge_item_definition_object` required with the widget's deletion.
+ * Both are OPTIONAL even though the editor always sets the definition
+ * object: this is the type `ResponseValue` names, and previously recorded
+ * responses may carry rows with neither.
  */
 export interface ChargeItemQuestionRow extends ApplyChargeItemDefinitionRequest {
   charge_item_definition_object?: ChargeItemDefinitionRead;

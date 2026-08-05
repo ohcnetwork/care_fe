@@ -29,7 +29,7 @@ function response(
   };
 }
 
-describe("mergeDraftResponses — spec amendment A1 compatibility-aware draft merge", () => {
+describe("mergeDraftResponses — compatibility-aware draft merge", () => {
   it("restores a plain answer unchanged when the question still exists with the same (shape-compatible) type", () => {
     const questions = [q({ id: "q1", type: "string" })];
     const draft = {
@@ -191,7 +191,7 @@ describe("mergeDraftResponses — spec amendment A1 compatibility-aware draft me
         id: "q1",
         type: "choice",
         text: "Diagnosis code",
-        answer_value_set: { slug: "icd-10" } as never,
+        answer_value_set: { slug: "icd-10" },
       }),
     ];
     const draft = {
@@ -273,7 +273,7 @@ describe("mergeDraftResponses — spec amendment A1 compatibility-aware draft me
         id: "q1",
         type: "quantity",
         text: "Dose",
-        answer_value_set: { slug: "ucum" } as never,
+        answer_value_set: { slug: "ucum" },
       }),
     ];
     const entry = {

@@ -5,7 +5,7 @@ import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
-import { withEntryAt } from "./withEntryAt";
+import { replaceEntryAt } from "./withEntryAt";
 
 export function DateInput({
   question,
@@ -21,12 +21,8 @@ export function DateInput({
 
   const handleChange = (date: Date | undefined) => {
     if (!date) return;
-    if (valueIndex === undefined) {
-      updateResponse({ values: [{ type: "date", value: date }] });
-      return;
-    }
     updateResponse({
-      values: withEntryAt(response?.values, valueIndex, {
+      values: replaceEntryAt(response?.values, valueIndex, {
         type: "date",
         value: date,
       }),

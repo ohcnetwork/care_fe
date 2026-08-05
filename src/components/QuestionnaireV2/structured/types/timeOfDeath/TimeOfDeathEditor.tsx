@@ -11,32 +11,17 @@ import type { TimeOfDeathRow } from "@/types/questionnaire/structuredRows";
 
 import { createSeed, isEmptyRow, projectValues } from "./model";
 
-/** A patient's recorded time of death is not prefetched into this editor,
- *  and never was (`DeathQuestion.tsx` reads only the response) — this type
- *  is create-only. Module scope, like `projectValues`: a fresh `[]` literal
- *  on every render would be a new baseline identity each time, defeating
- *  the hook's own `useMemo` on it. Passed explicitly (rather than omitted)
- *  so the honest complete set — "the server confirmed zero rows", per the
- *  BASELINE COMPLETENESS CONTRACT — is what the core actually receives,
- *  not `undefined` (its "still loading/errored" signal).
+/** This type is create-only — a recorded time of death is never prefetched
+ *  into the editor. Module scope: a fresh `[]` per render would be a new
+ *  baseline identity, defeating the hook's memo. Passed explicitly rather
+ *  than omitted so the core receives "the server confirmed zero rows", not
+ *  `undefined` (its still-loading/errored signal).
  *
- *  KNOWN TRADE-OFF (found in review): an empty-but-defined baseline makes
- *  ANY `update`/`remove` edit an orphan by `resolveChanges`/`projectRows`'
- *  shared rule (`baseline !== undefined && !baseline.has(rowId)`) — real
- *  for a malformed/restored draft that somehow carries an `update` for
- *  this create-only singleton (the live reducer only ever emits `add`,
- *  never `update`, since `setRow` always targets `rows[0]`, which is
- *  either absent or itself the same `add`). For one render, `projectRows`
- *  hides that edit from `single.row` (correct — no baseline row exists to
- *  update) while `toRequests` — called with no baseline argument at all,
- *  by contract (`StructuredTypeDefinitionV2.toRequests`) — would still
- *  compile a PUT from it if submit raced ahead of the prune. It doesn't:
- *  `useStructuredRows`'s own orphan-prune effect (Phase 1 carry-forward,
- *  `core/useStructuredRows.ts`'s `orphanRowIds` effect) excises the edit
- *  reactively once `baseline` is defined, which — with `NO_BASELINE` a
- *  stable `[]` from first render — is immediately, before any realistic
- *  submit. Documented rather than worked around because Tasks 3/7/9 copy
- *  this exact block for their own create-only singletons/lists. */
+ *  Trade-off: an empty-but-defined baseline makes any `update`/`remove`
+ *  edit an orphan; `projectRows` hides such an edit from `single.row`
+ *  while `toRequests` (called without a baseline, by contract) would
+ *  still compile a PUT from it — but the hook's orphan-prune effect
+ *  excises it as soon as `baseline` is defined, i.e. immediately. */
 const NO_BASELINE: readonly BaselineRow<TimeOfDeathRow>[] = [];
 
 export function TimeOfDeathEditor({
@@ -71,9 +56,8 @@ export function TimeOfDeathEditor({
         rowLabel={() => t("structured_type__time_of_death")}
       />
       <DateTimeInput
-        // `aria-label`, not a `<label>`: `structuredRendering.spec.ts:85-91`
-        // asserts exactly one <label> in the block whose text equals the
-        // question title, and that one belongs to the renderer.
+        // `aria-label`, not a `<label>`: the renderer owns the visible label
+        // whose text equals the question title.
         aria-label={question.text}
         value={single.row?.row.deceased_datetime}
         onDateChange={(value) => {

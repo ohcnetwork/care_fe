@@ -5,7 +5,7 @@ import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
-import { withEntryAt } from "./withEntryAt";
+import { replaceEntryAt } from "./withEntryAt";
 
 export function BooleanInput({
   question,
@@ -21,20 +21,16 @@ export function BooleanInput({
   const value = entry?.type === "boolean" ? entry.value : undefined;
 
   const handleChange = (next: boolean) => {
-    // Legacy RadioInput contract: re-clicking the selected option CLEARS a
-    // non-required boolean (enable_when `exists` sources depend on this).
+    // Re-clicking the selected option clears a non-required boolean;
+    // enable_when `exists` sources depend on this.
     const clearing = value === next && !question.required;
-    if (valueIndex === undefined) {
-      updateResponse({
-        values: clearing ? [] : [{ type: "boolean", value: next }],
-      });
-      return;
-    }
     updateResponse({
-      values: withEntryAt(response?.values, valueIndex, {
-        type: "boolean",
-        value: clearing ? undefined : next,
-      }),
+      values: replaceEntryAt(
+        response?.values,
+        valueIndex,
+        { type: "boolean", value: clearing ? undefined : next },
+        clearing,
+      ),
     });
   };
 
