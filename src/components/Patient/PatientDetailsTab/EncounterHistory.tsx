@@ -35,7 +35,7 @@ const EncounterHistory = (props: PatientProps) => {
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
   const { hasPermission } = usePermissions();
-  const { canViewPatients } = getPermissions(
+  const { canViewPatients, canCreateEncounter } = getPermissions(
     hasPermission,
     patientData.permissions,
   );
@@ -79,18 +79,20 @@ const EncounterHistory = (props: PatientProps) => {
                     description={t("create_a_new_encounter_to_get_started")}
                     icon={<CaptionsOff className="size-5 text-primary m-1" />}
                     action={
-                      <CreateEncounterForm
-                        facilityId={facilityId}
-                        patientId={patientId}
-                        patientName={patientData.name}
-                        trigger={
-                          <Button>
-                            <PlusIcon />
-                            {t("create_encounter")}
-                            <ShortcutBadge actionId="create-encounter" />
-                          </Button>
-                        }
-                      />
+                      canCreateEncounter ? (
+                        <CreateEncounterForm
+                          facilityId={facilityId}
+                          patientId={patientId}
+                          patientName={patientData.name}
+                          trigger={
+                            <Button>
+                              <PlusIcon />
+                              {t("create_encounter")}
+                              <ShortcutBadge actionId="create-encounter" />
+                            </Button>
+                          }
+                        />
+                      ) : undefined
                     }
                   />
                 </div>
