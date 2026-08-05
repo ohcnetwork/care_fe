@@ -12,6 +12,7 @@ import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/st
 import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { useValueSetExpansion } from "@/components/QuestionnaireV2/shared/useValueSetExpansion";
 
+import { isEmptyQuantityEntry, nextQuantityEntry } from "./numericEntry";
 import { replaceEntryAt } from "./withEntryAt";
 
 /** Fallback UCUM valueset when the question has no unit valueset of its own. */
@@ -29,18 +30,11 @@ export function QuantityInput({
   // empty instead of leaking a wrong-typed value into the input.
   const entry = response?.values[valueIndex ?? 0];
   const value = entry?.type === "quantity" ? entry.value : undefined;
-  // Per-answer unit: a unit picked on THIS entry wins; `question.unit` is
-  // only the pre-selected default.
-  const pickedUnit = entry?.type === "quantity" ? entry.unit : undefined;
-  const unit = pickedUnit ?? question.unit;
-  // Invariant: the submitted `coding` always mirrors `unit` above unless
-  // the entry already carries its own explicit coding (set together with a
-  // picked unit by handleUnitChange). Without this fallback, an entry that
-  // never touched the unit picker (default unit accepted, only the value
-  // typed) would submit `coding: undefined` — the same backend 500 as an
-  // explicit pick with the fix missing, just via the untouched-default path
-  // instead.
-  const coding = entry?.coding ?? unit;
+  // Per-answer unit: the unit on THIS entry wins; `question.unit` is only
+  // the pre-selected default.
+  const unit =
+    (entry?.type === "quantity" ? entry.unit : undefined) ?? question.unit;
+  const coding = entry?.type === "quantity" ? entry.coding : undefined;
 
   // The question's unit valueset (owner-directed v2 semantics: for quantity,
   // `answer_value_set` IS the unit-choice source). A bounded expansion
@@ -48,16 +42,17 @@ export function QuantityInput({
   // search popover, scoped to the same valueset.
   const { boundedCodes } = useValueSetExpansion(question.answer_value_set);
 
-  const writeEntry = (next: ResponseValue) => {
+  const writeEntry = (next: ResponseValue, clearsSingle = false) => {
     updateResponse({
-      values: replaceEntryAt(response?.values, valueIndex, next),
+      values: replaceEntryAt(response?.values, valueIndex, next, clearsSingle),
     });
   };
 
   const handleValueChange = (raw: string) => {
-    const numericValue = raw === "" ? undefined : parseFloat(raw);
-    // Changing the numeric value never resets a picked or default unit.
-    writeEntry({ type: "quantity", value: numericValue, unit, coding });
+    // Editing or clearing the number never changes the unit: the unit on
+    // screen is written back with the value every time.
+    const next = nextQuantityEntry(raw, { unit, coding });
+    writeEntry(next, isEmptyQuantityEntry(next));
   };
 
   const handleUnitChange = (newUnit: Code) => {

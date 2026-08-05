@@ -1,5 +1,12 @@
 import { Provider as JotaiProvider, createStore } from "jotai";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   initializeResponses,
@@ -40,6 +47,11 @@ interface FormContextValue {
 }
 
 const FormContext = createContext<FormContextValue | null>(null);
+
+/** Module-level so the subject-less default keeps one identity — a fresh
+ *  `{}` per render would invalidate the memoized context value and re-render
+ *  every block of the form. */
+const EMPTY_SUBJECT: RendererSubject = {};
 
 export function useFormRenderer(): FormContextValue {
   const context = useContext(FormContext);
@@ -133,9 +145,10 @@ interface ProviderProps {
    * Creation-time seed overrides (a restored fill draft). Applied once,
    * merged over `initializeResponses` so the store is never observed
    * unseeded; entries only take effect when the question id still exists
-   * with the same structured_type (the fill host already gates restores
-   * on questionnaire id + version, this is defense in depth). Changing
-   * the prop after mount has no effect by design.
+   * with the same structured_type (both restore paths already run the
+   * draft through `mergeDraftResponses`, which drops per QUESTION and
+   * names what it dropped — this is defense in depth). Changing the prop
+   * after mount has no effect by design.
    */
   initialResponses?: Record<string, QuestionnaireResponse>;
   children: React.ReactNode;
@@ -144,7 +157,7 @@ interface ProviderProps {
 export function QuestionnaireFormProvider({
   questionnaire,
   mode,
-  subject = {},
+  subject = EMPTY_SUBJECT,
   revealHidden = false,
   inert = false,
   frozen = false,
@@ -198,10 +211,17 @@ export function QuestionnaireFormProvider({
     );
   }, [questionnaire, store]);
 
+  // Every canvas component consumes this context, so a fresh object literal
+  // per render would re-render every block on any host re-render (a studio
+  // keystroke, a fill-page state change) — defeating the response-identity
+  // preservation `syncResponses` above exists for.
+  const value = useMemo(
+    () => ({ mode, subject, questionnaire, revealHidden, inert, frozen }),
+    [mode, subject, questionnaire, revealHidden, inert, frozen],
+  );
+
   return (
-    <FormContext.Provider
-      value={{ mode, subject, questionnaire, revealHidden, inert, frozen }}
-    >
+    <FormContext.Provider value={value}>
       <JotaiProvider store={store}>{children}</JotaiProvider>
     </FormContext.Provider>
   );

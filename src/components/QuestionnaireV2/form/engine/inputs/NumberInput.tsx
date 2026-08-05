@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
+import { coerceNumberValue } from "./numericEntry";
 import { replaceEntryAt } from "./withEntryAt";
 
 export function NumberInput({
@@ -18,14 +19,17 @@ export function NumberInput({
   const value = entry?.type === "number" ? entry.value : undefined;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const cleared =
-      e.target.value === "" || Number.isNaN(e.target.valueAsNumber);
+    const next = coerceNumberValue(
+      e.target.value,
+      e.target.valueAsNumber,
+      question.type === "integer",
+    );
     updateResponse({
       values: replaceEntryAt(
         response?.values,
         valueIndex,
-        { type: "number", value: cleared ? undefined : e.target.valueAsNumber },
-        cleared,
+        { type: "number", value: next },
+        next === undefined,
       ),
     });
   };

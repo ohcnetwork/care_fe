@@ -1,8 +1,8 @@
 import type { TFunction } from "i18next";
 
+import { entryIsAnswered } from "@/components/QuestionnaireV2/form/engine/inputs/answeredEntry";
 import {
   buildLinkIndex,
-  entryHasContent,
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import { resolveStructuredSlotState } from "@/components/QuestionnaireV2/structured/registry";
@@ -50,8 +50,8 @@ export function structuredQuestionIsAnswerable(
  * shape.
  *
  * Only questions that are currently enabled and record answers can be
- * required-invalid; a response counts as answered when any entry has a
- * non-empty value.
+ * required-invalid; a response counts as answered when any of its entries
+ * does, by the same `entryIsAnswered` rule the submit serializer filters on.
  */
 export function collectRequiredErrors(
   questions: Question[],
@@ -88,13 +88,7 @@ export function collectRequiredErrors(
         continue;
       }
       const values = responses[question.id]?.values ?? [];
-      // An entry answers the question when it has real content, or carries a
-      // coding or unit without a value (value-set selections, unit-only
-      // quantities).
-      const answered = values.some(
-        (entry) =>
-          entryHasContent(entry) || entry.coding != null || entry.unit != null,
-      );
+      const answered = values.some(entryIsAnswered);
       if (!answered) {
         errors.push({
           question_id: question.id,

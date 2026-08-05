@@ -1,4 +1,5 @@
 import { Plus, X } from "lucide-react";
+import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,11 @@ import { cn } from "@/lib/utils";
 
 import { emptyEntry } from "@/components/QuestionnaireV2/form/engine/inputs/withEntryAt";
 import { QUESTION_TYPE_COMPONENTS } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
+import {
+  EMPTY_ROW_KEYS,
+  dropRowKey,
+  growRowKeys,
+} from "@/components/QuestionnaireV2/form/engine/rowKeys";
 import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/form/engine/sanitizeStylingClasses";
 import {
   useQuestionEnabled,
@@ -39,7 +45,9 @@ export interface QuestionBlockProps {
  * slot, sanitized styling), new layout, plus the two canvas seams: chrome
  * wrapping and `revealHidden`/`inert` handling from the form context.
  */
-export function QuestionBlock(props: QuestionBlockProps) {
+export const QuestionBlock = memo(function QuestionBlock(
+  props: QuestionBlockProps,
+) {
   const { question, depth, number } = props;
   const { mode, revealHidden, frozen } = useFormRenderer();
   const { QuestionShell } = useFormChrome();
@@ -48,8 +56,13 @@ export function QuestionBlock(props: QuestionBlockProps) {
   const hiddenByLogic = !enabled && question.disabled_display !== "protected";
   if (hiddenByLogic && !revealHidden) return null;
 
-  const disabled = mode === "readonly" || question.read_only === true || frozen;
-  const effectiveDisabled = disabled || !enabled;
+  // Two distinct states, and only inputs take both: `locked` is the question's
+  // persistent inertness, `frozen` is the in-flight submit. Anything that
+  // decides whether a control RENDERS must read `locked` alone — the freeze
+  // lasts one request, and a control that unmounts for it reflows the form
+  // mid-submit and flickers back on failure.
+  const locked = mode === "readonly" || question.read_only === true || !enabled;
+  const effectiveDisabled = locked || frozen;
 
   const wrap = (children: React.ReactNode) =>
     QuestionShell ? (
@@ -77,9 +90,10 @@ export function QuestionBlock(props: QuestionBlockProps) {
       depth={depth}
       number={number}
       effectiveDisabled={effectiveDisabled}
+      locked={locked}
     />,
   );
-}
+});
 
 /**
  * Structured types whose editor renders its own field-bound errors inline
@@ -113,11 +127,13 @@ function LeafBlock({
   depth,
   number,
   effectiveDisabled,
+  locked,
 }: {
   question: Question;
   depth: number;
   number?: string;
   effectiveDisabled: boolean;
+  locked: boolean;
 }) {
   const { t } = useTranslation();
   const { inert } = useFormRenderer();
@@ -150,6 +166,12 @@ function LeafBlock({
   const entryCount = Math.max(response?.values.length ?? 0, 1);
   const canRemoveEntries = (response?.values.length ?? 0) > 1;
 
+  // Rows that appeared since the last render claim a key here — see
+  // rowKeys.ts for why an index key cannot survive a removal.
+  const [rowKeys, setRowKeys] = useState(EMPTY_ROW_KEYS);
+  const visibleRowKeys = growRowKeys(rowKeys, entryCount);
+  if (visibleRowKeys !== rowKeys) setRowKeys(visibleRowKeys);
+
   // Adding from an empty response materializes the on-screen placeholder entry
   // too, so the new row never swallows the one the user was looking at.
   const handleAddEntry = () => {
@@ -160,6 +182,7 @@ function LeafBlock({
   };
 
   const handleRemoveEntry = (index: number) => {
+    setRowKeys((current) => dropRowKey(current, entryCount, index));
     updateResponse({
       values: (response?.values ?? []).filter((_, i) => i !== index),
     });
@@ -230,7 +253,10 @@ function LeafBlock({
         ) : isMultiEntry ? (
           <div className="space-y-2">
             {Array.from({ length: entryCount }, (_, index) => (
-              <div key={index} className="flex items-center gap-2">
+              <div
+                key={visibleRowKeys.keys[index]}
+                className="flex items-center gap-2"
+              >
                 <div className="min-w-0 flex-1">
                   <InputComponent
                     question={question}
@@ -266,7 +292,7 @@ function LeafBlock({
                 <Plus className="size-4" />
                 {t("add_another")}
               </Button>
-              <NoteControl questionId={question.id} />
+              <NoteControl questionId={question.id} locked={locked} />
             </div>
           </div>
         ) : (
@@ -289,7 +315,7 @@ function LeafBlock({
               )}
             </div>
             {question.type !== "display" && (
-              <NoteControl questionId={question.id} />
+              <NoteControl questionId={question.id} locked={locked} />
             )}
           </div>
         )}

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/form/engine/sanitizeStylingClasses";
+import { countLeafQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import type { Question } from "@/types/questionnaire/question";
 
@@ -44,6 +45,12 @@ export function SectionCard({
   // question cards of a read_only or logic-disabled group.
   const fieldsetDisabled = disabled && !inert;
   const children = question.questions ?? [];
+  // Two different counts on purpose: the header reports every question the
+  // section contains (recursive — matching the form header's own
+  // `countLeafQuestions`, otherwise a section whose questions all sit in a
+  // sub-group reads "0 questions"), while the nested grid heuristic below
+  // sizes columns from the DIRECT children it actually lays out.
+  const sectionQuestionCount = countLeafQuestions(children);
   const leafChildCount = children.filter(
     (child) => child.type !== "group",
   ).length;
@@ -91,7 +98,7 @@ export function SectionCard({
           </h3>
           <Badge variant="outline">{t("group")}</Badge>
           <span className="ml-auto text-xs text-gray-400">
-            {t("n_questions", { count: leafChildCount })}
+            {t("n_questions", { count: sectionQuestionCount })}
           </span>
         </div>
         {question.description && (
