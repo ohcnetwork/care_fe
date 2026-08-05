@@ -92,7 +92,7 @@ function handleBatchSubErrors(results: BatchRequestResult[]) {
         message: "Request Failed",
         status: result.status_code,
         silent: false,
-        cause: result.data as Record<string, unknown>,
+        cause: (result.data ?? {}) as Record<string, unknown>,
       }),
     );
   }
