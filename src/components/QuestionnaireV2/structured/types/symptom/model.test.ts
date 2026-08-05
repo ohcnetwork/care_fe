@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { describe, it } from "node:test";
 
 import { format } from "date-fns";
@@ -85,12 +86,39 @@ describe("symptom model", () => {
       assert.equal(toSymptomRow(symptom).onset, undefined);
     });
 
-    it("passes through an onset with no onset_datetime as an empty string, not undefined", () => {
+    it("drops onset_datetime entirely when the server recorded none", () => {
       const symptom = serverSymptom({ onset: { note: "vague" } });
-      assert.deepEqual(toSymptomRow(symptom).onset, {
-        note: "vague",
-        onset_datetime: "",
-      });
+      assert.deepEqual(toSymptomRow(symptom).onset, { note: "vague" });
+    });
+
+    it("reads the same onset day in every browser timezone", () => {
+      // This suite's own process runs in whatever TZ the machine/CI sets
+      // (UTC or IST in practice), and both hide the shift: an onset stored
+      // at the server's offset renders a day early west of it, and because
+      // a patch is the complete row, editing any other field writes that
+      // shifted onset back. `TZ` is read once at process start, so it can
+      // only be pinned in a CHILD process.
+      const modelUrl = new URL("./model.ts", import.meta.url).href;
+      const script = `
+        const assert = (await import("node:assert/strict")).default;
+        const { toSymptomRow } = await import(${JSON.stringify(modelUrl)});
+        const cases = [
+          ["2026-01-15T10:00:00+05:30", "2026-01-15"],
+          ["2026-01-15T00:00:00+05:30", "2026-01-15"],
+          ["2026-08-01T00:00:00.000Z", "2026-08-01"],
+        ];
+        for (const [recorded, day] of cases) {
+          const row = toSymptomRow({ onset: { onset_datetime: recorded } });
+          assert.equal(row.onset.onset_datetime, day);
+        }
+      `;
+      for (const tz of ["America/New_York", "Pacific/Kiritimati"]) {
+        execFileSync(
+          process.execPath,
+          ["--import", "tsx", "--input-type=module", "-e", script],
+          { env: { ...process.env, TZ: tz }, stdio: "pipe" },
+        );
+      }
     });
   });
 
@@ -391,6 +419,21 @@ describe("rowSchema — the assistant write guard", () => {
 
   it("accepts a baseline row converted via toSymptomRow", () => {
     const server = serverSymptom({
+      created_by: {
+        id: "user-1",
+        username: "care-doctor",
+      } as Symptom["created_by"],
+    });
+    const result = rowSchema.safeParse(toSymptomRow(server));
+    assert.equal(result.success, true, JSON.stringify(result));
+  });
+
+  it("accepts a baseline row whose onset carries no datetime", () => {
+    // FHIR allows an onset expressed only as onset_age/onset_string;
+    // deriving `""` for the missing datetime would fail `onsetSchema`'s
+    // date check and lock the assistant out of editing such a row.
+    const server = serverSymptom({
+      onset: { onset_string: "since childhood" },
       created_by: {
         id: "user-1",
         username: "care-doctor",

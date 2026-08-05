@@ -60,6 +60,17 @@ export interface UseAddToTemplateResult<TItem> {
   openAddToTemplate: (item: TItem) => void;
 }
 
+/**
+ * Every cached template list a write here must refresh. The two spellings are
+ * NOT redundant: the first is this hook's own list query, the second belongs
+ * to the legacy `ManageResponseTemplatesSheet`, which the structured editors
+ * still open — dropping it leaves that sheet showing pre-write data.
+ */
+const RESPONSE_TEMPLATE_LIST_KEYS = [
+  "questionnaire_response_templates",
+  "questionnaireResponseTemplates",
+] as const;
+
 /** `questionnaire` is a real filter only when the slug names an actual
  *  questionnaire. The fixed pseudo-slugs below mean the type is filled
  *  standalone, so created templates must stay reusable across questionnaires.
@@ -94,7 +105,7 @@ export function useAddToTemplate<
 
   const { data: templatesData, isLoading: isLoadingTemplates } = useQuery({
     queryKey: [
-      "questionnaire_response_templates",
+      RESPONSE_TEMPLATE_LIST_KEYS[0],
       questionnaireSlug,
       templateSearchQuery,
     ],
@@ -118,12 +129,9 @@ export function useAddToTemplate<
   };
 
   const invalidate = () => {
-    queryClient.invalidateQueries({
-      queryKey: ["questionnaire_response_templates", questionnaireSlug],
-    });
-    queryClient.invalidateQueries({
-      queryKey: ["questionnaireResponseTemplates", questionnaireSlug],
-    });
+    for (const key of RESPONSE_TEMPLATE_LIST_KEYS) {
+      queryClient.invalidateQueries({ queryKey: [key, questionnaireSlug] });
+    }
   };
 
   const addToTemplateMutation = useMutation({

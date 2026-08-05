@@ -4,9 +4,9 @@ import { describe, it } from "node:test";
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 
 import {
-  resolveRowExpanded,
-  rowHasBoundError,
+  resolveRowErrorState,
   unmatchedRowErrorFieldKeys,
+  type ErrorProneColumn,
 } from "./structuredListRowState";
 
 const err = (
@@ -18,7 +18,15 @@ const err = (
   ...over,
 });
 
-describe("rowHasBoundError", () => {
+/** `resolveRowErrorState(...).hasError` — the forced-expansion decision,
+ *  the half of the resolver these cases are about. */
+const rowHasBoundError = (
+  columns: readonly ErrorProneColumn[],
+  errors: readonly QuestionValidationError[],
+  match: { questionId: string; rowId: string; rowIndex: number },
+): boolean => resolveRowErrorState(columns, errors, match).hasError;
+
+describe("resolveRowErrorState — hasError", () => {
   it("no columns => false", () => {
     assert.equal(
       rowHasBoundError([], [], {
@@ -215,20 +223,66 @@ describe("unmatchedRowErrorFieldKeys", () => {
   });
 });
 
-describe("resolveRowExpanded", () => {
-  it("collapsed, no error => stays collapsed", () => {
-    assert.equal(resolveRowExpanded(false, false), false);
+describe("resolveRowErrorState — mobileHiddenErrorColumns", () => {
+  const match = { questionId: "q-1", rowId: "row-1", rowIndex: 0 };
+
+  it("a column with no errors is never listed, mobileHidden or not", () => {
+    assert.deepEqual(
+      resolveRowErrorState(
+        [{ key: "quantity", mobileHidden: true }, { key: "item" }],
+        [],
+        match,
+      ).mobileHiddenErrorColumns,
+      [],
+    );
   });
 
-  it("collapsed, has error => forced open", () => {
-    assert.equal(resolveRowExpanded(false, true), true);
+  it("an erroring VISIBLE column is not listed — its own cell renders the message at every width", () => {
+    assert.deepEqual(
+      resolveRowErrorState(
+        [{ key: "quantity" }],
+        [err({ row_id: "row-1" })],
+        match,
+      ).mobileHiddenErrorColumns,
+      [],
+    );
   });
 
-  it("expanded, no error => stays expanded", () => {
-    assert.equal(resolveRowExpanded(true, false), true);
+  it("an erroring mobileHidden column is listed, and still counts towards hasError", () => {
+    const column: ErrorProneColumn = { key: "quantity", mobileHidden: true };
+    const state = resolveRowErrorState(
+      [column],
+      [err({ row_id: "row-1" })],
+      match,
+    );
+    assert.deepEqual(state.mobileHiddenErrorColumns, [column]);
+    assert.equal(state.hasError, true);
   });
 
-  it("expanded, has error => stays expanded", () => {
-    assert.equal(resolveRowExpanded(true, true), true);
+  it("respects errorFieldKeys — a mobileHidden column erroring on a sub-key it owns is listed", () => {
+    const column: ErrorProneColumn = {
+      key: "dosage",
+      errorFieldKeys: ["dose_0", "dose_1"],
+      mobileHidden: true,
+    };
+    assert.deepEqual(
+      resolveRowErrorState(
+        [column],
+        [err({ row_id: "row-1", field_key: "dose_1" })],
+        match,
+      ).mobileHiddenErrorColumns,
+      [column],
+    );
+  });
+
+  it("an error bound to a DIFFERENT row does not list the column", () => {
+    assert.deepEqual(
+      resolveRowErrorState(
+        [{ key: "quantity", mobileHidden: true }],
+        [err({ row_id: "row-2" })],
+        match,
+      ).mobileHiddenErrorColumns,
+      [],
+    );
   });
 });

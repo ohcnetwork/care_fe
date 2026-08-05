@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
+import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
@@ -62,17 +63,16 @@ export function newFileRow(file: File, encounterId: string): FileUploadRow {
 }
 
 /**
- * A LIST with no "half filled" row: a row is born whole the moment
- * `newFileRow` creates it (its `name` starts `""`, but a `File` is already
- * attached). Deliberately no `isEmptyRow` filtering unnamed rows out of the
- * projection — projection and submit must agree, and `toRequests` submits
+ * A row is born whole the moment `newFileRow` creates it — its `name` starts
+ * `""`, but a `File` is already attached — so unnamed rows are deliberately
+ * NOT filtered out here (see {@link listProjectValues}): `toRequests` submits
  * every surviving row regardless of `name`, trusting the blocking
  * `validate()` error (`unnamedFileRowIds`) to stop the submit first.
- * Filtering here would let an attached-but-unnamed file silently vanish
- * from both the screen and the request with no error at all.
+ * Filtering would let an attached-but-unnamed file silently vanish from both
+ * the screen and the request with no error at all.
  */
-export const projectValues: ProjectValues<FileUploadRow> = (rows) =>
-  rows.length === 0 ? [] : [{ type: "files", value: [...rows] }];
+export const projectValues: ProjectValues<FileUploadRow> =
+  listProjectValues("files");
 
 /**
  * Row-scoped, pure, i18n-free — the definition file turns this into a
@@ -123,9 +123,9 @@ export function makeToRequests({
   context: StructuredRequestContext,
 ) => Promise<StructuredBatchEntry[]> {
   return async function toRequests(edits, { encounterId, questionId }) {
-    // `requires: ["encounterId", "facilityId"]` on the definition means the
-    // slot never reaches "ready" without one, so this is unreachable on a
-    // real submit. Returning before `creates.map` also keeps the injected
+    // `requires: ["encounterId"]` on the definition means the slot never
+    // reaches "ready" without one, so this is unreachable on a real submit.
+    // Returning before `creates.map` also keeps the injected
     // reader from ever running for a context that cannot build a valid
     // request.
     if (!encounterId) return [];

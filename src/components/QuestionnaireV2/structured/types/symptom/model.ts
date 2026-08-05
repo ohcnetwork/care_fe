@@ -1,22 +1,17 @@
 import { format } from "date-fns";
 import { z } from "zod";
 
-import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type {
   BaselineRow,
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
+import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
 import {
   onsetSchema,
   userDisplaySchema,
 } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
-import { sanitizeNote } from "@/components/QuestionnaireV2/structured/shared/sanitizeNote";
-import type {
-  StructuredBatchEntry,
-  StructuredRequestContext,
-} from "@/components/QuestionnaireV2/structured/types";
-import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
+import { makeUpsertToRequests } from "@/components/QuestionnaireV2/structured/shared/upsertToRequests";
 import { CodeSchema, type Code } from "@/types/base/code/code";
 import type { Symptom, SymptomRequest } from "@/types/emr/symptom/symptom";
 import {
@@ -24,7 +19,6 @@ import {
   SYMPTOM_SEVERITY,
   SYMPTOM_VERIFICATION_STATUS,
 } from "@/types/emr/symptom/symptom";
-import type { StructuredEdit } from "@/types/questionnaire/structured";
 
 /** The wire request shape doubles as the editable row shape. */
 export type SymptomRow = SymptomRequest;
@@ -64,10 +58,36 @@ export const SYMPTOM_SOFT_DELETE: SoftDeleteDescriptor<SymptomRow> = {
 };
 
 /**
- * Read shape → the row this question edits; `onset.onset_datetime` is cut
- * down to a bare date. Uses `date-fns` directly — `@/Utils/utils`
- * transitively reads `import.meta.env` via `@careConfig`, undefined under
- * `node --test`.
+ * The calendar date an ISO instant was RECORDED on, taken off the string
+ * rather than rendered from a `Date`: rendering resolves the instant on the
+ * BROWSER's clock, so an onset stored at the server's own offset comes out a
+ * day early anywhere west of it. A structured patch always ships the
+ * COMPLETE row, so a clinician editing only the severity would write that
+ * shifted onset back — this derivation must not depend on where the browser
+ * is.
+ */
+function isoCalendarDate(value: string): string {
+  return value.slice(0, 10);
+}
+
+/**
+ * `onset_datetime` cut down to the bare date the editor's `<input
+ * type="date">` speaks. An onset carrying no datetime at all (FHIR allows
+ * `onset_age`/`onset_string` alone) drops the KEY rather than storing
+ * `""` — `onsetSchema` rejects an empty date, so an `""` here would make
+ * every such baseline row unpatchable by the assistant.
+ */
+function toRowOnset(onset: Symptom["onset"]): SymptomRow["onset"] {
+  if (!onset) return undefined;
+  const { onset_datetime, ...rest } = onset;
+  if (!onset_datetime) return rest;
+  return { ...rest, onset_datetime: isoCalendarDate(onset_datetime) };
+}
+
+/**
+ * Read shape → the row this question edits. Uses `date-fns` directly —
+ * `@/Utils/utils` transitively reads `import.meta.env` via `@careConfig`,
+ * undefined under `node --test`.
  */
 export function toSymptomRow(symptom: Symptom): SymptomRow {
   return {
@@ -76,14 +96,7 @@ export function toSymptomRow(symptom: Symptom): SymptomRow {
     clinical_status: symptom.clinical_status,
     verification_status: symptom.verification_status,
     severity: symptom.severity,
-    onset: symptom.onset
-      ? {
-          ...symptom.onset,
-          onset_datetime: symptom.onset.onset_datetime
-            ? format(new Date(symptom.onset.onset_datetime), "yyyy-MM-dd")
-            : "",
-        }
-      : undefined,
+    onset: toRowOnset(symptom.onset),
     recorded_date: symptom.recorded_date,
     note: symptom.note,
     category: symptom.category,
@@ -136,10 +149,8 @@ export function symptomDuplicateKey(row: SymptomRow): string | undefined {
   return row.code.code || undefined;
 }
 
-/** Rows are complete from creation — no empty-row filter needed; an
- *  empty list projects to an unanswered section. */
-export const projectValues: ProjectValues<SymptomRow> = (rows) =>
-  rows.length === 0 ? [] : [{ type: "symptom", value: [...rows] }];
+export const projectValues: ProjectValues<SymptomRow> =
+  listProjectValues("symptom");
 
 /**
  * Reuses a historical symptom as a NEW row for this encounter: the server
@@ -155,50 +166,11 @@ export function toReusedSymptomRow(
   return { ...rest, encounter: encounterId };
 }
 
-/** Kept local rather than importing `definitions/adapt.ts`'s
- *  `sanitizeNote`: `model.ts` must stay React-free for `node --test`, and
- *  adapt.ts imports React. */
-
-/**
- * Edit log → at most one POST to the upsert endpoint. An empty edit log
- * yields an empty batch — untouched baseline rows are never re-sent, so a
- * concurrent edit to an unrelated symptom cannot be overwritten.
- *
- * `resolveChanges` receives no baseline: the differ only sees the edit
- * log, and the hook's prune effect drops edits for rows the baseline has
- * proven gone before submit. A `removes` entry always carries `.row` when
- * a softDelete descriptor is supplied; the `flatMap` guard honors the
- * shared optional type instead of asserting.
- *
- * `encounter: encounterId` overrides each row's own value on purpose: a reused
- * historical symptom can carry another encounter.
- */
-export async function toRequests(
-  edits: readonly StructuredEdit<SymptomRow>[],
-  { patientId, encounterId, questionId }: StructuredRequestContext,
-): Promise<StructuredBatchEntry[]> {
-  if (!patientId || !encounterId) return [];
-  const { creates, updates, removes } = resolveChanges(edits, {
-    softDelete: SYMPTOM_SOFT_DELETE,
-  });
-  const rows = [
-    ...creates,
-    ...updates,
-    ...removes.flatMap((entry) => (entry.row ? [entry.row] : [])),
-  ];
-  if (rows.length === 0) return [];
-  return [
-    {
-      url: `/api/v1/patient/${patientId}/symptom/upsert/`,
-      method: "POST",
-      body: {
-        datapoints: rows.map((row) => ({
-          ...row,
-          note: sanitizeNote(row.note),
-          encounter: encounterId,
-        })),
-      },
-      reference_id: structuredReferenceId("symptom", questionId),
-    },
-  ];
-}
+/** A reused historical symptom can carry another encounter — see
+ *  `makeUpsertToRequests` for the re-stamping contract every upsert type
+ *  shares. */
+export const toRequests = makeUpsertToRequests<SymptomRow>({
+  type: "symptom",
+  resource: "symptom",
+  softDelete: SYMPTOM_SOFT_DELETE,
+});

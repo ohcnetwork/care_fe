@@ -1,21 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
 import { Avatar } from "@/components/Common/Avatar";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 import { AddEntityControl } from "@/components/QuestionnaireV2/structured/core/AddEntityControl";
 import { RowStatusSelect } from "@/components/QuestionnaireV2/structured/core/RowStatusSelect";
@@ -23,10 +14,15 @@ import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/struct
 import {
   StructuredList,
   type StructuredColumn,
-  type StructuredControlProps,
 } from "@/components/QuestionnaireV2/structured/core/StructuredList";
 import type { BaselineRow } from "@/components/QuestionnaireV2/structured/core/types";
 import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
+import { formatCalendarDate } from "@/components/QuestionnaireV2/structured/shared/calendarDate";
+import {
+  EnumSelect,
+  todayDateString,
+  useTranslatedOptions,
+} from "@/components/QuestionnaireV2/structured/shared/editorPrimitives";
 import type { StructuredInputProps } from "@/components/QuestionnaireV2/structured/types";
 
 import query from "@/Utils/request/query";
@@ -40,8 +36,6 @@ import {
   SYMPTOM_VERIFICATION_STATUS,
   SYMPTOM_VERIFICATION_STATUS_COLORS,
   type Onset,
-  type SymptomClinicalStatus,
-  type SymptomSeverity,
 } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
 
@@ -78,80 +72,6 @@ function useSymptomBaseline(
   );
 }
 
-function ClinicalStatusSelect({
-  status,
-  onValueChange,
-  disabled,
-  controlProps,
-}: {
-  status: SymptomClinicalStatus;
-  onValueChange: (value: SymptomClinicalStatus) => void;
-  disabled?: boolean;
-  controlProps: StructuredControlProps;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Select value={status} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger {...controlProps} className="h-9 w-full">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {SYMPTOM_CLINICAL_STATUS.map((value) => (
-          <SelectItem key={value} value={value}>
-            {t(value)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-function SeveritySelect({
-  severity,
-  onValueChange,
-  disabled,
-  controlProps,
-}: {
-  severity: SymptomSeverity;
-  onValueChange: (value: SymptomSeverity) => void;
-  disabled?: boolean;
-  controlProps: StructuredControlProps;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Select value={severity} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger {...controlProps} className="h-9 w-full">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {SYMPTOM_SEVERITY.map((value) => (
-          <SelectItem key={value} value={value}>
-            {t(value)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-/** Every verification-status option, already translated — `RowStatusSelect`
- *  never imports i18next itself. Unlike `allergy_intolerance`'s
- *  `ALLERGY_VERIFICATION_STATUS` (an object display-label map),
- *  `SYMPTOM_VERIFICATION_STATUS` is already the plain enum tuple, so there
- *  is no second map to reconcile here. */
-function useVerificationStatusOptions() {
-  const { t } = useTranslation();
-  return useMemo(
-    () =>
-      SYMPTOM_VERIFICATION_STATUS.map((value) => ({ value, label: t(value) })),
-    [t],
-  );
-}
-
-function todayDateString(): string {
-  return format(new Date(), "yyyy-MM-dd");
-}
-
 /**
  * Fields for the STAGED (mobile add-flow) row — shares intent, not markup,
  * with the desktop `StructuredList` columns (mirrors `AllergyEditor.tsx`'s
@@ -169,7 +89,7 @@ function StagedSymptomFields({
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
-  const verificationOptions = useVerificationStatusOptions();
+  const verificationOptions = useTranslatedOptions(SYMPTOM_VERIFICATION_STATUS);
   return (
     <div className="grid grid-cols-2 gap-3">
       <div className="col-span-2 space-y-1">
@@ -193,8 +113,9 @@ function StagedSymptomFields({
       </div>
       <div className="space-y-1">
         <label className="text-xs text-gray-500">{t("status")}</label>
-        <ClinicalStatusSelect
-          status={row.clinical_status}
+        <EnumSelect
+          value={row.clinical_status}
+          options={SYMPTOM_CLINICAL_STATUS}
           onValueChange={(value) => onUpdate({ clinical_status: value })}
           disabled={disabled}
           controlProps={{
@@ -205,8 +126,9 @@ function StagedSymptomFields({
       </div>
       <div className="space-y-1">
         <label className="text-xs text-gray-500">{t("severity")}</label>
-        <SeveritySelect
-          severity={row.severity}
+        <EnumSelect
+          value={row.severity}
+          options={SYMPTOM_SEVERITY}
           onValueChange={(value) => onUpdate({ severity: value })}
           disabled={disabled}
           controlProps={{
@@ -251,7 +173,7 @@ export function SymptomEditor({
   encounterId,
 }: StructuredInputProps) {
   const { t } = useTranslation();
-  const verificationOptions = useVerificationStatusOptions();
+  const verificationOptions = useTranslatedOptions(SYMPTOM_VERIFICATION_STATUS);
   const baseline = useSymptomBaseline(patientId, encounterId);
 
   const list = useStructuredRows({
@@ -309,8 +231,9 @@ export function SymptomEditor({
         header: t("status"),
         width: "9rem",
         render: ({ row, update, disabled: cellDisabled, controlProps }) => (
-          <ClinicalStatusSelect
-            status={row.row.clinical_status}
+          <EnumSelect
+            value={row.row.clinical_status}
+            options={SYMPTOM_CLINICAL_STATUS}
             onValueChange={(value) => update({ clinical_status: value })}
             disabled={cellDisabled}
             controlProps={controlProps}
@@ -322,8 +245,9 @@ export function SymptomEditor({
         header: t("severity"),
         width: "9rem",
         render: ({ row, update, disabled: cellDisabled, controlProps }) => (
-          <SeveritySelect
-            severity={row.row.severity}
+          <EnumSelect
+            value={row.row.severity}
+            options={SYMPTOM_SEVERITY}
             onValueChange={(value) => update({ severity: value })}
             disabled={cellDisabled}
             controlProps={controlProps}
@@ -379,19 +303,20 @@ export function SymptomEditor({
     [list, t],
   );
 
-  // Each selected historical symptom is re-added as a new row; the same
-  // duplicate guard as `addRow` rejects collisions, one toast per
-  // rejection.
+  // Each selected historical symptom is re-added as a NEW row for this
+  // encounter (`toReusedSymptomRow` strips the server id). Duplicate
+  // filtering is `list.addRows`' job via `duplicateKey`; one warning toast
+  // covers any rejected duplicates in the batch, matching `DiagnosisEditor`.
   const handleAddHistorical = useCallback(
     (selected: SymptomRow[]) => {
       if (!encounterId) return;
       const results = list.addRows(
         selected.map((row) => toReusedSymptomRow(row, encounterId)),
       );
-      for (const result of results) {
-        if (!result.ok && result.reason === "duplicate") {
-          toast.warning(t("symptom_already_exist_warning"));
-        }
+      if (
+        results.some((result) => !result.ok && result.reason === "duplicate")
+      ) {
+        toast.warning(t("symptom_already_exist_warning"));
       }
     },
     [list, encounterId, t],
@@ -480,9 +405,7 @@ export function SymptomEditor({
                   key: "onset",
                   label: t("onset_date"),
                   render: (onset: Onset) =>
-                    onset?.onset_datetime
-                      ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
-                      : "",
+                    formatCalendarDate(onset?.onset_datetime, "dd MMM yyyy"),
                 },
               ],
               expandableFields: [
@@ -527,7 +450,7 @@ export function SymptomEditor({
         rowSummary={(row) =>
           [
             row.row.onset?.onset_datetime
-              ? `${t("onset")} ${format(new Date(row.row.onset.onset_datetime), "MMM d, yyyy")}`
+              ? `${t("onset")} ${formatCalendarDate(row.row.onset.onset_datetime, "MMM d, yyyy")}`
               : undefined,
             t(row.row.clinical_status),
             t(row.row.severity),

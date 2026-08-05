@@ -1,22 +1,17 @@
 import { format } from "date-fns";
 import { z } from "zod";
 
-import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type {
   BaselineRow,
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
+import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
 import {
   onsetSchema,
   userDisplaySchema,
 } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
-import { sanitizeNote } from "@/components/QuestionnaireV2/structured/shared/sanitizeNote";
-import type {
-  StructuredBatchEntry,
-  StructuredRequestContext,
-} from "@/components/QuestionnaireV2/structured/types";
-import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
+import { makeUpsertToRequests } from "@/components/QuestionnaireV2/structured/shared/upsertToRequests";
 import { CodeSchema, type Code } from "@/types/base/code/code";
 import type {
   Diagnosis,
@@ -28,7 +23,6 @@ import {
   DIAGNOSIS_SEVERITY,
   DIAGNOSIS_VERIFICATION_STATUS,
 } from "@/types/emr/diagnosis/diagnosis";
-import type { StructuredEdit } from "@/types/questionnaire/structured";
 
 /** The wire request shape doubles as the editable row shape. */
 export type DiagnosisRow = DiagnosisRequest;
@@ -68,10 +62,36 @@ export const DIAGNOSIS_SOFT_DELETE: SoftDeleteDescriptor<DiagnosisRow> = {
 };
 
 /**
- * Read shape → the row this question edits; `onset.onset_datetime` is cut
- * down to a bare date. Uses `date-fns` directly — `@/Utils/utils`
- * transitively reads `import.meta.env` via `@careConfig`, undefined under
- * `node --test`.
+ * The calendar date an ISO instant was RECORDED on, taken off the string
+ * rather than rendered from a `Date`: rendering resolves the instant on the
+ * BROWSER's clock, so an onset stored at the server's own offset comes out a
+ * day early anywhere west of it. A structured patch always ships the
+ * COMPLETE row, so a clinician editing only the severity would write that
+ * shifted onset back — this derivation must not depend on where the browser
+ * is.
+ */
+function isoCalendarDate(value: string): string {
+  return value.slice(0, 10);
+}
+
+/**
+ * `onset_datetime` cut down to the bare date the editor's `<input
+ * type="date">` speaks. An onset carrying no datetime at all (FHIR allows
+ * `onset_age`/`onset_string` alone) drops the KEY rather than storing
+ * `""` — `onsetSchema` rejects an empty date, so an `""` here would make
+ * every such baseline row unpatchable by the assistant.
+ */
+function toRowOnset(onset: Diagnosis["onset"]): DiagnosisRow["onset"] {
+  if (!onset) return undefined;
+  const { onset_datetime, ...rest } = onset;
+  if (!onset_datetime) return rest;
+  return { ...rest, onset_datetime: isoCalendarDate(onset_datetime) };
+}
+
+/**
+ * Read shape → the row this question edits. Uses `date-fns` directly —
+ * `@/Utils/utils` transitively reads `import.meta.env` via `@careConfig`,
+ * undefined under `node --test`.
  */
 export function toDiagnosisRow(diagnosis: Diagnosis): DiagnosisRow {
   return {
@@ -80,14 +100,7 @@ export function toDiagnosisRow(diagnosis: Diagnosis): DiagnosisRow {
     clinical_status: diagnosis.clinical_status,
     verification_status: diagnosis.verification_status,
     severity: diagnosis.severity,
-    onset: diagnosis.onset
-      ? {
-          ...diagnosis.onset,
-          onset_datetime: diagnosis.onset.onset_datetime
-            ? format(new Date(diagnosis.onset.onset_datetime), "yyyy-MM-dd")
-            : "",
-        }
-      : undefined,
+    onset: toRowOnset(diagnosis.onset),
     recorded_date: diagnosis.recorded_date,
     category: diagnosis.category,
     note: diagnosis.note,
@@ -129,10 +142,8 @@ export function newDiagnosisRow(code: Code, encounterId: string): DiagnosisRow {
   };
 }
 
-/** Rows are complete from creation — no empty-row filter needed; an
- *  empty list projects to an unanswered section. */
-export const projectValues: ProjectValues<DiagnosisRow> = (rows) =>
-  rows.length === 0 ? [] : [{ type: "diagnosis", value: [...rows] }];
+export const projectValues: ProjectValues<DiagnosisRow> =
+  listProjectValues("diagnosis");
 
 /** Duplicate-guard key for `findDuplicateCandidates`, which already
  *  excludes soft-deleted (entered_in_error) rows from its seen set. */
@@ -171,10 +182,6 @@ export function isOnsetFrozen(origin: "baseline" | "added"): boolean {
   return origin === "baseline";
 }
 
-/** Kept local rather than importing `definitions/adapt.ts`'s
- *  `sanitizeNote`: `model.ts` must stay React-free for `node --test`, and
- *  adapt.ts imports React. */
-
 /**
  * Reuses a historical diagnosis as a NEW row for this encounter: the
  * server id is stripped — keeping it would make the upsert update the
@@ -193,47 +200,11 @@ export function toReusedDiagnosisRow(
   };
 }
 
-/**
- * Edit log → at most one POST to the upsert endpoint. An empty edit log
- * yields an empty batch — dirtiness is derived from the log, so untouched
- * baseline rows are never re-sent.
- *
- * `resolveChanges` receives no baseline: the differ only sees the edit
- * log, and the hook's prune effect drops edits for rows the baseline has
- * proven gone before submit. A `removes` entry always carries `.row` when
- * a softDelete descriptor is supplied; the `flatMap` guard honors the
- * shared optional type instead of asserting.
- *
- * `encounter: encounterId` overrides each row's own value on purpose: a
- * historical row carries the encounter it was originally recorded under, so
- * re-stamping attaches it to the current encounter.
- */
-export async function toRequests(
-  edits: readonly StructuredEdit<DiagnosisRow>[],
-  { patientId, encounterId, questionId }: StructuredRequestContext,
-): Promise<StructuredBatchEntry[]> {
-  if (!patientId || !encounterId) return [];
-  const { creates, updates, removes } = resolveChanges(edits, {
-    softDelete: DIAGNOSIS_SOFT_DELETE,
-  });
-  const rows = [
-    ...creates,
-    ...updates,
-    ...removes.flatMap((entry) => (entry.row ? [entry.row] : [])),
-  ];
-  if (rows.length === 0) return [];
-  return [
-    {
-      url: `/api/v1/patient/${patientId}/diagnosis/upsert/`,
-      method: "POST",
-      body: {
-        datapoints: rows.map((row) => ({
-          ...row,
-          note: sanitizeNote(row.note),
-          encounter: encounterId,
-        })),
-      },
-      reference_id: structuredReferenceId("diagnosis", questionId),
-    },
-  ];
-}
+/** A historical row carries the encounter it was originally recorded under
+ *  — see `makeUpsertToRequests` for the re-stamping contract every upsert
+ *  type shares. */
+export const toRequests = makeUpsertToRequests<DiagnosisRow>({
+  type: "diagnosis",
+  resource: "diagnosis",
+  softDelete: DIAGNOSIS_SOFT_DELETE,
+});

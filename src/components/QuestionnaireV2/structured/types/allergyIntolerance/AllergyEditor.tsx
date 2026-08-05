@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -24,6 +23,11 @@ import {
 } from "@/components/QuestionnaireV2/structured/core/StructuredList";
 import type { BaselineRow } from "@/components/QuestionnaireV2/structured/core/types";
 import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
+import {
+  EnumSelect,
+  todayDateString,
+  useTranslatedOptions,
+} from "@/components/QuestionnaireV2/structured/shared/editorPrimitives";
 import type { StructuredInputProps } from "@/components/QuestionnaireV2/structured/types";
 
 import query from "@/Utils/request/query";
@@ -34,7 +38,6 @@ import {
   ALLERGY_CRITICALITY,
   ALLERGY_VERIFICATION_STATUS,
   type AllergyCategory,
-  type AllergyClinicalStatus,
   type AllergyVerificationStatus,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
@@ -111,84 +114,14 @@ function CategorySelect({
   );
 }
 
-function CriticalitySelect({
-  criticality,
-  onValueChange,
-  disabled,
-  controlProps,
-}: {
-  criticality: string;
-  onValueChange: (value: string) => void;
-  disabled?: boolean;
-  controlProps: StructuredControlProps;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Select
-      value={criticality}
-      onValueChange={onValueChange}
-      disabled={disabled}
-    >
-      <SelectTrigger {...controlProps} className="h-9 w-full">
-        <SelectValue placeholder={t("critical")} />
-      </SelectTrigger>
-      <SelectContent>
-        {ALLERGY_CRITICALITY.map((value) => (
-          <SelectItem key={value} value={value}>
-            {t(value)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-function ClinicalStatusSelect({
-  status,
-  onValueChange,
-  disabled,
-  controlProps,
-}: {
-  status: AllergyClinicalStatus;
-  onValueChange: (value: AllergyClinicalStatus) => void;
-  disabled?: boolean;
-  controlProps: StructuredControlProps;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Select value={status} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger {...controlProps} className="h-9 w-full">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {ALLERGY_CLINICAL_STATUS.map((value) => (
-          <SelectItem key={value} value={value}>
-            {t(value)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
 /** Options pre-translated — `RowStatusSelect` never imports i18next.
  *  Uses the enum keys (`t(value)`), which are real locale keys;
  *  `ALLERGY_VERIFICATION_STATUS`'s display labels are untranslated
- *  English. */
-function useVerificationStatusOptions() {
-  const { t } = useTranslation();
-  return useMemo(
-    () =>
-      (
-        Object.keys(ALLERGY_VERIFICATION_STATUS) as AllergyVerificationStatus[]
-      ).map((value) => ({ value, label: t(value) })),
-    [t],
-  );
-}
-
-function todayDateString(): string {
-  return format(new Date(), "yyyy-MM-dd");
-}
+ *  English. Module-level so the memo inside `useTranslatedOptions` has a
+ *  stable key. */
+const ALLERGY_VERIFICATION_STATUS_VALUES = Object.keys(
+  ALLERGY_VERIFICATION_STATUS,
+) as AllergyVerificationStatus[];
 
 /**
  * Fields for the STAGED (mobile add-flow) row, shared with the desktop
@@ -206,7 +139,9 @@ function StagedAllergyFields({
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
-  const verificationOptions = useVerificationStatusOptions();
+  const verificationOptions = useTranslatedOptions(
+    ALLERGY_VERIFICATION_STATUS_VALUES,
+  );
   return (
     <div className="grid grid-cols-2 gap-3">
       <div className="space-y-1">
@@ -224,10 +159,12 @@ function StagedAllergyFields({
       </div>
       <div className="space-y-1">
         <label className="text-xs text-gray-500">{t("criticality")}</label>
-        <CriticalitySelect
-          criticality={row.criticality}
+        <EnumSelect
+          value={row.criticality}
+          options={ALLERGY_CRITICALITY}
           onValueChange={(value) => onUpdate({ criticality: value })}
           disabled={disabled}
+          placeholder={t("critical")}
           controlProps={{
             id: "staged-allergy-criticality",
             "aria-label": t("criticality"),
@@ -284,7 +221,9 @@ export function AllergyEditor({
   encounterId,
 }: StructuredInputProps) {
   const { t } = useTranslation();
-  const verificationOptions = useVerificationStatusOptions();
+  const verificationOptions = useTranslatedOptions(
+    ALLERGY_VERIFICATION_STATUS_VALUES,
+  );
   const baseline = useAllergyBaseline(patientId);
 
   const list = useStructuredRows({
@@ -329,10 +268,12 @@ export function AllergyEditor({
         header: t("criticality"),
         width: "9rem",
         render: ({ row, update, disabled: cellDisabled, controlProps }) => (
-          <CriticalitySelect
-            criticality={row.row.criticality}
+          <EnumSelect
+            value={row.row.criticality}
+            options={ALLERGY_CRITICALITY}
             onValueChange={(value) => update({ criticality: value })}
             disabled={cellDisabled}
+            placeholder={t("critical")}
             controlProps={controlProps}
           />
         ),
@@ -358,8 +299,9 @@ export function AllergyEditor({
         header: t("clinical_status"),
         width: "9rem",
         render: ({ row, update, disabled: cellDisabled, controlProps }) => (
-          <ClinicalStatusSelect
-            status={row.row.clinical_status}
+          <EnumSelect
+            value={row.row.clinical_status}
+            options={ALLERGY_CLINICAL_STATUS}
             onValueChange={(value) => update({ clinical_status: value })}
             disabled={cellDisabled}
             controlProps={controlProps}

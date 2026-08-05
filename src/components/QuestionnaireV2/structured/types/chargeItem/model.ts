@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
+import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
 import {
   displayObjectSchema,
   nonEmptyString,
@@ -52,15 +53,11 @@ export const rowSchema = z
   })
   .strict();
 
-/**
- * A charge-item section is a LIST whose rows are born whole
- * (`newChargeItemRow`): there is no "half filled" state, so no `isEmptyRow`
- * predicate to keep in sync with a submission filter. Whatever `rows` holds
- * is what the clinician sees and exactly the set `toRequests` compiles
- * requests for.
- */
-export const projectValues: ProjectValues<ChargeItemRow> = (rows) =>
-  rows.length === 0 ? [] : [{ type: "charge_item", value: [...rows] }];
+/** Rows are born whole (`newChargeItemRow`), so whatever `rows` holds is
+ *  what the clinician sees and exactly the set `toRequests` compiles
+ *  requests for (see {@link listProjectValues}). */
+export const projectValues: ProjectValues<ChargeItemRow> =
+  listProjectValues("charge_item");
 
 /**
  * A freshly picked definition becomes a row: quantity defaults to `"1"`,

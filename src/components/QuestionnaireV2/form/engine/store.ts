@@ -285,7 +285,8 @@ export function useQuestionResponse(questionId: string) {
  *
  * Scoped to `values` (never `edits`) on purpose — a passive mirror of
  * baseline movement must never touch the edit log, which is the one thing
- * drafts persist and submit reads.
+ * drafts persist and submit reads. The one passive write that DOES have to
+ * rewrite the log is {@link useSetQuestionRowsPassively}.
  */
 export function useSetQuestionProjection(questionId: string) {
   const setAtom = useMemo(
@@ -299,6 +300,39 @@ export function useSetQuestionProjection(questionId: string) {
           [questionId]: { ...current, values },
         });
       }),
+    [questionId],
+  );
+  return useAtom(setAtom)[1];
+}
+
+/**
+ * The `values` mirror AND the edit log, written together and WITHOUT
+ * clearing this question's errors — the orphan prune's path, and the only
+ * sanctioned reason to rewrite `edits` outside {@link useQuestionResponse}'s
+ * setter.
+ *
+ * The prune excises edits whose baseline row vanished server-side. That is
+ * baseline movement, not clinician intent, so the same rule
+ * {@link useSetQuestionProjection} exists for applies: a refetch that
+ * delivers a smaller baseline must not silently clear a showing submit-time
+ * server error while the offending values stay on screen. It writes both
+ * keys in one set so no subscriber ever sees `values` and `edits` disagree.
+ */
+export function useSetQuestionRowsPassively(questionId: string) {
+  const setAtom = useMemo(
+    () =>
+      atom(
+        null,
+        (get, set, update: Pick<QuestionnaireResponse, "values" | "edits">) => {
+          const previous = get(responsesAtom);
+          const current = previous[questionId];
+          if (!current) return;
+          set(responsesAtom, {
+            ...previous,
+            [questionId]: { ...current, ...update },
+          });
+        },
+      ),
     [questionId],
   );
   return useAtom(setAtom)[1];

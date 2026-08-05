@@ -1,20 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 
 import { AddEntityControl } from "@/components/QuestionnaireV2/structured/core/AddEntityControl";
 import { RowStatusSelect } from "@/components/QuestionnaireV2/structured/core/RowStatusSelect";
@@ -22,10 +13,15 @@ import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/struct
 import {
   StructuredList,
   type StructuredColumn,
-  type StructuredControlProps,
 } from "@/components/QuestionnaireV2/structured/core/StructuredList";
 import type { BaselineRow } from "@/components/QuestionnaireV2/structured/core/types";
 import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
+import { formatCalendarDate } from "@/components/QuestionnaireV2/structured/shared/calendarDate";
+import {
+  EnumSelect,
+  todayDateString,
+  useTranslatedOptions,
+} from "@/components/QuestionnaireV2/structured/shared/editorPrimitives";
 import type { StructuredInputProps } from "@/components/QuestionnaireV2/structured/types";
 
 import query from "@/Utils/request/query";
@@ -34,7 +30,6 @@ import {
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_SEVERITY,
   DIAGNOSIS_VERIFICATION_STATUS,
-  type DiagnosisClinicalStatus,
   type DiagnosisSeverity,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
@@ -78,86 +73,6 @@ function useDiagnosisBaseline(
   );
 }
 
-function todayDateString(): string {
-  return format(new Date(), "yyyy-MM-dd");
-}
-
-function ClinicalStatusSelect({
-  status,
-  onValueChange,
-  disabled,
-  controlProps,
-}: {
-  status: DiagnosisClinicalStatus;
-  onValueChange: (value: DiagnosisClinicalStatus) => void;
-  disabled?: boolean;
-  controlProps: StructuredControlProps;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Select value={status} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger {...controlProps} className="h-9 w-full">
-        <SelectValue placeholder={t("diagnosis_status_placeholder")} />
-      </SelectTrigger>
-      <SelectContent>
-        {DIAGNOSIS_CLINICAL_STATUS.map((value) => (
-          <SelectItem key={value} value={value} className="capitalize">
-            {t(value)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-function SeveritySelect({
-  severity,
-  onValueChange,
-  disabled,
-  controlProps,
-}: {
-  severity: DiagnosisSeverity | null;
-  onValueChange: (value: DiagnosisSeverity) => void;
-  disabled?: boolean;
-  controlProps: StructuredControlProps;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Select
-      value={severity ?? undefined}
-      onValueChange={(value) => onValueChange(value as DiagnosisSeverity)}
-      disabled={disabled}
-    >
-      <SelectTrigger {...controlProps} className="h-9 w-full">
-        <SelectValue placeholder={t("choose_severity")} />
-      </SelectTrigger>
-      <SelectContent>
-        {DIAGNOSIS_SEVERITY.map((value) => (
-          <SelectItem key={value} value={value}>
-            {t(value)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-/** Every verification-status option, already translated — `RowStatusSelect`
- *  never imports i18next itself. `DIAGNOSIS_VERIFICATION_STATUS` is a plain
- *  readonly string array (unlike allergy's label-mapped
- *  `ALLERGY_VERIFICATION_STATUS`), so this maps it directly. */
-function useVerificationStatusOptions() {
-  const { t } = useTranslation();
-  return useMemo(
-    () =>
-      DIAGNOSIS_VERIFICATION_STATUS.map((value) => ({
-        value,
-        label: t(value),
-      })),
-    [t],
-  );
-}
-
 /**
  * Fields for the STAGED (mobile add-flow) row. Onset is always editable
  * here: a staged row never carries a server id, so the date input has no
@@ -173,7 +88,9 @@ function StagedDiagnosisFields({
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
-  const verificationOptions = useVerificationStatusOptions();
+  const verificationOptions = useTranslatedOptions(
+    DIAGNOSIS_VERIFICATION_STATUS,
+  );
   return (
     <div className="grid grid-cols-2 gap-3">
       <div className="col-span-2 space-y-1">
@@ -196,22 +113,27 @@ function StagedDiagnosisFields({
       </div>
       <div className="space-y-1">
         <label className="text-xs text-gray-500">{t("status")}</label>
-        <ClinicalStatusSelect
-          status={row.clinical_status}
+        <EnumSelect
+          value={row.clinical_status}
+          options={DIAGNOSIS_CLINICAL_STATUS}
           onValueChange={(value) => onUpdate({ clinical_status: value })}
           disabled={disabled}
+          placeholder={t("diagnosis_status_placeholder")}
           controlProps={{
             id: "staged-diagnosis-status",
             "aria-label": t("status"),
           }}
+          itemClassName="capitalize"
         />
       </div>
       <div className="space-y-1">
         <label className="text-xs text-gray-500">{t("severity")}</label>
-        <SeveritySelect
-          severity={row.severity}
+        <EnumSelect
+          value={row.severity}
+          options={DIAGNOSIS_SEVERITY}
           onValueChange={(value) => onUpdate({ severity: value })}
           disabled={disabled}
+          placeholder={t("choose_severity")}
           controlProps={{
             id: "staged-diagnosis-severity",
             "aria-label": t("severity"),
@@ -254,7 +176,9 @@ export function DiagnosisEditor({
   encounterId,
 }: StructuredInputProps) {
   const { t } = useTranslation();
-  const verificationOptions = useVerificationStatusOptions();
+  const verificationOptions = useTranslatedOptions(
+    DIAGNOSIS_VERIFICATION_STATUS,
+  );
   const baseline = useDiagnosisBaseline(patientId, encounterId);
 
   const list = useStructuredRows({
@@ -351,11 +275,14 @@ export function DiagnosisEditor({
         header: t("status"),
         width: "10rem",
         render: ({ row, update, disabled: cellDisabled, controlProps }) => (
-          <ClinicalStatusSelect
-            status={row.row.clinical_status}
+          <EnumSelect
+            value={row.row.clinical_status}
+            options={DIAGNOSIS_CLINICAL_STATUS}
             onValueChange={(value) => update({ clinical_status: value })}
             disabled={cellDisabled}
+            placeholder={t("diagnosis_status_placeholder")}
             controlProps={controlProps}
+            itemClassName="capitalize"
           />
         ),
       },
@@ -364,10 +291,12 @@ export function DiagnosisEditor({
         header: t("severity"),
         width: "9rem",
         render: ({ row, update, disabled: cellDisabled, controlProps }) => (
-          <SeveritySelect
-            severity={row.row.severity}
+          <EnumSelect
+            value={row.row.severity}
+            options={DIAGNOSIS_SEVERITY}
             onValueChange={(value) => update({ severity: value })}
             disabled={cellDisabled}
+            placeholder={t("choose_severity")}
             controlProps={controlProps}
           />
         ),
@@ -449,9 +378,7 @@ export function DiagnosisEditor({
                   key: "onset",
                   label: t("onset_date"),
                   render: (onset: DiagnosisRow["onset"]) =>
-                    onset?.onset_datetime
-                      ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
-                      : "",
+                    formatCalendarDate(onset?.onset_datetime, "dd MMM yyyy"),
                 },
               ],
               expandableFields: [

@@ -92,19 +92,28 @@ export type StructuredEditRecord = StructuredEdit<unknown>;
 const STRUCTURED_EDIT_OPS: readonly string[] = ["add", "update", "remove"];
 
 /** Is this parsed-JSON value a well-formed edit? Drafts and server dumps are
- *  untrusted blobs. `patch` is deliberately not checked here; only the type's
- *  own row schema can judge it, and request building has its own containment
- *  boundary. */
+ *  untrusted blobs, and this guard is the ONLY gate one passes before
+ *  `useStructuredRows` casts the sanitized log to `EditLog<TRow>`.
+ *
+ *  `patch` is checked for PRESENCE only — a non-null object — because it is
+ *  the complete row for every op (see {@link StructuredEdit}) and the first
+ *  thing every reader dereferences (`softDelete.isDeleted`, `duplicateKey`,
+ *  an editor's `rowTitle`); a truncated `{ rowId, op }` entry would throw
+ *  out of render and take the whole fill page with it. Its CONTENTS stay
+ *  unjudged here — only the type's own row schema can rule on those, and
+ *  request building has its own containment boundary. */
 export function isStructuredEditRecord(
   value: unknown,
 ): value is StructuredEditRecord {
   if (typeof value !== "object" || value === null) return false;
-  const candidate = value as { rowId?: unknown; op?: unknown };
+  const candidate = value as { rowId?: unknown; op?: unknown; patch?: unknown };
   return (
     typeof candidate.rowId === "string" &&
     candidate.rowId.length > 0 &&
     typeof candidate.op === "string" &&
-    STRUCTURED_EDIT_OPS.includes(candidate.op)
+    STRUCTURED_EDIT_OPS.includes(candidate.op) &&
+    typeof candidate.patch === "object" &&
+    candidate.patch !== null
   );
 }
 

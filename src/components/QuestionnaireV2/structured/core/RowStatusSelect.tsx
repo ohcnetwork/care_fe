@@ -51,6 +51,10 @@ export interface RowStatusSelectProps<TStatus extends string> {
  * The status/verification select whose one "already retracted" option is
  * gated on the row already existing server-side — shared by the allergy,
  * symptom, diagnosis and medication_statement editors.
+ *
+ * The gating and the pre-translated options are what separate this from
+ * `structured/shared/editorPrimitives`' `EnumSelect`, which offers every
+ * option and translates them itself; an ungated column wants that one.
  */
 export function RowStatusSelect<TStatus extends string>({
   value,

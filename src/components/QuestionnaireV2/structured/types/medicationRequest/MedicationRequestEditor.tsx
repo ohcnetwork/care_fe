@@ -109,6 +109,7 @@ import {
   newMedicationRowFromProduct,
   projectValues,
   toBaselineRows,
+  toMedicationRow,
 } from "./model";
 
 /**
@@ -641,7 +642,7 @@ export function MedicationRequestEditor({
   questionnaireSlug,
 }: StructuredInputProps) {
   const { t } = useTranslation();
-  const currentUser = useAuthUser() as UserReadMinimal;
+  const currentUser: UserReadMinimal = useAuthUser();
   const desktopLayout = useBreakpoints({ lg: true, default: false });
   const [{ prescription: prescriptionId }] = useQueryParams<{
     prescription?: string;
@@ -767,19 +768,16 @@ export function MedicationRequestEditor({
     (selected: (MedicationRequestRead | MedicationStatementRead)[]) => {
       const rows = selected.map((record): MedicationRequestRow => {
         if ("dosage_instruction" in record) {
-          const {
-            id: _id,
-            requested_product,
-            prescription: _prescription,
-            ...rest
-          } = record;
+          // The server id is dropped: a historical request re-added here is a
+          // NEW row, and keeping the id would make the upsert rewrite the
+          // original record. `toMedicationRow` is what keeps the read shape's
+          // audit fields out of it.
+          const { id: _id, ...row } = toMedicationRow(record, currentUser);
           return {
-            ...rest,
-            requested_product: requested_product?.id,
-            requested_product_internal: requested_product,
+            ...row,
             requester: currentUser,
-            medication: requested_product?.id ? undefined : rest.medication,
-          } as MedicationRequestRow;
+            medication: row.requested_product ? undefined : row.medication,
+          };
         }
         return {
           ...newMedicationRowFromCode(record.medication, currentUser),

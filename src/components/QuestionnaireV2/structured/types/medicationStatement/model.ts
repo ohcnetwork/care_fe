@@ -1,22 +1,16 @@
-import { format } from "date-fns";
 import { z } from "zod";
 
-import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type {
   BaselineRow,
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
+import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
 import {
   periodSchema,
   userDisplaySchema,
 } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
-import { sanitizeNote } from "@/components/QuestionnaireV2/structured/shared/sanitizeNote";
-import type {
-  StructuredBatchEntry,
-  StructuredRequestContext,
-} from "@/components/QuestionnaireV2/structured/types";
-import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
+import { makeUpsertToRequests } from "@/components/QuestionnaireV2/structured/shared/upsertToRequests";
 import { CodeSchema, type Code } from "@/types/base/code/code";
 import {
   MEDICATION_STATEMENT_STATUS,
@@ -116,15 +110,14 @@ export function newMedicationStatementRow(
 }
 
 /**
- * Converts one `HistoricalRecordSelector` selection into a fresh row:
- *  - a past PRESCRIPTION resets to the `newMedicationStatementRow` defaults,
- *    keeping only the medication and note — a prescription's
- *    dosage/status/period has no matching statement shape;
- *  - a past STATEMENT keeps everything BUT the server id (this is a new row)
- *    and is re-stamped to the CURRENT encounter, like every other creation
- *    path here.
+ * Reuses a past PRESCRIPTION as a NEW row for this encounter: everything
+ * resets to the `newMedicationStatementRow` defaults, keeping only the
+ * medication and note — a prescription's dosage/status/period has no
+ * matching statement shape. Named for the SOURCE record, since this type's
+ * historical selector reads two shapes into one row shape (see
+ * {@link toReusedMedicationStatementRow} for the statement half).
  */
-export function fromHistoricalMedicationRequest(
+export function toReusedRowFromPrescription(
   record: { medication: Code; note?: string },
   encounterId: string,
 ): MedicationStatementRow {
@@ -134,7 +127,13 @@ export function fromHistoricalMedicationRequest(
   };
 }
 
-export function fromHistoricalMedicationStatement(
+/**
+ * Reuses a historical statement as a NEW row for this encounter: the server
+ * id is stripped — keeping it would make the upsert update the original
+ * record in place — and `encounter` is re-stamped to the current encounter,
+ * like every other creation path here.
+ */
+export function toReusedMedicationStatementRow(
   record: MedicationStatementRead,
   encounterId: string,
 ): MedicationStatementRow {
@@ -151,64 +150,24 @@ export function fromHistoricalMedicationStatement(
 }
 
 /**
- * A list whose rows are born whole at creation — there is no "half filled"
- * state, so no `isEmptyRow` predicate exists to desync from a submission
- * filter. A row missing its dosage or period is INVALID, not EMPTY: it stays
- * on screen, projects, and hard-blocks submit via
- * `medicationStatementValidationIssues`, rather than being silently dropped.
+ * A row missing its dosage or period is INVALID, not EMPTY: it stays on
+ * screen, projects, and hard-blocks submit via
+ * `medicationStatementValidationIssues`, rather than being silently dropped
+ * (see {@link listProjectValues} for the shared list contract).
  */
-export const projectValues: ProjectValues<MedicationStatementRow> = (rows) =>
-  rows.length === 0 ? [] : [{ type: "medication_statement", value: [...rows] }];
+export const projectValues: ProjectValues<MedicationStatementRow> =
+  listProjectValues("medication_statement");
 
-/** Local copy of `definitions/adapt.ts`'s `sanitizeNote`: a `model.ts` must
- *  stay importable by the node:test harness, and `adapt.ts` imports React. */
-
-/**
- * The edit log → at most one POST against the upsert endpoint, carrying ONLY
- * rows this session touched: an empty edit log is an empty batch, so
- * untouched prefetched medications are never re-sent (a concurrent edit to
- * one can no longer be silently overwritten).
- *
- * `resolveChanges` gets no baseline — the differ takes only the edit log;
- * the editor's hook prunes edits whose rowId the baseline has dropped before
- * a submit reaches this function. A `removes` entry always carries `.row`
- * when a `softDelete` descriptor is supplied, but `ResolvedRemove.row` stays
- * optional for types with real delete semantics — hence the `flatMap` guard.
- *
- * `encounter`/`patient` are re-stamped unconditionally on every submitted
- * row: a row pulled in via the historical selector can carry a different
- * origin encounter.
- */
-export async function toRequests(
-  edits: readonly StructuredEdit<MedicationStatementRow>[],
-  { patientId, encounterId, questionId }: StructuredRequestContext,
-): Promise<StructuredBatchEntry[]> {
-  if (!patientId || !encounterId) return [];
-  const { creates, updates, removes } = resolveChanges(edits, {
-    softDelete: MEDICATION_STATEMENT_SOFT_DELETE,
-  });
-  const rows = [
-    ...creates,
-    ...updates,
-    ...removes.flatMap((entry) => (entry.row ? [entry.row] : [])),
-  ];
-  if (rows.length === 0) return [];
-  return [
-    {
-      url: `/api/v1/patient/${patientId}/medication/statement/upsert/`,
-      method: "POST",
-      body: {
-        datapoints: rows.map((row) => ({
-          ...row,
-          note: sanitizeNote(row.note),
-          encounter: encounterId,
-          patient: patientId,
-        })),
-      },
-      reference_id: structuredReferenceId("medication_statement", questionId),
-    },
-  ];
-}
+/** Unlike the other upsert types, this endpoint also wants the patient in
+ *  each datapoint. A row pulled in via the historical selector can carry a
+ *  different origin encounter — see `makeUpsertToRequests` for the
+ *  re-stamping contract every upsert type shares. */
+export const toRequests = makeUpsertToRequests<MedicationStatementRow>({
+  type: "medication_statement",
+  resource: "medication/statement",
+  softDelete: MEDICATION_STATEMENT_SOFT_DELETE,
+  decorateRow: (_row, { patientId }) => ({ patient: patientId }),
+});
 
 // ---------------------------------------------------------------------------
 // effective_period date conversion — the one boundary between the native
@@ -219,16 +178,27 @@ export async function toRequests(
 // ---------------------------------------------------------------------------
 
 /** Wire ISO datetime → the bare date the native input can display. `""` for
- *  `undefined` (an empty input, not an error). */
+ *  `undefined` (an empty input, not an error).
+ *
+ *  The date is taken off the ISO string rather than rendered from a `Date`,
+ *  which would resolve the instant on the BROWSER's clock: the values
+ *  reaching here were not necessarily written by this app — pre-existing
+ *  rows, fixtures and non-browser writers all carry UTC midnight, which a
+ *  local-clock render shows as the day before west of Greenwich. */
 export function periodDateForInput(value: string | undefined): string {
-  return value ? format(new Date(value), "yyyy-MM-dd") : "";
+  return value ? value.slice(0, 10) : "";
 }
 
 /** The native input's bare "yyyy-MM-dd" → a timezone-aware ISO instant
  *  (UTC midnight for that date) the backend accepts.
- *  `undefined` for an empty input (the field was cleared). */
+ *  `undefined` for an empty input (the field was cleared).
+ *
+ *  The `"T00:00:00.000Z"` suffix is load-bearing on both counts: without a
+ *  time the value is naive and the backend 400s, and without the `Z` the
+ *  instant lands on the browser's clock, so a clinician west of Greenwich
+ *  would store the day BEFORE the one they picked. */
 export function periodDateFromInput(value: string): string | undefined {
-  return value ? new Date(value).toISOString() : undefined;
+  return value ? new Date(`${value}T00:00:00.000Z`).toISOString() : undefined;
 }
 
 // ---------------------------------------------------------------------------

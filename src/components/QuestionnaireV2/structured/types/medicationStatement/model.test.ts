@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { describe, it } from "node:test";
 
 import {
@@ -13,13 +14,11 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
 
 import type { MedicationStatementRow } from "./model";
 import {
-  MEDICATION_STATEMENT_FIELD_KEYS,
-  MEDICATION_STATEMENT_SOFT_DELETE,
-  fromHistoricalMedicationRequest,
-  fromHistoricalMedicationStatement,
   isDosageMissing,
   isPeriodRangeInvalid,
   isPeriodStartMissing,
+  MEDICATION_STATEMENT_FIELD_KEYS,
+  MEDICATION_STATEMENT_SOFT_DELETE,
   medicationStatementValidationIssues,
   needsMedicationValidation,
   newMedicationStatementRow,
@@ -30,6 +29,8 @@ import {
   toBaselineRows,
   toMedicationStatementRow,
   toRequests,
+  toReusedMedicationStatementRow,
+  toReusedRowFromPrescription,
 } from "./model";
 
 const CTX = {
@@ -126,11 +127,11 @@ describe("medication_statement model", () => {
     });
   });
 
-  describe("fromHistoricalMedicationRequest", () => {
+  describe("toReusedRowFromPrescription", () => {
     it("resets to defaults, keeping only the medication and note", () => {
       const code = { code: "3", display: "Amoxicillin", system: "sys" };
       assert.deepEqual(
-        fromHistoricalMedicationRequest(
+        toReusedRowFromPrescription(
           { medication: code, note: "from prescription" },
           "enc-2",
         ),
@@ -146,13 +147,13 @@ describe("medication_statement model", () => {
     });
   });
 
-  describe("fromHistoricalMedicationStatement", () => {
+  describe("toReusedMedicationStatementRow", () => {
     it("strips the server id and re-stamps the CURRENT encounter, keeping everything else", () => {
       const historical = serverMedication({
         id: "old-id",
         encounter: "enc-old",
       });
-      const row = fromHistoricalMedicationStatement(historical, "enc-current");
+      const row = toReusedMedicationStatementRow(historical, "enc-current");
       assert.equal("id" in row, false);
       assert.deepEqual(row, {
         status: "active",
@@ -428,6 +429,9 @@ describe("medication_statement model", () => {
       // non-naive instant.
       const iso = periodDateFromInput("2026-08-01");
       assert.match(iso!, /Z$/);
+      // UTC midnight, not local midnight: a date-only field must denote the
+      // same day everywhere, and it is what every other writer of this
+      // field (the old app, fixtures, imports) stores.
       assert.equal(new Date(iso!).getTime(), Date.UTC(2026, 7, 1));
     });
 
@@ -438,6 +442,37 @@ describe("medication_statement model", () => {
     it("round-trips through both directions", () => {
       const iso = periodDateFromInput("2026-03-15");
       assert.equal(periodDateForInput(iso), "2026-03-15");
+    });
+
+    it("round-trips, and renders foreign values, in any timezone", () => {
+      // This suite's own process runs in whatever TZ the machine/CI sets
+      // (UTC or IST in practice), and both hide a UTC-vs-local mismatch:
+      // storing "2026-08-01" as local midnight while reading it back on
+      // another clock renders a different day. The read direction also has
+      // to survive values this app never wrote — the old app, fixtures and
+      // every non-browser writer store UTC midnight. Pin the timezone in a
+      // CHILD process — `TZ` is read once at process start, so it cannot be
+      // set from inside this one.
+      const modelUrl = new URL("./model.ts", import.meta.url).href;
+      const script = `
+        const assert = (await import("node:assert/strict")).default;
+        const { periodDateForInput, periodDateFromInput } =
+          await import(${JSON.stringify(modelUrl)});
+        for (const day of ["2026-08-01", "2026-03-15", "2027-01-01"]) {
+          const iso = periodDateFromInput(day);
+          assert.match(iso, /Z$/);
+          assert.equal(periodDateForInput(iso), day);
+        }
+        assert.equal(periodDateForInput("2026-08-01T00:00:00.000Z"), "2026-08-01");
+        assert.equal(periodDateForInput("2026-08-01T00:00:00+05:30"), "2026-08-01");
+      `;
+      for (const tz of ["America/New_York", "Pacific/Kiritimati"]) {
+        execFileSync(
+          process.execPath,
+          ["--import", "tsx", "--input-type=module", "-e", script],
+          { env: { ...process.env, TZ: tz }, stdio: "pipe" },
+        );
+      }
     });
   });
 

@@ -1,19 +1,13 @@
-import { format } from "date-fns";
 import { z } from "zod";
 
-import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type {
   BaselineRow,
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
+import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
 import { dateOnlyString } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
-import { sanitizeNote } from "@/components/QuestionnaireV2/structured/shared/sanitizeNote";
-import type {
-  StructuredBatchEntry,
-  StructuredRequestContext,
-} from "@/components/QuestionnaireV2/structured/types";
-import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
+import { makeUpsertToRequests } from "@/components/QuestionnaireV2/structured/shared/upsertToRequests";
 import { CodeSchema, type Code } from "@/types/base/code/code";
 import type {
   AllergyIntolerance,
@@ -24,7 +18,6 @@ import {
   ALLERGY_CLINICAL_STATUS,
   ALLERGY_CRITICALITY,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
-import type { StructuredEdit } from "@/types/questionnaire/structured";
 
 /** The wire request shape doubles as the editable row shape. */
 export type AllergyRow = AllergyIntoleranceRequest;
@@ -68,10 +61,21 @@ export const ALLERGY_SOFT_DELETE: SoftDeleteDescriptor<AllergyRow> = {
 };
 
 /**
+ * The calendar date an ISO instant was RECORDED on, taken off the string
+ * rather than rendered from a `Date`: rendering resolves the instant on the
+ * BROWSER's clock, so a date stored at the server's own offset comes out a
+ * day early anywhere west of it. A structured patch always ships the
+ * COMPLETE row, so a clinician editing only the criticality would write
+ * that shifted date back — this derivation must not depend on where the
+ * browser is.
+ */
+function isoCalendarDate(value: string): string {
+  return value.slice(0, 10);
+}
+
+/**
  * Read shape → the fields this question edits; `last_occurrence` is cut
- * down to a bare date. Uses `date-fns` directly — `@/Utils/utils`
- * transitively reads `import.meta.env` via `@careConfig`, which is
- * undefined under `node --test`.
+ * down to a bare date.
  */
 export function toAllergyRow(allergy: AllergyIntolerance): AllergyRow {
   return {
@@ -82,7 +86,7 @@ export function toAllergyRow(allergy: AllergyIntolerance): AllergyRow {
     category: allergy.category,
     criticality: allergy.criticality,
     last_occurrence: allergy.last_occurrence
-      ? format(new Date(allergy.last_occurrence), "yyyy-MM-dd")
+      ? isoCalendarDate(allergy.last_occurrence)
       : undefined,
     note: allergy.note,
     encounter: allergy.encounter,
@@ -120,55 +124,15 @@ export function newAllergyRow(code: Code, encounterId: string): AllergyRow {
   };
 }
 
-/** Rows are complete from creation — no empty-row filter needed; an
- *  empty list projects to an unanswered section. */
-export const projectValues: ProjectValues<AllergyRow> = (rows) =>
-  rows.length === 0 ? [] : [{ type: "allergy_intolerance", value: [...rows] }];
+export const projectValues: ProjectValues<AllergyRow> = listProjectValues(
+  "allergy_intolerance",
+);
 
-/** Kept local rather than importing `definitions/adapt.ts`'s
- *  `sanitizeNote`: `model.ts` must stay React-free for `node --test`, and
- *  adapt.ts imports React. */
-
-/**
- * Edit log → at most one POST to the upsert endpoint. An empty edit log
- * yields an empty batch — untouched baseline rows are never re-sent, so a
- * concurrent edit to an unrelated allergy cannot be overwritten.
- *
- * `resolveChanges` receives no baseline: the differ only sees the edit
- * log, and the hook's prune effect drops edits for rows the baseline has
- * proven gone before submit reaches here. A `removes` entry always
- * carries `.row` when a softDelete descriptor is supplied; the `flatMap`
- * guard honors the shared optional type instead of asserting.
- *
- * `encounter: encounterId` overrides each row's own value on purpose: the
- * baseline fetch is patient-scoped, so a row can carry a different encounter.
- */
-export async function toRequests(
-  edits: readonly StructuredEdit<AllergyRow>[],
-  { patientId, encounterId, questionId }: StructuredRequestContext,
-): Promise<StructuredBatchEntry[]> {
-  if (!patientId || !encounterId) return [];
-  const { creates, updates, removes } = resolveChanges(edits, {
-    softDelete: ALLERGY_SOFT_DELETE,
-  });
-  const rows = [
-    ...creates,
-    ...updates,
-    ...removes.flatMap((entry) => (entry.row ? [entry.row] : [])),
-  ];
-  if (rows.length === 0) return [];
-  return [
-    {
-      url: `/api/v1/patient/${patientId}/allergy_intolerance/upsert/`,
-      method: "POST",
-      body: {
-        datapoints: rows.map((row) => ({
-          ...row,
-          note: sanitizeNote(row.note),
-          encounter: encounterId,
-        })),
-      },
-      reference_id: structuredReferenceId("allergy_intolerance", questionId),
-    },
-  ];
-}
+/** The baseline fetch is patient-scoped, so a row can carry a different
+ *  encounter than the one being filled — see `makeUpsertToRequests` for the
+ *  re-stamping contract every upsert type shares. */
+export const toRequests = makeUpsertToRequests<AllergyRow>({
+  type: "allergy_intolerance",
+  resource: "allergy_intolerance",
+  softDelete: ALLERGY_SOFT_DELETE,
+});

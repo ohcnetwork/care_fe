@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { describe, it } from "node:test";
 
 import {
@@ -74,6 +75,36 @@ describe("allergy_intolerance model", () => {
     it("omits last_occurrence when the server never recorded one", () => {
       const allergy = serverAllergy({ last_occurrence: undefined });
       assert.equal(toAllergyRow(allergy).last_occurrence, undefined);
+    });
+
+    it("reads the same last_occurrence day in every browser timezone", () => {
+      // This suite's own process runs in whatever TZ the machine/CI sets
+      // (UTC or IST in practice), and both hide the shift: an occurrence
+      // stored at the server's offset renders a day early west of it, and
+      // because a patch is the complete row, editing any other field writes
+      // that shifted date back. `TZ` is read once at process start, so it
+      // can only be pinned in a CHILD process.
+      const modelUrl = new URL("./model.ts", import.meta.url).href;
+      const script = `
+        const assert = (await import("node:assert/strict")).default;
+        const { toAllergyRow } = await import(${JSON.stringify(modelUrl)});
+        const cases = [
+          ["2026-01-15T10:00:00+05:30", "2026-01-15"],
+          ["2026-01-15T00:00:00+05:30", "2026-01-15"],
+          ["2026-08-01T00:00:00.000Z", "2026-08-01"],
+        ];
+        for (const [recorded, day] of cases) {
+          const row = toAllergyRow({ last_occurrence: recorded });
+          assert.equal(row.last_occurrence, day);
+        }
+      `;
+      for (const tz of ["America/New_York", "Pacific/Kiritimati"]) {
+        execFileSync(
+          process.execPath,
+          ["--import", "tsx", "--input-type=module", "-e", script],
+          { env: { ...process.env, TZ: tz }, stdio: "pipe" },
+        );
+      }
     });
   });
 
@@ -312,6 +343,14 @@ describe("rowSchema — the assistant write guard", () => {
       rowSchema.safeParse(newAllergyRow(code, "enc-1")).success,
       true,
     );
+  });
+
+  it("accepts a baseline row converted via toAllergyRow", () => {
+    // The assistant echoes the COMPLETE row back as its patch, so a
+    // derivation this strict schema rejects makes every baseline row
+    // uneditable by it.
+    const result = rowSchema.safeParse(toAllergyRow(serverAllergy()));
+    assert.equal(result.success, true, JSON.stringify(result));
   });
 
   it("accepts an existing (baseline) row with an id", () => {

@@ -124,6 +124,37 @@ describe("medication_request model", () => {
       const row = toMedicationRow(medication, CURRENT_USER);
       assert.equal(row.requester, OTHER_USER);
     });
+
+    it("leaves the read shape's audit and expansion fields behind", () => {
+      const row = toMedicationRow(
+        serverMedication({
+          prescription: {
+            id: "presc-1",
+          } as MedicationRequestRead["prescription"],
+          inventory_items_internal: [],
+        }),
+        CURRENT_USER,
+      );
+      for (const key of [
+        "created_date",
+        "modified_date",
+        "updated_by",
+        "prescription",
+        "inventory_items_internal",
+      ]) {
+        assert.equal(key in row, false, `${key} rode into the row`);
+      }
+    });
+
+    it("produces a row this type's own rowSchema accepts", () => {
+      // The assistant's update/remove path echoes the COMPLETE row back as
+      // the patch, so a derivation the strict schema rejects makes every
+      // baseline row uneditable by it.
+      const result = rowSchema.safeParse(
+        toMedicationRow(serverMedication(), CURRENT_USER),
+      );
+      assert.equal(result.success, true, JSON.stringify(result));
+    });
   });
 
   describe("toBaselineRows", () => {
@@ -264,6 +295,87 @@ describe("medication_request model", () => {
         body.datapoints[0].create_prescription.alternate_identifier,
         body.datapoints[1].create_prescription.alternate_identifier,
       );
+    });
+
+    it("the prescription note typed on one new row reaches EVERY new row", async () => {
+      // The editor can only write the note onto one row (add A, type the
+      // note, add B), so ordering must not decide which datapoint the
+      // server reads it from.
+      const rowA = newMedicationRowFromCode(CODE, CURRENT_USER);
+      const rowB = newMedicationRowFromCode(
+        { code: "2", display: "Ibuprofen", system: "sys" },
+        CURRENT_USER,
+      );
+      const noted = {
+        ...rowA,
+        create_prescription: {
+          ...rowA.create_prescription!,
+          note: "morning round",
+        },
+      };
+      const requests = await toRequests(
+        [add("m1", noted), add("m2", rowB)],
+        CTX,
+      );
+      const body = requests[0].body as {
+        datapoints: { create_prescription: { note?: string } }[];
+      };
+      assert.equal(
+        body.datapoints[0].create_prescription.note,
+        "morning round",
+      );
+      assert.equal(
+        body.datapoints[1].create_prescription.note,
+        "morning round",
+      );
+    });
+
+    it("fans the note out even when the row carrying it is not the first create", async () => {
+      const rowA = newMedicationRowFromCode(CODE, CURRENT_USER);
+      const rowB = newMedicationRowFromCode(
+        { code: "2", display: "Ibuprofen", system: "sys" },
+        CURRENT_USER,
+      );
+      const noted = {
+        ...rowB,
+        create_prescription: {
+          ...rowB.create_prescription!,
+          note: "after food",
+        },
+      };
+      const requests = await toRequests(
+        [add("m1", rowA), add("m2", noted)],
+        CTX,
+      );
+      const body = requests[0].body as {
+        datapoints: { create_prescription: { note?: string } }[];
+      };
+      assert.equal(body.datapoints[0].create_prescription.note, "after food");
+      assert.equal(body.datapoints[1].create_prescription.note, "after food");
+    });
+
+    it("an existing medication never picks up the new rows' prescription note", async () => {
+      const server = serverMedication({ id: "med-1" });
+      const existing = toMedicationRow(server, CURRENT_USER);
+      const fresh = newMedicationRowFromCode(CODE, CURRENT_USER);
+      const noted = {
+        ...fresh,
+        create_prescription: {
+          ...fresh.create_prescription!,
+          note: "morning round",
+        },
+      };
+      const requests = await toRequests(
+        [update("med-1", existing), add("m1", noted)],
+        CTX,
+      );
+      const body = requests[0].body as {
+        datapoints: Record<string, unknown>[];
+      };
+      const existingDatapoint = body.datapoints.find(
+        (datapoint) => datapoint.id === "med-1",
+      )!;
+      assert.equal("create_prescription" in existingDatapoint, false);
     });
 
     it("an update to an existing medication carries no create_prescription", async () => {

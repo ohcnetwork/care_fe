@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,6 +33,7 @@ import type {
   RowId,
 } from "@/components/QuestionnaireV2/structured/core/types";
 import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
+import { formatCalendarDate } from "@/components/QuestionnaireV2/structured/shared/calendarDate";
 import type { StructuredInputProps } from "@/components/QuestionnaireV2/structured/types";
 
 import query from "@/Utils/request/query";
@@ -56,13 +56,13 @@ import type { Period } from "@/types/questionnaire/base";
 import {
   MEDICATION_STATEMENT_FIELD_KEYS,
   MEDICATION_STATEMENT_SOFT_DELETE,
-  fromHistoricalMedicationRequest,
-  fromHistoricalMedicationStatement,
   newMedicationStatementRow,
   periodDateForInput,
   periodDateFromInput,
   projectValues,
   toBaselineRows,
+  toReusedMedicationStatementRow,
+  toReusedRowFromPrescription,
   type MedicationStatementRow,
 } from "./model";
 
@@ -459,6 +459,11 @@ export function MedicationStatementEditor({
 
   const addPlaceholder = t("add_medication", { count: list.rows.length + 1 });
 
+  // Unreachable per the definition's `requires: ["patientId", "encounterId"]`
+  // — narrowed once here so the JSX below needs no non-null assertions
+  // (mirrors `ChargeItemEditor`).
+  if (!encounterId) return null;
+
   return (
     <div className="space-y-4">
       <StructuredDroppedRowsNotice
@@ -639,8 +644,8 @@ export function MedicationStatementEditor({
           onAddSelected={(selected) => {
             const converted = selected.map((record) =>
               "dosage_instruction" in record
-                ? fromHistoricalMedicationRequest(record, encounterId!)
-                : fromHistoricalMedicationStatement(record, encounterId!),
+                ? toReusedRowFromPrescription(record, encounterId)
+                : toReusedMedicationStatementRow(record, encounterId),
             );
             list.addRows(converted);
           }}
@@ -661,9 +666,9 @@ export function MedicationStatementEditor({
         rowSummary={(row) => {
           const period = row.row.effective_period;
           const periodText = period?.start
-            ? `${format(new Date(period.start), "d MMM, yyyy")} - ${
+            ? `${formatCalendarDate(period.start, "d MMM, yyyy")} - ${
                 period.end
-                  ? format(new Date(period.end), "d MMM, yyyy")
+                  ? formatCalendarDate(period.end, "d MMM, yyyy")
                   : t("ongoing")
               }`
             : undefined;
@@ -684,7 +689,7 @@ export function MedicationStatementEditor({
             disabled={disabled}
             searchPostFix=" clinical drug"
             createRow={(code: Code) =>
-              newMedicationStatementRow(code, encounterId!)
+              newMedicationStatementRow(code, encounterId)
             }
             onAdd={(row) => list.addRow(row)}
             renderStagedRow={(staged, updateStaged) => (

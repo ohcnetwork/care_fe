@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   useQuestionResponse,
   useSetQuestionProjection,
+  useSetQuestionRowsPassively,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import { sanitizeStructuredEditLog } from "@/types/questionnaire/structured";
 
@@ -88,11 +89,9 @@ export interface StructuredRowsOptions<TRow extends object> {
   /**
    * Domain derivation applied to every patch BEFORE it is recorded.
    *
-   * RETURN CONTRACT: the returned `Partial<TRow>` REPLACES `patch`
-   * entirely before being spread onto the current row (`mergePatch`) — it
-   * is NOT additionally merged with `patch`. Returning only derived
-   * fields silently drops the clinician's edit; start from
-   * `{ ...patch, ...derivedFields }`, or return `patch` unchanged.
+   * RETURN CONTRACT: derived fields ONLY. `mergePatch` lands them on top
+   * of `{ ...row, ...patch }`, so the clinician's edit applies with or
+   * without a normalizer and a returned field wins only where it is named.
    */
   normalizePatch?: (row: TRow, patch: Partial<TRow>) => Partial<TRow>;
 
@@ -128,19 +127,14 @@ export interface StructuredRowsBase<TRow extends object> {
   edits: EditLog<TRow>;
   /** Derived, never stored: `edits.length > 0`. */
   isDirty: boolean;
-  /** Restored edits whose baseline row has vanished server-side, computed
-   *  live from `(baseline, edits)` by `findOrphanRowIds`.
-   *
-   *  SELF-CLEARS: the prune effect excises these rowIds from `edits` as
-   *  soon as it detects them, so this is non-empty for at most one render
-   *  per detected orphan. Anything that must outlive that render (a
-   *  restore notice) must read {@link StructuredRowsBase.droppedEdits}. */
-  orphanRowIds: readonly RowId[];
   /** Every edit pruned as a confirmed orphan THIS MOUNT, in the order
-   *  encountered. Unlike `orphanRowIds`, this retains each dropped edit's
-   *  full `patch` — the only surviving copy of what the clinician typed,
-   *  since the prune removes it from `edits` and an autosave carries that
-   *  removal into the stored draft.
+   *  encountered — the ONE durable channel for what the prune removed. The
+   *  orphan rowIds themselves are internal: the prune excises them from
+   *  `edits` the render it detects them, so nothing outside this hook could
+   *  read them in time. Each entry retains its full `patch` — the only
+   *  surviving copy of what the clinician typed, since the prune removes it
+   *  from `edits` and an autosave carries that removal into the stored
+   *  draft.
    *
    *  DURABILITY: mount-lifetime only — a remount (an `enable_when` toggle,
    *  navigating away and back) resets it. Also cleared by `resetEdits`. */
@@ -221,6 +215,9 @@ export function useStructuredRows<
   // (`updateResponse` clears them on every write; only real user intent
   // should).
   const setProjection = useSetQuestionProjection(questionId);
+  // Same reasoning, one step further: the orphan prune must rewrite `edits`
+  // too, and is just as passive (see `commitPassively` below).
+  const setRowsPassively = useSetQuestionRowsPassively(questionId);
 
   // Sanitized at the read boundary — the same gate the submit path's
   // reader (`composeStructured.ts`) runs `response.edits` through, so
@@ -254,6 +251,9 @@ export function useStructuredRows<
     [baseline, edits, projectOpts],
   );
 
+  // Internal — the prune effect's trigger and nothing else. It self-clears
+  // the render after the prune runs, so `droppedEdits` is the only form of
+  // this a consumer can actually read.
   const orphanRowIds = useMemo(
     () => findOrphanRowIds(baseline, edits),
     [baseline, edits],
@@ -264,28 +264,45 @@ export function useStructuredRows<
     [rows, projectValues],
   );
 
-  // The one write that carries intent. `values` and `edits` land in a
-  // single atom write so no consumer ever sees them disagree.
+  // The `{ values, edits }` pair every write lands — in a single atom
+  // write, so no consumer ever sees the two disagree.
   //
   // For `mode: "single"`, `nextEdits` runs through
   // `truncateToSingletonRow` before anything derives from it, so the
   // persisted `edits` can never carry a second rowId that
   // `SingleRowController.row` (always `rows[0]`) never showed the
   // clinician. A no-op (same reference) for logs with 0 or 1 rowIds.
-  const commit = useCallback(
+  const composeWrite = useCallback(
     (nextEdits: EditLog<TRow>) => {
       const effectiveEdits =
         mode === "single"
           ? truncateToSingletonRow(baseline, nextEdits, projectOpts)
           : nextEdits;
       const nextRows = projectRows(baseline, effectiveEdits, projectOpts);
-      const nextValues = projectValues(nextRows.map((entry) => entry.row));
-      updateResponse({
-        values: nextValues,
+      return {
+        values: projectValues(nextRows.map((entry) => entry.row)),
         edits: [...effectiveEdits],
-      });
+      };
     },
-    [baseline, projectOpts, projectValues, mode, updateResponse],
+    [baseline, projectOpts, projectValues, mode],
+  );
+
+  // The write that carries intent: it clears this question's showing
+  // errors, which is correct for a mutator and for the `initialEdits` seed
+  // (an explicit user intent), and wrong for anything passive — see
+  // `commitPassively`.
+  const commit = useCallback(
+    (nextEdits: EditLog<TRow>) => updateResponse(composeWrite(nextEdits)),
+    [composeWrite, updateResponse],
+  );
+
+  // The same write with no intent attached: it leaves `errorsAtom` alone.
+  // Reserved for the orphan prune below — a refetch delivering a smaller
+  // baseline must not make a question's server errors vanish while the
+  // values that earned them stay on screen.
+  const commitPassively = useCallback(
+    (nextEdits: EditLog<TRow>) => setRowsPassively(composeWrite(nextEdits)),
+    [composeWrite, setRowsPassively],
   );
 
   // Baseline moved (first load, refetch, invalidation): refresh the
@@ -314,13 +331,15 @@ export function useStructuredRows<
   // `orphanRowIds` (empty while `baseline` is `undefined` — loading is
   // not confirmed-gone), it converges in one pass.
   //
-  // Each dropped edit is appended to `droppedEdits` BEFORE `commit`
+  // Each dropped edit is appended to `droppedEdits` BEFORE the commit
   // removes it from `edits`: otherwise the prune destroys the only record
   // of what it removed before any restore-notice UI could read it.
   //
   // Deliberately NOT gated on `disabled`: the submit freeze blocks NEW
   // user intent, but this effect records none — it only excises intent
-  // the baseline has proven stale.
+  // the baseline has proven stale. For the same reason it writes through
+  // `commitPassively`: recording no intent, it must not clear the
+  // question's showing errors.
   //
   // StrictMode double-invokes effects, so the functional `setDroppedEdits`
   // updater is idempotent: it skips already-captured rowIds and returns
@@ -329,7 +348,7 @@ export function useStructuredRows<
   const [droppedEdits, setDroppedEdits] = useState<EditLog<TRow>>([]);
   useEffect(() => {
     // NOT an optimization — this early return prevents an unbounded
-    // render loop under an unmemoized `baseline`. `commit` always writes
+    // render loop under an unmemoized `baseline`. The commit always writes
     // the atom, and an unmemoized baseline gives `orphanRowIds` a fresh
     // array reference every render even while its content stays `[]` —
     // without this guard that alone would commit, re-render, and commit
@@ -344,8 +363,8 @@ export function useStructuredRows<
       );
       return additions.length === 0 ? previous : [...previous, ...additions];
     });
-    commit(pruneOrphanEdits(baseline, edits));
-  }, [orphanRowIds, baseline, edits, commit]);
+    commitPassively(pruneOrphanEdits(baseline, edits));
+  }, [orphanRowIds, baseline, edits, commitPassively]);
 
   // Declarative one-shot seed (e.g. encounter's `?toDischarge`). The latch
   // decision is `decideInitialEditsSeed`: the ref must NOT latch while
@@ -534,7 +553,6 @@ export function useStructuredRows<
   const base: StructuredRowsBase<TRow> = {
     edits,
     isDirty: edits.length > 0,
-    orphanRowIds,
     droppedEdits,
     applyEdit,
     resetEdits,

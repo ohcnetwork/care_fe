@@ -3,12 +3,38 @@ import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import { selectStructuredFieldErrors } from "./structuredFieldErrors";
 import type { RowId } from "./types";
 
-/** The column shape {@link rowHasBoundError} needs — a structural subset of
- *  `StructuredColumn<TRow>` so this stays free of the primitive's generic
+/** The column shape {@link resolveRowErrorState} needs — a structural subset
+ *  of `StructuredColumn<TRow>` so this stays free of the primitive's generic
  *  `TRow` parameter and is trivially unit-testable (no React, no `.tsx`). */
 export interface ErrorProneColumn {
   key: string;
   errorFieldKeys?: readonly string[];
+  mobileHidden?: boolean;
+}
+
+/** Which row, in which question, errors must bind to. `rowIndex` is what a
+ *  v1-shim index-only error matches on. */
+export interface RowErrorMatch {
+  questionId: string;
+  rowId: RowId;
+  rowIndex: number;
+}
+
+/** Does any error bind to this column's cell in this row? The same matcher
+ *  the cell's own `StructuredFieldError` renders from. */
+function columnHasBoundError(
+  column: ErrorProneColumn,
+  errors: readonly QuestionValidationError[],
+  match: RowErrorMatch,
+): boolean {
+  return (
+    selectStructuredFieldErrors(errors, {
+      questionId: match.questionId,
+      rowId: match.rowId,
+      rowIndex: match.rowIndex,
+      fieldKeys: column.errorFieldKeys ?? [column.key],
+    }).length > 0
+  );
 }
 
 /** Every `field_key` some column already claims (`errorFieldKeys`,
@@ -30,8 +56,8 @@ function knownFieldKeys(columns: readonly ErrorProneColumn[]): Set<string> {
  * error from the block-level list — message deleted from the page,
  * `role="alert"` never rendered, row still collapsible, Save
  * hard-blocked with no visible reason. This names those keys so a
- * fallback slot can render them and `rowHasBoundError` can force the row
- * open.
+ * fallback slot can render them and {@link resolveRowErrorState}'s
+ * `hasError` can force the row open.
  *
  * Reuses `selectStructuredFieldErrors` (the same matcher every per-cell
  * check uses) to CONFIRM each candidate is actually bound to this
@@ -42,7 +68,7 @@ function knownFieldKeys(columns: readonly ErrorProneColumn[]): Set<string> {
 export function unmatchedRowErrorFieldKeys(
   columns: readonly ErrorProneColumn[],
   errors: readonly QuestionValidationError[],
-  match: { questionId: string; rowId: RowId; rowIndex: number },
+  match: RowErrorMatch,
 ): string[] {
   const known = knownFieldKeys(columns);
   const candidates = Array.from(
@@ -66,46 +92,40 @@ export function unmatchedRowErrorFieldKeys(
   );
 }
 
-/**
- * Does ANY column in this row carry a bound validation error — OR does an
- * error bind to this row under a `field_key` no column declares? Aggregates
- * across every column's `errorFieldKeys` (defaulting to `[column.key]`),
- * through the SAME matcher `StructuredFieldError` renders from — so "the
- * row has an error" and "some cell (or the fallback slot) renders one" can
- * never disagree with each other. The unmatched half is what makes an
- * undeclared `field_key` still force the row open (see
- * `unmatchedRowErrorFieldKeys`'s doc comment) instead of leaving Save
- * hard-blocked with no visible reason.
- */
-export function rowHasBoundError(
-  columns: readonly ErrorProneColumn[],
-  errors: readonly QuestionValidationError[],
-  match: { questionId: string; rowId: RowId; rowIndex: number },
-): boolean {
-  return (
-    columns.some(
-      (column) =>
-        selectStructuredFieldErrors(errors, {
-          questionId: match.questionId,
-          rowId: match.rowId,
-          rowIndex: match.rowIndex,
-          fieldKeys: column.errorFieldKeys ?? [column.key],
-        }).length > 0,
-    ) || unmatchedRowErrorFieldKeys(columns, errors, match).length > 0
-  );
+/** Everything one row's chrome needs to know about the errors bound to it,
+ *  resolved in a single pass — the row force-expands, prints the keys no
+ *  column owns, AND re-prints the ones whose cell is invisible below `lg`,
+ *  all from one scan and one shared matcher, so the three can never
+ *  disagree with each other. */
+export interface RowErrorState<TColumn extends ErrorProneColumn> {
+  /** Any error binds to this row at all — through a column's cell or under
+   *  a `field_key` no column declares. Forces the row open below `lg`. */
+  hasError: boolean;
+  /** Distinct `field_key`s bound to this row that belong to no declared
+   *  column — see {@link unmatchedRowErrorFieldKeys}. */
+  unmatchedFieldKeys: string[];
+  /** Columns carrying an error whose cell is `display:none` below `lg`.
+   *  Their message renders inside that hidden cell, so at narrow widths the
+   *  row would pin itself open, disable its own collapse toggle and block
+   *  Save while showing nothing — the caller re-renders these in a slot
+   *  that is visible there. */
+  mobileHiddenErrorColumns: TColumn[];
 }
 
-/**
- * A row carrying a bound error must never be collapsible away below
- * `lg`: the mobile body wrapper is the ONLY place the error message
- * renders, so a collapsed row's `role="alert"` sits in a `display:none`
- * subtree and is never announced — a hard-blocked Save would leave every
- * row on screen looking clean. `hasError` wins over the clinician's own
- * toggle; the toggle regains control the instant the error clears.
- */
-export function resolveRowExpanded(
-  toggledExpanded: boolean,
-  hasError: boolean,
-): boolean {
-  return toggledExpanded || hasError;
+export function resolveRowErrorState<TColumn extends ErrorProneColumn>(
+  columns: readonly TColumn[],
+  errors: readonly QuestionValidationError[],
+  match: RowErrorMatch,
+): RowErrorState<TColumn> {
+  const columnsWithError = columns.filter((column) =>
+    columnHasBoundError(column, errors, match),
+  );
+  const unmatchedFieldKeys = unmatchedRowErrorFieldKeys(columns, errors, match);
+  return {
+    hasError: columnsWithError.length > 0 || unmatchedFieldKeys.length > 0,
+    unmatchedFieldKeys,
+    mobileHiddenErrorColumns: columnsWithError.filter(
+      (column) => column.mobileHidden,
+    ),
+  };
 }

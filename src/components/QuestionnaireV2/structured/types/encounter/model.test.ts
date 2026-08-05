@@ -180,7 +180,10 @@ describe("encounter normalizePatch — status ⇒ period.end", () => {
         start: "2026-08-01T00:00:00.000Z",
         end: NOW,
       });
-      assert.equal(out.status, status);
+      // Derived fields ONLY: the status the clinician set is not echoed
+      // back here, it reaches the row through `mergePatch`'s own spread.
+      assert.equal("status" in out, false);
+      assert.equal(mergePatch(row, { status }, normalize).status, status);
     });
   }
 
@@ -221,10 +224,11 @@ describe("encounter normalizePatch — status ⇒ period.end", () => {
     });
   }
 
-  it("an unrelated patch on a live encounter touches neither period nor hospitalization", () => {
+  it("an unrelated patch on a live encounter derives nothing — and still records the clinician's field", () => {
     const row = fixtureRow(); // in_progress, imp, no period.end
-    const out = normalize(row, { external_identifier: "IP-2" });
-    assert.deepEqual(out, { external_identifier: "IP-2" });
+    const patch = { external_identifier: "IP-2" };
+    assert.deepEqual(normalize(row, patch), {});
+    assert.equal(mergePatch(row, patch, normalize).external_identifier, "IP-2");
   });
 
   it("the patch's OWN period.end survives on a terminal status — the date picker still works", () => {
@@ -235,13 +239,17 @@ describe("encounter normalizePatch — status ⇒ period.end", () => {
         end: "2026-08-03T00:00:00.000Z",
       },
     });
-    const out = normalize(row, {
+    const patch = {
       period: {
         start: "2026-08-01T00:00:00.000Z",
         end: "2026-08-05T12:00:00.000Z",
       },
-    });
-    assert.deepEqual(out.period, {
+    };
+    // The end the clinician picked is already set on the row-as-patched,
+    // so rule 1 re-stamps nothing and the picked value carries through
+    // untouched.
+    assert.equal(normalize(row, patch).period, undefined);
+    assert.deepEqual(mergePatch(row, patch, normalize).period, {
       start: "2026-08-01T00:00:00.000Z",
       end: "2026-08-05T12:00:00.000Z",
     });
@@ -353,9 +361,14 @@ describe("encounter normalizePatch — class/status ⇒ hospitalization", () => 
     const row = fixtureRow({
       hospitalization: { discharge_disposition: "rehab", re_admission: true },
     });
-    const out = normalize(row, { external_identifier: "IP-9" });
+    const patch = { external_identifier: "IP-9" };
+    const out = normalize(row, patch);
     assert.equal("hospitalization" in out, false);
-    assert.deepEqual(out, { external_identifier: "IP-9" });
+    assert.deepEqual(out, {});
+    assert.deepEqual(mergePatch(row, patch, normalize).hospitalization, {
+      discharge_disposition: "rehab",
+      re_admission: true,
+    });
   });
 
   it("a hospitalized class that is not discharged writes no hospitalization at all", () => {
@@ -952,6 +965,14 @@ describe("encounter — the untouched section, through the real reducer", () => 
 describe("rowSchema — the assistant write guard", () => {
   it("accepts a real row", () => {
     assert.equal(rowSchema.safeParse(fixtureRow()).success, true);
+  });
+
+  it("accepts a baseline row converted via toEncounterRow", () => {
+    // The assistant echoes the COMPLETE row back as its patch, so a
+    // derivation this strict schema rejects makes the baseline row
+    // uneditable by it.
+    const result = rowSchema.safeParse(toEncounterRow(fixtureRead()));
+    assert.equal(result.success, true, JSON.stringify(result));
   });
 
   it("accepts a null hospitalization (an ambulatory encounter's cleared record)", () => {

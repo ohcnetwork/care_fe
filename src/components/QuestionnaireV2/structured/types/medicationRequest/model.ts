@@ -6,6 +6,7 @@ import type {
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
+import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
 import {
   displayObjectSchema,
   isoInstantString,
@@ -337,16 +338,35 @@ export const MEDICATION_REQUEST_SOFT_DELETE: SoftDeleteDescriptor<MedicationRequ
 /**
  * `MedicationRequestRead` (the server shape) → the row this question edits.
  * Pure so it is testable without a DOM.
+ *
+ * Fields are PICKED, never spread: the read shape carries audit and
+ * expansion fields the row shape has no place for (`created_date`,
+ * `modified_date`, `updated_by`, `prescription`,
+ * `inventory_items_internal`). Spreading them would ride them into every
+ * upsert datapoint and — because `rowSchema` is `.strict()` — make an
+ * assistant patch echoing a baseline row unvalidatable.
  */
 export function toMedicationRow(
   medication: MedicationRequestRead,
   currentUser: UserReadMinimal,
 ): MedicationRequestRow {
-  const { requested_product, ...rest } = medication;
   return {
-    ...rest,
-    requested_product: requested_product?.id,
-    requested_product_internal: requested_product,
+    id: medication.id,
+    status: medication.status,
+    status_reason: medication.status_reason,
+    intent: medication.intent,
+    category: medication.category,
+    priority: medication.priority,
+    do_not_perform: medication.do_not_perform,
+    medication: medication.medication,
+    encounter: medication.encounter,
+    dosage_instruction: medication.dosage_instruction,
+    note: medication.note,
+    authored_on: medication.authored_on,
+    created_by: medication.created_by,
+    requested_product: medication.requested_product?.id,
+    requested_product_internal: medication.requested_product,
+    dispense_status: medication.dispense_status,
     requester: medication.requester || currentUser,
   };
 }
@@ -480,14 +500,11 @@ export function medicationRowFromTemplate(
   };
 }
 
-/**
- * A list, not a singleton — like `allergy_intolerance`/`diagnosis`, a row
- * here is born whole the moment `newMedicationRowFrom{Code,Product}` creates
- * it, so there is no separate `isEmptyRow` predicate to keep in sync with a
- * submission filter.
- */
-export const projectValues: ProjectValues<MedicationRequestRow> = (rows) =>
-  rows.length === 0 ? [] : [{ type: "medication_request", value: [...rows] }];
+/** A list, not a singleton: a row here is born whole the moment
+ *  `newMedicationRowFrom{Code,Product}` creates it (see
+ *  {@link listProjectValues}). */
+export const projectValues: ProjectValues<MedicationRequestRow> =
+  listProjectValues("medication_request");
 
 /**
  * The edit log → at most one POST against the upsert endpoint, carrying
@@ -498,6 +515,12 @@ export const projectValues: ProjectValues<MedicationRequestRow> = (rows) =>
  * `alternate_identifier`, generated once per call — new medications saved
  * together are grouped under ONE new prescription. Existing rows carry no
  * `create_prescription`.
+ *
+ * PRESCRIPTION NOTE: the editor can only write the note onto ONE row (two
+ * mutator calls in one handler would clobber each other), so it writes it
+ * to the first added row; here it is fanned out to EVERY new row's
+ * `create_prescription`. Which datapoint the server reads the note from is
+ * then not a question of ordering.
  *
  * The whole row is spread into the wire body first, then the fields the
  * server expects in a different shape are overridden.
@@ -518,6 +541,9 @@ export async function toRequests(
   if (rows.length === 0) return [];
 
   const prescriptionIdentifier = `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+  const prescriptionNote = rows.find(
+    (row) => !row.id && row.create_prescription?.note,
+  )?.create_prescription?.note;
 
   return [
     {
@@ -529,6 +555,7 @@ export async function toRequests(
           ...(!row.id && {
             create_prescription: {
               ...row.create_prescription,
+              note: prescriptionNote,
               status: PrescriptionStatus.active,
               alternate_identifier: prescriptionIdentifier,
             },

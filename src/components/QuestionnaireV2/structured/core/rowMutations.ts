@@ -18,24 +18,21 @@ import type {
 // ---------------------------------------------------------------------------
 
 /**
- * CONTRACT: the value `normalizePatch` returns REPLACES `patch` entirely
- * here — `{ ...current, ...normalizePatch(current, patch) }` — it does not
- * additionally merge with `patch`. A `normalizePatch` that returns only
- * its own derived fields silently drops the clinician's edit; it must
- * start from `{ ...patch, ... }` (or return `patch` unchanged).
+ * CONTRACT: `normalizePatch` returns its DERIVED FIELDS ONLY — they land
+ * on top of the clinician's `patch`, which is applied whether or not a
+ * normalizer exists. A normalizer therefore cannot drop an edit by
+ * omission; it can only override a field it names deliberately.
  */
 export function mergePatch<TRow extends object>(
   current: TRow,
   patch: Partial<TRow>,
   normalizePatch?: (row: TRow, patch: Partial<TRow>) => Partial<TRow>,
 ): TRow {
-  // `?? patch`: a `normalizePatch` returning `undefined`/`null` is
-  // type-illegal for typed callers but reachable from a plugin definition
-  // crossing the `unknown` boundary at runtime. Without the fallback,
-  // `{ ...current, ...undefined }` spreads nothing and the clinician's
-  // edit is silently dropped.
-  const derived = normalizePatch?.(current, patch) ?? patch;
-  return { ...current, ...derived } as TRow;
+  // Spreading `undefined`/`null` contributes nothing, so a plugin
+  // definition returning either across the `unknown` boundary — type-
+  // illegal, but reachable at runtime — degrades to "no derivation"
+  // rather than to a lost edit.
+  return { ...current, ...patch, ...normalizePatch?.(current, patch) } as TRow;
 }
 
 // ---------------------------------------------------------------------------

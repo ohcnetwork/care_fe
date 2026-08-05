@@ -26,7 +26,10 @@ const toRequests = makeToRequests({ readFileAsDataURL });
 export const filesDefinition: StructuredTypeDefinition<"files"> = {
   type: "files",
   component: FilesInput,
-  requires: ["encounterId", "facilityId"],
+  // Encounter only: the upload URL is composed from `encounterId` alone and
+  // nothing in this type reads a facility — requiring one would show the
+  // "requires context" placeholder on a mount that can upload perfectly well.
+  requires: ["encounterId"],
   subjects: ["encounter"],
   /**
    * File rows carry a raw `File`, a live browser handle with no JSON

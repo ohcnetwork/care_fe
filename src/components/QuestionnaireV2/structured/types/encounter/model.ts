@@ -152,9 +152,9 @@ export const projectValues: ProjectValues<EncounterRow> = (rows) => {
  * patch before it is recorded; a combined class+status edit is evaluated
  * against the values it is setting.
  *
- * RETURN CONTRACT (`StructuredRowsOptions.normalizePatch`): the result
- * REPLACES `patch` before being spread onto the row, so it must start from
- * `{ ...patch }`. Takes its config rather than importing `@careConfig`
+ * Returns its DERIVED FIELDS ONLY (`StructuredRowsOptions.normalizePatch`);
+ * `mergePatch` lands them on top of the clinician's own patch. Takes its
+ * config rather than importing `@careConfig`
  * (`care.config.ts` reads `import.meta.env`, absent under `node --test`);
  * `now` is injectable so period assertions can name a value.
  *
@@ -189,8 +189,11 @@ export function makeNormalizePatch({
     row: EncounterRow,
     patch: Partial<EncounterRow>,
   ): Partial<EncounterRow> {
+    // The row as the clinician's patch leaves it — every rule below reads
+    // the values being SET, not the pre-edit ones, so a combined
+    // class+status edit is judged as a whole.
     const next = { ...row, ...patch };
-    const out: Partial<EncounterRow> = { ...patch };
+    const out: Partial<EncounterRow> = {};
 
     // Rule 1 — period.end follows the status.
     if (TERMINAL_STATUSES.has(next.status)) {

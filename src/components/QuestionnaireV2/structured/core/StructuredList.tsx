@@ -30,11 +30,7 @@ import type { QuestionValidationError } from "@/types/questionnaire/batch";
 
 import { StructuredFieldError } from "./StructuredFieldError";
 import { selectStructuredFieldErrors } from "./structuredFieldErrors";
-import {
-  resolveRowExpanded,
-  rowHasBoundError,
-  unmatchedRowErrorFieldKeys,
-} from "./structuredListRowState";
+import { resolveRowErrorState } from "./structuredListRowState";
 import { gridTemplateColumns } from "./structuredListTracks";
 import type { ProjectedRow, RowId } from "./types";
 
@@ -411,30 +407,28 @@ function StructuredListRow<TRow extends object>({
   const extraActions = rowActions?.(row) ?? [];
   const bodyId = `${questionId}--${row.rowId}--body`;
 
+  // One scan for every error-driven decision this row makes — the forced
+  // expansion, the unmatched-key fallback, and the mobile re-print of a
+  // `mobileHidden` cell's error (all three rendered below).
+  const { hasError, unmatchedFieldKeys, mobileHiddenErrorColumns } = useMemo(
+    () =>
+      resolveRowErrorState(columns, errors, {
+        questionId,
+        rowId: row.rowId,
+        rowIndex,
+      }),
+    [columns, errors, questionId, row.rowId, rowIndex],
+  );
+
   // Below `lg` the body wrapper — the ONLY place a cell's
   // `StructuredFieldError` renders — is `display:none` while collapsed. A
   // row a blocking `validate()` error binds to must never be hideable that
   // way: `useSubmitFillSession` aborts the whole submit on any
   // `QuestionValidationError`, so a collapsed row would leave only a bare
   // toast and the error's `role="alert"` would never be announced from a
-  // hidden subtree. `hasError` forces the row open and yields back to the
-  // toggle the moment the error clears.
-  const hasError = rowHasBoundError(columns, errors, {
-    questionId,
-    rowId: row.rowId,
-    rowIndex,
-  });
-  const isExpanded = resolveRowExpanded(expanded, hasError);
-  // A `field_key` no column declares (e.g. a shared row-level `note` with
-  // no column of its own) renders in no cell, and not at the block level
-  // either — `QuestionBlock`'s allow-list suppresses it there for these
-  // types. `rowHasBoundError` already counts these (so the row
-  // force-expands); this is where they actually get PRINTED.
-  const unmatchedFieldKeys = unmatchedRowErrorFieldKeys(columns, errors, {
-    questionId,
-    rowId: row.rowId,
-    rowIndex,
-  });
+  // hidden subtree. `hasError` wins over the clinician's own toggle, which
+  // regains control the instant the error clears.
+  const isExpanded = expanded || hasError;
 
   // DEV-ONLY accessible-name audit — the enforcement
   // `StructuredControlProps` itself cannot provide (see its doc comment).
@@ -626,6 +620,37 @@ function StructuredListRow<TRow extends object>({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* Below-`lg` re-print of a `mobileHidden` cell's error. That cell
+            is `display:none` here, so its message — the shell's or the
+            column's own — is unreachable at this width while the error
+            still pins the row open, disables its collapse toggle and
+            blocks Save. `lg:hidden` because at `lg`+ the cell itself is
+            back and showing the same message; the id differs from the
+            cell's (`--mobile-error`) so the two copies never collide. The
+            caption names the field, which is otherwise only knowable from
+            the desktop column header. */}
+        {mobileHiddenErrorColumns.length > 0 && (
+          <div role="none" className="space-y-1 px-1 pb-2 lg:hidden">
+            {mobileHiddenErrorColumns.map((column) => (
+              <div key={column.key}>
+                {!column.headerHidden && (
+                  <span aria-hidden="true" className="block text-sm">
+                    {column.header}
+                  </span>
+                )}
+                <StructuredFieldError
+                  id={`${questionId}--${row.rowId}--${column.key}--mobile-error`}
+                  questionId={questionId}
+                  rowId={row.rowId}
+                  rowIndex={rowIndex}
+                  fieldKeys={column.errorFieldKeys ?? [column.key]}
+                  errors={errors}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Unmatched-error fallback. role="none" — like the mobile chrome
             above, this must never inject a phantom `role="cell"`, and

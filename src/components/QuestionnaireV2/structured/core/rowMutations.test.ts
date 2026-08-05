@@ -47,67 +47,65 @@ describe("mergePatch", () => {
     assert.deepEqual(result, { id: "r1", note: "new" });
   });
 
-  it("with normalizePatch, uses ITS return value, not the incoming patch, as the merge source", () => {
+  it("CONTRACT PIN: a normalizePatch returning ONLY its derived fields keeps the clinician's edit — derived fields land ON TOP of the patch", () => {
     const current: TestRow = { id: "r1", note: "old", status: "active" };
-    const normalizePatch = (row: TestRow, patch: Partial<TestRow>) => ({
-      ...patch,
+    const normalizePatch = (row: TestRow) => ({
       status: row.status === "active" ? "derived-active" : "derived-other",
     });
-    const result = mergePatch(current, { note: "new" }, normalizePatch);
+
+    const result = mergePatch(
+      current,
+      { note: "clinician typed this" },
+      normalizePatch,
+    );
+
     assert.deepEqual(result, {
       id: "r1",
-      note: "new",
+      note: "clinician typed this",
       status: "derived-active",
     });
   });
 
-  it("CONTRACT PIN: a normalizePatch that returns ONLY its derived fields (omitting the incoming patch) silently drops the clinician's edit", () => {
-    const current: TestRow = { id: "r1", note: "old", status: "active" };
-    // Badly-behaved: forgets to spread `patch` in, returns only the
-    // derived field. Documents the exact failure mode the option's doc
-    // comment warns about — not asserting this is desirable, pinning that
-    // it is real.
-    const badNormalizePatch = () => ({ status: "derived" });
+  it("a derived field WINS over the same field in the incoming patch", () => {
+    const current: TestRow = { id: "r1", note: "old" };
+    const normalizePatch = () => ({ status: "derived" });
+
     const result = mergePatch(
       current,
-      { note: "clinician typed this" },
-      badNormalizePatch,
+      { note: "typed", status: "clinician picked" },
+      normalizePatch,
     );
-    assert.deepEqual(result, { id: "r1", note: "old", status: "derived" });
-    assert.notEqual(result.note, "clinician typed this");
+
+    assert.deepEqual(result, { id: "r1", note: "typed", status: "derived" });
   });
 
-  it("a normalizePatch that returns undefined falls back to the incoming patch — does NOT silently discard the clinician's edit", () => {
+  it("normalizePatch sees the row and the raw patch, so it can derive from the values being SET", () => {
+    const current: TestRow = { id: "r1", note: "old", status: "active" };
+    const seen: { row: TestRow; patch: Partial<TestRow> }[] = [];
+    const normalizePatch = (row: TestRow, patch: Partial<TestRow>) => {
+      seen.push({ row, patch });
+      return {};
+    };
+
+    mergePatch(current, { status: "completed" }, normalizePatch);
+
+    assert.deepEqual(seen, [{ row: current, patch: { status: "completed" } }]);
+  });
+
+  it("a normalizePatch returning undefined or null contributes nothing and leaves the edit intact", () => {
     // Type-illegal for a typed caller (the signature promises
     // `Partial<TRow>`), but reachable from a plugin definition crossing
-    // the `unknown` boundary at runtime. Without the `?? patch` fallback,
-    // `{ ...current, ...undefined }` is a no-op spread and the edit is
-    // gone.
+    // the `unknown` boundary at runtime.
     const current: TestRow = { id: "r1", note: "old" };
-    const normalizePatchReturningUndefined = () =>
-      undefined as unknown as Partial<TestRow>;
 
-    const result = mergePatch(
-      current,
-      { note: "typed" },
-      normalizePatchReturningUndefined,
-    );
-
-    assert.deepEqual(result, { id: "r1", note: "typed" });
-  });
-
-  it("a normalizePatch that returns null ALSO falls back to the incoming patch", () => {
-    const current: TestRow = { id: "r1", note: "old" };
-    const normalizePatchReturningNull = () =>
-      null as unknown as Partial<TestRow>;
-
-    const result = mergePatch(
-      current,
-      { note: "typed" },
-      normalizePatchReturningNull,
-    );
-
-    assert.deepEqual(result, { id: "r1", note: "typed" });
+    for (const empty of [undefined, null]) {
+      const result = mergePatch(
+        current,
+        { note: "typed" },
+        () => empty as unknown as Partial<TestRow>,
+      );
+      assert.deepEqual(result, { id: "r1", note: "typed" });
+    }
   });
 });
 
@@ -225,10 +223,7 @@ describe("resolveSetRow — three-route dispatch", () => {
       patch: { note: "new" },
       createSeed: undefined,
       singletonRowId: "singleton",
-      normalizePatch: (row, patch) => ({
-        ...patch,
-        status: `derived-${row.status}`,
-      }),
+      normalizePatch: (row) => ({ status: `derived-${row.status}` }),
       questionId: "q1",
     });
 

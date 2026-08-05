@@ -16,8 +16,13 @@ describe("isStructuredEditRecord", () => {
     }
   });
 
-  it("accepts a remove with no patch", () => {
-    assert.equal(isStructuredEditRecord({ rowId: "r1", op: "remove" }), true);
+  it("rejects an entry with no patch, for EVERY op — patch is the complete row even for a remove", () => {
+    // A truncated draft reaching projectRows emits `row: undefined`, and
+    // the first dereference (softDelete.isDeleted, duplicateKey, an
+    // editor's rowTitle) throws out of render.
+    for (const op of ["add", "update", "remove"]) {
+      assert.equal(isStructuredEditRecord({ rowId: "r1", op }), false);
+    }
   });
 
   it("rejects malformed drafts", () => {
@@ -25,10 +30,27 @@ describe("isStructuredEditRecord", () => {
     assert.equal(isStructuredEditRecord(null), false);
     assert.equal(isStructuredEditRecord(undefined), false);
     assert.equal(isStructuredEditRecord("add"), false);
-    assert.equal(isStructuredEditRecord({ op: "add" }), false);
-    assert.equal(isStructuredEditRecord({ rowId: "", op: "add" }), false);
-    assert.equal(isStructuredEditRecord({ rowId: "r1", op: "delete" }), false);
-    assert.equal(isStructuredEditRecord({ rowId: 1, op: "add" }), false);
+    assert.equal(isStructuredEditRecord({ op: "add", patch: {} }), false);
+    assert.equal(
+      isStructuredEditRecord({ rowId: "", op: "add", patch: {} }),
+      false,
+    );
+    assert.equal(
+      isStructuredEditRecord({ rowId: "r1", op: "delete", patch: {} }),
+      false,
+    );
+    assert.equal(
+      isStructuredEditRecord({ rowId: 1, op: "add", patch: {} }),
+      false,
+    );
+    assert.equal(
+      isStructuredEditRecord({ rowId: "r1", op: "add", patch: null }),
+      false,
+    );
+    assert.equal(
+      isStructuredEditRecord({ rowId: "r1", op: "add", patch: "row" }),
+      false,
+    );
   });
 });
 
@@ -44,11 +66,12 @@ describe("sanitizeStructuredEditLog", () => {
   it("drops malformed entries (isStructuredEditRecord false)", () => {
     const log = [
       { rowId: "a", op: "add", patch: {} },
-      { rowId: "", op: "add" }, // empty rowId
-      { rowId: "b", op: "delete" }, // unknown op
+      { rowId: "", op: "add", patch: {} }, // empty rowId
+      { rowId: "b", op: "delete", patch: {} }, // unknown op
+      { rowId: "c", op: "add" }, // truncated: no patch
       null,
       "garbage",
-      { op: "add" }, // no rowId at all
+      { op: "add", patch: {} }, // no rowId at all
     ];
     assert.deepEqual(sanitizeStructuredEditLog(log), [
       { rowId: "a", op: "add", patch: {} },

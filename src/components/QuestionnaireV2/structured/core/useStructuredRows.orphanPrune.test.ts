@@ -24,7 +24,11 @@ import { createStore, Provider as JotaiProvider } from "jotai";
 import { act, createElement, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
-import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
+import {
+  errorsAtom,
+  responsesAtom,
+} from "@/components/QuestionnaireV2/form/engine/store";
+import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { StructuredEditRecord } from "@/types/questionnaire/structured";
 
@@ -121,7 +125,7 @@ describe("useStructuredRows — confirmed orphans are pruned from response.edits
     for (const cleanup of cleanups) cleanup();
   });
 
-  it("a restored draft's edit for a rowId the (now-known) baseline lacks is removed from response.edits, is never re-shown by orphanRowIds after the prune, and survives in droppedEdits", async () => {
+  it("a restored draft's edit for a rowId the (now-known) baseline lacks is removed from response.edits and survives in droppedEdits", async () => {
     const questionId = "q-orphan-pin";
     const staleEdit: StructuredEditRecord = {
       rowId: "vanished",
@@ -151,7 +155,6 @@ describe("useStructuredRows — confirmed orphans are pruned from response.edits
       [staleEdit],
       "baseline undefined must never prune",
     );
-    assert.deepEqual(resultRef.current?.orphanRowIds, []);
     assert.deepEqual(resultRef.current?.droppedEdits, []);
 
     // 2. Baseline resolves — a known, empty array: the server confirms
@@ -166,15 +169,11 @@ describe("useStructuredRows — confirmed orphans are pruned from response.edits
         "thing composeStructuredV2Requests/structuredEditsOf ever reads",
     );
     assert.deepEqual(
-      resultRef.current?.orphanRowIds,
-      [],
-      "orphanRowIds self-clears once the prune has run (documented trade-off)",
-    );
-    assert.deepEqual(
       resultRef.current?.droppedEdits,
       [staleEdit],
-      "droppedEdits is the durable record a restore notice needs — " +
-        "orphanRowIds alone cannot survive to be read later",
+      "droppedEdits is the durable record a restore notice needs — the " +
+        "orphan rowIds self-clear the render the prune runs, so nothing " +
+        "outside the hook could read them in time",
     );
 
     // 3. Idempotent: re-rendering again with the same (still-empty)
@@ -226,6 +225,64 @@ describe("useStructuredRows — confirmed orphans are pruned from response.edits
       liveEdit,
       ownRemove,
     ]);
+  });
+
+  it("the prune leaves this question's SHOWING errors intact — only genuine intent clears them", async () => {
+    const questionId = "q-orphan-pin-errors";
+    const staleEdit: StructuredEditRecord = {
+      rowId: "vanished",
+      op: "update",
+      patch: { id: "vanished", label: "restored draft intent" },
+    };
+    const seed: QuestionnaireResponse = {
+      question_id: questionId,
+      structured_type: "encounter",
+      link_id: "q-structured",
+      values: [],
+      edits: [staleEdit],
+    };
+    // A mapped server error from a failed submit, still on screen against
+    // a row the refetched baseline still has.
+    const showing: QuestionValidationError = {
+      question_id: questionId,
+      row_id: "survives",
+      field_key: "label",
+      error: "server said no",
+    };
+
+    const harness = mountHarness(questionId, seed);
+    const { store, resultRef } = harness;
+    cleanups.push(() => {
+      harness.root.unmount();
+      harness.container.remove();
+    });
+    store.set(errorsAtom, [showing]);
+
+    await setBaselineAndFlush(harness, undefined);
+    // A smaller baseline arrives: "vanished" is confirmed gone, "survives"
+    // — the row the error is bound to — is not.
+    await setBaselineAndFlush(harness, [
+      { rowId: "survives", row: { id: "survives", label: "server value" } },
+    ]);
+
+    assert.deepEqual(
+      store.get(responsesAtom)[questionId].edits,
+      [],
+      "sanity: the prune actually ran",
+    );
+    assert.deepEqual(
+      store.get(errorsAtom),
+      [showing],
+      "a passive prune records no intent, so the error that flagged a " +
+        "still-showing value must survive it",
+    );
+
+    // Contrast: a real mutator IS intent, and does clear them.
+    await act(async () => {
+      resultRef.current?.addRow({ id: "new", label: "typed" });
+      await flushTurns(10);
+    });
+    assert.deepEqual(store.get(errorsAtom), []);
   });
 
   it("resetEdits (Discard) also clears droppedEdits, not just edits", async () => {

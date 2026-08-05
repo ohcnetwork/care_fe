@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
+import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
 import {
   displayObjectSchema,
   nonEmptyString,
@@ -78,13 +79,10 @@ export const rowSchema = z
   })
   .strict();
 
-/**
- * A list whose rows are born whole from a picked or template-resolved
- * activity definition — no "half filled" row shape, so no `isEmptyRow`
- * predicate exists to desync from a submission filter.
- */
-export const projectValues: ProjectValues<ServiceRequestRow> = (rows) =>
-  rows.length === 0 ? [] : [{ type: "service_request", value: [...rows] }];
+/** Rows are born whole from a picked or template-resolved activity
+ *  definition (see {@link listProjectValues}). */
+export const projectValues: ProjectValues<ServiceRequestRow> =
+  listProjectValues("service_request");
 
 // `activityDefinitionPrice` deliberately lives in `ServiceRequestEditor.tsx`,
 // not here: `@/Utils/decimal` reads `care.config.ts`'s `import.meta.env`,
