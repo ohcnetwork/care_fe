@@ -23,6 +23,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import GovtOrganizationPicker from "@/components/Organization/GovtOrganizationPicker";
+
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { GENDERS, GENDER_TYPES } from "@/common/constants";
@@ -32,7 +34,6 @@ import { usePubSub } from "@/Utils/pubsubContext";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
-import GovtOrganizationPicker from "@/components/Organization/GovtOrganizationPicker";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import { Organization } from "@/types/organization/organization";
@@ -446,8 +447,6 @@ export default function PublicPatientRegistration(
                         value={geoOrganization}
                         onChange={(organization) => {
                           setGeoOrganization(organization);
-                          // Only commit the id once the cascade is deep enough,
-                          // so a half-finished selection fails validation.
                           field.onChange(
                             organization &&
                               isGeoOrganizationComplete(organization)
