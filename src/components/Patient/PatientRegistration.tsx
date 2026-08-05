@@ -1182,7 +1182,9 @@ const getEditableIdentifiers = (
   facility: FacilityRead,
 ) => {
   return identifiers.filter((identifier) => {
-    if (!identifier.value) {
+    // Keep empty strings so existing identifier values can be cleared,
+    // but skip identifiers that were never set (undefined/null).
+    if (identifier.value == null) {
       return false;
     }
     const config = facility.patient_instance_identifier_configs.find(
