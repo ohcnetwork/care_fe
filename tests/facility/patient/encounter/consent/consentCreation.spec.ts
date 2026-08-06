@@ -29,7 +29,7 @@ async function goToConsentsTab(page: Page) {
 /** Open the "Add Consent" sheet */
 async function openAddConsentSheet(page: Page) {
   await page.getByRole("button", { name: /add.*consent/i }).click();
-  await expect(page.getByText("Add Consent")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Add Consent" })).toBeVisible();
 }
 
 /** Click Save button in the consent form sheet */
