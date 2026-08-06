@@ -390,11 +390,12 @@ export default function TagConfigForm({
               <FormControl>
                 <input type="hidden" {...field} value={field.value || ""} />
               </FormControl>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-2 min-w-0">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
+                  className="w-full"
                   onClick={() => {
                     const others = TAG_COLORS.filter((c) => c !== field.value);
                     field.onChange(
@@ -407,14 +408,14 @@ export default function TagConfigForm({
                   {field.value ? t("shuffle_color") : t("assign_color")}
                 </Button>
                 {field.value && (
-                  <>
+                  <div className="flex items-center gap-2 min-w-0">
                     <Badge
                       style={{
                         color: field.value,
                         backgroundColor: field.value + "18",
                         borderColor: field.value + "40",
                       }}
-                      className="capitalize"
+                      className="capitalize min-w-0 whitespace-normal break-words"
                     >
                       {form.watch("display") || t("preview")}
                     </Badge>
@@ -422,13 +423,13 @@ export default function TagConfigForm({
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="size-7 text-muted-foreground"
+                      className="size-7 shrink-0 text-muted-foreground"
                       onClick={() => field.onChange("")}
                       disabled={isLoading}
                     >
                       <CareIcon icon="l-times" className="size-4" />
                     </Button>
-                  </>
+                  </div>
                 )}
               </div>
               <FormMessage />
