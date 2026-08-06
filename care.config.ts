@@ -260,7 +260,7 @@ const careConfig = {
    */
   patientTokenFreshnessMinutes: env.REACT_PATIENT_TOKEN_FRESHNESS_MINUTES
     ? parseInt(env.REACT_PATIENT_TOKEN_FRESHNESS_MINUTES, 10)
-    : 45,
+    : 15,
 
   /**
    * Health helpline shown to patients who cannot sign in. Deployment specific,
