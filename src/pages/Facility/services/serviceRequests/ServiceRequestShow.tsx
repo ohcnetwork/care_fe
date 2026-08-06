@@ -650,7 +650,7 @@ export default function ServiceRequestShow({
                 </SheetHeader>
                 <CompletionNoteContent
                   facilityId={facilityId}
-                  setIsCompleteDialogOpen={setIsCompleteDialogOpen}
+                  onSuccess={() => setIsCompleteDialogOpen(false)}
                   onCancel={() => setIsCompleteDialogOpen(false)}
                   serviceRequest={request}
                 />
@@ -670,7 +670,7 @@ export default function ServiceRequestShow({
                 </DialogHeader>
                 <CompletionNoteContent
                   facilityId={facilityId}
-                  setIsCompleteDialogOpen={setIsCompleteDialogOpen}
+                  onSuccess={() => setIsCompleteDialogOpen(false)}
                   onCancel={() => setIsCompleteDialogOpen(false)}
                   serviceRequest={request}
                 />
@@ -686,14 +686,15 @@ export default function ServiceRequestShow({
 interface CompletionNoteContentProps {
   facilityId: string;
   onCancel: () => void;
-  setIsCompleteDialogOpen: (open: boolean) => void;
+
+  onSuccess: () => void;
   serviceRequest: ServiceRequestReadSpec;
 }
 
 const CompletionNoteContent = ({
   facilityId,
   onCancel,
-  setIsCompleteDialogOpen,
+  onSuccess,
   serviceRequest,
 }: CompletionNoteContentProps) => {
   const { t } = useTranslation();
@@ -709,7 +710,7 @@ const CompletionNoteContent = ({
     }),
     onSuccess: () => {
       toast.success(t("service_request_completed"));
-      setIsCompleteDialogOpen(false);
+      onSuccess();
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequest.id],
       });
