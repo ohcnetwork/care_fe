@@ -34,15 +34,19 @@ self.addEventListener("message", (event) => {
 self.addEventListener("push", (event) => {
   if (!event.data) return;
 
+  const fallbackTitle = import.meta.env.REACT_APP_TITLE || "CARE";
+  const fallbackData = { title: fallbackTitle, body: event.data.text() };
   let data: Record<string, unknown>;
   try {
-    data = JSON.parse(event.data.text());
+    const parsed: unknown = JSON.parse(event.data.text());
+    // Reject non-object JSON (null, arrays, primitives) before any property access below.
+    data =
+      parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : fallbackData;
   } catch {
     // Malformed payload: still surface something rather than dropping the push silently.
-    data = {
-      title: "Care - Open Health Care Network",
-      body: event.data.text(),
-    };
+    data = fallbackData;
   }
 
   if (["PUSH_MESSAGE", "MESSAGE"].includes(data?.type as string)) {
@@ -54,7 +58,7 @@ self.addEventListener("push", (event) => {
         }),
     );
   } else {
-    const title = (data.title as string) || "Care - Open Health Care Network";
+    const title = (data.title as string) || fallbackTitle;
     const body = (data.body as string) || (data.message as string) || "";
     event.waitUntil(
       self.registration.showNotification(title, {
@@ -85,7 +89,10 @@ self.addEventListener("notificationclick", (e) => {
           try {
             return new URL(client.url).origin === self.location.origin;
           } catch (err) {
-            console.warn("Failed to parse client URL", client.url, err);
+            console.warn(
+              "Failed to parse client URL for same-origin check",
+              err,
+            );
             return false;
           }
         });
@@ -113,8 +120,9 @@ self.addEventListener("notificationclick", (e) => {
         // Stash the payload in Cache Storage and pass only an opaque id via
         // the hash, so PHI never lands in the URL or browser history.
         let targetUrl = fallbackUrl;
+        let clickId: string | null = null;
         try {
-          const clickId = crypto.randomUUID();
+          clickId = crypto.randomUUID();
           const cache = await caches.open(NOTIFICATION_CLICK_CACHE);
           await cache.put(
             notificationClickCacheKey(clickId),
@@ -123,12 +131,19 @@ self.addEventListener("notificationclick", (e) => {
           targetUrl = `${fallbackUrl}#notification_click=${clickId}`;
         } catch (err) {
           console.warn("Failed to stash notification click data", err);
+          clickId = null;
         }
 
         // The notifications plugin reads the payload back once it loads in
         // this window, so there's no separate branch to recover into here.
         const windowClient = await self.clients.openWindow(targetUrl);
-        await windowClient?.focus();
+        if (windowClient) {
+          await windowClient.focus();
+        } else if (clickId) {
+          // No window will ever consume this entry: don't leave the payload cached.
+          const cache = await caches.open(NOTIFICATION_CLICK_CACHE);
+          await cache.delete(notificationClickCacheKey(clickId));
+        }
       })
       .catch((err) => {
         console.warn("Failed to handle notification click", err);
