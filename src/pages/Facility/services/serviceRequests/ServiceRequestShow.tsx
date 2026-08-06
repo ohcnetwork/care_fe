@@ -650,8 +650,7 @@ export default function ServiceRequestShow({
                 </SheetHeader>
                 <CompletionNoteContent
                   facilityId={facilityId}
-                  onSuccess={() => setIsCompleteDialogOpen(false)}
-                  onCancel={() => setIsCompleteDialogOpen(false)}
+                  setIsCompleteDialogOpen={setIsCompleteDialogOpen}
                   serviceRequest={request}
                 />
               </SheetContent>
@@ -670,8 +669,7 @@ export default function ServiceRequestShow({
                 </DialogHeader>
                 <CompletionNoteContent
                   facilityId={facilityId}
-                  onSuccess={() => setIsCompleteDialogOpen(false)}
-                  onCancel={() => setIsCompleteDialogOpen(false)}
+                  setIsCompleteDialogOpen={setIsCompleteDialogOpen}
                   serviceRequest={request}
                 />
               </DialogContent>
@@ -685,16 +683,13 @@ export default function ServiceRequestShow({
 
 interface CompletionNoteContentProps {
   facilityId: string;
-  onCancel: () => void;
-
-  onSuccess: () => void;
   serviceRequest: ServiceRequestReadSpec;
+  setIsCompleteDialogOpen: (open: boolean) => void;
 }
 
 const CompletionNoteContent = ({
   facilityId,
-  onCancel,
-  onSuccess,
+  setIsCompleteDialogOpen,
   serviceRequest,
 }: CompletionNoteContentProps) => {
   const { t } = useTranslation();
@@ -710,7 +705,7 @@ const CompletionNoteContent = ({
     }),
     onSuccess: () => {
       toast.success(t("service_request_completed"));
-      onSuccess();
+      setIsCompleteDialogOpen(false);
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequest.id],
       });
@@ -748,7 +743,7 @@ const CompletionNoteContent = ({
         </Button>
         <Button
           variant="outline"
-          onClick={onCancel}
+          onClick={() => setIsCompleteDialogOpen(false)}
           disabled={isCompletingServiceRequest}
         >
           {t("cancel")}
