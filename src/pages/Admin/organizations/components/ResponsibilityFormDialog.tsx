@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
-import { ReactNode, useEffect, useId, useState } from "react";
+import { ReactNode, useEffect, useId, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -62,13 +62,17 @@ export default function ResponsibilityFormDialog({ org, trigger }: Props) {
   const [open, setOpen] = useState(false);
   const formId = useId();
 
-  const formSchema = z.object({
-    name: z
-      .string()
-      .trim()
-      .min(1, { message: t("field_required") }),
-    description: z.string().optional(),
-  });
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        name: z
+          .string()
+          .trim()
+          .min(1, { message: t("field_required") }),
+        description: z.string().optional(),
+      }),
+    [t],
+  );
 
   const form = useForm({
     resolver: zodResolver(formSchema),
