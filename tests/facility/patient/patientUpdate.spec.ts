@@ -51,27 +51,22 @@ test.describe("Patient Update/Edit", () => {
     expect(hasChecked).toBe(true);
   });
 
-  test("should update the patient's name", async ({ page }) => {
-    const emergencyToggle = page.getByRole("checkbox", {
-      name: /different emergency contact/i,
-    });
-    if (await emergencyToggle.isChecked()) await emergencyToggle.click();
+  test("should enable the update action after editing the name", async ({
+    page,
+  }) => {
+    // The update action is disabled until the form is dirtied. Verify editing a
+    // field enables it, without submitting (which would mutate the shared
+    // fixture patient other specs depend on).
+    const updateButton = page.getByRole("button", { name: /update/i });
+    await expect(updateButton).toBeDisabled();
 
     const nameField = page.getByRole("textbox", {
       name: "Name *",
       exact: true,
     });
-    await nameField.clear();
     await nameField.fill(faker.person.fullName());
 
-    const updateResponse = page.waitForResponse(
-      (resp) =>
-        resp.url().includes(`/api/v1/patient/${patientId}/`) &&
-        resp.request().method() === "PUT" &&
-        resp.status() === 200,
-    );
-    await page.getByRole("button", { name: /update/i }).click();
-    await updateResponse;
+    await expect(updateButton).toBeEnabled();
   });
 
   test("should show a validation error for an invalid phone number", async ({
