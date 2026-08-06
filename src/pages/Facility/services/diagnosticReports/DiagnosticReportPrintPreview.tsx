@@ -11,10 +11,10 @@ import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Loader } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Loading from "@/components/Common/Loading";
 import "@/lib/pdfWorker";
 import { Document, Page } from "react-pdf";
 
@@ -96,7 +96,7 @@ export const DiagnosticReportPrintPreview = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <Loader className="h-8 w-8 animate-spin" />
+        <Loading />
       </div>
     );
   }
