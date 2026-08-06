@@ -56,6 +56,10 @@ const config = [
       "**/*.css",
       "**/*.csv",
       "**/Dockerfile",
+      // Auto-generated AI-tool hook/plugin configs, not part of the app's tsconfig
+      ".opencode/**",
+      ".codex/**",
+      ".cursor/**",
     ],
   },
   eslint.configs.recommended,
