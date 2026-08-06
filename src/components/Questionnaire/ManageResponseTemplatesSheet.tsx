@@ -23,6 +23,7 @@ import * as z from "zod";
 
 import { cn } from "@/lib/utils";
 
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import {
   formatDosage,
   formatDuration,
@@ -203,15 +204,16 @@ function MedicationsPreview({
             );
           }
 
-          const instruction = med.dosage_instruction?.[0];
-
-          const dosageInfo = [
-            formatDosage(instruction),
-            formatFrequency(instruction),
-            formatDuration(instruction),
-          ]
-            .filter(Boolean)
-            .join(" • ");
+          const instructions = med.dosage_instruction ?? [];
+          const dosageLines = instructions
+            .map((di) => ({
+              di,
+              dosage: formatDosage(di),
+              instructionText: [formatFrequency(di), formatDuration(di)]
+                .filter(Boolean)
+                .join(" • "),
+            }))
+            .filter((line) => line.dosage || line.instructionText);
 
           return (
             <Button
@@ -235,9 +237,17 @@ function MedicationsPreview({
                 <div className="font-medium text-gray-900 text-xs leading-tight">
                   <MedicationName medication={med} />
                 </div>
-                {dosageInfo && (
+                {dosageLines.length > 0 && (
                   <div className="text-xs text-gray-500 mt-0.5 leading-tight">
-                    {dosageInfo}
+                    {dosageLines.map((line, i) => (
+                      <div key={i}>
+                        {line.dosage && (
+                          <FormattedDosage instruction={line.di} fallback="" />
+                        )}
+                        {line.dosage && line.instructionText && " • "}
+                        {line.instructionText}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

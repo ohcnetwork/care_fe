@@ -18,7 +18,9 @@ import Loading from "@/components/Common/Loading";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { EmptyState } from "@/components/ui/empty-state";
 
-import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
+import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
+import { formatFrequency } from "@/components/Medicine/utils";
 
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
@@ -158,7 +160,7 @@ export function DispenseHistory({
           </TableHeader>
           <TableBody className="bg-white">
             {medications.map((medication: MedicationDispenseRead) => {
-              const instruction = medication.dosage_instruction?.[0];
+              const instructions = medication.dosage_instruction ?? [];
 
               return (
                 <TableRow
@@ -169,10 +171,18 @@ export function DispenseHistory({
                     {medication.item.product.product_knowledge.name}
                   </TableCell>
                   <TableCell className="text-gray-950">
-                    {formatDosage(instruction) || "-"}
+                    <DosageInstructionList
+                      instructions={instructions}
+                      renderItem={(di) => (
+                        <FormattedDosage instruction={di} fallback="-" />
+                      )}
+                    />
                   </TableCell>
                   <TableCell className="text-gray-950">
-                    {formatFrequency(instruction) || "-"}
+                    <DosageInstructionList
+                      instructions={instructions}
+                      renderItem={(di) => formatFrequency(di) || "-"}
+                    />
                   </TableCell>
                   <TableCell className="text-gray-950 font-medium">
                     {medication.quantity ? round(medication.quantity) : "-"}

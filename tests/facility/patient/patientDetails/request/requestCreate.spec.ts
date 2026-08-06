@@ -27,7 +27,7 @@ test.describe("Resource Request Creation", () => {
 
     await test.step("Navigate to patient details", async () => {
       await page.getByText("View Encounter").first().click();
-      await page.getByRole("button", { name: /.*Y,.*/ }).click();
+      await page.getByRole("button", { name: /\d+(?:y|m|w|d)\b/ }).click();
       const viewProfileLink = page.getByRole("link", { name: "View Profile" });
       await viewProfileLink.waitFor({ state: "visible" });
       await viewProfileLink.click();
@@ -47,6 +47,7 @@ test.describe("Resource Request Creation", () => {
         .getByRole("combobox")
         .filter({ hasText: "Start typing to search..." })
         .click();
+      await page.getByRole("option").first().waitFor({ state: "visible" });
       await page.getByRole("option").first().click();
       await page
         .getByRole("textbox", { name: "Name of Contact Person at" })

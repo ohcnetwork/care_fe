@@ -3,13 +3,7 @@ import { t } from "i18next";
 import { RoleRead } from "@/types/emr/role/role";
 import { UserReadMinimal } from "@/types/user/user";
 
-type org_type =
-  | "team"
-  | "govt"
-  | "role"
-  | "product_supplier"
-  | "other"
-  | "product_supplier";
+type org_type = "team" | "govt" | "role" | "product_supplier" | "other";
 
 export enum OrgType {
   TEAM = "team",
@@ -53,6 +47,7 @@ export interface Organization {
   updated_at: string;
   metadata: Metadata | null;
   permissions: string[];
+  managing_organizations?: OrganizationParent[];
 }
 
 export interface OrganizationCreate {

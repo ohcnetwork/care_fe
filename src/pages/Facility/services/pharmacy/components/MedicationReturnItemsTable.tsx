@@ -154,7 +154,7 @@ export function MedicationReturnItemsTable({
               </TableCell>
             )}
             <TableCell>
-              <div className="font-medium">
+              <div className="font-medium text-wrap wrap-break-word">
                 {delivery.supplied_item?.product_knowledge?.name ||
                   delivery.supplied_inventory_item?.product?.product_knowledge
                     ?.name}

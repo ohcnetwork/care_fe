@@ -78,16 +78,16 @@ export default function TagConfigForm({
 
   const tagConfigSchema = z.object({
     display: z.string().trim().min(1, t("field_required")),
-    category: z.nativeEnum(TagCategory, {
-      required_error: t("field_required"),
+    category: z.enum(TagCategory, {
+      error: t("field_required"),
     }),
     description: z.string().trim().optional(),
     priority: z.number().min(0, t("priority_non_negative")),
-    status: z.nativeEnum(TagStatus, {
-      required_error: t("field_required"),
+    status: z.enum(TagStatus, {
+      error: t("field_required"),
     }),
-    resource: z.nativeEnum(TagResource, {
-      required_error: t("field_required"),
+    resource: z.enum(TagResource, {
+      error: t("field_required"),
     }),
     facility_organization: z.string().optional(),
     organization: z.string().optional(),

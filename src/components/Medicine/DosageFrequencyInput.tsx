@@ -8,10 +8,12 @@ import Autocomplete from "@/components/ui/autocomplete";
 import {
   fhirDosageToFrequencyValue,
   generateManSuggestions,
+  getTimingBounds,
   MAN_FREQUENCY_PRESETS,
   manToFhirTiming,
   MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequestDosageInstruction,
+  timingBoundsToRepeat,
 } from "@/types/emr/medicationRequest/medicationRequest";
 
 interface DosageFrequencyInputProps {
@@ -154,10 +156,28 @@ export function DosageFrequencyInput({
           text: "SOS",
         });
       } else {
-        // Standard FHIR timing (from M-A-N preset or direct FHIR code)
+        // Standard FHIR timing (from M-A-N preset or direct FHIR code).
+        // Preserve any scheduling bounds already chosen in the Duration field
+        // (duration / range / period) — only fall back to the preset's default
+        // bounds_duration when no bounds were set yet.
         const preset = MAN_FREQUENCY_PRESETS.find((p) => p.man === value);
+        // Only preserve a *meaningful* bound — getTimingBounds ignores the
+        // empty/"0" sentinel, so an unset duration falls back to the preset's
+        // default instead of clobbering it with a cleared value.
+        const existingBounds = getTimingBounds(
+          dosageInstruction.timing?.repeat,
+        );
+        const timing = existingBounds
+          ? {
+              ...fhirMapping.timing,
+              repeat: {
+                ...fhirMapping.timing.repeat,
+                ...timingBoundsToRepeat(existingBounds),
+              },
+            }
+          : fhirMapping.timing;
         onDosageInstructionChange({
-          timing: fhirMapping.timing,
+          timing,
           as_needed_boolean: false,
           as_needed_for: undefined,
           text: preset ? preset.man : undefined,

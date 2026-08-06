@@ -7,11 +7,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   EncounterRead,
   EncounterStatus,
-  inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
@@ -20,19 +18,32 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 
+import { PatientIDScanDialog } from "@/components/Scan/PatientIDScanDialog";
+import {
+  encounterRequiresDischarge,
+  useEncounterProgressController,
+} from "@/pages/Encounters/utils/useEncounterProgressController";
+import patientApi from "@/types/emr/patient/patientApi";
+import scheduleApi from "@/types/scheduling/scheduleApi";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import {
   CalendarCheck,
   CalendarRange,
-  ChevronDown,
+  CheckCircle,
   ExternalLinkIcon,
   ListOrdered,
+  ScanLine,
 } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 /**
  * Get the appointments page link for an appointment based on resource type.
@@ -56,25 +67,89 @@ const getQueueLink = (appointment: AppointmentRead): string => {
   }
 };
 
-const getOptions = (encounter: EncounterRead) => {
-  const options: ("close_appointment" | "mark_as_complete")[] = [];
+const PatientScanButton = ({
+  facilityId,
+  appointment,
+}: {
+  facilityId: string;
+  appointment: AppointmentRead;
+}) => {
+  const { t } = useTranslation();
+  const [scanDialogOpen, setScanDialogOpen] = useState(false);
 
-  if (
-    encounter.status === EncounterStatus.PLANNED ||
-    encounter.status === EncounterStatus.ON_HOLD
-  ) {
-    return ["start_encounter"];
-  }
+  const { mutate: checkPatientAppointments, isPending } = useMutation({
+    mutationFn: async (patientId: string) => {
+      const today = dateQueryString(new Date());
+      const controller = new AbortController();
 
-  if (encounter.appointment?.status !== AppointmentStatus.FULFILLED) {
-    options.push("close_appointment");
-  }
+      const [appointments, patient] = await Promise.all([
+        query(scheduleApi.appointments.list, {
+          pathParams: { facilityId },
+          queryParams: {
+            status: [
+              AppointmentStatus.BOOKED,
+              AppointmentStatus.CHECKED_IN,
+              AppointmentStatus.IN_CONSULTATION,
+            ].join(","),
+            resource_type: appointment.resource_type,
+            resource_ids: appointment.resource.id,
+            date_after: today,
+            date_before: today,
+            patient: patientId,
+          },
+        })({ signal: controller.signal }),
+        query(patientApi.get, {
+          silent: true,
+          pathParams: { id: patientId },
+        })({ signal: controller.signal }),
+      ]);
 
-  if (!inactiveEncounterStatus.includes(encounter.status)) {
-    options.push("mark_as_complete");
-  }
+      return { appointments, patient, patientId };
+    },
+    onSuccess: ({ appointments, patient, patientId }) => {
+      if (appointments.results?.length) {
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/appointments/${appointments.results[0].id}`,
+        );
+      } else {
+        toast.info(t("no_appointments_found_for_today"));
+        navigate(
+          `/facility/${facilityId}/patients/home?${new URLSearchParams({
+            phone_number: patient.phone_number,
+            year_of_birth: patient.year_of_birth?.toString() ?? "",
+            partial_id: patientId.slice(0, 5),
+          }).toString()}`,
+        );
+      }
+    },
+    onError: () => {
+      toast.error(t("failed_to_check_appointments"));
+    },
+  });
 
-  return options;
+  const handleScanSuccess = (patientId: string) => {
+    checkPatientAppointments(patientId);
+  };
+
+  return (
+    <div className="flex-1 flex items-center justify-center">
+      <Button
+        variant="ghost"
+        onClick={() => setScanDialogOpen(true)}
+        disabled={isPending}
+        aria-label={t("scan_qr")}
+        className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
+      >
+        <ScanLine className="size-4 text-black" />
+        <span className="text-sm text-black">{t("scan")}</span>
+      </Button>
+      <PatientIDScanDialog
+        open={scanDialogOpen}
+        onOpenChange={setScanDialogOpen}
+        onScanSuccess={handleScanSuccess}
+      />
+    </div>
+  );
 };
 
 export const AppointmentEncounterHeader = ({
@@ -87,14 +162,20 @@ export const AppointmentEncounterHeader = ({
   canWritePrimaryEncounter: boolean;
 }) => {
   return (
-    <div className="flex gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full items-center justify-center shadow-sm">
-      <TokenActions
-        patientId={encounter.patient.id}
-        facilityId={encounter.facility.id}
-        appointment={appointment}
-        resourceType={appointment.resource_type}
-        resourceId={appointment.resource.id}
-      />
+    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full sm:items-center items-stretch justify-center shadow-sm">
+      <div className="flex divide-x-2 items-stretch justify-evenly overflow-auto">
+        <PatientScanButton
+          facilityId={encounter.facility.id}
+          appointment={appointment}
+        />
+        <TokenActions
+          patientId={encounter.patient.id}
+          facilityId={encounter.facility.id}
+          appointment={appointment}
+          resourceType={appointment.resource_type}
+          resourceId={appointment.resource.id}
+        />
+      </div>
       {canWritePrimaryEncounter && (
         <div className="flex sm:flex-row flex-col gap-2 sm:items-center items-start">
           <AppointmentEncounterHeaderActions
@@ -116,8 +197,12 @@ const AppointmentEncounterHeaderActions = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const requiresDischarge = encounterRequiresDischarge(encounter);
 
-  const { actions, isEndEncounterPending } = useEncounter();
+  const { completeEverything, completeAppointment, isPending } =
+    useEncounterProgressController({
+      encounter,
+    });
 
   const { mutate: startEncounter } = useMutation({
     mutationFn: mutate(encounterApi.update, {
@@ -137,38 +222,26 @@ const AppointmentEncounterHeaderActions = ({
     });
   };
 
-  const options = getOptions(encounter);
-
-  if (options.length === 0) {
-    return null;
-  }
-
-  if (options.length === 1) {
-    const [option] = options;
+  if (
+    encounter.status === EncounterStatus.PLANNED ||
+    encounter.status === EncounterStatus.ON_HOLD
+  ) {
     return (
       <div
         className={cn(
-          "w-full sm:w-auto space-x-2",
-          appointment.token && "border-l border-gray-300 pl-2",
+          "w-full sm:w-auto space-x-2 text-center",
+          appointment.token && "sm:border-l-2 sm:pl-2",
         )}
       >
         <span className="text-sm text-black">
-          {option === "mark_as_complete"
-            ? t("do_you_want_to_complete_this_encounter")
-            : t("do_you_want_to_start_this_encounter")}
+          {t("do_you_want_to_start_this_encounter")}
         </span>
         <Button
           variant="outline"
           className="w-full sm:w-auto text-sm font-semibold text-black"
-          onClick={
-            option === "mark_as_complete"
-              ? actions.markAsCompleted
-              : handleStartEncounter
-          }
+          onClick={handleStartEncounter}
         >
-          {option === "mark_as_complete"
-            ? t("complete_encounter")
-            : t("start_encounter")}
+          {t("start_encounter")}
         </Button>
       </div>
     );
@@ -177,51 +250,71 @@ const AppointmentEncounterHeaderActions = ({
   return (
     <div
       className={cn(
-        "w-full sm:w-auto space-x-2",
-        appointment.token && "border-l border-gray-300 pl-2",
+        "w-full sm:w-auto space-x-2 flex items-center",
+        appointment.token && "sm:border-l-2 sm:pl-2",
       )}
     >
       <span className="text-sm text-black">
-        {t("how_do_you_to_finish_this_visit")}
+        {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
+          <span className="text-sm text-black">
+            {t("how_do_you_to_finish_this_visit")}
+          </span>
+        )}
       </span>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full sm:w-auto"
-            disabled={isEndEncounterPending}
-          >
-            <span className="text-sm font-semibold text-black">
-              {t("end_actions")}
-            </span>
-            <ChevronDown className="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-[59px]" align="start">
-          {options.map((option) => (
+      <Button
+        variant="outline"
+        className="w-full sm:w-auto"
+        disabled={isPending}
+        onClick={completeEverything}
+      >
+        <CheckCircle />
+        {requiresDischarge ? t("mark_for_discharge") : t("complete")}
+      </Button>
+      {encounter.status !== EncounterStatus.COMPLETED && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost">
+              <DotsVerticalIcon className="text-gray-700" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="min-w-[59px]" align="end">
+            {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
+              <DropdownMenuItem
+                className="p-2.5"
+                onClick={() => completeAppointment()}
+                disabled={isPending}
+              >
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium text-black">
+                    {t("close_appointment")}
+                  </span>
+                  <p className="text-xs text-gray-700">
+                    {t("close_appointment_description")}
+                  </p>
+                </div>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
-              key={option}
               className="p-2.5"
-              onClick={() => {
-                if (option === "mark_as_complete") {
-                  actions.markAsCompleted();
-                } else if (option === "close_appointment") {
-                  actions.endEncounter(encounter, false);
-                }
-              }}
+              onClick={() => completeEverything()}
+              disabled={isPending}
             >
               <div className="flex flex-col items-start">
                 <span className="text-sm font-medium text-black">
-                  {t(option)}
+                  {requiresDischarge
+                    ? t("mark_for_discharge")
+                    : t("mark_as_complete")}
                 </span>
                 <p className="text-xs text-gray-700">
-                  {t(`${option}_description`)}
+                  {requiresDischarge
+                    ? t("mark_for_discharge_description")
+                    : t("mark_as_complete_description")}
                 </p>
               </div>
             </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 };
@@ -248,66 +341,75 @@ const TokenActions = ({
   const { token } = appointment;
 
   return (
-    <div className="flex divide-x gap-2">
+    <>
       {appointment.id && (
-        <div className="flex items-center justify-center border-gray-300">
-          <Button variant="ghost" className="rounded-r-none pl-2 " asChild>
+        <div className="flex-1 flex items-center justify-center">
+          <Button
+            variant="ghost"
+            asChild
+            className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
+          >
             <Link href={getQueueLink(appointment)}>
-              <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
-                <div className="flex gap-2 items-center underline">
-                  <CalendarRange className="size-4 text-black" />
-                  {t("list")}
-                  <ExternalLinkIcon className="size-4 text-black" />
-                </div>
-              </div>
+              <CalendarRange className="size-4 text-black" />
+              <span className="text-sm text-black underline">{t("list")}</span>
+              <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
             </Link>
           </Button>
         </div>
       )}
       {appointment.id && (
-        <div className="flex items-center justify-center border-gray-300">
-          <Button variant="ghost" className="rounded-r-none" asChild>
+        <div className="flex-1 flex items-center justify-center">
+          <Button
+            variant="ghost"
+            asChild
+            className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
+          >
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
             >
-              <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
+              <>
                 {token ? (
                   <>
-                    <span className="text-sm text-gray-600">{t("token")}:</span>
+                    <span className="text-xs sm:text-sm text-gray-600">
+                      {t("token")}:
+                    </span>
                     <div className="flex whitespace-nowrap gap-1 items-center">
-                      <span className="text-sm text-black font-semibold underline ">
+                      <span className="text-sm text-black font-semibold underline">
                         {renderTokenNumber(token)}
                       </span>
-                      <ExternalLinkIcon className="size-4 text-black" />
+                      <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
                     </div>
                   </>
                 ) : (
-                  <div className="flex gap-2 items-center underline">
+                  <>
                     <CalendarCheck className="size-4 text-black" />
-                    {t("view")}
-                    <ExternalLinkIcon className="size-4 text-black" />
-                  </div>
+                    <span className="text-black underline">{t("view")}</span>
+                    <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
+                  </>
                 )}
-              </div>
+              </>
             </Link>
           </Button>
         </div>
       )}
       {token && (
-        <div className="flex items-center justify-center">
-          <Button variant="link" className="underline ">
+        <div className="flex-1 flex items-center justify-center">
+          <Button
+            variant="ghost"
+            className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
+            asChild
+          >
             <Link
               basePath="/"
-              className="flex items-center gap-1"
               href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
             >
               <ListOrdered className="size-4 text-black" />
-              {t("queue")}
-              <ExternalLinkIcon className="size-4 text-black" />
+              <span className="text-sm text-black underline">{t("queue")}</span>
+              <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
             </Link>
           </Button>
         </div>
       )}
-    </div>
+    </>
   );
 };

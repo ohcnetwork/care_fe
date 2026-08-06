@@ -17,12 +17,11 @@ interface LocationAssignmentViewProps {
   allLocations: LocationRead[];
   allBeds: LocationRead[];
   selectedLocation: LocationRead | null;
-  selectedLinkedBed: LocationAssociationRead | null;
   locationHistory: LocationRead[];
   selectedBed: LocationRead | null;
   currentLocation?: LocationAssociationRead;
   plannedLocations: LocationAssociationRead[];
-  activeLocations: LocationAssociationRead[];
+  reservedLocations: LocationAssociationRead[];
   // Flags
   isPending: boolean;
   assignmentHandlers: AssignmentHandlers;
@@ -33,12 +32,11 @@ export function LocationAssignmentView({
   allLocations,
   allBeds,
   selectedLocation,
-  selectedLinkedBed,
   locationHistory,
   selectedBed,
   currentLocation,
   plannedLocations,
-  activeLocations,
+  reservedLocations,
   assignmentHandlers,
   navigationHandlers,
 }: LocationAssignmentViewProps) {
@@ -48,20 +46,20 @@ export function LocationAssignmentView({
     isPending,
     editingState,
     setEditingState,
-    keepBedActive,
-    onKeepBedActiveChange,
     onMove,
+    onAddBed,
     onComplete,
     onUpdateTime,
-    onCancel,
+    onCancelBed,
     onCancelEdit,
     onConfirmEdit,
-    onAssignLinkedBed,
+    onAssignNowPlanned,
+    onAssignNowReserved,
+    resetScreen,
   } = assignmentHandlers;
   const {
     onLocationClick,
     onBedSelect,
-    onLinkedBedSelect,
     onCheckBedStatus,
     onSearchChange,
     onSearch,
@@ -69,8 +67,8 @@ export function LocationAssignmentView({
     onLoadMore,
     onClearSelection,
     onGoBack,
-    onAssignNowPlanned,
     onScheduleForLater,
+    onAddReservedBed,
     onAssignNow,
     showAvailableOnly,
     searchTerm,
@@ -79,30 +77,40 @@ export function LocationAssignmentView({
     hasMore,
   } = navigationHandlers;
 
-  const shouldShowNavigation =
-    sheetState.action === "move" ||
-    (!currentLocation && !plannedLocations.length);
+  const hasLocations =
+    !!currentLocation ||
+    plannedLocations.length > 0 ||
+    reservedLocations.length > 0;
+  const isOverview = sheetState.screen === "overview";
+  const isMove = sheetState.action === "move";
+  const isAddingAnotherBed = !isMove && !!currentLocation && !isOverview;
 
-  const isLinkedBed = selectedLinkedBed !== null;
+  const showAddAnotherBedForReservedPlanned = isOverview && hasLocations;
 
-  if (!shouldShowNavigation) {
+  const handlers = {
+    editingState,
+    setEditingState,
+    isPending,
+    onMove,
+    onComplete,
+    onUpdateTime,
+    onCancelBed,
+    onCancelEdit,
+    onConfirmEdit,
+    onAssignNowPlanned,
+    onAssignNowReserved,
+    onAddBed: showAddAnotherBedForReservedPlanned ? onAddBed : undefined,
+  };
+
+  if (isOverview && hasLocations) {
     return (
       <div className="flex flex-col gap-2">
         <CurrentLocationsList
           currentLocation={currentLocation}
           plannedLocations={plannedLocations}
-          editingState={editingState}
-          setEditingState={setEditingState}
-          isPending={isPending}
+          handlers={handlers}
           showMoveButton={true}
-          onMove={onMove}
-          onComplete={onComplete}
-          onUpdateTime={onUpdateTime}
-          onCancel={onCancel}
-          onAssignNow={onAssignNowPlanned}
-          onCancelEdit={onCancelEdit}
-          onConfirmEdit={onConfirmEdit}
-          linkedLocations={activeLocations}
+          reservedLocations={reservedLocations}
         />
       </div>
     );
@@ -112,20 +120,8 @@ export function LocationAssignmentView({
     <div className="space-y-2">
       <CurrentLocationsList
         currentLocation={currentLocation}
-        plannedLocations={plannedLocations}
-        editingState={editingState}
-        setEditingState={setEditingState}
-        isPending={isPending}
+        handlers={handlers}
         showMoveButton={false}
-        keepBedActive={keepBedActive}
-        onKeepBedActiveChange={onKeepBedActiveChange}
-        onMove={onMove}
-        onComplete={onComplete}
-        onUpdateTime={onUpdateTime}
-        onCancel={onCancel}
-        onAssignNow={onAssignNowPlanned}
-        onCancelEdit={onCancelEdit}
-        onConfirmEdit={onConfirmEdit}
       />
 
       <LocationNavigation
@@ -134,14 +130,12 @@ export function LocationAssignmentView({
         selectedLocation={selectedLocation}
         locationHistory={locationHistory}
         selectedBed={selectedBed}
-        selectedLinkedBed={selectedLinkedBed ?? undefined}
         showAvailableOnly={showAvailableOnly}
         searchTerm={searchTerm}
         isLoadingLocations={isLoadingLocations}
         isLoadingBeds={isLoadingBeds}
         hasMore={hasMore}
         onLocationClick={onLocationClick}
-        onLinkedBedSelect={onLinkedBedSelect}
         onBedSelect={onBedSelect}
         onCheckBedStatus={onCheckBedStatus}
         onSearchChange={onSearchChange}
@@ -150,28 +144,41 @@ export function LocationAssignmentView({
         onLoadMore={onLoadMore}
         onClearSelection={onClearSelection}
         onGoBack={onGoBack}
-        linkedLocations={activeLocations}
       />
 
       <div className="mt-8 flex justify-end gap-2">
-        <Button
-          variant="outline"
-          disabled={!selectedBed}
-          onClick={onScheduleForLater}
-        >
-          {t("schedule_for_later")}
-        </Button>
-        <Button
-          variant="primary"
-          disabled={!selectedBed && !selectedLinkedBed}
-          onClick={() => {
-            isLinkedBed
-              ? onAssignLinkedBed?.(selectedLinkedBed)
-              : onAssignNow();
-          }}
-        >
-          {t("assign_bed_now")}
-        </Button>
+        {!isOverview && (
+          <Button variant="outline" onClick={resetScreen}>
+            {t("cancel")}
+          </Button>
+        )}
+        {!isMove && (
+          <>
+            <Button
+              variant="outline"
+              disabled={!selectedBed}
+              onClick={onScheduleForLater}
+            >
+              {t("schedule_for_later")}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!selectedBed}
+              onClick={onAddReservedBed}
+            >
+              {t("add_reserved_bed")}
+            </Button>
+          </>
+        )}
+        {!isAddingAnotherBed && (
+          <Button
+            variant="primary"
+            disabled={!selectedBed}
+            onClick={onAssignNow}
+          >
+            {t("assign_bed_now")}
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Hospital, Printer } from "lucide-react";
+import { ChevronDown, Printer } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -20,6 +20,12 @@ import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
 import PrintTemplateSheet from "@/components/Facility/PrintTemplateSheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -39,16 +45,6 @@ import { FacilityMapsLink } from "./FacilityMapLink";
 
 type Props = {
   facilityId: string;
-};
-
-export const getFacilityFeatureIcon = (featureId: number) => {
-  const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
-  if (!feature?.icon) return null;
-  return typeof feature.icon === "string" ? (
-    <Hospital className="size-4" />
-  ) : (
-    feature.icon
-  );
 };
 
 export const FacilityHome = ({ facilityId }: Props) => {
@@ -224,23 +220,44 @@ export const FacilityHome = ({ facilityId }: Props) => {
             <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
               {canUpdateFacility && (
                 <div className="flex gap-1 max-sm:flex-col mt-10 sm:mt-4">
-                  <PLUGIN_Component
-                    __name="FacilityHomeActions"
-                    facility={facilityData}
-                  />
-                  <PrintTemplateSheet
-                    facility={facilityData}
-                    trigger={
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
                       <Button
-                        className="cursor-pointer font-semibold"
                         variant="outline"
                         size="sm"
+                        className="cursor-pointer font-semibold"
+                        aria-label="More Options"
+                        type="button"
                       >
-                        <Printer className="size-4" />
-                        {t("print_templates")}
+                        {t("configurations")}
+                        <ChevronDown className="size-4" />
                       </Button>
-                    }
-                  />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-full min-w-48"
+                    >
+                      <DropdownMenuGroup className="flex flex-col gap-1">
+                        <PrintTemplateSheet
+                          facility={facilityData}
+                          trigger={
+                            <button
+                              type="button"
+                              className="hover:bg-gray-100 hover:text-gray-900 flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+                            >
+                              <Printer className="size-4 text-gray-500" />
+                              {t("print_templates")}
+                            </button>
+                          }
+                        />
+                        <PLUGIN_Component
+                          __name="FacilityHomeActions"
+                          facility={facilityData}
+                          className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
+                        />
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <EditFacilitySheet
                     facilityId={facilityId}
                     trigger={
@@ -265,7 +282,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="col-span-1 sm:col-span-2 flex flex-col">
                         <span className="font-semibold">{t("address")}</span>
-                        <span className="text-gray-700 whitespace-pre-wrap break-words text-sm">
+                        <span className="text-gray-700 whitespace-pre-wrap wrap-break-word text-sm">
                           {facilityData.address}
                         </span>
                       </div>
@@ -340,7 +357,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
               {facilityData?.description && (
                 <Card>
-                  <CardContent className="mt-4 break-words">
+                  <CardContent className="mt-4 wrap-break-word">
                     <Markdown
                       content={facilityData.description}
                       className="text-sm"

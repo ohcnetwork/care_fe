@@ -48,6 +48,7 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { ExtensionContexts } from "@/Utils/schema/types";
 
 interface SupplyDeliveryTableProps {
   deliveries: SupplyDeliveryRead[];
@@ -93,7 +94,11 @@ export function SupplyDeliveryTable({
 
   // Get field metadata with extension name for reading namespaced values
   const extensionFields = useMemo(
-    () => getExtensionFieldsWithName(allExtensions),
+    () =>
+      getExtensionFieldsWithName(
+        allExtensions,
+        ExtensionContexts.supply_delivery_table,
+      ),
     [allExtensions],
   );
 
@@ -221,10 +226,12 @@ export function SupplyDeliveryTable({
         <TableRow>
           <TableHead>{t("item_price")}</TableHead>
           {informationalCodes.map((code) => (
-            <TableHead key={code.code}>{code.display}</TableHead>
+            <TableHead key={code.code} className="border border-r">
+              {code.display}
+            </TableHead>
           ))}
-          {!internal && <TableHead className="border-r">{t("pr")}</TableHead>}
-          {!internal && <TableHead>{t("tpr")}</TableHead>}
+          {!internal && <TableHead>{t("pr")}</TableHead>}
+          {!internal && <TableHead className="border-r">{t("tpr")}</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody className="text-sm">
@@ -268,7 +275,11 @@ export function SupplyDeliveryTable({
                     </Link>
                   );
                 }
-                return <div className="font-medium">{productName}</div>;
+                return (
+                  <div className="font-medium text-wrap wrap-break-word">
+                    {productName}
+                  </div>
+                );
               })()}
             </TableCell>
             <TableCell>
@@ -383,8 +394,7 @@ export function SupplyDeliveryTable({
             {extensionFields.map((field) => {
               const value = getExtensionValue(
                 delivery.extensions as NamespacedExtensionData,
-                field.extensionName,
-                field.name,
+                field,
               );
               return (
                 <TableCell key={`${field.extensionName}-${field.name}`}>

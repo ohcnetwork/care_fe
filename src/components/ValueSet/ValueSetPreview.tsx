@@ -39,7 +39,7 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
         compose: valueset.compose.include[0]?.system
           ? valueset.compose
           : {
-              include: [{ system: "http://snomed.info/sct" }],
+              include: [{ system: "http://snomed.info/sct", version: null }],
               exclude: [],
             },
       },

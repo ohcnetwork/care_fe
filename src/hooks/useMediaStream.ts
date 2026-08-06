@@ -23,16 +23,22 @@ export const useMediaStream = ({
   const [cameraPermission, setcameraPermission] =
     useState<MediaStreamState>("loading");
 
+  const updateDevices = useCallback(async () => {
+    try {
+      const list = await getCameraDevices();
+      setDevices(list);
+    } catch (err) {
+      console.error("Error enumerating devices:", err);
+    }
+  }, []);
+
   useEffect(() => {
-    navigator.mediaDevices.addEventListener("devicechange", getCameraDevices);
+    navigator.mediaDevices.addEventListener("devicechange", updateDevices);
 
     return () => {
-      navigator.mediaDevices.removeEventListener(
-        "devicechange",
-        getCameraDevices,
-      );
+      navigator.mediaDevices.removeEventListener("devicechange", updateDevices);
     };
-  }, [getCameraDevices]);
+  }, [updateDevices]);
 
   const startStream = useCallback(async () => {
     try {

@@ -46,7 +46,10 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
-import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
+import {
+  getCompletedDeliveryQuantity,
+  getInventoryBasePath,
+} from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import { ProductRead } from "@/types/inventory/product/product";
 import {
@@ -58,7 +61,15 @@ import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SUPPLY_REQUEST_STATUS_COLORS } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
-import { add, isPositive, round, subtract } from "@/Utils/decimal";
+import {
+  abs,
+  add,
+  isNegative,
+  isPositive,
+  max,
+  round,
+  subtract,
+} from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -257,7 +268,7 @@ export function RequestOrderShow({
             delivery.supplied_inventory_item?.product?.product_knowledge?.id ||
               ""
           ]?.quantity || 0,
-          delivery.supplied_item_quantity,
+          getCompletedDeliveryQuantity(delivery),
         ),
         product: delivery.supplied_inventory_item?.product,
       };
@@ -687,13 +698,29 @@ export function RequestOrderShow({
                                         className={cn(
                                           isPositive(
                                             supplyRequest.remaining_quantity,
-                                          )
-                                            ? "text-red-500"
-                                            : "text-green-500",
+                                          ) && "text-red-500",
                                         )}
                                       >
                                         {round(
+                                          max(
+                                            0,
+                                            supplyRequest.remaining_quantity,
+                                          ),
+                                        )}
+                                        {isNegative(
                                           supplyRequest.remaining_quantity,
+                                        ) && (
+                                          <span className="text-sm text-gray-500 ml-1">
+                                            (
+                                            {t("extra_supplied_quantity", {
+                                              quantity: round(
+                                                abs(
+                                                  supplyRequest.remaining_quantity,
+                                                ),
+                                              ),
+                                            })}
+                                            )
+                                          </span>
                                         )}
                                       </TableCell>
                                       <TableCell>

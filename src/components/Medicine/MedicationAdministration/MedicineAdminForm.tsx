@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -21,11 +22,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import {
-  formatDosage,
-  formatDuration,
-  formatFrequency,
-} from "@/components/Medicine/utils";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
+import { getDosageFromInstruction } from "@/components/Medicine/MedicationAdministration/utils";
+import { formatDuration, formatFrequency } from "@/components/Medicine/utils";
 
 import { formatName } from "@/Utils/utils";
 import {
@@ -33,7 +32,14 @@ import {
   MedicationAdministrationRequest,
   MedicationAdministrationStatus,
 } from "@/types/emr/medicationAdministration/medicationAdministration";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  getMedicationActiveWindow,
+  MedicationRequestRead,
+} from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 interface MedicineAdminFormProps {
   medication: MedicationRequestRead;
@@ -43,10 +49,159 @@ interface MedicineAdminFormProps {
   onChange: (request: MedicationAdministrationRequest) => void;
   onMedicationChange?: (medication: MedicationRequestRead) => void;
   formId: string;
+  productType: AdministrableProductType;
   isValid?: (valid: boolean) => void;
   compact?: boolean;
   otherGroupRequests?: MedicationRequestRead[];
 }
+
+interface DosageInstructionSelectorProps {
+  medication: MedicationRequestRead;
+  administrationRequest: MedicationAdministrationRequest;
+  onChange: (request: MedicationAdministrationRequest) => void;
+  formId: string;
+}
+
+function findSelectedDosageIndex(
+  medication: MedicationRequestRead,
+  administrationRequest: MedicationAdministrationRequest,
+): number {
+  const idx = medication.dosage_instruction.findIndex((di) => {
+    const doseValue = di.dose_and_rate?.dose_quantity?.value;
+    const doseUnit = di.dose_and_rate?.dose_quantity?.unit?.code;
+    return (
+      doseValue === administrationRequest.dosage?.dose?.value &&
+      doseUnit === administrationRequest.dosage?.dose?.unit?.code
+    );
+  });
+  return idx >= 0 ? idx : 0;
+}
+
+const DosageInstructionSelector: React.FC<DosageInstructionSelectorProps> = ({
+  medication,
+  administrationRequest,
+  onChange,
+  formId,
+}) => {
+  const { t } = useTranslation();
+  const selectedIndex = findSelectedDosageIndex(
+    medication,
+    administrationRequest,
+  );
+  const hasSingleInstruction = medication.dosage_instruction.length === 1;
+  const allDosagesAreSame = medication.dosage_instruction.every(
+    (di, _, arr) => {
+      const firstDose = arr[0]?.dose_and_rate?.dose_quantity;
+      const currentDose = di.dose_and_rate?.dose_quantity;
+      return (
+        firstDose?.value === currentDose?.value &&
+        firstDose?.unit?.code === currentDose?.unit?.code
+      );
+    },
+  );
+
+  const handleSelectDosage = (idx: number) => {
+    const instruction = medication.dosage_instruction[idx];
+    if (instruction) {
+      onChange({
+        ...administrationRequest,
+        dosage: getDosageFromInstruction(instruction),
+      });
+    }
+  };
+
+  // If there's only one instruction or all dosages are the same, show read-only display)
+  if (hasSingleInstruction || allDosagesAreSame) {
+    return (
+      <div className="space-y-2">
+        {medication.dosage_instruction.map((di, idx) => (
+          <div
+            key={idx}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-gray-50 rounded-lg"
+          >
+            <div>
+              <Label className="text-xs text-gray-500">{t("dosage")}</Label>
+              <p className="font-medium">
+                <FormattedDosage instruction={di} />
+              </p>
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">{t("frequency")}</Label>
+              <p className="font-medium">{formatFrequency(di) || "-"}</p>
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">{t("route")}</Label>
+              <p className="font-medium">{di?.route?.display || t("oral")}</p>
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">{t("duration")}</Label>
+              <p className="font-medium">{formatDuration(di) || "-"}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <Label>{t("select_dosage_instruction")}</Label>
+      <RadioGroup
+        value={String(selectedIndex)}
+        onValueChange={(value) => handleSelectDosage(parseInt(value, 10))}
+        className="space-y-2"
+      >
+        {medication.dosage_instruction.map((di, idx) => {
+          const isSelected = idx === selectedIndex;
+          return (
+            <div
+              key={idx}
+              className={cn(
+                "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                isSelected
+                  ? "bg-primary-50 border-primary-300"
+                  : "bg-gray-50 border-gray-200 hover:border-gray-300",
+              )}
+              onClick={() => handleSelectDosage(idx)}
+            >
+              <RadioGroupItem
+                value={String(idx)}
+                id={`${formId}-dosage-${idx}`}
+                className="mt-1"
+              />
+              <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <Label className="text-xs text-gray-500">{t("dosage")}</Label>
+                  <p className="font-medium">
+                    <FormattedDosage instruction={di} />
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">
+                    {t("frequency")}
+                  </Label>
+                  <p className="font-medium">{formatFrequency(di) || "-"}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">{t("route")}</Label>
+                  <p className="font-medium">
+                    {di?.route?.display || t("oral")}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">
+                    {t("duration")}
+                  </Label>
+                  <p className="font-medium">{formatDuration(di) || "-"}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </RadioGroup>
+    </div>
+  );
+};
 
 export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   medication,
@@ -59,6 +214,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
   isValid,
   compact = false,
   otherGroupRequests,
+  productType,
 }) => {
   const { t } = useTranslation();
 
@@ -208,6 +364,25 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
     setShowAdvanced(false);
   };
 
+  // Non-blocking warning: administering outside the prescribed window (before it
+  // starts or after it ends) is allowed — e.g. back-dating an early dose or a
+  // late catch-up — but must always be flagged so it's a deliberate choice.
+  const activeWindow = getMedicationActiveWindow(medication);
+  const adminStart = administrationRequest.occurrence_period_start
+    ? new Date(administrationRequest.occurrence_period_start)
+    : undefined;
+  const outOfRange =
+    !!adminStart &&
+    ((activeWindow.start instanceof Date &&
+      !isNaN(activeWindow.start.getTime()) &&
+      adminStart < activeWindow.start) ||
+      (!!activeWindow.end && adminStart > activeWindow.end));
+  const outOfRangeWarning = outOfRange ? (
+    <p className="text-xs text-amber-600">
+      {t("administration_out_of_range_warning")}
+    </p>
+  ) : null;
+
   // Compact mode for sheet - simplified form
   if (compact) {
     return (
@@ -225,7 +400,9 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             onClick={handleAdministerNow}
           >
             <CareIcon icon="l-check-circle" className="size-4 mr-1.5" />
-            {t("administer_now")}
+            {productType === ProductKnowledgeType.medication
+              ? t("administer_now")
+              : t("record_intake_now")}
           </Button>
           <Button
             type="button"
@@ -337,6 +514,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                 {startTimeError && (
                   <p className="text-xs text-red-500">{startTimeError}</p>
                 )}
+                {outOfRangeWarning}
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">{t("end_time")}</Label>
@@ -423,32 +601,12 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-gray-50 rounded-lg">
-        <div>
-          <Label className="text-xs text-gray-500">{t("dosage")}</Label>
-          <p className="font-medium">
-            {formatDosage(medication.dosage_instruction[0])}
-          </p>
-        </div>
-        <div>
-          <Label className="text-xs text-gray-500">{t("frequency")}</Label>
-          <p className="font-medium">
-            {formatFrequency(medication.dosage_instruction[0]) || "-"}
-          </p>
-        </div>
-        <div>
-          <Label className="text-xs text-gray-500">{t("route")}</Label>
-          <p className="font-medium">
-            {medication.dosage_instruction[0]?.route?.display || t("oral")}
-          </p>
-        </div>
-        <div>
-          <Label className="text-xs text-gray-500">{t("duration")}</Label>
-          <p className="font-medium">
-            {formatDuration(medication.dosage_instruction[0]) || "-"}
-          </p>
-        </div>
-      </div>
+      <DosageInstructionSelector
+        medication={medication}
+        administrationRequest={administrationRequest}
+        onChange={onChange}
+        formId={formId}
+      />
 
       {/* All prescriptions in the group */}
       {otherGroupRequests && otherGroupRequests.length > 0 && (
@@ -459,9 +617,12 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
           </div>
           <div className="space-y-1.5">
             {otherGroupRequests.map((req) => {
-              const dosage = req.dosage_instruction[0];
               const isCurrentMedication = req.id === medication.id;
               const canSelect = !isCurrentMedication && onMedicationChange;
+              const instructionSummaries = req.dosage_instruction.map((di) => {
+                const freq = formatFrequency(di);
+                return { di, freq };
+              });
               return (
                 <button
                   type="button"
@@ -482,26 +643,37 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                         className="size-4 text-primary-600"
                       />
                     )}
-                    <span
-                      className={
-                        isCurrentMedication
-                          ? "text-primary-700 font-medium"
-                          : "text-gray-700"
-                      }
-                    >
-                      {formatDosage(dosage)}
-                    </span>
-                    {formatFrequency(dosage) && (
-                      <span
-                        className={
-                          isCurrentMedication
-                            ? "text-primary-500"
-                            : "text-gray-400"
-                        }
-                      >
-                        · {formatFrequency(dosage)}
-                      </span>
-                    )}
+                    <div className="flex flex-col gap-0.5">
+                      {instructionSummaries.map((summary, idx) => (
+                        <div key={idx} className="flex items-center gap-1">
+                          <span
+                            className={
+                              isCurrentMedication
+                                ? "text-primary-700 font-medium"
+                                : "text-gray-700"
+                            }
+                          >
+                            <FormattedDosage instruction={summary.di} />
+                          </span>
+                          {summary.freq && (
+                            <span
+                              className={
+                                isCurrentMedication
+                                  ? "text-primary-500"
+                                  : "text-gray-400"
+                              }
+                            >
+                              · {summary.freq}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                      {req.note && (
+                        <div className="text-xs text-gray-500 italic whitespace-pre-wrap break-words">
+                          {req.note}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <Badge
                     variant={req.status === "active" ? "green" : "secondary"}
@@ -577,12 +749,10 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
                   occurrence_period_start: now,
                 };
 
-                if (
-                  !(
-                    administrationRequest.status === "in_progress" ||
-                    administrationRequest.status === "not_done"
-                  )
-                ) {
+                if (!(
+                  administrationRequest.status === "in_progress" ||
+                  administrationRequest.status === "not_done"
+                )) {
                   newRequest.occurrence_period_end = now;
                 }
 
@@ -632,6 +802,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         {startTimeError && (
           <p className="text-sm text-red-500">{startTimeError}</p>
         )}
+        {outOfRangeWarning}
       </div>
 
       <div className="space-y-2">

@@ -349,8 +349,7 @@ export const ObservationVisualizer = ({
                         .map((code) => {
                           if (!code.display) return null;
                           const details = row[`${code.display}_details`] as
-                            | ObservationDetails
-                            | undefined;
+                            ObservationDetails | undefined;
                           if (!details) return null;
                           return {
                             code,

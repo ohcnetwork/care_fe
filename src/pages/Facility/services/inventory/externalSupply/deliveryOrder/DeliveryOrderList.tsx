@@ -3,6 +3,7 @@ import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { PLUGIN_Component } from "@/PluginEngine";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -82,6 +83,7 @@ export function DeliveryOrderList({
   const { data: response, isLoading } = useQuery({
     queryKey: [
       "deliveryOrders",
+      facilityId,
       locationId,
       internal,
       isRequester,
@@ -93,7 +95,7 @@ export function DeliveryOrderList({
       queryParams: {
         ...(isRequester ? { destination: locationId } : { origin: locationId }),
         limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: effectiveStatus,
         origin_isnull: !internal,
         supplier: qParams.supplier,
@@ -134,6 +136,13 @@ export function DeliveryOrderList({
           </div>
           {(!isRequester || !internal) && (
             <div className="flex items-center gap-2">
+              {!internal && (
+                <PLUGIN_Component
+                  __name="DeliveryOrderActions"
+                  facilityId={facilityId}
+                  locationId={locationId}
+                />
+              )}
               <Button
                 variant="primary"
                 onClick={() =>
