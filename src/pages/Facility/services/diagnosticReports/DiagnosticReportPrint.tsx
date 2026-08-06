@@ -32,10 +32,5 @@ export default function DiagnosticReportPrint({
     return <span>{t("diagnostic_report_not_found")}</span>;
   }
 
-  return (
-    <DiagnosticReportPrintPreview
-      diagnosticReports={[fullReport]}
-      isLoading={isLoadingReport}
-    />
-  );
+  return <DiagnosticReportPrintPreview diagnosticReports={[fullReport]} />;
 }

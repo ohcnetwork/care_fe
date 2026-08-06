@@ -1,3 +1,4 @@
+import Loading from "@/components/Common/Loading";
 import { DiagnosticReportPrintPreview } from "@/pages/Facility/services/diagnosticReports/DiagnosticReportPrintPreview";
 import {
   DiagnosticReportRead,
@@ -14,7 +15,7 @@ export const MultipleDiagnosticReportsPrint = ({
   serviceRequestId: string;
   patientId: string;
 }) => {
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["diagnosticReports", patientId, serviceRequestId],
     queryFn: query(diagnosticReportApi.listDiagnosticReports, {
       pathParams: { patient_external_id: patientId },
@@ -45,14 +46,13 @@ export const MultipleDiagnosticReportsPrint = ({
     }),
   });
 
+  if (isLoading || isLoadingReports) {
+    return <Loading />;
+  }
+
   const diagnosticReports = allDiagnosticReports.filter(
     (report) => report.status === DiagnosticReportStatus.final,
   );
 
-  return (
-    <DiagnosticReportPrintPreview
-      diagnosticReports={diagnosticReports}
-      isLoading={isLoadingReports}
-    />
-  );
+  return <DiagnosticReportPrintPreview diagnosticReports={diagnosticReports} />;
 };

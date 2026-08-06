@@ -14,7 +14,6 @@ import { format } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Loading from "@/components/Common/Loading";
 import "@/lib/pdfWorker";
 import { Document, Page } from "react-pdf";
 
@@ -85,21 +84,11 @@ function ImageRenderer({
 }
 export const DiagnosticReportPrintPreview = ({
   diagnosticReports,
-  isLoading,
 }: {
   diagnosticReports: DiagnosticReportRead[];
-  isLoading: boolean;
 }) => {
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loading />
-      </div>
-    );
-  }
 
   const diagnosticReportDetail = diagnosticReports[0];
 
@@ -241,7 +230,7 @@ const DiagnosticReportPreviewItem = ({
   const pdfFiles = files.results.filter((file) => {
     if (!file.id || !fileUrls[file.id] || !file.extension || file.is_archived)
       return false;
-    return file.extension.toLowerCase().endsWith("pdf");
+    return /pdf$/i.test(file.extension);
   });
 
   const imageFiles = files.results.filter((file) => {
@@ -267,7 +256,8 @@ const DiagnosticReportPreviewItem = ({
             <span className="text-gray-600">{t("report_date")}</span>
             <span className="text-gray-600">:</span>
             <span className="font-semibold ml-2">
-              {report.created_date && format(report.created_date, "dd-MM-yyyy")}
+              {report.created_date &&
+                format(new Date(report.created_date), "dd-MM-yyyy")}
             </span>
           </div>
           <div className="grid grid-cols-[6rem_auto_1fr] items-center">
