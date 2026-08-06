@@ -4412,6 +4412,7 @@
   "patient_visits__from_this_visit": "From this visit",
   "patient_visits__keep_appointment": "Keep appointment",
   "patient_visits__no_history": "No past visits recorded",
+  "patient_visits__no_history_description": "No appointment history is available. Schedule your first appointment to begin.",
   "patient_visits__no_upcoming_description": "Book an appointment to see it listed here.",
   "patient_visits__not_found": "This visit could not be found.",
   "patient_visits__reason": "Reason for visit",

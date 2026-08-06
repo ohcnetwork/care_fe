@@ -27,7 +27,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
 
   // Deliberately unscoped: the booking may be for a linked family member
   // rather than the profile the app is currently showing.
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["appointment", tokenData?.phoneNumber],
     queryFn: query(PublicAppointmentApi.getAppointments, {
       headers: { Authorization: `Bearer ${tokenData?.token}` },
@@ -41,9 +41,20 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
     return <Loading />;
   }
 
+  if (isError) {
+    return (
+      <div className="mx-auto max-w-120 p-10 text-center">
+        <p className="text-sm text-gray-600">{t("network_failure")}</p>
+        <Button className="mt-6" asChild>
+          <Link href="/patient/home">{t("patient_booking__back_to_home")}</Link>
+        </Button>
+      </div>
+    );
+  }
+
   if (!appointment) {
     return (
-      <div className="mx-auto max-w-[480px] p-10 text-center">
+      <div className="mx-auto max-w-120 p-10 text-center">
         <p className="text-sm text-gray-600">{t("appointment_not_found")}</p>
         <Button className="mt-6" asChild>
           <Link href="/patient/home">{t("patient_booking__back_to_home")}</Link>
