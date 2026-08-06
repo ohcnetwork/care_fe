@@ -124,7 +124,7 @@ export default function PatientVisits() {
               />
             }
             title={t("no_appointments")}
-            description={t("patient_visits__no_upcoming_description")}
+            description={t("patient_visits__no_history_description")}
             className="gap-3 rounded-2xl border-gray-300 px-5 py-7 shadow-none"
             action={
               <Button className="w-full" asChild>
