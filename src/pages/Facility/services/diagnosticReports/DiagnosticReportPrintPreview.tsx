@@ -188,7 +188,6 @@ const DiagnosticReportPreviewItem = ({
         associating_id: report?.id,
       },
     }),
-    enabled: !!report?.id,
   });
 
   // Fetch a signed URL for each file via parallel queries.
@@ -204,7 +203,6 @@ const DiagnosticReportPreviewItem = ({
         },
         pathParams: { fileId: file.id! },
       }),
-      enabled: !!report?.id && !!file.id,
     })),
   });
 

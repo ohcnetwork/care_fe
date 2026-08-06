@@ -459,7 +459,7 @@ function DiagnosticReportItem({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openUploadDialog]);
 
-  // Initialize form with existing observations from the report
+  // Initialize form with existing observations from the full report
   useEffect(() => {
     if (fullReport?.observations && fullReport.observations.length > 0) {
       const initialObservations: ObservationsByDefinition = {};
