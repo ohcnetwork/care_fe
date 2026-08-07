@@ -96,7 +96,7 @@ export function PrintAllQuestionnaireResponses({
             </h2>
           </div>
 
-          <EncounterDetails
+          <PrintableEncounterDetails
             encounter={encounter}
             patient={encounter?.patient ?? patient}
           />
@@ -113,7 +113,7 @@ export function PrintAllQuestionnaireResponses({
           {questionnaireResponses?.results?.map(
             (item: QuestionnaireResponse) => (
               <div key={item.id} className="w-full">
-                <ResponseCard key={item.id} item={item} />
+                <PrintableResponseCard key={item.id} item={item} />
               </div>
             ),
           )}
@@ -150,7 +150,7 @@ interface EncounterDetailsProps {
   patient?: PatientRead;
 }
 
-export function EncounterDetails({
+export function PrintableEncounterDetails({
   encounter,
   patient,
 }: EncounterDetailsProps) {
@@ -331,7 +331,7 @@ interface ResponseCardProps {
   item?: QuestionnaireResponse;
 }
 
-export function ResponseCard({ item }: ResponseCardProps) {
+export function PrintableResponseCard({ item }: ResponseCardProps) {
   const { t } = useTranslation();
 
   if (!item) return null;

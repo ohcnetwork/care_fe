@@ -117,8 +117,8 @@ export const FormDialog = ({
 
   const questionnaireIds = new Set([...allQuestionnaires.map((q) => q.id)]);
 
-  const questionnaireList = [...questionnaireIds].map(
-    (id) => allQuestionnaires.find((q) => q.id === id)!,
+  const questionnaireList = [...questionnaireIds].map((id) =>
+    allQuestionnaires.find((q) => q.id === id)!,
   );
 
   useEffect(() => {
