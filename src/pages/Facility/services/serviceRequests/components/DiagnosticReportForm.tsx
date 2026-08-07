@@ -61,6 +61,7 @@ import { SpecimenRead, SpecimenStatus } from "@/types/emr/specimen/specimen";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { BACKEND_ALLOWED_EXTENSIONS, FileType } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -162,6 +163,12 @@ export function DiagnosticReportForm({
   const activeDiagnosticReports = diagnosticReports.filter(
     (report) => report.status !== DiagnosticReportStatus.final,
   );
+
+  // Show the create form when there's a report type left to create and no
+  // active report in progress, or when no reports exist at all.
+  const showCreateReportForm = availableReportCodes.length
+    ? activeDiagnosticReports.length === 0
+    : diagnosticReports.length === 0;
 
   // Creating a new diagnostic report
   const { mutate: createDiagnosticReport, isPending: isCreatingReport } =
@@ -319,10 +326,7 @@ export function DiagnosticReportForm({
           )}
         </div>
       )}
-      {((availableReportCodes.length > 0 &&
-        activeDiagnosticReports.length === 0) ||
-        (availableReportCodes.length === 0 &&
-          diagnosticReports.length === 0)) && (
+      {showCreateReportForm && (
         <CreateDiagnosticReportForm
           availableReportCodes={availableReportCodes}
           hasCollectedSpecimens={hasCollectedSpecimens}
@@ -379,7 +383,7 @@ function DiagnosticReportItem({
   // Query to fetch files for the diagnostic report
   const { data: files } = useQuery({
     queryKey: ["files", "diagnostic_report", report.id],
-    queryFn: query(fileApi.list, {
+    queryFn: query.paginated(fileApi.list, {
       queryParams: {
         file_type: "diagnostic_report",
         associating_id: report.id,
@@ -390,42 +394,22 @@ function DiagnosticReportItem({
     enabled: !!report.id && isExpanded,
   });
 
-  // Upserting observations for a diagnostic report
-  const { mutate: upsertObservations, isPending: isUpsertingObservations } =
-    useMutation({
-      mutationFn: mutate(observationApi.upsertObservations, {
-        pathParams: {
-          patient_external_id: patientId,
-          external_id: report.id,
-        },
-      }),
-      onSuccess: () => {
+  // Save observations and update the diagnostic report in a single batch request
+  const { mutate: saveReport, isPending: isSubmitting } = useBatchRequest({
+    onSuccess: ({ results }) => {
+      if (results.some((r) => r.reference_id === "upsert-observations")) {
         toast.success(t("test_results_saved_successfully"));
         queryClient.invalidateQueries({
           queryKey: ["serviceRequest", facilityId, serviceRequestId],
         });
-        queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport", report.id],
-        });
-      },
-    });
-
-  const { mutate: updateDiagnosticReport, isPending: isUpdatingReport } =
-    useMutation({
-      mutationFn: mutate(diagnosticReportApi.updateDiagnosticReport, {
-        pathParams: {
-          patient_external_id: patientId,
-          external_id: report.id,
-        },
-      }),
-      onSuccess: () => {
-        toast.success(t("conclusion_updated_successfully"));
-        queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport", report.id],
-        });
-        setIsExpanded(false);
-      },
-    });
+      }
+      toast.success(t("conclusion_updated_successfully"));
+      queryClient.invalidateQueries({
+        queryKey: ["diagnosticReport", report.id],
+      });
+      setIsExpanded(false);
+    },
+  });
 
   // Initialize file upload hook
   const inputId = `file_upload_diagnostic_report_${report.id}`;
@@ -784,21 +768,41 @@ function DiagnosticReportItem({
         )
         .filter((obs): obs is ObservationUpsertRequest => obs !== null);
 
-      // Upsert observations
+      const requests: BatchRequestObject[] = [];
+
+      // Upsert observations only when there are results to save
       if (formattedObservations.length > 0) {
-        upsertObservations({
-          observations: formattedObservations,
+        requests.push({
+          api: observationApi.upsertObservations,
+          referenceId: "upsert-observations",
+          pathParams: {
+            patient_external_id: patientId,
+            external_id: report.id,
+          },
+          body: {
+            observations: formattedObservations,
+          },
         });
       }
 
-      updateDiagnosticReport({
-        id: report.id,
-        status: report.status,
-        category: report.category,
-        code: report.code,
-        note: report.note,
-        conclusion,
+      requests.push({
+        api: diagnosticReportApi.updateDiagnosticReport,
+        referenceId: "update-report",
+        pathParams: {
+          patient_external_id: patientId,
+          external_id: report.id,
+        },
+        body: {
+          id: report.id,
+          status: report.status,
+          category: report.category,
+          code: report.code,
+          note: report.note,
+          conclusion,
+        },
       });
+
+      saveReport(requests);
     } catch (_error) {
       toast.error(t("error_validating_form"));
     }
@@ -945,8 +949,6 @@ function DiagnosticReportItem({
     );
   }
 
-  const isSubmitting = isUpsertingObservations || isUpdatingReport;
-
   return (
     <Card
       className={cn(
@@ -972,7 +974,7 @@ function DiagnosticReportItem({
                         {t("last_updated")}:{" "}
                         {fullReport
                           ? format(
-                              new Date(fullReport.modified_date),
+                              fullReport.modified_date,
                               "hh:mm a, MMM dd, yyyy",
                             )
                           : "-"}

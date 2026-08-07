@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 
 import query from "@/Utils/request/query";
 import Loading from "@/components/Common/Loading";
 import { DiagnosticReportPrintPreview } from "@/pages/Facility/services/diagnosticReports/DiagnosticReportPrintPreview";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
+import fileApi from "@/types/files/fileApi";
 import { useTranslation } from "react-i18next";
 
 export default function DiagnosticReportPrint({
@@ -24,6 +25,29 @@ export default function DiagnosticReportPrint({
     }),
   });
 
+  const diagnosticReports = fullReport ? [fullReport] : [];
+
+  const { allFiles, isLoadingFiles } = useQueries({
+    queries: diagnosticReports.map((report) => ({
+      queryKey: ["files", "diagnostic_report", report.id],
+      queryFn: query.paginated(fileApi.list, {
+        queryParams: {
+          file_type: "diagnostic_report",
+          associating_id: report.id,
+        },
+      }),
+    })),
+    combine: (results) => ({
+      allFiles: diagnosticReports.flatMap((report, index) =>
+        (results[index]?.data?.results ?? []).map((file) => ({
+          reportId: report.id,
+          file,
+        })),
+      ),
+      isLoadingFiles: results.some((result) => result.isLoading),
+    }),
+  });
+
   if (isLoadingReport) {
     return <Loading />;
   }
@@ -32,5 +56,11 @@ export default function DiagnosticReportPrint({
     return <span>{t("diagnostic_report_not_found")}</span>;
   }
 
-  return <DiagnosticReportPrintPreview diagnosticReports={[fullReport]} />;
+  return (
+    <DiagnosticReportPrintPreview
+      diagnosticReports={diagnosticReports}
+      allFiles={allFiles}
+      isLoading={isLoadingFiles}
+    />
+  );
 }

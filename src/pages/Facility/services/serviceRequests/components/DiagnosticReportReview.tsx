@@ -128,7 +128,7 @@ function DiagnosticReportReviewItem({
   const { data: files = { results: [], count: 0 }, isFetched: isFilesFetched } =
     useQuery({
       queryKey: ["files", "diagnostic_report", report.id],
-      queryFn: query(fileApi.list, {
+      queryFn: query.paginated(fileApi.list, {
         queryParams: {
           file_type: "diagnostic_report",
           associating_id: report.id,

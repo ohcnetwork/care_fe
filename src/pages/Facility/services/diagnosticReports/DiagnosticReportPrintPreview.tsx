@@ -5,11 +5,12 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
+import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -84,8 +85,12 @@ function ImageRenderer({
 }
 export const DiagnosticReportPrintPreview = ({
   diagnosticReports,
+  allFiles,
+  isLoading,
 }: {
   diagnosticReports: DiagnosticReportRead[];
+  allFiles: { reportId: string; file: FileReadMinimal }[];
+  isLoading?: boolean;
 }) => {
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
@@ -94,12 +99,40 @@ export const DiagnosticReportPrintPreview = ({
 
   const diagnosticReportLength = diagnosticReports.length;
 
+  // Fetch a signed URL for each file across all reports via parallel queries.
+  const { fileUrls, isFetchingFileUrls } = useQueries({
+    queries: allFiles.map(({ reportId, file }) => ({
+      queryKey: ["diagnostic_report_file_url", reportId, file.id],
+      queryFn: query(fileApi.get, {
+        queryParams: {
+          file_type: "diagnostic_report",
+          associating_id: reportId,
+        },
+        pathParams: { fileId: file.id },
+      }),
+    })),
+    combine: (results) => {
+      const fileUrls: Record<string, string> = {};
+      allFiles.forEach(({ file }, index) => {
+        const url = results[index]?.data?.read_signed_url;
+        if (url) {
+          fileUrls[file.id] = url;
+        }
+      });
+      return {
+        fileUrls,
+        isFetchingFileUrls: results.some((result) => result.isLoading),
+      };
+    },
+  });
+
   return (
     <div className="flex justify-center items-center">
       <PrintPreview
         title={`${t("diagnostic_report", { count: diagnosticReportLength })} - ${diagnosticReportDetail?.service_request?.title || t("diagnostic_report", { count: diagnosticReportLength })}`}
         facility={facility}
         templateSlug={PrintTemplateType.diagnostic_report}
+        disabled={isLoading || isFetchingFileUrls}
       >
         <div>
           <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
@@ -162,7 +195,14 @@ export const DiagnosticReportPrintPreview = ({
             </div>
           </div>
           {diagnosticReports.map((report) => (
-            <DiagnosticReportPreviewItem key={report.id} report={report} />
+            <DiagnosticReportPreviewItem
+              key={report.id}
+              report={report}
+              files={allFiles
+                .filter((entry) => entry.reportId === report.id)
+                .map((entry) => entry.file)}
+              fileUrls={fileUrls}
+            />
           ))}
 
           {/* Footer */}
@@ -175,65 +215,23 @@ export const DiagnosticReportPrintPreview = ({
 
 const DiagnosticReportPreviewItem = ({
   report,
+  files,
+  fileUrls,
 }: {
   report: DiagnosticReportRead;
+  files: FileReadMinimal[];
+  fileUrls: Record<string, string>;
 }) => {
   const { t } = useTranslation();
-  // Query to fetch files for the diagnostic report
-  const { data: files = { results: [], count: 0 } } = useQuery({
-    queryKey: ["files", "diagnostic_report", report?.id],
-    queryFn: query.paginated(fileApi.list, {
-      queryParams: {
-        file_type: "diagnostic_report",
-        associating_id: report?.id,
-      },
-    }),
-  });
-
-  // Fetch a signed URL for each file via parallel queries.
-  const filesWithId = files.results.filter((file) => file.id);
-
-  const fileUrlQueries = useQueries({
-    queries: filesWithId.map((file) => ({
-      queryKey: ["diagnostic_report_file_url", report?.id, file.id],
-      queryFn: query(fileApi.get, {
-        queryParams: {
-          file_type: "diagnostic_report",
-          associating_id: report?.id,
-        },
-        pathParams: { fileId: file.id! },
-      }),
-    })),
-  });
-
-  const fileUrls: Record<string, string> = {};
-  filesWithId.forEach((file, index) => {
-    const url = fileUrlQueries[index]?.data?.read_signed_url;
-    if (file.id && url) {
-      fileUrls[file.id] = url;
-    }
-  });
-
-  if (!report) {
-    return (
-      <div className="p-6">
-        <div className="text-center text-gray-500">
-          {t("diagnostic_report_not_found")}
-        </div>
-      </div>
-    );
-  }
 
   // Filter files - separate PDFs and images with URLs
-  const pdfFiles = files.results.filter((file) => {
-    if (!file.id || !fileUrls[file.id] || !file.extension || file.is_archived)
-      return false;
+  const pdfFiles = files.filter((file) => {
+    if (!fileUrls[file.id] || !file.extension || file.is_archived) return false;
     return /pdf$/i.test(file.extension);
   });
 
-  const imageFiles = files.results.filter((file) => {
-    if (!file.id || !fileUrls[file.id] || !file.extension || file.is_archived)
-      return false;
+  const imageFiles = files.filter((file) => {
+    if (!fileUrls[file.id] || !file.extension || file.is_archived) return false;
     return /(jpg|jpeg|png|gif|webp)$/i.test(file.extension);
   });
 
@@ -254,8 +252,7 @@ const DiagnosticReportPreviewItem = ({
             <span className="text-gray-600">{t("report_date")}</span>
             <span className="text-gray-600">:</span>
             <span className="font-semibold ml-2">
-              {report.created_date &&
-                format(new Date(report.created_date), "dd-MM-yyyy")}
+              {report.created_date && format(report.created_date, "dd-MM-yyyy")}
             </span>
           </div>
           <div className="grid grid-cols-[6rem_auto_1fr] items-center">
@@ -309,14 +306,14 @@ const DiagnosticReportPreviewItem = ({
           )}
         </div>
 
-        {files.results.length > 0 && (
+        {files.length > 0 && (
           <div className="mt-8">
             {pdfFiles.length > 0 && (
               <div className="mt-8">
                 <div className="space-y-12">
                   {pdfFiles.map((file) => (
                     <div key={`content-${file.id}`}>
-                      <PDFRenderer fileUrl={fileUrls[file.id!]} />
+                      <PDFRenderer fileUrl={fileUrls[file.id]} />
                     </div>
                   ))}
                 </div>
@@ -328,7 +325,7 @@ const DiagnosticReportPreviewItem = ({
                   {imageFiles.map((file) => (
                     <div key={`content-${file.id}`}>
                       <ImageRenderer
-                        fileUrl={fileUrls[file.id!]}
+                        fileUrl={fileUrls[file.id]}
                         fileName={file.name}
                       />
                     </div>
