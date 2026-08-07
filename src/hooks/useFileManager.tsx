@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -22,6 +22,10 @@ import FilePreviewDialog, {
   StateInterface,
 } from "@/components/Common/FilePreviewDialog";
 
+import {
+  createCareFileObjectUrl,
+  fetchCareFileBlob,
+} from "@/Utils/request/files";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -86,11 +90,24 @@ export default function useFileManager(
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
   const queryClient = useQueryClient();
 
-  const getExtension = (url: string) => {
-    const div1 = url.split("?")[0].split(".");
-    const ext: string = div1[div1.length - 1].toLowerCase();
-    return ext;
+  // Object URL currently backing the preview. CARE download routes are
+  // authenticated, so the bytes are fetched and wrapped rather than linked
+  // directly; the URL must be released when it is replaced or the dialog closes.
+  const objectUrlRef = useRef<string | null>(null);
+
+  const releaseObjectUrl = () => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
   };
+
+  useEffect(() => releaseObjectUrl, []);
+
+  // The CARE download route carries no filename, so the extension comes from
+  // the file record rather than from the URL.
+  const getExtension = (file: { extension?: string }) =>
+    (file.extension ?? "").replace(/^\./, "").toLowerCase();
 
   const retrieveUpload = async (
     file: FileReadMinimal,
@@ -119,8 +136,7 @@ export default function useFileManager(
 
     if (!data) return;
 
-    const signedUrl = data.read_signed_url as string;
-    const extension = getExtension(signedUrl);
+    const extension = getExtension(data);
 
     setFileState({
       ...file_state,
@@ -131,8 +147,16 @@ export default function useFileManager(
         extension as (typeof FILE_EXTENSIONS.IMAGE)[number],
       ),
     });
-    setDownloadURL(signedUrl);
-    setFileUrl(signedUrl);
+
+    try {
+      const objectUrl = await createCareFileObjectUrl(data.download_url);
+      releaseObjectUrl();
+      objectUrlRef.current = objectUrl;
+      setDownloadURL(objectUrl);
+      setFileUrl(objectUrl);
+    } catch {
+      toast.error(t("file_preview_failed"));
+    }
   };
 
   const validateArchiveReason = (name: any) => {
@@ -193,6 +217,8 @@ export default function useFileManager(
   };
 
   const handleFilePreviewClose = () => {
+    releaseObjectUrl();
+    setFileUrl("");
     setDownloadURL("");
     setFileState({
       ...file_state,
@@ -356,6 +382,9 @@ export default function useFileManager(
             {t("this_file_has_been_archived")}
           </div>
           <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
+            {/* These labels are pre-existing untranslated strings; localising
+                this dialog is out of scope for the file-transport migration. */}
+            {/* eslint-disable i18next/no-literal-string */}
             {[
               {
                 label: "File Name",
@@ -387,6 +416,7 @@ export default function useFileManager(
                 content: formatDateTime(archiveDialogueOpen?.archived_datetime),
                 icon: "l-clock",
               },
+              /* eslint-enable i18next/no-literal-string */
             ].map((item, index) => (
               <div key={index} className="flex gap-2">
                 <div className="flex aspect-square h-10 items-center justify-center rounded-full bg-primary-100">
@@ -517,10 +547,9 @@ export default function useFileManager(
       if (!file.id) return;
       toast.success(t("file_download_started"));
       const fileData = await retrieveUpload(file, associating_id);
-      const response = await fetch(fileData?.read_signed_url || "");
-      if (!response.ok) throw new Error("Network response was not ok.");
+      if (!fileData?.download_url) throw new Error("Missing download url");
 
-      const data = await response.blob();
+      const data = await fetchCareFileBlob(fileData.download_url);
       const blobUrl = window.URL.createObjectURL(data);
 
       const a = document.createElement("a");

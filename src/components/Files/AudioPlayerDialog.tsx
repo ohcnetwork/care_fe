@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -10,6 +11,7 @@ import {
 
 import AudioPlayer from "@/components/Common/AudioPlayer";
 
+import { createCareFileObjectUrl } from "@/Utils/request/files";
 import query from "@/Utils/request/query";
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
@@ -37,8 +39,39 @@ export default function AudioPlayerDialog({
     }),
     enabled: !!file?.id,
   });
+  // The CARE download route is authenticated, so the audio is fetched and
+  // wrapped in an object URL rather than handed to the player as a link.
+  const [audio, setAudio] = useState<{ src: string; source: string } | null>(
+    null,
+  );
+  const downloadUrl = fileData?.download_url;
+
+  useEffect(() => {
+    if (!downloadUrl) return;
+
+    let objectUrl: string | null = null;
+    let cancelled = false;
+
+    createCareFileObjectUrl(downloadUrl)
+      .then((url) => {
+        if (cancelled) {
+          URL.revokeObjectURL(url);
+          return;
+        }
+        objectUrl = url;
+        setAudio({ src: url, source: downloadUrl });
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [downloadUrl]);
+
+  // Only play an object URL that belongs to the currently selected file.
   const { Player, stopPlayback } = AudioPlayer({
-    src: fileData?.read_signed_url || "",
+    src: audio && audio.source === downloadUrl ? audio.src : "",
   });
 
   return (

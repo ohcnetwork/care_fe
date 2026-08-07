@@ -1,8 +1,6 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-pwa/client" />
 interface ImportMetaEnv {
-  readonly CARE_CDN_URL?: string;
-
   readonly REACT_APP_TITLE: string;
   readonly REACT_APP_META_DESCRIPTION: string;
   readonly REACT_APP_COVER_IMAGE: string;

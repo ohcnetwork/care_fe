@@ -3,6 +3,8 @@ import React from "react";
 
 import { cn } from "@/lib/utils";
 
+import { careFileUrl } from "@/Utils/request/files";
+
 // Subtle, professional color combinations that blend well with the UI
 const colorPairs: Array<[string, string]> = [
   ["#E3F2FD", "#1565C0"], // Subtle Blue
@@ -57,7 +59,11 @@ function Avatar({
     propColors ||
     (avatarText ? getColorPair(avatarText) : getColorPair("user"));
 
-  const shouldShowFallback = !imageUrl || hasImageError;
+  // Profile pictures and cover images are served by CARE as paths relative to
+  // the API origin, which is not necessarily the frontend origin.
+  const resolvedImageUrl = careFileUrl(imageUrl);
+
+  const shouldShowFallback = !resolvedImageUrl || hasImageError;
 
   return (
     <AvatarPrimitive.Root
@@ -70,7 +76,7 @@ function Avatar({
     >
       <AvatarPrimitive.Image
         data-slot="avatar-image"
-        src={imageUrl}
+        src={resolvedImageUrl || undefined}
         alt={name}
         className={cn(
           "aspect-square size-full object-cover rounded-md",

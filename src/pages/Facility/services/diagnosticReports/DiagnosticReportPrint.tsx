@@ -7,6 +7,7 @@ import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { createCareFileObjectUrl } from "@/Utils/request/files";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName, formatPatientAge } from "@/Utils/utils";
@@ -122,7 +123,8 @@ export default function DiagnosticReportPrint({
     enabled: !!report?.id,
   });
 
-  // Function to get signed URL for a file
+  // Fetches a file through CARE and wraps it in an object URL. The download
+  // route is authenticated, so an <img src> cannot point at it directly.
   const getFileUrl = async (file: FileReadMinimal) => {
     if (!file.id || !report?.id) return null;
 
@@ -135,9 +137,10 @@ export default function DiagnosticReportPrint({
         pathParams: { fileId: file.id },
       })({} as any);
 
-      return data?.read_signed_url as string;
+      if (!data?.download_url) return null;
+      return await createCareFileObjectUrl(data.download_url);
     } catch (error) {
-      console.error("Error fetching signed URL:", error);
+      console.error("Error fetching file from CARE:", error);
       return null;
     }
   };
@@ -145,9 +148,11 @@ export default function DiagnosticReportPrint({
   // Store file URLs
   const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
 
-  // Fetch signed URLs for all files
   useEffect(() => {
     if (!files.results.length) return;
+
+    let cancelled = false;
+    const created: string[] = [];
 
     const fetchAllUrls = async () => {
       const urls: Record<string, string> = {};
@@ -156,14 +161,21 @@ export default function DiagnosticReportPrint({
         if (!file.id) continue;
         const url = await getFileUrl(file);
         if (url) {
+          created.push(url);
           urls[file.id] = url;
         }
       }
 
+      if (cancelled) return;
       setFileUrls(urls);
     };
 
     fetchAllUrls();
+
+    return () => {
+      cancelled = true;
+      created.forEach((url) => URL.revokeObjectURL(url));
+    };
   }, [files.results, report?.id]);
 
   if (isLoading) {

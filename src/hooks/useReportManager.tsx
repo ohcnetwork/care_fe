@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -19,6 +19,10 @@ import FilePreviewDialog, {
   StateInterface,
 } from "@/components/Common/FilePreviewDialog";
 
+import {
+  createCareFileObjectUrl,
+  fetchCareFileBlob,
+} from "@/Utils/request/files";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -101,11 +105,24 @@ export default function useReportManager({
     });
   };
 
-  // Get file extension from URL
-  const getExtension = (url: string) => {
-    const fileNameSplit = url.split("?")[0].split(".");
-    return fileNameSplit[fileNameSplit.length - 1].toLowerCase();
+  // Object URL currently backing the preview. CARE report downloads are
+  // authenticated, so the bytes are fetched and wrapped rather than linked
+  // directly; the URL must be released when it is replaced or the dialog closes.
+  const objectUrlRef = useRef<string | null>(null);
+
+  const releaseObjectUrl = () => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
   };
+
+  useEffect(() => releaseObjectUrl, []);
+
+  // The CARE download route carries no filename, so the extension comes from
+  // the report record rather than from the URL.
+  const getExtension = (report: { extension?: string }) =>
+    (report.extension ?? "").replace(/^\./, "").toLowerCase();
 
   // View file handler
   const viewFile = useCallback(
@@ -119,8 +136,7 @@ export default function useReportManager({
       const data = await retrieveReport(report.id);
       if (!data) return;
 
-      const signedUrl = data.read_signed_url;
-      const extension = getExtension(signedUrl);
+      const extension = getExtension(data);
 
       setFileState({
         open: true,
@@ -132,8 +148,16 @@ export default function useReportManager({
         isZoomInDisabled: false,
         isZoomOutDisabled: false,
       });
-      setDownloadURL(signedUrl);
-      setFileUrl(signedUrl);
+
+      try {
+        const objectUrl = await createCareFileObjectUrl(data.download_url);
+        releaseObjectUrl();
+        objectUrlRef.current = objectUrl;
+        setDownloadURL(objectUrl);
+        setFileUrl(objectUrl);
+      } catch {
+        toast.error(t("file_preview_failed"));
+      }
     },
     [reportsData?.results],
   );
@@ -143,10 +167,9 @@ export default function useReportManager({
     try {
       toast.success(t("file_download_started"));
       const data = await retrieveReport(report.id);
-      const response = await fetch(data?.read_signed_url || "");
-      if (!response.ok) throw new Error("Network response was not ok.");
+      if (!data?.download_url) throw new Error("Missing download url");
 
-      const blob = await response.blob();
+      const blob = await fetchCareFileBlob(data.download_url);
       const blobUrl = window.URL.createObjectURL(blob);
 
       const a = document.createElement("a");
@@ -165,6 +188,8 @@ export default function useReportManager({
 
   // Handle file preview close
   const handleFilePreviewClose = () => {
+    releaseObjectUrl();
+    setFileUrl("");
     setDownloadURL("");
     setFileState((prev) => ({
       ...prev,

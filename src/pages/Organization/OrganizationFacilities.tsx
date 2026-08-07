@@ -15,6 +15,7 @@ import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
+import { careFileUrl } from "@/Utils/request/files";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { FacilityListRead } from "@/types/facility/facility";
@@ -125,7 +126,7 @@ export default function OrganizationFacilities({
                     <div className="relative h-48 bg-gray-100">
                       {facility.read_cover_image_url ? (
                         <img
-                          src={facility.read_cover_image_url}
+                          src={careFileUrl(facility.read_cover_image_url)}
                           alt={facility.name}
                           className="w-full h-full object-cover"
                         />

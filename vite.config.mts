@@ -411,13 +411,14 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
 
   await validateEnv(env);
 
-  const cdnUrls =
-    env.REACT_CDN_URLS ||
-    [
-      "https://egov-s3-facility-10bedicu.s3.amazonaws.com",
-      "https://egov-s3-patient-data-10bedicu.s3.amazonaws.com",
-      "http://localhost:4566",
-    ].join(" ");
+  // Optional allowlist for whitelabel assets (logos, cover images) served from
+  // a CDN. Files, avatars and facility images are served by CARE itself and are
+  // covered by the API origin below, so no object-storage bucket belongs here.
+  const cdnUrls = env.REACT_CDN_URLS || "";
+
+  // CARE serves every stored object, so its origin must be allowed for images.
+  // Empty when the app is served from the API origin, which 'self' already covers.
+  const careApiUrl = env.REACT_CARE_API_URL || "";
 
   return {
     envPrefix: "REACT_",
@@ -563,8 +564,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       headers: {
         "Content-Security-Policy-Report-Only": `default-src 'self';\
           style-src 'self' 'unsafe-inline';\
-          img-src 'self' https://cdn.ohc.network ${cdnUrls};\
-          object-src 'self' ${cdnUrls};`,
+          img-src 'self' blob: https://cdn.ohc.network ${careApiUrl} ${cdnUrls};\
+          object-src 'self' blob: ${cdnUrls};`,
       },
       port: 4000,
     },

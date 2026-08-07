@@ -51,8 +51,11 @@ export interface FileReadMinimal extends FileBase {
 }
 
 export interface FileRead extends FileReadMinimal {
-  signed_url: string;
-  read_signed_url: string;
+  /**
+   * CARE route serving the file, relative to the API origin. Never a
+   * storage-provider URL — resolve it with `careFileUrl`.
+   */
+  download_url: string;
   internal_name: string;
 }
 

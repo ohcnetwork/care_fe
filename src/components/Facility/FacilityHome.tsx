@@ -32,6 +32,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { getPermissions } from "@/common/Permissions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import { careFileUrl } from "@/Utils/request/files";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
@@ -155,7 +156,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
               {facilityData?.read_cover_image_url ? (
                 <>
                   <img
-                    src={facilityData.read_cover_image_url}
+                    src={careFileUrl(facilityData.read_cover_image_url)}
                     alt={facilityData?.name}
                     className="h-full w-full object-cover rounded-2xl"
                   />

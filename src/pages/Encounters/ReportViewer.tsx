@@ -44,6 +44,7 @@ import reportApi from "@/types/emr/report/reportApi";
 import { TemplateBaseRead } from "@/types/emr/template/template";
 import templateApi from "@/types/emr/template/templateApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { createCareFileObjectUrl } from "@/Utils/request/files";
 import mutate from "@/Utils/request/mutate";
 import query, { callApi } from "@/Utils/request/query";
 import { formatDateTime, relativeTime } from "@/Utils/utils";
@@ -157,12 +158,36 @@ export default function ReportViewer({
     enabled: !!selectedReportId,
   });
 
+  // The CARE report download is authenticated, so the bytes are fetched and
+  // wrapped in an object URL rather than linked directly. The URL is released
+  // when the report changes or the viewer unmounts.
   useEffect(() => {
     setPdfUrl(null);
-    if (reportDetail?.read_signed_url) {
-      setPdfUrl(reportDetail.read_signed_url);
-    }
-  }, [selectedReportId, reportDetail]);
+
+    const downloadUrl = reportDetail?.download_url;
+    if (!downloadUrl) return;
+
+    let objectUrl: string | null = null;
+    let cancelled = false;
+
+    createCareFileObjectUrl(downloadUrl)
+      .then((url) => {
+        if (cancelled) {
+          URL.revokeObjectURL(url);
+          return;
+        }
+        objectUrl = url;
+        setPdfUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) toast.error(t("file_preview_failed"));
+      });
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [selectedReportId, reportDetail, t]);
 
   const stopPolling = useCallback(() => {
     if (pollIntervalRef.current) {

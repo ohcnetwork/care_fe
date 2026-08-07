@@ -24,6 +24,7 @@ import CameraCaptureDialog from "@/components/Files/CameraCaptureDialog";
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
 import { getCroppedImg } from "@/Utils/getCroppedImg";
+import { careFileUrl } from "@/Utils/request/files";
 
 interface Props {
   title: string;
@@ -314,7 +315,7 @@ export default function AvatarEditModal({
                   </>
                 ) : imageUrl ? (
                   <img
-                    src={imageUrl || "/placeholder.svg"}
+                    src={careFileUrl(imageUrl) || "/placeholder.svg"}
                     alt="saved-photo"
                     loading="lazy"
                     decoding="async"
