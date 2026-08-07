@@ -23,13 +23,25 @@ async function goToConsentsTab(page: Page) {
   await page.goto(
     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents`,
   );
-  await page.waitForLoadState("networkidle");
+  // Wait for a specific ready signal instead of the flaky networkidle
+  await expect(
+    page.getByRole("button", { name: /add.*consent/i }),
+  ).toBeVisible();
+}
+
+/** Locate a datetime-local input by its form label (robust to field reordering) */
+function dateInputByLabel(page: Page, label: string) {
+  return page.locator(
+    `label:text-is("${label}") + input[type="datetime-local"]`,
+  );
 }
 
 /** Open the "Add Consent" sheet */
 async function openAddConsentSheet(page: Page) {
   await page.getByRole("button", { name: /add.*consent/i }).click();
-  await expect(page.getByRole("heading", { name: "Add Consent" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Add Consent" }),
+  ).toBeVisible();
 }
 
 /** Click Save button in the consent form sheet */
@@ -93,18 +105,19 @@ test.describe("Consent Creation", () => {
     await expect(page.getByText("Denied").first()).toBeVisible();
   });
 
-  test("create consent with each category → correct badge on card", async ({
-    page,
-  }) => {
-    const categories = [
-      { value: "Research", badge: "RESEARCH" },
-      { value: "Privacy Consent", badge: "PRIVACY CONSENT" },
-      { value: "Do Not Resuscitate", badge: "DO NOT RESUSCITATE" },
-      { value: "Advance Directive", badge: "ADVANCE DIRECTIVE" },
-      { value: "Advance Care Directive", badge: "ADVANCE CARE DIRECTIVE" },
-    ];
+  const consentCategories = [
+    { value: "Research", badge: "RESEARCH" },
+    { value: "Privacy Consent", badge: "PRIVACY CONSENT" },
+    { value: "Do Not Resuscitate", badge: "DO NOT RESUSCITATE" },
+    { value: "Advance Directive", badge: "ADVANCE DIRECTIVE" },
+    { value: "Advance Care Directive", badge: "ADVANCE CARE DIRECTIVE" },
+  ];
 
-    for (const { value, badge } of categories) {
+  // One test per category so failures are individually reportable
+  for (const { value, badge } of consentCategories) {
+    test(`create consent with ${value} category → ${badge} badge on card`, async ({
+      page,
+    }) => {
       await goToConsentsTab(page);
       await openAddConsentSheet(page);
 
@@ -123,8 +136,8 @@ test.describe("Consent Creation", () => {
 
       // Verify badge
       await expect(page.getByText(badge).first()).toBeVisible();
-    }
-  });
+    });
+  }
 
   test("create consent with note → See Details → note visible", async ({
     page,
@@ -135,7 +148,7 @@ test.describe("Consent Creation", () => {
     await openAddConsentSheet(page);
 
     // Fill note
-    await page.locator("textarea").fill(noteText);
+    await page.getByLabel("Note", { exact: true }).fill(noteText);
 
     await clickSave(page);
     await expectToast(page, /consent created successfully/i);
@@ -174,11 +187,11 @@ test.describe("Consent Creation", () => {
     await openAddConsentSheet(page);
 
     // Fill Valid From
-    const validFromInput = page.locator('input[type="datetime-local"]').nth(1);
+    const validFromInput = dateInputByLabel(page, "Consent Valid From");
     await validFromInput.fill(format(validFrom, "yyyy-MM-dd'T'HH:mm"));
 
     // Fill Valid Until
-    const validUntilInput = page.locator('input[type="datetime-local"]').nth(2);
+    const validUntilInput = dateInputByLabel(page, "Consent Valid Until");
     await validUntilInput.fill(format(validUntil, "yyyy-MM-dd'T'HH:mm"));
 
     await clickSave(page);
@@ -207,18 +220,19 @@ test.describe("Consent Creation", () => {
     await openAddConsentSheet(page);
 
     // Fill Valid From (after consent date)
-    const validFromInput = page.locator('input[type="datetime-local"]').nth(1);
+    const validFromInput = dateInputByLabel(page, "Consent Valid From");
     await validFromInput.fill(format(validFrom, "yyyy-MM-dd'T'HH:mm"));
 
     // Fill Valid Until (before Valid From)
-    const validUntilInput = page.locator('input[type="datetime-local"]').nth(2);
+    const validUntilInput = dateInputByLabel(page, "Consent Valid Until");
     await validUntilInput.fill(format(validUntil, "yyyy-MM-dd'T'HH:mm"));
 
     await clickSave(page);
 
-    // Should show validation error
+    // Should show validation error. The product string is misspelled
+    // ("Untill"); `untill?` tolerates a future correction to "until".
     await expect(
-      page.getByText(/valid from must be before valid untill/i),
+      page.getByText(/valid from must be before valid untill?/i),
     ).toBeVisible();
   });
 
@@ -232,7 +246,7 @@ test.describe("Consent Creation", () => {
     await openAddConsentSheet(page);
 
     // Fill Valid From to a date before consent date
-    const validFromInput = page.locator('input[type="datetime-local"]').nth(1);
+    const validFromInput = dateInputByLabel(page, "Consent Valid From");
     await validFromInput.fill(format(validFrom, "yyyy-MM-dd'T'HH:mm"));
 
     await clickSave(page);
@@ -259,18 +273,20 @@ test.describe("Consent Editing", () => {
 
     // Click Edit
     await page.getByRole("button", { name: "Edit" }).click();
-    await expect(page.getByText("Edit Consent")).toBeVisible();
+    const editSheet = page.getByRole("dialog");
+    await expect(editSheet.getByText("Edit Consent")).toBeVisible();
 
-    // Status and Note should be visible
-    await expect(page.getByText("Status")).toBeVisible();
-    await expect(page.getByText("Note")).toBeVisible();
+    // Status and Note should be visible within the edit sheet
+    await expect(editSheet.getByText("Status")).toBeVisible();
+    await expect(editSheet.getByText("Note")).toBeVisible();
 
-    // Creation-only fields should NOT be visible in edit mode
+    // Creation-only fields should NOT be present in the edit sheet.
+    // (Scoped to the sheet: the detail page behind it still shows these.)
     await expect(
-      page.getByText("Consent Given On", { exact: true }),
+      editSheet.getByText("Consent Given On", { exact: true }),
     ).not.toBeVisible();
     await expect(
-      page.getByText("Consent Decision", { exact: true }),
+      editSheet.getByText("Consent Decision", { exact: true }),
     ).not.toBeVisible();
   });
 
@@ -288,9 +304,10 @@ test.describe("Consent Editing", () => {
 
     // Click Edit
     await page.getByRole("button", { name: "Edit" }).click();
+    const editSheet = page.getByRole("dialog");
 
     // Change status to Inactive
-    await page
+    await editSheet
       .getByRole("combobox")
       .filter({ hasText: /active/i })
       .click();
@@ -299,8 +316,9 @@ test.describe("Consent Editing", () => {
     await clickSave(page);
     await expectToast(page, /consent updated successfully/i);
 
-    // Verify status updated on detail page
-    await expect(page.getByText("Inactive")).toBeVisible();
+    // Sheet closes after save; verify status updated on the detail page
+    await expect(editSheet).toBeHidden();
+    await expect(page.getByText("Inactive").first()).toBeVisible();
   });
 
   test("edit note → save → updated note on detail page", async ({ page }) => {
@@ -311,7 +329,7 @@ test.describe("Consent Editing", () => {
     await openAddConsentSheet(page);
 
     // Create with original note
-    await page.locator("textarea").fill(originalNote);
+    await page.getByLabel("Note", { exact: true }).fill(originalNote);
     await clickSave(page);
     await expectToast(page, /consent created successfully/i);
 
@@ -321,11 +339,12 @@ test.describe("Consent Editing", () => {
 
     // Edit
     await page.getByRole("button", { name: "Edit" }).click();
-    await page.locator("textarea").fill(updatedNote);
+    await page.getByLabel("Note", { exact: true }).fill(updatedNote);
     await clickSave(page);
     await expectToast(page, /consent updated successfully/i);
 
-    // Verify updated note
+    // Sheet closes after save; verify updated note on the detail page
+    await expect(page.getByRole("dialog")).toBeHidden();
     await expect(page.getByText(updatedNote)).toBeVisible();
     await expect(page.getByText(originalNote)).not.toBeVisible();
   });
@@ -350,9 +369,10 @@ test.describe("Consent Editing", () => {
     for (const status of statuses) {
       // Click Edit
       await page.getByRole("button", { name: "Edit" }).click();
+      const editSheet = page.getByRole("dialog");
 
       // Change status
-      await page.getByRole("combobox").first().click();
+      await editSheet.getByRole("combobox").first().click();
       await page
         .getByRole("option", { name: status.name, exact: true })
         .first()
@@ -361,8 +381,17 @@ test.describe("Consent Editing", () => {
       await clickSave(page);
       await expectToast(page, /consent updated successfully/i);
 
-      // Verify status on detail page
+      // Sheet closes after save; verify status on the detail page
+      await expect(editSheet).toBeHidden();
       await expect(page.getByText(status.display).first()).toBeVisible();
+
+      // Wait for the success toast to clear so the next iteration's toast
+      // doesn't stack and break the strict-match toast assertion
+      await expect(
+        page
+          .locator(".toaster.group")
+          .getByText(/consent updated successfully/i),
+      ).toHaveCount(0);
     }
   });
 });
