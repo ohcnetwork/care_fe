@@ -8,6 +8,15 @@ import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+// Every test here creates consents in one shared fixture encounter, so "newest
+// consent" is only well-defined if they don't run concurrently. Opt out of the
+// project's fullyParallel setting: run this file's tests sequentially on a
+// single worker (failures stay independent, unlike serial mode).
+test.describe.configure({ mode: "default" });
+
+// Set once in beforeAll from deterministic fixture ids (tests/support/*) and
+// only read afterwards. Playwright isolates by worker, so this module state is
+// not shared across parallel workers — safe to keep at module scope.
 let facilityId: string;
 let patientId: string;
 let encounterId: string;
@@ -29,11 +38,29 @@ async function goToConsentsTab(page: Page) {
   ).toBeVisible();
 }
 
-/** Locate a datetime-local input by its form label (robust to field reordering) */
+/**
+ * Locate a datetime-local input by its form label. These inputs aren't
+ * htmlFor-associated with their <label> in the source, so page.getByLabel()
+ * can't reach them; anchor on the label text and take the adjacent input.
+ */
 function dateInputByLabel(page: Page, label: string) {
   return page.locator(
     `label:text-is("${label}") + input[type="datetime-local"]`,
   );
+}
+
+/**
+ * The consents list is newest-first, so a just-created consent is the first
+ * consent card. Filter to cards that carry a "See Details" action (other cards
+ * on the page also use data-slot="card"), then take the newest. Scoping here
+ * avoids an unscoped page-wide getByText matching consents accumulated by
+ * earlier tests in this shared encounter.
+ */
+function firstConsentCard(page: Page) {
+  return page
+    .locator('[data-slot="card"]')
+    .filter({ has: page.getByRole("button", { name: "See Details" }) })
+    .first();
 }
 
 /** Open the "Add Consent" sheet */
@@ -60,10 +87,11 @@ test.describe("Consent Creation", () => {
     await clickSave(page);
     await expectToast(page, /consent created successfully/i);
 
-    // Verify card appears on list
-    await expect(page.getByText("TREATMENT").first()).toBeVisible();
-    await expect(page.getByText("Permitted").first()).toBeVisible();
-    await expect(page.getByText("Active").first()).toBeVisible();
+    // Verify the newly created card shows its default badges
+    const card = firstConsentCard(page);
+    await expect(card.getByText("TREATMENT")).toBeVisible();
+    await expect(card.getByText("Permitted")).toBeVisible();
+    await expect(card.getByText("Active")).toBeVisible();
   });
 
   test("create consent → See Details → sidebar shows correct fields", async ({
@@ -101,8 +129,8 @@ test.describe("Consent Creation", () => {
     await clickSave(page);
     await expectToast(page, /consent created successfully/i);
 
-    // Verify card shows Denied
-    await expect(page.getByText("Denied").first()).toBeVisible();
+    // Verify the newly created card shows Denied
+    await expect(firstConsentCard(page).getByText("Denied")).toBeVisible();
   });
 
   const consentCategories = [
@@ -134,8 +162,8 @@ test.describe("Consent Creation", () => {
       await clickSave(page);
       await expectToast(page, /consent created successfully/i);
 
-      // Verify badge
-      await expect(page.getByText(badge).first()).toBeVisible();
+      // Verify the newly created card shows the category badge
+      await expect(firstConsentCard(page).getByText(badge)).toBeVisible();
     });
   }
 
@@ -371,8 +399,9 @@ test.describe("Consent Editing", () => {
       await page.getByRole("button", { name: "Edit" }).click();
       const editSheet = page.getByRole("dialog");
 
-      // Change status
-      await editSheet.getByRole("combobox").first().click();
+      // Change status. In edit mode the sheet exposes a single combobox
+      // (Status), so scoping to the sheet reaches it without a positional index.
+      await editSheet.getByRole("combobox").click();
       await page
         .getByRole("option", { name: status.name, exact: true })
         .first()
