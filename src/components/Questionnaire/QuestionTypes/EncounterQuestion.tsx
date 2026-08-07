@@ -249,6 +249,17 @@ export function EncounterQuestion({
     return <div>{t("loading_encounter")}</div>;
   }
 
+  const isCurrentStatusNonSelectable =
+    NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounter.status);
+  const selectableEncounterStatuses = Object.values(EncounterStatus).filter(
+    (encounterStatus) => {
+      if (isCurrentStatusNonSelectable) {
+        return encounterStatus === encounter.status;
+      }
+      return !NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounterStatus);
+    },
+  );
+
   return (
     <div className="space-y-6">
       <QuestionLabel question={question} />
@@ -271,21 +282,13 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(EncounterStatus)
-                .filter((encounterStatus: EncounterStatus) => {
-                  if (
-                    NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounter.status)
-                  )
-                    return encounterStatus === encounter.status;
-                  return !NON_SELECTABLE_ENCOUNTER_STATUSES.includes(
-                    encounterStatus,
-                  );
-                })
-                .map((encounterStatus: EncounterStatus) => (
+              {selectableEncounterStatuses.map(
+                (encounterStatus: EncounterStatus) => (
                   <SelectItem key={encounterStatus} value={encounterStatus}>
                     {t(`encounter_status__${encounterStatus}`)}
                   </SelectItem>
-                ))}
+                ),
+              )}
             </SelectContent>
           </Select>
         </div>
