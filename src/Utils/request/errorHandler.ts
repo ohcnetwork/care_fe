@@ -35,6 +35,13 @@ export function handleHttpError(error: Error) {
 
   if (isBadRequest(error)) {
     if (Array.isArray(cause)) {
+      // DRF ValidationError renders as a bare list of strings, e.g. the file
+      // upload endpoint's size and mime-type rejections.
+      if (cause.length > 0 && cause.every((item) => typeof item === "string")) {
+        cause.forEach((message) => toast.error(message as string));
+        return;
+      }
+
       let handled = false;
       for (const obj of cause) {
         const errs = obj.errors;
@@ -58,6 +65,9 @@ export function handleHttpError(error: Error) {
       return;
     }
 
+    // Pre-existing fallback; replacing it is the deprecation's own TODO and is
+    // out of scope for the file-transport migration.
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     Notifications.BadRequest({ errs });
     return;
   }

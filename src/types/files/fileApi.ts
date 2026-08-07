@@ -1,16 +1,18 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
-import {
-  FileCreate,
-  FileRead,
-  FileReadMinimal,
-  FileUpdate,
-} from "@/types/files/file";
+import { FileRead, FileReadMinimal, FileUpdate } from "@/types/files/file";
 
 export default {
-  create: {
-    path: "/api/v1/files/",
+  /**
+   * Uploads a file through CARE as `multipart/form-data`.
+   *
+   * The body carries the binary `file` part plus `name`, `associating_id`,
+   * `file_type` and `file_category`. CARE streams the bytes to storage, so the
+   * client never talks to an object-storage provider.
+   */
+  upload: {
+    path: "/api/v1/files/upload-file/",
     method: HttpMethod.POST,
-    TBody: Type<FileCreate>(),
+    TBody: Type<FormData>(),
     TRes: Type<FileRead>(),
   },
   list: {
@@ -31,12 +33,6 @@ export default {
     method: HttpMethod.PUT,
     TBody: Type<FileUpdate>(),
     TRes: Type<FileRead>(),
-  },
-  markUploadCompleted: {
-    path: "/api/v1/files/{fileId}/mark_upload_completed/",
-    method: HttpMethod.POST,
-    TRes: Type<FileReadMinimal>(),
-    TBody: Type<void>(),
   },
   archive: {
     path: "/api/v1/files/{fileId}/archive/",

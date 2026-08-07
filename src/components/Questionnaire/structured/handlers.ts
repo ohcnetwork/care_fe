@@ -5,8 +5,6 @@ import {
 } from "@/components/Questionnaire/structured/types";
 import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 
-import { readFileAsDataURL } from "@/Utils/utils";
-
 interface StructuredHandlerContext {
   patientId: string;
   encounterId?: string;
@@ -204,24 +202,11 @@ export const structuredHandlers: {
     },
   },
   files: {
-    getRequests: async (files, { encounterId }) =>
-      await Promise.all(
-        files.map(async (file) => {
-          const base64 = (await readFileAsDataURL(file.file_data)).split(
-            ",",
-          )[1];
-          return {
-            url: `/api/v1/files/upload-file/`,
-            method: "POST",
-            body: {
-              ...file,
-              file_data: base64 as unknown as File,
-              encounter: encounterId,
-            },
-            reference_id: "files",
-          };
-        }),
-      ),
+    // Files are not part of the batch. CARE takes them as multipart/form-data,
+    // which cannot be expressed inside the batch request's JSON body, so
+    // QuestionnaireForm uploads them via uploadQuestionnaireFiles before
+    // submitting the batch.
+    getRequests: async () => [],
   },
   time_of_death: {
     getRequests: async (timeOfDeaths, { patientId }) => {

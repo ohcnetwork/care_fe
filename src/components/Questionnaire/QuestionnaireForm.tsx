@@ -56,6 +56,7 @@ import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationS
 import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
+import { uploadQuestionnaireFiles } from "./structured/fileUpload";
 import { getStructuredRequests } from "./structured/handlers";
 
 import queryClient from "@/Utils/request/queryClient";
@@ -378,6 +379,7 @@ export function QuestionnaireForm({
   const [{ continue_draft: continueDraftId }] = useQueryParams();
 
   const [isDirty, setIsDirty] = useState(false);
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   const [questionnaireForms, setQuestionnaireForms] = useState<
     QuestionnaireFormState[]
   >([]);
@@ -416,6 +418,9 @@ export function QuestionnaireForm({
   });
 
   const { mutate: submitBatch, isPending: isSubmitPending } = useMutation({
+    // Pre-existing; migrating this submission to useBatchRequest is out of
+    // scope for the file-transport migration.
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       setServerErrors(undefined);
@@ -547,7 +552,7 @@ export function QuestionnaireForm({
 
   const isDraftPending = isCreateDraftPending || isUpdateDraftPending;
 
-  const isPending = isSubmitPending || isDraftPending;
+  const isPending = isSubmitPending || isDraftPending || isUploadingFiles;
 
   // Check if questionnaire is saveable as draft (no structured questions)
   const isDraftSaveable = useMemo(() => {
@@ -936,6 +941,31 @@ export function QuestionnaireForm({
           },
         },
       });
+    }
+
+    // Files go to CARE as multipart/form-data, which the JSON batch body
+    // cannot carry, so they are uploaded first. A failure here aborts the
+    // submission rather than leaving the questionnaire saved without its files.
+    const fileValues = formsWithValidation.flatMap((form) =>
+      form.responses
+        .filter((response) => response.structured_type === "files")
+        .flatMap(
+          (response) =>
+            (response.values?.[0]?.value as FileUploadQuestion[] | undefined) ??
+            [],
+        ),
+    );
+
+    if (fileValues.length > 0) {
+      setIsUploadingFiles(true);
+      try {
+        await uploadQuestionnaireFiles(fileValues);
+      } catch {
+        // callApi surfaces the failure through the shared error handler.
+        return;
+      } finally {
+        setIsUploadingFiles(false);
+      }
     }
 
     setIsDirty(false);

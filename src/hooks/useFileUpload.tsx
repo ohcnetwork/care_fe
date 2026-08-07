@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
 import jsPDF from "jspdf";
 import {
@@ -14,8 +14,9 @@ import { toast } from "sonner";
 import AudioCaptureDialog from "@/components/Files/AudioCaptureDialog";
 import CameraCaptureDialog from "@/components/Files/CameraCaptureDialog";
 
-import mutate from "@/Utils/request/mutate";
+import { careFileUrl } from "@/Utils/request/files";
 import uploadFile from "@/Utils/request/uploadFile";
+import { getAuthorizationHeader } from "@/Utils/request/utils";
 import {
   DEFAULT_ALLOWED_EXTENSIONS,
   FILE_EXTENSIONS,
@@ -186,47 +187,60 @@ export default function useFileUpload(
     }
     return true;
   };
-  const { mutateAsync: markUploadComplete, error: markUploadCompleteError } =
-    useMutation({
-      mutationFn: (fileId: string) =>
-        mutate(fileApi.markUploadCompleted, {
-          pathParams: { fileId },
-        })(undefined),
-      onSuccess: (data) => {
-        queryClient.invalidateQueries({
-          queryKey: ["files", fileType, data.associating_id],
-        });
-        toast.success(t("file_uploaded"));
-        setError(null);
-        onUpload?.(data);
-      },
-    });
+  /**
+   * Uploads a file to CARE as `multipart/form-data`.
+   *
+   * XHR rather than `fetch` so the existing upload-progress UX survives the
+   * move off the direct-to-bucket PUT. `Content-Type` is deliberately not set:
+   * the browser derives it from the FormData, including the boundary.
+   */
+  const uploadfile = async (
+    file: File,
+    name: string,
+    associating_id: string,
+  ) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("name", name);
+    formData.append("original_name", file.name);
+    formData.append("associating_id", associating_id);
+    formData.append("file_type", fileType);
+    formData.append("file_category", category);
 
-  const uploadfile = async (data: FileRead, file: File) => {
-    const url = data.signed_url;
-    const internal_name = data.internal_name;
-    const newFile = new File([file], `${internal_name}`);
+    const authorization = getAuthorizationHeader();
 
     return new Promise<void>((resolve, reject) => {
       uploadFile(
-        url,
-        newFile,
-        "PUT",
-        { "Content-Type": file.type },
-        async (xhr: XMLHttpRequest) => {
+        careFileUrl(fileApi.upload.path),
+        formData,
+        fileApi.upload.method,
+        authorization ? { Authorization: authorization } : {},
+        (xhr: XMLHttpRequest) => {
           if (xhr.status >= 200 && xhr.status < 300) {
             setProgress(null);
-            await markUploadComplete(data.id);
-            if (markUploadCompleteError) {
-              toast.error(t("file_error__mark_complete_failed"));
+            let data: FileRead;
+            try {
+              data = JSON.parse(xhr.responseText) as FileRead;
+            } catch {
+              toast.error(t("file_error__dynamic", { statusText: "" }));
               reject();
               return;
             }
+            queryClient.invalidateQueries({
+              queryKey: ["files", fileType, data.associating_id],
+            });
+            toast.success(t("file_uploaded"));
+            setError(null);
+            onUpload?.(data);
             resolve();
           } else {
-            toast.error(
-              t("file_error__dynamic", { statusText: xhr.statusText }),
-            );
+            // 4xx bodies are surfaced by uploadFile through the shared error
+            // handler; this covers the statuses it leaves alone.
+            if (xhr.status < 400 || xhr.status > 499) {
+              toast.error(
+                t("file_error__dynamic", { statusText: xhr.statusText }),
+              );
+            }
             setProgress(null);
             reject();
           }
@@ -240,10 +254,6 @@ export default function useFileUpload(
       );
     });
   };
-
-  const { mutateAsync: createUpload } = useMutation({
-    mutationFn: mutate(fileApi.create),
-  });
 
   const handleUpload = async (
     associating_id: string,
@@ -289,21 +299,12 @@ export default function useFileUpload(
 
     for (const [index, file] of files.entries()) {
       try {
-        const data = await createUpload({
-          original_name: file.name ?? "",
-          file_type: fileType as FileType,
-          name:
-            allowNameFallback && uploadFileNames[index] === "" && file
-              ? file.name
-              : uploadFileNames[index],
-          associating_id,
-          file_category: category,
-          mime_type: file.type ?? "",
-        });
+        const name =
+          allowNameFallback && uploadFileNames[index] === "" && file
+            ? file.name
+            : uploadFileNames[index];
 
-        if (data) {
-          await uploadfile(data, file);
-        }
+        await uploadfile(file, name, associating_id);
       } catch (_error) {
         errors.push(file);
       }
