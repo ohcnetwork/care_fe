@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from "@playwright/test";
+import { format, subDays } from "date-fns";
 
 export async function selectFromLocationMultiSelect(
   page: Page,
@@ -692,4 +693,29 @@ export async function clickTabOrMenuItem(
   throw new Error(
     `Tab "${tabName}" not found as visible tab or in dropdown menu`,
   );
+}
+
+/**
+ * Opens the first in-progress encounter for a facility from the encounter
+ * listing and waits until its detail page (Overview tab) is ready.
+ *
+ * Centralises the fixture-selection query used across the encounter specs so
+ * the date window / status filter lives in one place.
+ *
+ * @param page - Playwright page instance
+ * @param facilityId - Facility whose encounters to list
+ */
+export async function openFirstInProgressEncounter(
+  page: Page,
+  facilityId: string,
+): Promise<void> {
+  const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
+  const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+
+  await page.goto(
+    `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
+  );
+  await page.getByRole("link", { name: "View Encounter" }).first().click();
+  await page.waitForURL(/\/facility\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+/);
+  await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
 }

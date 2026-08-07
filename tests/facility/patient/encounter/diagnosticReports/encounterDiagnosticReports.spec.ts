@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { format, subDays } from "date-fns";
+import { openFirstInProgressEncounter } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -9,17 +9,7 @@ test.describe("Encounter Diagnostic Reports Tab", () => {
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
-    );
-    await page.getByRole("link", { name: "View Encounter" }).first().click();
-    await page.waitForURL(
-      /\/facility\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+/,
-    );
-    await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
+    await openFirstInProgressEncounter(page, facilityId);
   });
 
   test("should display the diagnostic reports tab with its empty state", async ({

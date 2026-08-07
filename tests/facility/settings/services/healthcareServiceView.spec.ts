@@ -29,10 +29,8 @@ test.describe("Healthcare Service View", () => {
       .getByRole("textbox", { name: /search healthcare services/i })
       .fill("Pathology");
 
-    // Wait for search results
-    await page.waitForTimeout(500);
-
-    // Should find the Pathology Lab service
+    // Should find the Pathology Lab service (the assertion auto-waits for the
+    // debounced search results).
     const serviceLink = page.getByRole("link", { name: /pathology lab/i });
     await expect(serviceLink).toBeVisible({ timeout: 10000 });
   });
@@ -43,9 +41,7 @@ test.describe("Healthcare Service View", () => {
       .getByRole("textbox", { name: /search healthcare services/i })
       .fill("Pathology");
 
-    await page.waitForTimeout(500);
-
-    // Click on the service to view details
+    // Click on the service to view details (auto-waits for the search result).
     await page.getByRole("link", { name: /pathology lab/i }).click();
 
     // Wait for the detail page to load
@@ -65,9 +61,7 @@ test.describe("Healthcare Service View", () => {
       .getByRole("textbox", { name: /search healthcare services/i })
       .fill("Pharmacy");
 
-    await page.waitForTimeout(500);
-
-    // Click on the service
+    // Click on the service (the assertion below auto-waits for the result).
     const pharmacyLink = page.getByRole("link", { name: /main pharmacy/i });
     await expect(pharmacyLink).toBeVisible({ timeout: 10000 });
     await pharmacyLink.click();

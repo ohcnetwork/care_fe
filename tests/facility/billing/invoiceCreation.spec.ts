@@ -13,97 +13,79 @@ test.describe("Invoice Creation", () => {
     accountId = getAccountId();
   });
 
-  test("should navigate to invoice creation page from account", async ({
+  test("should open the invoice creation form from an active account", async ({
     page,
   }) => {
-    // Navigate to the account page
     await page.goto(`/facility/${facilityId}/billing/account/${accountId}`);
 
-    // Wait for the page to load
-    await page.waitForLoadState("networkidle");
+    // The fixture account is active and billable, so the create-invoice action
+    // must be offered. If it's missing (e.g. the account was closed elsewhere),
+    // this fails loudly — which is exactly the regression worth catching.
+    const createInvoice = page.getByRole("button", {
+      name: /create invoice/i,
+    });
+    await expect(createInvoice).toBeVisible();
+    await createInvoice.click();
 
-    // Look for a "Create Invoice" button or link
-    const createInvoiceButton = page
-      .getByRole("link", { name: /create invoice/i })
-      .or(page.getByRole("button", { name: /create invoice/i }));
-
-    if (
-      await createInvoiceButton
-        .first()
-        .isVisible()
-        .catch(() => false)
-    ) {
-      await createInvoiceButton.first().click();
-      await page.waitForURL(/\/invoices\/create/);
-
-      // Verify the invoice creation page loads
-      await expect(page).toHaveURL(/\/invoices\/create/);
-    }
+    await page.waitForURL(/\/invoices\/create$/);
+    await expect(page).toHaveURL(/\/invoices\/create$/);
+    // A fresh draft invoice is what the create form opens.
+    await expect(page.getByText("Draft", { exact: true })).toBeVisible();
   });
 
-  test("should view account details with invoices tab", async ({ page }) => {
-    // Navigate to the account page with invoices tab
+  test("should render the account invoices tab", async ({ page }) => {
     await page.goto(
       `/facility/${facilityId}/billing/account/${accountId}/invoices`,
     );
 
-    await page.waitForLoadState("networkidle");
-
-    // Verify the account page loads
-    // Should see account information
-    const accountContent = page.locator("main");
-    await expect(accountContent).toBeVisible({ timeout: 10000 });
+    // The invoices tab owns the invoice search box.
+    await expect(
+      page.getByRole("textbox", { name: /search invoices/i }),
+    ).toBeVisible({ timeout: 10000 });
   });
 
-  test("should view account charge items tab", async ({ page }) => {
-    // Navigate to the account page with charge items tab
+  test("should render the account charge items tab", async ({ page }) => {
     await page.goto(
       `/facility/${facilityId}/billing/account/${accountId}/charge_items`,
     );
 
-    await page.waitForLoadState("networkidle");
-
-    // Verify the charge items tab loads
-    const accountContent = page.locator("main");
-    await expect(accountContent).toBeVisible({ timeout: 10000 });
+    // "Print charge items" is always rendered by the charge items tab.
+    await expect(
+      page.getByRole("button", { name: /print charge items/i }),
+    ).toBeVisible({ timeout: 10000 });
   });
 
-  test("should view account payments tab", async ({ page }) => {
-    // Navigate to the account page with payments tab
+  test("should render the account payments tab", async ({ page }) => {
     await page.goto(
       `/facility/${facilityId}/billing/account/${accountId}/payments`,
     );
 
-    await page.waitForLoadState("networkidle");
-
-    // Verify the payments tab loads
-    const accountContent = page.locator("main");
-    await expect(accountContent).toBeVisible({ timeout: 10000 });
+    // Genuine either/or: the payments tab shows its empty state when there are
+    // no reconciliations, or the payments table when there are.
+    await expect(
+      page
+        .getByText(/no payments/i)
+        .or(page.getByRole("table"))
+        .first(),
+    ).toBeVisible({ timeout: 10000 });
   });
 
-  test("should navigate to facility billing invoices list", async ({
-    page,
-  }) => {
-    // Navigate to the facility-level invoices list
+  test("should render the facility invoices list", async ({ page }) => {
     await page.goto(`/facility/${facilityId}/billing/invoices`);
 
-    await page.waitForLoadState("networkidle");
-
-    // Verify the invoices list page loads
-    const invoiceContent = page.locator("main");
-    await expect(invoiceContent).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByRole("heading", { name: /invoice management/i }),
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByRole("textbox", { name: /search invoices/i }),
+    ).toBeVisible();
   });
 
-  test("should navigate to facility billing payments list", async ({
-    page,
-  }) => {
-    // Navigate to the facility-level payments list
+  test("should render the facility payments list", async ({ page }) => {
     await page.goto(`/facility/${facilityId}/billing/payments`);
 
-    await page.waitForLoadState("networkidle");
-
-    // Verify the payments list page loads
-    const paymentsContent = page.locator("main");
-    await expect(paymentsContent).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByRole("heading", { name: /payment reconciliations/i }),
+    ).toBeVisible({ timeout: 10000 });
   });
 });
