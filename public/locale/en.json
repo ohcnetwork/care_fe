@@ -2468,7 +2468,6 @@
   "error_updating_delivery": "Error updating delivery",
   "error_updating_encounter": "Error to Updating Encounter",
   "error_updating_location": "Error updating location",
-  "error_updating_medication_dispenses": "Error updating medication dispenses",
   "error_updating_order": "Error updating order",
   "error_updating_status": "Failed to update status",
   "error_updating_supply_deliveries": "Error updating supply deliveries",
