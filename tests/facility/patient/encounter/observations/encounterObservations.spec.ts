@@ -24,6 +24,10 @@ test.describe("Encounter Observations Tab", () => {
   test("should add a symptom via the encounter actions command palette", async ({
     page,
   }) => {
+    // NOTE: this test mutates the shared fixture encounter (adds a symptom
+    // observation). It is intentionally NOT run in serial mode: no other test in
+    // this file asserts an empty observations state, so the mutation can't race a
+    // sibling, and cross-run state is reset by the DB snapshot restore.
     await page
       .getByRole("button", { name: /encounter actions/i })
       .first()
