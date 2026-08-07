@@ -95,6 +95,44 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
     });
   });
 
+  /**
+   * Keystroke-level decimal entry. `fill()` sets the value in one shot and so
+   * never exercises the intermediate states a real typist produces — these
+   * type character by character instead.
+   *
+   * NumberInput keeps only the parsed `number` and re-renders
+   * `value.toString()`, so every intermediate string that is not its own
+   * round-trip ("0.", "1.30") is rewritten between keystrokes and the
+   * remaining characters land against a truncated value.
+   */
+  test("decimal input preserves a value typed character by character", async ({
+    page,
+  }) => {
+    await openKitchenSinkPreview(page);
+    await jumpTo(page, "Body temperature (C)");
+    const input = questionBlock(page, "Body temperature (C)").getByRole(
+      "spinbutton",
+    );
+
+    await test.step("a zero directly after the point survives", async () => {
+      await input.fill("");
+      await input.pressSequentially("0.0", { delay: 50 });
+      await expect.soft(input).toHaveValue("0.0");
+    });
+
+    await test.step("digits after a leading 0. are not absorbed into the units place", async () => {
+      await input.fill("");
+      await input.pressSequentially("0.01", { delay: 50 });
+      await expect.soft(input).toHaveValue("0.01");
+    });
+
+    await test.step("trailing zeros in the fraction survive", async () => {
+      await input.fill("");
+      await input.pressSequentially("1.30001", { delay: 50 });
+      await expect.soft(input).toHaveValue("1.30001");
+    });
+  });
+
   test("date, dateTime and time questions render their pickers", async ({
     page,
   }) => {
