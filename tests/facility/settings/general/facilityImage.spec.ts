@@ -23,6 +23,16 @@ test.describe("Facility Image Settings", () => {
 
     await expect(page.getByText("Cover image updated")).toBeVisible();
 
+    // The image is served by CARE, resolved against the API origin. It is never
+    // a storage-provider URL, so switching backend storage changes nothing here.
+    const coverImage = page
+      .locator('img[src*="/api/v1/assets/facility/"]')
+      .first();
+    await expect(coverImage).toBeVisible({ timeout: 10000 });
+    expect(await coverImage.getAttribute("src")).toContain(
+      `${process.env.REACT_CARE_API_URL ?? "http://127.0.0.1:9000"}/api/v1/assets/facility/`,
+    );
+
     await page.getByRole("button", { name: "Edit Cover Photo" }).click();
     await page.getByRole("button", { name: "Delete" }).click();
 
