@@ -8,6 +8,11 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Encounter Consents Tab", () => {
+  // The create test mutates the shared fixture encounter, so run this file's
+  // tests in declaration order (empty-state assertions before the create) in a
+  // single worker instead of in parallel.
+  test.describe.configure({ mode: "serial" });
+
   let facilityId: string;
 
   test.beforeEach(async ({ page }) => {

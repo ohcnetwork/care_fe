@@ -8,6 +8,10 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Encounter Devices Tab", () => {
+  // The associate test mutates the shared fixture encounter, so run this file's
+  // tests serially in one worker for deterministic ordering.
+  test.describe.configure({ mode: "serial" });
+
   let facilityId: string;
 
   test.beforeEach(async ({ page }) => {

@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { selectFromLocationMultiSelect } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -27,20 +28,12 @@ test.describe("Healthcare Service Create & Edit", () => {
     });
 
     await test.step("Select a location", async () => {
-      // Click the location selector
       const locationTrigger = page
         .getByRole("combobox")
         .filter({ hasText: /select locations/i })
-        .or(page.getByText(/select locations/i));
-      await locationTrigger.first().click();
-
-      // Wait for the location picker to open and select the first location
-      const plusButton = page.locator("button:has(svg.lucide-plus)").first();
-      await expect(plusButton).toBeVisible({ timeout: 5000 });
-      await plusButton.click();
-
-      // Close the picker
-      await page.keyboard.press("Escape");
+        .or(page.getByText(/select locations/i))
+        .first();
+      await selectFromLocationMultiSelect(page, locationTrigger);
     });
 
     await test.step("Submit the form", async () => {
@@ -84,13 +77,9 @@ test.describe("Healthcare Service Create & Edit", () => {
       const locationTrigger = page
         .getByRole("combobox")
         .filter({ hasText: /select locations/i })
-        .or(page.getByText(/select locations/i));
-      await locationTrigger.first().click();
-
-      const plusButton = page.locator("button:has(svg.lucide-plus)").first();
-      await expect(plusButton).toBeVisible({ timeout: 5000 });
-      await plusButton.click();
-      await page.keyboard.press("Escape");
+        .or(page.getByText(/select locations/i))
+        .first();
+      await selectFromLocationMultiSelect(page, locationTrigger);
 
       await page.getByRole("button", { name: /create/i }).click();
       await expect(

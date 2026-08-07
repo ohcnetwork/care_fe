@@ -37,18 +37,10 @@ test.describe("Patient Update/Edit", () => {
   });
 
   test("should display the gender pre-selected", async ({ page }) => {
-    const genderRadios = page.getByRole("radio");
-    const radioCount = await genderRadios.count();
-    expect(radioCount).toBeGreaterThan(0);
-
-    let hasChecked = false;
-    for (let i = 0; i < radioCount; i++) {
-      if (await genderRadios.nth(i).isChecked()) {
-        hasChecked = true;
-        break;
-      }
-    }
-    expect(hasChecked).toBe(true);
+    // The patient's saved gender should be pre-selected on load.
+    await expect(
+      page.getByRole("radio", { checked: true }).first(),
+    ).toBeVisible();
   });
 
   test("should enable the update action after editing the name", async ({
