@@ -136,17 +136,16 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                 )
               ) : (
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={link.name}
-                    className={
-                      "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
-                    }
+                  <NavLink
+                    href={link.url}
+                    isSelected={isSelected(link.url)}
+                    activeClass="bg-white text-green-700 shadow-sm"
                   >
-                    <NavLink
-                      href={link.url}
-                      isSelected={isSelected(link.url)}
-                      activeClass="bg-white text-green-700 shadow-sm"
+                    <SidebarMenuButton
+                      tooltip={link.name}
+                      className={
+                        "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
+                      }
                     >
                       {link.icon ? (
                         link.icon
@@ -160,8 +159,8 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       <span className="group-data-[collapsible=icon]:hidden ml-1">
                         {link.name}
                       </span>
-                    </NavLink>
-                  </SidebarMenuButton>
+                    </SidebarMenuButton>
+                  </NavLink>
                 </SidebarMenuItem>
               )}
             </Fragment>
