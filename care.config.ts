@@ -79,8 +79,7 @@ const careConfig = {
       : undefined),
 
   defaultDischargeDisposition: env.REACT_DEFAULT_DISCHARGE_DISPOSITION as
-    | EncounterDischargeDisposition
-    | undefined,
+    EncounterDischargeDisposition | undefined,
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
@@ -407,6 +406,14 @@ const careConfig = {
   maxFormDialogFavorites: env.REACT_MAX_FORM_DIALOG_FAVORITES
     ? parseInt(env.REACT_MAX_FORM_DIALOG_FAVORITES, 10)
     : 5,
+
+  /**
+   * Maximum number of datapoints allowed in a single upsert request.
+   * Must not exceed the backend limit (defaults to 100).
+   */
+  maxDatapointsPerUpsert: env.REACT_MAX_DATAPOINTS_PER_UPSERT
+    ? parseInt(env.REACT_MAX_DATAPOINTS_PER_UPSERT, 10)
+    : 100,
 } as const;
 
 export default careConfig;

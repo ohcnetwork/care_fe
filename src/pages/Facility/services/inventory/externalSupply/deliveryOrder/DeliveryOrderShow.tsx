@@ -14,6 +14,8 @@ import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import careConfig from "@careConfig";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
@@ -252,6 +254,9 @@ export function DeliveryOrderShow({
   });
   const { open: isSidebarOpen } = useSidebar();
 
+  const exceedsUpsertLimit =
+    selectedDeliveries.length > careConfig.maxDatapointsPerUpsert;
+
   const { data: deliveryOrder, isLoading } = useQuery({
     queryKey: ["deliveryOrders", deliveryOrderId],
     queryFn: query(deliveryOrderApi.retrieveDeliveryOrder, {
@@ -288,6 +293,7 @@ export function DeliveryOrderShow({
         queryClient.invalidateQueries({
           queryKey: ["supplyDeliveries", deliveryOrderId],
         });
+        setSelectedDeliveries([]);
         toast.success(t("supply_deliveries_updated_successfully"));
       },
       onError: (_error) => {
@@ -362,7 +368,6 @@ export function DeliveryOrderShow({
     upsertSupplyDeliveries({
       datapoints: selectedSupplyDeliveries,
     });
-    setSelectedDeliveries([]);
   }
 
   function handleMarkAsDamaged() {
@@ -388,7 +393,6 @@ export function DeliveryOrderShow({
     upsertSupplyDeliveries({
       datapoints: selectedSupplyDeliveries,
     });
-    setSelectedDeliveries([]);
   }
 
   function handleSubmitDialog() {
@@ -411,7 +415,6 @@ export function DeliveryOrderShow({
     upsertSupplyDeliveries({
       datapoints: selectedSupplyDeliveries,
     });
-    setSelectedDeliveries([]);
     setConfirmDialog((prev) => ({ ...prev, open: false }));
   }
 
@@ -578,7 +581,8 @@ export function DeliveryOrderShow({
                   disabled={
                     isUpsertingDeliveries ||
                     isUpdating ||
-                    selectedDeliveries.length !== 0
+                    selectedDeliveries.length !== 0 ||
+                    exceedsUpsertLimit
                   }
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}

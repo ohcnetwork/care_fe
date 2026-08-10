@@ -170,6 +170,7 @@ const envSchema = z
       })
       .optional(),
     REACT_MAX_FORM_DIALOG_FAVORITES: numberAsString.optional(),
+    REACT_MAX_DATAPOINTS_PER_UPSERT: numberAsString.optional(),
   })
   .superRefine(async (data, ctx) => {
     // Ensure at least one API URL configuration is provided
