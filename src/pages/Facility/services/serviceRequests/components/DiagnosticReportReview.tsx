@@ -32,13 +32,13 @@ import { FileListTable } from "@/components/Files/FileListTable";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import Loading from "@/components/Common/Loading";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
@@ -115,7 +115,7 @@ function DiagnosticReportReviewItem({
   const [conclusion, setConclusion] = useState<string>(report.conclusion || "");
   const [showApproveDialog, setShowApproveDialog] = useState(false);
 
-  const { data: fullReport, isFetched: isReportFetched } = useQuery({
+  const { data: fullReport, isLoading: isLoadingReport } = useQuery({
     queryKey: ["diagnosticReport", report.id],
     queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
       pathParams: {
@@ -167,8 +167,18 @@ function DiagnosticReportReviewItem({
     setConclusion(fullReport?.conclusion || "");
   }, [fullReport?.conclusion]);
 
-  if (isReportFetched) {
-    return <Loading />;
+  if (isLoadingReport) {
+    return (
+      <Card className="shadow-none border-gray-300 rounded-lg bg-white">
+        <CardContent className="p-4">
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-1/3" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (!fullReport) {
@@ -187,10 +197,9 @@ function DiagnosticReportReviewItem({
   };
 
   const isReportNotReviewable =
-    isReportFetched &&
     isFilesFetched &&
-    (!fullReport.observations || fullReport.observations.length === 0) &&
-    (!files?.results || files.results.length === 0) &&
+    !fullReport.observations?.length &&
+    !files?.results?.length &&
     !fullReport.conclusion;
 
   return (
@@ -220,12 +229,10 @@ function DiagnosticReportReviewItem({
                       </span>
                       <span className="text-sm text-gray-500 truncate">
                         {t("last_updated")}:{" "}
-                        {fullReport
-                          ? format(
-                              fullReport.modified_date,
-                              "hh:mm a, MMM dd, yyyy",
-                            )
-                          : "-"}
+                        {format(
+                          fullReport.modified_date,
+                          "hh:mm a, MMM dd, yyyy",
+                        )}
                       </span>
                     </div>
                   </div>
