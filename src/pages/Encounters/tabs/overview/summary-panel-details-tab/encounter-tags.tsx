@@ -6,7 +6,7 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { EmptyState } from "./empty-state";
+import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
 export const EncounterTags = () => {
   const { canWriteSelectedEncounter: canEdit, selectedEncounter: encounter } =

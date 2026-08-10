@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { formatPatientAge } from "@/Utils/utils";
+import { PatientAge } from "@/components/Patient/PatientAge";
 import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Button } from "@/components/ui/button";
@@ -52,8 +52,7 @@ const TokenCard = ({
   const patient = token?.patient ?? appointment?.patient;
   // Get patient with identifiers (appointment.patient has more data)
   const patientWithIdentifiers = appointment?.patient as
-    | PatientRead
-    | undefined;
+    PatientRead | undefined;
   const patientTags =
     patientWithIdentifiers?.instance_tags ?? patient?.instance_tags;
 
@@ -94,7 +93,7 @@ const TokenCard = ({
                   {patient.name || "--"}
                 </p>
                 <p className="pl-1 text-sm text-gray-600 font-medium">
-                  {formatPatientAge(patient, true)},{" "}
+                  <PatientAge patient={patient} />,{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </p>
                 {patientExtensionData.map((data) => {

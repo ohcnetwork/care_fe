@@ -38,7 +38,7 @@ const namespaceToUrl = (namespace: string) => {
 
   if (
     pluginConfig?.meta?.url &&
-    z.string().url().safeParse(pluginConfig.meta.url).success
+    z.url().safeParse(pluginConfig.meta.url).success
   ) {
     const url = new URL(pluginConfig.meta.url);
     return url.origin.toString();
@@ -165,4 +165,7 @@ export async function initI18n() {
     });
 }
 
+/**
+ * @public
+ */
 export default i18n;

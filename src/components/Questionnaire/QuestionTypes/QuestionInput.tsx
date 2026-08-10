@@ -454,11 +454,12 @@ export function QuestionInput({
                       question.repeats || question.type === "text",
                   })}
                 >
-                  {/* For basic types (not structured, not text/string, not repeating), use integrated notes */}
+                  {/* For basic types (not structured, not text/string/url, not repeating), use integrated notes */}
                   {!question.structured_type &&
                   !question.repeats &&
                   question.type !== "text" &&
-                  question.type !== "string" ? (
+                  question.type !== "string" &&
+                  question.type !== "url" ? (
                     <InputWithNotes
                       questionnaireResponse={questionnaireResponse}
                       onUpdateNote={(note) => {

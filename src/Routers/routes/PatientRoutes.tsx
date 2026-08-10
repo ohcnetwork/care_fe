@@ -1,7 +1,5 @@
 import { Redirect } from "raviger";
-import { Suspense, lazy } from "react";
 
-import Loading from "@/components/Common/Loading";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import PatientIndex from "@/components/Patient/PatientIndex";
 import { PatientProfile } from "@/components/Patient/PatientProfile";
@@ -16,10 +14,6 @@ import ClinicalHistoryPage from "@/pages/Patient/History";
 import PatientHome from "@/pages/Patient/PatientHome";
 import { ReportType } from "@/types/emr/report/report";
 import careConfig from "@careConfig";
-
-const ExcalidrawEditor = lazy(
-  () => import("@/components/Common/Drawings/ExcalidrawEditor"),
-);
 
 const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patients": ({ facilityId }) => (
@@ -104,48 +98,6 @@ const PatientRoutes: AppRoutes = {
   }, {}),
   "/facility/:facilityId/patient/:id/update": ({ id }) => (
     <PatientRegistration patientId={id} />
-  ),
-  "/facility/:facilityId/patient/:patientId/drawings/new": ({ patientId }) => {
-    return (
-      <Suspense fallback={<Loading />}>
-        <ExcalidrawEditor
-          associatingId={patientId}
-          associating_type="patient"
-        />
-      </Suspense>
-    );
-  },
-  "/facility/:facilityId/patient/:patientId/drawings/:drawingId": ({
-    patientId,
-    drawingId,
-  }) => (
-    <Suspense fallback={<Loading />}>
-      <ExcalidrawEditor
-        associatingId={patientId}
-        associating_type="patient"
-        drawingId={drawingId}
-      />
-    </Suspense>
-  ),
-
-  "/patient/:patientId/drawings/new": ({ patientId }) => {
-    return (
-      <Suspense fallback={<Loading />}>
-        <ExcalidrawEditor
-          associatingId={patientId}
-          associating_type="patient"
-        />
-      </Suspense>
-    );
-  },
-  "/patient/:patientId/drawings/:drawingId": ({ patientId, drawingId }) => (
-    <Suspense fallback={<Loading />}>
-      <ExcalidrawEditor
-        associatingId={patientId}
-        associating_type="patient"
-        drawingId={drawingId}
-      />
-    </Suspense>
   ),
   "/facility/:facilityId/patient/:patientId/history/:tab": ({
     facilityId,
