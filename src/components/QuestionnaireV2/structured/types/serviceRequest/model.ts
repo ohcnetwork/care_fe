@@ -1,24 +1,13 @@
-import { z } from "zod";
-
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
 import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
-import {
-  displayObjectSchema,
-  nonEmptyString,
-  userDisplaySchema,
-} from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
 } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
 
-import { CodeSchema } from "@/types/base/code/code";
-import {
-  ActivityDefinitionReadSpec,
-  Classification,
-} from "@/types/emr/activityDefinition/activityDefinition";
+import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import {
   Intent,
   Priority,
@@ -42,42 +31,6 @@ import { UserReadMinimal } from "@/types/user/user";
 export type ServiceRequestRow = ServiceRequestApplyActivityDefinitionForm & {
   activity_definition_object: ActivityDefinitionReadSpec;
 };
-
-/**
- * Assistant write guard. `activity_definition_object` is
- * `displayObjectSchema` (loose, slug/title-keyed): an assistant only ever
- * copies it verbatim from a prior pick, never authors the full
- * `ActivityDefinitionReadSpec` by hand; `requester` is `userDisplaySchema`
- * for the same reason. Every other field is `.strict()`, matching
- * `ServiceRequestApplyActivityDefinitionForm`'s `service_request` shape
- * (`BaseServiceRequestSpec` minus `id`, plus `locations`).
- */
-const serviceRequestSpecSchema = z
-  .object({
-    title: nonEmptyString,
-    status: z.enum(Status),
-    intent: z.enum(Intent),
-    priority: z.enum(Priority),
-    category: z.enum(Classification),
-    do_not_perform: z.boolean(),
-    note: z.string().nullable(),
-    code: CodeSchema,
-    body_site: CodeSchema.nullable(),
-    occurance: z.string().nullable(),
-    patient_instruction: z.string().nullable(),
-    locations: z.array(z.string()),
-    requester: userDisplaySchema,
-  })
-  .strict();
-
-export const rowSchema = z
-  .object({
-    encounter: nonEmptyString,
-    activity_definition: nonEmptyString,
-    service_request: serviceRequestSpecSchema,
-    activity_definition_object: displayObjectSchema(["slug", "title"]),
-  })
-  .strict();
 
 /** Rows are born whole from a picked or template-resolved activity
  *  definition (see {@link listProjectValues}). */
@@ -209,11 +162,9 @@ export function stripDisplay(
 
 /**
  * Service requests are applied via `apply_activity_definition/`, never
- * prefetched or amended in place, so the baseline is genuinely, permanently
- * empty — an explicit `new Map()`, not the `undefined` that means "still
- * loading or errored". `updates`/`removes` are never read: this create-only
- * endpoint has no verb for them, and an add-then-remove pair annihilates
- * inside the reducer before reaching this function.
+ * prefetched or amended in place. `updates`/`removes` are never read: this
+ * create-only endpoint has no verb for them, and an add-then-remove pair
+ * annihilates inside the reducer before reaching this function.
  *
  * The endpoint takes exactly ONE service request per call, so this returns
  * one `StructuredBatchEntry` per created row, all sharing the per-question
@@ -224,7 +175,7 @@ export async function toRequests(
   { facilityId, questionId }: StructuredRequestContext,
 ): Promise<StructuredBatchEntry[]> {
   if (!facilityId) return [];
-  const { creates } = resolveChanges(edits, { baseline: new Map() });
+  const { creates } = resolveChanges(edits, {});
   return creates.map((row) => ({
     url: `/api/v1/facility/${facilityId}/service_request/apply_activity_definition/`,
     method: "POST" as const,

@@ -285,51 +285,6 @@ describe("useStructuredRows — confirmed orphans are pruned from response.edits
     assert.deepEqual(store.get(errorsAtom), []);
   });
 
-  it("resetEdits (Discard) also clears droppedEdits, not just edits", async () => {
-    const questionId = "q-orphan-pin-reset";
-    const staleEdit: StructuredEditRecord = {
-      rowId: "vanished",
-      op: "update",
-      patch: { id: "vanished", label: "restored draft intent" },
-    };
-    const seed: QuestionnaireResponse = {
-      question_id: questionId,
-      structured_type: "encounter",
-      link_id: "q-structured",
-      values: [],
-      edits: [staleEdit],
-    };
-
-    const harness = mountHarness(questionId, seed);
-    const { resultRef } = harness;
-    cleanups.push(() => {
-      harness.root.unmount();
-      harness.container.remove();
-    });
-
-    await setBaselineAndFlush(harness, undefined);
-    await setBaselineAndFlush(harness, []); // reveals the orphan, prunes it
-    assert.deepEqual(
-      resultRef.current?.droppedEdits,
-      [staleEdit],
-      "sanity: the orphan was actually captured before Discard",
-    );
-
-    await act(async () => {
-      resultRef.current?.resetEdits();
-      await flushTurns(10);
-    });
-
-    assert.deepEqual(
-      resultRef.current?.droppedEdits,
-      [],
-      "a Discard forgets the restore-notice record too, per resetEdits's " +
-        "own doc comment — a stale notice naming edits from before an " +
-        "explicit 'forget everything' action would confuse, not inform",
-    );
-    assert.deepEqual(resultRef.current?.edits, []);
-  });
-
   it("the length===0 guard's second job: no write happens while baseline stays undefined, even when edits's reference churns (an unmemoized-baseline-shaped stress, without risking an actual unbounded loop)", async () => {
     const questionId = "q-orphan-pin-guard";
     const staleEdit: StructuredEditRecord = {

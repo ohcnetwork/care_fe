@@ -38,7 +38,7 @@ import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { dom, flushTurns } from "./jsdomTestEnv";
 import type { EditLog } from "./types";
-import { useStructuredRows } from "./useStructuredRows";
+import { useStructuredSingleRow } from "./useStructuredRows";
 
 interface Row {
   id: string;
@@ -109,13 +109,10 @@ function mountHarness(
   const baseline = [{ rowId: "row-1", row: { id: "row-1", label: "server" } }];
 
   function Child() {
-    // No explicit type argument: `TRow` infers from `projectValues`/
-    // `baseline`, `Mode` from the `mode: "single"` literal. The return
-    // value is intentionally unused — this hook is exercised for its
-    // EFFECTS (the seed's `commit`) only.
-    useStructuredRows({
+    // The return value is intentionally unused — this hook is exercised
+    // for its EFFECTS (the seed's `commit`) only.
+    useStructuredSingleRow({
       questionId,
-      mode: "single",
       baseline,
       projectValues,
       initialEdits,
@@ -283,9 +280,8 @@ describe("useStructuredRows — initialEdits seed timing vs. an ancestor's dirty
     ];
 
     function Child() {
-      useStructuredRows({
+      useStructuredSingleRow({
         questionId,
-        mode: "single",
         baseline,
         projectValues,
         initialEdits: [

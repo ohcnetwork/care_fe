@@ -25,7 +25,6 @@ import {
   periodDateForInput,
   periodDateFromInput,
   projectValues,
-  rowSchema,
   toBaselineRows,
   toMedicationStatementRow,
   toRequests,
@@ -641,79 +640,5 @@ describe("medication_statement model", () => {
         [],
       );
     });
-  });
-});
-
-describe("rowSchema — the assistant write guard", () => {
-  const code = { code: "1", display: "Paracetamol", system: "sys" };
-
-  it("accepts a real row", () => {
-    assert.equal(
-      rowSchema.safeParse(newMedicationStatementRow(code, "enc-1")).success,
-      true,
-    );
-  });
-
-  it("accepts a row with an empty dosage_text — the schema is not the completeness gate", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newMedicationStatementRow(code, "enc-1"),
-        dosage_text: "",
-      }).success,
-      true,
-    );
-  });
-
-  it("accepts a baseline row converted via toMedicationStatementRow", () => {
-    assert.equal(
-      rowSchema.safeParse(toMedicationStatementRow(serverMedication())).success,
-      true,
-    );
-  });
-
-  it("rejects an unknown field", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newMedicationStatementRow(code, "enc-1"),
-        route: "hallucinated field",
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects an invalid status enum value", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newMedicationStatementRow(code, "enc-1"),
-        status: "not_a_real_status",
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects an invalid information_source enum value", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newMedicationStatementRow(code, "enc-1"),
-        information_source: "self",
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects a period with an unparseable start", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newMedicationStatementRow(code, "enc-1"),
-        effective_period: { start: "not-a-date" },
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects a missing medication code", () => {
-    const { medication: _drop, ...withoutMedication } =
-      newMedicationStatementRow(code, "enc-1");
-    assert.equal(rowSchema.safeParse(withoutMedication).success, false);
   });
 });

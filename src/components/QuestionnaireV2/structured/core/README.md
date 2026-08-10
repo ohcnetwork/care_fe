@@ -3,8 +3,7 @@
 The row-list editing engine every structured question type builds on:
 `allergy_intolerance`, `medication_request`, `medication_statement`,
 `symptom`, `diagnosis`, `appointment`, `encounter`, `service_request`,
-`charge_item`, `files`, `time_of_death`. 32 files under `structured/types/`
-import from here (`grep -rl structured/core structured/types`).
+`charge_item`, `files`, `time_of_death`.
 
 `structured/` (`registry.ts`, `types.ts`, `pluginRegistry.ts`,
 `definitions/`) is the registration layer one level up — see the parent
@@ -39,10 +38,10 @@ Every entity's `model.ts` stays React-free on purpose ("must stay
 React-free for `node --test`" — a recurring comment across the type
 modules) and only imports pure core exports (`resolveChanges`, the
 `BaselineRow`/`ProjectValues`/`SoftDeleteDescriptor` types). Its
-`Editor.tsx` is the one file that actually calls `useStructuredRows` and
-renders `StructuredList`. If you're implementing a new structured type,
-`model.ts` + `Editor.tsx` is the whole job — you should never need to edit
-anything in this directory.
+`Editor.tsx` is the one file that actually calls `useStructuredRows` (or
+`useStructuredSingleRow`) and renders `StructuredList`. If you're
+implementing a new structured type, `model.ts` + `Editor.tsx` is the whole
+job — you should never need to edit anything in this directory.
 
 ## The data model
 
@@ -93,27 +92,34 @@ splices the entry out entirely — and it's what gets persisted into the
 response (`response.edits`) and what every `toRequests` reads to build the
 submit batch.
 
-**Invariant, stated three times in three files because it's load-bearing
-everywhere**: `RowEdit.patch` is always the **complete row**, for every
-op, including `remove` — never a partial diff, never absent. This is what
-lets `toRequests` stay pure (no query-cache access needed to reconstruct a
-row) and lets a draft restored after a failed baseline fetch still carry
-everything needed to build a soft-delete body. Contrast this with
-`SoftDeleteDescriptor.patch: Partial<TRow>`, which _is_ allowed to be
-partial — because it's merged onto an already-known baseline row by
-`resolveRemoveIntent` (`rowMutations.ts`) — a separate pure function, not
-the `applyEditToLog` reducer itself — **before** it becomes a `RowEdit`.
+**One entry per rowId is a system-wide guarantee, enforced at the read
+gates.** `applyEditToLog` never produces duplicates, and every untrusted
+log (a restored local draft, a server draft's `response_dump`) passes
+`sanitizeStructuredEditLog` (`src/types/questionnaire/structured.ts`) —
+which collapses duplicate rowIds to last-content/first-position — before
+`useStructuredRows` or the submit path (`composeStructured.ts`) reads it.
+Downstream (`projectRows`, `resolveChanges`, `findOrphanRowIds`) trusts
+this and iterates the log directly.
+
+**Invariant, stated wherever it's load-bearing**: `RowEdit.patch` is
+always the **complete row**, for every op, including `remove` — never a
+partial diff, never absent. This is what lets `toRequests` stay pure (no
+query-cache access needed to reconstruct a row) and lets a draft restored
+after a failed baseline fetch still carry everything needed to build a
+soft-delete body. Contrast this with `SoftDeleteDescriptor.patch:
+Partial<TRow>`, which _is_ allowed to be partial — because it's merged
+onto an already-known baseline row by `resolveRemoveIntent`
+(`rowMutations.ts`) — a separate pure function, not the `applyEditToLog`
+reducer itself — **before** it becomes a `RowEdit`.
 
 ## The write path: `editLog.ts`
 
 `applyEditToLog(log, edit, { baseline?, isEmptyRow? })` is the reducer
-every mutator funnels through — human clicks and the AI assistant alike
-call this exact function, which is the actual mechanism (not a code-review
-convention) that keeps human and assistant edits from diverging. It
-maintains "at most one entry per rowId" by coalescing the incoming edit
-against any existing entry for that rowId, per a 12-cell table (existing
-op `none|add|update|remove` × incoming op `add|update|remove`) documented
-in the file's header comment. The two facts worth internalizing:
+every mutator funnels through. It maintains "at most one entry per rowId"
+by coalescing the incoming edit against any existing entry for that rowId,
+per a 12-cell table (existing op `none|add|update|remove` × incoming op
+`add|update|remove`) documented in the file's header comment. The two
+facts worth internalizing:
 
 - **An op label on an existing entry is not proof of server history.**
   Annihilation (`add` → `remove` on a client-only row) erases the rowId's
@@ -127,9 +133,7 @@ in the file's header comment. The two facts worth internalizing:
   `resolveOpAgainstBaseline(rowId, baseline)`: `undefined` baseline always
   resolves to `"update"`, because a wrong `update` fails loudly (404/400)
   while a wrong `add` would silently duplicate a clinical record — "data
-  corruption, the worse failure" (comment in `editLog.ts`). This exact
-  fallback is what the AI assistant's baseline-blind writes rely on (see
-  below).
+  corruption, the worse failure" (comment in `editLog.ts`).
 
 Collapse-to-pristine (`isRevertedToBaseline`) uses **structural** equality
 (`deepEqualJson`, `deepEqual.ts`), not `===`, since patches are routinely
@@ -144,12 +148,6 @@ optional-keyed structs), and non-plain objects (`Date`, `Map`, `Set`,
 aren't JSON-safe to begin with. It does not guard against cycles — every
 row here is a plain API request object, so a cycle is meant to be a loud
 caller bug.
-
-`dedupeEditsFirstAppearance(log)` is the defensive read-time normalizer:
-collapses a log to one entry per rowId (last-write-wins on content, first
-appearance wins on position), for logs that `applyEditToLog` itself would
-never produce but a restored draft (whose records are validated
-independently, per-record) might.
 
 ## The read path: `projectRows.ts`
 
@@ -183,7 +181,7 @@ draft's pending `update` (it gets treated as an orphan) — a dedicated
 pins exactly this failure mode, and `StructuredRowsOptions.baseline`'s doc
 comment in `useStructuredRows.ts` states the same rule for callers.
 
-Three companion functions consumed only by the hook:
+Two companion functions consumed only by the hook:
 
 - `findOrphanRowIds(baseline, log)` — flags edits whose op isn't `add` and
   whose rowId the (confirmed, non-`undefined`) baseline lacks. Notably
@@ -194,44 +192,27 @@ Three companion functions consumed only by the hook:
 - `pruneOrphanEdits(baseline, log)` — drops exactly those rowIds; returns
   the same array reference when nothing changed (a reference-equality
   escape hatch used by the hook's effect-loop guard, see below).
-- `truncateToSingletonRow(baseline, log, options)` — enforces mode:
-  `"single"`'s at-most-one-row invariant by keeping only the first
-  projected row's rowId. Documented as "closed by construction" — no
-  shipped singleton type currently exercises the truncating branch, but
-  encounter's `?toDischarge` seed landing under `SINGLETON_ROW_ID` before
-  the real (server-id-keyed) baseline resolves is exactly the shape this
-  guards against.
+
+A singleton's at-most-one-row property is a rowId stability consequence
+(`SINGLETON_ROW_ID` for create-only types; the baseline's own key for
+`encounter`), not a truncation this module performs — the hook asserts it
+in dev (`composeWrite`) rather than silently rewriting the log.
 
 ## `changes.ts` — resolving a log into a request batch
 
-`resolveChanges(log, { softDelete?, baseline? })` → `{ creates, updates,
-removes }` is the last stop before each type's own `toRequests` builds
-wire bodies. It runs the log through `dedupeEditsFirstAppearance`, then
-for each resolved edit:
-
-- Drops (`continue`s past) **orphans** — `op !== "add"` and a supplied
-  `baseline` map lacks the rowId — silently, from every set. This mirrors
-  `projectRows`' orphan rule and exists because a `remove` naming a rowId
-  that never reached the server would, with `softDelete` configured, POST
-  a soft-delete body to an upsert endpoint and silently **create a
-  phantom entered-in-error row**.
-- Reclassifies an `add` whose rowId the baseline already has into an
-  `update` — the safety net for an edit recorded as `add` while the
-  baseline query was still in flight (`editLog.ts`'s `coalesceOntoAdd`
-  never consults baseline, so a later same-rowId edit can leave the entry
-  looking like an `add` after the baseline resolves). Flagged as "safe for
-  URL-keyed endpoints (`encounter`, the only reachable case today) but a
-  `toRequests` for a non-URL-keyed type must re-verify" — the reclassified
-  row may lack the server `id` a genuine update carries.
-- Builds a `remove`'s output row, when `softDelete` is configured, as a
-  **fresh merged object** (`{ ...patch, ...softDelete.patch }`) — never an
-  alias of either source.
+`resolveChanges(log, { softDelete? })` → `{ creates, updates, removes }`
+is the last stop before each type's own `toRequests` builds wire bodies.
+Adds land in `creates`, updates in `updates`; a `remove`'s output row,
+when `softDelete` is configured, is a **fresh merged object**
+(`{ ...patch, ...softDelete.patch }`) — never an alias of either source —
+and a bare `{ rowId }` otherwise.
 
 Total and pure: never mutates its inputs, always returns fresh arrays
 (though `creates`/`updates` entries alias the original patch object by
-reference). When `baseline` is omitted entirely (as opposed to supplied
-and empty), every edit is trusted — "a documented, conservative fallback,
-not a guarantee that no orphan reaches the wire."
+reference). Stale intent never reaches it: the hook's orphan prune excises
+edits whose baseline row vanished server-side at the one seam where
+`baseline` and `edits` coexist, and the sanitize gate guarantees one entry
+per rowId, so `resolveChanges` needs no baseline of its own.
 
 ## `rowMutations.ts` — deciding what edit a UI action produces
 
@@ -243,9 +224,6 @@ branching logic out of the hook into pure, separately-tested functions:
   `??` fallback: `patch` is unconditionally applied in full, and
   `normalizePatch`'s result — meant to be derived fields only — lands on
   top, adding or overriding but never suppressing the clinician's patch.
-  A `normalizePatch` that returned something unexpected at a plugin/
-  `unknown` boundary can only add stray fields on top; it can't erase what
-  the clinician typed.
 - `resolveRemoveIntent(entry, softDelete)` — if `entry.origin ===
 "baseline"` and a `softDelete` descriptor is configured, produces a
   soft-delete `update` (marker merged onto current content, row stays
@@ -256,9 +234,9 @@ branching logic out of the hook into pure, separately-tested functions:
   real baseline lands — tested end-to-end by constructing that exact
   loading-window row via `projectRows(undefined, log)` and asserting the
   outcome.
-- `resolveSetRow(input)` — mode:`"single"`'s mutator: `update` against the
-  existing row if one exists, otherwise `add` under `singletonRowId` built
-  from `createSeed()`; throws (naming the question id) if neither a
+- `resolveSetRow(input)` — the single-row mutator: `update` against the
+  existing row if one exists, otherwise `add` under `SINGLETON_ROW_ID`
+  built from `createSeed()`; throws (naming the question id) if neither a
   current row nor `createSeed` is available.
 - `decideInitialEditsSeed(edits, initialEdits)` → `"seed" | "wait" |
 "skip"`: `edits.length > 0` always wins (`"skip"` — a restored draft
@@ -289,37 +267,32 @@ _caller's_ responsibility — reusing the same "what does this row mean"
 logic the editor's `StructuredList` `rowTitle` prop already implements,
 rather than inventing a second derivation that could drift.
 
-## `useStructuredRows` — the hook every editor mounts
+## `useStructuredRows` / `useStructuredSingleRow` — the hook every editor mounts
+
+Two typed entry points over one internal implementation:
 
 ```ts
-function useStructuredRows<
-  TRow extends object,
-  Mode extends "list" | "single" = "list",
->(
-  options: StructuredRowsOptions<TRow> & { mode?: Mode },
-): StructuredRowsController<TRow, Mode>;
+function useStructuredRows<TRow extends object>(
+  options: StructuredRowsOptions<TRow>,
+): ListRowsController<TRow>;
+
+function useStructuredSingleRow<TRow extends object>(
+  options: StructuredRowsOptions<TRow>,
+): SingleRowController<TRow>;
 ```
 
 `StructuredRowsOptions<TRow>`: `questionId`, `baseline?` (see the
 completeness contract above), `projectValues` (module-scope-stable
 projection → `ResponseValue[]`; empty projection **must** be `[]` so an
-emptied section reads as unanswered), `mode?`, `softDelete?`,
-`duplicateKey?`, `displayOrder?`, `normalizePatch?`, `isEmptyRow?`,
-`createSeed?`, `singletonRowId?` (defaults `SINGLETON_ROW_ID`),
+emptied section reads as unanswered), `softDelete?`, `duplicateKey?`,
+`displayOrder?`, `normalizePatch?`, `isEmptyRow?`, `createSeed?`,
 `initialEdits?`, `disabled?`.
 
-Return shape is one of two, resolved by a runtime `mode === "single"`
-check cast into the conditional type — "the one unavoidable seam" between
-the two:
-
-- **`ListRowsController<TRow>`** (default): `rows: ProjectedRow<TRow>[]`,
-  `addRow`, `addRows`, `updateRow`, `removeRow`, `isDuplicate`.
-- **`SingleRowController<TRow>`**: `row: ProjectedRow<TRow> | undefined`,
-  `setRow`, `clearRow`.
-- Shared base (`StructuredRowsBase<TRow>`): `edits`, `isDirty` (derived,
-  `edits.length > 0`), `droppedEdits`, `applyEdit` (the raw seam — this is
-  what the AI assistant would use if it _could_ reach a mounted instance),
-  `resetEdits` (clears `droppedEdits` too).
+- **`ListRowsController<TRow>`**: `rows: ProjectedRow<TRow>[]`, `addRow`,
+  `addRows`, `updateRow`, `removeRow`, `droppedEdits`.
+- **`SingleRowController<TRow>`**: `row: ProjectedRow<TRow> | undefined`
+  (always the projection's `rows[0]`), `setRow`, `clearRow`,
+  `droppedEdits`.
 
 ### Data flow, in order (per render / per effect)
 
@@ -358,20 +331,16 @@ the two:
    sits below the fill session's dirty-tracking subscription
    (`useFillAutosave`) — a synchronous commit would be invisible to that
    subscription (no Draft chip, no unsaved-changes prompt).
-7. Mutators (`applyEdit`, `addRow`/`addRows`, `updateRow`, `removeRow`,
-   and singleton's `setRow`/`clearRow`) all fold through `applyEditToLog`
-   and commit via `updateResponse` (real intent, clears shown errors).
-   `resetEdits` is the one exception: it bypasses `applyEditToLog`
-   entirely and commits `[]` directly (and clears `droppedEdits`).
+7. Mutators (`addRow`/`addRows`, `updateRow`, `removeRow`, and the
+   single-row `setRow`/`clearRow`) all fold through `applyEditToLog` and
+   commit via `updateResponse` (real intent, clears shown errors).
    `addRows` batches its duplicate check into one `findDuplicateCandidates`
    call and skips the commit entirely if every candidate was rejected.
 
 **The one documented CAVEAT, worth repeating because it's easy to trip
 on**: every mutator closes over this render's `edits`. Two mutator calls
 inside one event handler overwrite each other — the second `commit` wins.
-`addRows` exists specifically to cover the batch-add case; anything
-heterogeneous (add one row, remove another, in the same handler) needs
-manual log-folding through `applyEditToLog` plus one `applyEdit` call.
+`addRows` exists specifically to cover the batch-add case.
 
 ## The UI layer
 
@@ -388,12 +357,11 @@ exported types:
   errors across multiple field keys, e.g. `dose_quantity`/`dose_unit`, or
   across a variable-length nested array as medication_request's dosage
   cells do), `ownsErrorDisplay?` (opt out of the shell's automatic
-  per-cell `<StructuredFieldError>` when the column renders its own),
-  `className?`.
+  per-cell `<StructuredFieldError>` when the column renders its own).
 - **`StructuredColumnContext<TRow>`** — what `render` receives: `row`
   (`ProjectedRow<TRow>`), `update: (patch: Partial<TRow>) => void`,
-  `disabled`, `removed` (mirrors `row.softDeleted`), plus the ARIA/error
-  bundle (`ariaLabel`, `fieldId`, `describedBy`, `invalid`, `errors`,
+  `disabled`, plus the ARIA/error bundle (`ariaLabel`, `fieldId`,
+  `describedBy`, `invalid`, `errors`,
   `controlProps: StructuredControlProps`). **Gotcha**: `update` is stable
   within a render (keyed on `[onUpdateRow, row.rowId]`) but **not** stable
   across edits, because `onUpdateRow` (typically `useStructuredRows`'s
@@ -402,8 +370,7 @@ exported types:
   render loop.
 - **`StructuredRowAction`** — `{ key, label, icon?, onSelect, disabled?,
 destructive? }` for a row's overflow-menu entries beyond the shell's
-  built-in Remove (e.g. medication_request/service_request's "Add to
-  template").
+  built-in Remove (e.g. medication_request's "Add to template").
 
 Mechanics worth knowing:
 
@@ -445,8 +412,8 @@ Mechanics worth knowing:
 - `rowDisabled` freezes the **entire row div** (`pointer-events-none
 opacity-40`), including its actions menu — there is currently no way to
   freeze fields but still let the clinician act on a disabled row (e.g. a
-  restore affordance). `canRemoveRow` defaults to `!row.softDeleted`.
-  Remove is always shell-owned, never something `rowActions` can
+  restore affordance). Remove is always shell-owned (offered exactly while
+  the row is not already soft-deleted), never something `rowActions` can
   override; the separator between custom actions and Remove is inserted
   only when both are present.
 
@@ -484,19 +451,17 @@ known at load time.
 
 ### `StructuredFieldError.tsx` / `structuredFieldErrors.ts`
 
-`selectStructuredFieldErrors(errors, { questionId, rowId?, rowIndex?,
-fieldKeys })` is "the ONE matcher" — every other error-aware piece in this
-directory (`StructuredList`'s cell wiring, `structuredListRowState.ts`,
+`selectStructuredFieldErrors(errors, { questionId, rowId?, fieldKeys })`
+is "the ONE matcher" — every other error-aware piece in this directory
+(`StructuredList`'s cell wiring, `structuredListRowState.ts`,
 `StructuredFieldError`) calls it rather than reimplementing matching.
 Precedence, in order: `question_id` must match; a falsy `field_key`
 (including `""`, matching `QuestionBlock.tsx`'s own filter) never
 matches; `fieldKeys.includes(error.field_key)`; then row identity —
-`error.row_id`, if present, decides the match on its own (even against a
-coincidentally-matching `index`); else `error.index === rowIndex` (the
-v1/server index-keyed fallback); else the query itself must be
-section-level (`rowId === undefined && rowIndex === undefined`). `row_id`
-strictly outranks `index` — an error carrying both never falls through to
-index matching, which prevents a stale-index false positive.
+`error.row_id`, if present, must equal the queried `rowId`; an error
+carrying no `row_id` binds only to a section-level query (`rowId ===
+undefined`) — that rule, in both directions, is what stops a
+section-level slot from swallowing row errors and vice versa.
 `StructuredFieldError` renders `<p role="alert">` for the _first_ match
 only (`error.error || error.msg || t("field_required")`, `||` not `??` —
 an empty-string message still falls through) and is required reading for
@@ -506,12 +471,12 @@ place those errors get announced.
 
 ## A simple consumer: `symptom`
 
-`model.ts` imports exactly four things from core: `resolveChanges`
-(`toRequests` builds `[...creates, ...updates,
-...removes.flatMap(e => e.row ? [e.row] : [])]` from it, no `baseline`
-passed — trusting every edit is fine here since symptom has no cross-row
-consistency concerns), and the types `BaselineRow`, `ProjectValues`,
-`SoftDeleteDescriptor`. `SYMPTOM_SOFT_DELETE` (`{ patch:
+`model.ts` imports from core only the types `BaselineRow`,
+`ProjectValues`, `SoftDeleteDescriptor`; its `toRequests` comes from
+`shared/upsertToRequests.ts`'s `makeUpsertToRequests` (the single
+patient-scoped upsert differ shared by symptom, diagnosis,
+allergy_intolerance and medication_statement), which calls
+`resolveChanges` internally. `SYMPTOM_SOFT_DELETE` (`{ patch:
 {verification_status: "entered_in_error"}, isDeleted: row =>
 row.verification_status === "entered_in_error" }`) is the one constant
 shared between `toRequests` and the Editor's `useStructuredRows` call.
@@ -520,16 +485,13 @@ the row shape; there's no separate editor-only type.
 
 `SymptomEditor.tsx` calls `useStructuredRows({ questionId, baseline,
 projectValues, softDelete: SYMPTOM_SOFT_DELETE, duplicateKey:
-symptomDuplicateKey, disabled })` — `mode` omitted, so it gets
-`ListRowsController`. From the return value: `list.rows` → `StructuredList`'s
-`rows`; `list.updateRow`/`list.removeRow` → `onUpdateRow`/`onRemoveRow`
-directly, no wrapper; `list.droppedEdits` → `StructuredDroppedRowsNotice`.
-`addControl` is an `<AddEntityControl<SymptomRow>>` whose `createRow` is
+symptomDuplicateKey, disabled })`. From the return value: `list.rows` →
+`StructuredList`'s `rows`; `list.updateRow`/`list.removeRow` →
+`onUpdateRow`/`onRemoveRow` directly, no wrapper; `list.droppedEdits` →
+`StructuredDroppedRowsNotice`. `addControl` is an
+`<AddEntityControl<SymptomRow>>` whose `createRow` is
 `newSymptomRow(code, encounterId)` and whose `onAdd` wraps `list.addRow`
-to toast on a `"duplicate"` rejection. `list.applyEdit`, `resetEdits`,
-`edits`, and `isDirty` go entirely unused by this Editor — a good
-indicator of how much of the hook's surface a "simple" consumer actually
-touches.
+to toast on a `"duplicate"` rejection.
 
 ## A complex consumer: `medication_request`
 
@@ -564,57 +526,12 @@ columns/render props and surrounding chrome, not hook configuration:
   (`structured/shared/responseTemplates/`), not core — but worth knowing
   core doesn't preclude a type from layering substantial extra machinery
   on top of the same `useStructuredRows`/`StructuredList` pair.
-- **`resolveChanges` usage is otherwise identical to symptom's** — same
-  `{creates, updates, removes}` → flat array pattern in `toRequests`. The
-  complexity genuinely does not touch the shared engine's contract at
-  all; it's all in what one column's `render` does with `ctx.update`.
 
 The pairing (simplest hook config + most complex UI, vs. richer hook
 config + simple UI) is the intended shape of this abstraction: `core`
 carries the row-identity/edit-log/projection bookkeeping uniformly, and
 each type spends its complexity budget on domain-specific rendering, not
 on re-deriving row bookkeeping.
-
-## How the AI fill-assistant integrates
-
-The assistant's `applyStructuredEdit`
-(`fill/assistant/useFillAssistantSession.ts`) does **not** call
-`useStructuredRows`. It calls the same two pure primitives the hook's
-mutators call — `applyEditToLog` (`editLog.ts`) and `projectRows`
-(`projectRows.ts`) — directly, and writes `responsesAtom` itself via the
-form store (`store.set`), bypassing `useQuestionResponse`'s setter
-entirely.
-
-This is deliberate, not an oversight, and the reasoning is spelled out in
-the assistant's own comments: `useStructuredRows` is a **per-question**
-hook, instantiated only while that question's editor component is
-mounted, holding that question's fetched `baseline` in its own closure.
-The assistant's fill-assist handle is built once per fill **session** and
-must be able to write to a structured question whether or not its editor
-is currently mounted or scrolled into view — there is no live
-`useStructuredRows` instance to call into, and no baseline to hand it.
-
-Consequences of writing baseline-blind (`applyEditToLog(log, edit, {})`
-and `projectRows(undefined, log, {})`, both with `baseline: undefined`):
-
-- Resurrection ambiguity (`remove`/`update` → `add`) always resolves to
-  the conservative `"update"` fallback in `resolveOpAgainstBaseline` — the
-  same designed-in behavior described above, not a special case for the
-  assistant.
-- No `isEmptyRow` filtering — that predicate lives in each type's
-  `model.ts`, "out of this generic handle's reach" — so the assistant's
-  display mirror can show an all-empty row a mounted editor never would.
-  Documented as display-only: submit derives from `edits`, not from this
-  projection.
-- The assistant replicates `useQuestionResponse`'s error-clearing side
-  effect by hand (`clearQuestionErrorsInState`) after every write, since
-  it isn't going through that setter to get it for free.
-
-Every write is still gated by `validateStructuredPatch` against the
-type's own zod `rowSchema` (via `resolveStructuredType` /
-`rowSchemaOf`, one layer up in `structured/registry.ts` — not part of
-`core`) — the assistant cannot write a shape core's write path wouldn't
-otherwise accept.
 
 ## Invariants and gotchas — read this before touching anything here
 
@@ -627,6 +544,10 @@ otherwise accept.
   Getting this backwards (passing `[]` mid-fetch) silently drops a
   restored draft's pending edit and is exactly what the "BASELINE
   COMPLETENESS CONTRACT" tests in `projectRows.test.ts` guard against.
+- **Every untrusted log passes `sanitizeStructuredEditLog` before core
+  reads it.** `projectRows`/`resolveChanges`/`findOrphanRowIds` trust one
+  entry per rowId; if you add a new ingestion path for `response.edits`,
+  sanitize at that boundary too.
 - **`ProjectedRow.origin` is not `!!row.id`.** A stripped-id historical
   re-add is `"added"` despite having existed before. `RowStatusSelect` and
   `resolveRemoveIntent` both depend on getting this right.
@@ -634,10 +555,9 @@ otherwise accept.
   annihilation (`add`→`remove`) erases a rowId's history from the log.
   Any code resolving add-vs-update ambiguity must consult the actual
   `baseline` map, never trust an existing entry's `op`.
-- **Every `useStructuredRows` mutator closes over the render's `edits`.**
-  Two mutator calls in one event handler drop all but the last commit.
-  Use `addRows` for batch adds; fold manually + one `applyEdit` for
-  anything heterogeneous.
+- **Every mutator closes over the render's `edits`.** Two mutator calls
+  in one event handler drop all but the last commit. Use `addRows` for
+  batch adds.
 - **`ctx.update` (from `StructuredColumnContext`) is stable within a
   render but not across edits.** Never key a `useCallback`/`useEffect` on
   it directly — route through something like medication_request's
@@ -652,6 +572,12 @@ otherwise accept.
   the fill session's dirty-tracking subscription (no Draft chip, no
   unsaved-changes prompt), because React runs child effects before parent
   effects and this hook sits below `useFillAutosave` in the tree.
+- **A single-row question must never project two rows.** Closed by
+  construction today (`SINGLETON_ROW_ID` for create-only types; the
+  baseline's own key for `encounter`), and asserted in dev by
+  `composeWrite`. A future singleton whose seed rowId can diverge from
+  its baseline key would trip that assertion — resolve the identity, do
+  not reintroduce silent truncation.
 - **`StructuredList`'s header and body must always render
   `columns.length + 1` cells**, never fewer — `headerHidden`/
   `mobileHidden` hide _content_, not the cell itself, or the shared
@@ -663,17 +589,3 @@ otherwise accept.
   `unmatchedRowErrorFieldKeys` actually surfaces it (it does, by design,
   but a new column added later could accidentally start "claiming" that
   `field_key` via a loose `errorFieldKeys` and swallow it silently).
-  Currently drifted doc comment worth fixing while in the area:
-  `structuredListRowState.ts` still references a `rowHasBoundError`
-  function name in one comment that was folded into
-  `resolveRowErrorState`'s `hasError` field and never renamed back.
-- **`truncateToSingletonRow`'s multi-row branch has no current caller** —
-  it's defensive, closed-by-construction code for a scenario (a singleton
-  type accumulating a second rowId, as encounter's `?toDischarge` seed
-  landing before the real baseline would produce) that every shipped
-  singleton type currently avoids by other means. Don't delete it as
-  unreachable; it's the fix for a bug class, not dead code.
-- **`resolveChanges`'s add→update reclassification only re-verified as
-  safe for URL-keyed endpoints** (encounter, today's only reachable case).
-  A new non-URL-keyed singleton/upsert type must re-check that the
-  reclassified row's missing server `id` doesn't break its `toRequests`.

@@ -70,9 +70,6 @@ export interface StructuredColumnContext<TRow extends object> {
   update: (patch: Partial<TRow>) => void;
   /** Row-level disabled: the list's `disabled` OR `rowDisabled(row)`. */
   disabled: boolean;
-  /** The row is soft-deleted — mirrors `row.softDeleted`, hoisted for
-   *  convenience because most columns freeze on it. */
-  removed: boolean;
   /** Accessible name every control in this cell MUST carry (`aria-label`),
    *  because the visible caption is `lg:hidden` and ARIA does not name a
    *  cell from its column header. Equals `column.header` unless the column
@@ -137,16 +134,14 @@ export interface StructuredColumn<TRow extends object> {
   /** The column renders its own `<StructuredFieldError>`. The shell then
    *  renders none for this cell but still computes `invalid`/`describedBy`. */
   ownsErrorDisplay?: boolean;
-  /** Extra classes on the cell wrapper. */
-  className?: string;
   render: (context: StructuredColumnContext<TRow>) => ReactNode;
 }
 
 /**
  * One entry of a row's overflow menu, alongside the shell's own synthesized
  * Remove item. Remove itself is never listed here — it is always
- * shell-owned (`canRemoveRow`/`removeLabel` below), so a type cannot
- * accidentally duplicate or shadow it.
+ * shell-owned (offered exactly while the row is not already soft-deleted),
+ * so a type cannot accidentally duplicate or shadow it.
  *
  * Kept independent of `TRow` on purpose — unlike `StructuredColumn.render`,
  * an action has no per-cell context to receive (no `update`, no
@@ -194,11 +189,6 @@ export interface StructuredListProps<TRow extends object> {
   rowDisabled?: (row: ProjectedRow<TRow>) => boolean;
   /** Domain state classes — e.g. `line-through` when resolved. */
   rowClassName?: (row: ProjectedRow<TRow>) => string | undefined;
-  /** Already-translated remove label. Defaults to `t("remove")`. */
-  removeLabel?: (row: ProjectedRow<TRow>) => string;
-  /** `false` disables the remove affordance. Defaults to
-   *  `(row) => !row.softDeleted`. */
-  canRemoveRow?: (row: ProjectedRow<TRow>) => boolean;
   /** Extra per-row overflow-menu items, ABOVE the shell's own Remove item
    *  (a `DropdownMenuSeparator` is inserted between the two groups
    *  automatically, only when both are non-empty). Generic on purpose —
@@ -240,8 +230,6 @@ export function StructuredList<TRow extends object>({
   rowSummary,
   rowDisabled,
   rowClassName,
-  removeLabel,
-  canRemoveRow,
   rowActions,
   addControl,
 }: StructuredListProps<TRow>) {
@@ -308,12 +296,11 @@ export function StructuredList<TRow extends object>({
                 </div>
               </div>
               <div role="rowgroup" className="bg-white">
-                {rows.map((row, rowIndex) => (
+                {rows.map((row) => (
                   <StructuredListRow
                     key={row.rowId}
                     questionId={questionId}
                     row={row}
-                    rowIndex={rowIndex}
                     columns={columns}
                     errors={errors}
                     listDisabled={disabled}
@@ -323,8 +310,6 @@ export function StructuredList<TRow extends object>({
                     rowSummary={rowSummary}
                     rowDisabled={rowDisabled}
                     rowClassName={rowClassName}
-                    removeLabel={removeLabel}
-                    canRemoveRow={canRemoveRow}
                     rowActions={rowActions}
                   />
                 ))}
@@ -341,7 +326,6 @@ export function StructuredList<TRow extends object>({
 interface StructuredListRowProps<TRow extends object> {
   questionId: string;
   row: ProjectedRow<TRow>;
-  rowIndex: number;
   columns: readonly StructuredColumn<TRow>[];
   errors: readonly QuestionValidationError[];
   listDisabled: boolean;
@@ -351,8 +335,6 @@ interface StructuredListRowProps<TRow extends object> {
   rowSummary?: (row: ProjectedRow<TRow>) => ReactNode;
   rowDisabled?: (row: ProjectedRow<TRow>) => boolean;
   rowClassName?: (row: ProjectedRow<TRow>) => string | undefined;
-  removeLabel?: (row: ProjectedRow<TRow>) => string;
-  canRemoveRow?: (row: ProjectedRow<TRow>) => boolean;
   rowActions?: (row: ProjectedRow<TRow>) => readonly StructuredRowAction[];
 }
 
@@ -368,7 +350,6 @@ interface StructuredListRowProps<TRow extends object> {
 function StructuredListRow<TRow extends object>({
   questionId,
   row,
-  rowIndex,
   columns,
   errors,
   listDisabled,
@@ -378,8 +359,6 @@ function StructuredListRow<TRow extends object>({
   rowSummary,
   rowDisabled,
   rowClassName,
-  removeLabel,
-  canRemoveRow,
   rowActions,
 }: StructuredListRowProps<TRow>) {
   const { t } = useTranslation();
@@ -396,8 +375,7 @@ function StructuredListRow<TRow extends object>({
   );
 
   const isDisabled = listDisabled || (rowDisabled?.(row) ?? false);
-  const canRemove = canRemoveRow?.(row) ?? !row.softDeleted;
-  const removeText = removeLabel?.(row) ?? t("remove");
+  const canRemove = !row.softDeleted;
   // Built fresh every render (not memoized) — deliberately: a type's
   // `rowActions` closure typically closes over its own per-row state (e.g.
   // `openAddToTemplate(row.row)`), and this shell has no way to know that
@@ -415,9 +393,8 @@ function StructuredListRow<TRow extends object>({
       resolveRowErrorState(columns, errors, {
         questionId,
         rowId: row.rowId,
-        rowIndex,
       }),
-    [columns, errors, questionId, row.rowId, rowIndex],
+    [columns, errors, questionId, row.rowId],
   );
 
   // Below `lg` the body wrapper — the ONLY place a cell's
@@ -505,7 +482,6 @@ function StructuredListRow<TRow extends object>({
           const cellErrors = selectStructuredFieldErrors(errors, {
             questionId,
             rowId: row.rowId,
-            rowIndex,
             fieldKeys,
           });
           const errorId = `${questionId}--${row.rowId}--${column.key}--error`;
@@ -517,7 +493,6 @@ function StructuredListRow<TRow extends object>({
             row,
             update,
             disabled: isDisabled,
-            removed: row.softDeleted,
             ariaLabel,
             fieldId,
             describedBy,
@@ -539,7 +514,6 @@ function StructuredListRow<TRow extends object>({
               className={cn(
                 "min-w-0 overflow-hidden px-1 py-1 lg:border-r lg:border-gray-200 lg:px-2 lg:py-1",
                 column.mobileHidden && "hidden lg:block",
-                column.className,
               )}
             >
               {!column.headerHidden && (
@@ -559,7 +533,6 @@ function StructuredListRow<TRow extends object>({
                   id={errorId}
                   questionId={questionId}
                   rowId={row.rowId}
-                  rowIndex={rowIndex}
                   fieldKeys={fieldKeys}
                   errors={errors}
                 />
@@ -614,7 +587,7 @@ function StructuredListRow<TRow extends object>({
                   className="text-red-600"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  <span>{removeText}</span>
+                  <span>{t("remove")}</span>
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -643,7 +616,6 @@ function StructuredListRow<TRow extends object>({
                   id={`${questionId}--${row.rowId}--${column.key}--mobile-error`}
                   questionId={questionId}
                   rowId={row.rowId}
-                  rowIndex={rowIndex}
                   fieldKeys={column.errorFieldKeys ?? [column.key]}
                   errors={errors}
                 />
@@ -671,7 +643,6 @@ function StructuredListRow<TRow extends object>({
                 id={`${questionId}--${row.rowId}--${fieldKey}--error`}
                 questionId={questionId}
                 rowId={row.rowId}
-                rowIndex={rowIndex}
                 fieldKeys={[fieldKey]}
                 errors={errors}
               />

@@ -14,12 +14,7 @@ import {
   toBaselineMap,
   type ApplyEditOptions,
 } from "./editLog";
-import {
-  findOrphanRowIds,
-  projectRows,
-  pruneOrphanEdits,
-  truncateToSingletonRow,
-} from "./projectRows";
+import { findOrphanRowIds, projectRows, pruneOrphanEdits } from "./projectRows";
 import { newRowId, SINGLETON_ROW_ID } from "./rowIds";
 import {
   decideInitialEditsSeed,
@@ -32,7 +27,6 @@ import type {
   EditLog,
   ProjectedRow,
   ProjectValues,
-  RowEdit,
   RowId,
   SoftDeleteDescriptor,
 } from "./types";
@@ -47,9 +41,7 @@ import type {
  *
  * CAVEAT: every mutator reads `edits` from this render's closure, so two
  * mutator calls in the same event handler overwrite each other — the
- * second `commit` wins. `addRows` covers the batch-add case; combining
- * heterogeneous operations in one handler requires folding a log manually
- * and calling `applyEdit` once.
+ * second `commit` wins. `addRows` covers the batch-add case.
  */
 
 // ---------------------------------------------------------------------------
@@ -80,8 +72,6 @@ export interface StructuredRowsOptions<TRow extends object> {
    *  to `entryHasContent`. */
   projectValues: ProjectValues<TRow>;
 
-  mode?: "list" | "single";
-
   softDelete?: SoftDeleteDescriptor<TRow>;
   duplicateKey?: (row: TRow) => string | undefined;
   displayOrder?: (a: TRow, b: TRow) => number;
@@ -100,11 +90,9 @@ export interface StructuredRowsOptions<TRow extends object> {
    *  `add`+`update` coalescing cell. */
   isEmptyRow?: (row: TRow) => boolean;
 
-  /** Required for `mode: "single"` when no baseline row exists yet (a
-   *  create-only singleton — `appointment`, `time_of_death`). */
+  /** Required by `useStructuredSingleRow` when no baseline row exists yet
+   *  (a create-only singleton — `appointment`, `time_of_death`). */
   createSeed?: () => TRow;
-  /** Defaults to `SINGLETON_ROW_ID`. */
-  singletonRowId?: RowId;
 
   /**
    * Seeded ONCE, on first mount, and only when the log is empty — so a
@@ -124,9 +112,6 @@ export interface StructuredRowsOptions<TRow extends object> {
 // ---------------------------------------------------------------------------
 
 export interface StructuredRowsBase<TRow extends object> {
-  edits: EditLog<TRow>;
-  /** Derived, never stored: `edits.length > 0`. */
-  isDirty: boolean;
   /** Every edit pruned as a confirmed orphan THIS MOUNT, in the order
    *  encountered — the ONE durable channel for what the prune removed. The
    *  orphan rowIds themselves are internal: the prune excises them from
@@ -137,15 +122,8 @@ export interface StructuredRowsBase<TRow extends object> {
    *  draft.
    *
    *  DURABILITY: mount-lifetime only — a remount (an `enable_when` toggle,
-   *  navigating away and back) resets it. Also cleared by `resetEdits`. */
+   *  navigating away and back) resets it. */
   droppedEdits: EditLog<TRow>;
-  /** The raw seam — for callers (e.g. the assistant's structured-edit
-   *  path) needing to record an edit no other mutator expresses. */
-  applyEdit: (edit: RowEdit<TRow>) => void;
-  /** Drop all intent; the projection collapses back to the baseline. Also
-   *  clears `droppedEdits` — a Discard forgets the restore-notice record
-   *  too, not just the live edit log. */
-  resetEdits: () => void;
 }
 
 export type AddRowResult =
@@ -159,7 +137,6 @@ export interface ListRowsController<
   addRows: (rows: readonly TRow[]) => AddRowResult[];
   updateRow: (rowId: RowId, patch: Partial<TRow>) => void;
   removeRow: (rowId: RowId) => void;
-  isDuplicate: (row: TRow) => boolean;
 }
 
 export interface SingleRowController<
@@ -174,37 +151,51 @@ export interface SingleRowController<
 // Hook
 // ---------------------------------------------------------------------------
 
-/**
- * One declaration with a conditional return type instead of three
- * overloads: this project's ESLint config applies the base `no-redeclare`
- * rule, which flags TS overload signatures as redeclarations. The
- * conditional type keyed on `Mode` gives the same call-site narrowing.
- */
-export type StructuredRowsController<
-  TRow extends object,
-  Mode extends "list" | "single",
-> = Mode extends "single"
-  ? SingleRowController<TRow>
-  : ListRowsController<TRow>;
+/** Multi-row editing (the default shape — 8 of 11 types). */
+export function useStructuredRows<TRow extends object>(
+  options: StructuredRowsOptions<TRow>,
+): ListRowsController<TRow> {
+  const internal = useStructuredRowsInternal(options, "list");
+  return {
+    rows: internal.rows,
+    droppedEdits: internal.droppedEdits,
+    addRow: internal.addRow,
+    addRows: internal.addRows,
+    updateRow: internal.updateRow,
+    removeRow: internal.removeRow,
+  };
+}
 
-export function useStructuredRows<
-  TRow extends object,
-  Mode extends "list" | "single" = "list",
->(
-  options: StructuredRowsOptions<TRow> & { mode?: Mode },
-): StructuredRowsController<TRow, Mode> {
+/** At-most-one-row editing (`appointment`, `time_of_death`, `encounter`).
+ *  The one row is always `rows[0]`; its identity is `SINGLETON_ROW_ID`
+ *  for create-only types with no server row yet, or the baseline's own
+ *  key once one exists. */
+export function useStructuredSingleRow<TRow extends object>(
+  options: StructuredRowsOptions<TRow>,
+): SingleRowController<TRow> {
+  const internal = useStructuredRowsInternal(options, "single");
+  return {
+    row: internal.rows[0],
+    droppedEdits: internal.droppedEdits,
+    setRow: internal.setRow,
+    clearRow: internal.clearRow,
+  };
+}
+
+function useStructuredRowsInternal<TRow extends object>(
+  options: StructuredRowsOptions<TRow>,
+  mode: "list" | "single",
+) {
   const {
     questionId,
     baseline,
     projectValues,
-    mode = "list",
     softDelete,
     duplicateKey,
     displayOrder,
     normalizePatch,
     isEmptyRow,
     createSeed,
-    singletonRowId = SINGLETON_ROW_ID,
     initialEdits,
     disabled,
   } = options;
@@ -267,24 +258,29 @@ export function useStructuredRows<
   // The `{ values, edits }` pair every write lands — in a single atom
   // write, so no consumer ever sees the two disagree.
   //
-  // For `mode: "single"`, `nextEdits` runs through
-  // `truncateToSingletonRow` before anything derives from it, so the
-  // persisted `edits` can never carry a second rowId that
-  // `SingleRowController.row` (always `rows[0]`) never showed the
-  // clinician. A no-op (same reference) for logs with 0 or 1 rowIds.
+  // For `mode: "single"`, the at-most-one-projected-row invariant is
+  // closed by construction for every shipped type: the log's one rowId is
+  // either `SINGLETON_ROW_ID` (create-only types over a constant `[]`
+  // baseline) or the baseline's own key (`encounter`, which mounts only
+  // after its query resolves). Asserted in dev rather than truncated, so
+  // a future singleton that breaks the assumption fails loudly instead of
+  // silently submitting a row the clinician never saw.
   const composeWrite = useCallback(
     (nextEdits: EditLog<TRow>) => {
-      const effectiveEdits =
-        mode === "single"
-          ? truncateToSingletonRow(baseline, nextEdits, projectOpts)
-          : nextEdits;
-      const nextRows = projectRows(baseline, effectiveEdits, projectOpts);
+      const nextRows = projectRows(baseline, nextEdits, projectOpts);
+      if (import.meta.env?.DEV && mode === "single" && nextRows.length > 1) {
+        console.error(
+          `useStructuredRows(${questionId}): mode "single" projected ` +
+            `${nextRows.length} rows — the edit log carries a rowId the ` +
+            `singleton never showed`,
+        );
+      }
       return {
         values: projectValues(nextRows.map((entry) => entry.row)),
-        edits: [...effectiveEdits],
+        edits: [...nextEdits],
       };
     },
-    [baseline, projectOpts, projectValues, mode],
+    [baseline, projectOpts, projectValues, mode, questionId],
   );
 
   // The write that carries intent: it clears this question's showing
@@ -416,28 +412,6 @@ export function useStructuredRows<
     });
   }, [initialEdits, edits, applyOpts, commit]);
 
-  const applyEdit = useCallback(
-    (edit: RowEdit<TRow>) => {
-      if (disabled) return;
-      commit(applyEditToLog(edits, edit, applyOpts));
-    },
-    [disabled, edits, applyOpts, commit],
-  );
-
-  const resetEdits = useCallback(() => {
-    if (disabled) return;
-    commit([]);
-    // A Discard forgets the restore-notice record too — a notice naming
-    // rows lost from a prior restore would be stale the instant the
-    // clinician explicitly abandoned every pending edit.
-    setDroppedEdits([]);
-  }, [disabled, commit]);
-
-  const isDuplicate = useCallback(
-    (row: TRow) => findDuplicateCandidates(rows, duplicateKey, [row])[0],
-    [rows, duplicateKey],
-  );
-
   const addRows = useCallback(
     (candidates: readonly TRow[]): AddRowResult[] => {
       if (disabled) {
@@ -522,7 +496,7 @@ export function useStructuredRows<
         currentRowId: entry?.rowId,
         patch,
         createSeed,
-        singletonRowId,
+        singletonRowId: SINGLETON_ROW_ID,
         normalizePatch,
         questionId,
       });
@@ -532,7 +506,6 @@ export function useStructuredRows<
       disabled,
       rows,
       createSeed,
-      singletonRowId,
       normalizePatch,
       questionId,
       edits,
@@ -550,32 +523,14 @@ export function useStructuredRows<
     );
   }, [disabled, rows, softDelete, edits, applyOpts, commit]);
 
-  const base: StructuredRowsBase<TRow> = {
-    edits,
-    isDirty: edits.length > 0,
-    droppedEdits,
-    applyEdit,
-    resetEdits,
-  };
-
-  // The runtime branch matches the `Mode` type parameter by construction,
-  // but nothing connects a runtime string comparison to a conditional
-  // type — the cast is the one unavoidable seam between them.
-  if (mode === "single") {
-    return {
-      ...base,
-      row: rows[0],
-      setRow,
-      clearRow,
-    } as unknown as StructuredRowsController<TRow, Mode>;
-  }
   return {
-    ...base,
     rows,
+    droppedEdits,
     addRow,
     addRows,
     updateRow,
     removeRow,
-    isDuplicate,
-  } as unknown as StructuredRowsController<TRow, Mode>;
+    setRow,
+    clearRow,
+  };
 }

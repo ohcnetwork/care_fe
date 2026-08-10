@@ -21,7 +21,7 @@ import { StructuredFieldError } from "@/components/QuestionnaireV2/structured/co
 import { SINGLETON_ROW_ID } from "@/components/QuestionnaireV2/structured/core/rowIds";
 import { selectStructuredFieldErrors } from "@/components/QuestionnaireV2/structured/core/structuredFieldErrors";
 import type { BaselineRow } from "@/components/QuestionnaireV2/structured/core/types";
-import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
+import { useStructuredSingleRow } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
 import type { StructuredInputProps } from "@/components/QuestionnaireV2/structured/types";
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -100,12 +100,8 @@ export function AppointmentEditor({
   const currentUser = useAuthUser();
   const [serviceType, setServiceType] = useAtom(scheduleServiceTypeAtom);
 
-  // No explicit type arguments — see TimeOfDeathEditor.tsx's identical note.
-  // `TRow` infers from `projectValues`/`createSeed`/`isEmptyRow`, `Mode`
-  // from the `mode: "single"` literal.
-  const single = useStructuredRows({
+  const single = useStructuredSingleRow({
     questionId: question.id,
-    mode: "single",
     baseline: NO_BASELINE,
     projectValues,
     createSeed,

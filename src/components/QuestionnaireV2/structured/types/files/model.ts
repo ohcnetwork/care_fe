@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
 import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
@@ -11,26 +9,6 @@ import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/t
 import type { FileUploadQuestion } from "@/types/files/file";
 import { FileCategory, FileType } from "@/types/files/file";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
-
-/**
- * Assistant write guard. `file_data: z.instanceof(File)` means this schema
- * ALWAYS rejects an assistant-authored patch by construction: an assistant
- * write arrives as plain JSON (`ApplyStructuredEditInput.patch: unknown`),
- * and a real browser `File` cannot be reconstructed from JSON — the same
- * round-trip impossibility behind this type's `draftPolicy: "exclude"`.
- * `File` is a Node/browser global, so `z.instanceof(File)` behaves the same
- * under `node --test` (Node 20+) as in the app.
- */
-export const rowSchema = z
-  .object({
-    name: z.string(),
-    file_type: z.enum(FileType),
-    file_category: z.enum(FileCategory),
-    associating_id: z.string().min(1),
-    original_name: z.string().min(1),
-    file_data: z.instanceof(File),
-  })
-  .strict();
 
 /**
  * Carries `file_data: File` — a live browser handle, not plain data —

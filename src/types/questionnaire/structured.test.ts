@@ -102,10 +102,9 @@ describe("sanitizeStructuredEditLog", () => {
       op: "add",
       patch: { note: "a-last" },
     });
-    // ... but its POSITION is the FIRST occurrence — ahead of "b", matching
-    // resolveChanges' dispatch-at-first-occurrence order, so a
-    // caller feeding this sanitized log to projectRows/resolveChanges gets
-    // the SAME row in both places.
+    // ... but its POSITION is the FIRST occurrence — ahead of "b". Both
+    // projectRows and resolveChanges iterate the sanitized log in order,
+    // so a caller feeding it to either gets the SAME row in both places.
     assert.deepEqual(sanitized[1], bOnly);
   });
 

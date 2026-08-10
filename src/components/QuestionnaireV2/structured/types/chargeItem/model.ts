@@ -1,13 +1,6 @@
-import { z } from "zod";
-
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
 import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
-import {
-  displayObjectSchema,
-  nonEmptyString,
-  userDisplaySchema,
-} from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
@@ -17,7 +10,6 @@ import type {
   ApplyChargeItemDefinitionRequest,
   ChargeItemQuestionRow,
 } from "@/types/billing/chargeItem/chargeItem";
-import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import type { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
@@ -30,28 +22,6 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
 export type ChargeItemRow = ChargeItemQuestionRow & {
   charge_item_definition_object: ChargeItemDefinitionRead;
 };
-
-/**
- * Assistant write guard. `charge_item_definition_object`/
- * `performer_actor_object` are passthrough, id-keyed-only schemas: an
- * assistant only ever copies one verbatim from a prior pick, never authors
- * the full `ChargeItemDefinitionRead`/`UserReadMinimal` shape by hand. Every
- * other field is `.strict()`.
- */
-export const rowSchema = z
-  .object({
-    charge_item_definition: nonEmptyString,
-    quantity: z.string(),
-    encounter: z.string().optional(),
-    patient: z.string().optional(),
-    service_resource: z.enum(ChargeItemServiceResource).optional(),
-    service_resource_id: z.string().optional(),
-    performer_actor: z.string().optional(),
-    account: z.string().optional(),
-    charge_item_definition_object: displayObjectSchema(["slug", "title"]),
-    performer_actor_object: userDisplaySchema.optional(),
-  })
-  .strict();
 
 /** Rows are born whole (`newChargeItemRow`), so whatever `rows` holds is
  *  what the clinician sees and exactly the set `toRequests` compiles
@@ -100,17 +70,12 @@ export async function toRequests(
   { facilityId, questionId }: StructuredRequestContext,
 ): Promise<StructuredBatchEntry[]> {
   if (!facilityId) return [];
-  // Create-only: no server row is ever fetched for this type, so the baseline
-  // is permanently empty — stated as an explicit empty Map because omitting
-  // `baseline` means "still loading or errored" per
-  // `ResolveChangesOptions.baseline`, which is not the fact here.
-  //
   // `updates`/`removes` are deliberately not merged into the request body:
   // `apply_charge_item_defs/` is create-only (no verb for an update), and a
   // remove for a rowId that never reached the server carries nothing worth
   // sending. Add-then-remove pairs annihilate inside the reducer before this
   // function ever sees them.
-  const { creates } = resolveChanges(edits, { baseline: new Map() });
+  const { creates } = resolveChanges(edits, {});
   if (creates.length === 0) return [];
   return [
     {

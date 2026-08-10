@@ -18,7 +18,7 @@ export const EMPTY_ROW_KEYS: RowKeys = { keys: [], next: 0 };
 
 /**
  * Keys for rows that appeared since the last render (an added entry, a
- * restored draft, an assistant write) — existing rows keep theirs. Returns
+ * restored draft) — existing rows keep theirs. Returns
  * the same object when nothing was missing, so callers can use identity to
  * decide whether state needs updating.
  */

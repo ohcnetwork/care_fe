@@ -4,12 +4,7 @@ import { describe, it } from "node:test";
 import type { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import type { SymptomRequest } from "@/types/emr/symptom/symptom";
 
-import {
-  findOrphanRowIds,
-  projectRows,
-  pruneOrphanEdits,
-  truncateToSingletonRow,
-} from "./projectRows";
+import { findOrphanRowIds, projectRows, pruneOrphanEdits } from "./projectRows";
 import { SINGLETON_ROW_ID } from "./rowIds";
 import {
   add,
@@ -258,48 +253,6 @@ describe("projectRows — baseline+edits projection", () => {
     });
   });
 
-  it("a malformed log carrying two `add` edits for the same rowId resolves to the LAST one only — loop 2 must agree with loop 1's per-rowId resolution, not double-emit", () => {
-    // Reachable only if the one-edit-per-rowId invariant is broken upstream
-    // (`applyEditToLog` never produces this on its own — see
-    // `editLog.test.ts`), but a restored draft's per-record
-    // `isStructuredEditRecord` gate validates each entry independently
-    // and would happily accept both. `projectRows` must not compound that
-    // corruption into two rendered rows for one identity.
-    const first = row("dup", "first add");
-    const second = row("dup", "second add");
-    const log: EditLog<TestRow> = [add("dup", first), add("dup", second)];
-
-    const result = projectRows([], log);
-
-    assert.equal(result.length, 1);
-    assert.deepEqual(result[0].row, second);
-  });
-
-  it("an `add` superseded by a later `update` for the same rowId in a malformed log resolves via the same last-write map loop 1 uses, in both directions", () => {
-    const stale = row("z", "stale add");
-    const fresh = row("z", "fresh update");
-    const log: EditLog<TestRow> = [add("z", stale), update("z", fresh)];
-
-    // Baseline absent "z" — the last edit for "z" is an `update`, and an
-    // `update` against a rowId the baseline doesn't have is the orphan
-    // rule (dropped), not a fallback to the stale `add`.
-    const withoutBaseline = projectRows([], log);
-    assert.deepEqual(
-      withoutBaseline.map((r) => r.rowId),
-      [],
-    );
-
-    // Baseline present "z" — loop 1 resolves via `editByRowId` (last
-    // write wins) and shows FRESH; loop 2 must not ALSO emit STALE as a
-    // second "added" row for the same rowId.
-    const baseline: BaselineRow<TestRow>[] = [
-      { rowId: "z", row: row("z", "original baseline") },
-    ];
-    const withBaseline = projectRows(baseline, log);
-    assert.equal(withBaseline.length, 1);
-    assert.deepEqual(withBaseline[0].row, fresh);
-  });
-
   it("displayOrder sorts the projection only — the Diagnosis bug: baseline and log order must survive projecting untouched", () => {
     const d1 = makeDiagnosisRow({
       id: "d1",
@@ -416,18 +369,6 @@ describe("projectRows — baseline+edits projection", () => {
     assert.equal(result[0].origin, "added");
   });
 
-  it("baseline===undefined: a malformed log with two entries for one rowId resolves via the same last-write map as step 1/2 — no double emission", () => {
-    const log: EditLog<TestRow> = [
-      update("dup", row("dup", "first")),
-      update("dup", row("dup", "second")),
-    ];
-
-    const result = projectRows(undefined, log);
-
-    assert.equal(result.length, 1);
-    assert.deepEqual(result[0].row, row("dup", "second"));
-  });
-
   it("baseline===undefined: displayOrder still sorts the presumed rows (step 3) alongside adds", () => {
     const log: EditLog<TestRow> = [
       update("b", row("b", "B")),
@@ -492,15 +433,6 @@ describe("projectRows — baseline+edits projection", () => {
     ];
 
     assert.deepEqual(findOrphanRowIds([], log), ["gone"]);
-  });
-
-  it("findOrphanRowIds: a malformed log with two entries for one rowId is reported once, resolved by the last write", () => {
-    const log: EditLog<TestRow> = [
-      update("dup", row("dup", "first")),
-      update("dup", row("dup", "second")),
-    ];
-
-    assert.deepEqual(findOrphanRowIds([], log), ["dup"]);
   });
 
   it("findOrphanRowIds: purity — neither baseline nor log is mutated", () => {
@@ -620,122 +552,6 @@ describe("projectRows — baseline+edits projection", () => {
 
       assert.deepEqual(pruned, []);
       assert.deepEqual(findOrphanRowIds([], pruned), []); // nothing left to name as orphan either
-    });
-  });
-
-  describe("truncateToSingletonRow — mode:'single' at-most-one-row truncation", () => {
-    it("0 or 1 entries: returns the SAME log reference untouched", () => {
-      const empty: EditLog<TestRow> = [];
-      assert.equal(truncateToSingletonRow(undefined, empty), empty);
-      const oneEntry: EditLog<TestRow> = [
-        add(SINGLETON_ROW_ID, row(SINGLETON_ROW_ID, "solo")),
-      ];
-      assert.equal(truncateToSingletonRow([], oneEntry), oneEntry);
-    });
-
-    it("THE BUG SHAPE: a create-only seed under SINGLETON_ROW_ID plus a REAL baseline row under a DIFFERENT id — keeps only the one projectRows shows as rows[0]", () => {
-      // Mirrors encounter's `?toDischarge` seed landing under the default
-      // `SINGLETON_ROW_ID` before the real baseline (keyed by the
-      // encounter's own server id) has resolved. `findOrphanRowIds` never
-      // flags the seeded `add` (adds are never orphans), so without this
-      // function BOTH rowIds would live in the log forever.
-      const baseline: BaselineRow<TestRow>[] = [
-        { rowId: "real-server-id", row: row("real-server-id", "server row") },
-      ];
-      const log: EditLog<TestRow> = [
-        add(SINGLETON_ROW_ID, row(SINGLETON_ROW_ID, "seeded before baseline")),
-      ];
-
-      const truncated = truncateToSingletonRow(baseline, log, {});
-
-      // projectRows renders the baseline row first (step 1) — the seeded
-      // add is skipped by projectRows' own step-2 collision guard since its
-      // rowId differs from the baseline's, so `rows[0]` is the baseline
-      // row. Truncation must keep exactly, and only, that rowId.
-      const rows = projectRows(baseline, log, {});
-      assert.equal(rows[0]?.rowId, "real-server-id");
-      assert.deepEqual(
-        truncated.map((e) => e.rowId),
-        [],
-      );
-      // The seeded add is gone — it never matched `rows[0]`'s rowId, so
-      // nothing in `truncated` still carries it. This is what stops it
-      // from reaching `resolveChanges` as a phantom create.
-    });
-
-    it("two distinct rowIds with NO baseline (both would render as added rows) — keeps only rows[0], the FIRST added rowId", () => {
-      const log: EditLog<TestRow> = [
-        add("first-add", row("first-add", "shown")),
-        add("second-add", row("second-add", "hidden")),
-      ];
-
-      const truncated = truncateToSingletonRow(undefined, log, {});
-
-      assert.deepEqual(
-        truncated.map((e) => e.rowId),
-        ["first-add"],
-      );
-    });
-
-    it("keeps EVERY entry for the surviving rowId, dropping only entries for other rowIds", () => {
-      // Not a shape `applyEditToLog` ever produces (it coalesces to at
-      // most one entry per rowId) — a hand-edited/restored draft's raw
-      // array is what this function must still be correct against, so
-      // "keep" legitimately has two entries here to prove filtering is by
-      // rowId MEMBERSHIP (keeping BOTH), not by position or count.
-      const log: EditLog<TestRow> = [
-        add("keep", row("keep", "v1")),
-        add("keep", row("keep", "v2")),
-        add("drop-me", row("drop-me", "unwanted")),
-      ];
-      // Sanity-check the premise: "keep" (last-write "v2") is rows[0].
-      assert.equal(projectRows(undefined, log, {})[0]?.rowId, "keep");
-
-      const truncated = truncateToSingletonRow(undefined, log, {});
-      assert.deepEqual(
-        truncated.map((e) => (e.patch as TestRow).label),
-        ["v1", "v2"],
-      );
-    });
-
-    it("every entry already shares the kept rowId: returns the SAME log reference (no-op, nothing to write)", () => {
-      // Two REAL baseline rows so the projection has more than one row
-      // (rows.length > 1, exercising the actual filter path below) — but
-      // the log only ever touches the one that turns out to be rows[0], so
-      // filtering changes nothing and the function hands back the same
-      // reference.
-      const baseline: BaselineRow<TestRow>[] = [
-        { rowId: "r1", row: row("r1", "A") },
-        { rowId: "r2", row: row("r2", "B") },
-      ];
-      const log: EditLog<TestRow> = [update("r1", row("r1", "A-edited"))];
-      assert.equal(truncateToSingletonRow(baseline, log, {}), log);
-    });
-
-    it("no row projects at all (every entry is an orphan against a known baseline) — leaves the log untouched for pruneOrphanEdits to handle", () => {
-      const log: EditLog<TestRow> = [
-        update("vanished-1", row("vanished-1", "stale")),
-        update("vanished-2", row("vanished-2", "stale")),
-      ];
-      assert.equal(truncateToSingletonRow([], log, {}), log);
-    });
-
-    it("purity — neither baseline nor log is mutated", () => {
-      const baseline = Object.freeze([
-        Object.freeze(
-          baselineEntry("real-id", Object.freeze(row("real-id", "x"))),
-        ),
-      ]);
-      const log = Object.freeze([
-        Object.freeze(add(SINGLETON_ROW_ID, row(SINGLETON_ROW_ID, "seeded"))),
-      ]);
-      const baselineSnapshot = structuredClone(baseline);
-      const logSnapshot = structuredClone(log);
-
-      truncateToSingletonRow(baseline, log, {});
-
-      assert.deepEqual(baseline, baselineSnapshot);
-      assert.deepEqual(log, logSnapshot);
     });
   });
 

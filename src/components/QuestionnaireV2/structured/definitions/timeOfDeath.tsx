@@ -1,8 +1,5 @@
 import { TimeOfDeathEditor } from "@/components/QuestionnaireV2/structured/types/timeOfDeath/TimeOfDeathEditor";
-import {
-  rowSchema,
-  toRequests,
-} from "@/components/QuestionnaireV2/structured/types/timeOfDeath/model";
+import { toRequests } from "@/components/QuestionnaireV2/structured/types/timeOfDeath/model";
 
 import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 
@@ -16,6 +13,4 @@ export const timeOfDeathDefinition: StructuredTypeDefinition<"time_of_death"> =
     draftPolicy: "serialize",
     contract: 2,
     toRequests,
-    // `rowSchema` documents which externally authored rows are accepted.
-    rowSchema,
   };

@@ -13,7 +13,10 @@ import {
   type EncounterClass,
   type EncounterRead,
 } from "@/types/emr/encounter/encounter";
-import type { StructuredEdit } from "@/types/questionnaire/structured";
+import {
+  sanitizeStructuredEditLog,
+  type StructuredEdit,
+} from "@/types/questionnaire/structured";
 
 import type { EncounterRow } from "./model";
 import {
@@ -22,7 +25,6 @@ import {
   makeNormalizePatch,
   projectValues,
   requiresDischargeDisposition,
-  rowSchema,
   toBaselineRows,
   toEncounterRow,
   toRequests,
@@ -753,10 +755,17 @@ describe("encounter toRequests", () => {
     );
   });
 
-  it("a duplicate-rowId log collapses to ONE PUT carrying the LAST content", async () => {
+  it("a duplicate-rowId draft log, sanitized at the real ingestion boundary, collapses to ONE PUT carrying the LAST content", async () => {
+    // `composeStructured.ts` runs `response.edits` through
+    // `sanitizeStructuredEditLog` before any `toRequests` sees it — the
+    // raw duplicate shape never reaches this function in the app.
     const stale = fixtureRow({ external_identifier: "STALE" });
     const fresh = fixtureRow({ external_identifier: "FRESH" });
-    const requests = await toRequests([update(stale), update(fresh)], CTX);
+    const edits = sanitizeStructuredEditLog([
+      update(stale),
+      update(fresh),
+    ]) as StructuredEdit<EncounterRow>[];
+    const requests = await toRequests(edits, CTX);
     assert.equal(requests.length, 1);
     assert.deepEqual(requests[0].body, putBody(fresh));
   });
@@ -788,11 +797,17 @@ describe("encounter toRequests", () => {
 // ---------------------------------------------------------------------------
 
 /** Runs the projection path and the submit path over the SAME (baseline,
- *  log) inputs. */
+ *  log) inputs — through the sanitize gate both real ingestion paths
+ *  apply (`useStructuredRows`' `edits` derivation and
+ *  `composeStructured.ts`), so a corrupted table shape reaches
+ *  `projectRows`/`toRequests` exactly as it would in the app. */
 async function agreement(
   baseline: readonly BaselineRow<EncounterRow>[] | undefined,
-  edits: readonly StructuredEdit<EncounterRow>[],
+  rawEdits: readonly StructuredEdit<EncounterRow>[],
 ) {
+  const edits = sanitizeStructuredEditLog(
+    rawEdits,
+  ) as StructuredEdit<EncounterRow>[];
   const rows = projectRows(baseline, edits).map((entry) => entry.row);
   const values = projectValues(rows);
   const shown = (values[0]?.value as EncounterRow[] | undefined)?.[0];
@@ -959,85 +974,5 @@ describe("encounter — the untouched section, through the real reducer", () => 
     });
     assert.equal(merged.hospitalization?.discharge_disposition, "home");
     assert.deepEqual((await toRequests(log, CTX))[0].body, putBody(merged));
-  });
-});
-
-describe("rowSchema — the assistant write guard", () => {
-  it("accepts a real row", () => {
-    assert.equal(rowSchema.safeParse(fixtureRow()).success, true);
-  });
-
-  it("accepts a baseline row converted via toEncounterRow", () => {
-    // The assistant echoes the COMPLETE row back as its patch, so a
-    // derivation this strict schema rejects makes the baseline row
-    // uneditable by it.
-    const result = rowSchema.safeParse(toEncounterRow(fixtureRead()));
-    assert.equal(result.success, true, JSON.stringify(result));
-  });
-
-  it("accepts a null hospitalization (an ambulatory encounter's cleared record)", () => {
-    assert.equal(
-      rowSchema.safeParse(fixtureRow({ hospitalization: null })).success,
-      true,
-    );
-  });
-
-  it("accepts null external_identifier/discharge_summary_advice", () => {
-    assert.equal(
-      rowSchema.safeParse(
-        fixtureRow({
-          external_identifier: null,
-          discharge_summary_advice: null,
-        }),
-      ).success,
-      true,
-    );
-  });
-
-  it("rejects an unknown top-level field", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...fixtureRow(), extra_field: "hallucinated" })
-        .success,
-      false,
-    );
-  });
-
-  it("rejects an invalid status enum value", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...fixtureRow(), status: "not_a_real_status" })
-        .success,
-      false,
-    );
-  });
-
-  it("rejects an invalid encounter_class enum value", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...fixtureRow(), encounter_class: "made_up" })
-        .success,
-      false,
-    );
-  });
-
-  it("rejects an unknown key inside hospitalization", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...fixtureRow(),
-        hospitalization: { made_up: true },
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects a missing period", () => {
-    const { period: _drop, ...withoutPeriod } = fixtureRow();
-    assert.equal(rowSchema.safeParse(withoutPeriod).success, false);
-  });
-
-  it("rejects a number where external_identifier expects string | null", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...fixtureRow(), external_identifier: 123 })
-        .success,
-      false,
-    );
   });
 });

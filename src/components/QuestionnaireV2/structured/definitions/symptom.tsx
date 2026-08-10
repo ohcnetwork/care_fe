@@ -1,8 +1,5 @@
 import { SymptomEditor } from "@/components/QuestionnaireV2/structured/types/symptom/SymptomEditor";
-import {
-  rowSchema,
-  toRequests,
-} from "@/components/QuestionnaireV2/structured/types/symptom/model";
+import { toRequests } from "@/components/QuestionnaireV2/structured/types/symptom/model";
 
 import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 
@@ -16,5 +13,4 @@ export const symptomDefinition: StructuredTypeDefinition<"symptom"> = {
   draftPolicy: "serialize",
   contract: 2,
   toRequests,
-  rowSchema,
 };

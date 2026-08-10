@@ -28,7 +28,6 @@ import {
   newServiceRequestRow,
   projectValues,
   requiredServiceRequestFieldMisses,
-  rowSchema,
   serviceRequestRowFromTemplate,
   stripDisplay,
   toRequests,
@@ -580,97 +579,5 @@ describe("service_request model", () => {
       });
       assert.equal(titleMatch.length, 1);
     });
-  });
-});
-
-describe("rowSchema — the assistant write guard", () => {
-  it("accepts a real row", () => {
-    assert.equal(rowSchema.safeParse(fixtureRow()).success, true);
-  });
-
-  it("accepts null body_site/note/occurance/patient_instruction", () => {
-    assert.equal(
-      rowSchema.safeParse(
-        fixtureRow({
-          service_request: {
-            ...fixtureRow().service_request,
-            note: null,
-            body_site: null,
-            occurance: null,
-            patient_instruction: null,
-          },
-        }),
-      ).success,
-      true,
-    );
-  });
-
-  it("rejects an unknown top-level field", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...fixtureRow(), extra_field: "hallucinated" })
-        .success,
-      false,
-    );
-  });
-
-  it("rejects an unknown field nested inside service_request", () => {
-    const row = fixtureRow();
-    assert.equal(
-      rowSchema.safeParse({
-        ...row,
-        service_request: { ...row.service_request, made_up: true },
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects an invalid priority enum value", () => {
-    const row = fixtureRow();
-    assert.equal(
-      rowSchema.safeParse({
-        ...row,
-        service_request: { ...row.service_request, priority: "not_a_priority" },
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects an activity_definition_object missing its slug", () => {
-    const row = fixtureRow();
-    const { slug: _slug, ...withoutSlug } = row.activity_definition_object;
-    assert.equal(
-      rowSchema.safeParse({
-        ...row,
-        activity_definition_object: withoutSlug,
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects a requester missing its username", () => {
-    const row = fixtureRow();
-    const { username: _username, ...userWithoutUsername } =
-      row.service_request.requester;
-    assert.equal(
-      rowSchema.safeParse({
-        ...row,
-        service_request: {
-          ...row.service_request,
-          requester: userWithoutUsername,
-        },
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects an empty title", () => {
-    const row = fixtureRow();
-    assert.equal(
-      rowSchema.safeParse({
-        ...row,
-        service_request: { ...row.service_request, title: "" },
-      }).success,
-      false,
-    );
   });
 });

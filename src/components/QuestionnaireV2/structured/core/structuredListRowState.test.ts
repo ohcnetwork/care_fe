@@ -23,7 +23,7 @@ const err = (
 const rowHasBoundError = (
   columns: readonly ErrorProneColumn[],
   errors: readonly QuestionValidationError[],
-  match: { questionId: string; rowId: string; rowIndex: number },
+  match: { questionId: string; rowId: string },
 ): boolean => resolveRowErrorState(columns, errors, match).hasError;
 
 describe("resolveRowErrorState — hasError", () => {
@@ -32,7 +32,6 @@ describe("resolveRowErrorState — hasError", () => {
       rowHasBoundError([], [], {
         questionId: "q-1",
         rowId: "row-1",
-        rowIndex: 0,
       }),
       false,
     );
@@ -43,7 +42,6 @@ describe("resolveRowErrorState — hasError", () => {
       rowHasBoundError([{ key: "quantity" }], [], {
         questionId: "q-1",
         rowId: "row-1",
-        rowIndex: 0,
       }),
       false,
     );
@@ -54,7 +52,6 @@ describe("resolveRowErrorState — hasError", () => {
       rowHasBoundError([{ key: "quantity" }], [err({ row_id: "row-1" })], {
         questionId: "q-1",
         rowId: "row-1",
-        rowIndex: 0,
       }),
       true,
     );
@@ -65,7 +62,6 @@ describe("resolveRowErrorState — hasError", () => {
       rowHasBoundError([{ key: "quantity" }], [err({ row_id: "row-2" })], {
         questionId: "q-1",
         rowId: "row-1",
-        rowIndex: 0,
       }),
       false,
     );
@@ -76,7 +72,7 @@ describe("resolveRowErrorState — hasError", () => {
       rowHasBoundError(
         [{ key: "quantity" }],
         [err({ row_id: "row-1", question_id: "q-2" })],
-        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+        { questionId: "q-1", rowId: "row-1" },
       ),
       false,
     );
@@ -87,7 +83,7 @@ describe("resolveRowErrorState — hasError", () => {
       rowHasBoundError(
         [{ key: "item" }, { key: "quantity" }, { key: "performer" }],
         [err({ row_id: "row-1", field_key: "performer" })],
-        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+        { questionId: "q-1", rowId: "row-1" },
       ),
       true,
     );
@@ -98,18 +94,7 @@ describe("resolveRowErrorState — hasError", () => {
       rowHasBoundError(
         [{ key: "dosage", errorFieldKeys: ["dose_0", "dose_1"] }],
         [err({ row_id: "row-1", field_key: "dose_1" })],
-        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
-      ),
-      true,
-    );
-  });
-
-  it("a v1-shim index-only error still matches by rowIndex", () => {
-    assert.equal(
-      rowHasBoundError(
-        [{ key: "quantity" }],
-        [err({ row_id: undefined, index: 2 })],
-        { questionId: "q-1", rowId: "row-3", rowIndex: 2 },
+        { questionId: "q-1", rowId: "row-1" },
       ),
       true,
     );
@@ -122,7 +107,7 @@ describe("resolveRowErrorState — hasError", () => {
       rowHasBoundError(
         [{ key: "quantity" }],
         [err({ row_id: "row-1", field_key: "note" })],
-        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+        { questionId: "q-1", rowId: "row-1" },
       ),
       true,
     );
@@ -135,7 +120,6 @@ describe("unmatchedRowErrorFieldKeys", () => {
       unmatchedRowErrorFieldKeys([{ key: "quantity" }], [], {
         questionId: "q-1",
         rowId: "row-1",
-        rowIndex: 0,
       }),
       [],
     );
@@ -146,7 +130,7 @@ describe("unmatchedRowErrorFieldKeys", () => {
       unmatchedRowErrorFieldKeys(
         [{ key: "quantity" }],
         [err({ row_id: "row-1", field_key: "quantity" })],
-        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+        { questionId: "q-1", rowId: "row-1" },
       ),
       [],
     );
@@ -157,7 +141,7 @@ describe("unmatchedRowErrorFieldKeys", () => {
       unmatchedRowErrorFieldKeys(
         [{ key: "quantity" }],
         [err({ row_id: "row-1", field_key: "note" })],
-        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+        { questionId: "q-1", rowId: "row-1" },
       ),
       ["note"],
     );
@@ -168,7 +152,7 @@ describe("unmatchedRowErrorFieldKeys", () => {
       unmatchedRowErrorFieldKeys(
         [{ key: "quantity" }],
         [err({ row_id: "row-2", field_key: "note" })],
-        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+        { questionId: "q-1", rowId: "row-1" },
       ),
       [],
     );
@@ -179,7 +163,7 @@ describe("unmatchedRowErrorFieldKeys", () => {
       unmatchedRowErrorFieldKeys(
         [{ key: "quantity" }],
         [err({ row_id: "row-1", field_key: "note", question_id: "q-2" })],
-        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+        { questionId: "q-1", rowId: "row-1" },
       ),
       [],
     );
@@ -194,7 +178,7 @@ describe("unmatchedRowErrorFieldKeys", () => {
           err({ row_id: "row-1", field_key: "note" }),
           err({ row_id: "row-1", field_key: "reason" }),
         ],
-        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+        { questionId: "q-1", rowId: "row-1" },
       ).sort(),
       ["note", "reason"],
     );
@@ -205,26 +189,15 @@ describe("unmatchedRowErrorFieldKeys", () => {
       unmatchedRowErrorFieldKeys(
         [{ key: "dosage", errorFieldKeys: ["dose_0", "dose_1"] }],
         [err({ row_id: "row-1", field_key: "dose_1" })],
-        { questionId: "q-1", rowId: "row-1", rowIndex: 0 },
+        { questionId: "q-1", rowId: "row-1" },
       ),
       [],
-    );
-  });
-
-  it("a v1-shim index-only unmatched error still matches by rowIndex", () => {
-    assert.deepEqual(
-      unmatchedRowErrorFieldKeys(
-        [{ key: "quantity" }],
-        [err({ row_id: undefined, index: 2, field_key: "note" })],
-        { questionId: "q-1", rowId: "row-3", rowIndex: 2 },
-      ),
-      ["note"],
     );
   });
 });
 
 describe("resolveRowErrorState — mobileHiddenErrorColumns", () => {
-  const match = { questionId: "q-1", rowId: "row-1", rowIndex: 0 };
+  const match = { questionId: "q-1", rowId: "row-1" };
 
   it("a column with no errors is never listed, mobileHidden or not", () => {
     assert.deepEqual(

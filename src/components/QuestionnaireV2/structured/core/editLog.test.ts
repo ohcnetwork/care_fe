@@ -139,7 +139,7 @@ describe("applyEditToLog — one edit per rowId, coalescing rules", () => {
 
   it("an update stray-landing after an add/remove annihilation, followed by an add, also resolves by DATA (same decision point, reached one hop earlier)", () => {
     // The same erasure, reached via `update` instead of `remove`: a
-    // debounced field flush (or an assistant edit) queued before the row
+    // debounced field flush queued before the row
     // was removed, arriving after the annihilation. `appendFresh` has no
     // way to know the rowId is stale, so it appends the `update` as
     // fresh. A subsequent `add` must still be judged against `baseline`,
@@ -293,7 +293,7 @@ describe("applyEditToLog — one edit per rowId, coalescing rules", () => {
     assert.deepEqual(afterEdit, [add("r1", row("r1", "still has content"))]);
   });
 
-  it("isEmptyRow is scoped to the add+update cell ONLY — an assistant re-`add` onto an existing `add` is never annihilated by content", () => {
+  it("isEmptyRow is scoped to the add+update cell ONLY — a re-`add` onto an existing `add` is never annihilated by content", () => {
     const isEmptyRow = (r: TestRow) => r.note.trim().length === 0;
 
     const afterAdd = applyEditToLog([], add("r1", row("r1", "some note")), {

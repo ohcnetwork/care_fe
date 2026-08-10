@@ -10,7 +10,6 @@ import {
   makeToRequests,
   newFileRow,
   projectValues,
-  rowSchema,
   unnamedFileRowIds,
 } from "./model";
 
@@ -268,45 +267,5 @@ describe("files model", () => {
       const bad = row({ name: "" });
       assert.deepEqual(projectValues([bad]), [{ type: "files", value: [bad] }]);
     });
-  });
-});
-
-describe("rowSchema — the assistant write guard", () => {
-  it("accepts a real row (built with a genuine File instance)", () => {
-    assert.equal(
-      rowSchema.safeParse(row({ name: "chest-xray" })).success,
-      true,
-    );
-  });
-
-  it("rejects an assistant-shaped patch — file_data can never be a real File instance from JSON", () => {
-    // Exactly what an assistant write actually looks like: `patch: unknown`
-    // arriving as plain JSON (`ApplyStructuredEditInput`), never a live
-    // browser File handle. This is not a gap — it is the honest, permanent
-    // answer for this type (see this schema's own doc comment).
-    const jsonShapedPatch = {
-      ...row({ name: "chest-xray" }),
-      file_data: { name: "chest-xray.pdf", size: 1234 },
-    };
-    assert.equal(rowSchema.safeParse(jsonShapedPatch).success, false);
-  });
-
-  it("rejects an unknown field", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...row(), extra_field: "hallucinated" }).success,
-      false,
-    );
-  });
-
-  it("rejects an invalid file_type enum value", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...row(), file_type: "not_a_real_type" }).success,
-      false,
-    );
-  });
-
-  it("rejects a missing associating_id", () => {
-    const { associating_id: _drop, ...withoutAssociatingId } = row();
-    assert.equal(rowSchema.safeParse(withoutAssociatingId).success, false);
   });
 });

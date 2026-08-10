@@ -24,7 +24,7 @@ import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/struct
 import { StructuredFieldError } from "@/components/QuestionnaireV2/structured/core/StructuredFieldError";
 import { mergePatch } from "@/components/QuestionnaireV2/structured/core/rowMutations";
 import { selectStructuredFieldErrors } from "@/components/QuestionnaireV2/structured/core/structuredFieldErrors";
-import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
+import { useStructuredSingleRow } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
 import type { StructuredInputProps } from "@/components/QuestionnaireV2/structured/types";
 
 import query from "@/Utils/request/query";
@@ -152,14 +152,8 @@ function EncounterEditorBody({
     [toDischarge, encounter, encounterId, normalizePatch],
   );
 
-  // No explicit type argument — `TRow` infers from `projectValues`, `Mode`
-  // from the `mode: "single"` literal below. Naming `TRow` explicitly here
-  // (`useStructuredRows<EncounterRow>({...})`) suppresses inference for
-  // `Mode`, which silently falls back to `"list"` and narrows the return
-  // to `ListRowsController` — no `row`/`setRow` at all.
-  const single = useStructuredRows({
+  const single = useStructuredSingleRow({
     questionId: question.id,
-    mode: "single",
     baseline,
     projectValues,
     normalizePatch,
@@ -177,10 +171,9 @@ function EncounterEditorBody({
   const hasDispositionError =
     selectStructuredFieldErrors(errors, {
       questionId: question.id,
-      // No rowId and no rowIndex: `hospitalization.discharge_disposition`
-      // belongs to the singleton SECTION, not to a row — matcher rule 3.
-      // Encounter is the only type in this wave that exercises that
-      // branch.
+      // No rowId: `hospitalization.discharge_disposition` belongs to the
+      // singleton SECTION, not to a row — the matcher's section-level
+      // rule. Encounter is the only type in this wave that exercises it.
       fieldKeys: ["hospitalization.discharge_disposition"],
     }).length > 0;
   const dispositionErrorId = `${question.id}--discharge-disposition--error`;

@@ -1,19 +1,12 @@
-import { z } from "zod";
-
 import type {
   BaselineRow,
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
 import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
-import {
-  periodSchema,
-  userDisplaySchema,
-} from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import { makeUpsertToRequests } from "@/components/QuestionnaireV2/structured/shared/upsertToRequests";
-import { CodeSchema, type Code } from "@/types/base/code/code";
+import type { Code } from "@/types/base/code/code";
 import {
-  MEDICATION_STATEMENT_STATUS,
   MedicationStatementInformationSourceType,
   type MedicationStatementRead,
   type MedicationStatementRequest,
@@ -22,29 +15,6 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
 
 /** The wire shape is already the row shape — no widening needed. */
 export type MedicationStatementRow = MedicationStatementRequest;
-
-/**
- * Assistant write guard: "is this a plausible row", not "is this row
- * complete enough to submit" — completeness is
- * `medicationStatementValidationIssues`' job. `dosage_text` accepts `""`
- * (matching `newMedicationStatementRow`'s seed); `effective_period` uses
- * {@link periodSchema}, whose values are full ISO instants on the wire —
- * the backend rejects a naive datetime (see `periodDateFromInput`).
- */
-export const rowSchema = z
-  .object({
-    id: z.string().optional(),
-    status: z.enum(MEDICATION_STATEMENT_STATUS),
-    reason: z.string().optional(),
-    medication: CodeSchema,
-    encounter: z.string().optional(),
-    dosage_text: z.string(),
-    effective_period: periodSchema.optional(),
-    information_source: z.enum(MedicationStatementInformationSourceType),
-    note: z.string().optional(),
-    created_by: userDisplaySchema.optional(),
-  })
-  .strict();
 
 /**
  * A row with a server `id` flips `status` to `"entered_in_error"` and stays

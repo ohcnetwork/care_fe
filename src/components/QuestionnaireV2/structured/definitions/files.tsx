@@ -5,7 +5,6 @@ import { readFileAsDataURL } from "@/Utils/utils";
 import { FilesEditor } from "@/components/QuestionnaireV2/structured/types/files/FilesEditor";
 import {
   makeToRequests,
-  rowSchema,
   unnamedFileRowIds,
 } from "@/components/QuestionnaireV2/structured/types/files/model";
 
@@ -41,7 +40,6 @@ export const filesDefinition: StructuredTypeDefinition<"files"> = {
   draftPolicy: "exclude",
   contract: 2,
   toRequests,
-  rowSchema,
   // i18n boundary: `unnamedFileRowIds` stays pure; this definition turns its
   // row ids into translated errors bound to the `name` column.
   validate: (_projection, edits, questionId) =>

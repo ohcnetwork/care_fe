@@ -19,7 +19,6 @@ import {
   SYMPTOM_SOFT_DELETE,
   newSymptomRow,
   projectValues,
-  rowSchema,
   symptomDuplicateKey,
   toBaselineRows,
   toRequests,
@@ -404,95 +403,5 @@ describe("symptom model", () => {
       assert.equal(projectedSeverity, "severe");
       assert.equal(submittedSeverity, "severe");
     });
-  });
-});
-
-describe("rowSchema — the assistant write guard", () => {
-  const code = { code: "1", display: "Headache", system: "sys" };
-
-  it("accepts a real row", () => {
-    assert.equal(
-      rowSchema.safeParse(newSymptomRow(code, "enc-1")).success,
-      true,
-    );
-  });
-
-  it("accepts a baseline row converted via toSymptomRow", () => {
-    const server = serverSymptom({
-      created_by: {
-        id: "user-1",
-        username: "care-doctor",
-      } as Symptom["created_by"],
-    });
-    const result = rowSchema.safeParse(toSymptomRow(server));
-    assert.equal(result.success, true, JSON.stringify(result));
-  });
-
-  it("accepts a baseline row whose onset carries no datetime", () => {
-    // FHIR allows an onset expressed only as onset_age/onset_string;
-    // deriving `""` for the missing datetime would fail `onsetSchema`'s
-    // date check and lock the assistant out of editing such a row.
-    const server = serverSymptom({
-      onset: { onset_string: "since childhood" },
-      created_by: {
-        id: "user-1",
-        username: "care-doctor",
-      } as Symptom["created_by"],
-    });
-    const result = rowSchema.safeParse(toSymptomRow(server));
-    assert.equal(result.success, true, JSON.stringify(result));
-  });
-
-  it("rejects an unknown field", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newSymptomRow(code, "enc-1"),
-        bodyPart: "hallucinated field",
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects an invalid severity enum value", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newSymptomRow(code, "enc-1"),
-        severity: "extreme",
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects a malformed onset_datetime", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newSymptomRow(code, "enc-1"),
-        onset: { onset_datetime: "2024-02-31" },
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects an unknown key inside onset", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newSymptomRow(code, "enc-1"),
-        onset: { onset_datetime: "2026-01-01", made_up: true },
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects an empty category", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...newSymptomRow(code, "enc-1"), category: "" })
-        .success,
-      false,
-    );
-  });
-
-  it("rejects a missing code", () => {
-    const { code: _drop, ...withoutCode } = newSymptomRow(code, "enc-1");
-    assert.equal(rowSchema.safeParse(withoutCode).success, false);
   });
 });

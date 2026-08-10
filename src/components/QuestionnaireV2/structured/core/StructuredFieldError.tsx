@@ -12,7 +12,6 @@ export interface StructuredFieldErrorProps {
   id?: string;
   questionId: string;
   rowId?: RowId;
-  rowIndex?: number;
   fieldKeys: readonly string[];
   errors: readonly QuestionValidationError[];
   className?: string;
@@ -28,7 +27,6 @@ export function StructuredFieldError({
   id,
   questionId,
   rowId,
-  rowIndex,
   fieldKeys,
   errors,
   className,
@@ -37,7 +35,6 @@ export function StructuredFieldError({
   const [error] = selectStructuredFieldErrors(errors, {
     questionId,
     rowId,
-    rowIndex,
     fieldKeys,
   });
   if (!error) return null;

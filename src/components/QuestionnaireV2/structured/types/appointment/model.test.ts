@@ -18,7 +18,6 @@ import {
   isEmptyRow,
   needsSlot,
   projectValues,
-  rowSchema,
   toRequests,
 } from "./model";
 
@@ -249,10 +248,9 @@ describe("appointment model", () => {
     it("ignores a stray remove op instead of erroring — there is no delete endpoint and no baseline row to remove", async () => {
       // A same-session add-then-clear is already annihilated by the
       // reducer before it reaches here; a standalone `remove` surviving
-      // in a restored draft (changes.ts's documented `appendFresh`
-      // counter-sequence) is an orphan against appointment's permanently
-      // empty baseline — resolveSingletonRow's explicit `baseline: new
-      // Map()` drops it the same way projectRows would.
+      // in a restored draft lands in `removes`, which
+      // `resolveSingletonRow` never reads — only `creates` can produce a
+      // request for this create-only type.
       const stray: StructuredEdit<AppointmentRow> = {
         rowId: SINGLETON_ROW_ID,
         op: "remove",
@@ -261,15 +259,16 @@ describe("appointment model", () => {
       assert.deepEqual(await toRequests([stray], CTX), []);
     });
 
-    it("a corrupted draft recording the singleton as 'update' (never a legitimate op for a create-only type) is an orphan — ZERO requests, matching what the projection would also show", async () => {
+    it("a corrupted draft recording the singleton as 'update' (never a legitimate op for a create-only type) yields ZERO requests, matching what the projection would also show", async () => {
       // A well-formed log never produces this (resolveSetRow's very first
       // call always returns "add"; every later call coalesces onto that
       // SAME entry and editLog.ts never reclassifies it away from "add"
       // without a baseline that already has the rowId — appointment's
-      // baseline never does). Reachable only via the raw `applyEdit` seam
-      // or a hand-edited draft. Because appointment's baseline is ALWAYS
-      // empty, this is an orphan by the SAME rule projectRows/
-      // findOrphanRowIds apply — dropped, not defensively resurrected.
+      // baseline never does). Reachable only via a hand-edited draft. The
+      // `update` lands in `resolveChanges`' `updates` set, which
+      // `resolveSingletonRow` never reads — and `projectRows` drops it as
+      // an orphan against appointment's permanently empty baseline, so
+      // zero requests match an empty projection.
       const corrupted: StructuredEdit<AppointmentRow> = {
         rowId: SINGLETON_ROW_ID,
         op: "update",
@@ -310,43 +309,6 @@ describe("appointment model", () => {
           .value[0],
         first,
       );
-    });
-
-    it("a RAW doubly-malformed log makes projectRows and toRequests pick DIFFERENT rows", async () => {
-      // `resolveChanges` dispatches "a" at its FIRST occurrence (index 0)
-      // but resolves its CONTENT from the last-write-wins map (`aLast`),
-      // while `projectRows`' add loop pushes "a" at its LAST occurrence
-      // (index 2) — so `rows[0]` is "b"'s entry (pushed at index 1) while
-      // `resolveChanges().creates[0]` is "a"'s latest content. Every real
-      // ingestion path sanitizes first (see the next case), so this shape
-      // never reaches either function through the app.
-      const aFirst = row({ note: "a-first", slot_id: "sA1" });
-      const bOnly = row({ note: "b-only", slot_id: "sB" });
-      const aLast = row({ note: "a-last", slot_id: "sA2" });
-      const edits: StructuredEdit<AppointmentRow>[] = [
-        { rowId: "a", op: "add", patch: aFirst },
-        { rowId: "b", op: "add", patch: bOnly },
-        { rowId: "a", op: "add", patch: aLast },
-      ];
-
-      const rows = projectRows([], edits, {});
-      const projected = projectValues(rows.map((entry) => entry.row));
-      const requests = await toRequests(edits, CTX);
-
-      assert.deepEqual(
-        (projected[0] as { type: "appointment"; value: AppointmentRow[] })
-          .value[0],
-        bOnly,
-      );
-      assert.equal(
-        requests[0]?.url,
-        "/api/v1/facility/fac-1/slots/sA2/create_appointment/",
-      );
-      assert.deepEqual(requests[0]?.body, {
-        note: "a-last",
-        patient: CTX.patientId,
-        tags: aLast.tags,
-      });
     });
 
     it("after sanitizeStructuredEditLog (the real ingestion boundary), projectRows and toRequests AGREE on the same log", async () => {
@@ -527,49 +489,5 @@ describe("appointment model", () => {
       ]);
       assert.deepEqual(clearedAfter, []);
     });
-  });
-});
-
-describe("rowSchema — the assistant write guard", () => {
-  it("accepts a real row", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        note: "fever follow-up",
-        slot_id: "slot-1",
-        tags: ["urgent"],
-      }).success,
-      true,
-    );
-  });
-
-  it("accepts a partially-filled row (note only, no slot) — this schema is not the completeness gate", () => {
-    assert.equal(
-      rowSchema.safeParse({ note: "fever follow-up", slot_id: "", tags: [] })
-        .success,
-      true,
-    );
-  });
-
-  it("rejects an unknown field", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        note: "",
-        slot_id: "",
-        tags: [],
-        reason: "hallucinated field",
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects a non-array tags", () => {
-    assert.equal(
-      rowSchema.safeParse({ note: "", slot_id: "", tags: "urgent" }).success,
-      false,
-    );
-  });
-
-  it("rejects a missing field", () => {
-    assert.equal(rowSchema.safeParse({ note: "", slot_id: "" }).success, false);
   });
 });

@@ -63,44 +63,7 @@ describe("selectStructuredFieldErrors", () => {
     );
   });
 
-  it("v1 fallback: an error with `index` and no `row_id` binds by rowIndex", () => {
-    const error = err({ index: 2 });
-    assert.deepEqual(
-      selectStructuredFieldErrors([error], {
-        questionId: "q-1",
-        rowIndex: 2,
-        fieldKeys: ["slot_id"],
-      }),
-      [error],
-    );
-  });
-
-  it("an error carrying BOTH row_id and index prefers row_id (row_id wins, and does NOT also match a different rowId that shares the index)", () => {
-    const error = err({ row_id: "row-1", index: 2 });
-    // Matching the carried row_id succeeds even though rowIndex differs.
-    assert.deepEqual(
-      selectStructuredFieldErrors([error], {
-        questionId: "q-1",
-        rowId: "row-1",
-        rowIndex: 99,
-        fieldKeys: ["slot_id"],
-      }),
-      [error],
-    );
-    // A DIFFERENT row that happens to share the index must NOT match —
-    // row_id's presence on the error stops the index fallback entirely.
-    assert.deepEqual(
-      selectStructuredFieldErrors([error], {
-        questionId: "q-1",
-        rowId: "row-2",
-        rowIndex: 2,
-        fieldKeys: ["slot_id"],
-      }),
-      [],
-    );
-  });
-
-  it("an error with NEITHER binds only to a section-level slot (rowId === undefined && rowIndex === undefined)", () => {
+  it("an error with no row_id binds only to a section-level slot (rowId === undefined)", () => {
     const error = err();
     assert.deepEqual(
       selectStructuredFieldErrors([error], {
@@ -137,7 +100,7 @@ describe("selectStructuredFieldErrors", () => {
 
   it("an empty-string field_key is treated the same as no field_key at all — never matches through this primitive, aligned with QuestionBlock.tsx's own falsy check", () => {
     const error = err({ field_key: "" });
-    // Neither a section-level query (no rowId/rowIndex)...
+    // Neither a section-level query (no rowId)...
     assert.deepEqual(
       selectStructuredFieldErrors([error], {
         questionId: "q-1",

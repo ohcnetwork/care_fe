@@ -1,22 +1,14 @@
-import { z } from "zod";
-
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type {
   BaselineRow,
   ProjectValues,
 } from "@/components/QuestionnaireV2/structured/core/types";
-import { periodSchema } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
 } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
 import {
-  ENCOUNTER_ADMIT_SOURCE,
-  ENCOUNTER_CLASS,
-  ENCOUNTER_DIET_PREFERENCE,
-  ENCOUNTER_DISCHARGE_DISPOSITION,
-  ENCOUNTER_PRIORITY,
   EncounterStatus,
   type EncounterClass,
   type EncounterDischargeDisposition,
@@ -32,36 +24,6 @@ import type { StructuredEdit } from "@/types/questionnaire/structured";
  * filter, and why an `add` and an `update` compile to the same request.
  */
 export type EncounterRow = EncounterEdit;
-
-/** `Hospitalization`'s zod mirror — `.strict()`, every field optional,
- *  matching `Hospitalization`'s own four fields exactly. */
-const hospitalizationSchema = z
-  .object({
-    re_admission: z.boolean().optional(),
-    admit_source: z.enum(ENCOUNTER_ADMIT_SOURCE).optional(),
-    discharge_disposition: z.enum(ENCOUNTER_DISCHARGE_DISPOSITION).optional(),
-    diet_preference: z.enum(ENCOUNTER_DIET_PREFERENCE).optional(),
-  })
-  .strict();
-
-/**
- * Runtime guard on externally authored rows. `hospitalization` accepts
- * `null`, matching `Hospitalization | null | undefined` — the server holds
- * `null` for an encounter that never had one. `external_identifier`/
- * `discharge_summary_advice` are `string | null` on the real type — both
- * `.nullable()`, not merely `.optional()`.
- */
-export const rowSchema = z
-  .object({
-    status: z.enum(EncounterStatus),
-    encounter_class: z.enum(ENCOUNTER_CLASS),
-    period: periodSchema,
-    hospitalization: hospitalizationSchema.nullable().optional(),
-    priority: z.enum(ENCOUNTER_PRIORITY),
-    external_identifier: z.string().nullable(),
-    discharge_summary_advice: z.string().nullable(),
-  })
-  .strict();
 
 /** Statuses that END an encounter, and therefore want a `period.end`. */
 const TERMINAL_STATUSES: ReadonlySet<EncounterStatus> = new Set([
@@ -281,13 +243,11 @@ export function blocksSaveForMissingDischargeDisposition(
  * under a duplicate-entry log. A log carrying only a corrupted foreign rowId
  * sends nothing, matching the untouched row the projection shows.
  *
- * `resolveChanges(own, {})` passes no baseline: the encounter's baseline
- * exists but is not available to a pure differ; `undefined` is the
- * contract's word for "not known". After the identity filter
- * `resolveChanges` dedups to at most one entry, so `updates[0] ??
- * creates[0]` is an exact pick; an `add` recorded while the baseline is
- * unresolved compiles to the same PUT, safe because the endpoint is
- * URL-keyed. `removes` is dropped: this question has no delete verb, and
+ * After the identity filter the sanitized log holds at most one entry
+ * for `encounterId`, so `updates[0] ?? creates[0]` is an exact pick; an
+ * `add` recorded while the baseline is unresolved compiles to the same
+ * PUT, safe because the endpoint is URL-keyed. `removes` is dropped:
+ * this question has no delete verb, and
  * `projectRows` hides a `remove`d baseline row, so an empty projection and
  * zero requests agree.
  *

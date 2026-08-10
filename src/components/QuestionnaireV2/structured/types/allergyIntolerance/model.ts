@@ -1,52 +1,18 @@
-import { z } from "zod";
-
 import type {
   BaselineRow,
   ProjectValues,
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
 import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
-import { dateOnlyString } from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import { makeUpsertToRequests } from "@/components/QuestionnaireV2/structured/shared/upsertToRequests";
-import { CodeSchema, type Code } from "@/types/base/code/code";
+import type { Code } from "@/types/base/code/code";
 import type {
   AllergyIntolerance,
   AllergyIntoleranceRequest,
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
-import {
-  ALLERGY_CATEGORY,
-  ALLERGY_CLINICAL_STATUS,
-  ALLERGY_CRITICALITY,
-} from "@/types/emr/allergyIntolerance/allergyIntolerance";
 
 /** The wire request shape doubles as the editable row shape. */
 export type AllergyRow = AllergyIntoleranceRequest;
-
-/**
- * Assistant write guard. `verification_status` values are hand-listed —
- * `AllergyVerificationStatus` is a plain string union with no runtime
- * tuple to read. `criticality` is checked against `ALLERGY_CRITICALITY`
- * even though `AllergyIntoleranceRequest` widens the field to `string`.
- */
-export const rowSchema = z
-  .object({
-    id: z.string().optional(),
-    clinical_status: z.enum(ALLERGY_CLINICAL_STATUS),
-    verification_status: z.enum([
-      "unconfirmed",
-      "confirmed",
-      "refuted",
-      "presumed",
-      "entered_in_error",
-    ]),
-    category: z.enum(ALLERGY_CATEGORY),
-    criticality: z.enum(ALLERGY_CRITICALITY),
-    code: CodeSchema,
-    last_occurrence: dateOnlyString.optional(),
-    note: z.string().optional(),
-    encounter: z.string().min(1),
-  })
-  .strict();
 
 /**
  * Removing a row that exists on the server flips `verification_status` to

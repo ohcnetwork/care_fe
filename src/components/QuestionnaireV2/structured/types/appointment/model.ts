@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import { resolveChanges } from "@/components/QuestionnaireV2/structured/core/changes";
 import type { ProjectValues } from "@/components/QuestionnaireV2/structured/core/types";
 import type {
@@ -12,21 +10,6 @@ import type { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 /** The wire shape is already the row shape — no widening needed. */
 export type AppointmentRow = CreateAppointmentQuestion;
-
-/**
- * Runtime guard on externally authored rows. Deliberately permissive on
- * `note`/`slot_id` — both may be legitimately blank mid-edit. A schema's
- * job is "is this a plausible row shape", not "is this row complete enough
- * to submit"; completeness is `needsSlot`'s separate, edit-log-aware
- * decision.
- */
-export const rowSchema = z
-  .object({
-    note: z.string(),
-    slot_id: z.string(),
-    tags: z.array(z.string()),
-  })
-  .strict();
 
 /**
  * Is `row.slot_id` a real slot address, not just a truthy string? A caller
@@ -83,37 +66,33 @@ export const projectValues: ProjectValues<AppointmentRow> = (rows) => {
   return [{ type: "appointment", value: [row] }];
 };
 
-/** `mode: "single"` with no baseline needs a complete row to record an
- *  `add` against — `patch` is always the whole row. Appointment is
- *  create-only: there is no server row to seed from, unlike `encounter`. */
+/** A single-row type (`useStructuredSingleRow`) with no baseline needs a
+ *  complete row to record an `add` against — `patch` is always the whole
+ *  row. Appointment is create-only: there is no server row to seed from,
+ *  unlike `encounter`. */
 export function createSeed(): AppointmentRow {
   return { note: "", slot_id: "", tags: [] };
 }
 
 /**
  * Resolves the edit log down to the one row this create-only singleton
- * holds, or `undefined`.
- *
- * Passes an explicit, KNOWN-EMPTY `baseline` — not `{}` (baseline
- * `undefined`, "not yet known"): a create-only singleton has no server
- * row, ever, so an `update`/`remove` for ANY rowId is an orphan by the
- * same rule `projectRows` applies, and only `creates` can hold anything.
+ * holds, or `undefined`. Only `creates` can matter: a create-only
+ * singleton has no server row, ever — an add→remove pair annihilates
+ * inside the reducer, and there is no endpoint verb for an update.
  *
  * Do NOT pre-filter `edits` to a fixed singleton rowId: `projectValues`'
  * signature is bare `TRow[]` — it can only fall back to positional
  * `rows[0]` — so an identity filter here would make projection and
  * submission pick DIFFERENT rows under a corrupted multi-rowId log. Both
- * sides instead use the same signal, log order over the same empty
- * baseline, so `creates[0]` is `rows[0]` by construction — provided the
- * log has at most one entry per rowId, which every log produced by
- * `applyEditToLog` or surviving `sanitizeStructuredEditLog` does. A raw,
- * doubly-malformed log (duplicate entries for one rowId interleaved with
- * another's) can still diverge, but every real ingestion path sanitizes first.
+ * sides instead use the same signal, log order, so `creates[0]` is
+ * `rows[0]` by construction for any log with one entry per rowId — which
+ * every log produced by `applyEditToLog` or surviving
+ * `sanitizeStructuredEditLog` is.
  */
 function resolveSingletonRow(
   edits: readonly StructuredEdit<AppointmentRow>[],
 ): AppointmentRow | undefined {
-  const { creates } = resolveChanges(edits, { baseline: new Map() });
+  const { creates } = resolveChanges(edits, {});
   return creates[0];
 }
 

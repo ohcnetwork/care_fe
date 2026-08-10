@@ -29,8 +29,6 @@ import {
 import { FillShell } from "./FillShell";
 import { ServerErrorsPanel } from "./ServerErrorsPanel";
 import type { FormStore } from "./StoreRegistrar";
-import { FormAssistantSlot } from "./assistant/FormAssistantSlot";
-import { useFillAssistantSession } from "./assistant/useFillAssistantSession";
 import type { DroppedDraftAnswer } from "./draft/draftMerge";
 import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
 import { useFillSessionAutosave } from "./draft/useFillAutosave";
@@ -319,19 +317,6 @@ export function FillPageBody({
     t("unsaved_changes"),
   );
 
-  // The assistant capability's session-scoped handle. Built fresh for THIS
-  // mount (never looked up from a module global), so two fill sessions
-  // mounted at once get two independent handles. The phase goes in for the
-  // same reason `frozen` goes into every input surface below: the
-  // assistant writes to the same stores and must observe the same freeze.
-  const assistantHandle = useFillAssistantSession({
-    subject,
-    forms,
-    getStore,
-    storesVersion,
-    phase: sessionPhase,
-  });
-
   return (
     // Tabs wraps the shell so its Radix context reaches both the strip in
     // FillShell's `tabs` slot and the TabsContent panels below.
@@ -464,9 +449,6 @@ export function FillPageBody({
                       />
                     </div>
                   )}
-                  {/* Renders nothing unless a plugin registers a
-                      `formAssistant`. */}
-                  <FormAssistantSlot handle={assistantHandle} />
                 </section>
               </div>
             </FillOutlineNavProvider>

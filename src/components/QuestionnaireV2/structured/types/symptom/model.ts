@@ -1,5 +1,4 @@
 import { format } from "date-fns";
-import { z } from "zod";
 
 import type {
   BaselineRow,
@@ -7,44 +6,12 @@ import type {
   SoftDeleteDescriptor,
 } from "@/components/QuestionnaireV2/structured/core/types";
 import { listProjectValues } from "@/components/QuestionnaireV2/structured/shared/listProjectValues";
-import {
-  onsetSchema,
-  userDisplaySchema,
-} from "@/components/QuestionnaireV2/structured/shared/rowSchemaPrimitives";
 import { makeUpsertToRequests } from "@/components/QuestionnaireV2/structured/shared/upsertToRequests";
-import { CodeSchema, type Code } from "@/types/base/code/code";
+import type { Code } from "@/types/base/code/code";
 import type { Symptom, SymptomRequest } from "@/types/emr/symptom/symptom";
-import {
-  SYMPTOM_CLINICAL_STATUS,
-  SYMPTOM_SEVERITY,
-  SYMPTOM_VERIFICATION_STATUS,
-} from "@/types/emr/symptom/symptom";
 
 /** The wire request shape doubles as the editable row shape. */
 export type SymptomRow = SymptomRequest;
-
-/**
- * Assistant write guard. `category` stays a bare non-empty string — no
- * exhaustive runtime enum exists for it. Timestamp fields are read-only
- * pass-through, left as plain optional strings.
- */
-export const rowSchema = z
-  .object({
-    id: z.string().optional(),
-    clinical_status: z.enum(SYMPTOM_CLINICAL_STATUS),
-    verification_status: z.enum(SYMPTOM_VERIFICATION_STATUS),
-    code: CodeSchema,
-    severity: z.enum(SYMPTOM_SEVERITY),
-    onset: onsetSchema.optional(),
-    recorded_date: z.string().optional(),
-    note: z.string().optional(),
-    encounter: z.string().min(1),
-    category: z.string().min(1),
-    created_date: z.string().optional(),
-    updated_date: z.string().optional(),
-    created_by: userDisplaySchema.optional(),
-  })
-  .strict();
 
 /**
  * Removing a row that exists on the server flips `verification_status` to
@@ -74,8 +41,7 @@ function isoCalendarDate(value: string): string {
  * `onset_datetime` cut down to the bare date the editor's `<input
  * type="date">` speaks. An onset carrying no datetime at all (FHIR allows
  * `onset_age`/`onset_string` alone) drops the KEY rather than storing
- * `""` — `onsetSchema` rejects an empty date, so an `""` here would make
- * every such baseline row unpatchable by the assistant.
+ * `""` — `""` is not a valid date value for the input.
  */
 function toRowOnset(onset: Symptom["onset"]): SymptomRow["onset"] {
   if (!onset) return undefined;

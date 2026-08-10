@@ -23,7 +23,6 @@ import {
   newMedicationRowFromCode,
   newMedicationRowFromProduct,
   projectValues,
-  rowSchema,
   toBaselineRows,
   toMedicationRow,
   toRequests,
@@ -144,16 +143,6 @@ describe("medication_request model", () => {
       ]) {
         assert.equal(key in row, false, `${key} rode into the row`);
       }
-    });
-
-    it("produces a row this type's own rowSchema accepts", () => {
-      // The assistant's update/remove path echoes the COMPLETE row back as
-      // the patch, so a derivation the strict schema rejects makes every
-      // baseline row uneditable by it.
-      const result = rowSchema.safeParse(
-        toMedicationRow(serverMedication(), CURRENT_USER),
-      );
-      assert.equal(result.success, true, JSON.stringify(result));
     });
   });
 
@@ -856,121 +845,5 @@ describe("medication_request model", () => {
       };
       assert.deepEqual(body.datapoints[0].medication, CODE);
     });
-  });
-});
-
-describe("rowSchema — the assistant write guard", () => {
-  it("accepts a real code-based row", () => {
-    const result = rowSchema.safeParse(
-      newMedicationRowFromCode(CODE, CURRENT_USER),
-    );
-    assert.equal(result.success, true, JSON.stringify(result));
-  });
-
-  it("accepts a real product-based row", () => {
-    const product = {
-      id: "prod-1",
-      slug: "paracetamol-500mg",
-      name: "Paracetamol 500mg",
-      product_type: ProductKnowledgeType.medication,
-    } as ProductKnowledgeBase;
-    const result = rowSchema.safeParse(
-      newMedicationRowFromProduct(product, CURRENT_USER),
-    );
-    assert.equal(result.success, true, JSON.stringify(result));
-  });
-
-  it("accepts a dose-range (taper/titrate) dosage instruction", () => {
-    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
-    row.dosage_instruction = [
-      {
-        as_needed_boolean: false,
-        dose_and_rate: {
-          type: "ordered",
-          dose_range: {
-            low: {
-              value: "1",
-              unit: { code: "{tbl}", display: "tablets", system: "u" },
-            },
-            high: {
-              value: "2",
-              unit: { code: "{tbl}", display: "tablets", system: "u" },
-            },
-          },
-        },
-        timing: {
-          repeat: {
-            frequency: 1,
-            period: "1",
-            period_unit: "d",
-            bounds_duration: { value: "5", unit: "d" },
-          },
-        },
-      },
-    ];
-    const result = rowSchema.safeParse(row);
-    assert.equal(result.success, true, JSON.stringify(result));
-  });
-
-  it("rejects an unknown top-level field", () => {
-    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
-    assert.equal(
-      rowSchema.safeParse({ ...row, extra_field: "hallucinated" }).success,
-      false,
-    );
-  });
-
-  it("rejects the legacy dirty flag — .strict() forces the clean v2 path", () => {
-    const row = {
-      ...newMedicationRowFromCode(CODE, CURRENT_USER),
-      dirty: true,
-    };
-    assert.equal(rowSchema.safeParse(row).success, false);
-  });
-
-  it("rejects an invalid status enum value", () => {
-    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
-    assert.equal(
-      rowSchema.safeParse({ ...row, status: "not_a_real_status" }).success,
-      false,
-    );
-  });
-
-  it("rejects an invalid period_unit inside a dosage instruction's timing", () => {
-    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
-    row.dosage_instruction[0].timing = {
-      repeat: { frequency: 1, period: "1", period_unit: "not_a_unit" as never },
-    };
-    assert.equal(rowSchema.safeParse(row).success, false);
-  });
-
-  it("rejects an unknown field nested inside a dosage instruction", () => {
-    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
-    (row.dosage_instruction[0] as unknown as Record<string, unknown>).made_up =
-      true;
-    assert.equal(rowSchema.safeParse(row).success, false);
-  });
-
-  it("rejects a missing requester", () => {
-    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
-    const { requester: _drop, ...withoutRequester } = row;
-    assert.equal(rowSchema.safeParse(withoutRequester).success, false);
-  });
-
-  it("rejects a malformed authored_on", () => {
-    const row = {
-      ...newMedicationRowFromCode(CODE, CURRENT_USER),
-      authored_on: "",
-    };
-    assert.equal(rowSchema.safeParse(row).success, false);
-  });
-
-  it("rejects a create_prescription with an invalid status", () => {
-    const row = newMedicationRowFromCode(CODE, CURRENT_USER);
-    row.create_prescription = {
-      status: "not_a_real_status" as never,
-      alternate_identifier: "",
-    };
-    assert.equal(rowSchema.safeParse(row).success, false);
   });
 });

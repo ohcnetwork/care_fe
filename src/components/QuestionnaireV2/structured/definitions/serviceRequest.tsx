@@ -3,7 +3,6 @@ import { t } from "i18next";
 import { ServiceRequestEditor } from "@/components/QuestionnaireV2/structured/types/serviceRequest/ServiceRequestEditor";
 import {
   requiredServiceRequestFieldMisses,
-  rowSchema,
   toRequests,
 } from "@/components/QuestionnaireV2/structured/types/serviceRequest/model";
 
@@ -20,7 +19,6 @@ export const serviceRequestDefinition: StructuredTypeDefinition<"service_request
     draftPolicy: "serialize",
     contract: 2,
     toRequests,
-    rowSchema,
     // i18n boundary: `requiredServiceRequestFieldMisses` stays pure; this
     // definition turns its misses into translated, row-scoped errors.
     validate: (_projection, edits, questionId) =>

@@ -3,7 +3,6 @@ import { t } from "i18next";
 import { MedicationStatementEditor } from "@/components/QuestionnaireV2/structured/types/medicationStatement/MedicationStatementEditor";
 import {
   medicationStatementValidationIssues,
-  rowSchema,
   toRequests,
 } from "@/components/QuestionnaireV2/structured/types/medicationStatement/model";
 
@@ -38,7 +37,6 @@ export const medicationStatementDefinition: StructuredTypeDefinition<"medication
     draftPolicy: "serialize",
     contract: 2,
     toRequests,
-    rowSchema,
     validate: (_projection, edits, questionId) =>
       medicationStatementValidationIssues(edits).map((issue) => ({
         question_id: questionId,

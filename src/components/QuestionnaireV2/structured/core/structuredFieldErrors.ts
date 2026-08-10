@@ -4,12 +4,9 @@ import type { RowId } from "./types";
 
 export interface StructuredFieldErrorMatch {
   questionId: string;
-  /** v2 identity. Omit for a section-level field — the encounter type's
+  /** Row identity. Omit for a section-level field — the encounter type's
    *  `hospitalization.discharge_disposition` has no row. */
   rowId?: RowId;
-  /** v1/server identity fallback: the row's CURRENT position in the
-   *  projection. Server batch errors and v1 validators are index-keyed. */
-  rowIndex?: number;
   fieldKeys: readonly string[];
 }
 
@@ -19,19 +16,15 @@ export interface StructuredFieldErrorMatch {
  * `aria-describedby` without rendering anything, and so a type module
  * that owns its own error display uses identical semantics.
  *
- * Row identity, in precedence order:
- *  1. the error carries `row_id`  → it must equal `match.rowId`;
- *  2. else it carries `index`     → it must equal `match.rowIndex`
- *     (v1/server errors are index-keyed; this clause and `rowIndex` go
- *     when those do);
- *  3. else (neither)              → it binds ONLY to a section-level
- *     slot, i.e. one with no row identity of its own.
- * Rule 3 in both directions is what stops a section-level slot from
- * swallowing row errors and vice versa.
+ * Row identity: an error carrying `row_id` must equal `match.rowId`; an
+ * error carrying neither binds ONLY to a section-level slot, i.e. one
+ * with no row identity of its own. That second rule, in both directions,
+ * is what stops a section-level slot from swallowing row errors and vice
+ * versa.
  */
 export function selectStructuredFieldErrors(
   errors: readonly QuestionValidationError[],
-  { questionId, rowId, rowIndex, fieldKeys }: StructuredFieldErrorMatch,
+  { questionId, rowId, fieldKeys }: StructuredFieldErrorMatch,
 ): QuestionValidationError[] {
   return errors.filter((error) => {
     if (error.question_id !== questionId) return false;
@@ -43,8 +36,6 @@ export function selectStructuredFieldErrors(
     if (!error.field_key) return false;
     if (!fieldKeys.includes(error.field_key)) return false;
     if (error.row_id !== undefined) return error.row_id === rowId;
-    if (error.index !== undefined)
-      return rowIndex !== undefined && error.index === rowIndex;
-    return rowId === undefined && rowIndex === undefined;
+    return rowId === undefined;
   });
 }

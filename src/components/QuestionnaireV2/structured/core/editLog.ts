@@ -46,9 +46,9 @@ export interface ApplyEditOptions<TRow extends object> {
  * what makes "a clinician who never touched a section sends zero requests
  * for it" true by construction rather than by convention.
  *
- * Pure and total — never mutates `log` or an existing entry. The
- * assistant's edit path calls this same function, so human and assistant
- * input cannot diverge.
+ * Pure and total — never mutates `log` or an existing entry. Every
+ * mutator funnels through this one function, so no writer can diverge on
+ * the coalescing rules.
  *
  * Coalescing table (existing entry's op × incoming edit's op):
  *
@@ -241,24 +241,4 @@ function isRevertedToBaseline<TRow extends object>(
   const baselineRow = baseline?.get(edit.rowId);
   if (baselineRow === undefined) return false;
   return deepEqualJson(edit.patch, baselineRow);
-}
-
-/**
- * Collapses a log to at most one edit per rowId: content follows the LAST
- * entry for a rowId, position its FIRST appearance. Identity for any log
- * `applyEditToLog` produced (one entry per rowId already), but a restored
- * draft's per-record validation admits duplicate rowIds the reducer never
- * emits — every consumer (`resolveChanges`, `findOrphanRowIds`) iterates
- * this so one identity is acted on exactly once.
- *
- * Pure: never mutates `log`; returns a fresh array.
- */
-export function dedupeEditsFirstAppearance<TRow extends object>(
-  log: EditLog<TRow>,
-): readonly RowEdit<TRow>[] {
-  // A Map keyed by rowId gives exactly these semantics: re-setting an
-  // existing key keeps its original position and replaces its value.
-  const editByRowId = new Map<RowId, RowEdit<TRow>>();
-  for (const edit of log) editByRowId.set(edit.rowId, edit);
-  return [...editByRowId.values()];
 }

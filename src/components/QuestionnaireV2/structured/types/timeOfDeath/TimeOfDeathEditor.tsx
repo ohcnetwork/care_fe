@@ -5,7 +5,7 @@ import { DateTimeInput } from "@/components/Common/DateTimeInput";
 
 import { StructuredDroppedRowsNotice } from "@/components/QuestionnaireV2/structured/core/StructuredDroppedRowsNotice";
 import type { BaselineRow } from "@/components/QuestionnaireV2/structured/core/types";
-import { useStructuredRows } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
+import { useStructuredSingleRow } from "@/components/QuestionnaireV2/structured/core/useStructuredRows";
 import type { StructuredInputProps } from "@/components/QuestionnaireV2/structured/types";
 import type { TimeOfDeathRow } from "@/types/questionnaire/structuredRows";
 
@@ -29,19 +29,8 @@ export function TimeOfDeathEditor({
   disabled,
 }: StructuredInputProps) {
   const { t } = useTranslation();
-  // No explicit type arguments. `TRow` infers from `projectValues` /
-  // `createSeed` / `isEmptyRow`'s own types below, and `Mode` infers from
-  // the `mode: "single"` literal in this same call. Supplying `TRow`
-  // explicitly here (`useStructuredRows<TimeOfDeathRow>({...})`) is a trap:
-  // TypeScript has no partial type-argument inference, so naming ONE type
-  // argument suppresses inference for the rest, and `Mode` silently falls
-  // back to its `"list"` default instead of reading `mode: "single"` —
-  // narrowing the return to `ListRowsController`, which has no `row`/
-  // `setRow` at all. Every future `mode: "single"` call site (appointment,
-  // encounter) should call it exactly this way — with no type arguments.
-  const single = useStructuredRows({
+  const single = useStructuredSingleRow({
     questionId: question.id,
-    mode: "single",
     baseline: NO_BASELINE,
     projectValues,
     createSeed,

@@ -1,5 +1,4 @@
 import { FilesTabsProps } from "@/components/Files/FilesTab";
-import type { FormAssistantDefinition } from "@/components/QuestionnaireV2/fill/assistant/formAssistantRegistry";
 import type { PluginStructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import type { OverrideCondition } from "@/lib/override";
@@ -217,28 +216,6 @@ export type PluginManifest = {
    *  appear in the studio's type picker, render in preview and fill,
    *  validate at submit, and build their own batch requests. */
   structuredQuestionTypes?: readonly PluginStructuredTypeDefinition[];
-  /**
-   * The agent capability. `PluginEngine` registers it (via
-   * `formAssistantRegistry`) under the CONFIGURED plugin slug
-   * (`config.slug`, the trusted, backend-issued identity), never this
-   * manifest's own self-declared `plugin` field — a remote's manifest is
-   * attacker-controllable, and `plugin` is exactly the field it declares
-   * about itself.
-   *
-   * The registered component receives a session-scoped
-   * `FillAssistantHandle` (`fill/assistant/types.ts`) — `listForms`,
-   * `listQuestions`, `getValue`/`setValue`, `applyStructuredEdit`,
-   * `subscribe` — constructed fresh per mounted fill session, never
-   * looked up from a module global. Every write goes through one
-   * validated choke point (`coercion.ts` for plain values,
-   * `structuredEditValidation.ts`'s zod row schema check for structured
-   * ones) before it becomes an ordinary pending edit — reviewable,
-   * revertible, and unaudited: nothing persists until the clinician
-   * presses Save.
-   *
-   * Changing this shape requires a lockstep update in `care_scribe`.
-   */
-  formAssistant?: FormAssistantDefinition;
 };
 
 export type PluginManifestWithMeta = PluginManifest & {

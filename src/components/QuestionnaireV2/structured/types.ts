@@ -1,5 +1,4 @@
 import type { ComponentType } from "react";
-import type { z } from "zod";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
@@ -157,10 +156,4 @@ export interface StructuredTypeDefinition<
     edits: readonly StructuredEdit<DataTypeFor<K>>[],
     context: StructuredRequestContext,
   ) => Promise<StructuredBatchEntry[]>;
-  /**
-   * Runtime guard for externally authored rows of this type. Schemas must be
-   * strict so unknown fields fail validation; absence is fail-closed. Kept as
-   * a bare `z.ZodType` because consumers only call `.safeParse`.
-   */
-  rowSchema?: z.ZodType;
 }

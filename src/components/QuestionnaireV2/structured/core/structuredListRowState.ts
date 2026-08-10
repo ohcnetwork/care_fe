@@ -12,12 +12,10 @@ export interface ErrorProneColumn {
   mobileHidden?: boolean;
 }
 
-/** Which row, in which question, errors must bind to. `rowIndex` is what a
- *  v1-shim index-only error matches on. */
+/** Which row, in which question, errors must bind to. */
 export interface RowErrorMatch {
   questionId: string;
   rowId: RowId;
-  rowIndex: number;
 }
 
 /** Does any error bind to this column's cell in this row? The same matcher
@@ -31,7 +29,6 @@ function columnHasBoundError(
     selectStructuredFieldErrors(errors, {
       questionId: match.questionId,
       rowId: match.rowId,
-      rowIndex: match.rowIndex,
       fieldKeys: column.errorFieldKeys ?? [column.key],
     }).length > 0
   );
@@ -86,7 +83,6 @@ export function unmatchedRowErrorFieldKeys(
       selectStructuredFieldErrors(errors, {
         questionId: match.questionId,
         rowId: match.rowId,
-        rowIndex: match.rowIndex,
         fieldKeys: [fieldKey],
       }).length > 0,
   );

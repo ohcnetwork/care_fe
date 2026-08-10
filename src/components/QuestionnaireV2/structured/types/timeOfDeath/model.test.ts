@@ -5,13 +5,7 @@ import { SINGLETON_ROW_ID } from "@/components/QuestionnaireV2/structured/core/r
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
 import type { TimeOfDeathRow } from "@/types/questionnaire/structuredRows";
-import {
-  createSeed,
-  isEmptyRow,
-  projectValues,
-  rowSchema,
-  toRequests,
-} from "./model";
+import { createSeed, isEmptyRow, projectValues, toRequests } from "./model";
 
 const CTX = { patientId: "pat-1", questionId: "q-1" } as const;
 const add = (deceased_datetime: string): StructuredEdit<TimeOfDeathRow> => ({
@@ -132,37 +126,5 @@ describe("time_of_death model", () => {
         reference_id: "structured:time_of_death:q-1",
       },
     ]);
-  });
-});
-
-describe("rowSchema — the assistant write guard", () => {
-  it("accepts a real row", () => {
-    const result = rowSchema.safeParse({
-      deceased_datetime: "2026-08-04T10:00:00Z",
-    });
-    assert.equal(result.success, true);
-  });
-
-  it("rejects an unknown field", () => {
-    const result = rowSchema.safeParse({
-      deceased_datetime: "2026-08-04T10:00:00Z",
-      cause_of_death: "hallucinated field",
-    });
-    assert.equal(result.success, false);
-  });
-
-  it("rejects a missing deceased_datetime", () => {
-    assert.equal(rowSchema.safeParse({}).success, false);
-  });
-
-  it("rejects an empty deceased_datetime", () => {
-    assert.equal(rowSchema.safeParse({ deceased_datetime: "" }).success, false);
-  });
-
-  it("rejects a non-string deceased_datetime", () => {
-    assert.equal(
-      rowSchema.safeParse({ deceased_datetime: 12345 }).success,
-      false,
-    );
   });
 });

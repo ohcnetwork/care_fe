@@ -3,7 +3,6 @@ import { t } from "i18next";
 import { EncounterEditor } from "@/components/QuestionnaireV2/structured/types/encounter/EncounterEditor";
 import {
   blocksSaveForMissingDischargeDisposition,
-  rowSchema,
   toRequests,
 } from "@/components/QuestionnaireV2/structured/types/encounter/model";
 
@@ -27,7 +26,6 @@ export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
   draftPolicy: "serialize",
   contract: 2,
   toRequests,
-  rowSchema,
   // An untouched section must not block Save; the error only applies after
   // the clinician edits the encounter. If no default discharge disposition is
   // configured, touched discharged inpatient rows require the clinician to

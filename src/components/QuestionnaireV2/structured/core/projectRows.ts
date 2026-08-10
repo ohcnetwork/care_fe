@@ -1,4 +1,3 @@
-import { dedupeEditsFirstAppearance } from "./editLog";
 import type {
   BaselineRow,
   EditLog,
@@ -13,7 +12,7 @@ import type {
  *
  *  - No `single` flag: a singleton's at-most-one-row invariant is a rowId
  *    stability property (`SINGLETON_ROW_ID`), not a truncation this
- *    function performs — see {@link truncateToSingletonRow}.
+ *    function performs — `useStructuredRows` asserts it in dev instead.
  *  - No orphan channel bundled into the return: {@link findOrphanRowIds}
  *    is the sibling function over the same `(baseline, log)` inputs.
  *
@@ -74,6 +73,11 @@ export interface ProjectRowsOptions<TRow extends object> {
  *    is unresolved, not orphaned — see step 3 in the implementation.
  *
  * 4. `displayOrder`, applied last via a stable sort.
+ *
+ * `log` is trusted to hold at most one entry per rowId: `applyEditToLog`
+ * never produces duplicates, and every restored draft passes
+ * `sanitizeStructuredEditLog` (the read gate in `useStructuredRows` and
+ * `composeStructured.ts`) before reaching here.
  */
 export function projectRows<TRow extends object>(
   baseline: readonly BaselineRow<TRow>[] | undefined,
@@ -110,15 +114,10 @@ export function projectRows<TRow extends object>(
     });
   }
 
-  // 2. Adds, in edit-log order. Two guards:
-  //    - `editByRowId.get(edit.rowId) !== edit` skips an entry a later
-  //      entry for the same rowId superseded (`applyEditToLog` never
-  //      produces duplicates, but a restored draft's per-record
-  //      validation admits them).
-  //    - `baselineRowIds.has(edit.rowId)` skips a rowId loop 1 already
-  //      emitted — see the collision note in the doc comment.
+  // 2. Adds, in edit-log order. `baselineRowIds.has(edit.rowId)` skips a
+  //    rowId loop 1 already emitted — see the collision note in the doc
+  //    comment.
   for (const edit of log) {
-    if (editByRowId.get(edit.rowId) !== edit) continue;
     if (edit.op !== "add") continue;
     if (baselineRowIds.has(edit.rowId)) continue;
 
@@ -140,7 +139,6 @@ export function projectRows<TRow extends object>(
   //    arrives and confirms it.
   if (baseline === undefined) {
     for (const edit of log) {
-      if (editByRowId.get(edit.rowId) !== edit) continue;
       if (edit.op !== "update") continue;
 
       rows.push({
@@ -174,8 +172,7 @@ export function projectRows<TRow extends object>(
  * deliberately NOT "not rendered", which would also flag the clinician's
  * own remove of an added row and every ordinary `add`.
  *
- * Pure; duplicates in a malformed log are reported once
- * ({@link dedupeEditsFirstAppearance}).
+ * Pure.
  */
 export function findOrphanRowIds<TRow extends object>(
   baseline: readonly BaselineRow<TRow>[] | undefined,
@@ -185,7 +182,7 @@ export function findOrphanRowIds<TRow extends object>(
   const baselineRowIds = new Set<RowId>(baseline.map((entry) => entry.rowId));
 
   const orphanRowIds: RowId[] = [];
-  for (const edit of dedupeEditsFirstAppearance(log)) {
+  for (const edit of log) {
     if (edit.op !== "add" && !baselineRowIds.has(edit.rowId)) {
       orphanRowIds.push(edit.rowId);
     }
@@ -219,42 +216,4 @@ export function pruneOrphanEdits<TRow extends object>(
   if (orphanRowIds.length === 0) return log;
   const orphanSet = new Set(orphanRowIds);
   return log.filter((edit) => !orphanSet.has(edit.rowId));
-}
-
-/**
- * Restricts an edit log to at most the ONE rowId {@link projectRows}
- * would show as `rows[0]` for the same `(baseline, log)` pair.
- *
- * Why: singleton mode only ever SHOWS `rows[0]`, but nothing upstream
- * stops the log from holding a second rowId — an `initialEdits` seed
- * writes an `add` under `singletonRowId`, an `add` is never an orphan,
- * and if a real baseline row for the same question resolves under its
- * OWN server id while that seed is still in the log, the two coexist: a
- * caller writing `edits` from every projected row would silently submit
- * BOTH on Save. Keeps whichever rowId `projectRows` shows FIRST, so "the
- * one row" is defined by the exact projection the clinician sees.
- *
- * Unreachable for every type shipped so far — closed by construction
- * rather than left as a trap for the next singleton.
- *
- * Pure; returns the SAME `log` reference when there is nothing to drop.
- */
-export function truncateToSingletonRow<TRow extends object>(
-  baseline: readonly BaselineRow<TRow>[] | undefined,
-  log: EditLog<TRow>,
-  options: ProjectRowsOptions<TRow> = {},
-): EditLog<TRow> {
-  if (log.length === 0) return log;
-  // Checks the FULL PROJECTION's row count, not `log.length` — a baseline
-  // can contribute rows the log never mentions (a real baseline row under
-  // its own id, plus a single seeded `add` under a different id, is a
-  // one-entry log that still projects TWO rows).
-  const rows = projectRows(baseline, log, options);
-  if (rows.length <= 1) return log;
-  const keepRowId = rows[0]?.rowId;
-  // No row projects at all — nothing to keep; leave `log` for orphan
-  // pruning to handle. Defensive: unreachable alongside `rows.length > 1`.
-  if (keepRowId === undefined) return log;
-  const truncated = log.filter((edit) => edit.rowId === keepRowId);
-  return truncated.length === log.length ? log : truncated;
 }

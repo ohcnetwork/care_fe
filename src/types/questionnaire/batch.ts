@@ -47,11 +47,10 @@ export interface QuestionValidationError {
   msg?: string;
   type?: string;
   field_key?: string;
-  /** v2 row identity — the stable client rowId (the server id for a
-   *  baseline row, a uuid for an added one). Preferred over `index`. */
+  /** Row identity — the stable client rowId (the server id for a
+   *  baseline row, a uuid for an added one). Absent for a section-level
+   *  error. */
   row_id?: string;
-  /** Positional identity in `values[0].value`, used by backend batch errors. */
-  index?: number;
   required?: boolean;
 }
 export interface ValidationErrorResponse {

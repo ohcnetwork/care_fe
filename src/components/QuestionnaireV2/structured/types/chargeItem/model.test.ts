@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { applyEditToLog } from "@/components/QuestionnaireV2/structured/core/editLog";
-import { projectRows } from "@/components/QuestionnaireV2/structured/core/projectRows";
 import type { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import type { StructuredEdit } from "@/types/questionnaire/structured";
 
@@ -11,7 +10,6 @@ import {
   invalidQuantityRowIds,
   newChargeItemRow,
   projectValues,
-  rowSchema,
   stripDisplay,
   toRequests,
 } from "./model";
@@ -202,50 +200,6 @@ describe("charge_item model", () => {
       };
       assert.deepEqual(await toRequests([corrupted], CTX), []);
     });
-
-    it("PROJECTION AND SUBMIT AGREE AS A SET under a duplicated-rowId corruption, even though order can differ", async () => {
-      // A duplicate rowId can make `resolveChanges` (dispatches at FIRST
-      // occurrence, content from the last-write-wins map) and `projectRows`
-      // (pushes at LAST occurrence) disagree on ORDER, but never on CONTENT —
-      // both resolve a rowId's content from the same last-write-wins map.
-      const rowA1 = newChargeItemRow(
-        fixtureDefinition({ slug: "a-first" }),
-        "enc-1",
-      );
-      const rowB = newChargeItemRow(
-        fixtureDefinition({ slug: "b-only" }),
-        "enc-1",
-      );
-      const rowA2 = newChargeItemRow(
-        fixtureDefinition({ slug: "a-last" }),
-        "enc-1",
-      );
-      const edits: StructuredEdit<ChargeItemRow>[] = [
-        { rowId: "a", op: "add", patch: rowA1 },
-        { rowId: "b", op: "add", patch: rowB },
-        { rowId: "a", op: "add", patch: rowA2 },
-      ];
-
-      const projectedRows = projectRows([], edits, {}).map(
-        (entry) => entry.row,
-      );
-      const projection = projectValues(projectedRows);
-      const requests = await toRequests(edits, CTX);
-
-      const projectedSlugs = (
-        projection[0] as { type: "charge_item"; value: ChargeItemRow[] }
-      ).value
-        .map((r) => r.charge_item_definition)
-        .sort();
-      const submittedSlugs = (
-        requests[0]?.body as { requests: ChargeItemRow[] }
-      ).requests
-        .map((r) => r.charge_item_definition)
-        .sort();
-
-      assert.deepEqual(projectedSlugs, ["a-last", "b-only"]);
-      assert.deepEqual(submittedSlugs, ["a-last", "b-only"]);
-    });
   });
 
   describe("invalidQuantityRowIds", () => {
@@ -306,70 +260,5 @@ describe("charge_item model", () => {
         { type: "charge_item", value: [bad] },
       ]);
     });
-  });
-});
-
-describe("rowSchema — the assistant write guard", () => {
-  it("accepts a real row", () => {
-    assert.equal(rowSchema.safeParse(row()).success, true);
-  });
-
-  it("accepts a row with a performer picked", () => {
-    const withPerformer = row({
-      performer_actor: "user-1",
-      performer_actor_object: {
-        id: "user-1",
-        username: "care-doctor",
-      } as unknown as ChargeItemRow["performer_actor_object"],
-    });
-    assert.equal(rowSchema.safeParse(withPerformer).success, true);
-  });
-
-  it("rejects an unknown top-level field", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...row(), extra_field: "hallucinated" }).success,
-      false,
-    );
-  });
-
-  it("rejects a missing charge_item_definition_object", () => {
-    const { charge_item_definition_object: _drop, ...bad } = row();
-    assert.equal(rowSchema.safeParse(bad).success, false);
-  });
-
-  it("rejects a charge_item_definition_object missing its slug", () => {
-    const bad = row();
-    const { slug: _slug, ...definitionWithoutSlug } =
-      bad.charge_item_definition_object;
-    assert.equal(
-      rowSchema.safeParse({
-        ...bad,
-        charge_item_definition_object: definitionWithoutSlug,
-      }).success,
-      false,
-    );
-  });
-
-  it("passes through extra real fields on the display object", () => {
-    assert.equal(
-      rowSchema.safeParse(row()).success,
-      true,
-      "fixtureDefinition's category/slug_config/tags/etc. must not be rejected",
-    );
-  });
-
-  it("rejects an invalid service_resource enum value", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...row(), service_resource: "not_a_real_value" })
-        .success,
-      false,
-    );
-  });
-
-  it("rejects an empty charge_item_definition", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...row(), charge_item_definition: "" }).success,
-      false,
-    );
   });
 });

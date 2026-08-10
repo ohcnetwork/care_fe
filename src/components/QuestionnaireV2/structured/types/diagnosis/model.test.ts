@@ -20,7 +20,6 @@ import {
   isOnsetFrozen,
   newDiagnosisRow,
   projectValues,
-  rowSchema,
   toBaselineRows,
   toDiagnosisRow,
   toRequests,
@@ -531,88 +530,5 @@ describe("diagnosis model", () => {
       assert.equal(datapoints[0].id, "d1");
       assert.equal(datapoints[0].severity, "severe");
     });
-  });
-});
-
-describe("rowSchema — the assistant write guard", () => {
-  const code = { code: "1", display: "Hypertension", system: "sys" };
-
-  it("accepts a real row", () => {
-    assert.equal(
-      rowSchema.safeParse(newDiagnosisRow(code, "enc-1")).success,
-      true,
-    );
-  });
-
-  it("accepts a null severity", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...newDiagnosisRow(code, "enc-1"), severity: null })
-        .success,
-      true,
-    );
-  });
-
-  it("accepts a baseline row converted via toDiagnosisRow", () => {
-    const server = serverDiagnosis({
-      created_by: {
-        id: "user-1",
-        username: "care-doctor",
-      } as Diagnosis["created_by"],
-    });
-    const result = rowSchema.safeParse(toDiagnosisRow(server));
-    assert.equal(result.success, true, JSON.stringify(result));
-  });
-
-  it("accepts a baseline row whose onset carries no datetime", () => {
-    // FHIR allows an onset expressed only as onset_age/onset_string;
-    // deriving `""` for the missing datetime would fail `onsetSchema`'s
-    // date check and lock the assistant out of editing such a row.
-    const server = serverDiagnosis({
-      onset: { onset_string: "since childhood" },
-      created_by: {
-        id: "user-1",
-        username: "care-doctor",
-      } as Diagnosis["created_by"],
-    });
-    const result = rowSchema.safeParse(toDiagnosisRow(server));
-    assert.equal(result.success, true, JSON.stringify(result));
-  });
-
-  it("rejects an unknown field, including the legacy dirty flag", () => {
-    assert.equal(
-      rowSchema.safeParse({ ...newDiagnosisRow(code, "enc-1"), dirty: true })
-        .success,
-      false,
-    );
-  });
-
-  it("rejects an invalid category enum value", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newDiagnosisRow(code, "enc-1"),
-        category: "made_up_category",
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects an invalid severity string", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newDiagnosisRow(code, "enc-1"),
-        severity: "extreme",
-      }).success,
-      false,
-    );
-  });
-
-  it("rejects a malformed onset_datetime", () => {
-    assert.equal(
-      rowSchema.safeParse({
-        ...newDiagnosisRow(code, "enc-1"),
-        onset: { onset_datetime: "2024-02-31" },
-      }).success,
-      false,
-    );
   });
 });
