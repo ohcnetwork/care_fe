@@ -14,7 +14,7 @@ export const questionnaireResponseTemplateApi = {
     TRes: Type<PaginatedResponse<QuestionnaireResponseTemplateReadSpec>>(),
     TQuery: Type<{
       questionnaire?: string;
-      facility?: string;
+      facility: string;
       name?: string;
       key_filter?: QuestionnaireResponseTemplateKeyFilter;
       limit?: number;
