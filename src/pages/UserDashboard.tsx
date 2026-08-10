@@ -343,9 +343,13 @@ const TabContent = ({
 }: TabContentProps) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
-  const filteredItems = tabItems.filter((item) =>
-    item.name.toLowerCase().includes(search.trim().toLowerCase()),
-  );
+  const filteredItems =
+    tabItems.length > 1
+      ? tabItems.filter((item) =>
+          item.name.toLowerCase().includes(search.trim().toLowerCase()),
+        )
+      : tabItems;
+  const isMobile = useBreakpoints({ default: true, sm: false });
   return (
     <section
       className="space-y-3 md:space-y-4"
@@ -363,7 +367,7 @@ const TabContent = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
-            autoFocus
+            autoFocus={!isMobile}
           />
         </div>
       )}

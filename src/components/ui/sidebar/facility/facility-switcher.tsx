@@ -79,8 +79,8 @@ export function FacilitySwitcher({
               <div className="relative p-1.5">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-3.5 text-gray-400" />
                 <Input
-                  placeholder={t("search_button")}
-                  aria-label={t("search_button")}
+                  placeholder={t("search_facilities")}
+                  aria-label={t("search_facilities")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8 h-8 sm:text-sm"
