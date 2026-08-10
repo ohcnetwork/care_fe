@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 import { ChevronRight } from "lucide-react";
 import { ActiveLink, useFullPath, usePath } from "raviger";
-import { Fragment, ReactNode, useMemo, useState } from "react";
+import { Fragment, ReactNode, forwardRef, useMemo, useState } from "react";
 
 import { navExpansionAtom } from "@/atoms/navExpansionAtom";
 import { cn } from "@/lib/utils";
@@ -54,23 +54,26 @@ export interface NavigationLink {
   children?: NavigationLink[];
 }
 
-function NavLink({
-  href,
-  isSelected,
-  activeClass,
-  exactActiveClass,
-  className,
-  onClick,
-  children,
-}: {
-  href: string;
-  isSelected: boolean;
-  activeClass?: string;
-  exactActiveClass?: string;
-  className?: string;
-  onClick?: (e: React.MouseEvent) => void;
-  children: ReactNode;
-}) {
+function NavLink(
+  {
+    href,
+    isSelected,
+    activeClass,
+    exactActiveClass,
+    className,
+    onClick,
+    children,
+  }: {
+    href: string;
+    isSelected: boolean;
+    activeClass?: string;
+    exactActiveClass?: string;
+    className?: string;
+    onClick?: (e: React.MouseEvent) => void;
+    children: ReactNode;
+  },
+  ref: React.Ref<HTMLAnchorElement>,
+) {
   const resolvedExact = exactActiveClass ?? activeClass;
   const { toggleSidebar, isMobile } = useSidebar();
 
@@ -80,6 +83,7 @@ function NavLink({
       className={className}
       activeClass={activeClass}
       exactActiveClass={resolvedExact}
+      ref={ref}
       onClick={(e) => {
         if (isSelected) {
           e.preventDefault();
@@ -94,6 +98,11 @@ function NavLink({
     </ActiveLink>
   );
 }
+
+const NavLinkForwardRef = forwardRef<
+  HTMLAnchorElement,
+  Parameters<typeof NavLink>[0]
+>(NavLink);
 
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
@@ -143,7 +152,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                     }
                   >
-                    <NavLink
+                    <NavLinkForwardRef
                       href={link.url}
                       isSelected={isSelected(link.url)}
                       activeClass="bg-white text-green-700 shadow-sm"
@@ -160,7 +169,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       <span className="group-data-[collapsible=icon]:hidden ml-1">
                         {link.name}
                       </span>
-                    </NavLink>
+                    </NavLinkForwardRef>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
@@ -229,7 +238,7 @@ function CollapsibleNavItem({
                         "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                       }
                     >
-                      <NavLink
+                      <NavLinkForwardRef
                         href={subItem.url}
                         isSelected={isSubItemSelected(subItem.url)}
                         className="w-full"
@@ -242,7 +251,7 @@ function CollapsibleNavItem({
                         exactActiveClass="bg-white text-green-700 shadow"
                       >
                         {subItem.name}
-                      </NavLink>
+                      </NavLinkForwardRef>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                 </Fragment>
@@ -265,7 +274,7 @@ function NavItem({
   const selected = path === item.url;
 
   return (
-    <NavLink
+    <NavLinkForwardRef
       href={item.url}
       isSelected={selected}
       className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
@@ -273,7 +282,7 @@ function NavItem({
       onClick={() => setOpen(false)}
     >
       {item.name}
-    </NavLink>
+    </NavLinkForwardRef>
   );
 }
 

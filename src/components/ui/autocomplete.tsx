@@ -215,7 +215,7 @@ export default function Autocomplete({
               className={cn(
                 "w-full min-w-0 justify-between border-gray-300 shadow-xs py-4.5! font-normal",
                 className,
-                selectedOption && "rounded-r-none",
+                selectedOption && showClearButton && "rounded-r-none",
               )}
               disabled={disabled}
               type="button"
@@ -227,6 +227,9 @@ export default function Autocomplete({
                     : selectedOption?.label
                   : placeholder}
               </span>
+              {!(selectedOption && showClearButton) && (
+                <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+              )}
             </Button>
           </DrawerTrigger>
           <DrawerContent
@@ -242,7 +245,7 @@ export default function Autocomplete({
             </div>
           </DrawerContent>
         </Drawer>
-        {selectedOption && showClearButton ? (
+        {selectedOption && showClearButton && (
           <Button
             variant="outline"
             size="icon"
@@ -254,8 +257,6 @@ export default function Autocomplete({
             <Cross2Icon />
             <span className="sr-only">{t("clear")}</span>
           </Button>
-        ) : (
-          <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50 pointer-events-none" />
         )}
       </div>
     );
@@ -274,7 +275,7 @@ export default function Autocomplete({
             className={cn(
               "w-full justify-between border-gray-300 shadow-xs py-4.5! font-normal",
               className,
-              selectedOption && "rounded-r-none",
+              selectedOption && showClearButton && "rounded-r-none",
             )}
             disabled={disabled}
             onClick={() => setOpen(!open)}
@@ -289,6 +290,15 @@ export default function Autocomplete({
             >
               {displayText}
             </span>
+            {!(selectedOption && showClearButton) &&
+              (shortcutId ? (
+                <div className="flex items-center justify-center gap-1">
+                  <ShortcutBadge actionId={shortcutId} />
+                  <CaretSortIcon className="size-3 shrink-0 opacity-50" />
+                </div>
+              ) : (
+                <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+              ))}
           </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -301,7 +311,7 @@ export default function Autocomplete({
           <Command>{commandContent}</Command>
         </PopoverContent>
       </Popover>
-      {selectedOption && showClearButton ? (
+      {selectedOption && showClearButton && (
         <Button
           variant="outline"
           size="icon"
@@ -313,19 +323,6 @@ export default function Autocomplete({
           <Cross2Icon />
           <span className="sr-only">{t("clear")}</span>
         </Button>
-      ) : (
-        <>
-          {shortcutId ? (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <div className="flex items-center justify-center gap-1">
-                <ShortcutBadge actionId={shortcutId} />
-                <CaretSortIcon className="size-3 shrink-0 opacity-50" />
-              </div>
-            </div>
-          ) : (
-            <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50 pointer-events-none" />
-          )}
-        </>
       )}
     </div>
   );

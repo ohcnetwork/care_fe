@@ -36,7 +36,7 @@ const EncounterHistory = (props: PatientProps) => {
 
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
   const { hasPermission } = usePermissions();
-  const { canViewPatients } = getPermissions(
+  const { canViewPatients, canCreateEncounter } = getPermissions(
     hasPermission,
     patientData.permissions,
   );
