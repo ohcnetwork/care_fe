@@ -42,7 +42,7 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PERMISSION_LIST_TEMPLATE, getPermissions } from "@/common/Permissions";
+import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
@@ -141,15 +141,8 @@ function AccountShow({
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
-  const { canUpdateAccount } = getPermissions(
-    hasPermission,
-    facility?.permissions || [],
-  );
-
-  const canListTemplates = hasPermission(
-    PERMISSION_LIST_TEMPLATE,
-    facility?.permissions || [],
-  );
+  const { canUpdateAccount, canListTemplate: canListTemplates } =
+    getPermissions(hasPermission, facility?.permissions || []);
 
   useShortcutSubContext("facility:account:show");
 
