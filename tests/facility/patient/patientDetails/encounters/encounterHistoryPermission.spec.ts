@@ -1,97 +1,165 @@
-import { type Page, expect, test } from "@playwright/test";
+import { faker } from "@faker-js/faker";
+import { type Browser, expect, test } from "@playwright/test";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
-
-// The admin user is a super admin, and super admins bypass every permission
-// check. The nurse account gets real object-level permission checks.
-test.use({ storageState: "tests/.auth/nurse.json" });
-
-const CREATE_ENCOUNTER_PERMISSION = "can_create_encounter";
 
 /**
- * Force the encounter history empty state.
- * The API returns an empty encounter list for the patient.
+ * The empty-state "Create Encounter" button must follow the
+ * "can_create_encounter" permission.
+ *
+ * The Nurse role has the permission. The Staff role does not.
+ * Both roles have "can_list_patients", so both see the encounters tab.
+ *
+ * The test creates a patient with no encounter, and gives both users a role
+ * on the geo organization of the patient. This grants real object-level
+ * permissions, so no request stub is necessary.
  */
-async function stubEmptyEncounterList(page: Page, patientId: string) {
-  await page.route(
-    (url) =>
-      url.pathname === "/api/v1/encounter/" &&
-      url.searchParams.get("patient") === patientId,
-    (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          count: 0,
-          next: null,
-          previous: null,
-          results: [],
-        }),
-      }),
+
+interface ApiListResponse<T> {
+  results: T[];
+}
+
+async function api<T>(
+  path: string,
+  init?: { method?: string; body?: unknown },
+): Promise<T> {
+  const response = await fetch(`${getApiUrl()}${path}`, {
+    method: init?.method ?? "GET",
+    headers: getApiHeaders(),
+    body: init?.body ? JSON.stringify(init.body) : undefined,
+  });
+  if (!response.ok) {
+    throw new Error(
+      `${init?.method ?? "GET"} ${path} failed: ${response.status} — ${await response.text()}`,
+    );
+  }
+  return (await response.json()) as T;
+}
+
+async function getGeoOrganizationId(): Promise<string> {
+  const { results } = await api<ApiListResponse<{ id: string }>>(
+    "/api/v1/organization/?org_type=govt&limit=1",
   );
+  const id = results[0]?.id;
+  if (!id) throw new Error("No govt organization found");
+  return id;
+}
+
+async function getRoleId(name: string): Promise<string> {
+  const { results } = await api<ApiListResponse<{ id: string; name: string }>>(
+    `/api/v1/role/?name=${encodeURIComponent(name)}`,
+  );
+  const role = results.find((item) => item.name === name);
+  if (!role) throw new Error(`Role not found: ${name}`);
+  return role.id;
+}
+
+async function getUserId(username: string): Promise<string> {
+  const user = await api<{ id: string }>(`/api/v1/users/${username}/`);
+  return user.id;
 }
 
 /**
- * Control the "can_create_encounter" permission on the patient response.
- * The test keeps or removes the permission before the page renders.
+ * Give the user a role on the organization, so object permissions apply.
+ * The function is idempotent, because a test run can repeat on the same
+ * database.
  */
-async function stubPatientPermission(
-  page: Page,
-  patientId: string,
-  grantCreateEncounter: boolean,
+async function assignOrganizationRole(
+  organizationId: string,
+  username: string,
+  roleName: string,
 ) {
-  await page.route(
-    (url) => url.pathname === `/api/v1/patient/${patientId}/`,
-    async (route) => {
-      const response = await route.fetch();
-      const patient = await response.json();
-      const permissions: string[] = patient.permissions ?? [];
+  const userId = await getUserId(username);
+  const roleId = await getRoleId(roleName);
+  const path = `/api/v1/organization/${organizationId}/users/`;
 
-      patient.permissions = grantCreateEncounter
-        ? Array.from(new Set([...permissions, CREATE_ENCOUNTER_PERMISSION]))
-        : permissions.filter(
-            (permission) => permission !== CREATE_ENCOUNTER_PERMISSION,
-          );
+  const { results } = await api<
+    ApiListResponse<{
+      id: string;
+      user: { id: string };
+      role: { id: string };
+    }>
+  >(`${path}?limit=100`);
+  const existing = results.find((item) => item.user.id === userId);
 
-      await route.fulfill({ response, json: patient });
+  if (!existing) {
+    await api(path, { method: "POST", body: { user: userId, role: roleId } });
+    return;
+  }
+
+  if (existing.role.id !== roleId) {
+    await api(`${path}${existing.id}/`, {
+      method: "PUT",
+      body: { user: userId, role: roleId },
+    });
+  }
+}
+
+/** Create a patient that has no encounter, so the empty state renders. */
+async function createPatientWithoutEncounter(
+  geoOrganizationId: string,
+): Promise<string> {
+  const patient = await api<{ id: string }>("/api/v1/patient/", {
+    method: "POST",
+    body: {
+      name: `Encounter Permission ${faker.string.alphanumeric(6)}`,
+      gender: "male",
+      phone_number: `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`,
+      date_of_birth: "1990-01-15",
+      geo_organization: geoOrganizationId,
+      identifiers: [],
     },
-  );
+  });
+  return patient.id;
 }
 
 test.describe("Encounter history create button permission", () => {
-  let facilityId: string;
+  // Serial mode keeps both tests in one worker, so the shared setup runs once.
+  test.describe.configure({ mode: "serial" });
+
+  const facilityId = getFacilityId();
   let patientId: string;
 
-  test.beforeEach(async () => {
-    facilityId = getFacilityId();
-    patientId = getPatientId();
+  test.beforeAll(async () => {
+    const geoOrganizationId = await getGeoOrganizationId();
+    await assignOrganizationRole(geoOrganizationId, "care-nurse", "Nurse");
+    await assignOrganizationRole(geoOrganizationId, "care-staff", "Staff");
+    patientId = await createPatientWithoutEncounter(geoOrganizationId);
   });
 
-  test("shows the create encounter button with the create permission", async ({
-    page,
-  }) => {
-    await stubEmptyEncounterList(page, patientId);
-    await stubPatientPermission(page, patientId, true);
-
+  /** Open the patient encounters tab as the given user. */
+  async function openEncountersTab(browser: Browser, storageState: string) {
+    const context = await browser.newContext({ storageState });
+    const page = await context.newPage();
     await page.goto(`/facility/${facilityId}/patient/${patientId}/encounters`);
+    return { context, page };
+  }
+
+  test("shows the create encounter button for a nurse", async ({ browser }) => {
+    const { context, page } = await openEncountersTab(
+      browser,
+      "tests/.auth/nurse.json",
+    );
 
     await expect(page.getByText("No active encounters found")).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Create Encounter" }),
     ).toBeVisible();
+
+    await context.close();
   });
 
-  test("hides the create encounter button without the create permission", async ({
-    page,
-  }) => {
-    await stubEmptyEncounterList(page, patientId);
-    await stubPatientPermission(page, patientId, false);
-
-    await page.goto(`/facility/${facilityId}/patient/${patientId}/encounters`);
+  test("hides the create encounter button for staff", async ({ browser }) => {
+    const { context, page } = await openEncountersTab(
+      browser,
+      "tests/.auth/staff.json",
+    );
 
     await expect(page.getByText("No active encounters found")).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Create Encounter" }),
     ).toHaveCount(0);
+
+    await context.close();
   });
 });

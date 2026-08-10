@@ -57,6 +57,7 @@ cd <care-backend-dir>
 | -------------------------------- | ---------------- | ---------- |
 | `tests/.auth/user.json`          | `admin`          | `admin`    |
 | `tests/.auth/nurse.json`         | `care-nurse`     | `Ohcn@123` |
+| `tests/.auth/staff.json`         | `care-staff`     | `Ohcn@123` |
 | `tests/.auth/facilityAdmin.json` | `care-fac-admin` | `Ohcn@123` |
 
 ### Frontend Setup
