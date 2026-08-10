@@ -155,7 +155,6 @@ function DiagnosticReportDetailCard({
             {report.service_request?.title ||
               t("diagnostic_report", { count: 1 })}
           </span>
-          {report.code?.display && <span> - {report.code.display}</span>}
         </CardTitle>
         <div className="flex items-center gap-2">
           <Badge variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}>
@@ -220,6 +219,14 @@ function DiagnosticReportDetailCard({
       <CardContent className="px-4 pb-4 pt-0 space-y-4">
         {/* Report Details Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          {report.code?.display && (
+            <div>
+              <div className="text-gray-500">{t("report")}</div>
+              <div className="font-medium">
+                <span>{report.code.display}</span>
+              </div>
+            </div>
+          )}
           {report.service_request?.code?.display && (
             <div>
               <div className="text-gray-500">{t("procedure")}</div>
