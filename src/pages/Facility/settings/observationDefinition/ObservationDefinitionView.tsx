@@ -32,7 +32,10 @@ import {
   getValuesetSummary,
   QualifiedRange,
 } from "@/types/base/qualifiedRange/qualifiedRange";
-import { OBSERVATION_DEFINITION_STATUS_COLORS } from "@/types/emr/observationDefinition/observationDefinition";
+import {
+  OBSERVATION_DEFINITION_STATUS_COLORS,
+  ObservationDefinitionStatus,
+} from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 
 interface Props {
@@ -194,7 +197,7 @@ export default function ObservationDefinitionView({
     isError,
   } = useQuery({
     queryKey: ["observationDefinitions", observationSlug],
-    queryFn: query(observationDefinitionApi.retrieveObservationDefinition, {
+    queryFn: query(observationDefinitionApi.get, {
       pathParams: { observationSlug },
       queryParams: {
         facility: facilityId,
@@ -204,7 +207,7 @@ export default function ObservationDefinitionView({
 
   const { mutate: updateObservationDefinition, isPending: isDeleting } =
     useMutation({
-      mutationFn: mutate(observationDefinitionApi.updateObservationDefinition, {
+      mutationFn: mutate(observationDefinitionApi.update, {
         pathParams: { observationSlug },
         queryParams: {
           facility: facilityId,
@@ -220,11 +223,19 @@ export default function ObservationDefinitionView({
   const handleDelete = () => {
     if (!definition) return;
     updateObservationDefinition({
-      ...definition,
-      component: definition.component || [],
-      status: "retired",
+      title: definition.title,
+      status: ObservationDefinitionStatus.RETIRED,
+      description: definition.description,
+      category: definition.category,
+      code: definition.code,
+      permitted_data_type: definition.permitted_data_type,
+      component: definition.component,
+      body_site: definition.body_site,
+      method: definition.method,
+      permitted_unit: definition.permitted_unit,
+      derived_from_uri: definition.derived_from_uri,
+      qualified_ranges: definition.qualified_ranges,
       slug_value: definition.slug_config.slug_value,
-      facility: facilityId,
     });
   };
 
@@ -413,7 +424,7 @@ export default function ObservationDefinitionView({
           </CardContent>
         </Card>
 
-        {definition.component?.length > 0 && (
+        {definition.component && definition.component.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>{t("components")}</CardTitle>
@@ -423,7 +434,7 @@ export default function ObservationDefinitionView({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {definition.component.map((comp, index) => (
+                {definition.component?.map((comp, index) => (
                   <div
                     key={index}
                     className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
