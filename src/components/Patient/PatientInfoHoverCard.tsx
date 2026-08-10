@@ -1,5 +1,6 @@
 import { Avatar } from "@/components/Common/Avatar";
 import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
+import { PatientAge } from "@/components/Patient/PatientAge";
 import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,6 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { formatPatientAge } from "@/Utils/utils";
 import { Phone } from "lucide-react";
 import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -45,8 +45,7 @@ export const PatientInfoHoverCard = ({
           <div className="flex flex-col">
             <h5 className="text-lg font-semibold">{patient.name}</h5>
             <span className="text-gray-700 text-sm font-medium">
-              {formatPatientAge(patient, true)},{" "}
-              {t(`GENDER__${patient.gender}`)}
+              <PatientAge patient={patient} />, {t(`GENDER__${patient.gender}`)}
             </span>
           </div>
         </div>
