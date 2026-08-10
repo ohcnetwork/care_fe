@@ -36,6 +36,7 @@ export function FacilitySwitcher({
   const [searchQuery, setSearchQuery] = useState("");
   const filteredFacilities = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
+    if (!query) return facilities;
     return facilities.filter((facility) =>
       facility.name.toLowerCase().includes(query),
     );
