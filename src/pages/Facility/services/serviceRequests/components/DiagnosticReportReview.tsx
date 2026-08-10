@@ -32,6 +32,7 @@ import { FileListTable } from "@/components/Files/FileListTable";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import Loading from "@/components/Common/Loading";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -122,7 +123,7 @@ function DiagnosticReportReviewItem({
         external_id: report.id,
       },
     }),
-    enabled: !!report.id && isExpanded,
+    enabled: isExpanded,
   });
 
   const { data: files = { results: [], count: 0 }, isFetched: isFilesFetched } =
@@ -162,21 +163,25 @@ function DiagnosticReportReviewItem({
       },
     });
 
-  // Prefer the full detail (with observations); fall back to the list report
-  // while the detail request is still loading.
-  const reportDetail = fullReport ?? report;
-
   useEffect(() => {
-    setConclusion(reportDetail?.conclusion || "");
-  }, [reportDetail?.conclusion]);
+    setConclusion(fullReport?.conclusion || "");
+  }, [fullReport?.conclusion]);
+
+  if (isReportFetched) {
+    return <Loading />;
+  }
+
+  if (!fullReport) {
+    return null;
+  }
 
   const handleApprove = () => {
     updateDiagnosticReport({
-      id: reportDetail.id,
+      id: fullReport.id,
       status: DiagnosticReportStatus.final,
-      category: reportDetail.category,
-      code: reportDetail.code,
-      note: reportDetail.note,
+      category: fullReport.category,
+      code: fullReport.code,
+      note: fullReport.note,
       conclusion: conclusion,
     });
   };
@@ -184,9 +189,9 @@ function DiagnosticReportReviewItem({
   const isReportNotReviewable =
     isReportFetched &&
     isFilesFetched &&
-    (!reportDetail.observations || reportDetail.observations.length === 0) &&
+    (!fullReport.observations || fullReport.observations.length === 0) &&
     (!files?.results || files.results.length === 0) &&
-    !reportDetail.conclusion;
+    !fullReport.conclusion;
 
   return (
     <Card
@@ -217,7 +222,7 @@ function DiagnosticReportReviewItem({
                         {t("last_updated")}:{" "}
                         {fullReport
                           ? format(
-                              new Date(fullReport.modified_date),
+                              fullReport.modified_date,
                               "hh:mm a, MMM dd, yyyy",
                             )
                           : "-"}
@@ -232,15 +237,15 @@ function DiagnosticReportReviewItem({
                     {t("no_observations_entered")}
                   </span>
                 )}
-                {reportDetail.created_by && (
+                {fullReport.created_by && (
                   <div className="flex items-center gap-2 min-w-0">
                     <Avatar
-                      name={formatName(reportDetail.created_by, true)}
+                      name={formatName(fullReport.created_by, true)}
                       className="size-5 shrink-0"
-                      imageUrl={reportDetail.created_by.profile_picture_url}
+                      imageUrl={fullReport.created_by.profile_picture_url}
                     />
                     <span className="text-sm text-gray-700 font-medium truncate">
-                      {formatName(reportDetail.created_by)}
+                      {formatName(fullReport.created_by)}
                     </span>
                   </div>
                 )}
@@ -301,17 +306,17 @@ function DiagnosticReportReviewItem({
               <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
                 <CardHeader className="p-4 pb-0">
                   <CardTitle className="text-base font-semibold">
-                    {reportDetail.code?.display}
+                    {fullReport.code?.display}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  {(reportDetail.observations?.length ?? 0) === 0 && (
+                  {(fullReport.observations?.length ?? 0) === 0 && (
                     <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border cursor-default text-center">
                       {t("no_observations_entered")}
                     </p>
                   )}
                   <DiagnosticReportResultsTable
-                    observations={(reportDetail.observations ?? []).filter(
+                    observations={(fullReport.observations ?? []).filter(
                       (obs) =>
                         obs.status !== ObservationStatus.ENTERED_IN_ERROR,
                     )}
@@ -327,9 +332,9 @@ function DiagnosticReportReviewItem({
                   >
                     {t("conclusion")}
                   </Label>
-                  {reportDetail.status === DiagnosticReportStatus.final ? (
+                  {fullReport.status === DiagnosticReportStatus.final ? (
                     <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border border-gray-200 cursor-default">
-                      {reportDetail.conclusion || t("no_conclusion_entered")}
+                      {fullReport.conclusion || t("no_conclusion_entered")}
                     </p>
                   ) : (
                     <Textarea
