@@ -60,17 +60,18 @@ REACT_CARE_API_URL=http://127.0.0.1:9000
 
 Once you have the local backend running and loaded dummy data, you can use the following credentials to authenticate:
 
-```yaml
-# Default Local Backend Credentials
-ROLE            USERNAME                PASSWORD
-----------------------------------------------------------------
-Volunteer       volunteer_2_0           Coronasafe@123
-Doctor          doctor_2_0              Coronasafe@123
-Staff           staff_2_0               Coronasafe@123
-Nurse           nurse_2_0               Coronasafe@123
-Administrator   administrator_2_0       Coronasafe@123
-Facility Admin  facility_admin_2_0      Coronasafe@123
-```
+| Role | Username | Password |
+| :--- | :--- | :--- |
+| **Superuser** | `admin` | `admin` |
+| **Doctor** | `care-doctor` | `Ohcn@123` |
+| **Staff** | `care-staff` | `Ohcn@123` |
+| **Nurse** | `care-nurse` | `Ohcn@123` |
+| **Administrator** | `care-admin` | `Ohcn@123` |
+| **Volunteer** | `care-volunteer` | `Ohcn@123` |
+| **Facility Admin** | `care-fac-admin` | `Ohcn@123` |
+| **Admin** | `care-role-admin` | `Ohcn@123` |
+| **Manager** | `care-role-manager` | `Ohcn@123` |
+| **Member** | `care-role-member` | `Ohcn@123` |
 
 ## Multitenancy for Development
 

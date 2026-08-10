@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { formatDosage, formatFrequency } from "@/components/Medicine/utils";
 
 import { MedicationAdministrationRead } from "@/types/emr/medicationAdministration/medicationAdministration";
@@ -30,6 +31,10 @@ import {
   INACTIVE_MEDICATION_STATUSES,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  type AdministrableProductType,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 
 import {
   getGroupActiveWindow,
@@ -74,6 +79,7 @@ interface GroupedMedicationRowProps {
     admin: MedicationAdministrationRead,
   ) => void;
   canWrite: boolean;
+  productType: AdministrableProductType;
 }
 
 // Individual medication row within expanded group
@@ -89,6 +95,7 @@ const IndividualMedicationRow: React.FC<{
   onAdminister: (medication: MedicationRequestRead) => void;
   onDiscontinue: (medication: MedicationRequestRead) => void;
   canWrite: boolean;
+  productType: AdministrableProductType;
 }> = ({
   medication,
   visibleSlots,
@@ -98,6 +105,7 @@ const IndividualMedicationRow: React.FC<{
   onAdminister,
   onDiscontinue,
   canWrite,
+  productType,
 }) => {
   const { t } = useTranslation();
   const isInactive = INACTIVE_MEDICATION_STATUSES.includes(
@@ -126,16 +134,21 @@ const IndividualMedicationRow: React.FC<{
             )}
             gap="sm"
             renderItem={(di) => {
-              const text = [
-                formatDosage(di),
-                formatFrequency(di),
-                di.method?.display,
-              ]
+              const dosage = formatDosage(di);
+              const instructionText = [formatFrequency(di), di.method?.display]
                 .filter(Boolean)
                 .join(", ");
               return (
-                <div>
-                  {text && <div>{text}</div>}
+                <div className="text-wrap wrap-break-word">
+                  {(dosage || instructionText) && (
+                    <div>
+                      {dosage && (
+                        <FormattedDosage instruction={di} fallback="" />
+                      )}
+                      {dosage && instructionText && ", "}
+                      {instructionText}
+                    </div>
+                  )}
                   {di.route?.display && (
                     <Badge variant="blue" className="text-xs mt-0.5">
                       {di.route.display}
@@ -157,7 +170,7 @@ const IndividualMedicationRow: React.FC<{
             {t(medication.status)}
           </Badge>
         </div>
-        <div className="text-xs text-gray-500 mt-0.5">
+        <div className="text-xs text-gray-500 mt-0.5 text-wrap wrap-break-word">
           {t("added_on")}:{" "}
           {format(
             new Date(medication.authored_on || medication.created_date),
@@ -246,8 +259,17 @@ const IndividualMedicationRow: React.FC<{
                 className="w-full h-7 mt-1 text-primary-700 border-primary-500 hover:bg-primary-50 font-medium text-xs"
                 onClick={() => onAdminister(medication)}
               >
-                <CareIcon icon="l-syringe" className="size-3 mr-1" />
-                {t("administer")}
+                <CareIcon
+                  icon={
+                    productType === ProductKnowledgeType.medication
+                      ? "l-syringe"
+                      : "l-utensils"
+                  }
+                  className="size-3 mr-1"
+                />
+                {productType === ProductKnowledgeType.medication
+                  ? t("administer")
+                  : t("record_intake")}
               </Button>
             )}
           </div>
@@ -289,6 +311,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
   onDiscontinue,
   onDiscontinueGroup,
   canWrite,
+  productType,
 }) => {
   const { t } = useTranslation();
   const isExpanded = expandedGroups.has(group.productId);
@@ -379,8 +402,8 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                     const freq = formatFrequency(di);
                     return (
                       <div>
-                        <div>
-                          {formatDosage(di)}
+                        <div className="text-wrap wrap-break-word">
+                          <FormattedDosage instruction={di} />
                           {freq && <span className="text-gray-400"> · </span>}
                           {freq}
                           {di.method?.display && (
@@ -422,7 +445,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
 
               {/* Last administered */}
               {group.lastAdministeredTime && (
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="text-xs text-gray-500 mt-1 text-wrap wrap-break-word">
                   {t("last_administered")}:{" "}
                   {formatDistanceToNow(new Date(group.lastAdministeredTime))}{" "}
                   {t("ago")}
@@ -464,6 +487,10 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                 isLastSlotOfDay && "border-r-4 border-r-gray-200",
               )}
             >
+              {/* Window start/end markers
+               * Start and end are calculated based on authored date. During Medication Request creation, authored date prefills with current time,
+               * but if the user changes the date, time sets to 00:00.
+               */}
               {windowState.isStartSlot && (
                 <WindowCap label={t("starts")} date={groupWindow.start} />
               )}
@@ -522,8 +549,17 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                     className="w-full h-8 text-primary-700 border-primary-500 hover:bg-primary-50 font-medium"
                     onClick={() => onAdministerGroup(group)}
                   >
-                    <CareIcon icon="l-syringe" className="size-4 mr-1" />
-                    {t("administer")}
+                    <CareIcon
+                      icon={
+                        productType === ProductKnowledgeType.medication
+                          ? "l-syringe"
+                          : "l-utensils"
+                      }
+                      className="size-4 mr-1"
+                    />
+                    {productType === ProductKnowledgeType.medication
+                      ? t("administer")
+                      : t("record_intake")}
                   </Button>
                 )}
             </div>
@@ -561,6 +597,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
             onAdminister={onAdminister}
             onDiscontinue={onDiscontinue}
             canWrite={canWrite}
+            productType={productType}
           />
         ))}
       </CollapsibleContent>

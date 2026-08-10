@@ -70,7 +70,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { formatDosage } from "@/components/Medicine/utils";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import {
@@ -966,9 +966,16 @@ export function MedicationRequestQuestion({
                           <DosageInstructionList
                             instructions={instructions}
                             renderItem={(di) => {
-                              const dosage = formatDosage(di) || "";
                               const freq = formatFrequency(di) || "";
-                              return [dosage, freq].filter(Boolean).join("\n");
+                              return (
+                                <div className="flex flex-col">
+                                  <FormattedDosage
+                                    instruction={di}
+                                    fallback=""
+                                  />
+                                  {freq && <span>{freq}</span>}
+                                </div>
+                              );
                             }}
                             gap="sm"
                           />
@@ -1690,7 +1697,12 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     >
       {/* Medicine Name */}
       {desktopLayout && (
-        <div className="lg:p-4 lg:px-2 lg:py-1 flex flex-col justify-between lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
+        <div
+          className={cn(
+            "lg:p-4 lg:px-2 lg:py-1 flex flex-col lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm",
+            isReadOnly ? "justify-center" : "justify-between",
+          )}
+        >
           <span
             className={cn(
               "wrap-break-word line-clamp-2 hidden lg:block",
@@ -1737,6 +1749,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                         "h-9 text-sm cursor-pointer",
                         hasError(fieldKey) && "border-red-500",
                       )}
+                      disabled={disabled || isReadOnly}
                     />
                   ) : (
                     <>
@@ -2381,6 +2394,3 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     </div>
   );
 };
-
-// Re-export reverseFrequencyOption from MedicationTimingSelect for backwards compatibility
-export { reverseFrequencyOption } from "@/components/Medicine/MedicationTimingSelect";

@@ -21,6 +21,22 @@ export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
   return "";
 }
 
+/**
+ * Whether a dosage should be highlighted — true for dose ranges and for
+ * quantities whose rounded display value is not exactly 1.
+ */
+export function isNonUnitDose(
+  instruction?: MedicationRequestDosageInstruction,
+): boolean {
+  const doseAndRate = instruction?.dose_and_rate;
+  if (!doseAndRate) return false;
+
+  const { dose_range, dose_quantity } = doseAndRate;
+  if (dose_range) return true;
+  if (dose_quantity?.value == null) return false;
+  return round(dose_quantity.value) !== round(1);
+}
+
 // Helper function to format dosage instructions in Rx style
 export function formatSig(instruction?: MedicationRequestDosageInstruction) {
   if (!instruction) return "";
@@ -74,39 +90,6 @@ export function formatDuration(
 ): string {
   const bounds = getTimingBounds(instruction?.timing?.repeat);
   return bounds ? formatTimingBounds(bounds) : "";
-}
-
-/**
- * Compact one-line medication summary:
- *   "1 tablet × 1-0-1 (Twice a day) × 5 days = 10 tablets"
- */
-export function formatMedicationLine(
-  instruction?: MedicationRequestDosageInstruction,
-  unitLabel = "units",
-): string {
-  if (!instruction) return "";
-  const parts: string[] = [];
-
-  // Dosage
-  const dosage = formatDosage(instruction);
-  if (dosage) parts.push(dosage);
-
-  // Frequency
-  const freq = formatFrequency(instruction);
-  if (freq) parts.push(freq);
-
-  // Duration
-  const dur = formatDuration(instruction);
-  if (dur) parts.push(dur);
-
-  if (parts.length === 0) return "";
-
-  // Total
-  const total = formatTotalUnits([instruction], unitLabel);
-  if (total) {
-    return `${parts.join(" × ")} = ${total}`;
-  }
-  return parts.join(" × ");
 }
 
 /**

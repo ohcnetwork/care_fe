@@ -103,7 +103,7 @@ const closedStatusText = {
   [AccountBillingStatus.closed_combined]: "close_account_help_closed_combined",
 };
 
-export function AccountShow({
+function AccountShow({
   facilityId,
   accountId,
   tab,
