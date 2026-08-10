@@ -3,6 +3,12 @@
 > **Source of truth:** `src/lib/override/` — see `index.ts`, `register.ts`,
 > `registry.ts`, `bridge.ts`, `contexts.ts`, `OverrideProvider.tsx`, and
 > `types.ts`.
+>
+> **Companion doc:** `care-apps-plugin-overrides.md` covers the build-time
+> registration pipeline (`plugins/autoRegisterComponents.ts`, the
+> `REACT_MFE_REGISTERED_COMPONENTS` allowlist, and supported export forms) and
+> the manifest-level override contract Care Apps declare. This doc focuses on
+> the runtime framework in `src/lib/override/`. Read them together.
 
 ## Goal
 
@@ -22,23 +28,31 @@ Key properties:
 
 ### `register(key, BaseComponent)`
 
-Wraps a component to make it overrideable. Consumers use the component normally.
+Wraps a component to make it overrideable. **You normally do not call this by
+hand.** At build time `plugins/autoRegisterComponents.ts` rewrites eligible
+exported PascalCase components under `src/` (subject to the
+`REACT_MFE_REGISTERED_COMPONENTS` allowlist) so their export calls `register()`
+for you — see `care-apps-plugin-overrides.md` for the transform, allowlist, and
+supported export forms. You just write and consume the component normally:
 
 ```tsx
-import { register } from "@/lib/override";
-
+// You write this:
 function PatientCard(props: PatientCardProps) {
   return <div>Base Card</div>;
 }
 
-export default register("PatientCard", PatientCard);
+export default PatientCard;
 ```
-
-Usage is unchanged:
 
 ```tsx
+// The build transform emits the registration; usage stays unchanged:
+export default register("PatientCard", PatientCard);
+
 <PatientCard patient={patient} />
 ```
+
+Calling `register()` manually still works and is what the transform emits; it is
+occasionally useful in tests.
 
 **What it does under the hood:**
 
@@ -175,6 +189,14 @@ window.__careOverrides.addComponent(key, { component, condition?, priority? })
 
 This global is installed as a side effect when `src/lib/override/index.ts` is
 first imported (before any plugin manifest evaluates).
+
+> **Manifest vs. registry shape.** Care Apps declare overrides in their manifest
+> using the higher-level contract documented in `care-apps-plugin-overrides.md`
+> (`{ component: "PatientCard", replacement, condition?, priority? }`, where
+> `component` is the string key and `replacement` is the component). `PluginEngine`
+> reads those entries and calls the registry-level `addOverride(key, { component,
+> condition?, priority? })` / `window.__careOverrides.addComponent` shown here,
+> where `component` is the replacement component itself.
 
 ---
 
