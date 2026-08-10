@@ -50,13 +50,20 @@ if: >
       (github.event.pull_request == null || github.event.pull_request.draft == false) &&
       (github.event.comment == null || github.event.comment.user.type != 'Bot') &&
       (github.event.issue == null || github.event.issue.pull_request != null) }}
-permissions: read-all
+# Least privilege for the agent job. It only reads: the base repo (contents), the PR's files and
+# review threads (pull-requests), and PR conversation comments, which are issue comments (issues).
+# All writes happen in separate, permission-scoped safe-output jobs — the agent job never writes.
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
 # Check out the TRUSTED BASE repo, never the PR head.
 #
 # This is not belt-and-braces. gh-aw compiles the Copilot engine with
 # `--allow-all-tools --allow-all-paths` and NO --available-tools/--excluded-tools/--deny-tool —
-# verified in the compiled lock. The agent file's `tools: [read, search]` does NOT restrict the
-# CLI's toolset. So the agent really does have bash, create, edit and web_fetch, in a
+# verified in the compiled lock. The `tools: github: toolsets: [default]` declaration below scopes
+# the GitHub MCP surface, NOT the CLI's own toolset. So the agent really does have bash, create,
+# edit and web_fetch, in a
 # pull_request_target job that holds COPILOT_GITHUB_TOKEN. Checking out the PR head would put
 # attacker-controlled code on disk next to those tools and that token — the textbook pwn request,
 # which `gh aw compile` warns about explicitly.

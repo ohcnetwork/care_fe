@@ -118,7 +118,7 @@ Organize legibility findings by severity so the most important ones lead:
 **`Convention` (repo style)**
 
 - Violates a documented pattern in `CLAUDE.md` or the repo's conventions
-- Example: event handlers should cite the event + expected side effect, per CLAUDE.md section 3.2
+- Example: user-facing strings must use i18next keys, per `CLAUDE.md`'s _Code Style Guidelines_
 - Fix is straightforward once the rule is known
 
 **`Polish` (optional — advisory only)**
@@ -334,7 +334,7 @@ For every place user-supplied or server-supplied text is rendered:
 - Tailwind color tokens only — no hardcoded hex/rgb; primary is `#0d9f6e` via the token. **Cite `tailwind.config.js`.**
 - `cn()` for conditional class merging — not template literals or `clsx` alone. **Cite `react-components.instructions.md`.**
 - CVA for multi-variant components. **Cite `react-components.instructions.md`.**
-- shadcn/ui or CAREUI primitives before hand-rolling — check `src/components/ui/` and `src/components/CAREUI/`. **Cite `react-components.instructions.md`.**
+- shadcn/ui or CAREUI primitives before hand-rolling — check `src/components/ui/` and `src/CAREUI/`. **Cite `react-components.instructions.md`.**
 - `useBreakpoints` for responsive logic branches (not inline `window.innerWidth` checks). **Cite `pages.instructions.md`.**
 - i18next keys, not string literals, for user-facing text. **Cite `CLAUDE.md`.**
 
