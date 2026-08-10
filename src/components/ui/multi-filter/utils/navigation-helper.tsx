@@ -5,13 +5,15 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Separator } from "@/components/ui/separator";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+export interface NavigationHelperProps {
+  isActiveFilter?: boolean;
+  hideRightArrow?: boolean;
+}
+
 export default function NavigationHelper({
   isActiveFilter,
   hideRightArrow,
-}: {
-  isActiveFilter?: boolean;
-  hideRightArrow?: boolean;
-}) {
+}: NavigationHelperProps) {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ sm: false, default: true });
 

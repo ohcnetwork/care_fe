@@ -167,10 +167,14 @@ export default function ReportViewer({
 
   useEffect(() => {
     setPdfUrl(null);
-    if (reportDetail?.read_signed_url) {
+    if (
+      reportDetail?.read_signed_url &&
+      reportDetail.associating_id === associatingId &&
+      reportDetail.report_type === reportType
+    ) {
       setPdfUrl(reportDetail.read_signed_url);
     }
-  }, [selectedReportId, reportDetail]);
+  }, [selectedReportId, reportDetail, associatingId, reportType]);
 
   const stopPolling = useCallback(() => {
     if (pollIntervalRef.current) {
