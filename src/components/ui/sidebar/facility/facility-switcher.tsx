@@ -22,7 +22,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { FacilityBareMinimum } from "@/types/facility/facility";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export function FacilitySwitcher({
   facilities,
@@ -34,9 +34,12 @@ export function FacilitySwitcher({
   const { isMobile } = useSidebar();
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredFacilities = facilities.filter((facility) =>
-    facility.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredFacilities = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return facilities.filter((facility) =>
+      facility.name.toLowerCase().includes(query),
+    );
+  }, [facilities, searchQuery]);
 
   return (
     <SidebarMenu>

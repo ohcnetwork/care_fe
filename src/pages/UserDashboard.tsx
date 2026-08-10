@@ -6,7 +6,7 @@ import {
   User2Icon,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -343,13 +343,11 @@ const TabContent = ({
 }: TabContentProps) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
-  const filteredItems =
-    tabItems.length > 1
-      ? tabItems.filter((item) =>
-          item.name.toLowerCase().includes(search.trim().toLowerCase()),
-        )
-      : tabItems;
-  const isMobile = useBreakpoints({ default: true, sm: false });
+  const filteredItems = useMemo(() => {
+    if (tabItems.length <= 1) return tabItems;
+    const query = search.trim().toLowerCase();
+    return tabItems.filter((item) => item.name.toLowerCase().includes(query));
+  }, [tabItems, search]);
   return (
     <section
       className="space-y-3 md:space-y-4"
@@ -367,7 +365,6 @@ const TabContent = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
-            autoFocus={!isMobile}
           />
         </div>
       )}
