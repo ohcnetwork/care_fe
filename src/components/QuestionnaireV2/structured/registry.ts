@@ -2,10 +2,7 @@ import type { TFunction } from "i18next";
 import type { ComponentType } from "react";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
-import type {
-  QuestionnaireResponse,
-  ResponseValue,
-} from "@/types/questionnaire/form";
+import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { SubjectType } from "@/types/questionnaire/questionnaire";
 import type {
   StructuredEditRecord,
@@ -79,24 +76,6 @@ export function structuredDataAny(
 ): unknown[] {
   const raw = response?.values?.[0]?.value;
   return Array.isArray(raw) ? raw : [];
-}
-
-/**
- * The write-side inverse of {@link structuredDataAny}: wraps projected
- * rows back into the `values` array a structured response stores. The
- * cast is this module's sanctioned narrowing for a GENERIC writer:
- * `ResponseValue`'s structured arms are keyed by core type names with
- * per-type row arrays, but a namespaced plugin type is no union arm at
- * all and its rows are opaque to the host, so there is nothing honest to
- * narrow to. Readers recover the rows via {@link structuredDataAny},
- * which never trusts the arm anyway.
- */
-export function projectionResponseValues(
-  type: string,
-  rows: readonly unknown[],
-): ResponseValue[] {
-  if (rows.length === 0) return [];
-  return [{ type, value: rows }] as unknown as ResponseValue[];
 }
 
 /**

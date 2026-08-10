@@ -29,7 +29,7 @@ export interface RequiredCheckContext {
  * Broken slots are handled by structured-specific validation so the generic
  * required check does not stack a second, vaguer required error.
  */
-export function structuredQuestionIsAnswerable(
+function structuredQuestionIsAnswerable(
   structuredType: string,
   questionId: string,
   context: RequiredCheckContext,

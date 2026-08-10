@@ -107,7 +107,7 @@ function questionSignatures(questions: Question[]): Map<string, string> {
  * re-seeds that one entry so a stale value of another shape can't linger in
  * enable_when evaluation.
  */
-export function syncResponses(
+function syncResponses(
   previous: Record<string, QuestionnaireResponse>,
   previousSignatures: Map<string, string>,
   questions: Question[],

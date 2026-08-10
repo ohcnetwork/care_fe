@@ -219,7 +219,7 @@ export function evaluateEnableWhen(
  *  write path (edit clears the flag) and the structured slot's
  *  `clearError` prop. No-ops when the question has no errors so
  *  subscribers don't re-render on unrelated edits. */
-export function clearQuestionErrorsInState(
+function clearQuestionErrorsInState(
   get: Getter,
   set: Setter,
   questionId: string,
