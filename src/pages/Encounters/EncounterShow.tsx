@@ -229,14 +229,14 @@ export const EncounterShow = (props: Props) => {
       )}
 
       <div className="flex flex-col gap-2">
-        <Card className="bg-white shadow-sm border-none rounded-sm p-2 md:p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <Card className="bg-white shadow-sm border-none rounded-sm p-2 md:p-4 flex flex-col md:flex-wrap xl:flex-nowrap md:flex-row md:justify-between md:items-center gap-4">
           <PatientHeader
             patient={patient}
             facilityId={facilityId}
             className="flex-1 p-0 bg-transparent shadow-none"
           />
           {selectedEncounter && (
-            <div className="flex max-md:flex-col items-end justify-center gap-4">
+            <div className="flex max-md:flex-col items-end justify-center gap-4 md:ml-auto">
               <PLUGIN_Component
                 __name="PatientInfoCardQuickActions"
                 encounter={selectedEncounter}

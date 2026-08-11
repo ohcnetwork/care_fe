@@ -20,12 +20,14 @@ interface PatientHoverCardProps {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   facilityId?: string;
   disabled?: boolean;
+  truncateEnabled?: boolean;
 }
 
 export function PatientHoverCard({
   patient,
   facilityId,
   disabled = false,
+  truncateEnabled = true,
 }: PatientHoverCardProps) {
   return (
     <>
@@ -33,7 +35,7 @@ export function PatientHoverCard({
       <Drawer>
         <DrawerTrigger
           disabled={disabled}
-          className="lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="w-full min-w-0 lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <PatientHoverCardTrigger patient={patient} disabled={disabled} />
         </DrawerTrigger>
@@ -49,9 +51,13 @@ export function PatientHoverCard({
       <Popover>
         <PopoverTrigger
           disabled={disabled}
-          className="hidden lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background"
+          className="hidden max-w-full min-w-0 lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background"
         >
-          <PatientHoverCardTrigger patient={patient} disabled={disabled} />
+          <PatientHoverCardTrigger
+            patient={patient}
+            disabled={disabled}
+            truncateEnabled={truncateEnabled}
+          />
         </PopoverTrigger>
         <PopoverContent
           className="flex flex-col border border-gray-200 shadow-lg p-4 rounded-md gap-4 w-100"
@@ -71,11 +77,13 @@ export function PatientHoverCard({
 interface PatientHoverCardTriggerProps {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   disabled?: boolean;
+  truncateEnabled?: boolean;
 }
 
 function PatientHoverCardTrigger({
   patient,
   disabled = false,
+  truncateEnabled = false,
 }: PatientHoverCardTriggerProps) {
   const { t } = useTranslation();
 
@@ -83,30 +91,33 @@ function PatientHoverCardTrigger({
     <div
       data-slot="patient-info-hover-card-trigger"
       className={cn(
-        "flex w-fit gap-3 items-center rounded-md",
+        "flex gap-3 items-center rounded-md min-w-46",
         !disabled && "hover:bg-gray-50 active:bg-gray-50 cursor-pointer",
       )}
     >
-      <div className="size-12">
+      <div className="size-12 shrink-0">
         <Avatar name={patient.name} />
       </div>
 
-      <div className="flex flex-col">
-        <div className="flex flex-row gap-2 items-center">
-          <h5
-            className={cn(
-              "text-lg font-semibold whitespace-nowrap",
-              !disabled && "underline",
-            )}
-          >
-            {patient.name}
-          </h5>
-          {!disabled && <ChevronDown size={16} />}
-        </div>
+      <div
+        className={cn(
+          "flex flex-col min-w-0",
+          truncateEnabled ? "max-w-md" : "max-w-full",
+        )}
+      >
+        <h5
+          className={cn(
+            "text-lg font-semibold truncate text-start",
+            !disabled && "underline",
+          )}
+        >
+          {patient.name}
+        </h5>
         <span className="flex flex-start text-gray-700">
           <PatientAge patient={patient} />, {t(`GENDER__${patient.gender}`)}
         </span>
       </div>
+      {!disabled && <ChevronDown size={16} className="self-start mt-1" />}
     </div>
   );
 }

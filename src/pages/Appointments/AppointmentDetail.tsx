@@ -291,6 +291,7 @@ export default function AppointmentDetail(props: Props) {
                 </div>
               )
             }
+            className="flex-col sm:flex-row sm:items-center justify-between"
           />
           <div className="mt-4">
             <PatientDeceasedInfo patient={appointment.patient} />

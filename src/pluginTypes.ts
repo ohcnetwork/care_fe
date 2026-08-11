@@ -78,6 +78,7 @@ export type PatientSearchActionsComponentType = React.FC<{
 export type PatientInfoCardActionsComponentType = React.FC<{
   facilityId: string;
   patient: PatientRead | PatientListRead | PublicPatientRead;
+  canWritePatient?: boolean;
   className?: string;
 }>;
 
