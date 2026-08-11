@@ -14,7 +14,6 @@ import {
 } from "@/pages/Facility/services/pharmacy/types";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
-import batchApi from "@/types/base/batch/batchApi";
 import {
   calculateTotalPriceWithQuantity,
   MonetaryComponentType,
@@ -39,6 +38,7 @@ import {
   MedicationDispenseCreate,
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
+import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
   ACTIVE_MEDICATION_STATUSES,
   computeMedicationDispenseQuantity,
@@ -55,7 +55,11 @@ import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { isGreaterThan, isZero, round, roundWhole } from "@/Utils/decimal";
-import { isLotAllowedForDispensing } from "@/Utils/inventory";
+import {
+  isLotAllowedForDispensing,
+  sortInventoriesFefo,
+} from "@/Utils/inventory";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
@@ -291,12 +295,15 @@ export function useMedicationBill({
             product_knowledge: productKnowledgeId,
             net_content_gt: 0,
             include_children: true,
+            ordering: "created_date",
           },
         })({ signal: new AbortController().signal });
 
         setProductKnowledgeInventoriesMap((prev) => ({
           ...prev,
-          [productKnowledgeId]: inventoriesResponse.results || [],
+          [productKnowledgeId]: sortInventoriesFefo(
+            inventoriesResponse.results || [],
+          ),
         }));
       }
     };
@@ -459,8 +466,7 @@ export function useMedicationBill({
   });
 
   // Dispense mutation
-  const { mutate: dispense, isPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
+  const { mutate: dispense, isPending } = useBatchRequest({
     onSuccess: (response: unknown) => {
       toast.success(t("medications_billed_and_prescriptions_completed"));
 
@@ -652,12 +658,7 @@ export function useMedicationBill({
     }
 
     // Build dispense requests
-    const requests: {
-      url: string;
-      method: string;
-      reference_id: string;
-      body: unknown;
-    }[] = [];
+    const requests: BatchRequestObject[] = [];
     const defaultEncounterId = prescriptionId
       ? prescription?.encounter?.id
       : (allMedicationsResponse?.results[0]?.encounter ?? encounterId);
@@ -713,9 +714,8 @@ export function useMedicationBill({
         }
 
         requests.push({
-          url: `/api/v1/medication/dispense/`,
-          method: "POST",
-          reference_id: `dispense_${item.reference_id}_lot_${lot.selectedInventoryId}`,
+          api: medicationDispenseApi.create,
+          referenceId: `dispense_${item.reference_id}_lot_${lot.selectedInventoryId}`,
           body: dispenseData,
         });
       });
@@ -741,9 +741,9 @@ export function useMedicationBill({
 
     if (prescriptionIds.size > 0) {
       requests.push({
-        url: `/api/v1/patient/${patientId}/medication/prescription/upsert/`,
-        method: "POST",
-        reference_id: "prescription_completion_upsert",
+        api: prescriptionApi.upsert,
+        pathParams: { patientId },
+        referenceId: "prescription_completion_upsert",
         body: {
           datapoints: Array.from(prescriptionIds).map((pId) => ({
             id: pId,
@@ -753,7 +753,7 @@ export function useMedicationBill({
       });
     }
 
-    dispense({ requests });
+    dispense(requests);
   };
 
   const handleRemoveMedication = (

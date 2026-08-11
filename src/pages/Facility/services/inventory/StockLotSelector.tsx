@@ -24,6 +24,7 @@ import { isPositive, round } from "@/Utils/decimal";
 import {
   getExpiryBadgeVariant,
   isProductRestrictedFromDispensing,
+  sortInventoriesFefo,
 } from "@/Utils/inventory";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
@@ -82,12 +83,15 @@ export default function StockLotSelector({
         net_content_gt: net_content_gt,
         product_knowledge: productKnowledge?.id || "",
         limit: 100,
+        ordering: "created_date",
       },
     }),
     enabled: Boolean(facilityId && locationId && productKnowledge?.id),
   });
 
-  const inventories = queryInventories?.results || availableInventories || [];
+  const inventories = sortInventoriesFefo(
+    queryInventories?.results || availableInventories || [],
+  );
 
   const selectedLotsWithInventory = selectedLots.filter(
     (lot) => lot.selectedInventoryId,

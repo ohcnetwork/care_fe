@@ -1,5 +1,6 @@
 import { addMonths, endOfMonth, isAfter } from "date-fns";
 
+import { InventoryRead } from "@/types/inventory/product/inventory";
 import careConfig from "@careConfig";
 
 export type ExpiryStatus = "expired" | "expiring_soon" | "valid";
@@ -67,4 +68,24 @@ export function getExpiryBadgeVariant(
   if (status === "expired") return "destructive";
   if (status === "expiring_soon") return "yellow";
   return "primary";
+}
+
+/**
+ * Sorts inventory lots FEFO (earliest expiry first); lots without an
+ * expiration date sort last. Stable sort, so equal/missing expiries keep
+ * their existing (FIFO) relative order.
+ * @param inventories - The inventory lots to sort
+ * @returns A new array sorted FEFO
+ */
+export function sortInventoriesFefo(
+  inventories: InventoryRead[],
+): InventoryRead[] {
+  return [...inventories].sort((a, b) => {
+    const aExpiry = a.product.expiration_date;
+    const bExpiry = b.product.expiration_date;
+    if (!aExpiry && !bExpiry) return 0;
+    if (!aExpiry) return 1;
+    if (!bExpiry) return -1;
+    return new Date(aExpiry).getTime() - new Date(bExpiry).getTime();
+  });
 }

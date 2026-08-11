@@ -85,7 +85,10 @@ import {
   round,
   zodDecimal,
 } from "@/Utils/decimal";
-import { isLotAllowedForDispensing } from "@/Utils/inventory";
+import {
+  isLotAllowedForDispensing,
+  sortInventoriesFefo,
+} from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface SelectedLocation {
@@ -209,6 +212,7 @@ export default function DispenseDrawer({
             limit: 100,
             product_knowledge: productKnowledgeId,
             net_content_gt: 0,
+            ordering: "created_date",
           },
         })({ signal: new AbortController().signal });
 
@@ -223,7 +227,7 @@ export default function DispenseDrawer({
       setProductKnowledgeInventoriesMap((prev) => {
         const updated = { ...prev };
         results.forEach(({ productKnowledgeId, inventories }) => {
-          updated[productKnowledgeId] = inventories;
+          updated[productKnowledgeId] = sortInventoriesFefo(inventories);
         });
         return updated;
       });
