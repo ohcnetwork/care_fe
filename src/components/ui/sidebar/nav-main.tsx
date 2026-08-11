@@ -229,26 +229,26 @@ function CollapsibleNavItem({
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      tooltip={link.name}
+                      tooltip={subItem.name}
                       className={
                         "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                       }
                     >
                       <NavLink
-                        href={link.url}
-                        isSelected={isSubItemSelected(link.url)}
+                        href={subItem.url}
+                        isSelected={isSubItemSelected(subItem.url)}
                         activeClass="bg-white text-green-700 shadow-sm"
                       >
-                        {link.icon ? (
-                          link.icon
+                        {subItem.icon ? (
+                          subItem.icon
                         ) : (
                           <Avatar
-                            name={link.name}
+                            name={subItem.name}
                             className="size-6 -m-1 rounded-sm"
                           />
                         )}
                         <span className="group-data-[collapsible=icon]:hidden ml-1">
-                          {link.name}
+                          {subItem.name}
                         </span>
                       </NavLink>
                     </SidebarMenuButton>
