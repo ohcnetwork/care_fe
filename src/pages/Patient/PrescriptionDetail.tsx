@@ -173,7 +173,10 @@ export default function PrescriptionDetail({ id }: { id: string }) {
     enabled: !!tokenData?.token,
   });
 
-  const medications = prescription?.medications ?? [];
+  // Entries marked entered_in_error are void records and should never reach the patient.
+  const medications = (prescription?.medications ?? []).filter(
+    (medication) => medication.status !== "entered_in_error",
+  );
 
   return (
     <PatientAppShell

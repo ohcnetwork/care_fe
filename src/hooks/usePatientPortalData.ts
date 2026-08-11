@@ -120,9 +120,13 @@ export function usePatientAppointments() {
 
 export function usePatientPrescriptions({
   status,
+  createdDateAfter,
+  createdDateBefore,
   enabled = true,
 }: {
   status?: PrescriptionStatus[];
+  createdDateAfter?: string;
+  createdDateBefore?: string;
   enabled?: boolean;
 } = {}) {
   const { selectedPatient } = usePatientContext();
@@ -135,9 +139,16 @@ export function usePatientPrescriptions({
       phoneNumber,
       selectedPatient?.id,
       statusParam,
+      createdDateAfter,
+      createdDateBefore,
     ],
     route: patientPortalApi.listPrescriptions,
-    queryParams: { patient: selectedPatient?.id, status: statusParam },
+    queryParams: {
+      patient: selectedPatient?.id,
+      status: statusParam,
+      created_date_after: createdDateAfter,
+      created_date_before: createdDateBefore,
+    },
     enabled: enabled && !!token && !!selectedPatient?.id,
   });
 
@@ -156,18 +167,20 @@ export const PROCESSING_REPORT_STATUSES = [
   DiagnosticReportStatus.preliminary,
 ];
 
-export const ACTIVE_PRESCRIPTION_STATUSES = [PrescriptionStatus.active];
-
-export const PAST_PRESCRIPTION_STATUSES = [
+export const PRESCRIPTION_STATUSES = [
+  PrescriptionStatus.active,
   PrescriptionStatus.completed,
-  PrescriptionStatus.cancelled,
 ];
 
 export function usePatientDiagnosticReports({
   status,
+  createdDateAfter,
+  createdDateBefore,
   enabled = true,
 }: {
   status?: DiagnosticReportStatus[];
+  createdDateAfter?: string;
+  createdDateBefore?: string;
   enabled?: boolean;
 } = {}) {
   const { selectedPatient } = usePatientContext();
@@ -180,9 +193,16 @@ export function usePatientDiagnosticReports({
       phoneNumber,
       selectedPatient?.id,
       statusParam,
+      createdDateAfter,
+      createdDateBefore,
     ],
     route: patientPortalApi.listDiagnosticReports,
-    queryParams: { patient: selectedPatient?.id, status: statusParam },
+    queryParams: {
+      patient: selectedPatient?.id,
+      status: statusParam,
+      created_date_after: createdDateAfter,
+      created_date_before: createdDateBefore,
+    },
     enabled: enabled && !!token && !!selectedPatient?.id,
   });
 
