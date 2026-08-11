@@ -71,13 +71,6 @@ export function useReportTemplateOptions({
 }) {
   const [search, setSearch] = useState("");
 
-  // Clear a stale search once the caller stops needing templates (e.g. the menu closed).
-  const [prevEnabled, setPrevEnabled] = useState(enabled);
-  if (enabled !== prevEnabled) {
-    setPrevEnabled(enabled);
-    if (!enabled && search) setSearch("");
-  }
-
   const { data: templatesData, isLoading } = useQuery({
     queryKey: ["templates", facilityId, reportType, search],
     queryFn: query.debounced(templateApi.listTemplates, {
@@ -192,11 +185,12 @@ export function GenerateReportDropdown({
   // Freeze the single-button vs dropdown decision to the unfiltered result: once a search is
   // active, the loading state of a refetch must not unmount the open DropdownMenu.
   if (!search && (isLoading || templates.length === 1)) {
+    const singleTemplateUrl = !isLoading ? templates[0]?.url : undefined;
     return (
       <Button
         variant="outline_primary"
-        disabled={isLoading}
-        onClick={() => templates[0] && navigate(templates[0].url)}
+        disabled={!singleTemplateUrl}
+        onClick={() => singleTemplateUrl && navigate(singleTemplateUrl)}
       >
         {isLoading ? (
           <CareIcon icon="l-spinner" className="size-4 animate-spin" />
