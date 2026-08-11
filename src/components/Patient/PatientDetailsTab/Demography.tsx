@@ -208,10 +208,7 @@ export const Demography = (props: PatientProps) => {
               {formatPatientAge(patientData, true)})
             </>
           ) : (
-            <>
-              {patientData.year_of_birth} ({formatPatientAge(patientData, true)}
-              )
-            </>
+            <>{formatPatientAge(patientData, true)}</>
           ),
         },
         {

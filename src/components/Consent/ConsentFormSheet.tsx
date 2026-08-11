@@ -97,7 +97,7 @@ const consentFormSchema = (isEdit: boolean) =>
         data.period.start > data.period.end
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("valid_from_after_valid_untill"),
           path: ["period.end"],
         });
@@ -108,7 +108,7 @@ const consentFormSchema = (isEdit: boolean) =>
         new Date(data.period.start) < new Date(data.date)
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("consent_period_start_before_consent_date_validation"),
           path: ["period.start"],
         });
