@@ -14,6 +14,16 @@ test.describe("Create Patient Prescription", () => {
   test.describe.configure({ mode: "serial" });
   let facilityId: string;
 
+  // These tests run serially against the same encounter, so every prescription
+  // they create shows up in one shared table. Pick two distinct medicines so
+  // the highlighted (non-unit) test and the unit test never land on rows that
+  // match the same medicine name — otherwise the unit test could match the
+  // other test's highlighted row and fail intermittently.
+  const [highlightedMedicine, unitMedicine] = faker.helpers.arrayElements(
+    medicineNames,
+    2,
+  );
+
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
@@ -26,7 +36,7 @@ test.describe("Create Patient Prescription", () => {
   });
 
   test("Add medication to patient prescription", async ({ page }) => {
-    const medicineName = faker.helpers.arrayElement(medicineNames);
+    const medicineName = highlightedMedicine;
     // Use a non-unit dose (value !== 1) so the dosage is highlighted
     const dosage = faker.number.int({ min: 2, max: 100 }).toString();
     const frequency = faker.helpers.arrayElement(frequencies);
@@ -119,7 +129,7 @@ test.describe("Create Patient Prescription", () => {
   test("Unit dosage is not highlighted in patient prescription", async ({
     page,
   }) => {
-    const medicineName = faker.helpers.arrayElement(medicineNames);
+    const medicineName = unitMedicine;
     // Use a unit dose (value === 1) so the dosage is NOT highlighted
     const dosage = "1";
     const frequency = faker.helpers.arrayElement(frequencies);
