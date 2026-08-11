@@ -1,7 +1,7 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { FileText, Hash, Loader, MoreVertical } from "lucide-react";
+import { Hash, MoreVertical } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -62,6 +62,10 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { isPositive } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
+import {
+  ReportTemplateSearchList,
+  useReportTemplateOptions,
+} from "@/components/Files/GenerateReportDropdown";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -71,7 +75,6 @@ import {
 } from "@/pages/Facility/billing/account/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ReportType } from "@/types/emr/report/report";
-import templateApi from "@/types/emr/template/templateApi";
 import AccountSheet from "./AccountSheet";
 import TransferPaymentSheet from "./TransferPaymentSheet";
 import BedChargeItemsTable from "./components/BedChargeItemsTable";
@@ -168,19 +171,17 @@ function AccountShow({
 
   const hasBillableItems = (billableChargeItems?.count ?? 0) > 0;
 
-  const { data: templatesData, isLoading: isLoadingTemplates } = useQuery({
-    queryKey: ["templates", facilityId, "account_report"],
-    queryFn: query(templateApi.listTemplates, {
-      queryParams: {
-        facility: facilityId,
-        template_type: ReportType.ACCOUNT_REPORT,
-        status: "active",
-      },
-    }),
+  const {
+    templates: accountTemplates,
+    isLoading: isLoadingTemplates,
+    search: accountTemplateSearch,
+    setSearch: setAccountTemplateSearch,
+  } = useReportTemplateOptions({
+    facilityId,
+    associatingId: accountId,
+    reportType: ReportType.ACCOUNT_REPORT,
     enabled: dropdownOpen && canListTemplates,
   });
-
-  const accountTemplates = templatesData?.results ?? [];
 
   const showMoreAfterIndex = useBreakpoints({
     default: 1,
@@ -477,30 +478,21 @@ function AccountShow({
                   <CareIcon icon="l-exchange" className="mr-2 size-4" />
                   {t("transfer_payment")}
                 </DropdownMenuItem>
-                {canListTemplates && isLoadingTemplates && (
-                  <DropdownMenuItem disabled>
-                    <Loader className="size-3 animate-spin" />
-                    {t("loading")}
-                  </DropdownMenuItem>
-                )}
-                {canListTemplates && accountTemplates.length > 0 && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel>{t("reports")}</DropdownMenuLabel>
-                    <div className="max-h-[30vh] overflow-y-auto">
-                      {accountTemplates.map((template) => (
-                        <DropdownMenuItem key={template.id} asChild>
-                          <Link
-                            href={`/facility/${facilityId}/billing/account/${accountId}/report/template/${template.slug}`}
-                          >
-                            <FileText className="mr-2 size-4 shrink-0" />
-                            {template.name}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
-                    </div>
-                  </>
-                )}
+                {canListTemplates &&
+                  (isLoadingTemplates ||
+                    accountTemplates.length > 0 ||
+                    accountTemplateSearch) && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>{t("reports")}</DropdownMenuLabel>
+                      <ReportTemplateSearchList
+                        templates={accountTemplates}
+                        isLoading={isLoadingTemplates}
+                        search={accountTemplateSearch}
+                        onSearchChange={setAccountTemplateSearch}
+                      />
+                    </>
+                  )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}

@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { FileText, Plus, SearchIcon } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,49 +28,24 @@ import {
 } from "@/components/ui/table";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import { PERMISSION_LIST_TEMPLATE } from "@/common/Permissions";
 import Loading from "@/components/Common/Loading";
 import { FilterBadges, FilterButton } from "@/components/Files/FileFilters";
+import {
+  GenerateReportDropdown,
+  getReportBasePath,
+} from "@/components/Files/GenerateReportDropdown";
 import { EmptyState } from "@/components/ui/empty-state";
-import { usePermissions } from "@/context/PermissionContext";
 
 import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
 
-import query from "@/Utils/request/query";
 import queryClient from "@/Utils/request/queryClient";
-import NavigationHelper from "@/components/ui/multi-filter/utils/navigation-helper";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ReportRead,
   ReportReadList,
   ReportType,
 } from "@/types/emr/report/report";
-import templateApi from "@/types/emr/template/templateApi";
-
-function getReportBasePath(
-  reportType: ReportType | undefined,
-  associatingId: string,
-  facilityId?: string,
-  patientId?: string,
-): string | null {
-  switch (reportType) {
-    case ReportType.DISCHARGE_SUMMARY:
-      return facilityId && patientId
-        ? `/facility/${facilityId}/patient/${patientId}/encounter/${associatingId}`
-        : null;
-    case ReportType.ACCOUNT_REPORT:
-      return facilityId
-        ? `/facility/${facilityId}/billing/account/${associatingId}`
-        : null;
-    case ReportType.PATIENT_SUMMARY:
-      return facilityId && patientId
-        ? `/facility/${facilityId}/patient/${patientId}`
-        : null;
-    default:
-      return null;
-  }
-}
 
 interface ReportTabProps {
   associatingId: string;
@@ -444,104 +418,5 @@ export function ReportSubTab({
       {/* Dialogs */}
       {Dialogs}
     </div>
-  );
-}
-
-function GenerateReportDropdown({
-  facilityId,
-  patientId,
-  associatingId,
-  reportType,
-}: {
-  facilityId: string;
-  patientId?: string;
-  associatingId: string;
-  reportType?: ReportType;
-}) {
-  const { t } = useTranslation();
-  const { facility } = useCurrentFacilitySilently();
-  const { hasPermission } = usePermissions();
-
-  const canListTemplate = hasPermission(
-    PERMISSION_LIST_TEMPLATE,
-    facility?.permissions,
-  );
-
-  const { data: templatesData, isLoading } = useQuery({
-    queryKey: ["templates", facilityId, reportType],
-    queryFn: query(templateApi.listTemplates, {
-      queryParams: {
-        facility: facilityId,
-        template_type: reportType,
-        status: "active",
-      },
-    }),
-    enabled: canListTemplate && !!reportType,
-  });
-
-  const getTemplateUrl = (slug: string) => {
-    const basePath = getReportBasePath(
-      reportType,
-      associatingId,
-      facilityId,
-      patientId,
-    );
-    return basePath ? `${basePath}/report/template/${slug}` : null;
-  };
-
-  const templates = (templatesData?.results ?? []).flatMap((template) => {
-    const url = getTemplateUrl(template.slug);
-    return url ? [{ template, url }] : [];
-  });
-
-  if (!isLoading && templates.length === 0) return null;
-
-  if (isLoading || templates.length === 1) {
-    return (
-      <Button
-        variant="outline_primary"
-        disabled={isLoading}
-        onClick={() => templates[0] && navigate(templates[0].url)}
-      >
-        {isLoading ? (
-          <CareIcon icon="l-spinner" className="size-4 animate-spin" />
-        ) : (
-          <Plus className="size-4" />
-        )}
-        <span>{t("generate_report")}</span>
-      </Button>
-    );
-  }
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline_primary">
-          <Plus className="size-4" />
-          <span>{t("generate_report")}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-full max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
-      >
-        <div className="px-2 pt-2">
-          <div className="max-h-[30vh] overflow-y-auto pb-2">
-            {templates.map(({ template, url }) => {
-              return (
-                <DropdownMenuItem
-                  key={template.id}
-                  onClick={() => navigate(url)}
-                >
-                  <FileText className="size-4 shrink-0" />
-                  <span className="truncate">{template.name}</span>
-                </DropdownMenuItem>
-              );
-            })}
-          </div>
-          <NavigationHelper hideRightArrow />
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
