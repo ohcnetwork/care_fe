@@ -4945,6 +4945,8 @@
   "report_preview": "Report Preview",
   "report_template_description": "Report templates help you create standardized formats for patient reports and clinical documentation.",
   "report_type": "Report Type",
+  "report_unavailable": "Report unavailable",
+  "report_unavailable_description": "This report could not be loaded. Please try again or select a different report.",
   "reported_by": "Reported by",
   "reports": "Reports",
   "repository": "Repository",

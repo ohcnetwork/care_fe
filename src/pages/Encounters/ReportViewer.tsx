@@ -157,7 +157,11 @@ export default function ReportViewer({
     }
   }, [reports, selectedReportId]);
 
-  const { data: reportDetail, isLoading: isLoadingDetail } = useQuery({
+  const {
+    data: reportDetail,
+    isLoading: isLoadingDetail,
+    isError: isReportDetailError,
+  } = useQuery({
     queryKey: ["report", selectedReportId],
     queryFn: query(reportApi.retrieveReport, {
       pathParams: { id: selectedReportId! },
@@ -165,16 +169,17 @@ export default function ReportViewer({
     enabled: !!selectedReportId,
   });
 
+  const reportMismatch =
+    !!reportDetail &&
+    (reportDetail.associating_id !== associatingId ||
+      reportDetail.report_type !== reportType);
+
   useEffect(() => {
     setPdfUrl(null);
-    if (
-      reportDetail?.read_signed_url &&
-      reportDetail.associating_id === associatingId &&
-      reportDetail.report_type === reportType
-    ) {
+    if (reportDetail?.read_signed_url && !reportMismatch) {
       setPdfUrl(reportDetail.read_signed_url);
     }
-  }, [selectedReportId, reportDetail, associatingId, reportType]);
+  }, [selectedReportId, reportDetail, reportMismatch]);
 
   const stopPolling = useCallback(() => {
     if (pollIntervalRef.current) {
@@ -592,6 +597,18 @@ export default function ReportViewer({
                 className="size-full"
               />
             )}
+
+            {!isGenerating &&
+              !isLoadingDetail &&
+              !!selectedReportId &&
+              (isReportDetailError || reportMismatch) && (
+                <EmptyState
+                  icon={<FileText className="size-6 text-destructive" />}
+                  title={t("report_unavailable")}
+                  description={t("report_unavailable_description")}
+                  className="size-full"
+                />
+              )}
 
             {pdfUrl && !isLoadingDetail && (
               <object
