@@ -42,6 +42,7 @@ import {
 import {
   ACTIVE_MEDICATION_STATUSES,
   computeMedicationDispenseQuantity,
+  formatMedicationRequestStatusFilter,
   MedicationRequestDispenseStatus,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
@@ -219,7 +220,9 @@ export function useMedicationBill({
           queryParams: {
             facility: facilityId,
             limit: 100,
-            status: ACTIVE_MEDICATION_STATUSES.join(","),
+            status: formatMedicationRequestStatusFilter(
+              ACTIVE_MEDICATION_STATUSES,
+            ),
             exclude_dispense_status: "complete,incomplete",
           },
         })({ signal });

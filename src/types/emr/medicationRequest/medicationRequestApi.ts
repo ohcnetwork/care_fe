@@ -1,5 +1,8 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  MedicationRequestRead,
+  MedicationRequestStatusFilter,
+} from "@/types/emr/medicationRequest/medicationRequest";
 
 export default {
   list: {
@@ -13,7 +16,7 @@ export default {
       medications_only?: boolean;
       facility?: string;
       ordering?: string;
-      status?: string;
+      status?: MedicationRequestStatusFilter;
       exclude_dispense_status?: string;
       limit?: number | string;
       offset?: number | string;

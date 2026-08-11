@@ -97,6 +97,18 @@ export const MEDICATION_REQUEST_STATUS = [
 export type MedicationRequestStatus =
   (typeof MEDICATION_REQUEST_STATUS)[number];
 
+/** A medication request status filter accepted by the list endpoint. */
+export type MedicationRequestStatusFilter =
+  | MedicationRequestStatus
+  | `${MedicationRequestStatus},${string}`;
+
+/** Serializes one or more medication request statuses for list filtering. */
+export function formatMedicationRequestStatusFilter(
+  statuses: readonly MedicationRequestStatus[],
+): MedicationRequestStatusFilter {
+  return statuses.join(",") as MedicationRequestStatusFilter;
+}
+
 export const MEDICATION_REQUEST_STATUS_REASON = [
   "altchoice",
   "clarif",
