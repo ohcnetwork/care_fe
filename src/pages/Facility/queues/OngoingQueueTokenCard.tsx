@@ -125,22 +125,28 @@ function useTokenActions({
         label: t("move_to_up_next"),
         icon: <ArrowBigDown className="size-4 mr-2" />,
         onSelect: () =>
-          updateToken({
-            status: TokenStatus.CREATED,
-            note: token.note,
-            sub_queue: token.sub_queue?.id || null,
-          }),
+          updateToken(
+            {
+              status: TokenStatus.CREATED,
+              note: token.note,
+              sub_queue: token.sub_queue?.id || null,
+            },
+            { onSuccess: () => toast.success(t("token_moved_to_up_next")) },
+          ),
       },
       {
         key: "recall_later",
         label: t("recall_later"),
         icon: <RotateCcwSquare className="size-4 mr-2" />,
         onSelect: () =>
-          updateToken({
-            status: TokenStatus.UNFULFILLED,
-            note: token.note,
-            sub_queue: null,
-          }),
+          updateToken(
+            {
+              status: TokenStatus.UNFULFILLED,
+              note: token.note,
+              sub_queue: null,
+            },
+            { onSuccess: () => toast.success(t("token_recalled_later")) },
+          ),
       },
     );
   }
@@ -151,11 +157,14 @@ function useTokenActions({
       label: t("return_to_waiting"),
       icon: <BringToFront className="size-4 mr-2" />,
       onSelect: () =>
-        updateToken({
-          status: TokenStatus.CREATED,
-          note: token.note,
-          sub_queue: null,
-        }),
+        updateToken(
+          {
+            status: TokenStatus.CREATED,
+            note: token.note,
+            sub_queue: null,
+          },
+          { onSuccess: () => toast.success(t("token_returned_to_waiting")) },
+        ),
     });
 
     if (assignedServicePointIds.length > 1) {
@@ -328,6 +337,7 @@ function EnteredInErrorDialog({
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, token.queue.id],
       });
+      toast.success(t("token_marked_as_entered_in_error"));
       onOpenChange(false);
     },
   });
@@ -664,11 +674,17 @@ const TokenContent = ({
               className="flex-1 gap-1"
               onClick={() => {
                 if (assignedServicePoints.length === 1) {
-                  updateToken({
-                    status: TokenStatus.CREATED,
-                    note: token.note,
-                    sub_queue: assignedServicePoints[0].id,
-                  });
+                  updateToken(
+                    {
+                      status: TokenStatus.CREATED,
+                      note: token.note,
+                      sub_queue: assignedServicePoints[0].id,
+                    },
+                    {
+                      onSuccess: () =>
+                        toast.success(t("token_moved_to_up_next")),
+                    },
+                  );
                   return;
                 }
                 setServicePointAction("move_to_up_next");
@@ -686,11 +702,16 @@ const TokenContent = ({
               className="flex-1"
               onClick={() => {
                 if (assignedServicePoints.length === 1) {
-                  updateToken({
-                    status: TokenStatus.IN_PROGRESS,
-                    note: token.note,
-                    sub_queue: assignedServicePoints[0].id,
-                  });
+                  updateToken(
+                    {
+                      status: TokenStatus.IN_PROGRESS,
+                      note: token.note,
+                      sub_queue: assignedServicePoints[0].id,
+                    },
+                    {
+                      onSuccess: () => toast.success(t("token_now_serving")),
+                    },
+                  );
                   return;
                 }
                 setServicePointAction("serve");
@@ -732,11 +753,14 @@ const TokenContent = ({
             <Button
               variant="primary"
               onClick={() => {
-                updateToken({
-                  status: TokenStatus.IN_PROGRESS,
-                  note: token.note,
-                  sub_queue: token.sub_queue?.id || null,
-                });
+                updateToken(
+                  {
+                    status: TokenStatus.IN_PROGRESS,
+                    note: token.note,
+                    sub_queue: token.sub_queue?.id || null,
+                  },
+                  { onSuccess: () => toast.success(t("token_now_serving")) },
+                );
               }}
               disabled={
                 isPending || isLoadingSubQueues || hasNoAssignedServicePoints

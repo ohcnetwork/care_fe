@@ -9,6 +9,7 @@ import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 export function CancelTokenDialog({
   open,
@@ -38,6 +39,7 @@ export function CancelTokenDialog({
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, token.queue.id],
       });
+      toast.success(t("token_has_been_cancelled"));
       onOpenChange(false);
     },
   });

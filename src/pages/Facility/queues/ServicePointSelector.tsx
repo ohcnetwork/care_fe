@@ -21,6 +21,7 @@ import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 export type ServicePointSelectorAction =
   "serve" | "move_to_up_next" | "change_service_point";
@@ -33,19 +34,22 @@ const ACTION_TO_STATUS: Record<ServicePointSelectorAction, TokenStatus> = {
 
 const ACTION_TO_CONTENT: Record<
   ServicePointSelectorAction,
-  { title: string; description: string }
+  { title: string; description: string; successMessage: string }
 > = {
   serve: {
     title: "serve_token",
     description: "serve_confirmation",
+    successMessage: "token_now_serving",
   },
   move_to_up_next: {
     title: "move_to_up_next",
     description: "move_to_up_next_description",
+    successMessage: "token_moved_to_up_next",
   },
   change_service_point: {
     title: "change_service_point",
     description: "change_service_point_description",
+    successMessage: "service_point_changed",
   },
 };
 
@@ -68,7 +72,7 @@ export const ServicePointSelector = ({
   const isMobile = useBreakpoints({ default: true, sm: false });
   const queryClient = useQueryClient();
 
-  const { title, description } = ACTION_TO_CONTENT[action];
+  const { title, description, successMessage } = ACTION_TO_CONTENT[action];
 
   const targetStatus =
     action === "change_service_point" ? token.status : ACTION_TO_STATUS[action];
@@ -100,6 +104,7 @@ export const ServicePointSelector = ({
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, token.queue.id],
       });
+      toast.success(t(successMessage));
       onOpenChange(false);
     },
   });
