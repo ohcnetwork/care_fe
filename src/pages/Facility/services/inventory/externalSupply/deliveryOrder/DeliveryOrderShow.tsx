@@ -942,7 +942,9 @@ export function DeliveryOrderShow({
                     destination={deliveryOrder.destination.id}
                     onSuccess={handleSupplyDeliverySuccess}
                     isFetchingSupplyDeliveries={isFetchingSupplyDeliveries}
-                    supplyDeliveriesCount={supplyDeliveries?.count || 0}
+                    supplyDeliveriesCount={
+                      supplyDeliveries?.results.length || 0
+                    }
                   />
                 )}
               </div>
