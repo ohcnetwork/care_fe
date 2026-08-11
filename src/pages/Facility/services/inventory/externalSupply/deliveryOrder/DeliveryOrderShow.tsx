@@ -7,6 +7,7 @@ import {
   Hash,
   MoreVertical,
   Printer,
+  TriangleAlert,
   Truck,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
@@ -14,13 +15,12 @@ import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import careConfig from "@careConfig";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -78,6 +78,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { ExtensionContexts } from "@/Utils/schema/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import careConfig from "@careConfig";
 
 interface Props {
   facilityId: string;
@@ -254,9 +255,6 @@ export function DeliveryOrderShow({
   });
   const { open: isSidebarOpen } = useSidebar();
 
-  const exceedsUpsertLimit =
-    selectedDeliveries.length > careConfig.maxDatapointsPerUpsert;
-
   const { data: deliveryOrder, isLoading } = useQuery({
     queryKey: ["deliveryOrders", deliveryOrderId],
     queryFn: query(deliveryOrderApi.retrieveDeliveryOrder, {
@@ -269,18 +267,21 @@ export function DeliveryOrderShow({
 
   const isRequester = locationId === deliveryOrder?.destination.id;
 
-  const { data: supplyDeliveries, isLoading: isLoadingSupplyDeliveries } =
-    useQuery({
-      queryKey: ["supplyDeliveries", deliveryOrderId],
-      queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
-        queryParams: {
-          order: deliveryOrderId,
-          facility: facilityId,
-          ordering: "created_date",
-        },
-      }),
-      enabled: !!deliveryOrderId,
-    });
+  const {
+    data: supplyDeliveries,
+    isLoading: isLoadingSupplyDeliveries,
+    isFetching: isFetchingSupplyDeliveries,
+  } = useQuery({
+    queryKey: ["supplyDeliveries", deliveryOrderId],
+    queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
+      queryParams: {
+        order: deliveryOrderId,
+        facility: facilityId,
+        ordering: "created_date",
+      },
+    }),
+    enabled: !!deliveryOrderId,
+  });
 
   const supplyOrderId = supplyDeliveries?.results?.find(
     (delivery) => delivery.supply_request && delivery.supply_request.id,
@@ -293,7 +294,6 @@ export function DeliveryOrderShow({
         queryClient.invalidateQueries({
           queryKey: ["supplyDeliveries", deliveryOrderId],
         });
-        setSelectedDeliveries([]);
         toast.success(t("supply_deliveries_updated_successfully"));
       },
       onError: (_error) => {
@@ -368,6 +368,7 @@ export function DeliveryOrderShow({
     upsertSupplyDeliveries({
       datapoints: selectedSupplyDeliveries,
     });
+    setSelectedDeliveries([]);
   }
 
   function handleMarkAsDamaged() {
@@ -393,6 +394,7 @@ export function DeliveryOrderShow({
     upsertSupplyDeliveries({
       datapoints: selectedSupplyDeliveries,
     });
+    setSelectedDeliveries([]);
   }
 
   function handleSubmitDialog() {
@@ -415,6 +417,7 @@ export function DeliveryOrderShow({
     upsertSupplyDeliveries({
       datapoints: selectedSupplyDeliveries,
     });
+    setSelectedDeliveries([]);
     setConfirmDialog((prev) => ({ ...prev, open: false }));
   }
 
@@ -473,6 +476,10 @@ export function DeliveryOrderShow({
     internal,
     anyCompletedSupplyDeliveries,
   );
+
+  const hasReachedUpsertLimit =
+    !!supplyDeliveries &&
+    supplyDeliveries.results.length >= careConfig.maxDatapointsPerUpsert;
 
   return (
     <Page
@@ -581,8 +588,7 @@ export function DeliveryOrderShow({
                   disabled={
                     isUpsertingDeliveries ||
                     isUpdating ||
-                    selectedDeliveries.length !== 0 ||
-                    exceedsUpsertLimit
+                    selectedDeliveries.length !== 0
                   }
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}
@@ -915,14 +921,28 @@ export function DeliveryOrderShow({
                   <></>
                 )}
 
+                {hasReachedUpsertLimit && (
+                  <Alert className="border-amber-300 bg-amber-50 text-amber-800 [&>svg]:text-amber-600 *:data-[slot=alert-description]:text-amber-700">
+                    <TriangleAlert />
+                    <AlertTitle>{t("item_limit_reached")}</AlertTitle>
+                    <AlertDescription>
+                      {t("max_datapoints_per_upsert_limit", {
+                        count: careConfig.maxDatapointsPerUpsert,
+                      })}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 {/* Add New Supply Delivery Form - Always show when in draft mode */}
-                {canAddSupplyDeliveries && (
+                {canAddSupplyDeliveries && !hasReachedUpsertLimit && (
                   <AddSupplyDeliveryForm
                     deliveryOrderId={deliveryOrderId}
                     facilityId={facilityId}
                     origin={deliveryOrder.origin?.id}
                     destination={deliveryOrder.destination.id}
                     onSuccess={handleSupplyDeliverySuccess}
+                    isFetchingSupplyDeliveries={isFetchingSupplyDeliveries}
+                    supplyDeliveriesCount={supplyDeliveries?.count || 0}
                   />
                 )}
               </div>

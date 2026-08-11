@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle, Trash2, TriangleAlert } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useCallback, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -12,6 +12,7 @@ import careConfig from "@/../care.config";
 import { cn } from "@/lib/utils";
 
 import { DisablingCover } from "@/components/Common/DisablingCover";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -129,6 +130,9 @@ interface Props {
   origin?: string;
   destination: string;
   onSuccess: () => void;
+
+  supplyDeliveriesCount: number;
+  isFetchingSupplyDeliveries: boolean;
 }
 
 export function AddSupplyDeliveryForm({
@@ -137,6 +141,8 @@ export function AddSupplyDeliveryForm({
   origin,
   destination,
   onSuccess,
+  supplyDeliveriesCount,
+  isFetchingSupplyDeliveries,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -236,6 +242,9 @@ export function AddSupplyDeliveryForm({
     control: form.control,
     name: "items",
   });
+
+  const hasReachedUpsertLimit =
+    supplyDeliveriesCount >= careConfig.maxDatapointsPerUpsert;
 
   const loadFromSupplyRequests = () => {
     setIsSelectDialogOpen(true);
@@ -897,29 +906,42 @@ export function AddSupplyDeliveryForm({
                     </div>
                   </div>
 
-                  <div className="flex flex-row gap-2 mt-4 items-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleAddAnotherItem}
-                    >
-                      <PlusCircle className="mr-2 size-4" />
-                      {t("add_another")}
-                    </Button>
-                    {supplyRequests?.results?.length &&
-                      supplyRequests?.results?.length > 0 && (
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          onClick={loadFromSupplyRequests}
-                        >
-                          {t("load_from_order")} ({supplyRequests?.count}{" "}
-                          {t("items")}
-                          )
-                          <ShortcutBadge actionId="load-from-order" />
-                        </Button>
-                      )}
-                  </div>
+                  {supplyDeliveriesCount + fields.length >=
+                  careConfig.maxDatapointsPerUpsert ? (
+                    <Alert className="border-amber-300 bg-amber-50 text-amber-800 [&>svg]:text-amber-600 *:data-[slot=alert-description]:text-amber-700">
+                      <TriangleAlert />
+                      <AlertTitle>{t("item_limit_reached")}</AlertTitle>
+                      <AlertDescription>
+                        {t("max_datapoints_per_upsert_limit", {
+                          count: careConfig.maxDatapointsPerUpsert,
+                        })}
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <div className="flex flex-row gap-2 mt-4 items-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleAddAnotherItem}
+                      >
+                        <PlusCircle className="mr-2 size-4" />
+                        {t("add_another")}
+                      </Button>
+                      {supplyRequests?.results?.length &&
+                        supplyRequests?.results?.length > 0 && (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={loadFromSupplyRequests}
+                          >
+                            {t("load_from_order")} ({supplyRequests?.count}{" "}
+                            {t("items")}
+                            )
+                            <ShortcutBadge actionId="load-from-order" />
+                          </Button>
+                        )}
+                    </div>
+                  )}
 
                   <div className="flex justify-between">
                     <Button
@@ -952,6 +974,11 @@ export function AddSupplyDeliveryForm({
                           type="button"
                           variant="outline_primary"
                           onClick={loadFromSupplyRequests}
+                          disabled={
+                            isProcessing ||
+                            hasReachedUpsertLimit ||
+                            isFetchingSupplyDeliveries
+                          }
                         >
                           {t("load_from_order")} ({supplyRequests?.count}{" "}
                           {t("items")}
@@ -971,6 +998,11 @@ export function AddSupplyDeliveryForm({
                     type="button"
                     variant="outline_primary"
                     onClick={() => handleAddAnotherItem()}
+                    disabled={
+                      isProcessing ||
+                      hasReachedUpsertLimit ||
+                      isFetchingSupplyDeliveries
+                    }
                   >
                     <PlusCircle className="mr-2 size-4" />
                     {t("add_item")}
