@@ -5,6 +5,17 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+// Selecting the first available location is repeated across the create and edit
+// flows, so keep it in one place.
+async function selectFirstLocation(page: import("@playwright/test").Page) {
+  const locationTrigger = page
+    .getByRole("combobox")
+    .filter({ hasText: /select locations/i })
+    .or(page.getByText(/select locations/i))
+    .first();
+  await selectFromLocationMultiSelect(page, locationTrigger);
+}
+
 test.describe("Healthcare Service Create & Edit", () => {
   let facilityId: string;
 
@@ -28,12 +39,7 @@ test.describe("Healthcare Service Create & Edit", () => {
     });
 
     await test.step("Select a location", async () => {
-      const locationTrigger = page
-        .getByRole("combobox")
-        .filter({ hasText: /select locations/i })
-        .or(page.getByText(/select locations/i))
-        .first();
-      await selectFromLocationMultiSelect(page, locationTrigger);
+      await selectFirstLocation(page);
     });
 
     await test.step("Submit the form", async () => {
@@ -74,12 +80,7 @@ test.describe("Healthcare Service Create & Edit", () => {
       await page.getByRole("textbox", { name: /name/i }).fill(originalName);
 
       // Select a location
-      const locationTrigger = page
-        .getByRole("combobox")
-        .filter({ hasText: /select locations/i })
-        .or(page.getByText(/select locations/i))
-        .first();
-      await selectFromLocationMultiSelect(page, locationTrigger);
+      await selectFirstLocation(page);
 
       await page.getByRole("button", { name: /create/i }).click();
       await expect(

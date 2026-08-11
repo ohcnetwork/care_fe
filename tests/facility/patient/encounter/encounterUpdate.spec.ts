@@ -13,10 +13,7 @@ test.describe("Encounter Update", () => {
   });
 
   async function openUpdateForm(page: import("@playwright/test").Page) {
-    await page
-      .locator('a[href*="/questionnaire/encounter"]:visible')
-      .first()
-      .click();
+    await page.getByRole("link", { name: "Update Encounter" }).first().click();
     await page.waitForURL(/\/questionnaire\/encounter/);
     await expect(page.getByText("Encounter Status")).toBeVisible();
   }

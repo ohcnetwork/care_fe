@@ -715,7 +715,14 @@ export async function openFirstInProgressEncounter(
   await page.goto(
     `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
   );
-  await page.getByRole("link", { name: "View Encounter" }).first().click();
+  const firstEncounter = page
+    .getByRole("link", { name: "View Encounter" })
+    .first();
+  await expect(
+    firstEncounter,
+    `No in-progress encounter found for facility ${facilityId} — the shared fixture may be missing.`,
+  ).toBeVisible();
+  await firstEncounter.click();
   await page.waitForURL(/\/facility\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+/);
   await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
 }

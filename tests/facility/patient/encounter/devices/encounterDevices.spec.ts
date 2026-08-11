@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   clickTabOrMenuItem,
   openFirstInProgressEncounter,
+  selectFromCommand,
 } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -40,8 +41,12 @@ test.describe("Encounter Devices Tab", () => {
     const dialog = page.getByRole("dialog", { name: "Associate device" });
     await expect(dialog).toBeVisible();
 
-    await dialog.getByRole("combobox", { name: /select device/i }).click();
-    await page.getByRole("option").first().click();
+    // The device options render in a popover portalled outside the dialog, so
+    // scope the selection through the shared command helper.
+    await selectFromCommand(
+      page,
+      dialog.getByRole("combobox", { name: /select device/i }),
+    );
 
     const associate = dialog.getByRole("button", {
       name: "Associate",

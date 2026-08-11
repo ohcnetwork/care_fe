@@ -56,6 +56,11 @@ test.describe("Encounter Consents Tab", () => {
 
     const dialog = page.getByRole("dialog", { name: "Add Consent" });
     await expect(dialog).toBeVisible();
+
+    // decision/category/status all have schema defaults (permit / treatment /
+    // active), so saving without changes submits a valid consent. The dialog
+    // closing below is what proves the save landed — a missing required field
+    // would keep it open and fail this test.
     await dialog.getByRole("button", { name: "Save" }).click();
 
     await expect(dialog).toBeHidden();
