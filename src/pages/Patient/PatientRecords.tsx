@@ -1,11 +1,13 @@
+import dayjs from "dayjs";
 import { FileText } from "lucide-react";
-import { Link, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterDateRange } from "@/components/ui/multi-filter/utils/Utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { InfiniteScrollSentinel } from "@/components/Common/InfiniteScrollSentinel";
@@ -15,11 +17,10 @@ import {
   PatientHeaderTabs,
 } from "@/components/Patient/PatientAppShell";
 import { PrescriptionRow } from "@/components/Patient/PrescriptionRow";
+import { RecordsDateFilter } from "@/components/Patient/RecordsDateFilter";
 
-import { Button } from "@/components/ui/button";
 import {
-  ACTIVE_PRESCRIPTION_STATUSES,
-  PAST_PRESCRIPTION_STATUSES,
+  PRESCRIPTION_STATUSES,
   PROCESSING_REPORT_STATUSES,
   READY_REPORT_STATUSES,
   usePatientDiagnosticReports,
@@ -27,9 +28,26 @@ import {
 } from "@/hooks/usePatientPortalData";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
+import { dateQueryString } from "@/Utils/utils";
+
 type RecordsTab = "prescriptions" | "reports";
-type PrescriptionFilter = "active" | "past";
 type ReportFilter = "all" | "ready" | "processing";
+
+// Records already arrive newest-first from the API, so grouping only needs to
+// collapse consecutive same-day entries rather than re-sort them.
+function groupByDate<T extends { created_date: string }>(items: T[]) {
+  const groups: { date: string; items: T[] }[] = [];
+  for (const item of items) {
+    const date = dayjs(item.created_date).format("DD MMM YYYY");
+    const lastGroup = groups.at(-1);
+    if (lastGroup?.date === date) {
+      lastGroup.items.push(item);
+    } else {
+      groups.push({ date, items: [item] });
+    }
+  }
+  return groups;
+}
 
 function FilterChip({
   active,
@@ -67,20 +85,25 @@ export default function PatientRecords() {
   const [{ tab }, setQueryParams] = useQueryParams<{ tab?: RecordsTab }>();
 
   const activeTab: RecordsTab = tab === "reports" ? "reports" : "prescriptions";
-  const [prescriptionFilter, setPrescriptionFilter] =
-    useState<PrescriptionFilter>("active");
   const [reportFilter, setReportFilter] = useState<ReportFilter>("all");
+  // A single created_date filter, shared across both tabs since both OTP
+  // endpoints accept the same created_date_after/before query params.
+  const [dateRange, setDateRange] = useState<FilterDateRange>({});
+  const createdDateAfter = dateRange.from
+    ? dateQueryString(dateRange.from)
+    : undefined;
+  const createdDateBefore = dateRange.to
+    ? dateQueryString(dateRange.to)
+    : undefined;
 
   const {
     prescriptions,
-    count: prescriptionCount,
     isLoading: isLoadingPrescriptions,
     ...prescriptionPages
   } = usePatientPrescriptions({
-    status:
-      prescriptionFilter === "active"
-        ? ACTIVE_PRESCRIPTION_STATUSES
-        : PAST_PRESCRIPTION_STATUSES,
+    status: PRESCRIPTION_STATUSES,
+    createdDateAfter,
+    createdDateBefore,
     enabled: activeTab === "prescriptions",
   });
   const {
@@ -95,6 +118,8 @@ export default function PatientRecords() {
         : reportFilter === "processing"
           ? PROCESSING_REPORT_STATUSES
           : [...READY_REPORT_STATUSES, ...PROCESSING_REPORT_STATUSES],
+    createdDateAfter,
+    createdDateBefore,
     enabled: activeTab === "reports",
   });
 
@@ -118,39 +143,29 @@ export default function PatientRecords() {
       }
     >
       <div className="flex min-w-0 flex-1 flex-col gap-3 p-4 pt-4.5">
+        <RecordsDateFilter
+          value={dateRange}
+          onChange={setDateRange}
+          className="self-start"
+        />
         {activeTab === "prescriptions" ? (
           <>
-            <div className="flex gap-2">
-              <FilterChip
-                active={prescriptionFilter === "active"}
-                onClick={() => setPrescriptionFilter("active")}
-              >
-                {t("active")}
-                {prescriptionFilter === "active" && ` · ${prescriptionCount}`}
-              </FilterChip>
-              <FilterChip
-                active={prescriptionFilter === "past"}
-                onClick={() => setPrescriptionFilter("past")}
-              >
-                {t("past")}
-                {prescriptionFilter === "past" && ` · ${prescriptionCount}`}
-              </FilterChip>
-            </div>
-
             {isLoadingPrescriptions ? (
               <Skeleton className="h-24 w-full rounded-2xl" />
             ) : prescriptions.length ? (
               <>
-                {prescriptionFilter === "past" && (
-                  <span className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.09em] text-gray-500">
-                    {t("patient_records__earlier")}
-                  </span>
-                )}
-                {prescriptions.map((prescription) => (
-                  <PrescriptionRow
-                    key={prescription.id}
-                    prescription={prescription}
-                  />
+                {groupByDate(prescriptions).map(({ date, items }) => (
+                  <div key={date} className="flex flex-col gap-2.5">
+                    <span className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.09em] text-gray-500">
+                      {date}
+                    </span>
+                    {items.map((prescription) => (
+                      <PrescriptionRow
+                        key={prescription.id}
+                        prescription={prescription}
+                      />
+                    ))}
+                  </div>
                 ))}
                 <InfiniteScrollSentinel {...prescriptionPages} />
               </>
@@ -171,13 +186,6 @@ export default function PatientRecords() {
                 }
                 description={t("patient_records__no_prescriptions_description")}
                 className="gap-3 rounded-2xl border-gray-300 px-5 py-7 shadow-none"
-                action={
-                  <Button className="w-full" asChild>
-                    <Link href="/nearby_facilities">
-                      {t("patient_home__book_first_appointment")}
-                    </Link>
-                  </Button>
-                }
               />
             )}
           </>
@@ -211,8 +219,15 @@ export default function PatientRecords() {
               <Skeleton className="h-20 w-full rounded-2xl" />
             ) : reports.length ? (
               <>
-                {reports.map((report) => (
-                  <DiagnosticReportRow key={report.id} report={report} />
+                {groupByDate(reports).map(({ date, items }) => (
+                  <div key={date} className="flex flex-col gap-2.5">
+                    <span className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.09em] text-gray-500">
+                      {date}
+                    </span>
+                    {items.map((report) => (
+                      <DiagnosticReportRow key={report.id} report={report} />
+                    ))}
+                  </div>
                 ))}
                 <InfiniteScrollSentinel {...reportPages} />
               </>
@@ -233,13 +248,6 @@ export default function PatientRecords() {
                     : t("patient_records__no_reports")
                 }
                 description={t("patient_records__no_reports_description")}
-                action={
-                  <Button className="w-full" asChild>
-                    <Link href="/nearby_facilities">
-                      {t("patient_home__book_first_appointment")}
-                    </Link>
-                  </Button>
-                }
               />
             )}
           </>

@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { PatientAppShell } from "@/components/Patient/PatientAppShell";
-import { PatientBadge } from "@/components/Patient/PatientBadge";
 
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 
@@ -15,7 +14,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import patientPortalApi from "@/types/emr/patientPortal/patientPortalApi";
 
-import { reportFlagSummary, reportTitle } from "./records/reportUtils";
+import { reportTitle } from "./records/reportUtils";
 
 function MetaField({ label, value }: { label: string; value: string }) {
   return (
@@ -40,7 +39,6 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
   });
 
   const observations = report?.observations ?? [];
-  const flags = report ? reportFlagSummary(report) : 0;
   const collectedAt = observations
     .map((observation) => observation.effective_datetime)
     .filter(Boolean)
@@ -84,12 +82,6 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
                 />
               )}
             </div>
-
-            {flags > 0 && (
-              <PatientBadge tone="warning" className="self-start">
-                {t("patient_records__flagged_count", { count: flags })}
-              </PatientBadge>
-            )}
 
             {observations.length > 0 && (
               <DiagnosticReportResultsTable

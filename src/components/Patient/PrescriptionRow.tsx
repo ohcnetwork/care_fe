@@ -1,26 +1,11 @@
 import dayjs from "dayjs";
 import { ChevronRight } from "lucide-react";
 import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import {
-  PatientBadge,
-  type PatientBadgeTone,
-} from "@/components/Patient/PatientBadge";
-
 import { formatName } from "@/Utils/utils";
-import {
-  PrescriptionStatus,
-  PrescritionList,
-} from "@/types/emr/prescription/prescription";
-
-export const PRESCRIPTION_TONES = {
-  active: "success",
-  completed: "neutral",
-  cancelled: "danger",
-} as const satisfies Record<PrescriptionStatus, PatientBadgeTone>;
+import { PrescritionList } from "@/types/emr/prescription/prescription";
 
 export function PrescriptionRow({
   prescription,
@@ -29,15 +14,11 @@ export function PrescriptionRow({
   prescription: PrescritionList;
   className?: string;
 }) {
-  const { t } = useTranslation();
-  const isActive = prescription.status === PrescriptionStatus.active;
-
   return (
     <Link
       href={`/patient/records/prescriptions/${prescription.id}`}
       className={cn(
         "flex items-center gap-2.5 rounded-2xl border bg-white p-4 hover:border-gray-300",
-        isActive ? "border-primary-200" : "border-gray-200 opacity-80",
         className,
       )}
     >
@@ -55,9 +36,6 @@ export function PrescriptionRow({
             .join(" · ")}
         </span>
       </div>
-      <PatientBadge tone={PRESCRIPTION_TONES[prescription.status]}>
-        {t(prescription.status)}
-      </PatientBadge>
       <ChevronRight
         className="size-4.25 shrink-0 text-gray-600"
         strokeWidth={2.1}
