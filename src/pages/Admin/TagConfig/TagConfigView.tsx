@@ -81,6 +81,8 @@ export default function TagConfigView({
         priority: childData.priority,
         status: TagStatus.ARCHIVED,
         resource: childData.resource,
+        facility_organization: childData.facility_organization?.id ?? null,
+        organization: childData.organization?.id ?? null,
         parent:
           childData.parent &&
           typeof childData.parent === "object" &&
