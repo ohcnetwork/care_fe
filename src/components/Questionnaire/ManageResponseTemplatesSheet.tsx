@@ -84,34 +84,7 @@ import query from "@/Utils/request/query";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
 import { t } from "i18next";
-
-/**
- * Builds a medication object suitable for storing in a template, converting
- * internal representations to template-friendly format.
- */
-function buildMedicationForTemplate(
-  medication: MedicationRequestCreate,
-): Record<string, unknown> {
-  const medicationForTemplate: Record<string, unknown> = {
-    ...medication,
-    requested_product: medication.requested_product_internal?.slug || undefined,
-  };
-
-  // Handle medication field based on whether we have a product slug
-  if (medication.requested_product) {
-    delete medicationForTemplate.medication;
-  } else if (medication.medication?.code) {
-    medicationForTemplate.medication = medication.medication;
-  } else {
-    delete medicationForTemplate.medication;
-  }
-
-  // Remove internal objects that shouldn't be stored in templates
-  delete medicationForTemplate.requested_product_internal;
-  delete medicationForTemplate.id;
-
-  return medicationForTemplate;
-}
+import { buildMedicationForTemplate } from "./QuestionTypes/MedicationRequestQuestion";
 
 function MedicationName({
   medication,

@@ -3,7 +3,10 @@ import {
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import type { ResolvedStructuredType } from "@/components/QuestionnaireV2/structured/registry";
-import { resolveStructuredSlotState } from "@/components/QuestionnaireV2/structured/registry";
+import {
+  resolveStructuredSlotState,
+  structuredDataAny,
+} from "@/components/QuestionnaireV2/structured/registry";
 import type {
   StructuredBatchEntry,
   StructuredRequestContext,
@@ -20,10 +23,6 @@ import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import type { SubmitResult } from "@/types/questionnaire/questionnaireApi";
 
-import {
-  composeStructuredV2Requests,
-  structuredEditsOf,
-} from "./composeStructured";
 import { serializeResponseValues } from "./serializeValues";
 import { planPlainSubmit } from "./submitTarget";
 
@@ -66,18 +65,18 @@ export class MissingEncounterError extends Error {
 }
 
 /**
- * A structured type's `toRequests` threw or rejected.
+ * A structured type's `buildRequests` threw or rejected.
  *
- * `toRequests` is third-party code for plugin types, and submit is fired as
- * `void submit()`. The host catches failures and pins them to the question
- * that produced them, preventing an unhandled rejection from turning Save
- * Changes into a silent no-op.
+ * `buildRequests` is third-party code for plugin types, and submit is fired
+ * as `void submit()`. The host catches failures and pins them to the
+ * question that produced them, preventing an unhandled rejection from
+ * turning Save Changes into a silent no-op.
  */
 export class StructuredBuildError extends Error {
   readonly questionId: string;
 
   constructor(questionId: string, cause: unknown) {
-    super(`toRequests failed for structured question ${questionId}`, {
+    super(`buildRequests failed for structured question ${questionId}`, {
       cause,
     });
     this.name = "StructuredBuildError";
@@ -85,20 +84,16 @@ export class StructuredBuildError extends Error {
   }
 }
 
-/** `definition.toRequests` (via `composeStructuredV2Requests`) behind the
- *  containment boundary — a synchronous throw and a rejected promise both
- *  become one `StructuredBuildError`, pinned to the question that produced
- *  it. */
+/** `definition.buildRequests` behind the containment boundary — a
+ *  synchronous throw and a rejected promise both become one
+ *  `StructuredBuildError`, pinned to the question that produced it. */
 async function buildStructuredRequests(
   definition: ResolvedStructuredType,
-  response: QuestionnaireResponse,
+  data: unknown[],
   context: StructuredRequestContext,
 ): Promise<StructuredBatchEntry[]> {
   try {
-    // Only what the clinician CHANGED. The projection — the patient's
-    // existing rows — is display state and never reaches a domain
-    // endpoint, so an untouched section cannot re-upsert anything.
-    return await composeStructuredV2Requests(definition, response, context);
+    return await definition.buildRequests(data, context);
   } catch (error) {
     throw new StructuredBuildError(context.questionId, error);
   }
@@ -121,7 +116,7 @@ export interface ComposeBatchArgs {
 
 /**
  * Assemble the one-batch submission. Structured answers become raw
- * domain-API requests via each type's `toRequests`; plain answers POST to
+ * domain-API requests via each type's `buildRequests`; plain answers POST to
  * the patient-bound or resource-subject questionnaire submit endpoint; a
  * resumed server draft also gets its completion PUT. Only questions
  * currently enabled by enable_when contribute, including structured leaves,
@@ -169,7 +164,7 @@ export async function composeBatch({
         // The same slot-state predicate the renderer (`StructuredSlot`) and
         // submit-time validators read. Unknown types, subject mismatches and
         // missing context all skip here; missing context prevents calling
-        // `toRequests` without the required ids.
+        // `buildRequests` without the required ids.
         const state = resolveStructuredSlotState(
           question.structured_type,
           questionnaire.subject_type,
@@ -184,12 +179,10 @@ export async function composeBatch({
         // questionnaire's subject_type, not the session's runtime subject,
         // so the explicit runtime gate stays on top of it.
         if (!patientBound && definition.source !== "plugin") continue;
-        // "Did anything change" rather than "is anything recorded": a
-        // section displaying twelve prefetched rows and holding no edits
-        // contributes zero requests, before any type code runs.
-        if (structuredEditsOf(response).length === 0) continue;
+        const data = structuredDataAny(response);
+        if (data.length === 0) continue;
         structuredWork.push(
-          buildStructuredRequests(definition, response, {
+          buildStructuredRequests(definition, data, {
             patientId: patientBound?.patientId,
             encounterId: renderCtx.encounterId,
             facilityId: renderCtx.facilityId,

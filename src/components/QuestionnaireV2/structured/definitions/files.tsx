@@ -1,53 +1,55 @@
-import { t } from "i18next";
+import {
+  FilesQuestion,
+  validateFileUploadQuestion,
+} from "@/components/Questionnaire/QuestionTypes/FileQuestion";
 
 import { readFileAsDataURL } from "@/Utils/utils";
-
-import { FilesEditor } from "@/components/QuestionnaireV2/structured/types/files/FilesEditor";
-import {
-  makeToRequests,
-  unnamedFileRowIds,
-} from "@/components/QuestionnaireV2/structured/types/files/model";
 
 import type {
   StructuredInputProps,
   StructuredTypeDefinition,
 } from "@/components/QuestionnaireV2/structured/types";
+import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
+import { useLegacyResponseCallback } from "./adapt";
 
 function FilesInput(props: StructuredInputProps) {
+  const updateResponse = useLegacyResponseCallback(props.onChange);
   if (!props.encounterId) return null;
-  return <FilesEditor {...props} />;
+  return (
+    <FilesQuestion
+      question={props.question}
+      encounterId={props.encounterId}
+      questionnaireResponse={props.response}
+      updateQuestionnaireResponseCB={updateResponse}
+      disabled={props.disabled}
+      errors={props.errors}
+    />
+  );
 }
-
-// The real `readFileAsDataURL` is wired here so the model can stay free of
-// Vite-only imports and remain safe to load in the node test harness.
-const toRequests = makeToRequests({ readFileAsDataURL });
 
 export const filesDefinition: StructuredTypeDefinition<"files"> = {
   type: "files",
   component: FilesInput,
-  // Encounter only: the upload URL is composed from `encounterId` alone and
-  // nothing in this type reads a facility — requiring one would show the
-  // "requires context" placeholder on a mount that can upload perfectly well.
-  requires: ["encounterId"],
+  requires: ["encounterId", "facilityId"],
   subjects: ["encounter"],
-  /**
-   * File rows carry a raw `File`, a live browser handle with no JSON
-   * representation, so they cannot be restored from serialized drafts.
-   * Attachments in this section are lost after a crash, reload, or accidental
-   * navigation; other structured sections can still restore normally because
-   * the exclusion is scoped to this type.
-   */
+  // Raw `File` objects cannot round-trip through JSON — hard exclude.
   draftPolicy: "exclude",
-  contract: 2,
-  toRequests,
-  // i18n boundary: `unnamedFileRowIds` stays pure; this definition turns its
-  // row ids into translated errors bound to the `name` column.
-  validate: (_projection, edits, questionId) =>
-    unnamedFileRowIds(edits).map((rowId) => ({
-      question_id: questionId,
-      field_key: "name",
-      row_id: rowId,
-      error: t("field_required"),
-      required: true,
-    })),
+  validate: (files, questionId) =>
+    validateFileUploadQuestion(files, questionId),
+  buildRequests: async (files, { encounterId, questionId }) =>
+    await Promise.all(
+      files.map(async (file) => {
+        const base64 = (await readFileAsDataURL(file.file_data)).split(",")[1];
+        return {
+          url: `/api/v1/files/upload-file/`,
+          method: "POST" as const,
+          body: {
+            ...file,
+            file_data: base64,
+            encounter: encounterId,
+          },
+          reference_id: structuredReferenceId("files", questionId),
+        };
+      }),
+    ),
 };

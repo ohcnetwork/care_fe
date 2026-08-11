@@ -47,10 +47,7 @@ export interface QuestionValidationError {
   msg?: string;
   type?: string;
   field_key?: string;
-  /** Row identity — the stable client rowId (the server id for a
-   *  baseline row, a uuid for an added one). Absent for a section-level
-   *  error. */
-  row_id?: string;
+  index?: number;
   required?: boolean;
 }
 export interface ValidationErrorResponse {

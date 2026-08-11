@@ -2,24 +2,24 @@ import type { ComponentType } from "react";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { SubjectType } from "@/types/questionnaire/questionnaire";
-import {
-  PLUGIN_STRUCTURED_TYPE_PATTERN,
-  type StructuredEditRecord,
-} from "@/types/questionnaire/structured";
+import { PLUGIN_STRUCTURED_TYPE_PATTERN } from "@/types/questionnaire/structured";
 
 import type {
   StructuredBatchEntry,
   StructuredContextKey,
-  StructuredDraftPolicy,
   StructuredInputProps,
   StructuredRequestContext,
 } from "./types";
 
 /**
- * Federation plugin contribution for a structured question type. Plugin row
- * shapes are opaque to the host, so the plugin's own component, validation and
- * request builder are the only code that interprets them. Plugins own i18n:
- * `label` is a plain display string from the manifest.
+ * What a federation plugin contributes to make a structured question type
+ * of its own. The same contract as a core `StructuredTypeDefinition`, minus
+ * the compile-time key correlation core enjoys: a plugin's data shape is
+ * opaque to the host, so its entries arrive as `unknown[]` and the plugin's
+ * own component/validate/buildRequests are the only code that reads them.
+ *
+ * Plugins own their i18n — `label` is a plain display string from the
+ * manifest, never an i18n key the host resolves.
  */
 export interface PluginStructuredTypeDefinition {
   /** Namespaced `{plugin_slug}.{type_name}` — bare names are reserved for core. */
@@ -29,19 +29,17 @@ export interface PluginStructuredTypeDefinition {
   /** Questionnaire subject types this type may be authored onto — same
    *  gate core types declare (picker, fill renderer, compose, validate). */
   subjects: readonly SubjectType[];
-  draftPolicy: StructuredDraftPolicy;
+  draftPolicy: "serialize" | "exclude";
   /** Display label (plugins own their i18n; plain string fallback). */
   label: string;
   icon?: ComponentType<{ className?: string }>;
-  contract: 2;
   validate?: (
-    projection: readonly unknown[],
-    edits: readonly StructuredEditRecord[],
+    data: unknown[],
     questionId: string,
     required: boolean,
   ) => QuestionValidationError[];
-  toRequests: (
-    edits: readonly StructuredEditRecord[],
+  buildRequests: (
+    data: unknown[],
     context: StructuredRequestContext,
   ) => Promise<StructuredBatchEntry[]>;
 }
@@ -68,8 +66,16 @@ function notify() {
 const noopCleanup = () => {};
 
 /** Register a plugin structured type; returns its cleanup closure.
- *  Namespacing prevents collisions with core and other plugin types, so the
- *  namespace must match the plugin slug that owns the registration. */
+ *  Throws on a non-namespaced id — PluginEngine catches and logs, so one
+ *  bad definition never takes the app down.
+ *
+ *  Namespacing is the whole isolation story: `{plugin_slug}.{type_name}`
+ *  can collide with neither a core type (those are bare) nor another
+ *  plugin's — which holds only if the slug half is VERIFIED, so
+ *  `ownerSlug` is checked against it here. Without that check, plugin B
+ *  listing `plugin_a.assessment` (a copied sample, or malice) would take
+ *  over questionnaires authored against plugin A's type depending on
+ *  manifest load order, with no user-visible signal. */
 export function registerPluginStructuredType(
   definition: PluginStructuredTypeDefinition,
   ownerSlug: string,

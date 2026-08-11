@@ -137,15 +137,13 @@ function filterAvailableEntries(
 }
 
 /**
- * Whether a stored response contains draft-worthy data. Structured edit logs
- * count because projections are stripped before storage; baseline rows do not
- * count because they were never in the stored copy.
+ * Whether a stored response contains draft-worthy data: any recorded value,
+ * or a note the clinician typed.
  */
 export function draftResponseHasContent(
   response: QuestionnaireResponse,
 ): boolean {
   if (response.values.some(entryHasContent)) return true;
-  if ((response.edits?.length ?? 0) > 0) return true;
   return !!response.note;
 }
 
@@ -177,9 +175,9 @@ export function mergeDraftResponses(
       continue;
     }
 
-    // Structured: whole-response gate on structured_type. Per-row
-    // reconciliation against the refetched baseline is
-    // `useStructuredRows`'s job (droppedEdits), not this function's.
+    // Structured: whole-response gate on structured_type — the values are
+    // that type's own request objects, opaque to this merge, so they either
+    // carry whole (same type) or drop whole (type changed).
     if (fresh.type === "structured" || response.structured_type) {
       if (fresh.structured_type !== response.structured_type) {
         if (draftResponseHasContent(response)) {

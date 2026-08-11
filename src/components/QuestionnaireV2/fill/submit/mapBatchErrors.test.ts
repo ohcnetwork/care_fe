@@ -7,8 +7,8 @@ import { mapBatchErrors } from "./mapBatchErrors";
 
 /**
  * The seam that routes a failed batch sub-request back to the question that
- * produced it. `composeStructured.test.ts` pins the reference-id format
- * because this parser is its only consumer.
+ * produced it. `structuredReferenceId` (structured/types.ts) is the writer
+ * of the reference-id format this parser reads.
  */
 
 type BatchResults = Parameters<typeof mapBatchErrors>[0];

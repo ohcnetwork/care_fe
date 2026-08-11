@@ -47,18 +47,6 @@ interface Props {
   isServiceAccount?: boolean;
   trigger?: React.ReactNode;
   onClear?: () => void;
-  /**
-   * Accessible name for the built-in trigger button. Ignored when a custom
-   * `trigger` is supplied — that node owns its own name.
-   *
-   * Declared explicitly because this component does not spread unknown
-   * props onto its trigger: a caller passing `aria-label` without this
-   * prop compiles cleanly (TypeScript's excess-property check does not
-   * flag a hyphenated attribute on a custom component) but the value is
-   * silently dropped, leaving the rendered combobox with no accessible
-   * name.
-   */
-  "aria-label"?: string;
 }
 
 const PAGE_LIMIT = 50;
@@ -173,7 +161,6 @@ export default function UserSelector({
   isServiceAccount = false,
   trigger,
   onClear,
-  "aria-label": ariaLabel,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -238,7 +225,6 @@ export default function UserSelector({
         type="button"
         variant="outline"
         role="combobox"
-        aria-label={ariaLabel}
         className="min-w-60 w-full justify-start"
         disabled={disabled}
         onKeyDown={(e) => {

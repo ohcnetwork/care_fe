@@ -48,24 +48,6 @@ export async function draftFormCount(page: Page): Promise<number> {
 }
 
 /**
- * The stored (single) fill draft's `forms` content, serialized — the part
- * that actually reflects clinician edits — or `undefined` if there is no
- * draft. Deliberately excludes the stored `savedAt` timestamp: a
- * content-free persist legitimately re-stamps `savedAt` on every write
- * regardless of whether anything changed, which is `saveFillDraft`'s own
- * contract and not a spurious rewrite worth failing on.
- */
-export async function soleDraftForms(page: Page): Promise<string | undefined> {
-  return page.evaluate((prefix) => {
-    const key = Object.keys(localStorage).find((k) => k.startsWith(prefix));
-    if (!key) return undefined;
-    const raw = localStorage.getItem(key);
-    if (!raw) return undefined;
-    return JSON.stringify((JSON.parse(raw) as { forms: unknown }).forms);
-  }, FILL_DRAFT_KEY_PREFIX);
-}
-
-/**
  * The first non-empty string answer the persisted draft holds for ONE
  * form, read straight from storage. Unlike `draftFormCount`, this reads
  * past a `pagehide` flush (which persists whatever the live store holds

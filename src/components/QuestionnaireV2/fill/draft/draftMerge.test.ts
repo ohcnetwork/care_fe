@@ -289,7 +289,7 @@ describe("mergeDraftResponses — compatibility-aware draft merge", () => {
     assert.deepEqual(responses.q1.values, [entry]);
   });
 
-  it("CARRY-OVER RULE: structured edits overlay by rowId when structured_type still matches — the edit log restores verbatim", () => {
+  it("CARRY-OVER RULE: structured values restore verbatim when structured_type still matches", () => {
     const questions = [
       q({
         id: "q1",
@@ -298,19 +298,23 @@ describe("mergeDraftResponses — compatibility-aware draft merge", () => {
         text: "Diagnoses",
       }),
     ];
-    const edits = [{ rowId: "r1", op: "add" as const, patch: { code: "J45" } }];
+    const values = [
+      {
+        type: "diagnosis",
+        value: [{ code: { system: "s", code: "J45", display: "Asthma" } }],
+      } as unknown as QuestionnaireResponse["values"][number],
+    ];
     const draft = {
       q1: response({
         question_id: "q1",
         structured_type: "diagnosis",
-        values: [],
-        edits,
+        values,
       }),
     };
 
     const { responses, dropped } = mergeDraftResponses(questions, draft);
 
-    assert.deepEqual(responses.q1.edits, edits);
+    assert.deepEqual(responses.q1.values, values);
     assert.deepEqual(dropped, []);
   });
 
@@ -327,20 +331,24 @@ describe("mergeDraftResponses — compatibility-aware draft merge", () => {
       q1: response({
         question_id: "q1",
         structured_type: "diagnosis", // was diagnosis, question retyped to symptom
-        values: [],
-        edits: [{ rowId: "r1", op: "add" as const, patch: { code: "J45" } }],
+        values: [
+          {
+            type: "diagnosis",
+            value: [{ code: { system: "s", code: "J45", display: "Asthma" } }],
+          } as unknown as QuestionnaireResponse["values"][number],
+        ],
       }),
     };
 
     const { responses, dropped } = mergeDraftResponses(questions, draft);
 
-    assert.deepEqual(responses.q1.edits, undefined);
+    assert.deepEqual(responses.q1.values, []);
     assert.deepEqual(dropped, [
       { questionId: "q1", label: "Symptoms", reason: "type_changed" },
     ]);
   });
 
-  it("a structured question with an empty edit log and structured_type mismatch is not reported (nothing to lose)", () => {
+  it("a structured question with empty values and a structured_type mismatch is not reported (nothing to lose)", () => {
     const questions = [
       q({
         id: "q1",
@@ -354,7 +362,6 @@ describe("mergeDraftResponses — compatibility-aware draft merge", () => {
         question_id: "q1",
         structured_type: "diagnosis",
         values: [],
-        edits: [],
       }),
     };
 

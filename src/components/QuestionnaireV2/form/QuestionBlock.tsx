@@ -96,28 +96,6 @@ export const QuestionBlock = memo(function QuestionBlock(
 });
 
 /**
- * Structured types whose editor renders its own field-bound errors inline
- * via `StructuredFieldError` — directly, or through `StructuredList`'s
- * per-cell rendering (plus its unmatched-field_key fallback). For these,
- * `LeafBlock` prints only errors WITHOUT a `field_key`; every other type
- * prints all errors. Deliberately an explicit set, not "every structured
- * question": a type joins in the same commit that wires the primitive.
- * Listed-but-unwired silently deletes a field error's only display;
- * wired-but-unlisted merely double-prints it.
- */
-const STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS = new Set<string>([
-  "allergy_intolerance",
-  "appointment",
-  "charge_item",
-  "diagnosis",
-  "files",
-  "medication_request",
-  "medication_statement",
-  "service_request",
-  "symptom",
-]);
-
-/**
  * The non-group body — a separate component so the response and error
  * store subscriptions only exist for questions that actually record
  * answers (groups returned above without ever mounting them).
@@ -187,16 +165,6 @@ function LeafBlock({
       values: (response?.values ?? []).filter((_, i) => i !== index),
     });
   };
-
-  // Structured questions suppress block-level field errors only when their
-  // editor renders `StructuredFieldError` itself. Listed-but-unwired types hide
-  // the only error display; unlisted-but-wired types double-print messages.
-  const blockErrors =
-    question.type === "structured" &&
-    question.structured_type &&
-    STRUCTURED_TYPES_WITH_INLINE_FIELD_ERRORS.has(question.structured_type)
-      ? errors.filter((error) => !error.field_key)
-      : errors;
 
   return (
     // data-question-id is the renderer's stable per-question DOM anchor —
@@ -320,13 +288,12 @@ function LeafBlock({
           </div>
         )}
       </div>
-      {/* role="alert" announces validation failures; structured field-bound
-          errors render inline while section-level errors stay here. */}
-      {/* Message resolution uses `error.error || error.msg` so empty strings
-          fall through instead of rendering blank. */}
-      {blockErrors.map((error, i) => (
+      {/* role="alert" so a validation failure is ANNOUNCED, not only
+          drawn: client-side validation writes these straight into the
+          store with no other live region anywhere on the fill page. */}
+      {errors.map((error, i) => (
         <p key={i} role="alert" className="text-sm text-red-600">
-          {error.error || error.msg || t("field_required")}
+          {error.msg ?? error.error}
         </p>
       ))}
     </div>

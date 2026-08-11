@@ -10,7 +10,7 @@ import { planPlainSubmit } from "./submitTarget";
 /**
  * `composeBatch.ts` itself is unrunnable under this plain `node --test`
  * harness (it imports `structured/registry.ts`, which pulls in every core
- * definition's component tree — see the header of `composeStructured.test.ts`).
+ * definition's component tree).
  * The submit-body decision lives in `submitTarget.ts` for exactly that
  * reason; these are composeBatch's plain-answer tests.
  */

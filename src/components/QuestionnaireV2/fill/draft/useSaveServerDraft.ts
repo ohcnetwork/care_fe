@@ -13,7 +13,6 @@ import {
 } from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
-import { draftResponseForStorage } from "@/components/QuestionnaireV2/fill/draft/fillDraftStore";
 import { unsupportedDraftStructuredTypes } from "@/components/QuestionnaireV2/fill/draft/unsupportedDraftStructuredTypes";
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
@@ -155,9 +154,7 @@ export function useSaveServerDraft({
     const response_dump = {
       questionnaireResponses: {
         questionnaire: primary.questionnaire,
-        responses: Object.values(store.get(responsesAtom)).map(
-          draftResponseForStorage,
-        ),
+        responses: Object.values(store.get(responsesAtom)),
         errors: [],
       },
     };

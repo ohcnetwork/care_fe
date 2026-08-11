@@ -10,8 +10,8 @@ import { SchedulableResourceType } from "@/types/scheduling/schedule";
  * `getOnInit: true` is load-bearing: without it, `atomWithStorage`
  * resolves to `initialValue` (Practitioner) on the first render and only
  * reads `localStorage` in its `onMount`, so a consumer that seeds its own
- * first-render state from this atom (e.g. `AppointmentEditor`'s
- * `useState(() => initialResource(serviceType, currentUser))`) captures
+ * first-render state from this atom (e.g. `AppointmentQuestion`'s
+ * `useState(() => getInitialResourceState(cachedServiceType, currentUser))`) captures
  * the pre-hydration default. With it, `localStorage` is read synchronously
  * once when the atom is constructed, so every consumer's first render
  * already reflects the persisted preference.

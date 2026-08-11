@@ -4,10 +4,7 @@ import {
   MonetaryComponent,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
-import {
-  ChargeItemDefinitionBase,
-  ChargeItemDefinitionRead,
-} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -90,23 +87,6 @@ export interface ApplyChargeItemDefinitionRequest {
 
 export interface ApplyMultipleChargeItemDefinitionRequest {
   requests: ApplyChargeItemDefinitionRequest[];
-}
-
-/**
- * A charge item as the questionnaire's structured question holds it: the
- * wire request plus the two objects the table renders from — the
- * definition's title and price components, and the chosen performer.
- *
- * They live ON the row so a restored draft can repaint the table without
- * refetching either.
- *
- * Both are OPTIONAL even though the editor always sets the definition
- * object: this is the type `ResponseValue` names, and previously recorded
- * responses may carry rows with neither.
- */
-export interface ChargeItemQuestionRow extends ApplyChargeItemDefinitionRequest {
-  charge_item_definition_object?: ChargeItemDefinitionRead;
-  performer_actor_object?: UserReadMinimal;
 }
 
 export interface ChargeItemUpdate extends Omit<

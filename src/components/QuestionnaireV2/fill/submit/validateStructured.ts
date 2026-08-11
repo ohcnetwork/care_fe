@@ -9,7 +9,6 @@ import {
   structuredDataAny,
 } from "@/components/QuestionnaireV2/structured/registry";
 
-import { structuredEditsOf } from "@/components/QuestionnaireV2/fill/submit/composeStructured";
 import type { RendererSubject } from "@/components/QuestionnaireV2/form/types";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -71,19 +70,11 @@ export function collectStructuredErrors(
       const response = responses[question.id];
       // The recorded entries must belong to this question's type.
       if (response?.structured_type !== type) continue;
-      const required = question.required ?? false;
-      const projection = structuredDataAny(response);
-      const edits = structuredEditsOf(response);
-      // Nothing recorded AND nothing changed. The two halves answer
-      // different questions, so neither may gate the other: a
-      // NON-empty projection with an empty log still runs (a required
-      // section satisfied by rows the server already had); a non-empty log
-      // with an empty projection still runs (the clinician removed every
-      // row).
-      if (projection.length === 0 && edits.length === 0) continue;
+      const data = structuredDataAny(response);
+      if (data.length === 0) continue;
       try {
         errors.push(
-          ...definition.validate(projection, edits, question.id, required),
+          ...definition.validate(data, question.id, question.required ?? false),
         );
       } catch (error) {
         // Plugin code runs here. Contain throws as one question-scoped error

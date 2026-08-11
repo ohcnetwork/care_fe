@@ -6,10 +6,9 @@ mounts at `/admin/questionnaires` and
 encounter/patient questionnaire routes (`ConsultationRoutes.tsx`). It
 replaced the legacy questionnaire UI in `src/components/Questionnaire`:
 the legacy fill stack (`QuestionnaireForm`, `EncounterQuestionnaire`,
-`QuestionRenderer`, `QuestionInput`, the simple input components and the
-whole `QuestionTypes/*` tree) is deleted — every structured type now lives
-in `structured/types/`. What survives there is the allowlist below:
-value-set and entity pickers plus the response-template sheets.
+`QuestionRenderer`, `QuestionInput` and the simple input components) is
+deleted. What survives there is the allowlist below — chiefly the
+structured `QuestionTypes/*` components, adapted behind `structured/`.
 
 There is exactly ONE renderer (`form/`) and one engine
 (`form/engine/`). If you find yourself writing a second display path for
@@ -87,24 +86,11 @@ questions, that is the bug.
   patient-mount draft — which legacy did allow — POSTs without one and
   becomes an unreachable orphan.
 - `structured/` — the one registration point for structured question
-  types. `StructuredTypeDefinition` colocates component, context
-  `requires`, submit-time `validate`, `buildRequests` and `draftPolicy`;
-  `registry.ts` is total and key-correlated over `StructuredQuestionType`,
-  so a new union member refuses to compile until its definition exists.
-  - `types/<type>/` — each type's own module: a React-free `model.ts`
-    (row derivation, differ, `toRequests`, row schema) beside its editor,
-    unit-tested under `node --test`.
-  - `definitions/<type>.tsx` — the thin registration wrapper binding that
-    model and editor into a `StructuredTypeDefinition`.
-  - `shared/` — what more than one type needs, in two halves. The
-    model-side helpers — `upsertToRequests.ts` (the single patient-scoped
-    upsert request shape), `listProjectValues.ts`, `rowSchemaPrimitives.ts`,
-    `sanitizeNote.ts` — must stay React-/careConfig-free, because the
-    `model.ts` files import them and those run under `node --test`. The
-    editor-side helpers — `editorPrimitives.tsx` and `responseTemplates/`
-    — are React by nature; no model may import them.
-  - `core/` — the baseline/edits/projection state engine every type runs
-    on (`useStructuredRows` and the `StructuredList` primitives).
+  types. `StructuredTypeDefinition` colocates component (typed adapter
+  over the legacy QuestionTypes UI), context `requires`, submit-time
+  `validate`, `buildRequests` and `draftPolicy`; `registry.ts` is total
+  and key-correlated over `StructuredQuestionType`, so a new union member
+  refuses to compile until its definition exists.
 - `shared/` — presentation primitives and the pure tree utilities
   (`questionTree.ts`), plus `buildUpdateBody.ts` and
   `downloadQuestionnaireJson.ts`. `manage/` and `builder/` depend on
@@ -188,59 +174,35 @@ export file.
 
 ## Legacy imports (allowlist)
 
-v2 may import from `src/components/Questionnaire` only:
-
-- `ValueSetSelect` — the value-set picker: the builder's answer-option and
-  coding cards, the studio inspector's unit field, the choice/quantity
-  engine inputs, `structured/core/AddEntityControl.tsx` and the
-  medication_request/service_request editors.
-- `MedicationValueSetSelect` — the medication picker, medication_request
-  only.
-- `SelectOrCreateValueset` — the builder's pick-or-create sheet
-  (`builder/AnswerOptionsEditor.tsx`).
-- `EntitySelectionDrawer` — the structured add-a-row picker
-  (`structured/core/AddEntityControl.tsx` and medication_request).
-- `ManageResponseTemplatesSheet` — the manage-templates sheet, rendered
-  directly by the medication_request and service_request editors.
-- `AddToTemplateDialog` — the add-to-template dialog, reached only through
-  `structured/shared/responseTemplates/useAddToTemplate.tsx`.
-- `data/StructuredFormData` — three separate things: `FIXED_QUESTIONNAIRES`
-  (the fixed pseudo-questionnaires the fill page mounts by slug),
-  `STRUCTURED_QUESTIONS` (the builder picker's structured tiles) and
-  `filterStructuredQuestionnaireSlugs` (which slug a response template is
-  saved under).
-- `QuestionnaireSearch` — the fill page's questionnaire picker, both the
-  empty-state one and the in-session "add forms" one.
-- `OrgSelector` — `manage/OrganizationsField.tsx`.
-
-Everything else in that directory (chiefly `ValueSetSearchContent`) exists
-only because the above use it; nothing in v2 may import it directly. A new
-legacy dependency needs an allowlist entry here, not an ad-hoc reach-in.
+v2 may import from `src/components/Questionnaire` only: `ValueSetSelect`,
+`SelectOrCreateValueset`, `data/StructuredFormData` (fixed
+pseudo-questionnaires), `QuestionnaireSearch` (the fill picker state), the
+`QuestionTypes/*` structured components — exclusively via
+`structured/definitions/*`, whose typed adapters replaced the renderer's
+old "one permitted `any`" — and `OrgSelector`. Everything else in that
+directory (`FieldError`, `EntitySelectionDrawer`,
+`ValueSetSearchContent`, the response-template sheets) exists only because
+those structured components use it; nothing in v2 may import it directly.
+A new legacy dependency needs an allowlist entry here, not an ad-hoc
+reach-in.
 
 ## Adding a structured question type
 
 1. Add the value to `STRUCTURED_QUESTION_TYPES`
    (`src/types/questionnaire/structured.ts`) — the union, the builder's
    picker and import validation derive from it.
-2. Write `structured/types/<type>/model.ts` (row derivation, differ, row
-   schema, `toRequests` with a unique `reference_id` via
-   `structuredReferenceId`) and its editor beside it. Keep the model
-   React-free so its `model.test.ts` runs under `node --test`, and reach
-   for `shared/upsertToRequests.ts` rather than a fifth hand-rolled copy
-   of the patient-scoped upsert shape.
-3. Register it in `structured/definitions/<type>.tsx`: the component,
-   `requires` (declare only what the module actually reads), `subjects`
-   (which questionnaire subject types may carry it), optional `validate`,
-   `buildRequests`, and an honest `draftPolicy` — `"serialize"` only when
-   the values are pure user input that can safely round-trip through a
-   local draft. Gate on missing context by narrowing at the top of the
-   editor body (`if (!encounterId) return null;`), never with `!`.
-4. Add it to `structured/registry.ts` (the total record will not compile
-   without it) and add the type's entry to `StructuredDataMap`
+2. Write `structured/definitions/<type>.tsx`: the input component
+   (native, or a typed adapter over an existing widget), `requires`,
+   `subjects` (which questionnaire subject types may carry it), optional
+   `validate`, `buildRequests` (unique `reference_id` via
+   `structuredReferenceId`), and an honest `draftPolicy` — `"serialize"`
+   only when the values are pure user input that can safely round-trip
+   through a local draft.
+3. Register it in `structured/registry.ts` (the total record will not
+   compile without it) and add the type's entry to `StructuredDataMap`
    (`structured/types.ts`) plus the `ResponseValue` variant
-   (`src/types/questionnaire/form.ts`) — `listProjectValues` derives the
-   row type from those two staying key-correlated.
-5. Add i18n (`structured_type__*`) and backend support.
+   (`src/types/questionnaire/form.ts`).
+4. Add i18n (`structured_type__*`) and backend support.
 
 Plugins contribute types the same way but at runtime: a manifest's
 `structuredQuestionTypes` (`PluginStructuredTypeDefinition`,

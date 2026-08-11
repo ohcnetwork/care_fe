@@ -1,7 +1,10 @@
 /**
  * Canonical list of structured question types — the single runtime source
  * the `StructuredQuestionType` union derives from. Lives in the types layer
- * so `src/types/*` never imports from the components tree.
+ * so `src/types/*` never imports from the components tree (the legacy
+ * arrangement derived this union from
+ * `components/Questionnaire/data/StructuredFormData`, inverting the layer
+ * dependency).
  *
  * Adding a type here is step one of the checklist in
  * `src/components/QuestionnaireV2/structured/` — the total registry there
@@ -62,75 +65,4 @@ export function isPluginStructuredTypeName(
   value: string,
 ): value is PluginStructuredTypeName {
   return PLUGIN_STRUCTURED_TYPE_PATTERN.test(value);
-}
-
-/**
- * Clinician changes to a structured section, distinct from projection display
- * state. `rowId` is stable and client-owned: the server id for existing rows,
- * or a uuid for new rows. `patch` is the complete row for every operation so
- * request composition remains self-sufficient.
- */
-export type StructuredEditOp = "add" | "update" | "remove";
-
-export interface StructuredEdit<TRow> {
-  /** Server id for a row that exists on the server; uuid for an add. */
-  rowId: string;
-  op: StructuredEditOp;
-  patch: TRow;
-}
-
-/**
- * The type-erased edit, as it is stored on a `QuestionnaireResponse`, in a
- * local draft and in a server draft's `response_dump`. A row shape is
- * opaque outside its own type module — the same honesty `unknown[]` buys
- * `ResolvedStructuredType`'s data reads — so `patch` widens to `unknown`
- * and the ONE sanctioned narrowing back happens at the registry boundary,
- * where key-correlation already guarantees the pairing.
- */
-export type StructuredEditRecord = StructuredEdit<unknown>;
-
-const STRUCTURED_EDIT_OPS: readonly string[] = ["add", "update", "remove"];
-
-/** Is this parsed-JSON value a well-formed edit? Drafts and server dumps are
- *  untrusted blobs, and this guard is the ONLY gate one passes before
- *  `useStructuredRows` casts the sanitized log to `EditLog<TRow>`.
- *
- *  `patch` is checked for PRESENCE only — a non-null object — because it is
- *  the complete row for every op (see {@link StructuredEdit}) and the first
- *  thing every reader dereferences (`softDelete.isDeleted`, `duplicateKey`,
- *  an editor's `rowTitle`); a truncated `{ rowId, op }` entry would throw
- *  out of render and take the whole fill page with it. Its CONTENTS stay
- *  unjudged here — only the type's own row schema can rule on those, and
- *  request building has its own containment boundary. */
-export function isStructuredEditRecord(
-  value: unknown,
-): value is StructuredEditRecord {
-  if (typeof value !== "object" || value === null) return false;
-  const candidate = value as { rowId?: unknown; op?: unknown; patch?: unknown };
-  return (
-    typeof candidate.rowId === "string" &&
-    candidate.rowId.length > 0 &&
-    typeof candidate.op === "string" &&
-    STRUCTURED_EDIT_OPS.includes(candidate.op) &&
-    typeof candidate.patch === "object" &&
-    candidate.patch !== null
-  );
-}
-
-/**
- * Sanitizes an untrusted edit log: drops malformed entries and collapses
- * duplicate `rowId`s to the last entry's content while preserving the first
- * entry's position. Map insertion order keeps the surviving entry at that
- * first position when an existing key is updated.
- */
-export function sanitizeStructuredEditLog(
-  raw: unknown,
-): StructuredEditRecord[] {
-  if (!Array.isArray(raw)) return [];
-  const byRowId = new Map<string, StructuredEditRecord>();
-  for (const entry of raw) {
-    if (!isStructuredEditRecord(entry)) continue;
-    byRowId.set(entry.rowId, entry);
-  }
-  return [...byRowId.values()];
 }

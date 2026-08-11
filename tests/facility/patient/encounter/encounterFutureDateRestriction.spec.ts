@@ -1,4 +1,6 @@
+import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
+import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterClasses";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
@@ -17,22 +19,9 @@ async function openEncounterForm(page: Page) {
   await page.getByRole("button", { name: "Create Encounter" }).click();
 }
 
-// Which encounter classes are offered is environment config
-// (`REACT_ALLOWED_ENCOUNTER_CLASSES`, defaults to all of them) — this test
-// only needs SOME class selected, so it reads the "Type of Encounter"
-// button group that's actually rendered rather than assuming the full
-// fixture list (`encounterClasses.ts`) is available. Picking a class not
-// offered in this environment isn't a UI regression to fix; the fixed
-// selector below is what keeps this arrangement step deterministic
-// regardless of which classes are configured.
 async function selectRandomEncounterClass(page: Page) {
-  const classGroup = page
-    .locator('[data-slot="form-item"]')
-    .filter({ hasText: "Type of Encounter" });
-  const classButtons = classGroup.getByRole("button");
-  await classButtons.first().waitFor({ state: "visible" });
-  const count = await classButtons.count();
-  await classButtons.nth(Math.floor(Math.random() * count)).click();
+  const randomClass = faker.helpers.arrayElement(ENCOUNTER_CLASSES);
+  await page.getByRole("button", { name: randomClass }).click();
 }
 
 async function openCalendarAndGetNextMonthButton(page: Page) {

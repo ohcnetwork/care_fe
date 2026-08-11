@@ -31,18 +31,14 @@ const DOSAGE_UNITS = [
 
 const DURATION_UNITS = ["days", "hours", "weeks", "months", "years"];
 
-// The rendered labels, not the wire values: the intent select translates
-// each `MEDICATION_REQUEST_INTENT` member through
-// `medication_request_intent__*`, so these are what the option's accessible
-// name actually is.
 const INTENT_OPTIONS = [
-  "Proposal",
-  "Plan",
-  "Order",
-  "Original order",
-  "Reflex order",
-  "Filler order",
-  "Instance order",
+  "proposal",
+  "plan",
+  "order",
+  "original order",
+  "reflex order",
+  "filler order",
+  "instance order",
 ];
 
 const medicationOptions = [
@@ -176,10 +172,7 @@ test.describe("Medication Request Questionnaire", () => {
     // Select random additional instruction - target only enabled button
     const instruction = faker.helpers.arrayElement(instructionOptions);
 
-    await page
-      .getByRole("button", { name: /show advanced fields/i })
-      .first()
-      .click();
+    await page.getByTitle("Show Advanced Fields").first().click();
     await page
       .locator("button:not([disabled])")
       .filter({ hasText: "No instructions selected" })
@@ -220,13 +213,12 @@ test.describe("Medication Request Questionnaire", () => {
     const intent = faker.helpers.arrayElement(INTENT_OPTIONS);
     await page.getByRole("option", { name: intent, exact: true }).click();
 
-    // Add notes - scroll to the end and target the active notes field.
-    // The row's accessible name is now the column header ("Note") rather
-    // than the placeholder text — StructuredList's `controlProps` names
-    // every control from `column.header`, not from its placeholder — so
-    // this locates the field by its (still-distinct) placeholder instead.
+    // Add notes - scroll to the end and target the active notes field
     const notes = faker.lorem.sentence();
-    await page.getByPlaceholder("Enter additional notes").last().fill(notes);
+    await page
+      .getByRole("textbox", { name: "Enter additional notes" })
+      .last()
+      .fill(notes);
 
     await page.getByRole("button", { name: "Save Changes" }).click();
 

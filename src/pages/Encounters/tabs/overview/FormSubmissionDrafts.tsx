@@ -8,7 +8,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { reviveDraftResponses } from "@/components/QuestionnaireV2/fill/draft/fillDraftStore";
+import { reviveDraftResponses } from "@/components/QuestionnaireV2/fill/draft/fillDraftCore";
 import { QuestionnaireFormRenderer } from "@/components/QuestionnaireV2/form/FormCanvas";
 import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";

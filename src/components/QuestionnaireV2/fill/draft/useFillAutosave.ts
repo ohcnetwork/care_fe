@@ -208,9 +208,9 @@ export function useFillSessionAutosave({
       return [
         store.sub(responsesAtom, () => {
           if (finishedRef.current) return;
-          // An edit is a change to the draft-safe partition OR to the edit
-          // log of a draft-EXCLUDED question (files): those answers never
-          // reach the stored draft, but abandoning them is still losing the
+          // An edit is a change to the draft-safe partition OR to the note
+          // on a draft-EXCLUDED question: those answers never reach the
+          // stored draft, but abandoning them is still losing the
           // clinician's work, so they must arm the prompt and the chip.
           // What is deliberately NOT an edit is an excluded question's
           // `values`: structured widgets write prefetched server rows there

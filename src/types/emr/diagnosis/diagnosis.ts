@@ -77,6 +77,7 @@ export interface DiagnosisRequest {
   note?: string;
   category: DiagnosisCategory;
   encounter: string;
+  dirty: boolean;
   created_by?: UserReadMinimal;
   created_date?: string;
   updated_date?: string;

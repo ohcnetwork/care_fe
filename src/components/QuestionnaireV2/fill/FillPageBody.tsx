@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 import type { PatientRead } from "@/types/emr/patient/patient";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -36,6 +37,7 @@ import { useSaveServerDraft } from "./draft/useSaveServerDraft";
 import type { FillSubject } from "./subject";
 import { rendererSubjectOf } from "./subject";
 import { useSubmitFillSession } from "./submit/useSubmitFillSession";
+import { useFillActions } from "./useFillActions";
 import { useFillSessionForms } from "./useFillSessionForms";
 
 /** The canvas title and its unsaved-work badge. One fragment shared by the
@@ -317,6 +319,11 @@ export function FillPageBody({
     t("unsaved_changes"),
   );
 
+  // What a federated agent (Scribe) may do to this session, and the one
+  // validated path for doing it. Nothing is registered for a session with
+  // no patient in scope, so those mounts hand the plugin an empty list.
+  const { descriptors, invoke } = useFillActions({ subject, forms, getStore });
+
   return (
     // Tabs wraps the shell so its Radix context reaches both the strip in
     // FillShell's `tabs` slot and the TabsContent panels below.
@@ -449,6 +456,12 @@ export function FillPageBody({
                       />
                     </div>
                   )}
+                  {/* Renders nothing unless a plugin provides Scribe. */}
+                  <PLUGIN_Component
+                    __name="Scribe"
+                    actions={descriptors}
+                    invoke={invoke}
+                  />
                 </section>
               </div>
             </FillOutlineNavProvider>

@@ -1,38 +1,77 @@
-import { t } from "i18next";
-
-import { MedicationRequestEditor } from "@/components/QuestionnaireV2/structured/types/medicationRequest/MedicationRequestEditor";
 import {
-  invalidDosageFieldErrors,
-  toRequests,
-} from "@/components/QuestionnaireV2/structured/types/medicationRequest/model";
+  MedicationRequestQuestion,
+  validateMedicationRequestQuestion,
+} from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
+import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 
-import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
+import type {
+  StructuredInputProps,
+  StructuredTypeDefinition,
+} from "@/components/QuestionnaireV2/structured/types";
+import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
+import { sanitizeNote, useLegacyResponseCallback } from "./adapt";
+
+function MedicationRequestInput(props: StructuredInputProps) {
+  const updateResponse = useLegacyResponseCallback(props.onChange);
+  if (!props.patientId || !props.encounterId) return null;
+  return (
+    <MedicationRequestQuestion
+      patientId={props.patientId}
+      encounterId={props.encounterId}
+      question={props.question}
+      questionnaireResponse={props.response}
+      updateQuestionnaireResponseCB={updateResponse}
+      disabled={props.disabled}
+      errors={props.errors}
+      questionnaireId={props.questionnaireId}
+      questionnaireSlug={props.questionnaireSlug}
+    />
+  );
+}
 
 export const medicationRequestDefinition: StructuredTypeDefinition<"medication_request"> =
   {
     type: "medication_request",
-    component: MedicationRequestEditor,
+    component: MedicationRequestInput,
     requires: ["patientId", "encounterId"],
     subjects: ["encounter"],
-    // Medication request rows contain only plain JSON-serializable data, so
-    // they can be restored from drafts without losing type information.
-    draftPolicy: "serialize",
-    contract: 2,
-    toRequests,
-    // The i18n boundary: `model.ts`'s pure `invalidDosageFieldErrors`
-    // becomes translated, row-scoped errors here — model.ts must not import
-    // i18next (the `node --test` harness has none). `row_id` (not `index`)
-    // is what makes these bind to the correct `StructuredList` cell via
-    // `selectStructuredFieldErrors`'s row-identity precedence.
-    validate: (_projection, edits, questionId) =>
-      invalidDosageFieldErrors(edits).map((error) => ({
-        question_id: questionId,
-        field_key: error.fieldKey,
-        row_id: error.rowId,
-        error:
-          error.kind === "duration"
-            ? t(error.durationError!)
-            : t("field_required"),
-        required: true,
-      })),
+    draftPolicy: "exclude",
+    validate: (medications, questionId) =>
+      validateMedicationRequestQuestion(medications, questionId),
+    buildRequests: async (
+      medications,
+      { patientId, encounterId, questionId },
+    ) => {
+      // Only modified rows submit (`dirty`); new rows get a prescription
+      // shell with a generated alternate identifier.
+      const dirtyMedications = medications.filter((m) => m.dirty);
+      // `subjects` is encounter-only, so a patient is always in scope here
+      // — narrowed rather than asserted (the context type is optional for
+      // plugin types that declare a resource subject).
+      if (!patientId || dirtyMedications.length === 0) return [];
+      const prescriptionIdentifier = `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+      return [
+        {
+          url: `/api/v1/patient/${patientId}/medication/request/upsert/`,
+          method: "POST",
+          body: {
+            datapoints: dirtyMedications.map((medication) => ({
+              ...medication,
+              ...(!medication.id && {
+                create_prescription: {
+                  ...medication.create_prescription,
+                  status: PrescriptionStatus.active,
+                  alternate_identifier: prescriptionIdentifier,
+                },
+              }),
+              note: sanitizeNote(medication.note),
+              encounter: encounterId,
+              patient: patientId,
+              requester: medication.requester?.id,
+            })),
+          },
+          reference_id: structuredReferenceId("medication_request", questionId),
+        },
+      ];
+    },
   };
