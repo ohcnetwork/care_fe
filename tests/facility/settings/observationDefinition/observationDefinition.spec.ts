@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 
 import { expect, test } from "@playwright/test";
+import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 const UNITS = [
@@ -820,5 +821,56 @@ test.describe("Observation Definition Form with Interpretation", () => {
     await expect(
       page.getByText("observation definition created successfully"),
     ).toBeVisible({ timeout: 10000 });
+  });
+
+  test("should create observation definition with a component that has no unit", async ({
+    page,
+  }) => {
+    const data = generateObservationData();
+
+    await fillBasicObservationForm(page, data);
+
+    await test.step("Add component without unit", async () => {
+      await page
+        .getByRole("button", {
+          name: "Add your first component",
+        })
+        .click();
+
+      // Fill component code
+      await selectFromValueSet(
+        page,
+        page.getByRole("combobox", { name: "Code *", exact: true }),
+        { search: "Hemoglobin" },
+      );
+
+      // Select component data type but intentionally skip the unit
+      await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
+      await page.getByRole("option", { name: "Quantity" }).first().click();
+    });
+
+    await page.getByRole("button", { name: "Create" }).click();
+    await expectToast(page, "observation definition created successfully");
+  });
+
+  test("should show validation error when component code is left blank", async ({
+    page,
+  }) => {
+    const data = generateObservationData();
+
+    await fillBasicObservationForm(page, data);
+
+    // Add a component but leave the code empty
+    await page
+      .getByRole("button", {
+        name: "Add your first component",
+      })
+      .click();
+
+    await page.getByRole("button", { name: "Create" }).click();
+
+    await expect(page.getByText("Required")).toBeVisible();
+
+    await expect(page).toHaveURL(/observation_definitions\/new/);
   });
 });

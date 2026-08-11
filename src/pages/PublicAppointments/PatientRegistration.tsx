@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -20,6 +21,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import GovtOrganizationPicker from "@/components/Organization/GovtOrganizationPicker";
+
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { GENDERS, GENDER_TYPES } from "@/common/constants";
@@ -29,9 +32,9 @@ import { usePubSub } from "@/Utils/pubsubContext";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
-import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
+import { Organization } from "@/types/organization/organization";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { PublicAppointment } from "@/types/scheduling/schedule";
 
@@ -40,7 +43,9 @@ type PatientRegistrationProps = {
   staffId: string;
 };
 
-export function PatientRegistration(props: PatientRegistrationProps) {
+export default function PublicPatientRegistration(
+  props: PatientRegistrationProps,
+) {
   const { staffId } = props;
   const { t } = useTranslation();
   const [{ slotId, reason }] = useQueryParams();
@@ -51,6 +56,10 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
+
+  const [selectedGeoOrg, setSelectedGeoOrg] = useState<Organization | null>(
+    null,
+  );
 
   const patientSchema = z
     .object({
@@ -370,15 +379,20 @@ export function PatientRegistration(props: PatientRegistrationProps) {
               <FormField
                 control={form.control}
                 name="geo_organization"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem className="flex flex-col">
                     <FormControl>
-                      <GovtOrganizationSelector
-                        {...field}
+                      <GovtOrganizationPicker
+                        ref={field.ref}
+                        aria-invalid={!!fieldState.error}
                         required
                         authToken={tokenData.token}
-                        onChange={(value) => {
-                          field.onChange(value);
+                        value={selectedGeoOrg}
+                        onChange={(organization) => {
+                          setSelectedGeoOrg(organization);
+                          const isValid =
+                            !!organization && !organization.has_children;
+                          field.onChange(isValid ? organization.id : "");
                         }}
                       />
                     </FormControl>
