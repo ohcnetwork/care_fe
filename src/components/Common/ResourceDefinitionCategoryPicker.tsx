@@ -833,7 +833,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 variant="outline"
                 type="button"
                 onClick={handleClearSelection}
-                className="rounded-l-none shadow-none text-gray-400 border-gray-300 border-l-0 h-9.5"
+                className="rounded-l-none shadow-none text-gray-400 border-gray-300 border-l-0 h-auto"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
@@ -965,7 +965,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 variant="outline"
                 type="button"
                 onClick={handleClearSelection}
-                className="rounded-l-none shadow-none text-gray-400 border-gray-300 border-l-0 h-9.5"
+                className="rounded-l-none shadow-none text-gray-400 border-gray-300 border-l-0 h-auto"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
