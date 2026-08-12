@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import TagBadge from "@/components/Tags/TagBadge";
 
 import useFilters from "@/hooks/useFilters";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
@@ -26,7 +27,6 @@ import { formatDateTime, formatName } from "@/Utils/utils";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { PrescriptionSummary } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { PaginatedResponse } from "@/Utils/request/types";
 import DispensedMedicationList from "./DispensedMedicationList";
 import { MedicationReturnSheet } from "./MedicationReturnSheet";
@@ -125,14 +125,7 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
               </span>
               <div className="flex flex-wrap items-start gap-2 text-sm whitespace-nowrap">
                 {prescriptionTags.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant="secondary"
-                    className="capitalize"
-                    title={tag.description}
-                  >
-                    {getTagHierarchyDisplay(tag)}
-                  </Badge>
+                  <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
                 ))}
               </div>
             </div>
