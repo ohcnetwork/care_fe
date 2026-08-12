@@ -24,6 +24,12 @@ type CellConfig = {
   render?: (value: string | undefined) => React.ReactNode;
 };
 
+function parseSpan(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 interface GenericTableProps {
   headers: HeaderRow[];
   rows: TableRowType[] | undefined;
@@ -61,9 +67,8 @@ export default function PrintTable({
   });
   rows?.forEach((row, rowIndex) => {
     headers.forEach(({ key }) => {
-      const spanVal = row[`_span_${key}`];
-      if (spanVal) {
-        const span = parseInt(spanVal);
+      const span = parseSpan(row[`_span_${key}`]);
+      if (span) {
         for (let i = 1; i < span; i++) {
           skipCells[key].add(rowIndex + i);
         }
@@ -147,8 +152,7 @@ export default function PrintTable({
                 >
                   {headers.map(({ key }) => {
                     if (skipCells[key]?.has(index)) return null;
-                    const spanVal = row[`_span_${key}`];
-                    const rowSpan = spanVal ? parseInt(spanVal) : undefined;
+                    const rowSpan = parseSpan(row[`_span_${key}`]);
                     return (
                       <TableCell
                         rowSpan={rowSpan}
