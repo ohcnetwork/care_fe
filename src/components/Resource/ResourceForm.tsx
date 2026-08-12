@@ -36,8 +36,10 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { valuesOf } from "@/Utils/utils";
 import BecknFlow from "@/components/Resource/beckn/BecknFlow";
-import { healthServiceTypeForCategory } from "@/types/beckn/becknModels";
-import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  becknPatientFrom,
+  healthServiceTypeForCategory,
+} from "@/types/beckn/becknModels";
 import patientApi from "@/types/emr/patient/patientApi";
 import {
   getResourceRequestCategoryEnum,
@@ -56,24 +58,6 @@ interface ResourceProps {
 // Consultation discover searches the network for Care Coordination Desks; the
 // user then picks which desk/facility to assign the referral to.
 const COORDINATION_DESK_SEARCH = "Care Coordination Desk";
-
-/**
- * Best-effort ABHA lookup from a patient's identifiers (matched by system or
- * display), threaded into the Beckn participant. Returns undefined when the
- * patient has no ABHA on file — the flow then confirms with name only.
- */
-function findAbha(patient?: PatientRead): string | undefined {
-  const identifier = (patient?.instance_identifiers ?? []).find((i) => {
-    const system = i.config?.config?.system?.toLowerCase() ?? "";
-    const display = i.config?.config?.display?.toLowerCase() ?? "";
-    return (
-      system.includes("abha") ||
-      system.includes("abdm") ||
-      display.includes("abha")
-    );
-  });
-  return identifier?.value;
-}
 
 /**
  * Minimal resource-request form for the Care Coordination Network flow.
@@ -202,12 +186,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         <BecknFlow
           serviceType="consultation"
           facilityId={String(facilityId)}
-          patient={{
-            name: patientData?.name,
-            gender: patientData?.gender,
-            dateOfBirth: patientData?.date_of_birth ?? undefined,
-            abha: findAbha(patientData),
-          }}
+          patient={becknPatientFrom(patientData)}
           discover={flowIntent}
           title={flowIntent.title}
           autoStart

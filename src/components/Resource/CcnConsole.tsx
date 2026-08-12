@@ -18,6 +18,10 @@ import {
 
 import query from "@/Utils/request/query";
 import {
+  becknPatientFrom,
+  HEALTH_SERVICE_TYPES,
+} from "@/types/beckn/becknModels";
+import {
   getResourceRequestCategoryEnum,
   ResourceRequestRead,
   ResourceRequestStatus,
@@ -25,13 +29,6 @@ import {
 import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 // Health service types the coordinator can book an appointment for.
-const HEALTH_SERVICE_TYPES = [
-  {
-    value: "PHYSICAL_CONSULTATION",
-    labelKey: "ccn_service_type__physical_consultation",
-  },
-  { value: "LAB_TEST", labelKey: "ccn_service_type__lab_test" },
-] as const;
 
 interface CcnConsoleProps {
   facilityId: string;
@@ -226,7 +223,7 @@ function AppointmentBooking({
       <BecknFlow
         serviceType="appointment"
         facilityId={facilityId}
-        patient={{ name: resource.related_patient?.name ?? undefined }}
+        patient={becknPatientFrom(resource.related_patient)}
         discover={{ healthServiceType }}
         // coordinationRef links the booking to the originating referral. The RR
         // record does not currently expose the Beckn coordinationId; wire it

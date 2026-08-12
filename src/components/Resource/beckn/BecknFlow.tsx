@@ -11,6 +11,9 @@ import SlotPicker from "@/components/Resource/beckn/SlotPicker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+import { GENDER_TYPES } from "@/common/constants";
+
+import { formatDateTime } from "@/Utils/utils";
 import { useBecknTransaction } from "@/hooks/useBecknTransaction";
 import {
   BecknPatient,
@@ -21,6 +24,7 @@ import {
   buildDiscoverBody,
   buildInitBody,
   buildSelectBody,
+  healthServiceTypeLabel,
 } from "@/types/beckn/becknModels";
 
 interface BecknFlowProps {
@@ -210,12 +214,47 @@ export default function BecknFlow({
     }
   })();
 
+  // The popup is the last checkpoint before the order is placed on the network,
+  // so it carries enough to verify *who* is being referred and *what* is being
+  // committed to. Optional rows are dropped rather than rendered as dashes.
+  const genderLabel = GENDER_TYPES.find((g) => g.id === patient?.gender)?.text;
+  const serviceTypeLabel = healthServiceTypeLabel(healthServiceType);
+  const referralId = flow.initResult.contractId;
+
   const confirmSummary: ConfirmSummaryRow[] = [
     { label: t("patient"), value: patient?.name ?? "—" },
-    { label: t("beckn_provider_offer"), value: option?.label ?? "—" },
+    ...(genderLabel ? [{ label: t("sex"), value: genderLabel }] : []),
+    ...(patient?.dateOfBirth
+      ? [
+          {
+            label: t("date_of_birth"),
+            value: formatDateTime(patient.dateOfBirth),
+          },
+        ]
+      : []),
+    ...(patient?.abha
+      ? [{ label: t("patient_id_abha"), value: patient.abha }]
+      : []),
+    ...(isConsultation && title
+      ? [{ label: t("request_title"), value: title }]
+      : []),
+    ...(serviceTypeLabel
+      ? [{ label: t("ccn_service_type"), value: serviceTypeLabel }]
+      : []),
+    {
+      label: isConsultation
+        ? t("ccn_coordination_desk")
+        : t("beckn_provider_offer"),
+      value: option?.label ?? "—",
+    },
     ...(isConsultation
       ? []
       : [{ label: t("beckn_slot"), value: slot?.label ?? "—" }]),
+    // Minted by the BPP at init — proof the referral exists and names what
+    // confirm is about to finalise.
+    ...(isConsultation && referralId
+      ? [{ label: t("ccn_referral_id"), value: referralId }]
+      : []),
   ];
 
   return (

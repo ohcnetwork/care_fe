@@ -58,7 +58,9 @@ export default function ConfirmDialog({
               className="flex justify-between gap-4 border-b py-2 last:border-b-0"
             >
               <dt className="text-gray-500">{row.label}</dt>
-              <dd className="text-right font-medium">{row.value}</dd>
+              <dd className="min-w-0 break-words text-right font-medium">
+                {row.value}
+              </dd>
             </div>
           ))}
         </dl>

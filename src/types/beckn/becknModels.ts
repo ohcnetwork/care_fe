@@ -15,6 +15,8 @@
 
 import { t } from "i18next";
 
+import { PatientRead } from "@/types/emr/patient/patient";
+
 export type BecknServiceType = "consultation" | "appointment";
 
 export type BecknActionName =
@@ -268,6 +270,22 @@ export function healthServiceTypeForCategory(
     : "PHYSICAL_CONSULTATION";
 }
 
+/** The `healthServiceType` codes this flow supports, with their i18n labels. */
+export const HEALTH_SERVICE_TYPES = [
+  {
+    value: "PHYSICAL_CONSULTATION",
+    labelKey: "ccn_service_type__physical_consultation",
+  },
+  { value: "LAB_TEST", labelKey: "ccn_service_type__lab_test" },
+] as const;
+
+/** Human label for a `healthServiceType`, falling back to the raw code. */
+export function healthServiceTypeLabel(value: string | undefined): string {
+  if (!value) return "";
+  const match = HEALTH_SERVICE_TYPES.find((o) => o.value === value);
+  return match ? t(match.labelKey) : value;
+}
+
 /**
  * Build a commitment's `offer` for select/confirm. onyx validation requires
  * `offer.resourceIds` (mirroring the committed `resources[].id`); omitting it
@@ -314,6 +332,41 @@ export interface BecknPatient {
   gender?: string;
   dateOfBirth?: string;
   abha?: string;
+}
+
+/**
+ * Best-effort ABHA lookup from a patient's identifiers (matched by system or
+ * display). Returns undefined when the patient has no ABHA on file — the flow
+ * then proceeds with name only.
+ */
+function findAbha(patient: PatientRead): string | undefined {
+  const identifier = (patient.instance_identifiers ?? []).find((i) => {
+    const system = i.config?.config?.system?.toLowerCase() ?? "";
+    const display = i.config?.config?.display?.toLowerCase() ?? "";
+    return (
+      system.includes("abha") ||
+      system.includes("abdm") ||
+      display.includes("abha")
+    );
+  });
+  return identifier?.value;
+}
+
+/**
+ * Narrow a Care patient to the fields Beckn carries. Both flows go through
+ * this, so the participant sent on the wire and the summary shown in the
+ * confirmation popup are always built from the same fields.
+ */
+export function becknPatientFrom(
+  patient: PatientRead | null | undefined,
+): BecknPatient | undefined {
+  if (!patient) return undefined;
+  return {
+    name: patient.name,
+    gender: patient.gender,
+    dateOfBirth: patient.date_of_birth ?? undefined,
+    abha: findAbha(patient),
+  };
 }
 
 /**
