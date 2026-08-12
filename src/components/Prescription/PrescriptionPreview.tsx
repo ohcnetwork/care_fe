@@ -10,9 +10,10 @@ import { Markdown } from "@/components/ui/markdown";
 import Loading from "@/components/Common/Loading";
 import PrintTable from "@/components/Common/PrintTable";
 import {
+  formatAdditionalInstructions,
   formatDosage,
   formatDuration,
-  formatFrequencyWithInstructions,
+  formatFrequency,
   formatSig,
 } from "@/components/Medicine/utils";
 
@@ -73,7 +74,7 @@ const PrescriptionContent = ({
         </span>
       </div>
 
-      <div className="border border-gray-200 rounded-md">
+      <div className="border border-gray-300 rounded-md">
         <div className="relative flex justify-between place-items-end px-4 py-3">
           <div className="absolute top-5 left-0 h-3.5 w-1 bg-gray-400 rounded-r-md"></div>
           <div>
@@ -108,8 +109,12 @@ const PrescriptionContent = ({
               (medication, medIndex): Record<string, string | undefined>[] => {
                 const instructions = medication.dosage_instruction;
                 const isMulti = instructions.length > 1;
-                const totalRows =
-                  instructions.length + (medication.note ? 1 : 0);
+                const noteText = medication.note
+                  ? `${t("note")}: ${medication.note}`
+                  : undefined;
+                const medicationNote =
+                  isMulti && noteText ? [{ _fullspan: noteText }] : [];
+                const totalRows = instructions.length + medicationNote.length;
                 const shouldSpan = totalRows > 1;
                 return [
                   ...instructions.map((di, idx) => ({
@@ -125,30 +130,34 @@ const PrescriptionContent = ({
                     medicine:
                       idx === 0 ? displayMedicationName(medication) : "",
                     dosage: formatDosage(di) || "",
-                    frequency: formatFrequencyWithInstructions(di) || "",
+                    frequency: formatFrequency(di) || "",
                     duration: formatDuration(di) || "",
-                    instructions: formatSig(di) || "",
+                    instructions: [
+                      formatSig(di),
+                      formatAdditionalInstructions(di),
+                      !isMulti ? noteText : undefined,
+                    ]
+                      .filter(Boolean)
+                      .join("\n\n"),
                   })),
-                  ...(medication.note
-                    ? [
-                        {
-                          _fullspan: `${t("note")}: ${medication.note}`,
-                        },
-                      ]
-                    : []),
+                  ...medicationNote,
                 ];
               },
             )}
-            cellClassName="text-sm print:text-xs wrap-break-word whitespace-break-spaces text-gray-950 font-normal text-left"
+            cellClassName="text-sm print:text-xs wrap-break-word whitespace-break-spaces text-gray-950 font-normal text-left border-t border-gray-300"
             cellConfig={{
-              hash_tag: { className: "text-center text-gray-600 w-8" },
-              medicine: { className: "font-medium max-w-56 min-w-32" },
-              dosage: { className: "w-24" },
-              duration: { className: "border-r w-20" },
-              frequency: { className: "min-w-24 max-w-56" },
-              instructions: { className: "min-w-28 max-w-56" },
+              hash_tag: {
+                className: "text-center text-gray-600 w-8 print:w-[5%]",
+              },
+              medicine: {
+                className: "font-medium max-w-56 min-w-32 print:w-[20%]",
+              },
+              dosage: { className: "w-24 print:w-[12%]" },
+              frequency: { className: "min-w-24 max-w-56 print:w-[18%]" },
+              duration: { className: "border-r w-20 print:w-[10%]" },
+              instructions: { className: "min-w-28 max-w-56 print:w-[30%]" },
             }}
-            headerClassName="text-gray-700 text-left font-normal bg-gray-50 text-xs print:text-[11px] first:rounded-none border-t"
+            headerClassName="text-gray-700 text-left font-normal bg-gray-50 text-xs print:text-[11px] first:rounded-none border-y border-gray-300"
             tableClassName="border-0 rounded-none"
           />
         )}
@@ -261,7 +270,7 @@ export const PrescriptionPreview = ({
       footer={
         <div className="mt-2 text-xs print:text-[10px] text-gray-900 text-center flex gap-2 justify-center">
           <span>{t("computer_generated_prescription")}</span>|
-          <span>{format(new Date(), "PP 'at' p")}</span>
+          <span>{format(new Date(), "PP p")}</span>
         </div>
       }
     >

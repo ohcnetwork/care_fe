@@ -7,7 +7,7 @@ import {
   MedicationRequestDosageInstruction,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { round } from "@/Utils/decimal";
-import Decimal from "decimal.js";
+import type Decimal from "decimal.js";
 
 /**
  * Round to accounting precision for dosage/medication display.
@@ -126,18 +126,18 @@ export function joinInstructionTexts(
 }
 
 /**
- * Format frequency along with any additional instructions for a single
- * dosage instruction (e.g. "Twice a day, Take with food").
+ * Format the additional instructions of a dosage instruction
+ * (e.g. "Take with food").
  */
-export function formatFrequencyWithInstructions(
-  di: MedicationRequestDosageInstruction,
+export function formatAdditionalInstructions(
+  instruction?: MedicationRequestDosageInstruction,
 ): string {
-  const freq = formatFrequency(di);
-  const additional = di.additional_instruction
-    ?.map((item) => item.display)
-    .filter(Boolean)
-    .join(", ");
-  return [freq, additional].filter(Boolean).join(", ");
+  return (
+    instruction?.additional_instruction
+      ?.map((item) => item.display)
+      .filter(Boolean)
+      .join(", ") || ""
+  );
 }
 
 export function formatTotalUnits(
