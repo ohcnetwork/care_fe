@@ -130,7 +130,7 @@ const DispenseOrderPreview = ({
 
   return (
     <PrintPreview
-      title={`${t("dispense_order")}`}
+      title={t("dispense_order")}
       disabled={!dispenses?.length}
       facility={facility}
       templateSlug={PrintTemplateType.dispense_order}
