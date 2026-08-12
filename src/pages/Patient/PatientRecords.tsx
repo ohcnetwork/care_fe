@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import { EmptyState } from "@/components/ui/empty-state";
-import { FilterDateRange } from "@/components/ui/multi-filter/utils/Utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { InfiniteScrollSentinel } from "@/components/Common/InfiniteScrollSentinel";
@@ -17,7 +16,6 @@ import {
   PatientHeaderTabs,
 } from "@/components/Patient/PatientAppShell";
 import { PrescriptionRow } from "@/components/Patient/PrescriptionRow";
-import { RecordsDateFilter } from "@/components/Patient/RecordsDateFilter";
 
 import {
   PRESCRIPTION_STATUSES,
@@ -28,7 +26,7 @@ import {
 } from "@/hooks/usePatientPortalData";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import { dateQueryString } from "@/Utils/utils";
+// import { dateQueryString } from "@/Utils/utils";
 
 type RecordsTab = "prescriptions" | "reports";
 type ReportFilter = "all" | "ready" | "processing";
@@ -88,13 +86,13 @@ export default function PatientRecords() {
   const [reportFilter, setReportFilter] = useState<ReportFilter>("all");
   // A single created_date filter, shared across both tabs since both OTP
   // endpoints accept the same created_date_after/before query params.
-  const [dateRange, setDateRange] = useState<FilterDateRange>({});
-  const createdDateAfter = dateRange.from
-    ? dateQueryString(dateRange.from)
-    : undefined;
-  const createdDateBefore = dateRange.to
-    ? dateQueryString(dateRange.to)
-    : undefined;
+  // const [dateRange, setDateRange] = useState<FilterDateRange>({});
+  // const createdDateAfter = dateRange.from
+  //   ? dateQueryString(dateRange.from)
+  //   : undefined;
+  // const createdDateBefore = dateRange.to
+  //   ? dateQueryString(dateRange.to)
+  //   : undefined;
 
   const {
     prescriptions,
@@ -102,8 +100,8 @@ export default function PatientRecords() {
     ...prescriptionPages
   } = usePatientPrescriptions({
     status: PRESCRIPTION_STATUSES,
-    createdDateAfter,
-    createdDateBefore,
+    // createdDateAfter,
+    // createdDateBefore,
     enabled: activeTab === "prescriptions",
   });
   const {
@@ -118,8 +116,8 @@ export default function PatientRecords() {
         : reportFilter === "processing"
           ? PROCESSING_REPORT_STATUSES
           : [...READY_REPORT_STATUSES, ...PROCESSING_REPORT_STATUSES],
-    createdDateAfter,
-    createdDateBefore,
+    // createdDateAfter,
+    // createdDateBefore,
     enabled: activeTab === "reports",
   });
 
@@ -143,11 +141,11 @@ export default function PatientRecords() {
       }
     >
       <div className="flex min-w-0 flex-1 flex-col gap-3 p-4 pt-4.5">
-        <RecordsDateFilter
+        {/* <RecordsDateFilter
           value={dateRange}
           onChange={setDateRange}
           className="self-start"
-        />
+        /> */}
         {activeTab === "prescriptions" ? (
           <>
             {isLoadingPrescriptions ? (
