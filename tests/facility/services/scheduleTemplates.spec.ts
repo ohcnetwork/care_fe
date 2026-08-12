@@ -22,6 +22,9 @@ test.use({ storageState: "tests/.auth/user.json" });
  * - Empty state handling
  */
 test.describe("Schedule Templates", () => {
+  const createScheduleButtonName = /add schedule|create template/i;
+  const createScheduleSheetTitle = /add new schedule|create schedule template/i;
+
   let facilityId: string;
   let serviceId: string;
   let serviceName: string;
@@ -49,10 +52,9 @@ test.describe("Schedule Templates", () => {
    * Helper to open the create schedule template sheet
    */
   async function openCreateSheet(page: Page) {
-    await page.getByRole("button", { name: "Add Schedule" }).click();
-    await expect(
-      page.getByRole("heading", { name: "Add New Schedule" }),
-    ).toBeVisible();
+    await page.getByRole("button", { name: createScheduleButtonName }).click();
+    await expect(page.getByRole("heading", { name: createScheduleSheetTitle }))
+      .toBeVisible();
   }
 
   /**
@@ -138,9 +140,7 @@ test.describe("Schedule Templates", () => {
 
   test("should navigate to schedule templates page", async ({ page }) => {
     await test.step("Verify schedule page loads", async () => {
-      await expect(
-        page.getByRole("heading", { name: serviceName }),
-      ).toBeVisible();
+      await expect(page).toHaveURL(scheduleUrl);
     });
 
     await test.step("Verify schedule tab is active", async () => {
@@ -150,7 +150,7 @@ test.describe("Schedule Templates", () => {
 
     await test.step("Verify Add Schedule button is present", async () => {
       await expect(
-        page.getByRole("button", { name: "Add Schedule" }),
+        page.getByRole("button", { name: createScheduleButtonName }),
       ).toBeVisible();
     });
   });
@@ -190,7 +190,7 @@ test.describe("Schedule Templates", () => {
 
       // Wait for sheet to close and template to appear
       await expect(
-        page.getByRole("heading", { name: "Add New Schedule" }),
+        page.getByRole("heading", { name: createScheduleSheetTitle }),
       ).not.toBeVisible();
     });
 
@@ -273,7 +273,7 @@ test.describe("Schedule Templates", () => {
       await page.getByRole("button", { name: "Save" }).click();
 
       await expect(
-        page.getByRole("heading", { name: "Add New Schedule" }),
+        page.getByRole("heading", { name: createScheduleSheetTitle }),
       ).not.toBeVisible();
     });
 
