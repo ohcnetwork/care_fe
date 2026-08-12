@@ -63,12 +63,9 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     facilityData?.permissions ?? [],
   );
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return t("morning");
-    if (hour < 18) return t("afternoon");
-    return t("evening");
-  };
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? t("morning") : hour < 18 ? t("afternoon") : t("evening");
 
   // Default shortcuts
   const defaultShortcuts: Array<{
@@ -140,12 +137,12 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
               <Trans
                 i18nKey="greet_user"
                 values={{
-                  time_of_day: getGreeting(),
+                  time_of_day: greeting,
                   user: formatName(user),
                 }}
                 components={{
-                  1: <span className="text-xl/8 font-medium text-gray-600" />,
-                  2: <span className="text-xl/8 font-semibold text-gray-950" />,
+                  1: <span />,
+                  2: <span className="font-semibold text-gray-950" />,
                 }}
               />
             </h1>

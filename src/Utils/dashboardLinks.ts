@@ -30,14 +30,10 @@ export type DashboardShortcutIconName = keyof typeof DASHBOARD_SHORTCUT_ICONS;
 
 export const DEFAULT_DASHBOARD_SHORTCUT_ICON = BoxDuoIcon;
 
-export const DASHBOARD_SHORTCUT_ICON_NAMES = Object.keys(
-  DASHBOARD_SHORTCUT_ICONS,
-) as DashboardShortcutIconName[];
-
 export function isDashboardShortcutIconName(
   name: string,
 ): name is DashboardShortcutIconName {
-  return name in DASHBOARD_SHORTCUT_ICONS;
+  return Object.hasOwn(DASHBOARD_SHORTCUT_ICONS, name);
 }
 
 /** Resolves an env/config icon name; unknown names fall back to Box. */
