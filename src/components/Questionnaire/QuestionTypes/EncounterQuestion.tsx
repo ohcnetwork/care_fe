@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -82,7 +82,11 @@ const NON_SELECTABLE_ENCOUNTER_STATUSES: EncounterStatus[] = [
   EncounterStatus.COMPLETED,
 ];
 
-const OUTPATIENT_ENCOUNTER_CLASSES: EncounterClass[] = ["amb", "vr", "hh"];
+const HOSPITALIZATION_ENCOUNTER_CLASSES: EncounterClass[] = [
+  "imp",
+  "obsenc",
+  "emer",
+];
 
 function toEncounterEdit(read: EncounterRead): EncounterEdit {
   return {
@@ -97,53 +101,51 @@ function toEncounterEdit(read: EncounterRead): EncounterEdit {
 }
 
 function resolveDischargeDisposition(
-  encounter: EncounterEdit,
-  server: EncounterRead | undefined,
+  edit: EncounterEdit,
+  encounter: EncounterRead | undefined,
 ): EncounterDischargeDisposition | undefined {
-  const current = encounter.hospitalization?.discharge_disposition;
+  const current = edit.hospitalization?.discharge_disposition;
   if (current) {
     return current;
   }
-  return encounter.status === EncounterStatus.DISCHARGED
+  return edit.status === EncounterStatus.DISCHARGED
     ? careConfig.defaultDischargeDisposition
-    : server?.hospitalization?.discharge_disposition;
+    : encounter?.hospitalization?.discharge_disposition;
 }
 
 function resolveHospitalization(
-  encounter: EncounterEdit,
-  server: EncounterRead | undefined,
+  edit: EncounterEdit,
+  encounter: EncounterRead | undefined,
 ): Hospitalization {
-  if (OUTPATIENT_ENCOUNTER_CLASSES.includes(encounter.encounter_class)) {
+  if (!HOSPITALIZATION_ENCOUNTER_CLASSES.includes(edit.encounter_class)) {
     return {};
   }
   return {
-    ...encounter.hospitalization,
-    discharge_disposition: resolveDischargeDisposition(encounter, server),
+    ...edit.hospitalization,
+    discharge_disposition: resolveDischargeDisposition(edit, encounter),
   };
 }
 
 function resolvePeriodEnd(
-  encounter: EncounterEdit,
-  server: EncounterRead | undefined,
+  edit: EncounterEdit,
+  encounter: EncounterRead | undefined,
 ): string | undefined {
-  if (!TERMINAL_ENCOUNTER_STATUSES.includes(encounter.status)) {
+  if (!TERMINAL_ENCOUNTER_STATUSES.includes(edit.status)) {
     return undefined;
   }
   // Leaving a terminal status clears the end date, so fall back to the
   // recorded one rather than stamping "now" on the way back in.
-  return (
-    encounter.period.end ?? server?.period?.end ?? new Date().toISOString()
-  );
+  return edit.period.end ?? encounter?.period?.end ?? new Date().toISOString();
 }
 
 function normalizeEncounter(
-  encounter: EncounterEdit,
-  server: EncounterRead | undefined,
+  edit: EncounterEdit,
+  encounter: EncounterRead | undefined,
 ): EncounterEdit {
   return {
-    ...encounter,
-    hospitalization: resolveHospitalization(encounter, server),
-    period: { ...encounter.period, end: resolvePeriodEnd(encounter, server) },
+    ...edit,
+    hospitalization: resolveHospitalization(edit, encounter),
+    period: { ...edit.period, end: resolvePeriodEnd(edit, encounter) },
   };
 }
 
@@ -162,7 +164,7 @@ export function validateEncounterQuestion(
 
   if (
     value?.status === EncounterStatus.DISCHARGED &&
-    ["imp", "obsenc", "emer"].includes(value.encounter_class) &&
+    HOSPITALIZATION_ENCOUNTER_CLASSES.includes(value.encounter_class) &&
     !value?.hospitalization?.discharge_disposition
   ) {
     errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
@@ -203,18 +205,12 @@ export function EncounterQuestion({
     questionnaireResponse.values[0]?.value as EncounterEdit[] | undefined
   )?.[0];
 
-  // Seed the response from the server once per encounter. Skipped if the form
-  // already has an answer (e.g. a restored draft) so it isn't clobbered on remount.
-  const seededEncounterId = useRef<string>(null);
+  // Seed the response from the server once; skipped once the form has an
+  // answer (e.g. a restored draft) so it isn't clobbered on remount.
   useEffect(() => {
-    if (
-      !encounterData ||
-      encounter ||
-      seededEncounterId.current === encounterData.id
-    ) {
+    if (!encounterData || encounter) {
       return;
     }
-    seededEncounterId.current = encounterData.id;
     const seed = toEncounterEdit(encounterData);
     if (toDischarge === "true") {
       seed.status = EncounterStatus.DISCHARGED;
@@ -393,7 +389,9 @@ export function EncounterQuestion({
       )}
 
       {/* Hospitalization Details - Only show for relevant encounter classes */}
-      {["imp", "obsenc", "emer"].includes(encounter.encounter_class) && (
+      {HOSPITALIZATION_ENCOUNTER_CLASSES.includes(
+        encounter.encounter_class,
+      ) && (
         <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
           <h3 className="text-lg font-semibold wrap-break-word">
             {t("hospitalization_details")}
