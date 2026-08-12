@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { PencilIcon, ReplaceIcon } from "lucide-react";
 import { useState } from "react";
@@ -35,9 +35,9 @@ import {
 import { InventoryItemsSelector } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
 import { LotSelection } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { useInventoryItemsAutoSelect } from "@/pages/Facility/services/pharmacy/billMedications/utils/useInventoryItemsAutoSelect";
-import { useAttachChargeItemsToInvoice } from "@/pages/Facility/services/pharmacy/hooks/useAttachChargeItemsToInvoice";
 
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
+import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import {
   getSubstitutionReasonDisplay,
   getSubstitutionTypeDisplay,
@@ -56,6 +56,7 @@ import {
   roundWhole,
 } from "@/Utils/decimal";
 import { useBatchRequest } from "@/Utils/request/batch";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
@@ -63,11 +64,9 @@ interface Props {
   facilityId: string;
   locationId: string;
   dispense: MedicationDispenseRead;
-  /** Account used to create a new draft invoice when no draft invoice exists. */
-  accountId?: string;
   /**
    * When set, the replacement dispense's charge item is appended to this draft
-   * invoice. When unset, a new draft invoice is created for the account.
+   * invoice. When unset, it stays unbilled.
    */
   draftInvoiceId?: string;
 }
@@ -80,24 +79,22 @@ interface Props {
  * changes, the original dispense is marked as `cancelled` (restoring its
  * stock) and a replacement dispense is created under the same dispense
  * order (carrying the same authorizing request) in a single batch request.
- * The replacement's charge item is then settled into the invoice (appended
- * to the draft invoice, or a new draft invoice is created). When there are no
- * changes, nothing is submitted.
+ * The replacement's charge item is then appended to the draft invoice, if any.
+ * When there are no changes, nothing is submitted.
  */
 export function EditDispenseSheet({
   facilityId,
   locationId,
   dispense,
-  accountId,
   draftInvoiceId,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const attachChargeItemsToInvoice = useAttachChargeItemsToInvoice({
-    facilityId,
-    accountId,
-    draftInvoiceId,
+  const { mutateAsync: attachChargeItemsToInvoice } = useMutation({
+    mutationFn: mutate(chargeItemApi.addChargeItemsToInvoice, {
+      pathParams: { facilityId, invoiceId: draftInvoiceId ?? "" },
+    }),
   });
 
   const medication = dispense.authorizing_request;
@@ -187,8 +184,8 @@ export function EditDispenseSheet({
       const chargeItem = (
         replacement?.data as { charge_item?: ChargeItemRead } | undefined
       )?.charge_item;
-      if (chargeItem) {
-        await attachChargeItemsToInvoice([chargeItem.id]);
+      if (chargeItem && draftInvoiceId) {
+        await attachChargeItemsToInvoice({ charge_items: [chargeItem.id] });
       }
 
       queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });

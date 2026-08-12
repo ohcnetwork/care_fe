@@ -75,11 +75,9 @@ function canEditDispense(dispense: MedicationDispenseRead): boolean {
 interface DispenseEditContext {
   facilityId: string;
   locationId: string;
-  /** Account used to create a new draft invoice when no draft invoice exists. */
-  accountId?: string;
   /**
    * Draft invoice the replacement dispense's charge item is appended to. When
-   * unset, a new draft invoice is created for the account.
+   * unset, it stays unbilled.
    */
   draftInvoiceId?: string;
 }
@@ -230,7 +228,6 @@ function DispenseItemsTable({
                   <EditDispenseSheet
                     facilityId={edit.facilityId}
                     locationId={edit.locationId}
-                    accountId={edit.accountId}
                     draftInvoiceId={edit.draftInvoiceId}
                     dispense={dispense}
                   />

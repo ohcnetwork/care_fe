@@ -432,15 +432,14 @@ export function DispenseOrderView({
       locationId={locationId}
       dispenseOrderId={dispenseOrderId}
       encounterId={orderEncounterId}
-      accountId={account?.id}
       draftInvoiceId={draftInvoiceId}
     />
   ) : null;
 
-  // Per-row edit context; the replacement dispense's charge item is settled
-  // into the draft invoice (or a new one is created for the account).
+  // Per-row edit context; the replacement dispense's charge item is appended
+  // to the draft invoice, if any.
   const editContext = isOrderOpen
-    ? { facilityId, locationId, accountId: account?.id, draftInvoiceId }
+    ? { facilityId, locationId, draftInvoiceId }
     : undefined;
 
   const handlePutOnHold = () => {
@@ -549,17 +548,21 @@ export function DispenseOrderView({
             )}
           </div>
         ) : (
-          <Button variant="link" className="underline" asChild>
-            <Link
-              href={`/facility/${facilityId}/billing/account/${account?.id}`}
-              basePath="/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t("account")}
-              <ExternalLinkIcon />
-            </Link>
-          </Button>
+          <>
+            {account?.id && (
+              <Button variant="link" className="underline" asChild>
+                <Link
+                  href={`/facility/${facilityId}/billing/account/${account.id}`}
+                  basePath="/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t("account")}
+                  <ExternalLinkIcon />
+                </Link>
+              </Button>
+            )}
+          </>
         )}
       </Card>
 
