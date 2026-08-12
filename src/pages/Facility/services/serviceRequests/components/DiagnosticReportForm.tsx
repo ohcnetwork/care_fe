@@ -409,7 +409,6 @@ function DiagnosticReportItem({
           queryKey: ["serviceRequest", facilityId, serviceRequestId],
         });
       }
-      toast.success(t("conclusion_updated_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["diagnosticReport", report.id],
       });

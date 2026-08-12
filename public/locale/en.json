@@ -1369,7 +1369,6 @@
   "computer_generated_prescription": "This is a computer generated prescription.",
   "concepts": "Concepts",
   "conclusion": "Conclusion",
-  "conclusion_updated_successfully": "Conclusion updated successfully",
   "condition": "Condition",
   "condition_age_value_type__days": "Days",
   "condition_age_value_type__months": "Months",
