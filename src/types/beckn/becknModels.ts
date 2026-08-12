@@ -544,35 +544,62 @@ export interface SelectParams {
   healthServiceType?: string;
 }
 
+/**
+ * Build the `select` body. The appointment flow asks for a window rather than a
+ * fixed time: the requested `appointmentWindowStart`/`End` ride in
+ * `performance[]` (not on the contract), and `on_select` answers with the
+ * concrete bookable slots in that same shape — which is what `extractSlots`
+ * reads back. `contractAttributes` therefore carries only the service type.
+ */
 export function buildSelectBody(params: SelectParams): Record<string, unknown> {
   const { serviceType, transactionId, option, healthServiceType } = params;
-  const contractAttributes =
-    serviceType === "consultation"
-      ? {
-          "@context": ATTR_CONTEXT.referral,
-          "@type": "hrf:HealthReferral",
-          coordinationId: transactionId,
-        }
-      : pruneUndefined({
-          "@context": ATTR_CONTEXT.contract,
-          "@type": "hct:HealthContract",
-          healthServiceType,
-          appointmentWindowStart: option.availabilityStart,
-          appointmentWindowEnd: option.availabilityEnd,
-        });
+
+  if (serviceType === "consultation") {
+    return {
+      transactionId,
+      context: buildContext(option, [ATTR_CONTEXT.referral]),
+      message: {
+        contract: {
+          status: { code: "DRAFT" },
+          commitments: [buildCommitment(option, "DRAFT")],
+          contractAttributes: {
+            "@context": ATTR_CONTEXT.referral,
+            "@type": "hrf:HealthReferral",
+            coordinationId: transactionId,
+          },
+        },
+      },
+    };
+  }
 
   return {
     transactionId,
     context: buildContext(option, [
-      serviceType === "consultation"
-        ? ATTR_CONTEXT.referral
-        : ATTR_CONTEXT.contract,
+      ATTR_CONTEXT.contract,
+      ATTR_CONTEXT.performance,
     ]),
     message: {
       contract: {
         status: { code: "DRAFT" },
         commitments: [buildCommitment(option, "DRAFT")],
-        contractAttributes,
+        // No `id` yet — the BPP mints one per slot it offers back, and that id
+        // is what `confirm` commits to.
+        performance: [
+          {
+            performanceAttributes: pruneUndefined({
+              "@context": ATTR_CONTEXT.performance,
+              "@type": "hpe:HealthPerformance",
+              healthServiceType,
+              appointmentWindowStart: option.availabilityStart,
+              appointmentWindowEnd: option.availabilityEnd,
+            }),
+          },
+        ],
+        contractAttributes: pruneUndefined({
+          "@context": ATTR_CONTEXT.contract,
+          "@type": "hct:HealthContract",
+          healthServiceType,
+        }),
       },
     },
   };
