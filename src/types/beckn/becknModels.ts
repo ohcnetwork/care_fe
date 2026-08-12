@@ -69,6 +69,9 @@ export interface CatalogOption {
   catalogName?: string;
   bppId?: string;
   bppUri?: string;
+  /** Resource `availabilitySchedule` window, IST-stamped, carried into select. */
+  availabilityStart?: string;
+  availabilityEnd?: string;
 }
 
 /** One appointment slot flattened from an `on_select` contract. */
@@ -111,6 +114,35 @@ function asString(v: unknown): string | undefined {
 
 function descriptorName(v: unknown): string | undefined {
   return asString(asRecord(asRecord(v)?.descriptor)?.name);
+}
+
+/**
+ * Schedule times arrive from discover as zone-less local timestamps; the network
+ * runs on IST, so stamp the offset rather than letting `new Date()` read them as
+ * browser-local. Values that already carry a zone are left alone.
+ */
+function withIstOffset(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  return /(Z|[+-]\d{2}:?\d{2})$/.test(value) ? value : `${value}+05:30`;
+}
+
+/**
+ * Pull a resource's `availabilitySchedule` window. Tolerates the schedule sitting
+ * on the resource itself or under `resourceAttributes`, and being a single object
+ * or a list (first entry wins).
+ */
+function extractAvailability(resource: Record<string, unknown> | undefined): {
+  availabilityStart?: string;
+  availabilityEnd?: string;
+} {
+  const raw =
+    resource?.availabilitySchedule ??
+    asRecord(resource?.resourceAttributes)?.availabilitySchedule;
+  const schedule = asRecord(raw) ?? asRecord(asArray(raw)[0]);
+  return {
+    availabilityStart: withIstOffset(asString(schedule?.startTime)),
+    availabilityEnd: withIstOffset(asString(schedule?.endTime)),
+  };
 }
 
 /**
@@ -167,6 +199,7 @@ export function extractOffers(slice: BecknSlice | undefined): CatalogOption[] {
         catalogName,
         bppId,
         bppUri,
+        ...extractAvailability(resource),
       });
     });
   });
@@ -520,11 +553,13 @@ export function buildSelectBody(params: SelectParams): Record<string, unknown> {
           "@type": "hrf:HealthReferral",
           coordinationId: transactionId,
         }
-      : {
+      : pruneUndefined({
           "@context": ATTR_CONTEXT.contract,
           "@type": "hct:HealthContract",
           healthServiceType,
-        };
+          appointmentWindowStart: option.availabilityStart,
+          appointmentWindowEnd: option.availabilityEnd,
+        });
 
   return {
     transactionId,
