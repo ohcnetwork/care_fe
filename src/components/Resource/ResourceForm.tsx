@@ -128,9 +128,11 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     }
   }, [resourceData, form]);
 
-  // Consultation referrals are created by the backend on Beckn `confirm` (not by
-  // a direct POST) to avoid duplicating the ResourceRequest. Submitting a NEW
-  // request starts the Beckn flow; `flowIntent` holds the discover parameters.
+  // Consultation referrals are created by the backend during the Beckn flow (not
+  // by a direct POST) to avoid duplicating the ResourceRequest: `init` mints the
+  // referral and creates the request, and the origin facility then fires
+  // `confirm` to finalise it. Submitting a NEW request starts that flow;
+  // `flowIntent` holds the discover parameters.
   const [flowIntent, setFlowIntent] = useState<{
     textSearch?: string;
     healthServiceType?: string;

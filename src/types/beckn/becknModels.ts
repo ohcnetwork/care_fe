@@ -15,8 +15,6 @@
 
 import { t } from "i18next";
 
-import { BecknResourceExtension } from "@/types/resourceRequest/resourceRequest";
-
 export type BecknServiceType = "consultation" | "appointment";
 
 export type BecknActionName =
@@ -587,44 +585,4 @@ function pruneUndefined<T extends Record<string, unknown>>(obj: T): T {
   return Object.fromEntries(
     Object.entries(obj).filter(([, v]) => v !== undefined),
   ) as T;
-}
-
-/**
- * Build the `confirm` body that approves an incoming referral from the CC
- * console. Unlike the origin-side flow, the CC did not run discover/init in this
- * session — the BE persisted the transaction on the ResourceRequest under
- * `extensions.beckn`. We echo the stored `contract` back with its lifecycle
- * flipped to ACTIVE (schema-agnostic: whatever shape the BE stored is preserved),
- * stamp the ResourceRequest id as the top-level `contract.id`, and key it by the
- * stored `transactionId`; the BE resolves routing from the persisted
- * transaction. Returns null when no transaction is stored.
- */
-export function buildReferralConfirmFromExtension(
-  ext: BecknResourceExtension | undefined,
-  contractId?: string,
-): Record<string, unknown> | null {
-  const transactionId = asString(ext?.transactionId);
-  if (!transactionId) return null;
-
-  const stored = asRecord(ext?.contract);
-  if (!stored) return { transactionId };
-
-  const contract: Record<string, unknown> = {
-    ...stored,
-    status: { code: "ACTIVE" },
-  };
-  if (contractId) contract.id = contractId;
-  const attrs = asRecord(stored.contractAttributes);
-  if (attrs) {
-    contract.contractAttributes = { ...attrs, lifecycleState: "ACTIVE" };
-  }
-  const commitments = asArray(stored.commitments);
-  if (commitments.length) {
-    contract.commitments = commitments.map((c) => ({
-      ...(asRecord(c) ?? {}),
-      status: { descriptor: { code: "ACTIVE" } },
-    }));
-  }
-
-  return { transactionId, message: { contract } };
 }

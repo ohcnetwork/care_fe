@@ -41,10 +41,14 @@ interface BecknFlowProps {
  * Reusable Beckn orchestrator over the Care BAP.
  *
  * - `consultation`: pick a coordinator → Submit fires `init` (full
- *   ServiceCoordination contract) → confirmation popup → `confirm` (carrying the
- *   contract id minted at init) creates the ResourceRequest. No slots.
+ *   ServiceCoordination contract), which mints the referral and creates the
+ *   ResourceRequest → confirmation popup → `confirm` (carrying the contract id
+ *   minted at init) finalises it. No slots.
  * - `appointment`: pick a provider → `select` → choose a slot → confirm popup →
  *   `confirm` books a TokenBooking (linked to the referral via coordinationRef).
+ *
+ * Both flows are driven by the origin facility as the BAP consumer: it places
+ * the order and therefore fires `confirm` itself.
  */
 export default function BecknFlow({
   serviceType,
@@ -154,10 +158,10 @@ export default function BecknFlow({
     coordinationId,
   ]);
 
-  // Consultation terminates at ON_INIT (the referral is created); appointment
-  // terminates at ON_CONFIRM (the booking is made).
-  const done =
-    phase === "confirmed" || (isConsultation && phase === "initialized");
+  // Both flows terminate at ON_CONFIRM: the origin facility confirms its own
+  // referral (the BAP consumer places the order), and the appointment booking
+  // is likewise finalised by confirm.
+  const done = phase === "confirmed";
 
   const confirmedRef = useRef(false);
   useEffect(() => {
@@ -184,8 +188,10 @@ export default function BecknFlow({
   // loader instead of a stale interactive state.
   const busy = flow.acting || !!flow.awaiting;
   const showPicker = !busy && phase === "discovered";
-  const showSlots =
-    !busy && phase === "selected" && serviceType === "appointment";
+  const showSlots = !busy && phase === "selected" && !isConsultation;
+  // Consultation: `init` mints the referral, then the origin confirms it.
+  const showReferralConfirm =
+    !busy && isConsultation && phase === "initialized";
 
   const waitingMessage = (() => {
     switch (flow.awaiting) {
@@ -207,8 +213,8 @@ export default function BecknFlow({
   const confirmSummary: ConfirmSummaryRow[] = [
     { label: t("patient"), value: patient?.name ?? "—" },
     { label: t("beckn_provider_offer"), value: option?.label ?? "—" },
-    ...(serviceType === "consultation"
-      ? [{ label: t("facility"), value: facilityId }]
+    ...(isConsultation
+      ? []
       : [{ label: t("beckn_slot"), value: slot?.label ?? "—" }]),
   ];
 
@@ -283,23 +289,29 @@ export default function BecknFlow({
               {t("beckn_confirm_booking")}
             </Button>
           </div>
+        ) : showReferralConfirm ? (
+          <Button variant="primary" onClick={() => setConfirmOpen(true)}>
+            {t("ccn_confirm_referral")}
+          </Button>
         ) : (
           <StatusLine text={t("beckn_working")} />
         )}
       </CardContent>
 
-      {!isConsultation && (
-        <ConfirmDialog
-          open={confirmOpen}
-          onOpenChange={setConfirmOpen}
-          title={t("beckn_confirm_appointment")}
-          description={patient?.abha ? undefined : t("beckn_no_abha_on_file")}
-          summary={confirmSummary}
-          confirmLabel={t("book_appointment")}
-          confirming={phase === "confirming"}
-          onConfirm={doConfirm}
-        />
-      )}
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={
+          isConsultation
+            ? t("ccn_confirm_referral")
+            : t("beckn_confirm_appointment")
+        }
+        description={patient?.abha ? undefined : t("beckn_no_abha_on_file")}
+        summary={confirmSummary}
+        confirmLabel={isConsultation ? t("confirm") : t("book_appointment")}
+        confirming={phase === "confirming"}
+        onConfirm={doConfirm}
+      />
     </Card>
   );
 }

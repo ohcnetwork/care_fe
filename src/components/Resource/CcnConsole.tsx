@@ -1,15 +1,12 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import BecknFlow from "@/components/Resource/beckn/BecknFlow";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -20,8 +17,6 @@ import {
 } from "@/components/ui/select";
 
 import query from "@/Utils/request/query";
-import { useBecknTransaction } from "@/hooks/useBecknTransaction";
-import { buildReferralConfirmFromExtension } from "@/types/beckn/becknModels";
 import {
   getResourceRequestCategoryEnum,
   ResourceRequestRead,
@@ -45,10 +40,12 @@ interface CcnConsoleProps {
 
 /**
  * Care-Coordinator console: incoming (receiving) ResourceRequests on the left,
- * and on selection the request detail on the right. A `pending` request is
- * confirmed here (Beckn `confirm` → status becomes `approved`); once approved,
- * the Beckn appointment-booking flow is enabled. The FE never speaks Beckn
- * directly — it calls Care BE's BAP REST endpoints (see BecknFlow / the hook).
+ * and on selection the request detail on the right. The origin facility places
+ * and confirms the referral itself (it is the BAP consumer), so requests reach
+ * this console already `approved` — the desk's acceptance *is* the `on_confirm`
+ * response. Once approved, the Beckn appointment-booking flow is enabled. The FE
+ * never speaks Beckn directly — it calls Care BE's BAP REST endpoints (see
+ * BecknFlow / the hook).
  */
 export default function CcnConsole({
   facilityId,
@@ -133,7 +130,6 @@ function ResourceDetail({
   resourceId: string;
 }) {
   const { t } = useTranslation();
-  const qc = useQueryClient();
   const { data: resource, isLoading } = useQuery({
     queryKey: ["ccn-resource", resourceId],
     queryFn: query(resourceRequestApi.get, {
@@ -145,7 +141,6 @@ function ResourceDetail({
     return <Loading />;
   }
 
-  const isPending = resource.status === ResourceRequestStatus.PENDING;
   const isApproved = resource.status === ResourceRequestStatus.APPROVED;
 
   return (
@@ -182,92 +177,14 @@ function ResourceDetail({
         </CardContent>
       </Card>
 
-      {isPending ? (
-        <ReferralConfirm
-          resource={resource}
-          onApproved={() =>
-            qc.invalidateQueries({ queryKey: ["ccn-resource", resourceId] })
-          }
-        />
-      ) : null}
-
       {isApproved ? (
         <AppointmentBooking facilityId={facilityId} resource={resource} />
-      ) : null}
-
-      {!isPending && !isApproved ? (
+      ) : (
         <p className="text-sm text-gray-500">
           {t("ccn_booking_available_once_approved")}
         </p>
-      ) : null}
+      )}
     </div>
-  );
-}
-
-/**
- * Confirm an incoming referral: resumes the Beckn transaction persisted on the
- * request (`extensions.beckn`) and fires `confirm`. On ON_CONFIRM the BE moves
- * the request to `approved`, so we refetch it to reveal the appointment flow.
- */
-function ReferralConfirm({
-  resource,
-  onApproved,
-}: {
-  resource: ResourceRequestRead;
-  onApproved: () => void;
-}) {
-  const { t } = useTranslation();
-  const flow = useBecknTransaction();
-  const ext = resource.extensions?.beckn;
-  const transactionId = ext?.transactionId;
-
-  const confirm = () => {
-    const body = buildReferralConfirmFromExtension(ext, resource.id);
-    if (!body || !transactionId) return;
-    flow.resume(transactionId);
-    void flow.act("confirm", body);
-  };
-
-  const approvedRef = useRef(false);
-  useEffect(() => {
-    if (flow.phase === "confirmed" && !approvedRef.current) {
-      approvedRef.current = true;
-      onApproved();
-    }
-  }, [flow.phase, onApproved]);
-
-  // Busy from firing confirm until its `on_confirm` callback arrives (or fails).
-  const busy = flow.acting || !!flow.awaiting;
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">{t("ccn_confirm_referral")}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {flow.error ? (
-          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {flow.error}
-          </div>
-        ) : null}
-        {!transactionId ? (
-          <p className="text-sm text-gray-500">{t("ccn_no_linked_referral")}</p>
-        ) : flow.phase === "confirmed" ? (
-          <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-            {t("ccn_referral_confirmed")}
-          </div>
-        ) : busy ? (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <CareIcon icon="l-spinner" className="size-4 animate-spin" />
-            {t("ccn_confirming_referral")}
-          </div>
-        ) : (
-          <Button variant="primary" onClick={confirm}>
-            {t("ccn_confirm_and_approve")}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
   );
 }
 
