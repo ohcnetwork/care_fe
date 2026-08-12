@@ -6,6 +6,8 @@ import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+const appointmentTriggerName = /schedule appointment|book appointment/i;
+
 test.describe("Appointment Booking Workflow", () => {
   let facilityId: string;
   let patientId: string;
@@ -14,11 +16,13 @@ test.describe("Appointment Booking Workflow", () => {
     facilityId = getFacilityId();
     patientId = getPatientId();
 
-    // Navigate to patient home page
+    // Navigate to patient profile page
     await page.goto(`/facility/${facilityId}/patient/${patientId}`);
 
-    // Wait for page to load
-    await expect(page.locator('[data-slot="page-header"]')).toBeVisible();
+    // Wait for the appointment action to be available
+    await expect(
+      page.getByRole("button", { name: appointmentTriggerName }),
+    ).toBeVisible();
   });
 
   /**
@@ -28,7 +32,7 @@ test.describe("Appointment Booking Workflow", () => {
   test("should open appointment booking sheet", async ({ page }) => {
     await test.step("Click Book Appointment button", async () => {
       const bookButton = page.getByRole("button", {
-        name: /book appointment/i,
+        name: appointmentTriggerName,
       });
       await expect(bookButton).toBeVisible();
       await bookButton.click();
@@ -58,7 +62,9 @@ test.describe("Appointment Booking Workflow", () => {
    */
   test("should fill appointment booking form", async ({ page }) => {
     await test.step("Open booking sheet", async () => {
-      await page.getByRole("button", { name: /book appointment/i }).click();
+      await page
+        .getByRole("button", { name: appointmentTriggerName })
+        .click();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
     });
@@ -102,7 +108,9 @@ test.describe("Appointment Booking Workflow", () => {
    */
   test("should select appointment date and time slot", async ({ page }) => {
     await test.step("Open booking sheet", async () => {
-      await page.getByRole("button", { name: /book appointment/i }).click();
+      await page
+        .getByRole("button", { name: appointmentTriggerName })
+        .click();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
     });
@@ -169,7 +177,9 @@ test.describe("Appointment Booking Workflow", () => {
     page,
   }) => {
     await test.step("Open booking sheet", async () => {
-      await page.getByRole("button", { name: /book appointment/i }).click();
+      await page
+        .getByRole("button", { name: appointmentTriggerName })
+        .click();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
     });
@@ -244,7 +254,9 @@ test.describe("Appointment Booking Workflow", () => {
     page,
   }) => {
     await test.step("Open booking sheet", async () => {
-      await page.getByRole("button", { name: /book appointment/i }).click();
+      await page
+        .getByRole("button", { name: appointmentTriggerName })
+        .click();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
     });
@@ -286,7 +298,9 @@ test.describe("Appointment Booking Workflow", () => {
    */
   test("should handle no available slots gracefully", async ({ page }) => {
     await test.step("Open booking sheet", async () => {
-      await page.getByRole("button", { name: /book appointment/i }).click();
+      await page
+        .getByRole("button", { name: appointmentTriggerName })
+        .click();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
     });
@@ -331,7 +345,9 @@ test.describe("Appointment Booking Workflow", () => {
    */
   test("should close booking sheet", async ({ page }) => {
     await test.step("Open booking sheet", async () => {
-      await page.getByRole("button", { name: /book appointment/i }).click();
+      await page
+        .getByRole("button", { name: appointmentTriggerName })
+        .click();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
     });
@@ -346,7 +362,9 @@ test.describe("Appointment Booking Workflow", () => {
 
     await test.step("Reopen and close via close button", async () => {
       // Reopen
-      await page.getByRole("button", { name: /book appointment/i }).click();
+      await page
+        .getByRole("button", { name: appointmentTriggerName })
+        .click();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
 
