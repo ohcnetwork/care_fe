@@ -1290,3 +1290,560 @@ export const StethoscopeDuoIcon: React.FC<IconProps> = ({
     </svg>
   );
 };
+
+/** Calendar with checkmark — appointments / confirmed schedule. */
+export const AppointmentDuoIcon: React.FC<IconProps> = ({
+  className = "size-8",
+}) => {
+  const uid = React.useId().replace(/:/g, "");
+
+  return (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <mask
+        id={`${uid}-mask0_44763_6733`}
+        style={{ maskType: "luminance" }}
+        maskUnits="userSpaceOnUse"
+        x="0"
+        y="0"
+        width="32"
+        height="32"
+      >
+        <rect width="32" height="32" fill="white" />
+        <path
+          d="M28.8672 12.4333C28.8672 11.9 28.3366 11.5 27.6733 11.5H3.92841C3.3978 11.5 2.99984 11.9 2.86719 12.4333C2.86719 13.2333 2.86719 14.1667 2.86719 15.1V17.7667C2.86719 23.1 2.86719 25.7667 4.72433 27.6333C6.58147 29.5 9.23453 29.5 14.5407 29.5H17.1937C22.4998 29.5 25.1529 29.5 27.01 27.6333C28.8672 25.7667 28.8672 23.1 28.8672 17.7667V15.1C28.8672 14.1667 28.8672 13.2333 28.8672 12.4333Z"
+          fill="black"
+        />
+      </mask>
+      <g mask={`url(#${uid}-mask0_44763_6733)`}>
+        <path
+          d="M21.333 1.59961C21.9996 1.59961 22.4003 2.13277 22.4004 2.66602V4.50977C24.492 4.67068 25.8945 5.07123 27.0098 6.08008C28.4689 7.40007 28.8672 9.20036 28.8672 12.3203V12.4404C28.8672 13.0403 28.3362 13.4003 27.8057 13.4004H3.92773C3.26461 13.4003 2.86721 12.9204 2.86719 12.4404V12.3203C2.99984 9.20037 3.26446 7.40006 4.72363 6.08008C5.88565 5.02891 7.35937 4.63546 9.59961 4.48828V2.66602C9.59974 2.13277 10.0004 1.59961 10.667 1.59961C11.3334 1.59975 11.7333 1.99962 11.7334 2.66602V4.41211C12.5778 4.39979 13.5088 4.40039 14.54 4.40039H17.1934C18.3343 4.40039 19.3525 4.40129 20.2666 4.41797V2.66602C20.2667 1.99963 20.7998 1.59976 21.333 1.59961Z"
+          fill={`url(#${uid}-paint0_linear_44763_6733)`}
+        />
+      </g>
+      <mask
+        id={`${uid}-mask1_44763_6733`}
+        style={{ maskType: "alpha" }}
+        maskUnits="userSpaceOnUse"
+        x="2"
+        y="11"
+        width="27"
+        height="19"
+      >
+        <path
+          d="M28.8672 12.4333C28.8672 11.9 28.3366 11.5 27.6733 11.5H3.92841C3.3978 11.5 2.99984 11.9 2.86719 12.4333C2.86719 13.2333 2.86719 14.1667 2.86719 15.1V17.7667C2.86719 23.1 2.86719 25.7667 4.72433 27.6333C6.58147 29.5 9.23453 29.5 14.5407 29.5H17.1937C22.4998 29.5 25.1529 29.5 27.01 27.6333C28.8672 25.7667 28.8672 23.1 28.8672 17.7667V15.1C28.8672 14.1667 28.8672 13.2333 28.8672 12.4333Z"
+          fill="black"
+        />
+      </mask>
+      <g mask={`url(#${uid}-mask1_44763_6733)`}>
+        <g filter={`url(#${uid}-filter0_f_44763_6733)`}>
+          <path
+            d="M21.24 15.4572C21.583 15.1142 22.1391 15.1142 22.4821 15.4572C22.8251 15.8003 22.8251 16.3563 22.4821 16.6993L14.7523 24.4291C14.4093 24.7722 13.8532 24.7722 13.5102 24.4291L9.99665 20.9156C9.65362 20.5725 9.65362 20.0165 9.99665 19.6735C10.3397 19.3305 10.8957 19.3305 11.2387 19.6735L14.1313 22.566L21.24 15.4572Z"
+            fill={`url(#${uid}-paint1_linear_44763_6733)`}
+          />
+        </g>
+        <g filter={`url(#${uid}-filter1_f_44763_6733)`}>
+          <path
+            d="M21.333 1.59961C21.9996 1.59961 22.4003 2.13277 22.4004 2.66602V4.50977C24.492 4.67068 25.8945 5.07123 27.0098 6.08008C28.4689 7.40007 28.8672 9.20036 28.8672 12.3203V12.4404C28.8672 13.0403 28.3362 13.4003 27.8057 13.4004H3.92773C3.26461 13.4003 2.86721 12.9204 2.86719 12.4404V12.3203C2.99984 9.20037 3.26446 7.40006 4.72363 6.08008C5.88565 5.02891 7.35937 4.63546 9.59961 4.48828V2.66602C9.59974 2.13277 10.0004 1.59961 10.667 1.59961C11.3334 1.59975 11.7333 1.99962 11.7334 2.66602V4.41211C12.5778 4.39979 13.5088 4.40039 14.54 4.40039H17.1934C18.3343 4.40039 19.3525 4.40129 20.2666 4.41797V2.66602C20.2667 1.99963 20.7998 1.59976 21.333 1.59961Z"
+            fill={`url(#${uid}-paint2_linear_44763_6733)`}
+          />
+        </g>
+      </g>
+      <path
+        d="M28.8672 12.4333C28.8672 11.9 28.3366 11.5 27.6733 11.5H3.92841C3.3978 11.5 2.99984 11.9 2.86719 12.4333C2.86719 13.2333 2.86719 14.1667 2.86719 15.1V17.7667C2.86719 23.1 2.86719 25.7667 4.72433 27.6333C6.58147 29.5 9.23454 29.5 14.5407 29.5H17.1937C22.4998 29.5 25.1529 29.5 27.01 27.6333C28.8672 25.7667 28.8672 23.1 28.8672 17.7667V15.1C28.8672 14.1667 28.8672 13.2333 28.8672 12.4333Z"
+        fill={`url(#${uid}-paint3_linear_44763_6733)`}
+      />
+      <defs>
+        <filter
+          id={`${uid}-filter0_f_44763_6733`}
+          x="8.73938"
+          y="14.2"
+          width="15"
+          height="11.4866"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
+          <feGaussianBlur
+            stdDeviation="0.5"
+            result="effect1_foregroundBlur_44763_6733"
+          />
+        </filter>
+        <filter
+          id={`${uid}-filter1_f_44763_6733`}
+          x="0.867188"
+          y="-0.400391"
+          width="30"
+          height="15.8008"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
+          <feGaussianBlur
+            stdDeviation="1"
+            result="effect1_foregroundBlur_44763_6733"
+          />
+        </filter>
+        <linearGradient
+          id={`${uid}-paint0_linear_44763_6733`}
+          x1="16.0666"
+          y1="1.59961"
+          x2="16.0666"
+          y2="25.0663"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#34D399" />
+          <stop offset="1" stopColor="#047857" />
+        </linearGradient>
+        <linearGradient
+          id={`${uid}-paint1_linear_44763_6733`}
+          x1="16.2394"
+          y1="15.2"
+          x2="16.2394"
+          y2="24.6864"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#34D399" />
+          <stop offset="1" stopColor="#047857" />
+        </linearGradient>
+        <linearGradient
+          id={`${uid}-paint2_linear_44763_6733`}
+          x1="16.0666"
+          y1="1.59961"
+          x2="16.0666"
+          y2="25.0663"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#059669" />
+          <stop offset="1" stopColor="#065F46" />
+        </linearGradient>
+        <linearGradient
+          id={`${uid}-paint3_linear_44763_6733`}
+          x1="15.8672"
+          y1="11.5"
+          x2="15.8672"
+          y2="29.4998"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#E3E3E5" stopOpacity="0.6" />
+          <stop offset="1" stopColor="#BBBBC0" stopOpacity="0.6" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
+
+export const UsersDuoIcon: React.FC<IconProps> = ({ className = "size-8" }) => {
+  const uid = React.useId().replace(/:/g, "");
+
+  return (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <g clipPath={`url(#${uid}-clip0_44762_6687)`}>
+        <mask
+          id={`${uid}-mask0_44762_6687`}
+          style={{ maskType: "luminance" }}
+          maskUnits="userSpaceOnUse"
+          x="0"
+          y="0"
+          width="32"
+          height="32"
+        >
+          <path d="M32 0H0V32H32V0Z" fill="white" />
+          <path
+            d="M16.5885 18.6667C21.7863 18.6669 25.9999 22.8805 26 28.0782C26 29.5077 24.8409 30.6667 23.4115 30.6667H8.58855C7.15909 30.6667 6 29.5077 6 28.0782C6.00016 22.8805 10.2137 18.6669 15.4115 18.6667H16.5885ZM16 6.66675C18.5773 6.66675 20.6667 8.75608 20.6667 11.3334C20.6667 13.9107 18.5773 16.0001 16 16.0001C13.4227 16.0001 11.3333 13.9107 11.3333 11.3334C11.3333 8.75608 13.4227 6.66675 16 6.66675Z"
+            fill="black"
+          />
+        </mask>
+        <g mask={`url(#${uid}-mask0_44762_6687)`}>
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M2.66663 14.6666C2.66663 7.30289 8.63627 1.33325 16 1.33325C23.3637 1.33325 29.3333 7.30289 29.3333 14.6666C29.3333 22.0303 23.3637 27.9999 16 27.9999C8.63627 27.9999 2.66663 22.0303 2.66663 14.6666Z"
+            fill={`url(#${uid}-paint0_linear_44762_6687)`}
+          />
+        </g>
+        <mask
+          id={`${uid}-mask1_44762_6687`}
+          style={{ maskType: "luminance" }}
+          maskUnits="userSpaceOnUse"
+          x="6"
+          y="6"
+          width="20"
+          height="25"
+        >
+          <path
+            d="M16.5885 18.6667C21.7863 18.6669 25.9999 22.8805 26 28.0782C26 29.5077 24.8409 30.6667 23.4115 30.6667H8.58855C7.15909 30.6667 6 29.5077 6 28.0782C6.00016 22.8805 10.2137 18.6669 15.4115 18.6667H16.5885ZM16 6.66675C18.5773 6.66675 20.6667 8.75608 20.6667 11.3334C20.6667 13.9107 18.5773 16.0001 16 16.0001C13.4227 16.0001 11.3333 13.9107 11.3333 11.3334C11.3333 8.75608 13.4227 6.66675 16 6.66675Z"
+            fill="white"
+          />
+        </mask>
+        <g mask={`url(#${uid}-mask1_44762_6687)`}>
+          <g filter={`url(#${uid}-filter0_f_44762_6687)`}>
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M2.66663 14.6668C2.66663 7.30314 8.63627 1.3335 16 1.3335C23.3637 1.3335 29.3333 7.30314 29.3333 14.6668C29.3333 22.0306 23.3637 28.0002 16 28.0002C8.63627 28.0002 2.66663 22.0306 2.66663 14.6668Z"
+              fill={`url(#${uid}-paint1_linear_44762_6687)`}
+            />
+          </g>
+        </g>
+        <path
+          d="M16.5885 18.6667C21.7863 18.6669 25.9999 22.8805 26 28.0782C26 29.5077 24.8409 30.6667 23.4115 30.6667H8.58855C7.15909 30.6667 6 29.5077 6 28.0782C6.00016 22.8805 10.2137 18.6669 15.4115 18.6667H16.5885ZM16 6.66675C18.5773 6.66675 20.6667 8.75608 20.6667 11.3334C20.6667 13.9107 18.5773 16.0001 16 16.0001C13.4227 16.0001 11.3333 13.9107 11.3333 11.3334C11.3333 8.75608 13.4227 6.66675 16 6.66675Z"
+          fill={`url(#${uid}-paint2_linear_44762_6687)`}
+        />
+      </g>
+      <defs>
+        <filter
+          id={`${uid}-filter0_f_44762_6687`}
+          x="-1.33337"
+          y="-2.6665"
+          width="34.6666"
+          height="34.6667"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
+          <feGaussianBlur
+            stdDeviation="2"
+            result="effect1_foregroundBlur_44762_6687"
+          />
+        </filter>
+        <linearGradient
+          id={`${uid}-paint0_linear_44762_6687`}
+          x1="16"
+          y1="1.33325"
+          x2="16"
+          y2="27.9999"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#34D399" />
+          <stop offset="1" stopColor="#047857" />
+        </linearGradient>
+        <linearGradient
+          id={`${uid}-paint1_linear_44762_6687`}
+          x1="16"
+          y1="1.3335"
+          x2="16"
+          y2="28.0002"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#34D399" />
+          <stop offset="1" stopColor="#047857" />
+        </linearGradient>
+        <linearGradient
+          id={`${uid}-paint2_linear_44762_6687`}
+          x1="16"
+          y1="6.66675"
+          x2="16"
+          y2="30.6667"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="white" stopOpacity="0.6" />
+          <stop offset="1" stopColor="#D6D6D6" stopOpacity="0.6" />
+        </linearGradient>
+        <clipPath id={`${uid}-clip0_44762_6687`}>
+          <rect width="32" height="32" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
+
+export const BoxDuoIcon: React.FC<IconProps> = ({ className = "size-8" }) => {
+  const uid = React.useId().replace(/:/g, "");
+
+  return (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <g clipPath={`url(#${uid}-clip0_44763_6806)`}>
+        <mask
+          id={`${uid}-mask0_44763_6806`}
+          style={{ maskType: "luminance" }}
+          maskUnits="userSpaceOnUse"
+          x="0"
+          y="0"
+          width="32"
+          height="32"
+        >
+          <path d="M32 0H0V32H32V0Z" fill="white" />
+          <path
+            d="M10.0003 23.0785C10.0007 22.5834 10.5221 22.2609 10.9651 22.4822L13.2633 23.6319C13.7148 23.8578 14.0003 24.3197 14.0003 24.8246V26.2557C13.9996 26.7506 13.4783 27.0731 13.0354 26.8519L10.7373 25.7022C10.2857 25.4763 10.0004 25.0143 10.0003 24.5095V23.0785ZM14.7151 2.03948C15.515 1.59982 16.4855 1.59978 17.2854 2.03948L29.3336 8.66708L31.8154 12.9002C32.1951 13.5477 31.9666 14.3821 31.3088 14.7439L20.37 20.7595C19.7151 21.1195 18.892 20.871 18.5459 20.2087L16.0003 15.3338L25.1252 10.7699L16.0003 6.00042L6.87397 10.7699L16.0003 15.3338L13.4534 20.2087C13.1071 20.871 12.2841 21.1197 11.6292 20.7595L0.690374 14.7439C0.0330332 14.3819 -0.195689 13.5475 0.183863 12.9002L2.66693 8.66708L14.7151 2.03948Z"
+            fill="black"
+          />
+        </mask>
+        <g mask={`url(#${uid}-mask0_44763_6806)`}>
+          <path
+            d="M28.6666 11.3334C28.6666 11.3334 29.3333 12.7085 29.3333 13.5105V21.7566C29.3333 22.7291 28.804 23.6251 27.9518 24.0938L17.2852 29.9597C16.4849 30.3998 15.515 30.3998 14.7148 29.9597L4.04813 24.0938C3.19601 23.6251 2.66663 22.7291 2.66663 21.7566V13.5105C2.66663 12.7085 3.33331 11.3334 3.33331 11.3334L16 4.66675L28.6666 11.3334Z"
+            fill={`url(#${uid}-paint0_linear_44763_6806)`}
+          />
+        </g>
+        <mask
+          id={`${uid}-mask1_44763_6806`}
+          style={{ maskType: "luminance" }}
+          maskUnits="userSpaceOnUse"
+          x="0"
+          y="1"
+          width="32"
+          height="26"
+        >
+          <path
+            d="M10.0003 23.0785C10.0007 22.5834 10.5221 22.2609 10.9651 22.4822L13.2633 23.6319C13.7148 23.8578 14.0003 24.3197 14.0003 24.8246V26.2557C13.9996 26.7506 13.4783 27.0731 13.0354 26.8519L10.7373 25.7022C10.2857 25.4763 10.0004 25.0143 10.0003 24.5095V23.0785ZM14.7151 2.03948C15.515 1.59982 16.4855 1.59978 17.2854 2.03948L29.3336 8.66708L31.8154 12.9002C32.1951 13.5477 31.9666 14.3821 31.3088 14.7439L20.37 20.7595C19.7151 21.1195 18.892 20.871 18.5459 20.2087L16.0003 15.3338L25.1252 10.7699L16.0003 6.00042L6.87397 10.7699L16.0003 15.3338L13.4534 20.2087C13.1071 20.871 12.2841 21.1197 11.6292 20.7595L0.690374 14.7439C0.0330332 14.3819 -0.195689 13.5475 0.183863 12.9002L2.66693 8.66708L14.7151 2.03948Z"
+            fill="white"
+          />
+        </mask>
+        <g mask={`url(#${uid}-mask1_44763_6806)`}>
+          <g filter={`url(#${uid}-filter0_f_44763_6806)`}>
+            <path
+              d="M28.6667 11.3334C28.6667 11.3334 29.3334 12.7085 29.3334 13.5105V21.7566C29.3334 22.7291 28.8041 23.6251 27.9519 24.0938L17.2853 29.9597C16.485 30.3998 15.5151 30.3998 14.7149 29.9597L4.04825 24.0938C3.19613 23.6251 2.66675 22.7291 2.66675 21.7566V13.5105C2.66675 12.7085 3.33343 11.3334 3.33343 11.3334L16.0001 4.66675L28.6667 11.3334Z"
+              fill={`url(#${uid}-paint1_linear_44763_6806)`}
+            />
+          </g>
+        </g>
+        <path
+          d="M10.0003 23.0785C10.0007 22.5834 10.5221 22.2609 10.9651 22.4822L13.2633 23.6319C13.7148 23.8578 14.0003 24.3197 14.0003 24.8246V26.2557C13.9996 26.7506 13.4783 27.0731 13.0354 26.8519L10.7373 25.7022C10.2857 25.4763 10.0004 25.0143 10.0003 24.5095V23.0785ZM14.7151 2.03948C15.515 1.59982 16.4855 1.59978 17.2854 2.03948L29.3336 8.66708L31.8154 12.9002C32.1951 13.5477 31.9666 14.3821 31.3088 14.7439L20.37 20.7595C19.7151 21.1195 18.892 20.871 18.5459 20.2087L16.0003 15.3338L25.1252 10.7699L16.0003 6.00042L6.87397 10.7699L16.0003 15.3338L13.4534 20.2087C13.1071 20.871 12.2841 21.1197 11.6292 20.7595L0.690374 14.7439C0.0330332 14.3819 -0.195689 13.5475 0.183863 12.9002L2.66693 8.66708L14.7151 2.03948Z"
+          fill={`url(#${uid}-paint2_linear_44763_6806)`}
+        />
+      </g>
+      <defs>
+        <filter
+          id={`${uid}-filter0_f_44763_6806`}
+          x="0.666748"
+          y="2.66675"
+          width="30.6666"
+          height="29.623"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
+          <feGaussianBlur
+            stdDeviation="1"
+            result="effect1_foregroundBlur_44763_6806"
+          />
+        </filter>
+        <linearGradient
+          id={`${uid}-paint0_linear_44763_6806`}
+          x1="16"
+          y1="4.66675"
+          x2="16"
+          y2="30.2894"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#34D399" />
+          <stop offset="1" stopColor="#047857" />
+        </linearGradient>
+        <linearGradient
+          id={`${uid}-paint1_linear_44763_6806`}
+          x1="16.0001"
+          y1="4.66675"
+          x2="16.0001"
+          y2="30.2894"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#34D399" />
+          <stop offset="1" stopColor="#047857" />
+        </linearGradient>
+        <linearGradient
+          id={`${uid}-paint2_linear_44763_6806`}
+          x1="16"
+          y1="1.70942"
+          x2="16"
+          y2="26.9228"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#E3E3E5" stopOpacity="0.6" />
+          <stop offset="1" stopColor="#BBBBC0" stopOpacity="0.6" />
+        </linearGradient>
+        <clipPath id={`${uid}-clip0_44763_6806`}>
+          <rect width="32" height="32" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
+
+export const DatabaseDuoIcon: React.FC<IconProps> = ({
+  className = "size-8",
+}) => {
+  const uid = React.useId().replace(/:/g, "");
+
+  return (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <g clipPath={`url(#${uid}-clip0_44763_6792)`}>
+        <mask
+          id={`${uid}-mask0_44763_6792`}
+          style={{ maskType: "luminance" }}
+          maskUnits="userSpaceOnUse"
+          x="0"
+          y="0"
+          width="32"
+          height="32"
+        >
+          <path d="M32 0H0V32H32V0Z" fill="white" />
+          <path
+            d="M16 1.33325C9.38364 1.33325 4 3.42689 4 5.99992C4 8.57295 9.38364 10.6666 16 10.6666C22.6164 10.6666 28 8.57295 28 5.99992C28 3.42689 22.6164 1.33325 16 1.33325Z"
+            fill="black"
+          />
+        </mask>
+        <g mask={`url(#${uid}-mask0_44763_6792)`}>
+          <path
+            d="M16 30.6667C9.38364 30.6667 4 28.5731 4 26V6C13.1613 8.16516 18.4152 8.21637 28 6V26C28 28.5731 22.6164 30.6667 16 30.6667Z"
+            fill={`url(#${uid}-paint0_linear_44763_6792)`}
+          />
+        </g>
+        <mask
+          id={`${uid}-mask1_44763_6792`}
+          style={{ maskType: "luminance" }}
+          maskUnits="userSpaceOnUse"
+          x="4"
+          y="1"
+          width="24"
+          height="10"
+        >
+          <path
+            d="M16 1.33325C9.38364 1.33325 4 3.42689 4 5.99992C4 8.57295 9.38364 10.6666 16 10.6666C22.6164 10.6666 28 8.57295 28 5.99992C28 3.42689 22.6164 1.33325 16 1.33325Z"
+            fill="white"
+          />
+        </mask>
+        <g mask={`url(#${uid}-mask1_44763_6792)`}>
+          <g filter={`url(#${uid}-filter0_f_44763_6792)`}>
+            <path
+              d="M16 30.6667C9.38364 30.6667 4 28.5731 4 26V6C13.1613 8.16516 18.4152 8.21637 28 6V26C28 28.5731 22.6164 30.6667 16 30.6667Z"
+              fill={`url(#${uid}-paint1_linear_44763_6792)`}
+            />
+          </g>
+        </g>
+        <path
+          d="M16 10.6667C9.38364 10.6667 4 12.7604 4 15.3334C4 17.9065 9.38364 20.0001 16 20.0001C22.6164 20.0001 28 17.9065 28 15.3334C28 12.7604 22.6164 10.6667 16 10.6667Z"
+          fill={`url(#${uid}-paint2_linear_44763_6792)`}
+        />
+        <path
+          d="M16 1.33325C9.38364 1.33325 4 3.42689 4 5.99992C4 8.57295 9.38364 10.6666 16 10.6666C22.6164 10.6666 28 8.57295 28 5.99992C28 3.42689 22.6164 1.33325 16 1.33325Z"
+          fill={`url(#${uid}-paint3_linear_44763_6792)`}
+        />
+      </g>
+      <defs>
+        <filter
+          id={`${uid}-filter0_f_44763_6792`}
+          x="2"
+          y="4"
+          width="28"
+          height="28.6667"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
+          <feGaussianBlur
+            stdDeviation="1"
+            result="effect1_foregroundBlur_44763_6792"
+          />
+        </filter>
+        <linearGradient
+          id={`${uid}-paint0_linear_44763_6792`}
+          x1="16"
+          y1="6"
+          x2="16"
+          y2="30.6667"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#34D399" />
+          <stop offset="1" stopColor="#065F46" />
+        </linearGradient>
+        <linearGradient
+          id={`${uid}-paint1_linear_44763_6792`}
+          x1="16"
+          y1="6"
+          x2="16"
+          y2="30.6667"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#34D399" />
+          <stop offset="1" stopColor="#047857" />
+        </linearGradient>
+        <linearGradient
+          id={`${uid}-paint2_linear_44763_6792`}
+          x1="16"
+          y1="1.31075"
+          x2="16"
+          y2="20.0001"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#34D399" />
+          <stop offset="1" stopColor="#047857" />
+        </linearGradient>
+        <linearGradient
+          id={`${uid}-paint3_linear_44763_6792`}
+          x1="16"
+          y1="1.33325"
+          x2="16"
+          y2="10.6666"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#E3E3E5" stopOpacity="0.6" />
+          <stop offset="1" stopColor="#BBBBC0" stopOpacity="0.6" />
+        </linearGradient>
+        <clipPath id={`${uid}-clip0_44763_6792`}>
+          <rect width="32" height="32" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};

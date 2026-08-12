@@ -1,26 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowUpRight,
-  Box,
-  Calendar,
-  Database,
-  LucideIcon,
-  RotateCcw,
-  Users,
-  Wrench,
-  X,
-} from "lucide-react";
+import { ArrowUpRight, RotateCcw, Wrench, X } from "lucide-react";
 import { Link } from "raviger";
-import { type ComponentType, useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
-import {
-  CalendarDuoIcon,
-  ChartDuoIcon,
-  HeartDuoIcon,
-  StethoscopeDuoIcon,
-} from "@/CAREUI/icons/CustomIcons";
-
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -42,21 +25,24 @@ import useUserPreferences from "@/hooks/useUserPreferences";
 import { getPermissions } from "@/common/Permissions";
 
 import {
+  CalendarDuoIcon,
+  HeartDuoIcon,
+  StethoscopeDuoIcon,
+} from "@/CAREUI/icons/CustomIcons";
+import {
   DashboardLinkContext,
   processCustomDashboardLinks,
+  type DashboardShortcutIcon,
 } from "@/Utils/dashboardLinks";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { useCareApps } from "@/hooks/useCareApps";
 import facilityApi from "@/types/facility/facilityApi";
 import careConfig from "@careConfig";
 
 interface FacilityOverviewProps {
   facilityId: string;
 }
-
-type ShortcutIcon = LucideIcon | ComponentType<{ className?: string }>;
 
 export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { t } = useTranslation();
@@ -71,15 +57,6 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       pathParams: { facilityId },
     }),
   });
-
-  const careApps = useCareApps();
-  const isAnalyticsEnabled = useMemo(
-    () =>
-      careApps.some(
-        (app) => !app.isLoading && app.plugin === "care_analytics_fe",
-      ),
-    [careApps],
-  );
 
   const { canViewAppointments, canListEncounters } = getPermissions(
     hasPermission,
@@ -97,7 +74,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const defaultShortcuts: Array<{
     title: string;
     description: string;
-    icon: ShortcutIcon;
+    icon: DashboardShortcutIcon;
     href: string;
     visible: boolean;
   }> = [
@@ -122,22 +99,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       href: `/facility/${facilityId}/services`,
       visible: true,
     },
-    {
-      title: t("analytics"),
-      description: t("view_analytics"),
-      icon: ChartDuoIcon,
-      href: `/facility/${facilityId}/analytics`,
-      visible: isAnalyticsEnabled,
-    },
   ];
-
-  // Process custom dashboard links from environment
-  const iconMap = {
-    Calendar,
-    Users,
-    Box,
-    Database,
-  };
 
   const context: DashboardLinkContext = {
     facilityId,
@@ -148,7 +110,6 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const customDashboardLinks = processCustomDashboardLinks(
     careConfig.customShortcuts,
     context,
-    iconMap,
   );
 
   // Combine default and custom dashboard links
@@ -206,16 +167,16 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   href={shortcut.href}
                   className="block h-full min-w-0 rounded-lg ring-primary-400 ring-offset-2 transition-all duration-200 hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
                 >
-                  <Card className="flex h-full flex-col gap-[5px] overflow-hidden rounded-lg border-0 bg-white p-1 shadow-[0_1px_3px_0_rgb(0_0_0_/_0.10),0_1px_2px_0_rgb(0_0_0_/_0.06)]">
-                    <CardContent className="flex flex-1 flex-col gap-[5px] p-0">
-                      <div className="min-h-[100px] space-y-2 rounded-t rounded-b-lg bg-gray-100 px-3 py-2.5 sm:min-h-[115px] sm:space-y-3 sm:px-4 sm:py-3">
+                  <Card className="flex h-full flex-col gap-1.5 overflow-hidden rounded-lg border-0 bg-white p-1 shadow-sm">
+                    <CardContent className="flex flex-1 flex-col gap-1.5 p-0">
+                      <div className="min-h-25 space-y-2 rounded-t rounded-b-lg bg-gray-100 px-3 py-2.5 sm:min-h-28 sm:space-y-3 sm:px-4 sm:py-3">
                         <div className="w-fit">
                           <shortcut.icon className="size-7 text-primary sm:size-8" />
                         </div>
                         <CardTitle className="m-0 text-sm leading-6 font-semibold text-gray-950 sm:text-base/9">
                           {shortcut.title}
                         </CardTitle>
-                        <CardDescription className="truncate text-[11px] leading-4 font-normal text-gray-700 sm:text-xs sm:leading-normal">
+                        <CardDescription className="truncate text-xs leading-4 font-normal text-gray-700 sm:leading-normal">
                           {shortcut.description}
                         </CardDescription>
                       </div>
@@ -241,9 +202,14 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
               </h2>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all opacity-0 group-hover/pinned-links:opacity-100 focus-visible:opacity-100">
-                    <Wrench className="size-4" />
-                  </button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-gray-500 opacity-0 transition-all group-hover/pinned-links:opacity-100 hover:text-gray-700 focus-visible:opacity-100"
+                    aria-label={t("actions")}
+                  >
+                    <Wrench />
+                  </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={resetCustomLinks}>
@@ -256,19 +222,21 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {pinnedLinks.map((link) => (
                 <div key={link.link} className="relative group block h-full">
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="icon"
                     onClick={() => removeCustomLink(link.link)}
-                    className="absolute -top-2 -right-2 z-10 p-1 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    className="absolute -top-2 -right-2 z-10 size-6 rounded-full bg-gray-100 text-gray-500 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-red-100 hover:text-red-600"
                     aria-label={t("remove")}
                   >
-                    <X className="size-4" />
-                  </button>
+                    <X />
+                  </Button>
                   <Link
                     href={link.link}
                     className="block h-full rounded-xl ring-primary-400 ring-offset-2 transition-all duration-200 hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
                   >
                     <Card className="h-full rounded-xl border border-gray-200 bg-gray-100 p-1">
-                      <CardContent className="flex min-h-[68px] items-center justify-between gap-2 rounded-lg bg-white p-3 shadow-[0_1px_2px_0_rgb(0_0_0_/_0.10),0_1px_1px_0_rgb(0_0_0_/_0.06)]">
+                      <CardContent className="flex min-h-17 items-center justify-between gap-2 rounded-lg bg-white p-3 shadow-sm">
                         <div className="min-w-0 space-y-2">
                           {link.description && (
                             <CardDescription className="truncate text-sm font-medium text-gray-500">
