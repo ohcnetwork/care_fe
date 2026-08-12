@@ -205,11 +205,6 @@ export function EncounterList({
     searchWithOptions[0];
   const showSearchOptions = searchText.trim() !== "";
 
-  const searchQueryParams = {
-    name: qParams.name || undefined,
-    external_identifier: qParams.external_identifier || undefined,
-  };
-
   const updateSearchQuery = (
     nextSearchWith: SearchWith,
     nextSearchText: string,
@@ -312,13 +307,13 @@ export function EncounterList({
           care_team_user,
         ),
         encounter_class: encounterClass,
-        external_identifier: searchQueryParams.external_identifier,
+        external_identifier: qParams.external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
         patient_filter: patient_filter,
-        name: searchQueryParams.name,
+        name: qParams.name,
       },
     }),
     enabled: !propEncounters && !encounter_id,
