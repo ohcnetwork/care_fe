@@ -135,7 +135,7 @@ export const conditionSchema = z.discriminatedUnion("_conditionType", [
     value: z.enum(careConfig.encounterClasses),
     _conditionType: z.literal("encounter_class_equality"),
   }),
-]) as z.ZodType<ConditionForm>;
+]) as z.ZodType<ConditionForm, ConditionForm>;
 
 export function getConditionDiscriminatorValue(
   metric: string,
@@ -146,8 +146,10 @@ export function getConditionDiscriminatorValue(
 
 export function ConditionOperationSummary({
   condition,
+  shortDisplay = false,
 }: {
   condition: Condition;
+  shortDisplay?: boolean;
 }) {
   const { t } = useTranslation();
   const conditionName = t(`condition_metric__${condition.metric}`);
@@ -178,16 +180,22 @@ export function ConditionOperationSummary({
         typeof condition.value === "object" && "value_type" in condition.value
           ? condition?.value.value_type
           : "";
-      return `${conditionName} is equal to ${valueDisplay} ${valueType}`;
+      return shortDisplay
+        ? `${valueDisplay} ${valueType}`
+        : `${conditionName} is equal to ${valueDisplay} ${valueType}`;
     }
     case ConditionOperation.in_range: {
       const valueType =
         "value_type" in condition.value ? condition?.value.value_type : "";
-      return `${conditionName} is in range ${condition.value.min} to ${condition.value.max} ${valueType}`;
+      return shortDisplay
+        ? `${condition.value.min} to ${condition.value.max} ${valueType}`
+        : `${conditionName} is in range ${condition.value.min} to ${condition.value.max} ${valueType}`;
     }
     case ConditionOperation.has_tag: {
       const tagDisplay = tags.map((tag) => tag.display).join(", ");
-      return `Has any of the following ${tagResource} tag(s): ${tagDisplay}`;
+      return shortDisplay
+        ? `${tagDisplay}`
+        : `Has any of the following ${tagResource} tag(s): ${tagDisplay}`;
     }
   }
 }

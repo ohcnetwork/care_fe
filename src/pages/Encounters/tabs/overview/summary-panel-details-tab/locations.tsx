@@ -8,7 +8,7 @@ import { LocationTree } from "@/components/Location/LocationTree";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
-import { EmptyState } from "./empty-state";
+import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
 export const Locations = () => {
   const { t } = useTranslation();
@@ -29,7 +29,12 @@ export const Locations = () => {
             <HistoryIcon className="cursor-pointer" strokeWidth={1.5} />
           </Button>
           {canWriteSelectedEncounter && (
-            <Button variant="ghost" size="sm" onClick={assignLocation}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={assignLocation}
+              data-shortcut-id="assign-location"
+            >
               <SquarePen className="cursor-pointer" strokeWidth={1.5} />
             </Button>
           )}

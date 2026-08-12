@@ -12,15 +12,8 @@ export const BODY_SITES = [
 ];
 
 export const KNOWN_USERNAMES = [
-  "admin",
   "care-doctor",
   "care-staff",
   "care-nurse",
-  "care-admin",
-  "care-volunteer",
   "care-fac-admin",
-  "volunteer_2_0",
-  "doctor_2_0",
-  "nurse_2_0",
-  "staff_2_0",
 ];

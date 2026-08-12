@@ -11,7 +11,18 @@ import {
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Create Patient Prescription", () => {
+  test.describe.configure({ mode: "serial" });
   let facilityId: string;
+
+  // These tests run serially against the same encounter, so every prescription
+  // they create shows up in one shared table. Pick two distinct medicines so
+  // the highlighted (non-unit) test and the unit test never land on rows that
+  // match the same medicine name — otherwise the unit test could match the
+  // other test's highlighted row and fail intermittently.
+  const [highlightedMedicine, unitMedicine] = faker.helpers.arrayElements(
+    medicineNames,
+    2,
+  );
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
@@ -25,8 +36,9 @@ test.describe("Create Patient Prescription", () => {
   });
 
   test("Add medication to patient prescription", async ({ page }) => {
-    const medicineName = faker.helpers.arrayElement(medicineNames);
-    const dosage = faker.number.int({ min: 1, max: 100 }).toString();
+    const medicineName = highlightedMedicine;
+    // Use a non-unit dose (value !== 1) so the dosage is highlighted
+    const dosage = faker.number.int({ min: 2, max: 100 }).toString();
     const frequency = faker.helpers.arrayElement(frequencies);
     const selectedInstruction = faker.helpers.arrayElement(instructions);
     const notes = "testing notes";
@@ -36,7 +48,7 @@ test.describe("Create Patient Prescription", () => {
       // Wait for the "Add Medication" button to be visible instead of networkidle
       await expect(
         page.getByText(/Add Medication|Add another Medication/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Add medication", async () => {
@@ -80,7 +92,7 @@ test.describe("Create Patient Prescription", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText("Questionnaire submitted successfully"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Verify medication in table", async () => {
@@ -93,17 +105,113 @@ test.describe("Create Patient Prescription", () => {
             resp.status() === 200,
         ),
       ]);
+      // Click "All Prescriptions" sidebar card to see all medicines
       await page
-        .getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2} (AM|PM)$/)
-        .first()
+        .locator("[data-slot='card']")
+        .filter({ hasText: "View all medications" })
         .click();
       const table = page.getByRole("table");
-      await expect(table).toBeVisible({ timeout: 10000 });
+      await expect(table).toBeVisible();
       await expect(table).toContainText(medicineName);
       await expect(table).toContainText(dosage);
       await expect(table).toContainText(frequency.display);
       await expect(table).toContainText(selectedInstruction);
-      await expect(page.getByText(`Note${notes}`)).toBeVisible();
+      // Non-unit dosages (value !== 1) are visually highlighted
+      const medicationRow = table
+        .getByRole("row")
+        .filter({ hasText: medicineName });
+      const highlightedDosage = medicationRow.locator(".bg-yellow-100");
+      await expect(highlightedDosage).toHaveCount(1);
+      await expect(highlightedDosage.first()).toBeVisible();
+    });
+  });
+
+  test("Unit dosage is not highlighted in patient prescription", async ({
+    page,
+  }) => {
+    const medicineName = unitMedicine;
+    // Use a unit dose (value === 1) so the dosage is NOT highlighted
+    const dosage = "1";
+    const frequency = faker.helpers.arrayElement(frequencies);
+    const selectedInstruction = faker.helpers.arrayElement(instructions);
+    const notes = "testing notes";
+
+    await test.step("Open prescription form", async () => {
+      await page.getByRole("link", { name: /Create/i }).click();
+      // Wait for the "Add Medication" button to be visible instead of networkidle
+      await expect(
+        page.getByText(/Add Medication|Add another Medication/i),
+      ).toBeVisible();
+    });
+
+    await test.step("Add medication", async () => {
+      await page.getByText(/Add Medication|Add another Medication/i).click();
+    });
+
+    await test.step("Select medicine from list", async () => {
+      await page.getByRole("tab", { name: "Medication" }).click();
+      await page.locator("input[data-slot='command-input']").fill(medicineName);
+      await page.getByRole("option", { name: medicineName }).first().click();
+      await expect(page.getByText(medicineName).first()).toBeVisible();
+    });
+
+    await test.step("Fill medication details", async () => {
+      await page.getByPlaceholder("Enter a number...").first().click();
+      await page.getByPlaceholder("Enter a number...").first().fill(dosage);
+      await page.keyboard.press("Enter");
+
+      await page.getByText("eg. 1-0-1").first().click();
+      await page.getByPlaceholder("Type eg. 1-0-1").fill(frequency.input);
+      await page
+        .getByRole("option", { name: frequency.display })
+        .nth(0)
+        .click();
+
+      // expand
+      await page.getByTitle("Show Advanced Fields").first().click();
+
+      await page
+        .getByRole("button", { name: "No instructions selected" })
+        .last()
+        .click();
+      await page.getByRole("option", { name: selectedInstruction }).click();
+
+      await page.getByPlaceholder("Notes").last().fill(notes);
+    });
+
+    await test.step("Submit prescription", async () => {
+      await page.getByRole("button", { name: "Submit" }).click();
+      await expect(
+        page
+          .locator("li[data-sonner-toast]")
+          .getByText("Questionnaire submitted successfully"),
+      ).toBeVisible();
+    });
+
+    await test.step("Verify medication is not highlighted in table", async () => {
+      // Wait for prescriptions API to respond after clicking tab
+      await Promise.all([
+        page.getByRole("tab", { name: "Medicines" }).click(),
+        page.waitForResponse(
+          (resp) =>
+            resp.url().includes("/medication/prescription/") &&
+            resp.status() === 200,
+        ),
+      ]);
+      // Click "All Prescriptions" sidebar card to see all medicines
+      await page
+        .locator("[data-slot='card']")
+        .filter({ hasText: "View all medications" })
+        .click();
+      const table = page.getByRole("table");
+      await expect(table).toBeVisible();
+      await expect(table).toContainText(medicineName);
+      await expect(table).toContainText(dosage);
+      // Unit dosages (value === 1) are NOT visually highlighted
+      const medicationRow = table.getByRole("row").filter({
+        hasText: medicineName,
+      });
+      await expect(medicationRow.locator(".bg-yellow-100")).toHaveCount(0);
     });
   });
 });

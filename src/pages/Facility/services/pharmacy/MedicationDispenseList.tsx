@@ -33,8 +33,9 @@ import {
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { DosageInstructionList } from "@/components/Medicine/DosageInstructionList";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import {
-  formatDoseRange,
   formatDuration,
   formatFrequency,
   formatTotalUnits,
@@ -51,7 +52,6 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 
-import { round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -109,8 +109,7 @@ function MedicationTable({
         </TableHeader>
         <TableBody className="bg-white">
           {medications.map((medication: MedicationRequestRead) => {
-            const instruction = medication.dosage_instruction[0];
-            const dosage = instruction?.dose_and_rate?.dose_quantity;
+            const instructions = medication.dosage_instruction;
 
             return (
               <TableRow
@@ -143,15 +142,24 @@ function MedicationTable({
                   </span>
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
-                  {dosage
-                    ? `${round(dosage.value)} ${dosage.unit.display}`
-                    : formatDoseRange(instruction?.dose_and_rate?.dose_range)}
+                  <DosageInstructionList
+                    instructions={instructions}
+                    renderItem={(di) => (
+                      <FormattedDosage instruction={di} fallback="-" />
+                    )}
+                  />
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
-                  {formatFrequency(instruction) || "-"}
+                  <DosageInstructionList
+                    instructions={instructions}
+                    renderItem={(di) => formatFrequency(di) || "-"}
+                  />
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
-                  {formatDuration(instruction) || "-"}
+                  <DosageInstructionList
+                    instructions={instructions}
+                    renderItem={(di) => formatDuration(di) || "-"}
+                  />
                 </TableCell>
                 <TableCell className="text-gray-950 font-medium">
                   {formatTotalUnits(medication.dosage_instruction, t("units"))}
@@ -293,9 +301,7 @@ export default function MedicationDispenseList({
   };
   for (const med of allMedications) {
     const key = (med.dispense_status || "incomplete") as
-      | "incomplete"
-      | "partial"
-      | "complete";
+      "incomplete" | "partial" | "complete";
     countsInit[key] += 1;
   }
   const dispenseCounts = countsInit;
@@ -367,8 +373,8 @@ export default function MedicationDispenseList({
                 onValueChange={(value) =>
                   setDispenseFilter(
                     (value as
-                      | "all"
-                      | keyof typeof MedicationRequestDispenseStatus) ?? "all",
+                      "all" | keyof typeof MedicationRequestDispenseStatus) ??
+                      "all",
                   )
                 }
                 options={["all", "incomplete", "partial", "complete"]}

@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import type React from "react";
@@ -13,7 +12,6 @@ import { usePermissions } from "@/context/PermissionContext";
 
 import { DisablingCover } from "@/components/Common/DisablingCover";
 import PrintFooter from "@/components/Common/PrintFooter";
-import { Button } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -32,10 +30,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { PAYMENT_RECONCILIATION_METHOD_MAP } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import {
+  getPaymentTypeLabelKey,
+  PAYMENT_RECONCILIATION_METHOD_MAP,
+} from "@/types/billing/paymentReconciliation/paymentReconciliation";
 
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import accountApi from "@/types/billing/account/accountApi";
@@ -48,8 +47,10 @@ import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
   PaymentReconciliationRead,
   PaymentReconciliationStatus,
+  PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 import useFilters from "@/hooks/useFilters";
@@ -57,6 +58,7 @@ import useFilters from "@/hooks/useFilters";
 import { add, multiply, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import BackButton from "@/components/Common/BackButton";
 
 interface DetailRowProps {
   label: string;
@@ -91,7 +93,6 @@ export const PrintChargeItems = (props: {
   const { facilityId, accountId } = props;
   const { facility } = useCurrentFacility();
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const { hasPermission } = usePermissions();
   const { canManageLockedInvoice } = getPermissions(
     hasPermission,
@@ -133,7 +134,7 @@ export const PrintChargeItems = (props: {
   const showStatusLabel = `${t("show_status")}`;
   const groupByParentCategoryLabel = `${t("group_by_parent_category")}`;
 
-  const { data: account } = useQuery({
+  const { data: account, isLoading: isLoadingAccount } = useQuery({
     queryKey: ["account", accountId],
     queryFn: query(accountApi.retrieveAccount, {
       pathParams: { facilityId, accountId },
@@ -210,9 +211,7 @@ export const PrintChargeItems = (props: {
         <p className="text-gray-500">
           {t("no_permission_to_print_charge_items")}
         </p>
-        <Button variant="outline" onClick={() => goBack()}>
-          {t("go_back")}
-        </Button>
+        <BackButton variant="outline">{t("go_back")}</BackButton>
       </div>
     );
   }
@@ -415,49 +414,25 @@ export const PrintChargeItems = (props: {
       </div>
       <PrintPreview
         title={t("charge_items")}
-        disabled={!chargeItems?.results?.length}
+        disabled={isLoading || isLoadingPayments || isLoadingAccount}
         className="print:pt-0"
+        facility={facility}
+        templateSlug={PrintTemplateType.charge_items}
+        hideFacilityHeader={hideHeader}
       >
-        <DisablingCover disabled={isLoading || isLoadingPayments}>
+        <DisablingCover
+          disabled={isLoading || isLoadingPayments || isLoadingAccount}
+        >
           {summaryMode && hasUnissuedChargeItems ? (
             <p className="mt-2 text-xs text-red-600">
               {t("unissued_charge_items_summary_warning")}
             </p>
           ) : (
-            <div className="md:p-2 max-w-4xl mx-auto bg-white">
+            <div className="bg-white">
+              {hideHeader && preserveHeaderSpace && (
+                <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
+              )}
               <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    <th className="p-0 font-normal text-left">
-                      {hideHeader && preserveHeaderSpace ? (
-                        <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
-                      ) : !hideHeader ? (
-                        <div className="flex flex-col sm:flex-row print:flex-row print:items-start justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
-                          <img
-                            src={careConfig.mainLogo?.dark}
-                            alt="Care Logo"
-                            className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2 print:mb-0 print:order-2"
-                          />
-                          <div className="text-center sm:text-left sm:order-1 print:text-left">
-                            <h1 className="text-2xl font-semibold">
-                              {facility?.name}
-                            </h1>
-                            {facility?.address && (
-                              <div className="text-gray-500 whitespace-pre-wrap wrap-break-word text-xs">
-                                {facility.address}
-                                {facility.phone_number && (
-                                  <p className="text-gray-500 text-xs">
-                                    {facility.phone_number}
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ) : null}
-                    </th>
-                  </tr>
-                </thead>
                 <tbody>
                   <tr>
                     <td className="p-0 align-top">
@@ -466,7 +441,7 @@ export const PrintChargeItems = (props: {
                           <DetailRow
                             label={t("name")}
                             value={account?.patient?.name}
-                            width="w-16"
+                            width="w-22"
                           />
                           <DetailRow
                             label={`${t("age")} / ${t("sex")}`}
@@ -475,12 +450,22 @@ export const PrintChargeItems = (props: {
                                 ? `${formatPatientAge(account.patient, true)}, ${t(`GENDER__${account.patient.gender}`)}`
                                 : undefined
                             }
-                            width="w-16"
+                            width="w-22"
                           />
                           <DetailRow
                             label={`${t("address")}`}
                             value={account?.patient?.address}
-                            width="w-16"
+                            width="w-22"
+                          />
+                          <DetailRow
+                            label={t("mobile_number")}
+                            value={
+                              account?.patient &&
+                              formatPhoneNumberIntl(
+                                account.patient.phone_number,
+                              )
+                            }
+                            width="w-22"
                           />
                           {account?.primary_encounter?.current_location && (
                             <DetailRow
@@ -489,11 +474,16 @@ export const PrintChargeItems = (props: {
                                 account?.primary_encounter?.current_location
                                   ?.name
                               }
-                              width="w-16"
+                              width="w-22"
                             />
                           )}
                         </div>
                         <div className="space-y-1">
+                          <DetailRow
+                            label={`${t("bill_id")}`}
+                            value={account?.id}
+                            width="w-24"
+                          />
                           <DetailRow
                             label={`${t("date")}`}
                             value={formatDateTime(new Date(), "DD-MM-YYYY")}
@@ -513,16 +503,7 @@ export const PrintChargeItems = (props: {
                                 width="w-24"
                               />
                             ))}
-                          <DetailRow
-                            label={t("mobile_number")}
-                            value={
-                              account?.patient &&
-                              formatPhoneNumberIntl(
-                                account.patient.phone_number,
-                              )
-                            }
-                            width="w-24"
-                          />
+
                           {account?.primary_encounter && (
                             <>
                               <DetailRow
@@ -1249,6 +1230,12 @@ export const PrintChargeItems = (props: {
                                         ),
                                       ),
                                     );
+                                    const paymentTypeLabel = t(
+                                      getPaymentTypeLabelKey(
+                                        paymentType as PaymentReconciliationType,
+                                        false,
+                                      ),
+                                    );
 
                                     if (summaryMode) {
                                       // In summary mode, show only payment type with total
@@ -1261,7 +1248,7 @@ export const PrintChargeItems = (props: {
                                             colSpan={2}
                                             className="font-semibold capitalize"
                                           >
-                                            {t(paymentType)}
+                                            {paymentTypeLabel}
                                           </TableCell>
                                           <TableCell className="text-right font-semibold">
                                             <MonetaryDisplay
@@ -1283,7 +1270,7 @@ export const PrintChargeItems = (props: {
                                               colSpan={3}
                                               className="capitalize"
                                             >
-                                              {t(paymentType)}
+                                              {paymentTypeLabel}
                                             </TableCell>
                                             <TableCell className="text-right">
                                               <MonetaryDisplay
@@ -1304,11 +1291,18 @@ export const PrintChargeItems = (props: {
                                               className="bg-transparent hover:bg-transparent"
                                             >
                                               <TableCell>
-                                                {payment.payment_datetime &&
-                                                  formatDateTime(
-                                                    payment.payment_datetime,
-                                                    "DD-MM-YY",
-                                                  )}
+                                                <div className="flex flex-col mr-1">
+                                                  <span>
+                                                    {payment.payment_datetime &&
+                                                      formatDateTime(
+                                                        payment.payment_datetime,
+                                                        "DD-MM-YY",
+                                                      )}
+                                                  </span>
+                                                  <span className="font-mono text-xs text-gray-500">
+                                                    {payment.id}
+                                                  </span>
+                                                </div>
                                               </TableCell>
                                               <TableCell>
                                                 {payment.target_invoice?.number}
@@ -1316,7 +1310,10 @@ export const PrintChargeItems = (props: {
                                               {hidePaymentTypeGrouping && (
                                                 <TableCell className="text-left capitalize">
                                                   {t(
-                                                    payment.reconciliation_type,
+                                                    getPaymentTypeLabelKey(
+                                                      payment.reconciliation_type,
+                                                      payment.is_credit_note,
+                                                    ),
                                                   )}
                                                 </TableCell>
                                               )}
@@ -1471,6 +1468,12 @@ export const PrintChargeItems = (props: {
                                         ),
                                       ),
                                     );
+                                    const paymentTypeLabel = t(
+                                      getPaymentTypeLabelKey(
+                                        paymentType as PaymentReconciliationType,
+                                        true,
+                                      ),
+                                    );
 
                                     if (summaryMode) {
                                       // In summary mode, show only payment type with total
@@ -1483,7 +1486,7 @@ export const PrintChargeItems = (props: {
                                             colSpan={2}
                                             className="font-semibold capitalize"
                                           >
-                                            {t(paymentType)}
+                                            {paymentTypeLabel}
                                           </TableCell>
                                           <TableCell className="text-right font-semibold">
                                             <MonetaryDisplay
@@ -1505,7 +1508,7 @@ export const PrintChargeItems = (props: {
                                               colSpan={3}
                                               className="capitalize"
                                             >
-                                              {t(paymentType)}
+                                              {paymentTypeLabel}
                                             </TableCell>
                                             <TableCell className="text-right">
                                               <MonetaryDisplay
@@ -1526,11 +1529,18 @@ export const PrintChargeItems = (props: {
                                               className="bg-transparent hover:bg-transparent"
                                             >
                                               <TableCell>
-                                                {payment.payment_datetime &&
-                                                  formatDateTime(
-                                                    payment.payment_datetime,
-                                                    "DD-MM-YY",
-                                                  )}
+                                                <div className="flex flex-col">
+                                                  <span>
+                                                    {payment.payment_datetime &&
+                                                      formatDateTime(
+                                                        payment.payment_datetime,
+                                                        "DD-MM-YY",
+                                                      )}
+                                                  </span>
+                                                  <span className="font-mono text-xs text-gray-500">
+                                                    {payment.id}
+                                                  </span>
+                                                </div>
                                               </TableCell>
                                               <TableCell>
                                                 {payment.target_invoice?.number}
@@ -1538,7 +1548,10 @@ export const PrintChargeItems = (props: {
                                               {hidePaymentTypeGrouping && (
                                                 <TableCell className="text-left capitalize">
                                                   {t(
-                                                    payment.reconciliation_type,
+                                                    getPaymentTypeLabelKey(
+                                                      payment.reconciliation_type,
+                                                      payment.is_credit_note,
+                                                    ),
                                                   )}
                                                 </TableCell>
                                               )}

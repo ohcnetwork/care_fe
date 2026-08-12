@@ -102,7 +102,6 @@ import {
 } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
 
 import { generateSlug } from "@/Utils/utils";
 import { CodingEditor } from "./CodingEditor";
@@ -255,9 +254,7 @@ export default function QuestionnaireEditor({
     new Set(),
   );
   const [selectedOrgs, setSelectedOrgs] = useState<Organization[]>([]);
-  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagRead[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
-  const [tagSearchQuery, setTagSearchQuery] = useState("");
   const [orgError, setOrgError] = useState<string | undefined>();
   const [importUrl, setImportUrl] = useState("");
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -352,32 +349,6 @@ export default function QuestionnaireEditor({
     }),
   });
 
-  const { data: availableTags, isLoading: isLoadingAvailableTags } = useQuery({
-    queryKey: ["questionnaireTags", tagSearchQuery],
-    queryFn: query.debounced(questionnaireApi.tags.list, {
-      queryParams: {
-        name: tagSearchQuery || undefined,
-      },
-    }),
-  });
-
-  // This useMemo will automatically include the new tag in options
-  const tagOptions = useMemo(() => {
-    if (!availableTags?.results) return selectedTags;
-    if (tagSearchQuery) return availableTags.results;
-
-    const availableSlugs = new Set(
-      availableTags.results.map((tag) => tag.slug),
-    );
-
-    // Add selected tags that aren't in availableTags
-    const selectedNotInAvailable = selectedTags.filter(
-      (selectedTag) => !availableSlugs.has(selectedTag.slug),
-    );
-
-    return [...availableTags.results, ...selectedNotInAvailable];
-  }, [availableTags, selectedTags, tagSearchQuery]);
-
   const { mutate: createQuestionnaire, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.create, {
       silent: true,
@@ -424,7 +395,7 @@ export default function QuestionnaireEditor({
     },
   });
 
-  const urlSchema = z.string().url(t("please enter a valid url"));
+  const urlSchema = z.url(t("please enter a valid url"));
 
   const QuestionnaireFormPartialSchema = z.object({
     title: z.string().trim().min(1, t("field_required")),
@@ -473,7 +444,6 @@ export default function QuestionnaireEditor({
           subject_type: "encounter",
           questions: [],
           slug: "",
-          tags: [],
         };
       }
       return null;
@@ -490,7 +460,6 @@ export default function QuestionnaireEditor({
       status: questionnaire?.status,
       subject_type: questionnaire?.subject_type,
       version: questionnaire?.version,
-      tags: questionnaire?.tags,
     },
     mode: "onChange",
   });
@@ -507,7 +476,6 @@ export default function QuestionnaireEditor({
         status: initialQuestionnaire.status,
         subject_type: initialQuestionnaire.subject_type,
         version: initialQuestionnaire.version,
-        tags: initialQuestionnaire.tags,
       };
 
       setQuestionnaire(initialQuestionnaire);
@@ -530,11 +498,6 @@ export default function QuestionnaireEditor({
   const rootQuestions: Question[] = useWatch({
     control: form.control,
     name: "questions",
-  });
-
-  const tags = useWatch({
-    control: form.control,
-    name: "tags",
   });
 
   useEffect(() => {
@@ -767,7 +730,6 @@ export default function QuestionnaireEditor({
         ...form.getValues(),
         questions: rootQuestions,
         organizations: selectedOrgs.map((o) => o.id),
-        tags: selectedTags.map((t) => t.id),
       });
     }
   };
@@ -798,7 +760,7 @@ export default function QuestionnaireEditor({
       importQuestionnaire(importUrl);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
+        toast.error(error.issues[0].message);
       }
     }
   };
@@ -881,22 +843,7 @@ export default function QuestionnaireEditor({
     });
   };
 
-  const handleToggleTag = (tagId: string) => {
-    const newTag = tagOptions.find((t) => t.id === tagId);
-    const newAdded = newTag ? [...selectedTags, newTag] : selectedTags;
-    setSelectedTags((current) =>
-      current.some((t) => t.id === tagId)
-        ? current.filter((t) => t.id !== tagId)
-        : newAdded,
-    );
-  };
-
-  const handleTagCreated = (tag: QuestionnaireTagRead) => {
-    setSelectedTags((current) => [...current, tag]);
-  };
-
-  const handleAddQuestion = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleAddQuestionAtIndex = (index: number) => {
     const newQuestion: Question = {
       id: crypto.randomUUID(),
       link_id: `Q-${Date.now()}`,
@@ -904,11 +851,21 @@ export default function QuestionnaireEditor({
       type: "string",
       questions: [],
     };
-    updateQuestions([...rootQuestions, newQuestion]);
+    const newQuestions = [
+      ...rootQuestions.slice(0, index),
+      newQuestion,
+      ...rootQuestions.slice(index),
+    ];
+    updateQuestions(newQuestions);
     setExpandedQuestions((prev) => new Set([...prev, newQuestion.link_id]));
     setTimeout(() => {
       scrollToQuestion(newQuestion.link_id);
     }, 100);
+  };
+
+  const handleAddQuestion = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleAddQuestionAtIndex(rootQuestions.length);
   };
 
   return (
@@ -1068,16 +1025,6 @@ export default function QuestionnaireEditor({
                     error: orgError,
                     setError: setOrgError,
                   }}
-                  tags={tags}
-                  tagSelection={{
-                    selectedTags: selectedTags,
-                    onToggle: handleToggleTag,
-                    searchQuery: tagSearchQuery,
-                    setSearchQuery: setTagSearchQuery,
-                    available: tagOptions,
-                    isLoading: isLoadingAvailableTags,
-                    onTagCreated: !slug ? handleTagCreated : undefined,
-                  }}
                 />
                 <QuestionActions
                   selectedQuestions={selectedQuestions}
@@ -1192,80 +1139,83 @@ export default function QuestionnaireEditor({
                     <CardContent className="p-0">
                       <div className="space-y-6">
                         {rootQuestions.map((question, index) => (
-                          <div
-                            key={question.id}
-                            id={`question-${question.link_id}`}
-                            ref={(el) => {
-                              questionRefs.current[question.link_id] = el;
-                            }}
-                            className="relative bg-white rounded-lg shadow-md"
-                          >
-                            <QuestionEditor
-                              name={`questions.${index}`}
-                              index={index}
-                              key={question.link_id}
-                              question={question}
-                              selectedQuestions={selectedQuestions}
-                              onToggleSelection={handleToggleSelection}
-                              form={form}
-                              onChange={(updatedQuestion) => {
-                                const newQuestions = rootQuestions.map(
-                                  (q, i) => (i === index ? updatedQuestion : q),
-                                );
-                                updateQuestions(newQuestions);
+                          <div key={question.id}>
+                            <div
+                              id={`question-${question.link_id}`}
+                              ref={(el) => {
+                                questionRefs.current[question.link_id] = el;
                               }}
-                              onDelete={() => {
-                                const newQuestions = rootQuestions.filter(
-                                  (_, i) => i !== index,
-                                );
-                                updateQuestions(newQuestions);
-                              }}
-                              isExpanded={expandedQuestions.has(
-                                question.link_id,
-                              )}
-                              onToggleExpand={() =>
-                                toggleQuestionExpanded(question.link_id)
-                              }
-                              depth={0}
-                              onMoveUp={() => {
-                                if (index > 0) {
-                                  const newQuestions = swapElements(
-                                    rootQuestions,
-                                    index,
-                                    index - 1,
+                              className="relative bg-white rounded-lg shadow-md"
+                            >
+                              <QuestionEditor
+                                name={`questions.${index}`}
+                                index={index}
+                                key={question.link_id}
+                                question={question}
+                                selectedQuestions={selectedQuestions}
+                                onToggleSelection={handleToggleSelection}
+                                form={form}
+                                onChange={(updatedQuestion) => {
+                                  const newQuestions = rootQuestions.map(
+                                    (q, i) =>
+                                      i === index ? updatedQuestion : q,
                                   );
                                   updateQuestions(newQuestions);
-                                }
-                              }}
-                              onMoveDown={() => {
-                                if (index < rootQuestions.length - 1) {
-                                  const newQuestions = swapElements(
-                                    rootQuestions,
-                                    index,
-                                    index + 1,
+                                }}
+                                onDelete={() => {
+                                  const newQuestions = rootQuestions.filter(
+                                    (_, i) => i !== index,
                                   );
                                   updateQuestions(newQuestions);
+                                }}
+                                addQuestionAtIndex={handleAddQuestionAtIndex}
+                                isExpanded={expandedQuestions.has(
+                                  question.link_id,
+                                )}
+                                onToggleExpand={() =>
+                                  toggleQuestionExpanded(question.link_id)
                                 }
-                              }}
-                              isFirst={index === 0}
-                              isLast={index === rootQuestions.length - 1}
-                              structuredTypeError={
-                                structuredTypeErrors[question.id]
-                              }
-                              setStructuredTypeError={(error) => {
-                                setStructuredTypeErrors((prev) => ({
-                                  ...prev,
-                                  [question.id]: error,
-                                }));
-                              }}
-                              enableWhenDependencies={enableWhenDependencies}
-                              handleEnableWhenDependentClick={
-                                handleEnableWhenDependentClick
-                              }
-                              expandPath={expandPath}
-                              questionRefs={questionRefs}
-                              totalSiblings={rootQuestions.length}
-                            />
+                                depth={0}
+                                onMoveUp={() => {
+                                  if (index > 0) {
+                                    const newQuestions = swapElements(
+                                      rootQuestions,
+                                      index,
+                                      index - 1,
+                                    );
+                                    updateQuestions(newQuestions);
+                                  }
+                                }}
+                                onMoveDown={() => {
+                                  if (index < rootQuestions.length - 1) {
+                                    const newQuestions = swapElements(
+                                      rootQuestions,
+                                      index,
+                                      index + 1,
+                                    );
+                                    updateQuestions(newQuestions);
+                                  }
+                                }}
+                                isFirst={index === 0}
+                                isLast={index === rootQuestions.length - 1}
+                                structuredTypeError={
+                                  structuredTypeErrors[question.id]
+                                }
+                                setStructuredTypeError={(error) => {
+                                  setStructuredTypeErrors((prev) => ({
+                                    ...prev,
+                                    [question.id]: error,
+                                  }));
+                                }}
+                                enableWhenDependencies={enableWhenDependencies}
+                                handleEnableWhenDependentClick={
+                                  handleEnableWhenDependentClick
+                                }
+                                expandPath={expandPath}
+                                questionRefs={questionRefs}
+                                totalSiblings={rootQuestions.length}
+                              />
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1319,16 +1269,6 @@ export default function QuestionnaireEditor({
                   isLoading: isLoadingAvailableOrganizations,
                   error: orgError,
                   setError: setOrgError,
-                }}
-                tags={tags}
-                tagSelection={{
-                  selectedTags: selectedTags,
-                  onToggle: handleToggleTag,
-                  searchQuery: tagSearchQuery,
-                  setSearchQuery: setTagSearchQuery,
-                  available: tagOptions,
-                  isLoading: isLoadingAvailableTags,
-                  onTagCreated: handleTagCreated,
                 }}
               />
               <QuestionActions
@@ -1754,6 +1694,7 @@ interface QuestionEditorProps {
   question: Question;
   onChange: (updated: Question) => void;
   onDelete: () => void;
+  addQuestionAtIndex?: (targetIndex: number) => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
   depth: number;
@@ -1782,6 +1723,7 @@ function QuestionEditor({
   question,
   onChange,
   onDelete,
+  addQuestionAtIndex,
   isExpanded,
   onToggleExpand,
   depth,
@@ -2046,10 +1988,7 @@ function QuestionEditor({
                 newCondition = {
                   question: condition.question,
                   operator: condition.operator as
-                    | "greater"
-                    | "less"
-                    | "greater_or_equals"
-                    | "less_or_equals",
+                    "greater" | "less" | "greater_or_equals" | "less_or_equals",
                   answer: Number(value),
                 };
               } else {
@@ -2069,6 +2008,27 @@ function QuestionEditor({
     }
   };
   const UNIT_TYPES = ["quantity", "choice", "decimal", "integer"];
+
+  const handleAddSubQuestionAtIndex = (targetIndex: number) => {
+    const newQuestion: Question = {
+      id: crypto.randomUUID(),
+      link_id: `Q-${Date.now()}`,
+      text: "New Sub-Question",
+      type: "string",
+      questions: [],
+    };
+    const subQuestions = questions || [];
+    const newQuestions = [
+      ...subQuestions.slice(0, targetIndex),
+      newQuestion,
+      ...subQuestions.slice(targetIndex),
+    ];
+    updateField("questions", newQuestions);
+    setExpandedSubQuestions((prev) => new Set([...prev, newQuestion.link_id]));
+    setTimeout(() => {
+      scrollToQuestion(newQuestion.link_id);
+    }, 100);
+  };
 
   return (
     <Collapsible
@@ -2108,51 +2068,79 @@ function QuestionEditor({
             <ChevronsUpDown className="size-4 text-gray-500" />
           )}
         </CollapsibleTrigger>
-        {!(depth > 0 && totalSiblings === 1) && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-8">
-                <CareIcon icon="l-ellipsis-v" className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {!isFirst && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMoveUp?.();
-                  }}
-                >
-                  <ChevronUp className="mr-2 size-4" />
-                  {t("move_up")}
-                </DropdownMenuItem>
-              )}
-              {!isLast && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMoveDown?.();
-                  }}
-                >
-                  <ChevronDown className="mr-2 size-4" />
-                  {t("move_down")}
-                </DropdownMenuItem>
-              )}
-
-              <DropdownMenuSeparator />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              aria-label={t("question_actions")}
+            >
+              <CareIcon icon="l-ellipsis-v" className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {!isFirst && (
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDelete();
+                  onMoveUp?.();
                 }}
-                className="text-destructive"
               >
-                <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
-                {t("delete")}
+                <ChevronUp className="mr-2 size-4" />
+                {t("move_up")}
               </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+            )}
+            {!isLast && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveDown?.();
+                }}
+              >
+                <ChevronDown className="mr-2 size-4" />
+                {t("move_down")}
+              </DropdownMenuItem>
+            )}
+            {addQuestionAtIndex && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addQuestionAtIndex(index);
+                }}
+              >
+                <CareIcon icon="l-plus" className="mr-2 size-4" />
+                {t("add_question_above")}
+              </DropdownMenuItem>
+            )}
+            {addQuestionAtIndex && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addQuestionAtIndex(index + 1);
+                }}
+              >
+                <CareIcon icon="l-plus" className="mr-2 size-4" />
+                {t("add_question_below")}
+              </DropdownMenuItem>
+            )}
+            {!(depth > 0 && totalSiblings === 1) && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                  className="text-destructive"
+                >
+                  <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
+                  {t("delete")}
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <CollapsibleContent>
@@ -2813,23 +2801,7 @@ function QuestionEditor({
                   className="underline text-gray-950 font-semibold"
                   onClick={(e) => {
                     e.preventDefault();
-                    const newQuestion: Question = {
-                      id: crypto.randomUUID(),
-                      link_id: `Q-${Date.now()}`,
-                      text: "New Sub-Question",
-                      type: "string",
-                      questions: [],
-                    };
-                    updateField("questions", [
-                      ...(questions || []),
-                      newQuestion,
-                    ]);
-                    setExpandedSubQuestions(
-                      (prev) => new Set([...prev, newQuestion.link_id]),
-                    );
-                    setTimeout(() => {
-                      scrollToQuestion(newQuestion.link_id);
-                    }, 100);
+                    handleAddSubQuestionAtIndex((questions || []).length);
                   }}
                 >
                   <CareIcon icon="l-plus" className="size-4" />
@@ -2900,6 +2872,7 @@ function QuestionEditor({
                           updateField("questions", newQuestions);
                         }
                       }}
+                      addQuestionAtIndex={handleAddSubQuestionAtIndex}
                       isFirst={idx === 0}
                       isLast={idx === (questions?.length || 0) - 1}
                       expandPath={expandPath?.slice(1)}

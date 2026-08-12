@@ -1,10 +1,21 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+// Duration is a native input with plain <button> suggestions in the popover;
+// exact-match avoids catching the range / period action buttons.
+async function selectDuration(page: Page, duration: number, unit: string) {
+  const field = page.getByRole("textbox", { name: "Duration" });
+  await field.click();
+  await field.fill(`${duration} ${unit}`);
+  await page
+    .getByRole("button", { name: `${duration} ${unit}`, exact: true })
+    .click();
+}
 
 const INT_MAX = 70; // Arbitrary upper limit for integer fields
 const DOSAGE_UNITS = [
@@ -18,13 +29,7 @@ const DOSAGE_UNITS = [
   "count",
 ];
 
-const DURATION_UNITS = [
-  { value: "d", label: "days" },
-  { value: "h", label: "hours" },
-  { value: "wk", label: "weeks" },
-  { value: "mo", label: "months" },
-  { value: "a", label: "years" },
-];
+const DURATION_UNITS = ["days", "hours", "weeks", "months", "years"];
 
 const INTENT_OPTIONS = [
   "proposal",
@@ -106,10 +111,8 @@ test.describe("Medication Request Questionnaire", () => {
   let medicationName: string;
   let dosageQuantity: number;
   let dosageUnit: string;
-  let durationLabel: string;
   let durationUnit: string;
   let duration: number;
-  let durationData: { value: string; label: string };
   let frequencyData: { input: string; display: string };
 
   test.beforeEach(async ({ page }) => {
@@ -120,10 +123,10 @@ test.describe("Medication Request Questionnaire", () => {
     dosageQuantity = faker.number.int(INT_MAX);
     dosageUnit = faker.helpers.arrayElement(DOSAGE_UNITS);
     frequencyData = faker.helpers.arrayElement(frequencies);
-    durationData = faker.helpers.arrayElement(DURATION_UNITS);
-    durationLabel = durationData.label;
-    durationUnit = durationData.value;
-    duration = faker.number.int({ min: 1, max: INT_MAX });
+    durationUnit = faker.helpers.arrayElement(DURATION_UNITS);
+    // min: 2 keeps us in the plural range — the new DurationInput renders
+    // proper singulars ("1 day") which would break exact-match option lookups.
+    duration = faker.number.int({ min: 2, max: INT_MAX });
 
     questionnaireUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`;
 
@@ -164,14 +167,7 @@ test.describe("Medication Request Questionnaire", () => {
     await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
     await page.getByRole("option", { name: frequencyData.display }).click();
 
-    await page.getByRole("combobox", { name: "1 day" }).click();
-    await page
-      .getByPlaceholder("Type eg. 5 days, 2 weeks")
-      .fill(`${duration} ${durationLabel}`);
-
-    await page
-      .getByRole("option", { name: `${duration} ${durationLabel}` })
-      .click();
+    await selectDuration(page, duration, durationUnit);
 
     // Select random additional instruction - target only enabled button
     const instruction = faker.helpers.arrayElement(instructionOptions);
@@ -281,14 +277,7 @@ test.describe("Medication Request Questionnaire", () => {
     await page.getByPlaceholder("Type eg. 1-0-1").fill(frequencyData.input);
     await page.getByRole("option", { name: frequencyData.display }).click();
 
-    await page.getByRole("combobox", { name: "1 day" }).click();
-    await page
-      .getByPlaceholder("Type eg. 5 days, 2 weeks")
-      .fill(`${duration} ${durationLabel}`);
-
-    await page
-      .getByRole("option", { name: `${duration} ${durationLabel}` })
-      .click();
+    await selectDuration(page, duration, durationUnit);
 
     await page.getByRole("button", { name: "Submit" }).click();
 
@@ -330,9 +319,7 @@ test.describe("Medication Request Questionnaire", () => {
 
     await page.getByRole("button", { name: "Submit" }).click();
 
-    await expect(
-      page.getByText("Dosage*+This field is required"),
-    ).toBeVisible();
+    await expect(page.getByText("Dosage*This field is required")).toBeVisible();
 
     await expect(page.getByText("Frequency*eg. 1-0-1This field")).toBeVisible();
   });

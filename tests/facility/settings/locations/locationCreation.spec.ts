@@ -179,7 +179,7 @@ test.describe("Facility Location Creation", () => {
     await test.step("Verify bed created", async () => {
       await expect(
         page.locator("li[data-sonner-toast]").getByText("Location Created"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Verify bed in child table", async () => {
@@ -205,6 +205,7 @@ test.describe("Facility Location Creation", () => {
       await page.getByRole("button", { name: "Add Location" }).click();
       await page.getByRole("combobox", { name: "Location Form" }).click();
       await page.getByRole("option", { name: "Bed" }).click();
+      await expect(page.getByRole("textbox", { name: "Name" })).toBeVisible();
       await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
       await page
         .getByRole("checkbox", { name: "Create Multiple Beds" })
@@ -222,7 +223,7 @@ test.describe("Facility Location Creation", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText(`${bedCount} Beds created successfully`),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Verify each bed in child table", async () => {
@@ -238,6 +239,45 @@ test.describe("Facility Location Creation", () => {
     });
   });
 
+  test("preserves a customized bed name when the bed count changes", async ({
+    page,
+  }) => {
+    const bedBaseName = faker.word.words(1);
+    const customBedName = `ICU-${faker.string.alpha(5)}`;
+
+    await test.step("Open parent location", async () => {
+      await page.locator('[data-slot="table-body"] tr').first().click();
+    });
+
+    await test.step("Set up bulk beds and customize the first bed name", async () => {
+      await page.getByRole("button", { name: "Add Location" }).click();
+      await page.getByRole("combobox", { name: "Location Form" }).click();
+      await page.getByRole("option", { name: "Bed" }).click();
+      await page.getByRole("textbox", { name: "Name" }).fill(bedBaseName);
+      await page
+        .getByRole("checkbox", { name: "Create Multiple Beds" })
+        .click();
+      await page.getByRole("combobox", { name: "Number of beds" }).click();
+      await page.getByRole("option", { name: "3 Beds", exact: true }).click();
+      await page
+        .getByRole("checkbox", { name: "Customize individual bed names" })
+        .click();
+      await page
+        .getByRole("textbox", { name: /^Bed Number 1\b/i })
+        .fill(customBedName);
+    });
+
+    await test.step("Change the bed count; custom name must be kept", async () => {
+      await page.getByRole("combobox", { name: "Number of beds" }).click();
+      await page.getByRole("option", { name: "4 Beds", exact: true }).click();
+
+      // Changing the count must not reset user-customized names to defaults.
+      await expect(
+        page.getByRole("textbox", { name: /^Bed Number 1\b/i }),
+      ).toHaveValue(customBedName);
+    });
+  });
+
   test("Verify error when creating bed in root location", async ({ page }) => {
     await test.step("Attempt to create bed at root", async () => {
       await page.getByRole("button", { name: "Add Location" }).click();
@@ -250,7 +290,7 @@ test.describe("Facility Location Creation", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText(/Beds can only be created under a parent location/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
   });
 });

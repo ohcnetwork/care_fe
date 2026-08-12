@@ -10,6 +10,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import RoleOrgSelector from "@/components/Common/RoleOrgSelector";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
+import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -28,6 +30,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+
+const TAG_COLORS = [
+  "#B91C1C", // Red
+  "#C2410C", // Orange
+  "#A16207", // Amber
+  "#15803D", // Green
+  "#0F766E", // Teal
+  "#1D4ED8", // Blue
+  "#7E22CE", // Purple
+  "#BE185D", // Pink
+  "#0E7490", // Cyan
+  "#4D7C0F", // Lime
+] as const;
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
@@ -63,19 +78,20 @@ export default function TagConfigForm({
 
   const tagConfigSchema = z.object({
     display: z.string().trim().min(1, t("field_required")),
-    category: z.nativeEnum(TagCategory, {
-      required_error: t("field_required"),
+    category: z.enum(TagCategory, {
+      error: t("field_required"),
     }),
     description: z.string().trim().optional(),
     priority: z.number().min(0, t("priority_non_negative")),
-    status: z.nativeEnum(TagStatus, {
-      required_error: t("field_required"),
+    status: z.enum(TagStatus, {
+      error: t("field_required"),
     }),
-    resource: z.nativeEnum(TagResource, {
-      required_error: t("field_required"),
+    resource: z.enum(TagResource, {
+      error: t("field_required"),
     }),
     facility_organization: z.string().optional(),
     organization: z.string().optional(),
+    color: z.string().optional(),
   });
 
   type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
@@ -101,6 +117,7 @@ export default function TagConfigForm({
       resource: parentTag?.resource || TagResource.PATIENT,
       facility_organization: undefined,
       organization: undefined,
+      color: "",
     },
   });
 
@@ -126,6 +143,10 @@ export default function TagConfigForm({
         resource: existingConfig.resource,
         facility_organization: existingConfig.facility_organization?.id,
         organization: existingConfig.organization?.id,
+        color:
+          typeof existingConfig.metadata?.color === "string"
+            ? existingConfig.metadata.color
+            : "",
       });
     }
   }, [existingConfig, isEditing, form]);
@@ -142,6 +163,7 @@ export default function TagConfigForm({
         resource: parentTag.resource,
         facility_organization: undefined,
         organization: undefined,
+        color: "",
       });
     }
   }, [parentTag, isCreatingChild, form]);
@@ -182,6 +204,7 @@ export default function TagConfigForm({
       priority: data.priority,
       status: data.status,
       resource: data.resource,
+      metadata: data.color ? { color: data.color } : {},
       ...(parentId && { parent: parentId }),
       ...(facilityId && { facility: facilityId }),
       ...(data.facility_organization && {
@@ -353,6 +376,62 @@ export default function TagConfigForm({
                   rows={3}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="color"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("color")}</FormLabel>
+              <FormControl>
+                <input type="hidden" {...field} value={field.value || ""} />
+              </FormControl>
+              <div className="flex flex-col gap-2 min-w-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    const others = TAG_COLORS.filter((c) => c !== field.value);
+                    field.onChange(
+                      others[Math.floor(Math.random() * others.length)],
+                    );
+                  }}
+                  disabled={isLoading}
+                >
+                  <CareIcon icon="l-shuffle" className="size-4" />
+                  {field.value ? t("shuffle_color") : t("assign_color")}
+                </Button>
+                {field.value && (
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Badge
+                      style={{
+                        color: field.value,
+                        backgroundColor: field.value + "18",
+                        borderColor: field.value + "40",
+                      }}
+                      className="capitalize min-w-0 whitespace-normal break-words"
+                    >
+                      {form.watch("display") || t("preview")}
+                    </Badge>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 shrink-0 text-muted-foreground"
+                      onClick={() => field.onChange("")}
+                      disabled={isLoading}
+                    >
+                      <CareIcon icon="l-times" className="size-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
               <FormMessage />
             </FormItem>
           )}

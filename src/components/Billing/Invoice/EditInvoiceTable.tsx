@@ -84,7 +84,7 @@ interface EditInvoiceTableProps {
 
 // Schema for a single price component
 const priceComponentSchema = z.object({
-  monetary_component_type: z.nativeEnum(MonetaryComponentType),
+  monetary_component_type: z.enum(MonetaryComponentType),
   code: z
     .object({
       code: z.string(),
@@ -110,17 +110,9 @@ const formSchema = z.object({
     z.object({
       id: z.string(),
       title: z.string(),
-      status: z.nativeEnum(ChargeItemStatus),
-      description: z
-        .string()
-        .optional()
-        .nullable()
-        .transform((val) => (val === "" ? null : val)),
-      note: z
-        .string()
-        .optional()
-        .nullable()
-        .transform((val) => (val === "" ? null : val)),
+      status: z.enum(ChargeItemStatus),
+      description: z.string().optional().nullable(),
+      note: z.string().optional().nullable(),
       ...chargeItemBaseSchema.shape,
     }),
   ),

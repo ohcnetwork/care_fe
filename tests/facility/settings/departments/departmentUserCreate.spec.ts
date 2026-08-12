@@ -15,7 +15,7 @@ test.describe("User Management in Departments", () => {
     facilityId = getFacilityId();
 
     await page.goto(`/facility/${facilityId}/settings/departments`);
-    await page.getByRole("table").getByText("Administration").first().click();
+    await page.getByText("Administration", { exact: true }).click();
     await page.getByRole("tab", { name: "Users" }).click();
   });
 
@@ -37,8 +37,6 @@ test.describe("User Management in Departments", () => {
     await test.step("Fill and submit user creation form", async () => {
       const userType = faker.helpers.arrayElement(USER_TYPES);
       const gender = faker.helpers.arrayElement(GENDERS);
-      await page.getByRole("combobox", { name: "User Type *" }).click();
-      await page.getByRole("option", { name: userType }).click();
       await page.getByRole("textbox", { name: "First Name *" }).fill(firstName);
       await page.getByRole("textbox", { name: "Last Name *" }).fill(lastName);
       await page.getByRole("textbox", { name: "Username" }).fill(username);
@@ -54,6 +52,19 @@ test.describe("User Management in Departments", () => {
         .fill(phoneNumber);
       await page.getByRole("combobox", { name: "Gender *" }).click();
       await page.getByRole("option", { name: gender, exact: true }).click();
+
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "Select organization" })
+        .click();
+      await page.getByPlaceholder("Search organization").fill(userType);
+      await page.getByRole("option", { name: userType }).click();
+      await page
+        .getByRole("combobox")
+        .filter({ hasText: "Select designation" })
+        .click();
+      await page.getByPlaceholder("Search Roles").fill("Member");
+      await page.getByRole("option", { name: "Member" }).click();
 
       const createButton = page.getByRole("button", { name: "Create User" });
       await createButton.click();
@@ -95,9 +106,6 @@ test.describe("User Management in Departments", () => {
     await expect(
       page.getByRole("heading", { name: "Add New User" }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("combobox", { name: "User Type *" }),
-    ).toHaveText("Nurse");
     await expect(
       page.getByRole("radio", { name: "Set password now" }),
     ).toBeChecked();

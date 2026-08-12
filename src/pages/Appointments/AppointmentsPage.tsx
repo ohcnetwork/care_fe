@@ -57,7 +57,6 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 
-import useAppHistory from "@/hooks/useAppHistory";
 import useFilters, { FilterState } from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
@@ -78,13 +77,10 @@ import {
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
-import {
-  dateQueryString,
-  formatDateTime,
-  formatPatientAge,
-} from "@/Utils/utils";
+import { dateQueryString, formatDateTime, goBack } from "@/Utils/utils";
 
 import { booleanFromString } from "@/common/utils";
+import { PatientAge } from "@/components/Patient/PatientAge";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import {
   dateFilter,
@@ -208,7 +204,6 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     .filter(Boolean) as TagConfig[];
 
   const { hasPermission } = usePermissions();
-  const { goBack } = useAppHistory();
 
   const { canViewAppointments } = getPermissions(
     hasPermission,
@@ -732,7 +727,7 @@ function AppointmentCard({
             {patient.name}
           </h3>
           <p className="text-sm text-gray-700">
-            {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
+            <PatientAge patient={patient} />, {t(`GENDER__${patient.gender}`)}
           </p>
           <p className="text-xs text-gray-500 mt-1">
             {formatDateTime(
@@ -959,8 +954,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
           <span className="flex flex-col">
             <span className="text-sm font-semibold">{patient.name}</span>
             <span className="text-xs text-gray-500">
-              {formatPatientAge(patient, true)},{" "}
-              {t(`GENDER__${patient.gender}`)}
+              <PatientAge patient={patient} />, {t(`GENDER__${patient.gender}`)}
             </span>
           </span>
         </span>
