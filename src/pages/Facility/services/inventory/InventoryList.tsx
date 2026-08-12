@@ -244,12 +244,15 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                 <TableHead>{t("expiration_date")}</TableHead>
                 <TableHead>{t("batch")}</TableHead>
                 <TableHead>{t("base_price")}</TableHead>
+                <TableHead>
+                  <span className="sr-only">{t("actions")}</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data?.results?.map((inventory) => (
                 <TableRow key={inventory.id}>
-                  <TableCell className="font-semibold space-x-2">
+                  <TableCell className="font-semibold">
                     <button
                       type="button"
                       className="hover:text-gray-700 underline"
@@ -262,19 +265,6 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                     >
                       {inventory.product.product_knowledge.name}
                     </button>
-                    <Link
-                      href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
-                      basePath="/"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <CareIcon
-                        icon="l-external-link-alt"
-                        className="size-4 text-gray-500 hover:text-gray-700"
-                      />
-                      <span className="sr-only">
-                        {t("view_product_details")}
-                      </span>
-                    </Link>
                   </TableCell>
                   <TableCell
                     className={cn(
@@ -315,6 +305,21 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                         }
                       />
                     )}
+                  </TableCell>
+                  <TableCell className="w-12">
+                    <Link
+                      href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
+                      basePath="/"
+                      className="flex items-center justify-center"
+                    >
+                      <CareIcon
+                        icon="l-external-link-alt"
+                        className="size-4 text-gray-500 hover:text-gray-700"
+                      />
+                      <span className="sr-only">
+                        {t("view_product_details")}
+                      </span>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}
