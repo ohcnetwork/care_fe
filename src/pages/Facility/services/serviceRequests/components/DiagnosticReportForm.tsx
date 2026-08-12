@@ -164,8 +164,14 @@ export function DiagnosticReportForm({
     (report) => report.status !== DiagnosticReportStatus.final,
   );
 
-  // Show the create form when there's a report type left to create and no
-  // active report in progress, or when no reports exist at all.
+  // Decide whether to show the "create report" form:
+  // - If report types are still available (multi-report case), show it only
+  //   when no report is currently in progress, so the user finishes the active
+  //   one before starting the next type.
+  // - If no report types are left, fall back to the single-report case: show it
+  //   only when no report exists yet. Once any report exists (active or final),
+  //   creation stays hidden permanently — e.g. a service request with a single
+  //   report type gets exactly one report and never offers "create" again.
   const showCreateReportForm = availableReportCodes.length
     ? activeDiagnosticReports.length === 0
     : diagnosticReports.length === 0;
