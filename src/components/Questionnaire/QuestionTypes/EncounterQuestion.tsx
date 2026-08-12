@@ -34,6 +34,7 @@ import {
   type EncounterEdit,
   type EncounterPriority,
   type EncounterRead,
+  type Hospitalization,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -95,32 +96,54 @@ function toEncounterEdit(read: EncounterRead): EncounterEdit {
   };
 }
 
+function resolveDischargeDisposition(
+  encounter: EncounterEdit,
+  server: EncounterRead | undefined,
+): EncounterDischargeDisposition | undefined {
+  const current = encounter.hospitalization?.discharge_disposition;
+  if (current) {
+    return current;
+  }
+  return encounter.status === EncounterStatus.DISCHARGED
+    ? careConfig.defaultDischargeDisposition
+    : server?.hospitalization?.discharge_disposition;
+}
+
+function resolveHospitalization(
+  encounter: EncounterEdit,
+  server: EncounterRead | undefined,
+): Hospitalization {
+  if (OUTPATIENT_ENCOUNTER_CLASSES.includes(encounter.encounter_class)) {
+    return {};
+  }
+  return {
+    ...encounter.hospitalization,
+    discharge_disposition: resolveDischargeDisposition(encounter, server),
+  };
+}
+
+function resolvePeriodEnd(
+  encounter: EncounterEdit,
+  server: EncounterRead | undefined,
+): string | undefined {
+  if (!TERMINAL_ENCOUNTER_STATUSES.includes(encounter.status)) {
+    return undefined;
+  }
+  // Leaving a terminal status clears the end date, so fall back to the
+  // recorded one rather than stamping "now" on the way back in.
+  return (
+    encounter.period.end ?? server?.period?.end ?? new Date().toISOString()
+  );
+}
+
 function normalizeEncounter(
   encounter: EncounterEdit,
   server: EncounterRead | undefined,
 ): EncounterEdit {
   return {
     ...encounter,
-    hospitalization: OUTPATIENT_ENCOUNTER_CLASSES.includes(
-      encounter.encounter_class,
-    )
-      ? {}
-      : {
-          ...encounter.hospitalization,
-          discharge_disposition:
-            encounter.status === EncounterStatus.DISCHARGED
-              ? (encounter.hospitalization?.discharge_disposition ??
-                careConfig.defaultDischargeDisposition)
-              : server?.hospitalization?.discharge_disposition,
-        },
-    period: {
-      ...encounter.period,
-      end: TERMINAL_ENCOUNTER_STATUSES.includes(encounter.status)
-        ? (encounter.period.end ??
-          server?.period?.end ??
-          new Date().toISOString())
-        : undefined,
-    },
+    hospitalization: resolveHospitalization(encounter, server),
+    period: { ...encounter.period, end: resolvePeriodEnd(encounter, server) },
   };
 }
 
@@ -159,11 +182,7 @@ export function EncounterQuestion({
   errors = [],
 }: EncounterQuestionProps) {
   // Fetch encounter data
-  const {
-    data: encounterData,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: encounterData, isLoading } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId },
@@ -184,11 +203,15 @@ export function EncounterQuestion({
     questionnaireResponse.values[0]?.value as EncounterEdit[] | undefined
   )?.[0];
 
-  // Seed the response from the server once. A later refetch must not silently
-  // discard edits the user has already made to the form.
+  // Seed the response from the server once per encounter. Skipped if the form
+  // already has an answer (e.g. a restored draft) so it isn't clobbered on remount.
   const seededEncounterId = useRef<string>(null);
   useEffect(() => {
-    if (!encounterData || seededEncounterId.current === encounterData.id) {
+    if (
+      !encounterData ||
+      encounter ||
+      seededEncounterId.current === encounterData.id
+    ) {
       return;
     }
     seededEncounterId.current = encounterData.id;
@@ -202,14 +225,11 @@ export function EncounterQuestion({
     );
   }, [
     encounterData,
+    encounter,
     toDischarge,
     updateQuestionnaireResponseCB,
     questionnaireResponse.question_id,
   ]);
-
-  if (isError) {
-    return <p className="text-sm text-gray-600">{t("network_failure")}</p>;
-  }
 
   if (isLoading || !encounter) {
     return <Skeleton className="h-64 w-full rounded-lg" />;
