@@ -83,7 +83,7 @@ const DiagnosisCard = ({
                 <div className="text-gray-500">{t("reported_by")}:</div>
                 <div className="mt-1 flex items-center gap-1.5">
                   <Avatar
-                    name={formatName(diagnosis.created_by)}
+                    name={formatName(diagnosis.created_by, true)}
                     className="size-5"
                     imageUrl={diagnosis.created_by.profile_picture_url}
                   />

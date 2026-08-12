@@ -1074,9 +1074,6 @@ export default function DispensedMedicationList({
         });
         toast.success(t("medication_dispense_updated"));
       },
-      onError: () => {
-        toast.error(t("error_updating_medication_dispenses"));
-      },
     });
 
   const handleUpdateDispenseOrder = (

@@ -92,7 +92,8 @@ const apiUrlMapSchema = jsonAsStringSchema
 
 const envSchema = z
   .object({
-    REACT_CARE_API_URL: z.string().url().optional(),
+    // An empty string is allowed and means "use relative, same-origin API requests".
+    REACT_CARE_API_URL: z.string().url().or(z.literal("")).optional(),
     REACT_CARE_URL_MAP: apiUrlMapSchema.optional(),
     REACT_APP_TITLE: z.string(),
     REACT_APP_META_DESCRIPTION: z.string(),
@@ -172,8 +173,7 @@ const envSchema = z
     REACT_MAX_FORM_DIALOG_FAVORITES: numberAsString.optional(),
   })
   .superRefine(async (data, ctx) => {
-    // Ensure at least one API URL configuration is provided
-    if (!data.REACT_CARE_API_URL && !data.REACT_CARE_URL_MAP) {
+    if (data.REACT_CARE_API_URL === undefined && !data.REACT_CARE_URL_MAP) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
