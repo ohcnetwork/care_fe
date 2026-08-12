@@ -6,6 +6,7 @@ import { BillMedicationLineItemSchemaType } from "@/pages/Facility/services/phar
 import { calculateTotalPriceWithQuantity } from "@/types/base/monetaryComponent/monetaryComponent";
 import { MAX_DISPENSES_PER_DISPENSE_ORDER } from "@/types/emr/dispenseOrder/dispenseOrder";
 import { add } from "@/Utils/decimal";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { AlertTriangleIcon, ArrowRightIcon, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -93,6 +94,7 @@ export const BillMedicationsFooter = ({
             )}
             {isBillingMedications ? t("billing") : t("bill_selected")}
             {!isBillingMedications && <ArrowRightIcon className="size-4" />}
+            <ShortcutBadge actionId="submit-action" />
           </Button>
         </div>
       </div>

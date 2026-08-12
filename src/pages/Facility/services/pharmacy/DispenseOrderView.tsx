@@ -91,6 +91,7 @@ import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDisp
 import { AddDispenseMedicationRow } from "@/pages/Facility/services/pharmacy/components/AddDispenseMedicationRow";
 import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
 import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -816,6 +817,7 @@ export function DispenseOrderView({
                       disabled={isUpdatingStatus || !canCompleteDispense}
                     >
                       {t("complete_dispense")}
+                      <ShortcutBadge actionId="dispense-button" />
                     </Button>
                   </span>
                 </TooltipTrigger>

@@ -183,7 +183,7 @@ const PrescriptionCard = ({
             </span>
           )}
         </div>
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-2 items-center">
           {/* Completed or cancelled badge */}
           {!isActive && (
             <Badge variant={PRESCRIPTION_STATUS_STYLES[prescription.status]}>
@@ -199,12 +199,13 @@ const PrescriptionCard = ({
 
           {/* Collapse button */}
           {/* Print button */}
-          <Button variant="outline" size="icon" asChild>
+          <Button variant="outline" asChild>
             <Link
               href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
               basePath="/"
             >
               <PrinterIcon />
+              <span>{t("print")}</span>
             </Link>
           </Button>
 
