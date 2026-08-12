@@ -25,7 +25,7 @@ import useUserPreferences from "@/hooks/useUserPreferences";
 import { getPermissions } from "@/common/Permissions";
 
 import {
-  CalendarDuoIcon,
+  AppointmentDuoIcon,
   HeartDuoIcon,
   StethoscopeDuoIcon,
 } from "@/CAREUI/icons/CustomIcons";
@@ -78,7 +78,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     {
       title: t("appointments"),
       description: t("view_appointments"),
-      icon: CalendarDuoIcon,
+      icon: AppointmentDuoIcon,
       href: `/facility/${facilityId}/appointments`,
       visible: canViewAppointments,
     },
