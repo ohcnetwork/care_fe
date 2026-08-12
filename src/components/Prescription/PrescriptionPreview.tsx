@@ -19,6 +19,7 @@ import {
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
@@ -120,9 +121,7 @@ const DetailRow = ({
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span
-        className={`ml-1 ${isStrong ? "font-semibold" : ""} ${valueClassName}`}
-      >
+      <span className={cn("ml-1", isStrong && "font-semibold", valueClassName)}>
         {value || "-"}
       </span>
     </div>
