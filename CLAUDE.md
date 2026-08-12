@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## What is CARE?
+All shared guidance for AI coding agents lives in a single source of truth: [`AGENTS.md`](./AGENTS.md). Claude Code inherits that guidance via the import below — keep repository conventions in `AGENTS.md` so every agent (Claude Code, Codex, Cursor, GitHub Copilot, Gemini, etc.) stays in sync.
 
 CARE is a Digital Public Good building an open source EMR + Hospital Management system. This is the React frontend (React 19 + TypeScript + Vite).
 
@@ -266,3 +266,4 @@ npx tsc --noEmit
 # 3. Run related tests (requires backend + build)
 npx playwright test tests/path/to/related/
 ```
+@AGENTS.md

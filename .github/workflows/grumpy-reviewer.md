@@ -44,7 +44,7 @@ safe-outputs:
     side: RIGHT
   submit-pull-request-review:
     max: 1
-    allowed-events: [COMMENT]
+    allowed-events: [COMMENT, APPROVE]
   missing-tool:
     create-issue: true
 ---
@@ -73,11 +73,14 @@ standards — follow it. This file only defines the *scope* and the *outputs*.
    sentences) and always explain *why* it's a problem.
 3. Post at most 10 inline comments — prioritize the ones that actually matter,
    don't manufacture nitpicks to fill the quota.
-4. Optionally submit a single consolidated review with
-   `submit-pull-request-review` (event `COMMENT`) summarizing the overall state.
-   Keep bot reviews informative and non-blocking.
+4. Submit a single consolidated review with `submit-pull-request-review` that
+   summarizes the overall state. Select the event as follows:
+   - Use `APPROVE` when the changed lines have no problem that must be fixed.
+     Small style preferences are not a reason to hold back an approval.
+   - Use `COMMENT` when you found a problem, or when you are not sure.
+   Never use `REQUEST_CHANGES`. Keep bot reviews informative and non-blocking.
 5. If the code on the changed lines is genuinely fine, say so — begrudgingly —
-   in the consolidated review and skip the nitpicks.
+   in the consolidated review, approve it, and skip the nitpicks.
 
 ## Security
 
