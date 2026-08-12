@@ -38,9 +38,9 @@ test.describe("Schedule Exceptions", () => {
     await page.goto(userAvailabilityUrl);
     await page.waitForLoadState("networkidle");
 
-    // Switch to exceptions tab
-    await page.getByRole("tab", { name: "Exceptions" }).click();
-    await expect(page.getByRole("tabpanel")).toBeVisible();
+    // Switch to exceptions view
+    await page.getByRole("button", { name: "Exceptions" }).click();
+    await expect(page.getByRole("button", { name: "Add Exception" })).toBeVisible();
   });
 
   test("should display empty state when no exceptions exist", async ({
