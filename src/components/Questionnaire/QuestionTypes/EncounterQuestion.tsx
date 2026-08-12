@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -80,6 +81,49 @@ const NON_SELECTABLE_ENCOUNTER_STATUSES: EncounterStatus[] = [
   EncounterStatus.COMPLETED,
 ];
 
+const OUTPATIENT_ENCOUNTER_CLASSES: EncounterClass[] = ["amb", "vr", "hh"];
+
+function toEncounterEdit(read: EncounterRead): EncounterEdit {
+  return {
+    status: read.status,
+    encounter_class: read.encounter_class,
+    period: read.period,
+    priority: read.priority,
+    hospitalization: read.hospitalization,
+    external_identifier: read.external_identifier,
+    discharge_summary_advice: read.discharge_summary_advice,
+  };
+}
+
+function normalizeEncounter(
+  encounter: EncounterEdit,
+  server: EncounterRead | undefined,
+): EncounterEdit {
+  return {
+    ...encounter,
+    hospitalization: OUTPATIENT_ENCOUNTER_CLASSES.includes(
+      encounter.encounter_class,
+    )
+      ? {}
+      : {
+          ...encounter.hospitalization,
+          discharge_disposition:
+            encounter.status === EncounterStatus.DISCHARGED
+              ? (encounter.hospitalization?.discharge_disposition ??
+                careConfig.defaultDischargeDisposition)
+              : server?.hospitalization?.discharge_disposition,
+        },
+    period: {
+      ...encounter.period,
+      end: TERMINAL_ENCOUNTER_STATUSES.includes(encounter.status)
+        ? (encounter.period.end ??
+          server?.period?.end ??
+          new Date().toISOString())
+        : undefined,
+    },
+  };
+}
+
 const ENCOUNTER_FIELDS: FieldDefinitions = {
   DISCHARGE_DISPOSITION: {
     key: "hospitalization.discharge_disposition",
@@ -115,7 +159,11 @@ export function EncounterQuestion({
   errors = [],
 }: EncounterQuestionProps) {
   // Fetch encounter data
-  const { data: encounterData, isLoading } = useQuery({
+  const {
+    data: encounterData,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["encounter", encounterId],
     queryFn: query(encounterApi.get, {
       pathParams: { id: encounterId },
@@ -130,123 +178,54 @@ export function EncounterQuestion({
     errors,
   );
 
-  const [encounter, setEncounter] = useState<EncounterEdit>({
-    status: EncounterStatus.UNKNOWN,
-    encounter_class: careConfig.defaultEncounterType,
-    period: {
-      start: new Date().toISOString(),
-      end: undefined,
-    },
-    priority: "routine",
-    external_identifier: "",
-    hospitalization: {
-      re_admission: false,
-      admit_source: "other",
-      discharge_disposition: careConfig.defaultDischargeDisposition,
-      diet_preference: "none",
-    },
-    discharge_summary_advice: null,
-  });
+  // The questionnaire response is the single source of truth for the encounter
+  // being edited; a copy in local state only ever drifts out of sync with it.
+  const encounter = (
+    questionnaireResponse.values[0]?.value as EncounterEdit[] | undefined
+  )?.[0];
 
-  // Transform EncounterRead to EncounterEdit format
-  const transformEncounterForUpdate = (
-    read: EncounterRead,
-  ): Partial<EncounterEdit> => {
-    return {
-      status: read.status,
-      encounter_class: read.encounter_class,
-      period: read.period,
-      priority: read.priority,
-      hospitalization: read.hospitalization,
-      external_identifier: read.external_identifier,
-      discharge_summary_advice: read.discharge_summary_advice,
-    };
-  };
+  // Seed the response from the server once. A later refetch must not silently
+  // discard edits the user has already made to the form.
+  const seededEncounterId = useRef<string>(null);
+  useEffect(() => {
+    if (!encounterData || seededEncounterId.current === encounterData.id) {
+      return;
+    }
+    seededEncounterId.current = encounterData.id;
+    const seed = toEncounterEdit(encounterData);
+    if (toDischarge === "true") {
+      seed.status = EncounterStatus.DISCHARGED;
+    }
+    updateQuestionnaireResponseCB(
+      [{ type: "encounter", value: [normalizeEncounter(seed, encounterData)] }],
+      questionnaireResponse.question_id,
+    );
+  }, [
+    encounterData,
+    toDischarge,
+    updateQuestionnaireResponseCB,
+    questionnaireResponse.question_id,
+  ]);
+
+  if (isError) {
+    return <p className="text-sm text-gray-600">{t("network_failure")}</p>;
+  }
+
+  if (isLoading || !encounter) {
+    return <Skeleton className="h-64 w-full rounded-lg" />;
+  }
 
   const handleUpdateEncounter = (updates: Partial<EncounterEdit>) => {
     clearError();
-    const newEncounter = { ...encounter, ...updates };
-    if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
-      newEncounter.hospitalization = {};
-    }
-
-    if (
-      ["imp", "obsenc", "emer"].includes(encounter.encounter_class) &&
-      newEncounter.status === EncounterStatus.DISCHARGED
-    ) {
-      newEncounter.hospitalization = {
-        ...newEncounter.hospitalization,
-        discharge_disposition:
-          newEncounter.hospitalization?.discharge_disposition ??
-          careConfig.defaultDischargeDisposition,
-      };
-    } else if ("hospitalization" in newEncounter) {
-      newEncounter.hospitalization = {
-        ...newEncounter.hospitalization,
-        discharge_disposition:
-          encounterData?.hospitalization?.discharge_disposition,
-      };
-    }
-
-    // Create the full encounter request object
-    const encounterRequest: EncounterEdit = {
-      ...newEncounter,
-    };
-
-    // Create the response value with the encounter request
-    const responseValue: ResponseValue = {
-      type: "encounter",
-      value: [encounterRequest],
-    };
-
+    const next = normalizeEncounter(
+      { ...encounter, ...updates },
+      encounterData,
+    );
     updateQuestionnaireResponseCB(
-      [responseValue],
+      [{ type: "encounter", value: [next] }],
       questionnaireResponse.question_id,
     );
   };
-
-  useEffect(() => {
-    const isTerminal = TERMINAL_ENCOUNTER_STATUSES.includes(encounter.status);
-    const desiredEnd = isTerminal
-      ? (encounter.period.end ??
-        encounterData?.period?.end ??
-        new Date().toISOString())
-      : undefined;
-
-    if (encounter.period.end !== desiredEnd) {
-      handleUpdateEncounter({
-        period: { ...encounter.period, end: desiredEnd },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [encounter.status]);
-
-  // Update encounter state when data is loaded
-  useEffect(() => {
-    if (encounterData) {
-      const updates = transformEncounterForUpdate(encounterData);
-      if (toDischarge === "true") {
-        updates.status = EncounterStatus.DISCHARGED;
-      }
-      handleUpdateEncounter(updates);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [encounterData]);
-
-  useEffect(() => {
-    const formStateValue = (
-      questionnaireResponse.values[0]?.value as EncounterEdit[]
-    )?.[0];
-    if (formStateValue) {
-      setEncounter(() => ({
-        ...formStateValue,
-      }));
-    }
-  }, [questionnaireResponse]);
-
-  if (isLoading) {
-    return <div>{t("loading_encounter")}</div>;
-  }
 
   const isCurrentStatusNonSelectable =
     NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounter.status);
