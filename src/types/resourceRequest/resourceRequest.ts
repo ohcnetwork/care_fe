@@ -57,6 +57,22 @@ export enum ResourceRequestCategory {
   OTHER = "other",
 }
 
+/**
+ * Beckn transaction state the backend persists on a resource request when it is
+ * created through the Care Coordination Network referral flow.
+ */
+export interface BecknResourceExtension {
+  transactionId?: string;
+  coordinationId?: string;
+  contract?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+export interface ResourceRequestExtensions {
+  beckn?: BecknResourceExtension;
+  [key: string]: unknown;
+}
+
 export interface ResourceRequestBase {
   emergency: boolean;
   title: string;
@@ -74,6 +90,7 @@ export interface ResourceRequestListRead extends ResourceRequestBase {
   assigned_facility: FacilityRead | null;
   created_date: string;
   modified_date: string;
+  extensions?: ResourceRequestExtensions;
 }
 
 export interface ResourceRequestRead extends ResourceRequestListRead {

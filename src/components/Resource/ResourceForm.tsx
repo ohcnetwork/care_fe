@@ -9,21 +9,20 @@ import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import RadioInput from "@/components/ui/RadioInput";
+import BackButton from "@/components/Common/BackButton";
+import Loading from "@/components/Common/Loading";
+import PageTitle from "@/components/Common/PageTitle";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Select,
   SelectContent,
@@ -32,21 +31,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-
-import Loading from "@/components/Common/Loading";
-import PageTitle from "@/components/Common/PageTitle";
-import UserSelector from "@/components/Common/UserSelector";
-
-import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName, mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
-import validators from "@/Utils/validators";
-import BackButton from "@/components/Common/BackButton";
+import { valuesOf } from "@/Utils/utils";
+import BecknFlow from "@/components/Resource/beckn/BecknFlow";
+import { healthServiceTypeForCategory } from "@/types/beckn/becknModels";
+import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
-import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
   getResourceRequestCategoryEnum,
   RESOURCE_REQUEST_STATUS_OPTIONS,
@@ -55,41 +47,49 @@ import {
   ResourceRequestStatus,
 } from "@/types/resourceRequest/resourceRequest";
 import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
-import { UserReadMinimal } from "@/types/user/user";
 
 interface ResourceProps {
-  facilityId: number;
+  facilityId: string;
   id?: string;
 }
 
+// Consultation discover searches the network for Care Coordination Desks; the
+// user then picks which desk/facility to assign the referral to.
+const COORDINATION_DESK_SEARCH = "Care Coordination Desk";
+
+/**
+ * Best-effort ABHA lookup from a patient's identifiers (matched by system or
+ * display), threaded into the Beckn participant. Returns undefined when the
+ * patient has no ABHA on file — the flow then confirms with name only.
+ */
+function findAbha(patient?: PatientRead): string | undefined {
+  const identifier = (patient?.instance_identifiers ?? []).find((i) => {
+    const system = i.config?.config?.system?.toLowerCase() ?? "";
+    const display = i.config?.config?.display?.toLowerCase() ?? "";
+    return (
+      system.includes("abha") ||
+      system.includes("abdm") ||
+      display.includes("abha")
+    );
+  });
+  return identifier?.value;
+}
+
+/**
+ * Minimal resource-request form for the Care Coordination Network flow.
+ *
+ * Exposes only the linked patient (read-only, taken from the
+ * `related_patient` query param), status, category and title. All other fields the backend accepts as optional are
+ * sent with safe defaults so the create/update flow continues unchanged.
+ */
 export default function ResourceForm({ facilityId, id }: ResourceProps) {
-  const [facilitySearch, setFacilitySearch] = useState("");
   const { t } = useTranslation();
   const [{ related_patient }] = useQueryParams();
-  const [assignedToUser, setAssignedToUser] = useState<UserReadMinimal>();
-  const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
     status: z.enum(ResourceRequestStatus),
     category: z.enum(ResourceRequestCategory),
-    assigned_facility: z
-      .object({
-        id: z.string(),
-        name: z.string(),
-      })
-      .nullable(),
-    emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
-    reason: z
-      .string()
-      .trim()
-      .min(1, { message: t("field_required") }),
-    referring_facility_contact_name: z
-      .string()
-      .min(1, { message: t("field_required") }),
-    referring_facility_contact_number: validators().phoneNumber.required,
-    priority: z.number().default(1),
-    assigned_to: z.string().optional(),
   });
 
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
@@ -114,13 +114,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
       status: ResourceRequestStatus.PENDING,
-      assigned_to: "",
-      emergency: "false" as const,
       title: "",
-      reason: "",
-      referring_facility_contact_name: "",
-      referring_facility_contact_number: "",
-      priority: 1,
     },
   });
 
@@ -129,34 +123,19 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       form.reset({
         status: resourceData.status,
         category: getResourceRequestCategoryEnum(resourceData.category),
-        assigned_facility: resourceData.assigned_facility,
-        assigned_to: resourceData.assigned_to?.id,
-        emergency: resourceData.emergency ? "true" : "false",
         title: resourceData.title,
-        reason: resourceData.reason,
-        referring_facility_contact_name:
-          resourceData.referring_facility_contact_name,
-        referring_facility_contact_number:
-          resourceData.referring_facility_contact_number,
-        priority: resourceData.priority,
       });
-      if (resourceData.assigned_to) {
-        setAssignedToUser(resourceData.assigned_to);
-      } else {
-        setAssignedToUser(undefined);
-      }
     }
   }, [resourceData, form]);
 
-  const { mutate: createResource, isPending } = useMutation({
-    mutationFn: mutate(resourceRequestApi.create),
-    onSuccess: (data: ResourceRequestRead) => {
-      toast.success(t("resource_created_successfully"));
-      navigate(`/facility/${facilityId}/resource/${data.id}`, {
-        replace: true,
-      });
-    },
-  });
+  // Consultation referrals are created by the backend on Beckn `confirm` (not by
+  // a direct POST) to avoid duplicating the ResourceRequest. Submitting a NEW
+  // request starts the Beckn flow; `flowIntent` holds the discover parameters.
+  const [flowIntent, setFlowIntent] = useState<{
+    textSearch?: string;
+    healthServiceType?: string;
+    title?: string;
+  } | null>(null);
 
   const { mutate: updateResource, isPending: isUpdatePending } = useMutation({
     mutationFn: mutate(resourceRequestApi.update, {
@@ -174,64 +153,76 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     const resourcePayload = {
       status: data.status,
       category: data.category,
-      origin_facility: String(facilityId),
-      assigned_facility: data.assigned_facility?.id || null,
-      assigned_to: assignedToUser?.id || null,
-      approving_facility: null,
-      emergency: data.emergency === "true",
       title: data.title,
-      reason: data.reason,
-      referring_facility_contact_name: data.referring_facility_contact_name,
-      referring_facility_contact_number: data.referring_facility_contact_number,
-      related_patient: related_patient,
-      priority: data.priority,
+      origin_facility: String(facilityId),
+      assigned_facility: null,
+      assigned_to: null,
+      approving_facility: null,
+      emergency: false,
+      reason: "",
+      referring_facility_contact_name: "",
+      referring_facility_contact_number: "",
+      related_patient: related_patient ?? null,
+      priority: 1,
     };
 
     if (id) {
       updateResource({ ...resourcePayload });
     } else {
-      createResource(resourcePayload);
-    }
-  };
-  const { data: facilities } = useQuery({
-    queryKey: ["facilities", facilitySearch],
-    queryFn: query.debounced(publicFacilityApi.getAll, {
-      queryParams: {
-        search_text: facilitySearch ? facilitySearch : undefined,
-        limit: 50,
-      },
-    }),
-  });
-
-  const facilityOptions = facilities?.results.map((facility) => ({
-    label: facility.name,
-    value: facility.id,
-  }));
-
-  const handleUserChange = (user: UserReadMinimal) => {
-    form.setValue("assigned_to", user.id, { shouldDirty: true });
-    setAssignedToUser(user);
-  };
-
-  const fillMyDetails = () => {
-    form.setValue("referring_facility_contact_name", formatName(authUser), {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    if (authUser.phone_number) {
-      form.setValue(
-        "referring_facility_contact_number",
-        authUser.phone_number,
-        {
-          shouldDirty: true,
-          shouldValidate: true,
-        },
-      );
+      setFlowIntent({
+        textSearch: COORDINATION_DESK_SEARCH,
+        healthServiceType: healthServiceTypeForCategory(data.category),
+        title: data.title,
+      });
     }
   };
 
-  if (isPending || isUpdatePending) {
+  if (isUpdatePending) {
     return <Loading />;
+  }
+
+  if (flowIntent && !id) {
+    return (
+      <div className="container mx-auto max-w-4xl space-y-6 p-4 md:p-6">
+        <PageTitle title={t("create_resource_request")} />
+        <Separator />
+        {patientData ? (
+          <Alert>
+            <div className="flex items-center gap-2">
+              <CareIcon icon="l-user" className="size-5 text-blue-700" />
+              <AlertDescription className="text-sm text-blue-700">
+                {t("linked_patient")}:{" "}
+                <strong className="font-medium">{patientData.name}</strong>
+              </AlertDescription>
+            </div>
+          </Alert>
+        ) : null}
+        <BecknFlow
+          serviceType="consultation"
+          facilityId={String(facilityId)}
+          patient={{
+            name: patientData?.name,
+            gender: patientData?.gender,
+            dateOfBirth: patientData?.date_of_birth ?? undefined,
+            abha: findAbha(patientData),
+          }}
+          discover={flowIntent}
+          title={flowIntent.title}
+          autoStart
+          onConfirmed={() => {
+            toast.success(t("resource_created_successfully"));
+            navigate(
+              `/facility/${facilityId}/patient/${related_patient}/resource_requests`,
+            );
+          }}
+        />
+        <div className="flex justify-start">
+          <Button variant="outline" onClick={() => setFlowIntent(null)}>
+            {t("ccn_back_to_form")}
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -263,193 +254,27 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
             </Alert>
           )}
 
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium">{t("basic_information")}</h3>
-              <p className="text-sm text-gray-500">
-                {t("resource_request_basic_info_description")}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 items-start">
-              <FormField
-                control={form.control}
-                name="assigned_facility"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>
-                      {t("facility_for_care_support")}
-                    </FormLabel>
-                    <FormControl>
-                      <Autocomplete
-                        {...field}
-                        showClearButton={!id}
-                        options={mergeAutocompleteOptions(
-                          facilityOptions ?? [],
-                          field.value
-                            ? {
-                                label: field.value.name,
-                                value: field.value.id,
-                              }
-                            : undefined,
-                        )}
-                        value={field.value?.id ?? ""}
-                        placeholder={t("start_typing_to_search")}
-                        onSearch={setFacilitySearch}
-                        onChange={(value) => {
-                          const facility = facilities?.results.find(
-                            (f) => f.id === value,
-                          );
-                          if (facility) {
-                            form.setValue("assigned_facility", facility, {
-                              shouldDirty: true,
-                              shouldValidate: true,
-                            });
-                          } else {
-                            form.resetField("assigned_facility");
-                          }
-
-                          // When the assigned facility changes, we need to clear the assigned to user
-                          form.setValue("assigned_to", undefined, {
-                            shouldDirty: true,
-                          });
-                          setAssignedToUser(undefined);
-                        }}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t("select_facility_description")}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="emergency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("is_this_an_emergency")}</FormLabel>
-                    <FormControl>
-                      <RadioInput
-                        {...field}
-                        onValueChange={field.onChange}
-                        options={[
-                          { value: "true", label: t("yes") },
-                          { value: "false", label: t("no") },
-                        ]}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t("emergency_description")}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("status")}</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger ref={field.ref}>
-                          <SelectValue placeholder={t("select_status")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {RESOURCE_REQUEST_STATUS_OPTIONS.map((option) => (
-                          <SelectItem key={option.text} value={option.text}>
-                            {t(`resource_request_status__${option.text}`)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("category")}</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger ref={field.ref}>
-                          <SelectValue
-                            placeholder={t("category_description")}
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {valuesOf(ResourceRequestCategory).map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {t(`resource_request_category__${category}`)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {id && (
-                <FormField
-                  control={form.control}
-                  name="assigned_to"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>{t("assigned_to")}</FormLabel>
-                      <FormControl>
-                        <UserSelector
-                          facilityId={form.watch("assigned_facility")?.id}
-                          selected={assignedToUser}
-                          onChange={handleUserChange}
-                          placeholder={t("search_users")}
-                          noOptionsMessage={t("no_users_found")}
-                          popoverClassName="w-full"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            </div>
-          </div>
-          <Separator />
-
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium">{t("request_details")}</h3>
-              <p className="text-sm text-gray-500">
-                {t("resource_request_details_description")}
-              </p>
-            </div>
-
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 items-start">
             <FormField
               control={form.control}
-              name="title"
+              name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel aria-required>{t("request_title")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder={t("request_title_placeholder")}
-                      onChange={(value) => field.onChange(value)}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    {t("request_title_description")}
-                  </FormDescription>
+                  <FormLabel aria-required>{t("status")}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger ref={field.ref}>
+                        <SelectValue placeholder={t("select_status")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {RESOURCE_REQUEST_STATUS_OPTIONS.map((option) => (
+                        <SelectItem key={option.text} value={option.text}>
+                          {t(`resource_request_status__${option.text}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -457,108 +282,62 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
             <FormField
               control={form.control}
-              name="reason"
+              name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel aria-required>{t("request_reason")}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder={t("request_reason_placeholder")}
-                      onChange={(value) => field.onChange(value)}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    {t("request_reason_description")}
-                  </FormDescription>
+                  <FormLabel aria-required>{t("category")}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger ref={field.ref}>
+                        <SelectValue placeholder={t("category_description")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {valuesOf(ResourceRequestCategory).map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {t(`resource_request_category__${category}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          <Separator />
-
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
-              <div>
-                <h3 className="text-lg font-medium">
-                  {t("contact_information")}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {t("contact_information_description")}
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={fillMyDetails}
-                className="shrink-0"
-              >
-                <CareIcon icon="l-user" className="mr-2 size-4" />
-                {t("fill_my_details")}
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 items-start">
-              <FormField
-                control={form.control}
-                name="referring_facility_contact_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("contact_person")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        onChange={(value) => field.onChange(value)}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t("contact_person_description")}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="referring_facility_contact_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel aria-required>{t("contact_phone")}</FormLabel>
-                    <FormControl>
-                      <PhoneInput
-                        {...field}
-                        onChange={(value) => field.onChange(value)}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t("contact_phone_description")}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel aria-required>{t("request_title")}</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder={t("request_title_placeholder")}
+                    onChange={(value) => field.onChange(value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <div className="flex justify-end gap-4 border-t border-gray-200 pt-4">
             <BackButton variant="outline">{t("cancel")}</BackButton>
             <Button
               type="submit"
               variant="primary"
-              disabled={
-                id ? isUpdatePending || !form.formState.isDirty : isPending
-              }
+              disabled={id ? isUpdatePending || !form.formState.isDirty : false}
             >
-              {isPending && (
+              {isUpdatePending && (
                 <CareIcon
                   icon="l-spinner"
                   className="mr-2 size-4 animate-spin"
                 />
               )}
-              {isPending ? t("submitting") : t("submit")}
+              {isUpdatePending ? t("submitting") : t("submit")}
             </Button>
           </div>
         </form>
