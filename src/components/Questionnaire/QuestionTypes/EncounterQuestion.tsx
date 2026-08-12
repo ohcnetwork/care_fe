@@ -66,6 +66,12 @@ interface EncounterQuestionProps {
   errors?: QuestionValidationError[];
 }
 
+const NON_SELECTABLE_ENCOUNTER_STATUSES: EncounterStatus[] = [
+  EncounterStatus.DISCHARGED,
+  EncounterStatus.UNKNOWN,
+  EncounterStatus.COMPLETED,
+];
+
 const ENCOUNTER_FIELDS: FieldDefinitions = {
   DISCHARGE_DISPOSITION: {
     key: "hospitalization.discharge_disposition",
@@ -271,6 +277,17 @@ export function EncounterQuestion({
     return <div>{t("loading_encounter")}</div>;
   }
 
+  const isCurrentStatusNonSelectable =
+    NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounter.status);
+  const selectableEncounterStatuses = Object.values(EncounterStatus).filter(
+    (encounterStatus) => {
+      if (isCurrentStatusNonSelectable) {
+        return encounterStatus === encounter.status;
+      }
+      return !NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounterStatus);
+    },
+  );
+
   return (
     <div className="space-y-6">
       <QuestionLabel question={question} />
@@ -293,18 +310,13 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(EncounterStatus)
-                .filter((encounterStatus: EncounterStatus) =>
-                  encounter.status === EncounterStatus.DISCHARGED
-                    ? encounterStatus === EncounterStatus.DISCHARGED
-                    : encounterStatus !== EncounterStatus.DISCHARGED &&
-                      encounterStatus !== EncounterStatus.UNKNOWN,
-                )
-                .map((encounterStatus: EncounterStatus) => (
+              {selectableEncounterStatuses.map(
+                (encounterStatus: EncounterStatus) => (
                   <SelectItem key={encounterStatus} value={encounterStatus}>
                     {t(`encounter_status__${encounterStatus}`)}
                   </SelectItem>
-                ))}
+                ),
+              )}
             </SelectContent>
           </Select>
         </div>
