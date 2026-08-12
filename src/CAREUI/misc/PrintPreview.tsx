@@ -33,7 +33,7 @@ type Props = {
   children: ReactNode;
   disabled?: boolean;
   className?: string;
-  title: string;
+  title: ReactNode;
   showBackButton?: boolean;
   watermark?: WatermarkProps;
   facility?: FacilityRead;

@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 
 export interface IPageTitleProps {
-  title: string;
+  title: ReactNode;
 }
 
 export default function PageHeadTitle({ title }: IPageTitleProps) {

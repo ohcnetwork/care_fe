@@ -30,6 +30,7 @@ export interface DetailRowProps {
   label: string;
   value?: string | null;
   isStrong?: boolean;
+  valueClassName?: string;
 }
 
 const PrescriptionContent = ({
@@ -109,12 +110,19 @@ const PrescriptionContent = ({
   );
 };
 
-const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
+const DetailRow = ({
+  label,
+  value,
+  isStrong = false,
+  valueClassName = "",
+}: DetailRowProps) => {
   return (
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
+      <span
+        className={`ml-1 ${isStrong ? "font-semibold" : ""} ${valueClassName}`}
+      >
         {value || "-"}
       </span>
     </div>
@@ -191,7 +199,12 @@ export const PrescriptionPreview = ({
 
   return (
     <PrintPreview
-      title={`${t("prescriptions")} - ${patient.name}`}
+      title={
+        <>
+          {t("prescriptions")} -{" "}
+          <span className="capitalize">{patient.name}</span>
+        </>
+      }
       disabled={!hasMedications}
       facility={facility}
       templateSlug={PrintTemplateType.prescription}
@@ -201,7 +214,12 @@ export const PrescriptionPreview = ({
           {/* Patient Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6 pb-3">
             <div className="space-y-1">
-              <DetailRow label={t("patient")} value={patient.name} isStrong />
+              <DetailRow
+                label={t("patient")}
+                value={patient.name}
+                isStrong
+                valueClassName="capitalize"
+              />
               <DetailRow
                 label={`${t("age")} / ${t("sex")}`}
                 value={

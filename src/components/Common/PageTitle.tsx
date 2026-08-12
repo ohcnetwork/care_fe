@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import PageHeadTitle from "@/components/Common/PageHeadTitle";
 
 export interface PageTitleProps {
-  title: string;
+  title: ReactNode;
   className?: string;
   componentRight?: ReactNode;
   isInsidePage?: boolean;
