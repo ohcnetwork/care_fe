@@ -313,14 +313,14 @@ const PrescriptionSummary = ({
           </span>
         )}
       </div>
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-2 items-center">
         <FormField
           control={form.control}
           name={`${name}.markComplete`}
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 pr-2">
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
@@ -334,7 +334,7 @@ const PrescriptionSummary = ({
             </FormItem>
           )}
         />
-        <Button variant="outline" size="icon" asChild>
+        <Button variant="outline" asChild>
           <Link
             href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
             basePath="/"
@@ -342,6 +342,7 @@ const PrescriptionSummary = ({
             rel="noopener noreferrer"
           >
             <PrinterIcon />
+            {t("print")}
           </Link>
         </Button>
         <DropdownMenu>
