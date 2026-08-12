@@ -247,9 +247,12 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
               className="text-sm whitespace-pre-wrap flex items-center gap-2 text-secondary-800"
             >
               {formatValue(value, question.type)}
-              {precedentUnit && (precedentUnit.display || precedentUnit.code) && (
-                <span className="ml-1 text-xs">{precedentUnit.display || precedentUnit.code}</span>
-              )}
+              {precedentUnit &&
+                (precedentUnit.display || precedentUnit.code) && (
+                  <span className="ml-1 text-xs">
+                    {precedentUnit.display || precedentUnit.code}
+                  </span>
+                )}
               {coding && (
                 <span className="ml-1 text-xs">
                   {coding.display} ({coding.code})
