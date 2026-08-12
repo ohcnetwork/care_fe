@@ -31,7 +31,6 @@ applyTo: "src/components/**/*.{ts,tsx}"
 ## Patient Name Display
 Whenever a patient name (`patient.name` from `PatientRead`) is rendered to the user, it MUST appear in title case (first letter of each word capitalized). Apply this consistently everywhere patient names surface.
 - Preferred: add the Tailwind `capitalize` class to the element that renders the name, e.g. `<span className="capitalize">{patient.name}</span>` or `className="capitalize"` on the existing rendering element. This handles casing via CSS and keeps the stored value untouched.
-- Titles/strings: when a name is embedded in a value that can't take a CSS class (page/print titles, `document.title`, template strings), build the title as a `ReactNode` and wrap only the name in `<span className="capitalize">{patient.name}</span>`. Title props such as `PrintPreview`/`Page`/`PageTitle` `title` accept `ReactNode` for exactly this reason.
 - Do NOT mutate or pre-transform the stored name for display (avoid ad-hoc `toUpperCase()`/`properCase()` on patient names) — rely on the `capitalize` class so the underlying data stays intact.
 - `patient.name` is a single free-text field. For user/practitioner names (first/last name objects) use `formatName()` from `@/Utils/utils`, not this rule.
 

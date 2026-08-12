@@ -199,12 +199,7 @@ export const PrescriptionPreview = ({
 
   return (
     <PrintPreview
-      title={
-        <>
-          {t("prescriptions")} -{" "}
-          <span className="capitalize">{patient.name}</span>
-        </>
-      }
+      title={t("prescriptions")}
       disabled={!hasMedications}
       facility={facility}
       templateSlug={PrintTemplateType.prescription}
