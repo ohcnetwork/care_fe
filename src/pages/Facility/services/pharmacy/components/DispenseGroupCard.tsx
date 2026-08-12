@@ -87,9 +87,11 @@ interface DispenseEditContext {
 function DispenseItemsTable({
   dispenses,
   edit,
+  orderClosed,
 }: {
   dispenses: MedicationDispenseRead[];
   edit?: DispenseEditContext;
+  orderClosed?: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -215,7 +217,10 @@ function DispenseItemsTable({
 
             {/* Status */}
             <div className="bg-white flex flex-col justify-center py-2 px-3 col-start-4 xl:min-w-48">
-              <DispenseStatusSelect dispense={dispense} />
+              <DispenseStatusSelect
+                dispense={dispense}
+                disabled={orderClosed}
+              />
             </div>
 
             {/* Actions */}
@@ -241,8 +246,10 @@ function DispenseItemsTable({
 
 const DispenseStatusSelect = ({
   dispense,
+  disabled,
 }: {
   dispense: MedicationDispenseRead;
+  disabled?: boolean;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -259,7 +266,7 @@ const DispenseStatusSelect = ({
 
   return (
     <Select
-      disabled={!EDITABLE_STATUSES.includes(dispense.status)}
+      disabled={disabled || !EDITABLE_STATUSES.includes(dispense.status)}
       value={dispense.status.toString()}
       onValueChange={(value) =>
         updateDispense({
@@ -292,10 +299,12 @@ export function DispenseItemsTableCard({
   dispenses,
   edit,
   isFetching,
+  orderClosed,
 }: {
   dispenses: MedicationDispenseRead[];
   edit?: DispenseEditContext;
   isFetching?: boolean;
+  orderClosed?: boolean;
 }) {
   return (
     <div
@@ -307,7 +316,11 @@ export function DispenseItemsTableCard({
         isFetching && "animate-pulse opacity-20 pointer-events-none",
       )}
     >
-      <DispenseItemsTable dispenses={dispenses} edit={edit} />
+      <DispenseItemsTable
+        dispenses={dispenses}
+        edit={edit}
+        orderClosed={orderClosed}
+      />
     </div>
   );
 }

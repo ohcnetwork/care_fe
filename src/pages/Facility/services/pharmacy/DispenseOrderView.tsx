@@ -644,6 +644,7 @@ export function DispenseOrderView({
                   dispenses={groupDispenses}
                   edit={editContext}
                   isFetching={isFetchingDispenses}
+                  orderClosed={isOrderCancelled || isOrderCompleted}
                 />
               </div>
             );
@@ -669,6 +670,7 @@ export function DispenseOrderView({
                   dispenses={groupDispenses}
                   edit={editContext}
                   isFetching={isFetchingDispenses}
+                  orderClosed={isOrderCancelled || isOrderCompleted}
                 />
               </div>
             );
@@ -702,7 +704,10 @@ export function DispenseOrderView({
                   />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <DispenseItemsTableCard dispenses={groupDispenses} />
+                  <DispenseItemsTableCard
+                    dispenses={groupDispenses}
+                    orderClosed={isOrderCancelled || isOrderCompleted}
+                  />
                 </CollapsibleContent>
               </Collapsible>
             );
