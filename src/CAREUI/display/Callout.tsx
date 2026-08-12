@@ -1,11 +1,11 @@
-import React from "react";
+import React, { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
 interface CalloutProps {
   variant?: "primary" | "secondary" | "warning" | "alert" | "danger";
   className?: string;
-  badge: string;
+  badge: ReactNode;
   children: React.ReactNode;
 }
 
@@ -27,20 +27,7 @@ export default function Callout({
         props.className,
       )}
     >
-      <div
-        className={cn(
-          "h-min rounded-full border bg-white px-2",
-          {
-            primary: "border-primary-200",
-            secondary: "border-secondary-300",
-            warning: "border-warning-300",
-            alert: "border-purple-300",
-            danger: "border-danger-300",
-          }[variant],
-        )}
-      >
-        <span className="font-medium">{props.badge}</span>
-      </div>
+      <span className="font-medium">{props.badge}</span>
       <div className="flex-1">
         <span className="font-medium">{props.children}</span>
       </div>

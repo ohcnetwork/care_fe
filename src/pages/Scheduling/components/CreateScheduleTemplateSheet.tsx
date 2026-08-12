@@ -54,6 +54,7 @@ import {
   ScheduleAvailabilityCreateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { TriangleAlert } from "lucide-react";
 
 interface Props {
   facilityId: string;
@@ -275,7 +276,10 @@ export default function CreateScheduleTemplateSheet({
     if (!slotsPerSession || !tokenDuration) return null;
 
     return (
-      <Callout variant="alert" badge="Info">
+      <Callout
+        variant="alert"
+        badge={<TriangleAlert className="size-4 shrink-0 text-purple-500" />}
+      >
         <Trans
           i18nKey="schedule_slots_allocation_callout"
           values={{

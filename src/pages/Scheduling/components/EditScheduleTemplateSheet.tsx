@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { SaveIcon, Trash2Icon } from "lucide-react";
+import { SaveIcon, Trash2Icon, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -284,7 +284,12 @@ const ScheduleTemplateEditor = ({
                   </FormLabel>
                 </div>
                 {template.is_public && !field.value && (
-                  <Callout variant="warning" badge="Note">
+                  <Callout
+                    variant="warning"
+                    badge={
+                      <TriangleAlert className="size-4 shrink-0 text-warning-700" />
+                    }
+                  >
                     <p className="text-sm">
                       {t("template_visibility_change_warning")}
                     </p>
@@ -636,7 +641,10 @@ const NewAvailabilityCard = ({
     if (!slotsPerSession || !tokenDuration) return null;
 
     return (
-      <Callout variant="alert" badge="Info">
+      <Callout
+        variant="alert"
+        badge={<TriangleAlert className="size-4 shrink-0 text-purple-500" />}
+      >
         <Trans
           i18nKey="schedule_slots_allocation_callout"
           values={{

@@ -15,12 +15,12 @@ import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -279,6 +279,7 @@ export function DeliveryOrderShow({
         facility: facilityId,
         ordering: "created_date",
       },
+      pageSize: careConfig.maxDatapointsPerUpsert,
     }),
     enabled: !!deliveryOrderId,
   });
@@ -478,7 +479,7 @@ export function DeliveryOrderShow({
   );
 
   const hasReachedUpsertLimit =
-    !!supplyDeliveries &&
+    supplyDeliveries &&
     supplyDeliveries.results.length >= careConfig.maxDatapointsPerUpsert;
 
   return (
@@ -851,7 +852,7 @@ export function DeliveryOrderShow({
             </div>
           </CardHeader>
           <CardContent className="p-2">
-            {isLoadingSupplyDeliveries ? (
+            {isLoadingSupplyDeliveries || isFetchingSupplyDeliveries ? (
               <div className="space-y-2">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="animate-pulse">
@@ -922,15 +923,19 @@ export function DeliveryOrderShow({
                 )}
 
                 {hasReachedUpsertLimit && (
-                  <Alert className="border-amber-300 bg-amber-50 text-amber-800 [&>svg]:text-amber-600 *:data-[slot=alert-description]:text-amber-700">
-                    <TriangleAlert />
-                    <AlertTitle>{t("item_limit_reached")}</AlertTitle>
-                    <AlertDescription>
+                  <Callout
+                    variant="warning"
+                    className="border border-amber-300 bg-amber-50 text-amber-800"
+                    badge={
+                      <TriangleAlert className="size-4 shrink-0 text-amber-600" />
+                    }
+                  >
+                    <span className="flex items-center gap-2">
                       {t("max_datapoints_per_upsert_limit", {
                         count: careConfig.maxDatapointsPerUpsert,
                       })}
-                    </AlertDescription>
-                  </Alert>
+                    </span>
+                  </Callout>
                 )}
 
                 {/* Add New Supply Delivery Form - Always show when in draft mode */}
@@ -941,7 +946,6 @@ export function DeliveryOrderShow({
                     origin={deliveryOrder.origin?.id}
                     destination={deliveryOrder.destination.id}
                     onSuccess={handleSupplyDeliverySuccess}
-                    isFetchingSupplyDeliveries={isFetchingSupplyDeliveries}
                     supplyDeliveriesCount={
                       supplyDeliveries?.results.length || 0
                     }

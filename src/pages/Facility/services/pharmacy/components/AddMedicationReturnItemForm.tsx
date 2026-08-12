@@ -467,8 +467,9 @@ export function AddMedicationReturnItemForm({
                       variant="secondary"
                       onClick={loadFromMedicationDispenses}
                     >
-                      {t("load_from_order")} ({medicationDispenses.length}{" "}
-                      {t("items")})
+                      {t("load_from_order_with_items", {
+                        count: medicationDispenses.length,
+                      })}
                       <ShortcutBadge actionId="load-from-order" />
                     </Button>
                   )}
@@ -506,8 +507,9 @@ export function AddMedicationReturnItemForm({
                       variant="outline_primary"
                       onClick={loadFromMedicationDispenses}
                     >
-                      {t("load_from_order")} ({medicationDispenses.length}{" "}
-                      {t("items")})
+                      {t("load_from_order_with_items", {
+                        count: medicationDispenses.length,
+                      })}
                       <ShortcutBadge actionId="load-from-order" />
                     </Button>
                     <p>- {t("or")} -</p>

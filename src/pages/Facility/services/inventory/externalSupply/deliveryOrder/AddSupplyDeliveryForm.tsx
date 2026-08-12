@@ -934,9 +934,9 @@ export function AddSupplyDeliveryForm({
                             variant="secondary"
                             onClick={loadFromSupplyRequests}
                           >
-                            {t("load_from_order")} ({supplyRequests?.count}{" "}
-                            {t("items")}
-                            )
+                            {t("load_from_order_with_items", {
+                              count: supplyRequests?.count,
+                            })}
                             <ShortcutBadge actionId="load-from-order" />
                           </Button>
                         )}
@@ -980,9 +980,9 @@ export function AddSupplyDeliveryForm({
                             isFetchingSupplyDeliveries
                           }
                         >
-                          {t("load_from_order")} ({supplyRequests?.count}{" "}
-                          {t("items")}
-                          )
+                          {t("load_from_order_with_items", {
+                            count: supplyRequests?.count,
+                          })}
                           <ShortcutBadge actionId="load-from-order" />
                         </Button>
                         <p>- {t("or")} -</p>
