@@ -202,7 +202,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-8 text-gray-500 opacity-0 transition-all group-hover/pinned-links:opacity-100 hover:text-gray-700 focus-visible:opacity-100"
+                    className="size-8 text-gray-500 transition-all hover:text-gray-700 focus-visible:opacity-100 data-[state=open]:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/pinned-links:opacity-100"
                     aria-label={t("actions")}
                   >
                     <Wrench />
@@ -223,7 +223,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                     variant="secondary"
                     size="icon"
                     onClick={() => removeCustomLink(link.link)}
-                    className="absolute -top-2 -right-2 z-10 size-6 rounded-full bg-gray-100 text-gray-500 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-red-100 hover:text-red-600"
+                    className="absolute -top-2 -right-2 z-10 size-6 rounded-full bg-gray-100 text-gray-500 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-red-100 hover:text-red-600 focus-visible:opacity-100"
                     aria-label={t("remove")}
                   >
                     <X />
