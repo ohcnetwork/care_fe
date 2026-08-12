@@ -218,6 +218,48 @@ function collectSubtreeIds(questions: Question[], ids: string[]): Set<string> {
   return result;
 }
 
+/** The `link_id`s a delete takes with it — conditions naming one of these
+ *  can no longer resolve. Walks only the removed subtrees. */
+function collectSubtreeLinkIds(
+  questions: Question[],
+  ids: string[],
+): Set<string> {
+  const result = new Set<string>();
+  const walk = (question: Question) => {
+    result.add(question.link_id);
+    for (const child of question.questions ?? []) walk(child);
+  };
+  for (const id of ids) {
+    const question = findQuestion(questions, id);
+    if (question) walk(question);
+  }
+  return result;
+}
+
+/**
+ * Drops the visibility conditions naming a removed `link_id`. Without this a
+ * dangling condition survives the save (`saveValidation` only rejects targets
+ * it can type-check) and every evaluator resolves the missing response to
+ * `false`, hiding the dependent question forever with nothing on screen to
+ * explain it. A question left with no conditions becomes unconditionally
+ * visible, which is the recoverable end of that trade.
+ *
+ * Returns the same reference when nothing matched, so the surrounding
+ * `mapTree` keeps identity for untouched questions.
+ */
+function dropConditionsTargeting(
+  question: Question,
+  removedLinkIds: Set<string>,
+): Question {
+  if (!question.enable_when?.length) return question;
+  const enable_when = question.enable_when.filter(
+    (condition) => !removedLinkIds.has(condition.question),
+  );
+  return enable_when.length === question.enable_when.length
+    ? question
+    : { ...question, enable_when };
+}
+
 /** Immutably map every questions array in the tree (root included). */
 export function mapTree(
   questions: Question[],
@@ -298,8 +340,11 @@ export function builderReducer(
     case "removeQuestions": {
       const ids = new Set(action.ids);
       const removedIds = collectSubtreeIds(state.questions, action.ids);
+      const removedLinkIds = collectSubtreeLinkIds(state.questions, action.ids);
       const questions = mapTree(state.questions, (list) =>
-        list.filter((q) => !ids.has(q.id)),
+        list
+          .filter((q) => !ids.has(q.id))
+          .map((q) => dropConditionsTargeting(q, removedLinkIds)),
       );
       return {
         questions,

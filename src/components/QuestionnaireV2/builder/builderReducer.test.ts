@@ -10,7 +10,9 @@ import {
 import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
 import {
+  type BuilderState,
   buildCondition,
+  builderReducer,
   migrateLegacyBooleanEnableWhen,
   normalizeExistsConditionAnswer,
 } from "./builderReducer";
@@ -40,6 +42,22 @@ function q(over: Partial<Question> & Pick<Question, "id" | "type">): Question {
     text: over.id,
     ...over,
   };
+}
+
+/** Depth-first lookup by id, so assertions can name a question without
+ *  tracking where the reducer left it in the tree. */
+function findById(questions: Question[], id: string): Question {
+  const search = (list: Question[]): Question | undefined => {
+    for (const question of list) {
+      if (question.id === id) return question;
+      const found = search(question.questions ?? []);
+      if (found) return found;
+    }
+    return undefined;
+  };
+  const found = search(questions);
+  if (!found) throw new Error(`question "${id}" not found`);
+  return found;
 }
 
 describe("normalizeExistsConditionAnswer", () => {
@@ -272,5 +290,115 @@ describe("migrateLegacyBooleanEnableWhen", () => {
     assert.deepEqual(migrated[1].questions?.[0].enable_when, [
       { question: "target", operator: "exists", answer: true },
     ]);
+  });
+});
+
+describe("removeQuestions — conditions naming the deleted question", () => {
+  const remove = (questions: Question[], ids: string[]): Question[] => {
+    const state: BuilderState = { questions, selectedId: null, dirty: false };
+    return builderReducer(state, { type: "removeQuestions", ids }).questions;
+  };
+
+  it("drops the dangling condition instead of leaving the dependent hidden forever", () => {
+    // Left in place, the condition survives the save and every evaluator
+    // resolves the missing response to false — the dependent never shows.
+    const questions = remove(
+      [
+        q({ id: "age", type: "integer" }),
+        q({
+          id: "dependent",
+          type: "string",
+          enable_when: [buildCondition("age", "equals", "18")],
+        }),
+      ],
+      ["age"],
+    );
+
+    assert.equal(questions.length, 1);
+    assert.deepEqual(questions[0].enable_when, []);
+  });
+
+  it("keeps the conditions whose targets survive the delete", () => {
+    const questions = remove(
+      [
+        q({ id: "age", type: "integer" }),
+        q({ id: "weight", type: "integer" }),
+        q({
+          id: "dependent",
+          type: "string",
+          enable_when: [
+            buildCondition("age", "equals", "18"),
+            buildCondition("weight", "greater", 50),
+          ],
+        }),
+      ],
+      ["age"],
+    );
+
+    assert.deepEqual(findById(questions, "dependent").enable_when, [
+      { question: "weight", operator: "greater", answer: 50 },
+    ]);
+  });
+
+  it("drops conditions naming a descendant of a deleted group", () => {
+    // Deleting a group takes its children's link_ids with it, so a condition
+    // on a child dangles just as one on the group itself would.
+    const questions = remove(
+      [
+        q({
+          id: "section",
+          type: "group",
+          questions: [q({ id: "nested", type: "boolean" })],
+        }),
+        q({
+          id: "dependent",
+          type: "string",
+          enable_when: [buildCondition("nested", "equals", true)],
+        }),
+      ],
+      ["section"],
+    );
+
+    assert.deepEqual(questions[0].enable_when, []);
+  });
+
+  it("cleans conditions on questions nested inside surviving groups", () => {
+    const questions = remove(
+      [
+        q({ id: "age", type: "integer" }),
+        q({
+          id: "section",
+          type: "group",
+          questions: [
+            q({
+              id: "nested-dependent",
+              type: "string",
+              enable_when: [buildCondition("age", "equals", "18")],
+            }),
+          ],
+        }),
+      ],
+      ["age"],
+    );
+
+    assert.deepEqual(findById(questions, "nested-dependent").enable_when, []);
+  });
+
+  it("leaves an untouched question at the same reference, so the tree keeps identity", () => {
+    const unrelated = q({
+      id: "dependent",
+      type: "string",
+      enable_when: [buildCondition("weight", "equals", "50")],
+    });
+    const questions = remove(
+      [
+        q({ id: "age", type: "integer" }),
+        q({ id: "weight", type: "integer" }),
+        unrelated,
+      ],
+      ["age"],
+    );
+
+    assert.equal(findById(questions, "dependent"), unrelated);
   });
 });
