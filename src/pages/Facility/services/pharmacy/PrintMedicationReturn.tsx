@@ -125,7 +125,7 @@ const MedicationReturnPreview = ({
 
   return (
     <PrintPreview
-      title={`${t("medication_return")} - ${patient.name}`}
+      title={`${t("medication_return")}}`}
       disabled={!supplyDeliveries?.length}
       facility={facility}
       templateSlug={PrintTemplateType.medication_return}
