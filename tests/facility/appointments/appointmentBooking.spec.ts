@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { selectFromCommand } from "tests/helper/ui";
+import { selectFirstAvailablePractitioner } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
@@ -62,43 +62,30 @@ test.describe("Appointment Booking Workflow", () => {
    */
   test("should fill appointment booking form", async ({ page }) => {
     await test.step("Open booking sheet", async () => {
-      await page
-        .getByRole("button", { name: appointmentTriggerName })
-        .click();
-      const sheet = page.getByRole("dialog");
-      await expect(sheet).toBeVisible();
+      await page.getByRole("button", { name: appointmentTriggerName }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
     });
 
-    await test.step("Select practitioner or healthcare service", async () => {
-      const sheet = page.getByRole("dialog");
+    await test.step("Select a practitioner", async () => {
+      await selectFirstAvailablePractitioner(page, page.getByRole("dialog"));
 
-      // Find the resource selector (either Practitioner or Healthcare Service)
-      const resourceTrigger = sheet
-        .getByRole("button")
-        .filter({ hasText: /select practitioner|select healthcare service/i })
-        .first();
-
-      if (await resourceTrigger.isVisible()) {
-        await selectFromCommand(page, resourceTrigger, { itemIndex: 0 });
-
-        // Verify selection was made
-        await expect(resourceTrigger).not.toHaveText(
-          /select practitioner|select healthcare service/i,
-        );
-      }
+      // The combobox trigger no longer shows the "Select Practitioner"
+      // placeholder once a practitioner is chosen.
+      await expect(
+        page
+          .getByRole("dialog")
+          .getByRole("combobox")
+          .filter({ hasText: /select practitioner/i }),
+      ).toHaveCount(0);
     });
 
     await test.step("Fill appointment reason", async () => {
-      const sheet = page.getByRole("dialog");
-      const reasonInput = sheet.getByRole("textbox", {
-        name: /reason|note/i,
-      });
-
-      if (await reasonInput.isVisible()) {
-        const appointmentReason = faker.lorem.sentence();
-        await reasonInput.fill(appointmentReason);
-        await expect(reasonInput).toHaveValue(appointmentReason);
-      }
+      const reasonInput = page
+        .getByRole("dialog")
+        .getByPlaceholder(/reason for visit/i);
+      const appointmentReason = faker.lorem.sentence();
+      await reasonInput.fill(appointmentReason);
+      await expect(reasonInput).toHaveValue(appointmentReason);
     });
   });
 
@@ -107,65 +94,27 @@ test.describe("Appointment Booking Workflow", () => {
    * Verifies date selection and slot picker functionality
    */
   test("should select appointment date and time slot", async ({ page }) => {
-    await test.step("Open booking sheet", async () => {
-      await page
-        .getByRole("button", { name: appointmentTriggerName })
-        .click();
-      const sheet = page.getByRole("dialog");
-      await expect(sheet).toBeVisible();
+    await test.step("Open booking sheet and select practitioner", async () => {
+      await page.getByRole("button", { name: appointmentTriggerName }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await selectFirstAvailablePractitioner(page, page.getByRole("dialog"));
     });
 
-    await test.step("Select practitioner first", async () => {
+    await test.step("Select a time slot", async () => {
       const sheet = page.getByRole("dialog");
-      const resourceTrigger = sheet
+
+      // Slots for the selected practitioner render as HH:mm buttons.
+      const slots = sheet
         .getByRole("button")
-        .filter({ hasText: /select practitioner|select healthcare service/i })
-        .first();
+        .filter({ hasText: /\d{2}:\d{2}/ });
+      await expect(slots.first()).toBeVisible();
 
-      if (await resourceTrigger.isVisible()) {
-        await selectFromCommand(page, resourceTrigger, { itemIndex: 0 });
-
-        // Wait for slots to load after practitioner selection
-        await page.waitForTimeout(1000);
-      }
-    });
-
-    await test.step("Verify date selection calendar is visible", async () => {
-      const sheet = page.getByRole("dialog");
-
-      // Look for calendar or date picker elements
-      // The calendar should be visible after selecting a practitioner
-      const calendarExists =
-        (await sheet.locator("[role='button'][name*='day']").count()) > 0;
-
-      if (calendarExists) {
-        // Calendar is present
-        expect(calendarExists).toBe(true);
-      }
-    });
-
-    await test.step("Verify time slots are displayed", async () => {
-      const sheet = page.getByRole("dialog");
-
-      // Look for available time slots
-      // Slots might be buttons or clickable elements with time information
-      const slotButtons = sheet.getByRole("button").filter({
-        hasText: /am|pm|available|:\d{2}/i,
-      });
-
-      const slotCount = await slotButtons.count();
-
-      // If slots are available, verify they can be selected
-      if (slotCount > 0) {
-        await slotButtons.first().click();
-
-        // After selecting a slot, the "Create Appointment" or "Book" button should appear
-        const createButton = sheet.getByRole("button", {
-          name: /create appointment|book|confirm/i,
-        });
-
-        await expect(createButton).toBeVisible();
-      }
+      // The picker auto-selects the first slot; pick a different one to prove a
+      // slot is selectable, then verify the confirm action is revealed.
+      await slots.nth(1).click();
+      await expect(
+        sheet.getByRole("button", { name: /confirm appointment/i }),
+      ).toBeVisible();
     });
   });
 
@@ -176,73 +125,48 @@ test.describe("Appointment Booking Workflow", () => {
   test("should complete full appointment booking workflow", async ({
     page,
   }) => {
-    await test.step("Open booking sheet", async () => {
-      await page
-        .getByRole("button", { name: appointmentTriggerName })
-        .click();
-      const sheet = page.getByRole("dialog");
-      await expect(sheet).toBeVisible();
+    await test.step("Open booking sheet and select practitioner", async () => {
+      await page.getByRole("button", { name: appointmentTriggerName }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await selectFirstAvailablePractitioner(page, page.getByRole("dialog"));
     });
 
-    await test.step("Select practitioner/service", async () => {
+    await test.step("Fill reason and wait for slots to load", async () => {
       const sheet = page.getByRole("dialog");
-      const resourceTrigger = sheet
+      await sheet
+        .getByPlaceholder(/reason for visit/i)
+        .fill(faker.lorem.sentence());
+
+      // The picker auto-selects the first available slot on load, which surfaces
+      // the confirm action below.
+      const slots = sheet
         .getByRole("button")
-        .filter({ hasText: /select practitioner|select healthcare service/i })
-        .first();
-
-      if (await resourceTrigger.isVisible()) {
-        await selectFromCommand(page, resourceTrigger, { itemIndex: 0 });
-        await page.waitForTimeout(1000);
-      }
+        .filter({ hasText: /\d{2}:\d{2}/ });
+      await expect(slots.first()).toBeVisible();
     });
 
-    await test.step("Fill appointment details", async () => {
+    await test.step("Confirm the appointment and verify success", async () => {
       const sheet = page.getByRole("dialog");
-      const reasonInput = sheet.getByRole("textbox", {
-        name: /reason|note/i,
+      const confirmButton = sheet.getByRole("button", {
+        name: /confirm appointment/i,
       });
+      await expect(confirmButton).toBeVisible();
 
-      if (await reasonInput.isVisible()) {
-        await reasonInput.fill(faker.lorem.sentence());
-      }
-    });
+      const [response] = await Promise.all([
+        page.waitForResponse(
+          (r) =>
+            r.url().includes("/create_appointment/") &&
+            r.request().method() === "POST",
+        ),
+        confirmButton.click(),
+      ]);
+      expect(response.status()).toBeLessThan(300);
 
-    await test.step("Select time slot if available", async () => {
-      const sheet = page.getByRole("dialog");
-      const slotButtons = sheet.getByRole("button").filter({
-        hasText: /am|pm|available|:\d{2}/i,
-      });
-
-      const slotCount = await slotButtons.count();
-      if (slotCount > 0) {
-        await slotButtons.first().click();
-
-        // Look for create/book button
-        const createButton = sheet.getByRole("button", {
-          name: /create appointment|book|confirm/i,
-        });
-
-        if (await createButton.isVisible()) {
-          await createButton.click();
-
-          // Wait for success message or navigation
-          await page.waitForLoadState("networkidle");
-
-          // Verify success - either toast message or navigation to appointment detail
-          const successToast = page.getByText(/appointment.*created|booked/i);
-          const isOnAppointmentPage = page.url().includes("/appointments/");
-
-          if (
-            await successToast.isVisible({ timeout: 5000 }).catch(() => false)
-          ) {
-            expect(await successToast.isVisible()).toBe(true);
-          } else if (isOnAppointmentPage) {
-            // Successfully navigated to appointment detail page
-            expect(isOnAppointmentPage).toBe(true);
-          }
-        }
-      }
+      // Post-submit: success toast AND navigation to the new appointment page.
+      await expect(
+        page.getByText(/appointment created successfully/i),
+      ).toBeVisible();
+      await expect(page).toHaveURL(/\/appointments\/[0-9a-f-]+/);
     });
   });
 
@@ -254,9 +178,7 @@ test.describe("Appointment Booking Workflow", () => {
     page,
   }) => {
     await test.step("Open booking sheet", async () => {
-      await page
-        .getByRole("button", { name: appointmentTriggerName })
-        .click();
+      await page.getByRole("button", { name: appointmentTriggerName }).click();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
     });
@@ -298,44 +220,28 @@ test.describe("Appointment Booking Workflow", () => {
    */
   test("should handle no available slots gracefully", async ({ page }) => {
     await test.step("Open booking sheet", async () => {
-      await page
-        .getByRole("button", { name: appointmentTriggerName })
-        .click();
+      await page.getByRole("button", { name: appointmentTriggerName }).click();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
     });
 
-    await test.step("Select practitioner", async () => {
-      const sheet = page.getByRole("dialog");
-      const resourceTrigger = sheet
-        .getByRole("button")
-        .filter({ hasText: /select practitioner|select healthcare service/i })
-        .first();
-
-      if (await resourceTrigger.isVisible()) {
-        await selectFromCommand(page, resourceTrigger, { itemIndex: 0 });
-        await page.waitForTimeout(1000);
-      }
+    await test.step("Select a practitioner", async () => {
+      // The trigger is a combobox (role="combobox"), and the picker lists both
+      // departments and practitioners — navigate the tree to a practitioner.
+      await selectFirstAvailablePractitioner(page, page.getByRole("dialog"));
     });
 
-    await test.step("Check for empty state or available slots", async () => {
+    await test.step("Slot area resolves to slots or empty state", async () => {
       const sheet = page.getByRole("dialog");
 
-      // Wait for either slots to appear or an empty state message
-      await page.waitForTimeout(2000);
-
-      const slotButtons = sheet.getByRole("button").filter({
-        hasText: /am|pm|available|:\d{2}/i,
-      });
-      const slotCount = await slotButtons.count();
-
-      const emptyMessage = sheet.getByText(
-        /no.*slots.*available|no.*appointments/i,
-      );
-      const hasEmptyMessage = await emptyMessage.isVisible().catch(() => false);
-
-      // Either slots should be available OR an empty state message should show
-      expect(slotCount > 0 || hasEmptyMessage).toBe(true);
+      // Once a practitioner is selected, the picker leaves its skeleton state and
+      // settles into exactly one of two loaded states: available slots (HH:mm
+      // buttons) or the empty-state message. Either is a valid graceful outcome.
+      const slots = sheet
+        .getByRole("button")
+        .filter({ hasText: /\d{2}:\d{2}/ });
+      const emptyState = sheet.getByText("No slots available for this date");
+      await expect(slots.first().or(emptyState)).toBeVisible();
     });
   });
 
@@ -345,9 +251,7 @@ test.describe("Appointment Booking Workflow", () => {
    */
   test("should close booking sheet", async ({ page }) => {
     await test.step("Open booking sheet", async () => {
-      await page
-        .getByRole("button", { name: appointmentTriggerName })
-        .click();
+      await page.getByRole("button", { name: appointmentTriggerName }).click();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
     });
@@ -362,9 +266,7 @@ test.describe("Appointment Booking Workflow", () => {
 
     await test.step("Reopen and close via close button", async () => {
       // Reopen
-      await page
-        .getByRole("button", { name: appointmentTriggerName })
-        .click();
+      await page.getByRole("button", { name: appointmentTriggerName }).click();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
 
