@@ -67,11 +67,10 @@ interface EncounterListProps {
   encounterClass?: EncounterClass;
 }
 
-const SEARCH_WITH_NAME = "name" as const;
-const SEARCH_WITH_EXTERNAL_IDENTIFIER = "external_identifier" as const;
-
-type SearchWith =
-  typeof SEARCH_WITH_NAME | typeof SEARCH_WITH_EXTERNAL_IDENTIFIER;
+enum SearchWith {
+  Name = "name",
+  ExternalIdentifier = "external_identifier",
+}
 
 const buildQueryParams = (
   facilityId: string,
@@ -152,9 +151,6 @@ export function EncounterList({
   const hasRestoredFilters = useRef(false);
   const hasAppliedDefaultStatus = useRef(false);
 
-  const [searchText, setSearchText] = useState(
-    qParams.external_identifier || qParams.name || "",
-  );
   const [searchOptionsOpen, setSearchOptionsOpen] = useState(false);
 
   const {
@@ -181,24 +177,22 @@ export function EncounterList({
 
   const searchWithOptions = [
     {
-      key: SEARCH_WITH_NAME,
+      key: SearchWith.Name,
       label: t("patient_name"),
       placeholder: t("search_by_patient_name"),
     },
     {
-      key: SEARCH_WITH_EXTERNAL_IDENTIFIER,
+      key: SearchWith.ExternalIdentifier,
       label: t("external_identifier"),
       placeholder: t("search_by_external_id"),
     },
   ];
 
-  const searchWith: SearchWith = qParams.external_identifier
-    ? SEARCH_WITH_EXTERNAL_IDENTIFIER
-    : SEARCH_WITH_NAME;
+  const searchWith = qParams.external_identifier
+    ? SearchWith.ExternalIdentifier
+    : SearchWith.Name;
 
-  useEffect(() => {
-    setSearchText(qParams.external_identifier || qParams.name || "");
-  }, [qParams.name, qParams.external_identifier]);
+  const searchText = qParams.external_identifier || qParams.name || "";
 
   const selectedSearchType =
     searchWithOptions.find((option) => option.key === searchWith) ||
@@ -209,17 +203,11 @@ export function EncounterList({
     nextSearchWith: SearchWith,
     nextSearchText: string,
   ) => {
-    if (nextSearchWith === SEARCH_WITH_NAME) {
-      updateQuery({
-        name: nextSearchText,
-        external_identifier: "",
-      });
-    } else {
-      updateQuery({
-        name: "",
-        external_identifier: nextSearchText,
-      });
-    }
+    updateQuery({
+      [SearchWith.Name]: "",
+      [SearchWith.ExternalIdentifier]: "",
+      [nextSearchWith]: nextSearchText,
+    });
   };
 
   const handleSearchWithChange = (nextSearchWith: SearchWith) => {
@@ -582,7 +570,7 @@ export function EncounterList({
                           aria-label={selectedSearchType.placeholder}
                           value={searchText}
                           onValueChange={(value) => {
-                            setSearchText(value);
+                            updateSearchQuery(searchWith, value);
                             setSearchOptionsOpen(value.trim() !== "");
                           }}
                           onFocus={() => {
