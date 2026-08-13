@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import query from "@/Utils/request/query";
 import {
@@ -23,6 +24,7 @@ import {
 } from "@/types/beckn/becknModels";
 import {
   getResourceRequestCategoryEnum,
+  ResourceRequestListRead,
   ResourceRequestRead,
   ResourceRequestStatus,
 } from "@/types/resourceRequest/resourceRequest";
@@ -35,79 +37,148 @@ interface CcnConsoleProps {
   resourceId?: string;
 }
 
+/** Which side of the referral this facility is on. */
+type CcnTab = "incoming" | "outgoing";
+
 /**
- * Care-Coordinator console: incoming (receiving) ResourceRequests on the left,
- * and on selection the request detail on the right. The origin facility places
- * and confirms the referral itself (it is the BAP consumer), so requests reach
- * this console already `approved` — the desk's acceptance *is* the `on_confirm`
- * response. Once approved, the Beckn appointment-booking flow is enabled. The FE
- * never speaks Beckn directly — it calls Care BE's BAP REST endpoints (see
- * BecknFlow / the hook).
+ * A request is Incoming when its origin facility is also its assigned facility.
+ * Everything else in the assigned-to-self result set is Outgoing.
+ */
+function isIncomingRequest(request: ResourceRequestListRead): boolean {
+  return (
+    !!request.origin_facility?.id &&
+    request.origin_facility.id === request.assigned_facility?.id
+  );
+}
+
+/**
+ * Care-Coordinator console: ResourceRequests on the left, and on selection the
+ * request detail on the right.
+ *
+ * A single fetch (`assigned_facility=self`) returns every request routed to this
+ * facility; the two tabs are then split client-side, avoiding a second query for
+ * a filter the coordinator can derive itself. **Incoming** is the working tab —
+ * requests whose origin facility is also the assigned facility, i.e. raised and
+ * fulfilled here; the origin facility places and confirms the referral itself
+ * (it is the BAP consumer), so requests reach this console already `approved` and
+ * the desk can run the Beckn appointment-booking flow. **Outgoing** is every
+ * other request (raised elsewhere, routed here) and is read-only, since booking
+ * is the originating desk's job. The FE never speaks Beckn directly — it calls
+ * Care BE's BAP REST endpoints (see BecknFlow / the hook).
  */
 export default function CcnConsole({
   facilityId,
   resourceId,
 }: CcnConsoleProps) {
   const { t } = useTranslation();
+  // Kept in the URL so the tab survives selecting a request (which navigates)
+  // and stays shareable. Anything unrecognised falls back to incoming.
+  const [{ tab }] = useQueryParams<{ tab?: string }>();
+  const activeTab: CcnTab = tab === "outgoing" ? "outgoing" : "incoming";
+  const isOutgoing = activeTab === "outgoing";
+
+  // One fetch for both tabs — everything assigned to this facility.
   const { data: list, isLoading: listLoading } = useQuery({
     queryKey: ["ccn-resource-list", facilityId],
     queryFn: query(resourceRequestApi.list, {
-      // Only requests this facility is receiving (assigned to).
-      queryParams: { limit: 100, assigned_facility: facilityId },
+      queryParams: { limit: 100, origin_facility: facilityId },
     }),
   });
 
-  const requests = list?.results ?? [];
+  // Incoming = origin facility is the assigned facility; Outgoing = the rest.
+  const requests = (list?.results ?? []).filter((item) =>
+    isOutgoing ? !isIncomingRequest(item) : isIncomingRequest(item),
+  );
+
+  // A request only exists in one of the two lists, so switching tabs drops the
+  // current selection rather than leaving the detail pane out of step.
+  const selectTab = (next: CcnTab) =>
+    navigate(
+      `/facility/${facilityId}/ccn${next === "outgoing" ? "?tab=outgoing" : ""}`,
+    );
 
   return (
     <div className="p-4">
       <PageTitle title={t("cc_console")} />
       <div className="flex h-[calc(100vh-9rem)] overflow-hidden rounded-lg border">
-        <aside className="w-80 shrink-0 overflow-y-auto border-r bg-gray-50">
-          {listLoading ? (
-            <div className="p-4 text-sm text-gray-500">{t("loading")}</div>
-          ) : requests.length === 0 ? (
-            <div className="p-4 text-sm text-gray-500">
-              {t("ccn_no_incoming_requests")}
-            </div>
-          ) : (
-            <ul className="divide-y">
-              {requests.map((item) => {
-                const active = item.id === resourceId;
-                return (
-                  <li key={item.id}>
-                    <Link
-                      href={`/facility/${facilityId}/ccn/${item.id}`}
-                      className={[
-                        "block px-4 py-3 hover:bg-white",
-                        active ? "border-l-2 border-primary-600 bg-white" : "",
-                      ].join(" ")}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="truncate text-sm font-medium">
-                          {item.title || t("ccn_untitled_request")}
-                        </span>
-                        <Badge
-                          variant="secondary"
-                          className="shrink-0 text-[10px]"
-                        >
-                          {item.status}
-                        </Badge>
-                      </div>
-                      <p className="mt-1 truncate text-xs text-gray-500">
-                        {item.origin_facility?.name ?? ""}
-                      </p>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+        <aside className="flex w-80 shrink-0 flex-col overflow-hidden border-r bg-gray-50">
+          <div className="shrink-0 border-b p-2">
+            <Tabs value={activeTab}>
+              <TabsList className="inline-flex h-8 w-full bg-transparent p-0">
+                <TabsTrigger
+                  value="incoming"
+                  className="w-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                  onClick={() => selectTab("incoming")}
+                >
+                  {t("incoming")}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="outgoing"
+                  className="w-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                  onClick={() => selectTab("outgoing")}
+                >
+                  {t("outgoing")}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            {listLoading ? (
+              <div className="p-4 text-sm text-gray-500">{t("loading")}</div>
+            ) : requests.length === 0 ? (
+              <div className="p-4 text-sm text-gray-500">
+                {isOutgoing
+                  ? t("ccn_no_outgoing_requests")
+                  : t("ccn_no_incoming_requests")}
+              </div>
+            ) : (
+              <ul className="divide-y">
+                {requests.map((item) => {
+                  const active = item.id === resourceId;
+                  return (
+                    <li key={item.id}>
+                      <Link
+                        href={`/facility/${facilityId}/ccn/${item.id}${
+                          isOutgoing ? "?tab=outgoing" : ""
+                        }`}
+                        className={[
+                          "block px-4 py-3 hover:bg-white",
+                          active
+                            ? "border-l-2 border-primary-600 bg-white"
+                            : "",
+                        ].join(" ")}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate text-sm font-medium">
+                            {item.title || t("ccn_untitled_request")}
+                          </span>
+                          <Badge
+                            variant="secondary"
+                            className="shrink-0 text-[10px]"
+                          >
+                            {item.status}
+                          </Badge>
+                        </div>
+                        <p className="mt-1 truncate text-xs text-gray-500">
+                          {item.origin_facility?.name ?? ""}
+                        </p>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </aside>
 
         <main className="flex-1 overflow-y-auto p-4">
           {resourceId ? (
-            <ResourceDetail facilityId={facilityId} resourceId={resourceId} />
+            <ResourceDetail
+              facilityId={facilityId}
+              resourceId={resourceId}
+              readOnly={isOutgoing}
+            />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-gray-500">
               {t("ccn_select_request_to_begin")}
@@ -122,9 +193,11 @@ export default function CcnConsole({
 function ResourceDetail({
   facilityId,
   resourceId,
+  readOnly,
 }: {
   facilityId: string;
   resourceId: string;
+  readOnly: boolean;
 }) {
   const { t } = useTranslation();
   const { data: resource, isLoading } = useQuery({
@@ -174,7 +247,9 @@ function ResourceDetail({
         </CardContent>
       </Card>
 
-      {isApproved ? (
+      {readOnly ? (
+        <p className="text-sm text-gray-500">{t("ccn_outgoing_read_only")}</p>
+      ) : isApproved ? (
         <AppointmentBooking facilityId={facilityId} resource={resource} />
       ) : (
         <p className="text-sm text-gray-500">
