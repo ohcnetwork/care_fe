@@ -71,16 +71,21 @@ export function getExpiryBadgeVariant(
 }
 
 /**
- * Sorts inventory lots FEFO (earliest expiry first); lots without an
- * expiration date sort last. Stable sort, so equal/missing expiries keep
- * their existing (FIFO) relative order.
+ * Sorts inventory lots FEFO (earliest expiry first); expired lots sort last
+ * regardless of date, and lots without an expiration date sort last within
+ * their group. Stable sort, so equal/missing expiries keep their existing
+ * (FIFO) relative order.
  * @param inventories - The inventory lots to sort
- * @returns A new array sorted FEFO
+ * @returns A new array sorted FEFO, with expired lots pushed to the bottom
  */
 export function sortInventoriesFefo(
   inventories: InventoryRead[],
 ): InventoryRead[] {
   return [...inventories].sort((a, b) => {
+    const aExpired = getExpiryStatus(a.product.expiration_date) === "expired";
+    const bExpired = getExpiryStatus(b.product.expiration_date) === "expired";
+    if (aExpired !== bExpired) return aExpired ? 1 : -1;
+
     const aExpiry = a.product.expiration_date;
     const bExpiry = b.product.expiration_date;
     if (!aExpiry && !bExpiry) return 0;
