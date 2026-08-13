@@ -1,4 +1,4 @@
-import { addMonths, endOfMonth, isAfter } from "date-fns";
+import { addMonths, endOfMonth, isAfter, startOfDay } from "date-fns";
 
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import careConfig from "@careConfig";
@@ -71,10 +71,12 @@ export function getExpiryBadgeVariant(
 }
 
 /**
- * Sorts inventory lots FEFO (earliest expiry first); expired lots sort last
- * regardless of date, and lots without a valid expiration date sort last
- * within their group. Stable sort, so equal/missing expiries keep their
- * existing (FIFO) relative order.
+ * Sorts inventory lots FEFO (earliest expiry first). Genuinely expired lots
+ * (per `getExpiryStatus`) always sort last, since they're already blocked
+ * from dispensing. Lots with no/unparseable expiration date are treated as
+ * not-expired (matching `isProductRestrictedFromDispensing`), so they sort
+ * after all dated non-expired lots but ahead of expired ones. Stable sort,
+ * so ties keep their existing (FIFO) relative order.
  * @param inventories - The inventory lots to sort
  * @returns A new array sorted FEFO, with expired lots pushed to the bottom
  */
@@ -84,16 +86,18 @@ export function sortInventoriesFefo(
   return inventories
     .map((inv) => {
       const expiry = inv.product.expiration_date;
-      const time = expiry ? new Date(expiry).getTime() : NaN;
+      // Compare calendar date only; time-of-day is incidental to data entry.
+      const expiryDay = expiry ? startOfDay(new Date(expiry)).getTime() : NaN;
       return {
         inv,
         expired: getExpiryStatus(expiry) === "expired",
-        time: Number.isNaN(time) ? Infinity : time,
+        expiryDay: Number.isNaN(expiryDay) ? Infinity : expiryDay,
       };
     })
     .sort((a, b) => {
       if (a.expired !== b.expired) return a.expired ? 1 : -1;
-      return a.time - b.time;
+      if (a.expiryDay === b.expiryDay) return 0;
+      return a.expiryDay < b.expiryDay ? -1 : 1;
     })
     .map(({ inv }) => inv);
 }
