@@ -65,6 +65,41 @@ interface SupplyDeliveryTableProps {
   linkToProduct?: boolean;
 }
 
+function ProductLink({
+  delivery,
+  internal,
+  linkToProduct,
+  facilityId,
+}: {
+  delivery: SupplyDeliveryRead;
+  internal: boolean;
+  linkToProduct: boolean;
+  facilityId?: string;
+}) {
+  const productId = internal
+    ? delivery.supplied_inventory_item?.product?.id
+    : delivery.supplied_item?.id;
+  const productName = internal
+    ? delivery.supplied_inventory_item?.product?.product_knowledge?.name
+    : delivery.supplied_item?.product_knowledge?.name;
+
+  if (linkToProduct && facilityId && productId) {
+    return (
+      <Link
+        href={`/facility/${facilityId}/settings/product/${productId}`}
+        className="font-medium text-primary-600 hover:underline"
+        onClick={(e) => e.stopPropagation()}
+        basePath="/"
+      >
+        {productName}
+      </Link>
+    );
+  }
+  return (
+    <div className="font-medium text-wrap wrap-break-word">{productName}</div>
+  );
+}
+
 export function SupplyDeliveryTable({
   deliveries,
   showCheckbox = false,
@@ -236,236 +271,217 @@ export function SupplyDeliveryTable({
         </TableRow>
       </TableHeader>
       <TableBody className="text-sm">
-        {deliveries.map((delivery) => (
-          <TableRow key={delivery.id}>
-            {showAllCheckbox && (
-              <TableCell>
-                {delivery.status === SupplyDeliveryStatus.in_progress && (
-                  <Checkbox
-                    checked={selectedDeliveries.includes(delivery.id)}
-                    onCheckedChange={(checked) => {
-                      onDeliverySelect?.(delivery.id, !!checked);
-                    }}
-                  />
-                )}
-              </TableCell>
-            )}
-            <TableCell>{serialNumberMap.get(delivery.id)}</TableCell>
-            <TableCell
-              className={cn(onDeliveryClick && "cursor-pointer underline")}
-              onClick={() => onDeliveryClick?.(delivery)}
-            >
-              {(() => {
-                const productId = internal
-                  ? delivery.supplied_inventory_item?.product?.id
-                  : delivery.supplied_item?.id;
-                const productName = internal
-                  ? delivery.supplied_inventory_item?.product?.product_knowledge
-                      ?.name
-                  : delivery.supplied_item?.product_knowledge?.name;
-
-                if (linkToProduct && facilityId && productId) {
-                  return (
-                    <Link
-                      href={`/facility/${facilityId}/settings/product/${productId}`}
-                      className="font-medium text-primary-600 hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                      basePath="/"
-                    >
-                      {productName}
-                    </Link>
-                  );
-                }
-                return (
-                  <div className="font-medium text-wrap wrap-break-word">
-                    {productName}
-                  </div>
-                );
-              })()}
-            </TableCell>
-            <TableCell>
-              {delivery.supplied_inventory_item?.product?.batch?.lot_number ||
-                "-"}
-            </TableCell>
-            <TableCell>
-              {(() => {
-                const expiry =
-                  delivery.supplied_inventory_item?.product?.expiration_date ||
-                  delivery.supplied_item?.expiration_date;
-                return expiry
-                  ? formatDate(parseISO(expiry), "dd/MM/yyyy")
-                  : "-";
-              })()}
-            </TableCell>
-            <TableCell>
-              {delivery.supply_request
-                ? round(delivery.supply_request.quantity)
-                : "-"}
-            </TableCell>
-            {!internal && (
-              <TableCell>{delivery.supplied_item_pack_size || "-"}</TableCell>
-            )}
-            {!internal && (
-              <TableCell>
-                {delivery.supplied_item_pack_quantity || "-"}
-              </TableCell>
-            )}
-            <TableCell>{round(delivery.supplied_item_quantity)}</TableCell>
-            <TableCell>
-              {delivery.created_date &&
-                formatDate(new Date(delivery.created_date), "dd/MM/yyyy")}
-            </TableCell>
-            <TableCell>
-              <MonetaryDisplay
-                amount={
-                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.filter(
-                    (c) =>
-                      c.monetary_component_type === MonetaryComponentType.base,
-                  )[0]?.amount
-                }
-              />
-            </TableCell>
-            {informationalCodes.map((code) => {
-              const informationalComponent =
-                delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.find(
-                  (c) =>
-                    c.monetary_component_type ===
-                      MonetaryComponentType.informational &&
-                    c.code?.code === code.code,
-                );
-              return (
-                <TableCell key={code.code}>
-                  {informationalComponent?.amount && (
-                    <MonetaryDisplay amount={informationalComponent.amount} />
+        {deliveries.map((delivery) => {
+          const expiry =
+            delivery.supplied_inventory_item?.product?.expiration_date ||
+            delivery.supplied_item?.expiration_date;
+          return (
+            <TableRow key={delivery.id}>
+              {showAllCheckbox && (
+                <TableCell>
+                  {delivery.status === SupplyDeliveryStatus.in_progress && (
+                    <Checkbox
+                      checked={selectedDeliveries.includes(delivery.id)}
+                      onCheckedChange={(checked) => {
+                        onDeliverySelect?.(delivery.id, !!checked);
+                      }}
+                    />
                   )}
                 </TableCell>
-              );
-            })}
-            {!internal && (
-              <TableCell>
-                <MonetaryDisplay
-                  amount={delivery.supplied_item?.purchase_price}
+              )}
+              <TableCell>{serialNumberMap.get(delivery.id)}</TableCell>
+              <TableCell
+                className={cn(onDeliveryClick && "cursor-pointer underline")}
+                onClick={() => onDeliveryClick?.(delivery)}
+              >
+                <ProductLink
+                  delivery={delivery}
+                  internal={internal}
+                  linkToProduct={linkToProduct}
+                  facilityId={facilityId}
                 />
               </TableCell>
-            )}
-            {!internal && (
               <TableCell>
-                <MonetaryDisplay amount={delivery.total_purchase_price} />
+                {delivery.supplied_inventory_item?.product?.batch?.lot_number ||
+                  "-"}
               </TableCell>
-            )}
-            <TableCell>
-              <MonetaryDisplay
-                factor={add(
-                  ...(
-                    delivery.supplied_inventory_item?.product
-                      .charge_item_definition?.price_components || []
-                  )
-                    .filter(
+              <TableCell>
+                {expiry ? formatDate(parseISO(expiry), "dd/MM/yyyy") : "-"}
+              </TableCell>
+              <TableCell>
+                {delivery.supply_request
+                  ? round(delivery.supply_request.quantity)
+                  : "-"}
+              </TableCell>
+              {!internal && (
+                <TableCell>{delivery.supplied_item_pack_size || "-"}</TableCell>
+              )}
+              {!internal && (
+                <TableCell>
+                  {delivery.supplied_item_pack_quantity || "-"}
+                </TableCell>
+              )}
+              <TableCell>{round(delivery.supplied_item_quantity)}</TableCell>
+              <TableCell>
+                {delivery.created_date &&
+                  formatDate(new Date(delivery.created_date), "dd/MM/yyyy")}
+              </TableCell>
+              <TableCell>
+                <MonetaryDisplay
+                  amount={
+                    delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.filter(
                       (c) =>
-                        c.monetary_component_type === MonetaryComponentType.tax,
-                    )
-                    .map((c) => c.factor || "0"),
-                )}
-              />
-            </TableCell>
-            <TableCell>
-              {(() => {
-                const discountComponents =
-                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components?.filter(
+                        c.monetary_component_type ===
+                        MonetaryComponentType.base,
+                    )[0]?.amount
+                  }
+                />
+              </TableCell>
+              {informationalCodes.map((code) => {
+                const informationalComponent =
+                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.find(
                     (c) =>
                       c.monetary_component_type ===
-                      MonetaryComponentType.discount,
+                        MonetaryComponentType.informational &&
+                      c.code?.code === code.code,
                   );
-
-                return discountComponents?.map((component, index) => (
-                  <div key={index}>
-                    <MonetaryDisplay {...component} />
-                  </div>
-                ));
-              })()}
-            </TableCell>
-            <TableCell>
-              <Badge variant={SUPPLY_DELIVERY_STATUS_COLORS[delivery.status]}>
-                {t(delivery.status)}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              {delivery.supplied_item_condition && (
-                <Badge
-                  variant={
-                    SUPPLY_DELIVERY_CONDITION_COLORS[
-                      delivery.supplied_item_condition
-                    ] as "secondary" | "destructive"
-                  }
-                >
-                  {t(delivery.supplied_item_condition)}
-                </Badge>
-              )}
-            </TableCell>
-            {extensionFields.map((field) => {
-              const value = getExtensionValue(
-                delivery.extensions as NamespacedExtensionData,
-                field,
-              );
-              return (
-                <TableCell key={`${field.extensionName}-${field.name}`}>
-                  {value !== undefined && value !== null ? String(value) : "-"}
+                return (
+                  <TableCell key={code.code}>
+                    {informationalComponent?.amount && (
+                      <MonetaryDisplay amount={informationalComponent.amount} />
+                    )}
+                  </TableCell>
+                );
+              })}
+              {!internal && (
+                <TableCell>
+                  <MonetaryDisplay
+                    amount={delivery.supplied_item?.purchase_price}
+                  />
                 </TableCell>
-              );
-            })}
-            {showActionsColumn && (
+              )}
+              {!internal && (
+                <TableCell>
+                  <MonetaryDisplay amount={delivery.total_purchase_price} />
+                </TableCell>
+              )}
               <TableCell>
-                {delivery.status === SupplyDeliveryStatus.in_progress && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        aria-label={t("actions")}
-                      >
-                        <EllipsisVertical className="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Button
-                          variant="ghost"
-                          onClick={() =>
-                            updateDeliveryStatus({
-                              deliveryId: delivery.id,
-                              status: SupplyDeliveryStatus.entered_in_error,
-                              extensions: delivery.extensions,
-                            })
-                          }
-                          className="w-full flex justify-stretch"
-                        >
-                          <CareIcon icon="l-exclamation-circle" />
-                          <span>{t("mark_as_entered_in_error")}</span>
-                        </Button>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Button
-                          variant="ghost"
-                          onClick={() =>
-                            updateDeliveryStatus({
-                              deliveryId: delivery.id,
-                              status: SupplyDeliveryStatus.abandoned,
-                              extensions: delivery.extensions,
-                            })
-                          }
-                          className="w-full flex justify-stretch"
-                        >
-                          <CareIcon icon="l-ban" />
-                          <span>{t("mark_as_abandoned")}</span>
-                        </Button>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <MonetaryDisplay
+                  factor={add(
+                    ...(
+                      delivery.supplied_inventory_item?.product
+                        .charge_item_definition?.price_components || []
+                    )
+                      .filter(
+                        (c) =>
+                          c.monetary_component_type ===
+                          MonetaryComponentType.tax,
+                      )
+                      .map((c) => c.factor || "0"),
+                  )}
+                />
+              </TableCell>
+              <TableCell>
+                {(() => {
+                  const discountComponents =
+                    delivery.supplied_inventory_item?.product.charge_item_definition?.price_components?.filter(
+                      (c) =>
+                        c.monetary_component_type ===
+                        MonetaryComponentType.discount,
+                    );
+
+                  return discountComponents?.map((component, index) => (
+                    <div key={index}>
+                      <MonetaryDisplay {...component} />
+                    </div>
+                  ));
+                })()}
+              </TableCell>
+              <TableCell>
+                <Badge variant={SUPPLY_DELIVERY_STATUS_COLORS[delivery.status]}>
+                  {t(delivery.status)}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                {delivery.supplied_item_condition && (
+                  <Badge
+                    variant={
+                      SUPPLY_DELIVERY_CONDITION_COLORS[
+                        delivery.supplied_item_condition
+                      ] as "secondary" | "destructive"
+                    }
+                  >
+                    {t(delivery.supplied_item_condition)}
+                  </Badge>
                 )}
               </TableCell>
-            )}
-          </TableRow>
-        ))}
+              {extensionFields.map((field) => {
+                const value = getExtensionValue(
+                  delivery.extensions as NamespacedExtensionData,
+                  field,
+                );
+                return (
+                  <TableCell key={`${field.extensionName}-${field.name}`}>
+                    {value !== undefined && value !== null
+                      ? String(value)
+                      : "-"}
+                  </TableCell>
+                );
+              })}
+              {showActionsColumn && (
+                <TableCell>
+                  {delivery.status === SupplyDeliveryStatus.in_progress && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          aria-label={t("actions")}
+                        >
+                          <EllipsisVertical className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Button
+                            variant="ghost"
+                            onClick={() =>
+                              updateDeliveryStatus({
+                                deliveryId: delivery.id,
+                                status: SupplyDeliveryStatus.entered_in_error,
+                                extensions: delivery.extensions,
+                              })
+                            }
+                            className="w-full flex justify-stretch"
+                          >
+                            <CareIcon icon="l-exclamation-circle" />
+                            <span>{t("mark_as_entered_in_error")}</span>
+                          </Button>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Button
+                            variant="ghost"
+                            onClick={() =>
+                              updateDeliveryStatus({
+                                deliveryId: delivery.id,
+                                status: SupplyDeliveryStatus.abandoned,
+                                extensions: delivery.extensions,
+                              })
+                            }
+                            className="w-full flex justify-stretch"
+                          >
+                            <CareIcon icon="l-ban" />
+                            <span>{t("mark_as_abandoned")}</span>
+                          </Button>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </TableCell>
+              )}
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   );
