@@ -12,7 +12,6 @@ import careConfig from "@/../care.config";
 import { cn } from "@/lib/utils";
 
 import { DisablingCover } from "@/components/Common/DisablingCover";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,6 +43,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import Callout from "@/CAREUI/display/Callout";
 import {
   getExtensionFieldsWithName,
   processExtensions,
@@ -130,7 +130,6 @@ interface Props {
   origin?: string;
   destination: string;
   onSuccess: () => void;
-
   supplyDeliveriesCount: number;
   isFetchingSupplyDeliveries: boolean;
 }
@@ -278,6 +277,7 @@ export function AddSupplyDeliveryForm({
       noOptionsMessage={t("no_orders_found")}
       className="px-10"
       popoverContentClassName="w-auto"
+      disabled={disableAddItem}
     />
   );
 
@@ -911,15 +911,19 @@ export function AddSupplyDeliveryForm({
 
                   {supplyDeliveriesCount + fields.length >=
                   careConfig.maxDatapointsPerUpsert ? (
-                    <Alert className="border-amber-300 bg-amber-50 text-amber-800 [&>svg]:text-amber-600 *:data-[slot=alert-description]:text-amber-700">
-                      <TriangleAlert />
-                      <AlertTitle>{t("item_limit_reached")}</AlertTitle>
-                      <AlertDescription>
+                    <Callout
+                      variant="warning"
+                      className="border border-amber-300 bg-amber-50 text-amber-800"
+                      badge={
+                        <TriangleAlert className="size-4 shrink-0 text-amber-600" />
+                      }
+                    >
+                      <span className="flex items-center gap-2">
                         {t("max_datapoints_per_upsert_limit", {
                           count: careConfig.maxDatapointsPerUpsert,
                         })}
-                      </AlertDescription>
-                    </Alert>
+                      </span>
+                    </Callout>
                   ) : (
                     <div className="flex flex-row gap-2 mt-4 items-end">
                       <Button
@@ -930,19 +934,19 @@ export function AddSupplyDeliveryForm({
                         <PlusCircle className="mr-2 size-4" />
                         {t("add_another")}
                       </Button>
-                      {supplyRequests?.results?.length &&
-                        supplyRequests.results.length > 0 && (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={loadFromSupplyRequests}
-                          >
-                            {t("load_from_order_with_items", {
-                              count: supplyRequests?.count,
-                            })}
-                            <ShortcutBadge actionId="load-from-order" />
-                          </Button>
-                        )}
+                      {!!supplyRequests?.results?.length && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={loadFromSupplyRequests}
+                          disabled={disableAddItem}
+                        >
+                          {t("load_from_order_with_items", {
+                            count: supplyRequests.count,
+                          })}
+                          <ShortcutBadge actionId="load-from-order" />
+                        </Button>
+                      )}
                     </div>
                   )}
 
@@ -970,8 +974,7 @@ export function AddSupplyDeliveryForm({
                 <p>{t("add_items_to_delivery_description")}</p>
                 <div className="flex flex-row gap-2 items-center mt-2">
                   {qParams.supplyOrder ? (
-                    supplyRequests?.results?.length &&
-                    supplyRequests.results.length > 0 && (
+                    !!supplyRequests?.results?.length && (
                       <>
                         <Button
                           type="button"
@@ -980,7 +983,7 @@ export function AddSupplyDeliveryForm({
                           disabled={disableAddItem}
                         >
                           {t("load_from_order_with_items", {
-                            count: supplyRequests?.count,
+                            count: supplyRequests.count,
                           })}
                           <ShortcutBadge actionId="load-from-order" />
                         </Button>

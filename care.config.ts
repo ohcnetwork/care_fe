@@ -409,7 +409,7 @@ const careConfig = {
 
   /**
    * Maximum number of datapoints allowed in a single upsert request.
-   * Must not exceed the backend limit (defaults to 100).
+   * This should be set with whatever backend sets.
    */
   maxDatapointsPerUpsert: env.REACT_MAX_DATAPOINTS_PER_UPSERT
     ? parseInt(env.REACT_MAX_DATAPOINTS_PER_UPSERT, 10)
