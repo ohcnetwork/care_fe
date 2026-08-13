@@ -931,7 +931,7 @@ export function AddSupplyDeliveryForm({
                         {t("add_another")}
                       </Button>
                       {supplyRequests?.results?.length &&
-                        supplyRequests?.results?.length > 0 && (
+                        supplyRequests.results.length > 0 && (
                           <Button
                             type="button"
                             variant="secondary"
@@ -971,7 +971,7 @@ export function AddSupplyDeliveryForm({
                 <div className="flex flex-row gap-2 items-center mt-2">
                   {qParams.supplyOrder ? (
                     supplyRequests?.results?.length &&
-                    supplyRequests?.results?.length > 0 && (
+                    supplyRequests.results.length > 0 && (
                       <>
                         <Button
                           type="button"
