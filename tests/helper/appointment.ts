@@ -1,5 +1,26 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { selectFirstAvailablePractitioner } from "tests/helper/ui";
+
+/**
+ * Clicks the first bookable day in the booking sheet's calendar.
+ *
+ * Bookable days are the enabled calendar-day buttons; disabled days render with
+ * the `disabled` attribute. We identify day cells as buttons whose text starts
+ * with the day number and — unlike the HH:mm slot buttons — contain no colon.
+ * We deliberately don't key off the "N left" token text: it's only rendered
+ * when the schedule has token limits (finite tokensLeft), so a limitless
+ * schedule would render a bookable day without it.
+ *
+ * Selecting a day loads that day's slots and auto-selects the first free one.
+ */
+export async function selectFirstBookableDay(sheet: Locator) {
+  await sheet
+    .locator("button:not([disabled])")
+    .filter({ hasText: /^\d/ })
+    .filter({ hasNotText: ":" })
+    .first()
+    .click();
+}
 
 /**
  * Books an appointment for the patient shown on the current page and returns the
@@ -23,19 +44,7 @@ export async function bookAppointment(
 
   await sheet.getByPlaceholder("Type the reason for visit").fill(reason);
 
-  // Pick the first bookable day. Bookable days are the enabled calendar-day
-  // buttons; disabled days render with the `disabled` attribute. We identify
-  // day cells as buttons whose text starts with the day number and — unlike the
-  // HH:mm slot buttons — contain no colon. We deliberately don't key off the
-  // "N left" token text: it's only rendered when the schedule has token limits
-  // (finite tokensLeft), so a limitless schedule would render a bookable day
-  // without it.
-  await sheet
-    .locator("button:not([disabled])")
-    .filter({ hasText: /^\d/ })
-    .filter({ hasNotText: ":" })
-    .first()
-    .click();
+  await selectFirstBookableDay(sheet);
 
   const confirm = sheet.getByRole("button", { name: "Confirm Appointment" });
   await expect(confirm).toBeEnabled();

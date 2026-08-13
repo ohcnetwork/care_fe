@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { bookAppointment } from "tests/helper/appointment";
+import {
+  bookAppointment,
+  selectFirstBookableDay,
+} from "tests/helper/appointment";
 import { selectFirstAvailablePractitioner } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientIds } from "tests/support/patientId";
@@ -104,7 +107,11 @@ test.describe("Appointment Booking Workflow", () => {
     await test.step("Select a time slot", async () => {
       const sheet = page.getByRole("dialog");
 
-      // Slots for the selected practitioner render as HH:mm buttons.
+      // Load slots for the first bookable day (the default date, today, may have
+      // no remaining slots depending on the time of the run).
+      await selectFirstBookableDay(sheet);
+
+      // Slots for the selected day render as HH:mm buttons.
       const slots = sheet
         .getByRole("button")
         .filter({ hasText: /\d{2}:\d{2}/ });
