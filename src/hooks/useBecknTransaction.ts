@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import query, { callApi } from "@/Utils/request/query";
 import becknApi from "@/types/beckn/becknApi";
@@ -63,6 +63,18 @@ const POLL_MS = 1500;
 const SLICE_POLL_MS = 1200;
 
 /**
+ * Firing an action makes its own callback slice and everything downstream
+ * stale — re-`select` after changing provider must refresh `on_select` and
+ * anything that was built on top of it.
+ */
+const STALE_SLICES: Partial<Record<BecknActionName, string[]>> = {
+  discover: ["on_discover", "on_select", "on_init", "on_confirm"],
+  select: ["on_select", "on_init", "on_confirm"],
+  init: ["on_init", "on_confirm"],
+  confirm: ["on_confirm"],
+};
+
+/**
  * Drives one Beckn transaction end-to-end against the Care BAP REST endpoints.
  *
  * `act(name, body)` fires an action (discover starts the txn and captures its
@@ -82,6 +94,9 @@ export function useBecknTransaction() {
   // The action whose `on_*` callback we're waiting for; null when it's the FE's
   // turn (an `ON_*` was received) or the flow is at rest. Drives the poller.
   const [awaiting, setAwaiting] = useState<BecknActionName | null>(null);
+  // Bumped by reset(): an action response that resolves after the flow was
+  // reset must not resurrect the abandoned transaction.
+  const epochRef = useRef(0);
 
   const statusQuery = useQuery<BecknTxnStatus>({
     queryKey: ["beckn", "status", transactionId],
@@ -115,12 +130,13 @@ export function useBecknTransaction() {
     }
   }, [status, awaiting]);
 
-  // Cache each ON_* slice once it is ready so the catalog survives later phases.
+  // Cache each ON_* slice once it is ready so the catalog survives later
+  // phases. Last write wins so a re-fired action replaces its stale slice.
   useEffect(() => {
     const data = sliceQuery.data;
     if (data?.ready && sliceAction) {
       setSlices((prev) =>
-        prev[sliceAction] ? prev : { ...prev, [sliceAction]: data },
+        prev[sliceAction] === data ? prev : { ...prev, [sliceAction]: data },
       );
     }
   }, [sliceQuery.data, sliceAction]);
@@ -136,15 +152,41 @@ export function useBecknTransaction() {
       name: BecknActionName,
       body: Record<string, unknown>,
     ): Promise<BecknActionResult> => {
+      const epoch = epochRef.current;
       setError(undefined);
       setActing(true);
       // Expect an `on_<name>` callback → (re)start the poller.
       setAwaiting(name);
+      // Stamp the fired action's request-phase status into the cache so the
+      // stale previous snapshot (an old `ON_*`, or NACK on retry) can neither
+      // satisfy the awaited-callback check above nor keep the slice observer
+      // attached while its query is removed below.
+      if (transactionId) {
+        qc.setQueryData<BecknTxnStatus>(
+          ["beckn", "status", transactionId],
+          (prev) => (prev ? { ...prev, status: name.toUpperCase() } : prev),
+        );
+      }
+      // Drop this action's slice and everything downstream so a re-fired
+      // action (e.g. re-`select` after changing provider) is never served its
+      // previous callback's data.
+      const stale = STALE_SLICES[name];
+      if (stale) {
+        setSlices((prev) => {
+          const next = { ...prev };
+          stale.forEach((key) => delete next[key]);
+          return next;
+        });
+      }
       try {
         const res = await callApi(becknApi.action, {
           pathParams: { action: name },
           body,
         });
+        // The flow was reset while this POST was in flight — drop the result.
+        if (epochRef.current !== epoch) {
+          return res;
+        }
         if (name === "discover") {
           setTransactionId(res.transactionId);
         }
@@ -157,11 +199,26 @@ export function useBecknTransaction() {
         }
         const tid = res.transactionId ?? transactionId;
         if (tid) {
+          if (stale) {
+            qc.removeQueries({ queryKey: ["beckn", "slice", tid] });
+          }
           await qc.invalidateQueries({
             queryKey: ["beckn", "status", tid],
           });
         }
         return res;
+      } catch {
+        // The POST itself failed (network/server): stop waiting for a callback
+        // that will never arrive and surface the failure — unless the flow was
+        // reset in the meantime.
+        if (epochRef.current === epoch) {
+          setAwaiting(null);
+          setError(t("beckn_request_failed"));
+        }
+        return {
+          transactionId: transactionId ?? "",
+          result: "error" as const,
+        };
       } finally {
         setActing(false);
       }
@@ -170,6 +227,7 @@ export function useBecknTransaction() {
   );
 
   const reset = useCallback(() => {
+    epochRef.current += 1;
     setTransactionId(undefined);
     setSlices({});
     setError(undefined);
