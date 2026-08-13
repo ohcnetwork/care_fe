@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { SaveIcon, Trash2Icon, TriangleAlert } from "lucide-react";
+import { Info, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -287,7 +287,7 @@ const ScheduleTemplateEditor = ({
                   <Callout
                     variant="warning"
                     badge={
-                      <TriangleAlert className="size-4 shrink-0 text-warning-700" />
+                      <Info className="size-4 shrink-0 text-warning-700" />
                     }
                   >
                     <p className="text-sm">
@@ -643,7 +643,7 @@ const NewAvailabilityCard = ({
     return (
       <Callout
         variant="alert"
-        badge={<TriangleAlert className="size-4 shrink-0 text-purple-500" />}
+        badge={<Info className="size-4 shrink-0 text-purple-500" />}
       >
         <Trans
           i18nKey="schedule_slots_allocation_callout"

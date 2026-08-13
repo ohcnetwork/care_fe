@@ -245,6 +245,9 @@ export function AddSupplyDeliveryForm({
   const hasReachedUpsertLimit =
     supplyDeliveriesCount >= careConfig.maxDatapointsPerUpsert;
 
+  const disableAddItem =
+    isProcessing || hasReachedUpsertLimit || isFetchingSupplyDeliveries;
+
   const loadFromSupplyRequests = () => {
     setIsSelectDialogOpen(true);
     handleSelectAll(true);
@@ -547,9 +550,6 @@ export function AddSupplyDeliveryForm({
 
     await createSupplyDelivery(deliveryPayload);
   }
-
-  const disableAddItem =
-    isProcessing || hasReachedUpsertLimit || isFetchingSupplyDeliveries;
 
   async function onSubmit(data: SupplyDeliveryFormValues) {
     if (!validateFormWithToasts(data)) {
