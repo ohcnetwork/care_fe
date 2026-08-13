@@ -1,13 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { type Page, expect, test } from "@playwright/test";
+import { selectFirstAvailablePractitioner } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
-
-// Display name of the seeded `care-doctor` practitioner. The resource picker
-// fuzzy-matches on the rendered name, not the username, so we search by name.
-const PRACTITIONER_NAME = "Gagan";
 
 /**
  * Books an appointment for the patient currently shown on the page and returns
@@ -23,16 +20,8 @@ async function bookAppointment(page: Page, reason: string): Promise<string> {
   const sheet = page.getByRole("dialog", { name: "Book Appointment" });
   await expect(sheet).toBeVisible();
 
-  // Select a practitioner from the resource selector.
-  await sheet.getByRole("combobox").click();
-  const practitionerPicker = page.getByRole("dialog").last();
-  // Widen the search beyond the current user's own departments so the seeded
-  // practitioner (in another department) is reachable.
-  await practitionerPicker.getByRole("button", { name: "My Dept." }).click();
-  await practitionerPicker
-    .getByPlaceholder(/search departments and practitioners/i)
-    .fill(PRACTITIONER_NAME);
-  await practitionerPicker.getByRole("option").first().click();
+  // Select the first available practitioner from the resource picker.
+  await selectFirstAvailablePractitioner(page, sheet);
 
   // Reason for the visit.
   await sheet.getByPlaceholder("Type the reason for visit").fill(reason);
@@ -66,6 +55,12 @@ async function bookAppointment(page: Page, reason: string): Promise<string> {
  * actions menu, the reschedule dialog, and back navigation.
  */
 test.describe("Appointment Detail Page", () => {
+  // Serial mode: beforeAll books a single shared appointment (a slot can't be
+  // booked twice), and the check-in test mutates it and must run last. Serial
+  // execution runs the file on one worker in order, so it neither double-books
+  // itself nor races the check-in ahead of the read-only tests.
+  test.describe.configure({ mode: "serial" });
+
   const reason = faker.lorem.sentence();
 
   // The test DB is not reset between tests, and a patient cannot be booked into
