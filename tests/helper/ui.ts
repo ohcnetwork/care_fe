@@ -295,6 +295,87 @@ export async function selectFromCommand(
   await scope.waitFor({ state: "hidden" }).catch(() => {});
 }
 
+/**
+ * Selects the first available practitioner in the scheduling resource picker
+ * (PractitionerSelector).
+ *
+ * The picker is a tree of departments; practitioners live inside them and their
+ * names are randomized fixtures, so we can't search by name. This does a
+ * depth-first search: at each level it selects a practitioner if one is listed,
+ * otherwise it descends into each department in turn, backing out of any that
+ * dead-ends and trying the next. Practitioner rows carry an avatar; department
+ * rows carry only a colored dot — that's how the two are told apart. The
+ * department tree is finite, so the search always terminates. Selecting a
+ * practitioner closes the picker.
+ */
+export async function selectFirstAvailablePractitioner(
+  page: Page,
+  scope: Locator,
+) {
+  await scope
+    .getByRole("combobox")
+    .filter({ hasText: /select practitioner/i })
+    .click();
+
+  const picker = page.locator("[data-radix-popper-content-wrapper]").last();
+  await picker.waitFor({ state: "visible" });
+
+  const avatar = page.locator('[data-slot="avatar"]');
+  // Both the top-level cmdk options and the in-department rows are clickable.
+  const rows = picker.locator('[role="option"], div.cursor-pointer');
+  const practitioners = rows.filter({ has: avatar });
+  const departments = rows.filter({ hasNot: avatar });
+  const backButton = picker
+    .locator("button:has(svg.lucide-arrow-left)")
+    .first();
+  // Terminal states that tell us a level has finished loading. Inside a
+  // department the users query settles to either practitioner rows or "no users
+  // in organization" (the child-departments section can render earlier, so it
+  // isn't a reliable "loaded" signal on its own). "No users in organization"
+  // only renders once loading finishes, so it's safe to wait on; at the root the
+  // equivalent "no organizations" empty state is shown transiently by cmdk while
+  // the list loads, so there we wait for an actual department row instead.
+  const noUsers = picker.getByText(/no users in organization/i).first();
+
+  async function waitForLevel(inDepartment: boolean) {
+    if (inDepartment) {
+      await expect(practitioners.first().or(noUsers)).toBeVisible();
+    } else {
+      await expect(departments.first()).toBeVisible();
+    }
+  }
+
+  // Depth-first search: pick a practitioner at the current level if one is
+  // listed, otherwise descend into each department in turn, backing out of any
+  // that dead-ends. The department tree is finite, so this always terminates.
+  async function search(inDepartment: boolean): Promise<boolean> {
+    await waitForLevel(inDepartment);
+
+    if ((await practitioners.count()) > 0) {
+      await practitioners.first().click();
+      await picker.waitFor({ state: "hidden" });
+      return true;
+    }
+
+    const count = await departments.count();
+    for (let i = 0; i < count; i++) {
+      await departments.nth(i).click();
+      if (await search(true)) return true;
+      // Dead end: back out and try the next sibling department.
+      await backButton.click();
+      await waitForLevel(inDepartment);
+    }
+
+    return false;
+  }
+
+  if (!(await search(false))) {
+    throw new Error(
+      "No practitioner available in the scheduling resource picker",
+    );
+  }
+}
+
 interface SelectFromCategoryPickerOptions {
   search?: string;
   navigateCategories?: string[];
