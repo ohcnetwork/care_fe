@@ -278,8 +278,8 @@ export function DeliveryOrderShow({
         order: deliveryOrderId,
         facility: facilityId,
         ordering: "created_date",
-        limit: String(careConfig.maxDatapointsPerUpsert),
       },
+      pageSize: careConfig.maxDatapointsPerUpsert,
     }),
   });
 
@@ -480,6 +480,9 @@ export function DeliveryOrderShow({
   const hasReachedUpsertLimit =
     supplyDeliveries &&
     supplyDeliveries.results.length >= careConfig.maxDatapointsPerUpsert;
+
+  const canReceiveAndUpdateStock =
+    selectedDeliveries.length <= careConfig.maxDatapointsPerUpsert;
 
   return (
     <Page
@@ -809,7 +812,8 @@ export function DeliveryOrderShow({
                       disabled={
                         isUpdating ||
                         isUpsertingDeliveries ||
-                        selectedDeliveries.length === 0
+                        selectedDeliveries.length === 0 ||
+                        !canReceiveAndUpdateStock
                       }
                     >
                       {isUpsertingDeliveries
@@ -850,6 +854,23 @@ export function DeliveryOrderShow({
                 )}
             </div>
           </CardHeader>
+          {!canReceiveAndUpdateStock && (
+            <div className="px-4">
+              <Callout
+                variant="warning"
+                className="border border-amber-300 bg-amber-50 text-amber-800"
+                badge={
+                  <TriangleAlert className="size-4 shrink-0 text-amber-600" />
+                }
+              >
+                <span className="flex items-center gap-2">
+                  {t("max_datapoints_per_upsert_limit", {
+                    count: careConfig.maxDatapointsPerUpsert,
+                  })}
+                </span>
+              </Callout>
+            </div>
+          )}
           <CardContent className="p-2">
             {isLoadingSupplyDeliveries ? (
               <div className="space-y-2">
@@ -921,7 +942,7 @@ export function DeliveryOrderShow({
                   <></>
                 )}
 
-                {hasReachedUpsertLimit && (
+                {hasReachedUpsertLimit && canAddSupplyDeliveries && (
                   <Callout
                     variant="warning"
                     className="border border-amber-300 bg-amber-50 text-amber-800"
