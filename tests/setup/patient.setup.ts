@@ -19,8 +19,20 @@ test("navigate to an encounter and save patient and encounter id", async ({
   );
 
   try {
+    // Capture every patient id in the list before navigating away, so we can
+    // also record a second, distinct patient. Suites that book their own
+    // appointment use it to avoid racing the primary fixture patient for the
+    // same slot on parallel workers.
+    const encounterLinks = page.getByRole("link", { name: "View Encounter" });
+    await encounterLinks.first().waitFor({ state: "visible" });
+    const patientIds = (
+      await encounterLinks.evaluateAll((links) =>
+        links.map((link) => link.getAttribute("href") ?? ""),
+      )
+    ).map((href) => href.match(/\/patient\/([^/]+)/)?.[1]);
+
     // Wait for encounter link to be visible
-    await page.getByRole("link", { name: "View Encounter" }).first().click();
+    await encounterLinks.first().click();
 
     // Wait for navigation to the encounter page
     await page.waitForURL(
@@ -38,13 +50,22 @@ test("navigate to an encounter and save patient and encounter id", async ({
       throw new Error(`Failed to extract IDs from URL: ${url}`);
     }
 
+    const secondPatientId = patientIds.find(
+      (id): id is string => !!id && id !== patientId,
+    );
+    if (!secondPatientId) {
+      throw new Error(
+        "Could not find a second distinct patient in the encounter list",
+      );
+    }
+
     // Ensure the directory exists
     fs.mkdirSync("tests/.auth", { recursive: true });
 
-    // Save patient ID
+    // Save patient IDs (primary + a distinct second patient)
     fs.writeFileSync(
       "tests/.auth/patientMeta.json",
-      JSON.stringify({ id: patientId }, null, 2),
+      JSON.stringify({ id: patientId, secondId: secondPatientId }, null, 2),
     );
 
     // Save encounter ID
@@ -54,6 +75,7 @@ test("navigate to an encounter and save patient and encounter id", async ({
     );
 
     console.log(`✅ Patient ID saved: ${patientId}`);
+    console.log(`✅ Second patient ID saved: ${secondPatientId}`);
     console.log(`✅ Encounter ID saved: ${encounterId}`);
   } catch (error) {
     console.error("❌ Failed to set up patient and encounter:", error);

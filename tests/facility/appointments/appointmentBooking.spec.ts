@@ -1,8 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { bookAppointment } from "tests/helper/appointment";
 import { selectFirstAvailablePractitioner } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
+import { getPatientIds } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -14,7 +15,7 @@ test.describe("Appointment Booking Workflow", () => {
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    patientId = getPatientId();
+    patientId = getPatientIds().id;
 
     // Navigate to patient profile page
     await page.goto(`/facility/${facilityId}/patient/${patientId}`);
@@ -125,48 +126,18 @@ test.describe("Appointment Booking Workflow", () => {
   test("should complete full appointment booking workflow", async ({
     page,
   }) => {
-    await test.step("Open booking sheet and select practitioner", async () => {
-      await page.getByRole("button", { name: appointmentTriggerName }).click();
-      await expect(page.getByRole("dialog")).toBeVisible();
-      await selectFirstAvailablePractitioner(page, page.getByRole("dialog"));
+    const reason = faker.lorem.sentence();
+
+    await test.step("Book an appointment end to end", async () => {
+      // Shared helper: opens the sheet, picks a practitioner, fills the reason,
+      // chooses the first bookable day, confirms, asserts the create response,
+      // and lands on the appointment detail page.
+      await bookAppointment(page, reason);
     });
 
-    await test.step("Fill reason and wait for slots to load", async () => {
-      const sheet = page.getByRole("dialog");
-      await sheet
-        .getByPlaceholder(/reason for visit/i)
-        .fill(faker.lorem.sentence());
-
-      // The picker auto-selects the first available slot on load, which surfaces
-      // the confirm action below.
-      const slots = sheet
-        .getByRole("button")
-        .filter({ hasText: /\d{2}:\d{2}/ });
-      await expect(slots.first()).toBeVisible();
-    });
-
-    await test.step("Confirm the appointment and verify success", async () => {
-      const sheet = page.getByRole("dialog");
-      const confirmButton = sheet.getByRole("button", {
-        name: /confirm appointment/i,
-      });
-      await expect(confirmButton).toBeVisible();
-
-      const [response] = await Promise.all([
-        page.waitForResponse(
-          (r) =>
-            r.url().includes("/create_appointment/") &&
-            r.request().method() === "POST",
-        ),
-        confirmButton.click(),
-      ]);
-      expect(response.status()).toBeLessThan(300);
-
-      // Post-submit: success toast AND navigation to the new appointment page.
-      await expect(
-        page.getByText(/appointment created successfully/i),
-      ).toBeVisible();
-      await expect(page).toHaveURL(/\/appointments\/[0-9a-f-]+/);
+    await test.step("Verify the booked appointment persisted", async () => {
+      // The reason we submitted is shown on the destination detail page.
+      await expect(page.getByText(reason)).toBeVisible();
     });
   });
 

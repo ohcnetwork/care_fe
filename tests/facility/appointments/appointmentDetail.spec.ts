@@ -1,51 +1,10 @@
 import { faker } from "@faker-js/faker";
-import { type Page, expect, test } from "@playwright/test";
-import { selectFirstAvailablePractitioner } from "tests/helper/ui";
+import { expect, test } from "@playwright/test";
+import { bookAppointment } from "tests/helper/appointment";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
+import { getPatientIds } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
-
-/**
- * Books an appointment for the patient currently shown on the page and returns
- * the created appointment's id once the detail page has loaded.
- *
- * The flow mirrors what a user does: open the booking sheet, pick a
- * practitioner, add a reason, choose the first available date (the slot picker
- * auto-selects the first free slot), and confirm.
- */
-async function bookAppointment(page: Page, reason: string): Promise<string> {
-  await page.getByRole("button", { name: "Schedule Appointment" }).click();
-
-  const sheet = page.getByRole("dialog", { name: "Book Appointment" });
-  await expect(sheet).toBeVisible();
-
-  // Select the first available practitioner from the resource picker.
-  await selectFirstAvailablePractitioner(page, sheet);
-
-  // Reason for the visit.
-  await sheet.getByPlaceholder("Type the reason for visit").fill(reason);
-
-  // Pick the first bookable day; day cells show a remaining-token count.
-  await sheet
-    .locator("button:not([disabled])")
-    .filter({ hasText: /^\d{1,2}\s*\d+ left$/ })
-    .first()
-    .click();
-
-  // The slot picker auto-selects the first available slot, which reveals the
-  // confirm action.
-  const confirm = sheet.getByRole("button", { name: "Confirm Appointment" });
-  await expect(confirm).toBeEnabled();
-  await confirm.click();
-
-  await page.waitForURL(/\/appointments\/[a-f0-9-]+/);
-  await expect(
-    page.getByRole("heading", { name: "Appointment Details" }),
-  ).toBeVisible();
-
-  return page.url().match(/appointments\/([a-f0-9-]+)/)?.[1] ?? "";
-}
 
 /**
  * Appointment Detail Page Tests
@@ -71,7 +30,10 @@ test.describe("Appointment Detail Page", () => {
 
   test.beforeAll(async ({ browser }) => {
     const facilityId = getFacilityId();
-    const patientId = getPatientId();
+    // Book against a patient distinct from the one appointmentBooking.spec.ts
+    // uses, so the two files can't race for the same patient/slot when they run
+    // on parallel workers (serial mode only orders tests within this file).
+    const patientId = getPatientIds().secondId;
     patientHome = `/facility/${facilityId}/patient/${patientId}`;
 
     const context = await browser.newContext({
@@ -102,7 +64,9 @@ test.describe("Appointment Detail Page", () => {
       page.getByText("Schedule Information", { exact: true }),
     ).toBeVisible();
     await expect(page.getByText("Patient Information")).toBeVisible();
-    await expect(page.getByText("Phone", { exact: false })).toBeVisible();
+    // Assert the patient's phone actually rendered (a tel: link), not just the
+    // static "Phone" label which is present regardless.
+    await expect(page.locator('a[href^="tel:"]').first()).toBeVisible();
   });
 
   test("offers token generation for a new appointment", async ({ page }) => {
