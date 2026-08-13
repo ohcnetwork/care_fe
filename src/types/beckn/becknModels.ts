@@ -69,9 +69,6 @@ export interface CatalogOption {
   catalogName?: string;
   bppId?: string;
   bppUri?: string;
-  /** Resource `availabilitySchedule` window, IST-stamped, carried into select. */
-  availabilityStart?: string;
-  availabilityEnd?: string;
 }
 
 /** One appointment slot flattened from an `on_select` contract. */
@@ -116,33 +113,108 @@ function descriptorName(v: unknown): string | undefined {
   return asString(asRecord(asRecord(v)?.descriptor)?.name);
 }
 
-/**
- * Schedule times arrive from discover as zone-less local timestamps; the network
- * runs on IST, so stamp the offset rather than letting `new Date()` read them as
- * browser-local. Values that already carry a zone are left alone.
- */
-function withIstOffset(value: string | undefined): string | undefined {
-  if (!value) return undefined;
-  return /(Z|[+-]\d{2}:?\d{2})$/.test(value) ? value : `${value}+05:30`;
+const IST_OFFSET = "+05:30";
+const IST_OFFSET_MINUTES = 330;
+
+/** `YYYY-MM-DD` for "today" in IST, whatever zone the browser is in. */
+function istToday(now: Date): string {
+  return new Date(now.getTime() + IST_OFFSET_MINUTES * 60_000)
+    .toISOString()
+    .slice(0, 10);
+}
+
+function withSeconds(time: string): string {
+  return time.length === 5 ? `${time}:00` : time;
 }
 
 /**
- * Pull a resource's `availabilitySchedule` window. Tolerates the schedule sitting
- * on the resource itself or under `resourceAttributes`, and being a single object
- * or a list (first entry wins).
+ * Normalise an `availabilitySchedule` value to a zoned IST timestamp
+ * (`2026-07-02T10:00:00+05:30`).
+ *
+ * The BPP publishes these as bare times of day ("22:00"), so a date has to be
+ * supplied — stamping an offset alone yields "22:00+05:30", which is not a
+ * timestamp and is not parseable as one. Values that already carry a date keep
+ * it; only a missing zone and missing seconds are filled in. Anything
+ * unrecognised is passed through untouched rather than mangled.
  */
-function extractAvailability(resource: Record<string, unknown> | undefined): {
-  availabilityStart?: string;
-  availabilityEnd?: string;
-} {
+function toIstTimestamp(
+  value: string | undefined,
+  date: string,
+): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+
+  const dated = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}(?::\d{2})?)(.*)$/.exec(
+    trimmed,
+  );
+  if (dated) {
+    const [, day, time, zone] = dated;
+    return `${day}T${withSeconds(time)}${zone.trim() || IST_OFFSET}`;
+  }
+
+  const timeOnly = /^(\d{2}:\d{2}(?::\d{2})?)(Z|[+-]\d{2}:?\d{2})?$/.exec(
+    trimmed,
+  );
+  if (timeOnly) {
+    const [, time, zone] = timeOnly;
+    return `${date}T${withSeconds(time)}${zone ?? IST_OFFSET}`;
+  }
+
+  return trimmed;
+}
+
+/** Shift a normalised timestamp's date part one day forward. */
+function nextDay(timestamp: string): string {
+  const day = new Date(`${timestamp.slice(0, 10)}T00:00:00Z`);
+  day.setUTCDate(day.getUTCDate() + 1);
+  return `${day.toISOString().slice(0, 10)}${timestamp.slice(10)}`;
+}
+
+/** The window a resource is bookable in, as sent on `select`. */
+export interface AvailabilityWindow {
+  start?: string;
+  end?: string;
+}
+
+/**
+ * Resolve the selected option's `availabilitySchedule` window from the
+ * `on_discover` slice. Read back out of the slice on demand — keyed by the
+ * option's `catalog-offer` index — rather than carried on `CatalogOption`,
+ * which keeps the option a flat descriptor of what the user picked.
+ *
+ * Tolerates the schedule sitting on the resource itself or under
+ * `resourceAttributes`, and being a single object or a list (first entry wins).
+ */
+export function availabilityForOption(
+  slice: BecknSlice | undefined,
+  option: CatalogOption | undefined,
+  now: Date = new Date(),
+): AvailabilityWindow {
+  if (!option) return {};
+  const [catalogIndex, offerIndex] = option.key.split("-").map(Number);
+  if (!Number.isInteger(catalogIndex) || !Number.isInteger(offerIndex)) {
+    return {};
+  }
+
+  const message = asRecord(slice?.data?.message);
+  const catalog = asRecord(asArray(message?.catalogs)[catalogIndex]);
+  const resources = asArray(catalog?.resources);
+  const resource = asRecord(resources[offerIndex] ?? resources[0]);
+
   const raw =
     resource?.availabilitySchedule ??
     asRecord(resource?.resourceAttributes)?.availabilitySchedule;
   const schedule = asRecord(raw) ?? asRecord(asArray(raw)[0]);
-  return {
-    availabilityStart: withIstOffset(asString(schedule?.startTime)),
-    availabilityEnd: withIstOffset(asString(schedule?.endTime)),
-  };
+  if (!schedule) return {};
+
+  const date = istToday(now);
+  const start = toIstTimestamp(asString(schedule.startTime), date);
+  let end = toIstTimestamp(asString(schedule.endTime), date);
+  // An overnight window (22:00 → 06:00) closes on the following day.
+  if (start && end && Date.parse(end) <= Date.parse(start)) {
+    end = nextDay(end);
+  }
+  return { start, end };
 }
 
 /**
@@ -199,7 +271,6 @@ export function extractOffers(slice: BecknSlice | undefined): CatalogOption[] {
         catalogName,
         bppId,
         bppUri,
-        ...extractAvailability(resource),
       });
     });
   });
@@ -542,6 +613,8 @@ export interface SelectParams {
   transactionId: string;
   option: CatalogOption;
   healthServiceType?: string;
+  /** Appointment only: the window the selected resource is bookable in. */
+  availability?: AvailabilityWindow;
 }
 
 /**
@@ -552,7 +625,13 @@ export interface SelectParams {
  * reads back. `contractAttributes` therefore carries only the service type.
  */
 export function buildSelectBody(params: SelectParams): Record<string, unknown> {
-  const { serviceType, transactionId, option, healthServiceType } = params;
+  const {
+    serviceType,
+    transactionId,
+    option,
+    healthServiceType,
+    availability,
+  } = params;
 
   if (serviceType === "consultation") {
     return {
@@ -582,16 +661,16 @@ export function buildSelectBody(params: SelectParams): Record<string, unknown> {
       contract: {
         status: { code: "DRAFT" },
         commitments: [buildCommitment(option, "DRAFT")],
-        // No `id` yet — the BPP mints one per slot it offers back, and that id
-        // is what `confirm` commits to.
+        // No `id` yet — the BPP mints one performance per slot it offers back,
+        // and that id is what `confirm` commits to.
         performance: [
           {
             performanceAttributes: pruneUndefined({
               "@context": ATTR_CONTEXT.performance,
               "@type": "hpe:HealthPerformance",
               healthServiceType,
-              appointmentWindowStart: option.availabilityStart,
-              appointmentWindowEnd: option.availabilityEnd,
+              appointmentWindowStart: availability?.start,
+              appointmentWindowEnd: availability?.end,
             }),
           },
         ],

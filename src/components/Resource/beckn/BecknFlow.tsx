@@ -20,6 +20,7 @@ import {
   BecknServiceType,
   BecknSlot,
   CatalogOption,
+  availabilityForOption,
   buildConfirmBody,
   buildDiscoverBody,
   buildInitBody,
@@ -116,6 +117,7 @@ export default function BecknFlow({
         transactionId,
         option,
         healthServiceType,
+        availability: availabilityForOption(flow.slices["on_discover"], option),
       }),
     );
   }, [
@@ -128,6 +130,7 @@ export default function BecknFlow({
     facilityId,
     title,
     healthServiceType,
+    flow.slices,
   ]);
 
   const doConfirm = useCallback(() => {
