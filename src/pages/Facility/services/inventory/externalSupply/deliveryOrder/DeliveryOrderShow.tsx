@@ -278,10 +278,9 @@ export function DeliveryOrderShow({
         order: deliveryOrderId,
         facility: facilityId,
         ordering: "created_date",
+        limit: String(careConfig.maxDatapointsPerUpsert),
       },
-      pageSize: careConfig.maxDatapointsPerUpsert,
     }),
-    enabled: !!deliveryOrderId,
   });
 
   const supplyOrderId = supplyDeliveries?.results?.find(
