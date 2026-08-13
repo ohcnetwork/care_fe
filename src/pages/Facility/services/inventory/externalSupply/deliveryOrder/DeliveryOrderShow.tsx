@@ -852,7 +852,7 @@ export function DeliveryOrderShow({
             </div>
           </CardHeader>
           <CardContent className="p-2">
-            {isLoadingSupplyDeliveries || isFetchingSupplyDeliveries ? (
+            {isLoadingSupplyDeliveries ? (
               <div className="space-y-2">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="animate-pulse">
@@ -949,6 +949,7 @@ export function DeliveryOrderShow({
                     supplyDeliveriesCount={
                       supplyDeliveries?.results.length || 0
                     }
+                    isFetchingSupplyDeliveries={isFetchingSupplyDeliveries}
                   />
                 )}
               </div>

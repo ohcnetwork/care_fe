@@ -548,6 +548,9 @@ export function AddSupplyDeliveryForm({
     await createSupplyDelivery(deliveryPayload);
   }
 
+  const disableAddItem =
+    isProcessing || hasReachedUpsertLimit || isFetchingSupplyDeliveries;
+
   async function onSubmit(data: SupplyDeliveryFormValues) {
     if (!validateFormWithToasts(data)) {
       return;
@@ -974,11 +977,7 @@ export function AddSupplyDeliveryForm({
                           type="button"
                           variant="outline_primary"
                           onClick={loadFromSupplyRequests}
-                          disabled={
-                            isProcessing ||
-                            hasReachedUpsertLimit ||
-                            isFetchingSupplyDeliveries
-                          }
+                          disabled={disableAddItem}
                         >
                           {t("load_from_order_with_items", {
                             count: supplyRequests?.count,
@@ -998,11 +997,7 @@ export function AddSupplyDeliveryForm({
                     type="button"
                     variant="outline_primary"
                     onClick={() => handleAddAnotherItem()}
-                    disabled={
-                      isProcessing ||
-                      hasReachedUpsertLimit ||
-                      isFetchingSupplyDeliveries
-                    }
+                    disabled={disableAddItem}
                   >
                     <PlusCircle className="mr-2 size-4" />
                     {t("add_item")}
