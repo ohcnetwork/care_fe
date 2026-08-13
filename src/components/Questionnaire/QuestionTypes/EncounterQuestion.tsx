@@ -27,6 +27,7 @@ import {
   ENCOUNTER_DISCHARGE_DISPOSITION,
   ENCOUNTER_PRIORITY,
   EncounterStatus,
+  inactiveEncounterStatus,
   type EncounterAdmitSources,
   type EncounterClass,
   type EncounterDietPreference,
@@ -67,14 +68,6 @@ interface EncounterQuestionProps {
   facilityId: string;
   errors?: QuestionValidationError[];
 }
-
-const TERMINAL_ENCOUNTER_STATUSES: EncounterStatus[] = [
-  EncounterStatus.DISCHARGED,
-  EncounterStatus.COMPLETED,
-  EncounterStatus.CANCELLED,
-  EncounterStatus.DISCONTINUED,
-  EncounterStatus.ENTERED_IN_ERROR,
-];
 
 const NON_SELECTABLE_ENCOUNTER_STATUSES: EncounterStatus[] = [
   EncounterStatus.DISCHARGED,
@@ -130,12 +123,19 @@ function resolvePeriodEnd(
   edit: EncounterEdit,
   encounter: EncounterRead | undefined,
 ): string | undefined {
-  if (!TERMINAL_ENCOUNTER_STATUSES.includes(edit.status)) {
-    return undefined;
+  if (
+    (
+      [
+        ...inactiveEncounterStatus,
+        EncounterStatus.DISCHARGED,
+      ] as EncounterStatus[]
+    ).includes(edit.status)
+  ) {
+    return (
+      edit.period.end ?? encounter?.period?.end ?? new Date().toISOString()
+    );
   }
-  // Leaving a terminal status clears the end date, so fall back to the
-  // recorded one rather than stamping "now" on the way back in.
-  return edit.period.end ?? encounter?.period?.end ?? new Date().toISOString();
+  return undefined;
 }
 
 function normalizeEncounter(
