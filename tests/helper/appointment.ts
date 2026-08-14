@@ -2,16 +2,12 @@ import { expect, type Locator, type Page } from "@playwright/test";
 import { selectFirstAvailablePractitioner } from "tests/helper/ui";
 
 /**
- * Clicks the first bookable day in the booking sheet's calendar.
+ * Clicks the first bookable day in the booking sheet's calendar, which loads
+ * that day's slots and auto-selects the first free one.
  *
- * Bookable days are the enabled calendar-day buttons; disabled days render with
- * the `disabled` attribute. We identify day cells as buttons whose text starts
- * with the day number and — unlike the HH:mm slot buttons — contain no colon.
- * We deliberately don't key off the "N left" token text: it's only rendered
- * when the schedule has token limits (finite tokensLeft), so a limitless
- * schedule would render a bookable day without it.
- *
- * Selecting a day loads that day's slots and auto-selects the first free one.
+ * Day cells are enabled buttons whose text starts with the day number and,
+ * unlike the HH:mm slot buttons, contain no colon. We avoid the "N left" token
+ * text because it isn't rendered for schedules without token limits.
  */
 export async function selectFirstBookableDay(sheet: Locator) {
   await sheet
