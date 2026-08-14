@@ -71,12 +71,8 @@ export function getExpiryBadgeVariant(
 }
 
 /**
- * Sorts inventory lots FEFO (earliest expiry first). Genuinely expired lots
- * (per `getExpiryStatus`) always sort last, since they're already blocked
- * from dispensing. Lots with no/unparseable expiration date are treated as
- * not-expired (matching `isProductRestrictedFromDispensing`), so they sort
- * after all dated non-expired lots but ahead of expired ones. Stable sort,
- * so ties keep their existing (FIFO) relative order.
+ * Sorts inventory lots FEFO (earliest expiry first), pushing expired lots to
+ * the bottom. Lots without a parseable expiration date sort as if valid.
  * @param inventories - The inventory lots to sort
  * @returns A new array sorted FEFO, with expired lots pushed to the bottom
  */
