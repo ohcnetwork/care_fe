@@ -115,34 +115,34 @@ function ProductDeliveriesDrawerContent({
           <TabsTrigger value="incoming">{t("incoming_deliveries")}</TabsTrigger>
           <TabsTrigger value="outgoing">{t("outgoing_deliveries")}</TabsTrigger>
         </TabsList>
+        <TabsContent value={direction}>
+          {isLoading ? (
+            <TableSkeleton count={2} />
+          ) : deliveries?.results && deliveries.results.length > 0 ? (
+            <>
+              <SupplyDeliveryTable
+                deliveries={deliveries.results}
+                facilityId={facilityId}
+                serialNumberOffset={DELIVERIES_PER_PAGE * (page - 1)}
+                linkToProduct
+                showLocations
+              />
+              <PaginationComponent
+                data={{ totalCount: deliveries.count }}
+                onChange={(newPage) => setPage(newPage)}
+                defaultPerPage={DELIVERIES_PER_PAGE}
+                cPage={page}
+              />
+            </>
+          ) : (
+            <EmptyState
+              icon={<Truck className="size-5 text-primary-600" />}
+              title={t("no_deliveries_found")}
+              description={t("no_deliveries_found_description")}
+            />
+          )}
+        </TabsContent>
       </Tabs>
-      <TabsContent value={direction}>
-        {isLoading ? (
-          <TableSkeleton count={2} />
-        ) : deliveries?.results && deliveries.results.length > 0 ? (
-          <>
-            <SupplyDeliveryTable
-              deliveries={deliveries.results}
-              facilityId={facilityId}
-              serialNumberOffset={DELIVERIES_PER_PAGE * (page - 1)}
-              linkToProduct
-              showLocations
-            />
-            <PaginationComponent
-              data={{ totalCount: deliveries.count }}
-              onChange={(newPage) => setPage(newPage)}
-              defaultPerPage={DELIVERIES_PER_PAGE}
-              cPage={page}
-            />
-          </>
-        ) : (
-          <EmptyState
-            icon={<Truck className="size-5 text-primary-600" />}
-            title={t("no_deliveries_found")}
-            description={t("no_deliveries_found_description")}
-          />
-        )}
-      </TabsContent>
     </div>
   );
 }
