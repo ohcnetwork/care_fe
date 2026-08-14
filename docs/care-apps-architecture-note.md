@@ -82,7 +82,7 @@ Host-to-plugin data sharing via `window` globals (plugins cannot import host mod
 
 Set in `src/index.tsx` at startup:
 
-- `window.CARE_API_URL` — Backend API base URL (`careConfig.apiUrl`). May be `""` for same-origin. Plugins use this for HTTP calls.
+- `window.CARE_API_URL` — Backend API base URL (`careConfig.apiUrl`). It may be `""` for same-origin requests. Plugins use this for HTTP calls.
 - `window.AuthUserContext` — The React context object from `src/hooks/useAuthUser.ts`, not the current user. Plugins call `React.useContext(window.AuthUserContext)` (same shared `react` instance) to read `user`, `signIn`, `signOut`, etc. That works because plugin UI renders inside the host `AuthUserProvider`.
 - `window.__CORE_ENV__` — The full `careConfig` object (API URLs, feature flags, locales, `careApps`, …).
 
