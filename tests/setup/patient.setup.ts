@@ -50,22 +50,28 @@ test("navigate to an encounter and save patient and encounter id", async ({
       throw new Error(`Failed to extract IDs from URL: ${url}`);
     }
 
+    // A second, distinct patient is optional here: only suites that book their
+    // own appointment need it (via getPatientIds), and that accessor throws if
+    // it's genuinely absent. Don't fail the whole setup — which every
+    // primary-patient suite depends on — just because a second patient wasn't
+    // found.
     const secondPatientId = patientIds.find(
       (id): id is string => !!id && id !== patientId,
     );
-    if (!secondPatientId) {
-      throw new Error(
-        "Could not find a second distinct patient in the encounter list",
-      );
-    }
 
     // Ensure the directory exists
     fs.mkdirSync("tests/.auth", { recursive: true });
 
-    // Save patient IDs (primary + a distinct second patient)
+    // Save patient IDs (primary + a distinct second patient, when available)
     fs.writeFileSync(
       "tests/.auth/patientMeta.json",
-      JSON.stringify({ id: patientId, secondId: secondPatientId }, null, 2),
+      JSON.stringify(
+        secondPatientId
+          ? { id: patientId, secondId: secondPatientId }
+          : { id: patientId },
+        null,
+        2,
+      ),
     );
 
     // Save encounter ID
@@ -75,7 +81,11 @@ test("navigate to an encounter and save patient and encounter id", async ({
     );
 
     console.log(`✅ Patient ID saved: ${patientId}`);
-    console.log(`✅ Second patient ID saved: ${secondPatientId}`);
+    if (secondPatientId) {
+      console.log(`✅ Second patient ID saved: ${secondPatientId}`);
+    } else {
+      console.warn("⚠️ No second distinct patient found in the encounter list");
+    }
     console.log(`✅ Encounter ID saved: ${encounterId}`);
   } catch (error) {
     console.error("❌ Failed to set up patient and encounter:", error);

@@ -117,9 +117,9 @@ test.describe("Appointment Booking Workflow", () => {
         .filter({ hasText: /\d{2}:\d{2}/ });
       await expect(slots.first()).toBeVisible();
 
-      // The picker auto-selects the first slot; pick a different one to prove a
-      // slot is selectable, then verify the confirm action is revealed.
-      await slots.nth(1).click();
+      // Selecting a bookable day auto-selects its first slot, which reveals the
+      // confirm action — proving a slot is selected without assuming a second
+      // slot exists.
       await expect(
         sheet.getByRole("button", { name: /confirm appointment/i }),
       ).toBeVisible();
@@ -178,9 +178,9 @@ test.describe("Appointment Booking Workflow", () => {
       // Verify tab is now active
       await expect(bookingsTab).toHaveAttribute("data-state", "active");
 
-      // Verify bookings list content is displayed
-      // This would show existing appointments for the patient
-      await page.waitForTimeout(500);
+      // The bookings list renders its own Upcoming/Past/Cancelled tabs, which
+      // confirms the panel switched — no fixed wait needed.
+      await expect(sheet.getByRole("tab", { name: /upcoming/i })).toBeVisible();
     });
 
     await test.step("Switch back to Book Appointment tab", async () => {
@@ -248,16 +248,9 @@ test.describe("Appointment Booking Workflow", () => {
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
 
-      // Look for close button (usually an X icon)
-      const closeButton = sheet
-        .getByRole("button")
-        .filter({ has: page.locator("svg.lucide-x") })
-        .first();
-
-      if (await closeButton.isVisible()) {
-        await closeButton.click();
-        await expect(sheet).not.toBeVisible({ timeout: 2000 });
-      }
+      // The sheet's close control exposes an accessible "Close" label.
+      await sheet.getByRole("button", { name: "Close" }).click();
+      await expect(sheet).not.toBeVisible({ timeout: 2000 });
     });
   });
 });
