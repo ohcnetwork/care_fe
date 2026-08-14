@@ -1,25 +1,31 @@
 ## Plugin Discovery & Setup
 
-- Build-time plugins configured via REACT_ENABLED_APPS env var
-- format: org/repo or org/repo@host/path/to/remoteEntry.js
+- Build-time plugins (every Vite command: `dev`, `build`, preview): `REACT_ENABLED_APPS`.
+- Format: `org/repo` or `org/repo@host/path/to/remoteEntry.js`.
+- Host `npm run dev` only (not production): also auto-discovers `apps/*/src/manifest.tsx` and loads that source through the host Vite graph. Same slug in both: `apps/` wins and the env remote URL is ignored.
 
 ## Build-time vs. Runtime
 
-- Build-time plugins: loaded from pluginMap.ts (generated at setup time), become read-only in UI
-- API plugins: fetched from /api/v1/plug_config/, editable in UI
-- Both merged at runtime by mergePlugConfigs() in src/Utils/plugConfig.ts
+- Build-time plugins come from `getBuildTimePlugConfigs()` in `src/Utils/plugConfig.ts`: `REACT_ENABLED_APPS` (`careConfig.careApps`) plus, on host `npm run dev` only, `apps/` (`localDevPluginConfigs`). There is no `npm run setup` and `src/pluginMap.ts` is an unused empty stub (removed as a generator in Plugin Architecture V3, [#16229](https://github.com/ohcnetwork/care_fe/pull/16229)).
+- The backend can also return plugins from `GET /api/v1/plug_config/` (database rows). Admin `/admin/apps` is that list: create/edit/delete those rows. It does not show `REACT_ENABLED_APPS` or `apps/` plugins.
+- `mergePlugConfigs()` combines API + build-time at runtime for `PluginEngine` and `initI18n()`. `source: "build"` / `isReadOnly: true` apply to that merged list, not the admin page.
+
+See `docs/care-apps-architecture-note.md` for merge rules and slug overwrite.
 
 ## Vite Federation Architecture
 
-- Main app (vite.config.mts): federation with name "core", dummy remote, shared: react/react-dom/i18next/react-query/raviger/sonner/decimal.js
-- Per-app (apps/care_hello_fe/vite.config.ts): exposes ./manifest pointing to src/manifest.tsx, builds remoteEntry.js to dist/assets/
-- RemoteEntry URL resolving: GitHub Pages if no @ suffix, otherwise http:// for localhost, https:// elsewhere
-- Runtime: PluginEngine.tsx uses setFederationRemote() to register each plugin slug dynamically, then getFederationRemote() to load manifest
+This is the **remote** path (`remoteEntry.js`). Host `npm run dev` + `apps/` skips it (see Local Dev Workflow below).
+
+- **Host** (`vite.config.mts`): federation name `"core"`. `remotes: { dummy: "" }` only enables the federation API; it does not list plugins. Shared: `react`, `react-dom`, `react-i18next`, `@tanstack/react-query`, `raviger`, `sonner`, `decimal.js`.
+- **Plugin repo** (its own Vite config, not something shipped under host `apps/`): `federation({ exposes: { "./manifest": "./src/manifest.tsx" } })` (some plugins use `manifest.ts`). `vite build` writes `dist/assets/remoteEntry.js`. Example: [care_hello_fe](https://github.com/ohcnetwork/care_hello_fe) — clone it separately; it is not vendored here.
+- **URL** comes from `care.config.ts` parsing `REACT_ENABLED_APPS`, not from Vite `remotes`. No `@` → GitHub Pages `https://{org}.github.io/{repo}`. With `@host/path`, prefix `http://` if the host contains `localhost`, else `https://`. That string becomes `meta.url`.
+- **Runtime** (`PluginEngine.tsx`): if `localDevPluginManifests[slug]` is missing, `setFederationRemote(slug, { url: meta.url })` then `getFederationRemote(slug, "./manifest")`.
 
 ## Local Dev Workflow (primary: in-tree)
 
-The recommended way to develop a plugin against the host is to drop (or symlink) the
-plugin checkout into the host's `apps/` directory and run the **host** dev server. No
+The recommended way to develop a plugin against the host is to **copy or clone** the
+plugin checkout into the host's `apps/` directory and run the **host** dev server. Do
+not `ln -s`: the scanner uses `Dirent.isDirectory()`, so a symlink is skipped. No
 separate plugin build, preview, or `REACT_ENABLED_APPS` entry is required — the host
 auto-discovers the plugin and loads its source directly through its own Vite graph with
 full HMR.
@@ -36,23 +42,25 @@ See **Dev-Mode Local Discovery (shipped)** below for exactly what the host does.
 ### Standalone alternative (remote-style, port 4173)
 
 When you need to exercise the real federated `remoteEntry.js` path (e.g. testing the
-production loading flow) rather than in-tree source, run the plugin as a standalone remote:
+production loading flow) rather than in-tree source, run the plugin as a standalone remote.
+Do **not** also put that slug under host `apps/` — on host `npm run dev`, `apps/` wins and
+the env URL is ignored.
 
-- Sample plugin: `npm run dev` → `vite preview` on `:4173` + `vite build --watch` keeps
-  `dist/assets/remoteEntry.js` fresh.
+- Sample plugin ([care_hello_fe](https://github.com/ohcnetwork/care_hello_fe), not vendored
+  here): `npm run dev` → `vite preview` on **hello’s** `:4173` + `vite build --watch` keeps
+  `dist/assets/remoteEntry.js` fresh. Other plugins set their own preview port.
 - Point the host at it: `REACT_ENABLED_APPS=ohcnetwork/care_hello_fe@localhost:4173/assets/remoteEntry.js`.
-- The plugin exposes `remoteEntry.js` at `dist/assets/` and serves on preview port `4173`.
-- In this mode there is **no automatic HMR back to the host** — the host reloads only after
-  the plugin rebuild lands a new `remoteEntry.js`.
+- The plugin exposes `remoteEntry.js` at `dist/assets/` and serves it from that preview port.
+- No HMR from plugin to host. After `remoteEntry.js` rebuilds, **refresh the CARE tab**
+  (`:4000`). The host does not auto-reload.
 
 ## HMR & Watch Status
 
-- Main app server has watch config ignoring tests/playwright/dist folders.
+- The host dev server does not watch `tests/`, `test/`, `*.test.*`, `*.spec.*`, `playwright-report/`, or `test-results/`. That list is `server.watch.ignored` in `vite.config.mts`.
 - In-tree dev (primary): the host watches `apps/` directly. Plugin source edits HMR through
   the host graph; adding/removing an `apps/*/src/manifest.tsx` triggers a full reload.
-- Standalone 4173 mode (alternative): `vite build --watch` keeps `dist/assets/remoteEntry.js`
-  fresh, but there is **no automatic HMR back to the host** — the host reloads only after the
-  plugin rebuild.
+- Standalone remote mode (alternative): `vite build --watch` keeps `dist/assets/remoteEntry.js`
+  fresh. There is no HMR back to the host — **refresh the CARE tab** after the plugin rebuild.
 
 ## Dev-Mode Local Discovery (shipped)
 
@@ -66,10 +74,11 @@ graph — no separate build, preview, or `REACT_ENABLED_APPS` entry needed.
   config entry has the shape `{ slug: "<slug>", meta: { name: "<slug>", localPath:
   "/local-plugins/<slug>", package: "local/<slug>" } }` (the `meta` object satisfies
   `PlugConfigMeta` from `src/types/plugConfig.ts`).
-- **`@/` → `/@fs/` rewrite:** imports inside plugin source that use the `@/` alias are
-  rewritten to absolute `/@fs/<resolved>` paths, resolved against the plugin's own
-  `apps/<slug>/src` (falling back to the host `src/`). This lets a plugin use the same
-  `@/*` convention as the host while its files live under `apps/`.
+- **`@/` → `/@fs/` rewrite:** imports inside plugin source that use `@/` are rewritten to
+  `/@fs/<absolute path>` only when that file exists under the plugin's `apps/<slug>/src`.
+  If it does not, the `@/` import is left unchanged and Vite's host alias `@` → `src/`
+  resolves it (plugin file wins, else host file). That is two steps, not one lookup.
+  Plugins can use the same `@/*` convention as the host while living under `apps/`.
 - **`/local-plugins/<slug>` asset serving:** a dev middleware serves files from
   `apps/<slug>/public/` at `/local-plugins/<slug>/...` (path-traversal guarded, `no-store`),
   so plugin static assets resolve without a build step.
@@ -88,17 +97,24 @@ For the manifest contract these plugins must satisfy, see `src/pluginTypes.ts`.
 
 ## Cloning Components Into a Plugin (`scripts/clone-component.ts`)
 
-When a plugin needs to reuse a component from the host app, use the
-`clone-component` CLI to copy the file along with every local file it
-transitively imports into the plugin's `src/` tree.
+Plugins cannot import host `src/` in production (federation only shares a few
+packages such as React). To reuse a host component, copy it into the plugin with
+this CLI. It photocopies the file and every local file it imports (JS/TS plus
+images/CSS those files import) into `apps/<plugin>/src/`. Runtime loading
+(`apps/` vs `remoteEntry.js`) is separate.
 
 ### Invocation
 
+Run from the **care_fe host repo**, not from the plugin checkout. The plugin must
+already exist at `apps/<target-app>/` with a `src/` directory. A checkout anywhere
+else, or a plugin loaded only via `REACT_ENABLED_APPS`, is not enough — the
+command throws `Target app not found`.
+
 ```bash
-# via npm script
+# from care_fe
 npm run clone-component -- <source> <target-app> [flags]
 
-# or directly with tsx
+# or
 npx tsx scripts/clone-component.ts <source> <target-app> [flags]
 ```
 
@@ -108,7 +124,8 @@ Arguments:
   - workspace-relative path: `src/components/Common/Loading.tsx`
   - absolute path
   - host alias: `@/components/ui/button`, `@core/components/ui/button`, `@careConfig`
-- `<target-app>` — directory name under `apps/` (e.g. `care_voice_fe`, `care_ask_fe`).
+- `<target-app>` — directory name under host `apps/` (example slugs: `care_hello_fe`).
+  That folder must already be present.
 
 Flags:
 
@@ -118,17 +135,21 @@ Flags:
 
 ### What it does
 
-- Walks the import graph starting from `<source>` through `import`, `export … from`, dynamic `import()`, and `require()` statements.
-- Resolves each specifier the same way Vite/TS does (extension probing, `index.*` for directories) for `.ts/.tsx/.js/.jsx/.mjs/.cjs/.json/.css/.scss` and common image/asset extensions.
-- Copies every resolved file into `apps/<target-app>/src/...` preserving the path under `src/`.
+- From each JS/TS file it copies, it follows static imports: `import … from "…"`,
+  `export … from "…"`, `import("…")`, and `require("…")` when the path is a
+  quoted string. It does not follow `import("./" + name)` or commented-out
+  imports.
+- For those paths it finds the real file (tries `.ts` / `.tsx` / `.js` / … and
+  `index.*` in a folder), then copies it to the same place under
+  `apps/<target-app>/src/`.
+- Images, fonts, lottie, and `.css` files that JS/TS imported are copied as-is
+  (no text rewrite). The script does not open CSS to follow `@import` or `url()`.
 - Rewrites host-only path aliases to ones the plugin tsconfig understands:
   - `@core/foo` → `@/foo`
   - `@careConfig` → `@/care.config` (and copies `care.config.ts` into `apps/<target-app>/src/`)
   - `@/foo` is left as-is (plugins use the same `@/*` alias).
 - Skips existing files unless `--force` is passed.
-- Copies binary assets (images, fonts, lottie, etc.) byte-for-byte without rewriting.
-- Collects bare-specifier imports and syncs any missing packages into the target app's `package.json` using the version and dependency section from the root workspace `package.json`.
-- Ignores imports that only appear inside comments.
+- Collects bare-specifier imports and syncs any missing packages into the target app's `package.json` using the version and dependency section from the host `package.json`.
 
 ### Output
 
@@ -146,19 +167,17 @@ A summary is printed at the end:
 ### Examples
 
 ```bash
-# Preview what cloning a button would pull in.
-npm run clone-component -- @/components/ui/button care_voice_fe --dry-run
+# from care_fe; apps/care_hello_fe must already exist
+npm run clone-component -- @/components/ui/button care_hello_fe --dry-run
 
-# Actually copy a page component into a plugin and overwrite collisions.
-npm run clone-component -- src/pages/Appointments/BookAppointment/BookAppointmentDetails.tsx care_ask_fe --force
+npm run clone-component -- src/pages/Appointments/BookAppointment/BookAppointmentDetails.tsx care_hello_fe --force
 
-# Copy the host care.config.ts shim into a plugin.
-npm run clone-component -- @careConfig care_voice_fe
+npm run clone-component -- @careConfig care_hello_fe
 ```
 
 ### Caveats
 
-- Only files under `src/` (and `care.config.ts`) are followed. Imports that resolve outside those roots are reported as unresolved.
+- Only files under host `src/` (and `care.config.ts`) are followed. Imports that resolve outside those roots are reported as unresolved.
 - The CLI updates the target app's `package.json`, but it does not run `npm install`.
-- Auto-sync only works for packages that already exist in the root workspace `package.json`; anything else is still reported for manual follow-up.
+- Auto-sync only works for packages that already exist in the host `package.json`; anything else is still reported for manual follow-up.
 - Once cloned, files are independent copies. They will not stay in sync with the host; re-run with `--force` to refresh.
