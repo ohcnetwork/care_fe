@@ -51,6 +51,7 @@ test.describe("Inventory Summary — All Deliveries drawer", () => {
           resp.url().includes("/api/v1/supply_delivery/") &&
           resp.request().method() === "GET" &&
           resp.url().includes("supplied_inventory_item_product_knowledge=") &&
+          resp.url().includes("destination=") &&
           resp.ok(),
       );
       await page.getByRole("button", { name: PRODUCT_NAME }).click();
@@ -66,6 +67,40 @@ test.describe("Inventory Summary — All Deliveries drawer", () => {
         drawer.getByRole("link", { name: PRODUCT_NAME }),
       ).toBeVisible();
     });
+  });
+
+  test("switches between incoming and outgoing deliveries", async ({
+    page,
+  }) => {
+    await expect(
+      page.getByRole("button", { name: PRODUCT_NAME }),
+    ).toBeVisible();
+
+    const incomingResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/api/v1/supply_delivery/") &&
+        resp.url().includes("destination=") &&
+        resp.ok(),
+    );
+    await page.getByRole("button", { name: PRODUCT_NAME }).click();
+    await incomingResponse;
+
+    const drawer = page.locator('[data-slot="drawer-content"]');
+    await expect(
+      drawer.getByRole("tab", { name: "Incoming Deliveries" }),
+    ).toHaveAttribute("data-state", "active");
+
+    const outgoingResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/api/v1/supply_delivery/") &&
+        resp.url().includes("origin=") &&
+        resp.ok(),
+    );
+    await drawer.getByRole("tab", { name: "Outgoing Deliveries" }).click();
+    await outgoingResponse;
+    await expect(
+      drawer.getByRole("tab", { name: "Outgoing Deliveries" }),
+    ).toHaveAttribute("data-state", "active");
   });
 
   test("shows the empty state in the drawer when a product has no deliveries", async ({

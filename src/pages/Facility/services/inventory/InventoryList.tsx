@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/drawer";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import { InventoryStatusOptions } from "@/types/inventory/product/inventory";
@@ -57,6 +58,9 @@ const DELIVERIES_PER_PAGE = 10;
 // Only in-progress and completed deliveries are shown in the deliveries drawer.
 const ACTIVE_DELIVERY_STATUS_FILTER = ACTIVE_SUPPLY_DELIVERY_STATUSES.join(",");
 
+// The API filters origin and destination with AND, so each direction is queried separately.
+type DeliveryDirection = "incoming" | "outgoing";
+
 interface ProductDeliveriesDrawerContentProps {
   facilityId: string;
   locationId: string;
@@ -69,6 +73,7 @@ function ProductDeliveriesDrawerContent({
   selectedProductKnowledge,
 }: ProductDeliveriesDrawerContentProps) {
   const { t } = useTranslation();
+  const [direction, setDirection] = useState<DeliveryDirection>("incoming");
   const [page, setPage] = useState(1);
 
   const { data: deliveries, isLoading } = useQuery({
@@ -77,12 +82,15 @@ function ProductDeliveriesDrawerContent({
       facilityId,
       locationId,
       selectedProductKnowledge?.id,
+      direction,
       page,
     ],
     queryFn: query(supplyDeliveryApi.listSupplyDelivery, {
       queryParams: {
         facility: facilityId,
-        destination: locationId,
+        ...(direction === "incoming"
+          ? { destination: locationId }
+          : { origin: locationId }),
         supplied_inventory_item_product_knowledge: selectedProductKnowledge?.id,
         status: ACTIVE_DELIVERY_STATUS_FILTER,
         limit: DELIVERIES_PER_PAGE,
@@ -94,6 +102,19 @@ function ProductDeliveriesDrawerContent({
 
   return (
     <div className="flex flex-col overflow-y-auto pt-4 max-h-[68vh]">
+      <Tabs
+        value={direction}
+        onValueChange={(value) => {
+          setDirection(value as DeliveryDirection);
+          setPage(1);
+        }}
+        className="mb-4"
+      >
+        <TabsList>
+          <TabsTrigger value="incoming">{t("incoming_deliveries")}</TabsTrigger>
+          <TabsTrigger value="outgoing">{t("outgoing_deliveries")}</TabsTrigger>
+        </TabsList>
+      </Tabs>
       {isLoading ? (
         <TableSkeleton count={2} />
       ) : deliveries?.results && deliveries.results.length > 0 ? (
