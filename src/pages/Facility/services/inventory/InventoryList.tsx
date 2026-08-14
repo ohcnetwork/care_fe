@@ -125,12 +125,14 @@ function ProductDeliveriesDrawerContent({
           linkToProduct
           showLocations
         />
-        <PaginationComponent
-          data={{ totalCount: deliveries.count }}
-          onChange={(newPage) => setPage(newPage)}
-          defaultPerPage={DELIVERIES_PER_PAGE}
-          cPage={page}
-        />
+        <div className="flex justify-center">
+          <PaginationComponent
+            data={{ totalCount: deliveries.count }}
+            onChange={(newPage) => setPage(newPage)}
+            defaultPerPage={DELIVERIES_PER_PAGE}
+            cPage={page}
+          />
+        </div>
       </>
     );
   };
