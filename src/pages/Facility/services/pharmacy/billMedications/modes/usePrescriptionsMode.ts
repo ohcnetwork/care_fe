@@ -25,7 +25,7 @@ export default function usePrescriptionsMode({
   patientId,
   prescriptionIds,
 }: Options): BillMedicationsMode {
-  const { prescriptions, anyEncounter, isLoading } = useQueries({
+  const { prescriptions, anyEncounter, isFetching } = useQueries({
     queries: prescriptionIds.map((prescriptionId) => ({
       queryKey: ["prescription", patientId, prescriptionId],
       queryFn: query(prescriptionApi.get, {
@@ -33,7 +33,7 @@ export default function usePrescriptionsMode({
       }),
     })),
     combine: (results) => ({
-      isLoading: results.some((result) => result.isLoading),
+      isFetching: results.some((result) => result.isFetching),
       prescriptions: results.map((result) => result.data),
       anyEncounter: results.find((result) => !!result.data)?.data?.encounter,
     }),
@@ -80,7 +80,7 @@ export default function usePrescriptionsMode({
 
   return {
     encounter: anyEncounter,
-    isLoading,
+    isLoading: isFetching,
     defaultValues,
     submit,
     isSubmitting,

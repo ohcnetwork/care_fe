@@ -70,6 +70,7 @@ export default function UnbilledPrescriptionsCard({
             <Button variant="outline" size="sm" asChild>
               <Link
                 href={`/medication_requests/patient/${patientId}/bill/prescriptions/${allPrescriptionIds.join(",")}?encounterId=${encounterId}`}
+                replace
               >
                 <ListPlus className="size-4" />
                 {t("include_all")}

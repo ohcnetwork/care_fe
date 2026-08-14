@@ -24,7 +24,7 @@ interface Props {
 export default function BillMedicationsShell({ facilityId, mode }: Props) {
   const { t } = useTranslation();
 
-  if (!mode.encounter) {
+  if (!mode.encounter || mode.isLoading) {
     return <Loading />;
   }
 
