@@ -27,6 +27,7 @@ import useFilters from "@/hooks/useFilters";
 
 import { isLessThan, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -274,9 +275,10 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
               {data?.results?.map((inventory) => (
                 <TableRow key={inventory.id}>
                   <TableCell className="font-semibold">
-                    <button
+                    <Button
                       type="button"
-                      className="hover:text-gray-700 underline"
+                      variant="link"
+                      className="font-semibold hover:text-gray-700 underline underline-offset-2"
                       onClick={() => {
                         setSelectedProductKnowledgeDrawer(
                           inventory.product.product_knowledge,
@@ -285,7 +287,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                       }}
                     >
                       {inventory.product.product_knowledge.name}
-                    </button>
+                    </Button>
                   </TableCell>
                   <TableCell
                     className={cn(
