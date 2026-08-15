@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { navigate } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Loading from "@/components/Common/Loading";
+import { Button } from "@/components/ui/button";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -33,16 +36,32 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
     enabled: !!tokenData.token,
   });
 
-  if (error) {
-    toast.error(t("appointment_not_found"));
-  }
+  useEffect(() => {
+    if (error) {
+      toast.error(t("appointment_not_found"));
+    }
+  }, [error, t]);
 
   const appointmentData = data?.results.find(
     (appointment) => appointment.id === appointmentId,
   );
 
-  if (isLoading || !appointmentData) {
+  if (isLoading) {
     return <Loading />;
+  }
+
+  if (error || !appointmentData) {
+    return (
+      <div className="mx-auto flex max-w-3xl flex-col items-center justify-center gap-4 p-12 text-center">
+        <div className="inline-flex size-16 items-center justify-center rounded-full bg-red-100">
+          <CareIcon icon="l-exclamation-circle" className="size-8 text-red-600" />
+        </div>
+        <h1 className="text-xl font-medium text-gray-900">
+          {t("appointment_not_found")}
+        </h1>
+        <Button onClick={() => navigate("/patient/home")}>{t("home")}</Button>
+      </div>
+    );
   }
 
   const appointmentTime = appointmentData.token_slot.start_datetime;
@@ -73,7 +92,7 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
           <h2 className="text-sm font-medium text-gray-500 mb-1">
             {t("patient")}:
           </h2>
-          <p className="text-lg font-medium">{appointmentData?.patient.name}</p>
+          <p className="text-lg font-medium">{appointmentData.patient.name}</p>
         </div>
 
         <div>
