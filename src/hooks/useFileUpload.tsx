@@ -190,6 +190,7 @@ export default function useFileUpload(
     mutationFn: (fileId: string) =>
       mutate(fileApi.markUploadCompleted, {
         pathParams: { fileId },
+        silent: true,
       })(undefined),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
