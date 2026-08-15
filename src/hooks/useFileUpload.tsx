@@ -186,21 +186,20 @@ export default function useFileUpload(
     }
     return true;
   };
-  const { mutateAsync: markUploadComplete, error: markUploadCompleteError } =
-    useMutation({
-      mutationFn: (fileId: string) =>
-        mutate(fileApi.markUploadCompleted, {
-          pathParams: { fileId },
-        })(undefined),
-      onSuccess: (data) => {
-        queryClient.invalidateQueries({
-          queryKey: ["files", fileType, data.associating_id],
-        });
-        toast.success(t("file_uploaded"));
-        setError(null);
-        onUpload?.(data);
-      },
-    });
+  const { mutateAsync: markUploadComplete } = useMutation({
+    mutationFn: (fileId: string) =>
+      mutate(fileApi.markUploadCompleted, {
+        pathParams: { fileId },
+      })(undefined),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["files", fileType, data.associating_id],
+      });
+      toast.success(t("file_uploaded"));
+      setError(null);
+      onUpload?.(data);
+    },
+  });
 
   const uploadfile = async (data: FileRead, file: File) => {
     const url = data.signed_url;
@@ -216,13 +215,14 @@ export default function useFileUpload(
         async (xhr: XMLHttpRequest) => {
           if (xhr.status >= 200 && xhr.status < 300) {
             setProgress(null);
-            await markUploadComplete(data.id);
-            if (markUploadCompleteError) {
+            try {
+              await markUploadComplete(data.id);
+              resolve();
+            } catch {
               toast.error(t("file_error__mark_complete_failed"));
+              setProgress(null);
               reject();
-              return;
             }
-            resolve();
           } else {
             toast.error(
               t("file_error__dynamic", { statusText: xhr.statusText }),
