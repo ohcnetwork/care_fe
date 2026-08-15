@@ -1,73 +1,68 @@
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+} from "react";
 
 export type Handler = (message: unknown) => Promise<void>;
 type PubSubContextType = {
   subscribe: (topic: string, handler: Handler) => void;
   unsubscribe: (topic: string, handler: Handler) => void;
   publish: (topic: string, message: unknown) => void;
-  subscribers: Record<string, Set<Handler>>;
-  setSubscribers: React.Dispatch<
-    React.SetStateAction<Record<string, Set<Handler>>>
-  >;
 };
 
 const PubSubContext = createContext<PubSubContextType | null>(null);
 
 export const PubSubProvider = ({ children }: { children: React.ReactNode }) => {
-  const [subscribers, setSubscribers] = useState<Record<string, Set<Handler>>>(
-    {},
-  );
+  const subscribersRef = useRef<Record<string, Set<Handler>>>({});
 
-  const subscribe = (topic: string, handler: Handler) => {
-    setSubscribers((prev) => ({
-      ...prev,
-      [topic]: new Set([...(prev[topic] || []), handler]),
-    }));
-  };
+  const subscribe = useCallback((topic: string, handler: Handler) => {
+    const handlers = subscribersRef.current[topic];
 
-  const unsubscribe = (topic: string, handler: Handler) => {
-    setSubscribers((prev) => {
-      const handlers = prev[topic];
-      if (!handlers) {
-        return prev;
-      }
-
-      const newHandlers = new Set(handlers);
-      newHandlers.delete(handler);
-
-      if (newHandlers.size === 0) {
-        const { [topic]: _, ...rest } = prev;
-        return rest;
-      }
-
-      return {
-        ...prev,
-        [topic]: newHandlers,
-      };
-    });
-  };
-
-  const publish = (topic: string, message: unknown) => {
-    if (!subscribers[topic]) {
+    if (handlers) {
+      handlers.add(handler);
       return;
     }
 
-    subscribers[topic].forEach(async (handler) => {
+    subscribersRef.current[topic] = new Set([handler]);
+  }, []);
+
+  const unsubscribe = useCallback((topic: string, handler: Handler) => {
+    const handlers = subscribersRef.current[topic];
+    if (!handlers) {
+      return;
+    }
+
+    handlers.delete(handler);
+
+    if (handlers.size === 0) {
+      delete subscribersRef.current[topic];
+    }
+  }, []);
+
+  const publish = useCallback((topic: string, message: unknown) => {
+    const handlers = subscribersRef.current[topic];
+    if (!handlers) {
+      return;
+    }
+
+    handlers.forEach(async (handler) => {
       try {
         await handler(message);
       } catch (error) {
         console.error(`Handler failed for topic ${topic}:`, error);
       }
     });
-  };
+  }, []);
 
-  return (
-    <PubSubContext.Provider
-      value={{ subscribe, unsubscribe, publish, subscribers, setSubscribers }}
-    >
-      {children}
-    </PubSubContext.Provider>
+  const value = useMemo(
+    () => ({ subscribe, unsubscribe, publish }),
+    [publish, subscribe, unsubscribe],
   );
+
+  return <PubSubContext.Provider value={value}>{children}</PubSubContext.Provider>;
 };
 
 export const usePubSub = () => {
