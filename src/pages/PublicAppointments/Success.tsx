@@ -38,7 +38,9 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
 
   useEffect(() => {
     if (error) {
-      toast.error(t("appointment_not_found"));
+      toast.error(t("page_load_error"), {
+        id: "appointment-success-load-error",
+      });
     }
   }, [error, t]);
 
@@ -50,10 +52,31 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
     return <Loading />;
   }
 
-  if (error || !appointmentData) {
+  if (error) {
     return (
       <div className="mx-auto flex max-w-3xl flex-col items-center justify-center gap-4 p-12 text-center">
-        <div className="inline-flex size-16 items-center justify-center rounded-full bg-red-100">
+        <div
+          aria-hidden="true"
+          className="inline-flex size-16 items-center justify-center rounded-full bg-red-100"
+        >
+          <CareIcon icon="l-exclamation-circle" className="size-8 text-red-600" />
+        </div>
+        <h1 className="text-xl font-medium text-gray-900">
+          {t("page_load_error")}
+        </h1>
+        <p className="text-sm text-gray-600">{t("could_not_load_page")}</p>
+        <Button onClick={() => navigate("/patient/home")}>{t("home")}</Button>
+      </div>
+    );
+  }
+
+  if (!appointmentData) {
+    return (
+      <div className="mx-auto flex max-w-3xl flex-col items-center justify-center gap-4 p-12 text-center">
+        <div
+          aria-hidden="true"
+          className="inline-flex size-16 items-center justify-center rounded-full bg-red-100"
+        >
           <CareIcon icon="l-exclamation-circle" className="size-8 text-red-600" />
         </div>
         <h1 className="text-xl font-medium text-gray-900">
