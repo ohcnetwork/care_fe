@@ -7,11 +7,11 @@ import {
 } from "react";
 
 export type Handler = (message: unknown) => Promise<void>;
-type PubSubContextType = {
+interface PubSubContextType {
   subscribe: (topic: string, handler: Handler) => void;
   unsubscribe: (topic: string, handler: Handler) => void;
   publish: (topic: string, message: unknown) => void;
-};
+}
 
 const PubSubContext = createContext<PubSubContextType | null>(null);
 
