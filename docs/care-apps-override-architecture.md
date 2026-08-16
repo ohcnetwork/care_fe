@@ -9,6 +9,11 @@
 > `REACT_MFE_REGISTERED_COMPONENTS` allowlist, and supported export forms) and
 > the manifest-level override contract Care Apps declare. This doc focuses on
 > the runtime framework in `src/lib/override/`. Read them together.
+>
+> **Wiring:** `src/PluginEngine.tsx` reads each plugin's `overrides` list and
+> calls `addOverride`. A Care App declaring overrides in its manifest is not
+> enough — the swap lands in the registry only after PluginEngine runs. Types
+> for that list live in `src/pluginTypes.ts`.
 
 ## Goal
 
@@ -18,9 +23,13 @@ registered React component — without changing how components are consumed.
 Key properties:
 
 - Components remain **pure**: no override-awareness in their implementation
-- Overrides are **context-aware** (route, user role, facility type, render stack)
+- Overrides **can** match on page, user role, facility type, and render stack.
+  Today `App.tsx` only fills `route` / `page` from the URL — `userRole` and
+  `facilityType` are never set, so conditions on those keys never match
 - Performance is **near O(1)** at render time for most components
-- Plugin bugs **cannot crash the host** (error boundary fallback)
+- A throwing override **does not white-screen the app**. `OverrideErrorBoundary`
+  replaces **that component** with a short message; it does **not** render the
+  original. Sidebar and other routes keep working (see Error Isolation)
 
 ---
 
@@ -31,12 +40,13 @@ Key properties:
 Wraps a component to make it overrideable. **You normally do not call this by
 hand.** At build time `plugins/autoRegisterComponents.ts` rewrites eligible
 exported PascalCase components under `src/` (subject to the
-`REACT_MFE_REGISTERED_COMPONENTS` allowlist) so their export calls `register()`
-for you — see `care-apps-plugin-overrides.md` for the transform, allowlist, and
-supported export forms. You just write and consume the component normally:
+`REACT_MFE_REGISTERED_COMPONENTS` allowlist) so the export already calls
+`register()`. See `care-apps-plugin-overrides.md` for the transform, allowlist,
+supported export forms, and the **named + default** trap. You just write and
+consume the component normally:
 
 ```tsx
-// You write this:
+// You write this (one export — default-only is a supported form):
 function PatientCard(props: PatientCardProps) {
   return <div>Base Card</div>;
 }
@@ -45,14 +55,35 @@ export default PatientCard;
 ```
 
 ```tsx
-// The build transform emits the registration; usage stays unchanged:
+// Idea of the transform (actual emit uses an import alias and a
+// `…Registered` binding — see the companion doc):
 export default register("PatientCard", PatientCard);
 
 <PatientCard patient={patient} />
 ```
 
-Calling `register()` manually still works and is what the transform emits; it is
-occasionally useful in tests.
+Empty or unset `REACT_MFE_REGISTERED_COMPONENTS` wraps **nothing**. The
+call site must import the **same** export Vite wrapped (named vs default).
+If a file has both `export function Foo` / `export const Foo` **and**
+`export default Foo`, Vite wraps the named export and **skips** the default
+(the name is already marked transformed). A default import then gets the
+original component — overrides never run.
+
+Calling `register()` by hand still works. It is always-on (does not need the
+allowlist). Put it on the export the call site actually imports. Example:
+`PrintInvoice.tsx` uses `export default register("PrintInvoice", PrintInvoiceBase)`
+because the router does `import PrintInvoice from "…"`. Renaming the inner
+function to `…Base` is optional; it only avoids two public values sharing the
+name `PrintInvoice`.
+
+```tsx
+export function PrintInvoiceBase(props: PrintInvoiceProps) { /* original */ }
+
+export default register("PrintInvoice", PrintInvoiceBase);
+```
+
+`export function PrintInvoice` plus `export default register("PrintInvoice", PrintInvoice)`
+also works for a default import — no rename required.
 
 **What it does under the hood:**
 
@@ -61,25 +92,39 @@ occasionally useful in tests.
    - If no overrides exist → renders `BaseComponent` directly
    - If overrides exist but none use stack conditions → **fast path**: looks up the precomputed `ResolutionMap`
    - If stack conditions are present → **stack-aware path**: creates a linked-list stack node and resolves dynamically
-3. Wraps override renders in an `OverrideErrorBoundary` — if the override throws, falls back to a safe message
+3. Wraps override renders in an `OverrideErrorBoundary` — if the override throws,
+   that slot shows a short message (not the original component; see Error Isolation)
 
 ### `addOverride(key, override)`
 
 Registers an override for a component. Returns a cleanup function.
+`PluginEngine` calls this for each manifest `overrides` entry: the string
+`component` is the registry key, and `replacement` becomes `override.component`.
 
 ```tsx
 import { addOverride } from "@/lib/override";
 
 const cleanup = addOverride("PatientCard", {
   component: CustomPatientCard,
-  condition: { page: "admin", userRole: "doctor" },
+  condition: { page: "admin" },
   priority: 10,
   description: "Custom card for admin doctors",
 });
 ```
 
-Overrides are sorted by `priority` (highest first). The first override whose
-`condition` matches the current context wins.
+Omit `condition` to always match. Overrides are sorted by `priority` (highest
+first). The first override whose `condition` matches the current context wins.
+
+`page` is the identifier `OverrideProvider` extracts from the URL (see below),
+not the full path. `userRole` / `facilityType` only match if those keys are
+set on the provider — `App.tsx` does not set them today.
+
+If `register()` has not run yet for that key, `addOverride` still stores the
+override on a placeholder entry. The sleeve must exist by render time or the
+page never looks at that entry.
+
+`PluginEngine` keeps the cleanup functions and runs them when the plugin list
+changes, so stale overrides do not pile up.
 
 ### `OverrideProvider`
 
@@ -91,6 +136,8 @@ import { OverrideProvider } from "@/lib/override";
 
 function App() {
   return (
+    // Example: pass extra context. App.tsx today uses <OverrideProvider>
+    // with no `context` prop — only `route` / `page` from the URL are filled.
     <OverrideProvider context={{ userRole: user?.role }}>
       <AppRoutes />
     </OverrideProvider>
@@ -98,11 +145,17 @@ function App() {
 }
 ```
 
+In `App.tsx`, `OverrideProvider` wraps `AuthUserProvider`. Role is not
+available at that spot today even if you wanted to pass `user.role`.
+
 The provider:
 
 1. Reads the current route via `usePath()` from raviger
-2. Extracts a `page` identifier from the route path
-3. Merges external context (role, facility type, custom values)
+2. Extracts a `page` identifier: first path segment (`/facilities` →
+   `"facilities"`). If the second segment looks like an id (UUID or digits)
+   and a third exists, it becomes `first-third`
+   (`/facility/<uuid>/patients` → `"facility-patients"`)
+3. Merges the optional `context` prop (role, facility type, custom values)
 4. Computes a `ResolutionMap` — a pre-resolved `Map<key, Component>` for all
    components that don't need stack-based resolution
 5. Subscribes to registry changes so the map recomputes when overrides are
@@ -173,22 +226,29 @@ RegisteredComponent renders:
 Stack matching uses subsequence matching — `["PatientHome", "PatientCard"]`
 matches any render tree where `PatientCard` is a descendant of `PatientHome`.
 
-Cost: **O(depth × overrides)** — only activated for components with
-`hasStackConditions: true`.
+Cost: **O(overrides × stack depth)** — only activated for components with
+`hasStackConditions: true`. `matchCondition` does not look at `stackPath`;
+that check happens only on this path.
 
 ---
 
 ## Federated Plugin Bridge
 
 Plugins loaded via Module Federation run in their own module graph and cannot
-import `@/lib/override` directly. The bridge (`bridge.ts`) exposes:
+import `@/lib/override` directly. Care Apps usually do not call this API
+themselves: they declare `overrides` in the manifest, and **host**
+`PluginEngine` (which *can* import `@/lib/override`) calls `addOverride`.
+
+The bridge (`bridge.ts`) is the escape hatch if a federated bundle must
+register without going through PluginEngine. It exposes:
 
 ```ts
 window.__careOverrides.addComponent(key, { component, condition?, priority? })
 ```
 
 This global is installed as a side effect when `src/lib/override/index.ts` is
-first imported (before any plugin manifest evaluates).
+first imported (before any plugin manifest evaluates). `addComponent` is
+`addOverride`.
 
 > **Manifest vs. registry shape.** Care Apps declare overrides in their manifest
 > using the higher-level contract documented in `care-apps-plugin-overrides.md`
@@ -202,8 +262,9 @@ first imported (before any plugin manifest evaluates).
 
 ## `__base` Prop Injection
 
-When an override is rendered, the wrapper injects `__base` pointing to the
-original base component. This lets overrides selectively render the original:
+When an override is chosen (`Component !== BaseComponent`), the wrapper
+injects `__base` pointing to the original. Base renders do not get this prop.
+Overrides can fall through to the original:
 
 ```tsx
 function CustomPatientCard({ __base: Base, ...props }) {
@@ -220,9 +281,21 @@ Each override render is wrapped in `OverrideErrorBoundary`. If the override
 throws, the boundary:
 
 1. Logs the error to the console with the component key
-2. Renders a minimal fallback message indicating which plugin override failed
+2. Renders a short message naming the component (for example: *A plugin
+   override for UserDashboard encountered an error and was replaced with
+   the default.*)
 
-The host app continues running normally.
+That message is the fallback. The original base component is **not**
+re-rendered, despite the console log saying "falling back to base
+component."
+
+The rest of the app keeps working (sidebar, other routes). The crashed
+component's slot stays as that message until you leave and come back, or
+reload after the override is fixed.
+
+This is not the same as `PluginEngine`'s full-screen `ErrorBoundary` ("Care
+has encountered an unexpected error"), which wraps plugin loading, not a
+single override slot.
 
 ---
 
@@ -233,7 +306,7 @@ The host app continues running normally.
 | Resolution map computation  | O(registry size × overrides) — runs once per context change |
 | Component render (fast)     | O(1) map lookup             |
 | Stack node creation         | O(1) linked-list append     |
-| Stack-aware resolution      | O(depth) — rare             |
+| Stack-aware resolution      | O(overrides × depth) — rare |
 
 ---
 

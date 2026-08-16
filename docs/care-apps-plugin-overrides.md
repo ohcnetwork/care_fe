@@ -28,17 +28,22 @@ export function BookAppointmentDetails(props: Props) {
 }
 ```
 
-Generated shape:
+Generated shape (idea — the plugin keeps the original binding name and
+appends a `…Registered` export; it does not rename the function to `…Base`):
 
 ```tsx
-function BookAppointmentDetailsBase(props: Props) {
+import { register as __careRegisterComponent } from "@/lib/override";
+
+function BookAppointmentDetails(props: Props) {
   return <section />;
 }
 
-export const BookAppointmentDetails = register(
+const BookAppointmentDetailsRegistered = __careRegisterComponent(
   "BookAppointmentDetails",
-  BookAppointmentDetailsBase,
+  BookAppointmentDetails,
 );
+
+export { BookAppointmentDetailsRegistered as BookAppointmentDetails };
 ```
 
 The plugin uses `MagicString` to produce high-resolution source maps for these
@@ -62,6 +67,30 @@ The following forms are **not** transformable and are silently skipped during re
 - `export const Foo = forwardRef(…)` / `export const Foo = memo(…)` — `forwardRef`/`memo` initializers (deliberately skipped because the registration wrapper does not forward refs)
 
 Allowlisting a name (via `REACT_MFE_REGISTERED_COMPONENTS`) that uses one of the first four skipped forms is a build error that names the unsupported form. A `forwardRef`/`memo` component is reported instead as an unknown component name (it is excluded from registration by design); convert it to a plain `export function`/`export const` component if it must be overridable.
+
+### Named + default in the same file
+
+If a module has both a named component export (`export function Foo` or
+`export const Foo`) **and** `export default Foo`, the plugin wraps the **named**
+export first, then **skips** `export default Foo` (the name is already
+transformed).
+
+```
+named hole    { Foo }     →  wrapped (sleeve)
+default hole  import Foo  →  still the original
+```
+
+Call sites must import the hole that was wrapped. A **default** import of such a
+file will not be overrideable via the allowlist. Fixes:
+
+- One export only, matching the import (`export function Foo` + `{ Foo }`, or
+  default-only + `import Foo from`).
+- Or call `register()` by hand on the export the call site uses (for example
+  `export default register("Foo", Foo)` when the router does
+  `import Foo from`).
+
+Hand-written `register()` does not need the allowlist. Renaming the inner
+function to `FooBase` is optional (avoids two public values named `Foo`).
 
 ## Registration Allowlist
 
@@ -102,9 +131,10 @@ overrides: [
 ```
 
 `PluginEngine` loads enabled app manifests, reads their `overrides`, and
-registers them with the override registry. The core registered component remains
-the stable React component type. At render time it chooses either the base
-component or the highest-priority matching override.
+calls `addOverride`. That only matters if the **call site imports the sleeve**
+(`register()` wrapper) — a notebook entry with no sleeve on the page is a
+no-op. At render time the sleeve chooses the base component or the
+highest-priority matching override.
 
 This keeps dynamic plugin loading safe: overrides can arrive after the app has
 started, and mounted registered components can re-render against the updated
@@ -145,14 +175,16 @@ registered rendered components.
 ## Debugging
 
 The Vite plugin emits high-resolution source maps with original source content.
-This improves transformed-code error locations, especially around generated
-imports, renamed base components, and appended registration exports.
+This improves transformed-code error locations around generated imports and
+appended `…Registered` exports. The transform does **not** rename the original
+function to `…Base` (that name appears only in some hand-written `register()`
+call sites).
 
 React DevTools still shows the runtime wrapper shape:
 
 ```txt
 Registered(BookAppointmentDetails)
-  BookAppointmentDetailsBase
+  BookAppointmentDetails
 ```
 
 That is expected. Source maps improve file and line mapping, not the runtime
