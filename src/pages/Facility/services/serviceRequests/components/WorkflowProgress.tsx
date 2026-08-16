@@ -104,7 +104,11 @@ function WorkflowContent({ events }: { events: TimelineEvent[] }) {
       <ScrollArea className="h-[calc(100vh-10rem)]">
         <div className="p-4 space-y-2">
           {events.map((event, index) => (
-            <TimelineNode key={index} event={event} isLatest={index === 0} />
+            <TimelineNode
+              key={`${event.timestamp}-${event.title}`}
+              event={event}
+              isLatest={index === 0}
+            />
           ))}
         </div>
       </ScrollArea>
@@ -171,6 +175,14 @@ export function WorkflowProgress({
     const diagnosticReportName =
       report.code?.display ?? report.service_request?.title ?? t("diagnostic");
     events.push({
+      title: t("diagnostic_report_created"),
+      description: t("diagnostic_report_created_description", {
+        name: diagnosticReportName,
+      }),
+      timestamp: report.created_date,
+      status: "completed",
+    });
+    events.push({
       title:
         report.status === "final"
           ? t("diagnostic_report_approved")
@@ -186,21 +198,6 @@ export function WorkflowProgress({
       timestamp:
         report.status === "final" ? report.modified_date : report.created_date,
       status: report.status === "final" ? "completed" : "in_progress",
-    });
-  });
-
-  // Add diagnostic report events
-  request.diagnostic_reports?.forEach((report: DiagnosticReportRead) => {
-    events.push({
-      title: t("diagnostic_report_created"),
-      description: t("diagnostic_report_created_description", {
-        name:
-          report.code?.display ??
-          report.service_request?.title ??
-          t("diagnostic"),
-      }),
-      timestamp: report.created_date,
-      status: "completed",
     });
   });
 

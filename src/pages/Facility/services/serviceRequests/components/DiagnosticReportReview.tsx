@@ -123,7 +123,6 @@ function DiagnosticReportReviewItem({
         external_id: report.id,
       },
     }),
-    enabled: isExpanded,
   });
 
   const { data: files = { results: [], count: 0 }, isFetched: isFilesFetched } =
@@ -137,7 +136,6 @@ function DiagnosticReportReviewItem({
           offset: 0,
         },
       }),
-      enabled: !!report.id && isExpanded,
     });
 
   const { mutate: updateDiagnosticReport, isPending: isUpdatingReport } =

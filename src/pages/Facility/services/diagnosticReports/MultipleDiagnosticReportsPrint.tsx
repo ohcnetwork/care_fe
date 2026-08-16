@@ -43,7 +43,7 @@ export const MultipleDiagnosticReportsPrint = ({
       allDiagnosticReports: results
         .map((r) => r.data)
         .filter((data): data is DiagnosticReportRead => !!data),
-      isLoading: results.some((r) => r.isLoading || r.isFetching),
+      isLoading: results.some((r) => r.isLoading),
     }),
   });
 

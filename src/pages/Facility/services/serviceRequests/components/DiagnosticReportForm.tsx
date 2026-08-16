@@ -134,9 +134,6 @@ export function DiagnosticReportForm({
   const queryClient = useQueryClient();
 
   const [showReportTypeSelect, setShowReportTypeSelect] = useState(false);
-  const [selectedReportCode, setSelectedReportCode] = useState<Code | null>(
-    null,
-  );
 
   // Check if all required specimens are collected
   const hasCollectedSpecimens =
@@ -164,16 +161,11 @@ export function DiagnosticReportForm({
     (report) => report.status !== DiagnosticReportStatus.final,
   );
 
-  // Decide whether to show the "create report" form:
-  // - If report types are still available (multi-report case), show it only
-  //   when no report is currently in progress, so the user finishes the active
-  //   one before starting the next type.
-  // - If no report types are left, fall back to the single-report case: show it
-  //   only when no report exists yet. Once any report exists (active or final),
-  //   creation stays hidden permanently — e.g. a service request with a single
-  //   report type gets exactly one report and never offers "create" again.
-  const showCreateReportForm = availableReportCodes.length
-    ? activeDiagnosticReports.length === 0
+  // Show the "create report" form only when appropriate for the SR type:
+  // - Single-report SR: show only when no report exists yet.
+  // - Multi-report SR: show when codes remain AND no report is currently in progress.
+  const showCreateReportForm = isMultipleDiagnosticReport
+    ? availableReportCodes.length > 0 && activeDiagnosticReports.length === 0
     : diagnosticReports.length === 0;
 
   // Creating a new diagnostic report
@@ -236,83 +228,17 @@ export function DiagnosticReportForm({
           {isMultipleDiagnosticReport && availableReportCodes.length > 0 && (
             <div className="-mt-3 rounded-b-lg bg-gray-100 px-2 pb-2 pt-4">
               {showReportTypeSelect ? (
-                <div className="flex flex-col items-stretch gap-2 rounded-lg border border-gray-200 bg-gray-100 p-4">
-                  <Button
-                    onClick={() => {
-                      setShowReportTypeSelect(false);
-                      setSelectedReportCode(null);
-                    }}
-                    variant="ghost"
-                    size="icon"
-                    className="self-end"
-                  >
-                    <X className="size-4" />
-                  </Button>
-                  <div className="w-full flex-1 space-y-2">
-                    <Label className="text-sm font-medium text-gray-950">
-                      {t("select_diagnostic_report_type")}
-                    </Label>
-                    <Select
-                      value={selectedReportCode?.code ?? ""}
-                      onValueChange={(value) => {
-                        const code =
-                          activityDefinition?.diagnostic_report_codes?.find(
-                            (c) => c.code === value,
-                          );
-                        setSelectedReportCode(code || null);
-                      }}
-                      disabled={!hasCollectedSpecimens || disableEdit}
-                    >
-                      <SelectTrigger className="w-full bg-white">
-                        <SelectValue
-                          placeholder={t("select_diagnostic_report_type")}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableReportCodes.map((code) => (
-                          <SelectItem key={code.code} value={code.code}>
-                            <div className="flex flex-col">
-                              <span className="truncate">
-                                {code.display} ({code.code})
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex ml-auto items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      className="underline"
-                      onClick={() => {
-                        setSelectedReportCode(null);
-                      }}
-                      disabled={disableEdit || isCreatingReport}
-                    >
-                      {t("clear")}
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        if (!selectedReportCode) return;
-                        handleCreateReport(selectedReportCode);
-                        setShowReportTypeSelect(false);
-                        setSelectedReportCode(null);
-                      }}
-                      disabled={
-                        disableEdit ||
-                        isCreatingReport ||
-                        !hasCollectedSpecimens ||
-                        !selectedReportCode
-                      }
-                      className="w-full sm:w-auto"
-                    >
-                      <Plus className="size-4 mr-2" />
-                      {t("create_report")}
-                    </Button>
-                  </div>
-                </div>
+                <ReportTypePicker
+                  availableReportCodes={availableReportCodes}
+                  hasCollectedSpecimens={hasCollectedSpecimens}
+                  disableEdit={disableEdit}
+                  isCreatingReport={isCreatingReport}
+                  onCreateReport={(code) => {
+                    handleCreateReport(code);
+                    setShowReportTypeSelect(false);
+                  }}
+                  onDismiss={() => setShowReportTypeSelect(false)}
+                />
               ) : (
                 <Button
                   variant="ghost"
@@ -337,8 +263,6 @@ export function DiagnosticReportForm({
           availableReportCodes={availableReportCodes}
           hasCollectedSpecimens={hasCollectedSpecimens}
           isMultipleDiagnosticReport={isMultipleDiagnosticReport}
-          activityDefinition={activityDefinition}
-          specimens={specimens}
           isCreatingReport={isCreatingReport}
           disableEdit={disableEdit}
           serviceRequestId={serviceRequestId}
@@ -1406,8 +1330,97 @@ function DiagnosticReportItem({
   );
 }
 
+function ReportTypePicker({
+  availableReportCodes,
+  hasCollectedSpecimens,
+  disableEdit,
+  isCreatingReport,
+  onCreateReport,
+  onDismiss,
+}: {
+  availableReportCodes: Code[];
+  hasCollectedSpecimens: boolean;
+  disableEdit: boolean;
+  isCreatingReport: boolean;
+  onCreateReport: (code: Code) => void;
+  onDismiss?: () => void;
+}) {
+  const { t } = useTranslation();
+  const [selectedCode, setSelectedCode] = useState<Code | null>(null);
+
+  return (
+    <div className="flex flex-col items-stretch gap-2 rounded-lg border border-gray-200 bg-gray-100 p-4">
+      {onDismiss && (
+        <Button
+          onClick={() => {
+            onDismiss();
+            setSelectedCode(null);
+          }}
+          variant="ghost"
+          size="icon"
+          className="self-end"
+        >
+          <X className="size-4" />
+        </Button>
+      )}
+      <div className="w-full flex-1 space-y-2">
+        <Label className="text-sm font-medium text-gray-950">
+          {t("select_diagnostic_report_type")}
+        </Label>
+        <Select
+          value={selectedCode?.code ?? ""}
+          onValueChange={(value) => {
+            const code = availableReportCodes.find((c) => c.code === value);
+            setSelectedCode(code ?? null);
+          }}
+          disabled={!hasCollectedSpecimens || disableEdit}
+        >
+          <SelectTrigger className="w-full bg-white">
+            <SelectValue placeholder={t("select_diagnostic_report_type")} />
+          </SelectTrigger>
+          <SelectContent>
+            {availableReportCodes.map((code) => (
+              <SelectItem key={code.code} value={code.code}>
+                <span className="truncate">
+                  {code.display} ({code.code})
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex ml-auto items-center gap-2">
+        <Button
+          variant="ghost"
+          className="underline"
+          onClick={() => setSelectedCode(null)}
+          disabled={!selectedCode}
+        >
+          {t("clear")}
+        </Button>
+        <Button
+          onClick={() => {
+            if (!selectedCode) return;
+            onCreateReport(selectedCode);
+            setSelectedCode(null);
+          }}
+          disabled={
+            disableEdit ||
+            isCreatingReport ||
+            !hasCollectedSpecimens ||
+            !selectedCode
+          }
+          className="w-full sm:w-auto"
+        >
+          <Plus className="size-4 mr-2" />
+          {t("create_report")}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 const CreateDiagnosticReportForm = ({
-  activityDefinition,
   isCreatingReport,
   disableEdit,
   serviceRequestId,
@@ -1416,12 +1429,6 @@ const CreateDiagnosticReportForm = ({
   isMultipleDiagnosticReport,
   availableReportCodes,
 }: {
-  activityDefinition?: {
-    diagnostic_report_codes?: Code[];
-    classification?: string;
-    specimen_requirements?: SpecimenDefinitionRead[];
-  };
-  specimens: SpecimenRead[];
   isCreatingReport: boolean;
   disableEdit: boolean;
   serviceRequestId: string;
@@ -1432,10 +1439,6 @@ const CreateDiagnosticReportForm = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const { t } = useTranslation();
-
-  const [selectedReportCode, setSelectedReportCode] = useState<Code | null>(
-    null,
-  );
 
   return (
     <Card
@@ -1502,15 +1505,9 @@ const CreateDiagnosticReportForm = ({
                 )}
                 {!isMultipleDiagnosticReport && (
                   <Button
-                    onClick={() =>
-                      handleCreateReport(selectedReportCode || undefined)
-                    }
+                    onClick={() => handleCreateReport()}
                     disabled={
-                      disableEdit ||
-                      isCreatingReport ||
-                      !hasCollectedSpecimens ||
-                      (!!activityDefinition?.diagnostic_report_codes?.length &&
-                        !selectedReportCode)
+                      disableEdit || isCreatingReport || !hasCollectedSpecimens
                     }
                     className="w-full sm:w-auto"
                   >
@@ -1520,78 +1517,13 @@ const CreateDiagnosticReportForm = ({
                 )}
               </div>
               {isMultipleDiagnosticReport && (
-                <div className="flex flex-col items-stretch sm:items-center gap-4 justify-center bg-gray-500/3 border border-gray-200 rounded-lg p-4">
-                  <div className="flex-1 w-full   space-y-2">
-                    <Label className="text-sm font-medium text-gray-950">
-                      {t("select_diagnostic_report_type")}
-                    </Label>
-                    <Select
-                      value={selectedReportCode?.code ?? ""}
-                      onValueChange={(value) => {
-                        const code =
-                          activityDefinition?.diagnostic_report_codes?.find(
-                            (c) => c.code === value,
-                          );
-                        setSelectedReportCode(code || null);
-                      }}
-                      disabled={!hasCollectedSpecimens || disableEdit}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue
-                          placeholder={t("select_diagnostic_report_type")}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableReportCodes.map((code) => (
-                          <SelectItem key={code.code} value={code.code}>
-                            <div className="flex flex-col">
-                              <span className="truncate">
-                                {code.display} ({code.code})
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex ml-auto gap-2 items-center">
-                    <Button
-                      variant="ghost"
-                      className="underline"
-                      onClick={() => {
-                        setSelectedReportCode(null);
-                      }}
-                      disabled={
-                        disableEdit ||
-                        isCreatingReport ||
-                        !hasCollectedSpecimens ||
-                        (!!activityDefinition?.diagnostic_report_codes
-                          ?.length &&
-                          !selectedReportCode)
-                      }
-                    >
-                      {t("clear")}
-                    </Button>
-                    <Button
-                      onClick={() =>
-                        handleCreateReport(selectedReportCode || undefined)
-                      }
-                      disabled={
-                        disableEdit ||
-                        isCreatingReport ||
-                        !hasCollectedSpecimens ||
-                        (!!activityDefinition?.diagnostic_report_codes
-                          ?.length &&
-                          !selectedReportCode)
-                      }
-                      className="w-full sm:w-auto"
-                    >
-                      <Plus className="size-4 mr-2" />
-                      {t("create_report")}
-                    </Button>
-                  </div>
-                </div>
+                <ReportTypePicker
+                  availableReportCodes={availableReportCodes}
+                  hasCollectedSpecimens={hasCollectedSpecimens}
+                  disableEdit={disableEdit}
+                  isCreatingReport={isCreatingReport}
+                  onCreateReport={handleCreateReport}
+                />
               )}
             </div>
           </CardContent>
