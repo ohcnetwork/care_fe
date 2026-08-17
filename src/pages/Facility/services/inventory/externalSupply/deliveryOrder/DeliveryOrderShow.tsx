@@ -488,7 +488,7 @@ export function DeliveryOrderShow({
     supplyDeliveries &&
     supplyDeliveries.results.length >= careConfig.maxDatapointsPerUpsert;
 
-  const canReceiveAndUpdateStock =
+  const isWithinUpsertLimit =
     selectedDeliveries.length <= careConfig.maxDatapointsPerUpsert;
 
   return (
@@ -821,7 +821,7 @@ export function DeliveryOrderShow({
                         isUpdating ||
                         isUpsertingDeliveries ||
                         selectedDeliveries.length === 0 ||
-                        !canReceiveAndUpdateStock
+                        !isWithinUpsertLimit
                       }
                     >
                       {isUpsertingDeliveries
@@ -841,7 +841,8 @@ export function DeliveryOrderShow({
                           disabled={
                             isUpdating ||
                             isUpsertingDeliveries ||
-                            selectedDeliveries.length === 0
+                            selectedDeliveries.length === 0 ||
+                            !isWithinUpsertLimit
                           }
                         >
                           {t("mark_as_abandoned")}
@@ -851,7 +852,8 @@ export function DeliveryOrderShow({
                           disabled={
                             isUpdating ||
                             isUpsertingDeliveries ||
-                            selectedDeliveries.length === 0
+                            selectedDeliveries.length === 0 ||
+                            !isWithinUpsertLimit
                           }
                         >
                           {t("mark_as_damaged")}
@@ -862,7 +864,7 @@ export function DeliveryOrderShow({
                 )}
             </div>
           </CardHeader>
-          {!canReceiveAndUpdateStock && (
+          {!isWithinUpsertLimit && (
             <div className="px-4">
               <Callout
                 variant="warning"
