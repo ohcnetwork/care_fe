@@ -93,7 +93,7 @@ const FacilityRoutes: AppRoutes = {
   }, {}),
   ...[
     "/facility/:facilityId/patient/:patientId/service_request/:serviceRequestId/diagnostic_reports/print",
-    "/organization/:organizationId/patient/:patientId/service_request/:serviceRequestId/diagnostic_reports/print",
+    "/organization/organizationId/patient/:patientId/service_request/:serviceRequestId/diagnostic_reports/print",
   ].reduce((acc: AppRoutes, path) => {
     acc[path] = ({ patientId, serviceRequestId }) => (
       <MultipleDiagnosticReportsPrint
