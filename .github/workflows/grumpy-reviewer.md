@@ -1,9 +1,9 @@
 ---
 description: >
   Grumpy senior code reviewer that automatically reviews the changed lines of
-  every pull request (including community/fork PRs) and leaves grumpy-but-
-  constructive inline review comments. Tone and reviewing standards are
-  delegated to the imported grumpy-reviewer agent.
+  every same-repository pull request and leaves grumpy-but-constructive inline
+  review comments. Tone and reviewing standards are delegated to the imported
+  grumpy-reviewer agent.
 on:
   pull_request_target:
     types:
@@ -11,21 +11,23 @@ on:
       - reopened
       - synchronize
   workflow_dispatch:
-  # Allow any contributor's pull request — including those from forks — to be
-  # reviewed. `pull_request_target` runs in the base-repository context, so the
-  # Copilot engine credentials are available even for fork PRs (a plain
-  # `pull_request` trigger would not expose them). The default role gate
-  # ([admin, maintainer, write]) would otherwise skip external contributors, so
-  # `all` is required to actually review community PRs. This is safe because the
-  # agent runs read-only via the safe-outputs pattern: it can only emit
-  # structured review comments that separate, permission-scoped jobs apply, so
-  # untrusted PR content can never gain write access to the repository.
-  roles: all
-# Only run on the upstream repository. Forks don't have the Copilot engine
-# credentials configured, so runs on forks would otherwise fail loudly and spam
-# fork maintainers. This condition short-circuits every job cleanly (workflow
-# shows as skipped, no error) on any repo other than ohcnetwork/care_fe.
-if: ${{ github.repository == 'ohcnetwork/care_fe' }}
+# Only run on the upstream repository, and only for pull requests whose branch
+# lives in that same repository (i.e. NOT from a fork). Two reasons:
+#   1. Forks don't have the Copilot engine credentials configured, so runs on a
+#      fork repo would fail loudly and spam fork maintainers.
+#   2. Fork PRs carry untrusted content: the GitHub MCP server's integrity
+#      policy refuses to hand a fork PR's diff to the agent ("lower integrity
+#      than agent requires"), so the review can't be produced anyway. Skipping
+#      such PRs here — rather than starting the engine and letting it fail — is a
+#      clean no-op (the workflow shows as skipped, no billed run, no error
+#      issue) instead of a spurious "missing data" failure.
+# `pull_request_target` runs in the base-repository context, so a same-repo PR's
+# author already has write access; the default role gate ([admin, maintainer,
+# write]) covers them without needing `roles: all`.
+if: >
+  ${{ github.repository == 'ohcnetwork/care_fe' &&
+      (github.event.pull_request == null ||
+       github.event.pull_request.head.repo.full_name == github.repository) }}
 # The Copilot engine authenticates inference with the COPILOT_GITHUB_TOKEN repo
 # secret — a fine-grained PAT whose owner has a Copilot license and only the
 # "Copilot Requests: Read" account permission (no repo scopes). Reading the PR
