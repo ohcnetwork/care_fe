@@ -67,11 +67,6 @@ interface EncounterListProps {
   encounterClass?: EncounterClass;
 }
 
-enum SearchWith {
-  Name = "name",
-  ExternalIdentifier = "external_identifier",
-}
-
 const buildQueryParams = (
   facilityId: string,
   status?: string,
@@ -171,25 +166,24 @@ export function EncounterList({
 
   const searchWithOptions = [
     {
-      key: SearchWith.Name,
+      key: "name",
       label: t("patient_name"),
       placeholder: t("search_by_patient_name"),
     },
     {
-      key: SearchWith.ExternalIdentifier,
+      key: "external_identifier",
       label: t("external_identifier"),
       placeholder: t("search_by_external_id"),
     },
   ];
 
-  const searchWith = qParams.with as SearchWith | undefined;
-
-  const searchText = qParams.value || "";
+  const searchWith = qParams.with;
+  const searchValue = qParams.value || "";
 
   const selectedSearchType =
     searchWithOptions.find((option) => option.key === searchWith) ||
     searchWithOptions[0];
-  const showSearchOptions = searchText.trim() !== "";
+  const showSearchOptions = searchValue.trim() !== "";
 
   // Restore filters from sessionStorage on mount AND set default dates if needed
   useEffect(() => {
@@ -257,18 +251,9 @@ export function EncounterList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const { with: _with, value: _value, ...encounterQueryParams } = qParams;
-
   const { data: queryEncounters, isFetching } = useQuery({
-    queryKey: [
-      "encounters",
-      facilityId,
-      encounterQueryParams,
-      searchWith,
-      encounterClass,
-      searchText,
-    ],
-    queryFn: query(encounterApi.list, {
+    queryKey: ["encounters", facilityId, encounterClass, qParams],
+    queryFn: query.debounced(encounterApi.list, {
       queryParams: {
         ...buildQueryParams(
           facilityId,
@@ -280,7 +265,7 @@ export function EncounterList({
           care_team_user,
         ),
         encounter_class: encounterClass,
-        ...(searchWith && { [searchWith]: qParams.value || undefined }),
+        ...(searchWith && { [searchWith]: searchValue || undefined }),
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
@@ -288,10 +273,7 @@ export function EncounterList({
         patient_filter: patient_filter,
       },
     }),
-    enabled:
-      !propEncounters &&
-      !encounter_id &&
-      (!qParams.with || Boolean(qParams.value?.trim())),
+    enabled: !propEncounters && !encounter_id,
   });
 
   const { data: queryEncounter } = useQuery({
@@ -555,10 +537,9 @@ export function EncounterList({
                       <PopoverAnchor asChild>
                         <CommandInput
                           aria-label={selectedSearchType.placeholder}
-                          value={searchText}
+                          value={searchValue}
                           onValueChange={(value) => {
                             updateQuery({
-                              with: searchWith,
                               value: value,
                             });
                             setSearchOptionsOpen(value.trim() !== "");
@@ -570,7 +551,7 @@ export function EncounterList({
                             }
                             if (event.key === "Enter" && !searchOptionsOpen) {
                               event.preventDefault();
-                              if (!searchText.trim()) {
+                              if (!searchValue.trim()) {
                                 updateQuery({
                                   with: undefined,
                                   value: undefined,
@@ -596,14 +577,13 @@ export function EncounterList({
                                 onSelect={() => {
                                   updateQuery({
                                     with: option.key,
-                                    value: searchText,
                                   });
                                   setSearchOptionsOpen(false);
                                 }}
                                 className="flex items-center gap-2"
                               >
                                 <div>
-                                  {searchText}{" "}
+                                  {searchValue}{" "}
                                   <span className="text-gray-500">
                                     {option.label}
                                   </span>
