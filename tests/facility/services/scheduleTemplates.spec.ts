@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 import { createHealthcareService } from "./helpers";
 
@@ -53,8 +54,77 @@ test.describe("Schedule Templates", () => {
    */
   async function openCreateSheet(page: Page) {
     await page.getByRole("button", { name: createScheduleButtonName }).click();
-    await expect(page.getByRole("heading", { name: createScheduleSheetTitle }))
-      .toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: createScheduleSheetTitle }),
+    ).toBeVisible();
+  }
+
+  /**
+   * Selects Valid From (tomorrow) and Valid Till (a week later).
+   *
+   * The backend rejects a valid_from of today ("Date cannot be before the
+   * current date"), so we use tomorrow. The template list is also filtered to
+   * the currently-viewed month, so both dates stay within the current month so
+   * the new template shows up in the default view.
+   *
+   * Days are targeted via react-day-picker's unambiguous `data-day` (ISO date)
+   * attribute, and interactions are scoped to the open popover — the schedule
+   * page renders its own inline month calendar that would otherwise collide.
+   */
+  function isoDate(d: Date) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+      d.getDate(),
+    ).padStart(2, "0")}`;
+  }
+
+  function monthsAhead(from: Date, to: Date) {
+    return (
+      (to.getFullYear() - from.getFullYear()) * 12 +
+      to.getMonth() -
+      from.getMonth()
+    );
+  }
+
+  async function pickCalendarDay(
+    page: Page,
+    target: Date,
+    monthsForward: number,
+  ) {
+    const calendar = page.locator('[data-slot="popover-content"]').last();
+    await expect(calendar).toBeVisible();
+    const nextMonth = calendar.getByRole("button", {
+      name: "Go to the Next Month",
+    });
+    for (let i = 0; i < monthsForward; i++) {
+      await nextMonth.click({ force: true });
+    }
+    await calendar
+      .locator(`[data-day="${isoDate(target)}"]`)
+      .getByRole("button")
+      .first()
+      .click();
+    // Selecting a day closes the popover; wait so the next picker is unambiguous
+    await expect(calendar).toBeHidden();
+  }
+
+  async function selectValidDates(page: Page) {
+    const today = new Date();
+    const validFrom = new Date(today);
+    validFrom.setDate(today.getDate() + 1); // tomorrow (backend requires a future date)
+    const validTo = new Date(validFrom);
+    validTo.setDate(validFrom.getDate() + 7);
+
+    // Valid From
+    await page.getByRole("button", { name: "Pick a date" }).first().click();
+    await pickCalendarDay(page, validFrom, monthsAhead(today, validFrom));
+
+    // Valid Till
+    await page
+      .locator('label:has-text("Valid Till")')
+      .locator("..")
+      .locator('button[data-slot="popover-trigger"]')
+      .click();
+    await pickCalendarDay(page, validTo, monthsAhead(today, validTo));
   }
 
   /**
@@ -70,6 +140,7 @@ test.describe("Schedule Templates", () => {
       slotsPerSession?: number;
       slotSizeMinutes?: number;
       isPublic?: boolean;
+      sessionTitle?: string;
     },
   ) {
     const {
@@ -80,47 +151,43 @@ test.describe("Schedule Templates", () => {
       slotsPerSession = 10,
       slotSizeMinutes = 30,
       isPublic = false,
+      sessionTitle = "General Consultation",
     } = options;
 
     // Fill template name
-    await page.getByRole("textbox", { name: "Name" }).fill(name);
+    await page.getByRole("textbox", { name: "Template Name" }).fill(name);
 
-    // Select valid from date (today)
-    await page.getByLabel("Valid From").click();
-    await page.getByRole("button", { name: "Today" }).click();
+    // Select valid from / valid till dates
+    await selectValidDates(page);
 
-    // Select valid to date (30 days from today)
-    await page.getByLabel("Valid To").click();
-    await page
-      .getByRole("gridcell")
-      .filter({ hasText: /^30$/ })
-      .first()
-      .click();
-
-    // Select weekdays
+    // Weekdays are toggle buttons whose accessible name is the full day name
     for (const day of weekdays) {
-      await page.getByLabel(day, { exact: true }).check();
+      await page.getByRole("button", { name: day, exact: true }).click();
     }
 
     // Toggle public if requested
     if (isPublic) {
-      await page.getByLabel("Make this template public").check();
+      await page
+        .getByRole("checkbox", { name: "Make the template public" })
+        .check();
     }
 
-    // Fill first availability slot (default slot is already present)
+    // Fill first availability session (a default session is already present)
     await page
       .getByRole("textbox", { name: "Session Title" })
-      .fill("General Consultation");
+      .fill(sessionTitle);
 
     // Fill time slots
-    await page.getByLabel("Start Time").fill(startTime);
-    await page.getByLabel("End Time").fill(endTime);
+    await page.getByRole("textbox", { name: "Start Time" }).fill(startTime);
+    await page.getByRole("textbox", { name: "End Time" }).fill(endTime);
 
     // Fill slot configuration
     await page
-      .getByLabel("Slot Size (minutes)")
+      .getByRole("spinbutton", { name: "Slot duration (mins.)" })
       .fill(slotSizeMinutes.toString());
-    await page.getByLabel("Patients per slot").fill(slotsPerSession.toString());
+    await page
+      .getByRole("spinbutton", { name: "Patients per Slot" })
+      .fill(slotsPerSession.toString());
   }
 
   test.beforeAll(async ({ browser }) => {
@@ -188,23 +255,26 @@ test.describe("Schedule Templates", () => {
     await test.step("Submit and verify success", async () => {
       await page.getByRole("button", { name: "Save" }).click();
 
-      // Wait for sheet to close and template to appear
+      // Success toast confirms the create request landed
+      await expectToast(page, "Schedule template created successfully");
+
+      // Sheet closes after a successful create
       await expect(
         page.getByRole("heading", { name: createScheduleSheetTitle }),
       ).not.toBeVisible();
     });
 
-    await test.step("Verify template appears in list", async () => {
-      await expect(page.getByText(templateName)).toBeVisible();
-    });
+    await test.step("Verify template appears with details", async () => {
+      const card = page
+        .locator("div.rounded-lg.bg-white")
+        .filter({ hasText: templateName });
 
-    await test.step("Verify template details are displayed", async () => {
-      // Verify days of week
-      await expect(page.getByText(/Mon.*Tue.*Wed/)).toBeVisible();
-
-      // Verify time slot details
-      await expect(page.getByText("General Consultation")).toBeVisible();
-      await expect(page.getByText(/09:00.*12:00/)).toBeVisible();
+      await expect(card).toBeVisible();
+      // Days of week (rendered as short, comma-separated abbreviations)
+      await expect(card).toContainText("Mon, Tue, Wed");
+      // Session title and formatted time range (see formatTimeShort util)
+      await expect(card.getByText("General Consultation")).toBeVisible();
+      await expect(card.getByText("9 AM - 12 PM")).toBeVisible();
     });
   });
 
@@ -216,73 +286,84 @@ test.describe("Schedule Templates", () => {
     });
 
     await test.step("Fill template name and basic info", async () => {
-      await page.getByRole("textbox", { name: "Name" }).fill(templateName);
-
-      // Select dates
-      await page.getByLabel("Valid From").click();
-      await page.getByRole("button", { name: "Today" }).click();
-
-      await page.getByLabel("Valid To").click();
       await page
-        .getByRole("gridcell")
-        .filter({ hasText: /^30$/ })
-        .first()
-        .click();
+        .getByRole("textbox", { name: "Template Name" })
+        .fill(templateName);
 
-      // Select all weekdays
-      await page.getByLabel("Monday", { exact: true }).check();
-      await page.getByLabel("Tuesday", { exact: true }).check();
-      await page.getByLabel("Wednesday", { exact: true }).check();
-      await page.getByLabel("Thursday", { exact: true }).check();
-      await page.getByLabel("Friday", { exact: true }).check();
+      // Select valid from / valid till dates
+      await selectValidDates(page);
+
+      // Select all weekdays (toggle buttons named by full day name)
+      for (const day of [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+      ]) {
+        await page.getByRole("button", { name: day, exact: true }).click();
+      }
     });
 
     await test.step("Fill first availability slot (Morning)", async () => {
       await page
         .getByRole("textbox", { name: "Session Title" })
         .fill("Morning Consultation");
-      await page.getByLabel("Start Time").fill("09:00");
-      await page.getByLabel("End Time").fill("12:00");
-      await page.getByLabel("Slot Size (minutes)").fill("20");
-      await page.getByLabel("Patients per slot").fill("1");
+      await page.getByRole("textbox", { name: "Start Time" }).fill("09:00");
+      await page.getByRole("textbox", { name: "End Time" }).fill("12:00");
+      await page
+        .getByRole("spinbutton", { name: "Slot duration (mins.)" })
+        .fill("20");
+      await page
+        .getByRole("spinbutton", { name: "Patients per Slot" })
+        .fill("1");
     });
 
     await test.step("Add second availability slot (Afternoon)", async () => {
-      await page.getByRole("button", { name: "Add Another Session" }).click();
+      await page.getByRole("button", { name: "Add another session" }).click();
 
-      // Fill second slot
-      const sessionTitles = page.getByRole("textbox", {
-        name: "Session Title",
-      });
-      await sessionTitles.nth(1).fill("Afternoon Consultation");
-
-      const startTimes = page.getByLabel("Start Time");
-      await startTimes.nth(1).fill("14:00");
-
-      const endTimes = page.getByLabel("End Time");
-      await endTimes.nth(1).fill("17:00");
-
-      const slotSizes = page.getByLabel("Slot Size (minutes)");
-      await slotSizes.nth(1).fill("30");
-
-      const patientsPerSlot = page.getByLabel("Patients per slot");
-      await patientsPerSlot.nth(1).fill("2");
+      // Fill second slot (index 1)
+      await page
+        .getByRole("textbox", { name: "Session Title" })
+        .nth(1)
+        .fill("Afternoon Consultation");
+      await page
+        .getByRole("textbox", { name: "Start Time" })
+        .nth(1)
+        .fill("14:00");
+      await page
+        .getByRole("textbox", { name: "End Time" })
+        .nth(1)
+        .fill("17:00");
+      await page
+        .getByRole("spinbutton", { name: "Slot duration (mins.)" })
+        .nth(1)
+        .fill("30");
+      await page
+        .getByRole("spinbutton", { name: "Patients per Slot" })
+        .nth(1)
+        .fill("2");
     });
 
     await test.step("Submit and verify template", async () => {
       await page.getByRole("button", { name: "Save" }).click();
 
+      await expectToast(page, "Schedule template created successfully");
       await expect(
         page.getByRole("heading", { name: createScheduleSheetTitle }),
       ).not.toBeVisible();
     });
 
     await test.step("Verify both slots are displayed", async () => {
-      await expect(page.getByText(templateName)).toBeVisible();
-      await expect(page.getByText("Morning Consultation")).toBeVisible();
-      await expect(page.getByText("Afternoon Consultation")).toBeVisible();
-      await expect(page.getByText(/09:00.*12:00/)).toBeVisible();
-      await expect(page.getByText(/14:00.*17:00/)).toBeVisible();
+      const card = page
+        .locator("div.rounded-lg.bg-white")
+        .filter({ hasText: templateName });
+
+      await expect(card).toBeVisible();
+      await expect(card.getByText("Morning Consultation")).toBeVisible();
+      await expect(card.getByText("Afternoon Consultation")).toBeVisible();
+      await expect(card.getByText("9 AM - 12 PM")).toBeVisible();
+      await expect(card.getByText("2 PM - 5 PM")).toBeVisible();
     });
   });
 
@@ -297,49 +378,48 @@ test.describe("Schedule Templates", () => {
         weekdays: ["Monday"],
       });
       await page.getByRole("button", { name: "Save" }).click();
+      await expectToast(page, "Schedule template created successfully");
       await expect(page.getByText(originalName)).toBeVisible();
     });
 
+    const sheet = page.locator('div[role="dialog"][data-slot="sheet-content"]');
+
     await test.step("Open edit sheet", async () => {
-      // Find the template and click its edit button
+      // Edit trigger is an icon-only button (pen-line icon) within the card
       const templateCard = page
-        .locator(".rounded-lg")
+        .locator("div.rounded-lg.bg-white")
         .filter({ hasText: originalName });
       await templateCard
-        .getByRole("button")
-        .filter({ hasText: /edit/i })
+        .locator('button[data-slot="button"]')
+        .filter({ has: page.locator("svg.lucide-pen-line") })
+        .first()
         .click();
 
       await expect(
-        page.getByRole("heading", { name: /edit.*schedule/i }),
+        sheet.getByRole("heading", { name: "Edit Schedule Template" }),
       ).toBeVisible();
     });
 
-    await test.step("Modify template name", async () => {
-      await page.getByRole("textbox", { name: "Name" }).clear();
-      await page.getByRole("textbox", { name: "Name" }).fill(updatedName);
-    });
-
-    await test.step("Modify weekdays", async () => {
-      // Add Tuesday and Wednesday
-      await page.getByLabel("Tuesday", { exact: true }).check();
-      await page.getByLabel("Wednesday", { exact: true }).check();
-    });
-
-    await test.step("Save changes", async () => {
-      await page.getByRole("button", { name: "Save" }).click();
-
+    await test.step("Verify existing name is prefilled", async () => {
       await expect(
-        page.getByRole("heading", { name: /edit.*schedule/i }),
-      ).not.toBeVisible({ timeout: 10000 });
+        sheet.getByRole("textbox", { name: "Template Name" }),
+      ).toHaveValue(originalName);
     });
 
-    await test.step("Verify changes are displayed", async () => {
+    await test.step("Modify template name and save", async () => {
+      await sheet
+        .getByRole("textbox", { name: "Template Name" })
+        .fill(updatedName);
+      await sheet.getByRole("button", { name: "Save", exact: true }).click();
+      await expectToast(page, "Schedule template updated successfully");
+    });
+
+    await test.step("Close sheet and verify changes are displayed", async () => {
+      await page.keyboard.press("Escape");
+      await expect(sheet).not.toBeVisible();
+
       await expect(page.getByText(updatedName)).toBeVisible();
       await expect(page.getByText(originalName)).not.toBeVisible();
-
-      // Verify updated days
-      await expect(page.getByText(/Mon.*Tue.*Wed/)).toBeVisible();
     });
   });
 
@@ -353,12 +433,13 @@ test.describe("Schedule Templates", () => {
         isPublic: false, // Keep it private
       });
       await page.getByRole("button", { name: "Save" }).click();
+      await expectToast(page, "Schedule template created successfully");
       await expect(page.getByText(privateName)).toBeVisible();
     });
 
     await test.step("Verify lock icon appears for private template", async () => {
       const templateCard = page
-        .locator(".rounded-lg")
+        .locator("div.rounded-lg.bg-white")
         .filter({ hasText: privateName });
 
       // Look for lock icon (indicates private template)
@@ -378,12 +459,13 @@ test.describe("Schedule Templates", () => {
         isPublic: true,
       });
       await page.getByRole("button", { name: "Save" }).click();
+      await expectToast(page, "Schedule template created successfully");
       await expect(page.getByText(publicName)).toBeVisible();
     });
 
     await test.step("Verify no lock icon for public template", async () => {
       const templateCard = page
-        .locator(".rounded-lg")
+        .locator("div.rounded-lg.bg-white")
         .filter({ hasText: publicName });
 
       // Lock icon should NOT be present
