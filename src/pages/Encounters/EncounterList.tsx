@@ -287,7 +287,10 @@ export function EncounterList({
         patient_filter: patient_filter,
       },
     }),
-    enabled: !propEncounters && !encounter_id && !!qParams.with,
+    enabled:
+      !propEncounters &&
+      !encounter_id &&
+      (!qParams.with || Boolean(qParams.value?.trim())),
   });
 
   const { data: queryEncounter } = useQuery({
@@ -558,9 +561,6 @@ export function EncounterList({
                               value: value,
                             });
                             setSearchOptionsOpen(value.trim() !== "");
-                          }}
-                          onFocus={() => {
-                            if (showSearchOptions) setSearchOptionsOpen(true);
                           }}
                           onKeyDown={(event) => {
                             if (event.key === "Escape") {
