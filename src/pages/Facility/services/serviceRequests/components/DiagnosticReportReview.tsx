@@ -49,7 +49,7 @@ import {
 } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
-import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
+import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
 import fileApi from "@/types/files/fileApi";
 import { format } from "date-fns";
 
@@ -57,7 +57,7 @@ interface DiagnosticReportReviewProps {
   facilityId: string;
   patientId: string;
   diagnosticReports: DiagnosticReportRead[];
-  observationDefinitions: ObservationDefinitionReadSpec[];
+  observationDefinitions: ObservationDefinitionRead[];
   serviceRequestId: string;
   disableEdit: boolean;
 }
@@ -106,7 +106,7 @@ function DiagnosticReportReviewItem({
   facilityId: string;
   patientId: string;
   serviceRequestId: string;
-  observationDefinitions: ObservationDefinitionReadSpec[];
+  observationDefinitions: ObservationDefinitionRead[];
   disableEdit: boolean;
 }) {
   const { t } = useTranslation();

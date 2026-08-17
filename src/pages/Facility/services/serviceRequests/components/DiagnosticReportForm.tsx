@@ -285,7 +285,7 @@ function DiagnosticReportItem({
   report: DiagnosticReportRead;
   patientId: string;
   serviceRequestId: string;
-  observationDefinitions: ObservationDefinitionReadSpec[];
+  observationDefinitions: ObservationDefinitionRead[];
   disableEdit: boolean;
   facilityId: string;
   isMultipleDiagnosticReport: boolean;
