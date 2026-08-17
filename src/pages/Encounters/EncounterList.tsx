@@ -138,13 +138,7 @@ export function EncounterList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
-    cacheBlacklist: [
-      "name",
-      "encounter_id",
-      "external_identifier",
-      "tags",
-      "patient_filter",
-    ],
+    cacheBlacklist: ["with", "value", "encounter_id", "tags", "patient_filter"],
   });
   const { t } = useTranslation();
   const [, setSavedFilters] = useAtom(encounterListFiltersAtom);
@@ -188,32 +182,14 @@ export function EncounterList({
     },
   ];
 
-  const searchWith = qParams.external_identifier
-    ? SearchWith.ExternalIdentifier
-    : SearchWith.Name;
+  const searchWith = qParams.with as SearchWith | undefined;
 
-  const searchText = qParams.external_identifier || qParams.name || "";
+  const searchText = qParams.value || "";
 
   const selectedSearchType =
     searchWithOptions.find((option) => option.key === searchWith) ||
     searchWithOptions[0];
   const showSearchOptions = searchText.trim() !== "";
-
-  const updateSearchQuery = (
-    nextSearchWith: SearchWith,
-    nextSearchText: string,
-  ) => {
-    updateQuery({
-      [SearchWith.Name]: "",
-      [SearchWith.ExternalIdentifier]: "",
-      [nextSearchWith]: nextSearchText,
-    });
-  };
-
-  const handleSearchWithChange = (nextSearchWith: SearchWith) => {
-    updateSearchQuery(nextSearchWith, searchText);
-    setSearchOptionsOpen(false);
-  };
 
   // Restore filters from sessionStorage on mount AND set default dates if needed
   useEffect(() => {
@@ -281,9 +257,17 @@ export function EncounterList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const { with: _with, value: _value, ...encounterQueryParams } = qParams;
+
   const { data: queryEncounters, isFetching } = useQuery({
-    queryKey: ["encounters", facilityId, qParams, encounterClass],
-    queryFn: query.debounced(encounterApi.list, {
+    queryKey: [
+      "encounters",
+      facilityId,
+      encounterQueryParams,
+      searchWith,
+      encounterClass,
+    ],
+    queryFn: query(encounterApi.list, {
       queryParams: {
         ...buildQueryParams(
           facilityId,
@@ -295,16 +279,15 @@ export function EncounterList({
           care_team_user,
         ),
         encounter_class: encounterClass,
-        external_identifier: qParams.external_identifier,
+        ...(searchWith && { [searchWith]: qParams.value || undefined }),
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
         patient_filter: patient_filter,
-        name: qParams.name,
       },
     }),
-    enabled: !propEncounters && !encounter_id,
+    enabled: !propEncounters && !encounter_id && !!qParams.with,
   });
 
   const { data: queryEncounter } = useQuery({
@@ -570,7 +553,10 @@ export function EncounterList({
                           aria-label={selectedSearchType.placeholder}
                           value={searchText}
                           onValueChange={(value) => {
-                            updateSearchQuery(searchWith, value);
+                            updateQuery({
+                              with: searchWith,
+                              value: value,
+                            });
                             setSearchOptionsOpen(value.trim() !== "");
                           }}
                           onFocus={() => {
@@ -583,7 +569,12 @@ export function EncounterList({
                             }
                             if (event.key === "Enter" && !searchOptionsOpen) {
                               event.preventDefault();
-                              updateSearchQuery(searchWith, searchText);
+                              if (!searchText.trim()) {
+                                updateQuery({
+                                  with: undefined,
+                                  value: undefined,
+                                });
+                              }
                             }
                           }}
                           placeholder={selectedSearchType.placeholder}
@@ -601,9 +592,13 @@ export function EncounterList({
                               <CommandItem
                                 key={option.key}
                                 value={option.key}
-                                onSelect={() =>
-                                  handleSearchWithChange(option.key)
-                                }
+                                onSelect={() => {
+                                  updateQuery({
+                                    with: option.key,
+                                    value: searchText,
+                                  });
+                                  setSearchOptionsOpen(false);
+                                }}
                                 className="flex items-center gap-2"
                               >
                                 <div>
