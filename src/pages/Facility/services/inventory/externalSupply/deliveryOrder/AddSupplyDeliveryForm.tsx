@@ -930,6 +930,7 @@ export function AddSupplyDeliveryForm({
                         type="button"
                         variant="outline"
                         onClick={handleAddAnotherItem}
+                        disabled={disableAddItem}
                       >
                         <PlusCircle className="mr-2 size-4" />
                         {t("add_another")}

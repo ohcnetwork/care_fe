@@ -100,9 +100,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await page.getByRole("link", { name: "Create Delivery Order" }).click();
     await page.getByRole("button", { name: "Create" }).click();
     await expect(
-      page.getByRole("button", { name: "Load from order" }),
+      page.getByRole("button", { name: /Load from order/ }),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Load from order" }).click();
+    await page.getByRole("button", { name: /Load from order/ }).click();
     await page.getByRole("button", { name: "Done" }).click();
     await page.getByRole("button", { name: "Select stock" }).nth(1).click();
     await page.locator("div").filter({ hasText: "₹20.00" }).nth(3).click();
@@ -129,9 +129,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await page.getByRole("link", { name: "Create Delivery Order" }).click();
     await page.getByRole("button", { name: "Create" }).click();
     await expect(
-      page.getByRole("button", { name: "Load from order" }),
+      page.getByRole("button", { name: /Load from order/ }),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Load from order" }).click();
+    await page.getByRole("button", { name: /Load from order/ }).click();
     await page.getByRole("button", { name: "Done" }).click();
     await page.getByRole("button", { name: "Select stock" }).nth(1).click();
     await page.locator("div").filter({ hasText: "₹20.00" }).nth(3).click();
