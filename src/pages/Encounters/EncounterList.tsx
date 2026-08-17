@@ -266,6 +266,7 @@ export function EncounterList({
       encounterQueryParams,
       searchWith,
       encounterClass,
+      searchText,
     ],
     queryFn: query(encounterApi.list, {
       queryParams: {
