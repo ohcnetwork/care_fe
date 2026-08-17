@@ -471,6 +471,13 @@ export function DeliveryOrderShow({
       (delivery) => delivery.status === SupplyDeliveryStatus.completed,
     ) ?? false;
 
+  const allSupplyDeliveriesCompletedOrAbandoned =
+    supplyDeliveries?.results?.every(
+      (delivery) =>
+        delivery.status === SupplyDeliveryStatus.completed ||
+        delivery.status === SupplyDeliveryStatus.abandoned,
+    ) ?? false;
+
   const deliveryOrderStatusActions = getDeliveryOrderStatusActions(
     deliveryOrder.status,
     internal,
@@ -591,7 +598,8 @@ export function DeliveryOrderShow({
                   disabled={
                     isUpsertingDeliveries ||
                     isUpdating ||
-                    selectedDeliveries.length !== 0
+                    selectedDeliveries.length !== 0 ||
+                    !allSupplyDeliveriesCompletedOrAbandoned
                   }
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}
