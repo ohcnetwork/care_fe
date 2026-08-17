@@ -81,6 +81,7 @@ const FacilityRoutes: AppRoutes = {
   }, {}),
   ...[
     "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print",
+    "/organization/organizationId/patient/:patientId/diagnostic_reports/:diagnosticReportId/print",
   ].reduce((acc: AppRoutes, path) => {
     acc[path] = ({ patientId, diagnosticReportId }) => (
       <DiagnosticReportPrint
@@ -92,6 +93,7 @@ const FacilityRoutes: AppRoutes = {
   }, {}),
   ...[
     "/facility/:facilityId/patient/:patientId/service_request/:serviceRequestId/diagnostic_reports/print",
+    "/organization/:organizationId/patient/:patientId/service_request/:serviceRequestId/diagnostic_reports/print",
   ].reduce((acc: AppRoutes, path) => {
     acc[path] = ({ patientId, serviceRequestId }) => (
       <MultipleDiagnosticReportsPrint

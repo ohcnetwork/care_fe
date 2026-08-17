@@ -1,7 +1,6 @@
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import PrintFooter from "@/components/Common/PrintFooter";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
@@ -16,6 +15,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import "@/lib/pdfWorker";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Document, Page } from "react-pdf";
 
 // TODO: Replace with PDFViewer or extract this to a component
@@ -92,7 +92,7 @@ export const DiagnosticReportPrintPreview = ({
   allFiles: { reportId: string; file: FileReadMinimal }[];
   isLoading?: boolean;
 }) => {
-  const { facility } = useCurrentFacility();
+  const { facility } = useCurrentFacilitySilently();
   const { t } = useTranslation();
 
   const diagnosticReportDetail = diagnosticReports[0];

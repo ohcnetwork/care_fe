@@ -1,10 +1,11 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 
-import query from "@/Utils/request/query";
 import Loading from "@/components/Common/Loading";
+import "@/lib/pdfWorker";
 import { DiagnosticReportPrintPreview } from "@/pages/Facility/services/diagnosticReports/DiagnosticReportPrintPreview";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import fileApi from "@/types/files/fileApi";
+import query from "@/Utils/request/query";
 import { useTranslation } from "react-i18next";
 
 export default function DiagnosticReportPrint({
@@ -15,6 +16,7 @@ export default function DiagnosticReportPrint({
   diagnosticReportId: string;
 }) {
   const { t } = useTranslation();
+
   const { data: fullReport, isLoading: isLoadingReport } = useQuery({
     queryKey: ["diagnosticReport", diagnosticReportId],
     queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
