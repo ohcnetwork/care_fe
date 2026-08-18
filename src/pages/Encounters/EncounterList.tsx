@@ -559,7 +559,7 @@ export function EncounterList({
                             }
                           }}
                           placeholder={selectedSearchType.placeholder}
-                          className="h-9 pl-2"
+                          className="h-9 pl-2 bg-white"
                         />
                       </PopoverAnchor>
                       <PopoverContent
