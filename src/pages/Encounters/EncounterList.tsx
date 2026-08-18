@@ -536,12 +536,11 @@ export function EncounterList({
                     >
                       <PopoverAnchor asChild>
                         <CommandInput
+                          hideSearchIcon
                           aria-label={selectedSearchType.placeholder}
                           value={searchValue}
                           onValueChange={(value) => {
-                            updateQuery({
-                              value,
-                            });
+                            updateQuery({ value });
                             setSearchOptionsOpen(value.trim() !== "");
                           }}
                           onKeyDown={(event) => {
@@ -560,6 +559,7 @@ export function EncounterList({
                             }
                           }}
                           placeholder={selectedSearchType.placeholder}
+                          className="h-9 pl-2"
                         />
                       </PopoverAnchor>
                       <PopoverContent
