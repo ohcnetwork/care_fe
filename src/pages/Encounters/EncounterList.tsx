@@ -540,7 +540,7 @@ export function EncounterList({
                           value={searchValue}
                           onValueChange={(value) => {
                             updateQuery({
-                              value: value,
+                              value,
                             });
                             setSearchOptionsOpen(value.trim() !== "");
                           }}
