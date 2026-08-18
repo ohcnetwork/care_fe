@@ -7,7 +7,9 @@ components overrideable by Care Apps.
 
 - Let Care Apps replace selected core React components.
 - Keep core component call sites unchanged.
-- Preserve context-aware overrides, including route and stack-path conditions.
+- Preserve context-aware overrides (`page`, and other `OverrideCondition`
+  keys). `stackPath` exists in the runtime but parent matching does not work
+  in CARE today — see Stack-Aware Overrides below.
 - Avoid registering every exported component when deployments only need a small
   override surface.
 - Keep transformed-code debugging usable with source maps.
@@ -76,7 +78,7 @@ export first, then **skips** `export default Foo` (the name is already
 transformed).
 
 ```
-named hole    { Foo }     →  wrapped (sleeve)
+named hole    { Foo }     →  wrapped (`register()`)
 default hole  import Foo  →  still the original
 ```
 
@@ -131,9 +133,9 @@ overrides: [
 ```
 
 `PluginEngine` loads enabled app manifests, reads their `overrides`, and
-calls `addOverride`. That only matters if the **call site imports the sleeve**
-(`register()` wrapper) — a notebook entry with no sleeve on the page is a
-no-op. At render time the sleeve chooses the base component or the
+calls `addOverride`. That only matters if the **call site imports the
+`register()` wrapper**. A registry entry with no wrapper on the page is a
+no-op. At render time the wrapper chooses the base component or the
 highest-priority matching override.
 
 This keeps dynamic plugin loading safe: overrides can arrive after the app has
@@ -142,8 +144,9 @@ override registry.
 
 ## Stack-Aware Overrides
 
-Overrides may use `condition.stackPath` when the same component should be
-overridden only under a specific parent path.
+`condition.stackPath` is a **filter** on the live render stack (parent
+`register()` wrappers above this component). It is not the URL — that is
+`page`. The Care App only *asks* for a match; it does not fill the stack.
 
 ```ts
 condition: {
@@ -151,9 +154,17 @@ condition: {
 }
 ```
 
-Every component name used in a stack path must be registered. If
-`REACT_MFE_REGISTERED_COMPONENTS` is set, include both the overridden component
-and the stack-path ancestors required for matching.
+You would expect: override `BookAppointmentDetails` only when it sits under
+`AppointmentPage`. **That does not match in CARE today**, even if both are
+registered and the React tree is correct.
+
+Why: a wrapper pushes its name onto the stack only if **that** component
+has a `stackPath` override. `AppointmentPage` usually has none, so it never
+pushes. Allowlisting it or calling `register()` by hand is not enough.
+
+`stackPath: ["BookAppointmentDetails"]` can match — that leaf has
+`stackPath`, so it pushes itself. Until parents push too, use `page` or
+omit `condition`.
 
 ## Performance Model
 

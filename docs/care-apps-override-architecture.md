@@ -25,7 +25,9 @@ Key properties:
 - Components remain **pure**: no override-awareness in their implementation
 - Overrides **can** match on page, user role, facility type, and render stack.
   Today `App.tsx` only fills `route` / `page` from the URL — `userRole` and
-  `facilityType` are never set, so conditions on those keys never match
+  `facilityType` are never set, so conditions on those keys never match.
+  `stackPath` (render stack) is implemented but **parent names never land on
+  the stack** in CARE today — see Stack-Aware Path
 - Performance is **near O(1)** at render time for most components
 - A throwing override **does not white-screen the app**. `OverrideErrorBoundary`
   replaces **that component** with a short message; it does **not** render the
@@ -91,7 +93,10 @@ also works for a default import — no rename required.
 2. Returns a wrapper that, at render time:
    - If no overrides exist → renders `BaseComponent` directly
    - If overrides exist but none use stack conditions → **fast path**: looks up the precomputed `ResolutionMap`
-   - If stack conditions are present → **stack-aware path**: creates a linked-list stack node and resolves dynamically
+   - If this key has a `stackPath` override → **stack-aware path**: this
+     sleeve writes its own name onto `StackContext` and resolves. Ancestors
+     that took the fast path (or have no overrides) do **not** write their
+     names, so parent+child `stackPath` does not match today (see Stack-Aware Path)
 3. Wraps override renders in an `OverrideErrorBoundary` — if the override throws,
    that slot shows a short message (not the original component; see Error Isolation)
 
@@ -178,7 +183,7 @@ interface OverrideCondition {
   page?: string | string[];
   userRole?: string | string[];
   facilityType?: string | string[];
-  stackPath?: string[];              // match component ancestry
+  stackPath?: string[];              // match sleeve ancestry (see Stack-Aware Path)
   custom?: (ctx: OverrideContextType) => boolean;
 }
 
@@ -223,8 +228,19 @@ RegisteredComponent renders:
   render resolved component within StackContext.Provider
 ```
 
-Stack matching uses subsequence matching — `["PatientHome", "PatientCard"]`
-matches any render tree where `PatientCard` is a descendant of `PatientHome`.
+A name is appended **only on this path**. Fast-path sleeves and sleeves with
+no overrides skip `StackContext.Provider`, so they never appear as parents.
+
+`stackPath: ["LoginHeader"]` can match (the leaf writes itself).
+`stackPath: ["FacilitiesPage", "LoginHeader"]` does **not** match today even
+when `FacilitiesPage` is registered and really renders `LoginHeader` — the
+parent never signed in. Registering the parent (env allowlist or hand
+`register()`) is not enough.
+
+The docs-shaped example — subsequence
+`["PatientHome", "PatientCard"]` meaning “card under that page” — is the
+intended design. It is **not usable in CARE today**. No in-tree Care App
+uses `stackPath`.
 
 Cost: **O(overrides × stack depth)** — only activated for components with
 `hasStackConditions: true`. `matchCondition` does not look at `stackPath`;
