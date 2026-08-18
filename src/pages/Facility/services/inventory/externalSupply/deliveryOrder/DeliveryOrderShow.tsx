@@ -472,11 +472,12 @@ export function DeliveryOrderShow({
     ) ?? false;
 
   const allSupplyDeliveriesCompletedOrAbandoned =
-    supplyDeliveries?.results?.every(
+    !!supplyDeliveries?.results?.length &&
+    supplyDeliveries.results.every(
       (delivery) =>
         delivery.status === SupplyDeliveryStatus.completed ||
         delivery.status === SupplyDeliveryStatus.abandoned,
-    ) ?? false;
+    );
 
   const deliveryOrderStatusActions = getDeliveryOrderStatusActions(
     deliveryOrder.status,
