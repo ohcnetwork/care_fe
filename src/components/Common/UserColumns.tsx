@@ -19,7 +19,7 @@ export default function UserColumns({
 }) {
   return (
     <section
-      className="flex flex-col gap-5 sm:flex-row"
+      className="flex flex-col gap-5 sm:flex-row sm:items-center"
       aria-labelledby="section-heading"
     >
       <div className="sm:w-1/4">
