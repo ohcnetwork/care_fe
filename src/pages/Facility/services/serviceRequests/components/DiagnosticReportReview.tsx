@@ -60,8 +60,6 @@ interface DiagnosticReportReviewProps {
   observationDefinitions: ObservationDefinitionRead[];
   serviceRequestId: string;
   disableEdit: boolean;
-  isExpanded: boolean;
-  setIsExpanded: (isExpanded: boolean) => void;
 }
 
 export function DiagnosticReportReview({
@@ -71,8 +69,6 @@ export function DiagnosticReportReview({
   serviceRequestId,
   observationDefinitions,
   disableEdit,
-  isExpanded,
-  setIsExpanded,
 }: DiagnosticReportReviewProps) {
   const { t } = useTranslation();
   return (
@@ -92,8 +88,6 @@ export function DiagnosticReportReview({
           serviceRequestId={serviceRequestId}
           observationDefinitions={observationDefinitions}
           disableEdit={disableEdit}
-          isExpanded={isExpanded}
-          setIsExpanded={setIsExpanded}
         />
       ))}
     </div>
@@ -107,8 +101,6 @@ function DiagnosticReportReviewItem({
   serviceRequestId,
   observationDefinitions,
   disableEdit,
-  isExpanded,
-  setIsExpanded,
 }: {
   report: DiagnosticReportRead;
   facilityId: string;
@@ -116,11 +108,11 @@ function DiagnosticReportReviewItem({
   serviceRequestId: string;
   observationDefinitions: ObservationDefinitionRead[];
   disableEdit: boolean;
-  isExpanded: boolean;
-  setIsExpanded: (isExpanded: boolean) => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const [conclusion, setConclusion] = useState<string>(report.conclusion || "");
   const [showApproveDialog, setShowApproveDialog] = useState(false);
@@ -170,6 +162,20 @@ function DiagnosticReportReviewItem({
         });
       },
     });
+
+  useEffect(() => {
+    if (
+      fullReport?.observations?.length ||
+      fullReport?.conclusion ||
+      files?.results?.length
+    ) {
+      setIsExpanded(true);
+    }
+  }, [
+    fullReport?.observations,
+    fullReport?.conclusion,
+    files?.results?.length,
+  ]);
 
   useEffect(() => {
     setConclusion(fullReport?.conclusion || "");

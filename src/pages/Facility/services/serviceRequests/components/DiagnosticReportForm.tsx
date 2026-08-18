@@ -96,7 +96,6 @@ interface DiagnosticReportFormProps {
   };
   specimens: SpecimenRead[];
   disableEdit: boolean;
-  setIsExpandReviewCard: (isExpanded: boolean) => void;
 }
 
 // Interface for component values
@@ -130,7 +129,6 @@ export function DiagnosticReportForm({
   specimens,
   disableEdit,
   facilityId,
-  setIsExpandReviewCard,
 }: DiagnosticReportFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -224,7 +222,6 @@ export function DiagnosticReportForm({
                 disableEdit={disableEdit}
                 isMultipleDiagnosticReport={isMultipleDiagnosticReport}
                 facilityId={facilityId}
-                setIsExpandReviewCard={setIsExpandReviewCard}
               />
             ))}
           </div>
@@ -284,7 +281,6 @@ function DiagnosticReportItem({
   disableEdit,
   facilityId,
   isMultipleDiagnosticReport,
-  setIsExpandReviewCard,
 }: {
   report: DiagnosticReportRead;
   patientId: string;
@@ -293,7 +289,6 @@ function DiagnosticReportItem({
   disableEdit: boolean;
   facilityId: string;
   isMultipleDiagnosticReport: boolean;
-  setIsExpandReviewCard: (isExpanded: boolean) => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -342,7 +337,6 @@ function DiagnosticReportItem({
         queryKey: ["diagnosticReport", report.id],
       });
       setIsExpanded(false);
-      setIsExpandReviewCard(true);
     },
   });
 
