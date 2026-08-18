@@ -426,15 +426,16 @@ export function DispenseOrderView({
 
   // Placeholder "add row" rendered below the dispense tables while the order
   // is open.
-  const addMedicationRow = isOrderOpen ? (
-    <AddDispenseMedicationRow
-      facilityId={facilityId}
-      locationId={locationId}
-      dispenseOrderId={dispenseOrderId}
-      encounterId={orderEncounterId}
-      draftInvoiceId={draftInvoiceId}
-    />
-  ) : null;
+  const addMedicationRow =
+    orderEncounterId && isOrderOpen ? (
+      <AddDispenseMedicationRow
+        facilityId={facilityId}
+        locationId={locationId}
+        dispenseOrderId={dispenseOrderId}
+        encounterId={orderEncounterId}
+        draftInvoiceId={draftInvoiceId}
+      />
+    ) : null;
 
   // Per-row edit context; the replacement dispense's charge item is appended
   // to the draft invoice, if any.

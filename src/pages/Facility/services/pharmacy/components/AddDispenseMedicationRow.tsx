@@ -31,7 +31,7 @@ interface Props {
    * authorizing request, so the encounter must be supplied by the caller
    * (derived from the order's existing dispenses).
    */
-  encounterId?: string;
+  encounterId: string;
   /**
    * When set, charge items of the created dispenses are appended to this
    * draft invoice. When unset, they stay unbilled.
@@ -83,8 +83,6 @@ export function AddDispenseMedicationRow({
     note,
     lots,
   }: AddMedicationValue) => {
-    if (!encounterId) return;
-
     const whenPrepared = new Date();
 
     await saveMedication(
@@ -115,7 +113,6 @@ export function AddDispenseMedicationRow({
       locationId={locationId}
       onSave={handleSave}
       isSaving={isSaving}
-      disableSave={!encounterId}
     />
   );
 }

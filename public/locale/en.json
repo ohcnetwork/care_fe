@@ -2534,6 +2534,8 @@
   "expiration_date_description": "The date after which this product should not be used",
   "expiration_date_must_be_after_manufacture_date": "Expiration date must be after manufacture date",
   "expired": "Expired",
+  "expired_lots_hidden_one": "{{count}} lot is expired or expiring soon and is hidden as it cannot be dispensed.",
+  "expired_lots_hidden_other": "{{count}} lots are expired or expiring soon and are hidden as they cannot be dispensed.",
   "expired_or_soon_to_expire_product_cannot_be_dispensed": "Expired or soon-to-expire products cannot be dispensed.",
   "expired_product_cannot_be_dispensed": "Expired products cannot be dispensed",
   "expires": "Expires",

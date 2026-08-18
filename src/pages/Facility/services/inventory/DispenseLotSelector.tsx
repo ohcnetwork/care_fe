@@ -1,4 +1,9 @@
-import { ChevronDownIcon, SearchIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  PackageXIcon,
+  SearchIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +21,7 @@ import {
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { getExpirationDateThresholdForDispensing } from "@/pages/Facility/services/inventory/utils";
 import { LotSelection } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { InventoryRead } from "@/types/inventory/product/inventory";
@@ -34,18 +40,16 @@ interface Props {
   facilityId: string;
   locationId: string;
   productKnowledgeId: string;
-  showOnlyAvailable?: boolean;
   value?: LotSelection;
   selected: LotSelection[];
   onChange: (selectedItems: LotSelection[]) => void;
   disabled?: boolean;
 }
 
-export const InventoryItemsSelector = ({
+export const DispenseLotSelector = ({
   facilityId,
   locationId,
   productKnowledgeId,
-  showOnlyAvailable = false,
   value,
   selected,
   onChange,
@@ -55,14 +59,17 @@ export const InventoryItemsSelector = ({
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: items, isLoading } = useQuery({
-    queryKey: ["inventoryItems", facilityId, locationId, productKnowledgeId],
+    queryKey: ["dispensableItems", facilityId, locationId, productKnowledgeId],
     queryFn: query(inventoryApi.list, {
       pathParams: { facilityId, locationId },
       queryParams: {
         product_knowledge: productKnowledgeId,
         status: "active",
         limit: 100,
-        ...(showOnlyAvailable ? { net_content_gt: 0 } : {}),
+        net_content_gt: 0,
+        ordering: "product__expiration_date",
+        product_expiration_date_after:
+          getExpirationDateThresholdForDispensing().toISOString(),
       },
     }),
     select: (data: PaginatedResponse<InventoryRead>) => data.results,
@@ -79,12 +86,7 @@ export const InventoryItemsSelector = ({
       : items || [];
 
   // Toggle lot selection
-  const toggleLotSelection = (
-    inventory: InventoryRead,
-    isRestricted: boolean,
-  ) => {
-    if (isRestricted) return;
-
+  const toggleLotSelection = (inventory: InventoryRead) => {
     const isSelected = selected.some(({ item }) => item.id === inventory.id);
 
     if (isSelected) {
@@ -94,30 +96,26 @@ export const InventoryItemsSelector = ({
       // Add to selection
       onChange([
         ...selected,
-        {
-          item: inventory,
-          quantity: "1",
-          autoSelected: false,
-        },
+        { item: inventory, quantity: "1", autoSelected: false },
       ]);
     }
   };
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="flex items-start gap-3">
-        <Skeleton className="h-10 w-48" />
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-9 w-24" />
-        </div>
-      </div>
-    );
+    return <Skeleton className="h-9 w-full min-w-48 rounded-md" />;
   }
 
   // No stock state
   if (!value && (!items || items.length === 0)) {
-    return <Badge variant="destructive">{t("no_stock")}</Badge>;
+    return (
+      <div className="flex h-9 w-full min-w-48 items-center gap-2 rounded-md border border-dashed border-amber-300 bg-amber-50 px-3">
+        <PackageXIcon className="size-4 shrink-0 text-amber-600" />
+        <span className="truncate text-sm font-medium text-amber-700">
+          {t("no_stock")}
+        </span>
+      </div>
+    );
   }
 
   return (
@@ -188,16 +186,11 @@ export const InventoryItemsSelector = ({
           </div>
         </div>
 
-        {/* Warning for restricted items */}
-        {filteredItems.some((inv) =>
-          isProductRestrictedFromDispensing(inv.product.expiration_date),
-        ) && (
-          <div className="px-2 py-1 bg-red-50 border-b border-red-100">
-            <span className="text-xs text-red-600">
-              {t("expired_product_cannot_be_dispensed")}
-            </span>
-          </div>
-        )}
+        <ExpiredItemsWarning
+          facilityId={facilityId}
+          locationId={locationId}
+          productKnowledgeId={productKnowledgeId}
+        />
 
         {/* Lot list table */}
         <div className="max-h-60 overflow-auto">
@@ -238,7 +231,7 @@ export const InventoryItemsSelector = ({
                           ? "cursor-not-allowed opacity-50 bg-gray-50"
                           : "cursor-pointer hover:bg-gray-50",
                       )}
-                      onClick={() => toggleLotSelection(inv, isRestricted)}
+                      onClick={() => !isRestricted && toggleLotSelection(inv)}
                     >
                       <td className="p-2 pb-0.5 text-center">
                         <Checkbox
@@ -313,5 +306,49 @@ export const InventoryItemsSelector = ({
         </div>
       </PopoverContent>
     </Popover>
+  );
+};
+
+interface ExpiredItemsWarningProps {
+  facilityId: string;
+  locationId: string;
+  productKnowledgeId: string;
+}
+
+const ExpiredItemsWarning = ({
+  facilityId,
+  locationId,
+  productKnowledgeId,
+}: ExpiredItemsWarningProps) => {
+  const { t } = useTranslation();
+
+  const { data: count, isLoading } = useQuery({
+    queryKey: ["expiredItems", facilityId, locationId, productKnowledgeId],
+    queryFn: query(inventoryApi.list, {
+      pathParams: { facilityId, locationId },
+      queryParams: {
+        product_knowledge: productKnowledgeId,
+        status: "active",
+        limit: 1,
+        net_content_gt: 0,
+        ordering: "product__expiration_date",
+        product_expiration_date_before:
+          getExpirationDateThresholdForDispensing().toISOString(),
+      },
+    }),
+    select: (data: PaginatedResponse<InventoryRead>) => data.count,
+  });
+
+  if (isLoading || !count) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-start gap-2 border-b border-amber-100 bg-amber-50 px-3 py-2">
+      <TriangleAlertIcon className="mt-0.5 size-3.5 shrink-0 text-amber-600" />
+      <span className="text-xs text-amber-700">
+        {t("expired_lots_hidden", { count })}
+      </span>
+    </div>
   );
 };

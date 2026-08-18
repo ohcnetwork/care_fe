@@ -243,9 +243,6 @@ export default function PrescriptionQueue({
         queryKey: ["prescriptionQueue", facilityId, qParams],
       });
     },
-    onError: () => {
-      toast.error(t("prescription_marking_complete_failed"));
-    },
   });
 
   return (
@@ -537,6 +534,7 @@ export default function PrescriptionQueue({
                           <Button
                             variant="outline"
                             className="font-semibold text-sm text-gray-950"
+                            asChild
                           >
                             <Link
                               href={`/medication_requests/patient/${item.encounter.patient.id}/bill/prescriptions/${item.id}`}

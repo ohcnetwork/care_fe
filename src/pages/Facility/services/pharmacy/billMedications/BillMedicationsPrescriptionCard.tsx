@@ -28,7 +28,7 @@ import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { InventoryItemsSelector } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
+import { DispenseLotSelector } from "@/pages/Facility/services/inventory/DispenseLotSelector";
 import {
   billMedicationsFormSchema,
   LotSelection,
@@ -76,7 +76,7 @@ import {
   XCircleIcon,
 } from "lucide-react";
 import { Link } from "raviger";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -277,6 +277,32 @@ const PrescriptionSummary = ({
   const prescription = form.watch(`${name}.prescription`);
   const encounter = prescription.encounter;
   const isActive = prescription.status === PrescriptionStatus.active;
+
+  const items = form.watch(`${name}.items`);
+  const isMarkCompleteDirty = form.getFieldState(
+    `${name}.markComplete`,
+    form.formState,
+  ).isDirty;
+
+  const shouldMarkComplete = items
+    .filter((item) => isMedicationDispenseable(item.medication))
+    .every((item) => item.isSelected);
+
+  // Keep `markComplete` in sync with the line item selection until the user overrides it.
+  useEffect(() => {
+    if (isMarkCompleteDirty) {
+      return;
+    }
+
+    if (form.getValues(`${name}.markComplete`) === shouldMarkComplete) {
+      return;
+    }
+
+    form.setValue(`${name}.markComplete`, shouldMarkComplete, {
+      shouldDirty: false,
+      shouldTouch: false,
+    });
+  }, [form, name, shouldMarkComplete, isMarkCompleteDirty]);
 
   return (
     <div className="relative flex justify-between col-start-1 col-span-7 bg-white pt-4 pr-2 pb-2 pl-4">
@@ -551,7 +577,8 @@ const MedicineLineItem = ({
         shouldValidate: true,
       });
     },
-    autoSelectOnMount: !lots.some((lot) => !lot.autoSelected),
+    // Enable this only if all lots were auto-selected, to avoid overriding user selections.
+    enabled: lots.every((lot) => lot.autoSelected),
   });
 
   return (
@@ -629,7 +656,7 @@ const MedicineLineItem = ({
                     key={`${name}.lots.${index}`}
                     className="w-full flex-1 flex flex-col justify-center px-3 py-2"
                   >
-                    <InventoryItemsSelector
+                    <DispenseLotSelector
                       value={lot}
                       selected={lots}
                       onChange={(lots) => {
@@ -642,7 +669,6 @@ const MedicineLineItem = ({
                       facilityId={facilityId}
                       locationId={locationId}
                       productKnowledgeId={effectiveProductKnowledge.id}
-                      showOnlyAvailable
                       disabled={disabled || isAutoSelectingInventoryItems}
                     />
                   </div>
@@ -650,7 +676,7 @@ const MedicineLineItem = ({
               {lots.length === 0 && (
                 <div className="w-full flex-1 flex flex-col justify-center px-3 py-2">
                   {effectiveProductKnowledge ? (
-                    <InventoryItemsSelector
+                    <DispenseLotSelector
                       selected={lots}
                       onChange={(lots) =>
                         form.setValue(`${name}.lots`, lots, {
@@ -662,7 +688,6 @@ const MedicineLineItem = ({
                       facilityId={facilityId}
                       locationId={locationId}
                       productKnowledgeId={effectiveProductKnowledge.id}
-                      showOnlyAvailable
                       disabled={disabled || isAutoSelectingInventoryItems}
                     />
                   ) : (

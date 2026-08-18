@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 
 import { formatTotalUnits } from "@/components/Medicine/utils";
 
-import { InventoryItemsSelector } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
+import { DispenseLotSelector } from "@/pages/Facility/services/inventory/DispenseLotSelector";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { LotSelection } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 
@@ -69,8 +69,6 @@ interface Props {
   onSave: (value: AddMedicationValue) => void | Promise<void>;
   /** Whether an external save operation triggered by `onSave` is in progress. */
   isSaving?: boolean;
-  /** Disables the save action, e.g. when a required context is missing. */
-  disableSave?: boolean;
 }
 
 /**
@@ -87,7 +85,6 @@ export function AddMedicationSheet({
   locationId,
   onSave,
   isSaving = false,
-  disableSave = false,
 }: Props) {
   const { t } = useTranslation();
 
@@ -113,7 +110,7 @@ export function AddMedicationSheet({
     locationId,
     productKnowledge: productKnowledge || null,
     dosageInstructions: [instruction],
-    autoSelectOnMount: open && !lots.some((lot) => !lot.autoSelected),
+    enabled: open && lots.every((lot) => lot.autoSelected),
     onSelect: (autoSelectedLots) => {
       setLots(autoSelectedLots);
     },
@@ -432,11 +429,10 @@ export function AddMedicationSheet({
                   {lots.map((lot, index) => (
                     <div key={lot.item.id} className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <InventoryItemsSelector
+                        <DispenseLotSelector
                           facilityId={facilityId}
                           locationId={locationId}
                           productKnowledgeId={productKnowledge.id}
-                          showOnlyAvailable
                           value={lot}
                           selected={lots}
                           onChange={setLots}
@@ -478,11 +474,10 @@ export function AddMedicationSheet({
                   ))}
 
                   {lots.length === 0 && (
-                    <InventoryItemsSelector
+                    <DispenseLotSelector
                       facilityId={facilityId}
                       locationId={locationId}
                       productKnowledgeId={productKnowledge.id}
-                      showOnlyAvailable
                       selected={lots}
                       onChange={setLots}
                       disabled={isSaving || isAutoSelectingInventoryItems}
@@ -507,7 +502,6 @@ export function AddMedicationSheet({
               disabled={
                 isSaving ||
                 isAutoSelectingInventoryItems ||
-                disableSave ||
                 !productKnowledge ||
                 !isDoseValid ||
                 !isFrequencyValid ||

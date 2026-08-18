@@ -32,9 +32,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { InventoryItemsSelector } from "@/pages/Facility/services/inventory/InventoryItemsSelector";
+import { DispenseLotSelector } from "@/pages/Facility/services/inventory/DispenseLotSelector";
 import { LotSelection } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
-import { useInventoryItemsAutoSelect } from "@/pages/Facility/services/pharmacy/billMedications/utils/useInventoryItemsAutoSelect";
 
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
@@ -130,24 +129,6 @@ export function EditDispenseSheet({
     quantity: roundWhole(dispense.quantity),
     autoSelected: false,
   });
-
-  // Auto-select an eligible lot for the effective product. Runs on product
-  // change (e.g. when substituting) as long as the current lot isn't a
-  // manual / original selection. The edit sheet is single-lot, so the first
-  // eligible lot is used.
-  const dosageInstructions = dispense.dosage_instruction?.length
-    ? dispense.dosage_instruction
-    : (medication?.dosage_instruction ?? []);
-
-  const { isAutoSelectingInventoryItems: isAutoSelecting } =
-    useInventoryItemsAutoSelect({
-      facilityId,
-      locationId,
-      productKnowledge: effectivePk,
-      dosageInstructions,
-      autoSelectOnMount: false,
-      onSelect: (autoSelectedLots) => setLot(autoSelectedLots[0] ?? null),
-    });
 
   const applySubstitution = (value: SubstitutionFormValues | null) => {
     setSubstitution(value);
@@ -338,11 +319,10 @@ export function EditDispenseSheet({
         <div className="flex gap-3 py-4">
           <div className="flex flex-col gap-2 w-full">
             <Label>{t("select_lot")}</Label>
-            <InventoryItemsSelector
+            <DispenseLotSelector
               facilityId={facilityId}
               locationId={locationId}
               productKnowledgeId={effectivePk.id}
-              showOnlyAvailable
               value={lot ?? undefined}
               selected={lot ? [lot] : []}
               onChange={(items) => {
@@ -356,7 +336,7 @@ export function EditDispenseSheet({
                     : null,
                 );
               }}
-              disabled={isSaving || isAutoSelecting}
+              disabled={isSaving}
             />
           </div>
 
@@ -377,7 +357,7 @@ export function EditDispenseSheet({
               }
               className="w-28"
               placeholder="0"
-              disabled={isSaving || isAutoSelecting || !lot}
+              disabled={isSaving || !lot}
             />
             {lot && !isQuantityValid && (
               <span className="text-sm text-red-600">
@@ -402,7 +382,6 @@ export function EditDispenseSheet({
             onClick={handleSave}
             disabled={
               isSaving ||
-              isAutoSelecting ||
               !lot ||
               !isQuantityValid ||
               (hasChanges && !encounterId)
