@@ -22,13 +22,14 @@ export const MultipleDiagnosticReportsPrint = ({
       pathParams: { patient_external_id: patientId },
       queryParams: {
         service_request: serviceRequestId,
+        status: DiagnosticReportStatus.final,
       },
     }),
   });
 
   const diagnosticReportResults = data?.results;
 
-  const { allDiagnosticReports, isLoading: isLoadingReports } = useQueries({
+  const { diagnosticReports, isLoading: isLoadingReports } = useQueries({
     queries:
       diagnosticReportResults?.map((report) => ({
         queryKey: ["diagnosticReport", report.id, patientId],
@@ -40,16 +41,12 @@ export const MultipleDiagnosticReportsPrint = ({
         }),
       })) ?? [],
     combine: (results) => ({
-      allDiagnosticReports: results
+      diagnosticReports: results
         .map((r) => r.data)
         .filter((data): data is DiagnosticReportRead => !!data),
       isLoading: results.some((r) => r.isLoading),
     }),
   });
-
-  const diagnosticReports = allDiagnosticReports.filter(
-    (report) => report.status === DiagnosticReportStatus.final,
-  );
 
   const { allFiles, isLoadingFiles } = useQueries({
     queries: diagnosticReports.map((report) => ({

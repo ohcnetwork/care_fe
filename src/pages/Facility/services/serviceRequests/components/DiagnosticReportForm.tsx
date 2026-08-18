@@ -96,6 +96,7 @@ interface DiagnosticReportFormProps {
   };
   specimens: SpecimenRead[];
   disableEdit: boolean;
+  setIsExpandReviewCard: (isExpanded: boolean) => void;
 }
 
 // Interface for component values
@@ -129,6 +130,7 @@ export function DiagnosticReportForm({
   specimens,
   disableEdit,
   facilityId,
+  setIsExpandReviewCard,
 }: DiagnosticReportFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -222,6 +224,7 @@ export function DiagnosticReportForm({
                 disableEdit={disableEdit}
                 isMultipleDiagnosticReport={isMultipleDiagnosticReport}
                 facilityId={facilityId}
+                setIsExpandReviewCard={setIsExpandReviewCard}
               />
             ))}
           </div>
@@ -281,6 +284,7 @@ function DiagnosticReportItem({
   disableEdit,
   facilityId,
   isMultipleDiagnosticReport,
+  setIsExpandReviewCard,
 }: {
   report: DiagnosticReportRead;
   patientId: string;
@@ -289,6 +293,7 @@ function DiagnosticReportItem({
   disableEdit: boolean;
   facilityId: string;
   isMultipleDiagnosticReport: boolean;
+  setIsExpandReviewCard: (isExpanded: boolean) => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -337,6 +342,7 @@ function DiagnosticReportItem({
         queryKey: ["diagnosticReport", report.id],
       });
       setIsExpanded(false);
+      setIsExpandReviewCard(true);
     },
   });
 
@@ -1186,13 +1192,13 @@ function DiagnosticReportItem({
                   <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-gray-50">
                     <CardContent className="p-4 space-y-2">
                       <Label
-                        htmlFor="conclusion"
+                        htmlFor={`conclusion-${report.id}`}
                         className="text-base font-semibold text-gray-950"
                       >
                         {t("conclusion")}
                       </Label>
                       <textarea
-                        id="conclusion"
+                        id={`conclusion-${report.id}`}
                         className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg border border-gray-300 p-2"
                         placeholder={t("enter_conclusion")}
                         value={conclusion}
