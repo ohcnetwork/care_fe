@@ -95,6 +95,7 @@ export default function ServiceRequestShow({
   const [isQRCodeSheetOpen, setIsQRCodeSheetOpen] = useState(false);
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
   const [completionNote, setCompletionNote] = useState("");
+  const [expandedReportId, setExpandedReportId] = useState<string | null>(null);
   const [selectedSpecimenDefinition, setSelectedSpecimenDefinition] =
     useState<SpecimenDefinitionRead | null>(null);
 
@@ -586,6 +587,7 @@ export default function ServiceRequestShow({
               activityDefinition={activityDefinition}
               specimens={request.specimens || []}
               disableEdit={disableEdit}
+              onReportSaved={setExpandedReportId}
             />
           </div>
           {diagnosticReports.length > 0 && (
@@ -596,6 +598,7 @@ export default function ServiceRequestShow({
               observationDefinitions={observationRequirements}
               serviceRequestId={serviceRequestId}
               disableEdit={disableEdit}
+              expandedReportId={expandedReportId}
             />
           )}
         </div>

@@ -60,6 +60,7 @@ interface DiagnosticReportReviewProps {
   observationDefinitions: ObservationDefinitionRead[];
   serviceRequestId: string;
   disableEdit: boolean;
+  expandedReportId: string | null;
 }
 
 export function DiagnosticReportReview({
@@ -69,6 +70,7 @@ export function DiagnosticReportReview({
   serviceRequestId,
   observationDefinitions,
   disableEdit,
+  expandedReportId,
 }: DiagnosticReportReviewProps) {
   const { t } = useTranslation();
   return (
@@ -88,6 +90,7 @@ export function DiagnosticReportReview({
           serviceRequestId={serviceRequestId}
           observationDefinitions={observationDefinitions}
           disableEdit={disableEdit}
+          expandedReportId={expandedReportId}
         />
       ))}
     </div>
@@ -101,6 +104,7 @@ function DiagnosticReportReviewItem({
   serviceRequestId,
   observationDefinitions,
   disableEdit,
+  expandedReportId,
 }: {
   report: DiagnosticReportRead;
   facilityId: string;
@@ -108,6 +112,7 @@ function DiagnosticReportReviewItem({
   serviceRequestId: string;
   observationDefinitions: ObservationDefinitionRead[];
   disableEdit: boolean;
+  expandedReportId: string | null;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -164,18 +169,10 @@ function DiagnosticReportReviewItem({
     });
 
   useEffect(() => {
-    if (
-      fullReport?.observations?.length ||
-      fullReport?.conclusion ||
-      files?.results?.length
-    ) {
+    if (expandedReportId === report.id) {
       setIsExpanded(true);
     }
-  }, [
-    fullReport?.observations,
-    fullReport?.conclusion,
-    files?.results?.length,
-  ]);
+  }, [expandedReportId, report.id]);
 
   useEffect(() => {
     setConclusion(fullReport?.conclusion || "");

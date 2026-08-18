@@ -96,6 +96,7 @@ interface DiagnosticReportFormProps {
   };
   specimens: SpecimenRead[];
   disableEdit: boolean;
+  onReportSaved: (reportId: string) => void;
 }
 
 // Interface for component values
@@ -129,6 +130,7 @@ export function DiagnosticReportForm({
   specimens,
   disableEdit,
   facilityId,
+  onReportSaved,
 }: DiagnosticReportFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -222,6 +224,7 @@ export function DiagnosticReportForm({
                 disableEdit={disableEdit}
                 isMultipleDiagnosticReport={isMultipleDiagnosticReport}
                 facilityId={facilityId}
+                onReportSaved={onReportSaved}
               />
             ))}
           </div>
@@ -281,6 +284,7 @@ function DiagnosticReportItem({
   disableEdit,
   facilityId,
   isMultipleDiagnosticReport,
+  onReportSaved,
 }: {
   report: DiagnosticReportRead;
   patientId: string;
@@ -289,6 +293,7 @@ function DiagnosticReportItem({
   disableEdit: boolean;
   facilityId: string;
   isMultipleDiagnosticReport: boolean;
+  onReportSaved: (reportId: string) => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -337,6 +342,7 @@ function DiagnosticReportItem({
         queryKey: ["diagnosticReport", report.id],
       });
       setIsExpanded(false);
+      onReportSaved(report.id);
     },
   });
 
