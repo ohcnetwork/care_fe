@@ -254,7 +254,7 @@ export default function Autocomplete({
             <span className="sr-only">{t("clear")}</span>
           </Button>
         ) : (
-          <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+          <CaretSortIcon className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
         )}
       </div>
     );
@@ -315,14 +315,14 @@ export default function Autocomplete({
       ) : (
         <>
           {shortcutId ? (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 ">
+            <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 ">
               <div className="flex items-center justify-center gap-1">
                 <ShortcutBadge actionId={shortcutId} />
                 <CaretSortIcon className="size-3 shrink-0 opacity-50" />
               </div>
             </div>
           ) : (
-            <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+            <CaretSortIcon className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
           )}
         </>
       )}
