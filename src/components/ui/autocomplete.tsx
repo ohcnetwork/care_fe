@@ -1,4 +1,5 @@
 import { CaretSortIcon, CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
+import { ChevronDown } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -280,14 +281,18 @@ export default function Autocomplete({
             ref={ref}
             data-shortcut-id={shortcutId}
           >
-            <span
-              className={cn(
-                inputValue && "truncate",
-                !selectedOption && "text-gray-500",
-              )}
-            >
-              {displayText}
-            </span>
+            <div className="flex items-center justify-between w-full">
+              <span
+                className={cn(
+                  inputValue && "truncate",
+                  !selectedOption && "text-gray-500",
+                )}
+              >
+                {displayText}
+              </span>
+
+              <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
+            </div>
           </Button>
         </PopoverTrigger>
         <PopoverContent
