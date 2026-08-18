@@ -424,10 +424,18 @@ export function DispenseOrderView({
     (inv) => inv.status === InvoiceStatus.draft,
   )?.id;
 
+  // Adding is only possible when the new charge items can still land somewhere
+  // editable: a draft invoice, an order with no invoices yet, or alongside
+  // existing unbilled dispenses.
+  const canAddMedication =
+    !!draftInvoiceId ||
+    invoiceGroups.length === 0 ||
+    unbilledDispenses.length > 0;
+
   // Placeholder "add row" rendered below the dispense tables while the order
   // is open.
   const addMedicationRow =
-    orderEncounterId && isOrderOpen ? (
+    orderEncounterId && isOrderOpen && canAddMedication ? (
       <AddDispenseMedicationRow
         facilityId={facilityId}
         locationId={locationId}
