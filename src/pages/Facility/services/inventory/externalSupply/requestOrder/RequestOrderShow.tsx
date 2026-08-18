@@ -755,6 +755,9 @@ export function RequestOrderShow({
                               showEmptyState={
                                 supplyRequests?.results.length === 0
                               }
+                              supplyRequestsCount={
+                                supplyRequests?.results.length || 0
+                              }
                             />
                           </div>
                         )}

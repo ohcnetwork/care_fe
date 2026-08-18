@@ -5,6 +5,10 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import careConfig from "@careConfig";
+
+import Callout from "@/CAREUI/display/Callout";
+
 import {
   Table,
   TableBody,
@@ -27,6 +31,7 @@ import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/Prod
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { RequestOrderStatus } from "@/types/inventory/requestOrder/requestOrder";
 import { SupplyRequestStatus } from "@/types/inventory/supplyRequest/supplyRequest";
@@ -34,7 +39,7 @@ import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 import { zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import { Box, Check, Trash2 } from "lucide-react";
+import { Box, Check, Trash2, TriangleAlert } from "lucide-react";
 
 const supplyRequestFormSchema = z.object({
   requests: z.array(
@@ -56,6 +61,8 @@ interface AddItemsFormProps {
   updateOrderStatus: (status: RequestOrderStatus) => void;
   disableApproveButton: boolean;
   showEmptyState: boolean;
+
+  supplyRequestsCount: number;
 }
 
 export function AddItemsForm({
@@ -64,6 +71,7 @@ export function AddItemsForm({
   updateOrderStatus,
   disableApproveButton,
   showEmptyState,
+  supplyRequestsCount,
 }: AddItemsFormProps) {
   const { t } = useTranslation();
 
@@ -78,6 +86,9 @@ export function AddItemsForm({
     control: form.control,
     name: "requests",
   });
+
+  const hasReachedUpsertLimit =
+    supplyRequestsCount + fields.length >= careConfig.maxDatapointsPerUpsert;
 
   const { mutate: createSupplyRequests, isPending: isCreating } = useMutation({
     mutationFn: async (
@@ -208,12 +219,28 @@ export function AddItemsForm({
               </div>
             )}
 
-            <ProductKnowledgeSelect
-              onChange={handleAddItem}
-              className="text-secondary-800 border-secondary-600 w-64! h-11 text-md"
-              placeholder={t("add_item")}
-              disableFavorites
-            />
+            {hasReachedUpsertLimit ? (
+              <Callout
+                variant="warning"
+                className="border border-amber-300 bg-amber-50 text-amber-800"
+                badge={
+                  <TriangleAlert className="size-4 shrink-0 text-amber-600" />
+                }
+              >
+                <span className="flex items-center gap-2">
+                  {t("max_datapoints_per_upsert_limit", {
+                    count: careConfig.maxDatapointsPerUpsert,
+                  })}
+                </span>
+              </Callout>
+            ) : (
+              <ProductKnowledgeSelect
+                onChange={handleAddItem}
+                className="text-secondary-800 border-secondary-600 w-64! h-11 text-md"
+                placeholder={t("add_item")}
+                disableFavorites
+              />
+            )}
 
             {fields.length > 0 ? (
               <>
@@ -239,7 +266,9 @@ export function AddItemsForm({
               </>
             ) : (
               <div className="mt-2 flex flex-col gap-2">
-                <p>-{t("or")}-</p>
+                <p className={cn(hasReachedUpsertLimit && "hidden")}>
+                  -{t("or")}-
+                </p>
                 <div className="flex flex-row gap-2 justify-between bg-white p-2 items-center border border-gray-200 rounded-md">
                   <div className="flex flex-col gap-2">
                     <p className="font-bold">

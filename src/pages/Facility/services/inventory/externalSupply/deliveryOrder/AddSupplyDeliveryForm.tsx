@@ -1038,7 +1038,7 @@ export function AddSupplyDeliveryForm({
                   {t("select_all")}
                 </label>
               </div>
-              <div className="border rounded-md divide-y">
+              <div className="border rounded-md divide-y max-h-[50vh] overflow-y-auto">
                 {supplyRequests.results.map((request) => (
                   <div
                     key={request.id}
