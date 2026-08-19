@@ -207,10 +207,16 @@ function DiagnosticReportReviewItem({
     });
   };
 
+  const nonDeletedObservations = fullReport.observations.filter(
+    (obs) => obs.status !== ObservationStatus.ENTERED_IN_ERROR,
+  );
+
+  const nonArchivedFiles = files.results.filter((file) => !file.is_archived);
+
   const isReportNotReviewable =
     isFilesFetched &&
-    !fullReport.observations?.length &&
-    !files?.results?.length &&
+    !nonDeletedObservations.length &&
+    !nonArchivedFiles.length &&
     !fullReport.conclusion;
 
   return (
@@ -415,7 +421,9 @@ function DiagnosticReportReviewItem({
                 <div className="flex justify-end">
                   <Button
                     variant="primary"
-                    disabled={disableEdit || isUpdatingReport}
+                    disabled={
+                      disableEdit || isUpdatingReport || isReportNotReviewable
+                    }
                     className="gap-2"
                     onClick={() => setShowApproveDialog(true)}
                   >
