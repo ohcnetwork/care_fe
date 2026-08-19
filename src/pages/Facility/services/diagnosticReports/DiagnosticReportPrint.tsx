@@ -1,7 +1,7 @@
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import PrintFooter from "@/components/Common/PrintFooter";
 import "@/lib/pdfWorker";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { FileReadMinimal } from "@/types/files/file";
@@ -94,7 +94,7 @@ export default function DiagnosticReportPrint({
   diagnosticReportId: string;
 }) {
   const { t } = useTranslation();
-  const { facility } = useCurrentFacility();
+  const { facility } = useCurrentFacilitySilently();
 
   const { data: report, isLoading } = useQuery({
     queryKey: ["diagnosticReport", diagnosticReportId],

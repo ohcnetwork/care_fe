@@ -19,6 +19,7 @@ import {
 
 import { cn } from "@/lib/utils";
 
+import { PatientAge } from "@/components/Patient/PatientAge";
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
@@ -28,7 +29,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { LocationTypeIcons } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
-import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { Clock, Stethoscope } from "lucide-react";
 
 export interface EncounterInfoCardProps {
@@ -64,7 +65,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
                 {encounter.patient.name}
               </h3>
               <p className="text-sm text-gray-700">
-                {formatPatientAge(encounter.patient, true)},{" "}
+                <PatientAge patient={encounter.patient} />,{" "}
                 {t(`GENDER__${encounter.patient.gender}`)}
               </p>
             </div>
