@@ -57,6 +57,7 @@ import {
   ObservationDefinitionComponent,
   ObservationDefinitionRead,
 } from "@/types/emr/observationDefinition/observationDefinition";
+import { Status as ServiceRequestStatus } from "@/types/emr/serviceRequest/serviceRequest";
 import { SpecimenRead, SpecimenStatus } from "@/types/emr/specimen/specimen";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { BACKEND_ALLOWED_EXTENSIONS, FileType } from "@/types/files/file";
@@ -96,6 +97,7 @@ interface DiagnosticReportFormProps {
   };
   specimens: SpecimenRead[];
   disableEdit: boolean;
+  serviceRequestStatus: ServiceRequestStatus;
   onReportSaved: (reportId: string) => void;
 }
 
@@ -130,6 +132,7 @@ export function DiagnosticReportForm({
   specimens,
   disableEdit,
   facilityId,
+  serviceRequestStatus,
   onReportSaved,
 }: DiagnosticReportFormProps) {
   const { t } = useTranslation();
@@ -166,9 +169,12 @@ export function DiagnosticReportForm({
   // Show the "create report" form only when appropriate for the SR type:
   // - Single-report SR: show only when no report exists yet.
   // - Multi-report SR: show when codes remain AND no report is currently in progress.
-  const showCreateReportForm = isMultipleDiagnosticReport
-    ? availableReportCodes.length > 0 && activeDiagnosticReports.length === 0
-    : diagnosticReports.length === 0;
+  // Never show once the service request is completed.
+  const showCreateReportForm =
+    serviceRequestStatus !== ServiceRequestStatus.completed &&
+    (isMultipleDiagnosticReport
+      ? availableReportCodes.length > 0 && activeDiagnosticReports.length === 0
+      : diagnosticReports.length === 0);
 
   // Creating a new diagnostic report
   const { mutate: createDiagnosticReport, isPending: isCreatingReport } =

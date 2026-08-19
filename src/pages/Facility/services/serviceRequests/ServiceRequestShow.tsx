@@ -587,6 +587,7 @@ export default function ServiceRequestShow({
               activityDefinition={activityDefinition}
               specimens={request.specimens || []}
               disableEdit={disableEdit}
+              serviceRequestStatus={request.status}
               onReportSaved={setExpandedReportId}
             />
           </div>
