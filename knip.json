@@ -10,7 +10,6 @@
     "tests/setup/*.setup.ts"
   ],
   "ignoreExportsUsedInFile": true,
-  "ignore": [".opencode/**"],
   "exclude": ["types", "nsExports", "nsTypes", "enumMembers", "duplicates"],
   "tags": ["-public"],
   "ignoreIssues": {
