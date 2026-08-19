@@ -17,7 +17,7 @@ export const PatientNotesTab = (props: PatientProps) => {
     <div className="w-full flex flex-col h-[calc(100vh-18rem)] border border-r mt-1 md:mt-4 rounded-lg overflow-hidden">
       <NoteManager
         canAccess={canViewClinicalData}
-        canWrite={canWritePatient}
+        canWrite={canViewClinicalData && canWritePatient}
         patientId={props.patientData.id}
         encounterId={undefined}
         hideEncounterNotes={true}

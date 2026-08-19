@@ -12,6 +12,8 @@ export const PERMISSION_SUBMIT_PATIENT_QUESTIONNAIRE =
 export const PERMISSION_CREATE_ENCOUNTER = "can_create_encounter";
 export const PERMISSION_LIST_ENCOUNTERS = "can_list_encounter";
 export const PERMISSION_WRITE_ENCOUNTER = "can_write_encounter";
+export const PERMISSION_WRITE_ENCOUNTER_CLINICAL_DATA =
+  "can_write_encounter_clinical_data";
 export const PERMISSION_READ_ENCOUNTER = "can_read_encounter";
 export const PERMISSION_READ_ENCOUNTER_CLINICAL_DATA =
   "can_read_encounter_clinical_data";
@@ -138,6 +140,8 @@ export interface Permissions {
   canListEncounters: boolean;
   /** Permission slug: "can_write_encounter" */
   canWriteEncounter: boolean;
+  /** Permission slug: "can_write_encounter_clinical_data" */
+  canWriteEncounterClinicalData: boolean;
   /** Permission slug: "can_read_encounter" */
   canReadEncounter: boolean;
   /** Permission slug: "can_read_encounter_clinical_data" */
@@ -310,6 +314,10 @@ export function getPermissions(
     canCreateEncounter: hasPermission(PERMISSION_CREATE_ENCOUNTER, permissions),
     canListEncounters: hasPermission(PERMISSION_LIST_ENCOUNTERS, permissions),
     canWriteEncounter: hasPermission(PERMISSION_WRITE_ENCOUNTER, permissions),
+    canWriteEncounterClinicalData: hasPermission(
+      PERMISSION_WRITE_ENCOUNTER_CLINICAL_DATA,
+      permissions,
+    ),
     canReadEncounter: hasPermission(PERMISSION_READ_ENCOUNTER, permissions),
     canReadEncounterClinicalData: hasPermission(
       PERMISSION_READ_ENCOUNTER_CLINICAL_DATA,

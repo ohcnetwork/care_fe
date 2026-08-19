@@ -452,6 +452,9 @@ export function NoteManager({
   }, [messagesData]);
 
   const handleCreateThread = (title: string) => {
+    if (!canWrite) {
+      return;
+    }
     if (title.trim()) {
       if (
         threadsData?.results.some((thread) => thread.title === title.trim())
@@ -470,7 +473,10 @@ export function NoteManager({
     e.preventDefault();
     e.stopPropagation();
     const canSend =
-      newMessage.trim() && selectedThread && !createMessageMutation.isPending;
+      canWrite &&
+      newMessage.trim() &&
+      selectedThread &&
+      !createMessageMutation.isPending;
     if (canSend) {
       createMessageMutation.mutate({ message: newMessage.trim() });
     }
@@ -551,18 +557,20 @@ export function NoteManager({
                     {t("notes__all_discussions")}
                   </h3>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setShowNewThreadDialog(true);
-                    setIsThreadsExpanded(false);
-                  }}
-                  className="h-8 hidden lg:block"
-                >
-                  <MessageSquarePlus className="size-4 mr-2" />
-                  {t("notes__new")}
-                </Button>
+                {canWrite && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShowNewThreadDialog(true);
+                      setIsThreadsExpanded(false);
+                    }}
+                    className="h-8 hidden lg:block"
+                  >
+                    <MessageSquarePlus className="size-4 mr-2" />
+                    {t("notes__new")}
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -623,7 +631,11 @@ export function NoteManager({
               </div>
             ) : (
               <div className="text-center text-sm font-medium text-gray-500">
-                {t("notes__select_create_thread")}
+                {t(
+                  canWrite
+                    ? "notes__select_create_thread"
+                    : "notes__no_discussions",
+                )}
               </div>
             )}
           </div>
@@ -748,14 +760,15 @@ export function NoteManager({
               <p className="text-sm text-gray-500 mb-6 max-w-sm">
                 {t("notes__welcome_description")}
               </p>
-              <Button
-                onClick={() => setShowNewThreadDialog(true)}
-                className="shadow-lg"
-                disabled={!canWrite}
-              >
-                <MessageSquarePlus className="size-5 mr-2" />
-                {t("notes__start_new_discussion")}
-              </Button>
+              {canWrite && (
+                <Button
+                  onClick={() => setShowNewThreadDialog(true)}
+                  className="shadow-lg"
+                >
+                  <MessageSquarePlus className="size-5 mr-2" />
+                  {t("notes__start_new_discussion")}
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -769,13 +782,15 @@ export function NoteManager({
         canWrite={canWrite}
       />
 
-      <NewThreadDialog
-        isOpen={showNewThreadDialog}
-        onClose={() => setShowNewThreadDialog(false)}
-        onCreate={handleCreateThread}
-        isCreating={createThreadMutation.isPending}
-        threadsUnused={threads}
-      />
+      {canWrite && (
+        <NewThreadDialog
+          isOpen={showNewThreadDialog}
+          onClose={() => setShowNewThreadDialog(false)}
+          onCreate={handleCreateThread}
+          isCreating={createThreadMutation.isPending}
+          threadsUnused={threads}
+        />
+      )}
     </div>
   );
 }
