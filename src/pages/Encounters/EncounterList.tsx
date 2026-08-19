@@ -133,7 +133,13 @@ export function EncounterList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
-    cacheBlacklist: ["with", "value", "encounter_id", "tags", "patient_filter"],
+    cacheBlacklist: [
+      "search_by",
+      "search_text",
+      "encounter_id",
+      "tags",
+      "patient_filter",
+    ],
   });
   const { t } = useTranslation();
   const [, setSavedFilters] = useAtom(encounterListFiltersAtom);
@@ -177,8 +183,10 @@ export function EncounterList({
     },
   ];
 
-  const searchWith = qParams.with;
-  const searchValue = qParams.value || "";
+  const searchWith = searchWithOptions.find(
+    (option) => option.key === qParams.search_by,
+  )?.key;
+  const searchValue = qParams.search_text || "";
 
   const selectedSearchType =
     searchWithOptions.find((option) => option.key === searchWith) ||
@@ -265,7 +273,9 @@ export function EncounterList({
           care_team_user,
         ),
         encounter_class: encounterClass,
-        ...(searchWith && { [searchWith]: searchValue || undefined }),
+        ...(searchWith && searchWithOptions.some((o) => o.key === searchWith)
+          ? { [searchWith]: searchValue || undefined }
+          : {}),
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
@@ -535,32 +545,34 @@ export function EncounterList({
                       onOpenChange={setSearchOptionsOpen}
                     >
                       <PopoverAnchor asChild>
-                        <CommandInput
-                          hideSearchIcon
-                          aria-label={selectedSearchType.placeholder}
-                          value={searchValue}
-                          onValueChange={(value) => {
-                            updateQuery({ value });
-                            setSearchOptionsOpen(value.trim() !== "");
-                          }}
-                          onKeyDown={(event) => {
-                            if (event.key === "Escape") {
-                              setSearchOptionsOpen(false);
-                              return;
-                            }
-                            if (event.key === "Enter" && !searchOptionsOpen) {
-                              event.preventDefault();
-                              if (!searchValue.trim()) {
-                                updateQuery({
-                                  with: undefined,
-                                  value: undefined,
-                                });
+                        <div className="w-full">
+                          <CommandInput
+                            hideSearchIcon
+                            aria-label={selectedSearchType.placeholder}
+                            value={searchValue}
+                            onValueChange={(value) => {
+                              updateQuery({ search_text: value });
+                              setSearchOptionsOpen(value.trim() !== "");
+                            }}
+                            onKeyDown={(event) => {
+                              if (event.key === "Escape") {
+                                setSearchOptionsOpen(false);
+                                return;
                               }
-                            }
-                          }}
-                          placeholder={selectedSearchType.placeholder}
-                          className="h-9 pl-2 bg-white"
-                        />
+                              if (event.key === "Enter" && !searchOptionsOpen) {
+                                event.preventDefault();
+                                if (!searchValue.trim()) {
+                                  updateQuery({
+                                    search_by: undefined,
+                                    search_text: undefined,
+                                  });
+                                }
+                              }
+                            }}
+                            placeholder={selectedSearchType.placeholder}
+                            className="h-9 pl-2 bg-white"
+                          />
+                        </div>
                       </PopoverAnchor>
                       <PopoverContent
                         className="w-(--radix-popover-trigger-width) p-0"
@@ -576,7 +588,7 @@ export function EncounterList({
                                 value={option.key}
                                 onSelect={() => {
                                   updateQuery({
-                                    with: option.key,
+                                    search_by: option.key,
                                   });
                                   setSearchOptionsOpen(false);
                                 }}
