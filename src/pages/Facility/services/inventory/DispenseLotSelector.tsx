@@ -58,6 +58,9 @@ export const DispenseLotSelector = ({
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
 
+  const { data: expiredCount, isLoading: isLoadingExpiredCount } =
+    useExpiredItemsCount(facilityId, locationId, productKnowledgeId);
+
   const { data: items, isLoading } = useQuery({
     queryKey: ["dispensableItems", facilityId, locationId, productKnowledgeId],
     queryFn: query(inventoryApi.list, {
@@ -102,17 +105,38 @@ export const DispenseLotSelector = ({
   };
 
   // Loading state
-  if (isLoading) {
+  if (isLoading || isLoadingExpiredCount) {
     return <Skeleton className="h-9 w-full min-w-48 rounded-md" />;
   }
 
-  // No stock state
+  // Nothing dispensable: either everything on hand is expired, or there is genuinely no stock
   if (!value && (!items || items.length === 0)) {
+    const label = expiredCount
+      ? t("all_stock_expired", { count: expiredCount })
+      : t("no_stock");
+
     return (
-      <div className="flex h-9 w-full min-w-48 items-center gap-2 rounded-md border border-dashed border-amber-300 bg-amber-50 px-3">
-        <PackageXIcon className="size-4 shrink-0 text-amber-600" />
-        <span className="truncate text-sm font-medium text-amber-700">
-          {t("no_stock")}
+      <div
+        className={cn(
+          "flex h-9 w-full min-w-48 items-center gap-2 rounded-md border border-dashed px-3",
+          expiredCount
+            ? "border-red-200 bg-red-50"
+            : "border-amber-200 bg-amber-50",
+        )}
+        title={label}
+      >
+        {expiredCount ? (
+          <TriangleAlertIcon className="size-4 shrink-0 text-red-600" />
+        ) : (
+          <PackageXIcon className="size-4 shrink-0 text-amber-600" />
+        )}
+        <span
+          className={cn(
+            "truncate text-sm font-medium",
+            expiredCount ? "text-red-700" : "text-amber-700",
+          )}
+        >
+          {label}
         </span>
       </div>
     );
@@ -315,14 +339,12 @@ interface ExpiredItemsWarningProps {
   productKnowledgeId: string;
 }
 
-const ExpiredItemsWarning = ({
-  facilityId,
-  locationId,
-  productKnowledgeId,
-}: ExpiredItemsWarningProps) => {
-  const { t } = useTranslation();
-
-  const { data: count, isLoading } = useQuery({
+const useExpiredItemsCount = (
+  facilityId: string,
+  locationId: string,
+  productKnowledgeId: string,
+) =>
+  useQuery({
     queryKey: ["expiredItems", facilityId, locationId, productKnowledgeId],
     queryFn: query(inventoryApi.list, {
       pathParams: { facilityId, locationId },
@@ -338,6 +360,19 @@ const ExpiredItemsWarning = ({
     }),
     select: (data: PaginatedResponse<InventoryRead>) => data.count,
   });
+
+const ExpiredItemsWarning = ({
+  facilityId,
+  locationId,
+  productKnowledgeId,
+}: ExpiredItemsWarningProps) => {
+  const { t } = useTranslation();
+
+  const { data: count, isLoading } = useExpiredItemsCount(
+    facilityId,
+    locationId,
+    productKnowledgeId,
+  );
 
   if (isLoading || !count) {
     return null;

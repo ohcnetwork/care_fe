@@ -668,6 +668,8 @@
   "all_status": "All Status",
   "all_statuses": "All Statuses",
   "all_stock": "All Stock",
+  "all_stock_expired_one": "All stock expired ({{count}} lot)",
+  "all_stock_expired_other": "All stock expired ({{count}} lots)",
   "all_supply_deliveries": "All Supply Deliveries",
   "all_type": "All Type",
   "all_types": "All Types",
