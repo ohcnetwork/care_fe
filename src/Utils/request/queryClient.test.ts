@@ -3,11 +3,15 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import queryClient, {
   clearQueryPersistenceCache,
+  OFFLINE_CACHE_KEY,
 } from "@/Utils/request/queryClient";
 
-const OFFLINE_CACHE_KEY = "REACT_QUERY_OFFLINE_CACHE";
-
-const flush = () => new Promise((resolve) => setTimeout(resolve, 1300));
+// `createAsyncStoragePersister` throttles saves with a 1000ms interval, so a
+// save queued before clearing fires within that window. Wait a little past it
+// to prove no queued save rewrites the cache.
+const PERSISTER_THROTTLE_MS = 1000;
+const flush = () =>
+  new Promise((resolve) => setTimeout(resolve, PERSISTER_THROTTLE_MS + 300));
 
 describe("clearQueryPersistenceCache", () => {
   beforeEach(() => {

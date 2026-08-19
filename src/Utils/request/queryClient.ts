@@ -34,7 +34,7 @@ const queryClient = new QueryClient({
   }),
 });
 
-const OFFLINE_CACHE_KEY = "REACT_QUERY_OFFLINE_CACHE";
+export const OFFLINE_CACHE_KEY = "REACT_QUERY_OFFLINE_CACHE";
 
 // Wraps the browser storage so that a persister's writes can be neutralized
 // once it has been retired. The async-storage persister throttles saves, so a
