@@ -631,11 +631,9 @@ export function NoteManager({
               </div>
             ) : (
               <div className="text-center text-sm font-medium text-gray-500">
-                {t(
-                  canWrite
-                    ? "notes__select_create_thread"
-                    : "notes__no_discussions",
-                )}
+                {canWrite
+                  ? t("notes__select_create_thread")
+                  : t("notes__no_discussions")}
               </div>
             )}
           </div>
