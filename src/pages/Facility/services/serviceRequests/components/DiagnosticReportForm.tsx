@@ -334,10 +334,10 @@ function DiagnosticReportItem({
     onSuccess: ({ results }) => {
       if (results.some((r) => r.reference_id === "upsert-observations")) {
         toast.success(t("test_results_saved_successfully"));
-        queryClient.invalidateQueries({
-          queryKey: ["serviceRequest", facilityId, serviceRequestId],
-        });
       }
+      queryClient.invalidateQueries({
+        queryKey: ["serviceRequest", facilityId, serviceRequestId],
+      });
       queryClient.invalidateQueries({
         queryKey: ["diagnosticReport", report.id],
       });
