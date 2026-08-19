@@ -221,13 +221,15 @@ function rewriteLocalPluginImports(rootDir: string, id: string, code: string) {
   return rewrittenCode;
 }
 
-// When a local plugin's CSS imports `tailwindcss/*` directly (used by the
-// plugin's standalone build), strip those imports in dev. The host care_fe
-// app already provides Tailwind v4 theme/preflight/utilities and scans
-// apps/** via the `content:` array in tailwind.config.js, so these imports
-// would otherwise (a) re-run preflight over the entire host page and (b) emit
-// no utilities (the utilities.css import isn't a v4 entry-point so it can't
-// scan sources from here).
+// Plugin standalone builds import Tailwind in their own CSS. On host serve,
+// strip `@import "tailwindcss"` / `theme.css` / `preflight.css` /
+// `utilities.css` (optional `layer(...)`). The host already runs one Tailwind
+// v4 pipeline over host + in-tree plugin sources, so plugin classes still
+// emit. A second pipeline here re-runs preflight on the whole page.
+// `utilities.css` is a supported v4 entry point — we still strip it, because
+// the host import already generates those utilities from the same files. If
+// the host stops scanning plugin sources, this strip would drop plugin
+// utilities and must be revisited.
 function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
   if (!id.endsWith(".css")) {
     return null;

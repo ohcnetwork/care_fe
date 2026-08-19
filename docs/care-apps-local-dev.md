@@ -2,11 +2,11 @@
 
 - Build-time plugins (every Vite command: `dev`, `build`, preview): `REACT_ENABLED_APPS`.
 - Format: `org/repo` or `org/repo@host/path/to/remoteEntry.js`.
-- Host `npm run dev` only (not production): also auto-discovers `apps/*/src/manifest.tsx` and loads that source through the host Vite graph. Same slug in both: `apps/` wins and the env remote URL is ignored.
+- Vite `command === "serve"` (includes `npm run dev` and `npm run local` / `vite --mode docker`; not `vite build`): also auto-discovers `apps/*/src/manifest.tsx` and loads that source through the host Vite graph. Local overwrites env only when the directory name equals the env plugin `name` (the repo). A mismatched folder is a second plugin, not a replacement.
 
 ## Build-time vs. Runtime
 
-- Build-time plugins come from `getBuildTimePlugConfigs()` in `src/Utils/plugConfig.ts`: `REACT_ENABLED_APPS` (`careConfig.careApps`) plus, on host `npm run dev` only, `apps/` (`localDevPluginConfigs`). There is no `npm run setup` and `src/pluginMap.ts` is an unused empty stub (removed as a generator in Plugin Architecture V3, [#16229](https://github.com/ohcnetwork/care_fe/pull/16229)).
+- Build-time plugins come from `getBuildTimePlugConfigs()` in `src/Utils/plugConfig.ts`: `REACT_ENABLED_APPS` (`careConfig.careApps`) plus, when Vite `command === "serve"`, `apps/` (`localDevPluginConfigs`). There is no `npm run setup` and `src/pluginMap.ts` is an unused empty stub (removed as a generator in Plugin Architecture V3, [#16229](https://github.com/ohcnetwork/care_fe/pull/16229)).
 - The backend can also return plugins from `GET /api/v1/plug_config/` (database rows). Admin `/admin/apps` is that list: create/edit/delete those rows. It does not show `REACT_ENABLED_APPS` or `apps/` plugins.
 - `mergePlugConfigs()` combines API + build-time at runtime for `PluginEngine` and `initI18n()`. `source: "build"` / `isReadOnly: true` apply to that merged list, not the admin page.
 
@@ -14,11 +14,11 @@ See `docs/care-apps-architecture-note.md` for merge rules and slug overwrite.
 
 ## Vite Federation Architecture
 
-This is the **remote** path (`remoteEntry.js`). Host `npm run dev` + `apps/` skips it (see Local Dev Workflow below).
+This is the **remote** path (`remoteEntry.js`). Vite `serve` + a matching `apps/<repo>/` skips it (see Local Dev Workflow below).
 
 - **Host** (`vite.config.mts`): federation name `"core"`. `remotes: { dummy: "" }` only enables the federation API; it does not list plugins. Shared: `react`, `react-dom`, `react-i18next`, `@tanstack/react-query`, `raviger`, `sonner`, `decimal.js`.
 - **Plugin repo** (its own Vite config, not something shipped under host `apps/`): `federation({ exposes: { "./manifest": "./src/manifest.tsx" } })` (some plugins use `manifest.ts`). `vite build` writes `dist/assets/remoteEntry.js`. Example: [care_hello_fe](https://github.com/ohcnetwork/care_hello_fe) — clone it separately; it is not vendored here.
-- **URL** comes from `care.config.ts` parsing `REACT_ENABLED_APPS`, not from Vite `remotes`. No `@` → GitHub Pages `https://{org}.github.io/{repo}`. With `@host/path`, prefix `http://` if the host contains `localhost`, else `https://`. That string becomes `meta.url`.
+- **URL** comes from `care.config.ts` parsing `REACT_ENABLED_APPS`, not from Vite `remotes`. No `@` → GitHub Pages `https://{org}.github.io/{repo}`. With an `@` suffix, the whole post-`@` string is `{scheme}://{cdn}` (including the path to `remoteEntry.js`); scheme is `http` if that string contains `localhost`, else `https` (a LAN IP therefore gets `https`). That becomes `meta.url`.
 - **Runtime** (`PluginEngine.tsx`): if `localDevPluginManifests[slug]` is missing, `setFederationRemote(slug, { url: meta.url })` then `getFederationRemote(slug, "./manifest")`.
 
 ## Local Dev Workflow (primary: in-tree)
@@ -31,7 +31,9 @@ auto-discovers the plugin and loads its source directly through its own Vite gra
 full HMR.
 
 - Place the plugin at `apps/<slug>/` so its manifest lives at `apps/<slug>/src/manifest.tsx`.
-- Start the host: `npm run dev` → vite on `:4000`.
+  The slug is the directory name. To replace a `REACT_ENABLED_APPS` entry, it must equal
+  that plugin's `name` (the repo, e.g. `care_hello_fe`).
+- Start the host with Vite `serve` (`npm run dev` or `npm run local`) → vite on `:4000`.
 - The host's `localPluginDevSupport()` plugin (in `vite.config.mts`) discovers every
   `apps/*/src/manifest.tsx`, registers each plugin, and serves it from host source.
 - Edits to plugin source trigger HMR (and a full reload when a manifest is added/removed),
@@ -43,8 +45,10 @@ See **Dev-Mode Local Discovery (shipped)** below for exactly what the host does.
 
 When you need to exercise the real federated `remoteEntry.js` path (e.g. testing the
 production loading flow) rather than in-tree source, run the plugin as a standalone remote.
-Do **not** also put that slug under host `apps/` — on host `npm run dev`, `apps/` wins and
-the env URL is ignored.
+Do **not** also put a folder named that repo under host `apps/` — on Vite `serve`,
+directory name === `plugin.name` means the local config replaces the env one and
+the env URL is unused. A differently named folder still loads the remote as a
+second plugin.
 
 - Sample plugin ([care_hello_fe](https://github.com/ohcnetwork/care_hello_fe), not vendored
   here): `npm run dev` → `vite preview` on **hello’s** `:4173` + `vite build --watch` keeps
@@ -64,16 +68,29 @@ the env URL is ignored.
 
 ## Dev-Mode Local Discovery (shipped)
 
-Implemented by `localPluginDevSupport()` in `vite.config.mts`. On `command === "serve"`
-the host scans the `apps/` directory and wires local plugins straight into its own module
-graph — no separate build, preview, or `REACT_ENABLED_APPS` entry needed.
+Implemented by `localPluginDevSupport()` in `vite.config.mts`. On Vite
+`command === "serve"` (`npm run dev`, `npm run local` / `vite --mode docker`,
+and any other `vite` dev-server invocation) the host scans `apps/` and wires
+local plugins into its own module graph — no separate plugin build, plugin
+preview, or `REACT_ENABLED_APPS` entry needed. `vite build` is `"build"` and
+emits an empty list; `npm run preview` serves that dist, so it does not
+re-scan `apps/` into the page.
 
 - **Auto-discovery:** every immediate `apps/<slug>/` directory whose `src/manifest.tsx`
   exists becomes a local plugin (sorted by slug). Each is exposed through the virtual module
   `virtual:care-local-plugins` as `localDevPluginConfigs` / `localDevPluginManifests`. Each
   config entry has the shape `{ slug: "<slug>", meta: { name: "<slug>", localPath:
   "/local-plugins/<slug>", package: "local/<slug>" } }` (the `meta` object satisfies
-  `PlugConfigMeta` from `src/types/plugConfig.ts`).
+  `PlugConfigMeta` from `src/types/plugConfig.ts`). There is **no `meta.url`**.
+  `getBuildTimePlugConfigs()` spreads that object into a `PlugConfig` whose
+  `meta.url` is what `PluginEngine` validates on the federation path — local
+  plugins never hit that check because `getPluginManifest()` returns on
+  `localDevPluginManifests[slug]` first. Do not add a `url` requirement in
+  front of that short-circuit; it would silently break in-tree serve.
+  `getBuildTimePlugConfigs()` then
+  `Map.set`s env plugins by `plugin.name` (repo) and these by directory slug. Equal
+  strings → local overwrites env. Unequal (`apps/hello` vs `ohcnetwork/care_hello_fe`)
+  → two plugins.
 - **`@/` → `/@fs/` rewrite:** imports inside plugin source that use `@/` are rewritten to
   `/@fs/<absolute path>` only when that file exists under the plugin's `apps/<slug>/src`.
   If it does not, the `@/` import is left unchanged and Vite's host alias `@` → `src/`
@@ -91,7 +108,7 @@ graph — no separate build, preview, or `REACT_ENABLED_APPS` entry needed.
   @tanstack/react-query, raviger, sonner, decimal.js, and `resolve.dedupe` forces plugin
   source to use the host's single copy — avoiding "Should have a queue" / hook-order errors.
 - **Full HMR:** because plugin source is part of the host graph, editing it hot-reloads via
-  the normal host `npm run dev`; adding/removing a manifest triggers a full reload.
+  the host Vite `serve` process; adding/removing a manifest triggers a full reload.
 
 For the manifest contract these plugins must satisfy, see `src/pluginTypes.ts`.
 

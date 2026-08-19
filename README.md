@@ -146,7 +146,8 @@ If your Nginx reverse-proxy has been set up correctly, then visit the school usi
 CARE supports a micro-frontend plugin architecture, letting you extend the app with additional features without forking it. Plugins are self-contained federated React remotes loaded at runtime via [Module Federation](https://github.com/originjs/vite-plugin-federation) (`@originjs/vite-plugin-federation`).
 
 - **Manifest contract**: each plugin exposes a `PluginManifest` defining the routes, components, tabs, and devices it provides. The source of truth for the manifest types is [`src/pluginTypes.ts`](src/pluginTypes.ts). Key host files are `src/PluginEngine.tsx` and `src/pluginTypes.ts`.
-- **Enabling plugins**: set the `REACT_ENABLED_APPS` environment variable to a comma-separated list of plugins in `org/repo` or `org/repo@host/path` form. With just `org/repo`, the remote is loaded from `https://{org}.github.io/{repo}`; otherwise the `@host` portion is used as the remote origin.
+- **Local plugin development**: clone or copy the plugin into `apps/<repo>/` and run the host with Vite `serve` (`npm run dev` or `npm run local`). No plugin build, preview port, or `REACT_ENABLED_APPS` entry is required. See [`docs/care-apps-local-dev.md`](docs/care-apps-local-dev.md).
+- **Enabling plugins**: set the `REACT_ENABLED_APPS` environment variable to a comma-separated list of plugins in `org/repo` or `org/repo@host/path` form. With just `org/repo`, the remote is loaded from `https://{org}.github.io/{repo}`. Otherwise the `@` suffix is used as-is for the remote entry URL (including the path to `remoteEntry.js`); CARE prefixes `http://` when that string contains `localhost`, `https://` otherwise. A LAN IP does not contain `localhost`, so it gets `https://`. This is the production / federated path (and the way to exercise `remoteEntry.js` locally).
 
   ```env
   # Load one plugin from GitHub Pages and another from a local dev server

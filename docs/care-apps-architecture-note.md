@@ -8,22 +8,22 @@
 Build-time plugins are the base enabled set. They load even when the backend has no matching `plug_config` row. That set has two inputs, both tagged `source: "build"`:
 
 - `careConfig.careApps`, parsed from `REACT_ENABLED_APPS` (every Vite command: `dev`, `build`, Playwright). This is the production path: Module Federation via a remote URL.
-- `localDevPluginConfigs`, from `apps/*/src/manifest.tsx`. **`apps/` is local development only — not production.** It is scanned only on host `npm run dev`. `vite build`, Playwright, staging, and production do not load plugins from `apps/`; they use `REACT_ENABLED_APPS` and/or `plug_config`.
+- `localDevPluginConfigs`, from `apps/*/src/manifest.tsx`. `createLocalPluginModule()` in `vite.config.mts` fills this when Vite `command === "serve"`, not when the npm script happens to be named `dev`. That includes `npm run dev` and `npm run local` (`vite --mode docker`). `vite build` uses `command === "build"` and emits empty arrays, so production, staging, and `npm run preview` of that dist do not load `apps/` — they use `REACT_ENABLED_APPS` and/or `plug_config`.
 
-If the same slug appears in both, the `apps/` entry overwrites the env entry (config and later the in-tree manifest). The `REACT_ENABLED_APPS` remote URL for that slug is ignored until the folder is removed from `apps/`.
+`getBuildTimePlugConfigs()` is a `Map`. Env plugins are keyed by `plugin.name` (the repo in `org/repo`). Local plugins are keyed by the `apps/<slug>/` directory name. The local row overwrites the env row **only when those strings are equal**. Then PluginEngine sees one slug and loads the in-tree manifest (the env remote URL for that key is unused). If the folder is `apps/kutumba` and env is `ohcnetwork/care_kutumba_fe`, the keys differ: you get **two** plugins, not a replacement. Clone as `apps/<repo>/` to replace; remove that folder to use the remote.
 
 Build-time plugin identity:
 
 - `REACT_ENABLED_APPS` is parsed by `care.config.ts` into `careConfig.careApps`.
 - Each build-time plugin is normalized into the same `PlugConfig` shape as the API response by `src/Utils/plugConfig.ts`.
-- The resolved `slug` for a build-time plugin is the parsed plugin `name` field, which is typically the repository name.
+- Env slug = parsed `name` = repository name. Local slug = directory name under `apps/`. Overwrite is string equality on that Map, not “same git repo.”
 
 `REACT_ENABLED_APPS` format:
 
 - Each entry is expected in the form `org/repo` or `org/repo@host/path/to/remoteEntry.js`.
-- If `@host/path` is omitted, CARE defaults to GitHub Pages: `https://{org}.github.io/{repo}`.
-- If the host contains `localhost`, CARE prefixes it with `http://`; otherwise it prefixes it with `https://`.
-- In host `npm run dev` only (not production), CARE auto-discovers local plugin apps from `apps/*/src/manifest.tsx` and loads them through the host Vite graph. Production still uses Module Federation.
+- If the `@` suffix is omitted, CARE defaults to GitHub Pages: `https://{org}.github.io/{repo}`.
+- Otherwise the whole post-`@` string is used as `{scheme}://{cdn}` (path to `remoteEntry.js` included). Scheme is `http` if that string contains `localhost`, `https` otherwise. A LAN IP is `https`.
+- When Vite `command === "serve"`, CARE also auto-discovers `apps/*/src/manifest.tsx` and loads them through the host Vite graph. That is not limited to `npm run dev`. `vite build` / production still use Module Federation.
 - Example remote entry for non-hosted local testing or preview flows: `ohcnetwork/care_hello_fe@localhost:4173/assets/remoteEntry.js`.
 
 Merge behavior:
@@ -33,11 +33,11 @@ Merge behavior:
 - If API and build-time provide the same slug, the frontend keeps one merged entry for that slug.
 - For overlapping metadata keys, build-time metadata wins.
 - API-only metadata keys that do not conflict are preserved.
-- If env and `apps/` both provide the same slug, `apps/` wins among the two build-time inputs (see above). That is independent of the API merge.
+- Env vs `apps/` is not a dedicated override API. Local wins among the two build-time inputs only on Map key collision (directory name === env `plugin.name`). Different strings → two entries. Independent of the API merge.
 
 For each resolved plugin config, `PluginEngine`:
 
-1. If `localDevPluginManifests[slug]` exists (host `npm run dev` + `apps/`), uses that source manifest and skips federation.
+1. If `localDevPluginManifests[slug]` exists (Vite `serve` + `apps/<slug>/`), uses that source manifest and skips federation.
 2. Otherwise validates `config.meta.url`, registers the remote with Vite federation using the plugin `slug`, and loads `./manifest`.
 3. Combines the manifest with `config.meta`.
 4. After plugins resolve, writes frozen `window.__CARE_PLUGIN_RUNTIME__ = { meta: { [slug]: PlugConfigMeta } }`.
@@ -46,7 +46,7 @@ For each resolved plugin config, `PluginEngine`:
 
 Failure behavior (federation path only — after `localDevPluginManifests[slug]` is missing):
 
-- In-tree plugins (`apps/` on host `dev`) have no remote URL and are not skipped; they already returned at step 1.
+- In-tree plugins (`apps/` on Vite `serve`) have no remote URL and are not skipped; they already returned at step 1.
 - If `config.meta.url` is missing or invalid, the plugin is logged and skipped.
 - If the remote manifest cannot be loaded, the plugin is logged and skipped.
 - These failures do not prevent the rest of the app or other plugins from loading.
@@ -64,19 +64,19 @@ Admin UI behavior:
 
 Testing vs local-dev (do not mix these paths):
 
-Playwright / `vite build` / production — **`apps/` is not scanned.** `createLocalPluginModule` returns empty arrays unless Vite `command` is `serve`. Playwright's `webServer` is `npm run preview` of that build (`playwright.config.ts`). Plugins in this path come only from `REACT_ENABLED_APPS` (federation URL) and/or `GET /api/v1/plug_config/`. Cloning a plugin into `apps/` in CI does not change that.
+Playwright / `vite build` / production — **`apps/` is not in the bundle.** `createLocalPluginModule` returns the `apps/` list only when Vite `command === "serve"`. `vite build` is `"build"` (empty list baked into dist). Playwright's `webServer` is `npm run preview` of that dist (`playwright.config.ts`). Preview serves the built JS; it does not re-scan `apps/` into the page. Plugins in this path come only from `REACT_ENABLED_APPS` (federation URL) and/or `GET /api/v1/plug_config/`. Cloning a plugin into `apps/` in CI does not change the previewed bundle.
 
 - If a plugin should always be present during tests, add it to `REACT_ENABLED_APPS`.
 - If a test needs backend-managed plugin metadata only, seed the `plug_config` API response.
 - If both API and build-time define the same slug, the frontend keeps one `source: "build"` entry and merges API-only metadata keys under build-time keys.
 - Federation / preview example (plugin must be built and served as a remote, **not** sitting in host `apps/` for that slug): `ohcnetwork/care_hello_fe@localhost:4173/assets/remoteEntry.js`. The hello plugin is **not vendored** in this repo; clone [care_hello_fe](https://github.com/ohcnetwork/care_hello_fe) separately and run its preview.
 
-Local plugin iteration — host `npm run dev` only:
+Local plugin iteration — Vite `serve` (`npm run dev`, `npm run local`, …):
 
 - Drop or copy the plugin at `apps/<slug>/` (hello: `apps/care_hello_fe`). CARE loads `src/manifest.tsx` through the host Vite graph and serves `public/` at `/local-plugins/<slug>/`. No `REACT_ENABLED_APPS` entry is required.
-- Same slug in `apps/` and `REACT_ENABLED_APPS` on host `dev`: **`apps/` wins** and the env remote URL is ignored. To exercise federation locally, remove that folder from `apps/`.
+- To replace an env plugin, the folder name must equal that plugin's `name` (the repo). Then the Map collision means local config replaces env and PluginEngine skips federation for that slug. A different folder name is a second plugin (in-tree plus remote). To exercise federation locally, remove the matching `apps/<repo>/` folder.
 
-Local Playwright exception: `reuseExistingServer` is true when `CI` is unset. If host `npm run dev` is already on `:4000`, tests hit the **dev** graph and `apps/` *does* load. That is not the documented test path. CI always starts preview, so `apps/` never loads there.
+Local Playwright exception: `reuseExistingServer` is true when `CI` is unset. If a Vite `serve` process is already on `:4000` (`npm run dev` or `npm run local`), tests hit that graph and `apps/` *does* load. That is not the documented test path. CI always starts preview of a build, so `apps/` is not in that bundle.
 
 Host-to-plugin data sharing via `window` globals (plugins cannot import host modules in production):
 

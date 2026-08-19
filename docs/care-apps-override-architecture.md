@@ -94,7 +94,7 @@ also works for a default import — no rename required.
    - If no overrides exist → renders `BaseComponent` directly
    - If overrides exist but none use stack conditions → **fast path**: looks up the precomputed `ResolutionMap`
    - If this key has a `stackPath` override → **stack-aware path**: this
-     sleeve writes its own name onto `StackContext` and resolves. Ancestors
+     `register()` wrapper writes its own name onto `StackContext` and resolves. Ancestors
      that took the fast path (or have no overrides) do **not** write their
      names, so parent+child `stackPath` does not match today (see Stack-Aware Path)
 3. Wraps override renders in an `OverrideErrorBoundary` — if the override throws,
@@ -125,8 +125,8 @@ not the full path. `userRole` / `facilityType` only match if those keys are
 set on the provider — `App.tsx` does not set them today.
 
 If `register()` has not run yet for that key, `addOverride` still stores the
-override on a placeholder entry. The sleeve must exist by render time or the
-page never looks at that entry.
+override on a placeholder entry. The `register()` wrapper must exist by
+render time or the page never looks at that entry.
 
 `PluginEngine` keeps the cleanup functions and runs them when the plugin list
 changes, so stale overrides do not pile up.
@@ -183,7 +183,7 @@ interface OverrideCondition {
   page?: string | string[];
   userRole?: string | string[];
   facilityType?: string | string[];
-  stackPath?: string[];              // match sleeve ancestry (see Stack-Aware Path)
+  stackPath?: string[];              // match register() wrapper ancestry (see Stack-Aware Path)
   custom?: (ctx: OverrideContextType) => boolean;
 }
 
@@ -228,8 +228,9 @@ RegisteredComponent renders:
   render resolved component within StackContext.Provider
 ```
 
-A name is appended **only on this path**. Fast-path sleeves and sleeves with
-no overrides skip `StackContext.Provider`, so they never appear as parents.
+A name is appended **only on this path**. Fast-path `register()` wrappers
+and wrappers with no overrides skip `StackContext.Provider`, so they never
+appear as parents.
 
 `stackPath: ["LoginHeader"]` can match (the leaf writes itself).
 `stackPath: ["FacilitiesPage", "LoginHeader"]` does **not** match today even
