@@ -716,5 +716,8 @@ export async function openFixtureEncounter(page: Page): Promise<void> {
   await page.goto(
     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
   );
-  await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
+  await expect(
+    page.getByRole("tab", { name: "Overview" }),
+    `Fixture encounter ${encounterId} did not load — the saved encounterMeta.json id may be stale or deleted; re-run the patient setup.`,
+  ).toBeVisible();
 }
