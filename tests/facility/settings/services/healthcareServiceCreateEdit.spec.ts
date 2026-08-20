@@ -35,7 +35,9 @@ test.describe("Healthcare Service Create & Edit", () => {
     });
 
     await test.step("Fill service name", async () => {
-      await page.getByRole("textbox", { name: /name/i }).fill(serviceName);
+      await page
+        .getByRole("textbox", { name: "Name", exact: true })
+        .fill(serviceName);
     });
 
     await test.step("Select a location", async () => {
@@ -77,7 +79,9 @@ test.describe("Healthcare Service Create & Edit", () => {
         .click();
       await page.waitForURL(/\/healthcare_services\/new/);
 
-      await page.getByRole("textbox", { name: /name/i }).fill(originalName);
+      await page
+        .getByRole("textbox", { name: "Name", exact: true })
+        .fill(originalName);
 
       // Select a location
       await selectFirstLocation(page);
@@ -102,8 +106,10 @@ test.describe("Healthcare Service Create & Edit", () => {
       await page.waitForURL(/\/edit$/);
 
       // Clear and update the name
-      await page.getByRole("textbox", { name: /name/i }).clear();
-      await page.getByRole("textbox", { name: /name/i }).fill(updatedName);
+      await page.getByRole("textbox", { name: "Name", exact: true }).clear();
+      await page
+        .getByRole("textbox", { name: "Name", exact: true })
+        .fill(updatedName);
 
       await page.getByRole("button", { name: "Save" }).click();
       await expect(
@@ -131,7 +137,7 @@ test.describe("Healthcare Service Create & Edit", () => {
     // Filling the required name and selecting a location makes the form valid,
     // which must enable the create action.
     await page
-      .getByRole("textbox", { name: /name/i })
+      .getByRole("textbox", { name: "Name", exact: true })
       .fill(faker.commerce.productName());
     await selectFirstLocation(page);
 

@@ -716,8 +716,12 @@ export async function openFixtureEncounter(page: Page): Promise<void> {
   await page.goto(
     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
   );
+  await page.waitForURL(new RegExp(`/encounter/${encounterId}/updates$`));
+  // Assert encounter-specific content (not just the tab shell) so a stale or
+  // deleted fixture id fails here with a clear reason instead of a blank page.
   await expect(
-    page.getByRole("tab", { name: "Overview" }),
+    page.getByRole("button", { name: /encounter actions/i }).first(),
     `Fixture encounter ${encounterId} did not load — the saved encounterMeta.json id may be stale or deleted; re-run the patient setup.`,
   ).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
 }

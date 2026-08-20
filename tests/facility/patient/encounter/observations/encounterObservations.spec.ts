@@ -41,7 +41,7 @@ test.describe("Encounter Observations Tab", () => {
     await combobox.scrollIntoViewIfNeeded();
     await combobox.click();
 
-    const search = page.locator('[data-slot="command-input"]');
+    const search = page.getByPlaceholder(/Add (another )?Symptom/i);
     await search.waitFor({ state: "visible" });
     await search.fill("Headache");
     await page
