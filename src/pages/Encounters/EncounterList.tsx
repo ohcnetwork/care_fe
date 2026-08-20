@@ -266,9 +266,7 @@ export function EncounterList({
           care_team_user,
         ),
         encounter_class: encounterClass,
-        ...(searchWith && searchWithOptions.some((o) => o.key === searchWith)
-          ? { [searchWith]: searchValue || undefined }
-          : {}),
+        ...(searchWith && { [searchWith]: searchValue || undefined }),
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
